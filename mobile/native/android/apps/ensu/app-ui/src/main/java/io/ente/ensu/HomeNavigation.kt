@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -39,7 +38,6 @@ import io.ente.ensu.settings.LogViewerScreen
 import io.ente.ensu.settings.SettingsScreen
 import io.ente.ensu.settings.SystemPromptSettingsScreen
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun HomeNavigation(
@@ -64,8 +62,6 @@ internal fun HomeNavigation(
     onOpenAttachment: (Attachment) -> Unit,
     onDeleteAccount: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     Scaffold(
         containerColor = EnsuColor.backgroundBase(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -163,9 +159,7 @@ internal fun HomeNavigation(
                         onOpenSystemPromptSettings = { navController.navigate(HomeRoute.SystemPromptSettings) },
                         onUnlockAdvanced = {
                             store.unlockAdvancedSettings()
-                            scope.launch {
-                                advancedSettingsDataStore.unlockAdvancedSettings()
-                            }
+                            advancedSettingsDataStore.persistUnlockAdvancedSettings()
                         },
                         onSignOut = onSignOut,
                         onSignIn = onSignIn,
@@ -195,15 +189,11 @@ internal fun HomeNavigation(
                         state = appState.modelSettings,
                         onSave = { modelSettings ->
                             store.updateModelSettings(modelSettings)
-                            scope.launch {
-                                advancedSettingsDataStore.saveModelSettings(modelSettings)
-                            }
+                            advancedSettingsDataStore.persistModelSettings(modelSettings)
                         },
                         onReset = {
                             store.resetModelSettings()
-                            scope.launch {
-                                advancedSettingsDataStore.resetModelSettings()
-                            }
+                            advancedSettingsDataStore.persistResetModelSettings()
                         }
                     )
                 }
@@ -221,17 +211,13 @@ internal fun HomeNavigation(
                         onSave = { value ->
                             val updated = appState.developerSettings.copy(systemPrompt = value)
                             store.updateDeveloperSettings(updated)
-                            scope.launch {
-                                advancedSettingsDataStore.saveSystemPrompt(value)
-                            }
+                            advancedSettingsDataStore.persistSystemPrompt(value)
                             navController.popBackStack()
                         },
                         onReset = {
                             val updated = appState.developerSettings.copy(systemPrompt = "")
                             store.updateDeveloperSettings(updated)
-                            scope.launch {
-                                advancedSettingsDataStore.saveSystemPrompt("")
-                            }
+                            advancedSettingsDataStore.persistSystemPrompt("")
                             navController.popBackStack()
                         }
                     )

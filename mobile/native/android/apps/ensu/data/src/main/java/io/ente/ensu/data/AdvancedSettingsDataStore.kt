@@ -7,8 +7,11 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.ente.ensu.domain.state.DeveloperSettingsState
 import io.ente.ensu.domain.state.ModelSettingsState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 private val Context.advancedSettingsPreferences by preferencesDataStore("ensu_advanced_settings")
 
@@ -18,6 +21,8 @@ data class AdvancedSettingsSnapshot(
 )
 
 class AdvancedSettingsDataStore(private val context: Context) {
+    private val persistenceScope = CoroutineScope(Dispatchers.IO)
+
     val settingsFlow: Flow<AdvancedSettingsSnapshot> = context.advancedSettingsPreferences.data.map { prefs ->
         AdvancedSettingsSnapshot(
             developerSettings = DeveloperSettingsState(
@@ -41,9 +46,21 @@ class AdvancedSettingsDataStore(private val context: Context) {
         }
     }
 
+    fun persistUnlockAdvancedSettings() {
+        persistenceScope.launch {
+            unlockAdvancedSettings()
+        }
+    }
+
     suspend fun saveSystemPrompt(value: String) {
         context.advancedSettingsPreferences.edit { prefs ->
             prefs[Keys.systemPrompt] = value
+        }
+    }
+
+    fun persistSystemPrompt(value: String) {
+        persistenceScope.launch {
+            saveSystemPrompt(value)
         }
     }
 
@@ -58,6 +75,12 @@ class AdvancedSettingsDataStore(private val context: Context) {
         }
     }
 
+    fun persistModelSettings(settings: ModelSettingsState) {
+        persistenceScope.launch {
+            saveModelSettings(settings)
+        }
+    }
+
     suspend fun resetModelSettings() {
         context.advancedSettingsPreferences.edit { prefs ->
             prefs[Keys.useCustomModel] = false
@@ -66,6 +89,12 @@ class AdvancedSettingsDataStore(private val context: Context) {
             prefs[Keys.contextLength] = ""
             prefs[Keys.maxTokens] = ""
             prefs[Keys.temperature] = ""
+        }
+    }
+
+    fun persistResetModelSettings() {
+        persistenceScope.launch {
+            resetModelSettings()
         }
     }
 

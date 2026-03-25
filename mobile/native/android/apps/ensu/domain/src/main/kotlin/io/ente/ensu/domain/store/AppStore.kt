@@ -142,7 +142,7 @@ class AppStore(
         modelSettings: ModelSettingsState
     ) {
         _state.value = _state.value.copy(developerSettings = developerSettings)
-        modelSettingsActions.updateModelSettings(modelSettings)
+        modelSettingsActions.hydratePersistedModelSettings(modelSettings)
     }
 
     fun signIn(email: String) = authActions.signIn(email)

@@ -91,6 +91,7 @@ export interface ChatDialogsProps {
     useCustomModel: boolean;
     defaultModelName: string;
     defaultModelUrl: string;
+    defaultModelMmproj?: string;
     loadedModelName: string | null;
     allowMmproj: boolean;
     isTauriRuntime: boolean;
@@ -144,6 +145,7 @@ export const ChatDialogs = memo(
         useCustomModel,
         defaultModelName,
         defaultModelUrl,
+        defaultModelMmproj,
         loadedModelName,
         allowMmproj,
         isTauriRuntime,
@@ -223,7 +225,9 @@ export const ChatDialogs = memo(
                     id: "default",
                     name: `${defaultModelName} (Default)`,
                     url: defaultModelUrl,
-                    mmproj: allowMmproj ? undefined : "",
+                    mmproj: allowMmproj
+                        ? (defaultModelMmproj ?? undefined)
+                        : "",
                 },
                 ...suggestedModels
                     .filter((model) => model.url !== defaultModelUrl)
@@ -235,7 +239,13 @@ export const ChatDialogs = memo(
                     })),
                 { id: "custom", name: "Custom", url: "", mmproj: "" },
             ],
-            [allowMmproj, defaultModelName, defaultModelUrl, suggestedModels],
+            [
+                allowMmproj,
+                defaultModelMmproj,
+                defaultModelName,
+                defaultModelUrl,
+                suggestedModels,
+            ],
         );
         const isCustomSelected = selectedModelId === "custom";
         const canSaveModelSettings =
@@ -260,7 +270,15 @@ export const ChatDialogs = memo(
                 !useCustomModel ? "default" : (matchedOption?.id ?? "custom"),
             );
             setShowAdvancedLimits(!!contextLength || !!maxTokens);
-        }, [showModelSettings]); // eslint-disable-line react-hooks/exhaustive-deps
+        }, [
+            contextLength,
+            maxTokens,
+            mmprojUrl,
+            modelOptions,
+            modelUrl,
+            showModelSettings,
+            useCustomModel,
+        ]);
 
         // Initialize system prompt draft from parent state when dialog opens
         React.useEffect(() => {
@@ -273,8 +291,14 @@ export const ChatDialogs = memo(
                 if (!value) return undefined;
                 try {
                     const url = new URL(value);
-                    if (!url.hostname.includes("huggingface.co")) {
+                    if (
+                        url.hostname !== "huggingface.co" &&
+                        !url.hostname.endsWith(".huggingface.co")
+                    ) {
                         return "URL must be a huggingface.co link";
+                    }
+                    if (url.pathname.includes("/blob/")) {
+                        return "Use a direct file URL, not a /blob/ page";
                     }
                     if (!url.pathname.endsWith(".gguf")) {
                         return "URL must end with .gguf";

@@ -606,6 +606,8 @@ export const ChatMessageList = memo(
             );
         }, []);
 
+        const lastMessageUuid = messages[messages.length - 1]?.messageUuid;
+
         const renderMessage = useCallback(
             (_index: number, message: ChatMessage) => {
                 const isStreaming =
@@ -613,7 +615,7 @@ export const ChatMessageList = memo(
                 return (
                     <MessageRow
                         message={message}
-                        isLastMessage={_index === messages.length - 1}
+                        isLastMessage={message.messageUuid === lastMessageUuid}
                         branchSwitchers={branchSwitchers}
                         loadingPhrase={isStreaming ? loadingPhrase : null}
                         loadingDots={isStreaming ? loadingDots : 0}
@@ -660,7 +662,7 @@ export const ChatMessageList = memo(
                 stripHiddenParts,
                 userBubbleBackground,
                 userMessageTextSx,
-                messages.length,
+                lastMessageUuid,
             ],
         );
 

@@ -59,6 +59,12 @@ interface TauriEnsuDefaults {
     desktopModelPresets: TauriEnsuModelPreset[];
 }
 
+export interface ResolvedModelPreset {
+    name: string;
+    url: string;
+    mmproj?: string;
+}
+
 export class LlmProvider {
     private backend = createInferenceBackend({
         backend: "auto",
@@ -72,6 +78,7 @@ export class LlmProvider {
     private currentContextKey?: string;
     private defaultModel = DEFAULT_MODEL;
     private ensuDefaults?: TauriEnsuDefaults;
+    private useDesktopRustDefaults = false;
 
     private downloadAbort?: AbortController;
     private progressListeners = new Set<(progress: DownloadProgress) => void>();
@@ -102,6 +109,21 @@ export class LlmProvider {
 
     public getEnsuDefaults(): TauriEnsuDefaults | undefined {
         return this.ensuDefaults;
+    }
+
+    public getResolvedModelPresets(): ResolvedModelPreset[] | undefined {
+        if (!this.ensuDefaults) {
+            return undefined;
+        }
+
+        const presets = this.useDesktopRustDefaults
+            ? this.ensuDefaults.desktopModelPresets
+            : this.ensuDefaults.mobileModelPresets;
+        return presets.map((preset) => ({
+            name: preset.title,
+            url: preset.url,
+            mmproj: preset.mmprojUrl ?? undefined,
+        }));
     }
 
     public getBackendKind() {
@@ -379,6 +401,7 @@ export class LlmProvider {
 
     private async resolveDefaultModelForDevice() {
         this.defaultModel = DEFAULT_MODEL;
+        this.useDesktopRustDefaults = false;
 
         if (this.backend.kind !== "tauri") {
             return;
@@ -398,8 +421,10 @@ export class LlmProvider {
                 platform === "macos" ||
                 platform === "darwin" ||
                 platform === "mac";
+            this.useDesktopRustDefaults =
+                isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES;
 
-            if (isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES) {
+            if (this.useDesktopRustDefaults) {
                 this.defaultModel = DESKTOP_DEFAULT_MODEL;
             }
 
@@ -410,11 +435,9 @@ export class LlmProvider {
                 const defaults = await invoke<TauriEnsuDefaults>(
                     "get_ensu_defaults",
                 );
-                const rustPreset =
-                    isMacPlatform &&
-                    totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES
-                        ? defaults.desktopDefaultModel
-                        : defaults.mobileDefaultModel;
+                const rustPreset = this.useDesktopRustDefaults
+                    ? defaults.desktopDefaultModel
+                    : defaults.mobileDefaultModel;
                 this.defaultModel = {
                     ...this.defaultModel,
                     id: rustPreset.id,

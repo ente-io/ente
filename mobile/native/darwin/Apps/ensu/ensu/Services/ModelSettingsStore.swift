@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 final class ModelSettingsStore: ObservableObject {
     static let shared = ModelSettingsStore()
+    static let highRAMThresholdBytes: UInt64 = 16 * 1024 * 1024 * 1024
 
     @Published var useCustomModel: Bool {
         didSet { persist() }
@@ -83,13 +84,11 @@ final class ModelSettingsStore: ObservableObject {
         return trimmed.isEmpty ? platformSystemPromptBody : trimmed
     }
 
-    private static let minHighRAMBytes: UInt64 = 16 * 1024 * 1024 * 1024
-
     private static var platformDefaultModel: EnsuRustModelPreset {
         #if os(iOS)
         EnsuRustDefaults.shared.mobileDefaultModel
         #else
-        if ProcessInfo.processInfo.physicalMemory >= minHighRAMBytes {
+        if ProcessInfo.processInfo.physicalMemory >= highRAMThresholdBytes {
             return EnsuRustDefaults.shared.desktopDefaultModel
         } else {
             return EnsuRustDefaults.shared.mobileDefaultModel

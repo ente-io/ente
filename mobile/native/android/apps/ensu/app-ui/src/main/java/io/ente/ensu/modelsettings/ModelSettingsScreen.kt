@@ -233,6 +233,12 @@ fun ModelSettingsScreen(
 
                 Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
                 Text(text = "Leave blank to use model defaults", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                Text(
+                    text = "Values below 0.35 or above 0.7 are clamped automatically.",
+                    style = EnsuTypography.small,
+                    color = EnsuColor.textMuted()
+                )
             }
         }
 

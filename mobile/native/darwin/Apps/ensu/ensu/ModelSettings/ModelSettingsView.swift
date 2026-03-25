@@ -25,12 +25,11 @@ struct ModelSettingsView: View {
 
     private let modelChoices: [ModelChoice] = {
         let defaults = EnsuRustDefaults.shared
-        let minHighRAMBytes: UInt64 = 16 * 1024 * 1024 * 1024
         #if os(iOS)
         let defaultModel = defaults.mobileDefaultModel
         let presets = defaults.mobileModelPresets
         #else
-        let isHighRAM = ProcessInfo.processInfo.physicalMemory >= minHighRAMBytes
+        let isHighRAM = ProcessInfo.processInfo.physicalMemory >= ModelSettingsStore.highRAMThresholdBytes
         let defaultModel = isHighRAM ? defaults.desktopDefaultModel : defaults.mobileDefaultModel
         let presets = isHighRAM ? defaults.desktopModelPresets : defaults.mobileModelPresets
         #endif

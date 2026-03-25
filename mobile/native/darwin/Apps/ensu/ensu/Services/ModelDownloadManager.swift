@@ -293,6 +293,11 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, URLSessionTaskDelega
 
         let destination = URL(fileURLWithPath: record.destinationPath)
         do {
+            if !location.looksLikeGgufFile {
+                try? FileManager.default.removeItem(at: location)
+                markFailed(id: id, message: "Downloaded file is not GGUF")
+                return
+            }
             try FileManager.default.createDirectory(
                 at: destination.deletingLastPathComponent(),
                 withIntermediateDirectories: true,
@@ -302,11 +307,6 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, URLSessionTaskDelega
                 try FileManager.default.removeItem(at: destination)
             }
             try FileManager.default.moveItem(at: location, to: destination)
-            if !destination.looksLikeGgufFile {
-                try? FileManager.default.removeItem(at: destination)
-                markFailed(id: id, message: "Downloaded file is not GGUF")
-                return
-            }
             clearRecord(id: id)
         } catch {
             markFailed(id: id, message: error.localizedDescription)

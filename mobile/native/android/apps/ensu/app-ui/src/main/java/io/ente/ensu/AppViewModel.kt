@@ -43,7 +43,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         credentialStore = credentialStore,
         endpointPreferences = endpointPreferences
     )
-    val ensuDefaults = EnsuRustDefaults.load()
+    val ensuDefaults = runCatching { EnsuRustDefaults.load() }
+        .onFailure { error ->
+            logRepository.log(
+                LogLevel.Error,
+                "Failed to load Rust defaults",
+                details = error.message,
+                tag = "App",
+                throwable = error
+            )
+        }
+        .getOrElse { fallbackEnsuDefaults() }
 
     val store = AppStore(
         sessionPreferences = sessionPreferences,
@@ -138,4 +148,69 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             ?: application.filesDir
         return File(root, "llm")
     }
+
+    private fun fallbackEnsuDefaults() = io.ente.ensu.domain.model.EnsuDefaults(
+        mobileSystemPromptBody = "You are Ensu, an AI assistant built by Ente. Current date and time: \$date\n\nUse Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.",
+        desktopSystemPromptBody = "You are Ensu, an AI assistant built by Ente. Current date and time: \$date\n\nUse Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.",
+        systemPromptDatePlaceholder = "\$date",
+        sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.",
+        mobileDefaultModel = io.ente.ensu.domain.model.EnsuModelPreset(
+            id = "lfm-vl-1.6b",
+            title = "LFM 2.5 VL 1.6B (Q4_0)",
+            url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
+            mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
+        ),
+        mobileModelPresets = listOf(
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "lfm-1.2b",
+                title = "LFM 2.5 1.2B Instruct (Q4_0)",
+                url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true",
+                mmprojUrl = null
+            ),
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "qwen-0.8b",
+                title = "Qwen 3.5 0.8B (Q4_K_M)",
+                url = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+                mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
+            ),
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "qwen-2b-q8",
+                title = "Qwen 3.5 2B (Q8_0)",
+                url = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+                mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
+            )
+        ),
+        desktopDefaultModel = io.ente.ensu.domain.model.EnsuModelPreset(
+            id = "qwen-4b-q4km",
+            title = "Qwen 3.5 4B (Q4_K_M)",
+            url = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+            mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf"
+        ),
+        desktopModelPresets = listOf(
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "lfm-vl-1.6b",
+                title = "LFM 2.5 VL 1.6B (Q4_0)",
+                url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
+                mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
+            ),
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "lfm-1.2b",
+                title = "LFM 2.5 1.2B Instruct (Q4_0)",
+                url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true",
+                mmprojUrl = null
+            ),
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "qwen-0.8b",
+                title = "Qwen 3.5 0.8B (Q4_K_M)",
+                url = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+                mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
+            ),
+            io.ente.ensu.domain.model.EnsuModelPreset(
+                id = "qwen-2b-q8",
+                title = "Qwen 3.5 2B (Q8_0)",
+                url = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+                mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
+            )
+        )
+    )
 }

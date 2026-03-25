@@ -1776,11 +1776,14 @@ final class ChatViewModel: ObservableObject {
         let targetKey = modelReadyKey(for: target)
 
         downloadProgressMonitorTask = Task { [weak self] in
-            guard let self else { return }
             var emptyPollCount = 0
 
             while !Task.isCancelled {
-                guard self.modelReadyKey(for: self.modelSettings.currentTarget()) == targetKey else {
+                guard let self else { return }
+                let currentTargetKey = await MainActor.run {
+                    self.modelReadyKey(for: self.modelSettings.currentTarget())
+                }
+                guard currentTargetKey == targetKey else {
                     return
                 }
 

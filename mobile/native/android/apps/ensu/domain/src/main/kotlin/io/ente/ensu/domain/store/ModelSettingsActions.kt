@@ -47,6 +47,13 @@ internal class ModelSettingsActions(
         refreshModelDownloadInfo()
     }
 
+    fun hydratePersistedModelSettings(settings: ModelSettingsState) {
+        state.update { appState ->
+            appState.copy(modelSettings = settings)
+        }
+        refreshModelDownloadInfo()
+    }
+
     fun resetModelSettings() {
         state.update { appState ->
             appState.copy(modelSettings = ModelSettingsState())
@@ -268,11 +275,18 @@ internal class ModelSettingsActions(
         val scope = scope ?: return
         downloadProgressMonitorJob?.cancel()
         downloadProgressMonitorJob = scope.launch {
+            var emptyPollCount = 0
             while (isActive) {
                 val progress = llmProvider.currentDownloadProgress(target)
                 if (progress == null) {
-                    break
+                    emptyPollCount += 1
+                    if (emptyPollCount >= 6) {
+                        break
+                    }
+                    delay(500)
+                    continue
                 }
+                emptyPollCount = 0
                 val isFailure = progress.percent < 0
                 if (isFailure) {
                     persistModelDownloadRequested(false)

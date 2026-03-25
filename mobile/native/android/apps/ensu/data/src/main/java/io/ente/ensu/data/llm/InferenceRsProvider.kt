@@ -68,7 +68,6 @@ class InferenceRsProvider(
         appContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
     private val downloadManager =
         appContext.getSystemService(DownloadManager::class.java)
-            ?: error("DownloadManager unavailable")
     private val downloadPrefs =
         appContext.getSharedPreferences("ensu.system.downloads", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
@@ -80,6 +79,8 @@ class InferenceRsProvider(
     @Volatile private var currentJobId: Long? = null
     @Volatile private var manualDownloadCancelled = false
     private var backendInitialized = false
+    private val legacyMigrationLock = Any()
+    private val migratingLegacyTargets = mutableSetOf<String>()
     private val migratedLegacyTargets = java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
     init {
@@ -307,7 +308,7 @@ class InferenceRsProvider(
     override fun cancelDownload() {
         manualDownloadCancelled = true
         val ids = loadAllDownloadRecords().map { it.downloadId }.distinct()
-        if (ids.isNotEmpty()) {
+        if (ids.isNotEmpty() && downloadManager != null) {
             downloadManager.remove(*ids.toLongArray())
         }
         clearAllDownloadRecords()
@@ -370,7 +371,7 @@ class InferenceRsProvider(
         target: LlmModelTarget,
         onProgress: (DownloadProgress) -> Unit
     ) {
-        if (externalDownloadsRoot == null) {
+        if (externalDownloadsRoot == null || downloadManager == null) {
             awaitManualDownload(target, onProgress)
             return
         }
@@ -419,6 +420,7 @@ class InferenceRsProvider(
     }
 
     private fun ensureDownloadsEnqueued(target: LlmModelTarget) {
+        val manager = downloadManager ?: return
         val expectedTargets = ModelDownloadSupport.expectedTargets(modelDir, target)
         val existingRecords = loadDownloadRecords(target).associateBy { it.destinationPath }
         val rowsById = queryDownloadRows(existingRecords.values.map { it.downloadId })
@@ -458,7 +460,7 @@ class InferenceRsProvider(
                     Environment.DIRECTORY_DOWNLOADS,
                     relativeDestinationPath(download.destination)
                 )
-            val id = downloadManager.enqueue(request)
+            val id = manager.enqueue(request)
             updatedRecords += DownloadRecord(
                 downloadId = id,
                 label = download.label,
@@ -472,9 +474,10 @@ class InferenceRsProvider(
 
     private fun queryDownloadRows(ids: Collection<Long>): Map<Long, DownloadRow> {
         if (ids.isEmpty()) return emptyMap()
+        val manager = downloadManager ?: return emptyMap()
         val query = DownloadManager.Query().setFilterById(*ids.toLongArray())
         val rows = mutableMapOf<Long, DownloadRow>()
-        downloadManager.query(query)?.use { cursor ->
+        manager.query(query)?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID)
             val statusColumn = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
             val reasonColumn = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON)
@@ -564,34 +567,44 @@ class InferenceRsProvider(
     private fun migrateLegacyDownloads(target: LlmModelTarget) {
         val legacyDir = legacyModelDir ?: return
         if (legacyDir.absolutePath == modelDir.absolutePath) return
-        if (migratedLegacyTargets.contains(target.id)) return
-
-        val oldTargets = ModelDownloadSupport.expectedTargets(legacyDir, target)
-        val newTargets = ModelDownloadSupport.expectedTargets(modelDir, target)
-        oldTargets.zip(newTargets).forEach { (oldTarget, newTarget) ->
-            if (!ModelDownloadSupport.looksLikeGguf(oldTarget.destination)) {
-                return@forEach
-            }
-            if (newTarget.destination.exists()) {
-                return@forEach
-            }
-
-            newTarget.destination.parentFile?.mkdirs()
-            val moved = oldTarget.destination.renameTo(newTarget.destination)
-            if (!moved) {
-                runCatching {
-                    oldTarget.destination.copyTo(newTarget.destination, overwrite = false)
-                    oldTarget.destination.delete()
-                }.onFailure { error ->
-                    Log.w(
-                        "InferenceRsProvider",
-                        "Legacy migration failed for ${oldTarget.destination.absolutePath}",
-                        error
-                    )
-                }
+        synchronized(legacyMigrationLock) {
+            if (migratedLegacyTargets.contains(target.id) || !migratingLegacyTargets.add(target.id)) {
+                return
             }
         }
-        migratedLegacyTargets.add(target.id)
+
+        try {
+            val oldTargets = ModelDownloadSupport.expectedTargets(legacyDir, target)
+            val newTargets = ModelDownloadSupport.expectedTargets(modelDir, target)
+            oldTargets.zip(newTargets).forEach { (oldTarget, newTarget) ->
+                if (!ModelDownloadSupport.looksLikeGguf(oldTarget.destination)) {
+                    return@forEach
+                }
+                if (newTarget.destination.exists()) {
+                    return@forEach
+                }
+
+                newTarget.destination.parentFile?.mkdirs()
+                val moved = oldTarget.destination.renameTo(newTarget.destination)
+                if (!moved) {
+                    runCatching {
+                        oldTarget.destination.copyTo(newTarget.destination, overwrite = false)
+                        oldTarget.destination.delete()
+                    }.onFailure { error ->
+                        Log.w(
+                            "InferenceRsProvider",
+                            "Legacy migration failed for ${oldTarget.destination.absolutePath}",
+                            error
+                        )
+                    }
+                }
+            }
+            migratedLegacyTargets.add(target.id)
+        } finally {
+            synchronized(legacyMigrationLock) {
+                migratingLegacyTargets.remove(target.id)
+            }
+        }
     }
 
     private fun userFacingDownloadFailure(reason: Int): String {

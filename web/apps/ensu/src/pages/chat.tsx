@@ -72,7 +72,11 @@ import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     SIGN_IN_ENABLED,
 } from "services/featureFlags";
-import { DEFAULT_MODEL, LlmProvider } from "services/llm/provider";
+import {
+    DEFAULT_MODEL,
+    LlmProvider,
+    type ResolvedModelPreset,
+} from "services/llm/provider";
 import type {
     DownloadProgress,
     GenerateEvent,
@@ -794,7 +798,7 @@ const Page: React.FC = () => {
     const [resolvedDefaultModel, setResolvedDefaultModel] =
         useState<ModelInfo>(DEFAULT_MODEL);
     const [resolvedModelPresets, setResolvedModelPresets] = useState<
-        { name: string; url: string; mmproj?: string }[] | null
+        ResolvedModelPreset[] | null
     >(null);
     const [modelUrl, setModelUrl] = useState("");
     const [mmprojUrl, setMmprojUrl] = useState("");
@@ -1244,6 +1248,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (typeof window === "undefined") return;
+        let cancelled = false;
         const isUnlocked =
             window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) === "1";
         setAdvancedUnlocked(isUnlocked);
@@ -1261,48 +1266,56 @@ const Page: React.FC = () => {
         let raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
         if (!raw) {
             // Migrate from IndexedDB (previous storage) to localStorage
-            void getKV(MODEL_SETTINGS_STORAGE_KEY).then((kvRaw) => {
-                if (!kvRaw || typeof kvRaw !== "object") return;
-                const migrated = JSON.stringify(kvRaw);
-                window.localStorage.setItem(
-                    MODEL_SETTINGS_STORAGE_KEY,
-                    migrated,
-                );
-                // Re-trigger the effect by reloading settings from the migrated data
-                const parsed = kvRaw as {
-                    useCustomModel?: boolean;
-                    modelUrl?: string;
-                    mmprojUrl?: string;
-                    contextLength?: string;
-                    maxTokens?: string;
-                };
-                const isTauri = detectTauriRuntime();
-                const canMmproj = isTauri;
-                const rawContextLength = parsed.contextLength ?? "";
-                const clampedContextLength =
-                    !isTauri &&
-                    rawContextLength &&
-                    Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
-                        ? String(DEFAULT_WEB_CONTEXT_SIZE)
-                        : rawContextLength;
-                if (clampedContextLength !== rawContextLength) {
-                    const clamped = {
-                        ...parsed,
-                        contextLength: clampedContextLength,
-                    };
+            void getKV(MODEL_SETTINGS_STORAGE_KEY)
+                .then((kvRaw) => {
+                    if (cancelled || !kvRaw || typeof kvRaw !== "object") {
+                        return;
+                    }
+                    const migrated = JSON.stringify(kvRaw);
                     window.localStorage.setItem(
                         MODEL_SETTINGS_STORAGE_KEY,
-                        JSON.stringify(clamped),
+                        migrated,
                     );
-                }
-                setUseCustomModel(!!parsed.useCustomModel);
-                setModelUrl(parsed.modelUrl ?? "");
-                setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
-                setContextLength(clampedContextLength);
-                setMaxTokens(parsed.maxTokens ?? "");
-                void removeKV(MODEL_SETTINGS_STORAGE_KEY);
-            });
-            return;
+                    // Re-trigger the effect by reloading settings from the migrated data
+                    const parsed = kvRaw as {
+                        useCustomModel?: boolean;
+                        modelUrl?: string;
+                        mmprojUrl?: string;
+                        contextLength?: string;
+                        maxTokens?: string;
+                    };
+                    const isTauri = detectTauriRuntime();
+                    const canMmproj = isTauri;
+                    const rawContextLength = parsed.contextLength ?? "";
+                    const clampedContextLength =
+                        !isTauri &&
+                        rawContextLength &&
+                        Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                            ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                            : rawContextLength;
+                    if (clampedContextLength !== rawContextLength) {
+                        const clamped = {
+                            ...parsed,
+                            contextLength: clampedContextLength,
+                        };
+                        window.localStorage.setItem(
+                            MODEL_SETTINGS_STORAGE_KEY,
+                            JSON.stringify(clamped),
+                        );
+                    }
+                    setUseCustomModel(!!parsed.useCustomModel);
+                    setModelUrl(parsed.modelUrl ?? "");
+                    setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
+                    setContextLength(clampedContextLength);
+                    setMaxTokens(parsed.maxTokens ?? "");
+                    void removeKV(MODEL_SETTINGS_STORAGE_KEY);
+                })
+                .catch((error: unknown) => {
+                    log.error("Failed to migrate model settings", error);
+                });
+            return () => {
+                cancelled = true;
+            };
         }
         try {
             const parsed = JSON.parse(raw) as {
@@ -1342,6 +1355,9 @@ const Page: React.FC = () => {
         } catch (error) {
             log.error("Failed to read model settings", error);
         }
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
@@ -2085,18 +2101,8 @@ const Page: React.FC = () => {
         }
         await providerRef.current.initialize();
         setResolvedDefaultModel(providerRef.current.getDefaultModel());
-        const defaults = providerRef.current.getEnsuDefaults();
-        if (defaults) {
-            const isTauri = providerRef.current.getBackendKind() === "tauri";
-            const presets = (
-                isTauri
-                    ? defaults.desktopModelPresets
-                    : defaults.mobileModelPresets
-            ).map((p) => ({
-                name: p.title,
-                url: p.url,
-                mmproj: p.mmprojUrl ?? undefined,
-            }));
+        const presets = providerRef.current.getResolvedModelPresets();
+        if (presets) {
             setResolvedModelPresets(presets);
         }
         return providerRef.current;
@@ -3628,7 +3634,16 @@ const Page: React.FC = () => {
 
     const handleUseDefaultModel = useCallback(() => {
         if (typeof window !== "undefined") {
-            window.localStorage.removeItem(MODEL_SETTINGS_STORAGE_KEY);
+            window.localStorage.setItem(
+                MODEL_SETTINGS_STORAGE_KEY,
+                JSON.stringify({
+                    useCustomModel: false,
+                    modelUrl: "",
+                    mmprojUrl: "",
+                    contextLength: "",
+                    maxTokens: "",
+                }),
+            );
             void removeKV(MODEL_SETTINGS_STORAGE_KEY);
         }
         setUseCustomModel(false);
@@ -4448,6 +4463,7 @@ const Page: React.FC = () => {
                 useCustomModel={useCustomModel}
                 defaultModelName={resolvedDefaultModel.name}
                 defaultModelUrl={resolvedDefaultModel.url}
+                defaultModelMmproj={resolvedDefaultModel.mmprojUrl}
                 loadedModelName={loadedModelName}
                 allowMmproj={allowMmproj}
                 isTauriRuntime={isTauriRuntime}

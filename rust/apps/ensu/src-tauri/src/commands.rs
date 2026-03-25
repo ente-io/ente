@@ -105,7 +105,11 @@ impl From<llm::EnsuDefaults> for TauriEnsuDefaults {
             mobile_default_model: d.mobile_default_model.into(),
             mobile_model_presets: d.mobile_model_presets.into_iter().map(Into::into).collect(),
             desktop_default_model: d.desktop_default_model.into(),
-            desktop_model_presets: d.desktop_model_presets.into_iter().map(Into::into).collect(),
+            desktop_model_presets: d
+                .desktop_model_presets
+                .into_iter()
+                .map(Into::into)
+                .collect(),
         }
     }
 }
