@@ -21,7 +21,7 @@ import (
 const (
 	StorageWarningMailLock = "storage_warning_mail_lock"
 
-	storageWarningBaseTemplate = "base.html"
+	storageWarningBaseTemplate = "ente_base.html"
 	storageWarningFromName     = "Ente"
 	storageWarningFromEmail    = "support@ente.io"
 
@@ -172,6 +172,10 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 		log.Error("Skipping storage warning mails: controller dependencies are not fully configured")
 		return
 	}
+	if c.UserRepo.IsLikelySelfHosted() {
+		return
+	}
+	log.Info("Running storage warning mails for cloud instance")
 
 	lockStatus := c.LockController.TryLock(StorageWarningMailLock, time.MicrosecondsAfterHours(24))
 	if !lockStatus {
