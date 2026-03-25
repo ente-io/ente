@@ -15,7 +15,7 @@
 
 Just hang around, enjoy the vibe. The Ente community — the people who are building Ente, and the people who are using Ente — hang out at various places depending on their proclivity:
 
-- [Discord](https://discord.ente.io)
+- [Discord](https://ente.com/discord)
 - [Mastodon](https://fosstodon.org/@ente)
 - [X / Twitter](https://twitter.com/enteio)
 - [Github Discussions](https://github.com/ente-io/ente/discussions)

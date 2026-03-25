@@ -266,7 +266,7 @@ Future<String> generateHtml(BuildContext context) async {
           class="footer-icons" style="width: 24px; padding: 4px" title="Mastodon" alt="Mastodon" /></a>
       <a href="https://twitter.com/enteio" target="_blank"><img src="https://email-assets.ente.io/twitter-icon.png"
           class="footer-icons" style="width: 24px; padding: 4px" title="Twitter" alt="Twitter" /></a>
-      <a href="https://discord.ente.io" target="_blank"><img src="https://email-assets.ente.io/discord-icon.png"
+      <a href="https://ente.com/discord" target="_blank"><img src="https://email-assets.ente.io/discord-icon.png"
           class="footer-icons" style="width: 24px; padding: 4px" title="Discord" alt="Discord" /></a>
       <a href="https://github.com/ente-io" target="_blank"><img src="https://email-assets.ente.io/github-icon.png"
           class="footer-icons" style="width: 24px; padding: 4px" title="GitHub" alt="GitHub" /></a>
