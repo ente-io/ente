@@ -69,7 +69,7 @@
 - Generate streams for videos (beta)
 
     > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://ente.io/help/photos/faq/video-streaming).
+    > [video streaming FAQ](https://ente.com/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 
@@ -293,7 +293,7 @@ Other highlights:
 
 ### Photo Editor
 
-Check out our [blog](https://ente.io/blog/introducing-web-desktop-photo-editor/)
+Check out our [blog](https://ente.com/blog/introducing-web-desktop-photo-editor/)
 to know about feature and functionalities.
 
 ## v1.6.47

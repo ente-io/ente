@@ -3,7 +3,7 @@ name = "ente-rs"
 version = "0.0.1"
 edition = "2024"
 description = "Rust bindings and CLI for ente.io"
-homepage = "https://ente.io"
+homepage = "https://ente.com"
 repository = "https://github.com/ente-io/ente"
 license = "AGPL-3.0-only"
 

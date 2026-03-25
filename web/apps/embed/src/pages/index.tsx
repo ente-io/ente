@@ -133,7 +133,7 @@ export default function EmbedGallery() {
                 if (!t && !ck) {
                     // Only redirect to ente.io if this is NOT a custom/self-hosted instance
                     if (!isCustomAlbumsAppOrigin) {
-                        window.location.href = "https://ente.io";
+                        window.location.href = "https://ente.com";
                         redirectingToWebsite = true;
                     }
                 }

@@ -135,7 +135,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                                 PlatformUtil.openWebView(
                                   context,
                                   context.l10n.faq,
-                                  'https://ente.io/help/auth/faq',
+                                  'https://ente.com/help/auth/faq',
                                 );
                               },
                             ),

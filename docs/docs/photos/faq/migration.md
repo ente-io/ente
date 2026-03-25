@@ -60,7 +60,7 @@ This usually occurs due to a network connectivity issue:
 - Check if your firewall is blocking Ente's servers
 - On desktop/web, try disabling "Faster uploads" in Settings > Preferences > Advanced
 
-For more check: [Troubleshooting](https://ente.io/help/photos/faq/troubleshooting#desktop-app-issues)
+For more check: [Troubleshooting](https://ente.com/help/photos/faq/troubleshooting#desktop-app-issues)
 
 ### How do I prevent duplicates while migrating from Google Photos? {#prevent-duplicates-migration}
 
@@ -159,7 +159,7 @@ You will receive a notification from the app once your export is complete.
 #### 2. Import into Ente
 
 Now simply drag and drop the downloaded folders into
-[our desktop app](https://ente.io/download/desktop) and grab a cup of coffee (or
+[our desktop app](https://ente.com/download/desktop) and grab a cup of coffee (or
 a good night's sleep, depending on the size of your library) while we handle the
 rest.
 

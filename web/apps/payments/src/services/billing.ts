@@ -494,5 +494,5 @@ const redirectToApp = (
 };
 
 const redirectHome = () => {
-    window.location.href = "https://ente.io";
+    window.location.href = "https://ente.com";
 };

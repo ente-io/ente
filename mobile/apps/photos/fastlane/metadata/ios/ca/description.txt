@@ -30,4 +30,4 @@ SUPORT
 Ens enorgulleix oferir un suport humà. Si ets client de pagament, pots contactar amb nosaltres a team@ente.io i esperar una resposta del nostre equip en menys de 24 hores.
 
 TERMINIS
-https://ente.io/terms
+https://ente.com/terms

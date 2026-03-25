@@ -369,7 +369,7 @@ Note that these FAQs are primarily for Ente's cloud service. Self-hosting has ad
 You can:
 
 1. **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
-2. **Discord**: Join our [Discord community](https://ente.io/discord) for discussions
+2. **Discord**: Join our [Discord community](https://ente.com/discord) for discussions
 3. **Email**: Contact [support@ente.io](mailto:support@ente.io)
 
 For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.

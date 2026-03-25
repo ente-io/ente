@@ -1,6 +1,6 @@
 # Museum
 
-API server for [ente.io](https://ente.io)
+API server for [ente.com](https://ente.com)
 
 ![Museum's role in Ente's architecture](scripts/images/museum.png)
 
@@ -67,10 +67,10 @@ chores.
   data.
 
 * The end-to-end encrypted cryptography that powers all this is [documented
-  here](https://ente.io/architecture)
+  here](https://ente.com/architecture)
 
 * Details about the 3 (yes 3!) clouds where the encrypted data and database are
-  replicated to are [documented here](https://ente.io/reliability)
+  replicated to are [documented here](https://ente.com/reliability)
 
 Museum's architecture is generic enough to support arbitrary end-to-end
 encrypted storage. While we're currently focusing on building a great photo
@@ -124,7 +124,7 @@ documentation PRs around this too.
 > [!TIP]
 >
 > For more documentation around self-hosting, see
-> **[ente.io/help/self-hosting](https://ente.io/help/self-hosting)**.
+> **[ente.io/help/self-hosting](https://ente.com/help/self-hosting)**.
 
 ## Thanks ❤️
 

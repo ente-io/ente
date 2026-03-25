@@ -2,4 +2,4 @@
 # Using 301 (permanent redirect)
 # Splat pattern preserves the entire path
 
-/* https://ente.io/help/:splat 301
+/* https://ente.com/help/:splat 301

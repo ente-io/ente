@@ -24,7 +24,7 @@ const Page: React.FC = () => {
             // Hide content before redirect to avoid error flash
             setHideContent(true);
             // Redirect to ente.io/locker for root path
-            window.location.href = "https://ente.io/locker";
+            window.location.href = "https://ente.com/locker";
         }
     }, []);
 

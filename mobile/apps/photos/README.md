@@ -11,7 +11,7 @@ commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5
         Hello world
 
 To know more about Ente, see [our main README](../../../README.md) or visit
-[ente.io](https://ente.io).
+[ente.com](https://ente.com).
 
 To use Ente Photos on the web, see [../../../web](../../../web/README.md). To use Ente
 Photos on the desktop, see [../../../desktop](../../../desktop/README.md). There is a also a
@@ -26,7 +26,7 @@ If you're looking for Ente Auth instead, see [../auth](../auth/README.md).
 The [GitHub
 releases](https://github.com/ente-io/ente/releases?q=photos-v1) contain
 APKs, built straight from source. The latest build is available at
-[ente.io/apk](https://ente.io/apk). These builds keep themselves updated,
+[ente.io/apk](https://ente.com/apk). These builds keep themselves updated,
 without relying on third party stores.
 
 You can alternatively install the build from PlayStore or F-Droid.

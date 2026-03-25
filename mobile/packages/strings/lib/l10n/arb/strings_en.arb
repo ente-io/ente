@@ -875,7 +875,7 @@
   "enterValidEmail": "That email doesn't seem to be valid. Please enter a valid email address",
   "addANewEmail": "Add a new email",
   "orPickAnExistingOne": "Or pick an existing one",
-  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.com",
   "sendInvite": "Send invite",
   "trustedInviteBody": "You have been invited to be a legacy contact by {email}.",
   "verifyEmailID": "Verify {email}",

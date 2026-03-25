@@ -7,7 +7,7 @@ Meaning, they are encrypted with your `keys` before they leave your device.
 <img src="assets/e2ee.svg" class="architecture-svg" style="max-width: 600px"
 title="End-to-end encryption in Ente" />
 
-Our source code has been [audited](https://ente.io/blog/cryptography-audit/) to
+Our source code has been [audited](https://ente.com/blog/cryptography-audit/) to
 verify that these `keys` are available only to you.
 
 Meaning, only you can access your data.
@@ -372,5 +372,5 @@ checkout [our code](https://github.com/ente-io).
 If you'd like to help us improve this document, kindly email
 [security@ente.io](mailto:security@ente.io).
 
-We have a [separate document](https://ente.io/reliability) that outlines how we
+We have a [separate document](https://ente.com/reliability) that outlines how we
 replicate your data across 3 different cloud providers to ensure reliability.

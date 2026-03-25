@@ -21,7 +21,7 @@ You can install Ente Photos on your iPhone or iPad from the [iOS AppStore](https
 
 ### How do I install Ente Photos on my desktop? {#install-desktop}
 
-You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.io/download/desktop).
+You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.com/download/desktop).
 
 **Supported platforms:**
 

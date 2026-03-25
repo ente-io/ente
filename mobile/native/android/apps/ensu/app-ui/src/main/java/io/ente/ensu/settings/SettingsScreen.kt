@@ -61,7 +61,7 @@ fun SettingsScreen(
                 SettingsItem(
                     title = "About",
                     iconVector = Icons.Outlined.Info,
-                    onClick = { context.openExternalLink("https://ente.io/blog/ensu/") }
+                    onClick = { context.openExternalLink("https://ente.com/blog/ensu/") }
                 )
             )
 
@@ -104,14 +104,14 @@ fun SettingsScreen(
                 SettingsItem(
                     title = "Privacy Policy",
                     iconRes = HugeIcons.ViewIcon,
-                    onClick = { context.openExternalLink("https://ente.io/privacy") }
+                    onClick = { context.openExternalLink("https://ente.com/privacy") }
                 )
             )
             add(
                 SettingsItem(
                     title = "Terms of Service",
                     iconVector = Icons.Outlined.Description,
-                    onClick = { context.openExternalLink("https://ente.io/terms") }
+                    onClick = { context.openExternalLink("https://ente.com/terms") }
                 )
             )
         }

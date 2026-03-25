@@ -95,7 +95,7 @@ To continue backing up:
 
 ### What plans does Ente offer? {#available-plans}
 
-See our [website](https://ente.io#pricing) for the complete list of supported plans and pricing.
+See our [website](https://ente.com#pricing) for the complete list of supported plans and pricing.
 
 We offer:
 
@@ -142,7 +142,7 @@ If you need a custom plan, please contact [support@ente.io](mailto:support@ente.
 
 ### Does Ente have Family Plans? {#family-plans-faq}
 
-Yes we do! Please check out our announcement post [here](https://ente.io/blog/family-plans).
+Yes we do! Please check out our announcement post [here](https://ente.com/blog/family-plans).
 
 In brief:
 
@@ -235,7 +235,7 @@ Common reasons and solutions:
 **Problem 3: "Invalid email address" or invitation fails**
 
 - Make sure the email address is correct
-- The person must have an Ente account already (ask them to sign up first at [ente.io](https://ente.io))
+- The person must have an Ente account already (ask them to sign up first at [ente.com](https://ente.com))
 - Free accounts can be invited to family plans
 
 **Problem 4: Family plan not available**
@@ -383,7 +383,7 @@ We support **annual** subscriptions over PayPal.
 **How to purchase with PayPal:**
 
 1. Email **paypal@ente.io** from your registered Ente email address
-2. In your email, mention the [storage plan](https://ente.io#pricing) of your choice (e.g., "100 GB annual plan")
+2. In your email, mention the [storage plan](https://ente.com#pricing) of your choice (e.g., "100 GB annual plan")
 3. We will send you an invoice with a PayPal payment link
 4. Complete the payment through PayPal
 5. Your account will be upgraded once payment is confirmed
@@ -406,7 +406,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 1. Email **crypto@ente.io** from your registered Ente email address
 2. In your email, specify:
-    - The [storage plan](https://ente.io#pricing) of your choice
+    - The [storage plan](https://ente.com#pricing) of your choice
     - Your preferred cryptocurrency
 3. We will send you an invoice with payment instructions
 4. Complete the payment using your crypto wallet
@@ -416,7 +416,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 ⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through web.ente.io instead.
 
-⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.io/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
+⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.com/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
 
 **Processing time:**
 

@@ -16,7 +16,7 @@ class SocialIconsRow extends StatelessWidget {
       children: [
         _SocialIconButton(
           icon: HugeIcons.strokeRoundedDiscord,
-          url: "https://ente.io/discord",
+          url: "https://ente.com/discord",
           color: colorScheme.textMuted,
         ),
         const SizedBox(width: 8),

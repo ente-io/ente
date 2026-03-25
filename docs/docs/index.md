@@ -33,7 +33,7 @@ literally means "my photos".
 
 But one day, he discovered that "ente" means "duck" in German. This unexpected
 connection sealed the deal after looking for alternative names and led to the
-adoption of ["Ducky"](https://ente.io/blog/ducky/), representing the playfulness
+adoption of ["Ducky"](https://ente.com/blog/ducky/), representing the playfulness
 and friendly nature of the community and team.
 
 ## Getting Started
@@ -62,16 +62,16 @@ You can find our contribution guidelines
 You can always engage with our community and team to hang out, answer queries
 and stay updated:
 
-- Chat: [Discord](https://ente.io/discord)
+- Chat: [Discord](https://ente.com/discord)
 - Discussions: [GitHub](https://github.com/ente-io/ente/discussions)
 - Socials:
     - Twitter: [enteio](https://twitter.com/enteio)
     - Mastodon: [@ente@fosstodon.org](https://fosstodon.org/@ente)
-    - Bluesky: [ente.io](https://bsky.app/profile/ente.io)
+    - Bluesky: [ente.com](https://bsky.app/profile/ente.io)
     - Instagram: [ente.app](https://www.instagram.com/ente.app)
 - Website:
-    - [Blog](https://ente.io/blog)
-    - [RSS](https://ente.io/blog/rss.xml)
+    - [Blog](https://ente.com/blog)
+    - [RSS](https://ente.com/blog/rss.xml)
 
 ## Getting Help
 

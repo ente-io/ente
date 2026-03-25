@@ -1333,7 +1333,7 @@ export class FileViewerPhotoSwipe {
                     html: publicAlbumEnteLogoHTML(),
                     onClick: () => {
                         window.open(
-                            "https://ente.io",
+                            "https://ente.com",
                             "_blank",
                             "noopener,noreferrer",
                         );

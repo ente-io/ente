@@ -251,7 +251,7 @@ export default function PublicCollectionGallery() {
                 if (!t && !ck) {
                     // Only redirect to ente.io if this is NOT a custom/self-hosted instance
                     if (!isCustomAlbumsAppOrigin) {
-                        window.location.href = "https://ente.io";
+                        window.location.href = "https://ente.com";
                         redirectingToWebsite = true;
                     }
                 }
@@ -659,7 +659,7 @@ export default function PublicCollectionGallery() {
                             />
                         ) : (
                             <SpacedRow sx={{ flex: 1 }}>
-                                <EnteLogoLink href="https://ente.io">
+                                <EnteLogoLink href="https://ente.com">
                                     <EnteLogo height={15} />
                                 </EnteLogoLink>
                                 <Stack direction="row" spacing={2}>
