@@ -13,6 +13,7 @@ class TimeMemory extends SmartMemory {
     List<Memory> memories,
     int firstDateToShow,
     int lastDateToShow, {
+    String? id,
     this.day,
     this.month,
     this.yearsAgo,
@@ -24,6 +25,7 @@ class TimeMemory extends SmartMemory {
           '',
           firstDateToShow,
           lastDateToShow,
+          id: id,
         );
 
   @override

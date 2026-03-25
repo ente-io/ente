@@ -14,6 +14,7 @@ import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import "package:photos/events/memory_seen_event.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
@@ -378,6 +379,7 @@ class MemoriesCacheService {
     try {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
+      final List<(ToShowMemory, SmartMemory)> typedMemories = [];
       final seenTimes = await (isOfflineMode
               ? MemoriesDB.offlineInstance
               : MemoriesDB.instance)
@@ -426,79 +428,49 @@ class MemoriesCacheService {
               memory.fileLocalIntIDs!.isNotEmpty;
           final fileIds =
               useLocalIntIds ? memory.fileLocalIntIDs! : memory.fileUploadedIDs;
-          late final SmartMemory smartMemory;
-          if (memory.type == MemoryType.people) {
-            smartMemory = PeopleMemory(
-              fileIds
-                  .where(
-                    (fileID) => useLocalIntIds
-                        ? true
-                        : uploadedIdToFile.containsKey(fileID),
-                  )
-                  .map(
-                    (fileID) {
-                      final file = useLocalIntIds
-                          ? _fileFromLocalIntId(
-                              fileID,
-                              localIdToFile,
-                            )
-                          : uploadedIdToFile[fileID];
-                      return file == null
-                          ? null
-                          : Memory.fromFile(
-                              file,
-                              seenTimes,
-                              seenTimeKey: useLocalIntIds ? fileID : null,
-                            );
-                    },
-                  )
-                  .whereType<Memory>()
-                  .toList(),
-              memory.firstTimeToShow,
-              memory.lastTimeToShow,
-              memory.peopleMemoryType!,
-              memory.personID!,
-              memory.personName,
-              isUnnamedCluster: memory.isUnnamedCluster ?? false,
-              title: memory.title,
-              id: memory.id,
-            );
-          } else {
-            smartMemory = SmartMemory(
-              fileIds
-                  .where(
-                    (fileID) => useLocalIntIds
-                        ? true
-                        : uploadedIdToFile.containsKey(fileID),
-                  )
-                  .map(
-                    (fileID) {
-                      final file = useLocalIntIds
-                          ? _fileFromLocalIntId(
-                              fileID,
-                              localIdToFile,
-                            )
-                          : uploadedIdToFile[fileID];
-                      return file == null
-                          ? null
-                          : Memory.fromFile(
-                              file,
-                              seenTimes,
-                              seenTimeKey: useLocalIntIds ? fileID : null,
-                            );
-                    },
-                  )
-                  .whereType<Memory>()
-                  .toList(),
-              memory.type,
-              memory.title,
-              memory.firstTimeToShow,
-              memory.lastTimeToShow,
-              id: memory.id,
-            );
-          }
+          final hydratedMemories = fileIds
+              .where(
+                (fileID) => useLocalIntIds
+                    ? true
+                    : uploadedIdToFile.containsKey(fileID),
+              )
+              .map(
+                (fileID) {
+                  final file = useLocalIntIds
+                      ? _fileFromLocalIntId(
+                          fileID,
+                          localIdToFile,
+                        )
+                      : uploadedIdToFile[fileID];
+                  return file == null
+                      ? null
+                      : Memory.fromFile(
+                          file,
+                          seenTimes,
+                          seenTimeKey: useLocalIntIds ? fileID : null,
+                        );
+                },
+              )
+              .whereType<Memory>()
+              .toList();
+          final smartMemory = memory.toSmartMemory(hydratedMemories);
           if (smartMemory.memories.isNotEmpty) {
             memories.add(smartMemory);
+            if (memory.hasTypedSpec) {
+              typedMemories.add((memory, smartMemory));
+            }
+          }
+        }
+      }
+      if (typedMemories.isNotEmpty) {
+        final locale = await getLocale();
+        final languageCode = locale?.languageCode ?? "en";
+        final s = await LanguageService.locals;
+        for (final typedMemory in typedMemories) {
+          try {
+            typedMemory.$2.title = typedMemory.$2.createTitle(s, languageCode);
+          } catch (_, __) {
+            typedMemory.$2.title = typedMemory.$1.title;
           }
         }
       }

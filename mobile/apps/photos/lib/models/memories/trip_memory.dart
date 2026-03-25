@@ -15,6 +15,7 @@ class TripMemory extends SmartMemory {
     int firstDateToShow,
     int lastDateToShow,
     this.location, {
+    String? id,
     this.locationName,
     this.tripYear,
     super.firstCreationTime,
@@ -25,6 +26,7 @@ class TripMemory extends SmartMemory {
           '',
           firstDateToShow,
           lastDateToShow,
+          id: id,
         );
 
   TripMemory copyWith({

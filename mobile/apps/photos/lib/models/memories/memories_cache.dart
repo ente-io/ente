@@ -4,6 +4,8 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/clip_memory.dart";
+import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/memory_spec.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
@@ -86,6 +88,7 @@ class ToShowMemory {
   final PeopleMemoryType? peopleMemoryType;
   final ClipMemoryType? clipMemoryType;
   final Location? location;
+  final MemorySpec? spec;
 
   bool get isOld {
     final now = DateTime.now().microsecondsSinceEpoch;
@@ -116,8 +119,10 @@ class ToShowMemory {
     this.peopleMemoryType,
     this.clipMemoryType,
     this.location,
+    this.spec,
   }) : assert(
-          (type == MemoryType.people &&
+          (spec != null) ||
+              (type == MemoryType.people &&
                   personID != null &&
                   peopleMemoryType != null) ||
               (type == MemoryType.trips && location != null) ||
@@ -151,6 +156,7 @@ class ToShowMemory {
     } else if (memory is ClipMemory) {
       clipMemoryType = memory.clipMemoryType;
     }
+    final spec = MemorySpec.fromSmartMemory(memory);
     final fileUploadedIDs = memory.memories
         .where((m) => m.file.uploadedFileID != null)
         .map((m) => m.file.uploadedFileID!)
@@ -171,10 +177,14 @@ class ToShowMemory {
       peopleMemoryType: peopleMemoryType,
       clipMemoryType: clipMemoryType,
       location: location,
+      spec: spec,
     );
   }
 
   factory ToShowMemory.fromJson(Map<String, dynamic> json) {
+    final spec = MemorySpec.fromJson(
+      json['spec'] != null ? Map<String, dynamic>.from(json['spec']) : null,
+    );
     return ToShowMemory(
       json['title'],
       List<int>.from(json['fileUploadedIDs']),
@@ -202,6 +212,7 @@ class ToShowMemory {
               longitude: json['location']['longitude'],
             )
           : null,
+      spec: spec,
     );
   }
 
@@ -221,6 +232,7 @@ class ToShowMemory {
       'isUnnamedCluster': isUnnamedCluster,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'clipMemoryType': clipMemoryType?.toString().split('.').last,
+      if (spec != null) 'spec': spec!.toJson(),
       'location': location != null
           ? {
               'latitude': location!.latitude!,
@@ -238,6 +250,43 @@ class ToShowMemory {
   static List<ToShowMemory> decodeJsonToList(String jsonString) {
     final jsonList = jsonDecode(jsonString) as List;
     return jsonList.map((json) => ToShowMemory.fromJson(json)).toList();
+  }
+
+  bool get hasTypedSpec => spec != null;
+
+  SmartMemory toSmartMemory(List<Memory> memories) {
+    if (spec != null) {
+      return spec!.toSmartMemory(
+        memories,
+        firstDateToShow: firstTimeToShow,
+        lastDateToShow: lastTimeToShow,
+        title: title,
+        id: id,
+      );
+    }
+
+    if (type == MemoryType.people) {
+      return PeopleMemory(
+        memories,
+        firstTimeToShow,
+        lastTimeToShow,
+        peopleMemoryType!,
+        personID!,
+        personName,
+        isUnnamedCluster: isUnnamedCluster ?? false,
+        title: title,
+        id: id,
+      );
+    }
+
+    return SmartMemory(
+      memories,
+      type,
+      title,
+      firstTimeToShow,
+      lastTimeToShow,
+      id: id,
+    );
   }
 }
 
