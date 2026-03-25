@@ -13,6 +13,7 @@ import (
 )
 
 const storageWarningIntegrationTestGiB = int64(1 << 30)
+const storageWarningIntegrationTestUserID int64 = 1
 
 func TestSendStorageWarningMailsActiveOverageIntegration(t *testing.T) {
 	testutil.WithServerRoot(t)
@@ -25,6 +26,7 @@ func TestSendStorageWarningMailsActiveOverageIntegration(t *testing.T) {
 
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
+		UserID:        storageWarningIntegrationTestUserID,
 		Email:        "active-overage@ente.io",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})
@@ -54,6 +56,7 @@ func TestSendStorageWarningMailsExpiredIntegration(t *testing.T) {
 
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
+		UserID:        storageWarningIntegrationTestUserID,
 		Email:        "expired-subscription@ente.io",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})

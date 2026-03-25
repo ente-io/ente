@@ -209,6 +209,14 @@ ENV="test" go test -v ./pkg/...
 go clean -testcache  && ENV="test" go test -v ./pkg/...
 ```
 
+To run the full `server/` Go test suite inside Docker instead of relying on a
+host Postgres setup, use:
+
+```sh
+./scripts/test-in-docker.sh
+./scripts/test-in-docker.sh -v
+```
+
 ## Configuration
 
 Now that you have museum running (either inside Docker or standalone), we can

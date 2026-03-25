@@ -19,6 +19,10 @@ import (
 )
 
 const testDBDSN = "user=test_user password=test_pass host=localhost dbname=ente_test_db sslmode=disable"
+const testDBName = "ente_test_db"
+const testDBUser = "test_user"
+const testDBSentinelTable = "ente_test_db_sentinel"
+const testDBSentinelMarker = "ente-server-test-db-v1"
 
 var (
 	testDBInitOnce sync.Once
@@ -74,6 +78,10 @@ func RequireTestDB(t *testing.T) *sql.DB {
 			testDBErr = err
 			return
 		}
+		if err := verifySafeTestDB(testDB); err != nil {
+			testDBErr = err
+			return
+		}
 
 		driver, err := postgres.WithInstance(testDB, &postgres.Config{})
 		if err != nil {
@@ -102,11 +110,15 @@ func RequireTestDB(t *testing.T) *sql.DB {
 
 func ResetTables(t *testing.T, db *sql.DB) {
 	t.Helper()
+	if err := verifySafeTestDB(db); err != nil {
+		t.Fatalf("refusing to reset tables on unsafe database connection: %v", err)
+	}
 	_, err := db.Exec(`
 		TRUNCATE TABLE
 			notification_history,
 			task_lock,
 			storage_bonus,
+			referral_codes,
 			subscriptions,
 			usage,
 			families,
@@ -118,6 +130,29 @@ func ResetTables(t *testing.T, db *sql.DB) {
 	if err != nil {
 		t.Fatalf("failed to reset test tables: %v", err)
 	}
+}
+
+func verifySafeTestDB(db *sql.DB) error {
+	var currentDBName, currentDBUser string
+	err := db.QueryRow(`SELECT current_database(), current_user`).Scan(&currentDBName, &currentDBUser)
+	if err != nil {
+		return fmt.Errorf("failed to verify test database identity: %w", err)
+	}
+	if currentDBName != testDBName {
+		return fmt.Errorf("expected test database %q, connected to %q", testDBName, currentDBName)
+	}
+	if currentDBUser != testDBUser {
+		return fmt.Errorf("expected test database user %q, connected as %q", testDBUser, currentDBUser)
+	}
+	var marker string
+	err = db.QueryRow(fmt.Sprintf(`SELECT marker FROM public.%s WHERE id = 1`, testDBSentinelTable)).Scan(&marker)
+	if err != nil {
+		return fmt.Errorf("missing test database sentinel in %q: run ./scripts/setup-test-db.sh or use the docker test runner: %w", testDBName, err)
+	}
+	if marker != testDBSentinelMarker {
+		return fmt.Errorf("unexpected test database sentinel marker %q", marker)
+	}
+	return nil
 }
 
 func WithServerRoot(t *testing.T) {
