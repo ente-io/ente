@@ -227,7 +227,7 @@
   "publicLinkEnabled": "Offentligt link aktiveret",
   "shareALink": "Del et link",
   "thisIsYourVerificationId": "Dette er dit bekræftelses-ID",
-  "shareTextConfirmOthersVerificationID": "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: {verificationID}",
+  "shareTextConfirmOthersVerificationID": "Hey, kan du bekræfte, at dette er dit ente.com verifikation ID: {verificationID}",
   "unavailableReferralCode": "Beklager, denne kode er ikke tilgængelig.",
   "storageInGB": "{storageAmountInGB} GB",
   "details": "Detaljer",

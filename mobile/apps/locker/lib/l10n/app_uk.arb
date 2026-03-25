@@ -541,7 +541,7 @@
   "verificationId": "Ідентифікатор підтвердження",
   "verifyEmailID": "Підтвердити {email}",
   "emailNoEnteAccount": "{email} не має облікового запису Ente.\n\nНадішліть їм запрошення, щоб поділитися елементами.",
-  "shareMyVerificationID": "Ось мій ідентифікатор підтвердження: {verificationID} для ente.io.",
+  "shareMyVerificationID": "Ось мій ідентифікатор підтвердження: {verificationID} для ente.com.",
   "shareTextConfirmOthersVerificationID": "Гей, ви можете підтвердити, що це ваш ідентифікатор підтвердження: {verificationID}",
   "passwordLock": "Блокування паролем",
   "manage": "Керування",

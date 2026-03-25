@@ -26,7 +26,7 @@ If you're looking for Ente Auth instead, see [../auth](../auth/README.md).
 The [GitHub
 releases](https://github.com/ente-io/ente/releases?q=photos-v1) contain
 APKs, built straight from source. The latest build is available at
-[ente.io/apk](https://ente.com/apk). These builds keep themselves updated,
+[ente.com/apk](https://ente.com/apk). These builds keep themselves updated,
 without relying on third party stores.
 
 You can alternatively install the build from PlayStore or F-Droid.

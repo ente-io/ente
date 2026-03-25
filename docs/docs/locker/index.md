@@ -85,7 +85,7 @@ Locker is free to use with generous limits:
 Locker's paid limits are included with any Ente Photos subscription. Locker
 storage is separate from Photos storage.
 
-View pricing at [ente.io/pricing](https://ente.com/pricing). Learn more about
+View pricing at [ente.com/pricing](https://ente.com/pricing). Learn more about
 [pricing and plans](/locker/faq/getting-started#locker-pricing).
 
 ## Who Locker is for

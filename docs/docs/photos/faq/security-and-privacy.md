@@ -163,7 +163,7 @@ Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos a
 
 Yes. You can send encrypted messages to [pgp@ente.io](mailto:pgp@ente.io). The
 public key is published on [openpgp.org](https://keys.openpgp.org/) and is also
-available at [ente.io/pgp/pgp.asc](https://ente.com/pgp/pgp.asc). The fingerprint
+available at [ente.com/pgp/pgp.asc](https://ente.com/pgp/pgp.asc). The fingerprint
 is `D71B F781 998B 4AED 01A2  0AF6 02BD D83A 56EA 68E2`.
 
 ## Sharing and Collaboration

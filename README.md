@@ -90,7 +90,7 @@ emergencies. Available for iOS and Android.
 
 Ente Locker is free for up to 100 items. If you're subscribed to Ente Photos,
 you can store up to 1000 items. Learn more at
-[ente.io/locker](https://ente.com/locker).
+[ente.com/locker](https://ente.com/locker).
 
 <div align="center">
 

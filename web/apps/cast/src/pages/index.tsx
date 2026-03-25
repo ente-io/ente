@@ -72,7 +72,7 @@ const Page: React.FC = () => {
             <Typography variant="h6" sx={{ fontWeight: "regular", mt: 3 }}>
                 Visit{" "}
                 <a href="https://ente.com/cast" target="_blank" rel="noopener">
-                    ente.io/cast
+                    ente.com/cast
                 </a>{" "}
                 for help
             </Typography>

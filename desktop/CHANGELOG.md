@@ -385,4 +385,4 @@ to know about feature and functionalities.
     We have squashed a few pesky bugs that were reported by our community
 
     If you would like to help us improve ente, come join the party @
-    ente.io/community!
+    ente.com/community!
