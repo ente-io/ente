@@ -104,9 +104,6 @@ ensure_generated_bindings() {
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
 }
 
-ensure_generated_bindings
-write_endpoint_config
-
 if [ "$(uname -s)" = "Darwin" ]; then
   HOST_LIB_EXT="dylib"
 elif [ "$(uname -s)" = "Linux" ]; then
@@ -218,6 +215,8 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 export SDKROOT="${HOST_SDKROOT}"
 
 ensure_uniffi_bindgen
+ensure_generated_bindings
+write_endpoint_config
 generate_swift_bindings "core" "${REPO_ROOT}/rust/uniffi/core" "core"
 generate_swift_bindings "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "db"
 generate_swift_bindings "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "sync"
