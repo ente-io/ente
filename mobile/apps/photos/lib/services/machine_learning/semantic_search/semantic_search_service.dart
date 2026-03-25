@@ -190,7 +190,10 @@ class SemanticSearchService {
       _logger.info(
         "read all ${imageEmbeddings.length} embeddings from DB in ${DateTime.now().difference(now).inMilliseconds} ms",
       );
-      await MLComputer.instance.cacheImageEmbeddings(imageEmbeddings);
+      await MLComputer.instance.cacheImageEmbeddings(
+        imageEmbeddings,
+        cacheRustExact: _shouldUseRustExactSearch,
+      );
       _imageEmbeddingsAreCached = true;
       _cachedEmbeddingsOffline = isOfflineMode;
       return;

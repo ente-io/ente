@@ -227,12 +227,16 @@ class MLComputer extends SuperIsolate {
     }
   }
 
-  Future<void> cacheImageEmbeddings(List<EmbeddingVector> embeddings) async {
+  Future<void> cacheImageEmbeddings(
+    List<EmbeddingVector> embeddings, {
+    bool cacheRustExact = false,
+  }) async {
     try {
       await runInIsolate(
         IsolateOperation.cacheImageEmbeddings,
         {
           'embeddings': embeddings,
+          'cacheRustExact': cacheRustExact,
         },
       ) as bool;
       _logger.info(
