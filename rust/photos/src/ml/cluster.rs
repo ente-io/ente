@@ -94,14 +94,13 @@ pub fn agglomerative_precomputed_min_size(
     let mut labels = vec![-1i32; n];
     let mut next_label = 0i32;
     for &ci in &active {
-        if let Some(members) = &clusters[ci] {
-            if members.len() >= min_cluster_size {
-                for &m in members {
-                    labels[m] = next_label;
-                }
-                next_label += 1;
+        if let Some(members) = &clusters[ci]
+            && members.len() >= min_cluster_size
+        {
+            for &m in members {
+                labels[m] = next_label;
             }
-            // else: too small, stays -1 (noise)
+            next_label += 1;
         }
     }
 

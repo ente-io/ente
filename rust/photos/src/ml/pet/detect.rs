@@ -138,10 +138,20 @@ pub fn run_pet_face_detection_with_session(
 
         // For a 2-class model (row_len >= 13): row[11] = cat score,
         // row[12] = dog score.  Pick argmax and map to 0=dog, 1=cat.
+        // Skip detections where species confidence is too low (< 60% of
+        // the winning class) to avoid misclassifying cats as dogs or vice versa.
         // For a 1-class model (row_len == 12): row[11] is the single class
         // score; class is always 0 (dog).
         let class_id: u8 = if row_len >= 13 {
-            if row[12] > row[11] { 0 } else { 1 }
+            let cat_score = row[11];
+            let dog_score = row[12];
+            let max_score = cat_score.max(dog_score);
+            let min_score = cat_score.min(dog_score);
+            // Skip if species scores are too close (ambiguous)
+            if max_score > 0.0 && min_score / max_score > 0.7 {
+                continue;
+            }
+            if dog_score > cat_score { 0 } else { 1 }
         } else {
             0
         };

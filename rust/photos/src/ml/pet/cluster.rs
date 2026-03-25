@@ -86,7 +86,7 @@ impl ClusterConfig {
             min_cluster_size: 2,
             min_samples: 1,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.85,
+            agglomerative_threshold: 0.625,
             outlier_max_centroid_distance: 0.0,
         }
     }
@@ -196,6 +196,10 @@ pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) ->
 
 /// Run incremental face-only clustering: assign new inputs to existing
 /// face clusters by centroid similarity, then cluster the remainder.
+///
+/// Uses a relaxed threshold for centroid matching (centroid is an average
+/// that doesn't represent any individual face perfectly, so it needs more
+/// slack than pairwise comparisons in batch mode).
 pub fn run_pet_clustering_incremental(
     new_inputs: &[PetClusterInput],
     existing_centroids_face: &HashMap<String, Vec<f32>>,
@@ -210,8 +214,11 @@ pub fn run_pet_clustering_incremental(
     let mut labels = vec![-1i32; n];
     let mut cluster_name_map: HashMap<i32, String> = HashMap::new();
 
-    // Step 1: Try to assign each new face to the closest existing cluster
-    let threshold = config.agglomerative_threshold;
+    // Step 1: Try to assign each new face to the closest existing cluster.
+    // Use a relaxed threshold: centroids are averages that drift from
+    // individual members, so we allow 15% more distance than batch mode.
+    let centroid_threshold = config.agglomerative_threshold * 1.15;
+    let min_sim = 1.0 - centroid_threshold;
 
     for (i, inp) in new_inputs.iter().enumerate() {
         if !inp.has_face() {
@@ -219,18 +226,29 @@ pub fn run_pet_clustering_incremental(
         }
 
         let mut best_sim = -1.0f32;
+        let mut second_best_sim = -1.0f32;
         let mut best_id: Option<&String> = None;
 
         for (cluster_id, centroid) in existing_centroids_face {
             let sim = dot(&inp.face_embedding, centroid);
             if sim > best_sim {
+                second_best_sim = best_sim;
                 best_sim = sim;
                 best_id = Some(cluster_id);
+            } else if sim > second_best_sim {
+                second_best_sim = sim;
             }
         }
 
-        // Assign if similarity > (1 - threshold), i.e. distance < threshold
-        if best_sim > (1.0 - threshold)
+        // Assign if:
+        // 1. Distance to best centroid is below relaxed threshold
+        // 2. Best is clearly better than second-best (margin > 0.05)
+        //    to avoid ambiguous assignments
+        let has_clear_winner =
+            existing_centroids_face.len() <= 1 || (best_sim - second_best_sim) > 0.05;
+
+        if best_sim > min_sim
+            && has_clear_winner
             && let Some(cid) = best_id
         {
             let numeric = cluster_name_map
@@ -460,7 +478,6 @@ fn eject_outliers(
                 for l in labels.iter_mut() {
                     if *l == c {
                         *l = -1;
-                        ejected += 1;
                     }
                 }
             }
@@ -860,7 +877,7 @@ fn birch_precomputed(dist: &[f32], n: usize, threshold: f32, min_cluster_size: u
     }
 
     // Mark small clusters as noise
-    for (label, members) in &clusters {
+    for (_label, members) in &clusters {
         if members.len() < min_cluster_size {
             for &m in members {
                 labels[m] = -1;
@@ -913,6 +930,7 @@ fn hdbscan_crate_precomputed(
 
 /// Custom HDBSCAN on a precomputed distance matrix.
 /// Production now uses the `hdbscan` crate via `hdbscan_crate_precomputed`.
+#[allow(dead_code)]
 pub(crate) fn hdbscan_precomputed(
     dist: &[f32],
     n: usize,
