@@ -20,7 +20,7 @@ import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const publicRoutes = new Set([
     "/login",
@@ -45,15 +45,18 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const isI18nReady = useSetupI18n();
     const isChangingRoute = useIsRouteChangeInProgress();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
-    const isLoggedIn = !!savedLocalUser();
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>();
     const requiresLogin = !publicRoutes.has(router.pathname);
 
     useEffect(() => {
-        logStartupBanner(savedLocalUser()?.id);
+        const localUser = savedLocalUser();
+        logStartupBanner(localUser?.id);
+        setIsLoggedIn(!!localUser);
     }, []);
 
     useEffect(() => {
-        if (!router.isReady || isLoggedIn || !requiresLogin) return;
+        if (!router.isReady || isLoggedIn === undefined) return;
+        if (isLoggedIn || !requiresLogin) return;
         void router.replace("/login");
     }, [isLoggedIn, requiresLogin, router]);
 
@@ -73,7 +76,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <AttributedMiniDialog {...miniDialogProps} />
 
             <BaseContext value={baseContext}>
-                {!isI18nReady || (!isLoggedIn && requiresLogin) ? (
+                {!isI18nReady ||
+                (requiresLogin &&
+                    (isLoggedIn === undefined || isLoggedIn === false)) ? (
                     <LoadingIndicator />
                 ) : (
                     <>
