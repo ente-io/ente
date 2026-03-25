@@ -142,8 +142,6 @@ Mirror source names with `*_test.dart`. Run only suites that cover your changes�
 
 ## Commit & Pull Request Guidelines
 
-⚠️ **CRITICAL: From the default template, use ONLY: Co-Authored-By: Claude <noreply@anthropic.com>** ⚠️
-
 ### Pre-commit/PR Checklist (RUN BEFORE EVERY COMMIT OR PR!)
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
