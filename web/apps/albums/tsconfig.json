@@ -1,0 +1,18 @@
+{
+    "extends": "ente-build-config/tsconfig-next.json",
+    "compilerOptions": {
+        "baseUrl": "../photos/src"
+    },
+    "include": [
+        "next-env.d.ts",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.js",
+        "../photos/src/**/*.ts",
+        "../photos/src/**/*.tsx",
+        "../photos/src/**/*.js",
+        "../../packages/base/components/utils/mui-theme.d.ts",
+        "../../packages/base/global-electron.d.ts"
+    ],
+    "exclude": ["node_modules", "out", ".next", ".next-desktop"]
+}

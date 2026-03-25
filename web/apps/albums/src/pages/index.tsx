@@ -53,8 +53,9 @@ import {
 import log from "ente-base/log";
 import {
     albumsAppOrigin,
+    isOfficialAlbumsApp,
     isCustomAlbumsAppOrigin,
-    shouldOnlyServeAlbumsApp,
+    photosAppOrigin,
 } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
@@ -189,6 +190,10 @@ export default function PublicCollectionGallery() {
             continue: {
                 text: t("login"),
                 action: async () => {
+                    if (isOfficialAlbumsApp) {
+                        window.location.href = photosAppOrigin();
+                        return;
+                    }
                     await router.push("/");
                 },
             },
@@ -203,7 +208,7 @@ export default function PublicCollectionGallery() {
     const checkAndRedirectForTripAlbum = (collection: Collection): boolean => {
         if (
             collection.pubMagicMetadata?.data.layout === "trip" &&
-            shouldOnlyServeAlbumsApp
+            isOfficialAlbumsApp
         ) {
             const currentURL = new URL(window.location.href);
             const albumsURL = new URL(albumsAppOrigin());
@@ -222,22 +227,6 @@ export default function PublicCollectionGallery() {
     };
 
     useEffect(() => {
-        const currentURL = new URL(window.location.href);
-        if (currentURL.pathname != "/") {
-            router.replace(
-                {
-                    pathname: "/shared-albums",
-                    search: currentURL.search,
-                    hash: currentURL.hash,
-                },
-                {
-                    pathname: "/",
-                    search: currentURL.search,
-                    hash: currentURL.hash,
-                },
-                { shallow: true },
-            );
-        }
         /**
          * Determine credentials, read the locally cached state, then start
          * pulling the latest from remote.

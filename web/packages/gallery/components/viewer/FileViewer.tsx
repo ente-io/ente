@@ -35,7 +35,7 @@ import { lowercaseExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { formattedListJoin, ut } from "ente-base/i18n";
 import log from "ente-base/log";
-import { shouldOnlyServeAlbumsApp } from "ente-base/origins";
+import { isOfficialAlbumsApp } from "ente-base/origins";
 import {
     FileInfo,
     type FileInfoExif,
@@ -792,7 +792,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
     activeAnnotatedFileRef.current = activeAnnotatedFile;
 
-    const isPublicAlbum = shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
+    const isPublicAlbum = isOfficialAlbumsApp || !!publicAlbumsCredentials;
 
     // Called when the like button (heart) is clicked.
     // - If public album: toggle like (unlike if already liked, else show modal)

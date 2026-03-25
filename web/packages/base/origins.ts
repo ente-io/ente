@@ -99,10 +99,10 @@ export const albumsAppOrigin = () =>
     process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.io";
 
 /**
- * Return true if this build is meant to only serve public albums.
+ * Return true if this build is Ente's official public albums deployment.
  */
-export const shouldOnlyServeAlbumsApp =
-    !!process.env.NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP;
+export const isOfficialAlbumsApp =
+    !!process.env.NEXT_PUBLIC_ENTE_OFFICIAL_ALBUMS_APP;
 
 /**
  * A static build time constant that is `true` if {@link shareAppOrigin} has
