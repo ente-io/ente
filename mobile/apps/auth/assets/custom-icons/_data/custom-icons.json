@@ -802,6 +802,13 @@
     },
     {
       "title": "Firefox",
+      "slug": "firefoxbrowser"
+      "altNames": [
+        "Firefox Browser"
+      ]
+    },
+    {
+      "title": "Mozilla",
       "slug": "mozilla"
     },
     {
