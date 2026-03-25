@@ -594,6 +594,16 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           onTap: () async => _onResetFacesAndClustering(context),
         ),
         MenuItemWidgetNew(
+          title: "Re-index pet faces",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiImage,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onReindexPetFaces(context),
+        ),
+        MenuItemWidgetNew(
           title: "Reset pet clustering",
           leadingIconWidget: _buildIconWidget(
             context,
@@ -903,6 +913,34 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('peopleToPersonMapping remove failed ', e, s);
+          await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
+  }
+
+  Future<void> _onReindexPetFaces(BuildContext context) async {
+    await showChoiceDialog(
+      context,
+      title: "Are you sure?",
+      body: "This will delete ALL pet data (indexed faces, bodies, embeddings, "
+          "clusters, and PetEntity data) and re-run detection, embedding, "
+          "and clustering from scratch.",
+      firstButtonLabel: "Yes, confirm",
+      firstButtonOnTap: () async {
+        try {
+          // Drop clustering data first
+          await mlDataDB.dropPetClusteringData();
+          await PetService.instance.deleteAllPets();
+          // Drop indexed faces/bodies and vector DBs
+          final allFileIds = (await mlDataDB.petIndexedFileIds()).keys.toList();
+          if (allFileIds.isNotEmpty) {
+            await mlDataDB.deletePetDataForFiles(allFileIds);
+          }
+          Bus.instance.fire(PetsChangedEvent(source: "reindexPetFaces"));
+          showShortToast(context, "Done — pet re-indexing will start shortly");
+        } catch (e, s) {
+          logger.warning('re-index pet faces failed', e, s);
           await showGenericErrorDialog(context: context, error: e);
         }
       },
