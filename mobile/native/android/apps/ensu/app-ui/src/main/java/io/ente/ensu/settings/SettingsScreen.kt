@@ -45,7 +45,6 @@ import io.ente.ensu.designsystem.HugeIcons
 
 @Composable
 fun SettingsScreen(
-    currentEndpoint: String,
     buildVersion: String,
     isLoggedIn: Boolean,
     userEmail: String?,
@@ -53,7 +52,6 @@ fun SettingsScreen(
     onOpenLogs: () -> Unit,
     onOpenModelSettings: () -> Unit,
     onOpenSystemPromptSettings: () -> Unit,
-    onOpenEndpointSettings: () -> Unit,
     onUnlockAdvanced: () -> Unit,
     onSignOut: () -> Unit,
     onSignIn: () -> Unit,
@@ -190,10 +188,6 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.size(EnsuSpacing.md.dp))
         }
 
-        val normalizedEndpoint = currentEndpoint.trim().trimEnd('/')
-        val defaultEndpoint = "https://api.ente.io"
-        val isCustomEndpoint = query.isBlank() && normalizedEndpoint.isNotBlank() && normalizedEndpoint != defaultEndpoint
-
         LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
             items(filteredItems, key = { it.title }) { item ->
                 SettingsRow(item)
@@ -225,30 +219,6 @@ fun SettingsScreen(
                             iconRes = HugeIcons.Edit01Icon,
                             onClick = onOpenSystemPromptSettings
                         )
-                    )
-                }
-                item(key = "advanced-endpoint") {
-                    SettingsRow(
-                        SettingsItem(
-                            title = "Endpoint",
-                            iconRes = HugeIcons.Settings01Icon,
-                            onClick = onOpenEndpointSettings
-                        )
-                    )
-                }
-            }
-
-            if (isCustomEndpoint) {
-                item(key = "endpoint") {
-                    Spacer(modifier = Modifier.size(EnsuSpacing.sm.dp))
-                    Text(
-                        text = "Endpoint: $normalizedEndpoint",
-                        style = EnsuTypography.small,
-                        color = EnsuColor.textMuted(),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = EnsuSpacing.sm.dp)
                     )
                 }
             }

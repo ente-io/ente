@@ -152,9 +152,7 @@ internal fun HomeNavigation(
                     popEnterTransition = { backEnter() },
                     popExitTransition = { backExit() }
                 ) {
-                    val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.io")
                     SettingsScreen(
-                        currentEndpoint = currentEndpoint,
                         buildVersion = appVersion,
                         isLoggedIn = appState.auth.isLoggedIn,
                         userEmail = appState.auth.email,
@@ -162,7 +160,6 @@ internal fun HomeNavigation(
                         onOpenLogs = { navController.navigate(HomeRoute.Logs) },
                         onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
                         onOpenSystemPromptSettings = { navController.navigate(HomeRoute.SystemPromptSettings) },
-                        onOpenEndpointSettings = { navController.navigate(HomeRoute.EndpointSettings) },
                         onUnlockAdvanced = {
                             store.unlockAdvancedSettings()
                             advancedSettingsDataStore.persistUnlockAdvancedSettings()
