@@ -3,8 +3,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import { accountLogout } from "ente-accounts-rs/services/logout";
-import { staticAppTitle } from "ente-base/app";
-import { CustomHead } from "ente-base/components/Head";
+import { LockerHead } from "components/LockerHead";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
@@ -19,7 +18,6 @@ import {
 import { lockerTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
-import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
 
@@ -43,11 +41,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         [logout, showMiniDialog],
     );
 
-    const title = isI18nReady ? t("title_locker") : staticAppTitle;
-
     return (
         <ThemeProvider theme={lockerTheme}>
-            <CustomHead {...{ title }} />
+            <LockerHead />
             <CssBaseline enableColorScheme />
             <AttributedMiniDialog {...miniDialogProps} />
 
