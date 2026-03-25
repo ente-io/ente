@@ -7,10 +7,8 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/events/pets_changed_event.dart";
-import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
-import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("PetClusterFeedbackService");
