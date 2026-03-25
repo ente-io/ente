@@ -46,14 +46,6 @@ jobs:
 
             - name: Install system dependencies
               run: |
-                  # Pin all webkit2gtk/javascriptcoregtk packages to the jammy
-                  # release pocket (2.36.x) to avoid 2.44+ which removed
-                  # deprecated APIs used by wry 0.24.x.
-                  sudo tee /etc/apt/preferences.d/webkit2gtk-pin > /dev/null << 'APTEOF'
-                  Package: libwebkit2gtk-4.0* libjavascriptcoregtk-4.0* gir1.2-webkit2-4.0 gir1.2-javascriptcoregtk-4.0
-                  Pin: release a=jammy
-                  Pin-Priority: 1001
-                  APTEOF
                   sudo apt-get update
                   sudo apt-get install -y libwebkit2gtk-4.0-dev libsoup2.4-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
