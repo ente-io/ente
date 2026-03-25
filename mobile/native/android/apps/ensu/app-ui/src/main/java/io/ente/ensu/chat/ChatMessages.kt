@@ -292,6 +292,7 @@ internal fun MessageList(
                     MessageAuthor.Assistant -> {
                         AssistantMessageBubble(
                             message = message,
+                            isLastMessage = message == messages.last(),
                             branchSelections = branchSelections,
                             onRetry = { onRetryMessage(message) },
                             onBranchChange = onBranchChange,
@@ -585,6 +586,7 @@ private fun UserMessageBubble(
 @Composable
 private fun AssistantMessageBubble(
     message: ChatMessage,
+    isLastMessage: Boolean,
     branchSelections: Map<String, Int>,
     onRetry: () -> Unit,
     onBranchChange: (String, Int) -> Unit,
@@ -632,16 +634,20 @@ private fun AssistantMessageBubble(
                 showMenu = showMenu,
                 pressOffset = pressOffset,
                 onDismiss = { showMenu = false },
-                actions = listOf(
-                    MessageAction("Copy", HugeIcons.Copy01Icon) {
-                        haptic.perform(HapticFeedbackType.TextHandleMove)
-                        clipboard.setText(AnnotatedString(stripHiddenMessageParts(message.text)))
-                    },
-                    MessageAction("Retry", HugeIcons.RepeatIcon) {
-                        haptic.perform(HapticFeedbackType.TextHandleMove)
-                        onRetry()
+                actions = buildList {
+                    if (!message.isSynthetic) {
+                        add(MessageAction("Copy", HugeIcons.Copy01Icon) {
+                            haptic.perform(HapticFeedbackType.TextHandleMove)
+                            clipboard.setText(AnnotatedString(stripHiddenMessageParts(message.text)))
+                        })
                     }
-                )
+                    if (!message.isSynthetic || isLastMessage) {
+                        add(MessageAction("Retry", HugeIcons.RepeatIcon) {
+                            haptic.perform(HapticFeedbackType.TextHandleMove)
+                            onRetry()
+                        })
+                    }
+                }
             )
         }
 

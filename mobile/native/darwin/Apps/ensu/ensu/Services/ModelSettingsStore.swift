@@ -83,11 +83,17 @@ final class ModelSettingsStore: ObservableObject {
         return trimmed.isEmpty ? platformSystemPromptBody : trimmed
     }
 
+    private static let minHighRAMBytes: UInt64 = 16 * 1024 * 1024 * 1024
+
     private static var platformDefaultModel: EnsuRustModelPreset {
         #if os(iOS)
         EnsuRustDefaults.shared.mobileDefaultModel
         #else
-        EnsuRustDefaults.shared.desktopDefaultModel
+        if ProcessInfo.processInfo.physicalMemory >= minHighRAMBytes {
+            return EnsuRustDefaults.shared.desktopDefaultModel
+        } else {
+            return EnsuRustDefaults.shared.mobileDefaultModel
+        }
         #endif
     }
 

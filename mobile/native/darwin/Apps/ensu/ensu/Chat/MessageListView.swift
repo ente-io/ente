@@ -186,6 +186,7 @@ struct MessageListView: View {
                     } else {
                         AssistantMessageBubbleView(
                             message: message,
+                            isLastMessage: message.id == messages.last?.id,
                             onCopy: { onCopy(message) },
                             onRetry: { onRetry(message) },
                             onBranchChange: { delta in onBranchChange(message, delta) },

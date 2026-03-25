@@ -32,8 +32,17 @@ internal class ModelSettingsActions(
     }
 
     fun updateModelSettings(settings: ModelSettingsState) {
+        val oldTarget = resolveTarget(state.value.modelSettings)
+        val newTarget = resolveTarget(settings)
         state.update { appState ->
             appState.copy(modelSettings = settings)
+        }
+        if (downloadIdentityChanged(oldTarget, newTarget)) {
+            modelDownloadJob?.cancel()
+            modelDownloadJob = null
+            downloadProgressMonitorJob?.cancel()
+            downloadProgressMonitorJob = null
+            llmProvider.cancelDownload()
         }
         refreshModelDownloadInfo()
     }
@@ -328,6 +337,15 @@ internal class ModelSettingsActions(
         val temperature = settings.temperature.trim().toFloatOrNull()
         val resolved = temperature?.takeIf { it >= 0f } ?: DEFAULT_TEMPERATURE
         return resolved.coerceIn(0.35f, 0.7f)
+    }
+
+    private fun downloadIdentityChanged(
+        oldTarget: LlmModelTarget,
+        newTarget: LlmModelTarget
+    ): Boolean {
+        return oldTarget.id != newTarget.id ||
+            oldTarget.url != newTarget.url ||
+            oldTarget.mmprojUrl != newTarget.mmprojUrl
     }
 
     companion object {

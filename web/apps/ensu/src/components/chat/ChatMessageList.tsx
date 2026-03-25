@@ -125,6 +125,7 @@ const AiSafetyFooter = memo(() => {
 
 interface MessageRowProps {
     message: ChatMessage;
+    isLastMessage: boolean;
     branchSwitchers: Record<string, BranchSwitcher>;
     loadingPhrase: string | null;
     loadingDots: number;
@@ -154,6 +155,7 @@ interface MessageRowProps {
 const MessageRow = memo(
     ({
         message,
+        isLastMessage,
         branchSwitchers,
         loadingPhrase,
         loadingDots,
@@ -336,7 +338,20 @@ const MessageRow = memo(
                             alignSelf: isSelf ? "flex-end" : "flex-start",
                         }}
                     >
-                        {isStreaming || isSynthetic ? null : isSelf ? (
+                        {isStreaming ? null : isSynthetic ? (
+                            isLastMessage ? (
+                                <IconButton
+                                    aria-label="Retry"
+                                    sx={actionButtonSx}
+                                    onClick={() => onRetryMessage(message)}
+                                >
+                                    <HugeiconsIcon
+                                        icon={RepeatIcon}
+                                        {...actionIconProps}
+                                    />
+                                </IconButton>
+                            ) : null
+                        ) : isSelf ? (
                             <>
                                 <IconButton
                                     aria-label="Edit"
@@ -598,6 +613,7 @@ export const ChatMessageList = memo(
                 return (
                     <MessageRow
                         message={message}
+                        isLastMessage={_index === messages.length - 1}
                         branchSwitchers={branchSwitchers}
                         loadingPhrase={isStreaming ? loadingPhrase : null}
                         loadingDots={isStreaming ? loadingDots : 0}
@@ -644,6 +660,7 @@ export const ChatMessageList = memo(
                 stripHiddenParts,
                 userBubbleBackground,
                 userMessageTextSx,
+                messages.length,
             ],
         );
 

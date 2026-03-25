@@ -161,6 +161,7 @@ struct UserMessageBubbleView: View {
 
 struct AssistantMessageBubbleView: View {
     let message: ChatMessage
+    let isLastMessage: Bool
     let onCopy: () -> Void
     let onRetry: () -> Void
     let onBranchChange: (Int) -> Void
@@ -184,13 +185,17 @@ struct AssistantMessageBubbleView: View {
                 .padding(.horizontal, EnsuSpacing.sm)
                 #if os(iOS)
                 .contextMenu {
-                    Button("Copy") {
-                        hapticTap()
-                        onCopy()
+                    if !message.isSynthetic {
+                        Button("Copy") {
+                            hapticTap()
+                            onCopy()
+                        }
                     }
-                    Button("Retry") {
-                        hapticMedium()
-                        onRetry()
+                    if !message.isSynthetic || isLastMessage {
+                        Button("Retry") {
+                            hapticMedium()
+                            onRetry()
+                        }
                     }
                 }
                 #endif

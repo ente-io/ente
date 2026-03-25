@@ -19,6 +19,7 @@ import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
+import { getKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
@@ -1248,8 +1249,51 @@ const Page: React.FC = () => {
                 DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
         );
 
-        const raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
-        if (!raw) return;
+        let raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
+        if (!raw) {
+            // Migrate from IndexedDB (previous storage) to localStorage
+            void getKV(MODEL_SETTINGS_STORAGE_KEY).then((kvRaw) => {
+                if (!kvRaw || typeof kvRaw !== "object") return;
+                const migrated = JSON.stringify(kvRaw);
+                window.localStorage.setItem(
+                    MODEL_SETTINGS_STORAGE_KEY,
+                    migrated,
+                );
+                // Re-trigger the effect by reloading settings from the migrated data
+                const parsed = kvRaw as {
+                    useCustomModel?: boolean;
+                    modelUrl?: string;
+                    mmprojUrl?: string;
+                    contextLength?: string;
+                    maxTokens?: string;
+                };
+                const isTauri = detectTauriRuntime();
+                const canMmproj = isTauri;
+                const rawContextLength = parsed.contextLength ?? "";
+                const clampedContextLength =
+                    !isTauri &&
+                    rawContextLength &&
+                    Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                        ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                        : rawContextLength;
+                if (clampedContextLength !== rawContextLength) {
+                    const clamped = {
+                        ...parsed,
+                        contextLength: clampedContextLength,
+                    };
+                    window.localStorage.setItem(
+                        MODEL_SETTINGS_STORAGE_KEY,
+                        JSON.stringify(clamped),
+                    );
+                }
+                setUseCustomModel(!!parsed.useCustomModel);
+                setModelUrl(parsed.modelUrl ?? "");
+                setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
+                setContextLength(clampedContextLength);
+                setMaxTokens(parsed.maxTokens ?? "");
+            });
+            return;
+        }
         try {
             const parsed = JSON.parse(raw) as {
                 useCustomModel?: boolean;
@@ -3506,7 +3550,7 @@ const Page: React.FC = () => {
                 : [
                       {
                           name: "LFM 2.5 VL 1.6B (Q4_0)",
-                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
                           mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
                       },
                       {
