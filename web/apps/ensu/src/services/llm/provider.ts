@@ -432,9 +432,8 @@ export class LlmProvider {
             // while keeping the web-only display fields (sizeBytes etc.)
             // as fallbacks.
             try {
-                const defaults = await invoke<TauriEnsuDefaults>(
-                    "get_ensu_defaults",
-                );
+                const defaults =
+                    await invoke<TauriEnsuDefaults>("get_ensu_defaults");
                 const rustPreset = this.useDesktopRustDefaults
                     ? defaults.desktopDefaultModel
                     : defaults.mobileDefaultModel;
