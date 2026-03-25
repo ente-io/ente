@@ -23,6 +23,38 @@ fn simsimd_dot_product(a: &[f32], b: &[f32]) -> f64 {
     score
 }
 
+fn validate_semantic_search_exact_dimensions(
+    image_file_ids: &[i64],
+    image_embeddings: &[Vec<f32>],
+    query_embeddings: &[Vec<f32>],
+) -> Result<(), String> {
+    if image_embeddings.is_empty() || query_embeddings.is_empty() {
+        return Ok(());
+    }
+
+    let expected_dimension = query_embeddings[0].len();
+
+    for (file_id, image_embedding) in image_file_ids.iter().zip(image_embeddings.iter()) {
+        if image_embedding.len() != expected_dimension {
+            return Err(format!(
+                "embedding dimension mismatch for file_id {file_id}: image={} query={expected_dimension}",
+                image_embedding.len(),
+            ));
+        }
+    }
+
+    for (query_index, query_embedding) in query_embeddings.iter().enumerate().skip(1) {
+        if query_embedding.len() != expected_dimension {
+            return Err(format!(
+                "query embedding dimension mismatch at index {query_index}: query={} expected={expected_dimension}",
+                query_embedding.len(),
+            ));
+        }
+    }
+
+    Ok(())
+}
+
 #[derive(Clone, Debug)]
 pub struct SemanticSearchExactRequest {
     pub image_file_ids: Vec<i64>,
@@ -45,41 +77,43 @@ pub struct SemanticSearchExactResponse {
 pub fn semantic_search_exact(
     req: SemanticSearchExactRequest,
 ) -> Result<SemanticSearchExactResponse, String> {
-    if req.image_file_ids.len() != req.image_embeddings.len() {
+    let SemanticSearchExactRequest {
+        image_file_ids,
+        image_embeddings,
+        query_embeddings,
+        minimum_similarities,
+    } = req;
+
+    if image_file_ids.len() != image_embeddings.len() {
         return Err(format!(
             "image_file_ids length {} does not match image_embeddings length {}",
-            req.image_file_ids.len(),
-            req.image_embeddings.len()
+            image_file_ids.len(),
+            image_embeddings.len()
         ));
     }
 
-    if req.query_embeddings.len() != req.minimum_similarities.len() {
+    if query_embeddings.len() != minimum_similarities.len() {
         return Err(format!(
             "query_embeddings length {} does not match minimum_similarities length {}",
-            req.query_embeddings.len(),
-            req.minimum_similarities.len()
+            query_embeddings.len(),
+            minimum_similarities.len()
         ));
     }
 
-    let matches_per_query = req
-        .query_embeddings
+    validate_semantic_search_exact_dimensions(
+        &image_file_ids,
+        &image_embeddings,
+        &query_embeddings,
+    )?;
+
+    let matches_per_query = query_embeddings
         .iter()
-        .zip(req.minimum_similarities.iter())
+        .zip(minimum_similarities.iter())
         .map(|(query_embedding, minimum_similarity)| {
             let minimum_similarity = f64::from(*minimum_similarity);
-            let mut query_matches = Vec::new();
+            let mut query_matches = Vec::with_capacity(image_embeddings.len());
 
-            for (file_id, image_embedding) in
-                req.image_file_ids.iter().zip(req.image_embeddings.iter())
-            {
-                if image_embedding.len() != query_embedding.len() {
-                    return Err(format!(
-                        "embedding dimension mismatch for file_id {file_id}: image={} query={}",
-                        image_embedding.len(),
-                        query_embedding.len()
-                    ));
-                }
-
+            for (file_id, image_embedding) in image_file_ids.iter().zip(image_embeddings.iter()) {
                 let score = simsimd_dot_product(image_embedding, query_embedding);
 
                 if score >= minimum_similarity {
@@ -91,9 +125,9 @@ pub fn semantic_search_exact(
             }
 
             query_matches.sort_by(|left, right| right.score.total_cmp(&left.score));
-            Ok(query_matches)
+            query_matches
         })
-        .collect::<Result<Vec<_>, String>>()?;
+        .collect();
 
     Ok(SemanticSearchExactResponse { matches_per_query })
 }
