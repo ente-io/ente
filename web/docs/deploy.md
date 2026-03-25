@@ -24,7 +24,7 @@ deployments, and the action that triggers them:
 | [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                      |
 | [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                      |
 | [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
-| [ente.com/help](https://ente.com/help)        | Production | Changes in `docs/` on push to `main`        |
+| [ente.com/help](https://ente.com/help)       | Production | Changes in `docs/` on push to `main`        |
 | [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
 
 ### Other subdomains
