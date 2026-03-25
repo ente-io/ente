@@ -1,5 +1,3 @@
-# CLAUDE.md
-
 ## Commit Message Guidelines
 
 When making commits, follow these rules:
