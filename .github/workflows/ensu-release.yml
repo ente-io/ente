@@ -69,10 +69,11 @@ jobs:
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
               run: |
-                  # Pin webkit2gtk to the jammy release pocket (2.36.x) to avoid
-                  # version 2.44+ which removed deprecated APIs used by wry 0.24.x
+                  # Pin all webkit2gtk/javascriptcoregtk packages to the jammy
+                  # release pocket (2.36.x) to avoid 2.44+ which removed
+                  # deprecated APIs used by wry 0.24.x.
                   sudo tee /etc/apt/preferences.d/webkit2gtk-pin > /dev/null << 'APTEOF'
-                  Package: libwebkit2gtk-4.0* libjavascriptcoregtk-4.0*
+                  Package: libwebkit2gtk-4.0* libjavascriptcoregtk-4.0* gir1.2-webkit2-4.0 gir1.2-javascriptcoregtk-4.0
                   Pin: release a=jammy
                   Pin-Priority: 1001
                   APTEOF
