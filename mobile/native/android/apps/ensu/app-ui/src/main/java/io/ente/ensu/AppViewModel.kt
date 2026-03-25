@@ -7,6 +7,7 @@ import android.os.Environment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.ente.ensu.data.AdvancedSettingsDataStore
+import io.ente.ensu.data.AdvancedSettingsSnapshot
 import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.data.auth.EnsuAuthService
@@ -102,7 +103,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            val initialSettings = advancedSettingsDataStore.settingsFlow.first()
+            val initialSettings = runCatching {
+                advancedSettingsDataStore.settingsFlow.first()
+            }.getOrDefault(AdvancedSettingsSnapshot())
             store.applyPersistedSettings(
                 developerSettings = initialSettings.developerSettings,
                 modelSettings = initialSettings.modelSettings
