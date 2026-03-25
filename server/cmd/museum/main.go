@@ -1056,6 +1056,8 @@ func setupDatabase() *sql.DB {
 
 	db.SetMaxIdleConns(6)
 	db.SetMaxOpenConns(45)
+	db.SetConnMaxLifetime(30 * time.Minute)
+	db.SetConnMaxIdleTime(10 * time.Minute)
 
 	log.Println("Database was configured successfully.")
 
