@@ -246,6 +246,13 @@ const parseDocumentBlocks = (text: string) => {
     return { text: stripped, documents };
 };
 
+const stripHiddenPartsText = (text: string) =>
+    text
+        .replace(/\u0000/g, "")
+        .replace(/<think>[\s\S]*?<\/think>/g, "")
+        .replace(/<todo_list>[\s\S]*?<\/todo_list>/g, "")
+        .trim();
+
 const buildDocumentBlocks = (documents: DocumentAttachment[]) => {
     if (!documents.length) return "";
     return documents
@@ -1526,7 +1533,6 @@ const Page: React.FC = () => {
     }, [
         chatKey,
         currentSessionId,
-        isDraftSession,
         sessionFromQuery,
         updateRouteSession,
         showMiniDialog,
@@ -1851,10 +1857,8 @@ const Page: React.FC = () => {
         },
         [
             chatKey,
-            downloadAttachment,
             firstPaintDone,
             inferImageMime,
-            readDecryptedAttachmentBytes,
         ],
     );
 
@@ -1909,7 +1913,7 @@ const Page: React.FC = () => {
         return () => {
             cancelled = true;
         };
-    }, [currentSession?.rootSessionUuid]);
+    }, [currentSession, currentSession?.rootSessionUuid]);
 
     useEffect(() => {
         if (isTauriRuntime) return;
@@ -2336,7 +2340,7 @@ const Page: React.FC = () => {
                 if (!firstUser) return;
 
                 const userText = parseDocumentBlocks(firstUser.text).text;
-                const assistantText = stripHiddenParts(firstAssistant.text);
+                const assistantText = stripHiddenPartsText(firstAssistant.text);
 
                 const fallbackSeed = trimToWords(userText, 7) || "New chat";
                 const fallbackTitle = sessionTitleFromText(
@@ -2483,11 +2487,7 @@ const Page: React.FC = () => {
     );
 
     const stripHiddenParts = useCallback((text: string) => {
-        return text
-            .replace(/\u0000/g, "")
-            .replace(/<think>[\s\S]*?<\/think>/g, "")
-            .replace(/<todo_list>[\s\S]*?<\/todo_list>/g, "")
-            .trim();
+        return stripHiddenPartsText(text);
     }, []);
 
     const getMessagePreview = useCallback(
@@ -2506,7 +2506,7 @@ const Page: React.FC = () => {
             if (imageCount > 0) return "Attached images";
             return "";
         },
-        [stripHiddenParts, parseDocumentBlocks],
+        [stripHiddenParts],
     );
 
     const appendMessageToState = useCallback((message: ChatMessage) => {
@@ -2549,7 +2549,7 @@ const Page: React.FC = () => {
                 return next;
             });
         },
-        [getMessagePreview, sessionTitleFromText],
+        [getMessagePreview],
     );
 
     const approxTokens = useCallback((text: string) => {
@@ -2718,7 +2718,7 @@ const Page: React.FC = () => {
             removeSessionFromState(sessionId);
             void syncChat(chatKey);
         },
-        [chatKey, removeSessionFromState, syncChat],
+        [chatKey, removeSessionFromState],
     );
 
     const requestDeleteSession = useCallback((sessionId: string) => {
@@ -2797,8 +2797,6 @@ const Page: React.FC = () => {
         },
         [
             chatKey,
-            downloadAttachment,
-            readDecryptedAttachmentBytes,
             showMiniDialog,
             inferImageMime,
         ],
@@ -2909,8 +2907,6 @@ const Page: React.FC = () => {
         },
         [
             chatKey,
-            downloadAttachment,
-            readDecryptedAttachmentBytes,
             inferImageMime,
             isTauriRuntime,
             showMiniDialog,
@@ -3031,7 +3027,6 @@ const Page: React.FC = () => {
         flushStreamingText,
         maybeGenerateSessionTitle,
         streamingParentId,
-        syncChat,
         updateBranchSelectionState,
         updateSessionAfterMessage,
     ]);
@@ -3308,7 +3303,8 @@ const Page: React.FC = () => {
             appendMessageToState,
             updateSessionAfterMessage,
             showMiniDialog,
-            syncChat,
+            approxTokens,
+            formatErrorMessage,
             scheduleStreamingFlush,
             flushStreamingText,
             maybeGenerateSessionTitle,
@@ -4139,13 +4135,11 @@ const Page: React.FC = () => {
         startGeneration,
         writeInferenceImages,
         cleanupInferenceImages,
-        storeEncryptedAttachmentBytes,
-        syncChat,
         updateBranchSelectionState,
         updateRouteSession,
-        formatErrorMessage,
         appendMessageToState,
         updateSessionAfterMessage,
+        refreshSessions,
     ]);
 
     useEffect(() => {
