@@ -11,7 +11,7 @@
         <p>Auth also comes with Offline mode, tags, icons, pins, import/export and more</p>
     </description>
     <launchable type="desktop-id">enteauth.desktop</launchable>
-    <url type="homepage">https://ente.io/auth</url>
+    <url type="homepage">https://ente.com/auth</url>
     <screenshots>
         <screenshot type="default">
             <image>https://raw.githubusercontent.com/ente-io/ente/main/.github/assets/auth.png</image>

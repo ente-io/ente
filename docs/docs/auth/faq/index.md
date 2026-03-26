@@ -19,7 +19,7 @@ that item.
 ### How can I support this project?
 
 You can support the development of this project by subscribing to our Photos app
-at [ente.io](https://ente.io).
+at [ente.com](https://ente.com).
 
 ### How can I enable FaceID lock in Ente Auth?
 

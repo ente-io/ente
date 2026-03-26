@@ -10,7 +10,7 @@ Manage account settings
 
 ### SEE ALSO
 
-* [ente](ente.md)	 - CLI tool for exporting your photos from ente.io
+* [ente](ente.md)	 - CLI tool for exporting your photos from Ente
 * [ente account add](ente_account_add.md)	 - login into existing account
 * [ente account get-token](ente_account_get-token.md)	 - Get token for an account for a specific app
 * [ente account list](ente_account_list.md)	 - list configured accounts

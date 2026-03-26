@@ -3,6 +3,8 @@ PODS:
     - Flutter
   - audio_session (0.0.1):
     - Flutter
+  - backup_exclusion (1.0.0):
+    - Flutter
   - battery_info (0.0.1):
     - Flutter
   - camera_avfoundation (0.0.1):
@@ -268,6 +270,7 @@ PODS:
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - backup_exclusion (from `.symlinks/plugins/backup_exclusion/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -361,6 +364,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/app_links/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  backup_exclusion:
+    :path: ".symlinks/plugins/backup_exclusion/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
   camera_avfoundation:
@@ -493,6 +498,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  backup_exclusion: 70e8847af915e95b2ff3323c6f49be001075353a
   battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
   camera_avfoundation: be3be85408cd4126f250386828e9b1dfa40ab436
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd

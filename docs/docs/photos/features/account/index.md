@@ -104,7 +104,7 @@ Ente offers **10 GB of storage for free, forever**. The free plan includes:
 - ✅ Map view and location tags
 - ✅ Background sync
 - ✅ Creating /receiving shared albums
-- ✅ Public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
+- ✅ Public links ([device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 
 **Free plan limitations:**
 
@@ -120,7 +120,7 @@ Paid plans unlock additional features and storage:
 - Family plan capability to share storage with 5 family members
 - Priority support
 
-See the [pricing page](https://ente.io#pricing) for current plans and pricing.
+See the [pricing page](https://ente.com#pricing) for current plans and pricing.
 
 ### Student discounts
 
