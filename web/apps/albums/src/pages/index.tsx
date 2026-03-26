@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { ActiveDownloadStatusNotifications } from "components/ActiveDownloadStatusNotifications";
-import { FeedIcon } from "components/Collections/CollectionHeader";
+import { FeedIcon } from "components/Collections/FeedIcon";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";

@@ -3,7 +3,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
-import { FeedIcon } from "components/Collections/CollectionHeader";
+import { FeedIcon } from "components/Collections/FeedIcon";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
