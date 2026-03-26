@@ -808,10 +808,6 @@
       ]
     },
     {
-      "title": "Mozilla",
-      "slug": "mozilla"
-    },
-    {
       "title": "fortrabbit"
     },
     {
@@ -1334,7 +1330,15 @@
       ]
     },
     {
-      "title": "Mozilla"
+      "title": "MozillaOld",
+      "slug": "mozilla_old"
+    },
+    {
+      "title": "Mozilla",
+      "slug": "mozilla",
+      "altNames": [
+        "Mozilla Account"
+      ]
     },
     {
       "title": "MyFRITZ!Net",
