@@ -71,6 +71,8 @@ Ente supports multiple 2FA methods for additional security:
 
 Enable 2FA in `Settings > Security` on mobile or desktop apps.
 
+Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos also enables it for Ente Auth, which can be a problem if you store your Ente account's 2FA code inside Ente Auth itself. See [Enteception](/auth/faq/enteception/).
+
 Learn more about [Passkeys](/photos/features/account/passkeys).
 
 ### End-to-end encryption
@@ -275,7 +277,6 @@ Learn more in the [Legacy guide](/photos/features/account/legacy/).
 ## Related topics
 
 - [Passkeys](/photos/features/account/passkeys) - Use passkeys for two-factor authentication
-- [App lock](/photos/features/account/app-lock) - Add a lock screen for the Ente Photos app
 - [Family Plans](/photos/features/account/family-plans) - Share storage with family members
 - [Referral Program](/photos/features/account/referral-program/) - Earn free storage by inviting friends
 - [Legacy](/photos/features/account/legacy/) - Designate trusted contacts for account recovery

@@ -30,6 +30,7 @@ import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_info_faces_item_widget.dart";
+import "package:photos/ui/viewer/file_details/file_info_pets_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/preview_properties_item_widget.dart";
@@ -305,6 +306,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         FacesItemWidget(file),
         const FileDetailsDivider(),
       ]);
+      if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+        fileDetailsTiles.addAll([
+          PetsItemWidget(file),
+          const FileDetailsDivider(),
+        ]);
+      }
     }
 
     if (file.uploadedFileID != null && file.updationTime != null) {

@@ -66,10 +66,11 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
 bool _stopHearBeat = false;
+bool _isRustInitialized = false;
+Future<void>? _rustInitFuture;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
   FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
@@ -158,6 +159,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await _scheduleHeartBeat(prefs, true);
+    await _ensureRustInitialized(via: 'workmanager:$taskId');
 
     _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
@@ -243,6 +245,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
+    await _ensureRustInitialized(
+      via: isBackground ? 'background:$via' : 'foreground:$via',
+    );
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _logFGHeartBeatInfo(preferences);
@@ -349,6 +354,27 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
+  }
+}
+
+Future<void> _ensureRustInitialized({required String via}) async {
+  if (_isRustInitialized) {
+    return;
+  }
+  final inFlightInit = _rustInitFuture;
+  if (inFlightInit != null) {
+    await inFlightInit;
+    return;
+  }
+
+  _logger.info("Initializing Rust bridge via $via");
+  final initFuture = EntePhotosRust.init();
+  _rustInitFuture = initFuture;
+  try {
+    await initFuture;
+    _isRustInitialized = true;
+  } finally {
+    _rustInitFuture = null;
   }
 }
 

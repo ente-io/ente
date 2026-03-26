@@ -68,6 +68,17 @@ Output: `app-ui/build/outputs/apk/release/app-ui-release.apk`
 
 Note: Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app-ui/build.gradle.kts`.
 
+## Certificate Fingerprints
+
+- **SHA1**: 55:32:94:80:28:F7:C7:43:9F:41:07:58:4B:13:F1:56:38:00:75:0C
+- **SHA256**: 66:99:CF:8C:42:AF:42:7B:55:2C:96:20:54:E5:D6:95:89:FA:49:09:96:55:3A:53:04:5E:B3:9C:C3:4F:2E:66
+
+To verify these fingerprints, use the following command:
+
+```bash
+apksigner verify --print-certs <path_to_apk>
+```
+
 ## Installation
 
 ### Install Debug Build

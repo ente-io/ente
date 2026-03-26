@@ -3,6 +3,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
+import { useDesktopAppLockRoute } from "components/utils/use-app-lock-route";
 import {
     isLocalStorageAndIndexedDBMismatch,
     savedLocalUser,
@@ -31,7 +32,7 @@ import {
     initVideoProcessing,
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
-import { AppLockOverlay } from "ente-new/photos/components/AppLockOverlay";
+import { AppLockReauthenticationDialog } from "ente-new/photos/components/app-lock/AppLockReauthenticationDialog";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
@@ -202,6 +203,13 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
             <BaseContext value={baseContext}>
+                {
+                    // The web and desktop components are rendered separately
+                    // because the desktop currently supports app-lock,
+                    // for which we have certain hooks and components.
+                    // We don't want this to load in the web as well, since there
+                    // is no particular purpose it would serve.
+                }
                 <PhotosAppContext value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
@@ -244,6 +252,11 @@ const DesktopMainContent: React.FC<MainContentProps> = ({
 }) => {
     const isAppLockReady = useSetupAppLock();
     const appLock = useAppLockSnapshot();
+    const { shouldBlockAppLockRouteTransition } = useDesktopAppLockRoute(
+        isAppLockReady,
+        appLock.isLocked,
+        appLock.lockScreenMode,
+    );
 
     useAutoLockWhenBackgrounded(
         appLock.enabled,
@@ -252,12 +265,13 @@ const DesktopMainContent: React.FC<MainContentProps> = ({
     );
 
     if (!isAppLockReady) return <LoadingIndicator />;
+    if (shouldBlockAppLockRouteTransition) return <LoadingIndicator />;
 
     return (
         <>
             {isChangingRoute && <TranslucentLoadingOverlay />}
             <Component {...pageProps} />
-            <AppLockOverlay />
+            <AppLockReauthenticationDialog />
         </>
     );
 };

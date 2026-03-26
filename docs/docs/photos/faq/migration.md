@@ -95,6 +95,24 @@ Duplicates can occur:
 > [!NOTE]
 >
 > Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
+
+### What is the best way to migrate Google Photos shared albums to Ente? {#migrate-google-photos-shared-albums}
+
+Google Takeout does not reliably export shared albums:
+
+- Shared albums you own may appear in Takeout and may export as a folder, but not consistently. Some photos may be missing, folders may be split, or the album might not be recreated at all.
+- Shared albums you joined (someone else owns) do not export unless you manually added each photo to your own library.
+- Shared-album names or structure are not preserved in the metadata, hence the shared album cannot be automatically reconstructed.
+
+The best way to export shared albums is to manually download each shared album:
+
+1. Open the album in Google Photos
+2. Menu (⁝) → Download all
+3. Extract the ZIP → you get a clean folder
+4. Import that folder into Ente → the album is preserved correctly
+
+This will reliably preserve the shared album name and contents.
+
 ### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
 
 Yes, you can start fresh.

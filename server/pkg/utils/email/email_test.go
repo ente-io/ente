@@ -1,6 +1,7 @@
 package email
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -93,6 +94,35 @@ func TestGetMaskedEmailForPublic(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := GetMaskedEmailForPublic(tt.email)
 			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestInactiveUserDeletionTemplatesIncludeAccountEmail(t *testing.T) {
+	originalWD, err := os.Getwd()
+	assert.NoError(t, err)
+	assert.NoError(t, os.Chdir("../../.."))
+	defer func() {
+		assert.NoError(t, os.Chdir(originalWD))
+	}()
+
+	templateData := map[string]interface{}{
+		"Email":        "alice@example.com",
+		"DeletionDate": "April 1, 2026",
+	}
+	templateNames := []string{
+		"inactive-user-deletion/warn_2m.html",
+		"inactive-user-deletion/warn_1m.html",
+		"inactive-user-deletion/warn_7d.html",
+		"inactive-user-deletion/warn_1d.html",
+		"inactive-user-deletion/confirm_13m.html",
+	}
+
+	for _, templateName := range templateNames {
+		t.Run(templateName, func(t *testing.T) {
+			body, err := getMailBodyWithBase("ente_base.html", templateName, templateData)
+			assert.NoError(t, err)
+			assert.Contains(t, body, "alice@example.com")
 		})
 	}
 }

@@ -325,6 +325,7 @@ jobs:
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
                   track: internal
+                  status: draft
 
             - name: Notify Discord
               if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'

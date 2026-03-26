@@ -1,0 +1,20 @@
+{
+    "name": "ente-accounts-rs",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "ente-base": "*",
+        "ente-wasm": "*",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "react-otp-input": "^3.1.1",
+        "uuid": "^13.0.0",
+        "zxcvbn": "^4.4.2"
+    },
+    "devDependencies": {
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
+        "@types/zxcvbn": "^4.4.5",
+        "ente-build-config": "*"
+    }
+}

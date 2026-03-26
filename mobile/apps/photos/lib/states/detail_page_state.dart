@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:photos/models/file/file.dart";
 
 enum FullScreenRequestReason {
   userInteraction,
@@ -11,13 +12,26 @@ typedef FullScreenRequestCallback = void Function(
   FullScreenRequestReason reason,
 );
 
+String? detailPageFileIdentifier(EnteFile file) {
+  if (file.uploadedFileID != null) {
+    return "uploaded_${file.uploadedFileID}";
+  }
+  if (file.localID != null) {
+    return "local_${file.localID}";
+  }
+  if (file.generatedID != null) {
+    return "generated_${file.generatedID}";
+  }
+  return null;
+}
+
 class InheritedDetailPageState extends InheritedWidget {
   final ValueNotifier<bool> enableFullScreenNotifier;
   final ValueNotifier<bool> isInSharedCollectionNotifier;
 
-  /// Holds the generatedID of the file currently showing thumbnail fallback.
-  /// Only the file with matching ID should display the fallback indicator.
-  final ValueNotifier<int?> showingThumbnailFallbackNotifier;
+  /// Holds the stable identifier of the file currently showing thumbnail
+  /// fallback. Only the file with matching ID should display the indicator.
+  final ValueNotifier<String?> showingThumbnailFallbackNotifier;
   // Cannot be const because we accept a ValueNotifier instance at runtime
   // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({

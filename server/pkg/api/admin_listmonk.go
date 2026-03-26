@@ -11,6 +11,7 @@ import (
 	"github.com/ente-io/museum/pkg/external/listmonk"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/crypto"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -22,31 +23,38 @@ import (
 
 const listmonkMissingSubscribersDefaultPageSize = 10000
 const listmonkMissingSubscribersMaxLoggedEmails = 10
+const listmonkMissingSubscribersMaxUnsubscribeAttempts = 500
 
 var listminkMissingSubscribersInFlight atomic.Bool
 
 type listminkMissingSubscribersJobConfig struct {
-	Endpoint         string
-	Username         string
-	Password         string
-	PageSize         int
-	HasUpperLimit    bool
-	UpperLimit       int
-	LogMissingEmails bool
-	TargetListIDSet  map[int]struct{}
+	Endpoint           string
+	Username           string
+	Password           string
+	PageSize           int
+	HasUpperLimit      bool
+	UpperLimit         int
+	LogMissingEmails   bool
+	UnsubscribeMissing bool
+	TargetListIDSet    map[int]struct{}
 }
 
 type listminkMissingSubscribersJobSummary struct {
-	StartedAt     int64
-	CompletedAt   int64
-	MissingCount  int
-	MatchedCount  int
-	ScannedCount  int
-	FetchedCount  int
-	PagesFetched  int
-	ListmonkTotal int
-	StopReason    string
-	Capped        bool
+	StartedAt             int64
+	CompletedAt           int64
+	MissingCount          int
+	MatchedCount          int
+	ScannedCount          int
+	FetchedCount          int
+	PagesFetched          int
+	ListmonkTotal         int
+	StopReason            string
+	Capped                bool
+	UnsubscribeMissing    bool
+	UnsubscribeAttempted  int
+	UnsubscribeSucceeded  int
+	UnsubscribeFailed     int
+	UnsubscribeCapReached bool
 }
 
 func (h *AdminHandler) GetListmonkMissingSubscribersCount(c *gin.Context) {
@@ -95,6 +103,19 @@ func (h *AdminHandler) GetListmonkMissingSubscribersCount(c *gin.Context) {
 		logMissingEmails = parsed
 	}
 
+	unsubscribeMissing := false
+	if unsubscribeMissingParam := strings.TrimSpace(c.Query("unsubscribeMissing")); unsubscribeMissingParam != "" {
+		parsed, err := strconv.ParseBool(unsubscribeMissingParam)
+		if err != nil {
+			handler.Error(c, stacktrace.Propagate(
+				ente.NewBadRequestWithMessage("invalid unsubscribeMissing query param, expected boolean"),
+				"",
+			))
+			return
+		}
+		unsubscribeMissing = parsed
+	}
+
 	upperLimitLogValue := interface{}("none")
 	if hasUpperLimit {
 		upperLimitLogValue = upperLimit
@@ -113,6 +134,7 @@ func (h *AdminHandler) GetListmonkMissingSubscribersCount(c *gin.Context) {
 		"page_size":     pageSize,
 		"upper_limit":   upperLimitLogValue,
 		"log_missing":   logMissingEmails,
+		"unsubscribe":   unsubscribeMissing,
 		"listmonk_user": username,
 	})
 
@@ -139,25 +161,27 @@ func (h *AdminHandler) GetListmonkMissingSubscribersCount(c *gin.Context) {
 	}
 
 	jobConfig := listminkMissingSubscribersJobConfig{
-		Endpoint:         baseURL + "/api/subscribers",
-		Username:         username,
-		Password:         password,
-		PageSize:         pageSize,
-		HasUpperLimit:    hasUpperLimit,
-		UpperLimit:       upperLimit,
-		LogMissingEmails: logMissingEmails,
-		TargetListIDSet:  targetListSet,
+		Endpoint:           baseURL + "/api/subscribers",
+		Username:           username,
+		Password:           password,
+		PageSize:           pageSize,
+		HasUpperLimit:      hasUpperLimit,
+		UpperLimit:         upperLimit,
+		LogMissingEmails:   logMissingEmails,
+		UnsubscribeMissing: unsubscribeMissing,
+		TargetListIDSet:    targetListSet,
 	}
 
 	go h.runListminkMissingSubscribersJobAsync(logger, jobConfig)
 
 	responsePayload := gin.H{
-		"status":           "started",
-		"requestID":        reqID,
-		"pageSize":         pageSize,
-		"upperLimit":       upperLimitResponseValue,
-		"logMissingEmails": logMissingEmails,
-		"acceptedAt":       time.Microseconds(),
+		"status":             "started",
+		"requestID":          reqID,
+		"pageSize":           pageSize,
+		"upperLimit":         upperLimitResponseValue,
+		"logMissingEmails":   logMissingEmails,
+		"unsubscribeMissing": unsubscribeMissing,
+		"acceptedAt":         time.Microseconds(),
 	}
 	logger.WithField("response_payload", responsePayload).Info("accepted listmonk missing-subscribers async job")
 	c.JSON(http.StatusAccepted, responsePayload)
@@ -188,21 +212,26 @@ func (h *AdminHandler) runListminkMissingSubscribersJobAsync(logger *logrus.Entr
 
 	durationMs := (summary.CompletedAt - summary.StartedAt) / 1000
 	logger.WithFields(logrus.Fields{
-		"pages_fetched":  summary.PagesFetched,
-		"fetched_count":  summary.FetchedCount,
-		"scanned_count":  summary.ScannedCount,
-		"matched_count":  summary.MatchedCount,
-		"missing_count":  summary.MissingCount,
-		"listmonk_total": summary.ListmonkTotal,
-		"stop_reason":    summary.StopReason,
-		"capped":         summary.Capped,
-		"duration_ms":    durationMs,
+		"pages_fetched":           summary.PagesFetched,
+		"fetched_count":           summary.FetchedCount,
+		"scanned_count":           summary.ScannedCount,
+		"matched_count":           summary.MatchedCount,
+		"missing_count":           summary.MissingCount,
+		"listmonk_total":          summary.ListmonkTotal,
+		"stop_reason":             summary.StopReason,
+		"capped":                  summary.Capped,
+		"unsubscribe_missing":     summary.UnsubscribeMissing,
+		"unsubscribe_attempted":   summary.UnsubscribeAttempted,
+		"unsubscribe_succeeded":   summary.UnsubscribeSucceeded,
+		"unsubscribe_failed":      summary.UnsubscribeFailed,
+		"unsubscribe_cap_reached": summary.UnsubscribeCapReached,
+		"duration_ms":             durationMs,
 	}).Info("completed listmonk missing-subscribers async job")
 
 	if h.DiscordController != nil {
 		// Summary intentionally contains no PII.
 		h.DiscordController.Notify(fmt.Sprintf(
-			"Listmonk missing-subscribers summary on `%s`: missing=%d, matched=%d, scanned=%d, fetched=%d, pages=%d, total=%d, capped=%t, stop_reason=%s, duration_ms=%d",
+			"Listmonk missing-subscribers summary on `%s`: active_missing=%d, active_found=%d, eligible=%d, fetched=%d, pages=%d, listmonk_total=%d, unsubscribe_missing=%t, unsub_attempted=%d, unsub_succeeded=%d, unsub_failed=%d, unsub_cap=%t, capped=%t, stop_reason=%s, duration_ms=%d",
 			h.DiscordController.HostName,
 			summary.MissingCount,
 			summary.MatchedCount,
@@ -210,6 +239,11 @@ func (h *AdminHandler) runListminkMissingSubscribersJobAsync(logger *logrus.Entr
 			summary.FetchedCount,
 			summary.PagesFetched,
 			summary.ListmonkTotal,
+			summary.UnsubscribeMissing,
+			summary.UnsubscribeAttempted,
+			summary.UnsubscribeSucceeded,
+			summary.UnsubscribeFailed,
+			summary.UnsubscribeCapReached,
 			summary.Capped,
 			summary.StopReason,
 			durationMs,
@@ -219,12 +253,14 @@ func (h *AdminHandler) runListminkMissingSubscribersJobAsync(logger *logrus.Entr
 
 func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubscribersJobConfig, logger *logrus.Entry) (listminkMissingSubscribersJobSummary, error) {
 	summary := listminkMissingSubscribersJobSummary{
-		StartedAt:  time.Microseconds(),
-		StopReason: "exhausted_pages",
+		StartedAt:          time.Microseconds(),
+		StopReason:         "exhausted_pages",
+		UnsubscribeMissing: cfg.UnsubscribeMissing,
 	}
 
 	pageNumber := 1
 	seenHashes := make(map[string]struct{})
+	emailsToUnsubscribe := make([]string, 0, listmonkMissingSubscribersMaxUnsubscribeAttempts)
 
 	for {
 		if cfg.HasUpperLimit && summary.FetchedCount >= cfg.UpperLimit {
@@ -269,7 +305,7 @@ func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubsc
 			if !subscriberInTargetLists(subscriber.ListIDs, cfg.TargetListIDSet) {
 				continue
 			}
-			email := normalizeEmailForHash(subscriber.Email)
+			email := emailUtil.NormalizeEmail(subscriber.Email)
 			if email == "" {
 				continue
 			}
@@ -298,6 +334,19 @@ func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubsc
 		}
 
 		pageMissingCount := len(pageHashes) - pageMatchedCount
+		if cfg.UnsubscribeMissing && pageMissingCount > 0 {
+			for _, hash := range pageHashes {
+				if _, exists := matchedHashSet[hash]; exists {
+					continue
+				}
+				if len(emailsToUnsubscribe) >= listmonkMissingSubscribersMaxUnsubscribeAttempts {
+					summary.UnsubscribeCapReached = true
+					break
+				}
+				emailsToUnsubscribe = append(emailsToUnsubscribe, pageHashToEmail[hash])
+			}
+		}
+
 		if cfg.LogMissingEmails && pageMissingCount > 0 {
 			missingEmailSamples := make([]string, 0, listmonkMissingSubscribersMaxLoggedEmails)
 			for _, hash := range pageHashes {
@@ -318,15 +367,17 @@ func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubsc
 		}
 
 		logger.WithFields(logrus.Fields{
-			"page":               pageNumber,
-			"page_results":       originalPageResultsCount,
-			"processed_results":  len(pageResults),
-			"page_unique_hashes": len(pageHashes),
-			"page_matched":       pageMatchedCount,
-			"page_missing":       pageMissingCount,
-			"fetched_count":      summary.FetchedCount,
-			"scanned_count":      summary.ScannedCount,
-			"matched_count":      summary.MatchedCount,
+			"page":                    pageNumber,
+			"page_results":            originalPageResultsCount,
+			"processed_results":       len(pageResults),
+			"page_unique_hashes":      len(pageHashes),
+			"page_matched":            pageMatchedCount,
+			"page_missing":            pageMissingCount,
+			"fetched_count":           summary.FetchedCount,
+			"scanned_count":           summary.ScannedCount,
+			"matched_count":           summary.MatchedCount,
+			"unsubscribe_queued":      len(emailsToUnsubscribe),
+			"unsubscribe_cap_reached": summary.UnsubscribeCapReached,
 		}).Info("processed listmonk subscribers page")
 
 		if summary.StopReason == "upper_limit_reached" {
@@ -348,14 +399,26 @@ func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubsc
 		pageNumber++
 	}
 
+	if cfg.UnsubscribeMissing && len(emailsToUnsubscribe) > 0 {
+		logger.WithField("unsubscribe_queued", len(emailsToUnsubscribe)).Info("starting listmonk unsubscribe for missing subscribers")
+		for _, email := range emailsToUnsubscribe {
+			summary.UnsubscribeAttempted++
+			if err := listmonkUnsubscribeByEmail(cfg.Endpoint, cfg.Username, cfg.Password, email); err != nil {
+				summary.UnsubscribeFailed++
+				logger.WithFields(logrus.Fields{
+					"unsubscribe_attempted": summary.UnsubscribeAttempted,
+					"unsubscribe_failed":    summary.UnsubscribeFailed,
+				}).WithError(err).Warn("failed to unsubscribe missing listmonk subscriber")
+				continue
+			}
+			summary.UnsubscribeSucceeded++
+		}
+	}
+
 	summary.CompletedAt = time.Microseconds()
 	summary.MissingCount = summary.ScannedCount - summary.MatchedCount
 	logger.WithField("missing_count", summary.MissingCount).Info("final missing subscribers count for async job")
 	return summary, nil
-}
-
-func normalizeEmailForHash(email string) string {
-	return strings.ToLower(email)
 }
 
 func subscriberInTargetLists(subscriberListIDs []int, targetListSet map[int]struct{}) bool {
@@ -365,4 +428,21 @@ func subscriberInTargetLists(subscriberListIDs []int, targetListSet map[int]stru
 		}
 	}
 	return false
+}
+
+func listmonkUnsubscribeByEmail(endpoint string, username string, password string, email string) error {
+	subscriberID, err := listmonk.GetSubscriberID(endpoint, username, password, email)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to find listmonk subscriber by email")
+	}
+	return stacktrace.Propagate(
+		listmonk.SendRequest(
+			http.MethodDelete,
+			fmt.Sprintf("%s/%d", endpoint, subscriberID),
+			map[string]interface{}{},
+			username,
+			password,
+		),
+		"failed to unsubscribe listmonk subscriber",
+	)
 }
