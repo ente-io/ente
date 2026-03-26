@@ -525,6 +525,13 @@ Yes! You can use Ente on as many devices as you want simultaneously. All your de
 
 The sync happens automatically in the background when devices are connected to the internet.
 
+### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}
+
+Please check that both devices are connected to the internet and that the app is
+not paused. If everything looks fine but sync still isn't working, please send us
+your debug logs via **Settings > General > Bug Report** so we can investigate
+further. You can reach us at [support@ente.io](mailto:support@ente.io).
+
 ## File Support & Upload Limits
 
 ### What file formats does Ente support? {#file-formats}
