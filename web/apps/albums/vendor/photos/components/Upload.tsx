@@ -182,7 +182,6 @@ export const Upload: React.FC<UploadProps> = ({
                 // @ts-ignore
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
-                setUploadProgressView,
             },
             onUploadFile,
             publicAlbumsCredentials,

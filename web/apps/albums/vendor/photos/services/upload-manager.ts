@@ -1,7 +1,5 @@
 // TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
-import { ensureLocalUser } from "ente-accounts/services/user";
-import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
@@ -9,7 +7,6 @@ import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import {
-    markUploadedAndObtainProcessableItem,
     shouldDisableCFUploadProxy,
     type ClusteredUploadItem,
     type UploadPhase,
@@ -30,20 +27,12 @@ import UploadService, {
     type PotentialLivePhotoAsset,
     type UploadAsset,
 } from "ente-gallery/services/upload/upload-service";
-import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import {
-    fileCreationTime,
-    type ParsedMetadata,
-} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
 import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
-import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
-import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
-import watcher from "services/watch";
 
 export type FileID = number;
 
@@ -86,7 +75,6 @@ export interface ProgressUpdater {
     >;
     setUploadFilenames: React.Dispatch<React.SetStateAction<UploadFileNames>>;
     setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
-    setUploadProgressView: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /** The number of uploads to process in parallel. */
@@ -106,7 +94,6 @@ class UIService {
     private uploadPhase: UploadPhase = "preparing";
     private filenames = new Map<number, string>();
     private hasLivePhoto = false;
-    private uploadProgressView = false;
 
     // STAGE LEVEL STATES
     private perFileProgress = 0;
@@ -120,7 +107,6 @@ class UIService {
         this.progressUpdater.setUploadPhase(this.uploadPhase);
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
-        this.progressUpdater.setUploadProgressView(this.uploadProgressView);
         this.progressUpdater.setUploadCounter({
             finished: this.filesUploadedCount,
             total: this.totalFilesCount,
@@ -169,11 +155,6 @@ class UIService {
     setHasLivePhoto(hasLivePhoto: boolean) {
         this.hasLivePhoto = hasLivePhoto;
         this.progressUpdater.setHasLivePhotos(hasLivePhoto);
-    }
-
-    setUploadProgressView(uploadProgressView: boolean) {
-        this.uploadProgressView = uploadProgressView;
-        this.progressUpdater.setUploadProgressView(uploadProgressView);
     }
 
     increaseFileUploaded() {
@@ -284,11 +265,6 @@ class UploadManager {
         this.publicAlbumsCredentials = publicAlbumsCredentials;
     }
 
-    logout() {
-        // TODO: Consolidate state in one place instead of spreading it.
-        UploadService.logout();
-    }
-
     public isUploadRunning() {
         return this.uploadInProgress;
     }
@@ -305,10 +281,6 @@ class UploadManager {
 
         this.uiService.reset();
         this.uiService.setUploadPhase("preparing");
-    }
-
-    showUploadProgressDialog() {
-        this.uiService.setUploadProgressView(true);
     }
 
     /**
@@ -341,8 +313,6 @@ class UploadManager {
         log.info(`Uploading ${itemsWithCollection.length} files`);
         this.uploadInProgress = true;
         this.uploaderName = uploaderName;
-
-        const logInterval = setInterval(logAboutMemoryPressureIfNeeded, 1000);
 
         try {
             await this.updateExistingFilesAndCollections(collections);
@@ -386,54 +356,13 @@ class UploadManager {
             }
         } finally {
             this.uiService.setUploadPhase("done");
-            void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.comlinkCryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
-            clearInterval(logInterval);
         }
 
         return this.uiService.hasFilesInResultList();
-    }
-
-    /**
-     * Upload a single file to the given collection.
-     *
-     * @param file A web {@link File} object representing the file to upload.
-     *
-     * @param collection The {@link Collection} in which the file should be
-     * added.
-     *
-     * @param sourceEnteFile The {@link EnteFile} from which the file being
-     * uploaded has been derived. This is used to extract and reassociated
-     * relevant metadata to the newly uploaded file.
-     */
-    public async uploadFile(
-        file: File,
-        collection: Collection,
-        sourceEnteFile: EnteFile,
-    ) {
-        const timestamp = fileCreationTime(sourceEnteFile);
-        const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
-        const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
-
-        const creationDate: ParsedMetadata["creationDate"] = dateTime
-            ? { timestamp, dateTime, offset }
-            : undefined;
-
-        // Fallback to the timestamp if a creationDate could not be constructed.
-        const creationTime = creationDate ? undefined : timestamp;
-
-        const item = {
-            uploadItem: file,
-            pathPrefix: undefined,
-            localID: 1,
-            collectionID: collection.id,
-            externalParsedMetadata: { creationDate, creationTime },
-        };
-
-        return this.uploadItems([item], [collection]);
     }
 
     private abortIfCancelled = () => {
@@ -443,15 +372,14 @@ class UploadManager {
     };
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicAlbumsCredentials) {
-            this.existingFiles = await savedPublicCollectionFiles(
-                this.publicAlbumsCredentials.accessToken,
-            );
-        } else {
-            const files = await computeNormalCollectionFilesFromSaved();
-            const userID = ensureLocalUser().id;
-            this.existingFiles = files.filter((file) => file.ownerID == userID);
+        const credentials = this.publicAlbumsCredentials;
+        if (!credentials) {
+            throw new Error("Missing public album credentials");
         }
+
+        this.existingFiles = await savedPublicCollectionFiles(
+            credentials.accessToken,
+        );
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),
         );
@@ -511,7 +439,6 @@ class UploadManager {
 
         while (this.itemsToBeUploaded.length > 0) {
             this.abortIfCancelled();
-            logAboutMemoryPressureIfNeeded();
 
             const clusteredItem = this.itemsToBeUploaded.pop()!;
             const { localID, collectionID } = clusteredItem;
@@ -530,7 +457,7 @@ class UploadManager {
                 uploadContext,
             );
 
-            const finishedUploadType = await this.postUploadTask(
+            const finishedUploadType = this.postUploadTask(
                 uploadableItem,
                 uploadResult,
             );
@@ -541,49 +468,28 @@ class UploadManager {
         }
     }
 
-    private async postUploadTask(
+    private postUploadTask(
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
-    ): Promise<FinishedUploadType> {
+    ): FinishedUploadType {
         const type = uploadResult.type;
         log.info(`Upload ${uploadableItem.fileName} | ${type}`);
-        try {
-            const processableUploadItem =
-                await markUploadedAndObtainProcessableItem(uploadableItem);
 
-            switch (uploadResult.type) {
-                case "failed":
-                case "blocked":
-                    // Retriable error.
-                    this.failedItems.push(uploadableItem);
-                    break;
+        switch (uploadResult.type) {
+            case "failed":
+            case "blocked":
+                // Retriable error.
+                this.failedItems.push(uploadableItem);
+                break;
 
-                case "addedSymlink":
-                    this.updateExistingFiles(uploadResult.file);
-                    break;
-
-                case "uploaded":
-                case "uploadedWithStaticThumbnail":
-                    {
-                        const { file } = uploadResult;
-
-                        indexNewUpload(file, processableUploadItem);
-                        processVideoNewUpload(file, processableUploadItem);
-
-                        this.updateExistingFiles(file);
-                    }
-                    break;
-            }
-
-            if (isDesktop && watcher.isUploadRunning()) {
-                watcher.onFileUpload(uploadableItem, uploadResult);
-            }
-
-            return type == "addedSymlink" ? "uploaded" : type;
-        } catch (e) {
-            log.error("Post file upload action failed", e);
-            return "failed";
+            case "addedSymlink":
+            case "uploaded":
+            case "uploadedWithStaticThumbnail":
+                this.updateExistingFiles(uploadResult.file);
+                break;
         }
+
+        return type == "addedSymlink" ? "uploaded" : type;
     }
 
     public cancelRunningUpload() {
@@ -614,12 +520,10 @@ class UploadManager {
     }
 
     /**
-     * `true` if an upload is currently in-progress (either a bunch of files
-     * directly uploaded by the user, or files being uploaded by the folder
-     * watch functionality).
+     * `true` if an upload is currently in-progress.
      */
     public isUploadInProgress = () => {
-        return this.uploadInProgress || watcher.isUploadRunning();
+        return this.uploadInProgress;
     };
 }
 
@@ -761,30 +665,4 @@ const clusterLivePhotos = async (
         result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
     }
     return result;
-};
-
-/**
- * Add logs if our usage increases some high water mark. This is solely so that
- * we have some indication in the logs if we get a user report of OOM crashes.
- */
-const logAboutMemoryPressureIfNeeded = () => {
-    if (!globalThis.electron) return;
-
-    // performance.memory is deprecated in general as a Web standard, and is
-    // also not available in the DOM types provided by TypeScript. However, it
-    // is the method recommended by the Electron team (see the link about the V8
-    // memory cage). The embedded Chromium supports it fine though, we just need
-    // to goad TypeScript to accept the type.
-
-    const { memory } = performance as unknown as {
-        memory: { totalJSHeapSize: number; jsHeapSizeLimit: number };
-    };
-
-    const heapSize = memory.totalJSHeapSize;
-    const heapLimit = memory.jsHeapSizeLimit;
-    if (heapSize / heapLimit > 0.7) {
-        log.info(
-            `Memory usage (${heapSize} bytes of ${heapLimit} bytes) exceeds the high water mark`,
-        );
-    }
 };
