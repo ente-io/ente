@@ -27,7 +27,7 @@
   "deleteReason4": "Nire arrazoia ez dago zerrendan",
   "sendEmail": "Bidali mezua",
   "deleteRequestSLAText": "Zure eskaera 72 ordutan prozesatua izango da.",
-  "deleteEmailRequest": "Mesedez, bidali e-mail bat <warning>account-deletion@ente.io</warning> helbidea zure erregistatutako helbidetik.",
+  "deleteEmailRequest": "Mesedez, bidali e-mail bat <warning>account-deletion@ente.com</warning> helbidea zure erregistatutako helbidetik.",
   "entePhotosPerm": "Ente-k <i>zure baimena behar du</i> zure argazkiak gordetzeko",
   "ok": "Ondo",
   "createAccount": "Sortu kontua",
@@ -63,7 +63,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -126,7 +126,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -258,7 +258,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

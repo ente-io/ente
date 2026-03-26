@@ -11,7 +11,7 @@ A QR code reader plugin for Ente.
                        DESC
   s.homepage         = 'https://ente.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Ente' => 'team@ente.io' }
+  s.author           = { 'Ente' => 'team@ente.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'

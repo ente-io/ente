@@ -29,7 +29,7 @@
   "deleteReason4": "Moja przyczyna nie jest wymieniona",
   "sendEmail": "Wyślij e-mail",
   "deleteRequestSLAText": "Twoje żądanie zostanie przetworzone w ciągu 72 godzin.",
-  "deleteEmailRequest": "Wyślij wiadomość e-mail na <warning>account-deletion@ente.io</warning> z zarejestrowanego adresu e-mail.",
+  "deleteEmailRequest": "Wyślij wiadomość e-mail na <warning>account-deletion@ente.com</warning> z zarejestrowanego adresu e-mail.",
   "entePhotosPerm": "Ente <i>potrzebuje uprawnień</i> aby przechowywać twoje zdjęcia",
   "ok": "Ok",
   "createAccount": "Stwórz konto",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -314,7 +314,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -755,7 +755,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -803,7 +803,7 @@
   "subscription": "Subskrypcja",
   "paymentDetails": "Szczegóły płatności",
   "manageFamily": "Zarządzaj Rodziną",
-  "contactToManageSubscription": "Skontaktuj się z nami pod adresem support@ente.io, aby zarządzać subskrypcją {provider}.",
+  "contactToManageSubscription": "Skontaktuj się z nami pod adresem support@ente.com, aby zarządzać subskrypcją {provider}.",
   "renewSubscription": "Odnów subskrypcję",
   "cancelSubscription": "Anuluj subskrypcję",
   "areYouSureYouWantToRenew": "Czy na pewno chcesz odnowić?",
@@ -853,7 +853,7 @@
   "visitWebToManage": "Odwiedź stronę web.ente.io, aby zarządzać subskrypcją",
   "managePaymentMethod": "Zarządzaj formami płatności",
   "couldNotUpdateSubscription": "Nie można było zaktualizować subskrybcji",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Skontaktuj się z support@ente.io i z przyjemnością pomożemy!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Skontaktuj się z support@ente.com i z przyjemnością pomożemy!",
   "paymentFailed": "Płatność się nie powiodła",
   "paymentFailedTalkToProvider": "Porozmawiaj ze wsparciem {providerName} jeśli zostałeś obciążony",
   "@paymentFailedTalkToProvider": {

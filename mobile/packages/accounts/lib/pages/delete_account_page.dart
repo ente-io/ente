@@ -65,7 +65,7 @@ class DeleteAccountPage extends StatelessWidget {
                   children: const [
                     TextSpan(text: "Please write to us at "),
                     TextSpan(
-                      text: "feedback@ente.io",
+                      text: "feedback@ente.com",
                       style: TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
                     ),
                     TextSpan(
@@ -83,7 +83,7 @@ class DeleteAccountPage extends StatelessWidget {
                 onTap: () async {
                   await sendEmail(
                     context,
-                    to: 'feedback@ente.io',
+                    to: 'feedback@ente.com',
                     subject: '[Feedback]',
                   );
                 },
@@ -215,7 +215,7 @@ class DeleteAccountPage extends StatelessWidget {
                   text: "Please send an email to ",
                 ),
                 TextSpan(
-                  text: "account-deletion@ente.io",
+                  text: "account-deletion@ente.com",
                   style: TextStyle(
                     color: Colors.orange[300],
                   ),
@@ -241,7 +241,7 @@ class DeleteAccountPage extends StatelessWidget {
                 Navigator.of(context).pop();
                 await sendEmail(
                   context,
-                  to: 'account-deletion@ente.io',
+                  to: 'account-deletion@ente.com',
                   subject: '[Delete account]',
                 );
               },

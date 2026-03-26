@@ -124,7 +124,7 @@ See the [pricing page](https://ente.com#pricing) for current plans and pricing.
 
 ### Student discounts
 
-Students receive **30% off** subscription plans. Email [students@ente.io](mailto:students@ente.io) from your school email address or provide proof of enrollment.
+Students receive **30% off** subscription plans. Email [students@ente.com](mailto:students@ente.com) from your school email address or provide proof of enrollment.
 
 Discounts are valid for one year and can be renewed.
 
@@ -160,12 +160,12 @@ Ente accepts multiple payment methods:
 **PayPal**:
 
 - Annual plans only
-- Email [paypal@ente.io](mailto:paypal@ente.io) to request an invoice
+- Email [paypal@ente.com](mailto:paypal@ente.com) to request an invoice
 
 **Cryptocurrency**:
 
 - Bitcoin (BTC), Ethereum (ETH), Dogecoin (DOGE)
-- Email [crypto@ente.io](mailto:crypto@ente.io) to request an invoice
+- Email [crypto@ente.com](mailto:crypto@ente.com) to request an invoice
 - Cannot be combined with discount codes
 
 **App Store payments**:

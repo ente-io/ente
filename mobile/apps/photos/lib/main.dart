@@ -278,7 +278,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       if (!initComplete && !isBackground) {
         _logger.severe("Stuck on splash screen for >= 15 seconds");
         triggerSendLogs(
-          "support@ente.io",
+          "support@ente.com",
           "Stuck on splash screen for >= 15 seconds on ${Platform.operatingSystem}",
           null,
         );

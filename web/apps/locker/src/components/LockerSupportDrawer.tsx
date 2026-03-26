@@ -36,7 +36,7 @@ export const LockerSupportDrawer: React.FC<
     const handleBlog = () => openURL("https://ente.com/blog/");
     const handleRequestFeature = () =>
         openURL("https://github.com/ente-io/ente/discussions");
-    const handleSupport = () => initiateEmail("support@ente.io");
+    const handleSupport = () => initiateEmail("support@ente.com");
 
     const viewLogs = async () => {
         log.info("Viewing logs");
@@ -94,7 +94,7 @@ export const LockerSupportDrawer: React.FC<
                 <LockerSidebarCardButton
                     icon={HelpCircleIcon}
                     label={
-                        <Tooltip title="support@ente.io">
+                        <Tooltip title="support@ente.com">
                             <Typography
                                 variant="small"
                                 sx={{ fontWeight: 500 }}

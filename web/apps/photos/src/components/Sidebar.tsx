@@ -1744,7 +1744,7 @@ const Help: React.FC<HelpProps> = ({
     );
 
     const handleSupport = useCallback(
-        () => initiateEmail("support@ente.io"),
+        () => initiateEmail("support@ente.com"),
         [],
     );
 
@@ -1835,7 +1835,7 @@ const Help: React.FC<HelpProps> = ({
                     <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={
-                            <Tooltip title="support@ente.io">
+                            <Tooltip title="support@ente.com">
                                 <Typography sx={{ fontWeight: "medium" }}>
                                     {t("support")}
                                 </Typography>

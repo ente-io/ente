@@ -147,7 +147,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                           onTap: () async {
                             await sendEmail(
                               context,
-                              to: "support@ente.io",
+                              to: "support@ente.com",
                             );
                           },
                           child: Text(

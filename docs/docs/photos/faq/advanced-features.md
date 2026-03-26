@@ -203,7 +203,7 @@ While video streaming is in beta, streams do not count against your storage quot
 Video streaming is still in beta. If something isn't working:
 
 - Create a thread in `#feedback` on [Discord](https://discord.com/channels/948937918347608085/1121126215995113552)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)
 
 For crashes or upload failures with streaming enabled, see [Troubleshooting](/photos/faq/troubleshooting#app-crashes-ml-video).
 
@@ -370,6 +370,6 @@ You can:
 
 1. **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
 2. **Discord**: Join our [Discord community](https://ente.com/discord) for discussions
-3. **Email**: Contact [support@ente.io](mailto:support@ente.io)
+3. **Email**: Contact [support@ente.com](mailto:support@ente.com)
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

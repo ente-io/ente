@@ -173,7 +173,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       if (result == true) {
         await sendLogs(
           context,
-          "support@ente.io",
+          "support@ente.com",
           postShare: () {},
         );
       }

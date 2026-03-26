@@ -29,7 +29,7 @@
   "deleteReason4": "Lý do không có trong danh sách",
   "sendEmail": "Gửi email",
   "deleteRequestSLAText": "Yêu cầu của bạn sẽ được xử lý trong vòng 72 giờ.",
-  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.io</warning> từ địa chỉ email đã đăng ký của bạn.",
+  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.com</warning> từ địa chỉ email đã đăng ký của bạn.",
   "entePhotosPerm": "Ente <i>cần quyền để</i> lưu giữ ảnh của bạn",
   "ok": "OK",
   "createAccount": "Tạo tài khoản",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -315,7 +315,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -889,7 +889,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -937,7 +937,7 @@
   "subscription": "Gói đăng ký",
   "paymentDetails": "Chi tiết thanh toán",
   "manageFamily": "Quản lý gia đình",
-  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.io để quản lý gói {provider} của bạn.",
+  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.com để quản lý gói {provider} của bạn.",
   "renewSubscription": "Gia hạn gói",
   "cancelSubscription": "Hủy gói",
   "areYouSureYouWantToRenew": "Bạn có chắc muốn gia hạn không?",
@@ -987,7 +987,7 @@
   "visitWebToManage": "Vui lòng truy cập web.ente.io để quản lý gói đăng ký",
   "managePaymentMethod": "Quản lý phương thức thanh toán",
   "couldNotUpdateSubscription": "Không thể cập nhật gói",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.io và chúng tôi rất sẵn sàng giúp đỡ!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.com và chúng tôi rất sẵn sàng giúp đỡ!",
   "paymentFailed": "Thanh toán thất bại",
   "paymentFailedTalkToProvider": "Vui lòng trao đổi với bộ phận hỗ trợ {providerName} nếu bạn đã bị tính phí",
   "@paymentFailedTalkToProvider": {

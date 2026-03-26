@@ -370,7 +370,7 @@ Thank you for reading this far! For implementation details, we request you to
 checkout [our code](https://github.com/ente-io).
 
 If you'd like to help us improve this document, kindly email
-[security@ente.io](mailto:security@ente.io).
+[security@ente.com](mailto:security@ente.com).
 
 We have a [separate document](https://ente.com/reliability) that outlines how we
 replicate your data across 3 different cloud providers to ensure reliability.

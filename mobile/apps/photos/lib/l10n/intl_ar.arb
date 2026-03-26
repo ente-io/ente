@@ -26,7 +26,7 @@
   "deleteReason4": "سببي غير مدرج",
   "sendEmail": "إرسال بريد إلكتروني",
   "deleteRequestSLAText": "ستتم معالجة طلبك خلال 72 ساعة.",
-  "deleteEmailRequest": "أرسل بريدًا إلكترونيًا إلى <warning>account-deletion@ente.io</warning> من عنوان بريدك الإلكتروني المسجل.",
+  "deleteEmailRequest": "أرسل بريدًا إلكترونيًا إلى <warning>account-deletion@ente.com</warning> من عنوان بريدك الإلكتروني المسجل.",
   "entePhotosPerm": "Ente <i>بحاجة إلى إذن</i> لحفظ صورك",
   "ok": "حسنًا",
   "createAccount": "إنشاء حساب",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -257,7 +257,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -603,7 +603,7 @@
   "subscription": "الاشتراك",
   "paymentDetails": "تفاصيل الدفع",
   "manageFamily": "إدارة العائلة",
-  "contactToManageSubscription": "يرجى التواصل معنا على support@ente.io لإدارة اشتراكك في {provider}.",
+  "contactToManageSubscription": "يرجى التواصل معنا على support@ente.com لإدارة اشتراكك في {provider}.",
   "renewSubscription": "تجديد الاشتراك",
   "cancelSubscription": "إلغاء الاشتراك",
   "areYouSureYouWantToRenew": "هل أنت متأكد من رغبتك في التجديد؟",
@@ -652,7 +652,7 @@
   "subAlreadyLinkedErrMessage": "تم ربط {id} الخاص بك بحساب Ente آخر.\nإذا كنت ترغب في استخدام {id} مع هذا الحساب، يرجى الاتصال بدعمنا.",
   "visitWebToManage": "يرجى زيارة web.ente.io لإدارة اشتراكك.",
   "couldNotUpdateSubscription": "تعذر تحديث الاشتراك.",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "يرجى التواصل مع support@ente.io وسنكون سعداء بمساعدتك!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "يرجى التواصل مع support@ente.com وسنكون سعداء بمساعدتك!",
   "paymentFailed": "فشلت عملية الدفع",
   "paymentFailedTalkToProvider": "يرجى التواصل مع دعم {providerName} إذا تم خصم المبلغ منك.",
   "@paymentFailedTalkToProvider": {
