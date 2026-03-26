@@ -18,6 +18,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
+import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
@@ -97,6 +98,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   @protected
   bool get isSaveEnabled => !_isLoading && _selectedCollectionIds.isNotEmpty;
+
+  bool get _canEditExistingFile => widget.existingFile is! TrashFile;
 
   @protected
   Future<bool> onEditModeBackPressed() async {
@@ -672,7 +675,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                 ),
           automaticallyImplyLeading: false,
           actions: [
-            if (isViewMode && currentData != null)
+            if (isViewMode && currentData != null && _canEditExistingFile)
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: _toggleMode,
