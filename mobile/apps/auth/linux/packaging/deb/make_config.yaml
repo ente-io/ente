@@ -3,7 +3,7 @@ package_name: enteauth
 include_build_number: false
 
 maintainer:
-  name: Ente.io Developers
+  name: Ente Developers
   email: auth@ente.com
 priority: optional
 section: x11
