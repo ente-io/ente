@@ -20,6 +20,78 @@ your iCloud library and import.
 > (Note: this is only needed during the initial import, subsequently
 > the app will automatically backup photos in the background as you take them).
 
+## Importing iCloud Shared Photo Library to Ente
+
+iCloud Shared Photo Library lets up to 6 people share a unified photo
+collection. Ente does not have an equivalent feature — instead, Ente offers
+[shared and collaborative albums](/photos/features/sharing/) on a per-album
+basis.
+
+To migrate photos from a Shared Photo Library to Ente, you need to first move
+them into your personal iCloud library, then import them into Ente.
+
+### 1. Move Shared Library photos to your Personal Library
+
+**On iPhone or iPad:**
+
+1. Open `Settings > Photos > Shared Library`.
+2. Tap **Leave Shared Library** (or **Delete Shared Library** if you are the
+   organizer).
+3. When prompted, choose **Keep All** to copy every photo from the Shared
+   Library into your Personal Library.
+
+> [!IMPORTANT]
+>
+> Make sure iCloud Photos has fully synced before leaving the Shared Library.
+> Open `Settings > Photos` and confirm the sync status shows "Up to Date". If
+> photos have not finished downloading, you may end up with lower-resolution
+> copies or missing files.
+
+> [!TIP]
+>
+> If you do not want to leave the Shared Library yet, you can also manually
+> select photos in the Shared Library view and move them to your Personal
+> Library without leaving.
+
+### 2. Import into Ente
+
+Once the photos are in your Personal Library, install the Ente app on your
+iPhone. It will directly read from your iCloud library and back up everything,
+including the photos you just moved from the Shared Library.
+
+### 3. What about metadata?
+
+- **EXIF data** (dates, location, camera info) embedded in photo files is
+  preserved during import.
+- **Favorites, album membership, and People tags** are stored only inside Apple
+  Photos and are not embedded in exported files. These will need to be
+  reorganized manually in Ente after import.
+
+### Desktop alternative
+
+If mobile is not an option, you can do the entire process on a Mac instead.
+
+**Moving photos to your Personal Library:**
+
+1. Open `Photos > Settings > Shared Library`.
+2. Click **Leave Shared Library** (or **Delete Shared Library**).
+3. Choose **Keep All** to move everything into your Personal Library.
+
+Make sure iCloud Photos has fully synced before leaving. Open
+`Photos > Settings > iCloud` and confirm the status shows "Up to Date".
+
+**Exporting and importing:**
+
+Export from the macOS Photos app using `File > Export > Export Unmodified
+Originals`, then drag the exported folder into the Ente desktop app.
+
+- Select `Sequential` file naming during export so Ente can correctly pair the
+  photo and video components of Live Photos.
+- "Export Unmodified Originals" gives the pre-edit file. Use "Export Photos"
+  instead to get the edited version.
+- Learn more about
+  [desktop import caveats](/photos/faq/migration#can-i-import-apple-photos-via-desktop).
+
 For information regarding desktop migration, please go through this
 [FAQ](/photos/faq/migration#importing-from-apple-photos).
 
