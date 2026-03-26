@@ -67,6 +67,20 @@ class FileMLInstruction {
   int get fileKey => isOffline ? offlineFileKey! : file.uploadedFileID!;
 }
 
+class RemoteMLHydrationSummary {
+  final int candidateFiles;
+  final int hydratedFaces;
+  final int hydratedClips;
+  final int remainingLocalMl;
+
+  const RemoteMLHydrationSummary({
+    this.candidateFiles = 0,
+    this.hydratedFaces = 0,
+    this.hydratedClips = 0,
+    this.remainingLocalMl = 0,
+  });
+}
+
 Future<IndexStatus> getIndexStatus() async {
   try {
     final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
@@ -119,7 +133,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFiledIDs = {};
 
-  final Set<int> filesWithFDStatus = await mlDataDB.getFileIDsWithFDData();
+  final Set<int> filesWithFDStatus = await mlDataDB.getFileIDsWithFDData(
+    type: DataType.mlData,
+  );
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFilesForSearch();
@@ -213,6 +229,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
           filesOwnedByOthers.add(instruction);
         }
       }
+      _lastFetchTimeForOthersIndexed = time;
       _logger.info(
         'Checking index for ${filesOwnedByOthers.length} owned by others',
       );
@@ -331,49 +348,11 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
       }
       continue;
     }
-    final Set<int> ids = {};
-    final Map<int, FileMLInstruction> pendingIndex = {};
-    for (final instruction in chunk) {
-      ids.add(instruction.file.uploadedFileID!);
-      pendingIndex[instruction.file.uploadedFileID!] = instruction;
-    }
-    _logger.info("fetching embeddings for ${ids.length} files");
-    final res = await fileDataService.getFilesData(ids);
-    _logger.info("embeddingResponse ${res.debugLog()}");
-    final List<Face> faces = [];
-    final List<ClipEmbedding> clipEmbeddings = [];
-    for (FileDataEntity fileMl in res.data.values) {
-      final existingInstruction = pendingIndex[fileMl.fileID]!;
-      final facesFromRemoteEmbedding = _getFacesFromRemoteEmbedding(fileMl);
-      //Note: Always do null check, empty value means no face was found.
-      if (facesFromRemoteEmbedding != null) {
-        faces.addAll(facesFromRemoteEmbedding);
-        existingInstruction.shouldRunFaces = false;
-      }
-      final remoteClipEmbedding =
-          fileMl.getClipEmbeddingIfCompatible(clipMlVersion);
-      if (remoteClipEmbedding != null) {
-        clipEmbeddings.add(
-          ClipEmbedding(
-            fileID: fileMl.fileID,
-            embedding: remoteClipEmbedding.embedding,
-            version: remoteClipEmbedding.version,
-          ),
-        );
-        existingInstruction.shouldRunClip = false;
-      }
-      if (!existingInstruction.pendingML) {
-        pendingIndex.remove(fileMl.fileID);
-      } else {
-        existingInstruction.existingRemoteFileML = fileMl;
-        pendingIndex[fileMl.fileID] = existingInstruction;
-      }
-    }
-
-    await mlDataDB.bulkInsertFaces(faces);
-    await mlDataDB.putClip(clipEmbeddings);
-    for (final fileID in pendingIndex.keys) {
-      final instruction = pendingIndex[fileID]!;
+    final pendingInstructions = await hydrateRemoteMLDataForInstructions(
+      chunk,
+      mlDataDB: mlDataDB,
+    );
+    for (final instruction in pendingInstructions) {
       if (instruction.pendingML) {
         batchToYield.add(instruction);
         if (batchToYield.length == yieldSize) {
@@ -389,6 +368,120 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
     _logger.info("queueing indexing for  ${batchToYield.length}");
     yield batchToYield;
   }
+}
+
+Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
+  required MLDataDB mlDataDB,
+}) async {
+  final filesWithRemoteML = await mlDataDB.getFileIDsWithFDData(
+    type: DataType.mlData,
+  );
+  if (filesWithRemoteML.isEmpty) {
+    return const RemoteMLHydrationSummary();
+  }
+
+  final filesToIndex = await getFilesForMlIndexing();
+  final ownedCandidates = filesToIndex.where((instruction) {
+    final uploadedFileID = instruction.file.uploadedFileID;
+    return uploadedFileID != null &&
+        instruction.file.isOwner &&
+        filesWithRemoteML.contains(uploadedFileID) &&
+        (instruction.shouldRunFaces || instruction.shouldRunClip);
+  }).toList();
+  if (ownedCandidates.isEmpty) {
+    return const RemoteMLHydrationSummary();
+  }
+
+  int hydratedFaces = 0;
+  int hydratedClips = 0;
+  int remainingLocalMl = 0;
+  for (int start = 0;
+      start < ownedCandidates.length;
+      start += embeddingFetchLimit) {
+    final end = math.min(start + embeddingFetchLimit, ownedCandidates.length);
+    final chunk = ownedCandidates.sublist(start, end);
+    final facePendingBefore = chunk.where((i) => i.shouldRunFaces).length;
+    final clipPendingBefore = chunk.where((i) => i.shouldRunClip).length;
+    final pendingAfterHydration = await hydrateRemoteMLDataForInstructions(
+      chunk,
+      mlDataDB: mlDataDB,
+    );
+    hydratedFaces += facePendingBefore -
+        pendingAfterHydration.where((i) => i.shouldRunFaces).length;
+    hydratedClips += clipPendingBefore -
+        pendingAfterHydration.where((i) => i.shouldRunClip).length;
+    remainingLocalMl += pendingAfterHydration.length;
+  }
+
+  return RemoteMLHydrationSummary(
+    candidateFiles: ownedCandidates.length,
+    hydratedFaces: hydratedFaces,
+    hydratedClips: hydratedClips,
+    remainingLocalMl: remainingLocalMl,
+  );
+}
+
+Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
+  List<FileMLInstruction> instructions, {
+  required MLDataDB mlDataDB,
+}) async {
+  if (instructions.isEmpty) {
+    return <FileMLInstruction>[];
+  }
+  final Set<int> ids = {};
+  final Map<int, FileMLInstruction> pendingIndex = {};
+  for (final instruction in instructions) {
+    if (instruction.isOffline) {
+      continue;
+    }
+    ids.add(instruction.file.uploadedFileID!);
+    pendingIndex[instruction.file.uploadedFileID!] = instruction;
+  }
+  if (ids.isEmpty) {
+    return instructions.where((instruction) => instruction.pendingML).toList();
+  }
+  _logger.info("fetching embeddings for ${ids.length} files");
+  final res = await fileDataService.getFilesData(ids);
+  _logger.info("embeddingResponse ${res.debugLog()}");
+  final List<Face> faces = [];
+  final List<ClipEmbedding> clipEmbeddings = [];
+  for (final fileMl in res.data.values) {
+    final existingInstruction = pendingIndex[fileMl.fileID];
+    if (existingInstruction == null) {
+      continue;
+    }
+    final facesFromRemoteEmbedding = _getFacesFromRemoteEmbedding(fileMl);
+    // Note: always do null check; an empty value means no face was found.
+    if (facesFromRemoteEmbedding != null) {
+      faces.addAll(facesFromRemoteEmbedding);
+      existingInstruction.shouldRunFaces = false;
+    }
+    final remoteClipEmbedding = fileMl.getClipEmbeddingIfCompatible(
+      clipMlVersion,
+    );
+    if (remoteClipEmbedding != null) {
+      clipEmbeddings.add(
+        ClipEmbedding(
+          fileID: fileMl.fileID,
+          embedding: remoteClipEmbedding.embedding,
+          version: remoteClipEmbedding.version,
+        ),
+      );
+      existingInstruction.shouldRunClip = false;
+    }
+    if (!existingInstruction.pendingML) {
+      pendingIndex.remove(fileMl.fileID);
+    } else {
+      existingInstruction.existingRemoteFileML = fileMl;
+      pendingIndex[fileMl.fileID] = existingInstruction;
+    }
+  }
+
+  await mlDataDB.bulkInsertFaces(faces);
+  await mlDataDB.putClip(clipEmbeddings);
+  return pendingIndex.values
+      .where((instruction) => instruction.pendingML)
+      .toList();
 }
 
 // Returns a list of faces from the given remote fileML. null if the version is less than the current version
