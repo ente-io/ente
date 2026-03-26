@@ -209,6 +209,22 @@ class BgTaskUtils {
       );
       if (Platform.isIOS && flagService.enableIOSBackgroundHandoff) {
         await requeueIOSBackgroundTasks(source: "configureWorkmanager");
+        final nextSchedule = nextIOSBackgroundProcessingSchedule(
+          isBackgroundHandoffEnabled: true,
+          hasActiveUploads: FileUploader.instance.hasActiveUploads,
+          isBackupEligible: await isIOSBackupEligible(),
+        );
+        if (nextSchedule != null) {
+          await scheduleIOSBackgroundProcessingTask(
+            source: "configureWorkmanager:bootstrap",
+            initialDelay: nextSchedule.delay,
+            reason: nextSchedule.reason,
+          );
+        } else {
+          await cancelIOSBackgroundProcessingTask(
+            source: "configureWorkmanager:handoff",
+          );
+        }
       } else {
         await workmanager.Workmanager().registerPeriodicTask(
           backgroundTaskIdentifier,
