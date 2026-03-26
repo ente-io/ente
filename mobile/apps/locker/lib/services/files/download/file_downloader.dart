@@ -185,6 +185,10 @@ Future<File?> openFile(
         [file.uploadedFileID!],
         removeWorkingCopies: false,
       );
+      await LockerDB.instance.setFilesMarkedOffline(
+        [file.uploadedFileID!],
+        false,
+      );
     } catch (_) {}
   }
 
