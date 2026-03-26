@@ -325,6 +325,19 @@ class RemoteAssetsService {
         return;
       }
       rethrow;
+    } on _ResumeValidationException catch (e, s) {
+      if (existingBytes > 0) {
+        _logger.warning(
+          "Resumed download validation failed for $url, restarting from scratch",
+          e,
+          s,
+        );
+        await _clearResumeArtifacts(savePath);
+        await _downloadFile(url, savePath);
+        return;
+      }
+      await _clearResumeArtifacts(savePath);
+      rethrow;
     }
   }
 
@@ -373,7 +386,7 @@ class RemoteAssetsService {
     if (existingBytes > 0) {
       // Revalidate the representation at request time so we never append
       // bytes from a different asset revision to an older partial file.
-      await _dio.download(
+      final response = await _dio.download(
         url,
         savePath,
         deleteOnError: false,
@@ -390,6 +403,12 @@ class RemoteAssetsService {
           _emitProgress(url, existingBytes + received, probe.totalBytes);
         },
       );
+      _validateResumedResponseHeaders(
+        response.headers,
+        expectedStart: existingBytes,
+        expectedTotalBytes: probe.totalBytes,
+      );
+      await _validateDownloadedFileLength(savePath, probe.totalBytes);
       return;
     }
 
@@ -405,6 +424,7 @@ class RemoteAssetsService {
         );
       },
     );
+    await _validateDownloadedFileLength(savePath, probe.totalBytes);
   }
 
   bool _shouldRestartDownloadFromScratch(DioException error) {
@@ -443,6 +463,46 @@ class RemoteAssetsService {
 
   Future<void> _deleteResumeMetadata(String tempPath) async {
     await _deleteFileIfExists(File(_resumeMetadataPath(tempPath)));
+  }
+
+  Future<void> _validateDownloadedFileLength(
+    String savePath,
+    int expectedTotalBytes,
+  ) async {
+    final actualBytes = await File(savePath).length();
+    if (actualBytes != expectedTotalBytes) {
+      throw _ResumeValidationException(
+        "Expected $expectedTotalBytes bytes, found $actualBytes",
+      );
+    }
+  }
+
+  void _validateResumedResponseHeaders(
+    Headers headers, {
+    required int expectedStart,
+    required int expectedTotalBytes,
+  }) {
+    final contentRange = headers.value(HttpHeaders.contentRangeHeader);
+    if (contentRange == null) {
+      throw const _ResumeValidationException(
+        "Missing Content-Range on resumed response",
+      );
+    }
+
+    final match = RegExp(r"bytes\s+(\d+)-(\d+)/(\d+)").firstMatch(contentRange);
+    final start = int.tryParse(match?.group(1) ?? "");
+    final end = int.tryParse(match?.group(2) ?? "");
+    final total = int.tryParse(match?.group(3) ?? "");
+    if (start != expectedStart ||
+        end == null ||
+        end < expectedStart ||
+        end >= expectedTotalBytes ||
+        total != expectedTotalBytes) {
+      throw _ResumeValidationException(
+        "Unexpected Content-Range '$contentRange' for resume from "
+        "$expectedStart of $expectedTotalBytes bytes",
+      );
+    }
   }
 
   Future<bool> _hasResumableDownloadState(String savePath) async {
@@ -526,7 +586,7 @@ class _RemoteAssetProbe {
 
   bool get hasStableValidator => ifRangeValidator != null;
 
-  String? get ifRangeValidator => _strongETag ?? lastModified;
+  String? get ifRangeValidator => _strongETag;
 
   bool get canResume => acceptsRanges && hasStableValidator;
 
@@ -612,7 +672,7 @@ class _ResumeMetadata {
   final String? etag;
   final String? lastModified;
 
-  String? get ifRangeValidator => _strongETag ?? lastModified;
+  String? get ifRangeValidator => _strongETag;
 
   Map<String, dynamic> toJson() {
     return {
@@ -639,4 +699,13 @@ class _ResumeMetadata {
   static bool _isWeakETag(String value) {
     return value.startsWith("W/") || value.startsWith("w/");
   }
+}
+
+class _ResumeValidationException implements Exception {
+  const _ResumeValidationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => "ResumeValidationException: $message";
 }
