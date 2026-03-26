@@ -202,10 +202,15 @@ export const initChatKeyStore = async () => {
             (remoteLocalStorageKey
                 ? readLocalStorageKey(remoteLocalStorageKey)
                 : undefined);
+        // Prefer localStorage over legacy secure storage for the local key.
+        // Pre-v0.1.12 builds only used localStorage, so when both exist the
+        // localStorage value is the key that actually encrypted the legacy DB.
+        // Stale OS keyring entries from a previous v0.1.12 install can shadow
+        // the correct localStorage key if secure storage is checked first.
         const legacyLocalChatKey =
+            readLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY) ??
             legacySecureLocalChatKey ??
-            nativeKeys.localChatKey ??
-            readLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+            nativeKeys.localChatKey;
         const remoteChatKey = secureRemoteChatKey ?? legacyRemoteChatKey;
         const localChatKey = secureLocalChatKey ?? legacyLocalChatKey;
 
