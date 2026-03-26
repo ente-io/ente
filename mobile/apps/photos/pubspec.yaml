@@ -248,7 +248,7 @@ dependency_overrides:
   js: ^0.6.7
   workmanager_apple:
     git:
-      url: https://github.com/prateekmedia/flutter_workmanager.git
+      url: https://github.com/ente-io/flutter_workmanager.git
       path: workmanager_apple
       ref: 34671326213e654635a2c3303d781e7890caa350
   media_kit: # update media_kit* if there is any update

@@ -38,7 +38,7 @@ dependency_overrides:
   win32: 5.10.1
   workmanager_apple:
     git:
-      url: https://github.com/prateekmedia/flutter_workmanager.git
+      url: https://github.com/ente-io/flutter_workmanager.git
       path: workmanager_apple
       ref: 34671326213e654635a2c3303d781e7890caa350
   log_viewer:

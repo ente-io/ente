@@ -3153,7 +3153,7 @@ packages:
       path: workmanager_apple
       ref: "34671326213e654635a2c3303d781e7890caa350"
       resolved-ref: "34671326213e654635a2c3303d781e7890caa350"
-      url: "https://github.com/prateekmedia/flutter_workmanager.git"
+      url: "https://github.com/ente-io/flutter_workmanager.git"
     source: git
     version: "0.9.1+2"
   workmanager_platform_interface:
