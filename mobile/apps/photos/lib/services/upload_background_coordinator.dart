@@ -38,6 +38,11 @@ Future<void> onUploadAppBackground() async {
     await GraceWindowIos.beginGraceWindow("ente-upload-grace-window");
     await prefs.setBool(_keyIOSUploadGraceActive, true);
     _isGraceWindowActiveInProcess = true;
+    await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
+      source: "graceWindowStarted",
+      initialDelay: BgTaskUtils.continuationDelay(),
+      reason: BgTaskUtils.iOSBackgroundProcessingReasonContinuation,
+    );
     unawaited(_waitForGraceWindowExpiration());
     return;
   }
@@ -113,12 +118,6 @@ Future<void> _waitForGraceWindowExpiration() async {
   if (!didOwnExpiration) {
     return;
   }
-
-  await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
-    source: "graceWindowExpired",
-    initialDelay: BgTaskUtils.continuationDelay(),
-    reason: BgTaskUtils.iOSBackgroundProcessingReasonContinuation,
-  );
 
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
     ProcessType.foreground.toString(),
