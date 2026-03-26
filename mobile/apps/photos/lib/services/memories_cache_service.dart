@@ -658,6 +658,30 @@ class MemoriesCacheService {
     return newCache;
   }
 
+  /// WARNING: Use for testing only.
+  ///
+  /// Computes the full smart memories set with debug surfacing enabled without
+  /// mutating the persisted memories cache.
+  Future<List<SmartMemory>> debugGetAllMemories({
+    DateTime? calcTime,
+  }) async {
+    return _memoriesUpdateLock.synchronized(() async {
+      final result = await smartMemoriesService.calcSmartMemories(
+        calcTime ?? DateTime.now(),
+        MemoriesCache(
+          toShowMemories: [],
+          peopleShownLogs: [],
+          clipShownLogs: [],
+          tripsShownLogs: [],
+          baseLocations: [],
+        ),
+        debugSurfaceAll: true,
+      );
+      locationService.baseLocations = result.baseLocations;
+      return result.memories;
+    });
+  }
+
   MemoriesCache _processOldCache(MemoriesCache? oldCache) {
     final List<PeopleShownLog> peopleShownLogs = [];
     final List<ClipShownLog> clipShownLogs = [];

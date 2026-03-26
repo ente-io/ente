@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
@@ -20,6 +21,7 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart"
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/settings/debug/memories_debug_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/ml_util.dart";
 
@@ -259,6 +261,17 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async => _onUpdateMemories(context),
+        ),
+        MenuItemWidgetNew(
+          title: "Show all memories debug",
+          leadingIconWidget: Icon(
+            Icons.bug_report_outlined,
+            color: getEnteColorScheme(context).menuItemIconStroke,
+            size: 20,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onShowAllMemoriesDebug(context),
         ),
         MenuItemWidgetNew(
           title: "Sync person mappings",
@@ -805,6 +818,13 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       logger.warning('Update memories failed', e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _onShowAllMemoriesDebug(BuildContext context) async {
+    await routeToPage(
+      context,
+      const MemoriesDebugPage(),
+    );
   }
 
   Future<void> _onSyncPersonMappings(BuildContext context) async {
