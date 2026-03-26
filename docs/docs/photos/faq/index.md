@@ -227,6 +227,10 @@ Jump to a category:
 
 - [How much Ente storage do I need when importing my Google Photos Takeout?](/photos/faq/migration#google-takeout-storage)
 
+### Importing from Apple Photos
+
+- [How do I import iCloud shared albums into Ente?](/photos/faq/migration#import-icloud-shared-albums)
+
 ## Search and Discovery
 
 [View complete Search and Discovery FAQ →](/photos/faq/search-and-discovery)

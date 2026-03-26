@@ -83,7 +83,7 @@ Duplicates can occur:
 2. Disable backup in Google Photos.
 3. Request Google Takeout.
 4. Empty any local photo folders which are part of Google Takeout and also need to be backed up post migration.
-   - External tools can be used to deduplicate Google Takeout before importing into Ente.
+    - External tools can be used to deduplicate Google Takeout before importing into Ente.
 5. Import Google Takeout using Ente desktop app.
 6. After successful import, enable desired photo folder backup on Ente mobile app.
 
@@ -122,11 +122,59 @@ Yes, you can start fresh.
 - Once synced, empty Trash to permanently remove all items from your account.
 
 Once this is done, you can reupload your entire Google Takeout folder again using the desktop app.
+
 ### Is there a way to remove partner sharing photos when importing via Google Takeout?
 
 There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.
 
 ## Importing from Apple Photos
+
+### How do I import iCloud shared albums into Ente? {#import-icloud-shared-albums}
+
+iCloud shared albums use reduced-quality copies of your photos and videos — they
+are **not** the same as your original files. Apple downscales photos to 2,048
+pixels on the long edge and caps videos at 720p / 15 minutes. Location data,
+captions, and original dates are also stripped.
+
+Because of these limitations, the best approach depends on whether you have
+access to the originals:
+
+#### If you (or the album owner) still have the originals in a personal Apple Photos library
+
+This is the recommended path, as it preserves full quality and metadata.
+
+1. Open the Apple Photos app on the device that has the originals.
+2. Back up from that device using the Ente mobile app (preferred) or export
+   via `File` > `Export` > `Export Unmodified Originals` on Mac and then import
+   into Ente using the desktop app.
+3. Organize the photos into albums inside Ente after upload.
+
+#### If shared album copies are all you have
+
+1. **On Mac:** Open the Photos app, select the shared album, select all photos
+   (`Command + A`), then `File` > `Export` > `Export Photos` and choose a
+   destination folder.
+2. **On iPhone/iPad:** Open the shared album, select photos, tap the share
+   button, and save them to your device library.
+3. **On iCloud.com:** Open the shared album, select up to 1,000 items, and
+   click Download.
+4. Import the downloaded folder into Ente using the desktop app by dragging and
+   dropping it. The folder name becomes the album name.
+
+> [!NOTE]
+>
+> Photos downloaded from iCloud shared albums will be lower quality than the
+> originals and will be missing location data and original dates. The download
+> date may replace the original capture date, causing photos to sort
+> incorrectly. After importing, you can
+> [fix dates manually](/photos/faq/metadata-and-editing#fix-incorrect-dates) in
+> Ente if needed.
+
+#### Tip: Use iCloud Shared Photo Library instead
+
+If you are on iOS 16.1+ / macOS 13+, consider using **iCloud Shared Photo
+Library** (different from shared albums). It preserves full-resolution originals
+and metadata, making migration to Ente straightforward via the mobile app.
 
 ### Why is it recommended to migrate Apple Photos from mobile? {#why-migrate-apple-photos-from-mobile}
 
