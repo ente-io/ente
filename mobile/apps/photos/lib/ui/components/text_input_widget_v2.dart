@@ -109,7 +109,7 @@ class TextInputWidgetV2 extends StatefulWidget {
 
 class _TextInputWidgetV2State extends State<TextInputWidgetV2>
     with SingleTickerProviderStateMixin {
-  static const _kHeight = 58.0;
+  static const _kHeight = 52.0;
   static const _kRadius = 16.0;
   static const _kHorizontalPadding = 16.0;
   static const _kIconContainerSize = 24.0;
@@ -266,8 +266,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
       widget.shouldSurfaceExecutionStates;
 
   bool get _isMultiline =>
-      !widget.isPasswordInput &&
-      (widget.maxLines == null || (widget.maxLines ?? 1) > 1);
+      !widget.isPasswordInput && (widget.maxLines ?? 1) > 1;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +313,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
               ],
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 9),
         ],
         GestureDetector(
           onTap: widget.isDisabled ? null : _focusNode.requestFocus,
@@ -336,7 +335,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
               children: [
                 if (leading != null) ...[
                   leading,
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                 ],
                 Expanded(
                   child: TextField(
@@ -347,7 +346,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                     textCapitalization: widget.textCapitalization!,
                     autofocus: widget.autoFocus ?? false,
                     autocorrect: widget.autoCorrect,
-                    maxLines: widget.isPasswordInput ? 1 : widget.maxLines,
+                    maxLines: widget.isPasswordInput ? 1 : (widget.maxLines ?? 1),
                     minLines: widget.isPasswordInput ? null : widget.minLines,
                     autofillHints: widget.autofillHints ??
                         (widget.isPasswordInput
@@ -376,7 +375,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                   ),
                 ),
                 if (trailing != null) ...[
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   trailing,
                 ],
               ],
