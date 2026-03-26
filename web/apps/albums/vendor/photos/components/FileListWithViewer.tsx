@@ -76,35 +76,15 @@ export type FileListWithViewerProps = {
         file: EnteFile,
         sourceCollectionSummaryID?: number,
     ) => void;
-    /**
-     * Called when the list scrolls, providing the current scroll offset.
-     */
-    onScroll?: (scrollOffset: number) => void;
-    /**
-     * Called when the visible date at the top of the viewport changes.
-     */
-    onVisibleDateChange?: (date: string | undefined) => void;
 } & Pick<
     FileListProps,
-    | "mode"
-    | "modePlus"
     | "layout"
     | "header"
     | "footer"
-    | "disableGrouping"
     | "enableSelect"
     | "selected"
     | "setSelected"
     | "activeCollectionID"
-    | "activePersonID"
-    | "favoriteFileIDs"
-    | "emailByUserID"
-    | "listBorderRadius"
-    | "onContextMenuAction"
-    | "onContextMenuOpenChange"
-    | "showAddPersonAction"
-    | "showEditLocationAction"
-    | "suppressSelectionUI"
 > &
     Pick<
         FileViewerProps,
@@ -136,8 +116,6 @@ export type FileListWithViewerProps = {
  * through this list of files).
  */
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
-    mode,
-    modePlus,
     layout,
     header,
     footer,
@@ -145,20 +123,10 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     files,
     enableDownload,
     enableImageEditing = true,
-    disableGrouping,
     enableSelect,
     selected,
     setSelected,
     activeCollectionID,
-    activePersonID,
-    favoriteFileIDs,
-    emailByUserID,
-    listBorderRadius,
-    onContextMenuAction,
-    onContextMenuOpenChange,
-    showAddPersonAction,
-    showEditLocationAction,
-    suppressSelectionUI,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -178,8 +146,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onAddFileToCollection,
-    onScroll,
-    onVisibleDateChange,
     pendingFileIndex,
     pendingFileSidebar,
     pendingHighlightCommentID,
@@ -281,28 +247,13 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     <FileList
                         {...{ width, height, annotatedFiles }}
                         {...{
-                            mode,
-                            modePlus,
                             layout,
                             header,
                             footer,
-                            user,
-                            disableGrouping,
                             enableSelect,
                             selected,
                             setSelected,
                             activeCollectionID,
-                            activePersonID,
-                            favoriteFileIDs,
-                            emailByUserID,
-                            listBorderRadius,
-                            onScroll,
-                            onVisibleDateChange,
-                            onContextMenuAction,
-                            onContextMenuOpenChange,
-                            showAddPersonAction,
-                            showEditLocationAction,
-                            suppressSelectionUI,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
@@ -323,7 +274,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     files,
                     isInHiddenSection,
                     isInIncomingSharedCollection,
-                    favoriteFileIDs,
                     fileNormalCollectionIDs,
                     collectionSummaries,
                     collectionNameByID,

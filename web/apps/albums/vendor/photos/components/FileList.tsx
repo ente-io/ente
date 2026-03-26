@@ -3,39 +3,21 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
-import type { LocalUser } from "ente-accounts/services/user";
-import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
-import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
-    FileContextMenu,
-    type ContextMenuPosition,
-} from "ente-new/photos/components/FileContextMenu";
-import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
-import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
-import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
-import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
-import {
-    PseudoCollectionID,
-    type CollectionSummary,
-} from "ente-new/photos/services/collection-summary";
-import {
-    getAvailableFileActions,
-    type FileContextAction,
-} from "ente-new/photos/utils/file-actions";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
@@ -154,19 +136,6 @@ export interface FileListAnnotatedFile {
     timelineDateString: string;
 }
 
-/**
- * A file augmented with the date when it will be permanently deleted.
- *
- * See: [Note: Files in trash pseudo collection have deleteBy]
- */
-export type EnteTrashFile = EnteFile & {
-    /**
-     * Timestamp (epoch microseconds) when the trash item (and its corresponding
-     * {@link EnteFile}) will be permanently deleted.
-     */
-    deleteBy?: number;
-};
-
 interface MasonryLayoutItem {
     file: EnteFile;
     fileIndex: number;
@@ -189,32 +158,16 @@ interface MasonrySourceItem {
     aspectRatio: number;
 }
 
-interface Dimensions {
-    width: number;
-    height: number;
-}
-
 export interface FileListProps {
     /** The height we should occupy (needed since the list is virtualized). */
     height: number;
     /** The width we should occupy.*/
     width: number;
     /**
-     * Optional border radius to apply to the scrollable list container.
-     */
-    listBorderRadius?: string;
-    /**
      * The files to show, annotated with cached precomputed properties that are
      * frequently needed by the {@link FileList}.
      */
     annotatedFiles: FileListAnnotatedFile[];
-    mode?: GalleryBarMode;
-    /**
-     * This is an experimental prop, to see if we can merge the separate
-     * "isInSearchMode" state kept by the gallery to be instead provided as a
-     * another mode in which the gallery operates.
-     */
-    modePlus?: GalleryBarMode | "search";
     /**
      * The visual layout used to render the file listing.
      */
@@ -232,21 +185,6 @@ export interface FileListProps {
      */
     footer?: FileListHeaderOrFooter;
     /**
-     * The logged in user, if any.
-     *
-     * This is only expected to be present when the listing is shown within the
-     * photos app, where we have a logged in user. The public albums app can
-     * omit this prop.
-     */
-    user?: LocalUser;
-    /**
-     * If `true`, then the default behaviour of grouping files by their date is
-     * suppressed.
-     *
-     * This behaviour is used when showing magic search results.
-     */
-    disableGrouping?: boolean;
-    /**
      * If `true`, then the user can select files in the listing by clicking on
      * their thumbnails (and other range selection mechanisms).
      */
@@ -255,23 +193,8 @@ export interface FileListProps {
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    /** This will be set if mode is not "people". */
+    /** The collection context used by the selection helpers. */
     activeCollectionID: number;
-    /** This will be set if mode is "people". */
-    activePersonID?: string | undefined;
-    /**
-     * File IDs of all the files that the user has marked as a favorite.
-     *
-     * Not set in the context of the shared albums app.
-     */
-    favoriteFileIDs?: Set<number>;
-    /**
-     * A map from known Ente user IDs to their emails.
-     *
-     * This is only expected in the context of the photos app, and will be
-     * omitted when running in the public albums app.
-     */
-    emailByUserID?: Map<number, string>;
     /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
@@ -279,46 +202,6 @@ export interface FileListProps {
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
-    /**
-     * Called when the list scrolls, providing the current scroll offset.
-     */
-    onScroll?: (scrollOffset: number) => void;
-    /**
-     * Called when the visible date at the top of the viewport changes.
-     */
-    onVisibleDateChange?: (date: string | undefined) => void;
-    /**
-     * The collection summary for the current view.
-     *
-     * Used to determine available context menu actions.
-     */
-    collectionSummary?: CollectionSummary;
-    /**
-     * Called when a context menu action is triggered on a file.
-     *
-     * @param action The action that was triggered.
-     */
-    onContextMenuAction?: (
-        action: FileContextAction,
-        targetFile?: EnteFile,
-        meta?: { isEphemeralSingleSelection: boolean },
-    ) => void;
-    /**
-     * Whether to show the "Add Person" action in the context menu.
-     */
-    showAddPersonAction?: boolean;
-    /**
-     * Whether to show the "Edit Location" action in the context menu.
-     */
-    showEditLocationAction?: boolean;
-    /**
-     * Called when the context menu opens or closes.
-     */
-    onContextMenuOpenChange?: (open: boolean) => void;
-    /**
-     * Hide selection visuals/interactions while keeping selection data.
-     */
-    suppressSelectionUI?: boolean;
 }
 
 /**
@@ -327,30 +210,15 @@ export interface FileListProps {
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
-    listBorderRadius,
-    mode,
-    modePlus,
     layout = "grid",
     header,
     footer,
-    user,
     annotatedFiles,
-    disableGrouping,
     enableSelect,
     selected,
     setSelected,
     activeCollectionID,
-    activePersonID,
-    favoriteFileIDs,
     onItemClick,
-    onScroll,
-    onVisibleDateChange,
-    collectionSummary,
-    onContextMenuAction,
-    showAddPersonAction,
-    showEditLocationAction,
-    onContextMenuOpenChange,
-    suppressSelectionUI = false,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -372,25 +240,6 @@ export const FileList: React.FC<FileListProps> = ({
         useState(new Set<string>());
     // Show back-to-top button when scrolled past threshold
     const [showBackToTop, setShowBackToTop] = useState(false);
-
-    // Context menu state
-    const [contextMenu, setContextMenu] = useState<{
-        position: ContextMenuPosition;
-        file: EnteFile;
-        fileIndex: number;
-    } | null>(null);
-
-    // Track selection state before right-click modified it.
-    // If there are already 3 files explicitly selected via checkmarks,
-    // right-clicking an unselected item will store the previous selections
-    // in this ref and temporarily select only the right-clicked file.
-    // If no action is taken from the context menu, the previous selection
-    // is restored when the menu closes.
-    const previousSelectionRef = useRef<SelectedState | null>(null);
-    // Track whether an action was taken from the context menu.
-    // This ref works in conjunction with previousSelectionRef: if an action
-    // is taken, the previous selection is not reverted when the context menu closes.
-    const contextMenuActionTakenRef = useRef(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
     const outerRef = useRef<HTMLDivElement | null>(null);
@@ -421,101 +270,81 @@ export const FileList: React.FC<FileListProps> = ({
 
         const { isSmallerLayout, columns } = layoutParams;
         const fileItemHeight = layoutParams.itemHeight + layoutParams.gap;
-        if (disableGrouping) {
-            items = items.concat(
-                batch(annotatedFiles, columns).map(
-                    (batchFiles, batchIndex) => ({
-                        height: fileItemHeight,
-                        type: "file",
-                        groups: [
-                            {
-                                annotatedFiles: batchFiles,
-                                annotatedFilesStartIndex: batchIndex * columns,
-                            },
-                        ],
-                    }),
-                ),
-            );
-        } else {
-            // A running counter of files that have been pushed into items, and
-            // a function to push them (incrementing the counter).
-            let fileIndex = 0;
-            const createFileItem = (splits: FileListAnnotatedFile[][]) =>
-                ({
-                    height: fileItemHeight,
-                    type: "file",
-                    groups: splits.map((split) => {
-                        const group = {
-                            annotatedFiles: split,
-                            annotatedFilesStartIndex: fileIndex,
-                        };
-                        fileIndex += split.length;
-                        return group;
-                    }),
-                }) satisfies FileListItem;
+        // A running counter of files that have been pushed into items, and
+        // a function to push them (incrementing the counter).
+        let fileIndex = 0;
+        const createFileItem = (splits: FileListAnnotatedFile[][]) =>
+            ({
+                height: fileItemHeight,
+                type: "file",
+                groups: splits.map((split) => {
+                    const group = {
+                        annotatedFiles: split,
+                        annotatedFilesStartIndex: fileIndex,
+                    };
+                    fileIndex += split.length;
+                    return group;
+                }),
+            }) satisfies FileListItem;
 
-            const pushItemsFromSplits = (splits: FileListAnnotatedFile[][]) => {
-                if (splits.length > 1) {
-                    // If we get here, the combined number of files across
-                    // splits is less than the number of columns.
-                    items.push({
-                        height: dateListItemHeight,
-                        type: "date",
-                        groups: splits.map((s) => ({
-                            date: s[0]!.timelineDateString,
-                            dateSpan: s.length,
-                        })),
-                    });
-                    items.push(createFileItem(splits));
-                } else {
-                    // A single group of files, but the number of such files
-                    // might be more than what fits a single row.
-                    items.push({
-                        height: dateListItemHeight,
-                        type: "date",
-                        groups: splits.map((s) => ({
-                            date: s[0]!.timelineDateString,
-                            dateSpan: columns,
-                        })),
-                    });
-                    items = items.concat(
-                        batch(splits[0]!, columns).map((batchFiles) =>
-                            createFileItem([batchFiles]),
-                        ),
-                    );
-                }
-            };
-
-            const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
-
-            let pendingSplits = new Array<FileListAnnotatedFile[]>();
-            for (const split of splitByDate(annotatedFiles)) {
-                const filledColumns = pendingSplits.reduce(
-                    (a, s) => a + s.length,
-                    0,
+        const pushItemsFromSplits = (splits: FileListAnnotatedFile[][]) => {
+            if (splits.length > 1) {
+                // If we get here, the combined number of files across
+                // splits is less than the number of columns.
+                items.push({
+                    height: dateListItemHeight,
+                    type: "date",
+                    groups: splits.map((s) => ({
+                        date: s[0]!.timelineDateString,
+                        dateSpan: s.length,
+                    })),
+                });
+                items.push(createFileItem(splits));
+            } else {
+                // A single group of files, but the number of such files
+                // might be more than what fits a single row.
+                items.push({
+                    height: dateListItemHeight,
+                    type: "date",
+                    groups: splits.map((s) => ({
+                        date: s[0]!.timelineDateString,
+                        dateSpan: columns,
+                    })),
+                });
+                items = items.concat(
+                    batch(splits[0]!, columns).map((batchFiles) =>
+                        createFileItem([batchFiles]),
+                    ),
                 );
-                const incomingColumns = split.length;
-
-                // Check if the files in this split can be added to same row.
-                if (
-                    !isSmallerLayout &&
-                    filledColumns +
-                        incomingColumns +
-                        Math.ceil(
-                            pendingSplits.length *
-                                spaceBetweenDatesToImageContainerWidthRatio,
-                        ) <=
-                        columns
-                ) {
-                    pendingSplits.push(split);
-                    continue;
-                }
-
-                if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
-                pendingSplits = [split];
             }
+        };
+
+        const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
+
+        let pendingSplits = new Array<FileListAnnotatedFile[]>();
+        for (const split of splitByDate(annotatedFiles)) {
+            const filledColumns = pendingSplits.reduce((a, s) => a + s.length, 0);
+            const incomingColumns = split.length;
+
+            // Check if the files in this split can be added to same row.
+            if (
+                !isSmallerLayout &&
+                filledColumns +
+                    incomingColumns +
+                    Math.ceil(
+                        pendingSplits.length *
+                            spaceBetweenDatesToImageContainerWidthRatio,
+                    ) <=
+                    columns
+            ) {
+                pendingSplits.push(split);
+                continue;
+            }
+
             if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
+            pendingSplits = [split];
         }
+        if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
 
         if (!annotatedFiles.length) {
             items.push({
@@ -553,7 +382,6 @@ export const FileList: React.FC<FileListProps> = ({
         header,
         footer,
         annotatedFiles,
-        disableGrouping,
         shouldUseMasonry,
         layoutParams,
     ]);
@@ -599,12 +427,12 @@ export const FileList: React.FC<FileListProps> = ({
         () =>
             handleSelectCreatorMulti(
                 setSelected,
-                mode,
-                user?.id,
+                undefined,
+                undefined,
                 activeCollectionID,
-                activePersonID,
+                undefined,
             ),
-        [setSelected, mode, user?.id, activeCollectionID, activePersonID],
+        [setSelected, activeCollectionID],
     );
 
     const onChangeSelectAllCheckBox = useCallback(
@@ -634,33 +462,25 @@ export const FileList: React.FC<FileListProps> = ({
         () =>
             handleSelectCreator(
                 setSelected,
-                mode,
-                user?.id,
+                undefined,
+                undefined,
                 activeCollectionID,
-                activePersonID,
+                undefined,
                 setRangeStartIndex,
             ),
-        [setSelected, mode, user?.id, activeCollectionID, activePersonID],
+        [setSelected, activeCollectionID],
     );
 
     const isSelectionContextMatching = useMemo(() => {
-        if (!mode) return selected.collectionID === activeCollectionID;
-        if (mode !== selected.context?.mode) return false;
-        if (selected.context.mode === "people") {
-            return selected.context.personID === activePersonID;
-        }
-        return selected.context.collectionID === activeCollectionID;
-    }, [activeCollectionID, activePersonID, mode, selected]);
+        return selected.collectionID === activeCollectionID;
+    }, [activeCollectionID, selected.collectionID]);
 
     const isFileSelected = useCallback(
-        (file: EnteFile) => {
-            if (suppressSelectionUI) return false;
-            return isSelectionContextMatching && !!selected[file.id];
-        },
-        [isSelectionContextMatching, selected, suppressSelectionUI],
+        (file: EnteFile) => isSelectionContextMatching && !!selected[file.id],
+        [isSelectionContextMatching, selected],
     );
 
-    const haveSelection = !suppressSelectionUI && selected.count > 0;
+    const haveSelection = selected.count > 0;
 
     const handleRangeSelect = useCallback(
         (index: number) => {
@@ -714,159 +534,16 @@ export const FileList: React.FC<FileListProps> = ({
         if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
-    const selectedFavoriteCount = useMemo(() => {
-        if (!favoriteFileIDs || selected.count == 0) return 0;
-        let count = 0;
-        for (const [key, value] of Object.entries(selected)) {
-            if (typeof value === "boolean" && value) {
-                if (favoriteFileIDs.has(Number(key))) {
-                    count += 1;
-                }
-            }
-        }
-        return count;
-    }, [favoriteFileIDs, selected]);
-
-    // Compute available context menu actions based on stable context and
-    // the favorite status of the current selection (for toggling).
-    const contextMenuActions = useMemo(() => {
-        if (!onContextMenuAction) return [];
-        const actions = getAvailableFileActions({
-            barMode: mode,
-            isInSearchMode: modePlus === "search",
-            collectionSummary,
-            showAddPerson: !!showAddPersonAction,
-            showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
-            showSendLink: selected.ownCount > 0,
-        });
-        if (!actions.includes("favorite")) return actions;
-        if (
-            selectedFavoriteCount > 0 &&
-            selectedFavoriteCount < selected.count
-        ) {
-            return actions.filter(
-                (action) => action !== "favorite" && action !== "unfavorite",
-            );
-        }
-        if (selectedFavoriteCount === selected.count && selected.count > 0) {
-            return actions.map((action) =>
-                action === "favorite" ? "unfavorite" : action,
-            );
-        }
-        return actions;
-    }, [
-        onContextMenuAction,
-        mode,
-        modePlus,
-        collectionSummary,
-        showAddPersonAction,
-        showEditLocationAction,
-        selected.ownCount,
-        selectedFavoriteCount,
-        selected.count,
-    ]);
-
-    // Handle context menu open
-    const handleContextMenu = useCallback(
-        (event: React.MouseEvent, file: EnteFile, fileIndex: number) => {
-            if (!onContextMenuAction) return;
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            // Reset tracking for this menu open.
-            previousSelectionRef.current = null;
-            contextMenuActionTakenRef.current = false;
-
-            // Handle selection behavior on right-click
-            if (!selected[file.id]) {
-                // Store current selection before replacing it
-                previousSelectionRef.current = { ...selected };
-
-                // File not selected: clear selection and select only this file
-                const isOwnFile = file.ownerID === user?.id;
-                const context =
-                    mode === "people" && activePersonID
-                        ? { mode: "people" as const, personID: activePersonID }
-                        : {
-                              mode: (mode ?? "albums") as
-                                  | "albums"
-                                  | "hidden-albums",
-                              collectionID: activeCollectionID,
-                          };
-                setSelected({
-                    [file.id]: true,
-                    ownCount: isOwnFile ? 1 : 0,
-                    count: 1,
-                    collectionID: activeCollectionID,
-                    context,
-                });
-            }
-            // If file is already selected, keep current multi-selection
-
-            setContextMenu({
-                position: { top: event.clientY, left: event.clientX },
-                file,
-                fileIndex,
-            });
-            onContextMenuOpenChange?.(true);
-        },
-        [
-            onContextMenuAction,
-            onContextMenuOpenChange,
-            selected,
-            setSelected,
-            user,
-            activeCollectionID,
-            activePersonID,
-            mode,
-        ],
-    );
-
-    // Handle context menu close
-    const handleContextMenuClose = useCallback(() => {
-        // Defer restore so a menu-item click can mark the close as action-driven.
-        void Promise.resolve().then(() => {
-            if (
-                !contextMenuActionTakenRef.current &&
-                previousSelectionRef.current
-            ) {
-                setSelected(previousSelectionRef.current);
-            }
-            previousSelectionRef.current = null;
-            contextMenuActionTakenRef.current = false;
-        });
-
-        setContextMenu(null);
-        onContextMenuOpenChange?.(false);
-    }, [onContextMenuOpenChange, setSelected]);
-
-    const handleContextMenuActionWithTracking = useCallback(
-        (action: FileContextAction) => {
-            const isEphemeralSingleSelection =
-                selected.count === 1 &&
-                previousSelectionRef.current?.count === 0;
-            contextMenuActionTakenRef.current = true;
-            onContextMenuAction?.(action, contextMenu?.file, {
-                isEphemeralSingleSelection,
-            });
-        },
-        [onContextMenuAction, contextMenu, selected.count],
-    );
-
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
-            const haveSelection =
-                !!enableSelect && !suppressSelectionUI && selected.count > 0;
-            const showGroupCheckbox =
-                haveSelection && !(contextMenu && selected.count === 1);
+            const haveSelection = !!enableSelect && selected.count > 0;
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
                         item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
-                                {showGroupCheckbox && (
+                                {haveSelection && (
                                     <Checkbox
                                         key={date}
                                         name={date}
@@ -895,11 +572,7 @@ export const FileList: React.FC<FileListProps> = ({
                                 return (
                                     <FileThumbnail
                                         key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                                        {...{
-                                            enableSelect:
-                                                !!enableSelect &&
-                                                !suppressSelectionUI,
-                                        }}
+                                        enableSelect={!!enableSelect}
                                         file={file}
                                         selected={isFileSelected(file)}
                                         selectOnClick={haveSelection}
@@ -914,24 +587,12 @@ export const FileList: React.FC<FileListProps> = ({
                                                 (index >= hoverIndex &&
                                                     index <= rangeStartIndex))
                                         }
-                                        activeCollectionID={activeCollectionID}
                                         showPlaceholder={isScrolling}
-                                        isFav={!!favoriteFileIDs?.has(file.id)}
                                         onClick={() => onItemClick(index)}
                                         onSelect={handleSelect(file, index)}
                                         onHover={() => setHoverIndex(index)}
                                         onRangeSelect={() =>
                                             handleRangeSelect(index)
-                                        }
-                                        onContextMenu={
-                                            onContextMenuAction
-                                                ? (e) =>
-                                                      handleContextMenu(
-                                                          e,
-                                                          file,
-                                                          index,
-                                                      )
-                                                : undefined
                                         }
                                     />
                                 );
@@ -945,25 +606,18 @@ export const FileList: React.FC<FileListProps> = ({
             }
         },
         [
-            activeCollectionID,
             checkedTimelineDateStrings,
-            contextMenu,
-            favoriteFileIDs,
             haveSelection,
-            handleContextMenu,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
             isShiftKeyPressed,
             isFileSelected,
             onChangeSelectAllCheckBox,
-            onContextMenuAction,
             onItemClick,
             rangeStartIndex,
             enableSelect,
             selected,
-            suppressSelectionUI,
-            user,
         ],
     );
 
@@ -989,40 +643,11 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, []);
 
-    // Track the last reported date to avoid unnecessary callbacks
-    const lastVisibleDateRef = useRef<string | undefined>(undefined);
-
     const handleScroll = useCallback(
         ({ scrollOffset }: { scrollOffset: number }) => {
-            onScroll?.(scrollOffset);
-
-            // Show back-to-top button when scrolled past threshold
             setShowBackToTop(scrollOffset > 500);
-
-            // Calculate which date is visible at the current scroll position
-            if (onVisibleDateChange && items.length > 0) {
-                let cumulativeHeight = 0;
-                let currentDate: string | undefined;
-
-                for (const item of items) {
-                    if (item.type === "date") {
-                        currentDate = item.groups[0]?.date;
-                    }
-                    cumulativeHeight += item.height;
-                    // Found the item that contains the scroll position
-                    if (cumulativeHeight > scrollOffset) {
-                        break;
-                    }
-                }
-
-                // Only call callback if date changed
-                if (currentDate !== lastVisibleDateRef.current) {
-                    lastVisibleDateRef.current = currentDate;
-                    onVisibleDateChange(currentDate);
-                }
-            }
         },
-        [onScroll, onVisibleDateChange, items],
+        [],
     );
 
     const masonryTargetRowHeight = useMemo(
@@ -1195,7 +820,6 @@ export const FileList: React.FC<FileListProps> = ({
         useCallback(
             (event) => {
                 const scrollOffset = event.currentTarget.scrollTop;
-                onScroll?.(scrollOffset);
                 setShowBackToTop(scrollOffset > 500);
                 setMasonryScrollTop(scrollOffset);
                 setMasonryIsScrolling(true);
@@ -1207,7 +831,7 @@ export const FileList: React.FC<FileListProps> = ({
                     masonryScrollIdleTimeoutRef.current = undefined;
                 }, masonryScrollIdleMs);
             },
-            [onScroll],
+            [],
         );
 
     useEffect(
@@ -1230,35 +854,6 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, [shouldUseMasonry]);
 
-    useEffect(() => {
-        if (!shouldUseMasonry || !onVisibleDateChange) return;
-        const topVisibleItem = masonryVisibleItems.reduce<
-            MasonryLayoutItem | undefined
-        >(
-            (best, item) =>
-                item.bottom > masonryViewportTop &&
-                (!best || item.top < best.top)
-                    ? item
-                    : best,
-            undefined,
-        );
-        const visibleDate =
-            topVisibleItem &&
-            annotatedFiles[topVisibleItem.fileIndex]?.timelineDateString;
-        const currentDate =
-            visibleDate ?? annotatedFiles[0]?.timelineDateString;
-        if (currentDate !== lastVisibleDateRef.current) {
-            lastVisibleDateRef.current = currentDate;
-            onVisibleDateChange(currentDate);
-        }
-    }, [
-        annotatedFiles,
-        masonryVisibleItems,
-        masonryViewportTop,
-        onVisibleDateChange,
-        shouldUseMasonry,
-    ]);
-
     const renderMasonryItem = useCallback(
         ({
             file,
@@ -1278,10 +873,7 @@ export const FileList: React.FC<FileListProps> = ({
                 >
                     <FileThumbnail
                         key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                        {...{
-                            enableSelect:
-                                !!enableSelect && !suppressSelectionUI,
-                        }}
+                        enableSelect={!!enableSelect}
                         file={file}
                         selected={isFileSelected(file)}
                         selectOnClick={haveSelection}
@@ -1294,18 +886,11 @@ export const FileList: React.FC<FileListProps> = ({
                                 (fileIndex >= hoverIndex &&
                                     fileIndex <= rangeStartIndex))
                         }
-                        activeCollectionID={activeCollectionID}
                         showPlaceholder={masonryIsScrolling && !isInViewport}
-                        isFav={!!favoriteFileIDs?.has(file.id)}
                         onClick={() => onItemClick(fileIndex)}
                         onSelect={handleSelect(file, fileIndex)}
                         onHover={() => setHoverIndex(fileIndex)}
                         onRangeSelect={() => handleRangeSelect(fileIndex)}
-                        onContextMenu={
-                            onContextMenuAction
-                                ? (e) => handleContextMenu(e, file, fileIndex)
-                                : undefined
-                        }
                         isMasonry
                         style={{ width: "100%", height: "100%" }}
                     />
@@ -1313,10 +898,7 @@ export const FileList: React.FC<FileListProps> = ({
             );
         },
         [
-            activeCollectionID,
             enableSelect,
-            favoriteFileIDs,
-            handleContextMenu,
             handleRangeSelect,
             handleSelect,
             haveSelection,
@@ -1326,12 +908,9 @@ export const FileList: React.FC<FileListProps> = ({
             masonryIsScrolling,
             masonryViewportBottom,
             masonryViewportTop,
-            onContextMenuAction,
             onItemClick,
             rangeStartIndex,
             selected,
-            suppressSelectionUI,
-            user,
         ],
     );
 
@@ -1348,9 +927,6 @@ export const FileList: React.FC<FileListProps> = ({
                         width: "100%",
                         height: "100%",
                         overflowY: "auto",
-                        ...(listBorderRadius && {
-                            borderRadius: listBorderRadius,
-                        }),
                     }}
                     onScroll={handleMasonryScroll}
                 >
@@ -1405,15 +981,6 @@ export const FileList: React.FC<FileListProps> = ({
                         <KeyboardArrowUpIcon />
                     </BackToTopButton>
                 )}
-                {onContextMenuAction && (
-                    <FileContextMenu
-                        open={contextMenu !== null}
-                        anchorPosition={contextMenu?.position}
-                        onClose={handleContextMenuClose}
-                        actions={contextMenuActions}
-                        onAction={handleContextMenuActionWithTracking}
-                    />
-                )}
             </Box>
         );
     }
@@ -1422,26 +989,10 @@ export const FileList: React.FC<FileListProps> = ({
         return <></>;
     }
 
-    // The old, mode unaware, behaviour.
-    let key = `${activeCollectionID}`;
-    if (modePlus) {
-        // If the new experimental modePlus prop is provided, use it to derive a
-        // mode specific key.
-        if (modePlus == "search") {
-            key = "search";
-        } else if (modePlus == "people") {
-            if (!activePersonID) {
-                assertionFailed();
-            } else {
-                key = activePersonID;
-            }
-        }
-    }
-
     return (
         <Box sx={{ position: "relative", width, height }}>
             <VariableSizeList
-                key={key}
+                key={activeCollectionID}
                 ref={listRef}
                 outerRef={outerRef}
                 {...{ width, height, itemData, itemSize, itemKey }}
@@ -1449,11 +1000,6 @@ export const FileList: React.FC<FileListProps> = ({
                 overscanCount={3}
                 useIsScrolling
                 onScroll={handleScroll}
-                style={
-                    listBorderRadius
-                        ? { borderRadius: listBorderRadius }
-                        : undefined
-                }
             >
                 {FileListRow}
             </VariableSizeList>
@@ -1465,15 +1011,6 @@ export const FileList: React.FC<FileListProps> = ({
                 >
                     <KeyboardArrowUpIcon />
                 </BackToTopButton>
-            )}
-            {onContextMenuAction && (
-                <FileContextMenu
-                    open={contextMenu !== null}
-                    anchorPosition={contextMenu?.position}
-                    onClose={handleContextMenuClose}
-                    actions={contextMenuActions}
-                    onAction={handleContextMenuActionWithTracking}
-                />
             )}
         </Box>
     );
@@ -1731,15 +1268,11 @@ type FileThumbnailProps = {
     isRangeSelectActive: boolean;
     selectOnClick: boolean;
     isInSelectRange: boolean;
-    activeCollectionID: number;
     showPlaceholder: boolean;
-    isFav: boolean;
     onClick: () => void;
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
-    onContextMenu?: (event: React.MouseEvent) => void;
-    onImageDimensions?: (dimensions: Dimensions) => void;
     isMasonry?: boolean;
     style?: React.CSSProperties;
 } & Pick<FileListProps, "enableSelect">;
@@ -1751,15 +1284,11 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     selectOnClick,
     isRangeSelectActive,
     isInSelectRange,
-    isFav,
-    activeCollectionID,
     showPlaceholder,
     onClick,
     onSelect,
     onHover,
     onRangeSelect,
-    onContextMenu,
-    onImageDimensions,
     isMasonry,
     style,
 }) => {
@@ -1829,16 +1358,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         }
     };
 
-    // See: [Note: Files in trash pseudo collection have deleteBy]
-    const deleteBy =
-        activeCollectionID == PseudoCollectionID.trash &&
-        (file as EnteTrashFile).deleteBy;
-
     return (
         <FileThumbnail_
             key={`thumb-${file.id}}`}
             onClick={handleClick}
-            onContextMenu={onContextMenu}
             onMouseEnter={handleHover}
             disabled={!imageURL}
             $disableBottomMargin={!!isMasonry}
@@ -1857,17 +1380,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             {file.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={file.metadata.fileType} />
             ) : imageURL ? (
-                <img
-                    src={imageURL}
-                    onLoad={(event) => {
-                        const { naturalWidth, naturalHeight } =
-                            event.currentTarget;
-                        onImageDimensions?.({
-                            width: naturalWidth,
-                            height: naturalHeight,
-                        });
-                    }}
-                />
+                <img src={imageURL} />
             ) : (
                 <LoadingThumbnail />
             )}
@@ -1881,25 +1394,12 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 )
             )}
             {selected && <SelectedOverlay />}
-            {isFav && (
-                <FavoriteOverlay>
-                    <StarIcon fontSize="small" />
-                </FavoriteOverlay>
-            )}
 
             <HoverOverlay
                 className="preview-card-hover-overlay"
                 checked={selected}
             />
             {isRangeSelectActive && isInSelectRange && <InSelectRangeOverlay />}
-
-            {deleteBy && (
-                <TileBottomTextOverlay>
-                    <Typography variant="small">
-                        {formattedDateRelative(deleteBy)}
-                    </Typography>
-                </TileBottomTextOverlay>
-            )}
         </FileThumbnail_>
     );
 };
@@ -2032,18 +1532,6 @@ const HoverOverlay = styled("div")<{ checked: boolean }>`
     ${(props) =>
         !props.checked &&
         "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
-`;
-
-/**
- * An overlay showing the favorite icon at bottom left.
- */
-const FavoriteOverlay = styled(Overlay)`
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-    padding: 5px;
-    color: white;
-    opacity: 0.6;
 `;
 
 /**
