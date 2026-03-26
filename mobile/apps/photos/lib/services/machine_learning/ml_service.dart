@@ -183,12 +183,6 @@ class MLService {
         !localSettings.remoteFetchEnabled) {
       return;
     }
-    if (!canFetch()) {
-      _logger.info(
-        "Skipping startup-owned remote ML hydration because remote fetch cooldown is active",
-      );
-      return;
-    }
     _hasScheduledStartupOwnedRemoteHydration = true;
     unawaited(_runStartupOwnedRemoteHydration());
   }
