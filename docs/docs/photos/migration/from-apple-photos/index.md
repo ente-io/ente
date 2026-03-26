@@ -77,14 +77,6 @@ Shared Library view without moving them to your Personal Library first.
 2. Select all photos (`Command + A`).
 3. Click `File > Export > Export Unmodified Originals` and choose a destination
    folder.
-4. Drag the exported folder into the Ente desktop app.
-
-- Select `Sequential` file naming during export so Ente can correctly pair the
-  photo and video components of Live Photos.
-- "Export Unmodified Originals" gives the pre-edit file. Use "Export Photos"
-  instead to get the edited version.
-- Learn more about
-  [desktop import caveats](/photos/faq/migration#can-i-import-apple-photos-via-desktop).
 
 For information regarding desktop migration, please go through this
 [FAQ](/photos/faq/migration#importing-from-apple-photos).
