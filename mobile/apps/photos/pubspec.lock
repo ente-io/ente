@@ -3162,12 +3162,13 @@ packages:
     source: hosted
     version: "0.9.0+2"
   workmanager_apple:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: workmanager_apple
-      sha256: "1cc12ae3cbf5535e72f7ba4fde0c12dd11b757caf493a28e22d684052701f2ca"
-      url: "https://pub.dev"
-    source: hosted
+      path: workmanager_apple
+      ref: "34671326213e654635a2c3303d781e7890caa350"
+      resolved-ref: "34671326213e654635a2c3303d781e7890caa350"
+      url: "https://github.com/ente-io/flutter_workmanager.git"
+    source: git
     version: "0.9.1+2"
   workmanager_platform_interface:
     dependency: transitive

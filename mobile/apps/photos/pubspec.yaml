@@ -237,6 +237,7 @@ dependencies:
   wechat_assets_picker: ^9.5.1
   widgets_to_image: ^1.0.0
   workmanager: 0.9.0+3
+  workmanager_apple: ^0.9.1+2
   xml: ^6.3.0
 
 dependency_overrides:
@@ -268,6 +269,11 @@ dependency_overrides:
   protobuf: ^3.1.0
   watcher: ^1.1.0
   win32: "5.10.1"
+  workmanager_apple:
+    git:
+      url: https://github.com/ente-io/flutter_workmanager.git
+      path: workmanager_apple
+      ref: 34671326213e654635a2c3303d781e7890caa350
 
 dev_dependencies:
   build_runner: ^2.4.7
