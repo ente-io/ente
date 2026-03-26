@@ -483,7 +483,7 @@
   "add": "Aggiungi",
   "collaboratorsCanAddFilesToTheSharedCollection": "I collaboratori possono aggiungere elementi alla raccolta condivisa.",
   "enterEmail": "Inserisci email",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -503,8 +503,8 @@
     },
     "description": "Number of collaborators that were successfully added to a collection."
   },
-  "addViewers": "{count, plural, one {}=0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
-  "addCollaborators": "{count, plural, one {}=0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
+  "addViewers": "{count, plural, =0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
+  "addCollaborators": "{count, plural, =0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Premi a lungo un'email per verificare la crittografia end to end.",
   "sharing": "Condivisione in corso...",
   "invalidEmailAddress": "Indirizzo email non valido",
