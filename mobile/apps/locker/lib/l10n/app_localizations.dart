@@ -3083,6 +3083,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please authenticate to view your active sessions'**
   String get authToViewYourActiveSessions;
+
+  /// No description provided for @deleteAccountFeedbackPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Something not working? Reach out at {email}, we\'d love to help.'**
+  String deleteAccountFeedbackPrompt(String email);
+
+  /// No description provided for @sendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get sendFeedback;
+
+  /// No description provided for @deleteAccountPermanentWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your Ente Auth, Photos, and Locker data'**
+  String get deleteAccountPermanentWarning;
 }
 
 class _AppLocalizationsDelegate
