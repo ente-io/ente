@@ -3,6 +3,7 @@ package io.ente.ensu.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,15 +45,21 @@ import io.ente.ensu.designsystem.HugeIcons
 
 @Composable
 fun SettingsScreen(
-    currentEndpoint: String,
+    buildVersion: String,
     isLoggedIn: Boolean,
     userEmail: String?,
+    isAdvancedUnlocked: Boolean,
     onOpenLogs: () -> Unit,
+    onOpenModelSettings: () -> Unit,
+    onOpenSystemPromptSettings: () -> Unit,
+    onUnlockAdvanced: () -> Unit,
     onSignOut: () -> Unit,
     onSignIn: () -> Unit,
     onDeleteAccount: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
+    var buildVersionTapCount by remember { mutableStateOf(0) }
+    var lastBuildVersionTapAt by remember { mutableStateOf<Long?>(null) }
     val context = LocalContext.current
 
     val allItems = remember(context, onOpenLogs, onSignOut, onSignIn, onDeleteAccount, isLoggedIn) {
@@ -125,6 +132,22 @@ fun SettingsScreen(
         }
     }
 
+    fun handleBuildVersionTap() {
+        if (isAdvancedUnlocked) return
+        val now = System.currentTimeMillis()
+        val lastTap = lastBuildVersionTapAt
+        if (lastTap != null && now - lastTap > 2000) {
+            buildVersionTapCount = 0
+        }
+        lastBuildVersionTapAt = now
+        buildVersionTapCount += 1
+        if (buildVersionTapCount >= 5) {
+            buildVersionTapCount = 0
+            onUnlockAdvanced()
+            Toast.makeText(context, "Advanced settings unlocked", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(modifier = Modifier.padding(EnsuSpacing.pageHorizontal.dp)) {
         OutlinedTextField(
             value = query,
@@ -165,25 +188,52 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.size(EnsuSpacing.md.dp))
         }
 
-        val normalizedEndpoint = currentEndpoint.trim().trimEnd('/')
-        val defaultEndpoint = "https://api.ente.io"
-        val isCustomEndpoint = query.isBlank() && normalizedEndpoint.isNotBlank() && normalizedEndpoint != defaultEndpoint
-
         LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
             items(filteredItems, key = { it.title }) { item ->
                 SettingsRow(item)
             }
 
-            if (isCustomEndpoint) {
-                item(key = "endpoint") {
+            if (isAdvancedUnlocked && query.isBlank()) {
+                item(key = "advanced-header") {
                     Spacer(modifier = Modifier.size(EnsuSpacing.sm.dp))
                     Text(
-                        text = "Endpoint: $normalizedEndpoint",
+                        text = "Advanced",
+                        style = EnsuTypography.small,
+                        color = EnsuColor.textMuted(),
+                        modifier = Modifier.padding(vertical = EnsuSpacing.xs.dp)
+                    )
+                }
+                item(key = "advanced-model-settings") {
+                    SettingsRow(
+                        SettingsItem(
+                            title = "Model settings",
+                            iconRes = HugeIcons.Settings01Icon,
+                            onClick = onOpenModelSettings
+                        )
+                    )
+                }
+                item(key = "advanced-system-prompt") {
+                    SettingsRow(
+                        SettingsItem(
+                            title = "System prompt",
+                            iconRes = HugeIcons.Edit01Icon,
+                            onClick = onOpenSystemPromptSettings
+                        )
+                    )
+                }
+            }
+
+            if (query.isBlank()) {
+                item(key = "build-version") {
+                    Spacer(modifier = Modifier.size(EnsuSpacing.sm.dp))
+                    Text(
+                        text = "Build version $buildVersion",
                         style = EnsuTypography.small,
                         color = EnsuColor.textMuted(),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable(onClick = ::handleBuildVersionTap)
                             .padding(vertical = EnsuSpacing.sm.dp)
                     )
                 }

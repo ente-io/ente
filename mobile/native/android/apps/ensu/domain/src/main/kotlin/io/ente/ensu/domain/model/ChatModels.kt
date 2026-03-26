@@ -16,6 +16,7 @@ data class ChatMessage(
     val timestampMillis: Long,
     val attachments: List<Attachment> = emptyList(),
     val isInterrupted: Boolean = false,
+    val isSynthetic: Boolean = false,
     val tokensPerSecond: Double? = null,
     val branchCount: Int = 1
 )

@@ -41,6 +41,26 @@ pub struct ModelInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+pub struct EnsuModelPreset {
+    pub id: String,
+    pub title: String,
+    pub url: String,
+    pub mmproj_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
+pub struct EnsuDefaults {
+    pub mobile_system_prompt_body: String,
+    pub desktop_system_prompt_body: String,
+    pub system_prompt_date_placeholder: String,
+    pub session_summary_system_prompt: String,
+    pub mobile_default_model: EnsuModelPreset,
+    pub mobile_model_presets: Vec<EnsuModelPreset>,
+    pub desktop_default_model: EnsuModelPreset,
+    pub desktop_model_presets: Vec<EnsuModelPreset>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
 pub struct ChatMessage {
     pub role: String,
     pub content: String,
@@ -150,6 +170,32 @@ impl From<core::ModelInfo> for ModelInfo {
             eos_token: value.eos_token,
             chat_template: value.chat_template,
             metadata_json: value.metadata_json,
+        }
+    }
+}
+
+impl From<core::EnsuModelPreset> for EnsuModelPreset {
+    fn from(value: core::EnsuModelPreset) -> Self {
+        Self {
+            id: value.id,
+            title: value.title,
+            url: value.url,
+            mmproj_url: value.mmproj_url,
+        }
+    }
+}
+
+impl From<core::EnsuDefaults> for EnsuDefaults {
+    fn from(value: core::EnsuDefaults) -> Self {
+        Self {
+            mobile_system_prompt_body: value.mobile_system_prompt_body,
+            desktop_system_prompt_body: value.desktop_system_prompt_body,
+            system_prompt_date_placeholder: value.system_prompt_date_placeholder,
+            session_summary_system_prompt: value.session_summary_system_prompt,
+            mobile_default_model: value.mobile_default_model.into(),
+            mobile_model_presets: value.mobile_model_presets.into_iter().map(Into::into).collect(),
+            desktop_default_model: value.desktop_default_model.into(),
+            desktop_model_presets: value.desktop_model_presets.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -286,6 +332,11 @@ pub fn get_model_info(model: Arc<ModelHandle>) -> Result<ModelInfo, InferenceErr
     core::get_model_info(model.handle.as_ref())
         .map(Into::into)
         .map_err(InferenceError::from)
+}
+
+#[uniffi::export]
+pub fn get_ensu_defaults() -> EnsuDefaults {
+    core::ensu_defaults().into()
 }
 
 #[uniffi::export]

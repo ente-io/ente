@@ -139,6 +139,7 @@ export interface ChatMessage {
     text: string;
     createdAt: number;
     attachments?: ChatAttachment[];
+    isSynthetic?: boolean;
 }
 
 export interface LocalSessionRecord {

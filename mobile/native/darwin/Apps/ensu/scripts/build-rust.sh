@@ -56,7 +56,53 @@ enum BuildEndpointConfig {
 EOF
 }
 
-write_endpoint_config
+bindings_missing() {
+  for binding in \
+    "${GENERATED_DIR}/core.swift" \
+    "${GENERATED_DIR}/coreFFI.h" \
+    "${GENERATED_DIR}/coreFFI.modulemap" \
+    "${GENERATED_DIR}/db.swift" \
+    "${GENERATED_DIR}/dbFFI.h" \
+    "${GENERATED_DIR}/dbFFI.modulemap" \
+    "${GENERATED_DIR}/sync.swift" \
+    "${GENERATED_DIR}/syncFFI.h" \
+    "${GENERATED_DIR}/syncFFI.modulemap"; do
+    if [ ! -f "${binding}" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+generate_swift_binding() {
+  crate_dir="$1"
+  dylib_name="$2"
+
+  (
+    cd "${crate_dir}"
+    cargo build --locked --release
+    uniffi-bindgen generate "target/release/${dylib_name}" --language swift --out-dir "${GENERATED_DIR}"
+  )
+}
+
+ensure_generated_bindings() {
+  if ! bindings_missing; then
+    return
+  fi
+
+  if ! command -v uniffi-bindgen >/dev/null 2>&1; then
+    echo "Missing generated UniFFI Swift bindings in ${GENERATED_DIR}." >&2
+    echo "Install uniffi-bindgen and retry the build." >&2
+    exit 1
+  fi
+
+  echo "Generating missing UniFFI Swift bindings..."
+  mkdir -p "${GENERATED_DIR}"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/core" "libcore.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
+}
 
 if [ "$(uname -s)" = "Darwin" ]; then
   HOST_LIB_EXT="dylib"
@@ -169,6 +215,8 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 export SDKROOT="${HOST_SDKROOT}"
 
 ensure_uniffi_bindgen
+ensure_generated_bindings
+write_endpoint_config
 generate_swift_bindings "core" "${REPO_ROOT}/rust/uniffi/core" "core"
 generate_swift_bindings "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "db"
 generate_swift_bindings "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "sync"

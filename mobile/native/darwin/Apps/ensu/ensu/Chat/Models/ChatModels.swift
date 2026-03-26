@@ -74,6 +74,7 @@ struct ChatMessage: Identifiable, Equatable {
     var timestamp: Date
     var attachments: [ChatAttachment]
     var isInterrupted: Bool
+    var isSynthetic: Bool
     var tokensPerSecond: Double?
     var branchIndex: Int
     var branchCount: Int
@@ -85,6 +86,7 @@ struct ChatMessage: Identifiable, Equatable {
         timestamp: Date = Date(),
         attachments: [ChatAttachment] = [],
         isInterrupted: Bool = false,
+        isSynthetic: Bool = false,
         tokensPerSecond: Double? = nil,
         branchIndex: Int = 1,
         branchCount: Int = 1
@@ -95,6 +97,7 @@ struct ChatMessage: Identifiable, Equatable {
         self.timestamp = timestamp
         self.attachments = attachments
         self.isInterrupted = isInterrupted
+        self.isSynthetic = isSynthetic
         self.tokensPerSecond = tokensPerSecond
         self.branchIndex = branchIndex
         self.branchCount = branchCount
