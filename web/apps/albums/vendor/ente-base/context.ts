@@ -11,10 +11,6 @@ import log from "./log";
  */
 export interface BaseContextT {
     /**
-     * Perform the (possibly app specific) logout sequence.
-     */
-    logout: () => void;
-    /**
      * Show a "mini dialog" with the given attributes.
      *
      * Mini dialogs (see {@link AttributedMiniDialog}) are meant for simple
@@ -41,14 +37,13 @@ export const BaseContext = createContext<BaseContextT | undefined>(undefined);
 export const useBaseContext = (): BaseContextT => useContext(BaseContext)!;
 
 /**
- * A helper function to create a {@link BaseContext} by deriving derivable
- * context values from the minimal subset.
+ * A helper function to create a {@link BaseContext} by deriving the generic
+ * error handler from the provided {@link showMiniDialog}.
  *
  * In simpler words, it automatically provides a definition of
  * {@link onGenericError} using the given {@link showMiniDialog} prop.
  */
 export const deriveBaseContext = ({
-    logout,
     showMiniDialog,
 }: Omit<BaseContextT, "onGenericError">): BaseContextT => {
     const onGenericError = (e: unknown) => {
@@ -63,5 +58,5 @@ export const deriveBaseContext = ({
         }, 0);
     };
 
-    return { logout, showMiniDialog, onGenericError };
+    return { showMiniDialog, onGenericError };
 };

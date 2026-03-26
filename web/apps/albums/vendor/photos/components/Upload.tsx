@@ -194,7 +194,7 @@ export const Upload: React.FC<UploadProps> = ({
     ...props
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
-    const { showNotification, watchFolderView } = usePhotosAppContext();
+    const { showNotification } = usePhotosAppContext();
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [
@@ -432,12 +432,6 @@ export const Upload: React.FC<UploadProps> = ({
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
     useEffect(() => {
-        if (watchFolderView) {
-            // if watch folder dialog is open don't catch the dropped file
-            // as they are folder being dropped for watching
-            return;
-        }
-
         let files: File[];
         isDragAndDrop.current = false;
 
