@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 #[cfg(target_os = "macos")]
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -1770,7 +1770,7 @@ fn verify_migrated_chat_db(
     source_message_ids_by_session: &HashMap<Uuid, Vec<Uuid>>,
     migrated_meta_keys: &[&str],
     target_sync_state: &SyncStateDb<SqliteBackend>,
-    target_attachments_dir: &PathBuf,
+    target_attachments_dir: &Path,
     expected_attachment_ids: &[String],
 ) -> Result<(), ApiError> {
     let target_session_ids = target_db

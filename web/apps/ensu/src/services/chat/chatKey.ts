@@ -171,7 +171,8 @@ export const initChatKeyStore = async () => {
     _chatKeyStoreInitUserID = userID;
     _chatKeyStoreInitPromise = (async () => {
         const remoteStorageKey = scopedRemoteChatKeySecureStorageKey();
-        const legacyRemoteStorageKey = scopedLegacyRemoteChatKeySecureStorageKey();
+        const legacyRemoteStorageKey =
+            scopedLegacyRemoteChatKeySecureStorageKey();
         const remoteLocalStorageKey = scopedRemoteChatKeyLocalStorageKey();
         const [
             secureRemoteChatKey,
@@ -179,24 +180,23 @@ export const initChatKeyStore = async () => {
             legacySecureRemoteChatKey,
             legacySecureLocalChatKey,
             nativeKeys,
-        ] =
-            await Promise.all([
-                remoteStorageKey
-                    ? secureStorageGet(remoteStorageKey).catch(() => undefined)
-                    : Promise.resolve(undefined),
-                secureStorageGet(LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
-                    () => undefined,
-                ),
-                legacyRemoteStorageKey
-                    ? secureStorageGet(legacyRemoteStorageKey).catch(
-                          () => undefined,
-                      )
-                    : Promise.resolve(undefined),
-                secureStorageGet(LEGACY_LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
-                    () => undefined,
-                ),
-                readNativeChatKeys(),
-            ]);
+        ] = await Promise.all([
+            remoteStorageKey
+                ? secureStorageGet(remoteStorageKey).catch(() => undefined)
+                : Promise.resolve(undefined),
+            secureStorageGet(LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
+                () => undefined,
+            ),
+            legacyRemoteStorageKey
+                ? secureStorageGet(legacyRemoteStorageKey).catch(
+                      () => undefined,
+                  )
+                : Promise.resolve(undefined),
+            secureStorageGet(LEGACY_LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
+                () => undefined,
+            ),
+            readNativeChatKeys(),
+        ]);
         const legacyRemoteChatKey =
             legacySecureRemoteChatKey ??
             (remoteLocalStorageKey

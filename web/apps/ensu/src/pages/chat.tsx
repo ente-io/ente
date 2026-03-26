@@ -1855,11 +1855,7 @@ const Page: React.FC = () => {
                 delete attachmentPreviewInFlightRef.current[attachment.id];
             }
         },
-        [
-            chatKey,
-            firstPaintDone,
-            inferImageMime,
-        ],
+        [chatKey, firstPaintDone, inferImageMime],
     );
 
     useEffect(() => {
@@ -2795,11 +2791,7 @@ const Page: React.FC = () => {
                 setPendingImages([]);
             }
         },
-        [
-            chatKey,
-            showMiniDialog,
-            inferImageMime,
-        ],
+        [chatKey, showMiniDialog, inferImageMime],
     );
 
     const handleCancelEdit = useCallback(() => {
@@ -2905,12 +2897,7 @@ const Page: React.FC = () => {
                 });
             }
         },
-        [
-            chatKey,
-            inferImageMime,
-            isTauriRuntime,
-            showMiniDialog,
-        ],
+        [chatKey, inferImageMime, isTauriRuntime, showMiniDialog],
     );
 
     const flushStreamingText = useCallback(() => {

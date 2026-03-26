@@ -849,12 +849,7 @@ const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
         try {
             const result = await invokeChat<NativeLegacyMigrationResult>(
                 "chat_db_migrate_legacy",
-                {
-                    input: {
-                        keyB64: chatKey,
-                        legacyKeyB64: candidateKey,
-                    },
-                },
+                { input: { keyB64: chatKey, legacyKeyB64: candidateKey } },
             );
             if (result.didMigrate) {
                 log.info("Migrated legacy native chat store to v2 DB", result);
