@@ -403,7 +403,9 @@ class MLService {
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
     if (!_canRunMLFunction(function: "Indexing")) return;
-    await _waitForOwnedRemoteHydrationIfRunning();
+    if (mode == MLMode.online && !isOfflineMode) {
+      await _waitForOwnedRemoteHydrationIfRunning();
+    }
     if (!_canRunMLFunction(function: "Indexing")) return;
 
     bool rustRuntimePrepared = false;
