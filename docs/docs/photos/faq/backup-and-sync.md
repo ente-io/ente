@@ -527,10 +527,13 @@ The sync happens automatically in the background when devices are connected to t
 
 ### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}
 
-Please check that both devices are connected to the internet and that the app is
-not paused. If everything looks fine but sync still isn't working, please send us
-your debug logs via **Settings > General > Bug Report** so we can investigate
-further. You can reach us at [support@ente.io](mailto:support@ente.io).
+This usually occurs due to a network connectivity issue:
+
+- Check your internet connection is active
+- Try switching networks (WiFi to mobile data or vice versa)
+- If network connection is fine and sync is still not occurring, please send us
+  your debug logs via **Settings > Help > View logs** so we can investigate
+  further. You can reach us at [support@ente.io](mailto:support@ente.io).
 
 ## File Support & Upload Limits
 
