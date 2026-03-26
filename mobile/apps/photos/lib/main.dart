@@ -32,6 +32,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import 'package:photos/services/background_run_helper.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
@@ -41,7 +42,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
-import 'package:photos/services/background_run_helper.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -186,7 +186,10 @@ Future<bool> runBackgroundTask(
           } catch (e, s) {
             result = false;
             _logger.severe(
-                "Unhandled background task failure for $taskId", e, s);
+              "Unhandled background task failure for $taskId",
+              e,
+              s,
+            );
           }
         },
         prefix: _backgroundLogPrefix(trigger),

@@ -246,11 +246,6 @@ dependency_overrides:
       ref: 16kb-fix
   intl: ^0.20.2
   js: ^0.6.7
-  workmanager_apple:
-    git:
-      url: https://github.com/ente-io/flutter_workmanager.git
-      path: workmanager_apple
-      ref: 34671326213e654635a2c3303d781e7890caa350
   media_kit: # update media_kit* if there is any update
     git:
       url: https://github.com/media-kit/media-kit
@@ -270,6 +265,11 @@ dependency_overrides:
   protobuf: ^3.1.0
   watcher: ^1.1.0
   win32: "5.10.1"
+  workmanager_apple:
+    git:
+      url: https://github.com/ente-io/flutter_workmanager.git
+      path: workmanager_apple
+      ref: 34671326213e654635a2c3303d781e7890caa350
 
 dev_dependencies:
   build_runner: ^2.4.7
