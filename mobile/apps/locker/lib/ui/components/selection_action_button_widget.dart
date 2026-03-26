@@ -25,6 +25,13 @@ class SelectionActionButton extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final color = isDestructive ? colorScheme.warning500 : colorScheme.textBase;
+    final iconWidget =
+        hugeIcon ??
+        Icon(
+          icon!,
+          color: color,
+          size: 24,
+        );
 
     return GestureDetector(
       onTap: onTap,
@@ -38,7 +45,11 @@ class SelectionActionButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            hugeIcon ?? Icon(icon!, color: color, size: 24),
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: Center(child: iconWidget),
+            ),
             const SizedBox(height: 8),
             Text(
               label,

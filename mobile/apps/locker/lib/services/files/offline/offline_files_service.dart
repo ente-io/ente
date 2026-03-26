@@ -160,7 +160,7 @@ class OfflineFilesService {
 
         final alreadyHasOfflineCopy =
             LockerDB.instance.isFileMarkedOffline(file) &&
-            await getCurrentOfflineEncryptedCopy(file) != null;
+                await getCurrentOfflineEncryptedCopy(file) != null;
         if (alreadyHasOfflineCopy) {
           _logger.fine('File $fileID already available offline');
           successCount += 1;
@@ -406,7 +406,7 @@ class OfflineFilesService {
     if (total == 1) {
       return progressLabel;
     }
-    return '$progressLabel ($current/$total)';
+    return '$progressLabel $current/$total';
   }
 
   _OfflineSaveFailureKind _classifyOfflineSaveFailure(Object error) {

@@ -64,18 +64,19 @@ class FileListWidget extends StatelessWidget {
                 ),
                 if (isMarkedOffline)
                   Positioned(
-                    top: 4,
                     right: 2,
+                    bottom: 6,
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: colorScheme.backdropBase,
                       ),
-                      padding: const EdgeInsets.all(1.0),
-                      child: Icon(
-                        Icons.offline_pin_rounded,
+                      padding: const EdgeInsets.all(2.0),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedBookmark02,
                         color: colorScheme.primary700,
                         size: 16.0,
+                        strokeWidth: 2.0,
                       ),
                     ),
                   ),

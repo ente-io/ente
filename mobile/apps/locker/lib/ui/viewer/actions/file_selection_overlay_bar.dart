@@ -31,7 +31,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final List<EnteFile> files;
   final CollectionViewType? collectionViewType;
   final ScrollController? scrollController;
-  final bool isTrashMode;
+  final bool isTrashMode; 
 
   const FileSelectionOverlayBar({
     required this.selectedFiles,
@@ -444,17 +444,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
-        children: _buildActionRow(actions),
+        children: _buildActionRow(actions, spacing: 0),
       ),
     );
   }
 
-  List<Widget> _buildActionRow(List<Widget> actions) {
+  List<Widget> _buildActionRow(List<Widget> actions, {double spacing = 12}) {
     final children = <Widget>[];
     for (var i = 0; i < actions.length; i++) {
       children.add(Expanded(child: actions[i]));
-      if (i != actions.length - 1) {
-        children.add(const SizedBox(width: 12));
+      if (i != actions.length - 1 && spacing > 0) {
+        children.add(SizedBox(width: spacing));
       }
     }
     return children;
@@ -465,6 +465,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final file = isSingleSelection ? selectedFiles.first : null;
     final files = selectedFiles.toList();
     final viewType = widget.collectionViewType;
+    final colorScheme = getEnteColorScheme(context);
     final actions = <Widget>[];
     final canToggleOffline =
         OfflineFilesService.instance.hasEligibleFiles(files);
@@ -516,11 +517,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (canToggleOffline) {
       actions.add(
         SelectionActionButton(
-          icon: shouldRemoveOffline
-              ? Icons.cloud_off_outlined
-              : Icons.offline_pin_outlined,
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedBookmark02,
+            color: colorScheme.textBase,
+          ),
           label: shouldRemoveOffline
-              ? context.l10n.removeFromOffline
+              ? context.l10n.unsave
               : context.l10n.saveOffline,
           onTap: () => _toggleOfflineAvailability(
             context,

@@ -30,7 +30,7 @@
     }
   },
   "saveOffline": "Save offline",
-  "removeFromOffline": "Remove offline",
+  "unsave": "Unsave",
   "savingOffline": "Saving offline...",
   "savingOfflineProgress": "Saving offline... {percentage}%",
   "@savingOfflineProgress": {
@@ -96,7 +96,7 @@
       }
     }
   },
-  "filesRemovedFromOffline": "{count, plural, =1{Offline removed for 1 file} other{Offline removed for {count} files}}",
+  "filesRemovedFromOffline": "{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}",
   "@filesRemovedFromOffline": {
     "description": "Success message when offline copies are removed",
     "placeholders": {

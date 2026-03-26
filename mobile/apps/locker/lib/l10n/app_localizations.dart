@@ -276,11 +276,11 @@ abstract class AppLocalizations {
   /// **'Save offline'**
   String get saveOffline;
 
-  /// No description provided for @removeFromOffline.
+  /// No description provided for @unsave.
   ///
   /// In en, this message translates to:
-  /// **'Remove offline'**
-  String get removeFromOffline;
+  /// **'Unsave'**
+  String get unsave;
 
   /// No description provided for @savingOffline.
   ///
@@ -327,7 +327,7 @@ abstract class AppLocalizations {
   /// Success message when offline copies are removed
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Offline removed for 1 file} other{Offline removed for {count} files}}'**
+  /// **'{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}'**
   String filesRemovedFromOffline(int count);
 
   /// No description provided for @downloadFailed.
@@ -2007,7 +2007,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTextRecommendUsingEnte.
   ///
   /// In en, this message translates to:
-  /// **'Download Ente\n\nhttps://ente.io'**
+  /// **'Download Ente\n\nhttps://ente.com'**
   String get shareTextRecommendUsingEnte;
 
   /// No description provided for @thisIsYourVerificationId.
@@ -2055,13 +2055,13 @@ abstract class AppLocalizations {
   /// No description provided for @shareMyVerificationID.
   ///
   /// In en, this message translates to:
-  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  /// **'Here\'s my verification ID: {verificationID} for ente.com.'**
   String shareMyVerificationID(Object verificationID);
 
   /// No description provided for @shareTextConfirmOthersVerificationID.
   ///
   /// In en, this message translates to:
-  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  /// **'Hey, can you confirm that this is your ente.com verification ID: {verificationID}'**
   String shareTextConfirmOthersVerificationID(Object verificationID);
 
   /// No description provided for @passwordLock.
