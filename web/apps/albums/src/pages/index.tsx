@@ -130,10 +130,7 @@ export default function PublicCollectionGallery() {
         [],
     );
     const [selected, setSelected] = useState<SelectedState>({
-        ownCount: 0,
         count: 0,
-        collectionID: 0,
-        context: undefined,
     });
 
     // TODO: Can we convert these to state
@@ -439,10 +436,7 @@ export default function PublicCollectionGallery() {
             return;
         }
         setSelected({
-            ownCount: 0,
             count: 0,
-            collectionID: 0,
-            context: undefined,
         });
     };
 

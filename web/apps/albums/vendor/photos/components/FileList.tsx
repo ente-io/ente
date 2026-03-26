@@ -193,7 +193,7 @@ export interface FileListProps {
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    /** The collection context used by the selection helpers. */
+    /** A stable key used to reset the virtualized list when the file set changes. */
     activeCollectionID: number;
     /**
      * Called when the user activates the thumbnail at the given {@link index}.
@@ -424,15 +424,8 @@ export const FileList: React.FC<FileListProps> = ({
     }, [annotatedFiles, selected]);
 
     const handleSelectMulti = useMemo(
-        () =>
-            handleSelectCreatorMulti(
-                setSelected,
-                undefined,
-                undefined,
-                activeCollectionID,
-                undefined,
-            ),
-        [setSelected, activeCollectionID],
+        () => handleSelectCreatorMulti(setSelected),
+        [setSelected],
     );
 
     const onChangeSelectAllCheckBox = useCallback(
@@ -459,25 +452,13 @@ export const FileList: React.FC<FileListProps> = ({
     );
 
     const handleSelect = useMemo(
-        () =>
-            handleSelectCreator(
-                setSelected,
-                undefined,
-                undefined,
-                activeCollectionID,
-                undefined,
-                setRangeStartIndex,
-            ),
-        [setSelected, activeCollectionID],
+        () => handleSelectCreator(setSelected, setRangeStartIndex),
+        [setSelected],
     );
 
-    const isSelectionContextMatching = useMemo(() => {
-        return selected.collectionID === activeCollectionID;
-    }, [activeCollectionID, selected.collectionID]);
-
     const isFileSelected = useCallback(
-        (file: EnteFile) => isSelectionContextMatching && !!selected[file.id],
-        [isSelectionContextMatching, selected],
+        (file: EnteFile) => !!selected[file.id],
+        [selected],
     );
 
     const haveSelection = selected.count > 0;
