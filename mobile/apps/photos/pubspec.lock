@@ -137,6 +137,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
+  backup_exclusion:
+    dependency: "direct main"
+    description:
+      path: "../../packages/backup_exclusion"
+      relative: true
+    source: path
+    version: "1.0.0"
   battery_info:
     dependency: "direct main"
     description:

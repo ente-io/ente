@@ -48,7 +48,7 @@ allows you to automate backups to ente's cloud.
 > the sync will be paused then and resumed when your upload is done.
 
 Some more details about the feature are in our
-[blog post](https://ente.io/blog/watch-folders) announcing it.
+[blog post](https://ente.com/blog/watch-folders) announcing it.
 
 ## 2-way sync
 

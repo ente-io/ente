@@ -1,12 +1,12 @@
+import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/utils/ios_backup_util.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('io.ente.photos/backup');
+  const channel = MethodChannel('io.ente.backup_exclusion');
   const testPath = '/var/mobile/Containers/Data/Application/test/Documents';
 
   late List<MethodCall> calls;
@@ -15,9 +15,9 @@ void main() {
     calls = [];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      calls.add(call);
-      return true;
-    });
+          calls.add(call);
+          return true;
+        });
   });
 
   tearDown(() {
@@ -26,21 +26,23 @@ void main() {
   });
 
   group('invokeExcludeFromBackup', () {
-    test('invokes excludeFromBackup on the correct channel with the given path',
-        () async {
-      await invokeExcludeFromBackup(testPath);
+    test(
+      'invokes excludeFromBackup on the correct channel with the given path',
+      () async {
+        await invokeExcludeFromBackup(testPath);
 
-      expect(calls, hasLength(1));
-      expect(calls.first.method, 'excludeFromBackup');
-      expect(calls.first.arguments, {'path': testPath});
-    });
+        expect(calls, hasLength(1));
+        expect(calls.first.method, 'excludeFromBackup');
+        expect(calls.first.arguments, {'path': testPath});
+      },
+    );
 
     test('logs a warning when the channel returns false', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (_) async => false);
 
       final logs = <LogRecord>[];
-      final sub = Logger('IosBackupUtil').onRecord.listen(logs.add);
+      final sub = Logger('BackupExclusion').onRecord.listen(logs.add);
 
       await invokeExcludeFromBackup(testPath);
 
@@ -58,14 +60,14 @@ void main() {
     test('logs a warning when the channel throws PlatformException', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (_) async {
-        throw PlatformException(
-          code: 'EXCLUDE_BACKUP_ERROR',
-          message: 'simulated native failure',
-        );
-      });
+            throw PlatformException(
+              code: 'EXCLUDE_BACKUP_ERROR',
+              message: 'simulated native failure',
+            );
+          });
 
       final logs = <LogRecord>[];
-      final sub = Logger('IosBackupUtil').onRecord.listen(logs.add);
+      final sub = Logger('BackupExclusion').onRecord.listen(logs.add);
 
       await invokeExcludeFromBackup(testPath);
 
@@ -80,17 +82,13 @@ void main() {
       );
     });
 
-    test(
-        'logs info and does not throw when channel is unregistered '
-        '(MissingPluginException — headless background)', () async {
-      // Remove the mock handler so invokeMethod throws MissingPluginException,
-      // simulating headless Workmanager execution where the channel is never
-      // registered.
+    test('logs info and does not throw when channel is unregistered '
+        '(MissingPluginException - headless background)', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, null);
 
       final logs = <LogRecord>[];
-      final sub = Logger('IosBackupUtil').onRecord.listen(logs.add);
+      final sub = Logger('BackupExclusion').onRecord.listen(logs.add);
 
       await expectLater(invokeExcludeFromBackup(testPath), completes);
 
@@ -108,7 +106,6 @@ void main() {
 
   group('excludeFromBackup (platform guard)', () {
     test('does not invoke the channel on non-iOS platforms', () async {
-      // Test host is Linux/macOS — Platform.isIOS is always false here.
       await excludeFromBackup(testPath);
       expect(calls, isEmpty);
     });

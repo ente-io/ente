@@ -483,7 +483,7 @@
   "add": "Aggiungi",
   "collaboratorsCanAddFilesToTheSharedCollection": "I collaboratori possono aggiungere elementi alla raccolta condivisa.",
   "enterEmail": "Inserisci email",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -503,8 +503,8 @@
     },
     "description": "Number of collaborators that were successfully added to a collection."
   },
-  "addViewers": "{count, plural, one {}=0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
-  "addCollaborators": "{count, plural, one {}=0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
+  "addViewers": "{count, plural, =0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
+  "addCollaborators": "{count, plural, =0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Premi a lungo un'email per verificare la crittografia end to end.",
   "sharing": "Condivisione in corso...",
   "invalidEmailAddress": "Indirizzo email non valido",
@@ -515,7 +515,7 @@
   "youCannotShareWithYourself": "Non puoi condividere con te stesso",
   "inviteToEnte": "Invita su Ente",
   "sendInvite": "Invita",
-  "shareTextRecommendUsingEnte": "Scarica Ente\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Scarica Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Questo è il tuo ID di verifica",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Chi condivide gli album con te deve vedere lo stesso ID sul proprio dispositivo.",
   "howToViewShareeVerificationID": "Chiedi di premere a lungo il loro indirizzo email nella schermata delle impostazioni e verificare che gli ID su entrambi i dispositivi corrispondano.",
@@ -531,8 +531,8 @@
   "verificationId": "ID di verifica",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} non ha un account Ente.\n\nInvia un invito per condividere elementi.",
-  "shareMyVerificationID": "Ecco il mio ID di verifica: {verificationID} per ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.io",
+  "shareMyVerificationID": "Ecco il mio ID di verifica: {verificationID} per ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.com",
   "passwordLock": "Blocco con password",
   "manage": "Gestisci",
   "addedAs": "Aggiunto come",

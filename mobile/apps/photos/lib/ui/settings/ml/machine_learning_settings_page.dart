@@ -328,7 +328,7 @@ class _MachineLearningSettingsPageState
         builder: (BuildContext context) {
           return WebPage(
             AppLocalizations.of(context).privacyPolicyTitle,
-            "https://ente.io/privacy",
+            "https://ente.com/privacy",
           );
         },
       ),

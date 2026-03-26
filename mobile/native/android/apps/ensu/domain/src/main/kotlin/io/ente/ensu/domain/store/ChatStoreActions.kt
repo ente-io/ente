@@ -9,6 +9,7 @@ import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.model.sanitizeTitleText
@@ -42,7 +43,8 @@ internal class ChatStoreActions(
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>,
     private val attachmentActions: AttachmentStoreActions,
     private val syncActions: SyncStoreActions,
-    private val modelSettingsActions: ModelSettingsActions
+    private val modelSettingsActions: ModelSettingsActions,
+    private val ensuDefaults: EnsuDefaults
 ) {
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
@@ -56,8 +58,7 @@ internal class ChatStoreActions(
     private var pendingOverflow: PendingOverflow? = null
     private var overflowBypassMessageId: String? = null
 
-    private val sessionSummarySystemPrompt =
-        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
+    private val sessionSummarySystemPrompt = ensuDefaults.sessionSummarySystemPrompt
     private val sessionSummaryMaxWords = 7
 
     fun setScope(scope: CoroutineScope) {
@@ -276,6 +277,7 @@ internal class ChatStoreActions(
     fun stopGeneration() {
         stopRequested = true
         llmProvider.stopGeneration()
+        generationJob?.cancel()
     }
 
     fun retryAssistantMessage(messageId: String) {
@@ -283,10 +285,17 @@ internal class ChatStoreActions(
             stopGeneration()
         }
         val sessionId = state.value.chat.currentSessionId ?: return
-        val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
-        if (message.author != MessageAuthor.Assistant) return
-        val parentId = message.parentId ?: return
-        val parent = messageStore[sessionId]?.firstOrNull { it.id == parentId } ?: return
+
+        // For synthetic interrupted placeholders, find the parent user message directly
+        val parent = if (messageId.startsWith("interrupted-placeholder-")) {
+            val parentUserId = messageId.removePrefix("interrupted-placeholder-")
+            messageStore[sessionId]?.firstOrNull { it.id == parentUserId }
+        } else {
+            val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
+            if (message.author != MessageAuthor.Assistant) return
+            val parentId = message.parentId ?: return
+            messageStore[sessionId]?.firstOrNull { it.id == parentId }
+        } ?: return
 
         if (attachmentActions.missingAttachments(sessionId).isNotEmpty()) {
             attachmentActions.ensureAttachmentsAvailable(sessionId)
@@ -935,7 +944,31 @@ internal class ChatStoreActions(
             message.copy(branchCount = max(1, siblings.size))
         }
 
-        return displayMessages to branchSelectionIndices
+        val isGenerating = state.value.chat.isGenerating
+        val finalMessages = buildList {
+            for (i in displayMessages.indices) {
+                val msg = displayMessages[i]
+                add(msg)
+                if (msg.author == MessageAuthor.User) {
+                    val next = displayMessages.getOrNull(i + 1)
+                    val isLastAndGenerating = i == displayMessages.lastIndex && isGenerating
+                    if (next?.author != MessageAuthor.Assistant && !isLastAndGenerating) {
+                        add(ChatMessage(
+                            id = "interrupted-placeholder-${msg.id}",
+                            sessionId = sessionId,
+                            parentId = msg.id,
+                            author = MessageAuthor.Assistant,
+                            text = "Response was interrupted",
+                            timestampMillis = msg.timestampMillis,
+                            isInterrupted = true,
+                            isSynthetic = true
+                        ))
+                    }
+                }
+            }
+        }
+
+        return finalMessages to branchSelectionIndices
     }
 
     private fun buildSelectedPath(sessionId: String): List<ChatMessage> {
@@ -1221,17 +1254,17 @@ internal class ChatStoreActions(
     private fun buildSystemPrompt(nowMillis: Long = clock()): String {
         val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             .format(Date(nowMillis))
-        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: $dateAndTime. $SYSTEM_PROMPT_BODY"
+        val promptBody = state.value.developerSettings.systemPrompt.trim()
+            .ifEmpty { ensuDefaults.mobileSystemPromptBody }
+        return promptBody.replace(ensuDefaults.systemPromptDatePlaceholder, dateAndTime)
     }
 
     companion object {
         private const val DEFAULT_CONTEXT_LENGTH = 12_000
         private const val DEFAULT_GENERATION_MAX_TOKENS = 8_192
         private const val MEDIA_MARKER = "<__media__>"
-        private const val OVERFLOW_SAFETY_TOKENS = 128
+        private const val OVERFLOW_SAFETY_TOKENS = 256
         private const val IMAGE_TOKEN_ESTIMATE = 768
         private const val MAX_CACHED_SESSIONS = 8
-        private const val SYSTEM_PROMPT_BODY =
-            "Use Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$"
     }
 }
