@@ -334,6 +334,8 @@ class RemoteAssetsService {
     int existingBytes,
   ) async {
     if (existingBytes > 0) {
+      // Revalidate the representation at request time so we never append
+      // bytes from a different asset revision to an older partial file.
       await _dio.download(
         url,
         savePath,
@@ -342,6 +344,7 @@ class RemoteAssetsService {
         options: Options(
           headers: {
             HttpHeaders.rangeHeader: "bytes=$existingBytes-",
+            HttpHeaders.ifRangeHeader: probe.ifRangeValidator!,
           },
           validateStatus: (status) => status == HttpStatus.partialContent,
         ),
@@ -472,7 +475,9 @@ class _RemoteAssetProbe {
   final String? etag;
   final String? lastModified;
 
-  bool get hasStableValidator => etag != null || lastModified != null;
+  bool get hasStableValidator => ifRangeValidator != null;
+
+  String? get ifRangeValidator => _strongETag ?? lastModified;
 
   bool get canResume => acceptsRanges && hasStableValidator;
 
@@ -513,6 +518,17 @@ class _RemoteAssetProbe {
     }
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  String? get _strongETag {
+    if (etag == null) {
+      return null;
+    }
+    return _isWeakETag(etag!) ? null : etag;
+  }
+
+  static bool _isWeakETag(String value) {
+    return value.startsWith("W/") || value.startsWith("w/");
   }
 }
 
