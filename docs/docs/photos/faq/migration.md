@@ -143,23 +143,18 @@ access to the originals:
 
 This is the recommended path, as it preserves full quality and metadata.
 
-1. Open the Apple Photos app on the device that has the originals.
-2. Back up from that device using the Ente mobile app (preferred) or export
-   via `File` > `Export` > `Export Unmodified Originals` on Mac and then import
-   into Ente using the desktop app.
+1. Install the Ente app on your iPhone/iPad.
+2. The Ente app will directly read from the iCloud library and back up
+   the originals with full quality and metadata.
 3. Organize the photos into albums inside Ente after upload.
 
 #### If shared album copies are all you have
 
-1. **On Mac:** Open the Photos app, select the shared album, select all photos
-   (`Command + A`), then `File` > `Export` > `Export Photos` and choose a
-   destination folder.
-2. **On iPhone/iPad:** Open the shared album, select photos, tap the share
+1. **On iPhone/iPad:** Open the shared album, select photos, tap the share
    button, and save them to your device library.
-3. **On iCloud.com:** Open the shared album, select up to 1,000 items, and
+2. **On iCloud.com:** Open the shared album, select up to 1,000 items, and
    click Download.
-4. Import the downloaded folder into Ente using the desktop app by dragging and
-   dropping it. The folder name becomes the album name.
+3. Import the saved photos into Ente using the mobile app or the desktop app.
 
 > [!NOTE]
 >
@@ -169,12 +164,6 @@ This is the recommended path, as it preserves full quality and metadata.
 > incorrectly. After importing, you can
 > [fix dates manually](/photos/faq/metadata-and-editing#fix-incorrect-dates) in
 > Ente if needed.
-
-#### Tip: Use iCloud Shared Photo Library instead
-
-If you are on iOS 16.1+ / macOS 13+, consider using **iCloud Shared Photo
-Library** (different from shared albums). It preserves full-resolution originals
-and metadata, making migration to Ente straightforward via the mobile app.
 
 ### Why is it recommended to migrate Apple Photos from mobile? {#why-migrate-apple-photos-from-mobile}
 
