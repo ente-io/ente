@@ -266,7 +266,9 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
       widget.shouldSurfaceExecutionStates;
 
   bool get _isMultiline =>
-      !widget.isPasswordInput && (widget.maxLines ?? 1) > 1;
+      !widget.isPasswordInput &&
+      ((widget.maxLines != null && widget.maxLines! > 1) ||
+          (widget.minLines != null && widget.minLines! > 1));
 
   @override
   Widget build(BuildContext context) {
@@ -346,8 +348,8 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                     textCapitalization: widget.textCapitalization!,
                     autofocus: widget.autoFocus ?? false,
                     autocorrect: widget.autoCorrect,
-                    maxLines: widget.isPasswordInput ? 1 : (widget.maxLines ?? 1),
-                    minLines: widget.isPasswordInput ? null : widget.minLines,
+                    maxLines: widget.maxLines ?? (_isMultiline ? null : 1),
+                    minLines: widget.minLines,
                     autofillHints: widget.autofillHints ??
                         (widget.isPasswordInput
                             ? const [AutofillHints.password]
