@@ -120,7 +120,7 @@ func (c *PlayStoreController) HandleNotification(notification playstore.Develope
 				return stacktrace.Propagate(surpErr, "")
 			}
 			if storage == nil || *storage <= 0 {
-				err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
+				err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.com",
 					ente.SubscriptionEndedEmailSubject,
 					ente.SubscriptionEndedEmailTemplate, map[string]interface{}{}, nil)
 				if err != nil {
@@ -136,7 +136,7 @@ func (c *PlayStoreController) HandleNotification(notification playstore.Develope
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
-		err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
+		err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.com",
 			ente.AccountOnHoldEmailSubject,
 			ente.OnHoldTemplate, map[string]interface{}{
 				"PaymentProvider": "PlayStore",
