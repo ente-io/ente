@@ -249,7 +249,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
           filesOwnedByOthers.add(instruction);
         }
       }
-      _lastFetchTimeForOthersIndexed = time;
+      if (filesOwnedByOthers.isNotEmpty) {
+        _lastFetchTimeForOthersIndexed = time;
+      }
       _logger.info(
         'Checking index for ${filesOwnedByOthers.length} owned by others',
       );

@@ -27,7 +27,6 @@ import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/services/sync/sync_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -190,23 +189,6 @@ class MLService {
 
   Future<void> _runStartupOwnedRemoteHydration() async {
     if (!hasGrantedMLConsent || isOfflineMode) {
-      return;
-    }
-    final bool syncSuccessful;
-    try {
-      syncSuccessful = await SyncService.instance.sync();
-    } catch (e, s) {
-      _logger.warning(
-        "Skipping startup-owned remote ML hydration because startup sync failed",
-        e,
-        s,
-      );
-      return;
-    }
-    if (!syncSuccessful) {
-      _logger.info(
-        "Skipping startup-owned remote ML hydration because startup sync did not complete",
-      );
       return;
     }
     try {
