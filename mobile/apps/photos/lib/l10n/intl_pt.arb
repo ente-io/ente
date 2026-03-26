@@ -23,7 +23,7 @@
   "deleteReason4": "O motivo não está na lista",
   "sendEmail": "Enviar email",
   "deleteRequestSLAText": "O seu pedido será processado dentro de 72 horas.",
-  "deleteEmailRequest": "Envie um e-mail para <warning>accountt-deletion@ente.com</warning> a partir do seu endereço de email registrado.",
+  "deleteEmailRequest": "Envie um e-mail para <warning>account-deletion@ente.com</warning> a partir do seu endereço de email registrado.",
   "entePhotosPerm": "Ente <i>precisa de permissão para</i> preservar suas fotos",
   "ok": "Ok",
   "createAccount": "Criar conta",
