@@ -110,16 +110,31 @@ class RemoteAssetsService {
   Future<void> _downloadFile(String url, String savePath) async {
     _logger.info("Downloading " + url);
     final probe = await _probeRemoteAsset(url);
+    final preservePartialDownload =
+        probe == null && await _hasResumableDownloadState(savePath);
     if (_shouldUseResumableDownload(probe)) {
       await _downloadFileResumable(url, savePath, probe!);
     } else {
-      await _downloadFileSingleShot(url, savePath);
+      await _downloadFileSingleShot(
+        url,
+        savePath,
+        preservePartialDownload: preservePartialDownload,
+      );
     }
 
     _logger.info("Downloaded " + url);
   }
 
-  Future<void> _downloadFileSingleShot(String url, String savePath) async {
+  Future<void> _downloadFileSingleShot(
+    String url,
+    String savePath, {
+    bool preservePartialDownload = false,
+  }) async {
+    if (preservePartialDownload) {
+      await _downloadFileSingleShotPreservingResume(url, savePath);
+      return;
+    }
+
     await _clearResumeArtifacts(savePath);
 
     await _dio.download(
@@ -129,6 +144,29 @@ class RemoteAssetsService {
         _emitProgress(url, received, total);
       },
     );
+  }
+
+  Future<void> _downloadFileSingleShotPreservingResume(
+    String url,
+    String savePath,
+  ) async {
+    final scratchFile = File(_singleShotScratchPath(savePath));
+    await _deleteFileIfExists(scratchFile);
+
+    try {
+      await _dio.download(
+        url,
+        scratchFile.path,
+        onReceiveProgress: (received, total) {
+          _emitProgress(url, received, total);
+        },
+      );
+      await _replaceFile(scratchFile, File(savePath));
+      await _deleteResumeMetadata(savePath);
+    } catch (e) {
+      await _deleteFileIfExists(scratchFile);
+      rethrow;
+    }
   }
 
   Future<void> cleanupOldModelsIfNeeded() async {
@@ -175,6 +213,8 @@ class RemoteAssetsService {
   String _tempPath(String finalPath) => "$finalPath.temp";
 
   String _resumeMetadataPath(String tempPath) => "$tempPath.resume.json";
+
+  String _singleShotScratchPath(String savePath) => "$savePath.single";
 
   bool _shouldUseResumableDownload(_RemoteAssetProbe? probe) {
     if (!_resumableDownloadsEnabled || probe == null) {
@@ -407,6 +447,17 @@ class RemoteAssetsService {
     await _deleteFileIfExists(File(_resumeMetadataPath(tempPath)));
   }
 
+  Future<bool> _hasResumableDownloadState(String savePath) async {
+    final tempFile = File(savePath);
+    if (!await tempFile.exists()) {
+      return false;
+    }
+    if (await tempFile.length() <= 0) {
+      return false;
+    }
+    return File(_resumeMetadataPath(savePath)).exists();
+  }
+
   Future<void> _clearResumeArtifacts(String tempPath) async {
     await _deleteFileIfExists(File(tempPath));
     await _deleteResumeMetadata(tempPath);
@@ -414,7 +465,7 @@ class RemoteAssetsService {
 
   Future<void> _replaceFile(File source, File target) async {
     await target.parent.create(recursive: true);
-    await _deleteFileIfExists(target);
+    // Keep the swap atomic so readers never observe the target path missing.
     await source.rename(target.path);
   }
 
