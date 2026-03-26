@@ -110,15 +110,13 @@ class RemoteAssetsService {
   Future<void> _downloadFile(String url, String savePath) async {
     _logger.info("Downloading " + url);
     final probe = await _probeRemoteAsset(url);
-    final preservePartialDownload =
-        probe == null && await _hasResumableDownloadState(savePath);
     if (_shouldUseResumableDownload(probe)) {
       await _downloadFileResumable(url, savePath, probe!);
     } else {
       await _downloadFileSingleShot(
         url,
         savePath,
-        preservePartialDownload: preservePartialDownload,
+        preservePartialDownload: await _hasResumableDownloadState(savePath),
       );
     }
 
@@ -614,6 +612,8 @@ class _ResumeMetadata {
   final String? etag;
   final String? lastModified;
 
+  String? get ifRangeValidator => _strongETag ?? lastModified;
+
   Map<String, dynamic> toJson() {
     return {
       "url": url,
@@ -626,7 +626,17 @@ class _ResumeMetadata {
   bool matches(_ResumeMetadata other) {
     return url == other.url &&
         totalBytes == other.totalBytes &&
-        etag == other.etag &&
-        lastModified == other.lastModified;
+        ifRangeValidator == other.ifRangeValidator;
+  }
+
+  String? get _strongETag {
+    if (etag == null) {
+      return null;
+    }
+    return _isWeakETag(etag!) ? null : etag;
+  }
+
+  static bool _isWeakETag(String value) {
+    return value.startsWith("W/") || value.startsWith("w/");
   }
 }
