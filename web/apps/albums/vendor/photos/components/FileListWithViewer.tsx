@@ -1,8 +1,4 @@
-import { IconButton, Tooltip, styled } from "@mui/material";
-import { useColorScheme, useTheme } from "@mui/material/styles";
-import { CollectionMapDialog } from "components/Collections/CollectionMapDialog";
-import { useModalVisibility } from "ente-base/components/utils/modal";
-import { useBaseContext } from "ente-base/context";
+import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
@@ -15,11 +11,8 @@ import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
-import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { moveToTrash } from "ente-new/photos/services/collection";
-import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -56,8 +49,6 @@ export type FileListWithViewerProps = {
      * pull from remote.
      */
     onRemotePull: () => Promise<void>;
-    activeCollectionSummary?: CollectionSummary;
-    activeCollection?: Collection;
     /**
      * If set, the file viewer will open to this file index on mount/update.
      * Set to undefined after the navigation is complete.
@@ -160,8 +151,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     setSelected,
     activeCollectionID,
     activePersonID,
-    activeCollectionSummary,
-    activeCollection,
     favoriteFileIDs,
     emailByUserID,
     listBorderRadius,
@@ -209,17 +198,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const [highlightCommentID, setHighlightCommentID] = useState<
         string | undefined
     >(undefined);
-    const { show: showMapDialog, props: mapDialogVisibilityProps } =
-        useModalVisibility();
-    const { onGenericError } = useBaseContext();
-    const { mapEnabled } = useSettingsSnapshot();
-    const { mode: colorSchemeMode, systemMode } = useColorScheme();
-    const theme = useTheme();
-    const resolvedMode =
-        colorSchemeMode === "system"
-            ? systemMode
-            : (colorSchemeMode ?? theme.palette.mode);
-    const isDarkMode = resolvedMode === "dark";
 
     // Handle pending navigation from feed item clicks
     useEffect(() => {
@@ -296,51 +274,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         };
     }, [enableImageEditing]);
 
-    const shouldShowMapButton =
-        modePlus !== "search" &&
-        activeCollectionSummary?.type === "all" &&
-        (activeCollectionSummary.fileCount > 0 || files.length > 0);
-
-    const handleShowMap = useCallback(async () => {
-        if (!activeCollectionSummary) return;
-        if (!mapEnabled) {
-            try {
-                await updateMapEnabled(true);
-            } catch (e) {
-                onGenericError(e);
-                return;
-            }
-        }
-        showMapDialog();
-    }, [activeCollectionSummary, mapEnabled, onGenericError, showMapDialog]);
-
-    const headerWithMap = useMemo(() => {
-        if (!shouldShowMapButton || !header) return header;
-        return {
-            ...header,
-            component: (
-                <HeaderWithMap>
-                    <HeaderMain>{header.component}</HeaderMain>
-                    <Tooltip title={t("map")}>
-                        <IconButton
-                            className="map-button"
-                            size="small"
-                            aria-label={t("map")}
-                            onClick={handleShowMap}
-                        >
-                            <MapIcon
-                                src="/images/gallery-globe/globe.svg"
-                                alt=""
-                                aria-hidden
-                                $isDarkMode={isDarkMode}
-                            />
-                        </IconButton>
-                    </Tooltip>
-                </HeaderWithMap>
-            ),
-        };
-    }, [header, handleShowMap, isDarkMode, shouldShowMapButton]);
-
     return (
         <Container>
             <AutoSizer>
@@ -351,7 +284,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             mode,
                             modePlus,
                             layout,
-                            header: headerWithMap,
+                            header,
                             footer,
                             user,
                             disableGrouping,
@@ -365,7 +298,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             listBorderRadius,
                             onScroll,
                             onVisibleDateChange,
-                            collectionSummary: activeCollectionSummary,
                             onContextMenuAction,
                             onContextMenuOpenChange,
                             showAddPersonAction,
@@ -418,25 +350,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onAddFileToCollection={onAddFileToCollection}
                 activeCollectionID={activeCollectionID}
             />
-            {shouldShowMapButton && (
-                <CollectionMapDialog
-                    {...mapDialogVisibilityProps}
-                    collectionSummary={activeCollectionSummary}
-                    activeCollection={activeCollection}
-                    onRemotePull={onRemotePull}
-                    {...{
-                        onAddSaveGroup,
-                        onMarkTempDeleted,
-                        onAddFileToCollection,
-                        onRemoteFilesPull,
-                        onVisualFeedback,
-                        fileNormalCollectionIDs,
-                        collectionNameByID,
-                        onSelectCollection,
-                        onSelectPerson,
-                    }}
-                />
-            )}
         </Container>
     );
 };
@@ -445,33 +358,6 @@ const Container = styled("div")`
     flex: 1;
     width: 100%;
 `;
-
-const HeaderWithMap = styled("div")`
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    width: 100%;
-    & > .map-button {
-        flex-shrink: 0;
-        margin-left: auto;
-    }
-`;
-
-const HeaderMain = styled("div")`
-    flex: 1;
-    min-width: 0;
-`;
-
-const MapIcon = styled("img")<{ $isDarkMode: boolean }>(
-    ({ theme, $isDarkMode }) => ({
-        display: "block",
-        width: 24,
-        height: 24,
-        filter:
-            $isDarkMode || theme.palette.mode === "dark" ? "invert(1)" : "none",
-    }),
-);
 
 /**
  * See: [Note: Timeline date string]
