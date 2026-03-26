@@ -7,7 +7,6 @@ appId: io.ente.locker
     Preserve account credentials.
 - inputText: "automatedSecretName"
 - pressKey: Enter
-
 - inputText: "automatedUserName"
 - pressKey: Enter
 - inputText: "automatedPassword"
@@ -35,7 +34,6 @@ appId: io.ente.locker
 - tapOn: hide_password
 - tapOn: Edit
 - tapOn: someRandomNotes
-
 - inputText: " edited"
 - tapOn: Save
 - extendedWaitUntil:
@@ -46,15 +44,11 @@ appId: io.ente.locker
 - assertVisible:
     text: someRandomNotes edited
 - tapOn: Back
-- longPressOn: automatedSecretName
-- tapOn: Delete
-- tapOn: Yes, delete item
-- extendedWaitUntil:
-    visible: "Deleting item..."
-    timeout: 10000
-- swipe:
-    start: 2%, 50%
-    end: 80%, 50%
-    duration: 300
-- tapOn: Trash
-- tapOn: automatedSecretName
+- runFlow:
+    file: ../subflows/delete_item_to_trash.yaml
+    env:
+      ITEM_NAME: automatedSecretName
+- runFlow:
+    file: ../subflows/delete_item_from_trash.yaml
+    env:
+      ITEM_NAME: automatedSecretName
