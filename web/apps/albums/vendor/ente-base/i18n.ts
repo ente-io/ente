@@ -5,6 +5,7 @@ import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
+import enUSTranslation from "../../../../packages/base/locales/en-US/translation.json";
 
 /**
  * List of all {@link SupportedLocale}s.
@@ -45,6 +46,7 @@ export const supportedLocales = [
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 const defaultLocale: SupportedLocale = "en-US";
+const defaultNamespace = "translation";
 
 /**
  * Load translations and add custom formatters.
@@ -82,13 +84,24 @@ export const setupI18n = async () => {
         // from the public folder, these JSON files are content hash named and
         // eminently cacheable.
         //
+        // Inline the default locale to avoid blocking first render on an extra
+        // locale chunk fetch for the most common startup path.
+        //
         // https://github.com/i18next/i18next-resources-to-backend
         .use(
             resourcesToBackend(
-                (language: string, namespace: string) =>
-                    import(
+                (language: string, namespace: string) => {
+                    if (
+                        language === defaultLocale &&
+                        namespace === defaultNamespace
+                    ) {
+                        return enUSTranslation;
+                    }
+
+                    return import(
                         `../../../../packages/base/locales/${language}/${namespace}.json`
-                    ),
+                    );
+                },
             ),
         )
         // react-i18next: React support
