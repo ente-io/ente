@@ -3,7 +3,6 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
-import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
@@ -343,7 +342,6 @@ export const FileList: React.FC<FileListProps> = ({
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
-    emailByUserID,
     onItemClick,
     onScroll,
     onVisibleDateChange,
@@ -898,8 +896,6 @@ export const FileList: React.FC<FileListProps> = ({
                                     <FileThumbnail
                                         key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
                                         {...{
-                                            user,
-                                            emailByUserID,
                                             enableSelect:
                                                 !!enableSelect &&
                                                 !suppressSelectionUI,
@@ -952,7 +948,6 @@ export const FileList: React.FC<FileListProps> = ({
             activeCollectionID,
             checkedTimelineDateStrings,
             contextMenu,
-            emailByUserID,
             favoriteFileIDs,
             haveSelection,
             handleContextMenu,
@@ -1284,8 +1279,6 @@ export const FileList: React.FC<FileListProps> = ({
                     <FileThumbnail
                         key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
                         {...{
-                            user,
-                            emailByUserID,
                             enableSelect:
                                 !!enableSelect && !suppressSelectionUI,
                         }}
@@ -1321,7 +1314,6 @@ export const FileList: React.FC<FileListProps> = ({
         },
         [
             activeCollectionID,
-            emailByUserID,
             enableSelect,
             favoriteFileIDs,
             handleContextMenu,
@@ -1750,18 +1742,16 @@ type FileThumbnailProps = {
     onImageDimensions?: (dimensions: Dimensions) => void;
     isMasonry?: boolean;
     style?: React.CSSProperties;
-} & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
+} & Pick<FileListProps, "enableSelect">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
     file,
-    user,
     enableSelect,
     selected,
     selectOnClick,
     isRangeSelectActive,
     isInSelectRange,
     isFav,
-    emailByUserID,
     activeCollectionID,
     showPlaceholder,
     onClick,
@@ -1891,11 +1881,6 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 )
             )}
             {selected && <SelectedOverlay />}
-            {shouldShowAvatar(file, user) && (
-                <AvatarOverlay>
-                    <Avatar {...{ user, file, emailByUserID }} />
-                </AvatarOverlay>
-            )}
             {isFav && (
                 <FavoriteOverlay>
                     <StarIcon fontSize="small" />
@@ -2050,17 +2035,6 @@ const HoverOverlay = styled("div")<{ checked: boolean }>`
 `;
 
 /**
- * An overlay showing the avatars of the person who shared the item, at the top
- * right.
- */
-const AvatarOverlay = styled(Overlay)`
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 5px;
-`;
-
-/**
  * An overlay showing the favorite icon at bottom left.
  */
 const FavoriteOverlay = styled(Overlay)`
@@ -2125,19 +2099,3 @@ const VideoDurationOverlay: React.FC<VideoDurationOverlayProps> = ({
         )}
     </FileTypeIndicatorOverlay>
 );
-
-/**
- * Return `true` if the owner or uploader name avatar indicator should be shown
- * for the given {@link file}.
- */
-const shouldShowAvatar = (file: EnteFile, user: LocalUser | undefined) => {
-    // Public albums app.
-    if (!user) return false;
-    // A file shared with the user.
-    if (file.ownerID != user.id) return true;
-    // A public collected file (i.e. a file owned by the user, uploaded by an
-    // named guest via a public collect link)
-    if (file.pubMagicMetadata?.data.uploaderName) return true;
-    // Regular file.
-    return false;
-};
