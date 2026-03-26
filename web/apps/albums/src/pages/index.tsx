@@ -53,8 +53,8 @@ import {
 import log from "ente-base/log";
 import {
     albumsAppOrigin,
-    isOfficialAlbumsApp,
     isCustomAlbumsAppOrigin,
+    isOfficialAlbumsApp,
     photosAppOrigin,
 } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
@@ -712,7 +712,6 @@ export default function PublicCollectionGallery() {
                 uploadCollection={publicCollection}
                 setLoading={setBlockingLoad}
                 setShouldDisableDropzone={setShouldDisableDropzone}
-                uploadTypeSelectorIntent="collect"
                 uploadTypeSelectorView={uploadTypeSelectorView}
                 onRemotePull={publicAlbumsRemotePull}
                 onUploadFile={handleUploadFile}
