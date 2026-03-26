@@ -1703,11 +1703,25 @@ class FileUploader {
         continue;
       }
 
-      final queueItem = _queue.remove(entry.key);
-      if (queueItem != null) {
+      final queueItem = _queue[entry.key];
+      if (queueItem?.status == UploadStatus.inProgress) {
+        // Let the active worker finish its normal success cleanup. Removing the
+        // queue entry here would trip the worker's `_queue.remove(localID)!`.
+        if (backup.status != BackupItemStatus.uploaded) {
+          _allBackups[entry.key] = backup.copyWith(
+            status: BackupItemStatus.uploaded,
+            file: dbFile,
+          );
+          changed = true;
+        }
+        continue;
+      }
+
+      final removedQueueItem = _queue.remove(entry.key);
+      if (removedQueueItem != null) {
         queueChanged = true;
-        if (!queueItem.completer.isCompleted) {
-          queueItem.completer.complete(dbFile!);
+        if (!removedQueueItem.completer.isCompleted) {
+          removedQueueItem.completer.complete(dbFile!);
         }
       }
       if (backup.status != BackupItemStatus.uploaded) {
