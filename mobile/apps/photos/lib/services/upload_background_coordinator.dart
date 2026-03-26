@@ -101,7 +101,10 @@ Future<void> _waitForGraceWindowExpiration() async {
   // onUploadAppForeground (which can run between any two awaits here) won't
   // see the marker and do a second lock release against freshly
   // reacquired locks.
-  await GraceWindowIos.consumeExpiredState();
+  final didOwnExpiration = await GraceWindowIos.consumeExpiredState();
+  if (!didOwnExpiration) {
+    return;
+  }
 
   await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
     source: "graceWindowExpired",

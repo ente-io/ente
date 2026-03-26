@@ -1672,6 +1672,8 @@ class FileUploader {
         );
 
         if (queueItem.status == UploadStatus.inProgress) {
+          // Leave the queue entry in place so the active worker can unwind and
+          // complete its normal queue/completer cleanup without null asserts.
           _allBackups[entry.key] = backup.copyWith(
             status: BackupItemStatus.retry,
             error: SilentlyCancelUploadsError(),
