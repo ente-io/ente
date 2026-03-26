@@ -153,7 +153,13 @@ class InfoFileService {
 
   /// Checks if a file is an info file
   bool isInfoFile(EnteFile file) {
-    return file.pubMagicMetadata.info != null || file.fileType == FileType.info;
+    if (file.fileType == FileType.info) {
+      return true;
+    }
+    if (file.fileType != null && file.fileType != FileType.other) {
+      return false;
+    }
+    return file.pubMagicMetadata.info != null;
   }
 
   /// Gets the display title for an info file based on its content
