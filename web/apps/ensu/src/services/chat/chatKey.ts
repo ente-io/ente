@@ -22,6 +22,8 @@ type PersistedChatKeys = { remoteChatKey?: string; localChatKey?: string };
 
 let _persistedChatKeys: PersistedChatKeys = {};
 let _legacyPersistedChatKeys: PersistedChatKeys = {};
+/** All distinct keys discovered during init, before any cleanup. */
+let _allDiscoveredLocalChatKeys: string[] = [];
 let _chatKeyStoreInitPromise: Promise<void> | undefined;
 let _chatKeyStoreInitUserID: number | undefined;
 
@@ -213,6 +215,30 @@ export const initChatKeyStore = async () => {
             localChatKey: legacyLocalChatKey,
         };
 
+        // Capture every distinct local chat key found across all sources
+        // *before* cleanup deletes legacy copies. The migration needs all
+        // of these because the ?? chains above can shadow the correct key
+        // when stale entries exist in the OS keyring.
+        {
+            const rawLocalStorage = readLocalStorageKey(
+                LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY,
+            );
+            const seen = new Set<string>();
+            const all: string[] = [];
+            for (const k of [
+                secureLocalChatKey,
+                legacySecureLocalChatKey,
+                nativeKeys.localChatKey,
+                rawLocalStorage,
+            ]) {
+                if (k && !seen.has(k)) {
+                    seen.add(k);
+                    all.push(k);
+                }
+            }
+            _allDiscoveredLocalChatKeys = all;
+        }
+
         if (
             secureRemoteChatKey !== remoteChatKey ||
             secureLocalChatKey !== localChatKey
@@ -303,6 +329,35 @@ export const legacyLocalChatKey = (): string | undefined => {
     }
 
     return readLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+};
+
+/**
+ * Return all distinct legacy key candidates that might decrypt a legacy DB.
+ *
+ * Unlike {@link legacyLocalChatKey} and {@link legacyCachedChatKey} which
+ * return the single "best" key from a prioritized chain, this returns every
+ * key found across all legacy storage locations so the migration can try
+ * each one. This is needed because stale keys in the OS keyring (secure
+ * storage) can shadow the correct key in localStorage.
+ */
+export const allLegacyKeyCandidates = (): string[] => {
+    const seen = new Set<string>();
+    const keys: string[] = [];
+    const add = (k: string | undefined) => {
+        if (k && !seen.has(k)) {
+            seen.add(k);
+            keys.push(k);
+        }
+    };
+    add(_legacyPersistedChatKeys.remoteChatKey);
+    add(_legacyPersistedChatKeys.localChatKey);
+    add(_persistedChatKeys.remoteChatKey);
+    add(_persistedChatKeys.localChatKey);
+    // Include every local chat key discovered during init (before cleanup
+    // deleted legacy copies). This ensures we try the raw localStorage key
+    // even when stale OS keyring entries shadowed it in the ?? chains.
+    for (const k of _allDiscoveredLocalChatKeys) add(k);
+    return keys;
 };
 
 export const clearCachedChatKey = () => {

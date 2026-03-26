@@ -4,8 +4,8 @@ import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
 import { base64ToBytes } from "services/base64";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import {
+    allLegacyKeyCandidates,
     cachedLocalChatKey,
-    legacyCachedChatKey,
     legacyLocalChatKey,
 } from "./chatKey";
 import {
@@ -835,16 +835,14 @@ const migrateLegacyChatStoreToNative = async (chatKey: string) => {
 const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
     if (!isTauriRuntime()) return;
 
-    const attemptedKeys = new Set<string>();
-    const candidateKeys: string[] = [];
-    for (const candidate of [
-        legacyCachedChatKey(),
-        legacyLocalChatKey(),
-        chatKey,
-    ]) {
-        if (!candidate || attemptedKeys.has(candidate)) continue;
-        attemptedKeys.add(candidate);
-        candidateKeys.push(candidate);
+    // Collect all known key candidates. allLegacyKeyCandidates returns every
+    // key found across secure storage, native file, AND localStorage. This is
+    // important because stale OS keyring entries from a previous install can
+    // shadow the correct localStorage key in the normal prioritized lookup.
+    const candidateKeys = allLegacyKeyCandidates();
+    const seen = new Set<string>(candidateKeys);
+    if (chatKey && !seen.has(chatKey)) {
+        candidateKeys.push(chatKey);
     }
 
     for (const candidateKey of candidateKeys) {
