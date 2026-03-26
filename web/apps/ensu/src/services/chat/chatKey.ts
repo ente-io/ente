@@ -1,5 +1,6 @@
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { HTTPError } from "ente-base/http";
+import log from "ente-base/log";
 import {
     isTauriAppRuntime,
     secureStorageDelete,
@@ -12,12 +13,15 @@ import { ChatKeyNotFoundError, createChatKey, getChatKey } from "./gateway";
 const CHAT_KEY_LOCAL_STORAGE_KEY = "ensu.chatKey";
 const LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY = "ensu.chatKey.local";
 const CHAT_KEY_FILE_NAME = "chat-keys.json";
-const REMOTE_CHAT_KEY_SECURE_STORAGE_KEY = "remoteChatKey";
-const LOCAL_CHAT_KEY_SECURE_STORAGE_KEY = "localChatKey";
+const REMOTE_CHAT_KEY_SECURE_STORAGE_KEY = "remoteChatKey.v2";
+const LOCAL_CHAT_KEY_SECURE_STORAGE_KEY = "localChatKey.v2";
+const LEGACY_REMOTE_CHAT_KEY_SECURE_STORAGE_KEY = "remoteChatKey";
+const LEGACY_LOCAL_CHAT_KEY_SECURE_STORAGE_KEY = "localChatKey";
 
 type PersistedChatKeys = { remoteChatKey?: string; localChatKey?: string };
 
 let _persistedChatKeys: PersistedChatKeys = {};
+let _legacyPersistedChatKeys: PersistedChatKeys = {};
 let _chatKeyStoreInitPromise: Promise<void> | undefined;
 let _chatKeyStoreInitUserID: number | undefined;
 
@@ -45,6 +49,13 @@ const scopedRemoteChatKeySecureStorageKey = () => {
     const userID = savedLocalUser()?.id;
     return userID
         ? `${REMOTE_CHAT_KEY_SECURE_STORAGE_KEY}.${userID}`
+        : undefined;
+};
+
+const scopedLegacyRemoteChatKeySecureStorageKey = () => {
+    const userID = savedLocalUser()?.id;
+    return userID
+        ? `${LEGACY_REMOTE_CHAT_KEY_SECURE_STORAGE_KEY}.${userID}`
         : undefined;
 };
 
@@ -98,9 +109,7 @@ const readNativeChatKeys = async (): Promise<PersistedChatKeys> => {
 const persistNativeChatKeys = async () => {
     if (!isTauriAppRuntime()) return;
 
-    const operations: Promise<void>[] = [
-        secureStorageDelete(REMOTE_CHAT_KEY_SECURE_STORAGE_KEY),
-    ];
+    const operations: Promise<void>[] = [];
     const remoteStorageKey = scopedRemoteChatKeySecureStorageKey();
     if (remoteStorageKey) {
         if (_persistedChatKeys.remoteChatKey) {
@@ -135,6 +144,20 @@ const persistNativeChatKeysSoon = () => {
     });
 };
 
+const cleanupLegacyChatKeyCopies = async () => {
+    clearLegacyRemoteChatKeyLocalStorage();
+    clearScopedRemoteChatKeyLocalStorage();
+    removeLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+
+    try {
+        const { removeFile } = await import("@tauri-apps/api/fs");
+        const path = await nativeChatKeyPath();
+        await removeFile(path);
+    } catch {
+        // ignore missing legacy file
+    }
+};
+
 export const initChatKeyStore = async () => {
     if (!isTauriAppRuntime()) return;
 
@@ -146,8 +169,15 @@ export const initChatKeyStore = async () => {
     _chatKeyStoreInitUserID = userID;
     _chatKeyStoreInitPromise = (async () => {
         const remoteStorageKey = scopedRemoteChatKeySecureStorageKey();
+        const legacyRemoteStorageKey = scopedLegacyRemoteChatKeySecureStorageKey();
         const remoteLocalStorageKey = scopedRemoteChatKeyLocalStorageKey();
-        const [secureRemoteChatKey, secureLocalChatKey, nativeKeys] =
+        const [
+            secureRemoteChatKey,
+            secureLocalChatKey,
+            legacySecureRemoteChatKey,
+            legacySecureLocalChatKey,
+            nativeKeys,
+        ] =
             await Promise.all([
                 remoteStorageKey
                     ? secureStorageGet(remoteStorageKey).catch(() => undefined)
@@ -155,25 +185,33 @@ export const initChatKeyStore = async () => {
                 secureStorageGet(LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
                     () => undefined,
                 ),
+                legacyRemoteStorageKey
+                    ? secureStorageGet(legacyRemoteStorageKey).catch(
+                          () => undefined,
+                      )
+                    : Promise.resolve(undefined),
+                secureStorageGet(LEGACY_LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
+                    () => undefined,
+                ),
                 readNativeChatKeys(),
             ]);
-        const remoteChatKey =
-            secureRemoteChatKey ??
+        const legacyRemoteChatKey =
+            legacySecureRemoteChatKey ??
             (remoteLocalStorageKey
                 ? readLocalStorageKey(remoteLocalStorageKey)
                 : undefined);
-        const localChatKey =
-            secureLocalChatKey ??
+        const legacyLocalChatKey =
+            legacySecureLocalChatKey ??
             nativeKeys.localChatKey ??
             readLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+        const remoteChatKey = secureRemoteChatKey ?? legacyRemoteChatKey;
+        const localChatKey = secureLocalChatKey ?? legacyLocalChatKey;
 
         _persistedChatKeys = { remoteChatKey, localChatKey };
-
-        try {
-            await secureStorageDelete(REMOTE_CHAT_KEY_SECURE_STORAGE_KEY);
-        } catch {
-            // Ignore legacy secure storage cleanup failures.
-        }
+        _legacyPersistedChatKeys = {
+            remoteChatKey: legacyRemoteChatKey,
+            localChatKey: legacyLocalChatKey,
+        };
 
         if (
             secureRemoteChatKey !== remoteChatKey ||
@@ -181,25 +219,19 @@ export const initChatKeyStore = async () => {
         ) {
             try {
                 await persistNativeChatKeys();
-                clearLegacyRemoteChatKeyLocalStorage();
-                clearScopedRemoteChatKeyLocalStorage();
-                removeLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
-            } catch {
-                clearLegacyRemoteChatKeyLocalStorage();
-                // Keep scoped localStorage keys when secure storage is unavailable.
+            } catch (error) {
+                log.warn(
+                    "Failed to persist chat keys to secure storage; continuing with in-memory keys",
+                    error,
+                );
+                return;
             }
-        } else {
-            clearLegacyRemoteChatKeyLocalStorage();
-            clearScopedRemoteChatKeyLocalStorage();
-            removeLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
         }
 
         try {
-            const { removeFile } = await import("@tauri-apps/api/fs");
-            const path = await nativeChatKeyPath();
-            await removeFile(path);
-        } catch {
-            // ignore missing legacy file
+            await cleanupLegacyChatKeyCopies();
+        } catch (error) {
+            log.warn("Failed to clean up legacy chat key copies", error);
         }
     })().catch((error: unknown) => {
         _chatKeyStoreInitPromise = undefined;
@@ -245,12 +277,29 @@ export const cachedChatKey = (): string | undefined => {
     return storageKey ? readLocalStorageKey(storageKey) : undefined;
 };
 
+export const legacyCachedChatKey = (): string | undefined => {
+    if (isTauriAppRuntime()) {
+        return _legacyPersistedChatKeys.remoteChatKey;
+    }
+
+    const storageKey = scopedRemoteChatKeyLocalStorageKey();
+    return storageKey ? readLocalStorageKey(storageKey) : undefined;
+};
+
 /**
  * Return the cached local-only chat key (base64), if present.
  */
 export const cachedLocalChatKey = (): string | undefined => {
     if (isTauriAppRuntime()) {
         return _persistedChatKeys.localChatKey;
+    }
+
+    return readLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+};
+
+export const legacyLocalChatKey = (): string | undefined => {
+    if (isTauriAppRuntime()) {
+        return _legacyPersistedChatKeys.localChatKey;
     }
 
     return readLocalStorageKey(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);

@@ -3,7 +3,11 @@ import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
 import { base64ToBytes } from "services/base64";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
-import { cachedLocalChatKey } from "./chatKey";
+import {
+    cachedLocalChatKey,
+    legacyCachedChatKey,
+    legacyLocalChatKey,
+} from "./chatKey";
 import {
     decryptChatField,
     decryptChatPayload,
@@ -12,7 +16,7 @@ import {
 } from "./crypto";
 
 const STORAGE_KEY = "ensu.chat.store.v1";
-const NATIVE_MIGRATION_KEY = "ensu.chat.nativeMigration.v1";
+const NATIVE_MIGRATION_KEY = "ensu.chat.nativeMigration.v2";
 const CHAT_DB_NAME = "ensu-chat";
 const LEGACY_WEB_CHAT_DB_NAME = "ensu.chat.db";
 
@@ -201,6 +205,13 @@ interface NativeMessage {
     deletedAt?: number | null;
 }
 
+interface NativeLegacyMigrationResult {
+    didMigrate: boolean;
+    migratedSessions: number;
+    migratedMessages: number;
+    migratedAttachments: number;
+}
+
 const nowMicros = () => Date.now() * 1000;
 
 const isTauriRuntime = () =>
@@ -220,22 +231,6 @@ const formatLogError = (error: unknown) => {
     }
 };
 
-const getErrorMessage = (error: unknown) => {
-    if (error instanceof Error) return error.message || error.name;
-    if (typeof error === "string") return error;
-    if (error && typeof error === "object") {
-        const maybeMessage = (error as { message?: unknown }).message;
-        if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-            return maybeMessage;
-        }
-    }
-    try {
-        return JSON.stringify(error);
-    } catch {
-        return String(error);
-    }
-};
-
 const getErrorCode = (error: unknown) => {
     if (!error || typeof error !== "object") return undefined;
     const code = (error as { code?: unknown }).code;
@@ -244,18 +239,10 @@ const getErrorCode = (error: unknown) => {
 
 const shouldResetDbError = (error: unknown) => {
     const code = getErrorCode(error);
-    if (
+    return (
         code === "db_crypto" ||
         code === "db_invalid_blob_length" ||
         code === "db_invalid_encrypted_field"
-    ) {
-        return true;
-    }
-    const message = getErrorMessage(error).toLowerCase();
-    return (
-        message.includes("stream pull failed") ||
-        message.includes("invalid blob") ||
-        message.includes("invalid encrypted")
     );
 };
 
@@ -541,7 +528,7 @@ const deserializeAttachments = async (
 ): Promise<ChatAttachment[]> => {
     if (!attachments?.length || !isTauriRuntime()) return [];
 
-    const localKey = cachedLocalChatKey();
+    const localKey = cachedLocalChatKey() ?? legacyLocalChatKey();
 
     return Promise.all(
         attachments.map(async (attachment) => {
@@ -768,7 +755,6 @@ const migrateLegacyChatStoreToNative = async (chatKey: string) => {
         !legacy.attachmentBytes.length
     ) {
         localStorage.removeItem(STORAGE_KEY);
-        markNativeMigrationDone();
         return;
     }
 
@@ -843,8 +829,55 @@ const migrateLegacyChatStoreToNative = async (chatKey: string) => {
     }
 
     localStorage.removeItem(STORAGE_KEY);
-    markNativeMigrationDone();
     log.info("Finished migrating legacy local chat store to native DB");
+};
+
+const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
+    if (!isTauriRuntime()) return;
+
+    const attemptedKeys = new Set<string>();
+    const candidateKeys: string[] = [];
+    for (const candidate of [
+        legacyCachedChatKey(),
+        legacyLocalChatKey(),
+        chatKey,
+    ]) {
+        if (!candidate || attemptedKeys.has(candidate)) continue;
+        attemptedKeys.add(candidate);
+        candidateKeys.push(candidate);
+    }
+
+    for (const candidateKey of candidateKeys) {
+        try {
+            const result = await invokeChat<NativeLegacyMigrationResult>(
+                "chat_db_migrate_legacy",
+                {
+                    input: {
+                        keyB64: chatKey,
+                        legacyKeyB64: candidateKey,
+                    },
+                },
+            );
+            if (result.didMigrate) {
+                log.info("Migrated legacy native chat store to v2 DB", result);
+            }
+            return;
+        } catch (error) {
+            const code = getErrorCode(error);
+            if (
+                code === "db_crypto" ||
+                code === "db_invalid_blob_length" ||
+                code === "db_invalid_encrypted_field"
+            ) {
+                continue;
+            }
+            throw error;
+        }
+    }
+
+    log.warn(
+        "Skipping legacy native chat migration because the available legacy keys could not decrypt the legacy DB",
+    );
 };
 
 export const initializeChatStorePersistence = async (chatKey: string) => {
@@ -855,8 +888,13 @@ export const initializeChatStorePersistence = async (chatKey: string) => {
     _chatPersistenceInitKey = chatKey;
     const initPromise = (async () => {
         if (isTauriRuntime()) {
-            if (!hasLegacyChatStore() && isNativeMigrationDone()) return;
-            await migrateLegacyChatStoreToNative(chatKey);
+            if (!isNativeMigrationDone()) {
+                await migrateLegacyNativeChatStoreToV2(chatKey);
+                if (hasLegacyChatStore()) {
+                    await migrateLegacyChatStoreToNative(chatKey);
+                }
+                markNativeMigrationDone();
+            }
             return;
         }
 
@@ -1412,7 +1450,7 @@ const attachmentDir = async () => {
         const { appDataDir, join } = await import("@tauri-apps/api/path");
         const { createDir } = await import("@tauri-apps/api/fs");
         const root = await appDataDir();
-        const dir = await join(root, "ensu_llmchat_attachments");
+        const dir = await join(root, "ensu_llmchat_attachments_v2");
         await createDir(dir, { recursive: true });
         return dir;
     })();
@@ -1474,7 +1512,7 @@ export const readDecryptedAttachmentBytes = async (
     try {
         return await decryptAttachmentBytes(encrypted, chatKey, sessionUuid);
     } catch (error) {
-        const localKey = cachedLocalChatKey();
+        const localKey = cachedLocalChatKey() ?? legacyLocalChatKey();
         if (!localKey || localKey === chatKey) {
             throw error;
         }

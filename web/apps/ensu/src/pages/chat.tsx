@@ -2866,13 +2866,19 @@ const Page: React.FC = () => {
                         import("@tauri-apps/api/shell"),
                     ]);
                     const root = await appDataDir();
-                    const dir = await join(root, "ensu_llmchat_attachments");
+                    const dir = await join(root, "ensu_llmchat_attachments_v2");
                     await createDir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
                     await writeBinaryFile({ path: filePath, contents: bytes });
 
-                    await open(filePath);
+                    const normalizedPath = filePath.replace(/\\/g, "/");
+                    const fileUrl = new URL("file:///");
+                    fileUrl.pathname = normalizedPath.startsWith("/")
+                        ? normalizedPath
+                        : `/${normalizedPath}`;
+                    const openTarget = fileUrl.toString();
+                    await open(openTarget);
                     return;
                 }
 
