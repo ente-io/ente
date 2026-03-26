@@ -30,7 +30,7 @@
 // References
 //
 //   - Blog post: Custom S3 requests with AWS Go SDK
-//     https://ente.io/blog/tech/custom-s3-requests/
+//     https://ente.com/blog/tech/custom-s3-requests/
 //
 //   - AWS Go SDK examples:
 //     https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/common-examples.html

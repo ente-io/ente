@@ -125,6 +125,7 @@ class FlagService {
   bool get qrFeatureEnabled => internalUser;
 
   bool get enableIOSBackgroundHandoff => internalUser;
+  bool get enableBgLocalUploadPriority => internalUser;
   bool get syncRecoveryDiagnostics => internalUser;
 
   Future<void> tryRefreshFlags() async {

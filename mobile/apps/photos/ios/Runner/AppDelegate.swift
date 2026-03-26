@@ -36,7 +36,6 @@ import workmanager_apple
     }
 
     GeneratedPluginRegistrant.register(with: self)
-    registerBackupExclusionChannel()
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
@@ -89,38 +88,6 @@ import workmanager_apple
     }
 
     return json["internalUser"] as? Bool ?? false
-  }
-
-  private func registerBackupExclusionChannel() {
-    guard let controller = window?.rootViewController as? FlutterViewController else {
-      NSLog("[ente] registerBackupExclusionChannel: no FlutterViewController found, backup exclusion will not be applied")
-      return
-    }
-    let channel = FlutterMethodChannel(
-      name: "io.ente.photos/backup",
-      binaryMessenger: controller.binaryMessenger)
-    channel.setMethodCallHandler { call, result in
-      guard call.method == "excludeFromBackup" else {
-        result(FlutterMethodNotImplemented)
-        return
-      }
-      guard let args = call.arguments as? [String: Any],
-            let path = args["path"] as? String
-      else {
-        result(FlutterError(code: "INVALID_ARGS", message: "Missing 'path'", details: nil))
-        return
-      }
-      var url = URL(fileURLWithPath: path)
-      do {
-        try url.setResourceValue(true, forKey: .isExcludedFromBackupKey)
-        result(true)
-      } catch {
-        result(FlutterError(
-          code: "EXCLUDE_BACKUP_ERROR",
-          message: error.localizedDescription,
-          details: nil))
-      }
-    }
   }
 
   override func applicationDidBecomeActive(_ application: UIApplication) {

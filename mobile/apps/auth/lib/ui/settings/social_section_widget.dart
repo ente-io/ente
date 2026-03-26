@@ -38,7 +38,7 @@ class SocialSectionWidget extends StatelessWidget {
       ],
       SocialsMenuItemWidget(
         l10n.blog,
-        "https://ente.io/blog",
+        "https://ente.com/blog",
         launchInExternalApp: !Platform.isAndroid,
       ),
       sectionOptionSpacing,
@@ -51,7 +51,7 @@ class SocialSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+      const SocialsMenuItemWidget("Discord", "https://ente.com/discord"),
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
       sectionOptionSpacing,

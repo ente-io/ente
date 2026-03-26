@@ -71,7 +71,7 @@ export const FileShareView: React.FC = () => {
                         }}
                     >
                         <a
-                            href="https://ente.io/locker"
+                            href="https://ente.com/locker"
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ display: "block", lineHeight: 0 }}

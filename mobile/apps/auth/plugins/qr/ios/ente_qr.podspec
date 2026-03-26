@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 A QR code reader plugin for Ente.
                        DESC
-  s.homepage         = 'https://ente.io'
+  s.homepage         = 'https://ente.com'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Ente' => 'team@ente.io' }
   s.source           = { :path => '.' }

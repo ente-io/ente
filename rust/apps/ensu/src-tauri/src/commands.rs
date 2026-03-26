@@ -62,6 +62,58 @@ pub struct SystemInfo {
     total_memory_bytes: Option<u64>,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TauriEnsuModelPreset {
+    id: String,
+    title: String,
+    url: String,
+    mmproj_url: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TauriEnsuDefaults {
+    mobile_system_prompt_body: String,
+    desktop_system_prompt_body: String,
+    system_prompt_date_placeholder: String,
+    session_summary_system_prompt: String,
+    mobile_default_model: TauriEnsuModelPreset,
+    mobile_model_presets: Vec<TauriEnsuModelPreset>,
+    desktop_default_model: TauriEnsuModelPreset,
+    desktop_model_presets: Vec<TauriEnsuModelPreset>,
+}
+
+impl From<llm::EnsuModelPreset> for TauriEnsuModelPreset {
+    fn from(p: llm::EnsuModelPreset) -> Self {
+        Self {
+            id: p.id,
+            title: p.title,
+            url: p.url,
+            mmproj_url: p.mmproj_url,
+        }
+    }
+}
+
+impl From<llm::EnsuDefaults> for TauriEnsuDefaults {
+    fn from(d: llm::EnsuDefaults) -> Self {
+        Self {
+            mobile_system_prompt_body: d.mobile_system_prompt_body,
+            desktop_system_prompt_body: d.desktop_system_prompt_body,
+            system_prompt_date_placeholder: d.system_prompt_date_placeholder,
+            session_summary_system_prompt: d.session_summary_system_prompt,
+            mobile_default_model: d.mobile_default_model.into(),
+            mobile_model_presets: d.mobile_model_presets.into_iter().map(Into::into).collect(),
+            desktop_default_model: d.desktop_default_model.into(),
+            desktop_model_presets: d
+                .desktop_model_presets
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+        }
+    }
+}
+
 fn llm_error(message: impl Into<String>) -> ApiError {
     ApiError::new("llm", message)
 }
@@ -1384,6 +1436,11 @@ pub fn system_info() -> SystemInfo {
         platform: std::env::consts::OS.to_string(),
         total_memory_bytes: macos_total_memory_bytes(),
     }
+}
+
+#[tauri::command]
+pub fn get_ensu_defaults() -> TauriEnsuDefaults {
+    llm::ensu_defaults().into()
 }
 
 #[tauri::command]

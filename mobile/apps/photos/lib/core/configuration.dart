@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:convert';
 import "dart:io";
 
+import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
@@ -41,7 +42,6 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
-import 'package:photos/utils/ios_backup_util.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';

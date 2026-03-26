@@ -15,7 +15,7 @@ a second factor to secure your Ente account.**
 > credentials.
 >
 > - More details about why and how are in the Passkeys announcement
->   [blog post](https://ente.io/blog/introducing-passkeys-on-ente/).
+>   [blog post](https://ente.com/blog/introducing-passkeys-on-ente/).
 > - And to know more technical details about how our passkey verification works,
 >   you can see this
 >   [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
@@ -23,7 +23,7 @@ a second factor to secure your Ente account.**
 ## Passkeys and TOTP
 
 Ente already supports TOTP codes (in fact, we built an
-[entire app](https://ente.io/auth/) to store them...). Passkeys serve as an
+[entire app](https://ente.com/auth/) to store them...). Passkeys serve as an
 alternative 2FA (second factor) mechanism.
 
 If you add a passkey to your Ente account, it will be used instead of any

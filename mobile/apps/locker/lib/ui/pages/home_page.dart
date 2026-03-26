@@ -690,6 +690,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                             return const SizedBox.shrink();
                           }
                           return FloatingActionButton(
+                            tooltip: 'Add item',
                             onPressed: _openSavePage,
                             shape: const CircleBorder(),
                             backgroundColor: colorScheme.primary700,

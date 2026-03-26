@@ -63,6 +63,7 @@ fn main() {
             commands::llm_generate_chat_stream,
             commands::llm_cancel,
             commands::system_info,
+            commands::get_ensu_defaults,
             commands::fs_file_size,
             commands::fs_read_head,
             commands::fs_append_bytes,

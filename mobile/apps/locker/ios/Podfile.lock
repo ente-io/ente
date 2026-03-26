@@ -90,8 +90,9 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - sodium_libs (2.2.1):
+  - "sodium_libs (3.4.6+1)":
     - Flutter
+    - FlutterMacOS
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
@@ -124,7 +125,7 @@ DEPENDENCIES:
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sodium_libs (from `.symlinks/plugins/sodium_libs/ios`)
+  - sodium_libs (from `.symlinks/plugins/sodium_libs/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -184,7 +185,7 @@ EXTERNAL SOURCES:
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sodium_libs:
-    :path: ".symlinks/plugins/sodium_libs/ios"
+    :path: ".symlinks/plugins/sodium_libs/darwin"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   ua_client_hints:
@@ -220,7 +221,7 @@ SPEC CHECKSUMS:
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  sodium_libs: 6c6d0e83f4ee427c6464caa1f1bdc2abf3ca0b7f
+  sodium_libs: ecc719aba13e1077057a4f550592d80bf68e9d69
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
