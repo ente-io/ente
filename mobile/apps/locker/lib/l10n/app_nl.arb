@@ -970,7 +970,7 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, one {}=1{1 collectie succesvol verwijderd} other{{count} collecties succesvol verwijderd}}",
+  "collectionsDeletedSuccessfully": "{count, plural, =1{1 collectie succesvol verwijderd} other{{count} collecties succesvol verwijderd}}",
   "@collectionsDeletedSuccessfully": {
     "description": "Success message when collections are deleted",
     "placeholders": {
