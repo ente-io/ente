@@ -12,6 +12,7 @@ import "package:shared_preferences/shared_preferences.dart";
 const _keyIOSUploadGraceActive = "ios_bg_upload_grace_active";
 
 final _logger = Logger("UploadBackgroundCoordinator");
+bool _isGraceWindowActiveInProcess = false;
 
 Future<void> onUploadAppBackground() async {
   if (!Platform.isIOS || !flagService.enableIOSBackgroundHandoff) {
@@ -25,12 +26,18 @@ Future<void> onUploadAppBackground() async {
 
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool(_keyIOSUploadGraceActive) ?? false) {
-      return;
+      if (_isGraceWindowActiveInProcess) {
+        return;
+      }
+
+      _logger.info("Clearing stale iOS upload grace window marker");
+      await prefs.remove(_keyIOSUploadGraceActive);
     }
 
     _logger.info("Starting iOS upload grace window");
     await GraceWindowIos.beginGraceWindow("ente-upload-grace-window");
     await prefs.setBool(_keyIOSUploadGraceActive, true);
+    _isGraceWindowActiveInProcess = true;
     unawaited(_waitForGraceWindowExpiration());
     return;
   }
@@ -66,6 +73,7 @@ Future<void> onUploadAppForeground() async {
     await GraceWindowIos.endGraceWindow();
     final didExpireGraceWindow = await GraceWindowIos.consumeExpiredState();
     await prefs.remove(_keyIOSUploadGraceActive);
+    _isGraceWindowActiveInProcess = false;
     if (didExpireGraceWindow) {
       _logger.info(
         "Grace window expiration was observed natively before foreground recovery",
@@ -119,4 +127,5 @@ Future<void> _waitForGraceWindowExpiration() async {
 
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(_keyIOSUploadGraceActive);
+  _isGraceWindowActiveInProcess = false;
 }
