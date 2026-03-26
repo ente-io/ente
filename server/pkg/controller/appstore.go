@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
 	"github.com/ente-io/museum/pkg/controller/discord"
@@ -79,8 +80,8 @@ func (c *AppStoreController) validateSandboxRequest(ctx context.Context, environ
 	}
 
 	maskedEmail := email.GetMaskedEmailWithHint(user.Email)
-	c.DiscordController.Notify(fmt.Sprintf("iOS Sandbox %s for user: %s (userID: %d)",
-		sandboxContext, maskedEmail, userID))
+	c.DiscordController.NotifyThrottled(fmt.Sprintf("iOS Sandbox %s for user: %s (userID: %d)",
+		sandboxContext, maskedEmail, userID), 10*time.Minute)
 
 	if strings.HasSuffix(email.NormalizeEmail(user.Email), "@ente.io") {
 		return nil

@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 interface SessionPreferences {
     val selectedSessionId: Flow<String?>
     val sessionSummaries: Flow<Map<String, String>>
+    val modelDownloadRequested: Flow<Boolean>
     suspend fun setSelectedSessionId(sessionId: String?)
     suspend fun setSessionSummary(sessionId: String, summary: String?)
+    suspend fun setModelDownloadRequested(requested: Boolean)
 }

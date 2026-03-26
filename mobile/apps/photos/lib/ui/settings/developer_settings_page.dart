@@ -6,9 +6,11 @@ import "package:photos/core/network/network.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/ui/common/gradient_button.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/utils/dialog_util.dart";
 
 class DeveloperSettingsPage extends StatefulWidget {
   const DeveloperSettingsPage({super.key});
@@ -29,65 +31,90 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     _logger.info(
       "Current endpoint is: ${Configuration.instance.getHttpEndpoint()}",
     );
     return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).developerSettings),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: Text(
+          AppLocalizations.of(context).developerSettings,
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _urlController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).serverEndpoint,
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              TextInputWidgetV2(
+                label: AppLocalizations.of(context).serverEndpoint,
                 hintText: Configuration.instance.getHttpEndpoint(),
+                textEditingController: _urlController,
+                autoCorrect: false,
+                autoFocus: true,
+                keyboardType: TextInputType.url,
               ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 40),
-            GradientButton(
-              onTap: () async {
-                final url = _urlController.text.trim();
-                _logger.info("Entered endpoint: $url");
-                final modeToggleMessage =
-                    await _maybeToggleOfflineModeOption(url);
-                if (modeToggleMessage != null) {
-                  Bus.instance.fire(AppModeChangedEvent());
-                  showToast(context, modeToggleMessage);
-                  Navigator.of(context).pop();
-                  return;
-                }
-                try {
-                  final uri = Uri.parse(url);
-                  if ((uri.scheme == "http" || uri.scheme == "https")) {
-                    await _ping(url);
-                    await Configuration.instance.setHttpEndpoint(url);
-                    showToast(
-                      context,
-                      AppLocalizations.of(context).endpointUpdatedMessage,
-                    );
+              const SizedBox(height: 20),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: AppLocalizations.of(context).save,
+                onTap: () async {
+                  final url = _urlController.text.trim();
+                  _logger.info("Entered endpoint: $url");
+                  final modeToggleMessage =
+                      await _maybeToggleOfflineModeOption(url);
+                  if (modeToggleMessage != null) {
+                    Bus.instance.fire(AppModeChangedEvent());
+                    showToast(context, modeToggleMessage);
                     Navigator.of(context).pop();
-                  } else {
-                    throw const FormatException();
+                    return;
                   }
-                } catch (e) {
-                  // ignore: unawaited_futures
-                  showErrorDialog(
-                    context,
-                    AppLocalizations.of(context).invalidEndpoint,
-                    AppLocalizations.of(context).invalidEndpointMessage +
-                        "\n" +
-                        e.toString(),
-                  );
-                }
-              },
-              text: AppLocalizations.of(context).save,
-            ),
-          ],
+                  try {
+                    final uri = Uri.parse(url);
+                    if ((uri.scheme == "http" || uri.scheme == "https")) {
+                      await _ping(url);
+                      await Configuration.instance.setHttpEndpoint(url);
+                      showToast(
+                        context,
+                        AppLocalizations.of(context).endpointUpdatedMessage,
+                      );
+                      Navigator.of(context).pop();
+                    } else {
+                      throw const FormatException();
+                    }
+                  } catch (e) {
+                    _logger.severe("Failed to update developer endpoint", e);
+                    await showAlertBottomSheet(
+                      context,
+                      title: AppLocalizations.of(context).invalidEndpoint,
+                      message:
+                          AppLocalizations.of(context).invalidEndpointMessage +
+                              "\n" +
+                              e.toString(),
+                      assetPath: 'assets/warning-green.png',
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

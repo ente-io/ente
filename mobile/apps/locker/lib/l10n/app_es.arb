@@ -535,7 +535,7 @@
   "youCannotShareWithYourself": "No puedes compartir contigo mismo",
   "inviteToEnte": "Invitar a Ente",
   "sendInvite": "Enviar invitación",
-  "shareTextRecommendUsingEnte": "Descarga Ente\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarga Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Esta es tu ID de verificación",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguien que comparta álbumes contigo debería ver el mismo ID en su dispositivo.",
   "howToViewShareeVerificationID": "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifica que los identificadores de ambos dispositivos coincidan.",
@@ -551,8 +551,8 @@
   "verificationId": "ID de verificación",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} no tiene una cuenta de Ente.\n\nEnviales una invitacion para compartir elementos.",
-  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.io: {verificationID}?",
+  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.com: {verificationID}?",
   "passwordLock": "Bloqueo con contraseña",
   "manage": "Administrar",
   "addedAs": "Agregado como",
@@ -613,6 +613,14 @@
   "uploadStorageLimitErrorBody": "Te has quedado sin espacio de almacenamiento. Libera espacio para continuar subiendo.",
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
+  },
+  "uploadSubscriptionExpiredErrorTitle": "Tu suscripción ha caducado",
+  "@uploadSubscriptionExpiredErrorTitle": {
+    "description": "Title shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadSubscriptionExpiredErrorBody": "Tu suscripción de Ente Photos ha caducado. Renueva tu suscripción para seguir subiendo archivos.",
+  "@uploadSubscriptionExpiredErrorBody": {
+    "description": "Body shown when uploads fail because the Photos subscription is expired"
   },
   "uploadFileCountLimitErrorTitle": "Limite de archivos alcanzado",
   "@uploadFileCountLimitErrorTitle": {
@@ -1023,5 +1031,7 @@
   "usageFamily": "Familia",
   "searchSettings": "Ajustes de búsqueda",
   "suggestions": "Sugerencias",
-  "noResultsFound": "No se han encontrado resultados"
+  "noResultsFound": "No se han encontrado resultados",
+  "viewActiveSessions": "Ver sesiones activas",
+  "authToViewYourActiveSessions": "Por favor, autentícate para ver tus sesiones activas"
 }

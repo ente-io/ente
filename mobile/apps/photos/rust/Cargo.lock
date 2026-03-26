@@ -753,16 +753,7 @@ checksum = "177a59811828ea5dbc8927662d444ffee7b55a44696486f1b1a245ae9e652533"
 name = "ente_media_inspector"
 version = "0.1.0"
 dependencies = [
- "quick-xml",
-]
-
-[[package]]
-name = "ente_photos_rust"
-version = "0.0.1"
-dependencies = [
- "ente_media_inspector",
  "fast_image_resize",
- "flutter_rust_bridge",
  "half",
  "html-escape",
  "image",
@@ -774,10 +765,19 @@ dependencies = [
  "once_cell",
  "ort",
  "plsfix",
+ "quick-xml",
  "regex",
  "thiserror 2.0.18",
  "tiff",
  "usearch",
+]
+
+[[package]]
+name = "ente_photos_rust"
+version = "0.0.1"
+dependencies = [
+ "ente_media_inspector",
+ "flutter_rust_bridge",
 ]
 
 [[package]]

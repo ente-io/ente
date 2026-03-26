@@ -1,10 +1,12 @@
 name: "Lint (mobile)"
 
 on:
-    # Run on every pull request (open or push to it) that changes photos app or rust core
+    # Run on every pull request (open or push to it) that changes the photos app,
+    # shared photos Rust, or rust core
     pull_request:
         paths:
             - "mobile/apps/photos/**"
+            - "rust/photos/**"
             - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 

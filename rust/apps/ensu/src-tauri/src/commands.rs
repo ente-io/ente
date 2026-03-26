@@ -14,7 +14,7 @@ use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
-use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
+use tauri::{AppHandle, State, Window};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -38,6 +38,8 @@ struct ChatDbHolder {
     db: Arc<EnsuDb<SqliteBackend>>,
 }
 
+const SECURE_STORAGE_SERVICE: &str = "io.ente.ensu";
+
 #[derive(Debug, Serialize)]
 pub struct ApiError {
     code: String,
@@ -60,6 +62,58 @@ pub struct SystemInfo {
     total_memory_bytes: Option<u64>,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TauriEnsuModelPreset {
+    id: String,
+    title: String,
+    url: String,
+    mmproj_url: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TauriEnsuDefaults {
+    mobile_system_prompt_body: String,
+    desktop_system_prompt_body: String,
+    system_prompt_date_placeholder: String,
+    session_summary_system_prompt: String,
+    mobile_default_model: TauriEnsuModelPreset,
+    mobile_model_presets: Vec<TauriEnsuModelPreset>,
+    desktop_default_model: TauriEnsuModelPreset,
+    desktop_model_presets: Vec<TauriEnsuModelPreset>,
+}
+
+impl From<llm::EnsuModelPreset> for TauriEnsuModelPreset {
+    fn from(p: llm::EnsuModelPreset) -> Self {
+        Self {
+            id: p.id,
+            title: p.title,
+            url: p.url,
+            mmproj_url: p.mmproj_url,
+        }
+    }
+}
+
+impl From<llm::EnsuDefaults> for TauriEnsuDefaults {
+    fn from(d: llm::EnsuDefaults) -> Self {
+        Self {
+            mobile_system_prompt_body: d.mobile_system_prompt_body,
+            desktop_system_prompt_body: d.desktop_system_prompt_body,
+            system_prompt_date_placeholder: d.system_prompt_date_placeholder,
+            session_summary_system_prompt: d.session_summary_system_prompt,
+            mobile_default_model: d.mobile_default_model.into(),
+            mobile_model_presets: d.mobile_model_presets.into_iter().map(Into::into).collect(),
+            desktop_default_model: d.desktop_default_model.into(),
+            desktop_model_presets: d
+                .desktop_model_presets
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+        }
+    }
+}
+
 fn llm_error(message: impl Into<String>) -> ApiError {
     ApiError::new("llm", message)
 }
@@ -74,6 +128,11 @@ fn chat_db_thread_error() -> ApiError {
 
 fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
+}
+
+fn secure_storage_entry(key: &str) -> Result<keyring::Entry, ApiError> {
+    keyring::Entry::new(SECURE_STORAGE_SERVICE, key)
+        .map_err(|err| ApiError::new("secure_storage", err.to_string()))
 }
 
 fn default_llm_threads() -> i32 {
@@ -760,6 +819,7 @@ pub struct ChatMessageUpsertInput {
     sender: String,
     text: String,
     created_at: i64,
+    remote_id: Option<String>,
     deleted_at: Option<i64>,
     attachments: Option<Vec<ChatAttachmentInput>>,
 }
@@ -1029,16 +1089,38 @@ pub async fn chat_db_insert_message_with_uuid(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db_async(&state, app, key_b64, move |db| {
-        let message = db.insert_message_with_uuid(
-            message_uuid,
-            session_uuid,
-            sender,
-            &input.text,
-            parent,
-            attachments,
-            input.created_at,
-            input.deleted_at,
-        )?;
+        let attachment_metas = attachments
+            .iter()
+            .cloned()
+            .map(ensu_db::AttachmentMeta::from)
+            .collect::<Vec<_>>();
+        let message = if let Some(remote_id) = input.remote_id.as_deref() {
+            let message = db.upsert_message_from_remote(
+                message_uuid,
+                session_uuid,
+                remote_id,
+                sender,
+                &input.text,
+                parent,
+                attachment_metas,
+                input.created_at,
+            )?;
+            if let Some(deleted_at) = input.deleted_at {
+                db.apply_message_tombstone(message_uuid, deleted_at)?;
+            }
+            message
+        } else {
+            db.insert_message_with_uuid(
+                message_uuid,
+                session_uuid,
+                sender,
+                &input.text,
+                parent,
+                attachments,
+                input.created_at,
+                input.deleted_at,
+            )?
+        };
         build_message_dto(db, message)
     })
     .await
@@ -1263,7 +1345,7 @@ const LLM_EVENT_BATCH_MS: u64 = 80;
 const LLM_EVENT_BATCH_BYTES: usize = 2048;
 
 struct LlmEventSink {
-    window: WebviewWindow,
+    window: Window,
     buffered_text: String,
     buffered_job_id: Option<llm::JobId>,
     buffered_token_id: Option<i32>,
@@ -1271,7 +1353,7 @@ struct LlmEventSink {
 }
 
 impl LlmEventSink {
-    fn new(window: WebviewWindow) -> Self {
+    fn new(window: Window) -> Self {
         Self {
             window,
             buffered_text: String::new(),
@@ -1354,6 +1436,11 @@ pub fn system_info() -> SystemInfo {
         platform: std::env::consts::OS.to_string(),
         total_memory_bytes: macos_total_memory_bytes(),
     }
+}
+
+#[tauri::command]
+pub fn get_ensu_defaults() -> TauriEnsuDefaults {
+    llm::ensu_defaults().into()
 }
 
 #[tauri::command]
@@ -1448,7 +1535,7 @@ pub fn llm_free_model(state: State<LlmState>) -> Result<(), ApiError> {
 #[tauri::command]
 pub fn llm_generate_chat_stream(
     state: State<LlmState>,
-    window: WebviewWindow,
+    window: Window,
     request: llm::GenerateChatRequest,
 ) -> Result<(), ApiError> {
     let context = state
@@ -1545,29 +1632,56 @@ fn parse_uuid(value: &str) -> Result<Uuid, ApiError> {
     Uuid::parse_str(value).map_err(|err| ApiError::new("uuid", err.to_string()))
 }
 
+#[tauri::command]
+pub fn secure_storage_get(key: String) -> Result<Option<String>, ApiError> {
+    let entry = secure_storage_entry(&key)?;
+    match entry.get_password() {
+        Ok(value) => Ok(Some(value)),
+        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(err) => Err(ApiError::new("secure_storage", err.to_string())),
+    }
+}
+
+#[tauri::command]
+pub fn secure_storage_set(key: String, value: String) -> Result<(), ApiError> {
+    let entry = secure_storage_entry(&key)?;
+    entry
+        .set_password(&value)
+        .map_err(|err| ApiError::new("secure_storage", err.to_string()))
+}
+
+#[tauri::command]
+pub fn secure_storage_delete(key: String) -> Result<(), ApiError> {
+    let entry = secure_storage_entry(&key)?;
+    match entry.delete_credential() {
+        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        Err(err) => Err(ApiError::new("secure_storage", err.to_string())),
+    }
+}
+
 fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let dir = app
-        .path()
+    let resolver = app.path_resolver();
+    let dir = resolver
         .app_data_dir()
-        .map_err(|err| ApiError::new("path", err.to_string()))?;
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
     std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(dir.join("ensu_llmchat.db"))
 }
 
 fn sync_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let dir = app
-        .path()
+    let resolver = app.path_resolver();
+    let dir = resolver
         .app_data_dir()
-        .map_err(|err| ApiError::new("path", err.to_string()))?;
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
     std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(dir.join("llmchat_sync.db"))
 }
 
 fn attachments_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let dir = app
-        .path()
+    let resolver = app.path_resolver();
+    let dir = resolver
         .app_data_dir()
-        .map_err(|err| ApiError::new("path", err.to_string()))?;
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
     let attachments_dir = dir.join("ensu_llmchat_attachments");
     std::fs::create_dir_all(&attachments_dir)
         .map_err(|err| ApiError::new("io", err.to_string()))?;
@@ -1575,10 +1689,10 @@ fn attachments_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
 }
 
 fn sync_meta_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let dir = app
-        .path()
+    let resolver = app.path_resolver();
+    let dir = resolver
         .app_data_dir()
-        .map_err(|err| ApiError::new("path", err.to_string()))?;
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
     let meta_dir = dir.join("sync_meta");
     std::fs::create_dir_all(&meta_dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(meta_dir)

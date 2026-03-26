@@ -393,13 +393,11 @@ const InProgressSection: React.FC = () => {
         return (
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             <InProgressItemContainer key={localFileID}>
-                <span>{uploadFileNames.get(localFileID)}</span>
+                <InProgressFileName>
+                    {uploadFileNames.get(localFileID)}
+                </InProgressFileName>
                 {uploadPhase == "uploading" && (
-                    <>
-                        {" "}
-                        <span className="separator">{`-`}</span>
-                        <span>{`${progress}%`}</span>
-                    </>
+                    <InProgressPercent>{`${progress}%`}</InProgressPercent>
                 )}
             </InProgressItemContainer>
         );
@@ -440,23 +438,26 @@ const InProgressSection: React.FC = () => {
     );
 };
 
-const InProgressItemContainer = styled("div")`
-    display: inline-block;
-    & > span {
-        display: inline-block;
-    }
-    & > span:first-of-type {
-        position: relative;
-        top: 5px;
-        max-width: 340px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-    & > .separator {
-        margin: 0 5px;
-    }
-`;
+const InProgressItemContainer = styled("div")(({ theme }) => ({
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1.5),
+}));
+
+const InProgressFileName = styled("span")({
+    flex: 1,
+    minWidth: 0,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+});
+
+const InProgressPercent = styled("span")(({ theme }) => ({
+    flexShrink: 0,
+    color: theme.vars.palette.text.muted,
+    fontVariantNumeric: "tabular-nums",
+}));
 
 const SectionAccordion = styled((props: AccordionProps) => (
     <Accordion disableGutters elevation={0} square {...props} />

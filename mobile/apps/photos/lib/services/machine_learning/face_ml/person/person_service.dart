@@ -57,18 +57,17 @@ class PersonService {
 
   late Logger logger = Logger("PersonService");
 
-  static Future<void> init(
+  static void init(
     EntityService entityService,
     MLDataDB faceMLDataDB,
     SharedPreferences prefs,
-  ) async {
+  ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
     final settings = LocalSettings(prefs);
     final savedAutoMerge = settings.autoMergeThresholdOverride;
     if (savedAutoMerge != null) {
       autoMergeThreshold = savedAutoMerge.clamp(0.0, 1.0);
     }
-    await _instance!.refreshPersonCache();
   }
 
   Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
@@ -80,10 +79,21 @@ class PersonService {
     _lastCacheRefreshTime = 0;
   }
 
-  Future<void> refreshPersonCache() async {
+  Future<void> refreshPersonCache({
+    bool notifyListeners = false,
+    String source = "",
+  }) async {
     _lastCacheRefreshTime = 0;
     // wait to ensure cache is refreshed
     final _ = await getPersons();
+    if (notifyListeners) {
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.syncDone,
+          source: source,
+        ),
+      );
+    }
   }
 
   Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {

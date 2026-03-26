@@ -237,9 +237,38 @@ class LocalSyncService {
         ),
       );
     }
+    if (flagService.syncRecoveryDiagnostics) {
+      final int newMappingCount =
+          localDiffResult.newPathToLocalIDs?.values.fold<int>(
+                0,
+                (sum, ids) => sum + ids.length,
+              ) ??
+              0;
+      final int deletedMappingCount =
+          localDiffResult.deletePathToLocalIDs?.values.fold<int>(
+                0,
+                (sum, ids) => sum + ids.length,
+              ) ??
+              0;
+      if (newMappingCount > 0 || deletedMappingCount > 0 || hasUnsyncedFiles) {
+        final sampleRecovered = (localDiffResult.uniqueLocalFiles ?? [])
+            .take(3)
+            .map((file) => file.localID)
+            .toList();
+        _logger.info(
+          "syncAll recovery: "
+          "newFiles=${localDiffResult.uniqueLocalFiles?.length ?? 0}, "
+          "newMappings=$newMappingCount, "
+          "deletedMappings=$deletedMappingCount, "
+          "sampleRecovered=$sampleRecovered",
+        );
+      }
+    }
 
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
-    return hasUnsyncedFiles;
+    // syncAll can repair mappings without inserting new local files.
+    // We still need the follow-up remote sync to promote those entries.
+    return hasUnsyncedFiles || hasAnyMappingChanged;
   }
 
   Future<void> ignoreUpload(EnteFile file, InvalidFileError error) async {
@@ -332,6 +361,16 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
+      if (flagService.syncRecoveryDiagnostics && allFiles.length != files.length) {
+        final sampleLocalIDs =
+            allFiles.take(3).map((file) => file.localID).toList();
+        _logger.info(
+          "localSync partial materialization: "
+          "from=$fromTime to=$toTime "
+          "discovered=${allFiles.length} inserted=${files.length} "
+          "sampleLocalIDs=$sampleLocalIDs",
+        );
+      }
       _checkAndFireLocalAssetUpdateEvent(allFiles, files);
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);

@@ -423,6 +423,12 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
+        if (flagService.syncRecoveryDiagnostics) {
+          _logger.info(
+            "[${deviceCollection.name}] upload-prep empty: "
+            "pathID=${deviceCollection.id} mappedFromPath=0",
+          );
+        }
         continue;
       }
       final collectionID = await _getCollectionID(deviceCollection);
@@ -481,6 +487,25 @@ class RemoteSyncService {
             "mismatch in num of filesToSync ${localIDsToSync.length} to "
             "fileSynced ${fileFoundForLocalIDs.length}",
           );
+        }
+        if (flagService.syncRecoveryDiagnostics) {
+          final int mappedCount = localIDsToSync.length;
+          final int postFilterCount = localIDsToSync.length;
+          final int missingFileRows =
+              postFilterCount - fileFoundForLocalIDs.length;
+          if (missingFileRows > 0) {
+            final sample =
+                localIDsToSync.difference(fileFoundForLocalIDs).take(3);
+            _logger.warning(
+              "[${deviceCollection.name}] upload-prep missing rows: "
+              "pathID=${deviceCollection.id} "
+              "mappedFromPath=$mappedCount "
+              "postFilter=$postFilterCount "
+              "missingFileRows=$missingFileRows "
+              "collectionID=$collectionID "
+              "sample=${sample.toList()}",
+            );
+          }
         }
       }
     }

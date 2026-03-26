@@ -43,12 +43,12 @@ class AboutSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         AboutMenuItemWidget(
           title: AppLocalizations.of(context).privacy,
-          url: "https://ente.io/privacy",
+          url: "https://ente.com/privacy",
         ),
         sectionOptionSpacing,
         AboutMenuItemWidget(
           title: AppLocalizations.of(context).termsOfServicesTitle,
-          url: "https://ente.io/terms",
+          url: "https://ente.com/terms",
         ),
         sectionOptionSpacing,
         updateService.isIndependent()

@@ -53,4 +53,4 @@ easier for us to detect and fix any issues.
 Ente Auth collects no data by default.
 
 For more details, please refer to our
-[full privacy policy](https://ente.io/privacy).
+[full privacy policy](https://ente.com/privacy).
