@@ -316,7 +316,7 @@
     }
   },
   "sorry": "Desculpe",
-  "importFailureDesc": "Não foi possível analisar o arquivo selecionado. Escreva para support@ente.io se precisar de ajuda!",
+  "importFailureDesc": "Não foi possível analisar o arquivo selecionado. Escreva para support@ente.com se precisar de ajuda!",
   "pendingSyncs": "Atenção",
   "pendingSyncsWarningBody": "Alguns de seus códigos não foram salvos.\n\nCertifique-se que você possui uma cópia desses códigos antes de sair.",
   "checkInboxAndSpamFolder": "Verifique sua caixa de entrada (e spam) para concluir a verificação",

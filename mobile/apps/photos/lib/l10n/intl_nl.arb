@@ -135,7 +135,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -621,7 +621,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Betaalgegevens",
   "manageFamily": "Familie abonnement beheren",
-  "contactToManageSubscription": "Neem contact met ons op via support@ente.io om uw {provider} abonnement te beheren.",
+  "contactToManageSubscription": "Neem contact met ons op via support@ente.com om uw {provider} abonnement te beheren.",
   "renewSubscription": "Abonnement verlengen",
   "cancelSubscription": "Abonnement opzeggen",
   "areYouSureYouWantToRenew": "Weet u zeker dat u wilt verlengen?",
@@ -670,7 +670,7 @@
   "subAlreadyLinkedErrMessage": "Jouw {id} is al aan een ander Ente account gekoppeld.\nAls je jouw {id} wilt gebruiken met dit account, neem dan contact op met onze klantenservice",
   "visitWebToManage": "Bezoek alstublieft web.ente.io om uw abonnement te beheren",
   "couldNotUpdateSubscription": "Kon abonnement niet wijzigen",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Neem alstublieft contact op met support@ente.io en we helpen u graag!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Neem alstublieft contact op met support@ente.com en we helpen u graag!",
   "paymentFailed": "Betaling mislukt",
   "paymentFailedTalkToProvider": "Praat met {providerName} klantenservice als u in rekening bent gebracht",
   "@paymentFailedTalkToProvider": {

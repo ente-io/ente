@@ -329,7 +329,7 @@
     }
   },
   "sorry": "Scusa",
-  "importFailureDesc": "Impossibile analizzare il file selezionato.\nPer favore scrivi a support@ente.io se hai bisogno di aiuto!",
+  "importFailureDesc": "Impossibile analizzare il file selezionato.\nPer favore scrivi a support@ente.com se hai bisogno di aiuto!",
   "pendingSyncs": "Attenzione",
   "pendingSyncsWarningBody": "Non hai effettuato il backup di alcuni codici.\n\nPer favore assicurati di effettuare il backup di questi codici prima di disconnetterti.",
   "checkInboxAndSpamFolder": "Per favore, controlla la tua casella di posta (e lo spam) per completare la verifica",

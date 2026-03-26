@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -889,7 +889,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -937,7 +937,7 @@
   "subscription": "Gói đăng ký",
   "paymentDetails": "Chi tiết thanh toán",
   "manageFamily": "Quản lý gia đình",
-  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.io để quản lý gói {provider} của bạn.",
+  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.com để quản lý gói {provider} của bạn.",
   "renewSubscription": "Gia hạn gói",
   "cancelSubscription": "Hủy gói",
   "areYouSureYouWantToRenew": "Bạn có chắc muốn gia hạn không?",
@@ -987,7 +987,7 @@
   "visitWebToManage": "Vui lòng truy cập web.ente.io để quản lý gói đăng ký",
   "managePaymentMethod": "Quản lý phương thức thanh toán",
   "couldNotUpdateSubscription": "Không thể cập nhật gói",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.io và chúng tôi rất sẵn sàng giúp đỡ!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.com và chúng tôi rất sẵn sàng giúp đỡ!",
   "paymentFailed": "Thanh toán thất bại",
   "paymentFailedTalkToProvider": "Vui lòng trao đổi với bộ phận hỗ trợ {providerName} nếu bạn đã bị tính phí",
   "@paymentFailedTalkToProvider": {

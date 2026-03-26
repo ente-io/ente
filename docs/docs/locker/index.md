@@ -123,7 +123,7 @@ available:
    [Discord server](https://ente.com/discord) for community support and
    discussions
 3. **Email support**: Contact us at
-   [support@ente.io](mailto:support@ente.io) for personalized help
+   [support@ente.com](mailto:support@ente.com) for personalized help
 4. **GitHub**: Report bugs or request features on
    [GitHub](https://github.com/ente-io/ente/issues)
 

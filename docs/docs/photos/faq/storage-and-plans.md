@@ -136,7 +136,7 @@ To keep things fair, our plans don't increase linearly, and the tiers are such t
 
 In addition, we also offer [family plans](/photos/features/account/family-plans) so that you can gain more value out of a single subscription.
 
-If you need a custom plan, please contact [support@ente.io](mailto:support@ente.io).
+If you need a custom plan, please contact [support@ente.com](mailto:support@ente.com).
 
 ## Family Plans
 
@@ -211,7 +211,7 @@ Open `Settings > Family plans`, find the member in the list, click the edit icon
 
 **If the issue persists:**
 
-Contact [support@ente.io](mailto:support@ente.io) with:
+Contact [support@ente.com](mailto:support@ente.com) with:
 
 - Your email address (family plan admin)
 - The family member's email address
@@ -324,7 +324,7 @@ Unfortunately, we cannot apply discount codes retroactively. However, you can:
 2. Wait for the subscription period to end
 3. Resubscribe using the discount code
 
-Contact [support@ente.io](mailto:support@ente.io) if you have questions about your specific situation.
+Contact [support@ente.com](mailto:support@ente.com) if you have questions about your specific situation.
 
 ## Referral Program
 
@@ -423,7 +423,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 - Invoice generation: 1-2 business days
 - Payment confirmation: Depends on blockchain confirmation times (varies by cryptocurrency)
 
-For questions about crypto payments, contact [support@ente.io](mailto:support@ente.io).
+For questions about crypto payments, contact [support@ente.com](mailto:support@ente.com).
 
 ### Does Ente store my card details? {#card-security}
 
@@ -482,7 +482,7 @@ When your subscription expires, you enter a **30-day grace period** before your 
 Yes! If you had data exceeding the free 10 GB limit and your subscription expired:
 
 - Your data enters the 30-day grace period
-- To restore access to your data on the free plan, contact [support@ente.io](mailto:support@ente.io)
+- To restore access to your data on the free plan, contact [support@ente.com](mailto:support@ente.com)
 - We can restore your account to the free plan if you're within the grace period
 - You'll need to delete data to get under the 10 GB limit
 
@@ -567,7 +567,7 @@ You're 10 days into a 500 GB monthly plan ($5/month) and downgrade to 100 GB mon
 
 **Want a refund instead of credit?**
 
-If you prefer to have your credit refunded to your original payment method instead of storing it for future invoices, contact [support@ente.io](mailto:support@ente.io) and we'll assist you.
+If you prefer to have your credit refunded to your original payment method instead of storing it for future invoices, contact [support@ente.com](mailto:support@ente.com) and we'll assist you.
 
 ### Can I switch between monthly and yearly plans? {#switch-billing-cycle}
 
@@ -604,7 +604,7 @@ You can also access this via Settings > Account > Manage subscription > Manage p
 
 You will be able to see all of your previous invoices, with details regarding their payment status. In case of failed payments, you will also have an option to retry those charges.
 
-If you would like to change your payment method entirely (e.g., switch between App Store, Play Store, PayPal, or crypto), please contact [support@ente.io](mailto:support@ente.io).
+If you would like to change your payment method entirely (e.g., switch between App Store, Play Store, PayPal, or crypto), please contact [support@ente.com](mailto:support@ente.com).
 
 ### How can I cancel my subscription? {#cancel-subscription}
 
@@ -644,6 +644,6 @@ This will mark the account as active.
 
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
-Contact support at [support@ente.io](mailto:support@ente.io) and share a
+Contact support at [support@ente.com](mailto:support@ente.com) and share a
 screenshot of the `Settings > Account` page showing the registered email address
 (green box), so we can verify the account.

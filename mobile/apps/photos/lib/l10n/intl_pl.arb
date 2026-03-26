@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -755,7 +755,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -803,7 +803,7 @@
   "subscription": "Subskrypcja",
   "paymentDetails": "Szczegóły płatności",
   "manageFamily": "Zarządzaj Rodziną",
-  "contactToManageSubscription": "Skontaktuj się z nami pod adresem support@ente.io, aby zarządzać subskrypcją {provider}.",
+  "contactToManageSubscription": "Skontaktuj się z nami pod adresem support@ente.com, aby zarządzać subskrypcją {provider}.",
   "renewSubscription": "Odnów subskrypcję",
   "cancelSubscription": "Anuluj subskrypcję",
   "areYouSureYouWantToRenew": "Czy na pewno chcesz odnowić?",
@@ -853,7 +853,7 @@
   "visitWebToManage": "Odwiedź stronę web.ente.io, aby zarządzać subskrypcją",
   "managePaymentMethod": "Zarządzaj formami płatności",
   "couldNotUpdateSubscription": "Nie można było zaktualizować subskrybcji",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Skontaktuj się z support@ente.io i z przyjemnością pomożemy!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Skontaktuj się z support@ente.com i z przyjemnością pomożemy!",
   "paymentFailed": "Płatność się nie powiodła",
   "paymentFailedTalkToProvider": "Porozmawiaj ze wsparciem {providerName} jeśli zostałeś obciążony",
   "@paymentFailedTalkToProvider": {

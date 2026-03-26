@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -648,7 +648,7 @@
   "subscription": "Prenumeration",
   "paymentDetails": "Betalningsdetaljer",
   "manageFamily": "Hantera familj",
-  "contactToManageSubscription": "Kontakta oss på support@ente.io för att hantera din {provider} prenumeration.",
+  "contactToManageSubscription": "Kontakta oss på support@ente.com för att hantera din {provider} prenumeration.",
   "renewSubscription": "Förnya prenumeration",
   "cancelSubscription": "Avbryt prenumeration",
   "areYouSureYouWantToRenew": "Är du säker på att du vill förnya?",
@@ -697,7 +697,7 @@
   "subAlreadyLinkedErrMessage": "Din {id} är redan kopplad till ett annat Ente-konto.\nOm du vill använda din {id} med detta konto, vänligen kontakta vår support",
   "visitWebToManage": "Vänligen besök web.ente.io för att hantera ditt abonnemang",
   "couldNotUpdateSubscription": "Kunde inte uppdatera prenumeration",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vänligen kontakta support@ente.io så hjälper vi gärna till!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vänligen kontakta support@ente.com så hjälper vi gärna till!",
   "paymentFailed": "Betalning misslyckades",
   "paymentFailedTalkToProvider": "Prata med {providerName} support om du debiterades",
   "@paymentFailedTalkToProvider": {

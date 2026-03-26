@@ -77,7 +77,7 @@ and stay updated:
 
 If you encounter any issues with any of the products that's not answered by our
 documentation, please reach out to our team by sending an email to
-[support@ente.io](mailto:support@ente.io).
+[support@ente.com](mailto:support@ente.com).
 
 For community support, please post your queries on our
 [Discord](https://discord.gg/z2YVKkycX3) server.

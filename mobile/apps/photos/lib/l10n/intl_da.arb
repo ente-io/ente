@@ -121,7 +121,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -304,7 +304,7 @@
   "backedUpFolders": "Sikkerhedskopierede mapper",
   "freeUpDeviceSpace": "Frigør enhedsplads",
   "couldNotUpdateSubscription": "Abonnementet kunne ikke opdateres.",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Kontakt support@ente.io og vi vil være glade for at hjælpe!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Kontakt support@ente.com og vi vil være glade for at hjælpe!",
   "loggingOut": "Logger ud...",
   "invite": "Inviter",
   "fileSavedToGallery": "Fil gemt i galleri",

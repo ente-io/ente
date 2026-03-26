@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -708,7 +708,7 @@
   "subscription": "Prenumerata",
   "paymentDetails": "Mokėjimo duomenys",
   "manageFamily": "Tvarkyti šeimą",
-  "contactToManageSubscription": "Susisiekite su mumis adresu support@ente.io, kad sutvarkytumėte savo {provider} prenumeratą.",
+  "contactToManageSubscription": "Susisiekite su mumis adresu support@ente.com, kad sutvarkytumėte savo {provider} prenumeratą.",
   "renewSubscription": "Pratęsti prenumeratą",
   "cancelSubscription": "Atsisakyti prenumeratos",
   "areYouSureYouWantToRenew": "Ar tikrai norite pratęsti?",
@@ -757,7 +757,7 @@
   "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
   "visitWebToManage": "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą",
   "couldNotUpdateSubscription": "Nepavyko atnaujinti prenumeratos",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Susisiekite adresu support@ente.io ir mes mielai padėsime!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Susisiekite adresu support@ente.com ir mes mielai padėsime!",
   "paymentFailed": "Mokėjimas nepavyko",
   "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
   "@paymentFailedTalkToProvider": {

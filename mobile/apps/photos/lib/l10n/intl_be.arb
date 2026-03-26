@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -629,7 +629,7 @@
   "subscription": "Падпіска",
   "paymentDetails": "Падрабязнасці плацяжу",
   "manageFamily": "Кіраванне сям'ёй",
-  "contactToManageSubscription": "Адпраўце ліст на паштовы адрас support@ente.io, каб кіраваць сваёй падпіскай {provider}.",
+  "contactToManageSubscription": "Адпраўце ліст на паштовы адрас support@ente.com, каб кіраваць сваёй падпіскай {provider}.",
   "renewSubscription": "Падоўжыць падпіску",
   "cancelSubscription": "Скасаваць падпіску",
   "areYouSureYouWantToRenew": "Вы сапраўды хочаце падоўжыць?",
@@ -678,7 +678,7 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} ужо звязаны з іншым уліковым запісам Ente.\nКалі вы хочаце выкарыстоўваць ваш {id} з гэтым уліковым запісам, звярніцеся ў нашу службу падтрымкі",
   "visitWebToManage": "Наведайце web.ente.io, каб кіраваць сваёй падпіскай",
   "couldNotUpdateSubscription": "Не ўдалося абнавіць падпіску",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Адпраўце ліст на паштовы адрас support@ente.io і мы будзем рады дапамагчы!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Адпраўце ліст на паштовы адрас support@ente.com і мы будзем рады дапамагчы!",
   "paymentFailed": "Збой плацяжу",
   "paymentFailedTalkToProvider": "Звярніцеся ў падтрымку {providerName}, калі з вас спагналі грашовыя сродкі",
   "@paymentFailedTalkToProvider": {

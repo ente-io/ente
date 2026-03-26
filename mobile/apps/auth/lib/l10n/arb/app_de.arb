@@ -330,7 +330,7 @@
     }
   },
   "sorry": "Entschuldigen Sie",
-  "importFailureDesc": "Ausgewählte Datei ließ sich nicht verarbeiten.\nBitte wenden Sie sich an support@ente.io für Hilfe!",
+  "importFailureDesc": "Ausgewählte Datei ließ sich nicht verarbeiten.\nBitte wenden Sie sich an support@ente.com für Hilfe!",
   "pendingSyncs": "Warnung",
   "pendingSyncsWarningBody": "Einige Codes wurden nicht gesichert.\n\nBitte gehen Sie sicher, dass Sie einen Backupcode für diese Codes haben bevor Sie sich ausloggen.",
   "checkInboxAndSpamFolder": "Bitte überprüfen Sie Ihren E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",

@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -596,7 +596,7 @@
   "appstoreSubscription": "Претплата путем Епл продавнице",
   "visitWebToManage": "Претплатом можете управљати на страници web.ente.io",
   "couldNotUpdateSubscription": "Неуспешно ажурирање претплате",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Контактирајте подршку на support@ente.io и радо ћемо вам помоћи!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Контактирајте подршку на support@ente.com и радо ћемо вам помоћи!",
   "paymentFailed": "Неуспела уплата",
   "continueOnFreeTrial": "Настави бесплатни пробни период",
   "areYouSureYouWantToExit": "Сигурно желите да изађете?",

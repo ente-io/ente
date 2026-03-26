@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -878,7 +878,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -926,7 +926,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Zahlungsdetails",
   "manageFamily": "Familiengruppe verwalten",
-  "contactToManageSubscription": "Bitte kontaktiere uns über support@ente.io, um dein {provider} Abo zu verwalten.",
+  "contactToManageSubscription": "Bitte kontaktiere uns über support@ente.com, um dein {provider} Abo zu verwalten.",
   "renewSubscription": "Abonnement erneuern",
   "cancelSubscription": "Abonnement kündigen",
   "areYouSureYouWantToRenew": "Bist du sicher, dass du verlängern möchtest?",
@@ -976,7 +976,7 @@
   "visitWebToManage": "Bitte rufe \"web.ente.io\" auf, um dein Abo zu verwalten",
   "managePaymentMethod": "Zahlungsmethode verwalten",
   "couldNotUpdateSubscription": "Abo konnte nicht aktualisiert werden",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktieren Sie uns über support@ente.io wo wir Ihnen gerne weiterhelfen.",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktieren Sie uns über support@ente.com wo wir Ihnen gerne weiterhelfen.",
   "paymentFailed": "Zahlung fehlgeschlagen",
   "paymentFailedTalkToProvider": "Bitte kontaktiere den Support von {providerName}, falls etwas abgebucht wurde",
   "@paymentFailedTalkToProvider": {

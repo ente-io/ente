@@ -124,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -586,7 +586,7 @@
   "subscription": "Abonament",
   "paymentDetails": "Detalii de plată",
   "manageFamily": "Administrați familia",
-  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.io pentru a vă gestiona abonamentul {provider}.",
+  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.com pentru a vă gestiona abonamentul {provider}.",
   "renewSubscription": "Reînnoire abonament",
   "cancelSubscription": "Anulare abonament",
   "areYouSureYouWantToRenew": "Sunteți sigur că doriți să reînnoiți?",
@@ -635,7 +635,7 @@
   "subAlreadyLinkedErrMessage": "{id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți {id} cu acest cont, vă rugăm să contactați asistența noastră",
   "visitWebToManage": "Vă rugăm să vizitați web.ente.io pentru a vă gestiona abonamentul",
   "couldNotUpdateSubscription": "Nu s-a putut actualiza abonamentul",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.io și vom fi bucuroși să vă ajutăm!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.com și vom fi bucuroși să vă ajutăm!",
   "paymentFailed": "Plata nu a reușit",
   "paymentFailedTalkToProvider": "Vă rugăm să vorbiți cu asistența {providerName} dacă ați fost taxat",
   "@paymentFailedTalkToProvider": {

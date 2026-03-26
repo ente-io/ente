@@ -124,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -587,7 +587,7 @@
   "subscription": "サブスクリプション",
   "paymentDetails": "お支払い情報",
   "manageFamily": "ファミリーの管理",
-  "contactToManageSubscription": "{provider} サブスクリプションを管理するには、support@ente.io までご連絡ください。",
+  "contactToManageSubscription": "{provider} サブスクリプションを管理するには、support@ente.com までご連絡ください。",
   "renewSubscription": "サブスクリプションの更新",
   "cancelSubscription": "サブスクリプションをキャンセル",
   "areYouSureYouWantToRenew": "更新してもよろしいですか？",

@@ -74,7 +74,7 @@ password and recovery key, we cannot recover your account or data due to our
 end-to-end encrypted architecture.
 
 If you wish to delete your account in such scenarios, please reach out to
-support@ente.io and we will help you out.
+support@ente.com and we will help you out.
 
 ### What is my recovery key and why is it critical? {#recovery-key-importance}
 
@@ -138,7 +138,7 @@ If you've forgotten your password and are logged out everywhere:
 
 - **"Invalid recovery key"**: Check for typos, extra spaces, or missing words
 - **Recovery key not working**: Make sure you're using the recovery key (24 words), not a verification code (6 digits)
-- **Still can't access account**: Contact [support@ente.io](mailto:support@ente.io) - we may be able to help verify account ownership for account deletion, but cannot recover your data
+- **Still can't access account**: Contact [support@ente.com](mailto:support@ente.com) - we may be able to help verify account ownership for account deletion, but cannot recover your data
 
 ### Can I change my password? {#change-password}
 

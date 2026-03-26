@@ -164,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -732,7 +732,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -780,7 +780,7 @@
   "subscription": "Abonelik",
   "paymentDetails": "Ödeme detayları",
   "manageFamily": "Aileyi yönet",
-  "contactToManageSubscription": "Lütfen {provider} aboneliğinizi yönetmek için support@ente.io adresinden bizimle iletişime geçin.",
+  "contactToManageSubscription": "Lütfen {provider} aboneliğinizi yönetmek için support@ente.com adresinden bizimle iletişime geçin.",
   "renewSubscription": "Abonelik yenileme",
   "cancelSubscription": "Abonelik iptali",
   "areYouSureYouWantToRenew": "Yenilemek istediğinize emin misiniz?",
@@ -830,7 +830,7 @@
   "visitWebToManage": "Aboneliğinizi yönetmek için lütfen web.ente.io adresini ziyaret edin",
   "managePaymentMethod": "Ödeme yöntemini yönet",
   "couldNotUpdateSubscription": "Abonelikler kaydedilemedi",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Lütfen support@ente.io ile iletişime geçin; size yardımcı olmaktan memnuniyet duyarız!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Lütfen support@ente.com ile iletişime geçin; size yardımcı olmaktan memnuniyet duyarız!",
   "paymentFailed": "Ödeme başarısız oldu",
   "paymentFailedTalkToProvider": "Sizden ücret alındıysa lütfen {providerName} destek ekibiyle görüşün",
   "@paymentFailedTalkToProvider": {

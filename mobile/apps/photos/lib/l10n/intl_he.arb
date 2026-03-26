@@ -121,7 +121,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -507,7 +507,7 @@
   "subscription": "מנוי",
   "paymentDetails": "פרטי תשלום",
   "manageFamily": "נהל משפחה",
-  "contactToManageSubscription": "אנא צור איתנו קשר ב-support@ente.io על מנת לנהל את המנוי {provider}.",
+  "contactToManageSubscription": "אנא צור איתנו קשר ב-support@ente.com על מנת לנהל את המנוי {provider}.",
   "renewSubscription": "חדש מנוי",
   "cancelSubscription": "בטל מנוי",
   "areYouSureYouWantToRenew": "אתה בטוח שאתה רוצה לחדש?",
@@ -555,7 +555,7 @@
   "appstoreSubscription": "מנוי AppStore",
   "visitWebToManage": "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך",
   "couldNotUpdateSubscription": "לא ניתן לעדכן את המנוי",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "אנא צור קשר עם support@ente.io ואנחנו נשמח לעזור!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "אנא צור קשר עם support@ente.com ואנחנו נשמח לעזור!",
   "paymentFailed": "התשלום נכשל",
   "paymentFailedTalkToProvider": "אנא דבר עם התמיכה של {providerName} אם אתה חוייבת",
   "@paymentFailedTalkToProvider": {

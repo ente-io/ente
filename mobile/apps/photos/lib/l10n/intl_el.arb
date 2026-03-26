@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -540,7 +540,7 @@
     "type": "text"
   },
   "couldNotUpdateSubscription": "Αδυναμία ενημέρωσης συνδρομής",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Παρακαλούμε επικοινωνήστε με το support@ente.io και θα χαρούμε να βοηθήσουμε!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Παρακαλούμε επικοινωνήστε με το support@ente.com και θα χαρούμε να βοηθήσουμε!",
   "paymentFailed": "Η πληρωμή απέτυχε",
   "paymentFailedTalkToProvider": "Παρακαλούμε επικοινωνήστε με την υποστήριξη του {providerName} εάν έχετε χρεωθεί",
   "@paymentFailedTalkToProvider": {

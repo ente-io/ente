@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -721,7 +721,7 @@
   "subscription": "Подписка",
   "paymentDetails": "Платёжные данные",
   "manageFamily": "Управление семьёй",
-  "contactToManageSubscription": "Пожалуйста, свяжитесь с нами по адресу support@ente.io для управления вашей подпиской {provider}.",
+  "contactToManageSubscription": "Пожалуйста, свяжитесь с нами по адресу support@ente.com для управления вашей подпиской {provider}.",
   "renewSubscription": "Продлить подписку",
   "cancelSubscription": "Отменить подписку",
   "areYouSureYouWantToRenew": "Вы уверены, что хотите продлить?",
@@ -770,7 +770,7 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} уже связан с другим аккаунтом Ente.\nЕсли вы хотите использовать {id} с этим аккаунтом, пожалуйста, свяжитесь с нашей службой поддержки",
   "visitWebToManage": "Пожалуйста, посетите web.ente.io для управления вашей подпиской",
   "couldNotUpdateSubscription": "Не удалось обновить подписку",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.io, и мы будем рады помочь!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.com, и мы будем рады помочь!",
   "paymentFailed": "Платёж не удался",
   "paymentFailedTalkToProvider": "Пожалуйста, обратитесь в поддержку {providerName}, если с вас сняли деньги",
   "@paymentFailedTalkToProvider": {

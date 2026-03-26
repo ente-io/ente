@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -603,7 +603,7 @@
   "subscription": "Langganan",
   "paymentDetails": "Rincian pembayaran",
   "manageFamily": "Atur Keluarga",
-  "contactToManageSubscription": "Silakan hubungi kami di support@ente.io untuk mengatur langganan {provider} kamu.",
+  "contactToManageSubscription": "Silakan hubungi kami di support@ente.com untuk mengatur langganan {provider} kamu.",
   "renewSubscription": "Perpanjang langganan",
   "cancelSubscription": "Batalkan langganan",
   "areYouSureYouWantToRenew": "Apakah kamu yakin ingin memperpanjang?",
@@ -652,7 +652,7 @@
   "subAlreadyLinkedErrMessage": "{id} kamu telah terhubung dengan akun Ente lain.\nJika kamu ingin menggunakan {id} kamu untuk akun ini, silahkan hubungi tim bantuan kami",
   "visitWebToManage": "Silakan buka web.ente.io untuk mengatur langgananmu",
   "couldNotUpdateSubscription": "Tidak dapat memperbarui langganan",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Silakan hubungi support@ente.io dan kami akan dengan senang hati membantu!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Silakan hubungi support@ente.com dan kami akan dengan senang hati membantu!",
   "paymentFailed": "Pembayaran gagal",
   "paymentFailedTalkToProvider": "Harap hubungi dukungan {providerName} jika kamu dikenai biaya",
   "@paymentFailedTalkToProvider": {

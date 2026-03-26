@@ -162,7 +162,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -721,7 +721,7 @@
   "subscription": "Předplatné",
   "paymentDetails": "Platební údaje",
   "manageFamily": "Spravovat rodinu",
-  "contactToManageSubscription": "Kontaktujte nás prosím na adrese support@ente.io pro správu Vašeho {provider} předplatného.",
+  "contactToManageSubscription": "Kontaktujte nás prosím na adrese support@ente.com pro správu Vašeho {provider} předplatného.",
   "renewSubscription": "Obnovit předplatné",
   "cancelSubscription": "Zrušit předplatné",
   "areYouSureYouWantToRenew": "Opravdu chcete obnovit?",
@@ -770,7 +770,7 @@
   "subAlreadyLinkedErrMessage": "Vaše {id} je již propojeno s jiným účtem Ente.\nPokud chcete použít své {id} s tímto účtem, kontaktujte prosím naši podporu",
   "visitWebToManage": "Pro správu předplatného navštivte prosím web.ente.io",
   "couldNotUpdateSubscription": "Předplatné nelze aktualizovat",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Kontaktujte nás na adrese support@ente.io a rádi Vám pomůžeme!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Kontaktujte nás na adrese support@ente.com a rádi Vám pomůžeme!",
   "paymentFailed": "Platba se nezdařila",
   "paymentFailedTalkToProvider": "Pokud Vám byla účtována platba, obraťte se prosím na podporu {providerName}",
   "@paymentFailedTalkToProvider": {

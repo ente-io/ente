@@ -87,7 +87,7 @@ class SupportPage extends StatelessWidget {
     final l10n = context.l10n;
     await sendLogs(
       context,
-      "support@ente.io",
+      "support@ente.com",
       dialogBody: l10n.logsDialogBodyLocker,
     );
   }

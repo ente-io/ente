@@ -164,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -734,7 +734,7 @@
   "subscription": "Suscripción",
   "paymentDetails": "Detalles de pago",
   "manageFamily": "Administrar familia",
-  "contactToManageSubscription": "Por favor, contáctanos en support@ente.io para gestionar tu suscripción a {provider}.",
+  "contactToManageSubscription": "Por favor, contáctanos en support@ente.com para gestionar tu suscripción a {provider}.",
   "renewSubscription": "Renovar suscripción",
   "cancelSubscription": "Cancelar suscripción",
   "areYouSureYouWantToRenew": "¿Estás seguro de que quieres renovar?",
@@ -784,7 +784,7 @@
   "visitWebToManage": "Por favor, visita web.ente.io para administrar tu suscripción",
   "managePaymentMethod": "Gestionar métodos de pago",
   "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.io y estaremos encantados de ayudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.com y estaremos encantados de ayudar!",
   "paymentFailed": "Pago fallido",
   "paymentFailedTalkToProvider": "Por favor, habla con el soporte de {providerName} si se te cobró",
   "@paymentFailedTalkToProvider": {

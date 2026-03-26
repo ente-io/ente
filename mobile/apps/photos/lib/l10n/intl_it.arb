@@ -132,7 +132,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -631,7 +631,7 @@
   "subscription": "Abbonamento",
   "paymentDetails": "Dettagli di Pagamento",
   "manageFamily": "Gestisci Piano famiglia",
-  "contactToManageSubscription": "Scrivi all'indirizzo support@ente.io per gestire il tuo abbonamento {provider}.",
+  "contactToManageSubscription": "Scrivi all'indirizzo support@ente.com per gestire il tuo abbonamento {provider}.",
   "renewSubscription": "Rinnova abbonamento",
   "cancelSubscription": "Annulla abbonamento",
   "areYouSureYouWantToRenew": "Vuoi davvero rinnovare?",
@@ -680,7 +680,7 @@
   "subAlreadyLinkedErrMessage": "Il tuo {id} è già collegato a un altro account Ente.\nSe desideri utilizzare il tuo {id} con questo account, per favore contatta il nostro supporto''",
   "visitWebToManage": "Visita web.ente.io per gestire il tuo abbonamento",
   "couldNotUpdateSubscription": "Impossibile aggiornare l'abbonamento",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Contatta support@ente.io e saremo felici di aiutarti!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Contatta support@ente.com e saremo felici di aiutarti!",
   "paymentFailed": "Pagamento non riuscito",
   "paymentFailedTalkToProvider": "Si prega di parlare con il supporto di {providerName} se ti è stato addebitato qualcosa",
   "@paymentFailedTalkToProvider": {

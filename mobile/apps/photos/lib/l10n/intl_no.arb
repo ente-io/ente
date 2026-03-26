@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -603,7 +603,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Betalingsinformasjon",
   "manageFamily": "Administrer familie",
-  "contactToManageSubscription": "Kontakt oss på support@ente.io for å administrere ditt {provider} abonnement.",
+  "contactToManageSubscription": "Kontakt oss på support@ente.com for å administrere ditt {provider} abonnement.",
   "renewSubscription": "Forny abonnement",
   "cancelSubscription": "Avslutt abonnement",
   "areYouSureYouWantToRenew": "Er du sikker på at du vil fornye?",
@@ -652,7 +652,7 @@
   "subAlreadyLinkedErrMessage": "Din {id} er allerede koblet til en annen Ente-konto.\nHvis du ønsker å bruke din {id} med denne kontoen, vennligst kontakt vår brukerstøtte''",
   "visitWebToManage": "Vennligst besøk web.ente.io for å administrere abonnementet",
   "couldNotUpdateSubscription": "Kunne ikke oppdatere abonnement",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vennligst kontakt support@ente.io og vi vil gjerne hjelpe!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vennligst kontakt support@ente.com og vi vil gjerne hjelpe!",
   "paymentFailed": "Betaling feilet",
   "paymentFailedTalkToProvider": "Snakk med {providerName} kundestøtte hvis du ble belastet",
   "@paymentFailedTalkToProvider": {

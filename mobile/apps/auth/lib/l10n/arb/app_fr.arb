@@ -333,7 +333,7 @@
     }
   },
   "sorry": "Désolé",
-  "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.io si vous avez besoin d'aide !",
+  "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.com si vous avez besoin d'aide !",
   "pendingSyncs": "Attention",
   "pendingSyncsWarningBody": "Certains de vos codes n'ont pas été sauvegardés.\n\nVeuillez vous assurer que vous avez une sauvegarde de ces codes avant de vous déconnecter.",
   "checkInboxAndSpamFolder": "Veuillez consulter votre boîte de courriels (et les spam) pour compléter la vérification",

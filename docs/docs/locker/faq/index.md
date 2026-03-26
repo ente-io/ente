@@ -191,4 +191,4 @@ Jump to a category:
 - Check the [Getting Started guide](/locker/getting-started/)
 - Check the [Family Setup guide](/locker/getting-started/family-setup)
 - Visit the [main Locker documentation](/locker/)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)
