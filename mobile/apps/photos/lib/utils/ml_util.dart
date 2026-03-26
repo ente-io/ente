@@ -81,6 +81,16 @@ class RemoteMLHydrationSummary {
   });
 }
 
+class _OnlineMLIndexingCandidates {
+  final List<FileMLInstruction> matched;
+  final List<FileMLInstruction> unmatched;
+
+  const _OnlineMLIndexingCandidates({
+    required this.matched,
+    required this.unmatched,
+  });
+}
+
 Future<IndexStatus> getIndexStatus() async {
   try {
     final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
@@ -116,9 +126,8 @@ Future<IndexStatus> getIndexStatus() async {
 // when local indexing is disabled.
 int _lastFetchTimeForOthersIndexed = 0;
 
-/// Return a list of file instructions for files that should be indexed for ML
-Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
-  _logger.info('getFilesForMlIndexing called');
+Future<_OnlineMLIndexingCandidates>
+    _getOnlineFilesForMlIndexingCandidates() async {
   final mlDataDB = MLDataDB.instance;
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
@@ -199,14 +208,15 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
       continue;
     }
-    final instruction = FileMLInstruction(
-      file: enteFile,
-      mode: MLMode.online,
-      shouldRunFaces: shouldRunFaces,
-      shouldRunClip: shouldRunClip,
-      shouldRunPets: shouldRunPets,
+    hiddenFilesToIndex.add(
+      FileMLInstruction(
+        file: enteFile,
+        mode: MLMode.online,
+        shouldRunFaces: shouldRunFaces,
+        shouldRunClip: shouldRunClip,
+        shouldRunPets: shouldRunPets,
+      ),
     );
-    hiddenFilesToIndex.add(instruction);
   }
   final sortedBylocalID = <FileMLInstruction>[
     ...filesWithLocalID,
@@ -220,11 +230,21 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info(
     "Getting list of  ${sortedBylocalID.length} files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
+  return _OnlineMLIndexingCandidates(
+    matched: splitResult.matched,
+    unmatched: splitResult.unmatched,
+  );
+}
+
+/// Return a list of file instructions for files that should be indexed for ML
+Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
+  _logger.info('getFilesForMlIndexing called');
+  final candidateSplit = await _getOnlineFilesForMlIndexingCandidates();
   if (!localSettings.isMLLocalIndexingEnabled) {
     final time = DateTime.now().millisecondsSinceEpoch;
     if ((time - _lastFetchTimeForOthersIndexed) > 1000 * 60 * 60 * 24) {
       final filesOwnedByOthers = [];
-      for (final instruction in splitResult.unmatched) {
+      for (final instruction in candidateSplit.unmatched) {
         if (instruction.file.isUploaded && !instruction.file.isOwner) {
           filesOwnedByOthers.add(instruction);
         }
@@ -233,11 +253,11 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       _logger.info(
         'Checking index for ${filesOwnedByOthers.length} owned by others',
       );
-      return [...splitResult.matched, ...filesOwnedByOthers];
+      return [...candidateSplit.matched, ...filesOwnedByOthers];
     }
-    return splitResult.matched;
+    return candidateSplit.matched;
   }
-  return [...splitResult.matched, ...splitResult.unmatched];
+  return [...candidateSplit.matched, ...candidateSplit.unmatched];
 }
 
 Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
@@ -373,19 +393,9 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
 Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   required MLDataDB mlDataDB,
 }) async {
-  final filesWithRemoteML = await mlDataDB.getFileIDsWithFDData(
-    type: DataType.mlData,
-  );
-  if (filesWithRemoteML.isEmpty) {
-    return const RemoteMLHydrationSummary();
-  }
-
-  final filesToIndex = await getFilesForMlIndexing();
-  final ownedCandidates = filesToIndex.where((instruction) {
-    final uploadedFileID = instruction.file.uploadedFileID;
-    return uploadedFileID != null &&
-        instruction.file.isOwner &&
-        filesWithRemoteML.contains(uploadedFileID) &&
+  final candidateSplit = await _getOnlineFilesForMlIndexingCandidates();
+  final ownedCandidates = candidateSplit.matched.where((instruction) {
+    return instruction.file.isOwner &&
         (instruction.shouldRunFaces || instruction.shouldRunClip);
   }).toList();
   if (ownedCandidates.isEmpty) {

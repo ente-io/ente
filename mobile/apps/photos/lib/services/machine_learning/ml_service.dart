@@ -219,7 +219,15 @@ class MLService {
       );
       return;
     }
-    await hydrateRemoteEmbeddingsForOwnedFiles(reason: "startup");
+    try {
+      await hydrateRemoteEmbeddingsForOwnedFiles(reason: "startup");
+    } catch (e, s) {
+      _logger.warning(
+        "Skipping startup-owned remote ML hydration because owned hydration failed",
+        e,
+        s,
+      );
+    }
   }
 
   Future<void> hydrateRemoteEmbeddingsForOwnedFiles({
@@ -238,7 +246,7 @@ class MLService {
       );
       return existing;
     }
-    final future = _hydrateRemoteEmbeddingsForOwnedFilesInternal(
+    final future = _runOwnedRemoteHydrationSafely(
       reason: reason,
     );
     _ownedRemoteHydrationFuture = future;
@@ -248,6 +256,16 @@ class MLService {
       if (identical(_ownedRemoteHydrationFuture, future)) {
         _ownedRemoteHydrationFuture = null;
       }
+    }
+  }
+
+  Future<void> _runOwnedRemoteHydrationSafely({
+    required String reason,
+  }) async {
+    try {
+      await _hydrateRemoteEmbeddingsForOwnedFilesInternal(reason: reason);
+    } catch (e, s) {
+      _logger.warning("Owned remote ML hydration ($reason) failed", e, s);
     }
   }
 
@@ -276,7 +294,15 @@ class MLService {
     _logger.info(
       "Waiting for owned remote ML hydration to finish before indexing",
     );
-    await existing;
+    try {
+      await existing;
+    } catch (e, s) {
+      _logger.warning(
+        "Owned remote ML hydration failed while indexing was waiting, continuing",
+        e,
+        s,
+      );
+    }
   }
 
   bool canFetch() {
