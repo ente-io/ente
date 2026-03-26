@@ -321,8 +321,7 @@ class RemoteAssetsService {
       if (existingBytes > 0 && _shouldRestartDownloadFromScratch(e)) {
         _logger.info("Restarting resumable download from scratch for $url");
         await _clearResumeArtifacts(savePath);
-        await _writeResumeMetadata(savePath, metadata);
-        await _startResumableDownload(url, savePath, probe, 0);
+        await _downloadFile(url, savePath);
         return;
       }
       rethrow;
@@ -380,6 +379,7 @@ class RemoteAssetsService {
         deleteOnError: false,
         fileAccessMode: FileAccessMode.append,
         options: Options(
+          receiveDataWhenStatusError: false,
           headers: {
             HttpHeaders.rangeHeader: "bytes=$existingBytes-",
             HttpHeaders.ifRangeHeader: probe.ifRangeValidator!,
