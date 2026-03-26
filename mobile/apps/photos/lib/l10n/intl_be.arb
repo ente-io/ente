@@ -27,7 +27,7 @@
   "deleteReason4": "Прычына адсутнічае ў спісе",
   "sendEmail": "Адправіць ліст",
   "deleteRequestSLAText": "Ваш запыт будзе апрацаваны цягам 72 гадзін.",
-  "deleteEmailRequest": "Адпраўце ліст на <warning>account-deletion@ente.io</warning> з вашага зарэгістраванага адраса электроннай пошты.",
+  "deleteEmailRequest": "Адпраўце ліст на <warning>account-deletion@ente.com</warning> з вашага зарэгістраванага адраса электроннай пошты.",
   "entePhotosPerm": "Праграме <i>неабходны доступ</i> для захавання вашых фатаграфій",
   "ok": "OK",
   "createAccount": "Стварыць уліковы запіс",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -281,7 +281,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

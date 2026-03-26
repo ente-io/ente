@@ -128,4 +128,4 @@ available:
    [GitHub](https://github.com/ente-io/ente/issues)
 
 For security vulnerabilities, please email
-[security@ente.io](mailto:security@ente.io) directly.
+[security@ente.com](mailto:security@ente.com) directly.

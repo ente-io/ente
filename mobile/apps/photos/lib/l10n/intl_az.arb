@@ -28,7 +28,7 @@
   "deleteReason4": "Səbəbim siyahıda yoxdur",
   "sendEmail": "E-poçtu göndər",
   "deleteRequestSLAText": "Sorğunuz 72 saat ərzində icra olunacaq.",
-  "deleteEmailRequest": "Zəhmət olmasa, qeydiyyatdan keçdiyiniz e-poçt ünvanından <warning>account-deletion@ente.io</warning> ünvanına e-poçt göndərin.",
+  "deleteEmailRequest": "Zəhmət olmasa, qeydiyyatdan keçdiyiniz e-poçt ünvanından <warning>account-deletion@ente.com</warning> ünvanına e-poçt göndərin.",
   "entePhotosPerm": "Ente şəkillərinizi qorumaq üçün <i>icazə tələb edir</i>",
   "ok": "Bəli",
   "createAccount": "Hesab yarat",
@@ -76,7 +76,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -87,7 +87,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -310,7 +310,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

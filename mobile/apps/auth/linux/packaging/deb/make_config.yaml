@@ -4,7 +4,7 @@ include_build_number: false
 
 maintainer:
   name: Ente.io Developers
-  email: auth@ente.io
+  email: auth@ente.com
 priority: optional
 section: x11
 essential: false

@@ -597,4 +597,4 @@ If the automatic email doesn't work, send logs directly to [support@ente.com](ma
 3. **Email us at [support@ente.com](mailto:support@ente.com)** with details about your issue
 4. **Report bugs on [GitHub](https://github.com/ente-io/ente/issues)** if you've found a technical issue
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

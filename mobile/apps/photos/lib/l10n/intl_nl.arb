@@ -26,7 +26,7 @@
   "deleteReason4": "Mijn reden wordt niet vermeld",
   "sendEmail": "E-mail versturen",
   "deleteRequestSLAText": "Je verzoek wordt binnen 72 uur verwerkt.",
-  "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.io</warning> vanaf het door jou geregistreerde e-mailadres.",
+  "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.com</warning> vanaf het door jou geregistreerde e-mailadres.",
   "entePhotosPerm": "Ente <i>heeft toestemming nodig om</i> je foto's te bewaren",
   "ok": "Oké",
   "createAccount": "Maak account",
@@ -72,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -275,7 +275,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

@@ -26,7 +26,7 @@
   "deleteReason4": "Мој разлог није на листи",
   "sendEmail": "Пошаљи е-пошту",
   "deleteRequestSLAText": "Ваш захтев ће бити обрађен у року од 72 сата.",
-  "deleteEmailRequest": "Молимо пошаљите имејл на <warning>account-deletion@ente.io</warning> са ваше регистроване адресе е-поште.",
+  "deleteEmailRequest": "Молимо пошаљите имејл на <warning>account-deletion@ente.com</warning> са ваше регистроване адресе е-поште.",
   "entePhotosPerm": "Енте-у <i>је потребна дозвола да</i> сачува ваше фотографије",
   "ok": "Ок",
   "createAccount": "Направи налог",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -252,7 +252,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

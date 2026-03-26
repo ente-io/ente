@@ -27,7 +27,7 @@
   "deleteReason4": "Причина не перерахована",
   "sendEmail": "Надіслати електронного листа",
   "deleteRequestSLAText": "Ваш запит буде оброблений протягом 72 годин.",
-  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.io</warning> зі скриньки, зазначеної при реєстрації.",
+  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.com</warning> зі скриньки, зазначеної при реєстрації.",
   "entePhotosPerm": "Ente <i>потребує дозволу</i> до ваших світлин",
   "ok": "Добре",
   "createAccount": "Створити обліковий запис",
@@ -71,7 +71,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -274,7 +274,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

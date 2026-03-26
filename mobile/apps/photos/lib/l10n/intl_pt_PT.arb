@@ -26,7 +26,7 @@
   "deleteReason4": "A razão não está listada",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "O pedido será revisto dentre 72 horas.",
-  "deleteEmailRequest": "Favor, envie um e-mail a <warning>account-deletion@ente.io</warning> do e-mail registado.",
+  "deleteEmailRequest": "Favor, envie um e-mail a <warning>account-deletion@ente.com</warning> do e-mail registado.",
   "entePhotosPerm": "Ente <i>precisa da permissão para</i> preservar as suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -257,7 +257,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

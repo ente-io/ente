@@ -25,7 +25,7 @@
   "deleteReason4": "Motivul meu nu apare",
   "sendEmail": "Trimiteți e-mail",
   "deleteRequestSLAText": "Solicitarea dvs. va fi procesată în 72 de ore.",
-  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.io</warning> de pe adresa dvs. de e-mail înregistrată.",
+  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.com</warning> de pe adresa dvs. de e-mail înregistrată.",
   "entePhotosPerm": "Ente <i>are nevoie de permisiune</i> pentru a vă păstra fotografiile",
   "ok": "Ok",
   "createAccount": "Creare cont",
@@ -61,7 +61,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -256,7 +256,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

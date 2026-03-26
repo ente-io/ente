@@ -29,7 +29,7 @@
   "deleteReason4": "Nedenim listede yok",
   "sendEmail": "E-posta gönder",
   "deleteRequestSLAText": "İsteğiniz 72 saat içinde gerçekleştirilecek.",
-  "deleteEmailRequest": "Lütfen kayıtlı e-posta adresinizden <warning> account-deletion@ente.io</warning>'ya e-posta gönderiniz.",
+  "deleteEmailRequest": "Lütfen kayıtlı e-posta adresinizden <warning> account-deletion@ente.com</warning>'ya e-posta gönderiniz.",
   "entePhotosPerm": "Ente fotoğrafları saklamak için <i>iznine ihtiyaç duyuyor</i>",
   "ok": "Tamam",
   "createAccount": "Hesap oluşturun",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -313,7 +313,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

@@ -26,7 +26,7 @@
   "deleteReason4": "Årsaken min er ikke oppført",
   "sendEmail": "Send e-post",
   "deleteRequestSLAText": "Forespørselen din vil bli behandlet innen 72 timer.",
-  "deleteEmailRequest": "Vennligst send en e-post til <warning>account-deletion@ente.io</warning> fra din registrerte e-postadresse.",
+  "deleteEmailRequest": "Vennligst send en e-post til <warning>account-deletion@ente.com</warning> fra din registrerte e-postadresse.",
   "entePhotosPerm": "Ente <i>trenger tillatelse</i> for å bevare bildene dine",
   "ok": "Ok",
   "createAccount": "Opprett konto",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -257,7 +257,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

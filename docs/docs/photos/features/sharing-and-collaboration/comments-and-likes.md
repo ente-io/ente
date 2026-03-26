@@ -2,7 +2,7 @@
 title: Comments and Likes
 description: Engage with photos and videos in shared albums through comments and likes
 author: shanthy17
-author_email: shanthy@ente.io
+author_email: shanthy@ente.com
 ---
 
 # Comments and Likes

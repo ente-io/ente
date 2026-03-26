@@ -24,7 +24,7 @@
   "deleteReason4": "Min grund er ikke angivet",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Din anmodning vil blive behandlet inden for 72 timer.",
-  "deleteEmailRequest": "Send venligst en email til <warning>account-deletion@ente.io</warning> fra din registrerede email adresse.",
+  "deleteEmailRequest": "Send venligst en email til <warning>account-deletion@ente.com</warning> fra din registrerede email adresse.",
   "ok": "Ok",
   "createAccount": "Opret konto",
   "createNewAccount": "Opret en ny konto",
@@ -59,7 +59,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

@@ -27,7 +27,7 @@
   "deleteReason4": "其他原因",
   "sendEmail": "发送电子邮件",
   "deleteRequestSLAText": "您的请求将在 72 小时内处理。",
-  "deleteEmailRequest": "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.io</warning>。",
+  "deleteEmailRequest": "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.com</warning>。",
   "entePhotosPerm": "Ente <i>需要许可</i>才能保存您的照片",
   "ok": "Ok",
   "createAccount": "创建账户",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -287,7 +287,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

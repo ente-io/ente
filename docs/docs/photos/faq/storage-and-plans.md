@@ -282,7 +282,7 @@ Yes we do!
 
 We believe that privacy should be made accessible to everyone. In this spirit, we offer **30% off** our subscription plans to students.
 
-To apply for this discount, please verify your enrollment status in a school / college / university by writing to [students@ente.io](mailto:students@ente.io) from the email address assigned to you by your institute.
+To apply for this discount, please verify your enrollment status in a school / college / university by writing to [students@ente.com](mailto:students@ente.com) from the email address assigned to you by your institute.
 
 In case you do not have access to such an email address, please send us proof (such as your institute's identity card) that verifies your identity as a student.
 
@@ -382,7 +382,7 @@ We support **annual** subscriptions over PayPal.
 
 **How to purchase with PayPal:**
 
-1. Email **paypal@ente.io** from your registered Ente email address
+1. Email **paypal@ente.com** from your registered Ente email address
 2. In your email, mention the [storage plan](https://ente.com#pricing) of your choice (e.g., "100 GB annual plan")
 3. We will send you an invoice with a PayPal payment link
 4. Complete the payment through PayPal
@@ -404,7 +404,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 **How to purchase with cryptocurrency:**
 
-1. Email **crypto@ente.io** from your registered Ente email address
+1. Email **crypto@ente.com** from your registered Ente email address
 2. In your email, specify:
     - The [storage plan](https://ente.com#pricing) of your choice
     - Your preferred cryptocurrency

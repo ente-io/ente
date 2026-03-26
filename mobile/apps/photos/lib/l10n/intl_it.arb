@@ -27,7 +27,7 @@
   "deleteReason4": "Il motivo non è elencato",
   "sendEmail": "Invia email",
   "deleteRequestSLAText": "La tua richiesta verrà elaborata entro 72 ore.",
-  "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.io</warning> dal tuo indirizzo email registrato.",
+  "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.com</warning> dal tuo indirizzo email registrato.",
   "entePhotosPerm": "Ente <i>necessita del permesso per</i> preservare le tue foto",
   "ok": "Ok",
   "createAccount": "Crea account",
@@ -69,7 +69,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -273,7 +273,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

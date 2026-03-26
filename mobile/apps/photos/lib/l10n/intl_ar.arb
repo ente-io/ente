@@ -26,7 +26,7 @@
   "deleteReason4": "سببي غير مدرج",
   "sendEmail": "إرسال بريد إلكتروني",
   "deleteRequestSLAText": "ستتم معالجة طلبك خلال 72 ساعة.",
-  "deleteEmailRequest": "أرسل بريدًا إلكترونيًا إلى <warning>account-deletion@ente.io</warning> من عنوان بريدك الإلكتروني المسجل.",
+  "deleteEmailRequest": "أرسل بريدًا إلكترونيًا إلى <warning>account-deletion@ente.com</warning> من عنوان بريدك الإلكتروني المسجل.",
   "entePhotosPerm": "Ente <i>بحاجة إلى إذن</i> لحفظ صورك",
   "ok": "حسنًا",
   "createAccount": "إنشاء حساب",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -257,7 +257,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

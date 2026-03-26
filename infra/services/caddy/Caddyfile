@@ -1,5 +1,5 @@
 {
-	email custom-domains@ente.io
+	email custom-domains@ente.com
 	on_demand_tls {
 		ask https://api.ente.io/custom-domain
 	}

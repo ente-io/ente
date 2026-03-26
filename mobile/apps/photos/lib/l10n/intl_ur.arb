@@ -28,7 +28,7 @@
   "deleteReason4": "میری وجہ فہرست میں نہیں ہے",
   "sendEmail": "ای میل بھیجیں",
   "deleteRequestSLAText": "آپ کی درخواست پر 72 گھنٹوں کے اندر عمل کیا جائے گا.",
-  "deleteEmailRequest": "براہ کرم اپنے رجسٹرڈ ای میل ایڈریس سے <warning>account-deletion@ente.io</warning> پر ای میل بھیجیں.",
+  "deleteEmailRequest": "براہ کرم اپنے رجسٹرڈ ای میل ایڈریس سے <warning>account-deletion@ente.com</warning> پر ای میل بھیجیں.",
   "entePhotosPerm": "Ente کو آپ کی تصاویر محفوظ کرنے کے لیے <i>اجازت درکار ہے</i>",
   "ok": "ٹھیک ہے",
   "createAccount": "اکاؤنٹ بنائیں",
@@ -76,7 +76,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -87,7 +87,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -308,7 +308,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

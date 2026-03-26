@@ -27,7 +27,7 @@
   "deleteReason4": "Mano priežastis nenurodyta",
   "sendEmail": "Siųsti el. laišką",
   "deleteRequestSLAText": "Jūsų prašymas bus apdorotas per 72 valandas.",
-  "deleteEmailRequest": "Iš savo registruoto el. pašto adreso siųskite el. laišką adresu <warning>account-deletion@ente.io</warning>.",
+  "deleteEmailRequest": "Iš savo registruoto el. pašto adreso siųskite el. laišką adresu <warning>account-deletion@ente.com</warning>.",
   "entePhotosPerm": "„Ente“ <i>reikia leidimo</i> išsaugoti jūsų nuotraukas",
   "ok": "Gerai",
   "createAccount": "Kurti paskyrą",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -285,7 +285,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

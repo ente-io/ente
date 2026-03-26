@@ -29,7 +29,7 @@
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
-  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
+  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.com</warning> from your registered email address.",
   "entePhotosPerm": "Ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -315,7 +315,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

@@ -22,7 +22,7 @@
   "deleteReason4": "הסיבה שלי לא כלולה",
   "sendEmail": "שלח דוא\"ל",
   "deleteRequestSLAText": "הבקשה שלך תועבד תוך 72 שעות.",
-  "deleteEmailRequest": "אנא תשלח דוא\"ל ל<warning>account-deletion@ente.io</warning> מהכתובת דוא\"ל שנרשמת איתה.",
+  "deleteEmailRequest": "אנא תשלח דוא\"ל ל<warning>account-deletion@ente.com</warning> מהכתובת דוא\"ל שנרשמת איתה.",
   "entePhotosPerm": "Ente <i>צריך הרשאות על מנת </i> לשמור את התמונות שלך",
   "ok": "אוקיי",
   "createAccount": "צור חשבון",
@@ -58,7 +58,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -250,7 +250,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },

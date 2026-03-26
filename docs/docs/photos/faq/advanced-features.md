@@ -372,4 +372,4 @@ You can:
 2. **Discord**: Join our [Discord community](https://ente.com/discord) for discussions
 3. **Email**: Contact [support@ente.com](mailto:support@ente.com)
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.
