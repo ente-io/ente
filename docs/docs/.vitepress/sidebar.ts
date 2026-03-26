@@ -47,6 +47,10 @@ export const sidebar = [
                         link: "/photos/migration/from-apple-photos/",
                     },
                     {
+                        text: "iCloud Shared Albums",
+                        link: "/photos/migration/from-apple-photos/icloud-shared-albums",
+                    },
+                    {
                         text: "From Amazon Photos",
                         link: "/photos/migration/from-amazon-photos",
                     },
