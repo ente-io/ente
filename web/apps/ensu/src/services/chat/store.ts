@@ -2,7 +2,11 @@ import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
 import { base64ToBytes } from "services/base64";
-import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
+import {
+    decryptAttachmentBytes,
+    deriveAttachmentKeyB64,
+    encryptAttachmentBytes,
+} from "./attachments";
 import {
     allLegacyKeyCandidates,
     cachedLocalChatKey,
@@ -14,6 +18,20 @@ import {
     encryptChatField,
     encryptChatPayload,
 } from "./crypto";
+
+/** SHA-256 fingerprint (first 4 bytes, hex) for safe logging. */
+const shortHash = async (value: string) =>
+    Array.from(
+        new Uint8Array(
+            await crypto.subtle.digest(
+                "SHA-256",
+                new TextEncoder().encode(value),
+            ),
+        ),
+    )
+        .slice(0, 4)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
 const STORAGE_KEY = "ensu.chat.store.v1";
 const NATIVE_MIGRATION_KEY = "ensu.chat.nativeMigration.v2";
@@ -845,6 +863,12 @@ const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
         candidateKeys.push(chatKey);
     }
 
+    log.info("Migration keys", {
+        chatKeyHash: await shortHash(chatKey),
+        candidateCount: candidateKeys.length,
+        sameKey: candidateKeys.length === 1 && candidateKeys[0] === chatKey,
+    });
+
     for (const candidateKey of candidateKeys) {
         try {
             const result = await invokeChat<NativeLegacyMigrationResult>(
@@ -852,7 +876,12 @@ const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
                 { input: { keyB64: chatKey, legacyKeyB64: candidateKey } },
             );
             if (result.didMigrate) {
-                log.info("Migrated legacy native chat store to v2 DB", result);
+                log.info("Migrated legacy native chat store to v2 DB", {
+                    ...result,
+                    chatKeyHash: await shortHash(chatKey),
+                    legacyKeyHash: await shortHash(candidateKey),
+                    keyMatch: chatKey === candidateKey,
+                });
             }
             return;
         } catch (error) {
@@ -1475,6 +1504,14 @@ export const storeEncryptedAttachmentBytes = async (
     chatKey: string,
     sessionUuid: string,
 ) => {
+    const dk = await deriveAttachmentKeyB64(chatKey, sessionUuid);
+    const dkHash = await shortHash(dk);
+    log.info("Encrypting attachment", {
+        id: id.slice(0, 8),
+        session: sessionUuid.slice(0, 8),
+        plainBytes: data.length,
+        dkHash,
+    });
     const encrypted = await encryptAttachmentBytes(data, chatKey, sessionUuid);
     await writeAttachmentBytes(id, encrypted);
 };
@@ -1502,9 +1539,22 @@ export const readDecryptedAttachmentBytes = async (
     sessionUuid: string,
 ): Promise<Uint8Array> => {
     const encrypted = await readAttachmentBytes(id);
+    const dk = await deriveAttachmentKeyB64(chatKey, sessionUuid);
+    const dkHash = await shortHash(dk);
+    log.info("Decrypting attachment", {
+        id: id.slice(0, 8),
+        session: sessionUuid.slice(0, 8),
+        bytes: encrypted.length,
+        dkHash,
+    });
     try {
         return await decryptAttachmentBytes(encrypted, chatKey, sessionUuid);
     } catch (error) {
+        log.warn("Attachment decryption failed", {
+            id: id.slice(0, 8),
+            dkHash,
+            error: String(error),
+        });
         const localKey = cachedLocalChatKey() ?? legacyLocalChatKey();
         if (!localKey || localKey === chatKey) {
             throw error;
