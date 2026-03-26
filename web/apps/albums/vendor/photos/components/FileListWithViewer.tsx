@@ -5,18 +5,19 @@ import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     FileViewer,
     type FileViewerInitialSidebar,
-    type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
-import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
-import { moveToTrash } from "ente-new/photos/services/collection";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+    type ComponentProps,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { uploadManager } from "services/upload-manager";
 import {
     FileList,
     type FileListAnnotatedFile,
@@ -29,21 +30,6 @@ export type FileListWithViewerProps = {
      */
     files: EnteFile[];
     enableDownload?: boolean;
-    enableImageEditing?: boolean;
-    /**
-     * Called when the component wants to mark the given files as deleted in the
-     * the in-memory, unsynced, state maintained by the top level gallery.
-     *
-     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
-     * reducer's documentation.
-     *
-     * Not set in the context of the shared albums app.
-     */
-    onMarkTempDeleted?: (files: EnteFile[]) => void;
-    /**
-     * Called when the visibility of the file viewer dialog changes.
-     */
-    onSetOpenFileViewer?: (open: boolean) => void;
     /**
      * Called when an action in the file viewer requires us to perform a full
      * pull from remote.
@@ -71,11 +57,6 @@ export type FileListWithViewerProps = {
      * progress of user-initiated download, and to cancel it if needed.
      */
     onAddSaveGroup: AddSaveGroup;
-
-    onAddFileToCollection?: (
-        file: EnteFile,
-        sourceCollectionSummaryID?: number,
-    ) => void;
 } & Pick<
     FileListProps,
     | "layout"
@@ -87,22 +68,8 @@ export type FileListWithViewerProps = {
     | "activeCollectionID"
 > &
     Pick<
-        FileViewerProps,
-        | "user"
-        | "isInIncomingSharedCollection"
-        | "isInHiddenSection"
-        | "fileNormalCollectionIDs"
-        | "collectionSummaries"
-        | "collectionNameByID"
-        | "pendingFavoriteUpdates"
-        | "pendingVisibilityUpdates"
-        | "onRemoteFilesPull"
+        ComponentProps<typeof FileViewer>,
         | "onVisualFeedback"
-        | "onToggleFavorite"
-        | "onFileVisibilityUpdate"
-        | "onSendLink"
-        | "onSelectCollection"
-        | "onSelectPerson"
         | "publicAlbumsCredentials"
         | "collectionKey"
         | "onJoinAlbum"
@@ -119,33 +86,15 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     layout,
     header,
     footer,
-    user,
     files,
     enableDownload,
-    enableImageEditing = true,
     enableSelect,
     selected,
     setSelected,
     activeCollectionID,
-    isInIncomingSharedCollection,
-    isInHiddenSection,
-    fileNormalCollectionIDs,
-    collectionSummaries,
-    collectionNameByID,
-    pendingFavoriteUpdates,
-    pendingVisibilityUpdates,
-    onSetOpenFileViewer,
     onRemotePull,
-    onRemoteFilesPull,
     onVisualFeedback,
     onAddSaveGroup,
-    onToggleFavorite,
-    onFileVisibilityUpdate,
-    onSendLink,
-    onMarkTempDeleted,
-    onSelectCollection,
-    onSelectPerson,
-    onAddFileToCollection,
     pendingFileIndex,
     pendingFileSidebar,
     pendingHighlightCommentID,
@@ -172,14 +121,12 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             setInitialSidebar(pendingFileSidebar);
             setHighlightCommentID(pendingHighlightCommentID);
             setOpenFileViewer(true);
-            onSetOpenFileViewer?.(true);
             onPendingNavigationConsumed?.();
         }
     }, [
         pendingFileIndex,
         pendingFileSidebar,
         pendingHighlightCommentID,
-        onSetOpenFileViewer,
         onPendingNavigationConsumed,
     ]);
 
@@ -187,9 +134,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleCloseFileViewerInternal = useCallback(() => {
         setInitialSidebar(undefined);
         setHighlightCommentID(undefined);
-        onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
-    }, [onSetOpenFileViewer]);
+    }, []);
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -200,14 +146,10 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         [files],
     );
 
-    const handleThumbnailClick = useCallback(
-        (index: number) => {
-            setCurrentIndex(index);
-            setOpenFileViewer(true);
-            onSetOpenFileViewer?.(true);
-        },
-        [onSetOpenFileViewer],
-    );
+    const handleThumbnailClick = useCallback((index: number) => {
+        setCurrentIndex(index);
+        setOpenFileViewer(true);
+    }, []);
 
     const handleTriggerRemotePull = useCallback(
         () => void onRemotePull(),
@@ -219,26 +161,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             downloadAndSaveFiles([file], fileFileName(file), onAddSaveGroup),
         [onAddSaveGroup],
     );
-
-    const handleDelete = useMemo(() => {
-        return onMarkTempDeleted
-            ? (file: EnteFile) =>
-                  moveToTrash([file]).then(() => onMarkTempDeleted([file]))
-            : undefined;
-    }, [onMarkTempDeleted]);
-
-    const handleSaveEditedImageCopy = useMemo(() => {
-        if (!enableImageEditing) return undefined;
-        return (
-            editedFile: File,
-            collection: Collection,
-            enteFile: EnteFile,
-        ) => {
-            uploadManager.prepareForNewUpload();
-            uploadManager.showUploadProgressDialog();
-            void uploadManager.uploadFile(editedFile, collection, enteFile);
-        };
-    }, [enableImageEditing]);
 
     return (
         <Container>
@@ -266,38 +188,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 initialSidebar={initialSidebar}
                 highlightCommentID={highlightCommentID}
                 disableDownload={!enableDownload}
-                isInTrashSection={
-                    activeCollectionID == PseudoCollectionID.trash
-                }
                 {...{
-                    user,
                     files,
-                    isInHiddenSection,
-                    isInIncomingSharedCollection,
-                    fileNormalCollectionIDs,
-                    collectionSummaries,
-                    collectionNameByID,
-                    pendingFavoriteUpdates,
-                    pendingVisibilityUpdates,
-                    onRemoteFilesPull,
                     onVisualFeedback,
-                    onToggleFavorite,
-                    onFileVisibilityUpdate,
-                    onSendLink,
-                    onSelectCollection,
-                    onSelectPerson,
                     publicAlbumsCredentials,
                     collectionKey,
                     onJoinAlbum,
                     enableComment,
                     enableJoin,
                 }}
-                isCommentsFeatureEnabled
                 onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
-                onDelete={handleDelete}
-                onSaveEditedImageCopy={handleSaveEditedImageCopy}
-                onAddFileToCollection={onAddFileToCollection}
                 activeCollectionID={activeCollectionID}
             />
         </Container>
