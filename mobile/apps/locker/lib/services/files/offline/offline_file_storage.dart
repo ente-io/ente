@@ -94,27 +94,6 @@ Future<void> removeOfflineFileCopiesFromDisk(
   await _deleteCachedFileCopies(ids);
 }
 
-/// Prune encrypted blobs for files that are no longer part of the local offline
-/// set. Working copies are optional because open files may still be in use by
-/// another app.
-Future<void> removeOfflineFileCopiesExcept(
-  Set<int> keepIds, {
-  bool removeWorkingCopies = true,
-}) async {
-  await _deleteFilesFromDirectory(await _getOfflineEncryptedDirectory(), (
-    baseName,
-  ) {
-    final fileId = _parseEncryptedFileId(baseName);
-    return fileId != null && !keepIds.contains(fileId);
-  });
-
-  if (!removeWorkingCopies) {
-    return;
-  }
-
-  await _deleteCachedFileCopiesExcept(keepIds);
-}
-
 Future<void> clearAllOfflineFileCopies() async {
   _logger.info('Clearing all offline file copies');
   final encryptedDirectory = await _getOfflineEncryptedDirectory();
@@ -122,7 +101,22 @@ Future<void> clearAllOfflineFileCopies() async {
     await encryptedDirectory.delete(recursive: true);
   }
 
-  await _deleteCachedFileCopiesExcept(<int>{});
+  final cacheDirectory = Directory(Configuration.instance.getCacheDirectory());
+  if (!await cacheDirectory.exists()) {
+    return;
+  }
+
+  await for (final entity in cacheDirectory.list(followLinks: false)) {
+    try {
+      await entity.delete(recursive: true);
+    } catch (e, s) {
+      _logger.warning(
+        'Failed to delete ${entity.path} while clearing directory contents',
+        e,
+        s,
+      );
+    }
+  }
 }
 
 Future<void> cleanupOfflineWorkingFiles({
@@ -186,23 +180,6 @@ Future<void> _deleteCachedFileCopies(Set<int> ids) async {
 
     final decryptedId = _parseCachedDecryptedFileId(baseName);
     return decryptedId != null && ids.contains(decryptedId);
-  });
-}
-
-Future<void> _deleteCachedFileCopiesExcept(Set<int> keepIds) async {
-  final cacheDirectory = Directory(Configuration.instance.getCacheDirectory());
-  await _deleteFilesFromDirectory(cacheDirectory, (baseName) {
-    final encryptedId = _parseEncryptedFileId(baseName);
-    if (encryptedId != null) {
-      return !keepIds.contains(encryptedId);
-    }
-
-    final decryptedId = _parseCachedDecryptedFileId(baseName);
-    if (decryptedId != null) {
-      return !keepIds.contains(decryptedId);
-    }
-
-    return false;
   });
 }
 
