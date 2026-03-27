@@ -24,7 +24,7 @@ your iCloud library and import.
 
 iCloud Shared Photo Library lets up to 6 people share a unified photo
 collection. Ente does not have an equivalent feature — instead, Ente offers
-[shared and collaborative albums](/photos/features/sharing/) on a per-album
+[shared and collaborative albums](/photos/features/sharing-and-collaboration/collaboration) on a per-album
 basis.
 
 To migrate photos from iCloud Shared Photo Library to Ente, on mobile, you need
