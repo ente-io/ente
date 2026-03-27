@@ -3,7 +3,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
 import { staticAppTitle } from "ente-base/app";
-import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
+import { CustomHeadAlbums } from "ente-base/components/Head";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
 import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
@@ -45,12 +45,11 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
         }),
         [showLoadingBar, hideLoadingBar, showNotification],
     );
-
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
     return (
         <ThemeProvider theme={photosTheme}>
-            <CustomHeadPhotosOrAlbums {...{ title }} />
+            <CustomHeadAlbums {...{ title }} />
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />
