@@ -1842,18 +1842,12 @@ fn migrate_attachment_bytes(
 ) -> Result<(), ApiError> {
     let legacy_ciphertext =
         fs::read(source_path).map_err(|err| ApiError::new("io", err.to_string()))?;
-    let plaintext = chat_sync::crypto::decrypt_attachment_bytes(
-        &legacy_ciphertext,
-        legacy_key,
-        session_uuid,
-    )
-    .map_err(|err| ApiError::new("db_crypto", err.to_string()))?;
-    let ciphertext = chat_sync::crypto::encrypt_attachment_bytes(
-        &plaintext,
-        target_key,
-        session_uuid,
-    )
-    .map_err(|err| ApiError::new("db_crypto", err.to_string()))?;
+    let plaintext =
+        chat_sync::crypto::decrypt_attachment_bytes(&legacy_ciphertext, legacy_key, session_uuid)
+            .map_err(|err| ApiError::new("db_crypto", err.to_string()))?;
+    let ciphertext =
+        chat_sync::crypto::encrypt_attachment_bytes(&plaintext, target_key, session_uuid)
+            .map_err(|err| ApiError::new("db_crypto", err.to_string()))?;
     fs::write(target_path, ciphertext).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(())
 }
