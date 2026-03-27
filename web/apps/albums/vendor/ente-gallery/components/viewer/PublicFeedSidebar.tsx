@@ -121,21 +121,6 @@ const LikedCommentIcon: React.FC<{ heartStroke?: string }> = ({
     </svg>
 );
 
-const PersonIcon: React.FC = () => (
-    <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path
-            d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"
-            fill="currentColor"
-        />
-    </svg>
-);
-
 // =============================================================================
 // Types
 // =============================================================================
@@ -182,8 +167,6 @@ interface FeedUser {
     userName: string;
     /** Email/identifier used for avatar color. */
     email: string;
-    /** True if this is a registered user with masked email (show person icon). */
-    isMaskedEmail: boolean;
 }
 
 /** Base interface for all feed items. */
@@ -311,9 +294,6 @@ const processFeedItems = (
         return maskedEmails.get(userID) ?? String(userID);
     };
 
-    // On public albums, all registered users have masked emails
-    const isRegisteredUser = (anonUserID?: string): boolean => !anonUserID;
-
     // Helper to get thumbnail URL from cache
     const getThumbnailURL = (fileID: number | undefined): string | undefined =>
         fileID ? thumbnailCache.get(fileID) : undefined;
@@ -331,7 +311,6 @@ const processFeedItems = (
 
         const displayName = getUserName(c.userID, c.anonUserID);
         const avatarColorKey = getAvatarColorKey(c.userID, c.anonUserID);
-        const isMaskedEmail = isRegisteredUser(c.anonUserID);
 
         if (c.isReply && c.parentCommentID) {
             // This is a reply to a comment
@@ -348,7 +327,6 @@ const processFeedItems = (
                     anonUserID: c.anonUserID,
                     userName: displayName,
                     email: avatarColorKey,
-                    isMaskedEmail,
                 },
             });
         } else if (c.fileID) {
@@ -366,7 +344,6 @@ const processFeedItems = (
                     anonUserID: c.anonUserID,
                     userName: displayName,
                     email: avatarColorKey,
-                    isMaskedEmail,
                 },
             });
         }
@@ -389,13 +366,11 @@ const processFeedItems = (
 
         const userName = getUserName(r.userID, r.anonUserID);
         const email = getAvatarColorKey(r.userID, r.anonUserID);
-        const isMaskedEmail = isRegisteredUser(r.anonUserID);
         const user: FeedUser = {
             userID: r.userID,
             anonUserID: r.anonUserID,
             userName,
             email,
-            isMaskedEmail,
         };
 
         if (r.fileID && !r.commentID) {
@@ -584,11 +559,7 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item, onClick }) => {
                                     color: "#fff",
                                 }}
                             >
-                                {user.isMaskedEmail ? (
-                                    <PersonIcon />
-                                ) : (
-                                    (displayName[0]?.toUpperCase() ?? "A")
-                                )}
+                                {displayName[0]?.toUpperCase() ?? "A"}
                             </StyledAvatar>
                         );
                     })}
