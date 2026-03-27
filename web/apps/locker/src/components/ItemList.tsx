@@ -15,21 +15,12 @@ import {
     Box,
     Button,
     ButtonBase,
-    Chip,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     IconButton,
-    Menu,
-    MenuItem,
-    Snackbar,
     Stack,
-    TextField,
     Tooltip,
     Typography,
 } from "@mui/material";
 import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
-import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -62,8 +53,7 @@ import {
 } from "types";
 import { ItemCard } from "./ItemCard";
 import { ItemDetailView } from "./ItemDetailView";
-import { lockerDialogPaperSx } from "./lockerDialogStyles";
-import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
+import { ItemListDialogs } from "./itemList/ItemListDialogs";
 
 const uniqueCollectionsByID = (collections: LockerCollection[]) => {
     const seen = new Set<number>();
@@ -122,8 +112,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     onNavigateBack,
 }) => {
     const currentUserID = savedLocalUser()?.id ?? Number.NaN;
-    const [selectedItem, setSelectedItem] = useState<LockerItem | null>(null);
-    const [restoreItem, setRestoreItem] = useState<LockerItem | null>(null);
+    const [selectedItemID, setSelectedItemID] = useState<number | null>(null);
+    const [restoreItemID, setRestoreItemID] = useState<number | null>(null);
     const [restoreCollectionID, setRestoreCollectionID] = useState<
         number | null
     >(null);
@@ -149,8 +139,9 @@ export const ItemList: React.FC<ItemListProps> = ({
         completed: number;
         total: number;
     } | null>(null);
-    const [activeFileLinkItem, setActiveFileLinkItem] =
-        useState<LockerItem | null>(null);
+    const [activeFileLinkItemID, setActiveFileLinkItemID] = useState<
+        number | null
+    >(null);
     const [activeFileLink, setActiveFileLink] = useState<{
         linkID: string;
         url: string;
@@ -194,6 +185,14 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
         return [...itemsByID.values()];
     }, [collections]);
+    const allItemsByID = useMemo(
+        () => new Map(allItems.map((item) => [item.id, item])),
+        [allItems],
+    );
+    const trashItemsByID = useMemo(
+        () => new Map((trashItems ?? []).map((item) => [item.id, item])),
+        [trashItems],
+    );
     const selectedCollection = useMemo(
         () =>
             selectedCollectionID === null
@@ -202,6 +201,31 @@ export const ItemList: React.FC<ItemListProps> = ({
                       (collection) => collection.id === selectedCollectionID,
                   ) ?? null),
         [collections, selectedCollectionID],
+    );
+    const selectedItem = useMemo(() => {
+        if (selectedItemID === null) {
+            return null;
+        }
+
+        return (
+            allItemsByID.get(selectedItemID) ??
+            trashItemsByID.get(selectedItemID) ??
+            null
+        );
+    }, [allItemsByID, selectedItemID, trashItemsByID]);
+    const restoreItem = useMemo(
+        () =>
+            restoreItemID === null
+                ? null
+                : (trashItemsByID.get(restoreItemID) ?? null),
+        [restoreItemID, trashItemsByID],
+    );
+    const activeFileLinkItem = useMemo(
+        () =>
+            activeFileLinkItemID === null
+                ? null
+                : (allItemsByID.get(activeFileLinkItemID) ?? null),
+        [activeFileLinkItemID, allItemsByID],
     );
     const trimmedSearch = searchTerm.trim();
     const searchQuery = trimmedSearch.toLowerCase();
@@ -356,11 +380,34 @@ export const ItemList: React.FC<ItemListProps> = ({
         typeof navigator !== "undefined" &&
         typeof navigator.share === "function";
 
+    useEffect(() => {
+        if (selectedItemID !== null && !selectedItem) {
+            setSelectedItemID(null);
+        }
+    }, [selectedItem, selectedItemID]);
+
+    useEffect(() => {
+        if (restoreItemID !== null && !restoreItem) {
+            setRestoreItemID(null);
+            setRestoreCollectionID(null);
+        }
+    }, [restoreItem, restoreItemID]);
+
+    useEffect(() => {
+        if (activeFileLinkItemID !== null && !activeFileLinkItem) {
+            setActiveFileLinkItemID(null);
+            setActiveFileLink(null);
+            setIsCreatingFileLink(false);
+            setIsDeletingFileLink(false);
+            setIsDeleteFileLinkConfirmOpen(false);
+        }
+    }, [activeFileLinkItem, activeFileLinkItemID]);
+
     const handleRestoreConfirm = useCallback(() => {
         if (restoreItem && restoreCollectionID !== null && onRestoreItem) {
             onRestoreItem(restoreItem, restoreCollectionID);
         }
-        setRestoreItem(null);
+        setRestoreItemID(null);
         setRestoreCollectionID(null);
     }, [onRestoreItem, restoreCollectionID, restoreItem]);
 
@@ -434,7 +481,7 @@ export const ItemList: React.FC<ItemListProps> = ({
     const startSelectionModeForItem = useCallback((item: LockerItem) => {
         setSelectionMode(true);
         setSelectedItemIDs([item.id]);
-        setSelectedItem(null);
+        setSelectedItemID(null);
     }, []);
     const stopSelectionMode = useCallback(() => {
         setSelectionMode(false);
@@ -463,7 +510,7 @@ export const ItemList: React.FC<ItemListProps> = ({
         ) {
             return;
         }
-        setActiveFileLinkItem(null);
+        setActiveFileLinkItemID(null);
         setActiveFileLink(null);
     }, [isCreatingFileLink, isDeleteFileLinkConfirmOpen, isDeletingFileLink]);
     const openFileLinkDialog = useCallback(
@@ -476,7 +523,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 return;
             }
 
-            setActiveFileLinkItem(item);
+            setActiveFileLinkItemID(item.id);
             setActiveFileLink(null);
             setIsCreatingFileLink(true);
             try {
@@ -495,7 +542,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                         ? t("sharingRequiresPaidPlan")
                         : t("failedToCreateShareLink"),
                 );
-                setActiveFileLinkItem(null);
+                setActiveFileLinkItemID(null);
             } finally {
                 setIsCreatingFileLink(false);
             }
@@ -548,7 +595,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 activeFileLink?.linkID,
             );
             setFeedbackMessage(t("shareLinkDeletedSuccessfully"));
-            setActiveFileLinkItem(null);
+            setActiveFileLinkItemID(null);
             setActiveFileLink(null);
         } catch (error) {
             log.error(
@@ -760,10 +807,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 onDeleteItem={onDeleteItem}
                                 onPermanentlyDelete={onPermanentlyDelete}
                                 onRequestRestore={(item) => {
-                                    setRestoreItem(item);
+                                    setRestoreItemID(item.id);
                                     setRestoreCollectionID(null);
                                 }}
-                                onSelectItem={setSelectedItem}
+                                onSelectItem={(item) =>
+                                    setSelectedItemID(item.id)
+                                }
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
                                 selectionMode={selectionMode}
@@ -915,10 +964,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 onDeleteItem={onDeleteItem}
                                 onPermanentlyDelete={onPermanentlyDelete}
                                 onRequestRestore={(item) => {
-                                    setRestoreItem(item);
+                                    setRestoreItemID(item.id);
                                     setRestoreCollectionID(null);
                                 }}
-                                onSelectItem={setSelectedItem}
+                                onSelectItem={(item) =>
+                                    setSelectedItemID(item.id)
+                                }
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
                                 selectionMode={selectionMode}
@@ -1033,10 +1084,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 onDeleteItem={onDeleteItem}
                                 onPermanentlyDelete={onPermanentlyDelete}
                                 onRequestRestore={(item) => {
-                                    setRestoreItem(item);
+                                    setRestoreItemID(item.id);
                                     setRestoreCollectionID(null);
                                 }}
-                                onSelectItem={setSelectedItem}
+                                onSelectItem={(item) =>
+                                    setSelectedItemID(item.id)
+                                }
                                 currentUserID={currentUserID}
                                 onShareLink={
                                     isTrashView ? undefined : openFileLinkDialog
@@ -1094,14 +1147,14 @@ export const ItemList: React.FC<ItemListProps> = ({
             <ItemDetailView
                 item={selectedItem}
                 masterKey={masterKey}
-                onClose={() => setSelectedItem(null)}
+                onClose={() => setSelectedItemID(null)}
                 onEdit={
                     onEditItem &&
                     !isTrashView &&
                     selectedItem &&
                     (selectedItem.ownerID ?? currentUserID) === currentUserID
                         ? (item) => {
-                              setSelectedItem(null);
+                              setSelectedItemID(null);
                               onEditItem(item);
                           }
                         : undefined
@@ -1112,7 +1165,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                     selectedItem &&
                     (selectedItem.ownerID ?? currentUserID) === currentUserID
                         ? (item) => {
-                              setSelectedItem(null);
+                              setSelectedItemID(null);
                               onDeleteItem(item);
                           }
                         : undefined
@@ -1134,365 +1187,60 @@ export const ItemList: React.FC<ItemListProps> = ({
                 }
             />
 
-            <LockerFileLinkDialog
-                open={activeFileLinkItem !== null}
-                itemTitle={
+            <ItemListDialogs
+                activeFileLinkItemTitle={
                     activeFileLinkItem ? getItemTitle(activeFileLinkItem) : ""
                 }
-                url={activeFileLink?.url}
-                loading={isCreatingFileLink}
-                deleting={isDeletingFileLink}
-                showShareAction={canNativeShare}
-                onClose={closeFileLinkDialog}
-                onCopy={() => void copyActiveFileLink()}
-                onShare={() => void shareActiveFileLink()}
-                onDelete={() => setIsDeleteFileLinkConfirmOpen(true)}
-            />
-
-            <Dialog
-                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
-                open={isDeleteFileLinkConfirmOpen}
-                onClose={() => {
-                    if (!isDeletingFileLink) {
-                        setIsDeleteFileLinkConfirmOpen(false);
-                    }
+                activeFileLinkURL={activeFileLink?.url ?? null}
+                canNativeShare={canNativeShare}
+                closeCollectionFilterMenu={closeCollectionFilterMenu}
+                closeFileLinkDialog={closeFileLinkDialog}
+                clearHomeCollectionSelection={clearHomeCollectionSelection}
+                collectionFilterAnchorEl={collectionFilterAnchorEl}
+                createCollectionError={createCollectionError}
+                createCollectionName={createCollectionName}
+                createCollectionOpen={createCollectionOpen}
+                creatingCollection={creatingCollection}
+                deleteFileLink={() => void deleteActiveFileLink()}
+                displayCollections={displayCollections}
+                dropdownHomeCollections={dropdownHomeCollections}
+                feedbackMessage={feedbackMessage}
+                fileLinkDialogOpen={activeFileLinkItem !== null}
+                homeSelectedCollectionIDs={homeSelectedCollectionIDs}
+                isCreatingFileLink={isCreatingFileLink}
+                isDeleteFileLinkConfirmOpen={isDeleteFileLinkConfirmOpen}
+                isDeletingFileLink={isDeletingFileLink}
+                onCloseCreateCollectionDialog={() =>
+                    setCreateCollectionOpen(false)
+                }
+                onCloseFeedback={() => setFeedbackMessage(null)}
+                onCloseRenameDialog={() => setRenameCollectionID(null)}
+                onCloseRestoreDialog={() => {
+                    setRestoreItemID(null);
+                    setRestoreCollectionID(null);
                 }}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("deleteShareLinkDialogTitle")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 2.25 }}>
-                        <Typography sx={{ color: "text.muted" }}>
-                            {t("deleteShareLinkConfirmation")}
-                        </Typography>
-                        <Stack direction="row" sx={{ gap: 1 }}>
-                            <Button
-                                fullWidth
-                                color="secondary"
-                                disabled={isDeletingFileLink}
-                                onClick={() =>
-                                    setIsDeleteFileLinkConfirmOpen(false)
-                                }
-                                sx={{ minHeight: 44 }}
-                            >
-                                {t("cancel")}
-                            </Button>
-                            <LoadingButton
-                                fullWidth
-                                color="critical"
-                                loading={isDeletingFileLink}
-                                onClick={() => void deleteActiveFileLink()}
-                                sx={{ minHeight: 44 }}
-                            >
-                                {t("deleteLink")}
-                            </LoadingButton>
-                        </Stack>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
-                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
-                open={restoreItem !== null}
-                onClose={() => setRestoreItem(null)}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("restoreToCollection")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 1, pt: 0.25, pb: 1 }}>
-                        {displayCollections.length > 0 ? (
-                            displayCollections.map((collection) => (
-                                <Chip
-                                    key={collection.id}
-                                    label={collection.name}
-                                    variant={
-                                        restoreCollectionID === collection.id
-                                            ? "filled"
-                                            : "outlined"
-                                    }
-                                    color={
-                                        restoreCollectionID === collection.id
-                                            ? "primary"
-                                            : "default"
-                                    }
-                                    onClick={() =>
-                                        setRestoreCollectionID(collection.id)
-                                    }
-                                />
-                            ))
-                        ) : (
-                            <Typography
-                                variant="body"
-                                sx={{ color: "text.muted" }}
-                            >
-                                {t("noCollectionsAvailableForSelection")}
-                            </Typography>
-                        )}
-                        <Button
-                            variant="contained"
-                            disabled={restoreCollectionID === null}
-                            onClick={handleRestoreConfirm}
-                            sx={{ mt: 1 }}
-                        >
-                            {t("restore")}
-                        </Button>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
-                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
-                open={renameCollectionID !== null}
-                onClose={() => setRenameCollectionID(null)}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("renameCollection")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
-                        <TextField
-                            value={renameValue}
-                            onChange={(event) =>
-                                setRenameValue(event.target.value)
-                            }
-                            label={t("enterCollectionName")}
-                            fullWidth
-                            autoFocus
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter") {
-                                    handleRenameConfirm();
-                                }
-                            }}
-                        />
-                        <Button
-                            variant="contained"
-                            disabled={!renameValue.trim()}
-                            onClick={handleRenameConfirm}
-                        >
-                            {t("save")}
-                        </Button>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
-                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
-                open={createCollectionOpen}
-                onClose={() => {
-                    if (!creatingCollection) {
-                        setCreateCollectionOpen(false);
-                    }
+                onConfirmCreateCollection={() =>
+                    void handleCreateCollectionConfirm()
+                }
+                onConfirmRename={handleRenameConfirm}
+                onConfirmRestore={handleRestoreConfirm}
+                onCopyFileLink={() => void copyActiveFileLink()}
+                onRequestDeleteFileLink={() =>
+                    setIsDeleteFileLinkConfirmOpen(true)
+                }
+                onShareFileLink={() => void shareActiveFileLink()}
+                onToggleHomeCollection={toggleHomeCollection}
+                renameCollectionOpen={renameCollectionID !== null}
+                renameValue={renameValue}
+                restoreCollectionID={restoreCollectionID}
+                restoreDialogOpen={restoreItem !== null}
+                setCreateCollectionName={(value) => {
+                    setCreateCollectionName(value);
+                    setCreateCollectionError(null);
                 }}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("createCollection")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
-                        <TextField
-                            value={createCollectionName}
-                            onChange={(event) => {
-                                setCreateCollectionName(event.target.value);
-                                setCreateCollectionError(null);
-                            }}
-                            label={t("enterCollectionName")}
-                            fullWidth
-                            autoFocus
-                            disabled={creatingCollection}
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter") {
-                                    void handleCreateCollectionConfirm();
-                                }
-                            }}
-                        />
-                        {createCollectionError && (
-                            <Typography
-                                variant="small"
-                                sx={{ color: "critical.main" }}
-                            >
-                                {createCollectionError}
-                            </Typography>
-                        )}
-                        <Stack direction="row" sx={{ gap: 1 }}>
-                            <Button
-                                fullWidth
-                                color="secondary"
-                                onClick={() => setCreateCollectionOpen(false)}
-                                disabled={creatingCollection}
-                            >
-                                {t("cancel")}
-                            </Button>
-                            <LoadingButton
-                                fullWidth
-                                color="primary"
-                                loading={creatingCollection}
-                                onClick={() =>
-                                    void handleCreateCollectionConfirm()
-                                }
-                                disabled={!createCollectionName.trim()}
-                            >
-                                {t("createCollectionButton")}
-                            </LoadingButton>
-                        </Stack>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Menu
-                anchorEl={collectionFilterAnchorEl}
-                open={!!collectionFilterAnchorEl}
-                onClose={closeCollectionFilterMenu}
-                slotProps={{
-                    paper: {
-                        sx: {
-                            mt: 1,
-                            width: "fit-content",
-                            minWidth: 0,
-                            maxWidth: "calc(100vw - 32px)",
-                            borderRadius: "18px",
-                            overflow: "hidden",
-                        },
-                    },
-                }}
-            >
-                <Box sx={{ px: 1, pt: 0, pb: 0, width: "fit-content" }}>
-                    {dropdownHomeCollections.map((collection) => {
-                        const isSelected = homeSelectedCollectionIDs.includes(
-                            collection.id,
-                        );
-
-                        return (
-                            <MenuItem
-                                key={collection.id}
-                                onClick={() =>
-                                    toggleHomeCollection(collection.id)
-                                }
-                                sx={(theme) => ({
-                                    gap: 1.25,
-                                    px: 1,
-                                    py: 1,
-                                    my: "6px",
-                                    borderRadius: "14px",
-                                    alignItems: "center",
-                                    width: "auto",
-                                    color: isSelected
-                                        ? "primary.main"
-                                        : "text.base",
-                                    backgroundColor: isSelected
-                                        ? "rgba(16, 113, 255, 0.10)"
-                                        : "transparent",
-                                    "&:hover": {
-                                        backgroundColor: isSelected
-                                            ? "rgba(16, 113, 255, 0.14)"
-                                            : theme.vars.palette.fill.faint,
-                                    },
-                                })}
-                            >
-                                <CheckCircleRoundedIcon
-                                    sx={{
-                                        fontSize: 20,
-                                        color: isSelected
-                                            ? "primary.main"
-                                            : "text.faint",
-                                        opacity: isSelected ? 1 : 0.22,
-                                        flexShrink: 0,
-                                    }}
-                                />
-                                <Box sx={{ minWidth: 0, flex: 1 }}>
-                                    <Typography
-                                        variant="body"
-                                        sx={{
-                                            fontWeight: isSelected ? 700 : 500,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: 0.75,
-                                            minWidth: 0,
-                                            whiteSpace: "nowrap",
-                                        }}
-                                    >
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                whiteSpace: "nowrap",
-                                                minWidth: 0,
-                                            }}
-                                        >
-                                            {collection.name}
-                                        </Box>
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                color: "text.muted",
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            {"·"}
-                                        </Box>
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                color: "text.muted",
-                                                fontWeight: 500,
-                                                flexShrink: 0,
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        >
-                                            {new Intl.NumberFormat().format(
-                                                collection.items.length,
-                                            )}
-                                        </Box>
-                                    </Typography>
-                                </Box>
-                            </MenuItem>
-                        );
-                    })}
-                    {homeSelectedCollectionIDs.length > 0 && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                pt: "12px",
-                                pb: 0,
-                            }}
-                        >
-                            <Button
-                                color="secondary"
-                                onClick={() => {
-                                    clearHomeCollectionSelection();
-                                    closeCollectionFilterMenu();
-                                }}
-                                sx={{
-                                    minWidth: "auto",
-                                    px: 1,
-                                    py: 0.5,
-                                    backgroundColor: "transparent",
-                                    color: "text.muted",
-                                    fontSize: "0.8125rem",
-                                    fontWeight: 500,
-                                    textDecoration: "underline",
-                                    textUnderlineOffset: "3px",
-                                    "&:hover": {
-                                        backgroundColor: "transparent",
-                                        color: "text.secondary",
-                                    },
-                                }}
-                            >
-                                {t("clearSelection")}
-                            </Button>
-                        </Box>
-                    )}
-                </Box>
-            </Menu>
-
-            <Snackbar
-                open={feedbackMessage !== null}
-                message={feedbackMessage}
-                autoHideDuration={2500}
-                onClose={() => setFeedbackMessage(null)}
+                setDeleteFileLinkConfirmOpen={setIsDeleteFileLinkConfirmOpen}
+                setRenameValue={setRenameValue}
+                setRestoreCollectionID={setRestoreCollectionID}
             />
         </Stack>
     );
