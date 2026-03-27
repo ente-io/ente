@@ -16,7 +16,7 @@ import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar"
 import { PhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import "photoswipe/dist/photoswipe.css";
 import "styles/global.css";
@@ -29,10 +29,13 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
+    const logout = useCallback(() => {
+        // Public albums does not maintain a logged-in app session.
+    }, []);
 
     const baseContext = useMemo(
-        () => deriveBaseContext({ showMiniDialog }),
-        [showMiniDialog],
+        () => deriveBaseContext({ logout, showMiniDialog }),
+        [logout, showMiniDialog],
     );
     const appContext = useMemo(
         () => ({

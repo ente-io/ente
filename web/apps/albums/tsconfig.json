@@ -1,25 +1,6 @@
 {
+    "extends": "ente-build-config/tsconfig-next.json",
     "compilerOptions": {
-        "noEmit": true,
-        "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"],
-        "target": "ES2020",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "jsx": "preserve",
-        "isolatedModules": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "verbatimModuleSyntax": true,
-        "resolveJsonModule": true,
-        "strict": true,
-        "noImplicitReturns": true,
-        "noUnusedParameters": true,
-        "noUnusedLocals": true,
-        "noFallthroughCasesInSwitch": true,
-        "noUncheckedIndexedAccess": true,
-        "exactOptionalPropertyTypes": false,
-        "allowJs": true,
-        "incremental": true,
         "baseUrl": ".",
         "paths": {
             "components/*": ["vendor/photos/components/*"],
@@ -27,11 +8,8 @@
             "services/*": ["vendor/photos/services/*"],
             "utils/*": ["vendor/photos/utils/*"],
             "styles/*": ["vendor/photos/styles/*"],
-            "ente-base/*": ["vendor/ente-base/*"],
             "ente-gallery/*": ["vendor/ente-gallery/*"],
-            "ente-media/*": ["vendor/ente-media/*"],
-            "ente-new/*": ["vendor/ente-new/*"],
-            "ente-utils/*": ["vendor/ente-utils/*"]
+            "ente-new/*": ["vendor/ente-new/*"]
         }
     },
     "include": [
@@ -42,7 +20,9 @@
         "vendor/**/*.ts",
         "vendor/**/*.tsx",
         "vendor/**/*.js",
-        "vendor/**/*.d.ts"
+        "vendor/**/*.d.ts",
+        "../../packages/base/components/utils/mui-theme.d.ts",
+        "../../packages/base/global-electron.d.ts"
     ],
     "exclude": ["node_modules", "out", ".next", ".next-desktop"]
 }
