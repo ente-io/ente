@@ -16,7 +16,6 @@ import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import { getStoredAnonIdentity } from "ente-new/albums/services/public-reaction";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
-import { type UnifiedReaction } from "ente-new/photos/services/social";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -25,6 +24,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { type UnifiedReaction } from "./social-types";
 
 // =============================================================================
 // Icons

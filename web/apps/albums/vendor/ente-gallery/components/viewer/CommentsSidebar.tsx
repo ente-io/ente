@@ -15,7 +15,6 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import { isOfficialAlbumsApp } from "ente-base/origins";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
@@ -29,18 +28,7 @@ import {
     deletePublicReaction,
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
-import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
-import {
-    addComment,
-    deleteComment,
-    type Comment,
-} from "ente-new/photos/services/comment";
-import {
-    addCommentReaction,
-    deleteReaction,
-} from "ente-new/photos/services/reaction";
-import { type UnifiedReaction } from "ente-new/photos/services/social";
 import i18n, { t } from "i18next";
 import React, {
     useCallback,
@@ -52,6 +40,7 @@ import React, {
 import { AddNameModal } from "./AddNameModal";
 import { PublicCommentModal } from "./PublicCommentModal";
 import { PublicLikeModal } from "./PublicLikeModal";
+import { type Comment, type UnifiedReaction } from "./social-types";
 
 // =============================================================================
 // Icons
@@ -660,8 +649,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         return fileNormalCollectionIDs?.get(file.id) ?? [];
     }, [file, fileNormalCollectionIDs]);
 
-    // Check if this is a public album
-    const isPublicAlbum = isOfficialAlbumsApp || !!publicAlbumsCredentials;
+    const isPublicAlbum = true;
 
     // Build collection info list with comment counts and cover files (shared albums only)
     const collectionsInfo = useMemo((): CollectionInfo[] => {
@@ -1014,73 +1002,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const handleSend = async () => {
         if (!commentText.trim() || !file || !selectedCollectionInfo) return;
 
-        // For public albums, check if we already have an anon identity
-        if (isPublicAlbum) {
-            const storedIdentity = getStoredAnonIdentity(
-                selectedCollectionInfo.id,
-            );
-            if (storedIdentity && publicAlbumsCredentials && collectionKey) {
-                // User already has identity, send directly
-                await sendPublicComment(commentText.trim());
-            } else {
-                // Show modal to choose anonymous or join album
-                setShowPublicCommentModal(true);
-            }
-            return;
-        }
-
-        // For authenticated users, send via API
-        const text = commentText.trim();
-        const collectionID = selectedCollectionInfo.id;
-
-        setSending(true);
-        try {
-            const collection = await getCollectionByID(collectionID);
-
-            const newCommentID = await addComment(
-                collectionID,
-                file.id,
-                text,
-                collection.key,
-                replyingTo?.id,
-            );
-
-            // Add the new comment to local state
-            const newComment: Comment = {
-                id: newCommentID,
-                collectionID,
-                fileID: file.id,
-                text,
-                parentCommentID: replyingTo?.id,
-                isDeleted: false,
-                userID: currentUserID ?? 0,
-                createdAt: Date.now() * 1000, // Microseconds to match server format
-                updatedAt: Date.now() * 1000,
-            };
-            setComments((prev) => [...prev, newComment]);
-            setCommentsByCollection((prev) => {
-                const next = new Map(prev);
-                const existing = next.get(collectionID) ?? [];
-                next.set(collectionID, [...existing, newComment]);
-                return next;
-            });
-
-            setCommentText("");
-            setReplyingTo(null);
-
-            // Notify parent to update its comments state
-            onCommentAdded?.(newComment);
-
-            // Scroll to bottom after adding comment
-            setTimeout(() => {
-                if (commentsContainerRef.current) {
-                    commentsContainerRef.current.scrollTop = 0;
-                }
-            }, 0);
-        } catch (e) {
-            log.error("Failed to add comment", e);
-        } finally {
-            setSending(false);
+        const storedIdentity = getStoredAnonIdentity(selectedCollectionInfo.id);
+        if (storedIdentity && publicAlbumsCredentials && collectionKey) {
+            await sendPublicComment(commentText.trim());
+        } else {
+            setShowPublicCommentModal(true);
         }
     };
 
@@ -1326,145 +1252,73 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         const existingReactionID = likedComments.get(targetComment.id);
 
         try {
-            if (isPublicAlbum) {
-                // Public album - use public APIs
-                if (!publicAlbumsCredentials || !collectionKey) {
-                    log.error(
-                        "Missing credentials for public album comment like",
-                    );
-                    return;
-                }
+            if (!publicAlbumsCredentials || !collectionKey) {
+                log.error("Missing credentials for public album comment like");
+                return;
+            }
 
-                const storedIdentity = getStoredAnonIdentity(collectionID);
-                if (!storedIdentity) {
-                    // No identity - show modal to set name
-                    setPendingCommentLike(targetComment);
-                    setShowPublicLikeModal(true);
-                    return;
-                }
+            const storedIdentity = getStoredAnonIdentity(collectionID);
+            if (!storedIdentity) {
+                setPendingCommentLike(targetComment);
+                setShowPublicLikeModal(true);
+                return;
+            }
 
-                if (existingReactionID) {
-                    // Unlike - delete the reaction
-                    await deletePublicReaction(
-                        publicAlbumsCredentials,
+            if (existingReactionID) {
+                await deletePublicReaction(
+                    publicAlbumsCredentials,
+                    collectionID,
+                    existingReactionID,
+                    storedIdentity,
+                );
+                setLikedComments((prev) => {
+                    const next = new Map(prev);
+                    next.delete(targetComment.id);
+                    return next;
+                });
+                setReactionsByCollection((prev) => {
+                    const next = new Map(prev);
+                    const reactions = next.get(collectionID) ?? [];
+                    next.set(
                         collectionID,
-                        existingReactionID,
-                        storedIdentity,
+                        reactions.filter((r) => r.id !== existingReactionID),
                     );
-                    setLikedComments((prev) => {
-                        const next = new Map(prev);
-                        next.delete(targetComment.id);
-                        return next;
-                    });
-                    setReactionsByCollection((prev) => {
-                        const next = new Map(prev);
-                        const reactions = next.get(collectionID) ?? [];
-                        next.set(
-                            collectionID,
-                            reactions.filter(
-                                (r) => r.id !== existingReactionID,
-                            ),
-                        );
-                        return next;
-                    });
-                    onCommentReactionDeleted?.(
-                        collectionID,
-                        existingReactionID,
-                    );
-                } else {
-                    // Like - add a reaction
-                    const reactionID = await addPublicCommentReaction(
-                        publicAlbumsCredentials,
-                        collectionID,
-                        targetComment.id,
-                        "green_heart",
-                        collectionKey,
-                        storedIdentity,
-                        targetComment.fileID,
-                    );
-                    const newReaction: UnifiedReaction = {
-                        id: reactionID,
-                        collectionID,
-                        commentID: targetComment.id,
-                        reactionType: "green_heart",
-                        userID: 0,
-                        anonUserID: storedIdentity.anonUserID,
-                        isDeleted: false,
-                        createdAt: Date.now() * 1000,
-                        updatedAt: Date.now() * 1000,
-                    };
-                    setLikedComments((prev) => {
-                        const next = new Map(prev);
-                        next.set(targetComment.id, reactionID);
-                        return next;
-                    });
-                    setReactionsByCollection((prev) => {
-                        const next = new Map(prev);
-                        const reactions = next.get(collectionID) ?? [];
-                        next.set(collectionID, [...reactions, newReaction]);
-                        return next;
-                    });
-                    onCommentReactionAdded?.(newReaction);
-                }
+                    return next;
+                });
+                onCommentReactionDeleted?.(collectionID, existingReactionID);
             } else {
-                // Authenticated user - use regular APIs
-                const collection = await getCollectionByID(collectionID);
-
-                if (existingReactionID) {
-                    // Unlike - delete the reaction
-                    await deleteReaction(existingReactionID);
-                    setLikedComments((prev) => {
-                        const next = new Map(prev);
-                        next.delete(targetComment.id);
-                        return next;
-                    });
-                    setReactionsByCollection((prev) => {
-                        const next = new Map(prev);
-                        const reactions = next.get(collectionID) ?? [];
-                        next.set(
-                            collectionID,
-                            reactions.filter(
-                                (r) => r.id !== existingReactionID,
-                            ),
-                        );
-                        return next;
-                    });
-                    onCommentReactionDeleted?.(
-                        collectionID,
-                        existingReactionID,
-                    );
-                } else {
-                    // Like - add a reaction
-                    const reactionID = await addCommentReaction(
-                        collectionID,
-                        targetComment.id,
-                        "green_heart",
-                        collection.key,
-                        targetComment.fileID,
-                    );
-                    const newReaction: UnifiedReaction = {
-                        id: reactionID,
-                        collectionID,
-                        commentID: targetComment.id,
-                        reactionType: "green_heart",
-                        userID: currentUserID ?? 0,
-                        isDeleted: false,
-                        createdAt: Date.now() * 1000,
-                        updatedAt: Date.now() * 1000,
-                    };
-                    setLikedComments((prev) => {
-                        const next = new Map(prev);
-                        next.set(targetComment.id, reactionID);
-                        return next;
-                    });
-                    setReactionsByCollection((prev) => {
-                        const next = new Map(prev);
-                        const reactions = next.get(collectionID) ?? [];
-                        next.set(collectionID, [...reactions, newReaction]);
-                        return next;
-                    });
-                    onCommentReactionAdded?.(newReaction);
-                }
+                const reactionID = await addPublicCommentReaction(
+                    publicAlbumsCredentials,
+                    collectionID,
+                    targetComment.id,
+                    "green_heart",
+                    collectionKey,
+                    storedIdentity,
+                    targetComment.fileID,
+                );
+                const newReaction: UnifiedReaction = {
+                    id: reactionID,
+                    collectionID,
+                    commentID: targetComment.id,
+                    reactionType: "green_heart",
+                    userID: 0,
+                    anonUserID: storedIdentity.anonUserID,
+                    isDeleted: false,
+                    createdAt: Date.now() * 1000,
+                    updatedAt: Date.now() * 1000,
+                };
+                setLikedComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(targetComment.id, reactionID);
+                    return next;
+                });
+                setReactionsByCollection((prev) => {
+                    const next = new Map(prev);
+                    const reactions = next.get(collectionID) ?? [];
+                    next.set(collectionID, [...reactions, newReaction]);
+                    return next;
+                });
+                onCommentReactionAdded?.(newReaction);
             }
         } catch (e) {
             log.error("Failed to toggle comment like", e);
@@ -1487,26 +1341,24 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 break;
             case "delete":
                 try {
-                    // Use public API for anonymous users in public albums
-                    if (isPublicAlbum && publicAlbumsCredentials) {
-                        const storedIdentity = getStoredAnonIdentity(
-                            selectedCollectionInfo.id,
+                    if (!publicAlbumsCredentials) {
+                        log.error("Missing credentials for public comment delete");
+                        return;
+                    }
+
+                    const storedIdentity = getStoredAnonIdentity(
+                        selectedCollectionInfo.id,
+                    );
+                    if (storedIdentity) {
+                        await deletePublicComment(
+                            publicAlbumsCredentials,
+                            targetComment.collectionID,
+                            targetComment.id,
+                            storedIdentity,
                         );
-                        if (storedIdentity) {
-                            await deletePublicComment(
-                                publicAlbumsCredentials,
-                                targetComment.collectionID,
-                                targetComment.id,
-                                storedIdentity,
-                            );
-                        } else {
-                            log.error(
-                                "No stored identity for public comment delete",
-                            );
-                            return;
-                        }
                     } else {
-                        await deleteComment(targetComment.id);
+                        log.error("No stored identity for public comment delete");
+                        return;
                     }
 
                     // Update local state

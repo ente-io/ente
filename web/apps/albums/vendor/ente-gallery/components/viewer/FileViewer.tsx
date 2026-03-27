@@ -33,8 +33,6 @@ import {
     getPublicSocialDiff,
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
-import { type Comment } from "ente-new/photos/services/comment";
-import { type UnifiedReaction } from "ente-new/photos/services/social";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -54,6 +52,7 @@ import {
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 import { PublicLikeModal } from "./PublicLikeModal";
+import { type Comment, type UnifiedReaction } from "./social-types";
 
 const fileViewerBackStateKey = "__enteFileViewerBackState";
 
