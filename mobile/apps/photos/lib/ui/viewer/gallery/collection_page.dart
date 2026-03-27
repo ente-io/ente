@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -12,6 +14,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/search/hierarchical/album_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/actions/smart_albums_status_widget.dart";
@@ -27,14 +30,14 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
-class CollectionPage extends StatelessWidget {
+class CollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final bool? hasVerifiedLock;
   final bool isFromCollectPhotos;
   final EnteFile? fileToJumpTo;
 
-  CollectionPage(
+  const CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
@@ -43,25 +46,69 @@ class CollectionPage extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<CollectionPage> createState() => _CollectionPageState();
+}
+
+class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
+  StreamSubscription<CollectionUpdatedEvent>? _collectionUpdatedEvent;
+  bool _isTryingToPopDeletedCollectionPage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _collectionUpdatedEvent = Bus.instance.on<CollectionUpdatedEvent>().listen((
+      event,
+    ) {
+      if (event.collectionID != widget.c.collection.id ||
+          event.type != EventType.deletedFromRemote) {
+        return;
+      }
+      final collection = CollectionsService.instance.getCollectionByID(
+        widget.c.collection.id,
+      );
+      if (collection?.isDeleted ?? false) {
+        unawaited(_popDeletedCollectionPageWhenCurrentRoute());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _collectionUpdatedEvent?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _popDeletedCollectionPageWhenCurrentRoute() async {
+    if (!mounted || _isTryingToPopDeletedCollectionPage) {
+      return;
+    }
+    _isTryingToPopDeletedCollectionPage = true;
+    try {
+      await Navigator.of(context).maybePop();
+    } finally {
+      _isTryingToPopDeletedCollectionPage = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (hasVerifiedLock == false && c.collection.isHidden()) {
+    if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
 
     final galleryType = getGalleryType(
-      c.collection,
+      widget.c.collection,
       Configuration.instance.getUserID()!,
     );
     final List<EnteFile>? initialFiles =
-        c.thumbnail != null ? [c.thumbnail!] : null;
+        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result =
             await FilesDB.instance.getFilesInCollection(
-          c.collection.id,
+          widget.c.collection.id,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -79,11 +126,11 @@ class CollectionPage extends StatelessWidget {
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == c.collection.id),
+          .where((event) => event.collectionID == widget.c.collection.id),
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>().where(
               (event) =>
-                  event.id == c.collection.id &&
+                  event.id == widget.c.collection.id &&
                   event.type == CollectionMetaEventType.sortChanged,
             ),
       ],
@@ -92,39 +139,39 @@ class CollectionPage extends StatelessWidget {
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: tagPrefix,
+      tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      albumName: c.collection.displayName,
-      sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
+      albumName: widget.c.collection.displayName,
+      sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
       addHeaderOrFooterEmptyState: false,
       showSelectAll: true,
       emptyState: galleryType == GalleryType.ownedCollection
           ? EmptyAlbumState(
-              c.collection,
-              isFromCollectPhotos: isFromCollectPhotos,
+              widget.c.collection,
+              isFromCollectPhotos: widget.isFromCollectPhotos,
               onAddPhotos: () {
                 Bus.instance.fire(
                   CollectionMetaEvent(
-                    c.collection.id,
+                    widget.c.collection.id,
                     CollectionMetaEventType.autoAddPeople,
                   ),
                 );
               },
             )
           : const EmptyState(),
-      footer: isFromCollectPhotos
+      footer: widget.isFromCollectPhotos
           ? const SizedBox(height: 20)
           : const SizedBox(height: 212),
-      fileToJumpTo: fileToJumpTo,
+      fileToJumpTo: widget.fileToJumpTo,
     );
 
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter: AlbumFilter(
-            collectionID: c.collection.id,
-            albumName: c.collection.displayName,
+            collectionID: widget.c.collection.id,
+            albumName: widget.c.collection.displayName,
             occurrence: kMostRelevantFilter,
           ),
         ),
@@ -134,15 +181,15 @@ class CollectionPage extends StatelessWidget {
               preferredSize: const Size.fromHeight(90.0),
               child: GalleryAppBarWidget(
                 galleryType,
-                c.collection.displayName,
+                widget.c.collection.displayName,
                 _selectedFiles,
-                collection: c.collection,
-                isFromCollectPhotos: isFromCollectPhotos,
+                collection: widget.c.collection,
+                isFromCollectPhotos: widget.isFromCollectPhotos,
               ),
             ),
-            bottomNavigationBar: isFromCollectPhotos
+            bottomNavigationBar: widget.isFromCollectPhotos
                 ? CollectPhotosBottomButtons(
-                    c.collection,
+                    widget.c.collection,
                     selectedFiles: _selectedFiles,
                   )
                 : null,
@@ -160,7 +207,7 @@ class CollectionPage extends StatelessWidget {
                         builder: (context, value, _) {
                           return value
                               ? HierarchicalSearchGallery(
-                                  tagPrefix: tagPrefix,
+                                  tagPrefix: widget.tagPrefix,
                                   selectedFiles: _selectedFiles,
                                 )
                               : gallery;
@@ -169,12 +216,12 @@ class CollectionPage extends StatelessWidget {
                     },
                   ),
                   SmartAlbumsStatusWidget(
-                    collection: c.collection,
+                    collection: widget.c.collection,
                   ),
                   FileSelectionOverlayBar(
                     galleryType,
                     _selectedFiles,
-                    collection: c.collection,
+                    collection: widget.c.collection,
                   ),
                 ],
               ),

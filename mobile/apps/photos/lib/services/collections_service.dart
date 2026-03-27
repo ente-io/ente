@@ -2240,10 +2240,16 @@ class CollectionsService {
     final Collection? toCollection = _collectionIDToCollections[toCollectionID];
     final Collection? fromCollection =
         _collectionIDToCollections[fromCollectionID];
-    if (toCollection != null && !toCollection.isOwner(userID)) {
+    if (toCollection == null || toCollection.isDeleted) {
+      throw AssertionError("Can't move to a deleted album");
+    }
+    if (fromCollection == null || fromCollection.isDeleted) {
+      throw AssertionError("Can't move from a deleted album");
+    }
+    if (!toCollection.isOwner(userID)) {
       throw AssertionError("Can't move to a collection you don't own");
     }
-    if (fromCollection != null && !fromCollection.isOwner(userID)) {
+    if (!fromCollection.isOwner(userID)) {
       throw AssertionError("Can't move from a collection you don't own");
     }
     for (final file in files) {

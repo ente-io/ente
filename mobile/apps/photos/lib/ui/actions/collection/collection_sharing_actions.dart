@@ -512,16 +512,20 @@ class CollectionActions {
     Collection collection,
     BuildContext bContext,
   ) async {
+    await collectionsService.sync();
+    final currentCollection =
+        collectionsService.getCollectionByID(collection.id) ?? collection;
     final List<EnteFile> files =
-        await FilesDB.instance.getAllFilesCollection(collection.id);
+        await FilesDB.instance.getAllFilesCollection(currentCollection.id);
     await moveFilesFromCurrentCollection(
       bContext,
-      collection,
+      currentCollection,
       files,
-      isHidden: collection.isHidden() && !collection.isDefaultHidden(),
+      isHidden:
+          currentCollection.isHidden() && !currentCollection.isDefaultHidden(),
     );
     // collection should be empty on server now
-    await collectionsService.trashEmptyCollection(collection);
+    await collectionsService.trashEmptyCollection(currentCollection);
   }
 
   Future<void> removeFromUncatIfPresentInOtherAlbum(
@@ -581,10 +585,13 @@ class CollectionActions {
     Iterable<EnteFile> files, {
     bool isHidden = false,
   }) async {
+    await collectionsService.sync();
+    final currentCollection =
+        collectionsService.getCollectionByID(collection.id) ?? collection;
     final int currentUserID = Configuration.instance.getUserID()!;
-    final isCollectionOwner = collection.owner.id == currentUserID;
+    final isCollectionOwner = currentCollection.owner.id == currentUserID;
     final bool canRemoveAllParticipants =
-        collectionsService.canRemoveFilesFromAllParticipants(collection);
+        collectionsService.canRemoveFilesFromAllParticipants(currentCollection);
     final bool isCollectionAdmin =
         canRemoveAllParticipants && !isCollectionOwner;
     final FilesSplit split = FilesSplit.split(
@@ -598,7 +605,7 @@ class CollectionActions {
       ];
       if (filesToRemove.isNotEmpty) {
         await collectionsService.removeFromCollection(
-          collection.id,
+          currentCollection.id,
           filesToRemove,
         );
       }
@@ -606,14 +613,14 @@ class CollectionActions {
     }
     if (isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
       await collectionsService.removeFromCollection(
-        collection.id,
+        currentCollection.id,
         split.ownedByOtherUsers,
       );
     } else if (!isCollectionOwner && split.ownedByCurrentUser.isNotEmpty) {
       // collection is not owned by the user, just remove files owned
       // by current user and return
       await collectionsService.removeFromCollection(
-        collection.id,
+        currentCollection.id,
         split.ownedByCurrentUser,
       );
       return;
@@ -650,7 +657,7 @@ class CollectionActions {
     // This is needed when files are selected after filtering by another album,
     // as the file's collectionID might point to the filtered album instead of
     // the current collection.
-    final filesInCurrentCollection = collectionToFilesMap[collection.id];
+    final filesInCurrentCollection = collectionToFilesMap[currentCollection.id];
     if (filesInCurrentCollection != null) {
       for (final file in filesInCurrentCollection) {
         if (file.uploadedFileID != null &&
@@ -665,7 +672,11 @@ class CollectionActions {
     // collections. This mapping is done to avoid moving all the files to
     // uncategorized during remove from album.
     for (MapEntry<int, List<EnteFile>> entry in collectionToFilesMap.entries) {
-      if (!_isAutoMoveCandidate(collection.id, entry.key, currentUserID)) {
+      if (!_isAutoMoveCandidate(
+        currentCollection.id,
+        entry.key,
+        currentUserID,
+      )) {
         continue;
       }
       final targetCollection = collectionsService.getCollectionByID(entry.key)!;
@@ -720,8 +731,8 @@ class CollectionActions {
 
     for (MapEntry<int, List<EnteFile>> entry
         in destCollectionToFilesMap.entries) {
-      if (collection.type == CollectionType.uncategorized &&
-          entry.key == collection.id) {
+      if (currentCollection.type == CollectionType.uncategorized &&
+          entry.key == currentCollection.id) {
         // skip moving files to uncategorized collection from uncategorized
         // this flow is triggered while cleaning up uncategerized collection
         logger.info(
@@ -731,7 +742,7 @@ class CollectionActions {
         await collectionsService.move(
           entry.value,
           toCollectionID: entry.key,
-          fromCollectionID: collection.id,
+          fromCollectionID: currentCollection.id,
         );
       }
     }
