@@ -175,7 +175,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
           GradientButton(
             text: context.l10n.contactSupport,
             onTap: () async {
-              await sendLogs(context, "support@ente.io", postShare: () {});
+              await sendLogs(context, "support@ente.com", postShare: () {});
             },
           ),
         ],

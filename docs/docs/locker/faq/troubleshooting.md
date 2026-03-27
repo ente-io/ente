@@ -19,7 +19,7 @@ Try these steps:
 4. **Reinstall the app**: Uninstall and reinstall (your data is safe in the
    cloud)
 5. **Contact support**: If crashes continue, email
-   [support@ente.io](mailto:support@ente.io) with details
+   [support@ente.com](mailto:support@ente.com) with details
 
 ### The app is running slowly {#locker-app-slow}
 
@@ -101,7 +101,7 @@ Include:
 
 ### How do I contact support? {#locker-contact-support}
 
-Email [support@ente.io](mailto:support@ente.io) for personalized help.
+Email [support@ente.com](mailto:support@ente.com) for personalized help.
 
 Include:
 
@@ -113,7 +113,7 @@ Include:
 
 1. Open `Settings > Support`
 2. Tap **Export logs**
-3. Share the exported file with [support@ente.io](mailto:support@ente.io)
+3. Share the exported file with [support@ente.com](mailto:support@ente.com)
 
 Logs help us diagnose issues but contain no personal data.
 

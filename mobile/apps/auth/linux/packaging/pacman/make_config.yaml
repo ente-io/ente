@@ -1,8 +1,8 @@
 display_name: Ente Auth
 package_name: enteauth
 maintainer:
-  name: Ente.io Developers
-  email: auth@ente.io
+  name: Ente Developers
+  email: auth@ente.com
 licenses:
   - GPLv3
 icon: assets/generation-icons/icon-windows-linux.png

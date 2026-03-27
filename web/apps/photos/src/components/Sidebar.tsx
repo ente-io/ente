@@ -1548,7 +1548,7 @@ const DomainSettingsContents: React.FC = () => {
                         components={{
                             a: (
                                 <Link
-                                    href="https://ente.io/help/photos/features/sharing-and-collaboration/custom-domains/"
+                                    href="https://ente.com/help/photos/features/sharing-and-collaboration/custom-domains/"
                                     target="_blank"
                                     rel="noopener"
                                     color="accent"
@@ -1732,11 +1732,11 @@ const Help: React.FC<HelpProps> = ({
     };
 
     const handleHelp = useCallback(
-        () => openURL("https://ente.io/help/photos/"),
+        () => openURL("https://ente.com/help/photos/"),
         [],
     );
 
-    const handleBlog = useCallback(() => openURL("https://ente.io/blog/"), []);
+    const handleBlog = useCallback(() => openURL("https://ente.com/blog/"), []);
 
     const handleRequestFeature = useCallback(
         () => openURL("https://github.com/ente-io/ente/discussions"),
@@ -1744,7 +1744,7 @@ const Help: React.FC<HelpProps> = ({
     );
 
     const handleSupport = useCallback(
-        () => initiateEmail("support@ente.io"),
+        () => initiateEmail("support@ente.com"),
         [],
     );
 
@@ -1835,7 +1835,7 @@ const Help: React.FC<HelpProps> = ({
                     <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={
-                            <Tooltip title="support@ente.io">
+                            <Tooltip title="support@ente.com">
                                 <Typography sx={{ fontWeight: "medium" }}>
                                     {t("support")}
                                 </Typography>

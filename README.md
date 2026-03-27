@@ -23,7 +23,7 @@ Our source code and cryptography have been externally audited by Cure53 (a
 German cybersecurity firm, arguably the world's best), Symbolic Software (French
 cryptography experts) and Fallible (an Indian penetration testing firm).
 
-Learn more at [ente.io](https://ente.io).
+Learn more at [ente.com](https://ente.com).
 
 <br />
 
@@ -47,7 +47,7 @@ You can also clone this repository and choose to self-host.
 [<img height="40" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.photos)
 [<img height="40" src=".github/assets/f-droid-badge.png">](https://f-droid.org/packages/io.ente.photos.fdroid/)
 [<img height="40" src=".github/assets/obtainium-badge.png">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22io.ente.photos.independent%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fente-io%2Fente%22%2C%22author%22%3A%22ente-io%22%2C%22name%22%3A%22Ente%20Photos%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Atrue%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22ente-photos*%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3Anull%7D)
-[<img height="40" src=".github/assets/desktop-badge.png">](https://ente.io/download/desktop)
+[<img height="40" src=".github/assets/desktop-badge.png">](https://ente.com/download/desktop)
 [<img height="40" src=".github/assets/web-badge.svg">](https://web.ente.io)
 
 </div>
@@ -90,7 +90,7 @@ emergencies. Available for iOS and Android.
 
 Ente Locker is free for up to 100 items. If you're subscribed to Ente Photos,
 you can store up to 1000 items. Learn more at
-[ente.io/locker](https://ente.io/locker).
+[ente.com/locker](https://ente.com/locker).
 
 <div align="center">
 
@@ -118,11 +118,11 @@ please see our [support guide](SUPPORT.md).
 <img src=".github/assets/ente-ducky.png" width=200 alt="Ente's Mascot, Ducky,
     inviting people to Ente's source code repository" />
 
-Please visit the [community section](https://ente.io/about#community) for all the ways to
+Please visit the [community section](https://ente.com/about#community) for all the ways to
 connect with our community.
 
 [![Discord](https://img.shields.io/discord/948937918347608085?style=for-the-badge&logo=Discord&logoColor=white&label=Discord)](https://discord.gg/z2YVKkycX3)
-[![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.io/blog/rss.xml)
+[![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.com/blog/rss.xml)
 
 [![Twitter](.github/assets/twitter.svg)](https://twitter.com/enteio) &nbsp; [![Mastodon](.github/assets/mastodon.svg)](https://fosstodon.org/@ente)
 
@@ -131,7 +131,7 @@ connect with our community.
 ## Security
 
 If you believe you have found a security vulnerability, please responsibly
-disclose it by emailing security@ente.io or [using this
+disclose it by emailing security@ente.com or [using this
 link](https://github.com/ente-io/ente/security/advisories/new) instead of
 opening a public issue. We will investigate all legitimate reports. To know
 more, please see our [security policy](SECURITY.md).

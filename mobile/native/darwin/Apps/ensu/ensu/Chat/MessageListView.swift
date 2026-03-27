@@ -131,12 +131,6 @@ struct MessageListView: View {
             }
         }
 
-        if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled && !isUserDragging {
-                scrollToBottom(scrollProxy, force: true, animated: false)
-            }
-        }
-
         if newValue.isGenerating != previous.isGenerating {
             if newValue.isGenerating {
                 autoScrollEnabled = true
@@ -192,6 +186,7 @@ struct MessageListView: View {
                     } else {
                         AssistantMessageBubbleView(
                             message: message,
+                            isLastMessage: message.id == messages.last?.id,
                             onCopy: { onCopy(message) },
                             onRetry: { onRetry(message) },
                             onBranchChange: { delta in onBranchChange(message, delta) },
@@ -285,7 +280,7 @@ struct MessageListView: View {
         let fallbackPadding = EnsuSpacing.xxxl + EnsuSpacing.xxl + 60
         let measuredPadding = inputBarHeight > 0 ? inputBarHeight + EnsuSpacing.md : fallbackPadding
         let basePadding = max(fallbackPadding, measuredPadding)
-        return basePadding
+        return basePadding + keyboardHeight
     }
 
     private func scheduleInitialScroll(_ proxy: ScrollViewProxy) {

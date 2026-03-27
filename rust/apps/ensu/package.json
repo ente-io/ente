@@ -1,6 +1,6 @@
 {
   "name": "ensu-tauri",
-  "version": "0.1.9",
+  "version": "0.1.12",
   "private": true,
   "scripts": {
     "dev": "node scripts/tauri-dev.mjs",

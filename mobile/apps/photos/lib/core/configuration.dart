@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:convert';
 import "dart:io";
 
+import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
@@ -97,6 +98,10 @@ class Configuration {
         ),
       );
       _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+      final appSupportDirectory = await getApplicationSupportDirectory();
+      // Exclude Documents (SQLite, thumbnails, decrypted media) and Application Support (ML models) from backups since they’re server-derivable or must remain within the device’s E2EE boundary.
+      await excludeFromBackup(_documentsDirectory);
+      await excludeFromBackup(appSupportDirectory.path);
       _tempDocumentsDirPath = _documentsDirectory + "/temp/";
       final tempDocumentsDir = Directory(_tempDocumentsDirPath);
       await _cleanUpStaleFiles(tempDocumentsDir);

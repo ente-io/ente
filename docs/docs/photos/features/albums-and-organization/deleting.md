@@ -65,6 +65,8 @@ Trash is a special folder where deleted photos are held temporarily before perma
 - Photos remain for 30 days before automatic permanent deletion
 - Photos are hidden from normal views (galleries, search, albums)
 - Photos still count against your storage quota
+- On web/desktop, photos appear in trash sorted by date deleted; on mobile, photos appear sorted by date created
+- Photos show the remaining number of days until permanent deletion
 - You can restore photos anytime within the 30-day window
 - You can manually empty trash to free up storage immediately
 
@@ -110,7 +112,7 @@ If you accidentally deleted photos, you can restore them from Trash within 30 da
 3. Select the items to restore
 4. Click the "Restore" button
 
-Restored photos will be moved back to their original albums.
+Restored photos will be moved to an album of choice.
 
 ### Recovery time limit
 

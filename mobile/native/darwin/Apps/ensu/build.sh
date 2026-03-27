@@ -13,6 +13,28 @@ ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/ensu.xcarchive"
 EXPORT_PATH="$DERIVED_DATA_PATH/Export"
 EXPORT_OPTIONS_PLIST="$ROOT/ExportOptions-AppStore.plist"
 
+XCODE_EXTRA_ARGS=()
+XCODE_VERSION="$(xcodebuild -version 2>/dev/null | awk '/^Xcode / { print $2; exit }')"
+if [[ "$XCODE_VERSION" == 26* ]]; then
+  XCODE_EXTRA_ARGS+=(SWIFT_ENABLE_EXPLICIT_MODULES=NO)
+fi
+
+# Run xcodebuild, capturing output to a temp log to avoid SIGPIPE with pipefail.
+# On failure, prints the last 30 lines of the log for diagnostics.
+run_xcodebuild() {
+  local log
+  log="$(mktemp)"
+  if xcodebuild "$@" > "$log" 2>&1; then
+    rm -f "$log"
+  else
+    local rc=$?
+    echo "xcodebuild failed (exit $rc). Last 30 lines:" >&2
+    tail -30 "$log" >&2
+    rm -f "$log"
+    exit $rc
+  fi
+}
+
 usage() {
   cat <<'EOF'
 Build Ensu Apple app.
@@ -180,14 +202,15 @@ fi
 build_archive() {
   mkdir -p "$(dirname "$ARCHIVE_PATH")"
   echo "==> Building Release archive"
-  xcodebuild \
+  run_xcodebuild \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Release \
     -sdk iphoneos \
     -destination 'generic/platform=iOS' \
     -archivePath "$ARCHIVE_PATH" \
-    archive
+    archive \
+    "${XCODE_EXTRA_ARGS[@]}"
   echo "✅ Archive: $ARCHIVE_PATH"
 }
 
@@ -205,13 +228,14 @@ case "$MODE" in
     fi
 
     echo "==> Building Debug for simulator (id=$DESTINATION_ID)"
-    xcodebuild \
+    run_xcodebuild \
       -project "$PROJECT" \
       -scheme "$SCHEME" \
       -configuration Debug \
       -sdk iphonesimulator \
       -destination "id=$DESTINATION_ID" \
-      -derivedDataPath "$DERIVED_DATA_PATH"
+      -derivedDataPath "$DERIVED_DATA_PATH" \
+      "${XCODE_EXTRA_ARGS[@]}"
     ;;
   device)
     if [[ -z "$DESTINATION_ID" ]]; then
@@ -223,13 +247,14 @@ case "$MODE" in
     fi
 
     echo "==> Building Debug for device (id=$DESTINATION_ID)"
-    xcodebuild \
+    run_xcodebuild \
       -project "$PROJECT" \
       -scheme "$SCHEME" \
       -configuration Debug \
       -sdk iphoneos \
       -destination "id=$DESTINATION_ID" \
-      -derivedDataPath "$DERIVED_DATA_PATH"
+      -derivedDataPath "$DERIVED_DATA_PATH" \
+      "${XCODE_EXTRA_ARGS[@]}"
     ;;
   archive)
     build_archive
@@ -244,7 +269,7 @@ case "$MODE" in
 
     mkdir -p "$EXPORT_PATH"
     echo "==> Exporting IPA"
-    xcodebuild \
+    run_xcodebuild \
       -exportArchive \
       -archivePath "$ARCHIVE_PATH" \
       -exportPath "$EXPORT_PATH" \

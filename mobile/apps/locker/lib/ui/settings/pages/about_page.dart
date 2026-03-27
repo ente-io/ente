@@ -76,7 +76,7 @@ class AboutPage extends StatelessWidget {
     await PlatformUtil.openWebView(
       context,
       l10n.privacy,
-      "https://ente.io/privacy",
+      "https://ente.com/privacy",
     );
   }
 
@@ -85,7 +85,7 @@ class AboutPage extends StatelessWidget {
     await PlatformUtil.openWebView(
       context,
       l10n.termsOfServicesTitle,
-      "https://ente.io/terms",
+      "https://ente.com/terms",
     );
   }
 

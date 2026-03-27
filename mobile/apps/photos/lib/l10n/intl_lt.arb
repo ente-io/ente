@@ -27,7 +27,7 @@
   "deleteReason4": "Mano priežastis nenurodyta",
   "sendEmail": "Siųsti el. laišką",
   "deleteRequestSLAText": "Jūsų prašymas bus apdorotas per 72 valandas.",
-  "deleteEmailRequest": "Iš savo registruoto el. pašto adreso siųskite el. laišką adresu <warning>account-deletion@ente.io</warning>.",
+  "deleteEmailRequest": "Iš savo registruoto el. pašto adreso siųskite el. laišką adresu <warning>account-deletion@ente.com</warning>.",
   "entePhotosPerm": "„Ente“ <i>reikia leidimo</i> išsaugoti jūsų nuotraukas",
   "ok": "Gerai",
   "createAccount": "Kurti paskyrą",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -285,18 +285,19 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Patvirtinimo ID",
   "verifyEmailID": "Patvirtinti {email}",
   "emailNoEnteAccount": "{email} neturi „Ente“ paskyros.\n\nSiųskite jiems kvietimą bendrinti nuotraukas.",
-  "shareMyVerificationID": "Štai mano patvirtinimo ID: {verificationID}, skirta ente.io.",
-  "shareTextConfirmOthersVerificationID": "Ei, ar galite patvirtinti, kad tai yra jūsų ente.io patvirtinimo ID: {verificationID}",
+  "shareMyVerificationID": "Štai mano patvirtinimo ID: {verificationID}, skirta ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ei, ar galite patvirtinti, kad tai yra jūsų ente.com patvirtinimo ID: {verificationID}",
   "somethingWentWrong": "Kažkas nutiko ne taip",
   "sendInvite": "Siųsti kvietimą",
-  "shareTextRecommendUsingEnte": "Atsisiųskite „Ente“, kad galėtume lengvai bendrinti originalios kokybės nuotraukas ir vaizdo įrašus.\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Atsisiųsk „Ente“, kad galėtume lengvai bendrinti originalios kokybės nuotraukas ir vaizdo įrašus.\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Atsisiųsk „Ente“, kad galėčiau tave įtraukti į savo šeimos planą\n\nhttps://ente.com",
   "done": "Atlikta",
   "applyCodeTitle": "Taikyti kodą",
   "enterCodeDescription": "Įveskite draugo pateiktą kodą, kad gautumėte nemokamą saugyklą abiem.",
@@ -468,7 +469,6 @@
   "discover_sunset": "Saulėlydis",
   "discover_hills": "Kalvos",
   "discover_greenery": "Žaluma",
-  "mlIndexingDescription": "Atkreipkite dėmesį, kad mašininis mokymasis padidins pralaidumą ir akumuliatoriaus naudojimą, kol bus indeksuoti visi elementai. Apsvarstykite galimybę naudoti darbalaukio programą, kad indeksavimas būtų spartesnis – visi rezultatai bus sinchronizuojami automatiškai.",
   "loadingModel": "Atsisiunčiami modeliai...",
   "waitingForWifi": "Laukiama „WiFi“...",
   "status": "Būsena",
@@ -580,10 +580,81 @@
     }
   },
   "familyPlans": "Šeimos planai",
+  "family": "Šeima",
+  "designedForFamilies": "Sukurta šeimoms",
+  "shareYourSubscription": "Bendrinkite savo prenumerata su artimaisiais",
+  "plansStartAt": "Planai prasideda nuo {price} / mėnesį",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Peržiūrėti planus",
+  "addMember": "Įtraukti narį",
+  "inviteMembers": "Kviesti narius",
+  "emailAddress": "El. pašto adresas",
+  "sendInvites": "Siųsti kvietimus",
+  "enterAValidEmailAddress": "Įveskite tinkamą el. pašto adresą",
+  "alreadyAdded": "Jau įtrauktas.",
+  "thisUserIsNotOnEnte": "Šio naudotojo nėra platformoje „Ente“",
+  "members": "Nariai",
+  "pending": "Laukiama",
+  "closeFamilyPlan": "Uždaryti šeimos planą",
+  "closeFamilyConfirmTitle": "Uždaryti šeimos planą?",
+  "editStorageLimit": "Redaguoti saugyklos ribą",
+  "noLimitSet": "Nėra nustatyta riba",
+  "removeFromFamily": "Šalinti iš šeimos",
+  "removeMemberConfirmTitle": "Pašalinti narį?",
+  "removeMemberConfirmBody": "{email} praras prieigą prie bendrintos saugyklos.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Siųsti kvietimą dar kartą",
+  "revokeInviteConfirmTitle": "Panaikinti kvietimą?",
+  "memberStorageUsed": "{amount} panaudota",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Saugyklos riba",
+  "usingStorage": "Naudojama {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "limit": "Riba",
+  "noLimit": "Nėra ribos",
+  "currentUsageNote": "Dabartinis naudojimas: {amount}. Nustatykite į 0 dėl jokios ribos.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Išeiti šeimos planą?",
+  "leaveFamilyConfirmBody": "Prarasite prieigos prie bendrintos saugyklos.",
   "referrals": "Rekomendacijos",
   "notifications": "Pranešimai",
-  "sharedPhotoNotifications": "Naujos bendrintos nuotraukos",
-  "sharedPhotoNotificationsExplanation": "Gaukite pranešimus, kai kas nors įtraukia nuotrauką į bendrinamą albumą, kuriame dalyvaujate.",
+  "sharedPhotoNotifications": "Naujos bendrintos nuotraukos ir albumai",
+  "socialNotifications": "Patiktukai ir komentarai",
   "advanced": "Išplėstiniai",
   "general": "Bendrieji",
   "security": "Saugumas",
@@ -617,7 +688,6 @@
   "darkTheme": "Tamsi",
   "systemTheme": "Sistemos",
   "freeTrial": "Nemokamas bandomasis laikotarpis",
-  "selectYourPlan": "Pasirinkite planą",
   "enteSubscriptionPitch": "„Ente“ išsaugo jūsų prisiminimus, todėl jie visada bus pasiekiami, net jei prarasite įrenginį.",
   "enteSubscriptionShareWithFamily": "Į planą galima pridėti ir savo šeimą.",
   "currentUsageIs": "Dabartinis naudojimas – ",
@@ -638,7 +708,7 @@
   "subscription": "Prenumerata",
   "paymentDetails": "Mokėjimo duomenys",
   "manageFamily": "Tvarkyti šeimą",
-  "contactToManageSubscription": "Susisiekite su mumis adresu support@ente.io, kad sutvarkytumėte savo {provider} prenumeratą.",
+  "contactToManageSubscription": "Susisiekite su mumis adresu support@ente.com, kad sutvarkytumėte savo {provider} prenumeratą.",
   "renewSubscription": "Pratęsti prenumeratą",
   "cancelSubscription": "Atsisakyti prenumeratos",
   "areYouSureYouWantToRenew": "Ar tikrai norite pratęsti?",
@@ -687,7 +757,7 @@
   "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
   "visitWebToManage": "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą",
   "couldNotUpdateSubscription": "Nepavyko atnaujinti prenumeratos",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Susisiekite adresu support@ente.io ir mes mielai padėsime!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Susisiekite adresu support@ente.com ir mes mielai padėsime!",
   "paymentFailed": "Mokėjimas nepavyko",
   "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
   "@paymentFailedTalkToProvider": {
@@ -718,7 +788,6 @@
   "grantFullAccessPrompt": "Leiskite prieigą prie visų nuotraukų nustatymų programoje.",
   "allowPermTitle": "Leisti prieigą prie nuotraukų",
   "allowPermBody": "Iš nustatymų leiskite prieigą prie nuotraukų, kad „Ente“ galėtų rodyti ir kurti atsargines bibliotekos kopijas.",
-  "openSettings": "Atverti nustatymus",
   "selectMorePhotos": "Pasirinkti daugiau nuotraukų",
   "existingUser": "Esamas naudotojas",
   "newToEnte": "Naujas platformoje „Ente“",
@@ -1076,7 +1145,6 @@
   "fileTypesAndNames": "Failų tipai ir pavadinimai",
   "location": "Vietovė",
   "moments": "Akimirkos",
-  "searchFaceEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas indeksavimas.",
   "searchDatesEmptySection": "Ieškokite pagal datą, mėnesį arba metus",
   "searchLocationEmptySection": "Grupės nuotraukos, kurios padarytos tam tikru spinduliu nuo nuotraukos",
   "searchPeopleEmptySection": "Pakvieskite asmenis ir čia matysite visas jų bendrinamas nuotraukas.",
@@ -1423,7 +1491,6 @@
   },
   "extraPhotosFound": "Rastos papildomos nuotraukos",
   "configuration": "Konfiguracija",
-  "localIndexing": "Vietinis indeksavimas",
   "processed": "Apdorota",
   "resetPerson": "Šalinti",
   "areYouSureYouWantToResetThisPerson": "Ar tikrai norite iš naujo nustatyti šį asmenį?",
@@ -1761,9 +1828,6 @@
   "curatedMemories": "Kuruoti prisiminimai",
   "widgets": "Valdikliai",
   "memories": "Prisiminimai",
-  "peopleWidgetDesc": "Pasirinkite asmenis, kuriuos norite matyti savo pradžios ekrane.",
-  "albumsWidgetDesc": "Pasirinkite albumus, kuriuos norite matyti savo pradžios ekrane.",
-  "memoriesWidgetDesc": "Pasirinkite, kokius prisiminimus norite matyti savo pradžios ekrane.",
   "smartMemories": "Išmanieji prisiminimai",
   "pastYearsMemories": "Praėjusių metų prisiminimai",
   "deleteMultipleAlbumDialog": "Taip pat ištrinti nuotraukas (ir vaizdo įrašus), esančias šiuose {count} albumuose, iš <bold>visų</bold> kitų albumų, kuriuose jos yra dalis?",
@@ -1777,9 +1841,6 @@
   "sorryWeHadToPauseYourBackups": "Atsiprašome, turėjome pristabdyti jūsų atsarginių kopijų kūrimą.",
   "clickToInstallOurBestVersionYet": "Spustelėkite, kad įdiegtumėte geriausią mūsų versiją iki šiol",
   "onThisDayNotificationExplanation": "Gaukite priminimus apie praėjusių metų šios dienos prisiminimus.",
-  "addMemoriesWidgetPrompt": "Pridėkite prisiminimų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
-  "addAlbumWidgetPrompt": "Pridėkite albumo valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
-  "addPeopleWidgetPrompt": "Pridėkite asmenų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
   "birthdayNotifications": "Gimtadienio pranešimai",
   "receiveRemindersOnBirthdays": "Gaukite priminimus, kai yra kažkieno gimtadienis. Paliesdami pranešimą, pateksite į gimtadienio šventės asmens nuotraukas.",
   "happyBirthday": "Su gimtadieniu! 🥳",
@@ -1804,7 +1865,6 @@
   "same": "Tas pats",
   "different": "Skirtingas",
   "sameperson": "Tas pats asmuo?",
-  "indexingPausedStatusDescription": "Indeksavimas pristabdytas. Jis bus automatiškai tęsiamas, kai įrenginys bus parengtas. Įrenginys laikomas parengtu, kai jo akumuliatoriaus įkrovos lygis, akumuliatoriaus būklė ir terminė būklė yra normos ribose.",
   "thisWeek": "Šią savaitę",
   "lastWeek": "Praėjusią savaitę",
   "thisMonth": "Šį mėnesį",

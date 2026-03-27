@@ -330,7 +330,7 @@
     }
   },
   "sorry": "Bocsánat",
-  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.\nKérjük, írj a support@ente.io címre, ha segítségre van szükséged!",
+  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.\nKérjük, írj a support@ente.com címre, ha segítségre van szükséged!",
   "pendingSyncs": "Figyelmeztetés",
   "pendingSyncsWarningBody": "Néhány kódról nem készült biztonsági másolat.\n\nKérjük, győződj meg arról, hogy van biztonsági másolata ezekről a kódokról, mielőtt kijelentkezel.",
   "checkInboxAndSpamFolder": "Kérjük, ellenőrizd beérkező leveleid (spam mappát is) az ellenőrzés befejezéséhez",
@@ -343,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
