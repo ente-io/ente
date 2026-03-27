@@ -446,7 +446,7 @@ pub fn run_pet_clustering_incremental_rust(
         })
         .collect();
 
-    let body_centroids: HashMap<String, Vec<f32>> = existing_body_centroids
+    let _body_centroids: HashMap<String, Vec<f32>> = existing_body_centroids
         .into_iter()
         .map(|s| {
             (
