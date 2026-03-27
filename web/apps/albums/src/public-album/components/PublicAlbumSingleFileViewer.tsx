@@ -22,20 +22,19 @@ import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { useBaseContext } from "ente-base/context";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
+import { LazyNotification } from "@/public-album/components/lazy-ui";
 import type { AddSaveGroup } from "@/gallery/components/utils/save-groups";
 import { FileViewer } from "@/gallery/components/viewer/FileViewer";
 import { createPSRegisterElementIconHTML } from "@/gallery/components/viewer/icons";
 import { downloadManager } from "@/gallery/services/download";
-import { downloadAndSaveFiles } from "@/gallery/services/save";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getEnteURL } from "@/public-album/utils/public-album";
 
-interface PublicAlbumSingleFileViewerProps {
+export interface PublicAlbumSingleFileViewerProps {
     file: EnteFile;
     publicAlbumsCredentials: PublicAlbumsCredentials;
     collectionKey: string;
@@ -353,12 +352,16 @@ export const PublicAlbumSingleFileViewer: React.FC<
     const handleMenuClose = useCallback(() => setMenuAnchorEl(null), []);
 
     const handleDownload = useCallback(
-        (targetFile: EnteFile) =>
-            downloadAndSaveFiles(
+        async (targetFile: EnteFile) => {
+            const { downloadAndSaveFiles } = await import(
+                "@/gallery/services/save"
+            );
+            return downloadAndSaveFiles(
                 [targetFile],
                 fileFileName(targetFile),
                 onAddSaveGroup,
-            ),
+            );
+        },
         [onAddSaveGroup],
     );
 
@@ -742,16 +745,18 @@ export const PublicAlbumSingleFileViewer: React.FC<
                     <ActivityIndicator />
                 </Box>
             )}
-            <Notification
-                open={showCopiedMessage}
-                onClose={() => setShowCopiedMessage(false)}
-                horizontal="left"
-                attributes={{
-                    color: "secondary",
-                    startIcon: <CheckIcon />,
-                    title: "Copied!",
-                }}
-            />
+            {showCopiedMessage && (
+                <LazyNotification
+                    open={showCopiedMessage}
+                    onClose={() => setShowCopiedMessage(false)}
+                    horizontal="left"
+                    attributes={{
+                        color: "secondary",
+                        startIcon: <CheckIcon />,
+                        title: "Copied!",
+                    }}
+                />
+            )}
         </>
     );
 };

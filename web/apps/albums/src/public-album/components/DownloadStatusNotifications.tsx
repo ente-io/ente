@@ -34,7 +34,7 @@ const truncateAlbumName = (name: string): string => {
     return name.slice(0, MAX_ALBUM_NAME_LENGTH) + "...";
 };
 
-interface DownloadStatusNotificationsProps {
+export interface DownloadStatusNotificationsProps {
     /**
      * A list of user-initiated downloads for which a status should be shown.
      *

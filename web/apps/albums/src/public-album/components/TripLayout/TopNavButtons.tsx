@@ -4,9 +4,9 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
+import { LazyNotification } from "@/public-album/components/lazy-ui";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
-import { Notification } from "ente-new/photos/components/Notification";
 import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useState } from "react";
@@ -91,16 +91,18 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                 </SignUpButton>
             </ButtonContainer>
 
-            <Notification
-                open={showCopiedMessage}
-                onClose={() => setShowCopiedMessage(false)}
-                horizontal="left"
-                attributes={{
-                    color: "secondary",
-                    startIcon: <CheckIcon />,
-                    title: "Copied!",
-                }}
-            />
+            {showCopiedMessage && (
+                <LazyNotification
+                    open={showCopiedMessage}
+                    onClose={() => setShowCopiedMessage(false)}
+                    horizontal="left"
+                    attributes={{
+                        color: "secondary",
+                        startIcon: <CheckIcon />,
+                        title: "Copied!",
+                    }}
+                />
+            )}
         </>
     );
 };

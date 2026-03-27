@@ -3,15 +3,14 @@ import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "@/gallery/components/utils/save-groups";
 import {
-    FileViewer,
+    type FileViewerProps,
     type FileViewerInitialSidebar,
 } from "@/gallery/components/viewer/FileViewer";
-import { downloadAndSaveFiles } from "@/gallery/services/save";
+import { LazyFileViewer } from "@/gallery/components/viewer/lazy";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { t } from "i18next";
 import {
-    type ComponentProps,
     useCallback,
     useEffect,
     useMemo,
@@ -63,7 +62,7 @@ export type FileListWithViewerProps = {
     | "activeCollectionID"
 > &
     Pick<
-        ComponentProps<typeof FileViewer>,
+        FileViewerProps,
         | "publicAlbumsCredentials"
         | "collectionKey"
         | "onJoinAlbum"
@@ -144,10 +143,21 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     }, []);
 
     const handleDownload = useCallback(
-        (file: EnteFile) =>
-            downloadAndSaveFiles([file], fileFileName(file), onAddSaveGroup),
+        async (file: EnteFile) => {
+            const { downloadAndSaveFiles } = await import(
+                "@/gallery/services/save"
+            );
+            return downloadAndSaveFiles(
+                [file],
+                fileFileName(file),
+                onAddSaveGroup,
+            );
+        },
         [onAddSaveGroup],
     );
+
+    const shouldRenderFileViewer =
+        openFileViewer || pendingFileIndex !== undefined;
 
     return (
         <Container>
@@ -168,24 +178,26 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     />
                 )}
             </AutoSizer>
-            <FileViewer
-                open={openFileViewer}
-                onClose={handleCloseFileViewerInternal}
-                initialIndex={currentIndex}
-                initialSidebar={initialSidebar}
-                highlightCommentID={highlightCommentID}
-                disableDownload={!enableDownload}
-                {...{
-                    files,
-                    publicAlbumsCredentials,
-                    collectionKey,
-                    onJoinAlbum,
-                    enableComment,
-                    enableJoin,
-                }}
-                onDownload={handleDownload}
-                activeCollectionID={activeCollectionID}
-            />
+            {shouldRenderFileViewer && (
+                <LazyFileViewer
+                    open={openFileViewer}
+                    onClose={handleCloseFileViewerInternal}
+                    initialIndex={currentIndex}
+                    initialSidebar={initialSidebar}
+                    highlightCommentID={highlightCommentID}
+                    disableDownload={!enableDownload}
+                    {...{
+                        files,
+                        publicAlbumsCredentials,
+                        collectionKey,
+                        onJoinAlbum,
+                        enableComment,
+                        enableJoin,
+                    }}
+                    onDownload={handleDownload}
+                    activeCollectionID={activeCollectionID}
+                />
+            )}
         </Container>
     );
 };

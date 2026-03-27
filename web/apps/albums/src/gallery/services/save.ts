@@ -7,7 +7,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import JSZip from "jszip";
+import type JSZip from "jszip";
 import type {
     AddSaveGroup,
     UpdateSaveGroup,
@@ -24,6 +24,21 @@ interface DownloadLimits {
 }
 
 let cachedLimits: DownloadLimits | undefined;
+type JSZipConstructor = new () => JSZip;
+
+let jsZipConstructorPromise: Promise<JSZipConstructor> | undefined;
+
+const createJSZip = async (): Promise<JSZip> => {
+    const JSZipConstructor = await (jsZipConstructorPromise ??= import(
+        "jszip"
+    ).then((module) => {
+        const candidate = (
+            module as unknown as { default?: JSZipConstructor }
+        ).default;
+        return candidate ?? (module as unknown as JSZipConstructor);
+    }));
+    return new JSZipConstructor();
+};
 
 /**
  * Get download limits for the current device.
@@ -267,7 +282,7 @@ const downloadAndSave = async (
  * the batch size limit is reached.
  */
 class ZipBatcher {
-    private zip = new JSZip();
+    private zipPromise = createJSZip();
     private currentBatchSize = 0;
     private currentFileCount = 0;
     private batchIndex: number;
@@ -331,7 +346,8 @@ class ZipBatcher {
         // Ensure unique file names within the ZIP
         const uniqueName = this.getUniqueName(fileName);
         this.usedNames.add(uniqueName);
-        this.zip.file(uniqueName, data);
+        const zip = await this.zipPromise;
+        zip.file(uniqueName, data);
         this.currentBatchSize += size;
         this.currentFileCount++;
     }
@@ -348,7 +364,8 @@ class ZipBatcher {
     private async downloadCurrentBatch(): Promise<void> {
         this.onStateChange?.(true, this.batchIndex);
         try {
-            const zipBlob = await this.zip.generateAsync({ type: "blob" });
+            const zip = await this.zipPromise;
+            const zipBlob = await zip.generateAsync({ type: "blob" });
             const fileLabel =
                 this.currentFileCount === 1
                     ? "1 file"
@@ -369,7 +386,7 @@ class ZipBatcher {
         }
 
         // Reset for next batch
-        this.zip = new JSZip();
+        this.zipPromise = createJSZip();
         this.currentBatchSize = 0;
         this.currentFileCount = 0;
         this.usedNames.clear();

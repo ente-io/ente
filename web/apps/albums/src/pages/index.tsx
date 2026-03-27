@@ -22,9 +22,9 @@ import { ActiveDownloadStatusNotifications } from "@/public-album/components/Act
 import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
 import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
 import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
-import { PublicAlbumSingleFileViewer } from "@/public-album/components/PublicAlbumSingleFileViewer";
-import { TripLayout } from "@/public-album/components/TripLayout";
-import { Upload } from "@/public-album/components/Upload";
+import type { PublicAlbumSingleFileViewerProps } from "@/public-album/components/PublicAlbumSingleFileViewer";
+import type { TripLayoutProps } from "@/public-album/components/TripLayout";
+import type { UploadProps } from "@/public-album/components/Upload";
 import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
@@ -34,10 +34,6 @@ import {
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "ente-base/components/Navbar";
-import {
-    SingleInputForm,
-    type SingleInputFormProps,
-} from "ente-base/components/SingleInputForm";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
@@ -53,62 +49,85 @@ import {
     isOfficialAlbumsApp,
     photosAppOrigin,
 } from "ente-base/origins";
-import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import type { FullScreenDropZoneProps } from "@/gallery/components/FullScreenDropZone";
 import {
     useSaveGroupsActions,
     type AddSaveGroup,
 } from "@/gallery/components/utils/save-groups";
 import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
-import {
-    PublicFeedSidebar,
-    type PublicFeedItemClickInfo,
-} from "@/gallery/components/viewer/PublicFeedSidebar";
+import { type PublicFeedItemClickInfo } from "@/gallery/components/viewer/PublicFeedSidebar";
+import { LazyPublicFeedSidebar } from "@/gallery/components/viewer/lazy";
 import { downloadManager } from "@/gallery/services/download";
-import {
-    downloadAndSaveCollectionFiles,
-    downloadAndSaveFiles,
-} from "@/gallery/services/save";
-import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
 import { sortFiles } from "@/gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
-    removePublicCollectionAccessTokenJWT,
-    removePublicCollectionByKey,
-    savedPublicCollectionAccessTokenJWT,
-    savedPublicCollectionByKey,
-    savedPublicCollectionFiles,
-    savePublicCollectionAccessTokenJWT,
-} from "ente-new/albums/services/public-albums-fdb";
-import {
-    pullCollection,
-    pullPublicCollectionFiles,
-    removePublicCollectionFileData,
-    verifyPublicAlbumPassword,
-} from "ente-new/albums/services/public-collection";
-import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
-import { Notification } from "ente-new/photos/components/Notification";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
 import { t } from "i18next";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type FileWithPath } from "react-dropzone";
 import {
-    AccountsPageContents,
-    AccountsPageTitle,
-} from "@/public-album/components/AccountsPage";
-import { uploadManager } from "@/public-album/services/upload-manager";
+    type ComponentType,
+    type PropsWithChildren,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { type FileWithPath } from "react-dropzone";
+import { LazyNotification } from "@/public-album/components/lazy-ui";
+import type { PasswordUnlockScreenProps } from "@/public-album/components/PasswordUnlockScreen";
 import { getSelectedFiles, type SelectedState } from "@/public-album/utils/file";
 import { getEnteURL } from "@/public-album/utils/public-album";
 import { quickLinkDateRangeForFiles } from "@/public-album/utils/quick-link";
+
+const LazyPublicAlbumSingleFileViewer =
+    dynamic<PublicAlbumSingleFileViewerProps>(
+        () =>
+            import("@/public-album/components/PublicAlbumSingleFileViewer").then(
+                ({ PublicAlbumSingleFileViewer }) => PublicAlbumSingleFileViewer,
+            ),
+        { ssr: false, loading: () => <LoadingIndicator /> },
+    );
+
+const LazyTripLayout = dynamic<TripLayoutProps>(
+    () =>
+        import("@/public-album/components/TripLayout").then(
+            ({ TripLayout }) => TripLayout,
+        ),
+    { ssr: false, loading: () => <LoadingIndicator /> },
+);
+
+const LazyUpload = dynamic<UploadProps>(
+    () => import("@/public-album/components/Upload").then(({ Upload }) => Upload),
+    { ssr: false },
+);
+
+const LazyPasswordUnlockScreen = dynamic<PasswordUnlockScreenProps>(
+    () =>
+        import("@/public-album/components/PasswordUnlockScreen").then(
+            ({ PasswordUnlockScreen }) => PasswordUnlockScreen,
+        ),
+    { ssr: false, loading: () => <LoadingIndicator /> },
+);
+
+const loadPublicAlbumsFDB = () =>
+    import("ente-new/albums/services/public-albums-fdb");
+
+const loadPublicCollectionService = () =>
+    import("ente-new/albums/services/public-collection");
+
+const loadShareService = () => import("@/gallery/services/share");
+
+const loadJoinPublicAlbumRedirect = () =>
+    import("@/public-album/services/join-public-album-redirect");
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -126,6 +145,8 @@ export default function PublicCollectionGallery() {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [isUploadInProgress, setIsUploadInProgress] = useState(false);
+    const [shouldRenderUpload, setShouldRenderUpload] = useState(false);
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
     );
@@ -233,6 +254,17 @@ export default function PublicCollectionGallery() {
             try {
                 const currentURL = new URL(window.location.href);
                 const t = currentURL.searchParams.get("t");
+                const [
+                    { extractCollectionKeyFromShareURL },
+                    {
+                        savedPublicCollectionAccessTokenJWT,
+                        savedPublicCollectionByKey,
+                        savedPublicCollectionFiles,
+                    },
+                ] = await Promise.all([
+                    loadShareService(),
+                    loadPublicAlbumsFDB(),
+                ]);
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
                     // Only redirect to ente.io if this is NOT a custom/self-hosted instance
@@ -264,8 +296,6 @@ export default function PublicCollectionGallery() {
                 }
                 credentials.current = { accessToken, accessTokenJWT };
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
-                // Update the CF proxy flag, but we don't need to block on it.
-                void updateShouldDisableCFUploadProxy();
                 await publicAlbumsRemotePull();
             } finally {
                 if (
@@ -283,6 +313,25 @@ export default function PublicCollectionGallery() {
 
     const downloadEnabled =
         publicCollection?.publicURLs[0]?.enableDownload ?? true;
+    const collectEnabled = publicCollection?.publicURLs[0]?.enableCollect ?? false;
+
+    useEffect(() => {
+        if (!collectEnabled) return;
+        void import("@/gallery/services/upload").then(
+            ({ updateShouldDisableCFUploadProxy }) =>
+                updateShouldDisableCFUploadProxy(),
+        );
+    }, [collectEnabled]);
+
+    useEffect(() => {
+        if (
+            uploadTypeSelectorView ||
+            dragAndDropFiles.length > 0 ||
+            isUploadInProgress
+        ) {
+            setShouldRenderUpload(true);
+        }
+    }, [dragAndDropFiles.length, isUploadInProgress, uploadTypeSelectorView]);
 
     /**
      * Pull the latest data related to the public album from remote, updating
@@ -293,6 +342,17 @@ export default function PublicCollectionGallery() {
         showLoadingBar();
         setLoading(true);
         try {
+            const [
+                {
+                    pullCollection,
+                    pullPublicCollectionFiles,
+                    removePublicCollectionFileData,
+                },
+                { removePublicCollectionAccessTokenJWT },
+            ] = await Promise.all([
+                loadPublicCollectionService(),
+                loadPublicAlbumsFDB(),
+            ]);
             const { collection } = await pullCollection(
                 accessToken,
                 collectionKey.current!,
@@ -364,6 +424,13 @@ export default function PublicCollectionGallery() {
                 isHTTPErrorWithStatus(e, 410) ||
                 isHTTPErrorWithStatus(e, 429)
             ) {
+                const [
+                    { removePublicCollectionFileData },
+                    { removePublicCollectionByKey },
+                ] = await Promise.all([
+                    loadPublicCollectionService(),
+                    loadPublicAlbumsFDB(),
+                ]);
                 setErrorMessage(
                     isHTTPErrorWithStatus(e, 429)
                         ? t("link_request_limit_exceeded")
@@ -394,20 +461,38 @@ export default function PublicCollectionGallery() {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
-    // Join album handler for use in file viewer's public like modal
-    const { handleJoinAlbum } = useJoinAlbum({
-        publicCollection,
-        accessToken: credentials.current?.accessToken,
-        collectionKey: collectionKey.current,
-        credentials,
-    });
+    const handleJoinAlbum = useCallback(() => {
+        const accessToken = credentials.current?.accessToken;
+        const currentCollectionKey = collectionKey.current;
 
-    const handleSubmitPassword: SingleInputFormProps["onSubmit"] = async (
+        if (!publicCollection || !accessToken || !currentCollectionKey) {
+            return;
+        }
+
+        void loadJoinPublicAlbumRedirect().then(
+            ({ joinPublicAlbumViaRedirect }) =>
+                joinPublicAlbumViaRedirect({
+                    publicCollection,
+                    accessToken,
+                    collectionKey: currentCollectionKey,
+                    credentials,
+                }),
+        );
+    }, [publicCollection]);
+
+    const handleSubmitPassword: PasswordUnlockScreenProps["onSubmit"] = async (
         password,
         setFieldError,
     ) => {
         try {
             const accessToken = credentials.current!.accessToken;
+            const [
+                { verifyPublicAlbumPassword },
+                { savePublicCollectionAccessTokenJWT },
+            ] = await Promise.all([
+                import("@/public-album/services/verify-public-album-password"),
+                loadPublicAlbumsFDB(),
+            ]);
             const accessTokenJWT = await verifyPublicAlbumPassword(
                 publicCollection!.publicURLs[0]!,
                 password,
@@ -447,6 +532,9 @@ export default function PublicCollectionGallery() {
 
     const downloadFilesHelper = async () => {
         try {
+            const { downloadAndSaveFiles } = await import(
+                "@/gallery/services/save"
+            );
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
             const singleFile =
                 selectedFiles.length === 1 ? selectedFiles[0] : undefined;
@@ -462,10 +550,12 @@ export default function PublicCollectionGallery() {
     };
 
     const onAddPhotos = useMemo(() => {
-        return publicCollection?.publicURLs[0]?.enableCollect
-            ? () => setUploadTypeSelectorView(true)
-            : undefined;
-    }, [publicCollection]);
+        if (!collectEnabled) return undefined;
+        return () => {
+            setShouldRenderUpload(true);
+            setUploadTypeSelectorView(true);
+        };
+    }, [collectEnabled]);
 
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
@@ -474,7 +564,11 @@ export default function PublicCollectionGallery() {
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
     const joinEnabled = publicCollection?.publicURLs[0]?.enableJoin ?? false;
-    const addPhotosEnabled = !!onAddPhotos;
+    const addPhotosEnabled = collectEnabled;
+    const handleDrop = useCallback((files: FileWithPath[]) => {
+        setShouldRenderUpload(true);
+        setDragAndDropFiles(files);
+    }, []);
 
     const hasSelection = selected.count > 0;
     const isMobileHeaderLayout = useMediaQuery("(width < 720px)");
@@ -497,6 +591,7 @@ export default function PublicCollectionGallery() {
                                   onShowFeed: commentsEnabled
                                       ? showPublicFeed
                                       : undefined,
+                                  addPhotosDisabled: isUploadInProgress,
                                   hasSelection,
                               }}
                           />
@@ -512,6 +607,7 @@ export default function PublicCollectionGallery() {
             showPublicFeed,
             commentsEnabled,
             onAddPhotos,
+            isUploadInProgress,
             hasSelection,
             fileListHeaderHeightForViewport,
         ],
@@ -543,26 +639,7 @@ export default function PublicCollectionGallery() {
             </Stack100vhCenter>
         );
     } else if (isPasswordProtected && !credentials.current?.accessTokenJWT) {
-        return (
-            <AccountsPageContents>
-                <AccountsPageTitle>{t("password")}</AccountsPageTitle>
-                <Stack>
-                    <Typography
-                        variant="small"
-                        sx={{ color: "text.muted", mb: 2 }}
-                    >
-                        {t("link_password_description")}
-                    </Typography>
-                    <SingleInputForm
-                        inputType="password"
-                        label={t("password")}
-                        submitButtonColor="primary"
-                        submitButtonTitle={t("unlock")}
-                        onSubmit={handleSubmitPassword}
-                    />
-                </Stack>
-            </AccountsPageContents>
-        );
+        return <LazyPasswordUnlockScreen onSubmit={handleSubmitPassword} />;
     } else if (!publicFiles || !credentials.current) {
         return (
             <Stack100vhCenter>
@@ -584,7 +661,7 @@ export default function PublicCollectionGallery() {
     if (shouldShowSingleFileViewer) {
         return (
             <>
-                <PublicAlbumSingleFileViewer
+                <LazyPublicAlbumSingleFileViewer
                     file={publicFiles[0]!}
                     publicAlbumsCredentials={credentials.current}
                     collectionKey={collectionKey.current!}
@@ -601,14 +678,10 @@ export default function PublicCollectionGallery() {
         );
     }
 
-    return (
-        <FullScreenDropZone
-            disabled={shouldDisableDropzone}
-            onDrop={setDragAndDropFiles}
-            message={t("upload_dropzone_hint_public_album")}
-        >
+    const content = (
+        <>
             {layout === "trip" ? (
-                <TripLayout
+                <LazyTripLayout
                     files={publicFiles}
                     collection={publicCollection}
                     onAddPhotos={onAddPhotos}
@@ -648,24 +721,15 @@ export default function PublicCollectionGallery() {
                                 <Stack direction="row" spacing={2}>
                                     <SecondaryActionButton
                                         onAddPhotos={onAddPhotos}
+                                        addPhotosDisabled={isUploadInProgress}
                                         enableJoin={joinEnabled}
-                                        publicCollection={publicCollection}
-                                        accessToken={
-                                            credentials.current.accessToken
-                                        }
-                                        collectionKey={collectionKey.current}
-                                        credentials={credentials}
+                                        onJoinAlbum={handleJoinAlbum}
                                     />
                                     <PrimaryActionButton
                                         showJoinAsPrimary={
                                             addPhotosEnabled && joinEnabled
                                         }
-                                        publicCollection={publicCollection}
-                                        accessToken={
-                                            credentials.current.accessToken
-                                        }
-                                        collectionKey={collectionKey.current}
-                                        credentials={credentials}
+                                        onJoinAlbum={handleJoinAlbum}
                                     />
                                 </Stack>
                             </SpacedRow>
@@ -699,21 +763,26 @@ export default function PublicCollectionGallery() {
                 </>
             )}
             {blockingLoad && <TranslucentLoadingOverlay />}
-            <Upload
-                publicAlbumsCredentials={credentials.current}
-                uploadCollection={publicCollection}
-                setLoading={setBlockingLoad}
-                setShouldDisableDropzone={setShouldDisableDropzone}
-                uploadTypeSelectorView={uploadTypeSelectorView}
-                onRemotePull={publicAlbumsRemotePull}
-                onUploadFile={handleUploadFile}
-                closeUploadTypeSelector={closeUploadTypeSelectorView}
-                onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
-                {...{ dragAndDropFiles }}
-            />
+            {collectEnabled && shouldRenderUpload && (
+                <LazyUpload
+                    publicAlbumsCredentials={credentials.current}
+                    uploadCollection={publicCollection}
+                    setLoading={setBlockingLoad}
+                    setShouldDisableDropzone={setShouldDisableDropzone}
+                    uploadTypeSelectorView={uploadTypeSelectorView}
+                    onRemotePull={publicAlbumsRemotePull}
+                    onUploadFile={handleUploadFile}
+                    closeUploadTypeSelector={closeUploadTypeSelectorView}
+                    onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
+                    onUploadInProgressChange={setIsUploadInProgress}
+                    {...{ dragAndDropFiles }}
+                />
+            )}
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
-            {publicCollection && collectionKey.current && (
-                <PublicFeedSidebar
+            {publicFeedVisibilityProps.open &&
+                publicCollection &&
+                collectionKey.current && (
+                <LazyPublicFeedSidebar
                     {...publicFeedVisibilityProps}
                     files={publicFiles}
                     credentials={credentials.current}
@@ -721,7 +790,18 @@ export default function PublicCollectionGallery() {
                     onItemClick={handleFeedItemClick}
                 />
             )}
-        </FullScreenDropZone>
+        </>
+    );
+
+    return (
+        <LazyCollectDropZone
+            enabled={collectEnabled}
+            disabled={shouldDisableDropzone}
+            onDrop={handleDrop}
+            message={t("upload_dropzone_hint_public_album")}
+        >
+            {content}
+        </LazyCollectDropZone>
     );
 }
 
@@ -742,6 +822,45 @@ const normalizedPublicAlbumLayout = (layout: string | undefined) => {
     return "masonry";
 };
 
+type LazyCollectDropZoneProps = PropsWithChildren<
+    {
+        enabled: boolean;
+    } & Pick<FullScreenDropZoneProps, "disabled" | "message" | "onDrop">
+>;
+
+const LazyCollectDropZone: React.FC<LazyCollectDropZoneProps> = ({
+    enabled,
+    children,
+    ...props
+}) => {
+    const [DropZoneComponent, setDropZoneComponent] =
+        useState<
+            ComponentType<PropsWithChildren<FullScreenDropZoneProps>> | null
+        >(null);
+
+    useEffect(() => {
+        if (!enabled || DropZoneComponent) return;
+
+        let isCancelled = false;
+        void import("@/gallery/components/FullScreenDropZone").then(
+            ({ FullScreenDropZone }) => {
+                if (isCancelled) return;
+                setDropZoneComponent(() => FullScreenDropZone);
+            },
+        );
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [DropZoneComponent, enabled]);
+
+    if (!enabled || !DropZoneComponent) {
+        return <>{children}</>;
+    }
+
+    return <DropZoneComponent {...props}>{children}</DropZoneComponent>;
+};
+
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
     svg: { verticalAlign: "middle" },
@@ -759,8 +878,12 @@ const GreenButton = styled(Button)(() => ({
 
 const navbarActionButtonSx = { borderRadius: "16px", paddingBlock: "11px" };
 
-const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = uploadManager.isUploadInProgress();
+type AddPhotosButtonProps = ButtonishProps & { disabled?: boolean };
+
+const AddPhotosButton: React.FC<AddPhotosButtonProps> = ({
+    onClick,
+    disabled,
+}) => {
     const isSmallWidth = useIsSmallWidth();
 
     return (
@@ -786,33 +909,16 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
 interface PrimaryActionButtonProps {
     /** If true, shows "Join Album" as the primary action */
     showJoinAsPrimary?: boolean;
-    /** Collection to join (required if showJoinAsPrimary is true) */
-    publicCollection?: Collection;
-    /** Access token for the public link */
-    accessToken?: string;
-    /** Collection key from URL (base64 encoded) */
-    collectionKey?: string;
-    /** Credentials ref for JWT token access */
-    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+    onJoinAlbum?: () => void;
 }
 
 const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     showJoinAsPrimary,
-    publicCollection,
-    accessToken,
-    collectionKey,
-    credentials,
+    onJoinAlbum,
 }) => {
-    const { handleJoinAlbum } = useJoinAlbum({
-        publicCollection,
-        accessToken,
-        collectionKey,
-        credentials,
-    });
-
     if (showJoinAsPrimary) {
         return (
-            <GreenButton color="accent" onClick={handleJoinAlbum}>
+            <GreenButton color="accent" onClick={onJoinAlbum}>
                 {t("join_album")}
             </GreenButton>
         );
@@ -831,30 +937,24 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 
 interface SecondaryActionButtonProps {
     onAddPhotos?: () => void;
+    addPhotosDisabled?: boolean;
     enableJoin?: boolean;
-    publicCollection?: Collection;
-    accessToken?: string;
-    collectionKey?: string;
-    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+    onJoinAlbum?: () => void;
 }
 
 const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
     onAddPhotos,
+    addPhotosDisabled,
     enableJoin,
-    publicCollection,
-    accessToken,
-    collectionKey,
-    credentials,
+    onJoinAlbum,
 }) => {
-    const { handleJoinAlbum } = useJoinAlbum({
-        publicCollection,
-        accessToken,
-        collectionKey,
-        credentials,
-    });
-
     if (onAddPhotos) {
-        return <AddPhotosButton onClick={onAddPhotos} />;
+        return (
+            <AddPhotosButton
+                onClick={onAddPhotos}
+                disabled={addPhotosDisabled}
+            />
+        );
     }
 
     if (enableJoin) {
@@ -862,7 +962,7 @@ const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
             <FocusVisibleButton
                 color="secondary"
                 sx={navbarActionButtonSx}
-                onClick={handleJoinAlbum}
+                onClick={onJoinAlbum}
             >
                 {t("join_album")}
             </FocusVisibleButton>
@@ -928,6 +1028,7 @@ interface FileListHeaderProps {
     onAddSaveGroup: AddSaveGroup;
     onAddPhotos?: () => void;
     onShowFeed?: () => void;
+    addPhotosDisabled: boolean;
     hasSelection: boolean;
 }
 
@@ -956,10 +1057,10 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     onAddSaveGroup,
     onAddPhotos,
     onShowFeed,
+    addPhotosDisabled,
     hasSelection,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-    const addPhotosDisabled = uploadManager.isUploadInProgress();
 
     const memoriesDateRange = useMemo(() => {
         return quickLinkDateRangeForFiles(publicFiles);
@@ -969,14 +1070,18 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         memoriesDateRange !== undefined &&
         publicCollection.name === memoriesDateRange;
 
-    const downloadAllFiles = () =>
-        downloadAndSaveCollectionFiles(
-            publicCollection.name,
-            publicCollection.id,
-            publicFiles,
-            undefined,
-            onAddSaveGroup,
+    const downloadAllFiles = () => {
+        void import("@/gallery/services/save").then(
+            ({ downloadAndSaveCollectionFiles }) =>
+                downloadAndSaveCollectionFiles(
+                    publicCollection.name,
+                    publicCollection.id,
+                    publicFiles,
+                    undefined,
+                    onAddSaveGroup,
+                ),
         );
+    };
 
     const handleShare = async () => {
         if (typeof window === "undefined") return;
@@ -1107,16 +1212,18 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     </Stack>
                 </SpacedRow>
             </GalleryItemsHeaderAdapter>
-            <Notification
-                open={showCopiedMessage}
-                onClose={() => setShowCopiedMessage(false)}
-                horizontal="left"
-                attributes={{
-                    color: "secondary",
-                    startIcon: <CheckIcon />,
-                    title: "Copied!",
-                }}
-            />
+            {showCopiedMessage && (
+                <LazyNotification
+                    open={showCopiedMessage}
+                    onClose={() => setShowCopiedMessage(false)}
+                    horizontal="left"
+                    attributes={{
+                        color: "secondary",
+                        startIcon: <CheckIcon />,
+                        title: "Copied!",
+                    }}
+                />
+            )}
         </>
     );
 };

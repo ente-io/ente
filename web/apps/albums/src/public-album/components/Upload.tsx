@@ -70,7 +70,7 @@ interface RemotePullOpts {
     silent?: boolean;
 }
 
-interface UploadProps {
+export interface UploadProps {
     publicAlbumsCredentials?: PublicAlbumsCredentials;
     uploadTypeSelectorView: boolean;
     dragAndDropFiles: File[];
@@ -81,6 +81,7 @@ interface UploadProps {
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onUploadFile: (file: EnteFile) => void;
     onShowSessionExpiredDialog: () => void;
+    onUploadInProgressChange?: (value: boolean) => void;
 }
 
 type UploadType = "files" | "folders";
@@ -100,6 +101,7 @@ export const Upload: React.FC<UploadProps> = ({
     onRemotePull,
     onUploadFile,
     onShowSessionExpiredDialog,
+    onUploadInProgressChange,
     ...props
 }) => {
     const { onGenericError } = useBaseContext();
@@ -142,6 +144,12 @@ export const Upload: React.FC<UploadProps> = ({
      */
     const [isInputPending, setIsInputPending] = useState(false);
     const [selectedInputFiles, setSelectedInputFiles] = useState<File[]>([]);
+
+    const reportUploadInProgress = useCallback(
+        (value: boolean = uploadManager.isUploadInProgress()) =>
+            onUploadInProgressChange?.(value),
+        [onUploadInProgressChange],
+    );
 
     const handleInputSelect = useCallback((files: File[]) => {
         setIsInputPending(false);
@@ -198,7 +206,15 @@ export const Upload: React.FC<UploadProps> = ({
         if (uploadManager.isUploadRunning()) {
             setUploadProgressView(true);
         }
-    }, [onUploadFile, publicAlbumsCredentials]);
+        reportUploadInProgress();
+    }, [onUploadFile, publicAlbumsCredentials, reportUploadInProgress]);
+
+    useEffect(
+        () => () => {
+            onUploadInProgressChange?.(false);
+        },
+        [onUploadInProgressChange],
+    );
 
     useEffect(() => {
         let files: File[];
@@ -336,6 +352,7 @@ export const Upload: React.FC<UploadProps> = ({
         collections: Collection[],
         uploaderName?: string,
     ) => {
+        reportUploadInProgress(true);
         try {
             await preUploadAction();
             const wereFilesProcessed = await uploadManager.uploadItems(
@@ -349,11 +366,13 @@ export const Upload: React.FC<UploadProps> = ({
             closeUploadProgress();
             notifyUser(e);
         } finally {
+            reportUploadInProgress(false);
             postUploadAction();
         }
     };
 
     const retryFailed = async () => {
+        reportUploadInProgress(true);
         try {
             log.info("Retrying failed uploads");
             const { items, collections, parsedMetadataJSONMap } =
@@ -366,6 +385,7 @@ export const Upload: React.FC<UploadProps> = ({
             closeUploadProgress();
             notifyUser(e);
         } finally {
+            reportUploadInProgress(false);
             postUploadAction();
         }
     };

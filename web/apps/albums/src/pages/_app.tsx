@@ -1,16 +1,18 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import {
+    LazyAttributedMiniDialog,
+    LazyNotification,
+} from "@/public-album/components/lazy-ui";
 import { useNotification } from "@/public-album/hooks/useNotification";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHeadAlbums } from "ente-base/components/Head";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
 import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import { useSetupI18n } from "ente-base/components/utils/hooks-app";
 import { photosTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
-import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
 import { PhotosAppContext } from "ente-new/photos/types/context";
@@ -62,8 +64,10 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />
-            <AttributedMiniDialog {...miniDialogProps} />
-            <Notification {...notificationProps} />
+            {miniDialogProps.open && (
+                <LazyAttributedMiniDialog {...miniDialogProps} />
+            )}
+            {notificationProps.open && <LazyNotification {...notificationProps} />}
 
             <BaseContext value={baseContext}>
                 <PhotosAppContext value={appContext}>

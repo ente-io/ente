@@ -4,14 +4,15 @@ import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { useSaveGroupsActions } from "@/gallery/components/utils/save-groups";
 import {
-    FileViewer,
     type FileViewerInitialSidebar,
 } from "@/gallery/components/viewer/FileViewer";
 import {
-    PublicFeedSidebar,
     type PublicFeedItemClickInfo,
 } from "@/gallery/components/viewer/PublicFeedSidebar";
-import { downloadAndSaveCollectionFiles } from "@/gallery/services/save";
+import {
+    LazyFileViewer,
+    LazyPublicFeedSidebar,
+} from "@/gallery/components/viewer/lazy";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
@@ -39,7 +40,7 @@ import { useThumbnailGeneration } from "./hooks/useThumbnailGeneration";
 import type { JourneyPoint } from "./types";
 import type { PositionInfo } from "./utils/scrollUtils";
 
-interface TripLayoutProps {
+export interface TripLayoutProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
@@ -155,12 +156,15 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     // Download all files functionality
     const downloadAllFiles = () => {
         if (!collection) return;
-        void downloadAndSaveCollectionFiles(
-            collectionTitle,
-            collection.id,
-            files,
-            undefined,
-            onAddSaveGroup,
+        void import("@/gallery/services/save").then(
+            ({ downloadAndSaveCollectionFiles }) =>
+                downloadAndSaveCollectionFiles(
+                    collectionTitle,
+                    collection.id,
+                    files,
+                    undefined,
+                    onAddSaveGroup,
+                ),
         );
     };
 
@@ -577,27 +581,32 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             )}
 
             {/* FileViewer for photo gallery */}
-            <FileViewer
-                open={openFileViewer}
-                onClose={handleCloseFileViewerWithCleanup}
-                initialIndex={currentFileIndex}
-                initialSidebar={initialSidebar}
-                highlightCommentID={highlightCommentID}
-                files={viewerFiles}
-                disableDownload={!enableDownload}
-                publicAlbumsCredentials={credentials?.current}
-                collectionKey={collectionKey}
-                onJoinAlbum={handleJoinAlbum}
-                enableComment={enableComment}
-                enableJoin={enableJoin}
-            />
+            {openFileViewer && (
+                <LazyFileViewer
+                    open={openFileViewer}
+                    onClose={handleCloseFileViewerWithCleanup}
+                    initialIndex={currentFileIndex}
+                    initialSidebar={initialSidebar}
+                    highlightCommentID={highlightCommentID}
+                    files={viewerFiles}
+                    disableDownload={!enableDownload}
+                    publicAlbumsCredentials={credentials?.current}
+                    collectionKey={collectionKey}
+                    onJoinAlbum={handleJoinAlbum}
+                    enableComment={enableComment}
+                    enableJoin={enableJoin}
+                />
+            )}
 
             {/* Download progress notifications */}
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
 
             {/* Public feed sidebar */}
-            {collection && credentials?.current && collectionKey && (
-                <PublicFeedSidebar
+            {publicFeedVisibilityProps.open &&
+                collection &&
+                credentials?.current &&
+                collectionKey && (
+                <LazyPublicFeedSidebar
                     {...publicFeedVisibilityProps}
                     files={files}
                     credentials={credentials.current}
