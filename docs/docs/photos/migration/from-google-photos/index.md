@@ -6,7 +6,8 @@ description: Migrating your existing photos from Google Photos to Ente Photos
 # Import from Google Photos
 
 Follow the following steps to recover your data from Google Photos and preserve
-it with Ente.
+it with Ente. Also, please check out our
+[Migration FAQ](/photos/faq/migration) page for common queries.
 
 ### Steps
 
