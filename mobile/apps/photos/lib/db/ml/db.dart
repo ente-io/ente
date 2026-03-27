@@ -467,7 +467,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final petCentroidVdbs = _isOffline
         ? [
             PetClusterCentroidVectorDB.offlineDog,
-            PetClusterCentroidVectorDB.offlineCat
+            PetClusterCentroidVectorDB.offlineCat,
           ]
         : [PetClusterCentroidVectorDB.dog, PetClusterCentroidVectorDB.cat];
     for (final vdb in petCentroidVdbs) {

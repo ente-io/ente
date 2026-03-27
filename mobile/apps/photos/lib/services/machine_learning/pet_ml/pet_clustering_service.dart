@@ -575,8 +575,7 @@ extension PetClusteringDB on MLDataDB {
     );
     final result = <String, String>{};
     for (final r in rows) {
-      result[r[clusterIDColumn] as String] =
-          r[exemplarsColumn] as String;
+      result[r[clusterIDColumn] as String] = r[exemplarsColumn] as String;
     }
     return result;
   }
@@ -678,7 +677,7 @@ extension PetClusteringDB on MLDataDB {
     return result;
   }
 
-  /// Get petId → {clusterId → Set<faceIds>} for reconciliation.
+  /// Get petId to {clusterId to Set of faceIds} for reconciliation.
   Future<Map<String, Map<String, Set<String>>>>
       getPetToClusterIdToFaceIds() async {
     final db = await asyncDB;
