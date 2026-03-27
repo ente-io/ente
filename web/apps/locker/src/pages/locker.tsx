@@ -59,9 +59,9 @@ import {
     shareCollection as shareCollectionAPI,
     trashFiles,
     unshareCollection as unshareCollectionAPI,
-    updateItemCollections,
-    updateInfoItem,
     updateFileItem,
+    updateInfoItem,
+    updateItemCollections,
     uploadLockerFile,
     type LockerUploadProgress,
 } from "services/remote";
@@ -788,9 +788,10 @@ export const LockerPage: React.FC = () => {
 
             const normalizedNameToID = new Map(
                 collections
-                    .filter((collection) =>
-                        currentUserID !== undefined &&
-                        isCollectionOwner(collection, currentUserID),
+                    .filter(
+                        (collection) =>
+                            currentUserID !== undefined &&
+                            isCollectionOwner(collection, currentUserID),
                     )
                     .map((collection) => [
                         collection.name.trim().toLocaleLowerCase(),
@@ -1270,7 +1271,9 @@ export const LockerPage: React.FC = () => {
                             <FocusVisibleButton
                                 fullWidth
                                 color="secondary"
-                                disabled={visibleDeleteCollectionDialog?.loading}
+                                disabled={
+                                    visibleDeleteCollectionDialog?.loading
+                                }
                                 onClick={() => setDeleteCollectionDialog(null)}
                             >
                                 {t("cancel")}
@@ -1279,7 +1282,9 @@ export const LockerPage: React.FC = () => {
                                 fullWidth
                                 color="critical"
                                 loading={visibleDeleteCollectionDialog?.loading}
-                                onClick={() => void handleConfirmDeleteCollection()}
+                                onClick={() =>
+                                    void handleConfirmDeleteCollection()
+                                }
                             >
                                 {t("delete")}
                             </LoadingButton>

@@ -1531,11 +1531,7 @@ export const updateItemCollections = async (
         new Set(
             collectionIDs.length > 0
                 ? collectionIDs
-                : [
-                      (
-                          await ensureUncategorizedCollection(masterKey)
-                      ).id,
-                  ],
+                : [(await ensureUncategorizedCollection(masterKey)).id],
         ),
     );
     const currentCollectionIDSet = new Set(currentCollectionIDs);
@@ -1546,14 +1542,16 @@ export const updateItemCollections = async (
     const collectionIDsToRemove = currentCollectionIDs.filter(
         (collectionID) => !nextCollectionIDSet.has(collectionID),
     );
-    const uncategorizedCollection = await ensureUncategorizedCollection(masterKey);
+    const uncategorizedCollection =
+        await ensureUncategorizedCollection(masterKey);
     const pendingAddedCollectionIDs = [...collectionIDsToAdd];
 
     for (const collectionID of collectionIDsToRemove) {
         const targetCollectionID =
             pendingAddedCollectionIDs.shift() ??
             nextCollectionIDs.find(
-                (candidateCollectionID) => candidateCollectionID !== collectionID,
+                (candidateCollectionID) =>
+                    candidateCollectionID !== collectionID,
             ) ??
             uncategorizedCollection.id;
 

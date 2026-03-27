@@ -62,8 +62,8 @@ import {
 } from "types";
 import { ItemCard } from "./ItemCard";
 import { ItemDetailView } from "./ItemDetailView";
-import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
 import { lockerDialogPaperSx } from "./lockerDialogStyles";
+import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
 
 const uniqueCollectionsByID = (collections: LockerCollection[]) => {
     const seen = new Set<number>();

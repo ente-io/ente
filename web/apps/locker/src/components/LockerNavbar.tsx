@@ -127,13 +127,7 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
 );
 
 export const LockerUnstableToast: React.FC = () => (
-    <Box
-        sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 2,
-        }}
-    >
+    <Box sx={{ position: "sticky", top: 0, zIndex: 2 }}>
         <Stack
             direction="row"
             role="status"

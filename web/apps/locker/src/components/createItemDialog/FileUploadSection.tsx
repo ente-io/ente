@@ -355,7 +355,6 @@ export function FileUploadSection({
                         })}
                     </Stack>
                 )}
-
             </Stack>
 
             <Stack
@@ -536,7 +535,11 @@ const UploadItemCard = React.memo(function UploadItemCard({
                 )}
                 {isQueued && (
                     <ScheduleRoundedIcon
-                        sx={{ color: "text.muted", fontSize: 20, flexShrink: 0 }}
+                        sx={{
+                            color: "text.muted",
+                            fontSize: 20,
+                            flexShrink: 0,
+                        }}
                     />
                 )}
                 {canRemove && !isDone && !isFailed && (
@@ -578,23 +581,23 @@ const UploadItemCard = React.memo(function UploadItemCard({
                     />
                 </Box>
             )}
-        <Box sx={{ mt: "auto", height: 4, flexShrink: 0 }}>
-            <LinearProgress
-                variant="determinate"
-                value={
-                    isUploading
-                        ? uploadProgressValue(uploadProgress, uploadCap)
-                        : isDone
-                          ? 100
-                          : 0
-                }
-                sx={(theme) => ({
-                    height: 4,
-                    borderRadius: 0,
-                    opacity: isUploading || isDone ? 1 : 0,
-                    "& .MuiLinearProgress-bar": {
-                        transition:
-                            uploadProgress?.phase === "finalizing"
+            <Box sx={{ mt: "auto", height: 4, flexShrink: 0 }}>
+                <LinearProgress
+                    variant="determinate"
+                    value={
+                        isUploading
+                            ? uploadProgressValue(uploadProgress, uploadCap)
+                            : isDone
+                              ? 100
+                              : 0
+                    }
+                    sx={(theme) => ({
+                        height: 4,
+                        borderRadius: 0,
+                        opacity: isUploading || isDone ? 1 : 0,
+                        "& .MuiLinearProgress-bar": {
+                            transition:
+                                uploadProgress?.phase === "finalizing"
                                     ? theme.transitions.create("transform", {
                                           duration: 2200,
                                           easing: "ease-out",
@@ -606,8 +609,7 @@ const UploadItemCard = React.memo(function UploadItemCard({
             </Box>
         </Stack>
     );
-},
-areUploadItemCardPropsEqual);
+}, areUploadItemCardPropsEqual);
 
 function areUploadItemCardPropsEqual(
     previous: UploadItemCardProps,

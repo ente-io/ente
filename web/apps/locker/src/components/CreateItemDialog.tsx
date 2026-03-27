@@ -670,8 +670,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const canSave =
         selectedType !== null &&
         selectedCollectionIDs.length > 0 &&
-        getRequiredFields(selectedType).every((field) =>
-            typeof formData[field] === "string" && formData[field].trim(),
+        getRequiredFields(selectedType).every(
+            (field) =>
+                typeof formData[field] === "string" && formData[field].trim(),
         );
 
     const canUpload =
