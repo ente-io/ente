@@ -354,14 +354,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             return;
         }
 
-        setError(null);
-        setShowPassword(false);
-        setSelectedUploadItems([]);
-        setCustomCollectionNames([]);
-        setSelectedCollectionNamesByFileKey({});
-        resetUploadState();
         onClose();
-    }, [onClose, resetUploadState, saving, uploading]);
+    }, [onClose, saving, uploading]);
 
     const handleStepBackToOptions = useCallback(() => {
         if (isEditMode || saving || uploading) {
