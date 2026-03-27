@@ -1804,4 +1804,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authToViewYourActiveSessions =>
       'Please authenticate to view your active sessions';
+
+  @override
+  String deleteAccountFeedbackPrompt(String email) {
+    return 'Something not working? Reach out at $email, we\'d love to help.';
+  }
+
+  @override
+  String get sendFeedback => 'Send feedback';
+
+  @override
+  String get deleteAccountPermanentWarning =>
+      'This will permanently delete your Ente Auth, Photos, and Locker data';
 }

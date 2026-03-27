@@ -1041,5 +1041,15 @@
   "suggestions": "Suggestions",
   "noResultsFound": "No results found",
   "viewActiveSessions": "View active sessions",
-  "authToViewYourActiveSessions": "Please authenticate to view your active sessions"
+  "authToViewYourActiveSessions": "Please authenticate to view your active sessions",
+  "deleteAccountFeedbackPrompt": "Something not working? Reach out at {email}, we'd love to help.",
+  "@deleteAccountFeedbackPrompt": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "sendFeedback": "Send feedback",
+  "deleteAccountPermanentWarning": "This will permanently delete your Ente Auth, Photos, and Locker data"
 }
