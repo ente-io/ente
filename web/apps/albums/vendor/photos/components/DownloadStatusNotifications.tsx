@@ -49,23 +49,6 @@ interface DownloadStatusNotificationsProps {
      */
     onRemoveSaveGroup: (saveGroup: SaveGroup) => void;
     /**
-     * Called when the collection summary with the given {@link collectionID}
-     * should be shown. If {@link isHiddenCollectionSummary} is set, then any
-     * reauthentication as appropriate before switching to the hidden section of
-     * the app is performed first.
-     *
-     * and hidden attribute should be shown.
-     *
-     * This is only relevant in the context of the photos app, and can be
-     * omitted by the public albums app. See the documentation of
-     * {@link SaveGroup}'s {@link collectionSummaryID} property for why we don't
-     * store the collection summary itself.
-     */
-    onShowCollectionSummary?: (
-        collectionSummaryID: number | undefined,
-        isHiddenCollectionSummary: boolean | undefined,
-    ) => void;
-    /**
      * If true, make each notification full width on mobile phones (MUI "sm"
      * and below). Tablet and desktop widths remain unchanged.
      */
@@ -78,12 +61,7 @@ interface DownloadStatusNotificationsProps {
  */
 export const DownloadStatusNotifications: React.FC<
     DownloadStatusNotificationsProps
-> = ({
-    saveGroups,
-    onRemoveSaveGroup,
-    onShowCollectionSummary,
-    fullWidthOnMobile,
-}) => {
+> = ({ saveGroups, onRemoveSaveGroup, fullWidthOnMobile }) => {
     const { showMiniDialog } = useBaseContext();
     const fileLabel = t("file").toLowerCase();
     const [cancelDownloadGroup, setCancelDownloadGroup] =
@@ -127,19 +105,7 @@ export const DownloadStatusNotifications: React.FC<
         }
     };
 
-    const createOnClick = (group: SaveGroup) => () => {
-        const electron = globalThis.electron;
-        if (electron && group.downloadDirPath) {
-            void electron.openDirectory(group.downloadDirPath);
-        } else if (onShowCollectionSummary) {
-            onShowCollectionSummary(
-                group.collectionSummaryID,
-                group.isHiddenCollectionSummary,
-            );
-        } else {
-            return undefined;
-        }
-    };
+    const createOnClick = (_group: SaveGroup) => undefined;
 
     return (
         <>

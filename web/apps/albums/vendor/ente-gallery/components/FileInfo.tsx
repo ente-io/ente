@@ -56,15 +56,6 @@ type FileInfoAnnotatedExif = Required<FileInfoExif> & {
 export type FileInfoProps = ModalVisibilityProps & {
     file: EnteFile;
     exif: FileInfoExif | undefined;
-    allowEdits?: boolean;
-    allowMap?: boolean;
-    showCollections?: boolean;
-    fileCollectionIDs?: Map<number, number[]>;
-    collectionNameByID?: Map<number, string>;
-    onFileMetadataUpdate?: () => Promise<void>;
-    onUpdateCaption: (fileID: number, newCaption: string) => void;
-    onSelectCollection?: (collectionID: number) => void;
-    onSelectPerson?: (personID: string) => void;
 };
 
 export const FileInfo: React.FC<FileInfoProps> = ({

@@ -16,15 +16,13 @@ import { z } from "zod";
  *
  * For example, for each original image that the user uploads, there will be an
  * associated thumbnail file, potentially one or more preview files (optimized
- * for size or compatibility across devices), various ML embeddings generated
- * for that file, and possibly more such files in the future.
+ * for size or compatibility across devices), and possibly more such files in
+ * the future.
  *
  * There are specialized APIs for fetching and uploading the originals and the
  * thumbnails. But for the other associated data, we can use the file data APIs.
  */
-type FileDataType =
-    | "mldata" /* See: [Note: "mldata" format] */
-    | "vid_preview" /* See: [Note: Video playlist and preview] */;
+type FileDataType = "vid_preview" /* See: [Note: Video playlist and preview] */;
 
 const RemoteFileData = z.object({
     /**
@@ -44,25 +42,7 @@ const RemoteFileData = z.object({
     decryptionHeader: z.string(),
     /**
      * The epoch microseconds when this file data entry was last upserted.
-     *
-     * [Note: PUT "mldata" version check]
-     *
-     * When PUT-ting mldata onto remote, the client is expected to pass the
-     * updated at of the existing {@link RemoteFileData} which it is updating
-     * (this field), or 0 if the client is creating a new entity.
-     *
-     * This allows remote to detect and reject cases where the client is trying
-     * to overwrite a version it hasn't yet pulled.
-     *
-     * About the optionality of this field: Newer museums are expected to always
-     * provide the {@link updatedAt} in the response, but for ease of self
-     * hosters we don't take a hard dependency on the latest museum and instead
-     * allow this field to be optional. When it is not present, effectively
-     * we'll pass 0 as {@link lastUpdatedAt} in the "mldata" PUT API call, but
-     * since it's an old museum it'll anyway ignore it.
-     *
-     * > This note was added May 2025, and the optionality can be removed in a
-     * > few months when museums should've updated (tag: Migration).
+     * Optional for compatibility with older museum responses.
      */
     updatedAt: z.number().nullish().transform(nullToUndefined),
 });
@@ -137,8 +117,6 @@ export const fetchFileData = async (
  *
  * S3 metadata (museum term, the APIs call it "file data") is data that museum
  * uploads on behalf of the client. e.g.,
- *
- * - ML data.
  *
  * - Preview video playlist.
  *

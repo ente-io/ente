@@ -1222,8 +1222,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         };
     }, [open, shouldCloseOnBrowserBack]);
 
-    const handleUpdateCaption = useCallback(() => undefined, []);
-
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
     if (!activeAnnotatedFile) {
@@ -1237,7 +1235,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleFileInfoClose}
                 file={activeAnnotatedFile.file}
                 exif={activeFileExif}
-                onUpdateCaption={handleUpdateCaption}
             />
             <CommentsSidebar
                 open={openComments}

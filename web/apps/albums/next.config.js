@@ -23,8 +23,6 @@ module.exports = {
     env: {
         gitSHA,
         appName,
-        isDesktop: "",
-        desktopAppVersion: undefined,
     },
     webpack: (config, { isServer }) => {
         if (!isServer) {
