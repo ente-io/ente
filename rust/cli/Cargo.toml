@@ -43,5 +43,9 @@ open = "5.0"
 zip = "2.2"
 
 [dev-dependencies]
+hmac = "0.12"
 mockito = "1.6"
+sha2 = "0.10"
+srp = "0.6"
+sha1 = "0.10"
 tempdir = "0.3"

@@ -1,7 +1,9 @@
 use crate::api::client::ApiClient;
 use crate::api::models::{
-    AuthResponse, CreateSrpSessionRequest, CreateSrpSessionResponse, GetSrpAttributesResponse,
-    SendOtpRequest, SrpAttributes, VerifyEmailRequest, VerifySrpSessionRequest, VerifyTotpRequest,
+    AuthResponse, CompleteSrpSetupRequest, CompleteSrpSetupResponse, CreateSrpSessionRequest,
+    CreateSrpSessionResponse, EnableTwoFactorRequest, GetSrpAttributesResponse, SendOtpRequest,
+    SessionValidityResponse, SetUserAttributesRequest, SetupSrpRequest, SetupSrpResponse,
+    SrpAttributes, TwoFactorSecret, VerifyEmailRequest, VerifySrpSessionRequest, VerifyTotpRequest,
 };
 use crate::models::error::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -135,23 +137,68 @@ impl<'a> AuthClient<'a> {
     }
 
     /// Send OTP for email verification
-    pub async fn send_login_otp(&self, email: &str) -> Result<()> {
+    pub async fn send_otp(&self, email: &str, purpose: &str) -> Result<()> {
         let request = SendOtpRequest {
             email: email.to_string(),
-            purpose: "login".to_string(),
+            purpose: purpose.to_string(),
         };
 
         self.api.post_empty("/users/ott", &request, None).await
     }
 
     /// Verify email with OTP
-    pub async fn verify_email(&self, email: &str, otp: &str) -> Result<AuthResponse> {
+    pub async fn verify_email(
+        &self,
+        email: &str,
+        otp: &str,
+        source: Option<&str>,
+    ) -> Result<AuthResponse> {
         let request = VerifyEmailRequest {
             email: email.to_string(),
             ott: otp.to_string(),
+            source: source.map(str::to_string),
         };
 
         self.api.post("/users/verify-email", &request, None).await
+    }
+
+    /// Upload key attributes for the authenticated user
+    pub async fn set_user_key_attributes(
+        &self,
+        account_id: &str,
+        key_attributes: crate::api::models::KeyAttributes,
+    ) -> Result<()> {
+        let request = SetUserAttributesRequest { key_attributes };
+        self.api
+            .put_empty("/users/attributes", &request, Some(account_id))
+            .await
+    }
+
+    /// Start SRP setup for the authenticated user
+    pub async fn setup_srp(
+        &self,
+        account_id: &str,
+        request: &SetupSrpRequest,
+    ) -> Result<SetupSrpResponse> {
+        self.api
+            .post("/users/srp/setup", request, Some(account_id))
+            .await
+    }
+
+    /// Complete SRP setup for the authenticated user
+    pub async fn complete_srp_setup(
+        &self,
+        account_id: &str,
+        setup_id: &Uuid,
+        srp_m1: &str,
+    ) -> Result<CompleteSrpSetupResponse> {
+        let request = CompleteSrpSetupRequest {
+            setup_id: setup_id.to_string(),
+            srp_m1: srp_m1.to_string(),
+        };
+        self.api
+            .post("/users/srp/complete", &request, Some(account_id))
+            .await
     }
 
     /// Verify TOTP for two-factor authentication
@@ -170,6 +217,32 @@ impl<'a> AuthClient<'a> {
     pub async fn check_passkey_status(&self, session_id: &str) -> Result<AuthResponse> {
         let url = format!("/users/two-factor/passkeys/get-token?sessionID={session_id}");
         self.api.get(&url, None).await
+    }
+
+    /// Read the current user's key attributes if already configured
+    pub async fn get_session_validity(&self, account_id: &str) -> Result<SessionValidityResponse> {
+        self.api
+            .get("/users/session-validity/v2", Some(account_id))
+            .await
+    }
+
+    /// Start TOTP setup and receive the secret and QR code
+    pub async fn setup_two_factor(&self, account_id: &str) -> Result<TwoFactorSecret> {
+        let request = serde_json::json!({});
+        self.api
+            .post("/users/two-factor/setup", &request, Some(account_id))
+            .await
+    }
+
+    /// Enable TOTP with the encrypted recovery secret
+    pub async fn enable_two_factor(
+        &self,
+        account_id: &str,
+        request: &EnableTwoFactorRequest,
+    ) -> Result<()> {
+        self.api
+            .post_empty("/users/two-factor/enable", request, Some(account_id))
+            .await
     }
 }
 

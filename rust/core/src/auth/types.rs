@@ -56,6 +56,8 @@ pub struct KeyGenResult {
     pub key_attributes: KeyAttributes,
     /// Private keys to store locally
     pub private_key_attributes: PrivateKeyAttributes,
+    /// Key-encryption-key used to encrypt the master key and seed SRP setup.
+    pub key_encryption_key: Vec<u8>,
     /// Login key for SRP registration (16 bytes)
     pub login_key: Vec<u8>,
 }
