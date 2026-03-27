@@ -217,7 +217,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+                  args: ${{ matrix.platform.rust-target == 'aarch64-apple-darwin' && '--target aarch64-apple-darwin --bundles app' || matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
 
     build-android:
         runs-on: ubuntu-22.04
