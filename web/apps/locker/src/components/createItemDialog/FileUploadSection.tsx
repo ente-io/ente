@@ -20,7 +20,14 @@ import {
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import type { LockerUploadProgress } from "services/remote";
 import type { LockerCollection, LockerUploadCandidate } from "types";
 
@@ -46,8 +53,6 @@ interface FileUploadSectionProps {
     uploadingFileKeys: Set<string>;
     uploadProgressByFileKey: Record<string, LockerUploadProgress | null>;
     uploadCapByFileKey: Record<string, number>;
-    finalizingStartedAtByFileKey: Record<string, number>;
-    progressTick: number;
     uploading: boolean;
     error: string | null;
     canUpload: boolean;
@@ -72,8 +77,6 @@ export function FileUploadSection({
     uploadingFileKeys,
     uploadProgressByFileKey,
     uploadCapByFileKey,
-    finalizingStartedAtByFileKey,
-    progressTick,
     uploading,
     error,
     canUpload,
@@ -86,6 +89,90 @@ export function FileUploadSection({
     onClose,
     onUpload,
 }: FileUploadSectionProps) {
+    const [settledCompletedFileKeys, setSettledCompletedFileKeys] = useState<
+        Set<string>
+    >(() => new Set());
+    const settleTimeoutsRef = useRef<Map<string, number>>(new Map());
+    const cardRefMap = useRef<Map<string, HTMLDivElement>>(new Map());
+    const previousCardTopByKeyRef = useRef<Map<string, number>>(new Map());
+
+    useEffect(
+        () => () => {
+            settleTimeoutsRef.current.forEach((timeoutID) => {
+                window.clearTimeout(timeoutID);
+            });
+            settleTimeoutsRef.current.clear();
+        },
+        [],
+    );
+
+    useEffect(() => {
+        const activeFileKeys = new Set(
+            selectedUploadItems.map(uploadQueueItemKey),
+        );
+
+        settleTimeoutsRef.current.forEach((timeoutID, fileKey) => {
+            if (
+                !activeFileKeys.has(fileKey) ||
+                !completedFileKeys.has(fileKey)
+            ) {
+                window.clearTimeout(timeoutID);
+                settleTimeoutsRef.current.delete(fileKey);
+            }
+        });
+
+        setSettledCompletedFileKeys((current) => {
+            const next = new Set<string>();
+            current.forEach((fileKey) => {
+                if (
+                    activeFileKeys.has(fileKey) &&
+                    completedFileKeys.has(fileKey)
+                ) {
+                    next.add(fileKey);
+                }
+            });
+            return next;
+        });
+
+        completedFileKeys.forEach((fileKey) => {
+            if (
+                !activeFileKeys.has(fileKey) ||
+                settledCompletedFileKeys.has(fileKey) ||
+                settleTimeoutsRef.current.has(fileKey)
+            ) {
+                return;
+            }
+
+            const timeoutID = window.setTimeout(() => {
+                settleTimeoutsRef.current.delete(fileKey);
+                setSettledCompletedFileKeys((current) => {
+                    if (current.has(fileKey)) {
+                        return current;
+                    }
+
+                    const next = new Set(current);
+                    next.add(fileKey);
+                    return next;
+                });
+            }, 1000);
+            settleTimeoutsRef.current.set(fileKey, timeoutID);
+        });
+    }, [completedFileKeys, selectedUploadItems, settledCompletedFileKeys]);
+
+    const orderedUploadItems = useMemo(() => {
+        const pendingItems: LockerUploadCandidate[] = [];
+        const completedItems: LockerUploadCandidate[] = [];
+
+        for (const item of selectedUploadItems) {
+            if (settledCompletedFileKeys.has(uploadQueueItemKey(item))) {
+                completedItems.push(item);
+            } else {
+                pendingItems.push(item);
+            }
+        }
+
+        return [...pendingItems, ...completedItems];
+    }, [selectedUploadItems, settledCompletedFileKeys]);
     const shouldShowPerItemCollectionSelector = useMemo(() => {
         const uniqueParentPaths = new Set(
             selectedUploadItems.map(uploadItemParentPath),
@@ -107,161 +194,244 @@ export function FileUploadSection({
             ),
         [selectedUploadItems],
     );
-    const directoryInputProps = { directory: "", webkitdirectory: "" };
+
+    useLayoutEffect(() => {
+        const nextCardTopByKey = new Map<string, number>();
+
+        orderedUploadItems.forEach((item) => {
+            const fileKey = uploadQueueItemKey(item);
+            const element = cardRefMap.current.get(fileKey);
+            if (!element) {
+                return;
+            }
+
+            const nextTop = element.getBoundingClientRect().top;
+            nextCardTopByKey.set(fileKey, nextTop);
+
+            const previousTop = previousCardTopByKeyRef.current.get(fileKey);
+            if (previousTop === undefined) {
+                return;
+            }
+
+            const deltaY = previousTop - nextTop;
+            if (Math.abs(deltaY) < 1) {
+                return;
+            }
+
+            element.style.transition = "none";
+            element.style.transform = `translateY(${deltaY}px)`;
+            void element.getBoundingClientRect();
+            element.style.transition =
+                "transform 340ms cubic-bezier(0.22, 1, 0.36, 1)";
+            element.style.transform = "translateY(0)";
+        });
+
+        previousCardTopByKeyRef.current = nextCardTopByKey;
+    }, [orderedUploadItems]);
 
     return (
-        <Stack sx={{ gap: 2.5, pt: 0.5 }}>
+        <Stack sx={{ flex: 1, minHeight: 0, pt: 0.5 }}>
             <input
                 ref={fileInputRef}
                 type="file"
                 multiple
                 hidden
-                {...directoryInputProps}
                 onChange={onFileSelect}
             />
 
-            {selectedUploadItems.length === 0 ? (
-                <ButtonBase
-                    onClick={() => fileInputRef.current?.click()}
-                    sx={(theme) => ({
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: 1.5,
-                        p: 4,
-                        borderRadius: "16px",
-                        border: `2px dashed ${theme.vars.palette.divider}`,
-                        backgroundColor: theme.vars.palette.fill.faint,
-                        transition: "background-color 0.15s",
-                        "&:hover": {
-                            backgroundColor: theme.vars.palette.fill.faintHover,
-                        },
-                    })}
-                >
-                    <CloudUploadOutlinedIcon
-                        sx={{ fontSize: 40, color: "text.faint" }}
-                    />
-                    <Typography variant="body" sx={{ fontWeight: 600 }}>
-                        {t("saveDocumentsTitle")}
-                    </Typography>
-                    <Typography variant="small" sx={{ color: "text.muted" }}>
-                        {t("dropToSaveToLocker")}
-                    </Typography>
-                </ButtonBase>
-            ) : (
-                <Stack sx={{ gap: 1.25 }}>
-                    {selectedUploadItems.map((item) => {
-                        const fileKey = uploadQueueItemKey(item);
-                        return (
-                            <UploadItemCard
-                                key={fileKey}
-                                item={item}
-                                collections={collections}
-                                availableCollectionNames={
-                                    availableCollectionNames
-                                }
-                                selectedCollectionNames={
-                                    selectedCollectionNamesByFileKey[fileKey] ??
-                                    []
-                                }
-                                suggestedCollectionNames={
-                                    item.suggestedCollectionNames
-                                }
-                                showCollectionSelector={
-                                    shouldShowPerItemCollectionSelector
-                                }
-                                isDone={completedFileKeys.has(fileKey)}
-                                isFailed={failedFileKeys.has(fileKey)}
-                                isUploading={uploadingFileKeys.has(fileKey)}
-                                isQueued={
-                                    !completedFileKeys.has(fileKey) &&
-                                    !failedFileKeys.has(fileKey) &&
-                                    !uploadingFileKeys.has(fileKey) &&
-                                    uploading
-                                }
-                                uploadProgress={
-                                    uploadProgressByFileKey[fileKey]
-                                }
-                                uploadCap={uploadCapByFileKey[fileKey] ?? 95}
-                                finalizingStartedAt={
-                                    finalizingStartedAtByFileKey[fileKey]
-                                }
-                                progressTick={progressTick}
-                                uploadInFlight={uploading}
-                                onToggleCollectionName={(name) =>
-                                    onToggleCollectionName(fileKey, name)
-                                }
-                                onAddCollectionName={(name) =>
-                                    onAddCollectionName(fileKey, name)
-                                }
-                                canRemove={!uploading}
-                                onRemove={() => onRemoveItem(fileKey)}
-                            />
-                        );
-                    })}
-                </Stack>
-            )}
-
-            {!shouldShowPerItemCollectionSelector &&
-                selectedUploadItems.length > 0 && (
-                    <CollectionNameSelector
-                        collections={collections}
-                        availableNames={availableCollectionNames}
-                        selectedNames={sharedSelectedCollectionNames}
-                        suggestedNames={sharedSuggestedCollectionNames}
-                        onToggleName={(name) =>
-                            onSetCollectionNamesForAllItems(
-                                toggleCollectionName(
-                                    sharedSelectedCollectionNames,
-                                    name,
-                                ),
-                            )
-                        }
-                        onAddCollectionName={(name) => {
-                            onAddAvailableCollectionName(name);
-                            onSetCollectionNamesForAllItems(
-                                addCollectionName(
-                                    sharedSelectedCollectionNames,
-                                    name,
-                                ),
+            <Stack
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflowY: "auto",
+                    gap: 2.5,
+                    pr: 0.5,
+                    pb: 2,
+                }}
+            >
+                {selectedUploadItems.length === 0 ? (
+                    <ButtonBase
+                        onClick={() => fileInputRef.current?.click()}
+                        sx={(theme) => ({
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 1.5,
+                            p: 4,
+                            borderRadius: "16px",
+                            border: `2px dashed ${theme.vars.palette.divider}`,
+                            backgroundColor: theme.vars.palette.fill.faint,
+                            transition: "background-color 0.15s",
+                            "&:hover": {
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
+                            },
+                        })}
+                    >
+                        <CloudUploadOutlinedIcon
+                            sx={{ fontSize: 40, color: "text.faint" }}
+                        />
+                        <Typography variant="body" sx={{ fontWeight: 600 }}>
+                            {t("saveDocumentsTitle")}
+                        </Typography>
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted" }}
+                        >
+                            {t("dropToSaveToLocker")}
+                        </Typography>
+                    </ButtonBase>
+                ) : (
+                    <Stack sx={{ gap: 1.25 }}>
+                        {orderedUploadItems.map((item) => {
+                            const fileKey = uploadQueueItemKey(item);
+                            return (
+                                <Box
+                                    key={fileKey}
+                                    ref={(element: HTMLDivElement | null) => {
+                                        if (element) {
+                                            cardRefMap.current.set(
+                                                fileKey,
+                                                element,
+                                            );
+                                        } else {
+                                            cardRefMap.current.delete(fileKey);
+                                            previousCardTopByKeyRef.current.delete(
+                                                fileKey,
+                                            );
+                                        }
+                                    }}
+                                    sx={{ willChange: "transform" }}
+                                >
+                                    <UploadItemCard
+                                        item={item}
+                                        collections={collections}
+                                        availableCollectionNames={
+                                            availableCollectionNames
+                                        }
+                                        selectedCollectionNames={
+                                            selectedCollectionNamesByFileKey[
+                                                fileKey
+                                            ] ?? []
+                                        }
+                                        suggestedCollectionNames={
+                                            item.suggestedCollectionNames
+                                        }
+                                        showCollectionSelector={
+                                            shouldShowPerItemCollectionSelector
+                                        }
+                                        isDone={completedFileKeys.has(fileKey)}
+                                        isFailed={failedFileKeys.has(fileKey)}
+                                        isUploading={uploadingFileKeys.has(
+                                            fileKey,
+                                        )}
+                                        isQueued={
+                                            !completedFileKeys.has(fileKey) &&
+                                            !failedFileKeys.has(fileKey) &&
+                                            !uploadingFileKeys.has(fileKey) &&
+                                            uploading
+                                        }
+                                        uploadProgress={
+                                            uploadProgressByFileKey[fileKey]
+                                        }
+                                        uploadCap={
+                                            uploadCapByFileKey[fileKey] ?? 95
+                                        }
+                                        uploadInFlight={uploading}
+                                        onToggleCollectionName={(
+                                            name: string,
+                                        ) =>
+                                            onToggleCollectionName(
+                                                fileKey,
+                                                name,
+                                            )
+                                        }
+                                        onAddCollectionName={(name: string) =>
+                                            onAddCollectionName(fileKey, name)
+                                        }
+                                        canRemove={!uploading}
+                                        onRemove={() => onRemoveItem(fileKey)}
+                                    />
+                                </Box>
                             );
-                        }}
-                        disabled={uploading}
-                    />
+                        })}
+                    </Stack>
                 )}
 
-            {error && (
-                <Typography variant="small" sx={{ color: "critical.main" }}>
-                    {error}
-                </Typography>
-            )}
+                {error && (
+                    <Typography
+                        variant="small"
+                        sx={{ color: "critical.main" }}
+                    >
+                        {error}
+                    </Typography>
+                )}
+            </Stack>
 
-            <Stack direction="row" sx={{ gap: 1, pt: 1 }}>
-                <FocusVisibleButton
-                    fullWidth
-                    color="secondary"
-                    onClick={onClose}
-                    disabled={uploading}
-                    sx={{ borderRadius: "16px", py: 1.25 }}
-                >
-                    {t("cancel")}
-                </FocusVisibleButton>
-                <LoadingButton
-                    fullWidth
-                    color="accent"
-                    loading={uploading}
-                    disabled={!canUpload}
-                    sx={{ borderRadius: "16px", py: 1.25 }}
-                    onClick={() => void onUpload()}
-                >
-                    {t("saveRecord")}
-                </LoadingButton>
+            <Stack
+                sx={(theme) => ({
+                    gap: 1.5,
+                    pt: 2,
+                    borderTop: `1px solid ${theme.vars.palette.stroke.faint}`,
+                    backgroundColor: theme.vars.palette.background.paper,
+                })}
+            >
+                {!uploading &&
+                    !shouldShowPerItemCollectionSelector &&
+                    selectedUploadItems.length > 0 && (
+                        <CollectionNameSelector
+                            collections={collections}
+                            availableNames={availableCollectionNames}
+                            selectedNames={sharedSelectedCollectionNames}
+                            suggestedNames={sharedSuggestedCollectionNames}
+                            onToggleName={(name) =>
+                                onSetCollectionNamesForAllItems(
+                                    toggleCollectionName(
+                                        sharedSelectedCollectionNames,
+                                        name,
+                                    ),
+                                )
+                            }
+                            onAddCollectionName={(name) => {
+                                onAddAvailableCollectionName(name);
+                                onSetCollectionNamesForAllItems(
+                                    addCollectionName(
+                                        sharedSelectedCollectionNames,
+                                        name,
+                                    ),
+                                );
+                            }}
+                            disabled={uploading}
+                        />
+                    )}
+
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        onClick={onClose}
+                        disabled={uploading}
+                        sx={{ borderRadius: "16px", py: 1.25 }}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
+                    <LoadingButton
+                        fullWidth
+                        color="accent"
+                        loading={uploading}
+                        disabled={!canUpload}
+                        sx={{ borderRadius: "16px", py: 1.25 }}
+                        onClick={() => void onUpload()}
+                    >
+                        {t("saveRecord")}
+                    </LoadingButton>
+                </Stack>
             </Stack>
         </Stack>
     );
 }
 
-const UploadItemCard: React.FC<{
+interface UploadItemCardProps {
     item: LockerUploadCandidate;
     collections: LockerCollection[];
     availableCollectionNames: string[];
@@ -274,14 +444,14 @@ const UploadItemCard: React.FC<{
     isQueued: boolean;
     uploadProgress: LockerUploadProgress | null | undefined;
     uploadCap: number;
-    finalizingStartedAt?: number;
-    progressTick: number;
     uploadInFlight: boolean;
     onToggleCollectionName: (name: string) => void;
     onAddCollectionName: (name: string) => void;
     canRemove: boolean;
     onRemove: () => void;
-}> = ({
+}
+
+const UploadItemCard = React.memo(function UploadItemCard({
     item,
     collections,
     availableCollectionNames,
@@ -294,147 +464,182 @@ const UploadItemCard: React.FC<{
     isQueued,
     uploadProgress,
     uploadCap,
-    finalizingStartedAt,
-    progressTick,
     uploadInFlight,
     onToggleCollectionName,
     onAddCollectionName,
     canRemove,
     onRemove,
-}) => (
-    <Stack
-        sx={{
-            borderRadius: "12px",
-            backgroundColor: (theme) => theme.vars.palette.fill.faint,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-        }}
-    >
+}: UploadItemCardProps) {
+    return (
         <Stack
-            direction="row"
-            sx={{ alignItems: "center", gap: 1.5, p: 2, position: "relative" }}
+            sx={{
+                borderRadius: "12px",
+                backgroundColor: (theme) => theme.vars.palette.fill.faint,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+            }}
         >
-            <Box
+            <Stack
+                direction="row"
                 sx={{
-                    display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    width: 48,
-                    height: 48,
-                    borderRadius: "12px",
-                    backgroundColor: lockerItemIconConfig(
-                        "file",
-                        item.file.name,
-                    ).backgroundColor,
-                    flexShrink: 0,
+                    gap: 1.5,
+                    p: 2,
+                    position: "relative",
                 }}
             >
-                {lockerItemIcon("file", {
-                    fileName: item.file.name,
-                    size: 24,
-                    strokeWidth: 1.9,
-                })}
-            </Box>
-            <Box sx={{ flex: 1, minWidth: 0, pr: canRemove ? 5 : 0 }}>
-                <Typography variant="body" noWrap>
-                    {item.file.name}
-                </Typography>
-                <Typography variant="small" sx={{ color: "text.faint" }}>
-                    {formatFileSize(item.file.size)}
-                </Typography>
-            </Box>
-            {isDone && (
                 <Box
-                    sx={() => ({
-                        width: 24,
-                        height: 24,
-                        borderRadius: "50%",
+                    sx={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        backgroundColor: "#1071FF",
-                        color: "#FFFFFF",
+                        width: 48,
+                        height: 48,
+                        borderRadius: "12px",
+                        backgroundColor: lockerItemIconConfig(
+                            "file",
+                            item.file.name,
+                        ).backgroundColor,
                         flexShrink: 0,
-                    })}
+                    }}
                 >
-                    <CheckRoundedIcon sx={{ fontSize: 16 }} />
+                    {lockerItemIcon("file", {
+                        fileName: item.file.name,
+                        size: 24,
+                        strokeWidth: 1.9,
+                    })}
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0, pr: canRemove ? 5 : 0 }}>
+                    <Typography variant="body" noWrap>
+                        {item.file.name}
+                    </Typography>
+                    <Typography variant="small" sx={{ color: "text.faint" }}>
+                        {formatFileSize(item.file.size)}
+                    </Typography>
+                </Box>
+                {isDone && (
+                    <Box
+                        sx={() => ({
+                            width: 24,
+                            height: 24,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#1071FF",
+                            color: "#FFFFFF",
+                            flexShrink: 0,
+                        })}
+                    >
+                        <CheckRoundedIcon sx={{ fontSize: 16 }} />
+                    </Box>
+                )}
+                {isFailed && (
+                    <ErrorOutlineRoundedIcon
+                        sx={{
+                            color: "critical.main",
+                            fontSize: 20,
+                            flexShrink: 0,
+                        }}
+                    />
+                )}
+                {isQueued && (
+                    <ScheduleRoundedIcon
+                        sx={{ color: "text.muted", fontSize: 20, flexShrink: 0 }}
+                    />
+                )}
+                {canRemove && (
+                    <IconButton
+                        aria-label={t("delete")}
+                        onClick={onRemove}
+                        size="small"
+                        sx={(theme) => ({
+                            position: "absolute",
+                            top: 12,
+                            right: 12,
+                            width: 30,
+                            height: 30,
+                            borderRadius: "10px",
+                            backgroundColor: "transparent",
+                            color: theme.vars.palette.text.muted,
+                            flexShrink: 0,
+                            "&:hover": {
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
+                                color: theme.vars.palette.text.base,
+                            },
+                        })}
+                    >
+                        <DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                )}
+            </Stack>
+            {showCollectionSelector && (
+                <Box sx={{ px: 2, pt: 1.5, pb: 2, flexShrink: 0 }}>
+                    <CollectionNameSelector
+                        collections={collections}
+                        availableNames={availableCollectionNames}
+                        selectedNames={selectedCollectionNames}
+                        suggestedNames={suggestedCollectionNames}
+                        onToggleName={onToggleCollectionName}
+                        onAddCollectionName={onAddCollectionName}
+                        disabled={uploadInFlight}
+                    />
                 </Box>
             )}
-            {isFailed && (
-                <ErrorOutlineRoundedIcon
-                    sx={{ color: "critical.main", fontSize: 20, flexShrink: 0 }}
-                />
-            )}
-            {isQueued && (
-                <ScheduleRoundedIcon
-                    sx={{ color: "text.muted", fontSize: 20, flexShrink: 0 }}
-                />
-            )}
-            {canRemove && (
-                <IconButton
-                    aria-label={t("delete")}
-                    onClick={onRemove}
-                    size="small"
-                    sx={(theme) => ({
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        width: 30,
-                        height: 30,
-                        borderRadius: "10px",
-                        backgroundColor: "transparent",
-                        color: theme.vars.palette.text.muted,
-                        flexShrink: 0,
-                        "&:hover": {
-                            backgroundColor: theme.vars.palette.fill.faintHover,
-                            color: theme.vars.palette.text.base,
-                        },
-                    })}
-                >
-                    <DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-            )}
-        </Stack>
-        {showCollectionSelector && (
-            <Box sx={{ px: 2, pt: 1.5, pb: 2, flexShrink: 0 }}>
-                <CollectionNameSelector
-                    collections={collections}
-                    availableNames={availableCollectionNames}
-                    selectedNames={selectedCollectionNames}
-                    suggestedNames={suggestedCollectionNames}
-                    onToggleName={onToggleCollectionName}
-                    onAddCollectionName={onAddCollectionName}
-                    disabled={uploadInFlight}
-                />
-            </Box>
-        )}
         <Box sx={{ mt: "auto", height: 4, flexShrink: 0 }}>
             <LinearProgress
-                variant={isQueued ? "indeterminate" : "determinate"}
+                variant="determinate"
                 value={
-                    isQueued
-                        ? undefined
-                        : isUploading
-                          ? uploadProgressValue(
-                                uploadProgress,
-                                uploadCap,
-                                finalizingStartedAt,
-                                progressTick,
-                            )
-                          : isDone
-                            ? 100
-                            : 0
+                    isUploading
+                        ? uploadProgressValue(uploadProgress, uploadCap)
+                        : isDone
+                          ? 100
+                          : 0
                 }
-                sx={{
+                sx={(theme) => ({
                     height: 4,
                     borderRadius: 0,
-                    opacity: isQueued || isUploading || isDone ? 1 : 0,
-                }}
-            />
-        </Box>
-    </Stack>
-);
+                    opacity: isUploading || isDone ? 1 : 0,
+                    "& .MuiLinearProgress-bar": {
+                        transition:
+                            uploadProgress?.phase === "finalizing"
+                                    ? theme.transitions.create("transform", {
+                                          duration: 2200,
+                                          easing: "ease-out",
+                                      })
+                                    : undefined,
+                        },
+                    })}
+                />
+            </Box>
+        </Stack>
+    );
+},
+areUploadItemCardPropsEqual);
+
+function areUploadItemCardPropsEqual(
+    previous: UploadItemCardProps,
+    next: UploadItemCardProps,
+) {
+    return (
+        previous.item === next.item &&
+        previous.collections === next.collections &&
+        previous.availableCollectionNames === next.availableCollectionNames &&
+        previous.selectedCollectionNames === next.selectedCollectionNames &&
+        previous.suggestedCollectionNames === next.suggestedCollectionNames &&
+        previous.showCollectionSelector === next.showCollectionSelector &&
+        previous.isDone === next.isDone &&
+        previous.isFailed === next.isFailed &&
+        previous.isUploading === next.isUploading &&
+        previous.isQueued === next.isQueued &&
+        previous.uploadProgress === next.uploadProgress &&
+        previous.uploadCap === next.uploadCap &&
+        previous.uploadInFlight === next.uploadInFlight &&
+        previous.canRemove === next.canRemove
+    );
+}
 
 const CollectionNameSelector: React.FC<{
     collections: LockerCollection[];

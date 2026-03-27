@@ -64,8 +64,6 @@ export const collectionNamesByUploadItem = (
 export const uploadProgressValue = (
     progress: LockerUploadProgress | null | undefined,
     uploadCap: number,
-    finalizingStartedAt?: number,
-    now = Date.now(),
 ) => {
     if (!progress) {
         return 0;
@@ -79,14 +77,7 @@ export const uploadProgressValue = (
     }
 
     if (progress.phase === "finalizing") {
-        const start = finalizingStartedAt ?? now;
-        const elapsed = Math.max(0, now - start);
-        const finalTarget = 99;
-        const easedFraction = 1 - Math.exp(-elapsed / 2200);
-        return Math.min(
-            finalTarget,
-            uploadCap + (finalTarget - uploadCap) * easedFraction,
-        );
+        return 99;
     }
 
     return 0;

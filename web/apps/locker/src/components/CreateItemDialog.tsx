@@ -135,7 +135,6 @@ interface UploadState {
     uploadingFileKeys: Set<string>;
     uploadProgressByFileKey: Record<string, LockerUploadProgress | null>;
     uploadCapByFileKey: Record<string, number>;
-    finalizingStartedAtByFileKey: Record<string, number>;
 }
 
 const emptyUploadState = (): UploadState => ({
@@ -144,7 +143,6 @@ const emptyUploadState = (): UploadState => ({
     uploadingFileKeys: new Set(),
     uploadProgressByFileKey: {},
     uploadCapByFileKey: {},
-    finalizingStartedAtByFileKey: {},
 });
 
 export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
@@ -209,9 +207,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const [uploadCapByFileKey, setUploadCapByFileKey] = useState<
         Record<string, number>
     >({});
-    const [finalizingStartedAtByFileKey, setFinalizingStartedAtByFileKey] =
-        useState<Record<string, number>>({});
-    const [progressTick, setProgressTick] = useState(() => Date.now());
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
@@ -242,7 +237,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setUploadingFileKeys(nextState.uploadingFileKeys);
         setUploadProgressByFileKey(nextState.uploadProgressByFileKey);
         setUploadCapByFileKey(nextState.uploadCapByFileKey);
-        setFinalizingStartedAtByFileKey(nextState.finalizingStartedAtByFileKey);
     }, []);
 
     useEffect(() => {
@@ -338,18 +332,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         open,
         selectedCollectionIDs.length,
     ]);
-
-    useEffect(() => {
-        if (!uploading) {
-            return;
-        }
-
-        const interval = window.setInterval(() => {
-            setProgressTick(Date.now());
-        }, 200);
-
-        return () => window.clearInterval(interval);
-    }, [uploading]);
 
     const handleClose = useCallback(() => {
         if (saving || uploading) {
@@ -508,13 +490,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 ),
             ),
         );
-        setFinalizingStartedAtByFileKey((current) =>
-            Object.fromEntries(
-                Object.entries(current).filter(
-                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
-                ),
-            ),
-        );
         let uploadedCount = 0;
         try {
             const existingNormalizedNameToID = new Map(
@@ -588,17 +563,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             item.file,
                             collectionIDs,
                             (progress) => {
-                                if (progress.phase === "finalizing") {
-                                    setFinalizingStartedAtByFileKey(
-                                        (current) =>
-                                            current[fileKey]
-                                                ? current
-                                                : {
-                                                      ...current,
-                                                      [fileKey]: Date.now(),
-                                                  },
-                                    );
-                                }
                                 setUploadProgressByFileKey((current) => ({
                                     ...current,
                                     [fileKey]: progress,
@@ -689,6 +653,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         selectedUploadItems.some(
             (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
         );
+    const savedUploadCount = completedFileKeys.size;
+    const totalUploadCount = selectedUploadItems.length;
+    const showUploadCounter = isFileMode && totalUploadCount > 0;
 
     return (
         <Dialog
@@ -700,6 +667,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 paper: {
                     sx: {
                         ...lockerDialogPaperSx,
+                        display: "flex",
+                        flexDirection: "column",
                         maxHeight: "min(720px, 90vh)",
                         width: "min(100%, 520px)",
                     },
@@ -708,25 +677,57 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         >
             <DialogTitle
                 sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 2,
                     fontWeight: "bold",
                     px: { xs: 4, sm: 5 },
                     pt: { xs: 4, sm: 4.5 },
                     pb: { xs: 2, sm: 2.5 },
                 }}
             >
-                {isEditMode
-                    ? t("editItem")
-                    : isFileMode
-                      ? selectedUploadItems.length > 1
-                          ? t("saveDocumentsTitle")
-                          : t("saveDocumentTitle")
-                      : selectedType
-                        ? typeDisplayName(selectedType)
-                        : t("saveToLocker")}
+                <Box sx={{ minWidth: 0 }}>
+                    {isEditMode
+                        ? t("editItem")
+                        : isFileMode
+                          ? selectedUploadItems.length > 1
+                              ? t("saveDocumentsTitle")
+                              : t("saveDocumentTitle")
+                          : selectedType
+                            ? typeDisplayName(selectedType)
+                            : t("saveToLocker")}
+                </Box>
+                {showUploadCounter && (
+                    <Typography
+                        variant="small"
+                        sx={{
+                            flexShrink: 0,
+                            color: "text.muted",
+                            opacity: 0.8,
+                            fontWeight: 500,
+                            alignSelf: "center",
+                        }}
+                    >
+                        {savedUploadCount} / {totalUploadCount} {t("saved")}
+                    </Typography>
+                )}
             </DialogTitle>
 
             <DialogContent
-                sx={{ px: { xs: 4, sm: 5 }, py: { xs: 2.5, sm: 3 } }}
+                sx={{
+                    px: { xs: 4, sm: 5 },
+                    py: { xs: 2.5, sm: 3 },
+                    ...(isFileMode
+                        ? {
+                              display: "flex",
+                              flexDirection: "column",
+                              flex: 1,
+                              minHeight: 0,
+                              overflow: "hidden",
+                          }
+                        : {}),
+                }}
             >
                 {!isEditMode && !selectedOption && (
                     <Stack sx={{ gap: 2, pt: 0.5 }}>
@@ -764,10 +765,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         uploadingFileKeys={uploadingFileKeys}
                         uploadProgressByFileKey={uploadProgressByFileKey}
                         uploadCapByFileKey={uploadCapByFileKey}
-                        finalizingStartedAtByFileKey={
-                            finalizingStartedAtByFileKey
-                        }
-                        progressTick={progressTick}
                         uploading={uploading}
                         error={error}
                         canUpload={canUpload}
