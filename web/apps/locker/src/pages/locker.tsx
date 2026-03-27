@@ -264,6 +264,16 @@ export const LockerPage: React.FC = () => {
     } | null>(null);
     const [deleteCollectionDialog, setDeleteCollectionDialog] = useState<{
         collectionID: number;
+        collectionName: string;
+        hasItems: boolean;
+        deleteFromEverywhere: boolean;
+        loading: boolean;
+        error: string | null;
+    } | null>(null);
+    const deleteCollectionDialogRef = useRef<{
+        collectionID: number;
+        collectionName: string;
+        hasItems: boolean;
         deleteFromEverywhere: boolean;
         loading: boolean;
         error: string | null;
@@ -288,6 +298,15 @@ export const LockerPage: React.FC = () => {
         routeCollectionID !== null && Number.isFinite(routeCollectionID)
             ? routeCollectionID
             : null;
+
+    useEffect(() => {
+        if (deleteCollectionDialog) {
+            deleteCollectionDialogRef.current = deleteCollectionDialog;
+        }
+    }, [deleteCollectionDialog]);
+
+    const visibleDeleteCollectionDialog =
+        deleteCollectionDialog ?? deleteCollectionDialogRef.current;
     const isTrashView = router.pathname === "/trash";
     const isCollectionsView = router.pathname === "/collections";
 
@@ -919,6 +938,8 @@ export const LockerPage: React.FC = () => {
 
             setDeleteCollectionDialog({
                 collectionID,
+                collectionName: collection.name,
+                hasItems: collection.items.length > 0,
                 deleteFromEverywhere: false,
                 loading: false,
                 error: null,
@@ -928,12 +949,13 @@ export const LockerPage: React.FC = () => {
     );
 
     const handleConfirmDeleteCollection = useCallback(async () => {
-        if (!deleteCollectionDialog) {
+        const dialogState = deleteCollectionDialogRef.current;
+        if (!dialogState) {
             return;
         }
 
         const collection = collections.find(
-            (candidate) => candidate.id === deleteCollectionDialog.collectionID,
+            (candidate) => candidate.id === dialogState.collectionID,
         );
         if (!collection) {
             setDeleteCollectionDialog((current) =>
@@ -953,7 +975,7 @@ export const LockerPage: React.FC = () => {
         );
 
         try {
-            if (deleteCollectionDialog.deleteFromEverywhere) {
+            if (dialogState.deleteFromEverywhere) {
                 await deleteCollectionAPI(collection.id);
             } else if (collection.items.length > 0) {
                 if (!masterKey) {
@@ -989,7 +1011,6 @@ export const LockerPage: React.FC = () => {
         }
     }, [
         collections,
-        deleteCollectionDialog,
         masterKey,
         navigateHome,
         removeCollectionFromState,
@@ -1180,27 +1201,20 @@ export const LockerPage: React.FC = () => {
                         <Typography sx={{ color: "text.muted" }}>
                             {t("deleteCollectionDialogBody", {
                                 collectionName:
-                                    collections.find(
-                                        (candidate) =>
-                                            candidate.id ===
-                                            deleteCollectionDialog?.collectionID,
-                                    )?.name ?? "",
+                                    visibleDeleteCollectionDialog?.collectionName ??
+                                    "",
                             })}
                         </Typography>
-                        {(collections.find(
-                            (candidate) =>
-                                candidate.id ===
-                                deleteCollectionDialog?.collectionID,
-                        )?.items.length ?? 0) > 0 && (
+                        {visibleDeleteCollectionDialog?.hasItems && (
                             <FormControlLabel
                                 control={
                                     <Checkbox
                                         checked={
-                                            deleteCollectionDialog?.deleteFromEverywhere ??
+                                            visibleDeleteCollectionDialog?.deleteFromEverywhere ??
                                             false
                                         }
                                         disabled={
-                                            deleteCollectionDialog?.loading
+                                            visibleDeleteCollectionDialog?.loading
                                         }
                                         onChange={(event) =>
                                             setDeleteCollectionDialog(
@@ -1221,19 +1235,19 @@ export const LockerPage: React.FC = () => {
                                 sx={{ alignItems: "center", m: 0 }}
                             />
                         )}
-                        {deleteCollectionDialog?.error && (
+                        {visibleDeleteCollectionDialog?.error && (
                             <Typography
                                 variant="small"
                                 sx={{ color: "critical.main" }}
                             >
-                                {deleteCollectionDialog.error}
+                                {visibleDeleteCollectionDialog.error}
                             </Typography>
                         )}
                         <Stack direction="row" sx={{ gap: 1 }}>
                             <FocusVisibleButton
                                 fullWidth
                                 color="secondary"
-                                disabled={deleteCollectionDialog?.loading}
+                                disabled={visibleDeleteCollectionDialog?.loading}
                                 onClick={() => setDeleteCollectionDialog(null)}
                             >
                                 {t("cancel")}
@@ -1241,7 +1255,7 @@ export const LockerPage: React.FC = () => {
                             <LoadingButton
                                 fullWidth
                                 color="critical"
-                                loading={deleteCollectionDialog?.loading}
+                                loading={visibleDeleteCollectionDialog?.loading}
                                 onClick={() => void handleConfirmDeleteCollection()}
                             >
                                 {t("delete")}
