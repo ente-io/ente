@@ -330,7 +330,7 @@
     }
   },
   "sorry": "죄송합니다",
-  "importFailureDesc": "선택하신 파일을 분석할 수 없습니다.\n도움이 필요하시다면 support@ente.io로 문의해주세요.",
+  "importFailureDesc": "선택하신 파일을 분석할 수 없습니다.\n도움이 필요하시다면 support@ente.com로 문의해주세요.",
   "pendingSyncs": "경고",
   "pendingSyncsWarningBody": "코드 몇 개가 백업 되어있지 않습니다.\n\n로그아웃하기 전 해당 코드들을 백업하셨는지 확인해주세요.",
   "checkInboxAndSpamFolder": "검증을 위해 메일 보관함을 (또는 스팸 메일 보관함) 확인해주세요",
@@ -343,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

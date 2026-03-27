@@ -42,7 +42,7 @@ Future<ButtonResult?> showErrorDialog(
         onTap: () async {
           await sendEmail(
             context,
-            to: "support@ente.io",
+            to: "support@ente.com",
             body: body,
           );
         },

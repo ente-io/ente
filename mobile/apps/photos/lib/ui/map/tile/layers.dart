@@ -11,9 +11,9 @@ import "package:url_launcher/url_launcher_string.dart";
 String get _userAgent {
   try {
     final version = ServiceLocator.instance.packageInfo.version;
-    return "Ente Photos/$version (+https://ente.com; contact: team@ente.io)";
+    return "Ente Photos/$version (+https://ente.com; contact: team@ente.com)";
   } catch (_) {
-    return "Ente Photos/unknown (+https://ente.com; contact: team@ente.io)";
+    return "Ente Photos/unknown (+https://ente.com; contact: team@ente.com)";
   }
 }
 

@@ -315,7 +315,7 @@
     }
   },
   "sorry": "Съжаляваме",
-  "importFailureDesc": "Неуспешен анализ на избрания файл.\nМоля, пишете на support@ente.io, ако имате нужда от помощ!",
+  "importFailureDesc": "Неуспешен анализ на избрания файл.\nМоля, пишете на support@ente.com, ако имате нужда от помощ!",
   "pendingSyncs": "Предупреждение",
   "pendingSyncsWarningBody": "Някои от вашите кодове не са архивирани.\n\nМоля, уверете се, че имате резервно копие на тези кодове, преди да излезете.",
   "checkInboxAndSpamFolder": "Моля, проверете входящата си поща (и спама), за да завършите проверката",
@@ -328,7 +328,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

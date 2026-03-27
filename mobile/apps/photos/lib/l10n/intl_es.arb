@@ -29,7 +29,7 @@
   "deleteReason4": "Mi motivo no se encuentra en la lista",
   "sendEmail": "Enviar correo electrónico",
   "deleteRequestSLAText": "Tu solicitud será procesada dentro de las siguientes 72 horas.",
-  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.io</warning> desde la dirección de correo electrónico que usó para registrarse.",
+  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.com</warning> desde la dirección de correo electrónico que usó para registrarse.",
   "entePhotosPerm": "Ente <i>necesita permiso para</i> preservar tus fotos",
   "ok": "Aceptar",
   "createAccount": "Crear cuenta",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -164,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -314,7 +314,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -734,7 +734,7 @@
   "subscription": "Suscripción",
   "paymentDetails": "Detalles de pago",
   "manageFamily": "Administrar familia",
-  "contactToManageSubscription": "Por favor, contáctanos en support@ente.io para gestionar tu suscripción a {provider}.",
+  "contactToManageSubscription": "Por favor, contáctanos en support@ente.com para gestionar tu suscripción a {provider}.",
   "renewSubscription": "Renovar suscripción",
   "cancelSubscription": "Cancelar suscripción",
   "areYouSureYouWantToRenew": "¿Estás seguro de que quieres renovar?",
@@ -784,7 +784,7 @@
   "visitWebToManage": "Por favor, visita web.ente.io para administrar tu suscripción",
   "managePaymentMethod": "Gestionar métodos de pago",
   "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.io y estaremos encantados de ayudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.com y estaremos encantados de ayudar!",
   "paymentFailed": "Pago fallido",
   "paymentFailedTalkToProvider": "Por favor, habla con el soporte de {providerName} si se te cobró",
   "@paymentFailedTalkToProvider": {

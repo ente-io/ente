@@ -23,7 +23,7 @@ const (
 
 	storageWarningBaseTemplate = "ente_base.html"
 	storageWarningFromName     = "Ente"
-	storageWarningFromEmail    = "support@ente.io"
+	storageWarningFromEmail    = "support@ente.com"
 
 	storageWarningOverageThreshold             = 25 * (1 << 30)
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour

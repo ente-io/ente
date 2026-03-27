@@ -323,7 +323,7 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.io",
+	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.com",
 		ente.EmailChangedSubject, ente.EmailChangedTemplate, map[string]interface{}{
 			"NewEmail": email,
 		}, nil)
@@ -438,7 +438,7 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 			log.WithError(userErr).Error("Failed to get user")
 			return
 		}
-		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
+		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
 			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
 		}, nil)
 		if emailSendErr != nil {
@@ -518,7 +518,7 @@ func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) 
 		}
 	}
 	subject := fmt.Sprintf("Verification code: %s", ott)
-	err := emailUtil.SendTemplatedEmail([]string{to}, "Ente", "verify@ente.io",
+	err := emailUtil.SendTemplatedEmail([]string{to}, "Ente", "verify@ente.com",
 		subject, templateName, map[string]interface{}{
 			"VerificationCode": ott,
 		}, nil)

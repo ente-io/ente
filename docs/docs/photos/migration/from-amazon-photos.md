@@ -77,4 +77,4 @@ Once your photos are in Ente:
 ## Need Help?
 
 If you run into any issues during this migration, please reach out to
-[support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+[support@ente.com](mailto:support@ente.com) and we will be happy to help you!

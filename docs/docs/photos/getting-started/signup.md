@@ -30,7 +30,7 @@ You can choose any email address, including aliases, to create an account with E
 
 In any case, you can always change the email address your account is associated with at a later time as well.
 
-Once you submit your email address, you will be asked to verify it with a 6-digit code sent to your email. You should receive the verification code within a couple of minutes. If you don't receive it, check your spam folder. If that doesn't work, reach out to support@ente.io
+Once you submit your email address, you will be asked to verify it with a 6-digit code sent to your email. You should receive the verification code within a couple of minutes. If you don't receive it, check your spam folder. If that doesn't work, reach out to support@ente.com
 
 ### Set up a password {#setup-password}
 

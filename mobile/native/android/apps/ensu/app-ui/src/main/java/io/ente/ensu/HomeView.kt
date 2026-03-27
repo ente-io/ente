@@ -508,7 +508,7 @@ private fun openAttachment(context: Context, attachment: Attachment) {
 
 private fun openDeleteAccountEmail(context: Context) {
     val subject = Uri.encode("Request Deletion for Ente Account")
-    val uri = Uri.parse("mailto:support@ente.io?subject=$subject")
+    val uri = Uri.parse("mailto:support@ente.com?subject=$subject")
     val intent = Intent(Intent.ACTION_SENDTO, uri)
     val resolved = intent.resolveActivity(context.packageManager)
     if (resolved != null) {

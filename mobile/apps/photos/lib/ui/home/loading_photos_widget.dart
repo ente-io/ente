@@ -263,7 +263,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                                 await sendLogs(
                                   context,
                                   AppLocalizations.of(context).contactSupport,
-                                  "support@ente.io",
+                                  "support@ente.com",
                                   postShare: () {},
                                 );
                               },
