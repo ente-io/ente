@@ -1543,9 +1543,21 @@ export const updateItemCollections = async (
     const collectionIDsToRemove = currentCollectionIDs.filter(
         (collectionID) => !nextCollectionIDSet.has(collectionID),
     );
-    const uncategorizedCollection =
-        await ensureUncategorizedCollection(masterKey);
     const pendingAddedCollectionIDs = [...collectionIDsToAdd];
+    const sourceCollectionIDForAdd =
+        pendingAddedCollectionIDs.length > 0
+            ? (nextCollectionIDs.find((collectionID) =>
+                  currentCollectionIDSet.has(collectionID),
+              ) ?? currentCollectionIDs[0])
+            : undefined;
+    const sourceFileKeyForAdd = sourceCollectionIDForAdd
+        ? await decryptFileKeyForCollection(
+              fileID,
+              sourceCollectionIDForAdd,
+              masterKey,
+          )
+        : null;
+    let uncategorizedCollection: EncryptedCollectionRecord | undefined;
 
     for (const collectionID of collectionIDsToRemove) {
         const sourceCollectionRecord = encryptedCollections.get(collectionID);
@@ -1564,7 +1576,11 @@ export const updateItemCollections = async (
                 (candidateCollectionID) =>
                     candidateCollectionID !== collectionID,
             ) ??
-            uncategorizedCollection.id;
+            (
+                uncategorizedCollection ??
+                (uncategorizedCollection =
+                    await ensureUncategorizedCollection(masterKey))
+            ).id;
 
         if (targetCollectionID === collectionID) {
             continue;
@@ -1596,21 +1612,12 @@ export const updateItemCollections = async (
     }
 
     if (pendingAddedCollectionIDs.length > 0) {
-        const sourceCollectionID =
-            nextCollectionIDs.find((collectionID) =>
-                currentCollectionIDSet.has(collectionID),
-            ) ?? currentCollectionIDs[0];
-        if (!sourceCollectionID) {
+        if (!sourceFileKeyForAdd) {
             throw new Error(`File ${fileID} has no source collection`);
         }
-        const fileKey = await decryptFileKeyForCollection(
-            fileID,
-            sourceCollectionID,
-            masterKey,
-        );
         await addFileToCollections(
             fileID,
-            fileKey,
+            sourceFileKeyForAdd,
             pendingAddedCollectionIDs,
             masterKey,
         );

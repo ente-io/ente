@@ -32,7 +32,7 @@ import {
     lockerItemIcon,
     lockerItemIconConfig,
 } from "components/lockerItemIcons";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
+import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
@@ -60,10 +60,6 @@ import { isCollectionOwner, visibleLockerCollections } from "types";
 
 type CreateOption = LockerItemType | "file";
 const MAX_PARALLEL_UPLOADS = 4;
-
-interface LocalUser {
-    id: number;
-}
 
 const CREATABLE_TYPES: {
     type: CreateOption;
@@ -167,15 +163,31 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     editItem,
 }) => {
     const isEditMode = !!editItem;
-    const currentUserID = (ensureLocalUser as unknown as () => LocalUser)().id;
-    const displayCollections = useMemo(
-        () =>
-            visibleLockerCollections(collections).filter(
-                (collection) =>
-                    isEditMode || isCollectionOwner(collection, currentUserID),
-            ),
-        [collections, currentUserID, isEditMode],
+    const currentUserID = savedLocalUser()?.id ?? Number.NaN;
+    const editCollectionIDs = useMemo(
+        () => editItem?.collectionIDs ?? [],
+        [editItem],
     );
+    const displayCollections = useMemo(() => {
+        const ownedVisibleCollections = visibleLockerCollections(
+            collections,
+        ).filter((collection) => isCollectionOwner(collection, currentUserID));
+
+        if (!isEditMode) {
+            return ownedVisibleCollections;
+        }
+
+        const visibleCollectionIDSet = new Set(
+            ownedVisibleCollections.map((collection) => collection.id),
+        );
+        const currentEditCollections = collections.filter(
+            (collection) =>
+                editCollectionIDs.includes(collection.id) &&
+                !visibleCollectionIDSet.has(collection.id),
+        );
+
+        return [...ownedVisibleCollections, ...currentEditCollections];
+    }, [collections, currentUserID, editCollectionIDs, isEditMode]);
     const [selectedOption, setSelectedOption] = useState<CreateOption | null>(
         editItem?.type ?? null,
     );
@@ -220,10 +232,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
     const editCollectionID = editItem?.collectionID ?? null;
-    const editCollectionIDs = useMemo(
-        () => editItem?.collectionIDs ?? [],
-        [editItem],
-    );
     const selectedType =
         selectedOption && selectedOption !== "file"
             ? (selectedOption as LockerItemType)
@@ -439,7 +447,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     );
 
     const handleSave = useCallback(async () => {
-        if (!formType || selectedCollectionIDs.length === 0) {
+        if (!formType || (!isEditMode && selectedCollectionIDs.length === 0)) {
             return;
         }
 
@@ -472,7 +480,14 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } finally {
             setSaving(false);
         }
-    }, [formData, formType, handleClose, onSave, selectedCollectionIDs]);
+    }, [
+        formData,
+        formType,
+        handleClose,
+        isEditMode,
+        onSave,
+        selectedCollectionIDs,
+    ]);
 
     const handleUpload = useCallback(async () => {
         if (selectedUploadItems.length === 0 || !onUploadProgress) {
@@ -612,10 +627,12 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             error,
                             "uploadFile",
                         );
+                        const nextUpgradeCTAType =
+                            await lockerUpgradeCTAType(error);
                         setError((current) => current ?? formattedError);
-                        if (!upgradeCTAType) {
+                        if (nextUpgradeCTAType) {
                             setUpgradeCTAType(
-                                await lockerUpgradeCTAType(error),
+                                (current) => current ?? nextUpgradeCTAType,
                             );
                         }
                         setFailedFileKeys((current) =>
@@ -664,14 +681,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         onUploadItemComplete,
         onUploadsFinished,
         completedFileKeys,
-        upgradeCTAType,
         selectedCollectionNamesByFileKey,
         selectedUploadItems,
     ]);
 
     const canSave =
         formType !== null &&
-        selectedCollectionIDs.length > 0 &&
+        (isEditMode || selectedCollectionIDs.length > 0) &&
         getRequiredFields(formType).every(
             (field) =>
                 typeof formData[field] === "string" && formData[field].trim(),

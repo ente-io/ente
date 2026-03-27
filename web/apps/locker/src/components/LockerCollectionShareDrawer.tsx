@@ -13,7 +13,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
+import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -54,7 +54,7 @@ export const LockerCollectionShareDrawer: React.FC<
     onRefreshSharees,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const currentUser = ensureLocalUser();
+    const currentUser = savedLocalUser() ?? { id: Number.NaN, email: "" };
     const [sharees, setSharees] = useState<LockerCollectionParticipant[]>([]);
     const [isRefreshingSharees, setIsRefreshingSharees] = useState(false);
     const [addViewerOpen, setAddViewerOpen] = useState(false);

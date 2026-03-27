@@ -28,7 +28,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
+import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     OverflowMenu,
@@ -121,7 +121,7 @@ export const ItemList: React.FC<ItemListProps> = ({
     searchTerm,
     onNavigateBack,
 }) => {
-    const currentUserID = ensureLocalUser().id;
+    const currentUserID = savedLocalUser()?.id ?? Number.NaN;
     const [selectedItem, setSelectedItem] = useState<LockerItem | null>(null);
     const [restoreItem, setRestoreItem] = useState<LockerItem | null>(null);
     const [restoreCollectionID, setRestoreCollectionID] = useState<
@@ -1834,7 +1834,7 @@ const CollectionGrid: React.FC<{
     onRequestRenameCollection,
     onDeleteCollection,
 }) => {
-    const currentUserID = ensureLocalUser().id;
+    const currentUserID = savedLocalUser()?.id ?? Number.NaN;
 
     return (
         <Box
