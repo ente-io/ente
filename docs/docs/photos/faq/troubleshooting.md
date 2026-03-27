@@ -535,6 +535,7 @@ Machine learning features (face recognition and magic search) require downloadin
 - Enable ML on desktop first (faster processor)
 - Use WiFi for initial indexing
 - Keep the app open and in the foreground
+- If stuck or slow, keep the app open on the 'Machine Learning' page
 - Once indexed on one device, the indexes sync to other devices
 
 Learn more in [Search and Discovery FAQ](/photos/faq/search-and-discovery#ml-offline).
