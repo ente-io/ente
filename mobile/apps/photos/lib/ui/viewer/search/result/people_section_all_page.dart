@@ -649,7 +649,11 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         final slivers = <Widget>[
           if (widget.showSearchBar)
             SearchableAppBar(
-              title: Text(SectionType.face.sectionTitle(context)),
+              title: Text(
+                flagService.petEnabled
+                    ? AppLocalizations.of(context).peopleAndPets
+                    : SectionType.face.sectionTitle(context),
+              ),
               autoActivateSearch: widget.startInSearchMode,
               onSearch: _updateSearchQuery,
               onSearchClosed: _clearSearchQuery,
