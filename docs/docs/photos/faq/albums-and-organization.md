@@ -330,7 +330,7 @@ If you accidentally deleted photos, you can restore them from Trash within 30 da
 - Select the items to restore
 - Click the "Restore" button
 
-Restored photos will be moved back to their original albums.
+Restored photos will be moved to an album of choice.
 
 ### How do I permanently delete photos or empty trash? {#empty-trash}
 
