@@ -1630,12 +1630,7 @@ const SelectionActionBar: React.FC<{
     onDelete,
     onDone,
 }) => (
-    <Box
-        sx={{
-            px: { xs: 2, sm: 3 },
-            py: { xs: 1.25, sm: 1.5 },
-        }}
-    >
+    <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 1.25, sm: 1.5 } }}>
         <Box
             sx={(theme) => ({
                 maxWidth: 760,
@@ -1704,7 +1699,8 @@ const SelectionActionBar: React.FC<{
                             border: `1px solid ${theme.vars.palette.stroke.faint}`,
                             backgroundColor: theme.vars.palette.fill.faint,
                             "&:hover": {
-                                backgroundColor: theme.vars.palette.fill.faintHover,
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
                             },
                         })}
                     >
@@ -1726,7 +1722,8 @@ const SelectionActionBar: React.FC<{
                             border: `1px solid ${theme.vars.palette.stroke.faint}`,
                             backgroundColor: theme.vars.palette.fill.faint,
                             "&:hover": {
-                                backgroundColor: theme.vars.palette.fill.faintHover,
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
                             },
                         })}
                     >
@@ -1745,9 +1742,7 @@ const SelectionActionBar: React.FC<{
                             color: "#FFFFFF",
                             background:
                                 "linear-gradient(180deg, #1674FF 0%, #0B5FE0 100%)",
-                            "& .MuiButton-startIcon": {
-                                color: "#FFFFFF",
-                            },
+                            "& .MuiButton-startIcon": { color: "#FFFFFF" },
                             "&:hover": {
                                 boxShadow: "none",
                                 background:
@@ -1771,12 +1766,8 @@ const SelectionActionBar: React.FC<{
                             color: "#FFFFFF",
                             border: "1px solid rgba(185, 28, 28, 0.26)",
                             backgroundColor: "#D14343",
-                            "& .MuiButton-startIcon": {
-                                color: "#FFFFFF",
-                            },
-                            "&:hover": {
-                                backgroundColor: "#B93838",
-                            },
+                            "& .MuiButton-startIcon": { color: "#FFFFFF" },
+                            "&:hover": { backgroundColor: "#B93838" },
                         }}
                     >
                         {t("delete")}

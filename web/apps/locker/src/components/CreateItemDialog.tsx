@@ -224,7 +224,10 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         () => editItem?.collectionIDs ?? [],
         [editItem],
     );
-    const selectedType = selectedOption as LockerItemType | null;
+    const selectedType =
+        selectedOption && selectedOption !== "file"
+            ? (selectedOption as LockerItemType)
+            : null;
     const displayCollectionsRef = useRef(displayCollections);
 
     displayCollectionsRef.current = displayCollections;
@@ -908,25 +911,23 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             }
                         />
 
-                        {selectedType && !isFileMode && (
-                            <CollectionSelector
-                                collections={displayCollections}
-                                selectedIDs={selectedCollectionIDs}
-                                initialSelectedIDs={
-                                    isEditMode ? editCollectionIDs : undefined
-                                }
-                                onToggle={(collectionID) =>
-                                    setSelectedCollectionIDs((current) =>
-                                        current.includes(collectionID)
-                                            ? current.filter(
-                                                  (id) => id !== collectionID,
-                                              )
-                                            : [...current, collectionID],
-                                    )
-                                }
-                                onCreateCollection={onCreateCollection}
-                            />
-                        )}
+                        <CollectionSelector
+                            collections={displayCollections}
+                            selectedIDs={selectedCollectionIDs}
+                            initialSelectedIDs={
+                                isEditMode ? editCollectionIDs : undefined
+                            }
+                            onToggle={(collectionID) =>
+                                setSelectedCollectionIDs((current) =>
+                                    current.includes(collectionID)
+                                        ? current.filter(
+                                              (id) => id !== collectionID,
+                                          )
+                                        : [...current, collectionID],
+                                )
+                            }
+                            onCreateCollection={onCreateCollection}
+                        />
 
                         {error && upgradeCTAType !== "fileCountLimit" && (
                             <Typography

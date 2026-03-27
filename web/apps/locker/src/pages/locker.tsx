@@ -589,11 +589,9 @@ export const LockerPage: React.FC = () => {
             if (!masterKey || !editItem)
                 throw new Error("No master key or item");
             if (type === "file") {
-                await updateFileItem(
-                    editItem.id,
-                    String(data.name ?? ""),
-                    masterKey,
-                );
+                const editedName =
+                    typeof data.name === "string" ? data.name : "";
+                await updateFileItem(editItem.id, editedName, masterKey);
             } else {
                 await updateInfoItem(editItem.id, type, data, masterKey);
             }
@@ -1234,11 +1232,10 @@ export const LockerPage: React.FC = () => {
                                 control={
                                     <Checkbox
                                         checked={
-                                            visibleDeleteCollectionDialog?.deleteFromEverywhere ??
-                                            false
+                                            visibleDeleteCollectionDialog.deleteFromEverywhere
                                         }
                                         disabled={
-                                            visibleDeleteCollectionDialog?.loading
+                                            visibleDeleteCollectionDialog.loading
                                         }
                                         onChange={(event) =>
                                             setDeleteCollectionDialog(
@@ -1352,8 +1349,9 @@ export const LockerPage: React.FC = () => {
             <Snackbar
                 open={toast !== null}
                 message={toast}
+                autoHideDuration={3000}
                 onClose={(_event, reason) => {
-                    if (reason !== "clickaway") {
+                    if (reason === "clickaway") {
                         return;
                     }
                     setToast(null);
