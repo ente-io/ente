@@ -44,7 +44,7 @@ export type FileListWithViewerProps = {
      * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
      * reducer's documentation.
      *
-     * Not set in the context of the shared albums app.
+     * Not set in the context of the public albums app.
      */
     onMarkTempDeleted?: (files: EnteFile[]) => void;
     /**

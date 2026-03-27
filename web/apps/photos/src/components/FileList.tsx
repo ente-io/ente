@@ -263,7 +263,7 @@ export interface FileListProps {
     /**
      * File IDs of all the files that the user has marked as a favorite.
      *
-     * Not set in the context of the shared albums app.
+     * Not set in the context of the public albums app.
      */
     favoriteFileIDs?: Set<number>;
     /**
