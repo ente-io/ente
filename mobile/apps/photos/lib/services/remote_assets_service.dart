@@ -113,26 +113,13 @@ class RemoteAssetsService {
     if (_shouldUseResumableDownload(probe)) {
       await _downloadFileResumable(url, savePath, probe!);
     } else {
-      await _downloadFileSingleShot(
-        url,
-        savePath,
-        preservePartialDownload: await _hasResumableDownloadState(savePath),
-      );
+      await _downloadFileSingleShot(url, savePath);
     }
 
     _logger.info("Downloaded " + url);
   }
 
-  Future<void> _downloadFileSingleShot(
-    String url,
-    String savePath, {
-    bool preservePartialDownload = false,
-  }) async {
-    if (preservePartialDownload) {
-      await _downloadFileSingleShotPreservingResume(url, savePath);
-      return;
-    }
-
+  Future<void> _downloadFileSingleShot(String url, String savePath) async {
     await _clearResumeArtifacts(savePath);
 
     await _dio.download(
@@ -142,29 +129,6 @@ class RemoteAssetsService {
         _emitProgress(url, received, total);
       },
     );
-  }
-
-  Future<void> _downloadFileSingleShotPreservingResume(
-    String url,
-    String savePath,
-  ) async {
-    final scratchFile = File(_singleShotScratchPath(savePath));
-    await _deleteFileIfExists(scratchFile);
-
-    try {
-      await _dio.download(
-        url,
-        scratchFile.path,
-        onReceiveProgress: (received, total) {
-          _emitProgress(url, received, total);
-        },
-      );
-      await _replaceFile(scratchFile, File(savePath));
-      await _deleteResumeMetadata(savePath);
-    } catch (e) {
-      await _deleteFileIfExists(scratchFile);
-      rethrow;
-    }
   }
 
   Future<void> cleanupOldModelsIfNeeded() async {
@@ -212,8 +176,6 @@ class RemoteAssetsService {
 
   String _resumeMetadataPath(String tempPath) => "$tempPath.resume.json";
 
-  String _singleShotScratchPath(String savePath) => "$savePath.single";
-
   bool _shouldUseResumableDownload(_RemoteAssetProbe? probe) {
     if (!_resumableDownloadsEnabled || probe == null) {
       return false;
@@ -226,24 +188,6 @@ class RemoteAssetsService {
       return null;
     }
 
-    final headProbe = await _probeWithHead(url);
-    if (headProbe != null &&
-        (headProbe.canResume ||
-            headProbe.totalBytes <= _resumableThresholdBytes)) {
-      return headProbe;
-    }
-
-    final rangeProbe = await _probeWithRange(url);
-    if (headProbe == null) {
-      return rangeProbe;
-    }
-    if (rangeProbe == null) {
-      return headProbe;
-    }
-    return headProbe.merge(rangeProbe);
-  }
-
-  Future<_RemoteAssetProbe?> _probeWithHead(String url) async {
     try {
       final response = await _dio.head<void>(url);
       return _RemoteAssetProbe.fromHeaders(
@@ -255,41 +199,6 @@ class RemoteAssetsService {
       _logger.fine("HEAD probe failed for $url: $e");
       return null;
     }
-  }
-
-  Future<_RemoteAssetProbe?> _probeWithRange(String url) async {
-    Response<ResponseBody>? response;
-    try {
-      response = await _dio.get<ResponseBody>(
-        url,
-        options: Options(
-          responseType: ResponseType.stream,
-          headers: {
-            HttpHeaders.rangeHeader: "bytes=0-0",
-          },
-          validateStatus: (status) =>
-              status == HttpStatus.ok || status == HttpStatus.partialContent,
-        ),
-      );
-      return _RemoteAssetProbe.fromHeaders(
-        url,
-        response.statusCode,
-        response.headers,
-      );
-    } catch (e) {
-      _logger.fine("Range probe failed for $url: $e");
-      return null;
-    } finally {
-      await _cancelProbeResponse(response?.data);
-    }
-  }
-
-  Future<void> _cancelProbeResponse(ResponseBody? body) async {
-    if (body == null) {
-      return;
-    }
-    final subscription = body.stream.listen((_) {});
-    await subscription.cancel();
   }
 
   Future<void> _downloadFileResumable(
@@ -505,17 +414,6 @@ class RemoteAssetsService {
     }
   }
 
-  Future<bool> _hasResumableDownloadState(String savePath) async {
-    final tempFile = File(savePath);
-    if (!await tempFile.exists()) {
-      return false;
-    }
-    if (await tempFile.length() <= 0) {
-      return false;
-    }
-    return File(_resumeMetadataPath(savePath)).exists();
-  }
-
   Future<void> _clearResumeArtifacts(String tempPath) async {
     await _deleteFileIfExists(File(tempPath));
     await _deleteResumeMetadata(tempPath);
@@ -589,16 +487,6 @@ class _RemoteAssetProbe {
   String? get ifRangeValidator => _strongETag;
 
   bool get canResume => acceptsRanges && hasStableValidator;
-
-  _RemoteAssetProbe merge(_RemoteAssetProbe other) {
-    return _RemoteAssetProbe(
-      url: url,
-      totalBytes: other.totalBytes > 0 ? other.totalBytes : totalBytes,
-      acceptsRanges: acceptsRanges || other.acceptsRanges,
-      etag: other.etag ?? etag,
-      lastModified: other.lastModified ?? lastModified,
-    );
-  }
 
   static int? _parseTotalBytes(Headers headers) {
     final contentRange = headers.value(HttpHeaders.contentRangeHeader);
