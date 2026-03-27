@@ -115,32 +115,30 @@ This will reliably preserve the shared album name and contents.
 
 ### How do I move from Google Photos Partner Sharing to Ente? {#migrate-google-photos-partner-sharing}
 
-Google Photos Partner Sharing automatically shares one person's entire library (or photos of specific people) with a partner. Ente achieves the same result through shared albums. Here is how to migrate:
+Google Photos Partner Sharing automatically shares one person's entire library (or photos of specific people) with a partner. Ente achieves a similar result through shared albums. However, saving any shared photos (vs viewing) counts against the user's storage.
 
 #### 1. Both partners export and import their libraries
 
-Each partner should export their own Google Photos library via [Google Takeout](/photos/migration/from-google-photos/) and import it into their own Ente account.
+Each partner should export their own library via [Google Takeout](/photos/migration/from-google-photos/) and import it into their own Ente account.
 
-> **Note**: Photos that were only visible to you through Partner Sharing (not saved to your library) are **not** included in your Takeout. Only the partner who originally took those photos will have them in their export.
+> **Note**: Photos only visible to you through Partner Sharing (not saved to your library) are **not** included in your Takeout. Only the partner who originally took those photos will have them in their export. There is also no built-in filter to remove partner-shared photos from a Takeout import — so duplicates may occur if both partners import and then share entire libraries on Ente.
 
-#### 2. Handle duplicates from Partner Sharing
+#### 2. Handle duplicates
 
-If both partners saved copies of the same photos to their own Google Photos libraries, those duplicates will appear in both Takeout exports. After import, each partner can clean these up:
+After import, clean up any overlapping photos:
 
 - `Desktop app → Settings → Deduplicate files` removes exact duplicates
 - [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) catches near-duplicates
 
-#### 3. Set up ongoing photo sharing on Ente
-
-To replicate the automatic sharing behavior of Google Photos Partner Sharing:
+#### 3. Set up sharing on Ente
 
 **Share your Camera folder (recommended):**
 
-1. Open the **Camera** folder (Android) or **Recents** (iOS) in Ente
-2. Tap the Share icon and add your partner as a **Collaborator**
+1. Open the **Camera** folder (Android) or **Recents** (iOS)
+2. Tap the Share icon and add your partner as a [Collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
 3. Ask your partner to do the same for you
 
-Any new photos backed up to these folders will automatically sync to your partner's device. This creates two separate albums — one for each partner's photos — where both can view and contribute.
+New photos backed up to these folders will automatically sync to your partner's device.
 
 **Share all existing albums at once:**
 
@@ -150,11 +148,11 @@ Any new photos backed up to these folders will automatically sync to your partne
 
 **Auto-add photos of specific people:**
 
-If you only shared photos of certain people (e.g., your kids) via Google Photos Partner Sharing, use [Smart albums](/photos/features/albums-and-organization/auto-add-people) to automatically add photos of selected people to a shared album.
+Use [Smart albums](/photos/features/albums-and-organization/auto-add-people) to automatically add photos of selected people (e.g., your kids) to a shared album.
 
 #### 4. Consider a Family plan
 
-If both partners use Ente, a [Family plan](/photos/features/account/family-plans) lets you share a single subscription's storage at no extra cost. Each member keeps their own private space.
+A [Family plan](/photos/features/account/family-plans) lets both partners share a single subscription's storage at no extra cost, while keeping libraries private.
 
 ### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
 
