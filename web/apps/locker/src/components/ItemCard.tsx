@@ -383,7 +383,7 @@ const ItemOverflowMenu: React.FC<{
         triggerButtonIcon={<MoreVertIcon sx={{ fontSize: 20 }} />}
         triggerButtonSxProps={{ color: "text.faint", p: 0.5 }}
     >
-        {item.type !== "file" && onEdit && (
+        {onEdit && (
             <OverflowMenuOption
                 startIcon={<EditOutlinedIcon />}
                 onClick={() => onEdit(item)}

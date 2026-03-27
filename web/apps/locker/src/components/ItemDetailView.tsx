@@ -132,7 +132,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 {typeLabel(item.type)}
                             </Typography>
                         </Box>
-                        {!isTrashView && item.type !== "file" && onEdit && (
+                        {!isTrashView && onEdit && (
                             <Tooltip title={t("edit")}>
                                 <IconButton
                                     onClick={() => onEdit(item)}

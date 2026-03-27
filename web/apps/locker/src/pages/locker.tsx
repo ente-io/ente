@@ -59,7 +59,9 @@ import {
     shareCollection as shareCollectionAPI,
     trashFiles,
     unshareCollection as unshareCollectionAPI,
+    updateItemCollections,
     updateInfoItem,
+    updateFileItem,
     uploadLockerFile,
     type LockerUploadProgress,
 } from "services/remote";
@@ -261,6 +263,7 @@ export const LockerPage: React.FC = () => {
         type: LockerItemType;
         data: Record<string, unknown>;
         collectionID: number;
+        collectionIDs: number[];
     } | null>(null);
     const [deleteCollectionDialog, setDeleteCollectionDialog] = useState<{
         collectionID: number;
@@ -578,10 +581,23 @@ export const LockerPage: React.FC = () => {
     }, [refreshData]);
 
     const handleUpdateItem = useCallback(
-        async (type: LockerItemType, data: Record<string, unknown>) => {
+        async (
+            type: LockerItemType,
+            data: Record<string, unknown>,
+            collectionIDs: number[],
+        ) => {
             if (!masterKey || !editItem)
                 throw new Error("No master key or item");
-            await updateInfoItem(editItem.id, type, data, masterKey);
+            if (type === "file") {
+                await updateFileItem(
+                    editItem.id,
+                    String(data.name ?? ""),
+                    masterKey,
+                );
+            } else {
+                await updateInfoItem(editItem.id, type, data, masterKey);
+            }
+            await updateItemCollections(editItem.id, collectionIDs, masterKey);
             await refreshData();
             setToast(t("fileUpdatedSuccessfully"));
         },
@@ -682,8 +698,15 @@ export const LockerPage: React.FC = () => {
         setEditItem({
             id: item.id,
             type: item.type,
-            data: item.data as unknown as Record<string, unknown>,
+            data:
+                item.type === "file"
+                    ? { name: getItemTitle(item) }
+                    : (item.data as unknown as Record<string, unknown>),
             collectionID: item.collectionID,
+            collectionIDs:
+                item.collectionIDs.length > 0
+                    ? item.collectionIDs
+                    : [item.collectionID],
         });
     }, []);
 
@@ -1315,6 +1338,7 @@ export const LockerPage: React.FC = () => {
                     onClose={() => setEditItem(null)}
                     collections={collections}
                     onSave={handleUpdateItem}
+                    onCreateCollection={handleCreateCollection}
                     editItem={editItem}
                 />
             )}

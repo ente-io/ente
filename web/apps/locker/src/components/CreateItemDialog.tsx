@@ -132,6 +132,7 @@ interface CreateItemDialogProps {
         type: LockerItemType;
         data: Record<string, unknown>;
         collectionID: number;
+        collectionIDs: number[];
     } | null;
 }
 
@@ -219,10 +220,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
     const editCollectionID = editItem?.collectionID ?? null;
-    const selectedType =
-        selectedOption && selectedOption !== "file"
-            ? (selectedOption as LockerItemType)
-            : null;
+    const editCollectionIDs = editItem?.collectionIDs ?? [];
+    const selectedType = selectedOption as LockerItemType | null;
     const displayCollectionsRef = useRef(displayCollections);
 
     displayCollectionsRef.current = displayCollections;
@@ -263,9 +262,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 : undefined;
         setSelectedCollectionIDs(
             isEditMode
-                ? editCollectionID
-                    ? [editCollectionID]
-                    : []
+                ? normalizeSelectedCollectionIDs(
+                      editCollectionIDs.length > 0
+                          ? editCollectionIDs
+                          : editCollectionID
+                            ? [editCollectionID]
+                            : [],
+                  )
                 : normalizeSelectedCollectionIDs(
                       defaultCollectionID !== null &&
                           defaultCollectionID !== undefined
@@ -288,6 +291,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setUpgradeCTAType(null);
     }, [
         defaultCollectionID,
+        editCollectionIDs,
         editCollectionID,
         editItem,
         initialItems,
@@ -438,7 +442,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         }
 
         for (const field of getRequiredFields(selectedType)) {
-            if (!formData[field]?.trim()) {
+            const value = formData[field];
+            if (typeof value !== "string" || !value.trim()) {
                 setError(t("required_field"));
                 return;
             }
@@ -450,7 +455,10 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         try {
             const cleanData = Object.fromEntries(
                 Object.entries(formData)
-                    .filter(([, value]) => value.trim())
+                    .filter(
+                        ([, value]) =>
+                            typeof value === "string" && value.trim(),
+                    )
                     .map(([key, value]) => [key, value.trim()]),
             );
             await onSave(selectedType, cleanData, selectedCollectionIDs);
@@ -663,7 +671,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         selectedType !== null &&
         selectedCollectionIDs.length > 0 &&
         getRequiredFields(selectedType).every((field) =>
-            formData[field]?.trim(),
+            typeof formData[field] === "string" && formData[field].trim(),
         );
 
     const canUpload =
@@ -817,7 +825,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     </Stack>
                 )}
 
-                {isFileMode && (
+                {isFileMode && !isEditMode && (
                     <FileUploadSection
                         fileInputRef={fileInputRef}
                         selectedUploadItems={selectedUploadItems}
@@ -902,10 +910,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             }
                         />
 
-                        {!isEditMode && (
+                        {selectedType && (
                             <CollectionSelector
                                 collections={displayCollections}
                                 selectedIDs={selectedCollectionIDs}
+                                initialSelectedIDs={
+                                    isEditMode ? editCollectionIDs : undefined
+                                }
                                 onToggle={(collectionID) =>
                                     setSelectedCollectionIDs((current) =>
                                         current.includes(collectionID)
@@ -1185,6 +1196,21 @@ const ItemForm: React.FC<{
                     />
                 </Stack>
             );
+        case "file":
+            return (
+                <Stack sx={{ gap: 2 }}>
+                    <TextField
+                        label={t("fileTitle")}
+                        value={data.name ?? ""}
+                        onChange={(event) =>
+                            onChange("name", event.target.value)
+                        }
+                        fullWidth
+                        required
+                        autoFocus
+                    />
+                </Stack>
+            );
         default:
             return null;
     }
@@ -1200,6 +1226,8 @@ const getRequiredFields = (type: LockerItemType): string[] => {
             return ["name", "location"];
         case "emergencyContact":
             return ["name", "contactDetails"];
+        case "file":
+            return ["name"];
         default:
             return [];
     }
@@ -1223,26 +1251,37 @@ const typeDisplayName = (type: LockerItemType): string => {
 const CollectionSelector: React.FC<{
     collections: LockerCollection[];
     selectedIDs: number[];
+    initialSelectedIDs?: number[];
     onToggle: (id: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
-}> = ({ collections, selectedIDs, onToggle, onCreateCollection }) => {
+}> = ({
+    collections,
+    selectedIDs,
+    initialSelectedIDs,
+    onToggle,
+    onCreateCollection,
+}) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [createName, setCreateName] = useState("");
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
     const orderedCollections = useMemo(() => {
-        const selectedIDSet = new Set(selectedIDs);
         const sortedCollections = [...collections].sort((a, b) =>
             a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
         );
-        const selectedCollections = sortedCollections.filter((collection) =>
-            selectedIDSet.has(collection.id),
+        const initialSelectedIDSet = new Set(initialSelectedIDs ?? []);
+        if (initialSelectedIDSet.size === 0) {
+            return sortedCollections;
+        }
+
+        const initialSelectedCollections = sortedCollections.filter(
+            (collection) => initialSelectedIDSet.has(collection.id),
         );
         const remainingCollections = sortedCollections.filter(
-            (collection) => !selectedIDSet.has(collection.id),
+            (collection) => !initialSelectedIDSet.has(collection.id),
         );
-        return [...selectedCollections, ...remainingCollections];
-    }, [collections, selectedIDs]);
+        return [...initialSelectedCollections, ...remainingCollections];
+    }, [collections, initialSelectedIDs]);
 
     const handleCreateCollection = useCallback(async () => {
         const name = createName.trim();

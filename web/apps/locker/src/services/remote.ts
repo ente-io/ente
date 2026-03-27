@@ -1434,6 +1434,180 @@ export const updateInfoItem = async (
     }
 };
 
+export const updateFileItem = async (
+    fileID: number,
+    title: string,
+    masterKey: string,
+): Promise<void> => {
+    const fileRecord = getEncryptedFileRecord(fileID);
+    if (!fileRecord) throw new Error(`File ${fileID} not in cache`);
+
+    const collectionRecord = encryptedCollections.get(fileRecord.collectionID);
+    if (!collectionRecord)
+        throw new Error(`Collection ${fileRecord.collectionID} not in cache`);
+
+    const collectionKey = await decryptCollectionKey(
+        collectionRecord,
+        masterKey,
+    );
+    const fileKey = await decryptBox(
+        {
+            encryptedData: fileRecord.encryptedKey,
+            nonce: fileRecord.keyDecryptionNonce,
+        },
+        collectionKey,
+    );
+
+    const existingPubMagicMetadata = fileRecord.pubMagicMetadata
+        ? ((await decryptMetadataJSON(
+              {
+                  encryptedData: fileRecord.pubMagicMetadata.data,
+                  decryptionHeader: fileRecord.pubMagicMetadata.header,
+              },
+              fileKey,
+          )) as Record<string, unknown>)
+        : {};
+
+    const pubMagicMetadata = {
+        ...existingPubMagicMetadata,
+        noThumb: true,
+        editedName: title.trim(),
+        editedTime: Date.now(),
+    };
+    const pubMMJSON = JSON.stringify(pubMagicMetadata);
+    const encryptedPubMM = await encryptBlob(stringToB64(pubMMJSON), fileKey);
+    const version = fileRecord.pubMagicMetadata?.version ?? 1;
+
+    const res = await fetch(await apiURL("/files/public-magic-metadata"), {
+        method: "PUT",
+        headers: {
+            ...(await authenticatedRequestHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            metadataList: [
+                {
+                    id: fileID,
+                    magicMetadata: {
+                        version,
+                        count: Object.keys(pubMagicMetadata).length,
+                        data: encryptedPubMM.encryptedData,
+                        header: encryptedPubMM.decryptionHeader,
+                    },
+                },
+            ],
+        }),
+    });
+    ensureOk(res);
+
+    const records = encryptedFiles.get(fileID);
+    if (records) {
+        encryptedFiles.set(
+            fileID,
+            new Map(
+                [...records.entries()].map(([recordCollectionID, record]) => [
+                    recordCollectionID,
+                    {
+                        ...record,
+                        pubMagicMetadata: {
+                            version: version + 1,
+                            data: encryptedPubMM.encryptedData,
+                            header: encryptedPubMM.decryptionHeader,
+                        },
+                    },
+                ]),
+            ),
+        );
+    }
+};
+
+export const updateItemCollections = async (
+    fileID: number,
+    collectionIDs: number[],
+    masterKey: string,
+): Promise<void> => {
+    const currentCollectionIDs = getCollectionIDsForFile(fileID);
+    const nextCollectionIDs = Array.from(
+        new Set(
+            collectionIDs.length > 0
+                ? collectionIDs
+                : [
+                      (
+                          await ensureUncategorizedCollection(masterKey)
+                      ).id,
+                  ],
+        ),
+    );
+    const currentCollectionIDSet = new Set(currentCollectionIDs);
+    const nextCollectionIDSet = new Set(nextCollectionIDs);
+    const collectionIDsToAdd = nextCollectionIDs.filter(
+        (collectionID) => !currentCollectionIDSet.has(collectionID),
+    );
+    const collectionIDsToRemove = currentCollectionIDs.filter(
+        (collectionID) => !nextCollectionIDSet.has(collectionID),
+    );
+    const uncategorizedCollection = await ensureUncategorizedCollection(masterKey);
+    const pendingAddedCollectionIDs = [...collectionIDsToAdd];
+
+    for (const collectionID of collectionIDsToRemove) {
+        const targetCollectionID =
+            pendingAddedCollectionIDs.shift() ??
+            nextCollectionIDs.find(
+                (candidateCollectionID) => candidateCollectionID !== collectionID,
+            ) ??
+            uncategorizedCollection.id;
+
+        if (targetCollectionID === collectionID) {
+            continue;
+        }
+
+        const fileKey = await decryptFileKeyForCollection(
+            fileID,
+            collectionID,
+            masterKey,
+        );
+        const targetCollectionRecord =
+            encryptedCollections.get(targetCollectionID);
+        if (!targetCollectionRecord) {
+            throw new Error(`Collection ${targetCollectionID} not in cache`);
+        }
+        const targetCollectionKey = await decryptCollectionKey(
+            targetCollectionRecord,
+            masterKey,
+        );
+        const encryptedFileKey = await encryptBox(fileKey, targetCollectionKey);
+
+        await moveFilesBetweenCollections(collectionID, targetCollectionID, [
+            {
+                id: fileID,
+                encryptedKey: encryptedFileKey.encryptedData,
+                keyDecryptionNonce: encryptedFileKey.nonce,
+            },
+        ]);
+    }
+
+    if (pendingAddedCollectionIDs.length > 0) {
+        const sourceCollectionID =
+            nextCollectionIDs.find((collectionID) =>
+                currentCollectionIDSet.has(collectionID),
+            ) ?? currentCollectionIDs[0];
+        if (!sourceCollectionID) {
+            throw new Error(`File ${fileID} has no source collection`);
+        }
+        const fileKey = await decryptFileKeyForCollection(
+            fileID,
+            sourceCollectionID,
+            masterKey,
+        );
+        await addFileToCollections(
+            fileID,
+            fileKey,
+            pendingAddedCollectionIDs,
+            masterKey,
+        );
+    }
+};
+
 // ---------------------------------------------------------------------------
 // Trash operations
 // ---------------------------------------------------------------------------
