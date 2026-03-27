@@ -164,5 +164,36 @@ void main() {
       final mappings = await getClusterToPetId();
       expect(mappings, isEmpty);
     });
+
+    test('stale mapping removed when remote unassigns cluster', () async {
+      // Simulate initial state: pet-1 has cluster-1, cluster-2, cluster-3
+      await setClusterPetId('cluster-1', 'pet-1');
+      await setClusterPetId('cluster-2', 'pet-1');
+      await setClusterPetId('cluster-3', 'pet-1');
+
+      // Simulate remote unassign of cluster-2: remote now has only
+      // cluster-1 and cluster-3 assigned to pet-1
+      final remoteClusterIds = {'cluster-1', 'cluster-3'};
+      final remotePetIDs = {'pet-1'};
+      final localMappings = await getClusterToPetId();
+
+      // Remove stale: local mapping where pet exists remotely but
+      // cluster is no longer in remote assignments
+      for (final entry in localMappings.entries) {
+        if (remotePetIDs.contains(entry.value) &&
+            !remoteClusterIds.contains(entry.key)) {
+          await db.execute(
+            'DELETE FROM $petClusterPetTable WHERE $clusterIDColumn = ?',
+            [entry.key],
+          );
+        }
+      }
+
+      final mappings = await getClusterToPetId();
+      expect(mappings.length, 2);
+      expect(mappings['cluster-1'], 'pet-1');
+      expect(mappings['cluster-3'], 'pet-1');
+      expect(mappings.containsKey('cluster-2'), isFalse);
+    });
   });
 }

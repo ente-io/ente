@@ -210,6 +210,24 @@ class PetService {
       }
     }
 
+    // Remove stale local mappings: clusters locally assigned to a pet that
+    // still exists remotely but whose remote assignments no longer include
+    // that cluster (i.e. unmerge/unassign done on another device).
+    final remoteClusterIds = clusterToPetId.keys.toSet();
+    int removedStale = 0;
+    for (final entry in localMappings.entries) {
+      if (remotePetIDs.contains(entry.value) &&
+          !remoteClusterIds.contains(entry.key)) {
+        await mlDataDB.removeClusterPetId(entry.key);
+        removedStale++;
+      }
+    }
+    if (removedStale > 0) {
+      _logger.info(
+        "Removed $removedStale stale local pet cluster mappings",
+      );
+    }
+
     // Write all cluster-to-pet mappings
     for (final entry in clusterToPetId.entries) {
       await mlDataDB.setClusterPetId(entry.key, entry.value);
