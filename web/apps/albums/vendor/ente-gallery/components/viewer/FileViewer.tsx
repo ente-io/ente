@@ -4,7 +4,6 @@ import AddIcon from "@mui/icons-material/Add";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
@@ -21,7 +20,6 @@ import {
     type ModalProps,
 } from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
-import { isDesktop } from "ente-base/app";
 import { SpacedRow } from "ente-base/components/containers";
 import { InlineErrorIndicator } from "ente-base/components/ErrorIndicator";
 import { TitledMiniDialog } from "ente-base/components/MiniDialog";
@@ -31,7 +29,6 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useInterval, useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { lowercaseExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { formattedListJoin, ut } from "ente-base/i18n";
 import log from "ente-base/log";
@@ -41,11 +38,9 @@ import {
     type FileInfoExif,
     type FileInfoProps,
 } from "ente-gallery/components/FileInfo";
-import type { Collection } from "ente-media/collection";
-import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
+import { ItemVisibility } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
-import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import {
     addPublicReaction,
     createAnonIdentity,
@@ -55,10 +50,6 @@ import {
     getPublicSocialDiff,
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
-import {
-    ImageEditorOverlay,
-    type ImageEditorOverlayProps,
-} from "ente-new/photos/components/ImageEditorOverlay";
 import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import { type Comment } from "ente-new/photos/services/comment";
@@ -154,7 +145,6 @@ export interface FileViewerFileAnnotation {
      * `true` if this is an image which can be edited, _and_ editing is
      * possible, and the edit action should therefore be shown for this file.
      */
-    showEditImage: boolean;
 }
 
 /**
@@ -335,17 +325,6 @@ export type FileViewerProps = ModalVisibilityProps & {
      * If this is not provided then the delete action will not be shown.
      */
     onDelete?: (file: EnteFile) => Promise<void>;
-    /**
-     * Called when the user edits an image in the image editor and asks us to
-     * save their edits as a copy.
-     *
-     * Editing is disabled if this is not provided.
-     *
-     * See {@link onSaveEditedCopy} in the {@link ImageEditorOverlay} props for
-     * documentation about the parameters.
-     */
-    onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
-
     onAddFileToCollection?: (
         file: EnteFile,
         sourceCollectionSummaryID?: number,
@@ -440,7 +419,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onDelete,
     onSelectCollection,
     onSelectPerson,
-    onSaveEditedImageCopy,
     onAddFileToCollection,
     activeCollectionID,
     publicAlbumsCredentials,
@@ -505,7 +483,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openAddNameModal, setOpenAddNameModal] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
-    const [openImageEditor, setOpenImageEditor] = useState(false);
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
     const [openShortcuts, setOpenShortcuts] = useState(false);
 
@@ -657,7 +634,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
-        setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
         setIsFullscreen(false);
@@ -1465,33 +1441,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         activeCollectionID,
     ]);
 
-    const handleEditImage = useMemo(() => {
-        return onSaveEditedImageCopy
-            ? () => {
-                  handleMoreMenuCloseIfNeeded();
-                  setOpenImageEditor(true);
-              }
-            : undefined;
-    }, [onSaveEditedImageCopy, handleMoreMenuCloseIfNeeded]);
-
-    const handleImageEditorClose = useCallback(
-        () => setOpenImageEditor(false),
-        [],
-    );
-
-    const handleSaveEditedCopy = useMemo(() => {
-        return onSaveEditedImageCopy
-            ? (
-                  editedFile: File,
-                  collection: Collection,
-                  enteFile: EnteFile,
-              ) => {
-                  onSaveEditedImageCopy(editedFile, collection, enteFile);
-                  handleClose();
-              }
-            : undefined;
-    }, [onSaveEditedImageCopy, handleClose]);
-
     const handleAnnotate = useCallback(
         (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
             const fileID = file.id;
@@ -1509,9 +1458,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 isOwnFile &&
                 !isInTrashSection &&
                 !isInIncomingSharedCollection;
-
-            const showEditImage =
-                !!handleEditImage && canModify && fileIsEditableImage(file);
 
             const showDownload = (() => {
                 if (disableDownload) return undefined;
@@ -1545,7 +1491,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 showDelete,
                 showArchive,
                 showCopyImage,
-                showEditImage,
             };
 
             const annotatedFile = { file, annotation, itemData };
@@ -1559,7 +1504,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             isInTrashSection,
             isInHiddenSection,
             onDownload,
-            handleEditImage,
             handleConfirmDelete,
         ],
     );
@@ -1817,7 +1761,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             openLikeAlbumSelector ||
             openPublicLikeModal ||
             !!moreMenuAnchorEl ||
-            openImageEditor ||
             openConfirmDelete ||
             openShortcuts
         ) {
@@ -1850,7 +1793,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         openLikeAlbumSelector,
         openPublicLikeModal,
         moreMenuAnchorEl,
-        openImageEditor,
         openConfirmDelete,
         openShortcuts,
     ]);
@@ -2756,12 +2698,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     </MoreMenuItem>
                 )}
 
-                {activeAnnotatedFile.annotation.showEditImage && (
-                    <MoreMenuItem onClick={handleEditImage}>
-                        <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>
-                        <EditIcon />
-                    </MoreMenuItem>
-                )}
                 <MoreMenuItem
                     onClick={handleToggleFullscreen}
                     divider
@@ -2793,14 +2729,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleConfirmDeleteClose}
                 onConfirm={handleDelete}
             />
-            {handleSaveEditedCopy && (
-                <ImageEditorOverlay
-                    open={openImageEditor}
-                    onClose={handleImageEditorClose}
-                    file={activeAnnotatedFile.file}
-                    onSaveEditedCopy={handleSaveEditedCopy}
-                />
-            )}
             <Shortcuts
                 open={openShortcuts}
                 onClose={handleShortcutsClose}
@@ -3057,23 +2985,6 @@ const Shortcut: React.FC<ShortcutProps> = ({ action, shortcut }) => (
     </tr>
 );
 
-const fileIsEditableImage = (file: EnteFile) => {
-    // Only images are editable.
-    if (file.metadata.fileType !== FileType.image) return false;
-
-    const extension = lowercaseExtension(fileFileName(file));
-    // Assume it is editable;
-    let isRenderable = true;
-    if (extension && needsJPEGConversion(extension)) {
-        // See if the file is on the whitelist of extensions that we know
-        // will not be directly renderable.
-        if (!isDesktop) {
-            // On the web, we only support HEIC conversion.
-            isRenderable = isHEICExtension(extension);
-        }
-    }
-    return isRenderable;
-};
 
 /**
  * Return a promise that resolves with a "image/png" blob derived from the given

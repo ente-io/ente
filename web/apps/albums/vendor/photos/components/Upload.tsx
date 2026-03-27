@@ -45,7 +45,6 @@ import {
     savedPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "ente-new/albums/services/public-albums-fdb";
-import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
@@ -61,6 +60,15 @@ import { uploadManager } from "services/upload-manager";
 import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
 import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 import { UploadProgress } from "./UploadProgress";
+
+interface RemotePullOpts {
+    /**
+     * Perform the pull without showing a global loading bar.
+     *
+     * Default: `false`.
+     */
+    silent?: boolean;
+}
 
 interface UploadProps {
     publicAlbumsCredentials?: PublicAlbumsCredentials;

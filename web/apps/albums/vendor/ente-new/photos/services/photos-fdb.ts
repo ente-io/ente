@@ -12,7 +12,12 @@ import {
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { z } from "zod";
-import type { TrashItem } from "./trash";
+
+interface TrashItem {
+    file: EnteFile;
+    updatedAt: number;
+    deleteBy: number;
+}
 
 /**
  * Return all collections present in our local database.

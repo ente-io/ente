@@ -35,10 +35,10 @@ import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
     encryptMagicMetadata,
+    type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { splitByPredicate } from "ente-utils/array";
 import { z } from "zod";
-import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
     removeCollectionIDLastSyncTime,
     saveCollectionFiles,
@@ -56,6 +56,23 @@ const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";
 export const defaultHiddenCollectionUserFacingName = "Hidden";
 const favoritesCollectionName = "Favorites";
+const requestBatchSize = 1000;
+
+interface UpdateMagicMetadataRequest {
+    id: number;
+    magicMetadata: RemoteMagicMetadata;
+}
+
+const batched = async <T, U>(
+    items: T[],
+    op: (batchItems: T[]) => Promise<U>,
+): Promise<U[]> => {
+    const result: U[] = [];
+    for (let i = 0; i < items.length; i += requestBatchSize) {
+        result.push(await op(items.slice(i, i + requestBatchSize)));
+    }
+    return result;
+};
 
 /**
  * Create a new album (a collection of type "album") on remote, and return its
