@@ -834,8 +834,10 @@ const migrateLegacyChatStoreToNative = async (chatKey: string) => {
     log.info("Finished migrating legacy local chat store to native DB");
 };
 
-const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
-    if (!isTauriRuntime()) return;
+const migrateLegacyNativeChatStoreToV2 = async (
+    chatKey: string,
+): Promise<boolean> => {
+    if (!isTauriRuntime()) return true;
 
     // Collect all known key candidates. allLegacyKeyCandidates returns every
     // key found across secure storage, native file, AND localStorage. This is
@@ -859,7 +861,7 @@ const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
                 );
                 log.info("Migrated legacy native chat store to v2 DB", result);
             }
-            return;
+            return true;
         } catch (error) {
             const code = getErrorCode(error);
             if (
@@ -876,6 +878,7 @@ const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
     log.warn(
         "Skipping legacy native chat migration because the available legacy keys could not decrypt the legacy DB",
     );
+    return false;
 };
 
 export const initializeChatStorePersistence = async (chatKey: string) => {
@@ -887,11 +890,14 @@ export const initializeChatStorePersistence = async (chatKey: string) => {
     const initPromise = (async () => {
         if (isTauriRuntime()) {
             if (!isNativeMigrationDone()) {
-                await migrateLegacyNativeChatStoreToV2(chatKey);
+                const didResolveNativeMigration =
+                    await migrateLegacyNativeChatStoreToV2(chatKey);
                 if (hasLegacyChatStore()) {
                     await migrateLegacyChatStoreToNative(chatKey);
                 }
-                markNativeMigrationDone();
+                if (didResolveNativeMigration) {
+                    markNativeMigrationDone();
+                }
             }
             return;
         }

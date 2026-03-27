@@ -1887,13 +1887,15 @@ const Page: React.FC = () => {
         [sessions, currentSessionId],
     );
 
+    const currentRootSessionUuid = currentSession?.rootSessionUuid;
+
     useEffect(() => {
-        if (!currentSession) {
+        if (!currentRootSessionUuid) {
             setBranchSelections({});
             return;
         }
         let cancelled = false;
-        void getBranchSelections(currentSession.rootSessionUuid)
+        void getBranchSelections(currentRootSessionUuid)
             .then((selections) => {
                 if (!cancelled) {
                     setBranchSelections(selections);
@@ -1909,7 +1911,7 @@ const Page: React.FC = () => {
         return () => {
             cancelled = true;
         };
-    }, [currentSession, currentSession?.rootSessionUuid]);
+    }, [currentRootSessionUuid]);
 
     useEffect(() => {
         if (isTauriRuntime) return;

@@ -1873,6 +1873,7 @@ fn migrate_legacy_chat_db(
     let mut source_session_ids = Vec::new();
     let mut source_message_ids_by_session = HashMap::new();
     let mut expected_attachment_ids = Vec::new();
+    let legacy_sessions = legacy_db.list_all_sessions().map_err(ApiError::from)?;
 
     for meta_key in [
         SYNC_CURSOR_META_KEY,
@@ -1890,7 +1891,7 @@ fn migrate_legacy_chat_db(
         }
     }
 
-    for session in legacy_db.list_all_sessions().map_err(ApiError::from)? {
+    for session in legacy_sessions {
         source_session_ids.push(session.uuid);
         target_db
             .upsert_session(
