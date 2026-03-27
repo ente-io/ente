@@ -62,6 +62,14 @@ Ente provides several tools to help you optimize both your device storage and cl
 
 Learn more in the [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization).
 
+### Why is "Free up device space" taking so long? {#free-up-space-slow}
+
+Freeing up a very large number of files at once can take longer than expected.
+
+When you have a large library, free up space album by album instead. Open **On device**, open an album, tap the three-dot menu, and select **Free up device space**.
+
+Smaller batches usually work more reliably.
+
 ### Do items in trash count against my storage? {#trash-storage-count}
 
 Yes, items in trash are included in your storage quota calculation. To free up storage space, you can:
