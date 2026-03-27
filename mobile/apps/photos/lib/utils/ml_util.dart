@@ -72,12 +72,14 @@ class RemoteMLHydrationSummary {
   final int hydratedFaces;
   final int hydratedClips;
   final int remainingLocalMl;
+  final bool skippedDueToCandidateThreshold;
 
   const RemoteMLHydrationSummary({
     this.candidateFiles = 0,
     this.hydratedFaces = 0,
     this.hydratedClips = 0,
     this.remainingLocalMl = 0,
+    this.skippedDueToCandidateThreshold = false,
   });
 }
 
@@ -394,6 +396,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
 
 Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   required MLDataDB mlDataDB,
+  int? skipHydrationIfCandidateFileCountAtMost,
 }) async {
   final candidateSplit = await _getOnlineFilesForMlIndexingCandidates();
   final ownedCandidates = candidateSplit.matched.where((instruction) {
@@ -402,6 +405,14 @@ Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   }).toList();
   if (ownedCandidates.isEmpty) {
     return const RemoteMLHydrationSummary();
+  }
+  if (skipHydrationIfCandidateFileCountAtMost != null &&
+      ownedCandidates.length <= skipHydrationIfCandidateFileCountAtMost) {
+    return RemoteMLHydrationSummary(
+      candidateFiles: ownedCandidates.length,
+      remainingLocalMl: ownedCandidates.length,
+      skippedDueToCandidateThreshold: true,
+    );
   }
 
   int hydratedFaces = 0;

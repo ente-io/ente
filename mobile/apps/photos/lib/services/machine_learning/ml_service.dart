@@ -44,6 +44,7 @@ class MLService {
 
   int? lastRemoteFetch;
   static const int _kRemoteFetchCooldownOnLite = 1000 * 60 * 5;
+  static const int _kStartupOwnedRemoteHydrationMissingFileThreshold = 200;
   Future<void>? _ownedRemoteHydrationFuture;
   bool _hasScheduledStartupOwnedRemoteHydration = false;
 
@@ -202,7 +203,11 @@ class MLService {
       return;
     }
     try {
-      await hydrateRemoteEmbeddingsForOwnedFiles(reason: "startup");
+      await hydrateRemoteEmbeddingsForOwnedFiles(
+        reason: "startup",
+        skipHydrationIfCandidateFileCountAtMost:
+            _kStartupOwnedRemoteHydrationMissingFileThreshold,
+      );
     } catch (e, s) {
       _logger.warning(
         "Skipping startup-owned remote ML hydration because owned hydration failed",
@@ -214,6 +219,7 @@ class MLService {
 
   Future<void> hydrateRemoteEmbeddingsForOwnedFiles({
     required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
   }) async {
     if (isProcessBg ||
         isOfflineMode ||
@@ -230,6 +236,8 @@ class MLService {
     }
     final future = _runOwnedRemoteHydrationSafely(
       reason: reason,
+      skipHydrationIfCandidateFileCountAtMost:
+          skipHydrationIfCandidateFileCountAtMost,
     );
     _ownedRemoteHydrationFuture = future;
     try {
@@ -243,9 +251,14 @@ class MLService {
 
   Future<void> _runOwnedRemoteHydrationSafely({
     required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
   }) async {
     try {
-      await _hydrateRemoteEmbeddingsForOwnedFilesInternal(reason: reason);
+      await _hydrateRemoteEmbeddingsForOwnedFilesInternal(
+        reason: reason,
+        skipHydrationIfCandidateFileCountAtMost:
+            skipHydrationIfCandidateFileCountAtMost,
+      );
     } catch (e, s) {
       _logger.warning("Owned remote ML hydration ($reason) failed", e, s);
     }
@@ -253,11 +266,24 @@ class MLService {
 
   Future<void> _hydrateRemoteEmbeddingsForOwnedFilesInternal({
     required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
   }) async {
-    final summary = await hydrateOwnedRemoteMLData(mlDataDB: MLDataDB.instance);
+    final summary = await hydrateOwnedRemoteMLData(
+      mlDataDB: MLDataDB.instance,
+      skipHydrationIfCandidateFileCountAtMost:
+          skipHydrationIfCandidateFileCountAtMost,
+    );
     if (summary.candidateFiles == 0) {
       _logger.info(
         "Skipping owned remote ML hydration ($reason): no owned files need remote hydration",
+      );
+      return;
+    }
+    if (summary.skippedDueToCandidateThreshold) {
+      _logger.info(
+        "Skipping owned remote ML hydration ($reason): only ${summary.candidateFiles} "
+        "owned files are missing remote ML data (threshold: > "
+        "$skipHydrationIfCandidateFileCountAtMost)",
       );
       return;
     }
