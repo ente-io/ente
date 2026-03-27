@@ -900,7 +900,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                             )}
 
                             <SectionHeader
-                                title={t("allItems")}
+                                title={t("results")}
                                 countLabel={t("lockerItemsCount", {
                                     count: sortedItems.length,
                                 })}
