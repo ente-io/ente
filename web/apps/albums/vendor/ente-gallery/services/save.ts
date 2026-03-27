@@ -4,10 +4,7 @@ import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
-import {
-    exportMetadataDirectoryName,
-    exportTrashDirectoryName,
-} from "ente-gallery/export-dirs";
+import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
@@ -40,10 +37,7 @@ const safeDirectoryName = async (
     name: string,
     exists: (path: string) => Promise<boolean>,
 ): Promise<string> => {
-    const specialDirectoryNames = [
-        exportTrashDirectoryName,
-        exportMetadataDirectoryName,
-    ];
+    const specialDirectoryNames = [exportMetadataDirectoryName];
 
     let result = sanitizeFilename(name);
     let count = 1;
@@ -789,7 +783,7 @@ const saveFileDesktop = async (
     const writeStreamToFile = (
         exportName: string,
         stream: ReadableStream<Uint8Array> | null,
-    ) => writeStream(electron, joinPath(directoryPath, exportName), stream);
+    ) => writeStream(joinPath(directoryPath, exportName), stream);
 
     const stream = await downloadManager.fileStream(file);
     const fileName = fileFileName(file);

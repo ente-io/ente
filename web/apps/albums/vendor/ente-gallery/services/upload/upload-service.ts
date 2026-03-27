@@ -978,7 +978,7 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
             response,
             size,
             lastModifiedMs: lm,
-        } = await readStream(ensureElectron(), uploadItem);
+        } = await readStream(uploadItem);
         underlyingStream = response.body!;
         fileSize = size;
         lastModifiedMs = lm;
@@ -1316,7 +1316,7 @@ const tryExtractImageMetadata = async (
         // The library we use for extracting Exif from images, ExifReader,
         // doesn't support streams. But unlike videos, for images it is
         // reasonable to read the entire stream into memory here.
-        const { response } = await readStream(ensureElectron(), uploadItem);
+        const { response } = await readStream(uploadItem);
         const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
         const opts = lastModifiedMs ? { lastModified: lastModifiedMs } : {};
         file = new File([await response.arrayBuffer()], basename(path), opts);

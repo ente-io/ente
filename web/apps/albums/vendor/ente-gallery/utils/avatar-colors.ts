@@ -4,7 +4,7 @@
  * These colors are used to give users a consistent colored avatar
  * based on their identifier (email or user ID).
  */
-export const avatarColors = [
+const avatarColors = [
     "#76549A", // Purple
     "#DF7861", // Coral
     "#94B49F", // Sage green

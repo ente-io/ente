@@ -200,7 +200,7 @@ const uploadItemText = async (uploadItem: UploadItem) => {
     } else if (typeof uploadItem == "string") {
         return await ensureElectron().fs.readTextFile(uploadItem);
     } else if (Array.isArray(uploadItem)) {
-        const { response } = await readStream(ensureElectron(), uploadItem);
+        const { response } = await readStream(uploadItem);
         return await response.text();
     } else {
         return await uploadItem.file.text();

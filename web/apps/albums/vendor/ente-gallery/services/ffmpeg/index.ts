@@ -298,7 +298,7 @@ export const determineVideoDuration = async (
 export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
     const electron = globalThis.electron;
     if (electron) {
-        return convertToMP4Native(electron, blob);
+        return convertToMP4Native(blob);
     } else {
         const command = [
             ffmpegPathPlaceholder,
@@ -312,11 +312,9 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
     }
 };
 
-const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-    const token = await initiateConvertToMP4(electron, blob);
-    const mp4Blob = await readVideoStream(electron, token).then((res) =>
-        res.blob(),
-    );
-    await videoStreamDone(electron, token);
+const convertToMP4Native = async (blob: Blob) => {
+    const token = await initiateConvertToMP4(blob);
+    const mp4Blob = await readVideoStream(token).then((res) => res.blob());
+    await videoStreamDone(token);
     return mp4Blob;
 };
