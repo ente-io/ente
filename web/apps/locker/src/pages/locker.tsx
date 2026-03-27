@@ -7,9 +7,9 @@ import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDra
 import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
+import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -215,7 +215,7 @@ const getCollectionIDFromPath = (path: string) => {
 
 export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
-    const currentUserID = ensureLocalUser().id;
+    const currentUserID = savedLocalUser()?.id;
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
 
@@ -720,6 +720,7 @@ export const LockerPage: React.FC = () => {
             const normalizedNameToID = new Map(
                 collections
                     .filter((collection) =>
+                        currentUserID !== undefined &&
                         isCollectionOwner(collection, currentUserID),
                     )
                     .map((collection) => [
@@ -1145,8 +1146,12 @@ export const LockerPage: React.FC = () => {
             <Snackbar
                 open={toast !== null}
                 message={toast}
-                autoHideDuration={3000}
-                onClose={() => setToast(null)}
+                onClose={(_event, reason) => {
+                    if (reason !== "clickaway") {
+                        return;
+                    }
+                    setToast(null);
+                }}
             />
             {isDragActive && (
                 <Box
