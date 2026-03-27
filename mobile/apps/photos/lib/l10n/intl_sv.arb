@@ -27,7 +27,7 @@
   "deleteReason4": "Min orsak finns inte med",
   "sendEmail": "Skicka e-post",
   "deleteRequestSLAText": "Din begäran kommer att hanteras inom 72 timmar.",
-  "deleteEmailRequest": "Vänligen skicka ett e-postmeddelande till <warning>account-deletion@ente.io</warning> från din registrerade e-postadress.",
+  "deleteEmailRequest": "Vänligen skicka ett e-postmeddelande till <warning>account-deletion@ente.com</warning> från din registrerade e-postadress.",
   "entePhotosPerm": "Ente <i>behöver tillåtelse att</i> bevara dina foton",
   "ok": "OK",
   "createAccount": "Skapa konto",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -287,18 +287,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verifierings-ID",
   "verifyEmailID": "Bekräfta {email}",
   "emailNoEnteAccount": "{email} har inte ett Ente-konto.\n\nSkicka dem en inbjudan för att dela bilder.",
-  "shareMyVerificationID": "Här är mitt verifierings-ID: {verificationID} för ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hallå, kan du bekräfta att detta är ditt ente.io verifierings-ID: {verificationID}",
+  "shareMyVerificationID": "Här är mitt verifierings-ID: {verificationID} för ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hallå, kan du bekräfta att detta är ditt ente.com verifierings-ID: {verificationID}",
   "somethingWentWrong": "Något gick fel",
   "sendInvite": "Skicka inbjudan",
-  "shareTextRecommendUsingEnte": "Ladda ner Ente så att vi enkelt kan dela bilder och videor med originell kvalitet\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Ladda ner Ente så att vi enkelt kan dela bilder och videor med originell kvalitet\n\nhttps://ente.com",
   "done": "Klar",
   "applyCodeTitle": "Använd kod",
   "enterCodeDescription": "Ange koden som din vän har angett för att få gratis lagring för er båda",
@@ -648,7 +648,7 @@
   "subscription": "Prenumeration",
   "paymentDetails": "Betalningsdetaljer",
   "manageFamily": "Hantera familj",
-  "contactToManageSubscription": "Kontakta oss på support@ente.io för att hantera din {provider} prenumeration.",
+  "contactToManageSubscription": "Kontakta oss på support@ente.com för att hantera din {provider} prenumeration.",
   "renewSubscription": "Förnya prenumeration",
   "cancelSubscription": "Avbryt prenumeration",
   "areYouSureYouWantToRenew": "Är du säker på att du vill förnya?",
@@ -697,7 +697,7 @@
   "subAlreadyLinkedErrMessage": "Din {id} är redan kopplad till ett annat Ente-konto.\nOm du vill använda din {id} med detta konto, vänligen kontakta vår support",
   "visitWebToManage": "Vänligen besök web.ente.io för att hantera ditt abonnemang",
   "couldNotUpdateSubscription": "Kunde inte uppdatera prenumeration",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vänligen kontakta support@ente.io så hjälper vi gärna till!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vänligen kontakta support@ente.com så hjälper vi gärna till!",
   "paymentFailed": "Betalning misslyckades",
   "paymentFailedTalkToProvider": "Prata med {providerName} support om du debiterades",
   "@paymentFailedTalkToProvider": {

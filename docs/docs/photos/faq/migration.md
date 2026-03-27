@@ -60,7 +60,7 @@ This usually occurs due to a network connectivity issue:
 - Check if your firewall is blocking Ente's servers
 - On desktop/web, try disabling "Faster uploads" in Settings > Preferences > Advanced
 
-For more check: [Troubleshooting](https://ente.io/help/photos/faq/troubleshooting#desktop-app-issues)
+For more check: [Troubleshooting](https://ente.com/help/photos/faq/troubleshooting#desktop-app-issues)
 
 ### How do I prevent duplicates while migrating from Google Photos? {#prevent-duplicates-migration}
 
@@ -83,7 +83,7 @@ Duplicates can occur:
 2. Disable backup in Google Photos.
 3. Request Google Takeout.
 4. Empty any local photo folders which are part of Google Takeout and also need to be backed up post migration.
-   - External tools can be used to deduplicate Google Takeout before importing into Ente.
+    - External tools can be used to deduplicate Google Takeout before importing into Ente.
 5. Import Google Takeout using Ente desktop app.
 6. After successful import, enable desired photo folder backup on Ente mobile app.
 
@@ -122,6 +122,7 @@ Yes, you can start fresh.
 - Once synced, empty Trash to permanently remove all items from your account.
 
 Once this is done, you can reupload your entire Google Takeout folder again using the desktop app.
+
 ### Is there a way to remove partner sharing photos when importing via Google Takeout?
 
 There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.
@@ -159,7 +160,7 @@ You will receive a notification from the app once your export is complete.
 #### 2. Import into Ente
 
 Now simply drag and drop the downloaded folders into
-[our desktop app](https://ente.io/download/desktop) and grab a cup of coffee (or
+[our desktop app](https://ente.com/download/desktop) and grab a cup of coffee (or
 a good night's sleep, depending on the size of your library) while we handle the
 rest.
 

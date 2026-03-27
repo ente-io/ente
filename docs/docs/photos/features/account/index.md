@@ -104,7 +104,7 @@ Ente offers **10 GB of storage for free, forever**. The free plan includes:
 - ✅ Map view and location tags
 - ✅ Background sync
 - ✅ Creating /receiving shared albums
-- ✅ Public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
+- ✅ Public links ([device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 
 **Free plan limitations:**
 
@@ -120,11 +120,11 @@ Paid plans unlock additional features and storage:
 - Family plan capability to share storage with 5 family members
 - Priority support
 
-See the [pricing page](https://ente.io#pricing) for current plans and pricing.
+See the [pricing page](https://ente.com#pricing) for current plans and pricing.
 
 ### Student discounts
 
-Students receive **30% off** subscription plans. Email [students@ente.io](mailto:students@ente.io) from your school email address or provide proof of enrollment.
+Students receive **30% off** subscription plans. Email [students@ente.com](mailto:students@ente.com) from your school email address or provide proof of enrollment.
 
 Discounts are valid for one year and can be renewed.
 
@@ -160,12 +160,12 @@ Ente accepts multiple payment methods:
 **PayPal**:
 
 - Annual plans only
-- Email [paypal@ente.io](mailto:paypal@ente.io) to request an invoice
+- Email [paypal@ente.com](mailto:paypal@ente.com) to request an invoice
 
 **Cryptocurrency**:
 
 - Bitcoin (BTC), Ethereum (ETH), Dogecoin (DOGE)
-- Email [crypto@ente.io](mailto:crypto@ente.io) to request an invoice
+- Email [crypto@ente.com](mailto:crypto@ente.com) to request an invoice
 - Cannot be combined with discount codes
 
 **App Store payments**:

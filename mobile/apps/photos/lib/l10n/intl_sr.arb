@@ -26,7 +26,7 @@
   "deleteReason4": "Мој разлог није на листи",
   "sendEmail": "Пошаљи е-пошту",
   "deleteRequestSLAText": "Ваш захтев ће бити обрађен у року од 72 сата.",
-  "deleteEmailRequest": "Молимо пошаљите имејл на <warning>account-deletion@ente.io</warning> са ваше регистроване адресе е-поште.",
+  "deleteEmailRequest": "Молимо пошаљите имејл на <warning>account-deletion@ente.com</warning> са ваше регистроване адресе е-поште.",
   "entePhotosPerm": "Енте-у <i>је потребна дозвола да</i> сачува ваше фотографије",
   "ok": "Ок",
   "createAccount": "Направи налог",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -252,18 +252,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ИД за верификацију",
   "verifyEmailID": "Верификуј {email}",
   "emailNoEnteAccount": "{email} нема Енте налог.\n\nПошаљи им позивницу за дељење фотографија.",
-  "shareMyVerificationID": "Ево мог ИД-а за верификацију: {verificationID} за ente.io.",
-  "shareTextConfirmOthersVerificationID": "Здраво, можеш ли да потврдиш да је ово твој ente.io ИД за верификацију: {verificationID}",
+  "shareMyVerificationID": "Ево мог ИД-а за верификацију: {verificationID} за ente.com.",
+  "shareTextConfirmOthersVerificationID": "Здраво, можеш ли да потврдиш да је ово твој ente.com ИД за верификацију: {verificationID}",
   "somethingWentWrong": "Нешто није у реду",
   "sendInvite": "Пошаљи позивницу",
-  "shareTextRecommendUsingEnte": "Преузми Енте да бисмо лако делили фотографије и видео записе у оригиналном квалитету\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Преузми Енте да бисмо лако делили фотографије и видео записе у оригиналном квалитету\n\nhttps://ente.com",
   "done": "Готово",
   "applyCodeTitle": "Примени кôд",
   "enterCodeDescription": "Унеси код који ти је дао пријатељ да бисте обоје добили бесплатан простор за складиштење",
@@ -596,7 +596,7 @@
   "appstoreSubscription": "Претплата путем Епл продавнице",
   "visitWebToManage": "Претплатом можете управљати на страници web.ente.io",
   "couldNotUpdateSubscription": "Неуспешно ажурирање претплате",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Контактирајте подршку на support@ente.io и радо ћемо вам помоћи!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Контактирајте подршку на support@ente.com и радо ћемо вам помоћи!",
   "paymentFailed": "Неуспела уплата",
   "continueOnFreeTrial": "Настави бесплатни пробни период",
   "areYouSureYouWantToExit": "Сигурно желите да изађете?",

@@ -3,7 +3,7 @@
 Automated docker images that allow you to run any (or all) of the web apps are
 created every Wednesday. You can use fetch them from `ghcr.io/ente-io/web`.
 
-These images expose web apps on 5 ports:
+These images expose web apps on 8 ports:
 
 - `3000` - Photos
 - `3001` - Account
@@ -12,6 +12,7 @@ These images expose web apps on 5 ports:
 - `3004` - Cast
 - `3005` - Share
 - `3006` - Embed
+- `3008` - Paste
 
 For example, for selectively exposing only the photos web app on your port 8000,
 you could:
@@ -20,7 +21,7 @@ you could:
 docker run -it --rm -p 8000:3000 ghcr.io/ente-io/web
 ```
 
-These images accept two environment variables to allow you to customize them:
+These images accept three environment variables to allow you to customize them:
 
 - `ENTE_API_ORIGIN` - The API origin (scheme://host:port) for your API server.
   Default: "http://localhost:8080".

@@ -406,7 +406,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                               PlatformUtil.openWebView(
                                 context,
                                 "${context.strings.howItWorks}?",
-                                "https://ente.io/architecture",
+                                "https://ente.com/architecture",
                               );
                             },
                             child: Text(

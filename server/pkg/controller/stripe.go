@@ -584,7 +584,7 @@ func (c *StripeController) sendAccountOnHoldEmail(userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
+	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.com",
 		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
 			"PaymentProvider": "Stripe",
 		}, nil)

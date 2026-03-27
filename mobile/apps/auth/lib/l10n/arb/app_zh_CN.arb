@@ -333,7 +333,7 @@
     }
   },
   "sorry": "抱歉",
-  "importFailureDesc": "无法解析所选文件。\n如果您需要帮助，请发邮件给 support@ente.io！",
+  "importFailureDesc": "无法解析所选文件。\n如果您需要帮助，请发邮件给 support@ente.com！",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "您的一些代码尚未备份。\n\n请确保您在登出之前备份这些代码。",
   "checkInboxAndSpamFolder": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
@@ -346,7 +346,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

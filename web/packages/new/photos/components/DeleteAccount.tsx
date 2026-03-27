@@ -116,7 +116,7 @@ const DeleteAccountDialogContents: React.FC<
         );
 
     const askToMailForDeletion = () => {
-        const emailID = "account-deletion@ente.io";
+        const emailID = "account-deletion@ente.com";
 
         showMiniDialog({
             title: t("delete_account"),

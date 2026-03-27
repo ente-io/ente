@@ -8,7 +8,7 @@ for persistent file access to user-selected directories outside the app sandbox.
                        DESC
   s.homepage         = 'https://github.com/ente-io/ente'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Ente' => 'support@ente.io' }
+  s.author           = { 'Ente' => 'support@ente.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'

@@ -48,8 +48,8 @@ in `ports` in compose file.
 | Ente Photos                                             | Web      | 3000      | 3000           |
 | Ente Accounts                                           | Web      | 3001      | 3001           |
 | Ente Albums                                             | Web      | 3002      | 3002           |
-| [Ente Auth](https://ente.io/auth/)                      | Web      | 3003      | 3003           |
-| [Ente Cast](https://ente.io/help/photos/features/cast/) | Web      | 3004      | 3004           |
+| [Ente Auth](https://ente.com/auth/)                      | Web      | 3003      | 3003           |
+| [Ente Cast](https://ente.com/help/photos/features/cast/) | Web      | 3004      | 3004           |
 | Ente Public Locker                                      | Web      | 3005      | 3005           |
 | Ente Embed                                              | Web      | 3006      | 3006           |
 | Ente Paste (if deployed separately)                     | Web      | 3008      | 3008           |

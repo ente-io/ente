@@ -439,7 +439,7 @@ You may not be able to delete photos if:
 
 If you're an admin or owner and want to remove photos that others uploaded, you can remove them from the album or use [suggest deletion](/photos/faq/sharing-and-collaboration#suggest-deletion).
 
-If you still can't delete photos you own, contact [support@ente.io](mailto:support@ente.io).
+If you still can't delete photos you own, contact [support@ente.com](mailto:support@ente.com).
 
 ### How is Uncategorized different from Trash? {#uncategorized-vs-trash}
 

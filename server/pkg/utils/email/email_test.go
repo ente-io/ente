@@ -3,10 +3,10 @@ package email
 import (
 	"io"
 	"mime/quotedprintable"
-	"os"
 	"strings"
 	"testing"
 
+	"github.com/ente-io/museum/internal/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -122,12 +122,7 @@ func TestGetMaskedEmailForPublic(t *testing.T) {
 }
 
 func TestInactiveUserDeletionTemplatesIncludeAccountEmail(t *testing.T) {
-	originalWD, err := os.Getwd()
-	assert.NoError(t, err)
-	assert.NoError(t, os.Chdir("../../.."))
-	defer func() {
-		assert.NoError(t, os.Chdir(originalWD))
-	}()
+	testutil.WithServerRoot(t)
 
 	templateData := map[string]interface{}{
 		"Email":        "alice@example.com",
