@@ -207,6 +207,22 @@ Video streaming is still in beta. If something isn't working:
 
 For crashes or upload failures with streaming enabled, see [Troubleshooting](/photos/faq/troubleshooting#app-crashes-ml-video).
 
+### How can I check if a video is being streamed? {#check-streaming-detection}
+
+**On mobile:**
+
+If you see a green "Play Original" button, the streamed version is being used.
+
+**On desktop/web:**
+
+Open the video and click the gear icon in the player. If it shows **Auto**, the video is being streamed.
+
+### Why does my shared video start downloading instead of playing immediately? {#shared-video-downloads-instead-of-playing}
+
+If a video hasn't had a stream generated yet, the browser may start downloading the entire file (or a large portion of it) before playback begins. This can happen with large files like 1–2 GB videos.
+
+To avoid this, ensure video streaming is enabled so that streamable versions are generated for your videos. Learn more in the [Video Streaming feature guide](/photos/features/utilities/video-streaming).
+
 ### How does Cast work? {#how-does-cast-work}
 
 Ente Cast lets you play slideshow albums on Chromecast TVs or any internet-connected large screen. You can pair using auto-pair (Chromium browsers with Chromecast) or PIN pairing (works with any device).
