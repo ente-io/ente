@@ -681,8 +681,6 @@ export default function PublicCollectionGallery() {
                         selected={selected}
                         setSelected={setSelected}
                         activeCollectionID={PseudoCollectionID.all}
-                        onRemotePull={publicAlbumsRemotePull}
-                        onVisualFeedback={handleVisualFeedback}
                         onAddSaveGroup={onAddSaveGroup}
                         publicAlbumsCredentials={credentials.current}
                         collectionKey={collectionKey.current}

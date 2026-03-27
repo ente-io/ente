@@ -6,13 +6,11 @@ import type { JourneyPoint } from "../types";
 interface UseFileViewerProps {
     files: EnteFile[];
     onSetOpenFileViewer?: (open: boolean) => void;
-    onRemotePull?: () => Promise<void>;
 }
 
 export const useFileViewer = ({
     files,
     onSetOpenFileViewer,
-    onRemotePull,
 }: UseFileViewerProps) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
@@ -55,10 +53,6 @@ export const useFileViewer = ({
         onSetOpenFileViewer?.(false);
     }, [onSetOpenFileViewer]);
 
-    const handleTriggerRemotePull = useCallback(() => {
-        return onRemotePull?.() || Promise.resolve();
-    }, [onRemotePull]);
-
     return {
         // State
         openFileViewer,
@@ -67,6 +61,5 @@ export const useFileViewer = ({
         // Handlers
         handleOpenFileViewer,
         handleCloseFileViewer,
-        handleTriggerRemotePull,
     };
 };

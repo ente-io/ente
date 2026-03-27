@@ -31,11 +31,6 @@ export type FileListWithViewerProps = {
     files: EnteFile[];
     enableDownload?: boolean;
     /**
-     * Called when an action in the file viewer requires us to perform a full
-     * pull from remote.
-     */
-    onRemotePull: () => Promise<void>;
-    /**
      * If set, the file viewer will open to this file index on mount/update.
      * Set to undefined after the navigation is complete.
      */
@@ -69,7 +64,6 @@ export type FileListWithViewerProps = {
 > &
     Pick<
         ComponentProps<typeof FileViewer>,
-        | "onVisualFeedback"
         | "publicAlbumsCredentials"
         | "collectionKey"
         | "onJoinAlbum"
@@ -92,8 +86,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     selected,
     setSelected,
     activeCollectionID,
-    onRemotePull,
-    onVisualFeedback,
     onAddSaveGroup,
     pendingFileIndex,
     pendingFileSidebar,
@@ -151,11 +143,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         setOpenFileViewer(true);
     }, []);
 
-    const handleTriggerRemotePull = useCallback(
-        () => void onRemotePull(),
-        [onRemotePull],
-    );
-
     const handleDownload = useCallback(
         (file: EnteFile) =>
             downloadAndSaveFiles([file], fileFileName(file), onAddSaveGroup),
@@ -190,14 +177,12 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 disableDownload={!enableDownload}
                 {...{
                     files,
-                    onVisualFeedback,
                     publicAlbumsCredentials,
                     collectionKey,
                     onJoinAlbum,
                     enableComment,
                     enableJoin,
                 }}
-                onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 activeCollectionID={activeCollectionID}
             />

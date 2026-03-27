@@ -43,11 +43,8 @@ interface TripLayoutProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
-    user?: { id: number; email: string; token: string; [key: string]: unknown }; // User object for FileViewer
-    // FileViewer related props (optional, can be added as needed)
     enableDownload?: boolean;
     onSetOpenFileViewer?: (open: boolean) => void;
-    onRemotePull?: () => Promise<void>;
     onAddPhotos?: () => void; // Callback for add photos button
     // Join album props
     accessToken?: string;
@@ -69,10 +66,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     files,
     collection,
     albumTitle,
-    user,
     enableDownload,
     onSetOpenFileViewer,
-    onRemotePull,
     onAddPhotos,
     accessToken,
     collectionKey,
@@ -107,8 +102,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         viewerFiles,
         handleOpenFileViewer,
         handleCloseFileViewer,
-        handleTriggerRemotePull,
-    } = useFileViewer({ files, onSetOpenFileViewer, onRemotePull });
+    } = useFileViewer({ files, onSetOpenFileViewer });
 
     // Join album hook for file viewer's public like modal
     const { handleJoinAlbum } = useJoinAlbum({
@@ -590,13 +584,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 initialSidebar={initialSidebar}
                 highlightCommentID={highlightCommentID}
                 files={viewerFiles}
-                user={user}
                 disableDownload={!enableDownload}
-                onTriggerRemotePull={handleTriggerRemotePull}
-                onRemoteFilesPull={handleTriggerRemotePull}
-                onVisualFeedback={() => {
-                    // No-op: Trip viewer is read-only and doesn't need visual feedback
-                }}
                 publicAlbumsCredentials={credentials?.current}
                 collectionKey={collectionKey}
                 onJoinAlbum={handleJoinAlbum}
