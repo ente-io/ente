@@ -1,9 +1,22 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    Fab,
+    FormControlLabel,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
+import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
@@ -11,6 +24,8 @@ import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { LoadingIndicator } from "ente-base/components/loaders";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useBaseContext } from "ente-base/context";
 import {
     authenticatedRequestHeaders,
@@ -247,6 +262,12 @@ export const LockerPage: React.FC = () => {
         data: Record<string, unknown>;
         collectionID: number;
     } | null>(null);
+    const [deleteCollectionDialog, setDeleteCollectionDialog] = useState<{
+        collectionID: number;
+        deleteFromEverywhere: boolean;
+        loading: boolean;
+        error: string | null;
+    } | null>(null);
 
     // Toast state
     const [toast, setToast] = useState<string | null>(null);
@@ -433,6 +454,12 @@ export const LockerPage: React.FC = () => {
         isProgrammaticLockerNavigationRef.current = true;
         void router.push("/", undefined, { shallow: true });
     }, [router]);
+
+    const removeCollectionFromState = useCallback((collectionID: number) => {
+        setCollections((current) =>
+            current.filter((collection) => collection.id !== collectionID),
+        );
+    }, []);
 
     const handleNavigateBack = useCallback(() => {
         setSidebarOpen(false);
@@ -886,52 +913,90 @@ export const LockerPage: React.FC = () => {
             const collection = collections.find(
                 (candidate) => candidate.id === collectionID,
             );
-            const collectionName = collection?.name ?? "";
-            const shouldNavigateHome =
-                router.pathname === "/collection" &&
-                selectedCollectionID === collectionID;
-            showMiniDialog({
-                title: t("deleteCollection"),
-                message: t("deleteCollectionConfirmation", { collectionName }),
-                continue: {
-                    text: t("delete"),
-                    color: "critical",
-                    action: async () => {
-                        if (!collection) {
-                            throw new Error("Collection not found");
-                        }
+            if (!collection) {
+                throw new Error("Collection not found");
+            }
 
-                        if (collection.items.length > 0) {
-                            if (!masterKey) {
-                                throw new Error("Missing master key");
-                            }
-
-                            await deleteCollectionKeepingFiles(
-                                collection,
-                                masterKey,
-                            );
-                        } else {
-                            await deleteCollectionAPI(collectionID);
-                        }
-                        if (shouldNavigateHome) {
-                            navigateHome();
-                        }
-                        await refreshData();
-                        setToast(t("collectionDeletedSuccessfully"));
-                    },
-                },
+            setDeleteCollectionDialog({
+                collectionID,
+                deleteFromEverywhere: false,
+                loading: false,
+                error: null,
             });
         },
-        [
-            collections,
-            masterKey,
-            navigateHome,
-            refreshData,
-            router.pathname,
-            selectedCollectionID,
-            showMiniDialog,
-        ],
+        [collections],
     );
+
+    const handleConfirmDeleteCollection = useCallback(async () => {
+        if (!deleteCollectionDialog) {
+            return;
+        }
+
+        const collection = collections.find(
+            (candidate) => candidate.id === deleteCollectionDialog.collectionID,
+        );
+        if (!collection) {
+            setDeleteCollectionDialog((current) =>
+                current
+                    ? { ...current, error: t("collectionNotFoundError") }
+                    : current,
+            );
+            return;
+        }
+
+        const shouldNavigateHome =
+            router.pathname === "/collection" &&
+            selectedCollectionID === collection.id;
+
+        setDeleteCollectionDialog((current) =>
+            current ? { ...current, loading: true, error: null } : current,
+        );
+
+        try {
+            if (deleteCollectionDialog.deleteFromEverywhere) {
+                await deleteCollectionAPI(collection.id);
+            } else if (collection.items.length > 0) {
+                if (!masterKey) {
+                    throw new Error("Missing master key");
+                }
+
+                await deleteCollectionKeepingFiles(collection, masterKey);
+            } else {
+                await deleteCollectionAPI(collection.id, { keepFiles: true });
+            }
+
+            if (shouldNavigateHome) {
+                navigateHome();
+            }
+            removeCollectionFromState(collection.id);
+            await refreshData();
+            setToast(t("collectionDeletedSuccessfully"));
+            setDeleteCollectionDialog(null);
+        } catch (error) {
+            log.error("Failed to delete collection", error);
+            setDeleteCollectionDialog((current) =>
+                current
+                    ? {
+                          ...current,
+                          loading: false,
+                          error:
+                              error instanceof Error
+                                  ? error.message
+                                  : t("failedToDeleteCollection"),
+                      }
+                    : current,
+            );
+        }
+    }, [
+        collections,
+        deleteCollectionDialog,
+        masterKey,
+        navigateHome,
+        removeCollectionFromState,
+        refreshData,
+        router.pathname,
+        selectedCollectionID,
+    ]);
 
     const handleOpenShareCollection = useCallback(
         (collection: LockerCollection) => {
@@ -1089,6 +1154,102 @@ export const LockerPage: React.FC = () => {
                 onUnshareCollection={handleUnshareCollection}
                 onRefreshSharees={fetchCollectionSharees}
             />
+            <Dialog
+                open={deleteCollectionDialog !== null}
+                onClose={() => {
+                    if (!deleteCollectionDialog?.loading) {
+                        setDeleteCollectionDialog(null);
+                    }
+                }}
+                fullWidth
+                maxWidth="xs"
+                slotProps={{
+                    paper: {
+                        sx: {
+                            ...lockerDialogPaperSx,
+                            width: "min(100%, 420px)",
+                        },
+                    },
+                }}
+            >
+                <DialogTitle sx={{ pb: 1 }}>
+                    {t("deleteCollectionTitle")}
+                </DialogTitle>
+                <DialogContent>
+                    <Stack sx={{ gap: 2.25 }}>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("deleteCollectionDialogBody", {
+                                collectionName:
+                                    collections.find(
+                                        (candidate) =>
+                                            candidate.id ===
+                                            deleteCollectionDialog?.collectionID,
+                                    )?.name ?? "",
+                            })}
+                        </Typography>
+                        {(collections.find(
+                            (candidate) =>
+                                candidate.id ===
+                                deleteCollectionDialog?.collectionID,
+                        )?.items.length ?? 0) > 0 && (
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={
+                                            deleteCollectionDialog?.deleteFromEverywhere ??
+                                            false
+                                        }
+                                        disabled={
+                                            deleteCollectionDialog?.loading
+                                        }
+                                        onChange={(event) =>
+                                            setDeleteCollectionDialog(
+                                                (current) =>
+                                                    current
+                                                        ? {
+                                                              ...current,
+                                                              deleteFromEverywhere:
+                                                                  event.target
+                                                                      .checked,
+                                                          }
+                                                        : current,
+                                            )
+                                        }
+                                    />
+                                }
+                                label={t("deleteCollectionFromEverywhere")}
+                                sx={{ alignItems: "center", m: 0 }}
+                            />
+                        )}
+                        {deleteCollectionDialog?.error && (
+                            <Typography
+                                variant="small"
+                                sx={{ color: "critical.main" }}
+                            >
+                                {deleteCollectionDialog.error}
+                            </Typography>
+                        )}
+                        <Stack direction="row" sx={{ gap: 1 }}>
+                            <FocusVisibleButton
+                                fullWidth
+                                color="secondary"
+                                disabled={deleteCollectionDialog?.loading}
+                                onClick={() => setDeleteCollectionDialog(null)}
+                            >
+                                {t("cancel")}
+                            </FocusVisibleButton>
+                            <LoadingButton
+                                fullWidth
+                                color="critical"
+                                loading={deleteCollectionDialog?.loading}
+                                onClick={() => void handleConfirmDeleteCollection()}
+                            >
+                                {t("delete")}
+                            </LoadingButton>
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
 
             {!isTrashView && (
                 <Fab

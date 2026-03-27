@@ -237,6 +237,11 @@ const getEncryptedFileRecord = (
 const getAllEncryptedFileRecords = (): EncryptedFileRecord[] =>
     [...encryptedFiles.values()].flatMap((records) => [...records.values()]);
 
+const getCollectionIDsForFile = (fileID: number): number[] => {
+    const records = encryptedFiles.get(fileID);
+    return records ? [...records.keys()] : [];
+};
+
 const describeCryptoError = (e: unknown): string => {
     if (typeof e === "object" && e && "code" in e) {
         const code = typeof e.code === "string" ? e.code : "unknown";
@@ -1716,6 +1721,7 @@ export const restoreFromTrash = async (
 export const createCollection = async (
     name: string,
     masterKey: string,
+    type = "folder",
 ): Promise<number> => {
     // Generate collection key
     const collectionKey = await generateKey();
@@ -1738,12 +1744,33 @@ export const createCollection = async (
             keyDecryptionNonce: encryptedKey.nonce,
             encryptedName: encryptedName.encryptedData,
             nameDecryptionNonce: encryptedName.nonce,
-            type: "folder",
+            type,
         }),
     });
     ensureOk(res);
     const data = (await res.json()) as { collection: { id: number } };
     return data.collection.id;
+};
+
+const ensureUncategorizedCollection = async (masterKey: string) => {
+    let uncategorizedCollection = [...encryptedCollections.values()].find(
+        (candidate) => candidate.type === "uncategorized",
+    );
+    if (uncategorizedCollection) {
+        return uncategorizedCollection;
+    }
+
+    await createCollection("Uncategorized", masterKey, "uncategorized");
+    await fetchLockerData(masterKey);
+
+    uncategorizedCollection = [...encryptedCollections.values()].find(
+        (candidate) => candidate.type === "uncategorized",
+    );
+    if (!uncategorizedCollection) {
+        throw new Error("Failed to create Uncategorized collection");
+    }
+
+    return uncategorizedCollection;
 };
 
 /**
@@ -1812,12 +1839,7 @@ export const deleteCollectionKeepingFiles = async (
 ): Promise<void> => {
     const collectionID = collection.id;
     const currentUserID = ensureLocalUser().id;
-    const uncategorizedCollection = [...encryptedCollections.values()].find(
-        (candidate) => candidate.type === "uncategorized",
-    );
-    if (!uncategorizedCollection) {
-        throw new Error("Uncategorized collection not found in cache");
-    }
+    let uncategorizedCollection: EncryptedCollectionRecord | undefined;
 
     const fileIDsToRemove: number[] = [];
     const filesToMoveByTargetCollectionID = new Map<
@@ -1833,7 +1855,7 @@ export const deleteCollectionKeepingFiles = async (
             continue;
         }
 
-        const otherOwnedCollectionIDs = item.collectionIDs.filter(
+        const otherOwnedCollectionIDs = getCollectionIDsForFile(item.id).filter(
             (itemCollectionID) => {
                 if (itemCollectionID === collectionID) {
                     return false;
@@ -1849,8 +1871,16 @@ export const deleteCollectionKeepingFiles = async (
             },
         );
 
+        if (otherOwnedCollectionIDs.length === 0 && !uncategorizedCollection) {
+            uncategorizedCollection =
+                await ensureUncategorizedCollection(masterKey);
+        }
+
         const targetCollectionID =
-            otherOwnedCollectionIDs[0] ?? uncategorizedCollection.id;
+            otherOwnedCollectionIDs[0] ?? uncategorizedCollection?.id;
+        if (!targetCollectionID) {
+            throw new Error("Failed to resolve target collection");
+        }
         const fileKey = await decryptFileKeyForCollection(
             item.id,
             collectionID,
