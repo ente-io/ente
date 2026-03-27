@@ -1105,35 +1105,4 @@ const getComponents = (appName: AppName): Components => {
 
 // Exports ---
 
-/**
- * The MUI {@link Theme} to use for the photos app.
- *
- * This is also the "default" theme, in that it is used for the accounts app
- * which serves both photos and auth.
- */
 export const photosTheme = getTheme("photos");
-
-/**
- * The MUI {@link Theme} to use for the auth app.
- */
-export const authTheme = getTheme("auth");
-
-/**
- * The MUI {@link Theme} to use for the cast app.
- *
- * This is the same as the dark theme for the photos app.
- */
-export const castTheme = getTheme("cast");
-
-/**
- * The MUI {@link Theme} to use for the Ensu app.
- */
-export const ensuTheme = getTheme("ensu");
-
-/**
- * The MUI {@link Theme} to use for the locker public app.
- */
-export const shareTheme = getTheme("share");
-
-/** Theme for the locker app (blue accent, matching mobile Locker app). */
-export const lockerTheme = getTheme("locker");

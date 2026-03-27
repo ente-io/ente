@@ -1,6 +1,6 @@
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
-import { appName, appNames } from "./app";
+import { appName } from "./app";
 
 /**
  * Log a standard startup banner.
@@ -10,14 +10,6 @@ import { appName, appNames } from "./app";
  * @param userID The uid for the currently logged in user, if any.
  */
 export const logStartupBanner = (userID?: number) => {
-    // Log a warning if appName isn't what it claims to be. See the
-    // documentation of `appName` for why this is needed.
-    if (!appNames.includes(appName)) {
-        log.warn(
-            `App name "${appName}" is not one of the known app names: ${JSON.stringify(appNames)}`,
-        );
-    }
-
     const sha = process.env.gitSHA;
     const buildID = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
     log.info(`Starting ente-${appName}-web ${buildID}uid ${userID ?? 0}`);

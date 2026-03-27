@@ -23,9 +23,7 @@ export const disableDiskLogs = () => (shouldLogToDisk = false);
  * in the log that is saved on disk.
  */
 export const logToDisk = (message: string) => {
-    const electron = globalThis.electron;
-    if (electron) electron.logToDisk(message);
-    else if (inWorker()) workerLogToDisk(message);
+    if (inWorker()) workerLogToDisk(message);
     else webLogToDisk(message);
 };
 
@@ -119,10 +117,8 @@ const logDebug = (param: () => unknown) => {
  *
  * Whenever we need to save a log message to disk,
  *
- * - When running under electron these messages are saved to the log maintained
- *   by the electron app we're running under.
- *
- * - Otherwise such messages are written to a ring buffer in local storage.
+ * Messages are written to a ring buffer in local storage, and proxied back to
+ * the main thread when emitted from workers.
  */
 export default {
     /**

@@ -1,4 +1,3 @@
-import { desktopAppVersion, isDesktop } from "ente-base/app";
 import { wait } from "ente-utils/promise";
 import { z } from "zod";
 import { clientPackageName } from "./app";
@@ -15,7 +14,6 @@ import { ensureAuthToken } from "./token";
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
     "X-Client-Package": clientPackageName,
-    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -27,7 +25,6 @@ export const authenticatedRequestHeaders = async () => ({
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
-    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
