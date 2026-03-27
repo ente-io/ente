@@ -228,6 +228,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         selectedOption && selectedOption !== "file"
             ? (selectedOption as LockerItemType)
             : null;
+    const formType =
+        isEditMode && selectedOption === "file" ? "file" : selectedType;
     const displayCollectionsRef = useRef(displayCollections);
 
     displayCollectionsRef.current = displayCollections;
@@ -437,11 +439,11 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     );
 
     const handleSave = useCallback(async () => {
-        if (!selectedType || selectedCollectionIDs.length === 0) {
+        if (!formType || selectedCollectionIDs.length === 0) {
             return;
         }
 
-        for (const field of getRequiredFields(selectedType)) {
+        for (const field of getRequiredFields(formType)) {
             const value = formData[field];
             if (typeof value !== "string" || !value.trim()) {
                 setError(t("required_field"));
@@ -461,7 +463,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     )
                     .map(([key, value]) => [key, value.trim()]),
             );
-            await onSave(selectedType, cleanData, selectedCollectionIDs);
+            await onSave(formType, cleanData, selectedCollectionIDs);
             handleClose();
         } catch (error) {
             log.error("Failed to save Locker item", error);
@@ -470,7 +472,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } finally {
             setSaving(false);
         }
-    }, [formData, handleClose, onSave, selectedCollectionIDs, selectedType]);
+    }, [formData, formType, handleClose, onSave, selectedCollectionIDs]);
 
     const handleUpload = useCallback(async () => {
         if (selectedUploadItems.length === 0 || !onUploadProgress) {
@@ -668,9 +670,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     ]);
 
     const canSave =
-        selectedType !== null &&
+        formType !== null &&
         selectedCollectionIDs.length > 0 &&
-        getRequiredFields(selectedType).every(
+        getRequiredFields(formType).every(
             (field) =>
                 typeof formData[field] === "string" && formData[field].trim(),
         );
@@ -899,10 +901,10 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     />
                 )}
 
-                {selectedType && !isFileMode && (
+                {formType && (!isFileMode || isEditMode) && (
                     <Stack sx={{ gap: 2.5, pt: 0.5 }}>
                         <ItemForm
-                            type={selectedType}
+                            type={formType}
                             data={formData}
                             onChange={handleFieldChange}
                             showPassword={showPassword}
