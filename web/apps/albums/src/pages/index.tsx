@@ -18,13 +18,13 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { ActiveDownloadStatusNotifications } from "components/ActiveDownloadStatusNotifications";
-import { FeedIcon } from "components/Collections/FeedIcon";
-import { type FileListHeaderOrFooter } from "components/FileList";
-import { FileListWithViewer } from "components/FileListWithViewer";
-import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";
-import { TripLayout } from "components/TripLayout";
-import { Upload } from "components/Upload";
+import { ActiveDownloadStatusNotifications } from "@/public-album/components/ActiveDownloadStatusNotifications";
+import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
+import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
+import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
+import { PublicAlbumSingleFileViewer } from "@/public-album/components/PublicAlbumSingleFileViewer";
+import { TripLayout } from "@/public-album/components/TripLayout";
+import { Upload } from "@/public-album/components/Upload";
 import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
@@ -53,24 +53,24 @@ import {
     isOfficialAlbumsApp,
     photosAppOrigin,
 } from "ente-base/origins";
-import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
 import {
     useSaveGroupsActions,
     type AddSaveGroup,
-} from "ente-gallery/components/utils/save-groups";
-import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
+} from "@/gallery/components/utils/save-groups";
+import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
 import {
     PublicFeedSidebar,
     type PublicFeedItemClickInfo,
-} from "ente-gallery/components/viewer/PublicFeedSidebar";
-import { downloadManager } from "ente-gallery/services/download";
+} from "@/gallery/components/viewer/PublicFeedSidebar";
+import { downloadManager } from "@/gallery/services/download";
 import {
     downloadAndSaveCollectionFiles,
     downloadAndSaveFiles,
-} from "ente-gallery/services/save";
-import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
-import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
-import { sortFiles } from "ente-gallery/utils/file";
+} from "@/gallery/services/save";
+import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
+import { sortFiles } from "@/gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
@@ -96,7 +96,7 @@ import {
 import { Notification } from "ente-new/photos/components/Notification";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { useJoinAlbum } from "hooks/useJoinAlbum";
+import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -104,11 +104,11 @@ import { type FileWithPath } from "react-dropzone";
 import {
     AccountsPageContents,
     AccountsPageTitle,
-} from "../components/AccountsPage";
-import { uploadManager } from "services/upload-manager";
-import { getSelectedFiles, type SelectedState } from "utils/file";
-import { getEnteURL } from "utils/public-album";
-import { quickLinkDateRangeForFiles } from "utils/quick-link";
+} from "@/public-album/components/AccountsPage";
+import { uploadManager } from "@/public-album/services/upload-manager";
+import { getSelectedFiles, type SelectedState } from "@/public-album/utils/file";
+import { getEnteURL } from "@/public-album/utils/public-album";
+import { quickLinkDateRangeForFiles } from "@/public-album/utils/quick-link";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();

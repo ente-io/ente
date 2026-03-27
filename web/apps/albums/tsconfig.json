@@ -1,28 +1,31 @@
 {
-    "extends": "ente-build-config/tsconfig-next.json",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "components/*": ["vendor/photos/components/*"],
-            "hooks/*": ["vendor/photos/hooks/*"],
-            "services/*": ["vendor/photos/services/*"],
-            "utils/*": ["vendor/photos/utils/*"],
-            "styles/*": ["vendor/photos/styles/*"],
-            "ente-gallery/*": ["vendor/ente-gallery/*"],
-            "ente-new/*": ["vendor/ente-new/*"]
-        }
+  "extends": "ente-build-config/tsconfig-next.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
     },
-    "include": [
-        "next-env.d.ts",
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "src/**/*.js",
-        "vendor/**/*.ts",
-        "vendor/**/*.tsx",
-        "vendor/**/*.js",
-        "vendor/**/*.d.ts",
-        "../../packages/base/components/utils/mui-theme.d.ts",
-        "../../packages/base/global-electron.d.ts"
-    ],
-    "exclude": ["node_modules", "out", ".next", ".next-desktop"]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "../../packages/base/components/utils/mui-theme.d.ts",
+    "../../packages/base/global-electron.d.ts",
+    "next-env.d.ts",
+    "src/**/*.js",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "out",
+    ".next",
+    ".next-desktop"
+  ]
 }
