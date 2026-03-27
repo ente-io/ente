@@ -207,14 +207,12 @@ class RemoteAssetsService {
     _RemoteAssetProbe probe,
   ) async {
     final tempFile = File(savePath);
-    final metadata = _ResumeMetadata.fromProbe(probe);
     final existingBytes = await _prepareTempFileForResume(
       tempFile,
-      metadata,
       probe,
     );
 
-    await _writeResumeMetadata(savePath, metadata);
+    await _writeResumeMetadata(savePath, probe);
 
     if (existingBytes == probe.totalBytes) {
       _emitProgress(url, existingBytes, probe.totalBytes);
@@ -252,7 +250,6 @@ class RemoteAssetsService {
 
   Future<int> _prepareTempFileForResume(
     File tempFile,
-    _ResumeMetadata metadata,
     _RemoteAssetProbe probe,
   ) async {
     final metadataFile = File(_resumeMetadataPath(tempFile.path));
@@ -271,8 +268,8 @@ class RemoteAssetsService {
       return 0;
     }
 
-    final storedMetadata = await _readResumeMetadata(tempFile.path);
-    if (storedMetadata == null || !storedMetadata.matches(metadata)) {
+    final storedProbe = await _readResumeMetadata(tempFile.path);
+    if (storedProbe == null || !storedProbe.matches(probe)) {
       await _clearResumeArtifacts(tempFile.path);
       return 0;
     }
@@ -345,14 +342,14 @@ class RemoteAssetsService {
         statusCode == HttpStatus.requestedRangeNotSatisfiable;
   }
 
-  Future<_ResumeMetadata?> _readResumeMetadata(String tempPath) async {
+  Future<_RemoteAssetProbe?> _readResumeMetadata(String tempPath) async {
     final file = File(_resumeMetadataPath(tempPath));
     if (!await file.exists()) {
       return null;
     }
     try {
       final raw = await file.readAsString();
-      return _ResumeMetadata.fromJson(
+      return _RemoteAssetProbe.fromJson(
         jsonDecode(raw) as Map<String, dynamic>,
       );
     } catch (e, s) {
@@ -363,7 +360,7 @@ class RemoteAssetsService {
 
   Future<void> _writeResumeMetadata(
     String tempPath,
-    _ResumeMetadata metadata,
+    _RemoteAssetProbe metadata,
   ) async {
     final file = File(_resumeMetadataPath(tempPath));
     await file.parent.create(recursive: true);
@@ -446,13 +443,19 @@ class RemoteAssetsService {
   }
 }
 
+String? _strongETag(String? etag) {
+  if (etag == null || etag.startsWith("W/") || etag.startsWith("w/")) {
+    return null;
+  }
+  return etag;
+}
+
 class _RemoteAssetProbe {
   const _RemoteAssetProbe({
     required this.url,
     required this.totalBytes,
     required this.acceptsRanges,
     required this.etag,
-    required this.lastModified,
   });
 
   static _RemoteAssetProbe? fromHeaders(
@@ -460,19 +463,27 @@ class _RemoteAssetProbe {
     int? statusCode,
     Headers headers,
   ) {
-    final totalBytes = _parseTotalBytes(headers);
+    final contentLength = headers.value(HttpHeaders.contentLengthHeader);
+    final totalBytes = int.tryParse(contentLength ?? "");
     if (totalBytes == null || totalBytes <= 0) {
       return null;
     }
 
+    final acceptRanges = headers.value("accept-ranges")?.trim();
     return _RemoteAssetProbe(
       url: url,
       totalBytes: totalBytes,
-      acceptsRanges: _acceptsRanges(headers, statusCode),
-      etag: _normalizeHeader(headers.value(HttpHeaders.etagHeader)),
-      lastModified: _normalizeHeader(
-        headers.value(HttpHeaders.lastModifiedHeader),
-      ),
+      acceptsRanges: acceptRanges == "bytes",
+      etag: headers.value(HttpHeaders.etagHeader)?.trim(),
+    );
+  }
+
+  factory _RemoteAssetProbe.fromJson(Map<String, dynamic> json) {
+    return _RemoteAssetProbe(
+      url: json["url"] as String,
+      totalBytes: json["totalBytes"] as int,
+      acceptsRanges: false,
+      etag: json["etag"] as String?,
     );
   }
 
@@ -480,112 +491,23 @@ class _RemoteAssetProbe {
   final int totalBytes;
   final bool acceptsRanges;
   final String? etag;
-  final String? lastModified;
 
-  bool get hasStableValidator => ifRangeValidator != null;
+  String? get ifRangeValidator => _strongETag(etag);
 
-  String? get ifRangeValidator => _strongETag;
-
-  bool get canResume => acceptsRanges && hasStableValidator;
-
-  static int? _parseTotalBytes(Headers headers) {
-    final contentRange = headers.value(HttpHeaders.contentRangeHeader);
-    if (contentRange != null) {
-      final match = RegExp(r"bytes\s+\d+-\d+/(\d+)").firstMatch(contentRange);
-      final totalString = match?.group(1);
-      if (totalString != null) {
-        return int.tryParse(totalString);
-      }
-    }
-
-    final contentLength = headers.value(HttpHeaders.contentLengthHeader);
-    return int.tryParse(contentLength ?? "");
-  }
-
-  static bool _acceptsRanges(Headers headers, int? statusCode) {
-    final acceptRanges = _normalizeHeader(headers.value("accept-ranges"));
-    return statusCode == HttpStatus.partialContent ||
-        acceptRanges == "bytes" ||
-        headers.value(HttpHeaders.contentRangeHeader) != null;
-  }
-
-  static String? _normalizeHeader(String? value) {
-    if (value == null) {
-      return null;
-    }
-    final trimmed = value.trim();
-    return trimmed.isEmpty ? null : trimmed;
-  }
-
-  String? get _strongETag {
-    if (etag == null) {
-      return null;
-    }
-    return _isWeakETag(etag!) ? null : etag;
-  }
-
-  static bool _isWeakETag(String value) {
-    return value.startsWith("W/") || value.startsWith("w/");
-  }
-}
-
-class _ResumeMetadata {
-  const _ResumeMetadata({
-    required this.url,
-    required this.totalBytes,
-    required this.etag,
-    required this.lastModified,
-  });
-
-  factory _ResumeMetadata.fromProbe(_RemoteAssetProbe probe) {
-    return _ResumeMetadata(
-      url: probe.url,
-      totalBytes: probe.totalBytes,
-      etag: probe.etag,
-      lastModified: probe.lastModified,
-    );
-  }
-
-  factory _ResumeMetadata.fromJson(Map<String, dynamic> json) {
-    return _ResumeMetadata(
-      url: json["url"] as String,
-      totalBytes: json["totalBytes"] as int,
-      etag: json["etag"] as String?,
-      lastModified: json["lastModified"] as String?,
-    );
-  }
-
-  final String url;
-  final int totalBytes;
-  final String? etag;
-  final String? lastModified;
-
-  String? get ifRangeValidator => _strongETag;
+  bool get canResume => acceptsRanges && ifRangeValidator != null;
 
   Map<String, dynamic> toJson() {
     return {
       "url": url,
       "totalBytes": totalBytes,
       "etag": etag,
-      "lastModified": lastModified,
     };
   }
 
-  bool matches(_ResumeMetadata other) {
+  bool matches(_RemoteAssetProbe other) {
     return url == other.url &&
         totalBytes == other.totalBytes &&
         ifRangeValidator == other.ifRangeValidator;
-  }
-
-  String? get _strongETag {
-    if (etag == null) {
-      return null;
-    }
-    return _isWeakETag(etag!) ? null : etag;
-  }
-
-  static bool _isWeakETag(String value) {
-    return value.startsWith("W/") || value.startsWith("w/");
   }
 }
 
