@@ -123,19 +123,12 @@ Each partner should export their own library via [Google Takeout](/photos/migrat
 
 > **Note**: Photos only visible to you through Partner Sharing (not saved to your library) are **not** included in your Takeout. Only the partner who originally took those photos will have them in their export. There is also no built-in filter to remove partner-shared photos from a Takeout import — so duplicates may occur if both partners import and then share entire libraries on Ente.
 
-#### 2. Handle duplicates
-
-After import, clean up any overlapping photos:
-
-- `Desktop app → Settings → Deduplicate files` removes exact duplicates
-- [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) catches near-duplicates
-
-#### 3. Set up sharing on Ente
+#### 2. Set up sharing on Ente
 
 **Share your Camera folder (recommended):**
 
 1. Open the **Camera** folder (Android) or **Recents** (iOS)
-2. Tap the Share icon and add your partner as a [Collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
+2. Tap the Share icon and add your partner as a [Viewer, Collaborator, or Admin](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
 3. Ask your partner to do the same for you
 
 New photos backed up to these folders will automatically sync to your partner's device.
@@ -144,15 +137,17 @@ New photos backed up to these folders will automatically sync to your partner's 
 
 1. Long-press any album to enter selection mode
 2. Tap "All" at the bottom right to select every album
-3. Tap Share and add your partner as a [Viewer or Collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
+3. Tap Share and add your partner as a [Viewer, Collaborator, or Admin](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
 
 **Auto-add photos of specific people:**
 
 Use [Smart albums](/photos/features/albums-and-organization/auto-add-people) to automatically add photos of selected people (e.g., your kids) to a shared album.
 
-#### 4. Consider a Family plan
+#### 3. Consider a Family plan
 
 A [Family plan](/photos/features/account/family-plans) lets both partners share a single subscription's storage at no extra cost, while keeping libraries private.
+
+> **Note**: Shared albums on Ente have the extra advantage of [Admin roles](/photos/features/sharing-and-collaboration/collaboration#permissions-explained), E2EE [comments and likes](/photos/features/sharing-and-collaboration/comments-and-likes), [collect links](/photos/features/sharing-and-collaboration/collaboration#collecting-photos-from-anyone), bulk ZIP download, [custom domains](/photos/features/sharing-and-collaboration/custom-domains/), trip layout, and download restrictions — all things Google Photos shared albums do not offer.
 
 ### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
 
