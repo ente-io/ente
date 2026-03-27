@@ -9,6 +9,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import {
@@ -43,6 +44,7 @@ import {
 import type { LockerCollection, LockerItem } from "types";
 import {
     canEditCollection,
+    canLeaveCollection,
     canOpenCollectionSharing,
     canShareLockerFileLink,
     getItemTitle,
@@ -84,6 +86,7 @@ interface ItemListProps {
     onDeleteCollection?: (collectionID: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
     onShareCollection?: (collection: LockerCollection) => void;
+    onLeaveCollection?: (collection: LockerCollection) => void;
     searchTerm: string;
     onNavigateBack?: () => void;
 }
@@ -108,6 +111,7 @@ export const ItemList: React.FC<ItemListProps> = ({
     onDeleteCollection,
     onCreateCollection,
     onShareCollection,
+    onLeaveCollection,
     searchTerm,
     onNavigateBack,
 }) => {
@@ -451,6 +455,9 @@ export const ItemList: React.FC<ItemListProps> = ({
     const canEditSelectedCollection =
         selectedCollection !== null &&
         canEditCollection(selectedCollection, currentUserID);
+    const canLeaveSelectedCollection =
+        selectedCollection !== null &&
+        canLeaveCollection(selectedCollection, currentUserID);
     const canShareSelectedCollection =
         selectedCollection !== null &&
         canOpenCollectionSharing(selectedCollection);
@@ -899,6 +906,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         collections={displayCollections}
                                         onSelectCollection={onSelectCollection}
                                         onShareCollection={onShareCollection}
+                                        onLeaveCollection={onLeaveCollection}
                                         onRequestRenameCollection={(
                                             collection,
                                         ) => {
@@ -936,6 +944,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         collections={filteredCollections}
                                         onSelectCollection={onSelectCollection}
                                         onShareCollection={onShareCollection}
+                                        onLeaveCollection={onLeaveCollection}
                                         onRequestRenameCollection={(
                                             collection,
                                         ) => {
@@ -1042,7 +1051,8 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                     </IconButton>
                                                 </Tooltip>
                                             )}
-                                        {canEditSelectedCollection && (
+                                        {(canEditSelectedCollection ||
+                                            canLeaveSelectedCollection) && (
                                             <CollectionHeaderMenu
                                                 onShare={
                                                     canShareSelectedCollection &&
@@ -1067,6 +1077,15 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                         ? () =>
                                                               onDeleteCollection(
                                                                   selectedCollection.id,
+                                                              )
+                                                        : undefined
+                                                }
+                                                onLeave={
+                                                    onLeaveCollection &&
+                                                    canLeaveSelectedCollection
+                                                        ? () =>
+                                                              onLeaveCollection(
+                                                                  selectedCollection,
                                                               )
                                                         : undefined
                                                 }
@@ -1573,12 +1592,14 @@ const CollectionGrid: React.FC<{
     collections: LockerCollection[];
     onSelectCollection: (collectionID: number) => void;
     onShareCollection?: (collection: LockerCollection) => void;
+    onLeaveCollection?: (collection: LockerCollection) => void;
     onRequestRenameCollection?: (collection: LockerCollection) => void;
     onDeleteCollection?: (collectionID: number) => void;
 }> = ({
     collections,
     onSelectCollection,
     onShareCollection,
+    onLeaveCollection,
     onRequestRenameCollection,
     onDeleteCollection,
 }) => {
@@ -1603,6 +1624,12 @@ const CollectionGrid: React.FC<{
                         onShareCollection &&
                         canOpenCollectionSharing(collection)
                             ? () => onShareCollection(collection)
+                            : undefined
+                    }
+                    onLeave={
+                        onLeaveCollection &&
+                        canLeaveCollection(collection, currentUserID)
+                            ? () => onLeaveCollection(collection)
                             : undefined
                     }
                     onRename={
@@ -1861,9 +1888,10 @@ const CollectionCard: React.FC<{
     collection: LockerCollection;
     onClick: () => void;
     onShare?: () => void;
+    onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ collection, onClick, onShare, onRename, onDelete }) => {
+}> = ({ collection, onClick, onShare, onLeave, onRename, onDelete }) => {
     return (
         <ButtonBase
             component="div"
@@ -1975,13 +2003,14 @@ const CollectionCard: React.FC<{
                     </Typography>
                 </Box>
             </Stack>
-            {(onShare || onRename || onDelete) && (
+            {(onShare || onLeave || onRename || onDelete) && (
                 <Box
                     sx={{ flexShrink: 0, ml: 0.25 }}
                     onClick={(event) => event.stopPropagation()}
                 >
                     <CollectionContextMenu
                         onShare={onShare}
+                        onLeave={onLeave}
                         onRename={onRename}
                         onDelete={onDelete}
                     />
@@ -2016,9 +2045,10 @@ const SharedCollectionBadge: React.FC = () => {
 
 const CollectionContextMenu: React.FC<{
     onShare?: () => void;
+    onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ onShare, onRename, onDelete }) => (
+}> = ({ onShare, onLeave, onRename, onDelete }) => (
     <OverflowMenu
         ariaID="collection-context-menu"
         triggerButtonSxProps={{
@@ -2034,6 +2064,15 @@ const CollectionContextMenu: React.FC<{
                 onClick={onShare}
             >
                 {t("share")}
+            </OverflowMenuOption>
+        )}
+        {onLeave && (
+            <OverflowMenuOption
+                startIcon={<LogoutOutlinedIcon />}
+                color="critical"
+                onClick={onLeave}
+            >
+                {t("leaveCollection")}
             </OverflowMenuOption>
         )}
         {onRename && (
@@ -2058,9 +2097,10 @@ const CollectionContextMenu: React.FC<{
 
 const CollectionHeaderMenu: React.FC<{
     onShare?: () => void;
+    onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ onShare, onRename, onDelete }) => (
+}> = ({ onShare, onLeave, onRename, onDelete }) => (
     <OverflowMenu
         ariaID="collection-header-menu"
         triggerButtonSxProps={{ color: "text.muted" }}
@@ -2071,6 +2111,15 @@ const CollectionHeaderMenu: React.FC<{
                 onClick={onShare}
             >
                 {t("share")}
+            </OverflowMenuOption>
+        )}
+        {onLeave && (
+            <OverflowMenuOption
+                startIcon={<LogoutOutlinedIcon />}
+                color="critical"
+                onClick={onLeave}
+            >
+                {t("leaveCollection")}
             </OverflowMenuOption>
         )}
         {onRename && (

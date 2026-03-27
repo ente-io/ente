@@ -73,6 +73,7 @@ export const LockerPage: React.FC = () => {
         handleDrop,
         handleEditItem,
         handleEmptyTrash,
+        handleLeaveCollection,
         handleOpenShareCollection,
         handlePermanentlyDelete,
         handleRenameCollection,
@@ -206,6 +207,7 @@ export const LockerPage: React.FC = () => {
                     onDeleteCollection={handleDeleteCollection}
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
+                    onLeaveCollection={handleLeaveCollection}
                     searchTerm={searchTerm}
                     onNavigateBack={handleNavigateBack}
                 />
@@ -230,6 +232,7 @@ export const LockerPage: React.FC = () => {
                 onClose={() => setShareCollectionID(null)}
                 onShareCollection={handleShareCollection}
                 onUnshareCollection={handleUnshareCollection}
+                onLeaveCollection={handleLeaveCollection}
                 onRefreshSharees={fetchCollectionSharees}
             />
             <DeleteCollectionDialog

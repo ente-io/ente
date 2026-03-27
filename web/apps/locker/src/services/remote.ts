@@ -58,6 +58,7 @@ import {
 import {
     createCollectionWithDeps,
     deleteCollectionWithDeps,
+    ensureFavoritesCollectionWithDeps,
     ensureUncategorizedCollectionWithDeps,
     renameCollectionWithDeps,
 } from "./remote-collections";
@@ -922,6 +923,15 @@ const ensureUncategorizedCollection = async (masterKey: string) => {
     });
 };
 
+const ensureFavoritesCollection = async (masterKey: string) => {
+    return ensureFavoritesCollectionWithDeps(masterKey, {
+        findCollectionByType,
+        refetchCollections: async (resolvedMasterKey) => {
+            await fetchLockerData(resolvedMasterKey);
+        },
+    });
+};
+
 /**
  * Rename a collection.
  *
@@ -1004,6 +1014,61 @@ export const unshareCollection = async (
         decryptCollectionKey,
         updateCollectionShareesInCache,
     });
+};
+
+/**
+ * Leave a shared collection.
+ */
+export const leaveCollection = async (collectionID: number): Promise<void> => {
+    const res = await fetch(
+        await apiURL(`/collections/leave/${collectionID}`),
+        { method: "POST", headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+};
+
+/**
+ * Mark or unmark a Locker item as Important.
+ */
+export const setItemImportant = async (
+    fileID: number,
+    shouldBeImportant: boolean,
+    masterKey: string,
+): Promise<boolean> => {
+    const currentCollectionIDs = getCollectionIDsForFile(fileID);
+    if (currentCollectionIDs.length === 0) {
+        throw new Error(`File ${fileID} not found in cache`);
+    }
+
+    const favoritesCollection = findCollectionByType("favorites");
+    if (!shouldBeImportant && !favoritesCollection) {
+        return false;
+    }
+
+    const favoritesCollectionID =
+        favoritesCollection?.id ??
+        (await ensureFavoritesCollection(masterKey)).id;
+    const nextCollectionIDs = shouldBeImportant
+        ? Array.from(new Set([...currentCollectionIDs, favoritesCollectionID]))
+        : currentCollectionIDs.filter(
+              (collectionID) => collectionID !== favoritesCollectionID,
+          );
+
+    const hasChanged =
+        nextCollectionIDs.length !== currentCollectionIDs.length ||
+        nextCollectionIDs.some(
+            (collectionID) => !currentCollectionIDs.includes(collectionID),
+        );
+    if (!hasChanged) {
+        return false;
+    }
+
+    await updateItemCollectionsWithDeps(fileID, nextCollectionIDs, {
+        currentUserID: ensureLocalUser().id,
+        masterKey,
+        deps: createCollectionMutationDeps(),
+    });
+    return true;
 };
 
 // ---------------------------------------------------------------------------

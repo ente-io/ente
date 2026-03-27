@@ -22,6 +22,30 @@ interface EnsureUncategorizedDeps<TCollectionRecord> {
     refetchCollections: (masterKey: string) => Promise<void>;
 }
 
+const ensureCollectionWithTypeWithDeps = async <
+    TCollectionRecord extends CollectionRecordLike,
+>(
+    name: string,
+    type: string,
+    masterKey: string,
+    deps: EnsureUncategorizedDeps<TCollectionRecord>,
+): Promise<TCollectionRecord> => {
+    let collection = deps.findCollectionByType(type);
+    if (collection) {
+        return collection;
+    }
+
+    await createCollectionWithDeps(name, masterKey, type);
+    await deps.refetchCollections(masterKey);
+
+    collection = deps.findCollectionByType(type);
+    if (!collection) {
+        throw new Error(`Failed to create ${name} collection`);
+    }
+
+    return collection;
+};
+
 export const createCollectionWithDeps = async (
     name: string,
     masterKey: string,
@@ -56,22 +80,21 @@ export const ensureUncategorizedCollectionWithDeps = async <
 >(
     masterKey: string,
     deps: EnsureUncategorizedDeps<TCollectionRecord>,
-): Promise<TCollectionRecord> => {
-    let uncategorizedCollection = deps.findCollectionByType("uncategorized");
-    if (uncategorizedCollection) {
-        return uncategorizedCollection;
-    }
+): Promise<TCollectionRecord> =>
+    ensureCollectionWithTypeWithDeps(
+        "Uncategorized",
+        "uncategorized",
+        masterKey,
+        deps,
+    );
 
-    await createCollectionWithDeps("Uncategorized", masterKey, "uncategorized");
-    await deps.refetchCollections(masterKey);
-
-    uncategorizedCollection = deps.findCollectionByType("uncategorized");
-    if (!uncategorizedCollection) {
-        throw new Error("Failed to create Uncategorized collection");
-    }
-
-    return uncategorizedCollection;
-};
+export const ensureFavoritesCollectionWithDeps = async <
+    TCollectionRecord extends CollectionRecordLike,
+>(
+    masterKey: string,
+    deps: EnsureUncategorizedDeps<TCollectionRecord>,
+): Promise<TCollectionRecord> =>
+    ensureCollectionWithTypeWithDeps("Important", "favorites", masterKey, deps);
 
 export const renameCollectionWithDeps = async <TCollectionRecord>(
     collectionID: number,

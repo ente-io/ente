@@ -159,6 +159,13 @@ export const canOpenCollectionSharing = (collection: LockerCollection) =>
     !isImportantCollection(collection) &&
     !isUncategorizedCollection(collection);
 
+export const canLeaveCollection = (
+    collection: LockerCollection,
+    currentUserID: number,
+) =>
+    canOpenCollectionSharing(collection) &&
+    !isCollectionOwner(collection, currentUserID);
+
 export const canShareLockerFileLink = (
     item: LockerItem,
     currentUserID: number,
@@ -183,11 +190,7 @@ export const sortLockerCollections = (collections: LockerCollection[]) =>
     });
 
 export const visibleLockerCollections = (collections: LockerCollection[]) =>
-    sortLockerCollections(
-        collections.filter(
-            (collection) => !isUncategorizedCollection(collection),
-        ),
-    );
+    sortLockerCollections(collections);
 
 /**
  * Get the display title for a locker item.

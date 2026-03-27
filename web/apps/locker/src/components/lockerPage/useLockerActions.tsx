@@ -12,9 +12,11 @@ import {
     deleteCollection as deleteCollectionAPI,
     deleteCollectionKeepingFiles,
     emptyTrash as emptyTrashAPI,
+    leaveCollection as leaveCollectionAPI,
     permanentlyDeleteFromTrash,
     renameCollection as renameCollectionAPI,
     restoreFromTrash,
+    setItemImportant,
     shareCollection as shareCollectionAPI,
     trashFiles,
     unshareCollection as unshareCollectionAPI,
@@ -771,6 +773,100 @@ export const useLockerActions = ({
         [refreshData],
     );
 
+    const handleLeaveCollection = useCallback(
+        (collection: LockerCollection) => {
+            showMiniDialog({
+                title: t("leaveCollection"),
+                message: t("filesAddedByYouWillBeRemovedFromTheCollection"),
+                continue: {
+                    text: t("leaveCollection"),
+                    color: "critical",
+                    action: async () => {
+                        await leaveCollectionAPI(collection.id);
+                        if (shareCollectionID === collection.id) {
+                            setShareCollectionID(null);
+                        }
+                        if (selectedCollectionID === collection.id) {
+                            navigateHome();
+                        }
+                        removeCollectionFromState(collection.id);
+                        await refreshData();
+                        setToast(t("leaveCollectionSuccessfully"));
+                    },
+                },
+            });
+        },
+        [
+            navigateHome,
+            refreshData,
+            removeCollectionFromState,
+            selectedCollectionID,
+            shareCollectionID,
+            showMiniDialog,
+        ],
+    );
+
+    const handleSetItemsImportant = useCallback(
+        async (items: LockerItem[], shouldBeImportant: boolean) => {
+            if (!masterKey) {
+                throw new Error("No master key");
+            }
+            if (items.length === 0) {
+                return;
+            }
+
+            let changedCount = 0;
+            let pendingError: unknown;
+            try {
+                for (const item of items) {
+                    if (
+                        await setItemImportant(
+                            item.id,
+                            shouldBeImportant,
+                            masterKey,
+                        )
+                    ) {
+                        changedCount += 1;
+                    }
+                }
+            } catch (error) {
+                pendingError = error;
+            }
+
+            if (changedCount > 0) {
+                await refreshData();
+            }
+            if (pendingError) {
+                throw pendingError instanceof Error
+                    ? pendingError
+                    : new Error(t("failedToUpdateImportantStatus"));
+            }
+
+            if (changedCount === 0) {
+                if (shouldBeImportant) {
+                    setToast(t("allItemsAlreadyMarkedAsImportant"));
+                }
+                return;
+            }
+
+            if (shouldBeImportant) {
+                setToast(
+                    changedCount === 1
+                        ? t("fileMarkedAsImportant")
+                        : t("itemsMarkedAsImportant", { count: changedCount }),
+                );
+                return;
+            }
+
+            setToast(
+                changedCount === 1
+                    ? t("fileRemovedFromImportant")
+                    : t("itemsRemovedFromImportant", { count: changedCount }),
+            );
+        },
+        [masterKey, refreshData],
+    );
+
     return {
         createDialogOpen,
         deleteCollectionDialog,
@@ -791,8 +887,10 @@ export const useLockerActions = ({
         handleEmptyTrash,
         handleOpenShareCollection,
         handlePermanentlyDelete,
+        handleLeaveCollection,
         handleRenameCollection,
         handleRestoreItem,
+        handleSetItemsImportant,
         handleShareCollection,
         handleUnshareCollection,
         handleUpdateItem,
