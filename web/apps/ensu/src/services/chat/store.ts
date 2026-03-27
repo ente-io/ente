@@ -6,7 +6,9 @@ import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 import {
     allLegacyKeyCandidates,
     cachedLocalChatKey,
+    legacyAttachmentChatKey,
     legacyLocalChatKey,
+    setLegacyAttachmentChatKey,
 } from "./chatKey";
 import {
     decryptChatField,
@@ -852,6 +854,9 @@ const migrateLegacyNativeChatStoreToV2 = async (chatKey: string) => {
                 { input: { keyB64: chatKey, legacyKeyB64: candidateKey } },
             );
             if (result.didMigrate) {
+                await setLegacyAttachmentChatKey(
+                    candidateKey === chatKey ? undefined : candidateKey,
+                );
                 log.info("Migrated legacy native chat store to v2 DB", result);
             }
             return;
@@ -1505,11 +1510,23 @@ export const readDecryptedAttachmentBytes = async (
     try {
         return await decryptAttachmentBytes(encrypted, chatKey, sessionUuid);
     } catch (error) {
-        const localKey = cachedLocalChatKey() ?? legacyLocalChatKey();
-        if (!localKey || localKey === chatKey) {
-            throw error;
+        for (const fallbackKey of [
+            legacyAttachmentChatKey(),
+            cachedLocalChatKey(),
+            legacyLocalChatKey(),
+        ]) {
+            if (!fallbackKey || fallbackKey === chatKey) continue;
+            try {
+                return await decryptAttachmentBytes(
+                    encrypted,
+                    fallbackKey,
+                    sessionUuid,
+                );
+            } catch {
+                // Try the next known legacy key.
+            }
         }
-        return decryptAttachmentBytes(encrypted, localKey, sessionUuid);
+        throw error;
     }
 };
 

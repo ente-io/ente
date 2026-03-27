@@ -1833,25 +1833,6 @@ fn verify_migrated_chat_db(
     Ok(())
 }
 
-fn migrate_attachment_bytes(
-    source_path: &Path,
-    target_path: &Path,
-    legacy_key: &[u8],
-    target_key: &[u8],
-    session_uuid: Uuid,
-) -> Result<(), ApiError> {
-    let legacy_ciphertext =
-        fs::read(source_path).map_err(|err| ApiError::new("io", err.to_string()))?;
-    let plaintext =
-        chat_sync::crypto::decrypt_attachment_bytes(&legacy_ciphertext, legacy_key, session_uuid)
-            .map_err(|err| ApiError::new("db_crypto", err.to_string()))?;
-    let ciphertext =
-        chat_sync::crypto::encrypt_attachment_bytes(&plaintext, target_key, session_uuid)
-            .map_err(|err| ApiError::new("db_crypto", err.to_string()))?;
-    fs::write(target_path, ciphertext).map_err(|err| ApiError::new("io", err.to_string()))?;
-    Ok(())
-}
-
 fn migrate_legacy_chat_db(
     app: &AppHandle,
     input: &ChatDbMigrateLegacyInput,
@@ -1876,11 +1857,10 @@ fn migrate_legacy_chat_db(
     let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
 
     let legacy_db =
-        EnsuDb::open_sqlite_with_defaults(&legacy_db_path, &legacy_sync_path, legacy_key.clone())
+        EnsuDb::open_sqlite_with_defaults(&legacy_db_path, &legacy_sync_path, legacy_key)
             .map_err(ApiError::from)?;
-    let target_db =
-        EnsuDb::open_sqlite_with_defaults(&target_db_path, &target_sync_path, key.clone())
-            .map_err(ApiError::from)?;
+    let target_db = EnsuDb::open_sqlite_with_defaults(&target_db_path, &target_sync_path, key)
+        .map_err(ApiError::from)?;
     let legacy_sync_state =
         SyncStateDb::open_sqlite_with_defaults(&legacy_sync_path).map_err(ApiError::from)?;
     let target_sync_state =
@@ -2023,15 +2003,12 @@ fn migrate_legacy_chat_db(
 
                 let source_path = legacy_attachments_dir.join(&attachment.id);
                 let target_path = target_attachments_dir.join(&attachment.id);
-                if source_path.exists() {
-                    migrate_attachment_bytes(
-                        &source_path,
-                        &target_path,
-                        &legacy_key,
-                        &key,
-                        message.session_uuid,
-                    )?;
+                if source_path.exists() && !target_path.exists() {
+                    fs::copy(&source_path, &target_path)
+                        .map_err(|err| ApiError::new("io", err.to_string()))?;
                     migrated_attachments += 1;
+                }
+                if source_path.exists() {
                     expected_attachment_ids.push(attachment.id.clone());
                 }
             }

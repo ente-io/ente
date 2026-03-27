@@ -15,6 +15,7 @@ const LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY = "ensu.chatKey.local";
 const CHAT_KEY_FILE_NAME = "chat-keys.json";
 const REMOTE_CHAT_KEY_SECURE_STORAGE_KEY = "remoteChatKey.v2";
 const LOCAL_CHAT_KEY_SECURE_STORAGE_KEY = "localChatKey.v2";
+const LEGACY_ATTACHMENT_KEY_SECURE_STORAGE_KEY = "legacyAttachmentKey.v2";
 const LEGACY_REMOTE_CHAT_KEY_SECURE_STORAGE_KEY = "remoteChatKey";
 const LEGACY_LOCAL_CHAT_KEY_SECURE_STORAGE_KEY = "localChatKey";
 
@@ -22,6 +23,7 @@ type PersistedChatKeys = { remoteChatKey?: string; localChatKey?: string };
 
 let _persistedChatKeys: PersistedChatKeys = {};
 let _legacyPersistedChatKeys: PersistedChatKeys = {};
+let _legacyAttachmentChatKey: string | undefined;
 /** All distinct keys discovered during init, before any cleanup. */
 let _allDiscoveredLocalChatKeys: string[] = [];
 let _chatKeyStoreInitPromise: Promise<void> | undefined;
@@ -177,6 +179,7 @@ export const initChatKeyStore = async () => {
         const [
             secureRemoteChatKey,
             secureLocalChatKey,
+            secureLegacyAttachmentKey,
             legacySecureRemoteChatKey,
             legacySecureLocalChatKey,
             nativeKeys,
@@ -185,6 +188,9 @@ export const initChatKeyStore = async () => {
                 ? secureStorageGet(remoteStorageKey).catch(() => undefined)
                 : Promise.resolve(undefined),
             secureStorageGet(LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
+                () => undefined,
+            ),
+            secureStorageGet(LEGACY_ATTACHMENT_KEY_SECURE_STORAGE_KEY).catch(
                 () => undefined,
             ),
             legacyRemoteStorageKey
@@ -219,6 +225,7 @@ export const initChatKeyStore = async () => {
             remoteChatKey: legacyRemoteChatKey,
             localChatKey: legacyLocalChatKey,
         };
+        _legacyAttachmentChatKey = secureLegacyAttachmentKey;
 
         // Capture every distinct local chat key found across all sources
         // *before* cleanup deletes legacy copies. The migration needs all
@@ -363,6 +370,22 @@ export const allLegacyKeyCandidates = (): string[] => {
     // even when stale OS keyring entries shadowed it in the ?? chains.
     for (const k of _allDiscoveredLocalChatKeys) add(k);
     return keys;
+};
+
+export const legacyAttachmentChatKey = (): string | undefined =>
+    _legacyAttachmentChatKey;
+
+export const setLegacyAttachmentChatKey = async (chatKey?: string) => {
+    _legacyAttachmentChatKey = chatKey;
+    if (!isTauriAppRuntime()) return;
+    if (chatKey) {
+        await secureStorageSet(
+            LEGACY_ATTACHMENT_KEY_SECURE_STORAGE_KEY,
+            chatKey,
+        );
+    } else {
+        await secureStorageDelete(LEGACY_ATTACHMENT_KEY_SECURE_STORAGE_KEY);
+    }
 };
 
 export const clearCachedChatKey = () => {
