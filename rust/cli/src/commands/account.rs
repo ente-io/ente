@@ -243,6 +243,7 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn add_account(
     storage: &Storage,
     email_arg: Option<String>,
