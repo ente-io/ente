@@ -87,6 +87,7 @@ pub fn generate_keys_with_strength(
     Ok(KeyGenResult {
         key_attributes,
         private_key_attributes,
+        key_encryption_key: derived.key,
         login_key,
     })
 }
@@ -197,21 +198,12 @@ mod tests {
     fn test_generate_keys_can_decrypt_master_key() {
         crypto::init().unwrap();
 
-        let password = "my_secure_password";
-        let result = generate_test_keys(password).unwrap();
-
-        let kek_salt = crypto::decode_b64(&result.key_attributes.kek_salt).unwrap();
-        let kek = argon::derive_key(
-            password,
-            &kek_salt,
-            result.key_attributes.mem_limit.unwrap(),
-            result.key_attributes.ops_limit.unwrap(),
-        )
-        .unwrap();
+        let result = generate_test_keys("my_secure_password").unwrap();
 
         let encrypted_key = crypto::decode_b64(&result.key_attributes.encrypted_key).unwrap();
         let nonce = crypto::decode_b64(&result.key_attributes.key_decryption_nonce).unwrap();
-        let decrypted_master = secretbox::decrypt(&encrypted_key, &nonce, &kek).unwrap();
+        let decrypted_master =
+            secretbox::decrypt(&encrypted_key, &nonce, &result.key_encryption_key).unwrap();
 
         let original_master = crypto::decode_b64(&result.private_key_attributes.key).unwrap();
         assert_eq!(decrypted_master, original_master);
