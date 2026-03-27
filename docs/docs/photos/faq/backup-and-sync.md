@@ -539,6 +539,10 @@ This usually occurs due to a network connectivity issue:
   your debug logs via **Settings > Help > View logs** so we can investigate
   further. You can reach us at [support@ente.com](mailto:support@ente.com).
 
+### Is there a way to filter photos that are backed up to Ente but no longer on my device? {#filter-cloud-only-photos}
+
+No. There is currently no way to filter cloud-only photos (photos that exist in Ente but are no longer on your device).
+
 ## File Support & Upload Limits
 
 ### What file formats does Ente support? {#file-formats}
