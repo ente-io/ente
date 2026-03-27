@@ -107,10 +107,14 @@ class RemoteAssetsService {
     return fileName;
   }
 
-  Future<void> _downloadFile(String url, String savePath) async {
+  Future<void> _downloadFile(
+    String url,
+    String savePath, {
+    bool allowResume = true,
+  }) async {
     _logger.info("Downloading " + url);
     final probe = await _probeRemoteAsset(url);
-    if (_shouldUseResumableDownload(probe)) {
+    if (allowResume && _shouldUseResumableDownload(probe)) {
       await _downloadFileResumable(url, savePath, probe!);
     } else {
       await _downloadFileSingleShot(url, savePath);
@@ -192,7 +196,6 @@ class RemoteAssetsService {
       final response = await _dio.head<void>(url);
       return _RemoteAssetProbe.fromHeaders(
         url,
-        response.statusCode,
         response.headers,
       );
     } catch (e) {
@@ -228,7 +231,7 @@ class RemoteAssetsService {
       if (existingBytes > 0 && _shouldRestartDownloadFromScratch(e)) {
         _logger.info("Restarting resumable download from scratch for $url");
         await _clearResumeArtifacts(savePath);
-        await _downloadFile(url, savePath);
+        await _downloadFile(url, savePath, allowResume: false);
         return;
       }
       rethrow;
@@ -240,7 +243,7 @@ class RemoteAssetsService {
           s,
         );
         await _clearResumeArtifacts(savePath);
-        await _downloadFile(url, savePath);
+        await _downloadFile(url, savePath, allowResume: false);
         return;
       }
       await _clearResumeArtifacts(savePath);
@@ -460,7 +463,6 @@ class _RemoteAssetProbe {
 
   static _RemoteAssetProbe? fromHeaders(
     String url,
-    int? statusCode,
     Headers headers,
   ) {
     final contentLength = headers.value(HttpHeaders.contentLengthHeader);
