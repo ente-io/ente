@@ -26,7 +26,7 @@
   "deleteReason4": "A razão não está listada",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "O pedido será revisto dentre 72 horas.",
-  "deleteEmailRequest": "Favor, envie um e-mail a <warning>account-deletion@ente.io</warning> do e-mail registado.",
+  "deleteEmailRequest": "Favor, envie um e-mail a <warning>account-deletion@ente.com</warning> do e-mail registado.",
   "entePhotosPerm": "Ente <i>precisa da permissão para</i> preservar as suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -257,18 +257,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de Verificação",
   "verifyEmailID": "Verificar e-mail",
   "emailNoEnteAccount": "{email} não possui uma conta Ente.\n\nEnvie um convite para compartilhar fotos.",
-  "shareMyVerificationID": "Aqui está o meu ID de verificação: {verificationID} para ente.io.",
-  "shareTextConfirmOthersVerificationID": "Ei, você pode confirmar que este é seu ID de verificação do ente.io: {verificationID}",
+  "shareMyVerificationID": "Aqui está o meu ID de verificação: {verificationID} para ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ei, você pode confirmar que este é seu ID de verificação do ente.com: {verificationID}",
   "somethingWentWrong": "Ocorreu um erro",
   "sendInvite": "Enviar convite",
-  "shareTextRecommendUsingEnte": "Descarregue o Ente para poder partilhar facilmente fotografias e vídeos de qualidade original\n\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarregue o Ente para poder partilhar facilmente fotografias e vídeos de qualidade original\n\n\nhttps://ente.com",
   "done": "Concluído",
   "applyCodeTitle": "Aplicar código",
   "enterCodeDescription": "Introduza o código fornecido pelo seu amigo para obter armazenamento gratuito para ambos",
@@ -603,7 +603,7 @@
   "subscription": "Subscrição",
   "paymentDetails": "Detalhes de pagamento",
   "manageFamily": "Gerir família",
-  "contactToManageSubscription": "Contacte-nos em support@ente.io para gerir a sua subscrição {provider}",
+  "contactToManageSubscription": "Contacte-nos em support@ente.com para gerir a sua subscrição {provider}",
   "renewSubscription": "Renovar subscrição",
   "cancelSubscription": "Cancelar subscrição",
   "areYouSureYouWantToRenew": "Tem a certeza de que pretende renovar?",
@@ -652,7 +652,7 @@
   "subAlreadyLinkedErrMessage": "Seu {id} já está vinculado a outra conta Ente.\nSe você gostaria de usar seu {id} com esta conta, por favor contate nosso suporte''",
   "visitWebToManage": "Visite web.ente.io para gerir a sua subscrição",
   "couldNotUpdateSubscription": "Não foi possível atualizar a subscrição",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Por favor, entre em contato com support@ente.io e nós ficaremos felizes em ajudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Por favor, entre em contato com support@ente.com e nós ficaremos felizes em ajudar!",
   "paymentFailed": "O pagamento falhou",
   "paymentFailedTalkToProvider": "Por favor, fale com o suporte {providerName} se você foi cobrado",
   "@paymentFailedTalkToProvider": {

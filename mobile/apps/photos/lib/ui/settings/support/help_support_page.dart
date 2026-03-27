@@ -14,8 +14,8 @@ import "package:url_launcher/url_launcher_string.dart";
 
 class HelpSupportPage extends StatelessWidget {
   static final _logger = Logger("HelpSupportPage");
-  static const _helpUrl = "https://ente.io/help";
-  static const _photosFaqBaseUrl = "https://ente.io/help/photos/faq";
+  static const _helpUrl = "https://ente.com/help";
+  static const _photosFaqBaseUrl = "https://ente.com/help/photos/faq";
   static const _searchAndDiscoveryFaqUrl =
       "$_photosFaqBaseUrl/search-and-discovery";
   static const _backupAndSyncFaqUrl = "$_photosFaqBaseUrl/backup-and-sync";

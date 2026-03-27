@@ -209,9 +209,9 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                         <Trans
                             i18nKey={"mail_to_manage_subscription"}
                             components={{
-                                a: <Link href="mailto:support@ente.io" />,
+                                a: <Link href="mailto:support@ente.com" />,
                             }}
-                            values={{ emailID: "support@ente.io" }}
+                            values={{ emailID: "support@ente.com" }}
                         />
                     ),
                     continue: {},

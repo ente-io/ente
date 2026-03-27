@@ -38,7 +38,7 @@ it with Ente.
 
 8. Wait for Google to send you your data.
 
-9. Open [our desktop app](https://ente.io/download/desktop) and click on "Upload", then select "Google takeout".
+9. Open [our desktop app](https://ente.com/download/desktop) and click on "Upload", then select "Google takeout".
 
     ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
@@ -72,7 +72,7 @@ In case your uploads get interrupted, just drag and drop the folder or files aga
 
 If you run into any issues during this migration, please check out our
 [Migration FAQ](/photos/faq/migration#importing-from-google-photos) page or reach out to
-[support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+[support@ente.com](mailto:support@ente.com) and we will be happy to help you!
 
 > [!TIP]
 >

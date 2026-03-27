@@ -29,7 +29,7 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
-  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
+  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.com</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
   "entePhotosPerm": "Ente <i> benötigt Berechtigung, um </i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -315,19 +315,19 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verifizierungs-ID",
   "verifyEmailID": "Verifiziere {email}",
   "emailNoEnteAccount": "{email} hat kein Ente-Konto.\n\nSende eine Einladung, um Fotos zu teilen.",
-  "shareMyVerificationID": "Hier ist meine Verifizierungs-ID: {verificationID} für ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, kannst du bestätigen, dass dies deine ente.io Verifizierungs-ID ist: {verificationID}",
+  "shareMyVerificationID": "Hier ist meine Verifizierungs-ID: {verificationID} für ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, kannst du bestätigen, dass dies deine ente.com Verifizierungs-ID ist: {verificationID}",
   "somethingWentWrong": "Irgendetwas ging schief",
   "sendInvite": "Einladung senden",
-  "shareTextRecommendUsingEnte": "Hol dir Ente, damit wir ganz einfach Fotos und Videos in Originalqualität teilen können\n\nhttps://ente.io",
-  "shareTextRecommendUsingEnteForFamily": "Lade Ente herunter, damit ich dich zu meinem Familientarif hinzufügen kann\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Hol dir Ente, damit wir ganz einfach Fotos und Videos in Originalqualität teilen können\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Lade Ente herunter, damit ich dich zu meinem Familientarif hinzufügen kann\n\nhttps://ente.com",
   "done": "Fertig",
   "applyCodeTitle": "Code nutzen",
   "enterCodeDescription": "Gib den Code deines Freundes ein, damit sie beide kostenlosen Speicherplatz erhalten",
@@ -355,7 +355,7 @@
   "theyAlsoGetXGb": "Diese erhalten auch {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB für sie oder ihn + {storageAmountInGB} GB für dich, wenn ein Upgrade durchgeführt wird.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB jedes Mal, wenn sich jemand mit deinem Code für einen bezahlten Tarif anmeldet",
-  "shareTextReferralCode": "Ente Fotos ist ein privates und sicheres Zuhause für deine Fotos\n* Lade Ente Fotos von https://ente.io/app herunter\n* Erstelle ein Konto\n* Wende den Empfehlungscode {referralCode} an unter Einstellungen->Weiterempfehlungen\n* Erhalte {referralStorageInGB} GB kostenlos, wenn, du auf einen kostenpflichtigen Tarif upgradest",
+  "shareTextReferralCode": "Ente Fotos ist ein privates und sicheres Zuhause für deine Fotos\n* Lade Ente Fotos von https://ente.com/app herunter\n* Erstelle ein Konto\n* Wende den Empfehlungscode {referralCode} an unter Einstellungen->Weiterempfehlungen\n* Erhalte {referralStorageInGB} GB kostenlos, wenn, du auf einen kostenpflichtigen Tarif upgradest",
   "claimFreeStorage": "Freien Speicher einlösen",
   "inviteYourFriends": "Lade deine Freunde ein",
   "earnFreeStorage": "Kostenlosen Speicherplatz verdienen",
@@ -878,7 +878,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -926,7 +926,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Zahlungsdetails",
   "manageFamily": "Familiengruppe verwalten",
-  "contactToManageSubscription": "Bitte kontaktiere uns über support@ente.io, um dein {provider} Abo zu verwalten.",
+  "contactToManageSubscription": "Bitte kontaktiere uns über support@ente.com, um dein {provider} Abo zu verwalten.",
   "renewSubscription": "Abonnement erneuern",
   "cancelSubscription": "Abonnement kündigen",
   "areYouSureYouWantToRenew": "Bist du sicher, dass du verlängern möchtest?",
@@ -976,7 +976,7 @@
   "visitWebToManage": "Bitte rufe \"web.ente.io\" auf, um dein Abo zu verwalten",
   "managePaymentMethod": "Zahlungsmethode verwalten",
   "couldNotUpdateSubscription": "Abo konnte nicht aktualisiert werden",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktieren Sie uns über support@ente.io wo wir Ihnen gerne weiterhelfen.",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktieren Sie uns über support@ente.com wo wir Ihnen gerne weiterhelfen.",
   "paymentFailed": "Zahlung fehlgeschlagen",
   "paymentFailedTalkToProvider": "Bitte kontaktiere den Support von {providerName}, falls etwas abgebucht wurde",
   "@paymentFailedTalkToProvider": {

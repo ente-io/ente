@@ -4,103 +4,37 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"sync"
 	"testing"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/ente-io/museum/internal/testutil"
 	"github.com/google/uuid"
 )
 
 const testGiB = int64(1 << 30)
 
-var (
-	storageWarningRepoTestDB     *sql.DB
-	storageWarningRepoTestDBErr  error
-	storageWarningRepoTestDBOnce sync.Once
-)
-
 func getStorageWarningRepoTestDB(t *testing.T) *sql.DB {
 	t.Helper()
-	if os.Getenv("ENV") != "test" {
-		t.Skip("requires ENV=test")
-	}
-
-	storageWarningRepoTestDBOnce.Do(func() {
-		storageWarningRepoTestDB, storageWarningRepoTestDBErr = sql.Open("postgres", "user=test_user password=test_pass host=localhost dbname=ente_test_db sslmode=disable")
-		if storageWarningRepoTestDBErr != nil {
-			return
-		}
-
-		driver, err := postgres.WithInstance(storageWarningRepoTestDB, &postgres.Config{})
-		if err != nil {
-			storageWarningRepoTestDBErr = err
-			return
-		}
-
-		cwd, err := os.Getwd()
-		if err != nil {
-			storageWarningRepoTestDBErr = err
-			return
-		}
-		cwd = strings.Split(cwd, "/pkg/")[0]
-		migrationPath := "file://" + filepath.Join(cwd, "migrations")
-		mig, err := migrate.NewWithDatabaseInstance(migrationPath, "ente_test_db", driver)
-		if err != nil {
-			storageWarningRepoTestDBErr = err
-			return
-		}
-		if err := mig.Up(); err != nil && err != migrate.ErrNoChange {
-			storageWarningRepoTestDBErr = err
-			return
-		}
-	})
-
-	if storageWarningRepoTestDBErr != nil {
-		t.Skipf("repo storage warning integration tests require local postgres: %v", storageWarningRepoTestDBErr)
-	}
-
-	resetStorageWarningRepoTestTables(t, storageWarningRepoTestDB)
+	db := testutil.RequireTestDB(t)
+	resetStorageWarningRepoTestTables(t, db)
 	t.Cleanup(func() {
-		resetStorageWarningRepoTestTables(t, storageWarningRepoTestDB)
+		resetStorageWarningRepoTestTables(t, db)
 	})
-	return storageWarningRepoTestDB
+	return db
 }
 
 func resetStorageWarningRepoTestTables(t *testing.T, db *sql.DB) {
 	t.Helper()
-	for _, table := range []string{
-		"notification_history",
-		"storage_bonus",
-		"subscriptions",
-		"usage",
-		"families",
-		"users",
-	} {
-		if _, err := db.Exec("DELETE FROM " + table); err != nil {
-			t.Fatalf("failed to clear %s: %v", table, err)
-		}
-	}
+	testutil.ResetTables(t, db)
 }
 
 func insertStorageWarningTestUser(t *testing.T, db *sql.DB, userID int64, familyAdminID *int64) {
 	t.Helper()
-	_, err := db.Exec(
-		`INSERT INTO users(user_id, encrypted_email, email_decryption_nonce, email_hash, creation_time, family_admin_id)
-		 VALUES($1, $2, $3, $4, $5, $6)`,
-		userID,
-		[]byte{byte(userID), 1},
-		[]byte{byte(userID), 2},
-		fmt.Sprintf("user-%d@example.com", userID),
-		int64(1),
-		familyAdminID,
-	)
-	if err != nil {
-		t.Fatalf("failed to insert user %d: %v", userID, err)
-	}
+	testutil.InsertUser(t, db, testutil.UserFixture{
+		UserID:        userID,
+		Email:         fmt.Sprintf("user-%d@example.com", userID),
+		CreationTime:  1,
+		FamilyAdminID: familyAdminID,
+	})
 }
 
 func insertStorageWarningTestUsage(t *testing.T, db *sql.DB, userID int64, usage int64) {

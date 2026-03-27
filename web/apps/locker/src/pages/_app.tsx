@@ -1,9 +1,9 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { LockerHead } from "components/LockerHead";
 import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import { accountLogout } from "ente-accounts-rs/services/logout";
-import { LockerHead } from "components/LockerHead";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,

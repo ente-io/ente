@@ -131,15 +131,35 @@ class SubFaqWidget extends StatelessWidget {
 }
 
 class SubscriptionToggle extends StatefulWidget {
+  final bool isYearly;
   final Function(bool) onToggle;
-  const SubscriptionToggle({required this.onToggle, super.key});
+  const SubscriptionToggle({
+    required this.isYearly,
+    required this.onToggle,
+    super.key,
+  });
 
   @override
   State<SubscriptionToggle> createState() => _SubscriptionToggleState();
 }
 
 class _SubscriptionToggleState extends State<SubscriptionToggle> {
-  bool _isYearly = true;
+  late bool _isYearly;
+
+  @override
+  void initState() {
+    super.initState();
+    _isYearly = widget.isYearly;
+  }
+
+  @override
+  void didUpdateWidget(covariant SubscriptionToggle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isYearly != widget.isYearly) {
+      _isYearly = widget.isYearly;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const borderPadding = 2.5;

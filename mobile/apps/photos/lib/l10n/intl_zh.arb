@@ -27,7 +27,7 @@
   "deleteReason4": "其他原因",
   "sendEmail": "发送电子邮件",
   "deleteRequestSLAText": "您的请求将在 72 小时内处理。",
-  "deleteEmailRequest": "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.io</warning>。",
+  "deleteEmailRequest": "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.com</warning>。",
   "entePhotosPerm": "Ente <i>需要许可</i>才能保存您的照片",
   "ok": "Ok",
   "createAccount": "创建账户",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -287,15 +287,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "验证 ID",
   "verifyEmailID": "验证 {email}",
   "emailNoEnteAccount": "{email} 没有 Ente 帐户。\n\n向他们发出共享照片的邀请。",
-  "shareMyVerificationID": "这是我的ente.io 的验证 ID： {verificationID}。",
-  "shareTextConfirmOthersVerificationID": "嘿，你能确认这是你的 ente.io 验证 ID吗：{verificationID}",
+  "shareMyVerificationID": "这是我的ente.com 的验证 ID： {verificationID}。",
+  "shareTextConfirmOthersVerificationID": "嘿，你能确认这是你的 ente.com 验证 ID吗：{verificationID}",
   "somethingWentWrong": "出了些问题",
   "sendInvite": "发送邀请",
   "shareTextRecommendUsingEnte": "下载 Ente，让我们轻松共享高质量的原始照片和视频",
@@ -326,7 +326,7 @@
   "theyAlsoGetXGb": "他们也会获得 {storageAmountInGB} GB",
   "referralStorageForBoth": "对方升级后：他们可获得 {storageAmountInGB} GB，你也可获得 {storageAmountInGB} GB。",
   "freeStorageOnReferralSuccess": "每当有人使用您的代码注册付费计划时您将获得{storageAmountInGB} GB",
-  "shareTextReferralCode": "Ente Photos 是一个私密、安全的照片存放空间\n* 从 https://ente.io/app 下载 Ente Photos\n* 注册账号\n* 在「设置 → 推荐」中填写邀请码 {referralCode}\n* 升级到付费方案后，可免费获得 {referralStorageInGB}GB 存储空间",
+  "shareTextReferralCode": "Ente Photos 是一个私密、安全的照片存放空间\n* 从 https://ente.com/app 下载 Ente Photos\n* 注册账号\n* 在「设置 → 推荐」中填写邀请码 {referralCode}\n* 升级到付费方案后，可免费获得 {referralStorageInGB}GB 存储空间",
   "claimFreeStorage": "领取免费存储",
   "inviteYourFriends": "邀请您的朋友",
   "earnFreeStorage": "获得免费空间",
@@ -695,7 +695,7 @@
   "subscription": "订阅",
   "paymentDetails": "付款明细",
   "manageFamily": "管理家庭计划",
-  "contactToManageSubscription": "请通过support@ente.io 用英语联系我们来管理您的 {provider} 订阅。",
+  "contactToManageSubscription": "请通过support@ente.com 用英语联系我们来管理您的 {provider} 订阅。",
   "renewSubscription": "续费订阅",
   "cancelSubscription": "取消订阅",
   "areYouSureYouWantToRenew": "您确定要续费吗？",
@@ -744,7 +744,7 @@
   "subAlreadyLinkedErrMessage": "您的 {id} 已链接到另一个 Ente 账户。\n如果您想在此账户中使用您的 {id} ，请联系我们的支持人员",
   "visitWebToManage": "请访问 web.ente.io 来管理您的订阅",
   "couldNotUpdateSubscription": "无法升级订阅",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "请用英语联系 support@ente.io ，我们将乐意提供帮助！",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "请用英语联系 support@ente.com ，我们将乐意提供帮助！",
   "paymentFailed": "支付失败",
   "paymentFailedTalkToProvider": "如果您被收取费用，请用英语与 {providerName} 的客服聊天",
   "@paymentFailedTalkToProvider": {

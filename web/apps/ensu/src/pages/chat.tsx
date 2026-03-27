@@ -70,11 +70,15 @@ import {
 } from "services/chat/sync";
 import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
-    DEVELOPER_SETTINGS_ENABLED,
-    MODEL_SETTINGS_ENABLED,
     SIGN_IN_ENABLED,
 } from "services/featureFlags";
-import { DEFAULT_MODEL, LlmProvider } from "services/llm/provider";
+import {
+    DEFAULT_MODEL,
+    FALLBACK_DESKTOP_MODEL_PRESETS,
+    FALLBACK_MOBILE_MODEL_PRESETS,
+    LlmProvider,
+    type ResolvedModelPreset,
+} from "services/llm/provider";
 import type {
     DownloadProgress,
     GenerateEvent,
@@ -100,6 +104,9 @@ const formatTime = (timestamp: number) => {
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const DEFAULT_WEB_CONTEXT_SIZE = 4096;
+const ADVANCED_SETTINGS_UNLOCK_KEY = "ensu.advancedSettingsUnlocked";
+const MODEL_SETTINGS_STORAGE_KEY = "ensu.modelSettings";
+const SYSTEM_PROMPT_STORAGE_KEY = "ensu.systemPrompt";
 
 const loadingPhraseVerbs = [
     "Generating",
@@ -181,18 +188,19 @@ const toSafeBlobPart = (bytes: Uint8Array): ArrayBuffer => {
     return copy.buffer;
 };
 
-const CHAT_SYSTEM_PROMPT_BODY =
-    "Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.";
+const DEFAULT_CHAT_SYSTEM_PROMPT_BODY =
+    "You are Ensu, an AI assistant built by Ente. Current date and time: $date\n\nUse Markdown **bold** to emphasize important terms and key points.\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.";
+const SYSTEM_PROMPT_DATE_PLACEHOLDER = "$date";
 
-const buildChatSystemPrompt = () => {
+const buildChatSystemPrompt = (customSystemPrompt?: string) => {
     const dateAndTime = new Date().toLocaleString();
-    return `Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: ${dateAndTime}. ${CHAT_SYSTEM_PROMPT_BODY}`;
+    const promptBody =
+        customSystemPrompt?.trim() || DEFAULT_CHAT_SYSTEM_PROMPT_BODY;
+    return promptBody.split(SYSTEM_PROMPT_DATE_PLACEHOLDER).join(dateAndTime);
 };
 
 const SESSION_TITLE_PROMPT =
     "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.";
-
-const MODEL_SETTINGS_KEY = "ensu.modelSettings";
 
 const REPEAT_PENALTY = 1.18;
 const STREAMING_OUTRO_DURATION_MS = 520;
@@ -782,22 +790,25 @@ const Page: React.FC = () => {
     const [sessionSearch, setSessionSearch] = useState("");
     const [showSessionSearch, setShowSessionSearch] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
-    const [showDeveloperMenu, setShowDeveloperMenu] = useState(false);
+    const [advancedUnlocked, setAdvancedUnlocked] = useState(false);
     const [isDraftSession, setIsDraftSession] = useState(false);
     const [stickToBottom, setStickToBottom] = useState(true);
-    const [showDevSettings, setShowDevSettings] = useState(false);
     const [showModelSettings, setShowModelSettings] = useState(false);
+    const [showSystemPromptSettings, setShowSystemPromptSettings] =
+        useState(false);
     const [useCustomModel, setUseCustomModel] = useState(false);
     const [resolvedDefaultModel, setResolvedDefaultModel] =
         useState<ModelInfo>(DEFAULT_MODEL);
+    const [resolvedModelPresets, setResolvedModelPresets] = useState<
+        ResolvedModelPreset[] | null
+    >(null);
     const [modelUrl, setModelUrl] = useState("");
     const [mmprojUrl, setMmprojUrl] = useState("");
     const [contextLength, setContextLength] = useState("");
     const [maxTokens, setMaxTokens] = useState("");
-    const [modelUrlError, setModelUrlError] = useState<string | null>(null);
-    const [mmprojError, setMmprojError] = useState<string | null>(null);
-    const [contextError, setContextError] = useState<string | null>(null);
-    const [maxTokensError, setMaxTokensError] = useState<string | null>(null);
+    const [systemPrompt, setSystemPrompt] = useState(
+        DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
+    );
     const [isSavingModel, setIsSavingModel] = useState(false);
     const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
         null,
@@ -864,8 +875,8 @@ const Page: React.FC = () => {
     const userScrollTimeoutRef = useRef<number | null>(null);
     const currentSessionIdRef = useRef<string | undefined>(undefined);
     const isDraftSessionRef = useRef(false);
-    const logoClickCountRef = useRef(0);
-    const logoClickTimeoutRef = useRef<number | null>(null);
+    const buildVersionTapCountRef = useRef(0);
+    const buildVersionTapTimeoutRef = useRef<number | null>(null);
     const toastTimeoutRef = useRef<number | null>(null);
     const streamingBufferRef = useRef("");
     const streamingChunksRef = useRef<string[]>([]);
@@ -904,6 +915,10 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
+
+    const buildVersion = process.env.NEXT_PUBLIC_ENSU_VERSION
+        ? `v${process.env.NEXT_PUBLIC_ENSU_VERSION}`
+        : "dev";
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({
         sessionId: undefined,
@@ -1234,50 +1249,118 @@ const Page: React.FC = () => {
     }, [loading]);
 
     useEffect(() => {
+        if (typeof window === "undefined") return;
         let cancelled = false;
-        void getKV(MODEL_SETTINGS_KEY)
-            .then(async (raw) => {
-                if (!raw || typeof raw !== "object") return;
-                const parsed = raw as {
-                    useCustomModel?: boolean;
-                    modelUrl?: string;
-                    mmprojUrl?: string;
-                    contextLength?: string;
-                    maxTokens?: string;
-                };
-                const rawContextLength = parsed.contextLength ?? "";
-                const clampedContextLength =
-                    !isTauriRuntime &&
-                    rawContextLength &&
-                    Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
-                        ? String(DEFAULT_WEB_CONTEXT_SIZE)
-                        : rawContextLength;
-                if (clampedContextLength !== rawContextLength) {
-                    const nextSettings = {
-                        useCustomModel: !!parsed.useCustomModel,
-                        modelUrl: parsed.modelUrl ?? "",
-                        mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
-                        contextLength: clampedContextLength,
-                        maxTokens: parsed.maxTokens ?? "",
+        const isUnlocked =
+            window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) === "1";
+        setAdvancedUnlocked(isUnlocked);
+        setSystemPrompt(
+            window.localStorage.getItem(SYSTEM_PROMPT_STORAGE_KEY)?.trim() ||
+                DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
+        );
+
+        // Only restore custom model settings when advanced settings are
+        // unlocked. Without this gate a user who had custom settings before
+        // the unlock feature was added would silently keep a hidden custom
+        // model with no visible way to change it.
+        if (!isUnlocked) return;
+
+        let raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
+        if (!raw) {
+            // Migrate from IndexedDB (previous storage) to localStorage
+            void getKV(MODEL_SETTINGS_STORAGE_KEY)
+                .then((kvRaw) => {
+                    if (cancelled || !kvRaw || typeof kvRaw !== "object") {
+                        return;
+                    }
+                    const migrated = JSON.stringify(kvRaw);
+                    window.localStorage.setItem(
+                        MODEL_SETTINGS_STORAGE_KEY,
+                        migrated,
+                    );
+                    // Re-trigger the effect by reloading settings from the migrated data
+                    const parsed = kvRaw as {
+                        useCustomModel?: boolean;
+                        modelUrl?: string;
+                        mmprojUrl?: string;
+                        contextLength?: string;
+                        maxTokens?: string;
                     };
-                    await setKV(MODEL_SETTINGS_KEY, nextSettings);
-                }
-                if (cancelled) return;
-                setUseCustomModel(
-                    MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
+                    const isTauri = detectTauriRuntime();
+                    const canMmproj = isTauri;
+                    const rawContextLength = parsed.contextLength ?? "";
+                    const clampedContextLength =
+                        !isTauri &&
+                        rawContextLength &&
+                        Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                            ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                            : rawContextLength;
+                    if (clampedContextLength !== rawContextLength) {
+                        const clamped = {
+                            ...parsed,
+                            contextLength: clampedContextLength,
+                        };
+                        window.localStorage.setItem(
+                            MODEL_SETTINGS_STORAGE_KEY,
+                            JSON.stringify(clamped),
+                        );
+                    }
+                    setUseCustomModel(!!parsed.useCustomModel);
+                    setModelUrl(parsed.modelUrl ?? "");
+                    setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
+                    setContextLength(clampedContextLength);
+                    setMaxTokens(parsed.maxTokens ?? "");
+                    void removeKV(MODEL_SETTINGS_STORAGE_KEY);
+                })
+                .catch((error: unknown) => {
+                    log.error("Failed to migrate model settings", error);
+                });
+            return () => {
+                cancelled = true;
+            };
+        }
+        try {
+            const parsed = JSON.parse(raw) as {
+                useCustomModel?: boolean;
+                modelUrl?: string;
+                mmprojUrl?: string;
+                contextLength?: string;
+                maxTokens?: string;
+            };
+            const isTauri = detectTauriRuntime();
+            const canMmproj = isTauri;
+            const rawContextLength = parsed.contextLength ?? "";
+            const clampedContextLength =
+                !isTauri &&
+                rawContextLength &&
+                Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                    ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                    : rawContextLength;
+            if (clampedContextLength !== rawContextLength) {
+                const nextSettings = {
+                    useCustomModel: !!parsed.useCustomModel,
+                    modelUrl: parsed.modelUrl ?? "",
+                    mmprojUrl: canMmproj ? (parsed.mmprojUrl ?? "") : "",
+                    contextLength: clampedContextLength,
+                    maxTokens: parsed.maxTokens ?? "",
+                };
+                window.localStorage.setItem(
+                    MODEL_SETTINGS_STORAGE_KEY,
+                    JSON.stringify(nextSettings),
                 );
-                setModelUrl(parsed.modelUrl ?? "");
-                setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
-                setContextLength(clampedContextLength);
-                setMaxTokens(parsed.maxTokens ?? "");
-            })
-            .catch((error: unknown) => {
-                log.error("Failed to read model settings", error);
-            });
+            }
+            setUseCustomModel(!!parsed.useCustomModel);
+            setModelUrl(parsed.modelUrl ?? "");
+            setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
+            setContextLength(clampedContextLength);
+            setMaxTokens(parsed.maxTokens ?? "");
+        } catch (error) {
+            log.error("Failed to read model settings", error);
+        }
         return () => {
             cancelled = true;
         };
-    }, [allowMmproj, isTauriRuntime]);
+    }, []);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
         setDownloadStatus(progress);
@@ -1832,7 +1915,6 @@ const Page: React.FC = () => {
         if (isTauriRuntime) return;
         if (mmprojUrl) {
             setMmprojUrl("");
-            setMmprojError(null);
         }
     }, [isTauriRuntime, mmprojUrl]);
 
@@ -1867,6 +1949,29 @@ const Page: React.FC = () => {
 
     const displayMessages = useMemo(() => {
         const base = messageState.path ?? [];
+        // Insert synthetic "Response was interrupted" placeholders for orphaned user messages
+        const augmented: ChatMessage[] = [];
+        for (let i = 0; i < base.length; i++) {
+            const msg = base[i];
+            if (!msg) continue;
+            augmented.push(msg);
+            if (msg.sender === "self") {
+                const next = base[i + 1];
+                const isLastAndGenerating =
+                    i === base.length - 1 && isGenerating;
+                if (next?.sender !== "assistant" && !isLastAndGenerating) {
+                    augmented.push({
+                        messageUuid: `interrupted-placeholder-${msg.messageUuid}`,
+                        sessionUuid: msg.sessionUuid,
+                        parentMessageUuid: msg.messageUuid,
+                        sender: "assistant",
+                        text: "Response was interrupted",
+                        createdAt: msg.createdAt,
+                        isSynthetic: true,
+                    });
+                }
+            }
+        }
         if (streamingParentId) {
             const streamingMessage: ChatMessage = {
                 messageUuid: STREAMING_SELECTION_KEY,
@@ -1876,10 +1981,16 @@ const Page: React.FC = () => {
                 text: streamingText,
                 createdAt: streamingCreatedAtRef.current ?? Date.now() * 1000,
             };
-            return [...base, streamingMessage];
+            return [...augmented, streamingMessage];
         }
-        return base;
-    }, [messageState.path, streamingParentId, streamingText, currentSessionId]);
+        return augmented;
+    }, [
+        messageState.path,
+        streamingParentId,
+        streamingText,
+        currentSessionId,
+        isGenerating,
+    ]);
 
     const branchSwitchers = messageState.switchers;
 
@@ -1992,11 +2103,15 @@ const Page: React.FC = () => {
         }
         await providerRef.current.initialize();
         setResolvedDefaultModel(providerRef.current.getDefaultModel());
+        const presets = providerRef.current.getResolvedModelPresets();
+        if (presets) {
+            setResolvedModelPresets(presets);
+        }
         return providerRef.current;
     }, []);
 
     const getModelSettings = useCallback((): ModelSettings => {
-        const customModelEnabled = MODEL_SETTINGS_ENABLED && useCustomModel;
+        const customModelEnabled = useCustomModel;
         return {
             useCustomModel: customModelEnabled,
             modelUrl:
@@ -2466,7 +2581,7 @@ const Page: React.FC = () => {
                 contextSize -
                 (maxTokensCount ?? DEFAULT_GENERATION_MAX_TOKENS) -
                 safetyMargin;
-            budget -= approxTokens(buildChatSystemPrompt());
+            budget -= approxTokens(buildChatSystemPrompt(systemPrompt));
             budget -= approxTokens(promptText);
 
             if (budget <= 0) return [];
@@ -2517,7 +2632,7 @@ const Page: React.FC = () => {
 
             return selected.reverse();
         },
-        [approxTokens, slicePathUntil, stripHiddenParts],
+        [approxTokens, slicePathUntil, stripHiddenParts, systemPrompt],
     );
 
     const handleNewChat = useCallback(() => {
@@ -3006,7 +3121,10 @@ const Page: React.FC = () => {
                     )) ?? [];
 
                 const messages: LlmMessage[] = [
-                    { role: "system", content: buildChatSystemPrompt() },
+                    {
+                        role: "system",
+                        content: buildChatSystemPrompt(systemPrompt),
+                    },
                     ...history,
                     { role: "user", content: promptText },
                 ];
@@ -3188,6 +3306,7 @@ const Page: React.FC = () => {
             scheduleStreamingFlush,
             flushStreamingText,
             maybeGenerateSessionTitle,
+            systemPrompt,
         ],
     );
 
@@ -3299,38 +3418,10 @@ const Page: React.FC = () => {
         [],
     );
 
-    const openDeveloperMenu = useCallback(() => {
-        if (!DEVELOPER_SETTINGS_ENABLED) return;
-        if (!MODEL_SETTINGS_ENABLED) {
-            setShowDevSettings(true);
-            return;
-        }
-        setShowDeveloperMenu(true);
-    }, []);
-    const closeDeveloperMenu = useCallback(
-        () => setShowDeveloperMenu(false),
-        [],
-    );
-
     const handleLogoClick = useCallback(() => {
         if (typeof window === "undefined") return;
-        if (!DEVELOPER_SETTINGS_ENABLED) {
-            window.location.reload();
-            return;
-        }
-        if (logoClickTimeoutRef.current) {
-            window.clearTimeout(logoClickTimeoutRef.current);
-        }
-        logoClickCountRef.current += 1;
-        if (logoClickCountRef.current >= 5) {
-            logoClickCountRef.current = 0;
-            openDeveloperMenu();
-            return;
-        }
-        logoClickTimeoutRef.current = window.setTimeout(() => {
-            logoClickCountRef.current = 0;
-        }, 1500);
-    }, [openDeveloperMenu]);
+        window.location.reload();
+    }, []);
 
     const markUserScrollIntent = useCallback(() => {
         userScrollIntentRef.current = true;
@@ -3399,9 +3490,6 @@ const Page: React.FC = () => {
         setShowSessionSearch(false);
     }, []);
 
-    const openDevSettings = useCallback(() => setShowDevSettings(true), []);
-    const closeDevSettings = useCallback(() => setShowDevSettings(false), []);
-
     const saveLogs = useCallback(async () => {
         log.info("Saving logs");
         const electron = globalThis.electron;
@@ -3437,148 +3525,142 @@ const Page: React.FC = () => {
     }, [isTauriRuntime, showMiniDialog]);
 
     const openModelSettings = useCallback(() => {
-        if (!MODEL_SETTINGS_ENABLED) return;
+        if (!advancedUnlocked) return;
         setShowModelSettings(true);
-    }, []);
+    }, [advancedUnlocked]);
     const closeModelSettings = useCallback(
         () => setShowModelSettings(false),
         [],
     );
+    const openSystemPromptSettings = useCallback(() => {
+        if (!advancedUnlocked) return;
+        setShowSystemPromptSettings(true);
+    }, [advancedUnlocked]);
+    const closeSystemPromptSettings = useCallback(
+        () => setShowSystemPromptSettings(false),
+        [],
+    );
 
-    const suggestedModels = useMemo(
+    const handleBuildVersionTap = useCallback(() => {
+        if (advancedUnlocked || typeof window === "undefined") return;
+        if (buildVersionTapTimeoutRef.current) {
+            window.clearTimeout(buildVersionTapTimeoutRef.current);
+        }
+        buildVersionTapCountRef.current += 1;
+        if (buildVersionTapCountRef.current >= 5) {
+            buildVersionTapCountRef.current = 0;
+            setAdvancedUnlocked(true);
+            window.localStorage.setItem(ADVANCED_SETTINGS_UNLOCK_KEY, "1");
+            return;
+        }
+        buildVersionTapTimeoutRef.current = window.setTimeout(() => {
+            buildVersionTapCountRef.current = 0;
+            buildVersionTapTimeoutRef.current = null;
+        }, 1800);
+    }, [advancedUnlocked]);
+
+    // Hardcoded fallbacks used when Rust defaults are not available (web-only
+    // mode). These must stay in sync with rust/ensu/inference/src/defaults.rs.
+    const fallbackSuggestedModels = useMemo(
         () =>
             isTauriRuntime
-                ? [
-                      {
-                          name: "Qwen 3.5 0.8B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 2B (Q8_0)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 4B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                  ]
-                : [
-                      {
-                          name: "LFM 2.5 VL 1.6B (Q4_0)",
-                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-                          mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 0.8B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                  ],
+                ? FALLBACK_DESKTOP_MODEL_PRESETS
+                : FALLBACK_MOBILE_MODEL_PRESETS,
+        [isTauriRuntime],
+    );
+    const suggestedModels = resolvedModelPresets ?? fallbackSuggestedModels;
+
+    const handleSaveModel = useCallback(
+        (draft: {
+            useCustomModel: boolean;
+            modelUrl: string;
+            mmprojUrl: string;
+            contextLength: string;
+            maxTokens: string;
+        }) => {
+            setIsSavingModel(true);
+            const payload = {
+                useCustomModel: draft.useCustomModel,
+                modelUrl: draft.useCustomModel ? draft.modelUrl : "",
+                mmprojUrl:
+                    draft.useCustomModel && isTauriRuntime
+                        ? draft.mmprojUrl
+                        : "",
+                contextLength: draft.contextLength,
+                maxTokens: draft.maxTokens,
+            };
+            if (typeof window !== "undefined") {
+                window.localStorage.setItem(
+                    MODEL_SETTINGS_STORAGE_KEY,
+                    JSON.stringify(payload),
+                );
+                void setKV(MODEL_SETTINGS_STORAGE_KEY, payload);
+            }
+            setUseCustomModel(draft.useCustomModel);
+            setModelUrl(draft.modelUrl);
+            setMmprojUrl(draft.mmprojUrl);
+            setContextLength(draft.contextLength);
+            setMaxTokens(draft.maxTokens);
+            setLoadedModelName(null);
+            setIsSavingModel(false);
+            setShowModelSettings(false);
+        },
         [isTauriRuntime],
     );
 
-    const validateModelSettings = useCallback(() => {
-        const validateUrl = (value: string) => {
-            if (!value) return undefined;
-            try {
-                const url = new URL(value);
-                if (!url.hostname.includes("huggingface.co")) {
-                    return "URL must be a huggingface.co link";
-                }
-                if (!url.pathname.endsWith(".gguf")) {
-                    return "URL must end with .gguf";
-                }
-                return undefined;
-            } catch {
-                return "Enter a valid URL";
-            }
-        };
-
-        const modelError = modelUrl ? validateUrl(modelUrl) : "Required";
-        const mmprojError = isTauriRuntime ? validateUrl(mmprojUrl) : undefined;
-
-        const contextErrorValue =
-            contextLength && !/^\d+$/.test(contextLength)
-                ? "Enter a number"
-                : undefined;
-        const maxTokensErrorValue =
-            maxTokens && !/^\d+$/.test(maxTokens)
-                ? "Enter a number"
-                : undefined;
-
-        const contextValue = contextLength ? Number(contextLength) : undefined;
-        const maxTokensValue = maxTokens ? Number(maxTokens) : undefined;
-
-        const maxTokensLimitError =
-            contextValue && maxTokensValue && maxTokensValue > contextValue
-                ? "Must be <= context length"
-                : undefined;
-
-        setModelUrlError(modelError ?? null);
-        setMmprojError(mmprojError ?? null);
-        setContextError(contextErrorValue ?? null);
-        setMaxTokensError(maxTokensErrorValue ?? maxTokensLimitError ?? null);
-
-        return !(
-            modelError ||
-            mmprojError ||
-            contextErrorValue ||
-            maxTokensErrorValue ||
-            maxTokensLimitError
-        );
-    }, [contextLength, maxTokens, mmprojUrl, modelUrl, isTauriRuntime]);
-
-    const handleSaveModel = useCallback(async () => {
-        if (!validateModelSettings()) return;
-        setIsSavingModel(true);
-        const payload = {
-            useCustomModel: true,
-            modelUrl,
-            mmprojUrl: isTauriRuntime ? mmprojUrl : "",
-            contextLength,
-            maxTokens,
-        };
-        await setKV(MODEL_SETTINGS_KEY, payload);
-        setUseCustomModel(true);
-        setLoadedModelName(null);
-        setIsSavingModel(false);
-        setShowModelSettings(false);
-    }, [
-        contextLength,
-        maxTokens,
-        mmprojUrl,
-        modelUrl,
-        validateModelSettings,
-        isTauriRuntime,
-    ]);
-
-    const handleUseDefaultModel = useCallback(async () => {
-        await removeKV(MODEL_SETTINGS_KEY);
+    const handleUseDefaultModel = useCallback(() => {
+        if (typeof window !== "undefined") {
+            window.localStorage.setItem(
+                MODEL_SETTINGS_STORAGE_KEY,
+                JSON.stringify({
+                    useCustomModel: false,
+                    modelUrl: "",
+                    mmprojUrl: "",
+                    contextLength: "",
+                    maxTokens: "",
+                }),
+            );
+            void removeKV(MODEL_SETTINGS_STORAGE_KEY);
+        }
         setUseCustomModel(false);
         setModelUrl("");
         setMmprojUrl("");
         setContextLength("");
         setMaxTokens("");
-        setModelUrlError(null);
-        setMmprojError(null);
-        setContextError(null);
-        setMaxTokensError(null);
         setLoadedModelName(null);
         setShowModelSettings(false);
     }, []);
 
-    const handleFillSuggestion = useCallback(
-        (url: string, mmproj?: string) => {
-            setModelUrl(url);
-            setMmprojUrl(allowMmproj ? (mmproj ?? "") : "");
-            setModelUrlError(null);
-            setMmprojError(null);
-        },
-        [allowMmproj],
-    );
+    const handleSaveSystemPrompt = useCallback((promptText: string) => {
+        const normalizedPrompt = promptText.trim();
+        const isDefaultPrompt =
+            !normalizedPrompt ||
+            normalizedPrompt === DEFAULT_CHAT_SYSTEM_PROMPT_BODY;
+        if (typeof window !== "undefined") {
+            if (!isDefaultPrompt) {
+                window.localStorage.setItem(
+                    SYSTEM_PROMPT_STORAGE_KEY,
+                    normalizedPrompt,
+                );
+            } else {
+                window.localStorage.removeItem(SYSTEM_PROMPT_STORAGE_KEY);
+            }
+        }
+        setSystemPrompt(
+            isDefaultPrompt
+                ? DEFAULT_CHAT_SYSTEM_PROMPT_BODY
+                : normalizedPrompt,
+        );
+        setShowSystemPromptSettings(false);
+    }, []);
+
+    const handleUseDefaultSystemPrompt = useCallback(() => {
+        if (typeof window !== "undefined") {
+            window.localStorage.removeItem(SYSTEM_PROMPT_STORAGE_KEY);
+        }
+        setSystemPrompt(DEFAULT_CHAT_SYSTEM_PROMPT_BODY);
+        setShowSystemPromptSettings(false);
+    }, []);
 
     const closeAttachmentMenu = useCallback(() => {
         setAttachmentAnchor(null);
@@ -4342,12 +4424,11 @@ const Page: React.FC = () => {
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}
-                developerSettingsEnabled={DEVELOPER_SETTINGS_ENABLED}
-                modelSettingsEnabled={MODEL_SETTINGS_ENABLED}
-                showDeveloperMenu={showDeveloperMenu}
-                closeDeveloperMenu={closeDeveloperMenu}
+                advancedUnlocked={advancedUnlocked}
+                buildVersion={buildVersion}
+                handleBuildVersionTap={handleBuildVersionTap}
                 openModelSettings={openModelSettings}
-                openDevSettings={openDevSettings}
+                openSystemPromptSettings={openSystemPromptSettings}
                 isSmall={isSmall}
                 deleteSessionId={deleteSessionId}
                 deleteSessionLabel={deleteSessionLabel}
@@ -4357,31 +4438,27 @@ const Page: React.FC = () => {
                 closeModelSettings={closeModelSettings}
                 useCustomModel={useCustomModel}
                 defaultModelName={resolvedDefaultModel.name}
+                defaultModelUrl={resolvedDefaultModel.url}
+                defaultModelMmproj={resolvedDefaultModel.mmprojUrl}
                 loadedModelName={loadedModelName}
                 allowMmproj={allowMmproj}
                 isTauriRuntime={isTauriRuntime}
                 modelUrl={modelUrl}
-                setModelUrl={setModelUrl}
-                modelUrlError={modelUrlError}
                 mmprojUrl={mmprojUrl}
-                setMmprojUrl={setMmprojUrl}
-                mmprojError={mmprojError}
                 suggestedModels={suggestedModels}
-                handleFillSuggestion={handleFillSuggestion}
                 contextLength={contextLength}
-                setContextLength={setContextLength}
-                contextError={contextError}
                 maxTokens={maxTokens}
-                setMaxTokens={setMaxTokens}
-                maxTokensError={maxTokensError}
                 isSavingModel={isSavingModel}
                 handleSaveModel={handleSaveModel}
                 handleUseDefaultModel={handleUseDefaultModel}
+                showSystemPromptSettings={showSystemPromptSettings}
+                closeSystemPromptSettings={closeSystemPromptSettings}
+                systemPrompt={systemPrompt}
+                handleSaveSystemPrompt={handleSaveSystemPrompt}
+                handleUseDefaultSystemPrompt={handleUseDefaultSystemPrompt}
                 syncNotificationOpen={syncNotificationOpen}
                 setSyncNotificationOpen={setSyncNotificationOpen}
                 syncNotification={syncNotification}
-                showDevSettings={showDevSettings}
-                closeDevSettings={closeDevSettings}
                 modelGateStatus={modelGateStatus}
             />
         </>

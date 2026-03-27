@@ -7,7 +7,7 @@ const configPath =
 const pubkey = process.env.ENSU_TAURI_UPDATER_PUBKEY?.trim();
 const endpoint = (
     process.env.ENSU_TAURI_UPDATER_ENDPOINT ||
-    "https://ente.io/release-info/ensu-desktop.json"
+    "https://ente.com/release-info/ensu-desktop.json"
 ).trim();
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
