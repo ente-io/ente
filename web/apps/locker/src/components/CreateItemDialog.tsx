@@ -220,7 +220,10 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
     const editCollectionID = editItem?.collectionID ?? null;
-    const editCollectionIDs = editItem?.collectionIDs ?? [];
+    const editCollectionIDs = useMemo(
+        () => editItem?.collectionIDs ?? [],
+        [editItem],
+    );
     const selectedType = selectedOption as LockerItemType | null;
     const displayCollectionsRef = useRef(displayCollections);
 
@@ -899,7 +902,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     />
                 )}
 
-                {selectedType && (
+                {selectedType && !isFileMode && (
                     <Stack sx={{ gap: 2.5, pt: 0.5 }}>
                         <ItemForm
                             type={selectedType}
@@ -911,7 +914,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             }
                         />
 
-                        {selectedType && (
+                        {selectedType && !isFileMode && (
                             <CollectionSelector
                                 collections={displayCollections}
                                 selectedIDs={selectedCollectionIDs}
