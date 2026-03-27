@@ -171,7 +171,7 @@ class RemoteAssetsService {
   Dio get _dio => NetworkClient.instance.getDio();
 
   bool get _resumableDownloadsEnabled =>
-      flagService.internalUser || isOfflineMode;
+      isOfflineMode || flagService.internalUser;
 
   Lock _lockFor(String remotePath) =>
       _assetLocks.putIfAbsent(remotePath, Lock.new);
