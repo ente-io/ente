@@ -14,14 +14,8 @@ import { deriveInteractiveKey } from "ente-accounts-rs/services/crypto";
 import {
     ensureLocalUser,
     ensureUserKeyPair,
-    getPublicKey,
 } from "ente-accounts-rs/services/user";
-import {
-    authenticatedRequestHeaders,
-    ensureOk,
-    publicRequestHeaders,
-    retryEnsuringHTTPOk,
-} from "ente-base/http";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
@@ -38,17 +32,34 @@ import {
     boxSeal,
     boxSealOpen,
     createStreamDecryptor,
-    createStreamEncryptor,
     decryptBox,
     decryptBoxBytes,
     decryptMetadataJSON,
     encryptBlob,
     encryptBox,
-    encryptFileStreamWithKey,
     generateKey,
-    md5Base64,
     stringToB64,
 } from "./crypto";
+import {
+    deleteCollectionKeepingFilesWithDeps,
+    type EncryptedCollectionFileItem,
+    updateItemCollectionsWithDeps,
+} from "./remote-collection-mutations";
+import {
+    fetchCollectionShareesWithDeps,
+    shareCollectionWithDeps,
+    unshareCollectionWithDeps,
+} from "./remote-collection-sharing";
+import {
+    createCollectionWithDeps,
+    deleteCollectionWithDeps,
+    ensureUncategorizedCollectionWithDeps,
+    renameCollectionWithDeps,
+} from "./remote-collections";
+import {
+    type LockerUploadProgress,
+    uploadLockerFileWithDeps,
+} from "./remote-uploads";
 
 // ---------------------------------------------------------------------------
 // Zod schemas for API responses
@@ -256,10 +267,6 @@ const describeCryptoError = (e: unknown): string => {
     }
     return String(e);
 };
-
-const RemoteShareesResponse = z.object({
-    sharees: z.array(RemoteCollectionUser),
-});
 
 const RemoteFileShareLink = z.object({
     linkID: z.union([z.string(), z.number().transform(String)]),
@@ -1526,102 +1533,11 @@ export const updateItemCollections = async (
     collectionIDs: number[],
     masterKey: string,
 ): Promise<void> => {
-    const currentUserID = ensureLocalUser().id;
-    const currentCollectionIDs = getCollectionIDsForFile(fileID);
-    const nextCollectionIDs = Array.from(
-        new Set(
-            collectionIDs.length > 0
-                ? collectionIDs
-                : [(await ensureUncategorizedCollection(masterKey)).id],
-        ),
-    );
-    const currentCollectionIDSet = new Set(currentCollectionIDs);
-    const nextCollectionIDSet = new Set(nextCollectionIDs);
-    const collectionIDsToAdd = nextCollectionIDs.filter(
-        (collectionID) => !currentCollectionIDSet.has(collectionID),
-    );
-    const collectionIDsToRemove = currentCollectionIDs.filter(
-        (collectionID) => !nextCollectionIDSet.has(collectionID),
-    );
-    const pendingAddedCollectionIDs = [...collectionIDsToAdd];
-    const sourceCollectionIDForAdd =
-        pendingAddedCollectionIDs.length > 0
-            ? (nextCollectionIDs.find((collectionID) =>
-                  currentCollectionIDSet.has(collectionID),
-              ) ?? currentCollectionIDs[0])
-            : undefined;
-    const sourceFileKeyForAdd = sourceCollectionIDForAdd
-        ? await decryptFileKeyForCollection(
-              fileID,
-              sourceCollectionIDForAdd,
-              masterKey,
-          )
-        : null;
-    let uncategorizedCollection: EncryptedCollectionRecord | undefined;
-
-    for (const collectionID of collectionIDsToRemove) {
-        const sourceCollectionRecord = encryptedCollections.get(collectionID);
-        if (!sourceCollectionRecord) {
-            throw new Error(`Collection ${collectionID} not in cache`);
-        }
-
-        if (sourceCollectionRecord.ownerID !== currentUserID) {
-            await removeFilesFromCollection(collectionID, [fileID]);
-            continue;
-        }
-
-        const targetCollectionID =
-            pendingAddedCollectionIDs.shift() ??
-            nextCollectionIDs.find(
-                (candidateCollectionID) =>
-                    candidateCollectionID !== collectionID,
-            ) ??
-            (
-                uncategorizedCollection ??
-                (uncategorizedCollection =
-                    await ensureUncategorizedCollection(masterKey))
-            ).id;
-
-        if (targetCollectionID === collectionID) {
-            continue;
-        }
-
-        const fileKey = await decryptFileKeyForCollection(
-            fileID,
-            collectionID,
-            masterKey,
-        );
-        const targetCollectionRecord =
-            encryptedCollections.get(targetCollectionID);
-        if (!targetCollectionRecord) {
-            throw new Error(`Collection ${targetCollectionID} not in cache`);
-        }
-        const targetCollectionKey = await decryptCollectionKey(
-            targetCollectionRecord,
-            masterKey,
-        );
-        const encryptedFileKey = await encryptBox(fileKey, targetCollectionKey);
-
-        await moveFilesBetweenCollections(collectionID, targetCollectionID, [
-            {
-                id: fileID,
-                encryptedKey: encryptedFileKey.encryptedData,
-                keyDecryptionNonce: encryptedFileKey.nonce,
-            },
-        ]);
-    }
-
-    if (pendingAddedCollectionIDs.length > 0) {
-        if (!sourceFileKeyForAdd) {
-            throw new Error(`File ${fileID} has no source collection`);
-        }
-        await addFileToCollections(
-            fileID,
-            sourceFileKeyForAdd,
-            pendingAddedCollectionIDs,
-            masterKey,
-        );
-    }
+    await updateItemCollectionsWithDeps(fileID, collectionIDs, {
+        currentUserID: ensureLocalUser().id,
+        masterKey,
+        deps: createCollectionMutationDeps(),
+    });
 };
 
 // ---------------------------------------------------------------------------
@@ -1724,6 +1640,19 @@ const addFileToCollections = async (
     }
 };
 
+const COLLECTION_MUTATION_BATCH_SIZE = 100;
+
+const batchValues = <T>(
+    values: T[],
+    batchSize = COLLECTION_MUTATION_BATCH_SIZE,
+) => {
+    const batches: T[][] = [];
+    for (let i = 0; i < values.length; i += batchSize) {
+        batches.push(values.slice(i, i + batchSize));
+    }
+    return batches;
+};
+
 const decryptFileKeyForCollection = async (
     fileID: number,
     collectionID: number,
@@ -1754,6 +1683,34 @@ const decryptFileKeyForCollection = async (
     );
 };
 
+const buildEncryptedFileMoveItem = async (
+    fileID: number,
+    fromCollectionID: number,
+    toCollectionID: number,
+    masterKey: string,
+): Promise<EncryptedCollectionFileItem> => {
+    const fileKey = await decryptFileKeyForCollection(
+        fileID,
+        fromCollectionID,
+        masterKey,
+    );
+    const targetCollectionRecord = encryptedCollections.get(toCollectionID);
+    if (!targetCollectionRecord) {
+        throw new Error(`Collection ${toCollectionID} not in cache`);
+    }
+    const targetCollectionKey = await decryptCollectionKey(
+        targetCollectionRecord,
+        masterKey,
+    );
+    const encryptedFileKey = await encryptBox(fileKey, targetCollectionKey);
+
+    return {
+        id: fileID,
+        encryptedKey: encryptedFileKey.encryptedData,
+        keyDecryptionNonce: encryptedFileKey.nonce,
+    };
+};
+
 const removeFilesFromCollection = async (
     collectionID: number,
     fileIDs: number[],
@@ -1762,36 +1719,56 @@ const removeFilesFromCollection = async (
         return;
     }
 
-    const res = await fetch(await apiURL("/collections/v3/remove-files"), {
-        method: "POST",
-        headers: {
-            ...(await authenticatedRequestHeaders()),
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ collectionID, fileIDs }),
-    });
-    ensureOk(res);
+    for (const fileIDBatch of batchValues(fileIDs)) {
+        const res = await fetch(await apiURL("/collections/v3/remove-files"), {
+            method: "POST",
+            headers: {
+                ...(await authenticatedRequestHeaders()),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ collectionID, fileIDs: fileIDBatch }),
+        });
+        ensureOk(res);
+    }
 };
 
 const moveFilesBetweenCollections = async (
     fromCollectionID: number,
     toCollectionID: number,
-    files: { id: number; encryptedKey: string; keyDecryptionNonce: string }[],
+    files: EncryptedCollectionFileItem[],
 ): Promise<void> => {
     if (files.length === 0) {
         return;
     }
 
-    const res = await fetch(await apiURL("/collections/move-files"), {
-        method: "POST",
-        headers: {
-            ...(await authenticatedRequestHeaders()),
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ fromCollectionID, toCollectionID, files }),
-    });
-    ensureOk(res);
+    for (const fileBatch of batchValues(files)) {
+        const res = await fetch(await apiURL("/collections/move-files"), {
+            method: "POST",
+            headers: {
+                ...(await authenticatedRequestHeaders()),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                fromCollectionID,
+                toCollectionID,
+                files: fileBatch,
+            }),
+        });
+        ensureOk(res);
+    }
 };
+
+const createCollectionMutationDeps = () => ({
+    getCollectionIDsForFile,
+    getCollectionRecord: (collectionID: number) =>
+        encryptedCollections.get(collectionID),
+    ensureUncategorizedCollection,
+    decryptFileKeyForCollection,
+    buildEncryptedFileMoveItem,
+    removeFilesFromCollection,
+    moveFilesBetweenCollections,
+    addFileToCollections,
+});
 
 /**
  * Restore files from trash to a collection.
@@ -1913,54 +1890,19 @@ export const createCollection = async (
     masterKey: string,
     type = "folder",
 ): Promise<number> => {
-    // Generate collection key
-    const collectionKey = await generateKey();
-
-    // Encrypt collection key with master key (SecretBox)
-    const encryptedKey = await encryptBox(collectionKey, masterKey);
-
-    // Encrypt collection name with collection key (SecretBox)
-    const nameB64 = stringToB64(name);
-    const encryptedName = await encryptBox(nameB64, collectionKey);
-
-    const res = await fetch(await apiURL("/collections"), {
-        method: "POST",
-        headers: {
-            ...(await authenticatedRequestHeaders()),
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            encryptedKey: encryptedKey.encryptedData,
-            keyDecryptionNonce: encryptedKey.nonce,
-            encryptedName: encryptedName.encryptedData,
-            nameDecryptionNonce: encryptedName.nonce,
-            type,
-        }),
-    });
-    ensureOk(res);
-    const data = (await res.json()) as { collection: { id: number } };
-    return data.collection.id;
+    return createCollectionWithDeps(name, masterKey, type);
 };
 
 const ensureUncategorizedCollection = async (masterKey: string) => {
-    let uncategorizedCollection = [...encryptedCollections.values()].find(
-        (candidate) => candidate.type === "uncategorized",
-    );
-    if (uncategorizedCollection) {
-        return uncategorizedCollection;
-    }
-
-    await createCollection("Uncategorized", masterKey, "uncategorized");
-    await fetchLockerData(masterKey);
-
-    uncategorizedCollection = [...encryptedCollections.values()].find(
-        (candidate) => candidate.type === "uncategorized",
-    );
-    if (!uncategorizedCollection) {
-        throw new Error("Failed to create Uncategorized collection");
-    }
-
-    return uncategorizedCollection;
+    return ensureUncategorizedCollectionWithDeps(masterKey, {
+        findCollectionByType: (type) =>
+            [...encryptedCollections.values()].find(
+                (candidate) => candidate.type === type,
+            ),
+        refetchCollections: async (masterKey) => {
+            await fetchLockerData(masterKey);
+        },
+    });
 };
 
 /**
@@ -1975,32 +1917,11 @@ export const renameCollection = async (
     newName: string,
     masterKey: string,
 ): Promise<void> => {
-    const collectionRecord = encryptedCollections.get(collectionID);
-    if (!collectionRecord)
-        throw new Error(`Collection ${collectionID} not in cache`);
-
-    const collectionKey = await decryptCollectionKey(
-        collectionRecord,
-        masterKey,
-    );
-
-    // Encrypt new name with collection key
-    const nameB64 = stringToB64(newName);
-    const encryptedName = await encryptBox(nameB64, collectionKey);
-
-    const res = await fetch(await apiURL("/collections/rename"), {
-        method: "POST",
-        headers: {
-            ...(await authenticatedRequestHeaders()),
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            collectionID,
-            encryptedName: encryptedName.encryptedData,
-            nameDecryptionNonce: encryptedName.nonce,
-        }),
+    await renameCollectionWithDeps(collectionID, newName, masterKey, {
+        getCollectionRecord: (collectionID) =>
+            encryptedCollections.get(collectionID),
+        decryptCollectionKey,
     });
-    ensureOk(res);
 };
 
 /**
@@ -2012,100 +1933,19 @@ export const deleteCollection = async (
     collectionID: number,
     opts?: { keepFiles?: boolean },
 ): Promise<void> => {
-    const keepFiles = opts?.keepFiles ?? false;
-    const res = await fetch(
-        await apiURL(`/collections/v3/${collectionID}`, {
-            collectionID,
-            keepFiles,
-        }),
-        { method: "DELETE", headers: await authenticatedRequestHeaders() },
-    );
-    ensureOk(res);
+    await deleteCollectionWithDeps(collectionID, opts);
 };
 
 export const deleteCollectionKeepingFiles = async (
     collection: LockerCollection,
     masterKey: string,
 ): Promise<void> => {
-    const collectionID = collection.id;
-    const currentUserID = ensureLocalUser().id;
-    let uncategorizedCollection: EncryptedCollectionRecord | undefined;
-
-    const fileIDsToRemove: number[] = [];
-    const filesToMoveByTargetCollectionID = new Map<
-        number,
-        { id: number; encryptedKey: string; keyDecryptionNonce: string }[]
-    >();
-
-    for (const item of collection.items) {
-        const isCurrentUserOwned =
-            (item.ownerID ?? currentUserID) === currentUserID;
-        if (!isCurrentUserOwned) {
-            fileIDsToRemove.push(item.id);
-            continue;
-        }
-
-        const otherOwnedCollectionIDs = getCollectionIDsForFile(item.id).filter(
-            (itemCollectionID) => {
-                if (itemCollectionID === collectionID) {
-                    return false;
-                }
-
-                const targetCollection =
-                    encryptedCollections.get(itemCollectionID);
-                return (
-                    !!targetCollection &&
-                    targetCollection.ownerID === currentUserID &&
-                    targetCollection.type !== "uncategorized"
-                );
-            },
-        );
-
-        if (otherOwnedCollectionIDs.length === 0 && !uncategorizedCollection) {
-            uncategorizedCollection =
-                await ensureUncategorizedCollection(masterKey);
-        }
-
-        const targetCollectionID =
-            otherOwnedCollectionIDs[0] ?? uncategorizedCollection?.id;
-        if (!targetCollectionID) {
-            throw new Error("Failed to resolve target collection");
-        }
-        const fileKey = await decryptFileKeyForCollection(
-            item.id,
-            collectionID,
-            masterKey,
-        );
-        const targetCollectionRecord =
-            encryptedCollections.get(targetCollectionID);
-        if (!targetCollectionRecord) {
-            throw new Error(`Collection ${targetCollectionID} not in cache`);
-        }
-        const targetCollectionKey = await decryptCollectionKey(
-            targetCollectionRecord,
-            masterKey,
-        );
-        const encryptedFileKey = await encryptBox(fileKey, targetCollectionKey);
-        const filesToMove =
-            filesToMoveByTargetCollectionID.get(targetCollectionID) ?? [];
-        filesToMove.push({
-            id: item.id,
-            encryptedKey: encryptedFileKey.encryptedData,
-            keyDecryptionNonce: encryptedFileKey.nonce,
-        });
-        filesToMoveByTargetCollectionID.set(targetCollectionID, filesToMove);
-    }
-
-    for (const [targetCollectionID, files] of filesToMoveByTargetCollectionID) {
-        await moveFilesBetweenCollections(
-            collectionID,
-            targetCollectionID,
-            files,
-        );
-    }
-
-    await removeFilesFromCollection(collectionID, fileIDsToRemove);
-    await deleteCollection(collectionID, { keepFiles: true });
+    await deleteCollectionKeepingFilesWithDeps(collection, {
+        currentUserID: ensureLocalUser().id,
+        masterKey,
+        deps: createCollectionMutationDeps(),
+    });
+    await deleteCollection(collection.id, { keepFiles: true });
 };
 
 /**
@@ -2114,15 +1954,12 @@ export const deleteCollectionKeepingFiles = async (
 export const fetchCollectionSharees = async (
     collectionID: number,
 ): Promise<LockerCollectionParticipant[]> => {
-    const res = await fetch(
-        await apiURL("/collections/sharees", { collectionID }),
-        { headers: await authenticatedRequestHeaders() },
-    );
-    ensureOk(res);
-    const { sharees } = RemoteShareesResponse.parse(await res.json());
-    const parsedSharees = sharees.map(toLockerCollectionParticipant);
-    updateCollectionShareesInCache(collectionID, parsedSharees);
-    return parsedSharees;
+    return fetchCollectionShareesWithDeps(collectionID, {
+        getCollectionRecord: (collectionID) =>
+            encryptedCollections.get(collectionID),
+        decryptCollectionKey,
+        updateCollectionShareesInCache,
+    });
 };
 
 /**
@@ -2133,36 +1970,12 @@ export const shareCollection = async (
     email: string,
     masterKey: string,
 ): Promise<LockerCollectionParticipant[]> => {
-    const collectionRecord = encryptedCollections.get(collectionID);
-    if (!collectionRecord)
-        throw new Error(`Collection ${collectionID} not in cache`);
-
-    const collectionKey = await decryptCollectionKey(
-        collectionRecord,
-        masterKey,
-    );
-    const publicKey = await getPublicKey(email);
-    const encryptedKey = await boxSeal(collectionKey, publicKey);
-
-    const res = await fetch(await apiURL("/collections/share"), {
-        method: "POST",
-        headers: {
-            ...(await authenticatedRequestHeaders()),
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            collectionID,
-            email,
-            role: "VIEWER",
-            encryptedKey,
-        }),
+    return shareCollectionWithDeps(collectionID, email, masterKey, {
+        getCollectionRecord: (collectionID) =>
+            encryptedCollections.get(collectionID),
+        decryptCollectionKey,
+        updateCollectionShareesInCache,
     });
-    ensureOk(res);
-
-    const { sharees } = RemoteShareesResponse.parse(await res.json());
-    const parsedSharees = sharees.map(toLockerCollectionParticipant);
-    updateCollectionShareesInCache(collectionID, parsedSharees);
-    return parsedSharees;
 };
 
 /**
@@ -2172,553 +1985,36 @@ export const unshareCollection = async (
     collectionID: number,
     email: string,
 ): Promise<LockerCollectionParticipant[]> => {
-    const res = await fetch(await apiURL("/collections/unshare"), {
-        method: "POST",
-        headers: {
-            ...(await authenticatedRequestHeaders()),
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ collectionID, email }),
+    return unshareCollectionWithDeps(collectionID, email, {
+        getCollectionRecord: (collectionID) =>
+            encryptedCollections.get(collectionID),
+        decryptCollectionKey,
+        updateCollectionShareesInCache,
     });
-    ensureOk(res);
-
-    const { sharees } = RemoteShareesResponse.parse(await res.json());
-    const parsedSharees = sharees.map(toLockerCollectionParticipant);
-    updateCollectionShareesInCache(collectionID, parsedSharees);
-    return parsedSharees;
 };
 
 // ---------------------------------------------------------------------------
 // File upload
 // ---------------------------------------------------------------------------
 
-/**
- * A small black JPEG used as a placeholder thumbnail for non-image files.
- *
- * The server requires every file to have a thumbnail. For Locker files we
- * don't need a real one, so we encrypt this tiny placeholder and set the
- * `noThumb` flag in pubMagicMetadata.
- *
- * Generated via PIL: `Image.new('RGB', (1,1), (0,0,0)).save(buf, 'JPEG')`.
- */
-const BLACK_THUMBNAIL_B64 =
-    "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////" +
-    "2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDASIAAhEBAxEB" +
-    "/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAk" +
-    "M2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKz" +
-    "tLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgEC" +
-    "BAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpj" +
-    "ZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6" +
-    "/9oADAMBAAIRAxEAPwCOiiigD//Z";
+export type { LockerUploadProgress } from "./remote-uploads";
 
-const STREAM_ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
-const MULTIPART_CHUNKS_PER_PART = 5;
-
-const MultipartUploadURLs = z.object({
-    objectKey: z.string(),
-    partURLs: z.array(z.string()),
-    completeURL: z.string(),
-});
-
-interface MultipartCompletedPart {
-    partNumber: number;
-    eTag: string;
-}
-
-export type LockerUploadProgress =
-    | { phase: "preparing" }
-    | { phase: "uploading"; loaded: number; total: number }
-    | { phase: "finalizing" };
-
-/**
- * Request a presigned upload URL from the server.
- *
- * @param contentLength Size of the encrypted data in bytes.
- * @param contentMd5 MD5 hash of the encrypted data as base64.
- * @returns The S3 object key and presigned upload URL.
- */
-const fetchUploadURL = async (
-    contentLength: number,
-    contentMd5: string,
-): Promise<{ objectKey: string; url: string }> => {
-    const headers = new Headers(await authenticatedRequestHeaders());
-    headers.set("Content-Type", "application/json");
-    const res = await fetch(
-        await apiURL("/files/upload-url", { ts: Date.now() }),
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ contentLength, contentMD5: contentMd5 }),
-        },
-    );
-    ensureOk(res);
-    return (await res.json()) as { objectKey: string; url: string };
-};
-
-const fetchMultipartUploadURLs = async ({
-    contentLength,
-    partLength,
-    partMd5s,
-}: {
-    contentLength: number;
-    partLength: number;
-    partMd5s: string[];
-}): Promise<z.infer<typeof MultipartUploadURLs>> => {
-    const headers = new Headers(await authenticatedRequestHeaders());
-    headers.set("Content-Type", "application/json");
-    const res = await fetch(
-        await apiURL("/files/multipart-upload-url", { ts: Date.now() }),
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ contentLength, partLength, partMd5s }),
-        },
-    );
-    ensureOk(res);
-    return MultipartUploadURLs.parse(await res.json());
-};
-
-/**
- * Upload encrypted data to S3 using a presigned URL.
- *
- * @param url The presigned S3 URL.
- * @param data Encrypted data as bytes.
- * @param contentMd5 MD5 of the data as base64 (for Content-MD5 header).
- */
-const putFileToS3 = async (
-    url: string,
-    data: Uint8Array,
-    contentMd5: string,
-    onProgress?: (progress: { loaded: number; total?: number }) => void,
-): Promise<void> => {
-    const res = await new Promise<{
-        ok: boolean;
-        status: number;
-        statusText: string;
-    }>((resolve, reject) => {
-        const request = new XMLHttpRequest();
-        request.open("PUT", url);
-        request.setRequestHeader("Content-Type", "application/octet-stream");
-        request.setRequestHeader("Content-MD5", contentMd5);
-        request.upload.onprogress = (event) => {
-            onProgress?.({
-                loaded: event.loaded,
-                total: event.lengthComputable ? event.total : data.length,
-            });
-        };
-        request.onload = () =>
-            resolve({
-                ok: request.status >= 200 && request.status < 300,
-                status: request.status,
-                statusText: request.statusText,
-            });
-        request.onerror = () => reject(new Error("S3 upload failed"));
-        request.send(data);
-    });
-    if (!res.ok) {
-        throw new Error(`S3 upload failed: ${res.status} ${res.statusText}`);
-    }
-};
-
-const uploadSingleObject = async (
-    data: Uint8Array,
-    contentMd5: string,
-    onProgress?: (progress: { loaded: number; total?: number }) => void,
-): Promise<string> => {
-    const maxAttempts = 3;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-            const uploadURL = await fetchUploadURL(data.length, contentMd5);
-            await putFileToS3(uploadURL.url, data, contentMd5, onProgress);
-            return uploadURL.objectKey;
-        } catch (error) {
-            if (attempt === maxAttempts) {
-                throw error;
-            }
-        }
-    }
-
-    throw new Error("Unreachable upload retry state");
-};
-
-const putFilePartToS3 = async (
-    url: string,
-    data: Uint8Array,
-    contentMd5: string,
-    onProgress?: (progress: { loaded: number; total?: number }) => void,
-): Promise<string> => {
-    const maxAttempts = 3;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-            const eTag = await new Promise<string | null>((resolve, reject) => {
-                const request = new XMLHttpRequest();
-                request.open("PUT", url);
-                for (const [headerName, headerValue] of Object.entries({
-                    ...publicRequestHeaders(),
-                    "Content-MD5": contentMd5,
-                })) {
-                    request.setRequestHeader(headerName, headerValue);
-                }
-                request.upload.onprogress = (event) => {
-                    onProgress?.({
-                        loaded: event.loaded,
-                        total: event.lengthComputable
-                            ? event.total
-                            : data.length,
-                    });
-                };
-                request.onload = () => {
-                    if (request.status < 200 || request.status >= 300) {
-                        reject(
-                            new Error(
-                                `S3 multipart upload failed: ${request.status} ${request.statusText}`,
-                            ),
-                        );
-                        return;
-                    }
-                    resolve(request.getResponseHeader("etag"));
-                };
-                request.onerror = () =>
-                    reject(new Error("S3 multipart upload failed"));
-                request.send(data);
-            });
-            if (!eTag) {
-                throw new Error("Missing ETag from multipart upload response");
-            }
-            return eTag;
-        } catch (error) {
-            if (attempt === maxAttempts) {
-                throw error;
-            }
-        }
-    }
-
-    throw new Error("Unreachable multipart upload retry state");
-};
-
-const completeMultipartUpload = async (
-    completionURL: string,
-    completedParts: MultipartCompletedPart[],
-) => {
-    const body = [
-        "<CompleteMultipartUpload>",
-        ...completedParts.map(
-            (part) =>
-                `<Part><PartNumber>${part.partNumber}</PartNumber><ETag>${part.eTag}</ETag></Part>`,
-        ),
-        "</CompleteMultipartUpload>",
-    ].join("\n");
-
-    await retryEnsuringHTTPOk(() =>
-        fetch(completionURL, {
-            method: "POST",
-            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
-            body,
-        }),
-    );
-};
-
-const mergeUint8Arrays = (chunks: Uint8Array[]): Uint8Array => {
-    const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-    const merged = new Uint8Array(totalLength);
-    let offset = 0;
-    for (const chunk of chunks) {
-        merged.set(chunk, offset);
-        offset += chunk.length;
-    }
-    return merged;
-};
-
-const createAggregateUploadProgressReporter = (
-    total: number,
-    onProgress?: (progress: LockerUploadProgress) => void,
-) => {
-    let uploadedBytes = 0;
-
-    return {
-        reportPartProgress: (loaded: number) => {
-            onProgress?.({
-                phase: "uploading",
-                loaded: Math.min(total, uploadedBytes + loaded),
-                total,
-            });
-        },
-        completePart: (partLength: number) => {
-            uploadedBytes += partLength;
-            onProgress?.({
-                phase: "uploading",
-                loaded: Math.min(total, uploadedBytes),
-                total,
-            });
-        },
-    };
-};
-
-/**
- * Upload a file to Locker with E2E encryption.
- *
- * The full flow:
- * 1. Read file → base64
- * 2. Generate stream key, encrypt file content (4 MB chunks) via Rust/WASM
- * 3. Encrypt placeholder thumbnail with the same file key
- * 4. Get presigned URLs for file and thumbnail
- * 5. PUT encrypted data to S3
- * 6. Encrypt file key with collection key
- * 7. Encrypt metadata and pubMagicMetadata
- * 8. POST /files to register the file
- *
- * @param file The browser File object to upload.
- * @param collectionID Target collection.
- * @param masterKey The user's master key (base64).
- * @returns The created file's ID.
- */
 export const uploadLockerFile = async (
     file: File,
     collectionIDs: number[],
     masterKey: string,
     onProgress?: (progress: LockerUploadProgress) => void,
 ): Promise<number> => {
-    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
-    if (collectionID === undefined) {
-        throw new Error("No collection selected");
-    }
-    onProgress?.({ phase: "preparing" });
-
-    const plaintextChunkCount = Math.max(
-        1,
-        Math.ceil(file.size / STREAM_ENCRYPTION_CHUNK_SIZE),
-    );
-
-    const streamEncryptor = await createStreamEncryptor();
-    const fileKey = streamEncryptor.key;
-    const encryptedFileHeader = streamEncryptor.decryptionHeader;
-
-    let encryptedFileObjectKey: string;
-    let encryptedFileSize = 0;
-
-    try {
-        if (plaintextChunkCount >= MULTIPART_CHUNKS_PER_PART) {
-            const parts: Uint8Array[] = [];
-            const partMd5s: string[] = [];
-            let pendingEncryptedChunks: Uint8Array[] = [];
-
-            for (
-                let chunkIndex = 0;
-                chunkIndex < plaintextChunkCount;
-                chunkIndex++
-            ) {
-                const chunkStart = chunkIndex * STREAM_ENCRYPTION_CHUNK_SIZE;
-                const chunkEnd = Math.min(
-                    file.size,
-                    chunkStart + STREAM_ENCRYPTION_CHUNK_SIZE,
-                );
-                const plaintextChunk = new Uint8Array(
-                    await file.slice(chunkStart, chunkEnd).arrayBuffer(),
-                );
-                const isFinalChunk = chunkIndex === plaintextChunkCount - 1;
-                const encryptedChunk = await streamEncryptor.encryptChunk(
-                    plaintextChunk,
-                    isFinalChunk,
-                );
-                pendingEncryptedChunks.push(encryptedChunk);
-
-                if (
-                    pendingEncryptedChunks.length ===
-                        MULTIPART_CHUNKS_PER_PART ||
-                    isFinalChunk
-                ) {
-                    const partData = mergeUint8Arrays(pendingEncryptedChunks);
-                    parts.push(partData);
-                    partMd5s.push(await md5Base64(partData));
-                    encryptedFileSize += partData.length;
-                    pendingEncryptedChunks = [];
-                }
-            }
-
-            const firstPartLength = parts[0]?.length ?? 0;
-            if (!firstPartLength) {
-                throw new Error("Multipart upload produced no parts");
-            }
-
-            const multipartUpload = await fetchMultipartUploadURLs({
-                contentLength: encryptedFileSize,
-                partLength: firstPartLength,
-                partMd5s,
-            });
-            const completedParts: MultipartCompletedPart[] = [];
-            const progressReporter = createAggregateUploadProgressReporter(
-                encryptedFileSize,
-                onProgress,
-            );
-
-            for (const [index, partData] of parts.entries()) {
-                const partUploadURL = multipartUpload.partURLs[index];
-                const partMd5 = partMd5s[index];
-                if (!partUploadURL || !partMd5) {
-                    throw new Error("Missing multipart upload URL");
-                }
-                const eTag = await putFilePartToS3(
-                    partUploadURL,
-                    partData,
-                    partMd5,
-                    ({ loaded }) => progressReporter.reportPartProgress(loaded),
-                );
-                completedParts.push({ partNumber: index + 1, eTag });
-                progressReporter.completePart(partData.length);
-                parts[index] = new Uint8Array(0);
-            }
-
-            await completeMultipartUpload(
-                multipartUpload.completeURL,
-                completedParts,
-            );
-            encryptedFileObjectKey = multipartUpload.objectKey;
-        } else {
-            const encryptedChunks: Uint8Array[] = [];
-
-            for (
-                let chunkIndex = 0;
-                chunkIndex < plaintextChunkCount;
-                chunkIndex++
-            ) {
-                const chunkStart = chunkIndex * STREAM_ENCRYPTION_CHUNK_SIZE;
-                const chunkEnd = Math.min(
-                    file.size,
-                    chunkStart + STREAM_ENCRYPTION_CHUNK_SIZE,
-                );
-                const plaintextChunk = new Uint8Array(
-                    await file.slice(chunkStart, chunkEnd).arrayBuffer(),
-                );
-                const isFinalChunk = chunkIndex === plaintextChunkCount - 1;
-                encryptedChunks.push(
-                    await streamEncryptor.encryptChunk(
-                        plaintextChunk,
-                        isFinalChunk,
-                    ),
-                );
-            }
-
-            const encryptedFileBytes = mergeUint8Arrays(encryptedChunks);
-            encryptedFileSize = encryptedFileBytes.length;
-            const encryptedFileMd5 = await md5Base64(encryptedFileBytes);
-            encryptedFileObjectKey = await uploadSingleObject(
-                encryptedFileBytes,
-                encryptedFileMd5,
-                ({ loaded, total }) =>
-                    onProgress?.({
-                        phase: "uploading",
-                        loaded,
-                        total: total ?? encryptedFileBytes.length,
-                    }),
-            );
-        }
-    } finally {
-        streamEncryptor.free();
-    }
-
-    onProgress?.({
-        phase: "uploading",
-        loaded: encryptedFileSize,
-        total: encryptedFileSize,
-    });
-    onProgress?.({ phase: "finalizing" });
-
-    // 3. Encrypt the black placeholder thumbnail with the file key
-    const encryptedThumb = await encryptFileStreamWithKey(
-        BLACK_THUMBNAIL_B64,
-        fileKey,
-    );
-
-    // 4. Get the encrypted bytes for computing content length
-    const encryptedThumbBytes = b64ToBytes(encryptedThumb.encryptedData);
-
-    // 5. Fetch presigned upload URLs
-    const thumbObjectKey = await uploadSingleObject(
-        encryptedThumbBytes,
-        encryptedThumb.md5Hash,
-    );
-
-    // 7. Look up collection key
-    const collectionRecord = encryptedCollections.get(collectionID);
-    if (!collectionRecord)
-        throw new Error(`Collection ${collectionID} not in cache`);
-    const collectionKey = await decryptCollectionKey(
-        collectionRecord,
+    return uploadLockerFileWithDeps(
+        file,
+        collectionIDs,
         masterKey,
+        {
+            getCollectionRecord: (collectionID) =>
+                encryptedCollections.get(collectionID),
+            decryptCollectionKey,
+            addFileToCollections,
+        },
+        onProgress,
     );
-
-    // 8. Encrypt file key with collection key (SecretBox)
-    const encryptedKey = await encryptBox(fileKey, collectionKey);
-
-    // 9. Build and encrypt metadata
-    const now = Date.now();
-    // The browser exposes only lastModified, so preserve that instead of
-    // replacing file times with upload time.
-    const sourceModificationTime =
-        file.lastModified > 0 ? file.lastModified : now;
-    const metadata = {
-        title: file.name,
-        creationTime: sourceModificationTime,
-        modificationTime: sourceModificationTime,
-        fileType: 3, // FileType.other
-    };
-    const metadataJSON = JSON.stringify(metadata);
-    const encryptedMetadata = await encryptBlob(
-        stringToB64(metadataJSON),
-        fileKey,
-    );
-
-    // 10. Build and encrypt pubMagicMetadata (noThumb flag)
-    const pubMagicMetadata = { noThumb: true };
-    const pubMagicJSON = JSON.stringify(pubMagicMetadata);
-    const encryptedPubMagic = await encryptBlob(
-        stringToB64(pubMagicJSON),
-        fileKey,
-    );
-
-    // 11. POST /files to register the uploaded file
-    const postHeaders = new Headers(await authenticatedRequestHeaders());
-    postHeaders.set("Content-Type", "application/json");
-    const res = await fetch(await apiURL("/files"), {
-        method: "POST",
-        headers: postHeaders,
-        body: JSON.stringify({
-            collectionID,
-            encryptedKey: encryptedKey.encryptedData,
-            keyDecryptionNonce: encryptedKey.nonce,
-            file: {
-                objectKey: encryptedFileObjectKey,
-                decryptionHeader: encryptedFileHeader,
-                size: encryptedFileSize,
-            },
-            thumbnail: {
-                objectKey: thumbObjectKey,
-                decryptionHeader: encryptedThumb.decryptionHeader,
-                size: encryptedThumbBytes.length,
-            },
-            metadata: {
-                encryptedData: encryptedMetadata.encryptedData,
-                decryptionHeader: encryptedMetadata.decryptionHeader,
-            },
-            pubMagicMetadata: {
-                version: 1,
-                count: 1,
-                data: encryptedPubMagic.encryptedData,
-                header: encryptedPubMagic.decryptionHeader,
-            },
-        }),
-    });
-    ensureOk(res);
-    const created = (await res.json()) as { id: number };
-    if (additionalCollectionIDs.length > 0) {
-        await addFileToCollections(
-            created.id,
-            fileKey,
-            additionalCollectionIDs,
-            masterKey,
-        );
-    }
-    return created.id;
 };
