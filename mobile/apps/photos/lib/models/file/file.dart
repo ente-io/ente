@@ -432,4 +432,8 @@ class EnteFile {
       ..pubMmdVersion = pubMmdVersion ?? this.pubMmdVersion
       ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata;
   }
+
+  EnteFile copyForRemoteDownload() {
+    return copyWith()..localID = null;
+  }
 }
