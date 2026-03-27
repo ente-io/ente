@@ -25,10 +25,6 @@ import { FileListWithViewer } from "components/FileListWithViewer";
 import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";
 import { TripLayout } from "components/TripLayout";
 import { Upload } from "components/Upload";
-import {
-    AccountsPageContents,
-    AccountsPageTitle,
-} from "ente-accounts/components/layouts/centered-paper";
 import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
@@ -105,6 +101,10 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
+import {
+    AccountsPageContents,
+    AccountsPageTitle,
+} from "../components/AccountsPage";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
 import { getEnteURL } from "utils/public-album";

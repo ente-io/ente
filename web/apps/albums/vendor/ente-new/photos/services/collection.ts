@@ -1,7 +1,4 @@
-import {
-    ensureLocalUser,
-    ensureSavedKeyAttributes,
-} from "ente-accounts/services/user";
+import { ensureLocalUser, ensureSavedKeyAttributes } from "./auth-state";
 import { boxSealOpen, decryptBox, encryptBox } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";

@@ -27,7 +27,6 @@
             "services/*": ["vendor/photos/services/*"],
             "utils/*": ["vendor/photos/utils/*"],
             "styles/*": ["vendor/photos/styles/*"],
-            "ente-accounts/*": ["vendor/ente-accounts/*"],
             "ente-base/*": ["vendor/ente-base/*"],
             "ente-gallery/*": ["vendor/ente-gallery/*"],
             "ente-media/*": ["vendor/ente-media/*"],

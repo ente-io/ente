@@ -13,14 +13,12 @@
         "@mui/material": "^7.3.4",
         "@mui/system": "^7.3.3",
         "@mui/x-date-pickers": "^8.14.0",
-        "bip39": "^3.1.0",
         "bs58": "^6.0.0",
         "chrono-node": "^2.9.0",
         "comlink": "^4.4.2",
         "dayjs": "^1.11.18",
         "debounce": "^2.2.0",
         "exifreader": "^4.32.0",
-        "fast-srp-hap": "^2.0.4",
         "file-type": "21.3.1",
         "formik": "^2.4.6",
         "get-user-locale": "^3.0.0",
@@ -53,7 +51,6 @@
         "sanitize-filename": "^1.6.3",
         "similarity-transformation": "^0.0.1",
         "supercluster": "^8.0.1",
-        "uuid": "^13.0.0",
         "zod": "^4.1.12"
     },
     "devDependencies": {
