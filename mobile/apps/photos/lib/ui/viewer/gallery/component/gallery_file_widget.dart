@@ -1,9 +1,13 @@
+import "dart:async";
+
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:media_extension/media_extension.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
@@ -41,22 +45,55 @@ class GalleryFileWidget extends StatefulWidget {
 
 class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   static const borderRadius = BorderRadius.all(Radius.circular(1));
+  late EnteFile _file;
   late bool _isFileSelected;
   int? _currentPointerId;
   bool _isPointerInside = false;
+  StreamSubscription<FileUploadedEvent>? _uploadSubscription;
 
   @override
   void initState() {
     super.initState();
-    _isFileSelected =
-        widget.selectedFiles?.isFileSelected(widget.file) ?? false;
+    _file = widget.file;
+    _isFileSelected = widget.selectedFiles?.isFileSelected(_file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
+    _subscribeToUploadEvent();
+  }
+
+  @override
+  void didUpdateWidget(covariant GalleryFileWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.file.generatedID != oldWidget.file.generatedID) {
+      _file = widget.file;
+      _uploadSubscription?.cancel();
+      _subscribeToUploadEvent();
+    }
   }
 
   @override
   void dispose() {
+    _uploadSubscription?.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
+  }
+
+  void _subscribeToUploadEvent() {
+    if (!_file.isUploaded) {
+      _uploadSubscription =
+          Bus.instance.on<FileUploadedEvent>().listen((event) {
+        if (event.file.generatedID == _file.generatedID && mounted) {
+          final oldFile = _file;
+          setState(() {
+            _file = event.file;
+          });
+          widget.selectedFiles?.replaceFileIfSelected(oldFile, _file);
+          _uploadSubscription?.cancel();
+          _uploadSubscription = null;
+        }
+      });
+    } else {
+      _uploadSubscription = null;
+    }
   }
 
   @override
@@ -65,7 +102,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
     if (!widget.limitSelectionToOne) {
       return SwipeSelectableFileWidget(
-        file: widget.file,
+        file: _file,
         selectedFiles: widget.selectedFiles,
         onPointerStateChanged: (pointerId, isInside) {
           _currentPointerId = pointerId ?? _currentPointerId;
@@ -84,19 +121,20 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   Widget _buildFileContent(BuildContext context) {
     Color selectionColor = Colors.white;
     if (_isFileSelected &&
-        widget.file.isUploaded &&
-        widget.file.ownerID != widget.currentUserID) {
+        _file.isUploaded &&
+        _file.ownerID != widget.currentUserID) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
       selectionColor =
-          avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
+          avatarColors[(_file.ownerID!).remainder(avatarColors.length)];
     }
-    final String heroTag = widget.tag + widget.file.tag;
+    final String heroTag = widget.tag + _file.tag;
+    final String stableKey = "${widget.tag}_${_file.generatedID}";
     final Widget thumbnailWidget = ThumbnailWidget(
-      widget.file,
+      _file,
       diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
       serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
       shouldShowLivePhotoOverlay: true,
-      key: Key(heroTag),
+      key: Key(stableKey),
       thumbnailSize: widget.photoGridSize < photoGridSizeDefault
           ? thumbnailLargeSize
           : thumbnailSmallSize,
@@ -106,20 +144,20 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     return GestureDetector(
       onTap: () {
         widget.limitSelectionToOne
-            ? _onTapWithSelectionLimit(widget.file)
-            : _onTapNoSelectionLimit(context, widget.file);
+            ? _onTapWithSelectionLimit(_file)
+            : _onTapNoSelectionLimit(context, _file);
       },
       onLongPress: () {
         widget.limitSelectionToOne
-            ? _onLongPressWithSelectionLimit(context, widget.file)
-            : _onLongPressNoSelectionLimit(context, widget.file);
+            ? _onLongPressWithSelectionLimit(context, _file)
+            : _onLongPressNoSelectionLimit(context, _file);
       },
       child: _isFileSelected
           ? Stack(
               clipBehavior: Clip.none,
               children: [
                 ClipRRect(
-                  key: ValueKey(heroTag),
+                  key: ValueKey(stableKey),
                   borderRadius: borderRadius,
                   child: Hero(
                     tag: heroTag,
@@ -153,7 +191,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
               ],
             )
           : ClipRRect(
-              key: ValueKey(heroTag),
+              key: ValueKey(stableKey),
               borderRadius: borderRadius,
               child: Hero(
                 tag: heroTag,
@@ -173,12 +211,8 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   }
 
   void _selectedFilesListener() {
-    late bool latestSelectionState;
-    if (widget.selectedFiles?.files.contains(widget.file) ?? false) {
-      latestSelectionState = true;
-    } else {
-      latestSelectionState = false;
-    }
+    final latestSelectionState =
+        widget.selectedFiles?.isFileSelected(_file) ?? false;
     if (latestSelectionState != _isFileSelected && mounted) {
       setState(() {
         _isFileSelected = latestSelectionState;
@@ -235,7 +269,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         swipeHelper != null &&
         widget.selectedFiles != null &&
         widget.selectedFiles!.files.isNotEmpty) {
-      swipeHelper.startSelection(widget.file, forceSelecting: true);
+      swipeHelper.startSelection(_file, forceSelecting: true);
     }
   }
 

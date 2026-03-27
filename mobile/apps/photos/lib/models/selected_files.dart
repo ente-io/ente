@@ -122,6 +122,20 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Swaps the file reference in the selection set without changing selection
+  /// state. Used when a file's metadata changes (e.g., after upload sets
+  /// uploadedFileID) to keep the Set's hash/equality consistent with the
+  /// latest EnteFile instance.
+  void replaceFileIfSelected(EnteFile oldFile, EnteFile newFile) {
+    final EnteFile? match = files.firstWhereOrNull(
+      (element) => _isMatch(oldFile, element),
+    );
+    if (match != null) {
+      files.remove(match);
+      files.add(newFile);
+    }
+  }
+
   ///Replaces the current selection with [filesToSelect] in a single update.
   void replaceSelection(Set<EnteFile> filesToSelect) {
     final nonDummyFiles =
