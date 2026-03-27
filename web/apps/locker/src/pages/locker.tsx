@@ -692,21 +692,35 @@ export const LockerPage: React.FC = () => {
         [refreshData, selectedCollectionID, showMiniDialog],
     );
 
-    const handleEditItem = useCallback((item: LockerItem) => {
-        setEditItem({
-            id: item.id,
-            type: item.type,
-            data:
-                item.type === "file"
-                    ? { name: getItemTitle(item) }
-                    : (item.data as unknown as Record<string, unknown>),
-            collectionID: item.collectionID,
-            collectionIDs:
-                item.collectionIDs.length > 0
-                    ? item.collectionIDs
-                    : [item.collectionID],
-        });
-    }, []);
+    const handleEditItem = useCallback(
+        (item: LockerItem) => {
+            const fullCollectionIDs = Array.from(
+                new Set([
+                    ...item.collectionIDs,
+                    item.collectionID,
+                    ...collections
+                        .filter((collection) =>
+                            collection.items.some(
+                                (candidate) => candidate.id === item.id,
+                            ),
+                        )
+                        .map((collection) => collection.id),
+                ]),
+            );
+
+            setEditItem({
+                id: item.id,
+                type: item.type,
+                data:
+                    item.type === "file"
+                        ? { name: getItemTitle(item) }
+                        : (item.data as unknown as Record<string, unknown>),
+                collectionID: item.collectionID,
+                collectionIDs: fullCollectionIDs,
+            });
+        },
+        [collections],
+    );
 
     // Trash operations
 

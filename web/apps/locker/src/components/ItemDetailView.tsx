@@ -249,7 +249,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 )}
                             </>
                         )}
-                        {item.type !== "file" && onShareLink && (
+                        {onShareLink && (
                             <Button
                                 variant="outlined"
                                 startIcon={<ShareOutlinedIcon />}
