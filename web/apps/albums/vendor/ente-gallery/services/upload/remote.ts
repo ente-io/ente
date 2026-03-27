@@ -1,6 +1,5 @@
 import {
     authenticatedPublicAlbumsRequestHeaders,
-    authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
     type HTTPRequestRetrier,
@@ -31,51 +30,8 @@ const ObjectUploadURL = z.object({
 
 export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 
-const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
-
 /**
- * Fetch a fresh list of URLs from remote that can be used to upload objects.
- *
- * @param countHint An approximate number of objects that we're expecting to
- * upload.
- *
- * @returns A list of pre-signed object URLs that can be used to upload data to
- * the S3 bucket. Each URL also has an associated "object key" with which remote
- * will refer to the uploaded object after it has been uploaded.
- */
-export const fetchUploadURLs = async (countHint: number) => {
-    const count = Math.min(50, countHint * 2);
-    const res = await fetch(
-        await apiURL("/files/upload-urls", { count, ts: Date.now() }),
-        { headers: await authenticatedRequestHeaders() },
-    );
-    ensureOk(res);
-    return ObjectUploadURLResponse.parse(await res.json()).urls;
-};
-
-export const fetchUploadURLWithMetadata = async ({
-    contentLength,
-    contentMd5,
-}: {
-    contentLength: number;
-    contentMd5: string;
-}) => {
-    const headers = new Headers(await authenticatedRequestHeaders());
-    headers.set("Content-Type", "application/json");
-    const res = await fetch(
-        await apiURL("/files/upload-url", { ts: Date.now() }),
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ contentLength, contentMD5: contentMd5 }),
-        },
-    );
-    ensureOk(res);
-    return ObjectUploadURL.parse(await res.json());
-};
-
-/**
- * Sibling of {@link fetchUploadURLWithMetadata} for public albums.
+ * Fetch a pre-signed URL for uploading a public album file or thumbnail.
  */
 export const fetchPublicAlbumsUploadURLWithMetadata = async (
     {
@@ -100,31 +56,8 @@ export const fetchPublicAlbumsUploadURLWithMetadata = async (
     return ObjectUploadURL.parse(await res.json());
 };
 
-export const fetchMultipartUploadURLsWithMetadata = async ({
-    contentLength,
-    partLength,
-    partMd5s,
-}: {
-    contentLength: number;
-    partLength: number;
-    partMd5s: string[];
-}) => {
-    const headers = new Headers(await authenticatedRequestHeaders());
-    headers.set("Content-Type", "application/json");
-    const res = await fetch(
-        await apiURL("/files/multipart-upload-url", { ts: Date.now() }),
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ contentLength, partLength, partMd5s }),
-        },
-    );
-    ensureOk(res);
-    return MultipartUploadURLs.parse(await res.json());
-};
-
 /**
- * Sibling of {@link fetchMultipartUploadURLsWithMetadata} for public albums.
+ * Fetch multipart upload URLs for a large public album upload.
  */
 export const fetchPublicAlbumsMultipartUploadURLsWithMetadata = async (
     {
@@ -150,25 +83,6 @@ export const fetchPublicAlbumsMultipartUploadURLsWithMetadata = async (
     );
     ensureOk(res);
     return MultipartUploadURLs.parse(await res.json());
-};
-
-/**
- * Sibling of {@link fetchUploadURLs} for public albums.
- */
-export const fetchPublicAlbumsUploadURLs = async (
-    countHint: number,
-    credentials: PublicAlbumsCredentials,
-) => {
-    const count = Math.min(50, countHint * 2);
-    const res = await fetch(
-        await apiURL("/public-collection/upload-urls", {
-            count,
-            ts: Date.now(),
-        }),
-        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
-    );
-    ensureOk(res);
-    return ObjectUploadURLResponse.parse(await res.json()).urls;
 };
 
 /**
@@ -198,49 +112,6 @@ const MultipartUploadURLs = z.object({
 });
 
 export type MultipartUploadURLs = z.infer<typeof MultipartUploadURLs>;
-
-const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
-
-/**
- * Fetch a {@link MultipartUploadURLs} structure from remote that can be used to
- * upload a large object by splitting it into {@link uploadPartCount} parts.
- *
- * See: [Note: Multipart uploads].
- *
- * @param uploadPartCount The number of parts in which we want to upload the
- * object.
- *
- * @returns A structure ({@link MultipartUploadURLs}) containing pre-signed URLs
- * for uploading each part, a completion URL, and the final object key.
- */
-export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
-    const count = uploadPartCount;
-    const res = await fetch(
-        await apiURL("/files/multipart-upload-urls", { count, ts: Date.now() }),
-        { headers: await authenticatedRequestHeaders() },
-    );
-    ensureOk(res);
-    return MultipartUploadURLsResponse.parse(await res.json()).urls;
-};
-
-/**
- * Sibling of {@link fetchMultipartUploadURLs} for public albums.
- */
-export const fetchPublicAlbumsMultipartUploadURLs = async (
-    uploadPartCount: number,
-    credentials: PublicAlbumsCredentials,
-) => {
-    const count = uploadPartCount;
-    const res = await fetch(
-        await apiURL("/public-collection/multipart-upload-urls", {
-            count,
-            ts: Date.now(),
-        }),
-        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
-    );
-    ensureOk(res);
-    return MultipartUploadURLsResponse.parse(await res.json()).urls;
-};
 
 /**
  * Upload a file using a pre-signed URL.
@@ -489,11 +360,7 @@ const createMultipartUploadRequestBody = (
  *
  * In both cases, the overall flow is roughly like the following:
  *
- * 1. Obtain multiple pre-signed URLs from remote (museum). The specific API
- *    call will be different (because of the different authentication
- *    mechanisms) when we're running in the context of the photos app
- *    ({@link fetchMultipartUploadURLs}) and when we're running in the context
- *    of the public albums app ({@link fetchPublicAlbumsMultipartUploadURLs}).
+ * 1. Obtain metadata-aware pre-signed URLs from the public album upload API.
  *
  * 2. Break the file to be uploaded into parts, and upload each part using a PUT
  *    request to one of the pre-signed URLs we got in step 1. There are two
@@ -603,32 +470,10 @@ export interface UploadedFileObjectAttributes {
 }
 
 /**
- * Create a new {@link EnteFile} on remote by providing remote with information
- * about the file's contents (objects) that were uploaded, and other metadata
- * about the file.
- *
- * Remote only, does not modify local state.
- *
- * @returns the newly created {@link EnteFile}.
- */
-export const postEnteFile = async (
-    postFileRequest: PostEnteFileRequest,
-): Promise<RemoteEnteFile> => {
-    const res = await fetch(await apiURL("/files"), {
-        method: "POST",
-        headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify(postFileRequest),
-    });
-    ensureOk(res);
-    return RemoteEnteFile.parse(await res.json());
-};
-
-/**
- * Sibling of {@link postEnteFile} for public albums.
+ * Create a new public album file on remote.
  */
 export const postPublicAlbumsEnteFile = async (
     postFileRequest: PostEnteFileRequest,
-
     credentials: PublicAlbumsCredentials,
 ): Promise<RemoteEnteFile> => {
     const res = await fetch(await apiURL("/public-collection/file"), {

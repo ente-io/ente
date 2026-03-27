@@ -24,12 +24,12 @@ import { playableVideoURL, renderableImageBlob } from "./convert";
 
 /**
  * URL(s) for the original image or video, alongwith with potential conversions
- * applied to make it more likely that the browser (or desktop app) will be able
- * to render (or play) it.
+ * applied to make it more likely that the browser will be able to render (or
+ * play) it.
  *
  * The word "renderable" or "playable" is not a guarantee, but rather a best
  * effort indicator as we might not always be able to convert all formats to
- * something that the browser (or desktop app) can show.
+ * something that the browser can show.
  */
 export type RenderableSourceURLs =
     | {
@@ -144,8 +144,7 @@ class DownloadManager {
      * These are saved as a result of invocation of
      * {@link renderableSourceURLs}, which goes one step beyond
      * {@link fileURLPromises}, and also attempts to convert the downloaded file
-     * into a URL that the browser (or the desktop app) is likely to be able to
-     * render or play.
+     * into a URL that the browser is likely to be able to render or play.
      *
      * The entries are keyed by file ID.
      */

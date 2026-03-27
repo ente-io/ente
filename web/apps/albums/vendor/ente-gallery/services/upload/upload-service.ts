@@ -4,8 +4,7 @@
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { streamEncryptionChunkSize } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
-import { ensureElectron } from "ente-base/electron";
-import { basename, nameAndExtension } from "ente-base/file-name";
+import { nameAndExtension } from "ente-base/file-name";
 import {
     ensureOk,
     HTTPError,
@@ -23,7 +22,6 @@ import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
-import { readStream } from "ente-gallery/utils/native-stream";
 import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
     fileFileName,
@@ -39,7 +37,6 @@ import {
     encryptMagicMetadata,
     type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
-import { addToCollection } from "ente-new/photos/services/collection";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import {
@@ -56,25 +53,18 @@ import { matchJSONMetadata, type ParsedMetadataJSON } from "./metadata-json";
 import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
-    fetchMultipartUploadURLs,
-    fetchMultipartUploadURLsWithMetadata,
     fetchPublicAlbumsMultipartUploadURLsWithMetadata,
     fetchPublicAlbumsUploadURLWithMetadata,
-    fetchUploadURLs,
-    fetchUploadURLWithMetadata,
-    postEnteFile,
     postPublicAlbumsEnteFile,
     putFile,
     putFilePart,
     putFilePartViaWorker,
     putFileViaWorker,
     type MultipartCompletedPart,
-    type ObjectUploadURL,
     type PostEnteFileRequest,
 } from "./remote";
 import {
     fallbackThumbnail,
-    generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
 
@@ -129,146 +119,69 @@ const multipartChunksPerPart = 5;
 
 /** Upload files to cloud storage */
 class UploadService {
-    private uploadURLs: ObjectUploadURL[] = [];
-    private pendingUploadCount = 0;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
-    private activeUploadURLRefill: Promise<void> | undefined;
 
     init(publicAlbumsCredentials: PublicAlbumsCredentials | undefined) {
         this.publicAlbumsCredentials = publicAlbumsCredentials;
     }
 
     logout() {
-        this.uploadURLs = [];
-        this.pendingUploadCount = 0;
         this.publicAlbumsCredentials = undefined;
-        this.activeUploadURLRefill = undefined;
     }
 
-    async setFileCount(fileCount: number) {
-        this.pendingUploadCount = fileCount;
-        if (
-            areChecksumProtectedUploadsEnabled() ||
-            this.publicAlbumsCredentials
-        ) {
-            this.uploadURLs = [];
-            return;
-        }
-        await this.refillUploadURLs(); /* prefetch */
-    }
+    async setFileCount(_fileCount: number) {}
 
-    reducePendingUploadCount() {
-        this.pendingUploadCount--;
-    }
+    reducePendingUploadCount() {}
 
     async getUploadURL(metadata?: {
         contentLength: number;
         contentMd5: string;
     }) {
-        if (this.publicAlbumsCredentials) {
-            if (
-                metadata &&
-                metadata.contentLength >= 0 &&
-                metadata.contentMd5
-            ) {
-                return fetchPublicAlbumsUploadURLWithMetadata(
-                    metadata,
-                    this.publicAlbumsCredentials,
-                );
-            }
+        const credentials = this.publicAlbumsCredentials;
+        if (!credentials) {
+            throw new Error("Missing public album credentials");
+        }
+        if (
+            !metadata ||
+            metadata.contentLength < 0 ||
+            !metadata.contentMd5
+        ) {
             throw new Error("Public uploads require content metadata");
         }
-        if (
-            areChecksumProtectedUploadsEnabled() &&
-            metadata &&
-            metadata.contentLength >= 0 &&
-            metadata.contentMd5
-        ) {
-            return fetchUploadURLWithMetadata(metadata);
-        }
-        if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
-            await this.refillUploadURLs();
-        }
-        const url = this.uploadURLs.pop();
-        if (!url) throw new Error("Failed to obtain upload URL");
-        return url;
-    }
-
-    private async refillUploadURLs() {
         try {
-            if (!this.activeUploadURLRefill) {
-                this.activeUploadURLRefill = this._refillUploadURLs();
-            }
-            await this.activeUploadURLRefill;
-        } finally {
-            this.activeUploadURLRefill = undefined;
-        }
-
-        // Ensure that the upload URLs we have are unique.
-        //
-        // Sanity check added when this was a new implementation. Have kept it
-        // around, but it can be removed too.
-        if (
-            this.uploadURLs.length !=
-            new Set(this.uploadURLs.map((u) => u.url)).size
-        ) {
-            throw new Error("Duplicate upload URLs detected");
-        }
-    }
-
-    private async _refillUploadURLs() {
-        if (this.publicAlbumsCredentials) {
-            throw new Error(
-                "Public uploads should request metadata upload URLs",
+            return await fetchPublicAlbumsUploadURLWithMetadata(
+                metadata,
+                credentials,
             );
-        }
-        let urls: ObjectUploadURL[];
-        try {
-            urls = await fetchUploadURLs(this.pendingUploadCount);
         } catch (e) {
             throw translateURLFetchErrorIfNeeded(e);
         }
-        urls.forEach((u) => this.uploadURLs.push(u));
     }
 
     async fetchMultipartUploadURLs(
-        uploadPartCount: number,
+        _uploadPartCount: number,
         metadata?: {
             contentLength: number;
             partLength: number;
             partMd5s: string[];
         },
     ) {
-        if (this.publicAlbumsCredentials) {
-            if (
-                metadata &&
-                metadata.contentLength > 0 &&
-                metadata.partLength > 0 &&
-                metadata.partMd5s.length > 0
-            ) {
-                return fetchPublicAlbumsMultipartUploadURLsWithMetadata(
-                    metadata,
-                    this.publicAlbumsCredentials,
-                );
-            }
-            throw new Error(
-                "Public multipart uploads require content metadata",
-            );
+        const credentials = this.publicAlbumsCredentials;
+        if (!credentials) {
+            throw new Error("Missing public album credentials");
         }
         if (
-            metadata &&
-            areChecksumProtectedUploadsEnabled() &&
-            metadata.contentLength > 0 &&
-            metadata.partLength > 0 &&
-            metadata.partMd5s.length > 0
+            !metadata ||
+            metadata.contentLength <= 0 ||
+            metadata.partLength <= 0 ||
+            metadata.partMd5s.length == 0
         ) {
-            return fetchMultipartUploadURLsWithMetadata(metadata).catch(
-                (e: unknown) => {
-                    throw translateURLFetchErrorIfNeeded(e);
-                },
-            );
+            throw new Error("Public multipart uploads require content metadata");
         }
-        return fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
+        return fetchPublicAlbumsMultipartUploadURLsWithMetadata(
+            metadata,
+            credentials,
+        ).catch((e: unknown) => {
             throw translateURLFetchErrorIfNeeded(e);
         });
     }
@@ -282,12 +195,7 @@ export default uploadService;
 /**
  * Return the file name for the given {@link uploadItem}.
  */
-export const uploadItemFileName = (uploadItem: UploadItem) => {
-    if (uploadItem instanceof File) return uploadItem.name;
-    if (typeof uploadItem == "string") return basename(uploadItem);
-    if (Array.isArray(uploadItem)) return basename(uploadItem[1]);
-    return uploadItem.file.name;
-};
+export const uploadItemFileName = (uploadItem: UploadItem) => uploadItem.name;
 
 /* -- Various intermediate types used during upload -- */
 
@@ -542,12 +450,7 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
  * Return the size of the given {@link uploadItem}.
  */
 const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
-    if (uploadItem instanceof File) return uploadItem.size;
-    if (typeof uploadItem == "string")
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    if (Array.isArray(uploadItem))
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    return uploadItem.file.size;
+    return uploadItem.size;
 };
 
 /**
@@ -737,11 +640,11 @@ export const upload = async (
          *
          * When we already have a File object the multiple reads are fine.
          *
-         * When we're in the context of our desktop app and have a path, it
-         * might be possible to optimize further by using `ReadableStream.tee`
-         * to perform these steps simultaneously. However, that'll require
-         * restructuring the code so that these steps run in a parallel manner
-         * (tee will not work for strictly sequential reads of large streams).
+         * There might be room to optimize further by using
+         * `ReadableStream.tee` to perform these steps simultaneously.
+         * However, that'll require restructuring the code so that these steps
+         * run in a parallel manner (tee will not work for strictly sequential
+         * reads of large streams).
          */
 
         let assetDetails: ReadAssetDetailsResult;
@@ -784,15 +687,12 @@ export const upload = async (
             const matchInSameCollection = matches.find(
                 (f) => f.collectionID == collection.id,
             );
-            if (matchInSameCollection) {
-                return { type: "alreadyUploaded", file: matchInSameCollection };
-            } else {
-                // Any of the matching files can be used to add a symlink.
-                const symlink = Object.assign({}, anyMatch);
-                symlink.collectionID = collection.id;
-                await addToCollection(collection, [symlink]);
-                return { type: "addedSymlink", file: symlink };
-            }
+            // The public albums uploader only writes into the current public
+            // collection, and its dedup state is scoped to that collection.
+            return {
+                type: "alreadyUploaded",
+                file: matchInSameCollection ?? anyMatch,
+            };
         }
 
         abortIfCancelled();
@@ -877,11 +777,6 @@ export const upload = async (
  * Convert specific HTTP errors during an API call to remote endpoints for
  * fetching new upload URLs into error with known messages (if applicable).
  *
- * Can be used with the following functions:
- *
- * - {@link fetchUploadURLs}
- * - {@link fetchMultipartUploadURLs}
- *
  */
 const translateURLFetchErrorIfNeeded = (e: unknown) => {
     if (e instanceof HTTPError) {
@@ -898,100 +793,18 @@ const translateURLFetchErrorIfNeeded = (e: unknown) => {
 };
 
 /**
- * Read the given file or path or zip item into an in-memory representation.
+ * Read the given file into an in-memory representation.
  *
  * [Note: Reading a UploadItem]
  *
- * The file can be either a web
- * [File](https://developer.mozilla.org/en-US/docs/Web/API/File), the absolute
- * path to a file on desk, a combination of these two, or a entry in a zip file
- * on the user's local file system.
- *
- * tl;dr; There are four cases:
- *
- * 1. web / File
- * 2. desktop / File (+ path)
- * 3. desktop / path
- * 4. desktop / ZipItem
- *
- * For the when and why, read on.
- *
- * The code that accesses files (e.g. uplaads) gets invoked in two contexts:
- *
- * 1. web: the normal mode, when we're running in as a web app in the browser.
- *
- * 2. desktop: when we're running inside our desktop app.
- *
- * In the web context, we'll always get a File, since within the browser we
- * cannot programmatically construct paths to or arbitrarily access files on the
- * user's file system.
- *
- * > Note that even if we were to somehow have an absolute path at hand, we
- *   cannot programmatically create such File objects to arbitrary absolute
- *   paths on user's local file system for security reasons.
- *
- * So in the web context, this will always be a File we get as a result of an
- * explicit user interaction (e.g. drag and drop or using a file selector).
- *
- * In the desktop context, this can be either a File (+ path), or a path, or an
- * entry within a zip file.
- *
- * 2. If the user provided us this file via some user interaction (say a drag
- *    and a drop), this'll still be a File. But unlike in the web context, we
- *    also have access to the full path of this file.
- *
- * 3. In addition, when running in the desktop app we have the ability to
- *    initiate programmatic access absolute paths on the user's file system. For
- *    example, if the user asks us to watch certain folders on their disk for
- *    changes, we'll be able to pick up new images being added, and in such
- *    cases, the parameter here will be a path. Another example is when resuming
- *    an previously interrupted upload - we'll only have the path at hand in
- *    such cases, not the original File object since the app subsequently
- *    restarted.
- *
- * 4. The user might've also initiated an upload of a zip file (or we might be
- *    resuming one). In such cases we will get a tuple (path to the zip file on
- *    the local file system, and the name of the entry within that zip file).
- *
- * Case 3 and 4, when we're provided a path, are simple. We don't have a choice,
- * since we cannot still programmatically construct a File object (we can
- * construct it on the Node.js layer, but it can't then be transferred over the
- * IPC boundary). So all our operations use the path itself.
- *
- * Case 2 involves a choice on a use-case basis. Neither File nor the path is a
- * better choice for all use cases.
- *
- * > The advantage of the File object is that the browser has already read it
- *   into memory for us. The disadvantage comes in the case where we need to
- *   communicate with the native Node.js layer of our desktop app. Since this
- *   communication happens over IPC, the File's contents need to be serialized
- *   and copied, which is a bummer for large videos etc.
+ * The public albums uploader only deals with browser-provided
+ * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) objects.
  */
 const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
-    let underlyingStream: ReadableStream;
-    let file: File | undefined;
-    let fileSize: number;
-    let lastModifiedMs: number;
-
-    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        const {
-            response,
-            size,
-            lastModifiedMs: lm,
-        } = await readStream(uploadItem);
-        underlyingStream = response.body!;
-        fileSize = size;
-        lastModifiedMs = lm;
-    } else {
-        if (uploadItem instanceof File) {
-            file = uploadItem;
-        } else {
-            file = uploadItem.file;
-        }
-        underlyingStream = file.stream();
-        fileSize = file.size;
-        lastModifiedMs = file.lastModified;
-    }
+    const file = uploadItem;
+    const underlyingStream = file.stream();
+    const fileSize = file.size;
+    const lastModifiedMs = file.lastModified;
 
     const N = streamEncryptionChunkSize;
     const chunkCount = Math.ceil(fileSize / streamEncryptionChunkSize);
@@ -1068,9 +881,8 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
 };
 
 /**
- * Read the beginning of the given file (or its path), or use its filename as a
- * fallback, to determine its MIME type. From that, construct and return a
- * {@link FileTypeInfo}.
+ * Read the beginning of the given file to determine its MIME type. From that,
+ * construct and return a {@link FileTypeInfo}.
  *
  * While we're at it, also return the size of the file, and its last modified
  * time (expressed as epoch milliseconds).
@@ -1309,25 +1121,10 @@ const extractImageOrVideoMetadata = async (
 
 const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
-    lastModifiedMs: number | undefined,
+    _lastModifiedMs: number | undefined,
 ): Promise<ParsedMetadata | undefined> => {
-    let file: File;
-    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        // The library we use for extracting Exif from images, ExifReader,
-        // doesn't support streams. But unlike videos, for images it is
-        // reasonable to read the entire stream into memory here.
-        const { response } = await readStream(uploadItem);
-        const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        const opts = lastModifiedMs ? { lastModified: lastModifiedMs } : {};
-        file = new File([await response.arrayBuffer()], basename(path), opts);
-    } else if (uploadItem instanceof File) {
-        file = uploadItem;
-    } else {
-        file = uploadItem.file;
-    }
-
     try {
-        return await extractExif(file);
+        return await extractExif(uploadItem);
     } catch (e) {
         const fileName = uploadItemFileName(uploadItem);
         log.error(`Failed to extract image metadata for ${fileName}`, e);
@@ -1483,66 +1280,13 @@ const augmentWithThumbnail = async (
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
 ): Promise<ThumbnailedFile> => {
-    let fileData: Uint8Array | undefined;
     let thumbnail: Uint8Array | undefined;
     let hasStaticThumbnail = false;
 
-    const electron = globalThis.electron;
-
-    // 1. Native thumbnail generation using items's (effective) path.
-    if (electron && !(uploadItem instanceof File)) {
-        try {
-            thumbnail = await generateThumbnailNative(
-                electron,
-                uploadItem,
-                fileTypeInfo,
-            );
-        } catch (e) {
-            log.error("Native thumbnail generation failed", e);
-        }
-    }
-
-    if (!thumbnail) {
-        let blob: Blob | undefined;
-        if (uploadItem instanceof File) {
-            // 2. Browser based thumbnail generation for File (blobs).
-            blob = uploadItem;
-        } else {
-            // 3. Browser based thumbnail generation for paths.
-            //
-            // We can only get here when we're running in our desktop app (since
-            // only that works with non-File uploadItems), and the thumbnail
-            // generation failed.
-            //
-            // There are no expected scenarios when this should happen.
-            //
-            // The fallback in this case involves reading the entire stream into
-            // memory, and passing that data across the IPC boundary in a single
-            // go (i.e. not in a streaming manner). This is risky for videos of
-            // unbounded sizes, and since anyways we are not expected to come
-            // here for videos, so we only apply this fallback for images.
-
-            if (fileTypeInfo.fileType == FileType.image) {
-                const data = await readEntireStream(fileStream.stream);
-                blob = new Blob([data]);
-
-                // The Readable stream cannot be read twice, so use the data
-                // directly for subsequent steps.
-                fileData = data;
-            } else {
-                const fileName = uploadItemFileName(uploadItem);
-                log.warn(
-                    `Not using browser based thumbnail generation fallback for video at path ${fileName}`,
-                );
-            }
-        }
-
-        try {
-            if (blob)
-                thumbnail = await generateThumbnailWeb(blob, fileTypeInfo);
-        } catch (e) {
-            log.error("Web thumbnail creation failed", e);
-        }
+    try {
+        thumbnail = await generateThumbnailWeb(uploadItem, fileTypeInfo);
+    } catch (e) {
+        log.error("Web thumbnail creation failed", e);
     }
 
     if (!thumbnail) {
@@ -1551,7 +1295,7 @@ const augmentWithThumbnail = async (
     }
 
     return {
-        fileStreamOrData: fileData ?? fileStream,
+        fileStreamOrData: fileStream,
         thumbnail,
         hasStaticThumbnail,
     };
@@ -1772,7 +1516,6 @@ const uploadToBucket = async (
                 uploadContext,
                 requestRetrier,
                 maxPercent,
-                checksumEnabled,
             ));
     } else {
         const data =
@@ -1887,12 +1630,9 @@ const uploadStreamUsingMultipart = async (
     uploadContext: UploadContext,
     requestRetrier: HTTPRequestRetrier,
     maxPercent: number,
-    checksumEnabled: boolean,
 ) => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
-    const shouldSendPartChecksums =
-        checksumEnabled || !!uploadContext.publicAlbumsCredentials;
 
     const { stream } = dataStream;
     const streamReader = stream.getReader();
@@ -1900,94 +1640,39 @@ const uploadStreamUsingMultipart = async (
     let uploadPartCount = Math.ceil(
         dataStream.chunkCount / multipartChunksPerPart,
     );
+    // Public album uploads always request metadata-aware multipart URLs, so we
+    // first materialize each part to compute its checksum.
+    const parts: Uint8Array[] = [];
+    const partMd5s: string[] = [];
+    let fileSize = 0;
+    while (true) {
+        abortIfCancelled();
+        const partData = await nextMultipartUploadPart(streamReader);
+        if (partData.length === 0) break;
+        parts.push(partData);
+        fileSize += partData.length;
+        partMd5s.push(computeMd5Base64(partData));
+    }
+    const { done } = await streamReader.read();
+    if (!done) throw new Error("More chunks than expected");
 
-    if (shouldSendPartChecksums) {
-        const parts: Uint8Array[] = [];
-        const partMd5s: string[] = [];
-        let fileSize = 0;
-        while (true) {
-            abortIfCancelled();
-            const partData = await nextMultipartUploadPart(streamReader);
-            if (partData.length === 0) break;
-            parts.push(partData);
-            fileSize += partData.length;
-            partMd5s.push(computeMd5Base64(partData));
-        }
-        const { done } = await streamReader.read();
-        if (!done) throw new Error("More chunks than expected");
-
-        uploadPartCount = parts.length;
-        if (uploadPartCount == 0) {
-            throw new Error("Multipart upload produced no parts");
-        }
-        const firstPartLength = parts[0]?.length ?? 0;
-        if (firstPartLength == 0) {
-            throw new Error("Multipart part length missing");
-        }
-        const partLength = firstPartLength;
-
-        const multipartUploadURLs =
-            await uploadService.fetchMultipartUploadURLs(uploadPartCount, {
-                contentLength: fileSize,
-                partLength,
-                partMd5s,
-            });
-
-        const percentPerPart = maxPercent / uploadPartCount;
-        const completedParts: MultipartCompletedPart[] = [];
-        for (const [
-            index,
-            partUploadURL,
-        ] of multipartUploadURLs.partURLs.entries()) {
-            abortIfCancelled();
-
-            const partNumber = index + 1;
-            const partData = parts[index];
-            const checksum = partMd5s[index];
-            if (!partData || !checksum) {
-                throw new Error("Multipart checksum part mismatch");
-            }
-
-            const eTag = !isCFUploadProxyDisabled
-                ? await putFilePartViaWorker(
-                      partUploadURL,
-                      partData,
-                      requestRetrier,
-                      { contentMd5: checksum },
-                  )
-                : await putFilePart(partUploadURL, partData, requestRetrier, {
-                      contentMd5: checksum,
-                  });
-            if (!eTag) throw new Error(eTagMissingErrorMessage);
-
-            updateUploadProgress(fileLocalID, percentPerPart * partNumber);
-            completedParts.push({ partNumber, eTag });
-            parts[index] = new Uint8Array(0); // release memory
-        }
-
-        const completionURL = multipartUploadURLs.completeURL;
-        if (!isCFUploadProxyDisabled) {
-            await completeMultipartUploadViaWorker(
-                completionURL,
-                completedParts,
-                requestRetrier,
-            );
-        } else {
-            await completeMultipartUpload(
-                completionURL,
-                completedParts,
-                requestRetrier,
-            );
-        }
-
-        return { objectKey: multipartUploadURLs.objectKey, fileSize };
+    uploadPartCount = parts.length;
+    if (uploadPartCount == 0) {
+        throw new Error("Multipart upload produced no parts");
+    }
+    const partLength = parts[0]?.length ?? 0;
+    if (partLength == 0) {
+        throw new Error("Multipart part length missing");
     }
 
     const multipartUploadURLs =
-        await uploadService.fetchMultipartUploadURLs(uploadPartCount);
+        await uploadService.fetchMultipartUploadURLs(uploadPartCount, {
+            contentLength: fileSize,
+            partLength,
+            partMd5s,
+        });
 
     const percentPerPart = maxPercent / uploadPartCount;
-    let fileSize = 0;
     const completedParts: MultipartCompletedPart[] = [];
     for (const [
         index,
@@ -1996,23 +1681,28 @@ const uploadStreamUsingMultipart = async (
         abortIfCancelled();
 
         const partNumber = index + 1;
-        const partData = await nextMultipartUploadPart(streamReader);
-        fileSize += partData.length;
+        const partData = parts[index];
+        const checksum = partMd5s[index];
+        if (!partData || !checksum) {
+            throw new Error("Multipart checksum part mismatch");
+        }
 
         const eTag = !isCFUploadProxyDisabled
             ? await putFilePartViaWorker(
                   partUploadURL,
                   partData,
                   requestRetrier,
+                  { contentMd5: checksum },
               )
-            : await putFilePart(partUploadURL, partData, requestRetrier);
+            : await putFilePart(partUploadURL, partData, requestRetrier, {
+                  contentMd5: checksum,
+              });
         if (!eTag) throw new Error(eTagMissingErrorMessage);
 
         updateUploadProgress(fileLocalID, percentPerPart * partNumber);
         completedParts.push({ partNumber, eTag });
+        parts[index] = new Uint8Array(0); // release memory
     }
-    const { done } = await streamReader.read();
-    if (!done) throw new Error("More chunks than expected");
 
     const completionURL = multipartUploadURLs.completeURL;
     if (!isCFUploadProxyDisabled) {
@@ -2057,14 +1747,14 @@ const createRemoteFile = async (
     uploadContext: UploadContext,
 ) => {
     const { publicAlbumsCredentials } = uploadContext;
-
-    return publicAlbumsCredentials
-        ? retriedPostPublicAlbumsEnteFile(
-              newFileRequest,
-              publicAlbumsCredentials,
-              uploadContext,
-          )
-        : retriedPostEnteFile(newFileRequest, uploadContext);
+    if (!publicAlbumsCredentials) {
+        throw new Error("Missing public album credentials");
+    }
+    return retriedPostPublicAlbumsEnteFile(
+        newFileRequest,
+        publicAlbumsCredentials,
+        uploadContext,
+    );
 };
 
 const retriedPostPublicAlbumsEnteFile = async (
@@ -2076,28 +1766,6 @@ const retriedPostPublicAlbumsEnteFile = async (
         () => {
             abortIfCancelled();
             return postPublicAlbumsEnteFile(newFileRequest, credentials);
-        },
-        {
-            abortIfNeeded: (e) => {
-                if (isUploadCancelledError(e)) throw e;
-                if (e instanceof HTTPError) {
-                    switch (e.res.status) {
-                        case 413:
-                            throw new Error(fileTooLargeErrorMessage);
-                    }
-                }
-            },
-        },
-    );
-
-const retriedPostEnteFile = async (
-    newFileRequest: PostEnteFileRequest,
-    { abortIfCancelled }: UploadContext,
-) =>
-    retryAsyncOperation(
-        () => {
-            abortIfCancelled();
-            return postEnteFile(newFileRequest);
         },
         {
             abortIfNeeded: (e) => {

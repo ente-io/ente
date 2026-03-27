@@ -46,7 +46,6 @@
  */
 
 import { haveWindow } from "ente-base/env";
-import log from "ente-base/log";
 import {
     CollectionPrivateMagicMetadataData,
     CollectionPublicMagicMetadataData,
@@ -86,30 +85,6 @@ if (haveWindow()) {
  * - migration.ts
  */
 export { localForage };
-
-/**
- * Return `true` if we can access IndexedDB.
- *
- * This is used as a pre-flight check, to notify the user if they're using a
- * browser or extension that is preventing the app from using IndexedDB (which
- * is necessary for local storage of collections and files metadata).
- */
-export const canAccessIndexedDB = async () => {
-    try {
-        await localForage.ready();
-        return true;
-    } catch (e) {
-        log.error("IndexDB is not accessible", e);
-        return false;
-    }
-};
-
-/**
- * Clear any data stored in files DB.
- *
- * This is meant to be called during the logout sequence.
- */
-export const clearFilesDB = () => localForage.clear();
 
 /**
  * Return a Zod schema suitable for being used with the various magic metadata
@@ -187,7 +162,7 @@ export const LocalCollections = z.array(LocalCollection);
  * This is similar to {@link RemoteEnteFile}, but it differs in that it contains
  * the decrypted values instead of the encrypted data and nonce pairs.
  */
-export const LocalEnteFile = z.looseObject({
+const LocalEnteFile = z.looseObject({
     id: z.number(),
     collectionID: z.number(),
     ownerID: z.number(),

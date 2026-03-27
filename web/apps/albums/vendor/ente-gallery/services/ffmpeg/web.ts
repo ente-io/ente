@@ -2,7 +2,6 @@ import { FFFSType, FFmpeg } from "@ffmpeg/ffmpeg";
 import { joinPath } from "ente-base/file-name";
 import { newID } from "ente-base/id";
 import log from "ente-base/log";
-import type { FFmpegCommand } from "ente-base/types/ipc";
 import { PromiseQueue } from "ente-utils/promise";
 import { z } from "zod";
 import {
@@ -10,6 +9,8 @@ import {
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
+
+type FFmpegCommand = string[] | { default: string[]; hdr: string[] };
 
 /** Lazily initialized and loaded FFmpeg instance. */
 let _ffmpeg: Promise<FFmpeg> | undefined;
@@ -36,12 +37,6 @@ const createFFmpeg = async () => {
 
 /**
  * Run the given FFmpeg command using a Wasm FFmpeg running in a web worker.
- *
- * This is a sibling of {@link ffmpegExec} exposed by the desktop app in
- * `ipc.ts`. As a rough ballpark, currently the native FFmpeg integration in the
- * desktop app is 10-20x faster than the Wasm one.
- *
- * See: [Note: FFmpeg in Electron].
  *
  * @param command The FFmpeg command to execute.
  *
@@ -204,9 +199,7 @@ const FFProbeOutputIsHDR = z.object({
 });
 
 /**
- * A variant of the {@link isHDRVideo} function in the desktop app source (see
- * `ffmpeg.ts`), except here we have access to ffprobe and can use that instead
- * of parsing the ffmpeg stderr.
+ * Determine whether the mounted video likely contains HDR transfer metadata.
  *
  * See: [Note: Alternative FFmpeg command for HDR videos]
  *

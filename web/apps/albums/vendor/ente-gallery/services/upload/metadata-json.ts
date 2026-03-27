@@ -1,6 +1,5 @@
 /** @file Dealing with the JSON metadata sidecar files */
 
-import { ensureElectron } from "ente-base/electron";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Location } from "ente-base/types";
@@ -8,7 +7,6 @@ import type {
     UploadItem,
     UploadPathPrefix,
 } from "ente-gallery/services/upload";
-import { readStream } from "ente-gallery/utils/native-stream";
 
 /**
  * The data we read from the JSON metadata sidecar files.
@@ -194,18 +192,7 @@ export const tryParseTakeoutMetadataJSON = async (
     }
 };
 
-const uploadItemText = async (uploadItem: UploadItem) => {
-    if (uploadItem instanceof File) {
-        return await uploadItem.text();
-    } else if (typeof uploadItem == "string") {
-        return await ensureElectron().fs.readTextFile(uploadItem);
-    } else if (Array.isArray(uploadItem)) {
-        const { response } = await readStream(uploadItem);
-        return await response.text();
-    } else {
-        return await uploadItem.file.text();
-    }
-};
+const uploadItemText = async (uploadItem: UploadItem) => await uploadItem.text();
 
 const parseMetadataJSONText = (text: string) => {
     const metadataJSON_ = JSON.parse(text) as unknown;

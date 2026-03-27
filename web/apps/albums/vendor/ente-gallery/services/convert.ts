@@ -1,9 +1,7 @@
-import { isDesktop } from "ente-base/app";
 import { lowercaseExtension } from "ente-base/file-name";
 import log from "ente-base/log";
-import { workerBridge } from "ente-base/worker/worker-bridge";
 import type { EnteFile } from "ente-media/file";
-import { FileType, KnownFileTypeInfos } from "ente-media/file-type";
+import { KnownFileTypeInfos } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { detectFileTypeInfo } from "../utils/detect-type";
@@ -28,14 +26,10 @@ import { convertToMP4 } from "./ffmpeg";
  *    likely cannot render, continue. Otherwise return the imageBlob that was
  *    passed in (after setting its MIME type).
  *
- * 3. If we're running in our desktop app and this MIME type is something our
- *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
- *    return the resultant JPEG blob.
- *
- * 4. If this is an HEIC file and the browser does not have native HEIC support,
+ * 3. If this is an HEIC file and the browser does not have native HEIC support,
  *    then use our (Wasm) HEIC converter and return the resultant JPEG blob.
  *
- * 5. Otherwise return the original (with the MIME type if we were able to
+ * 4. Otherwise return the original (with the MIME type if we were able to
  *    deduce one).
  *
  * In will catch all errors and return the original in those cases.
@@ -52,26 +46,7 @@ export const renderableImageBlob = async (
         if (needsJPEGConversion(extension)) {
             log.debug(() => [`Converting ${fileName} to JPEG`, fileTypeInfo]);
 
-            // If we're running in our desktop app, see if our Node.js layer can
-            // convert this into a JPEG using native tools.
-
-            if (isDesktop) {
-                try {
-                    return await nativeConvertToJPEG(imageBlob);
-                } catch (e) {
-                    log.error("Native conversion to JPEG failed", e);
-                }
-            }
-
-            // If the previous step failed, or if native JPEG conversion is not
-            // available on this platform, for HEIC/HEIF files we can fallback
-            // to our web HEIC converter.
-
             if (isHEICExtension(extension)) {
-                // But first, check if the browser already knows how to natively
-                // render HEICs, e.g. Safari 17+. In such cases not only is the
-                // Wasm conversion unnecessary, the native hardware accelerated
-                // support will also be _much_ faster.
                 if (mimeType == "image/heic" && (await isHEICSupported())) {
                     log.debug(
                         () => `Using native HEIC support for ${fileName}`,
@@ -103,27 +78,6 @@ export const renderableImageBlob = async (
         log.error(`Failed to convert ${fileName}, will use the original`, e);
         return imageBlob;
     }
-};
-
-/**
- * Convert {@link imageBlob} to a JPEG blob.
- *
- * The presumption is that method used by our desktop app for converting to JPEG
- * should be able to handle files with all extensions for which
- * {@link needsJPEGConversion} returns true.
- */
-const nativeConvertToJPEG = async (imageBlob: Blob) => {
-    const startTime = Date.now();
-    const imageData = new Uint8Array(await imageBlob.arrayBuffer());
-    const electron = globalThis.electron;
-    // If we're running in a worker, we need to reroute the request back to
-    // the main thread since workers don't have access to the `window` (and
-    // thus, to the `window.electron`) object.
-    const jpegData = electron
-        ? await electron.convertToJPEG(imageData)
-        : await workerBridge!.convertToJPEG(imageData);
-    log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
-    return new Blob([jpegData], { type: "image/jpeg" });
 };
 
 let _isHEICSupported: Promise<boolean> | undefined;
@@ -168,15 +122,10 @@ const testHEICDataURL =
  * 1. If the browser thinks it can play the video, then return the an object URL
  *    created by directly using the provided {@link videoBlob}.
  *
- * 2. Otherwise try to convert using FFmpeg. This conversion always happens on
- *    the desktop app, but in the browser the conversion only happens for short
- *    videos since the Wasm FFmpeg implementation is much slower.
+ * 2. Otherwise try to convert using FFmpeg, but only for short videos since
+ *    the Wasm FFmpeg implementation is much slower.
  *
  * 3. On errors, return the original (as would've happened for step 1).
- *
- * A special case if for FileType.livePhoto on Linux in the desktop app, where
- * the conversion always happens to workaround the audio only playback in that
- * specific scenario.
  *
  * @param file The {@link EnteFile} with which this video is associated.
  *
@@ -188,7 +137,7 @@ const testHEICDataURL =
  * {@link videoBlob}.
  */
 export const playableVideoURL = async (
-    file: EnteFile,
+    _file: EnteFile,
     videoFileName: string,
     videoBlob: Blob,
 ): Promise<string> => {
@@ -224,47 +173,8 @@ export const playableVideoURL = async (
     const videoObjectURL = URL.createObjectURL(typedBlob);
     const isPlayable = await isPlaybackPossible(videoObjectURL);
 
-    let shouldConvert = false;
-
-    if (isPlayable) {
-        // The browser thinks it can play this video.
-        //
-        // But it is not a guarantee. In particular, a problematic case is when
-        // for a particular codec combination, browser can play the audio
-        // stream, but not the video stream. `isPlaybackPossible` would return
-        // true, but when the user will hear only audio and not see the video.
-        //
-        // For videos themselves, we solve this (and other issues) by providing
-        // a streaming variant. However it can still happen for live photos.
-        //
-        // Unfortunately, I haven't found a way yet of detecting if this
-        // scenario is going to arise (open a issue if you've found one).
-        // Fortunately, this particular failure mode has only been reported on
-        // Linux desktop app (which uses Chromium underneath). So we add a
-        // special case - if (desktop && livePhoto && linux) then forceConvert.
-        // Practically this is a reasonable fallback since the video component
-        // of a live photo is going to be a few seconds only, and the video
-        // conversion is fast in the desktop app.
-        if (
-            isDesktop &&
-            file.metadata.fileType == FileType.livePhoto &&
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            navigator.platform.startsWith("Linux")
-        ) {
-            shouldConvert = true;
-        }
-    } else {
-        // The browser doesn't think it can play this video, try transcoding.
-        if (isDesktop) {
-            // Always on desktop.
-            shouldConvert = true;
-        } else {
-            // Don't try to transcode on the web if the file is too big.
-            if (videoBlob.size < 100 * 1024 * 1024 /* 100 MB, arbitrary */) {
-                shouldConvert = true;
-            }
-        }
-    }
+    const shouldConvert =
+        !isPlayable && videoBlob.size < 100 * 1024 * 1024 /* 100 MB, arbitrary */;
 
     if (shouldConvert) {
         try {

@@ -1,18 +1,13 @@
 import { assertionFailed } from "ente-base/assert";
-import { suppressMainWindowBlurForTrustedPrompt } from "ente-base/electron";
-import { joinPath, nameAndExtension } from "ente-base/file-name";
+import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
-import { type Electron } from "ente-base/types/ipc";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
-import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
-import { writeStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import JSZip from "jszip";
-import sanitize from "sanitize-filename";
 import type {
     AddSaveGroup,
     UpdateSaveGroup,
@@ -29,43 +24,6 @@ interface DownloadLimits {
 }
 
 let cachedLimits: DownloadLimits | undefined;
-
-const sanitizeFilename = (s: string) => sanitize(s, { replacement: "_" });
-
-const safeDirectoryName = async (
-    directoryPath: string,
-    name: string,
-    exists: (path: string) => Promise<boolean>,
-): Promise<string> => {
-    const specialDirectoryNames = [exportMetadataDirectoryName];
-
-    let result = sanitizeFilename(name);
-    let count = 1;
-    while (
-        (await exists(joinPath(directoryPath, result))) ||
-        specialDirectoryNames.includes(result)
-    ) {
-        result = `${sanitizeFilename(name)}(${count})`;
-        count++;
-    }
-    return result;
-};
-
-const safeFileName = async (
-    directoryPath: string,
-    name: string,
-    exists: (path: string) => Promise<boolean>,
-) => {
-    let result = sanitizeFilename(name);
-    let count = 1;
-    while (await exists(joinPath(directoryPath, result))) {
-        const [fn, ext] = nameAndExtension(sanitizeFilename(name));
-        if (ext) result = `${fn}(${count}).${ext}`;
-        else result = `${fn}(${count})`;
-        count++;
-    }
-    return result;
-};
 
 /**
  * Get download limits for the current device.
@@ -114,10 +72,7 @@ const shouldIncludeZipNumber = (
 /**
  * Save the given {@link files} to the user's device.
  *
- * If we're running in the context of the web app, the files will be saved to
- * the user's download folder. If we're running in the context of our desktop
- * app, the user will be prompted to select a directory on their file system and
- * the files will be saved therein.
+ * Files are saved to the browser's download destination.
  *
  * @param files The files to save.
  *
@@ -143,10 +98,6 @@ export const downloadAndSaveFiles = (
  * list of files to save, this variant is tailored for saving saves all the
  * files that belong to a collection. Otherwise, it broadly behaves similarly;
  * see that method's documentation for more details.
- *
- * When running in the context of the desktop app, instead of saving the files
- * in the directory selected by the user, files are saved in a directory with
- * the same name as the collection.
  *
  * @param isHiddenCollectionSummary `true` if the collection is associated with
  * a "hidden" collection or pseudo-collection in the app. Only relevant when
@@ -175,12 +126,10 @@ const downloadAndSave = async (
     files: EnteFile[],
     title: string,
     onAddSaveGroup: AddSaveGroup,
-    collectionSummaryName?: string,
+    _collectionSummaryName?: string,
     collectionSummaryID?: number,
     isHiddenCollectionSummary?: boolean,
 ) => {
-    const electron = globalThis.electron;
-
     const total = files.length;
     if (!files.length) {
         // Nothing to download.
@@ -188,28 +137,11 @@ const downloadAndSave = async (
         return;
     }
 
-    let downloadDirPath: string | undefined;
-    if (electron) {
-        suppressMainWindowBlurForTrustedPrompt();
-        downloadDirPath = await electron.selectDirectory();
-        if (!downloadDirPath) {
-            // The user cancelled on the directory selection dialog.
-            return;
-        }
-        if (collectionSummaryName) {
-            downloadDirPath = await mkdirCollectionDownloadFolder(
-                electron,
-                downloadDirPath,
-                collectionSummaryName,
-            );
-        }
-    }
-
+    const downloadDirPath: string | undefined = undefined;
     const shouldZipOnWeb =
-        !electron &&
-        (files.length > 1 ||
-            (files.length === 1 &&
-                files[0]?.metadata.fileType === FileType.livePhoto));
+        files.length > 1 ||
+        (files.length === 1 &&
+            files[0]?.metadata.fileType === FileType.livePhoto);
     const includeZipNumber =
         shouldZipOnWeb &&
         shouldIncludeZipNumber(files, getDownloadLimits().maxZipSize);
@@ -222,40 +154,6 @@ const downloadAndSave = async (
     // sequentially (e.g., if initial download creates Parts 1-5 and fails,
     // retry creates Part 6+ instead of starting over at Part 1).
     let nextZipBatchIndex = 1;
-
-    const downloadFilesDesktop = async (
-        filesToDownload: EnteFile[],
-        resetFailedCount = false,
-    ) => {
-        if (!filesToDownload.length || isDownloading) return;
-        if (!electron || !downloadDirPath) return;
-
-        isDownloading = true;
-        if (resetFailedCount) {
-            updateSaveGroup((g) => ({ ...g, failed: 0 }));
-        }
-        failedFiles.length = 0;
-
-        try {
-            for (const file of filesToDownload) {
-                if (canceller.signal.aborted) break;
-                try {
-                    await saveFileDesktop(electron, file, downloadDirPath);
-                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
-                } catch (e) {
-                    log.error("File download failed", e);
-                    failedFiles.push(file);
-                    updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
-                }
-            }
-
-            if (!failedFiles.length) {
-                updateSaveGroup((g) => ({ ...g, retry: undefined }));
-            }
-        } finally {
-            isDownloading = false;
-        }
-    };
 
     const downloadFilesWeb = async (
         filesToDownload: EnteFile[],
@@ -344,12 +242,10 @@ const downloadAndSave = async (
         }
     };
 
-    const downloadFiles = electron ? downloadFilesDesktop : downloadFilesWeb;
-
     const retry = () => {
         if (!failedFiles.length || isDownloading || canceller.signal.aborted)
             return;
-        void downloadFiles([...failedFiles], true);
+        void downloadFilesWeb([...failedFiles], true);
     };
 
     updateSaveGroup = onAddSaveGroup({
@@ -363,7 +259,7 @@ const downloadAndSave = async (
         retry,
     });
 
-    await downloadFiles(files);
+    await downloadFilesWeb(files);
 };
 
 /**
@@ -725,84 +621,5 @@ const saveAsZip = async (
         // Clean up event listeners
         window.removeEventListener("offline", handleOffline);
         window.removeEventListener("online", handleOnline);
-    }
-};
-
-/**
- * Create a new directory on the user's file system with the same name as the
- * provided {@link collectionName} under the provided {@link downloadDirPath},
- * and return the full path to the created directory.
- *
- * This function can be used only when running in the context of our desktop
- * app, and so such requires an {@link Electron} instance as the witness.
- */
-const mkdirCollectionDownloadFolder = async (
-    { fs }: Electron,
-    downloadDirPath: string,
-    collectionName: string,
-) => {
-    const collectionDownloadName = await safeDirectoryName(
-        downloadDirPath,
-        collectionName,
-        fs.exists,
-    );
-    const collectionDownloadPath = joinPath(
-        downloadDirPath,
-        collectionDownloadName,
-    );
-    await fs.mkdirIfNeeded(collectionDownloadPath);
-    return collectionDownloadPath;
-};
-
-/**
- * Save a file to the given {@link directoryPath} using native filesystem APIs.
- *
- * This is a sibling of {@link saveAsFile} for use when we are running in the
- * context of our desktop app. Unlike the browser, the desktop app can use
- * native file system APIs to efficiently write the files on disk without
- * needing to prompt the user for each write.
- *
- * @param electron An {@link Electron} instance, a witness to the fact that
- * we're running in the desktop app.
- *
- * @param file The {@link EnteFile} whose contents we want to save to the user's
- * file system.
- *
- * @param directoryPath The file system directory in which to save the file.
- */
-const saveFileDesktop = async (
-    electron: Electron,
-    file: EnteFile,
-    directoryPath: string,
-) => {
-    const fs = electron.fs;
-
-    const createExportName = (fileName: string) =>
-        safeFileName(directoryPath, fileName, fs.exists);
-
-    const writeStreamToFile = (
-        exportName: string,
-        stream: ReadableStream<Uint8Array> | null,
-    ) => writeStream(joinPath(directoryPath, exportName), stream);
-
-    const stream = await downloadManager.fileStream(file);
-    const fileName = fileFileName(file);
-
-    if (file.metadata.fileType == FileType.livePhoto) {
-        const { imageFileName, imageData, videoFileName, videoData } =
-            await decodeLivePhoto(fileName, await new Response(stream).blob());
-        const imageExportName = await createExportName(imageFileName);
-        await writeStreamToFile(imageExportName, new Response(imageData).body);
-        try {
-            await writeStreamToFile(
-                await createExportName(videoFileName),
-                new Response(videoData).body,
-            );
-        } catch (e) {
-            await fs.rm(joinPath(directoryPath, imageExportName));
-            throw e;
-        }
-    } else {
-        await writeStreamToFile(await createExportName(fileName), stream);
     }
 };

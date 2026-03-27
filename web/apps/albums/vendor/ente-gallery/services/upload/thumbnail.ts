@@ -1,10 +1,5 @@
 import log from "ente-base/log";
-import { type Electron } from "ente-base/types/ipc";
 import * as ffmpeg from "ente-gallery/services/ffmpeg";
-import {
-    toPathOrZipEntry,
-    type FileSystemUploadItem,
-} from "ente-gallery/services/upload";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { isHEICExtension } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
@@ -21,9 +16,9 @@ const maxThumbnailSize = 100 * 1024; // 100 KB
  *
  * [Note: Rendering arbitrary file types to the canvas needs a timeout]
  *
- * When generating thumbnails on the web (or as a fallback on the desktop app),
- * we use an HTML canvas. We take the file's content, a blob, and load it on the
- * canvas by creating an image URL for this blob (using `createObjectURL`).
+ * When generating thumbnails on the web, we use an HTML canvas. We take the
+ * file's content, a blob, and load it on the canvas by creating an image URL
+ * for this blob (using `createObjectURL`).
  *
  * In case when the browser knows how to render images of this type, this works
  * great. Later we can read off the thumbnail from the (resized) canvas.
@@ -172,35 +167,6 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
 
     return await compressedJPEGData(canvas);
 };
-
-/**
- * Generate a JPEG thumbnail for the given file or path using native tools.
- *
- * This function only works when we're running in the context of our desktop
- * app, and this dependency is enforced by the need to pass the {@link electron}
- * object which we use to perform IPC with the Node.js side of our desktop app.
- *
- * @param fsUploadItem The image or video file on the user's file system whose
- * thumbnail we want to generate.
- *
- * @param fileTypeInfo The type information for {@link fsUploadItem}.
- *
- * @return The JPEG data of the generated thumbnail.
- *
- * See also {@link generateThumbnailWeb}.
- */
-export const generateThumbnailNative = async (
-    electron: Electron,
-    fsUploadItem: FileSystemUploadItem,
-    fileTypeInfo: FileTypeInfo,
-): Promise<Uint8Array> =>
-    fileTypeInfo.fileType == FileType.image
-        ? await electron.generateImageThumbnail(
-              toPathOrZipEntry(fsUploadItem),
-              maxThumbnailDimension,
-              maxThumbnailSize,
-          )
-        : ffmpeg.generateVideoThumbnailNative(electron, fsUploadItem);
 
 /**
  * A fallback, black, thumbnail for use in cases where thumbnail generation
