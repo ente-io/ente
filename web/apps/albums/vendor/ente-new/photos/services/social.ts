@@ -65,35 +65,6 @@ export const getUnifiedSocialDiff = async (
 };
 
 /**
- * Get album feed - comments and reactions relevant to the current user.
- *
- * This uses a server-side filtered endpoint that only returns:
- * - Comments on files owned by the user (excluding user's own comments)
- * - Replies to user's comments
- * - Reactions on files owned by the user
- * - Reactions on user's comments
- *
- * @param collectionID The ID of the collection.
- * @param collectionKey The decrypted collection key (base64 encoded).
- * @returns Filtered comments and reactions for the user's feed.
- */
-export const getAlbumFeed = async (
-    collectionID: number,
-    collectionKey: string,
-): Promise<UnifiedSocialDiff> => {
-    const res = await fetch(
-        await apiURL("/social/album-feed", {
-            collectionID,
-            sinceTime: 0,
-            limit: 1000,
-        }),
-        { headers: await authenticatedRequestHeaders() },
-    );
-    ensureOk(res);
-    return decryptSocialDiff(collectionKey, await res.json());
-};
-
-/**
  * Decrypt comments and reactions from the unified diff endpoint response.
  */
 const decryptSocialDiff = async (
