@@ -104,6 +104,20 @@ export function FileUploadSection({
         [],
     );
 
+    const sameFileKeySet = (a: Set<string>, b: Set<string>) => {
+        if (a.size !== b.size) {
+            return false;
+        }
+
+        for (const value of a) {
+            if (!b.has(value)) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     useEffect(() => {
         const activeFileKeys = new Set(
             selectedUploadItems.map(uploadQueueItemKey),
@@ -129,7 +143,7 @@ export function FileUploadSection({
                     next.add(fileKey);
                 }
             });
-            return next;
+            return sameFileKeySet(current, next) ? current : next;
         });
 
         completedFileKeys.forEach((fileKey) => {
@@ -283,6 +297,8 @@ export function FileUploadSection({
                     <Stack sx={{ gap: 1.25 }}>
                         {orderedUploadItems.map((item) => {
                             const fileKey = uploadQueueItemKey(item);
+                            const isSettledCompleted =
+                                settledCompletedFileKeys.has(fileKey);
                             return (
                                 <Box
                                     key={fileKey}
@@ -299,7 +315,11 @@ export function FileUploadSection({
                                             );
                                         }
                                     }}
-                                    sx={{ willChange: "transform" }}
+                                    sx={{
+                                        position: "relative",
+                                        zIndex: isSettledCompleted ? 0 : 1,
+                                        willChange: "transform",
+                                    }}
                                 >
                                     <UploadItemCard
                                         item={item}
