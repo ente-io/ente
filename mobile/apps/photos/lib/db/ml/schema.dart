@@ -284,11 +284,14 @@ const petFcClusterIDIndex =
 
 const petClusterSummaryTable = 'pet_cluster_summary';
 
+const exemplarsColumn = 'exemplars_json';
+
 const createPetClusterSummaryTable = '''
 CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
   $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
   $countColumn INTEGER NOT NULL DEFAULT 0,
-  $speciesColumn INTEGER NOT NULL DEFAULT -1
+  $speciesColumn INTEGER NOT NULL DEFAULT -1,
+  $exemplarsColumn TEXT
 );
 ''';
 

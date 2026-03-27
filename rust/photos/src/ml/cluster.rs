@@ -146,6 +146,63 @@ pub fn median_centroid(embs: &[&Vec<f32>], dim: usize) -> Vec<f32> {
     centroid
 }
 
+/// Select up to `k` diverse exemplars from a set of embeddings.
+///
+/// Uses greedy farthest-first traversal:
+/// 1. Start with the embedding closest to the mean centroid (most typical).
+/// 2. Repeatedly add the embedding farthest from all already-selected exemplars.
+///
+/// This gives good coverage of the cluster's shape without storing every member.
+pub fn select_exemplars(embs: &[&Vec<f32>], k: usize, dim: usize) -> Vec<Vec<f32>> {
+    let n = embs.len();
+    if n == 0 {
+        return Vec::new();
+    }
+    if n <= k {
+        return embs.iter().map(|e| (*e).clone()).collect();
+    }
+
+    let centroid = mean_centroid(embs, dim);
+
+    let mut selected: Vec<usize> = Vec::with_capacity(k);
+
+    // First exemplar: closest to the centroid (most representative)
+    let first = (0..n)
+        .max_by(|&a, &b| {
+            dot(embs[a], &centroid)
+                .partial_cmp(&dot(embs[b], &centroid))
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
+        .unwrap();
+    selected.push(first);
+
+    // Greedy farthest-first: pick the point whose nearest selected exemplar
+    // is as far away as possible (maximises diversity).
+    while selected.len() < k {
+        let best = (0..n)
+            .filter(|i| !selected.contains(i))
+            .min_by(|&a, &b| {
+                // max similarity to any selected exemplar
+                let max_sim_a = selected
+                    .iter()
+                    .map(|&s| dot(embs[a], embs[s]))
+                    .fold(f32::NEG_INFINITY, f32::max);
+                let max_sim_b = selected
+                    .iter()
+                    .map(|&s| dot(embs[b], embs[s]))
+                    .fold(f32::NEG_INFINITY, f32::max);
+                // lower max-similarity = farther = more diverse
+                max_sim_a
+                    .partial_cmp(&max_sim_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+            .unwrap();
+        selected.push(best);
+    }
+
+    selected.iter().map(|&i| embs[i].clone()).collect()
+}
+
 /// Compute L2-normalized mean centroid from a list of embeddings.
 pub fn mean_centroid(embs: &[&Vec<f32>], dim: usize) -> Vec<f32> {
     if embs.is_empty() {
