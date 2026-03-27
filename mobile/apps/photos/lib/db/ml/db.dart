@@ -454,9 +454,23 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deletePetBodiesTable);
     await db.execute(deletePetFaceVectorIdMappingTable);
     await db.execute(deletePetBodyVectorIdMappingTable);
+    await db.execute(deletePetFaceClustersTable);
+    await db.execute(deletePetClusterSummaryTable);
+    await db.execute(deletePetClusterPetTable);
+    await db.execute(deleteNotPetFeedbackTable);
+    await db.execute(deletePetClusterCentroidVectorIdMappingTable);
     final petVdbs =
         _isOffline ? PetVectorDB.allOfflineInstances : PetVectorDB.allInstances;
     for (final vdb in petVdbs) {
+      await vdb.deleteIndexFile();
+    }
+    final petCentroidVdbs = _isOffline
+        ? [
+            PetClusterCentroidVectorDB.offlineDog,
+            PetClusterCentroidVectorDB.offlineCat
+          ]
+        : [PetClusterCentroidVectorDB.dog, PetClusterCentroidVectorDB.cat];
+    for (final vdb in petCentroidVdbs) {
       await vdb.deleteIndexFile();
     }
     _markClusterSummaryMutated();

@@ -96,6 +96,13 @@ class PetClusterCentroidVectorDB {
     }
   }
 
+  /// Delete the on-disk index file and reset the lazy handle.
+  Future<void> deleteIndexFile() async {
+    final path = await getIndexPath();
+    await _deleteIndexFile(path);
+    _vectorDbFuture = null;
+  }
+
   // ── ID Mapping (cluster_id string → integer for usearch) ──
 
   Future<Map<String, int>> getClusterCentroidVectorIdMap(
