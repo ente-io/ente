@@ -1,5 +1,5 @@
 Latest changes:
-
+- Laurens: Make asset downloads (ML models) resumable (internal + offline)
 
 Still behind internal flag:
 - Ashil, Setal (I): Native family management screens
