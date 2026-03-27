@@ -1634,23 +1634,20 @@ const SelectionActionBar: React.FC<{
         sx={{
             px: { xs: 2, sm: 3 },
             py: { xs: 1.25, sm: 1.5 },
-            background:
-                "linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.95) 100%)",
         }}
     >
         <Box
-            sx={{
+            sx={(theme) => ({
                 maxWidth: 760,
                 mx: "auto",
                 borderRadius: "20px",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                background:
-                    "linear-gradient(180deg, rgba(24, 26, 30, 0.96) 0%, rgba(14, 16, 19, 0.98) 100%)",
-                boxShadow: "0 18px 42px rgba(0, 0, 0, 0.32)",
+                border: `1px solid ${theme.vars.palette.stroke.faint}`,
+                backgroundColor: theme.vars.palette.background.paper,
+                boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
                 backdropFilter: "blur(18px)",
                 px: { xs: 1.25, sm: 1.5 },
                 py: 1.25,
-            }}
+            })}
         >
             <Stack
                 direction={{ xs: "column", sm: "row" }}
@@ -1677,15 +1674,14 @@ const SelectionActionBar: React.FC<{
                             px: 1.25,
                             py: 0.875,
                             borderRadius: "14px",
-                            background:
-                                "linear-gradient(180deg, rgba(14, 71, 157, 0.26) 0%, rgba(8, 45, 106, 0.18) 100%)",
-                            border: "1px solid rgba(74, 144, 255, 0.18)",
+                            backgroundColor: "rgba(16, 113, 255, 0.10)",
+                            border: "1px solid rgba(16, 113, 255, 0.16)",
                         }}
                     >
                         <CheckCircleRoundedIcon
                             sx={{
                                 fontSize: 18,
-                                color: "#7FB3FF",
+                                color: "#1071FF",
                                 flexShrink: 0,
                             }}
                         />
@@ -1700,17 +1696,17 @@ const SelectionActionBar: React.FC<{
                     <IconButton
                         onClick={onDone}
                         disabled={bulkDownloading}
-                        sx={{
+                        sx={(theme) => ({
                             color: "text.muted",
                             width: 38,
                             height: 38,
                             flexShrink: 0,
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
-                            backgroundColor: "rgba(255, 255, 255, 0.035)",
+                            border: `1px solid ${theme.vars.palette.stroke.faint}`,
+                            backgroundColor: theme.vars.palette.fill.faint,
                             "&:hover": {
-                                backgroundColor: "rgba(255, 255, 255, 0.07)",
+                                backgroundColor: theme.vars.palette.fill.faintHover,
                             },
-                        }}
+                        })}
                     >
                         <ClearRoundedIcon sx={{ fontSize: 18 }} />
                     </IconButton>
@@ -1723,13 +1719,16 @@ const SelectionActionBar: React.FC<{
                         color="secondary"
                         onClick={onToggleSelectAll}
                         disabled={bulkDownloading}
-                        sx={{
+                        sx={(theme) => ({
                             minHeight: 42,
                             px: 1.5,
                             borderRadius: "14px",
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
-                            backgroundColor: "rgba(255, 255, 255, 0.04)",
-                        }}
+                            border: `1px solid ${theme.vars.palette.stroke.faint}`,
+                            backgroundColor: theme.vars.palette.fill.faint,
+                            "&:hover": {
+                                backgroundColor: theme.vars.palette.fill.faintHover,
+                            },
+                        })}
                     >
                         {allSelected ? t("deselectAll") : t("selectAll")}
                     </Button>
@@ -1743,8 +1742,12 @@ const SelectionActionBar: React.FC<{
                             px: 1.75,
                             borderRadius: "14px",
                             boxShadow: "none",
+                            color: "#FFFFFF",
                             background:
                                 "linear-gradient(180deg, #1674FF 0%, #0B5FE0 100%)",
+                            "& .MuiButton-startIcon": {
+                                color: "#FFFFFF",
+                            },
                             "&:hover": {
                                 boxShadow: "none",
                                 background:
@@ -1765,10 +1768,14 @@ const SelectionActionBar: React.FC<{
                             minHeight: 42,
                             px: 1.75,
                             borderRadius: "14px",
-                            border: "1px solid rgba(255, 91, 91, 0.22)",
-                            backgroundColor: "rgba(255, 91, 91, 0.12)",
+                            color: "#FFFFFF",
+                            border: "1px solid rgba(185, 28, 28, 0.26)",
+                            backgroundColor: "#D14343",
+                            "& .MuiButton-startIcon": {
+                                color: "#FFFFFF",
+                            },
                             "&:hover": {
-                                backgroundColor: "rgba(255, 91, 91, 0.18)",
+                                backgroundColor: "#B93838",
                             },
                         }}
                     >
