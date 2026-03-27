@@ -1526,6 +1526,7 @@ export const updateItemCollections = async (
     collectionIDs: number[],
     masterKey: string,
 ): Promise<void> => {
+    const currentUserID = ensureLocalUser().id;
     const currentCollectionIDs = getCollectionIDsForFile(fileID);
     const nextCollectionIDs = Array.from(
         new Set(
@@ -1547,6 +1548,16 @@ export const updateItemCollections = async (
     const pendingAddedCollectionIDs = [...collectionIDsToAdd];
 
     for (const collectionID of collectionIDsToRemove) {
+        const sourceCollectionRecord = encryptedCollections.get(collectionID);
+        if (!sourceCollectionRecord) {
+            throw new Error(`Collection ${collectionID} not in cache`);
+        }
+
+        if (sourceCollectionRecord.ownerID !== currentUserID) {
+            await removeFilesFromCollection(collectionID, [fileID]);
+            continue;
+        }
+
         const targetCollectionID =
             pendingAddedCollectionIDs.shift() ??
             nextCollectionIDs.find(

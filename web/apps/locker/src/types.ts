@@ -162,7 +162,7 @@ export const canOpenCollectionSharing = (collection: LockerCollection) =>
 export const canShareLockerFileLink = (
     item: LockerItem,
     currentUserID: number,
-) => item.type === "file" && (item.ownerID ?? currentUserID) === currentUserID;
+) => (item.ownerID ?? currentUserID) === currentUserID;
 
 export const canManageCollectionSharing = (
     collection: LockerCollection,

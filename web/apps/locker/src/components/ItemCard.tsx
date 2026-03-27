@@ -344,13 +344,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                                 />
                             </Box>
                         )}
-                        <ItemOverflowMenu
-                            item={item}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            deleteDisabledHint={deleteDisabledHint}
-                            onShareLink={onShareLink}
-                        />
+                        {!isIncomingShared && (
+                            <ItemOverflowMenu
+                                item={item}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
+                                deleteDisabledHint={deleteDisabledHint}
+                                onShareLink={onShareLink}
+                            />
+                        )}
                     </Stack>
                 )}
             </ButtonBase>
@@ -391,7 +393,7 @@ const ItemOverflowMenu: React.FC<{
                 {t("edit")}
             </OverflowMenuOption>
         )}
-        {item.type === "file" && onShareLink && (
+        {onShareLink && (
             <OverflowMenuOption
                 startIcon={<ShareOutlinedIcon />}
                 onClick={() => onShareLink(item)}

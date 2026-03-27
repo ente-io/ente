@@ -157,6 +157,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     } | null>(null);
     const [isCreatingFileLink, setIsCreatingFileLink] = useState(false);
     const [isDeletingFileLink, setIsDeletingFileLink] = useState(false);
+    const [isDeleteFileLinkConfirmOpen, setIsDeleteFileLinkConfirmOpen] =
+        useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     const displayCollections = useMemo(
@@ -454,12 +456,16 @@ export const ItemList: React.FC<ItemListProps> = ({
         );
     }, [visibleSelectableItemIDs]);
     const closeFileLinkDialog = useCallback(() => {
-        if (isCreatingFileLink || isDeletingFileLink) {
+        if (
+            isCreatingFileLink ||
+            isDeletingFileLink ||
+            isDeleteFileLinkConfirmOpen
+        ) {
             return;
         }
         setActiveFileLinkItem(null);
         setActiveFileLink(null);
-    }, [isCreatingFileLink, isDeletingFileLink]);
+    }, [isCreatingFileLink, isDeleteFileLinkConfirmOpen, isDeletingFileLink]);
     const openFileLinkDialog = useCallback(
         async (item: LockerItem) => {
             if (!masterKey) {
@@ -534,13 +540,6 @@ export const ItemList: React.FC<ItemListProps> = ({
         if (!activeFileLinkItem) {
             return;
         }
-        if (
-            !window.confirm(
-                `${t("deleteShareLinkDialogTitle")}\n\n${t("deleteShareLinkConfirmation")}`,
-            )
-        ) {
-            return;
-        }
 
         setIsDeletingFileLink(true);
         try {
@@ -559,6 +558,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             setFeedbackMessage(t("failedToDeleteShareLink"));
         } finally {
             setIsDeletingFileLink(false);
+            setIsDeleteFileLinkConfirmOpen(false);
         }
     }, [activeFileLink?.linkID, activeFileLinkItem]);
     const downloadSelectedFiles = useCallback(async () => {
@@ -1146,8 +1146,51 @@ export const ItemList: React.FC<ItemListProps> = ({
                 onClose={closeFileLinkDialog}
                 onCopy={() => void copyActiveFileLink()}
                 onShare={() => void shareActiveFileLink()}
-                onDelete={() => void deleteActiveFileLink()}
+                onDelete={() => setIsDeleteFileLinkConfirmOpen(true)}
             />
+
+            <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
+                open={isDeleteFileLinkConfirmOpen}
+                onClose={() => {
+                    if (!isDeletingFileLink) {
+                        setIsDeleteFileLinkConfirmOpen(false);
+                    }
+                }}
+                fullWidth
+                maxWidth="xs"
+            >
+                <DialogTitle>{t("deleteShareLinkDialogTitle")}</DialogTitle>
+                <DialogContent>
+                    <Stack sx={{ gap: 2.25 }}>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("deleteShareLinkConfirmation")}
+                        </Typography>
+                        <Stack direction="row" sx={{ gap: 1 }}>
+                            <Button
+                                fullWidth
+                                color="secondary"
+                                disabled={isDeletingFileLink}
+                                onClick={() =>
+                                    setIsDeleteFileLinkConfirmOpen(false)
+                                }
+                                sx={{ minHeight: 44 }}
+                            >
+                                {t("cancel")}
+                            </Button>
+                            <LoadingButton
+                                fullWidth
+                                color="critical"
+                                loading={isDeletingFileLink}
+                                onClick={() => void deleteActiveFileLink()}
+                                sx={{ minHeight: 44 }}
+                            >
+                                {t("deleteLink")}
+                            </LoadingButton>
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
 
             <Dialog
                 slotProps={{ paper: { sx: lockerDialogPaperSx } }}

@@ -245,23 +245,19 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                     : t("downloading")
                                                 : t("download")}
                                         </Button>
-                                        {onShareLink && (
-                                            <Button
-                                                variant="outlined"
-                                                startIcon={
-                                                    <ShareOutlinedIcon />
-                                                }
-                                                onClick={() =>
-                                                    onShareLink(item)
-                                                }
-                                                fullWidth
-                                            >
-                                                {t("shareLink")}
-                                            </Button>
-                                        )}
                                     </Stack>
                                 )}
                             </>
+                        )}
+                        {item.type !== "file" && onShareLink && (
+                            <Button
+                                variant="outlined"
+                                startIcon={<ShareOutlinedIcon />}
+                                onClick={() => onShareLink(item)}
+                                fullWidth
+                            >
+                                {t("shareLink")}
+                            </Button>
                         )}
                     </Stack>
 
