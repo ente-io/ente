@@ -131,6 +131,16 @@ When you first open Ente Photos, you'll be guided through account creation:
 
 For a detailed walkthrough, see [Creating an account](/photos/getting-started/signup).
 
+### Why am I not receiving the email verification code during signup? {#email-verification-code-signup}
+
+If you're not receiving the email verification code, try the following:
+
+1. Check your spam folder to see if the email was filtered there
+2. Make sure your email domain or provider isn't blocking emails from ente.io
+3. Resend the verification code
+
+If you still don't receive it after these steps, email [support@ente.io](mailto:support@ente.io) for further help.
+
 ### What is the recovery key and why is it important? {#recovery-key}
 
 Your recovery key is the **only way** to recover your account if you:
