@@ -330,7 +330,7 @@
     }
   },
   "sorry": "Omlouváme se",
-  "importFailureDesc": "Nelze analyzovat vybraný soubor.\nProsím napište na support@ente.io, pokud potřebujete pomoc!",
+  "importFailureDesc": "Nelze analyzovat vybraný soubor.\nProsím napište na support@ente.com, pokud potřebujete pomoc!",
   "pendingSyncs": "Varování",
   "pendingSyncsWarningBody": "Některé z Vašich kódů nebyly zálohovány.\n\nProsím, ujistěte se, že máte zálohu těchto kódů před odhlášením.",
   "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření",
@@ -343,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

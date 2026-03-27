@@ -12,7 +12,7 @@ const socialLinks = [
     {
         icon: DiscordBrandIcon,
         label: "Discord",
-        url: "https://ente.io/discord",
+        url: "https://ente.com/discord",
         buttonSize: 48,
     },
     {

@@ -100,11 +100,15 @@ class FlagService {
 
   bool get useRustForML => internalUser;
 
+  bool get enableMLInBackground => internalUser;
+
   bool get useRustForFaceThumbnails => internalUser;
 
   bool get petEnabled => internalUser;
 
   bool get qrFeatureEnabled => internalUser;
+
+  bool get enableBgLocalUploadPriority => internalUser;
 
   bool get syncRecoveryDiagnostics => internalUser;
 

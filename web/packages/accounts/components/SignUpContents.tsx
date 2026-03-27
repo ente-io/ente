@@ -278,13 +278,13 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                                 components={{
                                     a: (
                                         <Link
-                                            href="https://ente.io/terms"
+                                            href="https://ente.com/terms"
                                             target="_blank"
                                         />
                                     ),
                                     b: (
                                         <Link
-                                            href="https://ente.io/privacy"
+                                            href="https://ente.com/privacy"
                                             target="_blank"
                                         />
                                     ),

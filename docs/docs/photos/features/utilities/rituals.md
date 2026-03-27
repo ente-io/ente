@@ -62,4 +62,4 @@ Rituals help you build a photo habit by prompting you to take photos on specific
 
 - [Albums](/photos/features/albums-and-organization/albums)
 - [Notifications](/photos/features/utilities/notifications)
-- [Rituals blog post](https://ente.io/blog/rituals/)
+- [Rituals blog post](https://ente.com/blog/rituals/)

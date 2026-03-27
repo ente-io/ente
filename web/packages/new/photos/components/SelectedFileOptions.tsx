@@ -10,6 +10,7 @@ import {
     RemoveCircleIcon,
     Time04Icon,
     Unarchive03Icon,
+    UserAdd02Icon,
     ViewIcon,
     ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
@@ -17,7 +18,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
@@ -615,7 +615,7 @@ const AddToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const AddPersonButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("add_a_person")}>
         <IconButton {...{ onClick }}>
-            <PersonAddIcon />
+            <HugeiconsIcon icon={UserAdd02Icon} />
         </IconButton>
     </Tooltip>
 );

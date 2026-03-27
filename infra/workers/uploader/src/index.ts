@@ -1,7 +1,7 @@
 /**
  * Proxy file uploads.
  *
- * See: https://ente.io/blog/tech/making-uploads-faster/
+ * See: https://ente.com/blog/tech/making-uploads-faster/
  */
 
 export default {

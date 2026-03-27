@@ -29,7 +29,7 @@
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
-  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
+  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.com</warning> from your registered email address.",
   "entePhotosPerm": "Ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -315,19 +315,19 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verification ID",
   "verifyEmailID": "Verify {email}",
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share photos.",
-  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.com verification ID: {verificationID}",
   "somethingWentWrong": "Something went wrong",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io",
-  "shareTextRecommendUsingEnteForFamily": "Download Ente so I can add you to my family plan\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Download Ente so I can add you to my family plan\n\nhttps://ente.com",
   "done": "Done",
   "applyCodeTitle": "Apply code",
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
@@ -355,7 +355,7 @@
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB for them + {storageAmountInGB} GB for you when they upgrade.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
-  "shareTextReferralCode": "Ente Photos is a private and safe home for your photos\n* Download Ente Photos from https://ente.io/app\n* Create an account\n* Apply the referral code {referralCode} in Settings->Referral\n* Get {referralStorageInGB}GB free when you upgrade to a paid plan",
+  "shareTextReferralCode": "Ente Photos is a private and safe home for your photos\n* Download Ente Photos from https://ente.com/app\n* Create an account\n* Apply the referral code {referralCode} in Settings->Referral\n* Get {referralStorageInGB}GB free when you upgrade to a paid plan",
   "claimFreeStorage": "Claim free storage",
   "inviteYourFriends": "Invite your friends",
   "earnFreeStorage": "Earn free storage",
@@ -889,7 +889,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -937,7 +937,7 @@
   "subscription": "Subscription",
   "paymentDetails": "Payment details",
   "manageFamily": "Manage Family",
-  "contactToManageSubscription": "Please contact us at support@ente.io to manage your {provider} subscription.",
+  "contactToManageSubscription": "Please contact us at support@ente.com to manage your {provider} subscription.",
   "renewSubscription": "Renew subscription",
   "cancelSubscription": "Cancel subscription",
   "areYouSureYouWantToRenew": "Are you sure you want to renew?",
@@ -987,7 +987,7 @@
   "visitWebToManage": "Please visit web.ente.io to manage your subscription",
   "managePaymentMethod": "Manage payment method",
   "couldNotUpdateSubscription": "Could not update subscription",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Please contact support@ente.io and we will be happy to help!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Please contact support@ente.com and we will be happy to help!",
   "paymentFailed": "Payment failed",
   "paymentFailedTalkToProvider": "Please talk to {providerName} support if you were charged",
   "@paymentFailedTalkToProvider": {
@@ -1475,6 +1475,14 @@
   "searchCaptionEmptySection": "Add descriptions like \"#trip\" in photo info to quickly find them here",
   "language": "Language",
   "selectLanguage": "Select Language",
+  "noLocation": "No location",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "No location tag",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Location name",
   "addLocation": "Add location",
   "groupNearbyPhotos": "Group nearby photos",

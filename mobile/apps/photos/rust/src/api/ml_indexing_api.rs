@@ -1,14 +1,7 @@
-use crate::image::decode::decode_image_from_path;
-use crate::ml::{
-    clip::{image::run_clip_image, text::run_clip_text_query, tokenizer::tokenize_clip_text},
-    error::{MlError, MlResult},
-    face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
-    pet::{
-        align::run_pet_face_alignment,
-        detect::{run_pet_body_detection, run_pet_face_detection},
-        embed::{run_pet_body_embedding, run_pet_face_embedding},
-    },
-    runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
+use ente_media_inspector::ml::{
+    indexing as shared_indexing,
+    runtime::{ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
+    types as shared_types,
 };
 
 #[derive(Clone, Debug)]
@@ -155,218 +148,52 @@ pub struct RunClipTextResult {
 }
 
 pub fn init_ml_runtime(config: RustMlRuntimeConfig) -> Result<(), String> {
-    runtime::prepare_runtime(&to_runtime_config(&config)).map_err(|e| e.to_string())
+    shared_indexing::init_ml_runtime(to_runtime_config(&config)).map_err(|e| e.to_string())
 }
 
 pub fn release_ml_runtime() -> Result<(), String> {
-    runtime::release_runtime().map_err(|e| e.to_string())
+    shared_indexing::release_ml_runtime().map_err(|e| e.to_string())
 }
 
 pub fn analyze_image_rust(req: AnalyzeImageRequest) -> Result<AnalyzeImageResult, String> {
-    analyze_image_rust_inner(req).map_err(|e| e.to_string())
+    let shared_req = shared_indexing::AnalyzeImageRequest {
+        file_id: req.file_id,
+        image_path: req.image_path,
+        run_faces: req.run_faces,
+        run_clip: req.run_clip,
+        run_pets: req.run_pets,
+        runtime_config: MlRuntimeConfig {
+            model_paths: to_model_paths(&req.model_paths),
+            provider_policy: to_provider_policy(&req.provider_policy),
+        },
+    };
+
+    shared_indexing::analyze_image(shared_req)
+        .map(to_api_analyze_image_result)
+        .map_err(|e| e.to_string())
 }
 
 pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, String> {
-    run_clip_text_rust_inner(req).map_err(|e| e.to_string())
-}
-
-pub fn tokenize_clip_text_rust(text: String, vocab_path: String) -> Result<Vec<i32>, String> {
-    tokenize_clip_text_rust_inner(&text, &vocab_path).map_err(|e| e.to_string())
-}
-
-fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
-    validate_request_model_paths(&req)?;
-
-    let runtime_config = MlRuntimeConfig {
-        model_paths: to_model_paths(&req.model_paths),
+    let shared_req = shared_indexing::RunClipTextRequest {
+        text: req.text,
+        model_path: req.model_path,
+        vocab_path: req.vocab_path,
         provider_policy: to_provider_policy(&req.provider_policy),
     };
 
-    runtime::with_runtime(&runtime_config, |runtime| {
-        let decoded = decode_image_from_path(&req.image_path)?;
-        let dims = RustDimensions {
-            width: decoded.dimensions.width as i32,
-            height: decoded.dimensions.height as i32,
-        };
-
-        let faces = if req.run_faces {
-            let detections = run_face_detection(runtime, &decoded)?;
-            if detections.is_empty() {
-                Some(Vec::new())
-            } else {
-                let (aligned, mut face_results) =
-                    run_face_alignment(req.file_id, &decoded, detections)?;
-                run_face_embedding(runtime, &aligned, &mut face_results)?;
-                Some(face_results.into_iter().map(to_api_face_result).collect())
-            }
-        } else {
-            None
-        };
-
-        let clip = if req.run_clip {
-            let clip = run_clip_image(runtime, &decoded)?;
-            Some(RustClipResult {
-                embedding: clip.embedding,
-            })
-        } else {
-            None
-        };
-
-        let (pet_faces, pet_bodies) = if req.run_pets {
-            let pet_face_detections = run_pet_face_detection(runtime, &decoded)?;
-            let body_detections = run_pet_body_detection(runtime, &decoded)?;
-
-            let pet_face_results = if !pet_face_detections.is_empty() {
-                let (aligned, mut pet_results) =
-                    run_pet_face_alignment(req.file_id, &decoded, &pet_face_detections)?;
-                run_pet_face_embedding(runtime, &aligned, &mut pet_results)?;
-                pet_results
-            } else {
-                Vec::new()
-            };
-
-            let mut body_results: Vec<crate::ml::types::PetBodyResult> = body_detections
-                .into_iter()
-                .map(|det| {
-                    let base_id = crate::ml::types::to_face_id(req.file_id, det.box_xyxy);
-                    let pet_body_id = format!("{base_id}_c{}", det.coco_class);
-                    crate::ml::types::PetBodyResult {
-                        pet_body_id,
-                        detection: det,
-                        body_embedding: Vec::new(),
-                    }
-                })
-                .collect();
-            if !body_results.is_empty() {
-                run_pet_body_embedding(runtime, &decoded, &mut body_results)?;
-            }
-
-            (
-                Some(
-                    pet_face_results
-                        .into_iter()
-                        .map(to_api_pet_face_result)
-                        .collect(),
-                ),
-                Some(
-                    body_results
-                        .into_iter()
-                        .map(to_api_pet_body_result)
-                        .collect(),
-                ),
-            )
-        } else {
-            (None, None)
-        };
-
-        Ok(AnalyzeImageResult {
-            file_id: req.file_id,
-            decoded_image_size: dims,
-            faces,
-            clip,
-            pet_faces,
-            pet_bodies,
-        })
-    })
-}
-
-fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResult> {
-    let RunClipTextRequest {
-        text,
-        model_path,
-        vocab_path,
-        provider_policy,
-    } = req;
-
-    if model_path.trim().is_empty() {
-        return Err(MlError::InvalidRequest(
-            "missing model path: clipTextModelPath".to_string(),
-        ));
-    }
-    if vocab_path.trim().is_empty() {
-        return Err(MlError::InvalidRequest(
-            "missing model path: clipTextVocabPath".to_string(),
-        ));
-    }
-
-    let runtime_config = MlRuntimeConfig {
-        model_paths: ModelPaths {
-            face_detection: String::new(),
-            face_embedding: String::new(),
-            clip_image: String::new(),
-            clip_text: model_path,
-            pet_face_detection: String::new(),
-            pet_face_embedding_dog: String::new(),
-            pet_face_embedding_cat: String::new(),
-            pet_body_detection: String::new(),
-            pet_body_embedding_dog: String::new(),
-            pet_body_embedding_cat: String::new(),
-        },
-        provider_policy: to_provider_policy(&provider_policy),
-    };
-
-    runtime::with_runtime(&runtime_config, |runtime| {
-        let clip = run_clip_text_query(runtime, &text, &vocab_path)?;
-        Ok(RunClipTextResult {
-            embedding: clip
+    shared_indexing::run_clip_text(shared_req)
+        .map(|result| RunClipTextResult {
+            embedding: result
                 .embedding
                 .into_iter()
                 .map(|value| value as f64)
                 .collect(),
         })
-    })
+        .map_err(|e| e.to_string())
 }
 
-fn tokenize_clip_text_rust_inner(text: &str, vocab_path: &str) -> MlResult<Vec<i32>> {
-    if vocab_path.trim().is_empty() {
-        return Err(MlError::InvalidRequest(
-            "missing model path: clipTextVocabPath".to_string(),
-        ));
-    }
-    tokenize_clip_text(text, vocab_path)
-}
-
-fn validate_request_model_paths(req: &AnalyzeImageRequest) -> MlResult<()> {
-    let mut missing = Vec::new();
-    if req.run_faces {
-        if req.model_paths.face_detection.trim().is_empty() {
-            missing.push("faceDetectionModelPath");
-        }
-        if req.model_paths.face_embedding.trim().is_empty() {
-            missing.push("faceEmbeddingModelPath");
-        }
-    }
-    if req.run_clip && req.model_paths.clip_image.trim().is_empty() {
-        missing.push("clipImageModelPath");
-    }
-    if req.run_pets {
-        if req.model_paths.pet_face_detection.trim().is_empty() {
-            missing.push("petFaceDetectionModelPath");
-        }
-        if req.model_paths.pet_body_detection.trim().is_empty() {
-            missing.push("petBodyDetectionModelPath");
-        }
-        if req.model_paths.pet_face_embedding_dog.trim().is_empty() {
-            missing.push("petFaceEmbeddingDogModelPath");
-        }
-        if req.model_paths.pet_face_embedding_cat.trim().is_empty() {
-            missing.push("petFaceEmbeddingCatModelPath");
-        }
-        if req.model_paths.pet_body_embedding_dog.trim().is_empty() {
-            missing.push("petBodyEmbeddingDogModelPath");
-        }
-        if req.model_paths.pet_body_embedding_cat.trim().is_empty() {
-            missing.push("petBodyEmbeddingCatModelPath");
-        }
-    }
-    if missing.is_empty() {
-        return Ok(());
-    }
-
-    Err(MlError::InvalidRequest(format!(
-        "missing required model paths: {}",
-        missing.join(", ")
-    )))
+pub fn tokenize_clip_text_rust(text: String, vocab_path: String) -> Result<Vec<i32>, String> {
+    shared_indexing::tokenize_clip_text(&text, &vocab_path).map_err(|e| e.to_string())
 }
 
 fn to_runtime_config(config: &RustMlRuntimeConfig) -> MlRuntimeConfig {
@@ -400,7 +227,29 @@ fn to_provider_policy(policy: &RustExecutionProviderPolicy) -> ExecutionProvider
     }
 }
 
-fn to_api_face_result(result: crate::ml::types::FaceResult) -> RustFaceResult {
+fn to_api_analyze_image_result(result: shared_indexing::AnalyzeImageResult) -> AnalyzeImageResult {
+    AnalyzeImageResult {
+        file_id: result.file_id,
+        decoded_image_size: RustDimensions {
+            width: result.decoded_image_size.width as i32,
+            height: result.decoded_image_size.height as i32,
+        },
+        faces: result
+            .faces
+            .map(|faces| faces.into_iter().map(to_api_face_result).collect()),
+        clip: result.clip.map(|clip| RustClipResult {
+            embedding: clip.embedding,
+        }),
+        pet_faces: result
+            .pet_faces
+            .map(|faces| faces.into_iter().map(to_api_pet_face_result).collect()),
+        pet_bodies: result
+            .pet_bodies
+            .map(|bodies| bodies.into_iter().map(to_api_pet_body_result).collect()),
+    }
+}
+
+fn to_api_face_result(result: shared_types::FaceResult) -> RustFaceResult {
     RustFaceResult {
         detection: RustDetection {
             score: result.detection.score,
@@ -429,7 +278,7 @@ fn to_api_face_result(result: crate::ml::types::FaceResult) -> RustFaceResult {
     }
 }
 
-fn to_api_pet_face_result(result: crate::ml::types::PetFaceResult) -> RustPetFaceResult {
+fn to_api_pet_face_result(result: shared_types::PetFaceResult) -> RustPetFaceResult {
     RustPetFaceResult {
         detection: RustPetFaceDetectionResult {
             score: result.detection.score as f64,
@@ -466,7 +315,7 @@ fn to_api_pet_face_result(result: crate::ml::types::PetFaceResult) -> RustPetFac
     }
 }
 
-fn to_api_pet_body_result(result: crate::ml::types::PetBodyResult) -> RustPetBodyResult {
+fn to_api_pet_body_result(result: shared_types::PetBodyResult) -> RustPetBodyResult {
     RustPetBodyResult {
         box_xyxy: result
             .detection

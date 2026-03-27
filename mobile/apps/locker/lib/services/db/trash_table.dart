@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import "package:ente_crypto_api/ente_crypto_api.dart";
+import 'package:locker/models/file_type.dart';
 import 'package:locker/services/db/locker_db.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/utils/crypto_helper.dart';
@@ -89,6 +90,9 @@ Map<String, dynamic> _trashPayloadToMap(TrashFile trashFile) {
   return {
     'local_path': trashFile.localPath,
     'title': trashFile.title,
+    'file_type': trashFile.fileType != null
+        ? getInt(trashFile.fileType!)
+        : null,
     'creation_time': trashFile.creationTime,
     'modification_time': trashFile.modificationTime,
     'added_time': trashFile.addedTime,
@@ -145,6 +149,12 @@ Future<TrashFile> _trashFileFromRow(
   trashFile.mMdVersion = payload['m_md_version'] ?? 0;
   trashFile.pubMmdEncodedJson = payload['pub_mmd_encoded_json'];
   trashFile.pubMmdVersion = payload['pub_mmd_version'] ?? 1;
+  final fileTypeIndex = payload['file_type'] as int?;
+  if (fileTypeIndex != null) {
+    trashFile.fileType = getFileType(fileTypeIndex);
+  } else if (trashFile.pubMagicMetadata.info != null) {
+    trashFile.fileType = FileType.info;
+  }
   trashFile.createdAt = row['created_at'] ?? payload['created_at'];
   trashFile.updateAt = row['update_at'] ?? payload['update_at'];
   trashFile.deleteBy = row['delete_by'] ?? payload['delete_by'];
