@@ -424,6 +424,14 @@ For existing album links shared while on the free plan, the device limit will no
 
 Once you upgrade to a paid plan, all future public links will have no device limit unless you set one yourself.
 
+### Why do emails on my feed appear masked for public links? {#masked-emails-public-links}
+
+On public links, contributor emails are masked by default to protect privacy.
+
+If you're an album member viewing comments or likes in the mobile app, you'll see names instead of masked emails — but only for people you've already added to your People list with their linked email address.
+
+Anonymous viewers (people without an Ente account) can also show a name if they've entered one themselves when liking or commenting.
+
 ## Public Link Features
 
 ### Can I convert a quick link to a regular album? {#quick-link-convert}
