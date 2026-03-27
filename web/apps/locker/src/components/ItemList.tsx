@@ -29,6 +29,7 @@ import {
     Typography,
 } from "@mui/material";
 import { ensureLocalUser } from "ente-accounts-rs/services/user";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -1244,7 +1245,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 fullWidth
                 maxWidth="xs"
             >
-                <DialogTitle>{t("createNewCollection")}</DialogTitle>
+                <DialogTitle>{t("createCollection")}</DialogTitle>
                 <DialogContent>
                     <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
                         <TextField
@@ -1256,6 +1257,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                             label={t("enterCollectionName")}
                             fullWidth
                             autoFocus
+                            disabled={creatingCollection}
                             onKeyDown={(event) => {
                                 if (event.key === "Enter") {
                                     void handleCreateCollectionConfirm();
@@ -1279,19 +1281,17 @@ export const ItemList: React.FC<ItemListProps> = ({
                             >
                                 {t("cancel")}
                             </Button>
-                            <Button
+                            <LoadingButton
                                 fullWidth
-                                variant="contained"
+                                color="primary"
+                                loading={creatingCollection}
                                 onClick={() =>
                                     void handleCreateCollectionConfirm()
                                 }
-                                disabled={
-                                    creatingCollection ||
-                                    !createCollectionName.trim()
-                                }
+                                disabled={!createCollectionName.trim()}
                             >
                                 {t("createCollectionButton")}
-                            </Button>
+                            </LoadingButton>
                         </Stack>
                     </Stack>
                 </DialogContent>
