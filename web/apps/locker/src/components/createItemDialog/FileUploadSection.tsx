@@ -54,7 +54,6 @@ interface FileUploadSectionProps {
     uploadProgressByFileKey: Record<string, LockerUploadProgress | null>;
     uploadCapByFileKey: Record<string, number>;
     uploading: boolean;
-    error: string | null;
     canUpload: boolean;
     onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     onToggleCollectionName: (fileKey: string, name: string) => void;
@@ -78,7 +77,6 @@ export function FileUploadSection({
     uploadProgressByFileKey,
     uploadCapByFileKey,
     uploading,
-    error,
     canUpload,
     onFileSelect,
     onToggleCollectionName,
@@ -358,14 +356,6 @@ export function FileUploadSection({
                     </Stack>
                 )}
 
-                {error && (
-                    <Typography
-                        variant="small"
-                        sx={{ color: "critical.main" }}
-                    >
-                        {error}
-                    </Typography>
-                )}
             </Stack>
 
             <Stack
@@ -549,7 +539,7 @@ const UploadItemCard = React.memo(function UploadItemCard({
                         sx={{ color: "text.muted", fontSize: 20, flexShrink: 0 }}
                     />
                 )}
-                {canRemove && (
+                {canRemove && !isDone && !isFailed && (
                     <IconButton
                         aria-label={t("delete")}
                         onClick={onRemove}

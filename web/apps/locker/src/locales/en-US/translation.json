@@ -60,6 +60,7 @@
     "uploadStorageLimitErrorBody": "You've run out of storage space. Free up space to continue uploading.",
     "uploadSubscriptionExpiredErrorBody": "Your Ente Photos subscription has expired. Renew your subscription to continue uploading.",
     "uploadFileCountLimitErrorBody": "You've reached your file limit. Upgrade to a paid plan for more storage.",
+    "uploadFileCountLimitErrorBodyWithUpgrade": "You've reached your file limit. Please <cta>upgrade</cta> to a paid plan.",
     "uploadFileCountLimitErrorToast": "Action failed. You've reached your file limit.",
     "uploadFileTooLargeErrorBody": "This file is larger than the maximum supported upload size of 10GB.",
     "download": "Download",

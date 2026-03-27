@@ -75,6 +75,7 @@
     "dropToSaveToLocker": "ドロップしてLockerに保存",
     "create": "作成",
     "cancel": "キャンセル",
+    "uploadFileCountLimitErrorBodyWithUpgrade": "ファイル数の上限に達しました。<cta>アップグレード</cta>して有料プランをご利用ください。",
     "upload": "アップロード",
     "close": "閉じる",
     "logout": "ログアウト",

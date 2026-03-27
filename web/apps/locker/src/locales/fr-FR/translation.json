@@ -76,6 +76,7 @@
     "failedToLoadCollections": "Echec du chargement des collections : {{error}}",
     "deleteFileConfirmation": "Es-tu sur de vouloir supprimer <strong>{{fileName}}</strong> ?",
     "personalNote": "Note",
+    "uploadFileCountLimitErrorBodyWithUpgrade": "Vous avez atteint votre limite de fichiers. Veuillez <cta>passer a une offre payante</cta>.",
     "saveDocumentTitle": "Document",
     "document": "Document",
     "results": "Resultats",

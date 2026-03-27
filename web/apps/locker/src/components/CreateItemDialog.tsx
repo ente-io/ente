@@ -10,6 +10,7 @@ import {
     DialogTitle,
     IconButton,
     InputAdornment,
+    Link,
     Stack,
     TextField,
     Typography,
@@ -43,7 +44,12 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { formatLockerMutationError } from "services/locker-errors";
+import { Trans } from "react-i18next";
+import {
+    formatLockerMutationError,
+    lockerUpgradeCTAType,
+    type LockerUpgradeCTAType,
+} from "services/locker-errors";
 import type { LockerUploadProgress } from "services/remote";
 import type {
     LockerCollection,
@@ -178,6 +184,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [upgradeCTAType, setUpgradeCTAType] =
+        useState<LockerUpgradeCTAType | null>(null);
     const [formData, setFormData] = useState<Record<string, string>>(
         editItem ? (editItem.data as Record<string, string>) : {},
     );
@@ -277,6 +285,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         );
         resetUploadState();
         setError(null);
+        setUpgradeCTAType(null);
     }, [
         defaultCollectionID,
         editCollectionID,
@@ -356,6 +365,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setFormData({});
         setShowPassword(false);
         setError(null);
+        setUpgradeCTAType(null);
     }, [isEditMode, saving, uploading]);
 
     const handleDialogClose = useCallback(
@@ -383,6 +393,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             setSelectedCollectionNamesByFileKey({});
             resetUploadState();
             setError(null);
+            setUpgradeCTAType(null);
         },
         [resetUploadState],
     );
@@ -390,6 +401,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const handleFieldChange = useCallback((field: string, value: string) => {
         setFormData((previous) => ({ ...previous, [field]: value }));
         setError(null);
+        setUpgradeCTAType(null);
     }, []);
 
     const handleFileSelect = useCallback(
@@ -414,6 +426,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 );
                 resetUploadState();
                 setError(null);
+                setUpgradeCTAType(null);
             }
         },
         [resetUploadState, selectedCollectionIDs],
@@ -433,6 +446,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
         setSaving(true);
         setError(null);
+        setUpgradeCTAType(null);
         try {
             const cleanData = Object.fromEntries(
                 Object.entries(formData)
@@ -444,6 +458,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } catch (error) {
             log.error("Failed to save Locker item", error);
             setError(await formatLockerMutationError(error, "createItem"));
+            setUpgradeCTAType(await lockerUpgradeCTAType(error));
         } finally {
             setSaving(false);
         }
@@ -463,6 +478,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
         setUploading(true);
         setError(null);
+        setUpgradeCTAType(null);
         const pendingUploadFileKeys = new Set(
             pendingUploadItems.map((item) => uploadQueueItemKey(item)),
         );
@@ -533,6 +549,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 )
             ) {
                 setError(t("required_field"));
+                setUpgradeCTAType(null);
                 return;
             }
 
@@ -586,6 +603,11 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             "uploadFile",
                         );
                         setError((current) => current ?? formattedError);
+                        if (!upgradeCTAType) {
+                            setUpgradeCTAType(
+                                await lockerUpgradeCTAType(error),
+                            );
+                        }
                         setFailedFileKeys((current) =>
                             new Set(current).add(fileKey),
                         );
@@ -620,6 +642,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } catch (error) {
             log.error("Failed to upload Locker files", error);
             setError(await formatLockerMutationError(error, "uploadFile"));
+            setUpgradeCTAType(await lockerUpgradeCTAType(error));
         } finally {
             setUploading(false);
         }
@@ -631,6 +654,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         onUploadItemComplete,
         onUploadsFinished,
         completedFileKeys,
+        upgradeCTAType,
         selectedCollectionNamesByFileKey,
         selectedUploadItems,
     ]);
@@ -656,6 +680,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const savedUploadCount = completedFileKeys.size;
     const totalUploadCount = selectedUploadItems.length;
     const showUploadCounter = isFileMode && totalUploadCount > 0;
+    const shouldShowDialogErrorCard =
+        !!error && (isFileMode || upgradeCTAType === "fileCountLimit");
 
     return (
         <Dialog
@@ -729,6 +755,46 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         : {}),
                 }}
             >
+                {shouldShowDialogErrorCard && (
+                    <Box
+                        sx={(theme) => ({
+                            mb: 2.5,
+                            px: 2,
+                            py: 1.5,
+                            borderRadius: "16px",
+                            border: `1px solid ${theme.vars.palette.critical.main}22`,
+                            backgroundColor: `${theme.vars.palette.critical.main}12`,
+                        })}
+                    >
+                        <Typography
+                            variant="small"
+                            sx={{ color: "critical.main", fontWeight: 600 }}
+                        >
+                            {upgradeCTAType === "fileCountLimit" ? (
+                                <Trans
+                                    i18nKey="uploadFileCountLimitErrorBodyWithUpgrade"
+                                    components={{
+                                        cta: (
+                                            <Link
+                                                href="https://web.ente.io"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                underline="always"
+                                                sx={{
+                                                    color: "critical.main",
+                                                    fontWeight: 700,
+                                                }}
+                                            />
+                                        ),
+                                    }}
+                                />
+                            ) : (
+                                error
+                            )}
+                        </Typography>
+                    </Box>
+                )}
+
                 {!isEditMode && !selectedOption && (
                     <Stack sx={{ gap: 2, pt: 0.5 }}>
                         <Typography variant="body" sx={{ color: "text.muted" }}>
@@ -766,7 +832,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         uploadProgressByFileKey={uploadProgressByFileKey}
                         uploadCapByFileKey={uploadCapByFileKey}
                         uploading={uploading}
-                        error={error}
                         canUpload={canUpload}
                         onFileSelect={handleFileSelect}
                         onToggleCollectionName={(fileKey, name) =>
@@ -854,7 +919,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             />
                         )}
 
-                        {error && (
+                        {error && upgradeCTAType !== "fileCountLimit" && (
                             <Typography
                                 variant="small"
                                 sx={{ color: "critical.main" }}
