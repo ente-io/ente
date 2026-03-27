@@ -971,7 +971,7 @@ export const LockerPage: React.FC = () => {
     );
 
     const handleConfirmDeleteCollection = useCallback(async () => {
-        const dialogState = deleteCollectionDialogRef.current;
+        const dialogState = deleteCollectionDialog;
         if (!dialogState) {
             return;
         }
@@ -1033,6 +1033,7 @@ export const LockerPage: React.FC = () => {
         }
     }, [
         collections,
+        deleteCollectionDialog,
         masterKey,
         navigateHome,
         removeCollectionFromState,
