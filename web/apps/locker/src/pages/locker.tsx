@@ -978,13 +978,14 @@ export const LockerPage: React.FC = () => {
     if (initialLoadError && collections.length === 0) {
         return (
             <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+                <LockerUnstableToast />
                 <LockerNavbar
                     onOpenSidebar={() => setSidebarOpen(true)}
                     showMenuButton
+                    stickyTop={44}
                     searchTerm={searchTerm}
                     onSearchTermChange={setSearchTerm}
                 />
-                <LockerUnstableToast />
                 <Box
                     sx={{
                         flex: 1,
@@ -1027,13 +1028,14 @@ export const LockerPage: React.FC = () => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
+            <LockerUnstableToast />
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
+                stickyTop={44}
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
             />
-            <LockerUnstableToast />
             <Box
                 sx={{
                     flex: 1,
