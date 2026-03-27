@@ -420,7 +420,7 @@ In collaborative albums (with other Ente users), you can see who uploaded each p
 
 ### Will upgrading to a paid plan automatically remove device limits for existing public links that were shared while on free plan? {#device-limit-upgrade}
 
-For existing album links shared while on the free plan, the device limit will not be removed automatically.
+For existing album links shared while on the free plan, the device limit will not be removed automatically. You can edit the device limit from manage link option (open album>link icon on top)
 
 Once you upgrade to a paid plan, all future public links will have no device limit unless you set one yourself.
 
