@@ -398,6 +398,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         />
 
                         <CollectionSelector
+                            key={`${open ? "open" : "closed"}:${
+                                editItem?.id ?? "create"
+                            }:${formType}`}
                             collections={displayCollections}
                             selectedIDs={selectedCollectionIDs}
                             initialSelectedIDs={

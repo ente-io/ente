@@ -221,24 +221,38 @@ export const CollectionSelector: React.FC<{
     const [createName, setCreateName] = useState("");
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
+    const [newlyCreatedCollectionIDs, setNewlyCreatedCollectionIDs] = useState<
+        number[]
+    >([]);
 
     const orderedCollections = useMemo(() => {
         const sortedCollections = [...collections].sort((a, b) =>
             a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
         );
-        const initialSelectedIDSet = new Set(initialSelectedIDs ?? []);
-        if (initialSelectedIDSet.size === 0) {
+        const pinnedCollectionIDs = [
+            ...newlyCreatedCollectionIDs,
+            ...(initialSelectedIDs ?? []).filter(
+                (id) => !newlyCreatedCollectionIDs.includes(id),
+            ),
+        ];
+        if (pinnedCollectionIDs.length === 0) {
             return sortedCollections;
         }
 
-        const initialSelectedCollections = sortedCollections.filter(
-            (collection) => initialSelectedIDSet.has(collection.id),
+        const sortedCollectionsByID = new Map(
+            sortedCollections.map((collection) => [collection.id, collection]),
         );
+        const pinnedCollectionIDSet = new Set(pinnedCollectionIDs);
+        const pinnedCollections = pinnedCollectionIDs
+            .map((id) => sortedCollectionsByID.get(id))
+            .filter(
+                (collection): collection is LockerCollection => !!collection,
+            );
         const remainingCollections = sortedCollections.filter(
-            (collection) => !initialSelectedIDSet.has(collection.id),
+            (collection) => !pinnedCollectionIDSet.has(collection.id),
         );
-        return [...initialSelectedCollections, ...remainingCollections];
-    }, [collections, initialSelectedIDs]);
+        return [...pinnedCollections, ...remainingCollections];
+    }, [collections, initialSelectedIDs, newlyCreatedCollectionIDs]);
 
     const handleCreateCollection = useCallback(async () => {
         const name = createName.trim();
@@ -250,6 +264,10 @@ export const CollectionSelector: React.FC<{
         setCreateError(null);
         try {
             const newCollectionID = await onCreateCollection(name);
+            setNewlyCreatedCollectionIDs((current) => [
+                newCollectionID,
+                ...current.filter((id) => id !== newCollectionID),
+            ]);
             onToggle(newCollectionID);
             setCreateName("");
             setCreateOpen(false);
