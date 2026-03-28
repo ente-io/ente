@@ -474,11 +474,14 @@ const decryptAllData = async (
     const totalCollectionCount = activeCollectionRecords.length;
 
     const filesByCollection = new Map<number, EncryptedFileRecord[]>();
+    const collectionIDsByFileID = new Map<number, number[]>();
     for (const records of cache.files.values()) {
+        const sharedCollectionIDs = [...records.keys()];
         for (const file of records.values()) {
             const existing = filesByCollection.get(file.collectionID) ?? [];
             existing.push(file);
             filesByCollection.set(file.collectionID, existing);
+            collectionIDsByFileID.set(file.id, sharedCollectionIDs);
         }
     }
 
@@ -502,9 +505,14 @@ const decryptAllData = async (
                     ),
                 ),
             );
-            const items = decryptedItems.filter(
-                (item): item is LockerItem => item !== undefined,
-            );
+            const items = decryptedItems
+                .filter((item): item is LockerItem => item !== undefined)
+                .map((item) => ({
+                    ...item,
+                    collectionIDs:
+                        collectionIDsByFileID.get(item.id) ??
+                        item.collectionIDs,
+                }));
 
             result.push({
                 id: collectionRecord.id,
