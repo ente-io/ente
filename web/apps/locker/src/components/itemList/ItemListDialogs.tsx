@@ -44,16 +44,20 @@ interface ItemListDialogsProps {
     onCloseRestoreDialog: () => void;
     onCloseCreateCollectionDialog: () => void;
     onConfirmCreateCollection: () => void;
-    onConfirmRename: () => void;
-    onConfirmRestore: () => void;
+    onConfirmRename: () => void | Promise<void>;
+    onConfirmRestore: () => void | Promise<void>;
     onCopyFileLink: () => void;
     onRequestDeleteFileLink: () => void;
     onShareFileLink: () => void;
     onToggleHomeCollection: (collectionID: number) => void;
+    renameError: string | null;
     renameCollectionOpen: boolean;
+    renamingCollection: boolean;
     renameValue: string;
+    restoreError: string | null;
     restoreCollectionID: number | null;
     restoreDialogOpen: boolean;
+    restoringItem: boolean;
     setCreateCollectionName: (value: string) => void;
     setDeleteFileLinkConfirmOpen: (open: boolean) => void;
     setRenameValue: (value: string) => void;
@@ -92,10 +96,14 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
     onRequestDeleteFileLink,
     onShareFileLink,
     onToggleHomeCollection,
+    renameError,
     renameCollectionOpen,
+    renamingCollection,
     renameValue,
+    restoreError,
     restoreCollectionID,
     restoreDialogOpen,
+    restoringItem,
     setCreateCollectionName,
     setDeleteFileLinkConfirmOpen,
     setRenameValue,
@@ -161,7 +169,11 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
         <Dialog
             slotProps={{ paper: { sx: lockerDialogPaperSx } }}
             open={restoreDialogOpen}
-            onClose={onCloseRestoreDialog}
+            onClose={() => {
+                if (!restoringItem) {
+                    onCloseRestoreDialog();
+                }
+            }}
             fullWidth
             maxWidth="xs"
         >
@@ -183,6 +195,7 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
                                         ? "primary"
                                         : "default"
                                 }
+                                disabled={restoringItem}
                                 onClick={() =>
                                     setRestoreCollectionID(collection.id)
                                 }
@@ -193,14 +206,23 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
                             {t("noCollectionsAvailableForSelection")}
                         </Typography>
                     )}
-                    <Button
+                    {restoreError && (
+                        <Typography
+                            variant="small"
+                            sx={{ color: "critical.main" }}
+                        >
+                            {restoreError}
+                        </Typography>
+                    )}
+                    <LoadingButton
                         variant="contained"
+                        loading={restoringItem}
                         disabled={restoreCollectionID === null}
                         onClick={onConfirmRestore}
                         sx={{ mt: 1 }}
                     >
                         {t("restore")}
-                    </Button>
+                    </LoadingButton>
                 </Stack>
             </DialogContent>
         </Dialog>
@@ -208,7 +230,11 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
         <Dialog
             slotProps={{ paper: { sx: lockerDialogPaperSx } }}
             open={renameCollectionOpen}
-            onClose={onCloseRenameDialog}
+            onClose={() => {
+                if (!renamingCollection) {
+                    onCloseRenameDialog();
+                }
+            }}
             fullWidth
             maxWidth="xs"
         >
@@ -221,19 +247,29 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
                         label={t("enterCollectionName")}
                         fullWidth
                         autoFocus
+                        disabled={renamingCollection}
                         onKeyDown={(event) => {
                             if (event.key === "Enter") {
-                                onConfirmRename();
+                                void onConfirmRename();
                             }
                         }}
                     />
-                    <Button
+                    {renameError && (
+                        <Typography
+                            variant="small"
+                            sx={{ color: "critical.main" }}
+                        >
+                            {renameError}
+                        </Typography>
+                    )}
+                    <LoadingButton
                         variant="contained"
+                        loading={renamingCollection}
                         disabled={!renameValue.trim()}
                         onClick={onConfirmRename}
                     >
                         {t("save")}
-                    </Button>
+                    </LoadingButton>
                 </Stack>
             </DialogContent>
         </Dialog>

@@ -80,9 +80,15 @@ interface ItemListProps {
     onDeleteItem?: (item: LockerItem) => void;
     onDeleteItems?: (items: LockerItem[]) => void;
     onPermanentlyDelete?: (items: LockerItem[]) => void;
-    onRestoreItem?: (item: LockerItem, collectionID: number) => void;
+    onRestoreItem?: (
+        item: LockerItem,
+        collectionID: number,
+    ) => void | Promise<void>;
     onEmptyTrash?: () => void;
-    onRenameCollection?: (collectionID: number, newName: string) => void;
+    onRenameCollection?: (
+        collectionID: number,
+        newName: string,
+    ) => void | Promise<void>;
     onDeleteCollection?: (collectionID: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
     onShareCollection?: (collection: LockerCollection) => void;
@@ -121,10 +127,14 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [restoreCollectionID, setRestoreCollectionID] = useState<
         number | null
     >(null);
+    const [restoreError, setRestoreError] = useState<string | null>(null);
+    const [restoringItem, setRestoringItem] = useState(false);
     const [renameCollectionID, setRenameCollectionID] = useState<number | null>(
         null,
     );
     const [renameValue, setRenameValue] = useState("");
+    const [renameError, setRenameError] = useState<string | null>(null);
+    const [renamingCollection, setRenamingCollection] = useState(false);
     const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
     const [createCollectionName, setCreateCollectionName] = useState("");
     const [creatingCollection, setCreatingCollection] = useState(false);
@@ -398,6 +408,20 @@ export const ItemList: React.FC<ItemListProps> = ({
     }, [restoreItem, restoreItemID]);
 
     useEffect(() => {
+        if (restoreItemID === null) {
+            setRestoreError(null);
+            setRestoringItem(false);
+        }
+    }, [restoreItemID]);
+
+    useEffect(() => {
+        if (renameCollectionID === null) {
+            setRenameError(null);
+            setRenamingCollection(false);
+        }
+    }, [renameCollectionID]);
+
+    useEffect(() => {
         if (activeFileLinkItemID !== null && !activeFileLinkItem) {
             setActiveFileLinkItemID(null);
             setActiveFileLink(null);
@@ -407,25 +431,66 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
     }, [activeFileLinkItem, activeFileLinkItemID]);
 
-    const handleRestoreConfirm = useCallback(() => {
-        if (restoreItem && restoreCollectionID !== null && onRestoreItem) {
-            onRestoreItem(restoreItem, restoreCollectionID);
-        }
-        setRestoreItemID(null);
-        setRestoreCollectionID(null);
-    }, [onRestoreItem, restoreCollectionID, restoreItem]);
-
-    const handleRenameConfirm = useCallback(() => {
+    const handleRestoreConfirm = useCallback(async () => {
         if (
-            renameCollectionID !== null &&
-            renameValue.trim() &&
-            onRenameCollection
+            !restoreItem ||
+            restoreCollectionID === null ||
+            !onRestoreItem ||
+            restoringItem
         ) {
-            onRenameCollection(renameCollectionID, renameValue.trim());
+            return;
         }
-        setRenameCollectionID(null);
-        setRenameValue("");
-    }, [onRenameCollection, renameCollectionID, renameValue]);
+
+        setRestoringItem(true);
+        setRestoreError(null);
+        try {
+            await Promise.resolve(
+                onRestoreItem(restoreItem, restoreCollectionID),
+            );
+            setRestoreItemID(null);
+            setRestoreCollectionID(null);
+        } catch (error) {
+            log.error("Failed to restore Locker item", error);
+            setRestoreError(
+                error instanceof Error ? error.message : t("generic_error"),
+            );
+        } finally {
+            setRestoringItem(false);
+        }
+    }, [onRestoreItem, restoreCollectionID, restoreItem, restoringItem]);
+
+    const handleRenameConfirm = useCallback(async () => {
+        if (
+            renameCollectionID === null ||
+            !renameValue.trim() ||
+            !onRenameCollection ||
+            renamingCollection
+        ) {
+            return;
+        }
+
+        setRenamingCollection(true);
+        setRenameError(null);
+        try {
+            await Promise.resolve(
+                onRenameCollection(renameCollectionID, renameValue.trim()),
+            );
+            setRenameCollectionID(null);
+            setRenameValue("");
+        } catch (error) {
+            log.error("Failed to rename Locker collection", error);
+            setRenameError(
+                error instanceof Error ? error.message : t("generic_error"),
+            );
+        } finally {
+            setRenamingCollection(false);
+        }
+    }, [
+        onRenameCollection,
+        renameCollectionID,
+        renameValue,
+        renamingCollection,
+    ]);
 
     const handleCreateCollectionConfirm = useCallback(async () => {
         if (!onCreateCollection || !createCollectionName.trim()) {
@@ -1233,10 +1298,20 @@ export const ItemList: React.FC<ItemListProps> = ({
                     setCreateCollectionOpen(false)
                 }
                 onCloseFeedback={() => setFeedbackMessage(null)}
-                onCloseRenameDialog={() => setRenameCollectionID(null)}
+                onCloseRenameDialog={() => {
+                    if (renamingCollection) {
+                        return;
+                    }
+                    setRenameCollectionID(null);
+                    setRenameError(null);
+                }}
                 onCloseRestoreDialog={() => {
+                    if (restoringItem) {
+                        return;
+                    }
                     setRestoreItemID(null);
                     setRestoreCollectionID(null);
+                    setRestoreError(null);
                 }}
                 onConfirmCreateCollection={() =>
                     void handleCreateCollectionConfirm()
@@ -1249,17 +1324,27 @@ export const ItemList: React.FC<ItemListProps> = ({
                 }
                 onShareFileLink={() => void shareActiveFileLink()}
                 onToggleHomeCollection={toggleHomeCollection}
+                renameError={renameError}
                 renameCollectionOpen={renameCollectionID !== null}
+                renamingCollection={renamingCollection}
                 renameValue={renameValue}
+                restoreError={restoreError}
                 restoreCollectionID={restoreCollectionID}
                 restoreDialogOpen={restoreItem !== null}
+                restoringItem={restoringItem}
                 setCreateCollectionName={(value) => {
                     setCreateCollectionName(value);
                     setCreateCollectionError(null);
                 }}
                 setDeleteFileLinkConfirmOpen={setIsDeleteFileLinkConfirmOpen}
-                setRenameValue={setRenameValue}
-                setRestoreCollectionID={setRestoreCollectionID}
+                setRenameValue={(value) => {
+                    setRenameValue(value);
+                    setRenameError(null);
+                }}
+                setRestoreCollectionID={(collectionID) => {
+                    setRestoreCollectionID(collectionID);
+                    setRestoreError(null);
+                }}
             />
         </Stack>
     );
