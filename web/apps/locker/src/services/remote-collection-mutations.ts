@@ -59,17 +59,6 @@ const AUTO_MOVE_EXCLUDED_COLLECTION_TYPES = new Set([
     "uncategorized",
 ]);
 
-const takeFirstMatchingValue = <T>(
-    values: T[],
-    predicate: (value: T) => boolean,
-) => {
-    const index = values.findIndex(predicate);
-    if (index < 0) {
-        return undefined;
-    }
-    return values.splice(index, 1)[0];
-};
-
 const appendMapValue = <K, V>(map: Map<K, V[]>, key: K, value: V) => {
     const existingValues = map.get(key);
     if (existingValues) {
@@ -113,35 +102,17 @@ const resolveAutoMoveTargetCollectionID = async ({
     currentUserID,
     sourceCollectionID,
     preferredCollectionIDs,
-    pendingAddedCollectionIDs,
     getCollectionRecord,
     getUncategorizedCollection,
 }: {
     currentUserID: number;
     sourceCollectionID: number;
     preferredCollectionIDs: number[];
-    pendingAddedCollectionIDs?: number[];
     getCollectionRecord: (
         collectionID: number,
     ) => CollectionRecordLike | undefined;
     getUncategorizedCollection: () => Promise<CollectionRecordLike>;
 }) => {
-    const pendingTargetCollectionID = pendingAddedCollectionIDs
-        ? takeFirstMatchingValue(
-              pendingAddedCollectionIDs,
-              (candidateCollectionID) =>
-                  isAutoMoveCandidateCollection(
-                      candidateCollectionID,
-                      currentUserID,
-                      getCollectionRecord,
-                      sourceCollectionID,
-                  ),
-          )
-        : undefined;
-    if (pendingTargetCollectionID) {
-        return pendingTargetCollectionID;
-    }
-
     const existingTargetCollectionID = preferredCollectionIDs.find(
         (candidateCollectionID) =>
             isAutoMoveCandidateCollection(
@@ -155,17 +126,7 @@ const resolveAutoMoveTargetCollectionID = async ({
         return existingTargetCollectionID;
     }
 
-    const uncategorizedCollection = await getUncategorizedCollection();
-    const pendingUncategorizedIndex = pendingAddedCollectionIDs?.indexOf(
-        uncategorizedCollection.id,
-    );
-    if (
-        pendingUncategorizedIndex !== undefined &&
-        pendingUncategorizedIndex >= 0
-    ) {
-        pendingAddedCollectionIDs?.splice(pendingUncategorizedIndex, 1);
-    }
-    return uncategorizedCollection.id;
+    return (await getUncategorizedCollection()).id;
 };
 
 export const updateItemCollectionsWithDeps = async (
@@ -203,9 +164,8 @@ export const updateItemCollectionsWithDeps = async (
     const collectionIDsToRemove = currentCollectionIDs.filter(
         (collectionID) => !nextCollectionIDSet.has(collectionID),
     );
-    const pendingAddedCollectionIDs = [...collectionIDsToAdd];
     const sourceCollectionIDForAdd =
-        pendingAddedCollectionIDs.length > 0
+        collectionIDsToAdd.length > 0
             ? (nextCollectionIDs.find((collectionID) =>
                   currentCollectionIDSet.has(collectionID),
               ) ?? currentCollectionIDs[0])
@@ -217,6 +177,20 @@ export const updateItemCollectionsWithDeps = async (
               masterKey,
           )
         : null;
+
+    // Mirror mobile's safer ordering: establish explicit new memberships
+    // before we remove or auto-move any existing ones.
+    if (collectionIDsToAdd.length > 0) {
+        if (!sourceFileKeyForAdd) {
+            throw new Error(`File ${fileID} has no source collection`);
+        }
+        await addFileToCollections(
+            fileID,
+            sourceFileKeyForAdd,
+            collectionIDsToAdd,
+            masterKey,
+        );
+    }
 
     for (const collectionID of collectionIDsToRemove) {
         const sourceCollectionRecord = getCollectionRecord(collectionID);
@@ -233,7 +207,6 @@ export const updateItemCollectionsWithDeps = async (
             currentUserID,
             sourceCollectionID: collectionID,
             preferredCollectionIDs: nextCollectionIDs,
-            pendingAddedCollectionIDs,
             getCollectionRecord,
             getUncategorizedCollection,
         });
@@ -248,18 +221,6 @@ export const updateItemCollectionsWithDeps = async (
                 masterKey,
             ),
         ]);
-    }
-
-    if (pendingAddedCollectionIDs.length > 0) {
-        if (!sourceFileKeyForAdd) {
-            throw new Error(`File ${fileID} has no source collection`);
-        }
-        await addFileToCollections(
-            fileID,
-            sourceFileKeyForAdd,
-            pendingAddedCollectionIDs,
-            masterKey,
-        );
     }
 };
 
