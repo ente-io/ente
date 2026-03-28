@@ -23,7 +23,7 @@ import {
 } from "./fileUploadHelpers";
 import { getRequiredFields } from "./itemFormFieldsUtils";
 
-export type CreateOption = LockerItemType | "file";
+export type CreateOption = LockerItemType;
 const MAX_PARALLEL_UPLOADS = 4;
 
 export interface CreateItemDialogEditItem {
@@ -112,7 +112,7 @@ export const useCreateItemDialogState = ({
     editItem,
 }: UseCreateItemDialogStateProps) => {
     const isEditMode = !!editItem;
-    const currentUserID = savedLocalUser()?.id ?? Number.NaN;
+    const currentUserID = savedLocalUser()?.id;
     const editCollectionIDs = useMemo(
         () => initialEditCollectionIDs(editItem),
         [editItem],
@@ -120,7 +120,11 @@ export const useCreateItemDialogState = ({
     const displayCollections = useMemo(() => {
         const ownedVisibleCollections = visibleLockerCollections(
             collections,
-        ).filter((collection) => isCollectionOwner(collection, currentUserID));
+        ).filter(
+            (collection) =>
+                currentUserID !== undefined &&
+                isCollectionOwner(collection, currentUserID),
+        );
 
         if (!isEditMode) {
             return ownedVisibleCollections;

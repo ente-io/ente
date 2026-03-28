@@ -6,13 +6,7 @@ import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
-import type {
-    LockerCollection,
-    LockerCollectionParticipant,
-    LockerCollectionParticipantRole,
-    LockerItem,
-    LockerItemType,
-} from "types";
+import type { LockerCollection, LockerItem, LockerItemType } from "types";
 import { z } from "zod";
 import {
     boxSealOpen,
@@ -32,12 +26,10 @@ import {
     replaceLockerCache,
     setEncryptedFileRecord,
 } from "./remote-cache";
-
-const RemoteCollectionUser = z.object({
-    id: z.number(),
-    email: z.string().nullish(),
-    role: z.string().nullish(),
-});
+import {
+    RemoteCollectionUserSchema,
+    toLockerCollectionParticipant,
+} from "./remote-types";
 
 const RemoteMagicMetadata = z.object({
     version: z.number(),
@@ -48,14 +40,14 @@ const RemoteMagicMetadata = z.object({
 
 const RemoteCollection = z.object({
     id: z.number(),
-    owner: RemoteCollectionUser,
+    owner: RemoteCollectionUserSchema,
     encryptedKey: z.string(),
     keyDecryptionNonce: z.string().nullish(),
     encryptedName: z.string().nullish(),
     nameDecryptionNonce: z.string().nullish(),
     name: z.string().nullish(),
     type: z.string(),
-    sharees: z.array(RemoteCollectionUser).nullish(),
+    sharees: z.array(RemoteCollectionUserSchema).nullish(),
     publicURLs: z.array(z.unknown()).nullish(),
     updationTime: z.number(),
     isDeleted: z.boolean().nullish(),
@@ -140,16 +132,6 @@ export interface LockerTrashData {
 
 const collectionNameDecoder = new TextDecoder();
 const DOWNLOAD_URL_REVOKE_DELAY_MS = 30_000;
-
-const toLockerCollectionParticipant = (
-    user: z.infer<typeof RemoteCollectionUser>,
-): LockerCollectionParticipant => ({
-    id: user.id,
-    email: user.email ?? undefined,
-    role: user.role
-        ? (user.role.toUpperCase() as LockerCollectionParticipantRole)
-        : undefined,
-});
 
 const describeCryptoError = (error: unknown): string => {
     if (typeof error === "object" && error && "code" in error) {

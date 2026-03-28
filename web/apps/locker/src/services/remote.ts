@@ -69,6 +69,7 @@ import {
     fetchLockerData,
     fetchLockerTrash,
 } from "./remote-read";
+import { RemoteIDResponseSchema } from "./remote-types";
 import {
     type LockerUploadProgress,
     uploadLockerFileWithDeps,
@@ -373,7 +374,7 @@ export const createInfoItem = async (
     });
     ensureOk(res);
 
-    const created = (await res.json()) as { id: number };
+    const created = RemoteIDResponseSchema.parse(await res.json());
     if (additionalCollectionIDs.length > 0) {
         await addFileToCollections(
             created.id,

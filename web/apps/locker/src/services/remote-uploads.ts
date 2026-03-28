@@ -15,6 +15,10 @@ import {
     md5Base64,
     stringToB64,
 } from "./crypto";
+import {
+    RemoteIDResponseSchema,
+    RemoteUploadURLResponseSchema,
+} from "./remote-types";
 
 /**
  * The server requires every file to have a thumbnail. For Locker files we
@@ -90,7 +94,7 @@ const fetchUploadURL = async (
         },
     );
     ensureOk(res);
-    return (await res.json()) as { objectKey: string; url: string };
+    return RemoteUploadURLResponseSchema.parse(await res.json());
 };
 
 const fetchMultipartUploadURLs = async ({
@@ -516,7 +520,7 @@ export const uploadLockerFileWithDeps = async <TCollectionRecord>(
         }),
     });
     ensureOk(res);
-    const created = (await res.json()) as { id: number };
+    const created = RemoteIDResponseSchema.parse(await res.json());
     if (additionalCollectionIDs.length > 0) {
         await deps.addFileToCollections(
             created.id,

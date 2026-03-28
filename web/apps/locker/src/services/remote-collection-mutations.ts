@@ -224,6 +224,11 @@ export const updateItemCollectionsWithDeps = async (
     }
 };
 
+/**
+ * Rehomes or detaches every file from the collection before the caller
+ * deletes the collection record itself. This helper intentionally does not
+ * issue the final collection delete request.
+ */
 export const deleteCollectionKeepingFilesWithDeps = async (
     collection: LockerCollection,
     context: CollectionMutationContext,

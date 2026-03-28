@@ -67,6 +67,8 @@ export interface DeleteCollectionDialogState {
 }
 
 const COLLECTION_MUTATION_REFRESH_DELAY_MS = 750;
+const UPLOAD_REFRESH_DEBOUNCE_MS = 250;
+const UPLOAD_REFRESH_FOLLOW_UP_DELAYS_MS = [1200, 3000, 6000] as const;
 
 const fileFromEntry = (entry: FileSystemFileEntry) =>
     new Promise<File>((resolve, reject) => {
@@ -190,6 +192,8 @@ export const useLockerActions = ({
     const dragDepthRef = useRef(0);
     const shareCollectionIDRef = useRef<number | null>(shareCollectionID);
     const selectedCollectionIDRef = useRef<number | null>(selectedCollectionID);
+    const uploadRefreshTimeoutRef = useRef<number | null>(null);
+    const uploadFollowUpRefreshTimeoutsRef = useRef<number[]>([]);
 
     useEffect(() => {
         if (deleteCollectionDialog) {
@@ -204,6 +208,28 @@ export const useLockerActions = ({
     useEffect(() => {
         selectedCollectionIDRef.current = selectedCollectionID;
     }, [selectedCollectionID]);
+
+    const clearUploadRefreshTimeout = useCallback(() => {
+        if (uploadRefreshTimeoutRef.current !== null) {
+            window.clearTimeout(uploadRefreshTimeoutRef.current);
+            uploadRefreshTimeoutRef.current = null;
+        }
+    }, []);
+
+    const clearUploadFollowUpRefreshes = useCallback(() => {
+        uploadFollowUpRefreshTimeoutsRef.current.forEach((timeoutID) => {
+            window.clearTimeout(timeoutID);
+        });
+        uploadFollowUpRefreshTimeoutsRef.current = [];
+    }, []);
+
+    useEffect(
+        () => () => {
+            clearUploadRefreshTimeout();
+            clearUploadFollowUpRefreshes();
+        },
+        [clearUploadFollowUpRefreshes, clearUploadRefreshTimeout],
+    );
 
     useEffect(() => {
         if (
@@ -244,6 +270,27 @@ export const useLockerActions = ({
         }
     }, [refreshData]);
 
+    const scheduleUploadRefresh = useCallback(
+        (delayMs: number) => {
+            clearUploadRefreshTimeout();
+            uploadRefreshTimeoutRef.current = window.setTimeout(() => {
+                uploadRefreshTimeoutRef.current = null;
+                void refreshData(masterKey);
+            }, delayMs);
+        },
+        [clearUploadRefreshTimeout, masterKey, refreshData],
+    );
+
+    const scheduleUploadFollowUpRefreshes = useCallback(() => {
+        clearUploadFollowUpRefreshes();
+        uploadFollowUpRefreshTimeoutsRef.current =
+            UPLOAD_REFRESH_FOLLOW_UP_DELAYS_MS.map((delayMs) =>
+                window.setTimeout(() => {
+                    void refreshData(masterKey);
+                }, delayMs),
+            );
+    }, [clearUploadFollowUpRefreshes, masterKey, refreshData]);
+
     const handleCreateItem = useCallback(
         async (
             type: LockerItemType,
@@ -276,19 +323,28 @@ export const useLockerActions = ({
 
     const handleUploadsFinished = useCallback(
         async (uploadedCount: number) => {
-            await refreshData();
+            clearUploadRefreshTimeout();
+            clearUploadFollowUpRefreshes();
+            await refreshData(masterKey);
+            scheduleUploadFollowUpRefreshes();
             setToast(
                 uploadedCount === 1
                     ? t("uploadComplete")
                     : t("uploadMultipleComplete", { count: uploadedCount }),
             );
         },
-        [refreshData],
+        [
+            clearUploadFollowUpRefreshes,
+            clearUploadRefreshTimeout,
+            masterKey,
+            refreshData,
+            scheduleUploadFollowUpRefreshes,
+        ],
     );
 
     const handleUploadItemComplete = useCallback(() => {
-        void refreshData();
-    }, [refreshData]);
+        scheduleUploadRefresh(UPLOAD_REFRESH_DEBOUNCE_MS);
+    }, [scheduleUploadRefresh]);
 
     const handleUpdateItem = useCallback(
         async (

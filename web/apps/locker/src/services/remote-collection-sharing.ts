@@ -1,31 +1,16 @@
 import { getPublicKey } from "ente-accounts-rs/services/user";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import type {
-    LockerCollectionParticipant,
-    LockerCollectionParticipantRole,
-} from "types";
+import type { LockerCollectionParticipant } from "types";
 import { z } from "zod";
 import { boxSeal } from "./crypto";
-
-const RemoteCollectionUser = z.object({
-    id: z.number(),
-    email: z.string().nullish(),
-    role: z.string().nullish(),
-});
+import {
+    RemoteCollectionUserSchema,
+    toLockerCollectionParticipant,
+} from "./remote-types";
 
 const RemoteShareesResponse = z.object({
-    sharees: z.array(RemoteCollectionUser),
-});
-
-const toLockerCollectionParticipant = (
-    user: z.infer<typeof RemoteCollectionUser>,
-): LockerCollectionParticipant => ({
-    id: user.id,
-    email: user.email ?? undefined,
-    role: user.role
-        ? (user.role.toUpperCase() as LockerCollectionParticipantRole)
-        : undefined,
+    sharees: z.array(RemoteCollectionUserSchema),
 });
 
 interface CollectionSharingDeps<TCollectionRecord> {

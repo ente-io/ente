@@ -50,6 +50,7 @@ import {
     getItemTitle,
     hasDownloadableObject,
     isImportantCollection,
+    isLockerItemOwner,
     sortLockerCollections,
     visibleLockerCollections,
 } from "types";
@@ -121,7 +122,7 @@ export const ItemList: React.FC<ItemListProps> = ({
     searchTerm,
     onNavigateBack,
 }) => {
-    const currentUserID = savedLocalUser()?.id ?? Number.NaN;
+    const currentUserID = savedLocalUser()?.id;
     const [selectedItemID, setSelectedItemID] = useState<number | null>(null);
     const [restoreItemID, setRestoreItemID] = useState<number | null>(null);
     const [restoreCollectionID, setRestoreCollectionID] = useState<
@@ -372,8 +373,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     );
     const selectedOwnedItems = useMemo(
         () =>
-            selectedVisibleItems.filter(
-                (item) => (item.ownerID ?? currentUserID) === currentUserID,
+            selectedVisibleItems.filter((item) =>
+                isLockerItemOwner(item, currentUserID),
             ),
         [currentUserID, selectedVisibleItems],
     );
@@ -519,9 +520,11 @@ export const ItemList: React.FC<ItemListProps> = ({
 
     const canEditSelectedCollection =
         selectedCollection !== null &&
+        currentUserID !== undefined &&
         canEditCollection(selectedCollection, currentUserID);
     const canLeaveSelectedCollection =
         selectedCollection !== null &&
+        currentUserID !== undefined &&
         canLeaveCollection(selectedCollection, currentUserID);
     const canShareSelectedCollection =
         selectedCollection !== null &&
@@ -1242,7 +1245,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                     onEditItem &&
                     !isTrashView &&
                     selectedItem &&
-                    (selectedItem.ownerID ?? currentUserID) === currentUserID
+                    isLockerItemOwner(selectedItem, currentUserID)
                         ? (item) => {
                               setSelectedItemID(null);
                               onEditItem(item);
@@ -1253,7 +1256,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                     onDeleteItem &&
                     !isTrashView &&
                     selectedItem &&
-                    (selectedItem.ownerID ?? currentUserID) === currentUserID
+                    isLockerItemOwner(selectedItem, currentUserID)
                         ? (item) => {
                               setSelectedItemID(null);
                               onDeleteItem(item);
@@ -1263,7 +1266,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 onDeleteDisabledHint={
                     !isTrashView &&
                     selectedItem &&
-                    (selectedItem.ownerID ?? currentUserID) !== currentUserID
+                    !isLockerItemOwner(selectedItem, currentUserID)
                         ? t("actionNotSupportedForSharedFiles", { count: 1 })
                         : undefined
                 }
@@ -1423,7 +1426,7 @@ const ItemsSection: React.FC<{
     onPermanentlyDelete?: (items: LockerItem[]) => void;
     onRequestRestore: (item: LockerItem) => void;
     onSelectItem: (item: LockerItem) => void;
-    currentUserID: number;
+    currentUserID?: number;
     onShareLink?: (item: LockerItem) => void;
     selectionMode?: boolean;
     selectedItemIDSet?: Set<number>;
@@ -1452,17 +1455,17 @@ const ItemsSection: React.FC<{
             sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 1.1, mt: 1.25 }}
         >
             {items.map((item) => {
-                const isOwnedByCurrentUser =
-                    (item.ownerID ?? currentUserID) === currentUserID;
+                const isOwnedByCurrentUser = isLockerItemOwner(
+                    item,
+                    currentUserID,
+                );
                 return (
                     <ItemCard
                         key={item.id}
                         item={item}
                         masterKey={masterKey}
                         isTrashView={isTrashView}
-                        isIncomingShared={
-                            (item.ownerID ?? currentUserID) !== currentUserID
-                        }
+                        isIncomingShared={!isOwnedByCurrentUser}
                         onClick={() => onSelectItem(item)}
                         onEdit={
                             onEditItem && isOwnedByCurrentUser
@@ -1694,7 +1697,7 @@ const CollectionGrid: React.FC<{
     onRequestRenameCollection,
     onDeleteCollection,
 }) => {
-    const currentUserID = savedLocalUser()?.id ?? Number.NaN;
+    const currentUserID = savedLocalUser()?.id;
 
     return (
         <Box

@@ -1,6 +1,7 @@
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { encryptBox, generateKey, stringToB64 } from "./crypto";
+import { RemoteCollectionCreateResponseSchema } from "./remote-types";
 
 interface CollectionRecordLike {
     id: number;
@@ -71,7 +72,7 @@ export const createCollectionWithDeps = async (
         }),
     });
     ensureOk(res);
-    const data = (await res.json()) as { collection: { id: number } };
+    const data = RemoteCollectionCreateResponseSchema.parse(await res.json());
     return data.collection.id;
 };
 
@@ -135,7 +136,10 @@ export const deleteCollectionWithDeps = async (
 ): Promise<void> => {
     const keepFiles = opts?.keepFiles ?? false;
     const res = await fetch(
-        await apiURL(`/collections/v3/${collectionID}`, { keepFiles }),
+        await apiURL(`/collections/v3/${collectionID}`, {
+            collectionID,
+            keepFiles,
+        }),
         { method: "DELETE", headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
