@@ -202,6 +202,14 @@ const infoItemTitle = (
     }
 };
 
+const resolveCollectionIDsWithUncategorizedFallback = async (
+    collectionIDs: number[],
+    masterKey: string,
+) =>
+    collectionIDs.length > 0
+        ? Array.from(new Set(collectionIDs))
+        : [(await ensureUncategorizedCollection(masterKey)).id];
+
 /**
  * Fetch Locker file share links for the current user.
  *
@@ -290,12 +298,13 @@ export const deleteLockerFileShareLink = async (
 // ---------------------------------------------------------------------------
 
 /**
- * Create a new info item in the specified collection.
+ * Create a new info item in the specified collection(s).
  *
  * This uses the `/files/meta` endpoint for metadata-only files (no file
  * content blob, no thumbnail). The info data is stored in pubMagicMetadata.
  *
- * @param collectionID The collection to create the item in.
+ * @param collectionIDs The collection IDs to create the item in. Falls back
+ * to the user's Uncategorized collection when empty.
  * @param infoType The item type (e.g. "note", "accountCredential").
  * @param infoData The item's structured data (matching the type's schema).
  * @param masterKey The user's master key.
@@ -306,7 +315,11 @@ export const createInfoItem = async (
     infoData: Record<string, unknown>,
     masterKey: string,
 ): Promise<void> => {
-    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
+    const [collectionID, ...additionalCollectionIDs] =
+        await resolveCollectionIDsWithUncategorizedFallback(
+            collectionIDs,
+            masterKey,
+        );
     if (collectionID === undefined) {
         throw new Error("No collection selected");
     }
@@ -1084,9 +1097,14 @@ export const uploadLockerFile = async (
     masterKey: string,
     onProgress?: (progress: LockerUploadProgress) => void,
 ): Promise<number> => {
+    const targetCollectionIDs =
+        await resolveCollectionIDsWithUncategorizedFallback(
+            collectionIDs,
+            masterKey,
+        );
     return uploadLockerFileWithDeps(
         file,
-        collectionIDs,
+        targetCollectionIDs,
         masterKey,
         { getCollectionRecord, decryptCollectionKey, addFileToCollections },
         onProgress,

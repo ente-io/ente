@@ -14,7 +14,11 @@ import type {
     LockerItemType,
     LockerUploadCandidate,
 } from "types";
-import { isCollectionOwner, visibleLockerCollections } from "types";
+import {
+    isCollectionOwner,
+    isUncategorizedCollection,
+    visibleLockerCollections,
+} from "types";
 import {
     collectionNamesByUploadItem,
     dedupeCollectionNames,
@@ -127,7 +131,9 @@ export const useCreateItemDialogState = ({
         );
 
         if (!isEditMode) {
-            return ownedVisibleCollections;
+            return ownedVisibleCollections.filter(
+                (collection) => !isUncategorizedCollection(collection),
+            );
         }
 
         const visibleCollectionIDSet = new Set(
@@ -400,7 +406,7 @@ export const useCreateItemDialogState = ({
     );
 
     const handleSave = useCallback(async () => {
-        if (!formType || (!isEditMode && selectedCollectionIDs.length === 0)) {
+        if (!formType) {
             return;
         }
 
@@ -433,14 +439,7 @@ export const useCreateItemDialogState = ({
         } finally {
             setSaving(false);
         }
-    }, [
-        formData,
-        formType,
-        handleClose,
-        isEditMode,
-        onSave,
-        selectedCollectionIDs,
-    ]);
+    }, [formData, formType, handleClose, onSave, selectedCollectionIDs]);
 
     const handleUpload = useCallback(async () => {
         if (selectedUploadItems.length === 0 || !onUploadProgress) {
@@ -520,16 +519,6 @@ export const useCreateItemDialogState = ({
                     .filter((id): id is number => typeof id === "number");
                 return { item, fileKey, collectionIDs };
             });
-
-            if (
-                uploadTargets.some(
-                    ({ collectionIDs }) => collectionIDs.length === 0,
-                )
-            ) {
-                setError(t("required_field"));
-                setUpgradeCTAType(null);
-                return;
-            }
 
             let nextIndex = 0;
             const worker = async () => {
@@ -640,7 +629,6 @@ export const useCreateItemDialogState = ({
 
     const canSave =
         formType !== null &&
-        (isEditMode || selectedCollectionIDs.length > 0) &&
         getRequiredFields(formType).every(
             (field) =>
                 typeof formData[field] === "string" && formData[field].trim(),
@@ -648,11 +636,6 @@ export const useCreateItemDialogState = ({
     const canUpload =
         isFileMode &&
         selectedUploadItems.length > 0 &&
-        selectedUploadItems.every(
-            (item) =>
-                (selectedCollectionNamesByFileKey[uploadQueueItemKey(item)]
-                    ?.length ?? 0) > 0,
-        ) &&
         selectedUploadItems.some(
             (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
         );
