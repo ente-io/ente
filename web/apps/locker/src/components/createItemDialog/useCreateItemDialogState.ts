@@ -86,6 +86,18 @@ const initialEditCollectionIDs = (
     return editItem.collectionID ? [editItem.collectionID] : [];
 };
 
+const editFormData = (
+    editItem: CreateItemDialogEditItem | null | undefined,
+): Record<string, string> =>
+    editItem
+        ? Object.fromEntries(
+              Object.entries(editItem.data).filter(
+                  (entry): entry is [string, string] =>
+                      typeof entry[1] === "string",
+              ),
+          )
+        : {};
+
 export const useCreateItemDialogState = ({
     open,
     collections,
@@ -137,7 +149,7 @@ export const useCreateItemDialogState = ({
     const [upgradeCTAType, setUpgradeCTAType] =
         useState<LockerUpgradeCTAType | null>(null);
     const [formData, setFormData] = useState<Record<string, string>>(
-        editItem ? (editItem.data as Record<string, string>) : {},
+        editFormData(editItem),
     );
     const [showPassword, setShowPassword] = useState(false);
     const [selectedUploadItems, setSelectedUploadItems] = useState<
@@ -227,7 +239,7 @@ export const useCreateItemDialogState = ({
                           : [],
                   ),
         );
-        setFormData(editItem ? (editItem.data as Record<string, string>) : {});
+        setFormData(editFormData(editItem));
         setShowPassword(false);
         setSelectedUploadItems(initialItems ?? []);
         setCustomCollectionNames([]);

@@ -749,7 +749,13 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
 
         onDeleteItems?.(selectedOwnedItems);
-    }, [onDeleteItems, selectedOwnedItems, skippedSharedSelectionCount]);
+        stopSelectionMode();
+    }, [
+        onDeleteItems,
+        selectedOwnedItems,
+        skippedSharedSelectionCount,
+        stopSelectionMode,
+    ]);
 
     React.useEffect(() => {
         if (!isHomeView && homeSelectedCollectionIDs.length > 0) {
@@ -2094,6 +2100,7 @@ const CollectionCard: React.FC<{
                     onClick={(event) => event.stopPropagation()}
                 >
                     <CollectionContextMenu
+                        ariaID={`collection-context-menu-${collection.id}`}
                         onShare={onShare}
                         onLeave={onLeave}
                         onRename={onRename}
@@ -2129,13 +2136,14 @@ const SharedCollectionBadge: React.FC = () => {
 };
 
 const CollectionContextMenu: React.FC<{
+    ariaID: string;
     onShare?: () => void;
     onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ onShare, onLeave, onRename, onDelete }) => (
+}> = ({ ariaID, onShare, onLeave, onRename, onDelete }) => (
     <OverflowMenu
-        ariaID="collection-context-menu"
+        ariaID={ariaID}
         triggerButtonSxProps={{
             p: 0.25,
             color: "text.faint",

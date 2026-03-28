@@ -70,6 +70,7 @@
     "download": "Download",
     "downloading": "Downloading...",
     "downloadFailed": "Download failed",
+    "copyFailed": "Copy failed",
     "copiedToClipboard": "{{fieldName}} copied to clipboard",
     "noteName": "Title",
     "noteContent": "Content",

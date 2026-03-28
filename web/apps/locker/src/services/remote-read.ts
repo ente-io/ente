@@ -139,6 +139,7 @@ export interface LockerTrashData {
 }
 
 const collectionNameDecoder = new TextDecoder();
+const DOWNLOAD_URL_REVOKE_DELAY_MS = 30_000;
 
 const toLockerCollectionParticipant = (
     user: z.infer<typeof RemoteCollectionUser>,
@@ -819,6 +820,6 @@ export const downloadLockerFile = async (
     anchor.download = fileName;
     document.body.appendChild(anchor);
     anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
+    setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
     anchor.remove();
 };

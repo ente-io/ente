@@ -36,8 +36,18 @@ export const toggleCollectionName = (names: string[], name: string) => {
         : addCollectionName(names, name);
 };
 
+const uploadItemKeySuffixByFile = new WeakMap<File, string>();
+let uploadItemKeyCounter = 0;
+
 export const uploadQueueItemKey = (item: LockerUploadCandidate) =>
-    `${item.relativePath ?? item.file.name}:${item.file.size}:${item.file.lastModified}`;
+    `${item.relativePath ?? item.file.name}:${item.file.size}:${item.file.lastModified}:${
+        uploadItemKeySuffixByFile.get(item.file) ??
+        (() => {
+            const suffix = String(++uploadItemKeyCounter);
+            uploadItemKeySuffixByFile.set(item.file, suffix);
+            return suffix;
+        })()
+    }`;
 
 export const uploadItemParentPath = (item: LockerUploadCandidate) => {
     const segments = (item.relativePath ?? item.file.name)

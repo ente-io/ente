@@ -55,6 +55,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     onShareLink,
 }) => {
     const [copiedField, setCopiedField] = useState<string | null>(null);
+    const [copyError, setCopyError] = useState(false);
     const [downloadError, setDownloadError] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState<number | null>(
@@ -62,10 +63,18 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     );
 
     const copyToClipboard = useCallback((value: string, fieldName: string) => {
-        void navigator.clipboard.writeText(value).then(() => {
-            setCopiedField(fieldName);
-            setDownloadError(false);
-        });
+        void navigator.clipboard
+            .writeText(value)
+            .then(() => {
+                setCopiedField(fieldName);
+                setCopyError(false);
+                setDownloadError(false);
+            })
+            .catch((error: unknown) => {
+                log.error("Failed to copy Locker item field", error);
+                setCopiedField(null);
+                setCopyError(true);
+            });
     }, []);
 
     const handleDownload = useCallback(async () => {
@@ -283,15 +292,18 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
             )}
 
             <Snackbar
-                open={downloadError || copiedField !== null}
+                open={copyError || downloadError || copiedField !== null}
                 message={
-                    downloadError
-                        ? t("downloadFailed")
-                        : t("copiedToClipboard", { fieldName: copiedField })
+                    copyError
+                        ? t("copyFailed")
+                        : downloadError
+                          ? t("downloadFailed")
+                          : t("copiedToClipboard", { fieldName: copiedField })
                 }
                 autoHideDuration={2000}
                 onClose={() => {
                     setCopiedField(null);
+                    setCopyError(false);
                     setDownloadError(false);
                 }}
             />

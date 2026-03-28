@@ -66,6 +66,8 @@ export interface DeleteCollectionDialogState {
     error: string | null;
 }
 
+const COLLECTION_MUTATION_REFRESH_DELAY_MS = 750;
+
 const fileFromEntry = (entry: FileSystemFileEntry) =>
     new Promise<File>((resolve, reject) => {
         entry.file(resolve, reject);
@@ -186,12 +188,22 @@ export const useLockerActions = ({
     );
     const [isDragActive, setIsDragActive] = useState(false);
     const dragDepthRef = useRef(0);
+    const shareCollectionIDRef = useRef<number | null>(shareCollectionID);
+    const selectedCollectionIDRef = useRef<number | null>(selectedCollectionID);
 
     useEffect(() => {
         if (deleteCollectionDialog) {
             deleteCollectionDialogRef.current = deleteCollectionDialog;
         }
     }, [deleteCollectionDialog]);
+
+    useEffect(() => {
+        shareCollectionIDRef.current = shareCollectionID;
+    }, [shareCollectionID]);
+
+    useEffect(() => {
+        selectedCollectionIDRef.current = selectedCollectionID;
+    }, [selectedCollectionID]);
 
     useEffect(() => {
         if (
@@ -217,6 +229,20 @@ export const useLockerActions = ({
 
     const visibleDeleteCollectionDialog =
         deleteCollectionDialog ?? deleteCollectionDialogRef.current;
+
+    const refreshCollectionsAfterMutation = useCallback(async () => {
+        await new Promise((resolve) =>
+            setTimeout(resolve, COLLECTION_MUTATION_REFRESH_DELAY_MS),
+        );
+        try {
+            await refreshData();
+        } catch (error) {
+            log.error(
+                "Failed to refresh locker data after collection mutation",
+                error,
+            );
+        }
+    }, [refreshData]);
 
     const handleCreateItem = useCallback(
         async (
@@ -716,9 +742,9 @@ export const useLockerActions = ({
                 navigateHome();
             }
             removeCollectionFromState(collection.id);
-            await refreshData();
-            setToast(t("collectionDeletedSuccessfully"));
             setDeleteCollectionDialog(null);
+            setToast(t("collectionDeletedSuccessfully"));
+            void refreshCollectionsAfterMutation();
         } catch (error) {
             log.error("Failed to delete collection", error);
             setDeleteCollectionDialog((current) =>
@@ -739,7 +765,7 @@ export const useLockerActions = ({
         deleteCollectionDialog,
         masterKey,
         navigateHome,
-        refreshData,
+        refreshCollectionsAfterMutation,
         removeCollectionFromState,
         routerPathname,
         selectedCollectionID,
@@ -783,25 +809,23 @@ export const useLockerActions = ({
                     color: "critical",
                     action: async () => {
                         await leaveCollectionAPI(collection.id);
-                        if (shareCollectionID === collection.id) {
+                        if (shareCollectionIDRef.current === collection.id) {
                             setShareCollectionID(null);
                         }
-                        if (selectedCollectionID === collection.id) {
+                        if (selectedCollectionIDRef.current === collection.id) {
                             navigateHome();
                         }
                         removeCollectionFromState(collection.id);
-                        await refreshData();
                         setToast(t("leaveCollectionSuccessfully"));
+                        void refreshCollectionsAfterMutation();
                     },
                 },
             });
         },
         [
             navigateHome,
-            refreshData,
+            refreshCollectionsAfterMutation,
             removeCollectionFromState,
-            selectedCollectionID,
-            shareCollectionID,
             showMiniDialog,
         ],
     );

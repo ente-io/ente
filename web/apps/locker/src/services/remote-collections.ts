@@ -135,10 +135,7 @@ export const deleteCollectionWithDeps = async (
 ): Promise<void> => {
     const keepFiles = opts?.keepFiles ?? false;
     const res = await fetch(
-        await apiURL(`/collections/v3/${collectionID}`, {
-            collectionID,
-            keepFiles,
-        }),
+        await apiURL(`/collections/v3/${collectionID}`, { keepFiles }),
         { method: "DELETE", headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);

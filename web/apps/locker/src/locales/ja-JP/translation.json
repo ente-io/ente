@@ -58,6 +58,7 @@
     "uploadFileTooLargeErrorBody": "このファイルはサポートされている最大アップロードサイズ10GBを超えています。",
     "downloading": "ダウンロード中…",
     "downloadFailed": "ダウンロード失敗",
+    "copyFailed": "コピーに失敗しました",
     "copiedToClipboard": "{{fieldName}}がクリップボードにコピーされました",
     "noteName": "タイトル",
     "noteContent": "内容",

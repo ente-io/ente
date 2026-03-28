@@ -54,6 +54,7 @@
     "uploadFileTooLargeErrorBody": "Ce fichier depasse la taille maximale de telechargement prise en charge de 10 Go.",
     "downloading": "Téléchargement en cours...",
     "downloadFailed": "Échec du téléchargement",
+    "copyFailed": "Échec de la copie",
     "copiedToClipboard": "{{fieldName}} copie dans le presse-papiers",
     "noteName": "Titre",
     "noteContent": "Contenu",
