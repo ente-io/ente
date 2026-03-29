@@ -84,4 +84,20 @@ fn validates_known_motion_photo_indices_when_fixtures_present() {
         .expect("extract motionphoto.heic video")
         .expect("video present");
     assert!(motion_heic_video.len() > 1_000_000);
+
+    // Dual-MP4 motion photo: two embedded MP4s, full video is the second (larger) one.
+    let Some(dual_mp4) = fixture("dual_mp4_video_last.jpg") else {
+        eprintln!("Skipping: external fixture dual_mp4_video_last.jpg not present");
+        return;
+    };
+    let dual_index = get_motion_video_index_from_path(&dual_mp4)
+        .expect("read dual_mp4_video_last.jpg")
+        .expect("dual_mp4_video_last.jpg should have index");
+    assert_eq!(dual_index.start, 3_590_234);
+    assert_eq!(dual_index.end, 7_638_778);
+
+    let dual_video = extract_motion_video_from_path(&dual_mp4, None)
+        .expect("extract dual_mp4_video_last.jpg video")
+        .expect("video present");
+    assert!(dual_video.len() > 1_000_000);
 }

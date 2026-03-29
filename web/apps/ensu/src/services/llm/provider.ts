@@ -16,41 +16,80 @@ const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
 const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 
+// These fallback values must stay in sync with rust/ensu/inference/src/defaults.rs.
+// When running inside Tauri, resolveDefaultModelForDevice() overwrites them with
+// values fetched from the Rust get_ensu_defaults command.
 export const DEFAULT_MODEL: ModelInfo = {
-    id: "lfm-2.5-vl-1.6b",
+    id: "lfm-vl-1.6b",
     name: "LFM 2.5 VL 1.6B (Q4_0)",
-    url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+    url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
     mmprojUrl:
         "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-    description: "Liquid AI multimodal model (text-only on web)",
     sizeBytes: 695_752_160,
     mmprojSizeBytes: 583_109_888,
     sizeHuman: "~664 MB",
 };
 
-const TAURI_DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-3.5-2b-q80",
-    name: "Qwen 3.5 2B (Q8_0)",
-    url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
-    mmprojUrl:
-        "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
-    description: "Qwen multimodal model",
-    sizeBytes: 2_012_012_800,
-    mmprojSizeBytes: 668_227_264,
-    sizeHuman: "2.68 GB",
-};
-
-const HIGH_RAM_MAC_MODEL: ModelInfo = {
-    id: "qwen-3.5-4b-q4km",
+const DESKTOP_DEFAULT_MODEL: ModelInfo = {
+    id: "qwen-4b-q4km",
     name: "Qwen 3.5 4B (Q4_K_M)",
     url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
     mmprojUrl:
         "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-    description: "Qwen multimodal model for higher-memory macOS devices",
     sizeBytes: 2_740_937_888,
     mmprojSizeBytes: 672_423_616,
     sizeHuman: "3.63 GB",
 };
+
+interface TauriEnsuModelPreset {
+    id: string;
+    title: string;
+    url: string;
+    mmprojUrl?: string | null;
+}
+
+interface TauriEnsuDefaults {
+    mobileSystemPromptBody: string;
+    desktopSystemPromptBody: string;
+    systemPromptDatePlaceholder: string;
+    sessionSummarySystemPrompt: string;
+    mobileDefaultModel: TauriEnsuModelPreset;
+    mobileModelPresets: TauriEnsuModelPreset[];
+    desktopDefaultModel: TauriEnsuModelPreset;
+    desktopModelPresets: TauriEnsuModelPreset[];
+}
+
+export interface ResolvedModelPreset {
+    name: string;
+    url: string;
+    mmproj?: string;
+}
+
+export const FALLBACK_MOBILE_MODEL_PRESETS: ResolvedModelPreset[] = [
+    {
+        name: "LFM 2.5 1.2B Instruct (Q4_0)",
+        url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true",
+    },
+    {
+        name: "Qwen 3.5 0.8B (Q4_K_M)",
+        url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+        mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+    },
+    {
+        name: "Qwen 3.5 2B (Q8_0)",
+        url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+        mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+    },
+];
+
+export const FALLBACK_DESKTOP_MODEL_PRESETS: ResolvedModelPreset[] = [
+    {
+        name: "LFM 2.5 VL 1.6B (Q4_0)",
+        url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
+        mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+    },
+    ...FALLBACK_MOBILE_MODEL_PRESETS,
+];
 
 export class LlmProvider {
     private backend = createInferenceBackend({
@@ -64,6 +103,8 @@ export class LlmProvider {
     private currentMmprojPath?: string;
     private currentContextKey?: string;
     private defaultModel = DEFAULT_MODEL;
+    private ensuDefaults?: TauriEnsuDefaults;
+    private useDesktopRustDefaults = false;
 
     private downloadAbort?: AbortController;
     private progressListeners = new Set<(progress: DownloadProgress) => void>();
@@ -90,6 +131,25 @@ export class LlmProvider {
 
     public getDefaultModel() {
         return this.defaultModel;
+    }
+
+    public getEnsuDefaults(): TauriEnsuDefaults | undefined {
+        return this.ensuDefaults;
+    }
+
+    public getResolvedModelPresets(): ResolvedModelPreset[] | undefined {
+        if (!this.ensuDefaults) {
+            return undefined;
+        }
+
+        const presets = this.useDesktopRustDefaults
+            ? this.ensuDefaults.desktopModelPresets
+            : this.ensuDefaults.mobileModelPresets;
+        return presets.map((preset) => ({
+            name: preset.title,
+            url: preset.url,
+            mmproj: preset.mmprojUrl ?? undefined,
+        }));
     }
 
     public getBackendKind() {
@@ -366,15 +426,15 @@ export class LlmProvider {
     }
 
     private async resolveDefaultModelForDevice() {
-        this.defaultModel =
-            this.backend.kind === "tauri" ? TAURI_DEFAULT_MODEL : DEFAULT_MODEL;
+        this.defaultModel = DEFAULT_MODEL;
+        this.useDesktopRustDefaults = false;
 
         if (this.backend.kind !== "tauri") {
             return;
         }
 
         try {
-            const { invoke } = await import("@tauri-apps/api/core");
+            const { invoke } = await import("@tauri-apps/api/tauri");
             const info = await invoke<{
                 platform?: string;
                 totalMemoryBytes?: number | null;
@@ -387,9 +447,35 @@ export class LlmProvider {
                 platform === "macos" ||
                 platform === "darwin" ||
                 platform === "mac";
+            this.useDesktopRustDefaults =
+                isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES;
 
-            if (isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES) {
-                this.defaultModel = HIGH_RAM_MAC_MODEL;
+            if (this.useDesktopRustDefaults) {
+                this.defaultModel = DESKTOP_DEFAULT_MODEL;
+            }
+
+            // Overlay Rust-authoritative fields (id, name, url, mmprojUrl)
+            // while keeping the web-only display fields (sizeBytes etc.)
+            // as fallbacks.
+            try {
+                const defaults =
+                    await invoke<TauriEnsuDefaults>("get_ensu_defaults");
+                const rustPreset = this.useDesktopRustDefaults
+                    ? defaults.desktopDefaultModel
+                    : defaults.mobileDefaultModel;
+                this.defaultModel = {
+                    ...this.defaultModel,
+                    id: rustPreset.id,
+                    name: rustPreset.title,
+                    url: rustPreset.url,
+                    mmprojUrl: rustPreset.mmprojUrl ?? undefined,
+                };
+                this.ensuDefaults = defaults;
+            } catch (defaultsError) {
+                log.warn(
+                    "Failed to fetch ensu defaults from Rust",
+                    defaultsError,
+                );
             }
 
             log.info("LLM default model resolved", {
@@ -541,13 +627,10 @@ export class LlmProvider {
             totalBytes: 0,
         });
 
-        const {
-            mkdir: createDir,
-            exists,
-            remove: removeFile,
-            rename: renameFile,
-        } = await import("@tauri-apps/plugin-fs");
-        const { invoke } = await import("@tauri-apps/api/core");
+        const { createDir, exists, removeFile, renameFile } = await import(
+            "@tauri-apps/api/fs"
+        );
+        const { invoke } = await import("@tauri-apps/api/tauri");
         const { dirname } = await import("@tauri-apps/api/path");
 
         log.info("LLM download start", { url, destPath });

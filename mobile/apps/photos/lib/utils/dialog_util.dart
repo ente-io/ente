@@ -187,7 +187,7 @@ Future<ButtonResult?> showGenericErrorDialog({
           await sendLogs(
             context,
             AppLocalizations.of(context).contactSupport,
-            "support@ente.io",
+            "support@ente.com",
             postShare: () {},
           );
         },
@@ -220,7 +220,7 @@ Future<void> showGenericErrorBottomSheet({
           await sendLogs(
             context,
             AppLocalizations.of(context).contactSupport,
-            "support@ente.io",
+            "support@ente.com",
             postShare: () {},
           );
         },

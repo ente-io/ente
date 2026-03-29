@@ -45,34 +45,24 @@ class SemanticSearchService {
   bool? _cachedEmbeddingsOffline;
   Timer? _embeddingsCacheTimer;
   final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
+  static const Duration _vectorDbMigrationDelay = Duration(seconds: 10);
   Future<void>? _prepareVectorDbFuture;
 
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
   Future<void> init() async {
-    if (_hasInitialized) {
-      _logger.info("Initialized already");
-      return;
-    }
-    final hasGivenConsent = hasGrantedMLConsent;
-    if (!hasGivenConsent) return;
+    if (!hasGrantedMLConsent) return;
 
-    _logger.info("init called");
-    _hasInitialized = true;
+    _initializeIfNeeded();
+    _scheduleWarmup(delayTextModelLoad: true);
+  }
 
-    Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      if (_imageEmbeddingsAreCached) {
-        MLComputer.instance.clearImageEmbeddingsCache();
-        _imageEmbeddingsAreCached = false;
-      }
-    });
+  Future<void> prepareForInteractiveSearch() async {
+    if (!hasGrantedMLConsent) return;
 
-    if (flagService.usearchForSearch) {
-      unawaited(_prepareVectorDbForSearch());
-    }
-
-    unawaited(_loadTextModel(delay: true));
+    _initializeIfNeeded();
+    _scheduleWarmup(delayTextModelLoad: false);
   }
 
   bool isMagicSearchEnabledAndReady() {
@@ -84,11 +74,42 @@ class SemanticSearchService {
     return _prepareVectorDbFuture!;
   }
 
+  void _initializeIfNeeded() {
+    if (_hasInitialized) {
+      return;
+    }
+
+    _logger.info("init called");
+    _hasInitialized = true;
+
+    Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
+      if (_imageEmbeddingsAreCached) {
+        MLComputer.instance.clearImageEmbeddingsCache();
+        _imageEmbeddingsAreCached = false;
+      }
+    });
+  }
+
+  void _scheduleWarmup({required bool delayTextModelLoad}) {
+    if (flagService.usearchForSearch) {
+      unawaited(_prepareVectorDbForSearch());
+    }
+
+    if (_textModelIsLoaded) {
+      return;
+    }
+
+    unawaited(_loadTextModel(delay: delayTextModelLoad));
+  }
+
   Future<void> _prepareVectorDbForSearchInternal() async {
     try {
       if (!flagService.usearchForSearch) return;
       if (!flagService.hasGrantedMLConsent) return;
       if (!await _vectorDB.checkIfMigrationDone()) {
+        await Future.delayed(_vectorDbMigrationDelay);
+        if (!flagService.usearchForSearch) return;
+        if (!flagService.hasGrantedMLConsent) return;
         await _mlDataDB.checkMigrateFillClipVectorDB();
       }
       if (await _vectorDB.checkIfMigrationDone()) {

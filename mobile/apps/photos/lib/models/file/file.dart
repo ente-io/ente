@@ -95,8 +95,10 @@ class EnteFile {
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
-    file.location =
-        Location(latitude: asset.latitude, longitude: asset.longitude);
+    file.location = Location(
+      latitude: asset.latitude,
+      longitude: asset.longitude,
+    );
     file.fileType = fileTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = _safeGetMicroseconds(
@@ -212,8 +214,10 @@ class EnteFile {
       creationTime = exifTime.time!.microsecondsSinceEpoch;
     }
     if (mediaUploadData.exifData != null) {
-      mediaUploadData.isPanorama =
-          checkPanoramaFromEXIF(null, mediaUploadData.exifData);
+      mediaUploadData.isPanorama = checkPanoramaFromEXIF(
+        null,
+        mediaUploadData.exifData,
+      );
     }
     if (mediaUploadData.isPanorama != true &&
         fileType == FileType.image &&

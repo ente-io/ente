@@ -22,9 +22,9 @@ Ente Photos for Android can be downloaded through multiple channels based on you
 
 Ente Photos is available across all desktop operating systems:
 
-- [macOS](https://ente.io/download/desktop)
-- [Windows](https://ente.io/download/desktop)
-- [Linux](https://ente.io/download/desktop)
+- [macOS](https://ente.com/download/desktop)
+- [Windows](https://ente.com/download/desktop)
+- [Linux](https://ente.com/download/desktop)
 
 Open the installer and follow the instructions to install it on your desktop device.
 

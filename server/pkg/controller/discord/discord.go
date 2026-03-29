@@ -72,6 +72,19 @@ func (c *DiscordController) Notify(message string) {
 	c.sendMessage(c.MonaLisa, viper.GetString("discord.bot.mona-lisa.channel"), message)
 }
 
+func (c *DiscordController) NotifyThrottled(message string, window time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	now := time.Now()
+	if lastTime, exists := c.lastSent[message]; exists && now.Sub(lastTime) < window {
+		log.Infof("Skipping duplicate Discord notification: %s", message)
+		return
+	}
+	c.lastSent[message] = now
+	c.Notify(message)
+}
+
 // Send a message related to subscriptions.
 func (c *DiscordController) NotifyNewSub(userID int64, paymentProvider string, amount string) {
 	message := fmt.Sprintf("New subscriber via `%s`, after %s of signing up! 🫂 (%s)",
@@ -110,15 +123,7 @@ func (c *DiscordController) NotifyAccountDelete(userID int64, paymentProvider st
 }
 
 func (c *DiscordController) NotifyPotentialAbuse(message string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	now := time.Now()
-	if lastTime, exists := c.lastSent[message]; exists && now.Sub(lastTime) < time.Minute {
-		log.Infof("Skipping duplicate abuse notification: %s", message)
-		return
-	}
-	c.lastSent[message] = now
-	c.Notify(fmt.Sprintf("%s: %s", c.HostName, message))
+	c.NotifyThrottled(fmt.Sprintf("%s: %s", c.HostName, message), time.Minute)
 }
 
 func (c *DiscordController) getTimeSinceSignUp(userID int64) string {

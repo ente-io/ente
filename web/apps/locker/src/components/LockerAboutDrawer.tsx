@@ -55,13 +55,13 @@ export const LockerAboutDrawer: React.FC<
                     icon={Shield01Icon}
                     label={t("privacy")}
                     endIcon={<NorthEastIcon />}
-                    onClick={() => openExternal("https://ente.io/privacy")}
+                    onClick={() => openExternal("https://ente.com/privacy")}
                 />
                 <LockerSidebarCardButton
                     icon={LicenseIcon}
                     label={t("terms")}
                     endIcon={<NorthEastIcon />}
-                    onClick={() => openExternal("https://ente.io/terms")}
+                    onClick={() => openExternal("https://ente.com/terms")}
                 />
             </Stack>
         </LockerTitledNestedSidebarDrawer>

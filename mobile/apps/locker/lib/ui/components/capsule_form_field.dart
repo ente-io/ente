@@ -339,6 +339,7 @@ class _CapsuleDisplayFieldState extends State<CapsuleDisplayField> {
                       child: Icon(
                         _isVisible ? Icons.visibility : Icons.visibility_off,
                         size: 16,
+                         semanticLabel: _isVisible ? 'hide_password' : 'show_password',
                         color: colorScheme.textMuted,
                       ),
                     ),

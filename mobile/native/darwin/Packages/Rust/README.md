@@ -20,6 +20,14 @@ Note: The script applies the llama.cpp mtmd patch (requires `python3`). Set
 
 ## Build the xcframework
 
+Prerequisites on macOS:
+
+- `cargo`
+- `xcodebuild`
+- `lipo`
+- `cmake`
+- `uniffi-bindgen`
+
 From the repo root:
 
 ```bash

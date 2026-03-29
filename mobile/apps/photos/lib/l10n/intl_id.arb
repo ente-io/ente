@@ -26,7 +26,7 @@
   "deleteReason4": "Alasan saya tidak ada di daftar",
   "sendEmail": "Kirim email",
   "deleteRequestSLAText": "Permintaan kamu akan diproses dalam waktu 72 jam.",
-  "deleteEmailRequest": "Silakan kirim email ke <warning>account-deletion@ente.io</warning> dari alamat email kamu yang terdaftar.",
+  "deleteEmailRequest": "Silakan kirim email ke <warning>account-deletion@ente.com</warning> dari alamat email kamu yang terdaftar.",
   "entePhotosPerm": "Ente <i>memerlukan izin untuk</i> menyimpan fotomu",
   "ok": "Oke",
   "createAccount": "Buat akun",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -125,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -257,18 +257,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID Verifikasi",
   "verifyEmailID": "Verifikasi {email}",
   "emailNoEnteAccount": "{email} tidak punya akun Ente.\n\nUndang dia untuk berbagi foto.",
-  "shareMyVerificationID": "Ini ID Verifikasi saya di ente.io: {verificationID}.",
-  "shareTextConfirmOthersVerificationID": "Halo, bisakah kamu pastikan bahwa ini adalah ID Verifikasi ente.io milikmu: {verificationID}",
+  "shareMyVerificationID": "Ini ID Verifikasi saya di ente.com: {verificationID}.",
+  "shareTextConfirmOthersVerificationID": "Halo, bisakah kamu pastikan bahwa ini adalah ID Verifikasi ente.com milikmu: {verificationID}",
   "somethingWentWrong": "Terjadi kesalahan",
   "sendInvite": "Kirim undangan",
-  "shareTextRecommendUsingEnte": "Unduh Ente agar kita bisa berbagi foto dan video kualitas asli dengan mudah\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Unduh Ente agar kita bisa berbagi foto dan video kualitas asli dengan mudah\n\nhttps://ente.com",
   "done": "Selesai",
   "applyCodeTitle": "Terapkan kode",
   "enterCodeDescription": "Masukkan kode yang diberikan temanmu untuk memperoleh kuota gratis untuk kalian berdua",
@@ -437,7 +437,6 @@
   "discover_sunset": "Senja",
   "discover_hills": "Bukit",
   "discover_greenery": "Hijau-hijauan",
-  "mlIndexingDescription": "Perlu diperhatikan bahwa pemelajaran mesin dapat meningkatkan penggunaan data dan baterai perangkat hingga seluruh item selesai terindeks. Gunakan aplikasi desktop untuk pengindeksan lebih cepat, seluruh hasil akan tersinkronkan secara otomatis.",
   "loadingModel": "Mengunduh model...",
   "waitingForWifi": "Menunggu WiFi...",
   "status": "Status",
@@ -551,8 +550,6 @@
   "familyPlans": "Paket keluarga",
   "referrals": "Referensi",
   "notifications": "Notifikasi",
-  "sharedPhotoNotifications": "Foto terbagi baru",
-  "sharedPhotoNotificationsExplanation": "Terima notifikasi apabila seseorang menambahkan foto ke album bersama yang kamu ikuti",
   "advanced": "Lanjutan",
   "general": "Umum",
   "security": "Keamanan",
@@ -586,7 +583,6 @@
   "darkTheme": "Gelap",
   "systemTheme": "Sistem",
   "freeTrial": "Percobaan gratis",
-  "selectYourPlan": "Pilih paket kamu",
   "enteSubscriptionPitch": "Ente memelihara kenanganmu, sehingga ia selalu tersedia untukmu, bahkan jika kamu kehilangan perangkatmu.",
   "enteSubscriptionShareWithFamily": "Anggota keluargamu juga bisa ditambahkan ke paketmu.",
   "currentUsageIs": "Pemakaian saat ini sebesar ",
@@ -607,7 +603,7 @@
   "subscription": "Langganan",
   "paymentDetails": "Rincian pembayaran",
   "manageFamily": "Atur Keluarga",
-  "contactToManageSubscription": "Silakan hubungi kami di support@ente.io untuk mengatur langganan {provider} kamu.",
+  "contactToManageSubscription": "Silakan hubungi kami di support@ente.com untuk mengatur langganan {provider} kamu.",
   "renewSubscription": "Perpanjang langganan",
   "cancelSubscription": "Batalkan langganan",
   "areYouSureYouWantToRenew": "Apakah kamu yakin ingin memperpanjang?",
@@ -656,7 +652,7 @@
   "subAlreadyLinkedErrMessage": "{id} kamu telah terhubung dengan akun Ente lain.\nJika kamu ingin menggunakan {id} kamu untuk akun ini, silahkan hubungi tim bantuan kami",
   "visitWebToManage": "Silakan buka web.ente.io untuk mengatur langgananmu",
   "couldNotUpdateSubscription": "Tidak dapat memperbarui langganan",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Silakan hubungi support@ente.io dan kami akan dengan senang hati membantu!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Silakan hubungi support@ente.com dan kami akan dengan senang hati membantu!",
   "paymentFailed": "Pembayaran gagal",
   "paymentFailedTalkToProvider": "Harap hubungi dukungan {providerName} jika kamu dikenai biaya",
   "@paymentFailedTalkToProvider": {
@@ -687,7 +683,6 @@
   "grantFullAccessPrompt": "Harap berikan akses ke semua foto di app Pengaturan",
   "allowPermTitle": "Izinkan akses ke foto",
   "allowPermBody": "Ijinkan akses ke foto Anda dari Pengaturan agar Ente dapat menampilkan dan mencadangkan pustaka Anda.",
-  "openSettings": "Buka Pengaturan",
   "selectMorePhotos": "Pilih lebih banyak foto",
   "existingUser": "Masuk",
   "newToEnte": "Baru di Ente",
@@ -1016,7 +1011,6 @@
   "photoDescriptions": "Keterangan foto",
   "fileTypesAndNames": "Nama dan jenis file",
   "moments": "Momen",
-  "searchFaceEmptySection": "Orang akan ditampilkan di sini setelah pengindeksan selesai",
   "searchDatesEmptySection": "Telusuri dengan tanggal, bulan, atau tahun",
   "searchAlbumsEmptySection": "Album",
   "searchFileTypesAndNamesEmptySection": "Nama dan jenis file",

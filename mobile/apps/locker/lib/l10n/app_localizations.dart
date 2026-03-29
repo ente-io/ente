@@ -1947,7 +1947,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTextRecommendUsingEnte.
   ///
   /// In en, this message translates to:
-  /// **'Download Ente\n\nhttps://ente.io'**
+  /// **'Download Ente\n\nhttps://ente.com'**
   String get shareTextRecommendUsingEnte;
 
   /// No description provided for @thisIsYourVerificationId.
@@ -1995,13 +1995,13 @@ abstract class AppLocalizations {
   /// No description provided for @shareMyVerificationID.
   ///
   /// In en, this message translates to:
-  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  /// **'Here\'s my verification ID: {verificationID} for ente.com.'**
   String shareMyVerificationID(Object verificationID);
 
   /// No description provided for @shareTextConfirmOthersVerificationID.
   ///
   /// In en, this message translates to:
-  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  /// **'Hey, can you confirm that this is your ente.com verification ID: {verificationID}'**
   String shareTextConfirmOthersVerificationID(Object verificationID);
 
   /// No description provided for @passwordLock.
@@ -3083,6 +3083,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please authenticate to view your active sessions'**
   String get authToViewYourActiveSessions;
+
+  /// No description provided for @deleteAccountFeedbackPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Something not working? Reach out at {email}, we\'d love to help.'**
+  String deleteAccountFeedbackPrompt(String email);
+
+  /// No description provided for @sendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get sendFeedback;
+
+  /// No description provided for @deleteAccountPermanentWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your Ente Auth, Photos, and Locker data'**
+  String get deleteAccountPermanentWarning;
 }
 
 class _AppLocalizationsDelegate

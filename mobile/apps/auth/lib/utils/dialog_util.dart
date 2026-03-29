@@ -42,7 +42,7 @@ Future<ButtonResult?> showErrorDialog(
         onTap: () async {
           await sendEmail(
             context,
-            to: "support@ente.io",
+            to: "support@ente.com",
             body: body,
           );
         },
@@ -183,7 +183,7 @@ Future<ButtonResult?> showGenericErrorDialog({
             PlatformUtil.openWebView(
               context,
               context.l10n.faq,
-              "https://ente.io/help/auth/troubleshooting/windows-login",
+              "https://ente.com/help/auth/troubleshooting/windows-login",
             ).ignore();
           },
         ),

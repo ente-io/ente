@@ -29,7 +29,7 @@ export const PasteFooter = () => {
         <Stack alignItems="center" spacing={1.1}>
             <Box
                 component="a"
-                href="https://ente.io"
+                href="https://ente.com"
                 target="_blank"
                 rel="noopener"
                 aria-label="Ente"
@@ -52,7 +52,7 @@ export const PasteFooter = () => {
             >
                 <Typography
                     component="a"
-                    href="https://ente.io"
+                    href="https://ente.com"
                     target="_blank"
                     rel="noopener"
                     sx={productLinkSx(tokens.text.footer, "#08C225")}
@@ -70,7 +70,7 @@ export const PasteFooter = () => {
                 />
                 <Typography
                     component="a"
-                    href="https://ente.io/locker"
+                    href="https://ente.com/locker"
                     target="_blank"
                     rel="noopener"
                     sx={productLinkSx(tokens.text.footer, "#076AE2")}
@@ -88,7 +88,7 @@ export const PasteFooter = () => {
                 />
                 <Typography
                     component="a"
-                    href="https://ente.io/auth"
+                    href="https://ente.com/auth"
                     target="_blank"
                     rel="noopener"
                     sx={productLinkSx(tokens.text.footer, "#A75CFF")}

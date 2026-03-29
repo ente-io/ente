@@ -18,6 +18,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -697,11 +698,32 @@ class SearchService {
         .toList();
   }
 
-  Future<List<GenericSearchResult>> getLocationResults(String query) async {
+  Future<List<GenericSearchResult>> getLocationResults(
+    BuildContext context,
+    String query,
+  ) async {
     final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
-    final bool showNoLocationTag = query.length > 2 &&
-        "No Location Tag".toLowerCase().startsWith(query.toLowerCase());
+    final normalizedQuery = query.toLowerCase();
+    final noLocationName = AppLocalizations.of(context).noLocation;
+    final noLocationTagName = AppLocalizations.of(context).noLocationTag;
+    final normalizedNoLocationName = noLocationName.toLowerCase();
+    final normalizedNoLocationTagName = noLocationTagName.toLowerCase();
+    final disambiguationPrefixLength = min(
+      normalizedNoLocationName.length,
+      normalizedNoLocationTagName.length,
+    );
+    var sharedPrefixLength = 0;
+    while (sharedPrefixLength < disambiguationPrefixLength &&
+        normalizedNoLocationName.codeUnitAt(sharedPrefixLength) ==
+            normalizedNoLocationTagName.codeUnitAt(sharedPrefixLength)) {
+      sharedPrefixLength++;
+    }
+    final bool showNoLocation = normalizedQuery.length > 2 &&
+        normalizedNoLocationName.startsWith(normalizedQuery);
+    final bool showNoLocationTag =
+        normalizedQuery.length > sharedPrefixLength &&
+            normalizedNoLocationTagName.startsWith(normalizedQuery);
 
     final List<GenericSearchResult> searchResults = [];
 
@@ -724,8 +746,29 @@ class SearchService {
         }
       }
     }
+    if (showNoLocation) {
+      final noLocationFiles = allFiles.where((file) {
+        return file.isOwner && !file.hasLocation;
+      }).toList();
+      if (noLocationFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileType,
+            noLocationName,
+            noLocationFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: noLocationName,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileType,
+              matchedUploadedIDs: filesToUploadedFileIDs(noLocationFiles),
+              filterIcon: Icons.not_listed_location_outlined,
+            ),
+          ),
+        );
+      }
+    }
     if (showNoLocationTag) {
-      _logger.info("finding photos with no location");
+      _logger.info("finding photos with no location tag");
       // find files that have location but the file's location is not inside
       // any location tag
       final noLocationTagFiles = allFiles.where((file) {
@@ -747,10 +790,10 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.fileType,
-            "No Location Tag",
+            noLocationTagName,
             noLocationTagFiles,
             hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: "No Location Tag",
+              filterName: noLocationTagName,
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileType,
               matchedUploadedIDs: filesToUploadedFileIDs(noLocationTagFiles),

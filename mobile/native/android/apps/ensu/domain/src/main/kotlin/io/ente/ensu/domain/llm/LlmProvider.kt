@@ -50,7 +50,9 @@ interface LlmProvider {
     ): GenerationSummary
 
     fun isModelDownloaded(target: LlmModelTarget): Boolean
+    val isManualDownloadActive: Boolean
     suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long?
+    suspend fun currentDownloadProgress(target: LlmModelTarget): DownloadProgress?
     fun loadedContextLength(target: LlmModelTarget): Int?
 
     fun stopGeneration()

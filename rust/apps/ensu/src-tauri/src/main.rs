@@ -6,15 +6,12 @@ mod commands;
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_shell::init())
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
             // Show the main window after setup is complete
-            if let Some(window) = app.get_webview_window("main") {
+            if let Some(window) = app.get_window("main") {
                 window.show().unwrap();
             }
             Ok(())
@@ -26,6 +23,9 @@ fn main() {
             commands::crypto_decrypt_box,
             commands::crypto_encrypt_blob,
             commands::crypto_decrypt_blob,
+            commands::secure_storage_get,
+            commands::secure_storage_set,
+            commands::secure_storage_delete,
             commands::auth_derive_srp_credentials,
             commands::auth_decrypt_secrets,
             commands::auth_decrypt_keys_only,
@@ -54,6 +54,7 @@ fn main() {
             commands::chat_db_get_pending_deletions,
             commands::chat_db_hard_delete,
             commands::chat_db_reset,
+            commands::chat_db_migrate_legacy,
             commands::chat_sync,
             commands::llm_init_backend,
             commands::llm_load_model,
@@ -63,6 +64,7 @@ fn main() {
             commands::llm_generate_chat_stream,
             commands::llm_cancel,
             commands::system_info,
+            commands::get_ensu_defaults,
             commands::fs_file_size,
             commands::fs_read_head,
             commands::fs_append_bytes,

@@ -5,7 +5,7 @@ import { FileShareView } from "../components/file-share/FileShareView";
 /**
  * Index page that handles both root redirect and share links
  *
- * - Root domain (/) redirects to ente.io/locker
+ * - Root domain (/) redirects to ente.com/locker
  * - Share links (/token#key) render the FileShareView
  *
  * This page is served for all routes via:
@@ -23,8 +23,8 @@ const Page: React.FC = () => {
         if (pathname === "/" || pathname === "") {
             // Hide content before redirect to avoid error flash
             setHideContent(true);
-            // Redirect to ente.io/locker for root path
-            window.location.href = "https://ente.io/locker";
+            // Redirect to ente.com/locker for root path
+            window.location.href = "https://ente.com/locker";
         }
     }, []);
 

@@ -21,7 +21,7 @@ You can install Ente Photos on your iPhone or iPad from the [iOS AppStore](https
 
 ### How do I install Ente Photos on my desktop? {#install-desktop}
 
-You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.io/download/desktop).
+You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.com/download/desktop).
 
 **Supported platforms:**
 
@@ -131,6 +131,16 @@ When you first open Ente Photos, you'll be guided through account creation:
 
 For a detailed walkthrough, see [Creating an account](/photos/getting-started/signup).
 
+### Why am I not receiving the email verification code during signup? {#email-verification-code-signup}
+
+If you're not receiving the email verification code, try the following:
+
+1. Check your spam folder to see if the email was filtered there
+2. Make sure your email domain or provider isn't blocking emails from ente.io
+3. Resend the verification code
+
+If you still don't receive it after these steps, email [support@ente.io](mailto:support@ente.io) for further help.
+
 ### What is the recovery key and why is it important? {#recovery-key}
 
 Your recovery key is the **only way** to recover your account if you:
@@ -202,7 +212,7 @@ If you lose access to your passkey (for example, if you misplace a hardware secu
 3. Enter your Ente recovery key to log in
 4. Go to the Passkey settings page to delete the lost passkey and/or add a new one
 
-If you've lost both your passkey and recovery key, contact [support@ente.io](mailto:support@ente.io) for assistance.
+If you've lost both your passkey and recovery key, contact [support@ente.com](mailto:support@ente.com) for assistance.
 
 ### I'm not receiving the verification code email {#verification-code}
 
@@ -212,10 +222,10 @@ If you're not receiving verification codes:
 2. Wait a few minutes - emails can be delayed
 3. Try requesting a new code
 4. Make sure you entered the correct email address
-5. Contact [support@ente.io](mailto:support@ente.io) if the issue persists
+5. Contact [support@ente.com](mailto:support@ente.com) if the issue persists
 
 ### What if I lose access to my email address? {#lost-email}
 
 The recovery key does not bypass email verification. For security reasons, Ente does not disable or bypass email verification unless the account owner reaches out and successfully verifies their identity by providing account details.
 
-If you lose access to your email, contact [support@ente.io](mailto:support@ente.io).
+If you lose access to your email, contact [support@ente.com](mailto:support@ente.com).

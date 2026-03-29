@@ -113,8 +113,9 @@ apps:
 ```
 
 If you are using quickstart, note that only Photos and Albums are exposed by
-default in `compose.yaml`. Expose or deploy Share / Paste separately before
-pointing `apps.public-locker` / `apps.public-paste` to those URLs.
+default in `compose.yaml`. Uncomment the Share / Paste port mappings there, or
+deploy them separately, before pointing `apps.public-locker` /
+`apps.public-paste` to those URLs.
 
 ## Step 4: Make it publicly accessible
 

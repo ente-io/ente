@@ -1,9 +1,11 @@
 {
   "@@locale ": "en",
-  "enterYourEmailAddress": "Sartu zure helbide elektronikoa",
+  "enterYourEmailAddress": "Sartu zure e-posta helbidea",
+  "enterYourNewEmailAddress": "Sartu zure e-posta helbide berria",
   "accountWelcomeBack": "Ongi etorri berriro!",
   "emailAlreadyRegistered": "Helbide hau badago erregistratuta lehendik.",
   "emailNotRegistered": "Helbide hau ez dago erregistratuta.",
+  "accountSetupIncompleteCreateAccount": "Kontuaren kudeaketa ez da bukatu. Egun kontu berria kudeaketa bukatzeko.",
   "email": "E-maila",
   "cancel": "Utzi",
   "verify": "Egiaztatu",
@@ -25,7 +27,7 @@
   "deleteReason4": "Nire arrazoia ez dago zerrendan",
   "sendEmail": "Bidali mezua",
   "deleteRequestSLAText": "Zure eskaera 72 ordutan prozesatua izango da.",
-  "deleteEmailRequest": "Mesedez, bidali e-mail bat <warning>account-deletion@ente.io</warning> helbidea zure erregistatutako helbidetik.",
+  "deleteEmailRequest": "Mesedez, bidali e-mail bat <warning>account-deletion@ente.com</warning> helbidea zure erregistatutako helbidetik.",
   "entePhotosPerm": "Ente-k <i>zure baimena behar du</i> zure argazkiak gordetzeko",
   "ok": "Ondo",
   "createAccount": "Sortu kontua",
@@ -61,7 +63,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -124,7 +126,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -140,7 +142,7 @@
   "setupComplete": "Prestaketa burututa",
   "saveYourRecoveryKeyIfYouHaventAlready": "Gorde zure berreskuratze giltza ez baduzu oraindik egin",
   "thisCanBeUsedToRecoverYourAccountIfYou": "Hau zure kontua berreskuratzeko erabili ahal duzu, zure bigarren faktorea ahaztuz gero",
-  "twofactorAuthenticationPageTitle": "Faktore biko autentifikatzea",
+  "twofactorAuthenticationPageTitle": "Faktore biko autentifikazioa",
   "lostDevice": "Gailua galdu duzu?",
   "verifyingRecoveryKey": "Berreskuratze giltza egiaztatuz...",
   "recoveryKeyVerified": "Berreskuratze giltza egiaztatuta",
@@ -179,7 +181,7 @@
   "changePermissions": "Baimenak aldatu nahi?",
   "yesConvertToViewer": "Bai, egin ikusle",
   "cannotAddMorePhotosAfterBecomingViewer": "{user}-(e)k ezin izango du argazki gehiago gehitu album honetan \n\nBaina haiek gehitutako argazkiak kendu ahal izango dituzte",
-  "allowAddingPhotos": "Baimendu argazkiak gehitzea",
+  "allowAddingPhotos": "Utzi argazkiak gehitzen",
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
@@ -256,18 +258,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Egiaztatze IDa",
   "verifyEmailID": "Egiaztatu {email}",
   "emailNoEnteAccount": "{email}-(e)k ez du Ente konturik. \n\nBidali gonbidapena argazkiak partekatzeko.",
-  "shareMyVerificationID": "Hau da nire Egiaztatze IDa: {verificationID} ente.io-rako.",
-  "shareTextConfirmOthersVerificationID": "Ei, baieztatu ahal duzu hau dela zure ente.io Egiaztatze IDa?: {verificationID}",
+  "shareMyVerificationID": "Hau da nire Egiaztatze IDa: {verificationID} ente.com-rako.",
+  "shareTextConfirmOthersVerificationID": "Ei, baieztatu ahal duzu hau dela zure ente.com Egiaztatze IDa?: {verificationID}",
   "somethingWentWrong": "Zerbait oker joan da",
   "sendInvite": "Bidali gonbidapena",
-  "shareTextRecommendUsingEnte": "Jaitsi Ente argazkiak eta bideoak jatorrizko kalitatean errez partekatu ahal izateko \n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Jaitsi Ente argazkiak eta bideoak jatorrizko kalitatean errez partekatu ahal izateko \n\nhttps://ente.com",
   "done": "Eginda",
   "applyCodeTitle": "Aplikatu kodea",
   "enterCodeDescription": "Sartu zure lagunak emandako kodea, biontzat debaldeko biltegiratzea lortzeko",

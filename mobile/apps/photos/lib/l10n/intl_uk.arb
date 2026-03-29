@@ -27,7 +27,7 @@
   "deleteReason4": "Причина не перерахована",
   "sendEmail": "Надіслати електронного листа",
   "deleteRequestSLAText": "Ваш запит буде оброблений протягом 72 годин.",
-  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.io</warning> зі скриньки, зазначеної при реєстрації.",
+  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.com</warning> зі скриньки, зазначеної при реєстрації.",
   "entePhotosPerm": "Ente <i>потребує дозволу</i> до ваших світлин",
   "ok": "Добре",
   "createAccount": "Створити обліковий запис",
@@ -71,7 +71,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -134,7 +134,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -274,18 +274,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ідентифікатор підтвердження",
   "verifyEmailID": "Підтвердити {email}",
   "emailNoEnteAccount": "У {email} немає облікового запису Ente.\n\nНадішліть їм запрошення для обміну фотографіями.",
-  "shareMyVerificationID": "Ось мій ідентифікатор підтвердження: {verificationID} для ente.io.",
+  "shareMyVerificationID": "Ось мій ідентифікатор підтвердження: {verificationID} для ente.com.",
   "shareTextConfirmOthersVerificationID": "Гей, ви можете підтвердити, що це ваш ідентифікатор підтвердження: {verificationID}",
   "somethingWentWrong": "Щось пішло не так",
   "sendInvite": "Надіслати запрошення",
-  "shareTextRecommendUsingEnte": "Завантажте Ente для того, щоб легко поділитися фотографіями оригінальної якості та відео\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Завантажте Ente для того, щоб легко поділитися фотографіями оригінальної якості та відео\n\nhttps://ente.com",
   "done": "Готово",
   "applyCodeTitle": "Застосувати код",
   "enterCodeDescription": "Введіть код, наданий вашим другом, щоби отримати безплатне сховище для вас обох",
@@ -439,7 +439,6 @@
   "discover_sunset": "Захід сонця",
   "discover_hills": "Пагорби",
   "discover_greenery": "Зелень",
-  "mlIndexingDescription": "Зверніть увагу, що машинне навчання призведе до збільшення пропускної здатності та споживання заряду батареї, поки не будуть проіндексовані всі елементи. Для прискорення індексації скористайтеся настільним застосунком, всі результати будуть синхронізовані автоматично.",
   "loadingModel": "Завантаження моделей...",
   "waitingForWifi": "Очікування на Wi-Fi...",
   "status": "Стан",
@@ -552,8 +551,6 @@
   "familyPlans": "Сімейні тарифи",
   "referrals": "Реферали",
   "notifications": "Сповіщення",
-  "sharedPhotoNotifications": "Нові спільні фотографії",
-  "sharedPhotoNotificationsExplanation": "Отримувати сповіщення, коли хтось додасть фото до спільного альбому, в якому ви перебуваєте",
   "advanced": "Додатково",
   "general": "Загальні",
   "security": "Безпека",
@@ -587,7 +584,6 @@
   "darkTheme": "Темна",
   "systemTheme": "Як у системі",
   "freeTrial": "Безплатний пробний період",
-  "selectYourPlan": "Оберіть тариф",
   "enteSubscriptionPitch": "Ente зберігає ваші спогади, тому вони завжди доступні для вас, навіть якщо ви втратите пристрій.",
   "enteSubscriptionShareWithFamily": "Вашу сім'ю також можна додати до вашого тарифу.",
   "currentUsageIs": "Поточне використання ",
@@ -608,7 +604,7 @@
   "subscription": "Передплата",
   "paymentDetails": "Деталі платежу",
   "manageFamily": "Керування сім'єю",
-  "contactToManageSubscription": "Зв'яжіться з нами за адресою support@ente.io для управління вашою передплатою {provider}.",
+  "contactToManageSubscription": "Зв'яжіться з нами за адресою support@ente.com для управління вашою передплатою {provider}.",
   "renewSubscription": "Поновити передплату",
   "cancelSubscription": "Скасувати передплату",
   "areYouSureYouWantToRenew": "Ви впевнені, що хочете поновити?",
@@ -657,7 +653,7 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} вже пов'язаний з іншим обліковим записом Ente.\nЯкщо ви хочете використовувати свій {id} з цим обліковим записом, зверніться до нашої служби підтримки",
   "visitWebToManage": "Відвідайте web.ente.io, щоб керувати передплатою",
   "couldNotUpdateSubscription": "Не вдалося оновити передплату",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Зв'яжіться з support@ente.io і ми будемо раді допомогти!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Зв'яжіться з support@ente.com і ми будемо раді допомогти!",
   "paymentFailed": "Не вдалося оплатити",
   "paymentFailedTalkToProvider": "Зверніться до {providerName}, якщо було знято платіж",
   "@paymentFailedTalkToProvider": {
@@ -688,7 +684,6 @@
   "grantFullAccessPrompt": "Надайте доступ до всіх фотографій в налаштуваннях застосунку",
   "allowPermTitle": "Дозволити доступ до фотографій",
   "allowPermBody": "Надайте доступ до ваших фотографій з налаштувань, щоб Ente міг показувати та створювати резервну копію вашої бібліотеки.",
-  "openSettings": "Відкрити налаштування",
   "selectMorePhotos": "Обрати більше фотографій",
   "existingUser": "Наявний користувач",
   "newToEnte": "Уперше на Ente",
@@ -1008,7 +1003,6 @@
   "fileTypesAndNames": "Типи та назви файлів",
   "location": "Розташування",
   "moments": "Моменти",
-  "searchFaceEmptySection": "Люди будуть показані тут після завершення індексації",
   "searchDatesEmptySection": "Шукати за датою, місяцем або роком",
   "searchLocationEmptySection": "Групові фотографії, які зроблені в певному радіусі від фотографії",
   "searchPeopleEmptySection": "Запросіть людей, і ви побачите всі фотографії, якими вони поділилися, тут",
@@ -1366,7 +1360,6 @@
   },
   "extraPhotosFound": "Знайдено додаткові фотографії",
   "configuration": "Налаштування",
-  "localIndexing": "Локальне індексування",
   "processed": "Оброблено",
   "resetPerson": "Вилучити",
   "areYouSureYouWantToResetThisPerson": "Ви впевнені, що хочете скинути цю особу?",
@@ -1686,16 +1679,6 @@
     "description": "Tooltip or semantics label for the pause button"
   },
   "playfulKids": "Грайливі діти",
-  "candidLaughter": "Щирий сміх",
-  "groupSelfies": "Усі ми",
-  "birthdayJoy": "Радість дня народження",
-  "weddingMoments": "Сяйво весільного дня",
-  "goldenHourPortraits": "Обличчя в золоту годину",
-  "concertNights": "Концертні ночі",
-  "poolDays": "Дні біля басейну",
-  "picnicDays": "Спогади про пікнік",
-  "campingMoments": "Миті кемпінгу",
-  "babySmiles": "Усмішки малюка",
   "ritualsTitle": "Ритуали",
   "ritualAddTooltip": "Додати ритуал",
   "ritualActivityHeading": "Активність",
