@@ -78,7 +78,7 @@ class AboutUsPage extends StatelessWidget {
                               builder: (BuildContext context) {
                                 return WebPage(
                                   AppLocalizations.of(context).blog,
-                                  "https://ente.io/blog",
+                                  "https://ente.com/blog",
                                 );
                               },
                             ),
@@ -100,7 +100,7 @@ class AboutUsPage extends StatelessWidget {
                               builder: (BuildContext context) {
                                 return WebPage(
                                   AppLocalizations.of(context).privacy,
-                                  "https://ente.io/privacy",
+                                  "https://ente.com/privacy",
                                 );
                               },
                             ),
@@ -124,7 +124,7 @@ class AboutUsPage extends StatelessWidget {
                                 return WebPage(
                                   AppLocalizations.of(context)
                                       .termsOfServicesTitle,
-                                  "https://ente.io/terms",
+                                  "https://ente.com/terms",
                                 );
                               },
                             ),

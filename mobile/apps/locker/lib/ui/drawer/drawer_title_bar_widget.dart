@@ -28,6 +28,7 @@ class DrawerTitleBarWidget extends StatelessWidget {
                 scaffoldKey.currentState?.closeDrawer();
               },
               icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
+              tooltip: "Close",
             ),
             IconButton(
               visualDensity: const VisualDensity(horizontal: -2, vertical: -2),

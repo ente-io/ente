@@ -330,7 +330,7 @@
     }
   },
   "sorry": "Ho sentim",
-  "importFailureDesc": "No s'ha pogut analitzar el fitxer seleccionat.\nEscriu a support@ente.io si necessites ajuda!",
+  "importFailureDesc": "No s'ha pogut analitzar el fitxer seleccionat.\nEscriu a support@ente.com si necessites ajuda!",
   "pendingSyncs": "Advertència",
   "pendingSyncsWarningBody": "Alguns dels teus codis no s'han sincronitzat.\n\nSi us plau, assegura't de tenir una còpia de seguretat d'aquests codis abans de tancar la sessió.",
   "checkInboxAndSpamFolder": "Comprova la teva safata d'entrada (i el correu no desitjat) per completar la verificació",
@@ -343,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

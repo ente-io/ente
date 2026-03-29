@@ -9,7 +9,7 @@ Live versions are at:
 - Ente Auth: [auth.ente.io](https://auth.ente.io)
 
 To know more about Ente, see [our main README](../README.md) or visit
-[ente.io](https://ente.io).
+[ente.com](https://ente.com).
 
 ## Building from source
 

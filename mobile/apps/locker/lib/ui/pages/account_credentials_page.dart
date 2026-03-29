@@ -158,6 +158,7 @@ class _AccountCredentialsPageState
           },
           child: Icon(
             _passwordVisible ? Icons.visibility : Icons.visibility_off,
+            semanticLabel: _passwordVisible ? 'hide_password' : 'show_password',
           ),
         ),
         validator: (value) {

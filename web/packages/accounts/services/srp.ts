@@ -36,7 +36,7 @@ import {
  * It is used as an (user selectable) alternative to email verification.
  *
  * For more about the what and why, see the announcement blog post
- * https://ente.io/blog/ente-adopts-secure-remote-passwords/
+ * https://ente.com/blog/ente-adopts-secure-remote-passwords/
  *
  * Here we do not focus on the math (the above blog post links to reference
  * material, and there is also an RFC), but instead of the various bits of

@@ -9,20 +9,34 @@ import (
 	"testing"
 
 	entity "github.com/ente-io/museum/ente/storagebonus"
+	"github.com/ente-io/museum/internal/testutil"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func newStorageBonusTestRepository(t *testing.T) *Repository {
+	t.Helper()
+
+	testutil.WithServerRoot(t)
+	db := testutil.RequireTestDB(t)
+	testutil.ResetTables(t, db)
+	t.Cleanup(func() {
+		testutil.ResetTables(t, db)
+	})
+
+	return NewRepository(db)
+}
+
 // TestGetReferralCode tests the GetCode method
 func TestGetReferralCode(t *testing.T) {
 	ctx := context.Background()
-	repo := NewRepository(db)
+	repo := newStorageBonusTestRepository(t)
 	// Test for a user that doesn't have a storagebonus code
 	userID := int64(1)
 	code, err := repo.GetCode(ctx, userID)
 	assert.Nil(t, code)
-	assert.Equal(t, sql.ErrNoRows, errors.Unwrap(err))
+	assert.ErrorIs(t, err, sql.ErrNoRows)
 
 	// Insert a storagebonus code
 	newCode := "AABBCC"
@@ -39,12 +53,13 @@ func TestGetReferralCode(t *testing.T) {
 	// Test for a user that has a storagebonus code
 	code, err = repo.GetCode(ctx, userID)
 	assert.Nil(t, err)
-	assert.Equal(t, code, code)
+	assert.NotNil(t, code)
+	assert.Equal(t, newCode, *code)
 }
 
 // TestInsertReferralCode tests the InsertCode method
 func TestInsertReferralCode(t *testing.T) {
-	repo := NewRepository(db)
+	repo := newStorageBonusTestRepository(t)
 	// Insert a referral code
 	userID := int64(2)
 	code := "AAEEDD"
@@ -58,7 +73,7 @@ func TestInsertReferralCode(t *testing.T) {
 
 // TestAddNewReferralCode tests the AddNewCode method
 func TestAddNewReferralCode(t *testing.T) {
-	repo := NewRepository(db)
+	repo := newStorageBonusTestRepository(t)
 	userID := int64(3)
 	code := "B22222"
 	err := repo.InsertCode(context.Background(), userID, code)

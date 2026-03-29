@@ -201,7 +201,7 @@ const TappableContainer: React.FC<
     // up a page where they can configure the endpoint that the app should
     // connect to.
     //
-    // See: https://ente.io/help/self-hosting/guides/custom-server/
+    // See: https://ente.com/help/self-hosting/guides/custom-server/
     const [tapCount, setTapCount] = useState(0);
     const [showDevSettings, setShowDevSettings] = useState(false);
 

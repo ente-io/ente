@@ -85,7 +85,7 @@ Locker is free to use with generous limits:
 Locker's paid limits are included with any Ente Photos subscription. Locker
 storage is separate from Photos storage.
 
-View pricing at [ente.io/pricing](https://ente.io/pricing). Learn more about
+View pricing at [ente.com/pricing](https://ente.com/pricing). Learn more about
 [pricing and plans](/locker/faq/getting-started#locker-pricing).
 
 ## Who Locker is for
@@ -120,12 +120,12 @@ available:
    [Legacy](/locker/features/legacy/), and check the
    [FAQ](/locker/faq/) sections
 2. **Discord community**: Join our
-   [Discord server](https://ente.io/discord) for community support and
+   [Discord server](https://ente.com/discord) for community support and
    discussions
 3. **Email support**: Contact us at
-   [support@ente.io](mailto:support@ente.io) for personalized help
+   [support@ente.com](mailto:support@ente.com) for personalized help
 4. **GitHub**: Report bugs or request features on
    [GitHub](https://github.com/ente-io/ente/issues)
 
 For security vulnerabilities, please email
-[security@ente.io](mailto:security@ente.io) directly.
+[security@ente.com](mailto:security@ente.com) directly.

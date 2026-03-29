@@ -28,6 +28,7 @@ RUN yarn build:auth
 RUN yarn build:cast
 RUN yarn build:share
 RUN yarn build:embed
+RUN yarn build:paste
 
 FROM nginx
 
@@ -40,6 +41,7 @@ COPY --from=builder /build/web/apps/auth/out /out/auth
 COPY --from=builder /build/web/apps/cast/out /out/cast
 COPY --from=builder /build/web/apps/share/out /out/share
 COPY --from=builder /build/web/apps/embed/out /out/embed
+COPY --from=builder /build/web/apps/paste/out /out/paste
 
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
@@ -70,6 +72,10 @@ server {
     listen 3006; root /out/embed;
     location / { try_files \$uri \$uri.html /index.html; }
 }
+server {
+    listen 3008; root /out/paste;
+    location / { try_files \$uri \$uri.html /index.html; }
+}
 EOF
 
 EXPOSE 3000
@@ -79,6 +85,7 @@ EXPOSE 3003
 EXPOSE 3004
 EXPOSE 3005
 EXPOSE 3006
+EXPOSE 3008
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
 ENV ENTE_ALBUMS_ORIGIN=http://localhost:3002

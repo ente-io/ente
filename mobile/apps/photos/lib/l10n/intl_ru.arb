@@ -29,7 +29,7 @@
   "deleteReason4": "Моя причина не указана",
   "sendEmail": "Отправить электронное письмо",
   "deleteRequestSLAText": "Ваш запрос будет обработан в течение 72 часов.",
-  "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.io</warning> с вашего зарегистрированного адреса электронной почты.",
+  "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.com</warning> с вашего зарегистрированного адреса электронной почты.",
   "entePhotosPerm": "Ente <i>требуется разрешение для</i> сохранения ваших фото",
   "ok": "Хорошо",
   "createAccount": "Создать аккаунт",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -313,18 +313,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Идентификатор подтверждения",
   "verifyEmailID": "Подтвердить {email}",
   "emailNoEnteAccount": "У {email} нет аккаунта Ente.\n\nОтправьте ему приглашение для обмена фото.",
-  "shareMyVerificationID": "Вот мой идентификатор подтверждения: {verificationID} для ente.io.",
-  "shareTextConfirmOthersVerificationID": "Привет, можешь подтвердить, что это твой идентификатор подтверждения ente.io: {verificationID}",
+  "shareMyVerificationID": "Вот мой идентификатор подтверждения: {verificationID} для ente.com.",
+  "shareTextConfirmOthersVerificationID": "Привет, можешь подтвердить, что это твой идентификатор подтверждения ente.com: {verificationID}",
   "somethingWentWrong": "Что-то пошло не так",
   "sendInvite": "Отправить приглашение",
-  "shareTextRecommendUsingEnte": "Скачай Ente, чтобы мы могли легко делиться фото и видео в оригинальном качестве\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Скачай Ente, чтобы мы могли легко делиться фото и видео в оригинальном качестве\n\nhttps://ente.com",
   "done": "Готово",
   "applyCodeTitle": "Применить код",
   "enterCodeDescription": "Введите код, предоставленный вашим другом, чтобы вы оба могли получить бесплатное хранилище",
@@ -352,7 +352,7 @@
   "theyAlsoGetXGb": "Они тоже получат {storageAmountInGB} ГБ",
   "referralStorageForBoth": "{storageAmountInGB} ГБ для них + {storageAmountInGB} ГБ для вас при переходе на платный тариф.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ каждый раз, когда кто-то подписывается на платный тариф и применяет ваш код",
-  "shareTextReferralCode": "Ente Photos — это безопасное и защищённое хранилище для ваших фотографий\n* Скачайте Ente Photos — https://ente.io/app\n* Создайте аккаунт\n* Примените реферальный код {referralCode} в Настройки -> Рефералы -> Применить код\n* Получите {referralStorageInGB} ГБ бесплатно при переходе на платный тариф",
+  "shareTextReferralCode": "Ente Photos — это безопасное и защищённое хранилище для ваших фотографий\n* Скачайте Ente Photos — https://ente.com/app\n* Создайте аккаунт\n* Примените реферальный код {referralCode} в Настройки -> Рефералы -> Применить код\n* Получите {referralStorageInGB} ГБ бесплатно при переходе на платный тариф",
   "claimFreeStorage": "Получить бесплатное хранилище",
   "inviteYourFriends": "Пригласите своих друзей",
   "earnFreeStorage": "Заработайте бесплатное место в хранилище",
@@ -721,7 +721,7 @@
   "subscription": "Подписка",
   "paymentDetails": "Платёжные данные",
   "manageFamily": "Управление семьёй",
-  "contactToManageSubscription": "Пожалуйста, свяжитесь с нами по адресу support@ente.io для управления вашей подпиской {provider}.",
+  "contactToManageSubscription": "Пожалуйста, свяжитесь с нами по адресу support@ente.com для управления вашей подпиской {provider}.",
   "renewSubscription": "Продлить подписку",
   "cancelSubscription": "Отменить подписку",
   "areYouSureYouWantToRenew": "Вы уверены, что хотите продлить?",
@@ -770,7 +770,7 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} уже связан с другим аккаунтом Ente.\nЕсли вы хотите использовать {id} с этим аккаунтом, пожалуйста, свяжитесь с нашей службой поддержки",
   "visitWebToManage": "Пожалуйста, посетите web.ente.io для управления вашей подпиской",
   "couldNotUpdateSubscription": "Не удалось обновить подписку",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.io, и мы будем рады помочь!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.com, и мы будем рады помочь!",
   "paymentFailed": "Платёж не удался",
   "paymentFailedTalkToProvider": "Пожалуйста, обратитесь в поддержку {providerName}, если с вас сняли деньги",
   "@paymentFailedTalkToProvider": {

@@ -209,6 +209,14 @@ ENV="test" go test -v ./pkg/...
 go clean -testcache  && ENV="test" go test -v ./pkg/...
 ```
 
+To run the full `server/` Go test suite inside Docker instead of relying on a
+host Postgres setup, use:
+
+```sh
+./scripts/test-in-docker.sh
+./scripts/test-in-docker.sh -v
+```
+
 ## Configuration
 
 Now that you have museum running (either inside Docker or standalone), we can
@@ -230,4 +238,4 @@ The keys and values supported by this configuration file are documented in
 >
 > If your mobile app is able to connect to your self hosted instance but is not
 able to view or upload images, see
-[ente.io/help/self-hosting/guides/configuring-s3](https://ente.io/help/self-hosting/guides/configuring-s3).
+[ente.com/help/self-hosting/guides/configuring-s3](https://ente.com/help/self-hosting/guides/configuring-s3).

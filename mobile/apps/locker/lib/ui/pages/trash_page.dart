@@ -121,9 +121,7 @@ class _TrashPageState extends State<TrashPage> {
           onTap: () {
             Navigator.pop(context);
           },
-          child: const Icon(
-            Icons.arrow_back_outlined,
-          ),
+          child: const Icon(Icons.arrow_back_outlined, semanticLabel: "Back"),
         ),
       ),
       body: Stack(

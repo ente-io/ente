@@ -8,7 +8,7 @@ description: Getting started with self-hosting Ente
 If you're looking to spin up Ente on your server, you are in the right place!
 
 Our entire source code,
-[including the server](https://ente.io/blog/open-sourcing-our-server/) is open
+[including the server](https://ente.com/blog/open-sourcing-our-server/) is open
 source. This is the same code we use on production.
 
 For a quick preview, make sure your system meets the requirements mentioned
@@ -92,5 +92,5 @@ out our [migration guide](/auth/migration/) for more information.
 ## Queries?
 
 If you need support, please ask on our community
-[Discord](https://ente.io/discord) or start a discussion on
+[Discord](https://ente.com/discord) or start a discussion on
 [GitHub](https://github.com/ente-io/ente/discussions/).

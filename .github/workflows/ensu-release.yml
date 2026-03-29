@@ -55,8 +55,10 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 
-            - name: Install Rust stable
-              uses: dtolnay/rust-toolchain@stable
+            # Pin to 1.93.0: Rust 1.94.0 has a trait glob-import regression
+            # that breaks wry 0.24.x (SettingsExt not found via traits::*).
+            - name: Install Rust 1.93.0
+              uses: dtolnay/rust-toolchain@1.93.0
               with:
                   targets: ${{ matrix.platform.rust-target }}
 
@@ -215,7 +217,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+                  args: ${{ matrix.platform.rust-target == 'aarch64-apple-darwin' && '--target aarch64-apple-darwin --bundles app' || matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
 
     build-android:
         runs-on: ubuntu-22.04
@@ -327,7 +329,7 @@ jobs:
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
                   track: internal
-                  status: draft
+                  changesNotSentForReview: false
 
             - name: Notify Discord
               if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'

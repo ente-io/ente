@@ -217,7 +217,7 @@ const Page: React.FC = () => {
                     padding: "15px 30px",
                     marginBottom: "42px",
                 }}
-                href="https://ente.io/auth"
+                href="https://ente.com/auth"
                 target="_blank"
             >
                 Try Ente Auth

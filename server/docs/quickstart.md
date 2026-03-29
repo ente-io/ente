@@ -17,7 +17,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 > If you don't want to run via curl, you can alternatively download
 > [quickstart.sh](https://github.com/ente-io/ente/blob/main/server/quickstart.sh),
 > make it executable and run the script.
-> 
+>
 > ``` shell
 > curl -o quickstart.sh https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh
 > chmod +x quickstart.sh
@@ -32,7 +32,7 @@ http://localhost:3002.
 >
 > The verification code when you try to create an account can be seen in the
 > logs (See [self hosting
-> docs](https://ente.io/help/self-hosting/faq/otp#verification-code) for more
+> docs](https://ente.com/help/self-hosting/faq/otp#verification-code) for more
 > ways to get it)
 
 ## Details
@@ -139,13 +139,13 @@ should use an external S3 (/ DB) instead of the quickstart samples.
 >
 > Keep a plaintext backup of your photos until you are sure of what you are
 > doing and have a [backup
-> strategy](https://ente.io/help/self-hosting/faq/backup) worked out.
+> strategy](https://ente.com/help/self-hosting/faq/backup) worked out.
 
 ## Next steps
 
-See **[ente.io/help/self-hosting](https://ente.io/help/self-hosting)** for
+See **[ente.com/help/self-hosting](https://ente.com/help/self-hosting)** for
 guides on connecting to your self hosted instance [using your mobile
-app](https://ente.io/help/self-hosting/guides/custom-server/), modifying your
+app](https://ente.com/help/self-hosting/guides/custom-server/), modifying your
 setup to allow
-[uploading](https://ente.io/help/self-hosting/guides/configuring-s3) from your
+[uploading](https://ente.com/help/self-hosting/guides/configuring-s3) from your
 mobile app, and other customizations.

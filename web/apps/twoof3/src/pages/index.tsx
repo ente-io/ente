@@ -1110,7 +1110,7 @@ const Page = () => {
                                 <Box component="span">by</Box>
                                 <Box
                                     component="a"
-                                    href="https://ente.io"
+                                    href="https://ente.com"
                                     target="_blank"
                                     rel="noreferrer"
                                     sx={{
@@ -2214,7 +2214,7 @@ const Page = () => {
                             >
                                 <Box
                                     component="a"
-                                    href="https://ente.io"
+                                    href="https://ente.com"
                                     target="_blank"
                                     rel="noreferrer"
                                     sx={{

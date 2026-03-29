@@ -330,7 +330,7 @@
     }
   },
   "sorry": "Rất tiếc",
-  "importFailureDesc": "Không thể phân tích tệp đã chọn.\nVui lòng liên hệ support@ente.io nếu bạn cần trợ giúp!",
+  "importFailureDesc": "Không thể phân tích tệp đã chọn.\nVui lòng liên hệ support@ente.com nếu bạn cần trợ giúp!",
   "pendingSyncs": "Cảnh báo",
   "pendingSyncsWarningBody": "Một số mã của bạn chưa được sao lưu.\n\nVui lòng đảm bảo rằng bạn có bản sao lưu cho các mã này trước khi đăng xuất.",
   "checkInboxAndSpamFolder": "Vui lòng kiểm tra hộp thư đến (và thư rác) để hoàn tất xác minh",
@@ -343,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

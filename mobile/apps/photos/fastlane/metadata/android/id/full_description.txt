@@ -30,7 +30,7 @@ PERIZINAN
 ente memerlukan sejumlah izin tertentu sebagai penyedia penyimpanan foto, yang bisa ditinjau di sini: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 HARGA
-Kami tidak menyediakan paket yang gratis seumur hidup, karena penting bagi kami untuk tetap berdiri dan bertahan hingga masa depan. Namun, kami menyediakan paket yang terjangkau, yang bisa kamu bagikan dengan keluargamu. Kamu bisa menemukan informasi lebih lanjut di ente.io.
+Kami tidak menyediakan paket yang gratis seumur hidup, karena penting bagi kami untuk tetap berdiri dan bertahan hingga masa depan. Namun, kami menyediakan paket yang terjangkau, yang bisa kamu bagikan dengan keluargamu. Kamu bisa menemukan informasi lebih lanjut di ente.com.
 
 DUKUNGAN
-Kita bangga untuk menyediakan support berbasis manusia. Jika kamu adalah pelanggan berbayar, kamu bisa menghubungi team@ente.io dan menunggu balasan dari tim kami dalam 24 jam.
+Kita bangga untuk menyediakan support berbasis manusia. Jika kamu adalah pelanggan berbayar, kamu bisa menghubungi team@ente.com dan menunggu balasan dari tim kami dalam 24 jam.

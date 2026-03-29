@@ -15,7 +15,7 @@ class SocialIconsRow extends StatelessWidget {
     const socialLinks = [
       _SocialLink(
         icon: HugeIcons.strokeRoundedDiscord,
-        url: "https://ente.io/discord",
+        url: "https://ente.com/discord",
         label: "Discord",
       ),
       _SocialLink(

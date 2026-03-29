@@ -41,7 +41,7 @@ Some of the common configuration that can be done at top-level are:
 >
 > For more information, check
 > [this discussion](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970)
-> and our article on ensuring [reliability](https://ente.io/reliability/).
+> and our article on ensuring [reliability](https://ente.com/reliability/).
 
 Replication is disabled by default in self-hosted instance. Only the first
 bucket (`b2-eu-cen`) is used.
