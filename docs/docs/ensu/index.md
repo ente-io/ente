@@ -15,7 +15,7 @@ Think of it as a ChatGPT-like experience, except nothing ever leaves your
 device. It works offline, and it is free and open source.
 
 For the full backstory on why we built Ensu and where it is headed, read the
-launch post: [Ensu - Ente's Local LLM app](https://ente.io/blog/ensu/).
+launch post: [Ensu - Ente's Local LLM app](https://ente.com/blog/ensu/).
 
 ## Key highlights
 
@@ -32,7 +32,7 @@ launch post: [Ensu - Ente's Local LLM app](https://ente.io/blog/ensu/).
 
 ## Availability
 
-You can download Ensu from [ente.io/ensu](https://ente.io/ensu).
+You can download Ensu from [ente.com/ensu](https://ente.com/ensu).
 
 | Platform | Where to get it |
 | -------- | --------------- |
@@ -58,8 +58,8 @@ Some things people have been using it for:
 ## Getting Help
 
 - **FAQ**: Check the [FAQ](/ensu/faq/) for common questions.
-- **Discord**: Join the `#ensu` channel on [Discord](https://ente.io/discord).
-- **Email**: Write to [team@ente.io](mailto:team@ente.io) with feedback or
+- **Discord**: Join the `#ensu` channel on [Discord](https://ente.com/discord).
+- **Email**: Write to [team@ente.com](mailto:team@ente.com) with feedback or
   questions.
 - **GitHub**: Report bugs or request features on
   [GitHub](https://github.com/ente-io/ente/issues).
