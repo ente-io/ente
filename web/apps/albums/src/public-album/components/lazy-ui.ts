@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 
 export const LazyNotification = dynamic(
     () =>
-        import("ente-new/photos/components/Notification").then(
+        import("@/photos/components/Notification").then(
             ({ Notification }) => Notification,
         ),
     { ssr: false },

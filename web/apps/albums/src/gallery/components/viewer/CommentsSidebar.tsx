@@ -21,14 +21,14 @@ import type { EnteFile } from "ente-media/file";
 import {
     addPublicComment,
     deletePublicComment,
-} from "ente-new/albums/services/public-comment";
+} from "@/albums/services/public-comment";
 import {
     addPublicCommentReaction,
     createAnonIdentity,
     deletePublicReaction,
     getStoredAnonIdentity,
-} from "ente-new/albums/services/public-reaction";
-import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+} from "@/albums/services/public-reaction";
+import type { CollectionSummaries } from "@/photos/services/collection-summary";
 import i18n, { t } from "i18next";
 import React, {
     useCallback,

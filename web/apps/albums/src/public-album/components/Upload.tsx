@@ -40,12 +40,12 @@ import {
 } from "@/gallery/services/upload/upload-service";
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
+import { UploaderNameInput } from "@/albums/components/UploaderNameInput";
 import {
     savedPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
-} from "ente-new/albums/services/public-albums-fdb";
-import { usePhotosAppContext } from "ente-new/photos/types/context";
+} from "@/albums/services/public-albums-fdb";
+import { usePhotosAppContext } from "@/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";

@@ -24,7 +24,7 @@ import {
     getPublicParticipantsMaskedEmails,
     type PublicFeedComment,
     type PublicFeedReaction,
-} from "ente-new/albums/services/public-reaction";
+} from "@/albums/services/public-reaction";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 

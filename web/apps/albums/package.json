@@ -18,7 +18,6 @@
         "debounce": "^2.2.0",
         "ente-base": "*",
         "ente-media": "*",
-        "ente-new": "*",
         "ente-utils": "*",
         "exifreader": "^4.32.0",
         "file-type": "21.3.1",

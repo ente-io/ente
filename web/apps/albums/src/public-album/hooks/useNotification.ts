@@ -1,4 +1,4 @@
-import { type NotificationAttributes } from "ente-new/photos/components/Notification";
+import { type NotificationAttributes } from "@/photos/components/Notification";
 import { useCallback, useState } from "react";
 
 /**

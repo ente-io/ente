@@ -66,9 +66,9 @@ import { FileType } from "ente-media/file-type";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
-} from "ente-new/photos/components/gallery/ListHeader";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { usePhotosAppContext } from "ente-new/photos/types/context";
+} from "@/photos/components/gallery/ListHeader";
+import { PseudoCollectionID } from "@/photos/services/collection-summary";
+import { usePhotosAppContext } from "@/photos/types/context";
 import { t } from "i18next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -119,10 +119,10 @@ const LazyPasswordUnlockScreen = dynamic<PasswordUnlockScreenProps>(
 );
 
 const loadPublicAlbumsFDB = () =>
-    import("ente-new/albums/services/public-albums-fdb");
+    import("@/albums/services/public-albums-fdb");
 
 const loadPublicCollectionService = () =>
-    import("ente-new/albums/services/public-collection");
+    import("@/albums/services/public-collection");
 
 const loadShareService = () => import("@/gallery/services/share");
 

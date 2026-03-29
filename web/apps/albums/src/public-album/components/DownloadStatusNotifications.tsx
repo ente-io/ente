@@ -20,7 +20,7 @@ import {
     isSaveCompleteWithErrors,
     type SaveGroup,
 } from "@/gallery/components/utils/save-groups";
-import { Notification } from "ente-new/photos/components/Notification";
+import { Notification } from "@/photos/components/Notification";
 import { t } from "i18next";
 import { useState } from "react";
 

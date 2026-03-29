@@ -32,7 +32,7 @@ import {
     getPublicParticipantsMaskedEmails,
     getPublicSocialDiff,
     getStoredAnonIdentity,
-} from "ente-new/albums/services/public-reaction";
+} from "@/albums/services/public-reaction";
 import { t } from "i18next";
 import React, {
     useCallback,

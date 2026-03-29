@@ -14,8 +14,8 @@ import log from "ente-base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { getAvatarColor } from "@/gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
-import { getStoredAnonIdentity } from "ente-new/albums/services/public-reaction";
-import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+import { getStoredAnonIdentity } from "@/albums/services/public-reaction";
+import type { CollectionSummaries } from "@/photos/services/collection-summary";
 import { t } from "i18next";
 import React, {
     useCallback,

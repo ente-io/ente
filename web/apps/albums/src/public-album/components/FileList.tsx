@@ -12,12 +12,12 @@ import { FileType } from "ente-media/file-type";
 import {
     LoadingThumbnail,
     StaticThumbnail,
-} from "ente-new/photos/components/PlaceholderThumbnails";
+} from "@/photos/components/PlaceholderThumbnails";
 import {
     computeThumbnailGridLayoutParams,
     thumbnailGap,
     type ThumbnailGridLayoutParams,
-} from "ente-new/photos/components/utils/thumbnail-grid-layout";
+} from "@/photos/components/utils/thumbnail-grid-layout";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {

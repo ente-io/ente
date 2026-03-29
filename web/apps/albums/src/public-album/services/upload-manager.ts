@@ -31,7 +31,7 @@ import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
-import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
+import { savedPublicCollectionFiles } from "@/albums/services/public-albums-fdb";
 import { wait } from "ente-utils/promise";
 
 export type FileID = number;
