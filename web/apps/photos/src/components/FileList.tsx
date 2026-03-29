@@ -954,7 +954,6 @@ export const FileList: React.FC<FileListProps> = ({
             contextMenu,
             emailByUserID,
             favoriteFileIDs,
-            haveSelection,
             handleContextMenu,
             handleRangeSelect,
             handleSelect,
