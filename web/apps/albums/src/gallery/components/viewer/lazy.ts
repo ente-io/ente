@@ -2,15 +2,76 @@ import dynamic from "next/dynamic";
 import type { FileViewerProps } from "./FileViewer";
 import type { PublicFeedSidebarProps } from "./PublicFeedSidebar";
 
+const loadFileViewer = () => import("./FileViewer");
+const loadPublicFeedSidebar = () => import("./PublicFeedSidebar");
+
 export const LazyFileViewer = dynamic<FileViewerProps>(
-    () => import("./FileViewer").then(({ FileViewer }) => FileViewer),
+    () => loadFileViewer().then(({ FileViewer }) => FileViewer),
     { ssr: false },
 );
 
 export const LazyPublicFeedSidebar = dynamic<PublicFeedSidebarProps>(
     () =>
-        import("./PublicFeedSidebar").then(
+        loadPublicFeedSidebar().then(
             ({ PublicFeedSidebar }) => PublicFeedSidebar,
         ),
     { ssr: false },
 );
+
+let fileViewerPreload: Promise<void> | undefined;
+
+export const preloadFileViewer = () => {
+    if (typeof window === "undefined") {
+        return Promise.resolve();
+    }
+
+    fileViewerPreload ??= loadFileViewer().then(() => undefined);
+    return fileViewerPreload;
+};
+
+export const scheduleFileViewerPreload = () => {
+    if (typeof window === "undefined") {
+        return () => undefined;
+    }
+
+    let isCancelled = false;
+    let idleCallbackID: number | undefined;
+
+    const warmViewer = () => {
+        if (isCancelled) return;
+        void preloadFileViewer();
+    };
+
+    const requestWarmupOnIdle = () => {
+        const requestIdleCallback =
+            "requestIdleCallback" in window
+                ? window.requestIdleCallback.bind(window)
+                : undefined;
+
+        if (requestIdleCallback) {
+            idleCallbackID = requestIdleCallback(warmViewer, {
+                timeout: 1500,
+            });
+        } else {
+            idleCallbackID = window.setTimeout(warmViewer, 0);
+        }
+    };
+
+    requestWarmupOnIdle();
+
+    return () => {
+        isCancelled = true;
+        if (idleCallbackID !== undefined) {
+            const cancelIdleCallback =
+                "cancelIdleCallback" in window
+                    ? window.cancelIdleCallback.bind(window)
+                    : undefined;
+
+            if (cancelIdleCallback) {
+                cancelIdleCallback(idleCallbackID);
+            } else {
+                window.clearTimeout(idleCallbackID);
+            }
+        }
+    };
+};

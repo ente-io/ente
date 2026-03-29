@@ -5,7 +5,7 @@ import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutline
 import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
 import { Overlay } from "ente-base/components/containers";
 import log from "ente-base/log";
-import { downloadManager } from "@/gallery/services/download";
+import { thumbnailManager } from "@/gallery/services/thumbnail-manager";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -1301,7 +1301,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     useEffect(() => {
         let didCancel = false;
 
-        void downloadManager
+        void thumbnailManager
             .renderableThumbnailURL(file, showPlaceholder)
             .then((url) => !didCancel && setImageURL(url))
             .catch((e: unknown) => {

@@ -19,6 +19,10 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import {
+    getPublicAlbumsCredentials,
+    setPublicAlbumsCredentials,
+} from "./public-albums-credentials";
 import { detectFileTypeInfoFromChunk } from "../utils/detect-type";
 import { playableVideoURL, renderableImageBlob } from "./convert";
 
@@ -104,11 +108,9 @@ export type RenderableSourceURLs =
  * be called on logout to reset its internal state.
  */
 class DownloadManager {
-    /**
-     * Credentials that should be used to download files when we're in the
-     * context of the public albums app.
-     */
-    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    get publicAlbumsCredentials() {
+        return getPublicAlbumsCredentials();
+    }
     /**
      * Local cache for thumbnail blobs.
      *
@@ -186,7 +188,7 @@ class DownloadManager {
      * Reset the internal state of the download manager.
      */
     logout() {
-        this.publicAlbumsCredentials = undefined;
+        setPublicAlbumsCredentials(undefined);
         this.thumbnailURLPromises.clear();
         this.fileURLPromises.clear();
         this.renderableSourceURLPromises.clear();
@@ -201,7 +203,7 @@ class DownloadManager {
     setPublicAlbumsCredentials(
         credentials: PublicAlbumsCredentials | undefined,
     ) {
-        this.publicAlbumsCredentials = credentials;
+        setPublicAlbumsCredentials(credentials);
     }
 
     /**

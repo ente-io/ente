@@ -6,7 +6,10 @@ import {
     type FileViewerProps,
     type FileViewerInitialSidebar,
 } from "@/gallery/components/viewer/FileViewer";
-import { LazyFileViewer } from "@/gallery/components/viewer/lazy";
+import {
+    LazyFileViewer,
+    scheduleFileViewerPreload,
+} from "@/gallery/components/viewer/lazy";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { t } from "i18next";
@@ -127,6 +130,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         setHighlightCommentID(undefined);
         setOpenFileViewer(false);
     }, []);
+
+    useEffect(() => {
+        if (files.length === 0) return;
+        return scheduleFileViewerPreload();
+    }, [files.length]);
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>

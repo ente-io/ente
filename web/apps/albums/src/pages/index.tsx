@@ -57,7 +57,7 @@ import {
 import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
 import { type PublicFeedItemClickInfo } from "@/gallery/components/viewer/PublicFeedSidebar";
 import { LazyPublicFeedSidebar } from "@/gallery/components/viewer/lazy";
-import { downloadManager } from "@/gallery/services/download";
+import { setPublicAlbumsCredentials } from "@/gallery/services/public-albums-credentials";
 import { sortFiles } from "@/gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
@@ -295,7 +295,7 @@ export default function PublicCollectionGallery() {
                         await savedPublicCollectionAccessTokenJWT(accessToken);
                 }
                 credentials.current = { accessToken, accessTokenJWT };
-                downloadManager.setPublicAlbumsCredentials(credentials.current);
+                setPublicAlbumsCredentials(credentials.current);
                 await publicAlbumsRemotePull();
             } finally {
                 if (
@@ -372,7 +372,7 @@ export default function PublicCollectionGallery() {
             // disabled password protection on the link.
             if (!isPasswordProtected && credentials.current?.accessTokenJWT) {
                 credentials.current.accessTokenJWT = undefined;
-                downloadManager.setPublicAlbumsCredentials(credentials.current);
+                setPublicAlbumsCredentials(credentials.current);
                 removePublicCollectionAccessTokenJWT(accessToken);
             }
 
@@ -401,9 +401,7 @@ export default function PublicCollectionGallery() {
                     // to reenter the password.
                     if (isHTTP401Error(e)) {
                         credentials.current!.accessTokenJWT = undefined;
-                        downloadManager.setPublicAlbumsCredentials(
-                            credentials.current,
-                        );
+                        setPublicAlbumsCredentials(credentials.current);
                     } else {
                         throw e;
                     }
@@ -499,7 +497,7 @@ export default function PublicCollectionGallery() {
                 accessToken,
             );
             credentials.current!.accessTokenJWT = accessTokenJWT;
-            downloadManager.setPublicAlbumsCredentials(credentials.current);
+            setPublicAlbumsCredentials(credentials.current);
             await savePublicCollectionAccessTokenJWT(
                 accessToken,
                 accessTokenJWT,

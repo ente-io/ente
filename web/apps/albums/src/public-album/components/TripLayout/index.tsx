@@ -12,6 +12,7 @@ import {
 import {
     LazyFileViewer,
     LazyPublicFeedSidebar,
+    scheduleFileViewerPreload,
 } from "@/gallery/components/viewer/lazy";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
@@ -263,6 +264,11 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    useEffect(() => {
+        if (files.length === 0) return;
+        return scheduleFileViewerPreload();
+    }, [files.length]);
 
     // Use extracted data processing hooks
     useDataProcessing({
