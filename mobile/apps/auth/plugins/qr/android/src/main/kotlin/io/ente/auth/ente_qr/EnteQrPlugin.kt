@@ -2,7 +2,14 @@ package io.ente.auth.ente_qr
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import androidx.annotation.NonNull
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
+import com.google.android.gms.tasks.Tasks
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
@@ -25,6 +32,10 @@ import java.util.concurrent.Executors
 class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private val executor = Executors.newSingleThreadExecutor()
+
+  private val mlKitOptions = BarcodeScannerOptions.Builder()
+    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+    .build()
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ente_qr")
@@ -84,191 +95,233 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
+  /**
+   * Load a bitmap and apply EXIF orientation so the image is upright
+   * before QR detection.
+   */
+  private fun loadBitmapWithOrientation(imagePath: String): Bitmap? {
+    val bitmap = BitmapFactory.decodeFile(imagePath) ?: return null
+    return try {
+      val exif = ExifInterface(imagePath)
+      val orientation = exif.getAttributeInt(
+        ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+      )
+      val matrix = Matrix()
+      when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+        ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+        ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+        ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
+        ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.preScale(1f, -1f)
+        else -> return bitmap
+      }
+      val rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+      if (rotated !== bitmap) bitmap.recycle()
+      rotated
+    } catch (_: Exception) {
+      bitmap
+    }
+  }
+
+  private fun createDecodeHints(): HashMap<DecodeHintType, Any> {
+    val hints = HashMap<DecodeHintType, Any>()
+    hints[DecodeHintType.POSSIBLE_FORMATS] = listOf(BarcodeFormat.QR_CODE)
+    hints[DecodeHintType.TRY_HARDER] = true
+    hints[DecodeHintType.ALSO_INVERTED] = true
+    return hints
+  }
+
+  // ── ZXing fast path (single pass at original resolution) ──────────
+
+  /**
+   * Quick ZXing decode at original resolution with HybridBinarizer.
+   * Handles ~80% of clear QR codes instantly.
+   */
+  private fun zxingQuickDecode(bitmap: Bitmap): ZXingResult? {
+    val width = bitmap.width
+    val height = bitmap.height
+    val pixels = IntArray(width * height)
+    bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+    val source = RGBLuminanceSource(width, height, pixels)
+    val reader = MultiFormatReader()
+    reader.setHints(createDecodeHints())
+    return try {
+      reader.decode(BinaryBitmap(HybridBinarizer(source)))
+    } catch (_: NotFoundException) {
+      null
+    }
+  }
+
+  /**
+   * Quick ZXing multi-decode at original resolution.
+   */
+  private fun zxingQuickDecodeMultiple(bitmap: Bitmap): Array<ZXingResult>? {
+    val width = bitmap.width
+    val height = bitmap.height
+    val pixels = IntArray(width * height)
+    bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+    val source = RGBLuminanceSource(width, height, pixels)
+    val hints = createDecodeHints()
+    val reader = MultiFormatReader()
+    reader.setHints(hints)
+    val multiReader = GenericMultipleBarcodeReader(reader)
+    return try {
+      multiReader.decodeMultiple(BinaryBitmap(HybridBinarizer(source)), hints)
+    } catch (_: NotFoundException) {
+      null
+    }
+  }
+
+  // ── ML Kit (handles all difficult cases) ──────────────────────────
+
+  private fun mlKitScanSingle(bitmap: Bitmap): String? {
+    val scanner = BarcodeScanning.getClient(mlKitOptions)
+    return try {
+      val inputImage = InputImage.fromBitmap(bitmap, 0)
+      val barcodes = Tasks.await(scanner.process(inputImage))
+      barcodes.firstOrNull { it.rawValue != null }?.rawValue
+    } catch (_: Exception) {
+      null
+    } finally {
+      scanner.close()
+    }
+  }
+
+  private fun mlKitScanMultiple(bitmap: Bitmap): List<Map<String, Any>>? {
+    val scanner = BarcodeScanning.getClient(mlKitOptions)
+    return try {
+      val inputImage = InputImage.fromBitmap(bitmap, 0)
+      val barcodes = Tasks.await(scanner.process(inputImage))
+      val imgWidth = bitmap.width.toDouble()
+      val imgHeight = bitmap.height.toDouble()
+
+      val detections = barcodes.mapNotNull { barcode ->
+        val content = barcode.rawValue ?: return@mapNotNull null
+        val box = barcode.boundingBox ?: return@mapNotNull null
+        mapOf(
+          "content" to content,
+          "x" to (box.left / imgWidth),
+          "y" to (box.top / imgHeight),
+          "width" to (box.width() / imgWidth),
+          "height" to (box.height() / imgHeight),
+        )
+      }
+      detections.ifEmpty { null }
+    } catch (_: Exception) {
+      null
+    } finally {
+      scanner.close()
+    }
+  }
+
+  // ── Main scan methods ─────────────────────────────────────────────
+  //
+  // Strategy: ZXing fast pass → ML Kit fallback
+  // - ZXing at original resolution handles most clear QR codes instantly
+  // - ML Kit handles everything else (moiré, distortion, low contrast,
+  //   small QR codes, inverted colors) without wasting time on ZXing
+  //   multi-resolution/multi-binarizer attempts
+
   private fun scanQrCode(imagePath: String): Map<String, Any> {
     try {
       val file = File(imagePath)
       if (!file.exists()) {
-        return mapOf(
-          "success" to false,
-          "error" to "Image file not found: $imagePath"
-        )
+        return mapOf("success" to false, "error" to "Image file not found: $imagePath")
       }
 
-      var bitmap = BitmapFactory.decodeFile(imagePath)
-      if (bitmap == null) {
-        return mapOf(
-          "success" to false,
-          "error" to "Unable to decode image file"
-        )
-      }
+      val bitmap = loadBitmapWithOrientation(imagePath)
+        ?: return mapOf("success" to false, "error" to "Unable to decode image file")
 
-      // Try multiple times with different image sizes like Aegis does
-      for (i in 0..2) {
-        if (i != 0) {
-          // Resize bitmap for subsequent attempts
-          val newWidth = bitmap.width / (i * 2)
-          val newHeight = bitmap.height / (i * 2)
-          if (newWidth > 0 && newHeight > 0) {
-            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-          }
+      try {
+        // Fast path: ZXing at original resolution
+        val zxingResult = zxingQuickDecode(bitmap)
+        if (zxingResult != null) {
+          return mapOf("success" to true, "content" to zxingResult.text)
         }
 
-        try {
-          val width = bitmap.width
-          val height = bitmap.height
-          val pixels = IntArray(width * height)
-          bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-
-          val source = RGBLuminanceSource(width, height, pixels)
-          val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
-
-          val reader = MultiFormatReader()
-          val hints = HashMap<DecodeHintType, Any>()
-          hints[DecodeHintType.POSSIBLE_FORMATS] = listOf(BarcodeFormat.QR_CODE)
-          hints[DecodeHintType.TRY_HARDER] = true
-          hints[DecodeHintType.ALSO_INVERTED] = true
-          reader.setHints(hints)
-
-          val qrResult: ZXingResult = reader.decode(binaryBitmap)
-          
-          return mapOf(
-            "success" to true,
-            "content" to qrResult.text
-          )
-        } catch (e: NotFoundException) {
-          // Continue to next iteration
-          continue
+        // ML Kit fallback
+        val mlResult = mlKitScanSingle(bitmap)
+        if (mlResult != null) {
+          return mapOf("success" to true, "content" to mlResult)
         }
-      }
 
-      return mapOf(
-        "success" to false,
-        "error" to "No QR code found in image"
-      )
+        return mapOf("success" to false, "error" to "No QR code found in image")
+      } finally {
+        bitmap.recycle()
+      }
     } catch (e: Exception) {
-      return mapOf(
-        "success" to false,
-        "error" to "Error scanning QR code: ${e.message}"
-      )
+      return mapOf("success" to false, "error" to "Error scanning QR code: ${e.message}")
     }
   }
 
   private fun scanAllQrCodes(imagePath: String): Map<String, Any> {
     val file = File(imagePath)
     if (!file.exists()) {
-      return mapOf(
-        "success" to false,
-        "error" to "Image file not found: $imagePath"
-      )
+      return mapOf("success" to false, "error" to "Image file not found: $imagePath")
     }
 
-    val origBitmap = BitmapFactory.decodeFile(imagePath)
-      ?: return mapOf(
-        "success" to false,
-        "error" to "Unable to decode image file"
-      )
+    val bitmap = loadBitmapWithOrientation(imagePath)
+      ?: return mapOf("success" to false, "error" to "Unable to decode image file")
 
-    var bitmap = origBitmap
     try {
-      val origWidth = origBitmap.width.toDouble()
-      val origHeight = origBitmap.height.toDouble()
+      val imgWidth = bitmap.width.toDouble()
+      val imgHeight = bitmap.height.toDouble()
 
-      for (i in 0..2) {
-        if (i != 0) {
-          val newWidth = origBitmap.width / (i * 2)
-          val newHeight = origBitmap.height / (i * 2)
-          if (newWidth > 0 && newHeight > 0) {
-            if (bitmap !== origBitmap) bitmap.recycle()
-            bitmap = Bitmap.createScaledBitmap(origBitmap, newWidth, newHeight, true)
+      // Fast path: ZXing at original resolution
+      val zxingResults = zxingQuickDecodeMultiple(bitmap)
+      if (zxingResults != null && zxingResults.isNotEmpty()) {
+        val detections = mutableListOf<Map<String, Any>>()
+
+        for (qrResult in zxingResults) {
+          val points = qrResult.resultPoints
+          if (points == null || points.isEmpty()) continue
+
+          var minX = Float.MAX_VALUE
+          var minY = Float.MAX_VALUE
+          var maxX = -Float.MAX_VALUE
+          var maxY = -Float.MAX_VALUE
+
+          for (point in points) {
+            if (point == null) continue
+            if (point.x < minX) minX = point.x
+            if (point.y < minY) minY = point.y
+            if (point.x > maxX) maxX = point.x
+            if (point.y > maxY) maxY = point.y
           }
+
+          // Add padding around finder patterns
+          val padX = (maxX - minX) * 0.15f
+          val padY = (maxY - minY) * 0.15f
+          minX = (minX - padX).coerceAtLeast(0f)
+          minY = (minY - padY).coerceAtLeast(0f)
+          maxX = (maxX + padX).coerceAtMost(imgWidth.toFloat())
+          maxY = (maxY + padY).coerceAtMost(imgHeight.toFloat())
+
+          detections.add(mapOf(
+            "content" to qrResult.text,
+            "x" to (minX / imgWidth),
+            "y" to (minY / imgHeight),
+            "width" to ((maxX - minX) / imgWidth),
+            "height" to ((maxY - minY) / imgHeight),
+          ))
         }
 
-        try {
-          val width = bitmap.width
-          val height = bitmap.height
-          val pixels = IntArray(width * height)
-          bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-
-          val source = RGBLuminanceSource(width, height, pixels)
-          val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
-
-          val reader = MultiFormatReader()
-          val hints = HashMap<DecodeHintType, Any>()
-          hints[DecodeHintType.POSSIBLE_FORMATS] = listOf(BarcodeFormat.QR_CODE)
-          hints[DecodeHintType.TRY_HARDER] = true
-          hints[DecodeHintType.ALSO_INVERTED] = true
-          reader.setHints(hints)
-
-          val multiReader = GenericMultipleBarcodeReader(reader)
-          val results: Array<ZXingResult> = multiReader.decodeMultiple(binaryBitmap, hints)
-
-          val detections = mutableListOf<Map<String, Any>>()
-          val scaleX = if (i == 0) 1.0 else (i * 2).toDouble()
-          val scaleY = if (i == 0) 1.0 else (i * 2).toDouble()
-
-          for (qrResult in results) {
-            val points = qrResult.resultPoints
-            if (points == null || points.isEmpty()) continue
-
-            var minX = Float.MAX_VALUE
-            var minY = Float.MAX_VALUE
-            var maxX = -Float.MAX_VALUE
-            var maxY = -Float.MAX_VALUE
-
-            for (point in points) {
-              if (point == null) continue
-              val px = point.x * scaleX.toFloat()
-              val py = point.y * scaleY.toFloat()
-              if (px < minX) minX = px
-              if (py < minY) minY = py
-              if (px > maxX) maxX = px
-              if (py > maxY) maxY = py
-            }
-
-            // Add padding around finder patterns (they mark corners, not edges)
-            val padX = (maxX - minX) * 0.15f
-            val padY = (maxY - minY) * 0.15f
-            minX = (minX - padX).coerceAtLeast(0f)
-            minY = (minY - padY).coerceAtLeast(0f)
-            maxX = (maxX + padX).coerceAtMost(origWidth.toFloat())
-            maxY = (maxY + padY).coerceAtMost(origHeight.toFloat())
-
-            detections.add(mapOf(
-              "content" to qrResult.text,
-              "x" to (minX / origWidth),
-              "y" to (minY / origHeight),
-              "width" to ((maxX - minX) / origWidth),
-              "height" to ((maxY - minY) / origHeight),
-            ))
-          }
-
-          if (detections.isNotEmpty()) {
-            if (bitmap !== origBitmap) bitmap.recycle()
-            origBitmap.recycle()
-            return mapOf(
-              "success" to true,
-              "detections" to detections
-            )
-          }
-        } catch (e: NotFoundException) {
-          continue
+        if (detections.isNotEmpty()) {
+          return mapOf("success" to true, "detections" to detections)
         }
       }
 
-      if (bitmap !== origBitmap) bitmap.recycle()
-      origBitmap.recycle()
+      // ML Kit fallback
+      val mlDetections = mlKitScanMultiple(bitmap)
+      if (mlDetections != null) {
+        return mapOf("success" to true, "detections" to mlDetections)
+      }
 
-      return mapOf(
-        "success" to false,
-        "error" to "No QR code found in image"
-      )
+      return mapOf("success" to false, "error" to "No QR code found in image")
     } catch (e: Exception) {
-      if (bitmap !== origBitmap) bitmap.recycle()
-      origBitmap.recycle()
-      return mapOf(
-        "success" to false,
-        "error" to "Error scanning QR codes: ${e.message}"
-      )
+      return mapOf("success" to false, "error" to "Error scanning QR codes: ${e.message}")
+    } finally {
+      bitmap.recycle()
     }
   }
 

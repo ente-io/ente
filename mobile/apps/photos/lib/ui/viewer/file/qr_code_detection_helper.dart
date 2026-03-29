@@ -9,7 +9,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/utils/file_util.dart";
 
 class QrCodeDetectionHelper {
-  static const _debounceDuration = Duration(milliseconds: 1500);
+  static const _debounceDuration = Duration(milliseconds: 500);
 
   final Logger _logger = Logger("QrCodeDetectionHelper");
   final EnteQr _enteQr = EnteQr();
