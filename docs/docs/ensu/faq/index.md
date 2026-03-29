@@ -9,7 +9,7 @@ description: >
 Ensu is Ente's local-first AI chat app that runs entirely on your device. For a
 full overview of what Ensu is and why it exists, see the
 [introduction](/ensu/) or read the
-[launch blog post](https://ente.io/blog/ensu/).
+[launch blog post](https://ente.com/blog/ensu/).
 
 Below are answers to the most common questions.
 
@@ -25,7 +25,7 @@ your device.
 It is free, open source, and works offline after the initial model download.
 
 For the full story behind Ensu, including why we think local LLMs matter, read
-the [launch blog post](https://ente.io/blog/ensu/).
+the [launch blog post](https://ente.com/blog/ensu/).
 
 ### Which platforms does Ensu support? {#supported-platforms}
 
@@ -38,7 +38,7 @@ Ensu is available for:
 - **Linux**
 - **Web** (experimental, runs in your browser)
 
-You can download it from [ente.io/ensu](https://ente.io/ensu).
+You can download it from [ente.com/ensu](https://ente.com/ensu).
 
 ### Does Ensu require an internet connection? {#offline-usage}
 
@@ -141,8 +141,8 @@ guarantee that such a service would handle your searches privately. This goes
 against Ensu's core design principle of keeping everything on your device.
 
 If you have thoughts on how we should approach this, let us know on
-[Discord](https://ente.io/discord) in the `#ensu` channel or at
-[team@ente.io](mailto:team@ente.io).
+[Discord](https://ente.com/discord) in the `#ensu` channel or at
+[team@ente.com](mailto:team@ente.com).
 
 ### Can Ensu do everything ChatGPT can? {#comparison-with-chatgpt}
 
@@ -223,7 +223,7 @@ Try:
 3. Making sure you have at least 2 GB of free storage for the model file.
 
 If the problem persists, export your logs from the app settings and share them
-with us at [team@ente.io](mailto:team@ente.io).
+with us at [team@ente.com](mailto:team@ente.com).
 
 ## Feedback and Support
 
@@ -233,15 +233,15 @@ We would love to hear from you. The future direction of Ensu is still taking
 shape, and your input directly influences what we build next.
 
 - **Discord**: Join the `#ensu` channel on
-  [Discord](https://ente.io/discord).
-- **Email**: Write to [team@ente.io](mailto:team@ente.io).
+  [Discord](https://ente.com/discord).
+- **Email**: Write to [team@ente.com](mailto:team@ente.com).
 - **GitHub**: Open an issue or discussion on
   [GitHub](https://github.com/ente-io/ente).
 
 ### Where can I report bugs? {#bug-reports}
 
 You can report bugs on [GitHub](https://github.com/ente-io/ente/issues) or by
-emailing [team@ente.io](mailto:team@ente.io). If possible, include your device
+emailing [team@ente.com](mailto:team@ente.com). If possible, include your device
 model, OS version, and any logs exported from the app settings.
 
 ---
@@ -249,6 +249,6 @@ model, OS version, and any logs exported from the app settings.
 **Can't find what you're looking for?**
 
 - Read the [Ensu introduction](/ensu/) for an overview
-- Read the [launch blog post](https://ente.io/blog/ensu/) for the full story
-- Join [Discord](https://ente.io/discord) and head to the `#ensu` channel
-- Write to [team@ente.io](mailto:team@ente.io)
+- Read the [launch blog post](https://ente.com/blog/ensu/) for the full story
+- Join [Discord](https://ente.com/discord) and head to the `#ensu` channel
+- Write to [team@ente.com](mailto:team@ente.com)
