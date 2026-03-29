@@ -91,8 +91,8 @@ anyone except you.
 
 Ensu picks a default model based on your device:
 
-- **macOS with 16 GB or more RAM**: Gemma 3 4B IT (Q4_K_M), a 4-billion
-  parameter model by Google. This offers higher quality responses on machines
+- **macOS with 16 GB or more RAM**: Qwen 3.5 4B (Q4_K_M), a 4-billion
+  parameter model by Qwen. This offers higher quality responses on machines
   that can handle it.
 - **All other platforms** (Android, iOS, Windows, Linux, lower-memory macOS, and
   web): LFM 2.5 VL 1.6B (Q4_0), a 1.6-billion parameter multimodal model by
