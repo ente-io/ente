@@ -697,12 +697,6 @@ Future<bool> _runBackgroundPass({
   bool success = true;
   try {
     await _runMinimally(taskId, TimeLogger());
-    if (trigger == BackgroundTrigger.bgProcessing &&
-        taskId == BgTaskUtils.iOSBackgroundProcessingTask) {
-      await BgTaskUtils.scheduleNextIOSBackgroundProcessingTask(
-        source: "_runBackgroundPass:$taskId",
-      );
-    }
   } catch (e, s) {
     success = false;
     _logger.severe("Background run failed for $taskId", e, s);

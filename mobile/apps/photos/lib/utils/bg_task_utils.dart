@@ -340,34 +340,6 @@ class BgTaskUtils {
     await _clearIOSBackgroundProcessingSchedulingState();
   }
 
-  static Future<void> scheduleNextIOSBackgroundProcessingTask({
-    required String source,
-  }) async {
-    if (!Platform.isIOS) {
-      return;
-    }
-
-    if (!flagService.enableIOSBackgroundHandoff) {
-      await _clearIOSBackgroundProcessingSchedulingState();
-      return;
-    }
-
-    final nextSchedule = nextIOSBackgroundProcessingSchedule(
-      isBackgroundHandoffEnabled: true,
-      hasActiveUploads: FileUploader.instance.hasActiveUploads,
-      isBackupEligible: await isIOSBackupEligible(),
-    );
-    if (nextSchedule != null) {
-      await scheduleIOSBackgroundProcessingTask(
-        source: "$source:postRun",
-        initialDelay: nextSchedule.delay,
-        reason: nextSchedule.reason,
-      );
-    } else {
-      await _clearIOSBackgroundProcessingSchedulingState();
-    }
-  }
-
   static Future<void> handleIOSBackgroundProcessingTaskCompletion({
     required String source,
   }) async {
