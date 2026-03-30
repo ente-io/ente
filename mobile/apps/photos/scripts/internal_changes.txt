@@ -1,5 +1,9 @@
 Latest changes:
 - Laurens: Make asset downloads (ML models) resumable (internal + offline)
+- Ashil: Help & Support screen improvements
+- Neeraj: Refresh Home favorites state on toggle
+- Ashil: Stop showing unknown user avatar on shared albums opened via deeplinking
+- Ashil: Fix album sorting state not persisting
 
 Still behind internal flag:
 - Ashil, Setal (I): Native family management screens

@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "io.ente.locker"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -36,7 +36,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
         }
     }
 
@@ -55,6 +55,12 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 
