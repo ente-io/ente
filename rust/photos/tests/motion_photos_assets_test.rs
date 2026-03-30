@@ -100,4 +100,20 @@ fn validates_known_motion_photo_indices_when_fixtures_present() {
         .expect("extract dual_mp4_video_last.jpg video")
         .expect("video present");
     assert!(dual_video.len() > 1_000_000);
+
+    // Dual-MP4 motion photo: two embedded MP4s, full video is the first (larger) one.
+    let Some(dual_mp4_first) = fixture("dual_mp4_video_first.jpg") else {
+        eprintln!("Skipping: external fixture dual_mp4_video_first.jpg not present");
+        return;
+    };
+    let dual_first_index = get_motion_video_index_from_path(&dual_mp4_first)
+        .expect("read dual_mp4_video_first.jpg")
+        .expect("dual_mp4_video_first.jpg should have index");
+    assert_eq!(dual_first_index.start, 2_708_585);
+    assert_eq!(dual_first_index.end, 7_890_703);
+
+    let dual_first_video = extract_motion_video_from_path(&dual_mp4_first, None)
+        .expect("extract dual_mp4_video_first.jpg video")
+        .expect("video present");
+    assert!(dual_first_video.len() > 1_000_000);
 }
