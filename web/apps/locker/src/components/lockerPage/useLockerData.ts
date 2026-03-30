@@ -16,6 +16,7 @@ import {
     isEnteProductionEndpoint,
     LOCKER_FILE_LIMIT_FREE,
     LOCKER_FILE_LIMIT_PAID,
+    type LockerUploadLimitState,
 } from "services/locker-limits";
 import { fetchLockerData, fetchLockerTrash } from "services/remote";
 import type { LockerCollection, LockerItem } from "types";
@@ -38,14 +39,8 @@ interface LockerUserDetailsResponse {
     };
 }
 
-export interface UserDetails {
+export interface UserDetails extends LockerUploadLimitState {
     email: string;
-    usage: number;
-    storageLimit: number;
-    fileCount: number;
-    lockerFileLimit: number;
-    isPartOfFamily: boolean;
-    lockerFamilyFileCount?: number;
 }
 
 const hasPaidLockerAccess = (json: {

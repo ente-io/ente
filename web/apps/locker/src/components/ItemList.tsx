@@ -51,6 +51,7 @@ import {
     hasDownloadableObject,
     isImportantCollection,
     isLockerItemOwner,
+    restoreTargetLockerCollections,
     sortLockerCollections,
     visibleLockerCollections,
 } from "types";
@@ -175,6 +176,13 @@ export const ItemList: React.FC<ItemListProps> = ({
                     : visibleLockerCollections(collections),
             ),
         [collections, isCollectionsView],
+    );
+    const restoreCollections = useMemo(
+        () =>
+            uniqueCollectionsByID(
+                restoreTargetLockerCollections(collections, currentUserID),
+            ),
+        [collections, currentUserID],
     );
     const allItems = useMemo(() => {
         const itemsByID = new Map<number, LockerItem>();
@@ -407,6 +415,17 @@ export const ItemList: React.FC<ItemListProps> = ({
             setRestoreCollectionID(null);
         }
     }, [restoreItem, restoreItemID]);
+
+    useEffect(() => {
+        if (
+            restoreCollectionID !== null &&
+            !restoreCollections.some(
+                (collection) => collection.id === restoreCollectionID,
+            )
+        ) {
+            setRestoreCollectionID(null);
+        }
+    }, [restoreCollectionID, restoreCollections]);
 
     useEffect(() => {
         if (restoreItemID === null) {
@@ -1295,7 +1314,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                 createCollectionOpen={createCollectionOpen}
                 creatingCollection={creatingCollection}
                 deleteFileLink={() => void deleteActiveFileLink()}
-                displayCollections={displayCollections}
                 dropdownHomeCollections={dropdownHomeCollections}
                 feedbackMessage={feedbackMessage}
                 fileLinkDialogOpen={activeFileLinkItem !== null}
@@ -1337,6 +1355,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 renameCollectionOpen={renameCollectionID !== null}
                 renamingCollection={renamingCollection}
                 renameValue={renameValue}
+                restoreCollections={restoreCollections}
                 restoreError={restoreError}
                 restoreCollectionID={restoreCollectionID}
                 restoreDialogOpen={restoreItem !== null}

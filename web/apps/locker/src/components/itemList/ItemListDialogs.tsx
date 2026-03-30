@@ -32,7 +32,6 @@ interface ItemListDialogsProps {
     createCollectionOpen: boolean;
     creatingCollection: boolean;
     deleteFileLink: () => void;
-    displayCollections: LockerCollection[];
     dropdownHomeCollections: LockerCollection[];
     feedbackMessage: string | null;
     homeSelectedCollectionIDs: number[];
@@ -54,6 +53,7 @@ interface ItemListDialogsProps {
     renameCollectionOpen: boolean;
     renamingCollection: boolean;
     renameValue: string;
+    restoreCollections: LockerCollection[];
     restoreError: string | null;
     restoreCollectionID: number | null;
     restoreDialogOpen: boolean;
@@ -78,7 +78,6 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
     createCollectionOpen,
     creatingCollection,
     deleteFileLink,
-    displayCollections,
     dropdownHomeCollections,
     feedbackMessage,
     homeSelectedCollectionIDs,
@@ -100,6 +99,7 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
     renameCollectionOpen,
     renamingCollection,
     renameValue,
+    restoreCollections,
     restoreError,
     restoreCollectionID,
     restoreDialogOpen,
@@ -180,8 +180,8 @@ export const ItemListDialogs: React.FC<ItemListDialogsProps> = ({
             <DialogTitle>{t("restoreToCollection")}</DialogTitle>
             <DialogContent>
                 <Stack sx={{ gap: 1, pt: 0.25, pb: 1 }}>
-                    {displayCollections.length > 0 ? (
-                        displayCollections.map((collection) => (
+                    {restoreCollections.length > 0 ? (
+                        restoreCollections.map((collection) => (
                             <Chip
                                 key={collection.id}
                                 label={collection.name}

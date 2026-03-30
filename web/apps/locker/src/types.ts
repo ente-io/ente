@@ -147,6 +147,13 @@ export const isCollectionOwner = (
     currentUserID: number | undefined,
 ) => currentUserID !== undefined && collection.owner.id === currentUserID;
 
+export const canRestoreToCollection = (
+    collection: LockerCollection,
+    currentUserID: number | undefined,
+) =>
+    isCollectionOwner(collection, currentUserID) &&
+    !isUncategorizedCollection(collection);
+
 export const canEditCollection = (
     collection: LockerCollection,
     currentUserID: number | undefined,
@@ -198,6 +205,14 @@ export const sortLockerCollections = (collections: LockerCollection[]) =>
 
 export const visibleLockerCollections = (collections: LockerCollection[]) =>
     sortLockerCollections(collections);
+
+export const restoreTargetLockerCollections = (
+    collections: LockerCollection[],
+    currentUserID: number | undefined,
+) =>
+    visibleLockerCollections(collections).filter((collection) =>
+        canRestoreToCollection(collection, currentUserID),
+    );
 
 /**
  * Get the display title for a locker item.

@@ -8,6 +8,11 @@ import {
     lockerUpgradeCTAType,
     type LockerUpgradeCTAType,
 } from "services/locker-errors";
+import {
+    validateLockerUploadBatch,
+    type LockerUploadLimitState,
+    type LockerUploadPreflightFailure,
+} from "services/locker-limits";
 import type { LockerUploadProgress } from "services/remote";
 import type {
     LockerCollection,
@@ -58,8 +63,10 @@ interface UseCreateItemDialogStateProps {
         names: string[],
     ) => Promise<Map<string, number> | Record<string, number>>;
     defaultCollectionID?: number | null;
+    isProductionEndpoint: boolean;
     initialItems?: LockerUploadCandidate[];
     editItem?: CreateItemDialogEditItem | null;
+    userDetails?: LockerUploadLimitState;
 }
 
 interface UploadState {
@@ -112,8 +119,10 @@ export const useCreateItemDialogState = ({
     onUploadsFinished,
     onEnsureCollections,
     defaultCollectionID,
+    isProductionEndpoint,
     initialItems,
     editItem,
+    userDetails,
 }: UseCreateItemDialogStateProps) => {
     const isEditMode = !!editItem;
     const currentUserID = savedLocalUser()?.id;
@@ -453,6 +462,38 @@ export const useCreateItemDialogState = ({
             return;
         }
 
+        const preflightFailure = validateLockerUploadBatch(
+            pendingUploadItems.map(({ file }) => file),
+            userDetails,
+            isProductionEndpoint,
+        );
+        if (preflightFailure) {
+            const preflightFailureMessage = (
+                failure: LockerUploadPreflightFailure,
+            ) => {
+                switch (failure.reason) {
+                    case "emptyFile":
+                        return t("uploadEmptyFileErrorBody");
+                    case "fileCountLimit":
+                        return t("uploadFileCountLimitErrorBody");
+                    case "fileTooLarge":
+                        return t("uploadFileTooLargeErrorBody");
+                    case "storageLimit":
+                        return t("uploadStorageLimitErrorBody");
+                }
+            };
+
+            setError(preflightFailureMessage(preflightFailure));
+            setUpgradeCTAType(
+                preflightFailure.reason === "fileCountLimit"
+                    ? "fileCountLimit"
+                    : preflightFailure.reason === "storageLimit"
+                      ? "storageLimit"
+                      : null,
+            );
+            return;
+        }
+
         setUploading(true);
         setError(null);
         setUpgradeCTAType(null);
@@ -620,11 +661,13 @@ export const useCreateItemDialogState = ({
         displayCollections,
         handleClose,
         onEnsureCollections,
+        isProductionEndpoint,
         onUploadItemComplete,
         onUploadProgress,
         onUploadsFinished,
         selectedCollectionNamesByFileKey,
         selectedUploadItems,
+        userDetails,
     ]);
 
     const canSave =
