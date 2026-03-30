@@ -535,7 +535,6 @@
   "youCannotShareWithYourself": "Je kunt niet met jezelf delen",
   "inviteToEnte": "Uitnodigen voor Ente",
   "sendInvite": "Stuur een uitnodiging",
-  "shareTextRecommendUsingEnte": "Download Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Dit is uw verificatie-ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Iemand die albums met je deelt zou hetzelfde ID op hun apparaat moeten zien.",
   "howToViewShareeVerificationID": "Vraag hen om hun e-mailadres lang in te drukken op het instellingenscherm en te controleren dat de ID's op beide apparaten overeenkomen.",
@@ -551,8 +550,6 @@
   "verificationId": "Verificatie ID",
   "verifyEmailID": "Verifieer {email}",
   "emailNoEnteAccount": "{email} heeft geen Ente-account.\n\nStuur een uitnodiging om items te delen.",
-  "shareMyVerificationID": "Hier is mijn verificatie-ID: {verificationID} voor ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hey, kunt u bevestigen dat dit uw ente.com verificatie-ID is: {verificationID}",
   "passwordLock": "Wachtwoord slot",
   "manage": "Beheren",
   "addedAs": "Toegevoegd als",
@@ -970,7 +967,7 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, =1{1 collectie succesvol verwijderd} other{{count} collecties succesvol verwijderd}}",
+  "collectionsDeletedSuccessfully": "{count, plural, one {}=1{1 collectie succesvol verwijderd} other{{count} collecties succesvol verwijderd}}",
   "@collectionsDeletedSuccessfully": {
     "description": "Success message when collections are deleted",
     "placeholders": {
