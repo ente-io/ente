@@ -15,6 +15,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
+import "package:photos/states/detail_page_state.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
@@ -115,8 +116,14 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   }
 
   void _onLongPressEvent(bool isPressed, [Offset? localPosition]) {
-    // If pressing within a QR code region, let the QR overlay handle it
+    // If pressing within a QR code region, let the QR overlay handle it,
+    // but only when the overlay is actually visible (not in fullscreen mode).
+    final isQrOverlayVisible = !(InheritedDetailPageState.maybeOf(context)
+            ?.enableFullScreenNotifier
+            .value ??
+        true);
     if (isPressed &&
+        isQrOverlayVisible &&
         localPosition != null &&
         _isPositionInQrRegion(localPosition)) {
       return;
