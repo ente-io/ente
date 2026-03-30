@@ -7,6 +7,10 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
+import {
+    JOIN_ALBUM_CONTEXT_KEY,
+    type JoinAlbumContext,
+} from "ente-base/join-album";
 import log from "ente-base/log";
 import { customAPIHost } from "ente-base/origins";
 import {
@@ -15,10 +19,6 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
-import {
-    JOIN_ALBUM_CONTEXT_KEY,
-    type JoinAlbumContext,
-} from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";

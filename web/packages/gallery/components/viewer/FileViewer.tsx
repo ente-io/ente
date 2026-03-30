@@ -32,10 +32,8 @@ import { useInterval, useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
 import { formattedListJoin, ut } from "ente-base/i18n";
 import log from "ente-base/log";
-import { isOfficialAlbumsApp } from "ente-base/origins";
 import {
     FileInfo,
     type FileInfoExif,
@@ -46,15 +44,6 @@ import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
-import {
-    addPublicReaction,
-    createAnonIdentity,
-    deletePublicReaction,
-    getPublicAnonProfiles,
-    getPublicParticipantsMaskedEmails,
-    getPublicSocialDiff,
-    getStoredAnonIdentity,
-} from "ente-new/albums/services/public-reaction";
 import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
@@ -76,7 +65,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { AddNameModal } from "./AddNameModal";
 import { CommentsSidebar } from "./CommentsSidebar";
 import {
     fileInfoExifForFile,
@@ -92,7 +80,6 @@ import {
     resetMoreMenuButtonOnMenuClose,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
-import { PublicLikeModal } from "./PublicLikeModal";
 
 const fileViewerBackStateKey = "__enteFileViewerBackState";
 
@@ -176,8 +163,8 @@ export type FileViewerProps = ModalVisibilityProps & {
      * - If we're running in the context of the photos app, then this should be
      *   set to the currently logged in user.
      *
-     * - If we're running in the context of the public albums app, then this
-     *   should not be set.
+     * - If we're running in a viewer without account context, then this should
+     *   not be set.
      *
      * See: [Note: Gallery children can assume user]
      */
@@ -355,16 +342,10 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     activeCollectionID?: number;
     /**
-     * Public album credentials for anonymous reactions/comments.
-     * Required when viewing a public album (no logged in user).
-     */
-    publicAlbumsCredentials?: PublicAlbumsCredentials;
-    /**
      * If set, overrides whether browser back should be consumed to close the
      * viewer.
      *
-     * By default this is enabled in public album context, and disabled
-     * otherwise.
+     * By default this is disabled.
      */
     shouldCloseOnBrowserBack?: boolean;
     /**
@@ -372,19 +353,7 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     disableEscapeClose?: boolean;
     /**
-     * The decrypted collection key (base64 encoded) for encrypting reactions.
-     * Required when viewing a public album (no logged in user).
-     */
-    collectionKey?: string;
-    /**
-     * Called when user clicks "Join album to like" in the public like modal.
-     * Should trigger the join album flow (with mobile deep link fallback).
-     */
-    onJoinAlbum?: () => void;
-    /**
-     * `true` if comments are enabled on the public link.
-     *
-     * When `false`, the comment button and comments sidebar will be hidden.
+     * `true` if comments and reactions are enabled.
      * Defaults to `true`.
      */
     enableComment?: boolean;
@@ -395,14 +364,6 @@ export type FileViewerProps = ModalVisibilityProps & {
      * users. Defaults to `true`.
      */
     isCommentsFeatureEnabled?: boolean;
-    /**
-     * `true` if the "Join album" option is enabled for this public link.
-     *
-     * When `false`, the "Join album and like/comment" button will be hidden
-     * in the public like/comment modals.
-     * Defaults to `true`.
-     */
-    enableJoin?: boolean;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -443,18 +404,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onSaveEditedImageCopy,
     onAddFileToCollection,
     activeCollectionID,
-    publicAlbumsCredentials,
     shouldCloseOnBrowserBack: shouldCloseOnBrowserBackOverride,
     disableEscapeClose = false,
-    collectionKey,
-    onJoinAlbum,
     enableComment = true,
     isCommentsFeatureEnabled = true,
-    enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
-    const shouldCloseOnBrowserBack =
-        shouldCloseOnBrowserBackOverride ?? !!publicAlbumsCredentials;
+    const shouldCloseOnBrowserBack = shouldCloseOnBrowserBackOverride ?? false;
 
     // There are 3 things involved in this dance:
     //
@@ -501,8 +457,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openComments, setOpenComments] = useState(false);
     const [openLikes, setOpenLikes] = useState(false);
     const [openLikeAlbumSelector, setOpenLikeAlbumSelector] = useState(false);
-    const [openPublicLikeModal, setOpenPublicLikeModal] = useState(false);
-    const [openAddNameModal, setOpenAddNameModal] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
@@ -595,6 +549,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // Helper to get current user's file reactions from allReactions
     const getUserFileReactions = useCallback(
         (fileId: number): { collectionId: number; reactionId: string }[] => {
+            if (!user?.id) return [];
             const fileReactionsMap = allReactionsRef.current.get(fileId);
             if (!fileReactionsMap) return [];
 
@@ -603,9 +558,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 reactionId: string;
             }[] = [];
             for (const [collectionId, reactions] of fileReactionsMap) {
-                // Get stored anonymous identity for this specific collection
-                const storedAnonIdentity = getStoredAnonIdentity(collectionId);
-
                 const userFileReaction = reactions.find((r) => {
                     if (
                         r.commentID ||
@@ -613,15 +565,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         r.reactionType !== "green_heart"
                     )
                         return false;
-                    // Check for logged-in user
-                    if (user?.id && r.userID === user.id) return true;
-                    // Check for anonymous user
-                    if (
-                        storedAnonIdentity &&
-                        r.anonUserID === storedAnonIdentity.anonUserID
-                    )
-                        return true;
-                    return false;
+                    return r.userID === user.id;
                 });
                 if (userFileReaction) {
                     userReactions.push({
@@ -653,7 +597,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenComments(false);
         setOpenLikes(false);
         setOpenLikeAlbumSelector(false);
-        setOpenPublicLikeModal(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
@@ -792,119 +735,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
     activeAnnotatedFileRef.current = activeAnnotatedFile;
 
-    const isPublicAlbum = isOfficialAlbumsApp || !!publicAlbumsCredentials;
-
     // Called when the like button (heart) is clicked.
-    // - If public album: toggle like (unlike if already liked, else show modal)
     // - If gallery view: show album selector (like) OR unlike selector/direct delete
     // - If collection view: toggle like in that collection
     const handleLikeClick = useCallback(() => {
-        if (isPublicAlbum) {
-            const file = activeAnnotatedFileRef.current?.file;
-            if (!file || !publicAlbumsCredentials) {
-                setOpenPublicLikeModal(true);
-                return;
-            }
-
-            const fileId = file.id;
-            const collectionId = file.collectionID;
-            const storedAnonIdentity = getStoredAnonIdentity(collectionId);
-
-            // Check if already liked by current anon user (file-level only, not comment likes)
-            const fileReactionsMap = allReactionsRef.current.get(fileId);
-            const collectionReactions =
-                fileReactionsMap?.get(collectionId) ?? [];
-            const existingReaction = collectionReactions.find(
-                (r) =>
-                    r.reactionType === "green_heart" &&
-                    !r.commentID &&
-                    storedAnonIdentity &&
-                    r.anonUserID === storedAnonIdentity.anonUserID,
-            );
-
-            if (existingReaction) {
-                // Already liked - unlike (delete reaction)
-                void (async () => {
-                    try {
-                        await deletePublicReaction(
-                            publicAlbumsCredentials,
-                            collectionId,
-                            existingReaction.id,
-                        );
-
-                        // Update local state
-                        setAllReactions((prev) => {
-                            const next = new Map(prev);
-                            const fileReactionsMap = new Map<
-                                number,
-                                UnifiedReaction[]
-                            >(prev.get(fileId) ?? new Map());
-                            const updatedReactions = (
-                                fileReactionsMap.get(collectionId) ?? []
-                            ).filter((r) => r.id !== existingReaction.id);
-                            fileReactionsMap.set(
-                                collectionId,
-                                updatedReactions,
-                            );
-                            next.set(fileId, fileReactionsMap);
-                            return next;
-                        });
-                    } catch (e) {
-                        log.error("Failed to delete public reaction", e);
-                    }
-                })();
-            } else if (storedAnonIdentity) {
-                // Has identity but not liked - add reaction directly
-                void (async () => {
-                    try {
-                        if (!collectionKey) {
-                            log.error(
-                                "Missing collection key for public reaction",
-                            );
-                            return;
-                        }
-                        const reactionId = await addPublicReaction(
-                            publicAlbumsCredentials,
-                            collectionId,
-                            fileId,
-                            "green_heart",
-                            collectionKey,
-                        );
-
-                        // Update local state
-                        setAllReactions((prev) => {
-                            const next = new Map(prev);
-                            const fileReactionsMap = new Map<
-                                number,
-                                UnifiedReaction[]
-                            >(prev.get(fileId) ?? new Map());
-                            const collectionReactions =
-                                fileReactionsMap.get(collectionId) ?? [];
-                            fileReactionsMap.set(collectionId, [
-                                ...collectionReactions,
-                                {
-                                    id: reactionId,
-                                    collectionID: collectionId,
-                                    fileID: fileId,
-                                    reactionType: "green_heart",
-                                    userID: 0,
-                                    anonUserID: storedAnonIdentity.anonUserID,
-                                    isDeleted: false,
-                                    createdAt: Date.now() * 1000,
-                                    updatedAt: Date.now() * 1000,
-                                },
-                            ]);
-                            next.set(fileId, fileReactionsMap);
-                            return next;
-                        });
-                    } catch (e) {
-                        log.error("Failed to add public reaction", e);
-                    }
-                })();
-            } else {
-                // No identity - show modal to get name
-                setOpenPublicLikeModal(true);
-            }
+        if (!user?.id) {
             return;
         }
 
@@ -1083,14 +918,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 })();
             }
         }
-    }, [
-        activeCollectionID,
-        getUserFileReactions,
-        user?.id,
-        isPublicAlbum,
-        publicAlbumsCredentials,
-        collectionKey,
-    ]);
+    }, [activeCollectionID, getUserFileReactions, user?.id]);
 
     const handleLikeAlbumSelectorClose = useCallback(
         () => setOpenLikeAlbumSelector(false),
@@ -1257,119 +1085,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         collectionSummaries,
     ]);
 
-    const handlePublicLikeModalClose = useCallback(
-        () => setOpenPublicLikeModal(false),
-        [],
-    );
-
-    const handleLikeAnonymously = useCallback(() => {
-        setOpenPublicLikeModal(false);
-        setOpenAddNameModal(true);
-    }, []);
-
-    const handleJoinAlbumToLike = useCallback(() => {
-        setOpenPublicLikeModal(false);
-        onJoinAlbum?.();
-    }, [onJoinAlbum]);
-
-    const handleAddNameModalClose = useCallback(
-        () => setOpenAddNameModal(false),
-        [],
-    );
-
-    const handleAddNameSubmit = useCallback(
-        (name: string) => {
-            const file = activeAnnotatedFileRef.current?.file;
-            if (!file || !publicAlbumsCredentials || !collectionKey) {
-                log.error(
-                    "Missing file, credentials, or collection key for public reaction",
-                );
-                setOpenAddNameModal(false);
-                return;
-            }
-
-            const fileId = file.id;
-            // Use file.collectionID for public albums since activeCollectionID is a pseudo ID (0)
-            const collectionId =
-                activeCollectionID && activeCollectionID > 0
-                    ? activeCollectionID
-                    : file.collectionID;
-
-            void (async () => {
-                try {
-                    // Check if we already have an anon identity for this collection, otherwise create one
-                    let identity = getStoredAnonIdentity(collectionId);
-                    if (!identity) {
-                        identity = await createAnonIdentity(
-                            publicAlbumsCredentials,
-                            collectionId,
-                            name,
-                            collectionKey,
-                        );
-                    }
-
-                    // Add the public reaction
-                    const reactionId = await addPublicReaction(
-                        publicAlbumsCredentials,
-                        collectionId,
-                        fileId,
-                        "green_heart",
-                        collectionKey,
-                        identity,
-                    );
-
-                    // Update local state
-                    setAllReactions((prev) => {
-                        const next = new Map(prev);
-                        const fileReactionsMap = new Map<
-                            number,
-                            UnifiedReaction[]
-                        >(prev.get(fileId) ?? new Map());
-                        const collectionReactions =
-                            fileReactionsMap.get(collectionId) ?? [];
-                        fileReactionsMap.set(collectionId, [
-                            ...collectionReactions,
-                            {
-                                id: reactionId,
-                                collectionID: collectionId,
-                                fileID: fileId,
-                                reactionType: "green_heart",
-                                // Use a special userID for anonymous users (derived from anonUserID)
-                                userID: 0,
-                                anonUserID: identity.anonUserID,
-                                isDeleted: false,
-                                createdAt: Date.now() * 1000,
-                                updatedAt: Date.now() * 1000,
-                            },
-                        ]);
-                        next.set(fileId, fileReactionsMap);
-                        return next;
-                    });
-
-                    // Update anonUserNames so the name shows immediately in likers list
-                    setAnonUserNames((prev) => {
-                        const next = new Map(prev);
-                        next.set(identity.anonUserID, name);
-                        return next;
-                    });
-
-                    setOpenAddNameModal(false);
-                    setOpenLikes(true);
-                } catch (e) {
-                    log.error("Failed to add public reaction", e);
-                    onGenericError(e);
-                    setOpenAddNameModal(false);
-                }
-            })();
-        },
-        [
-            activeCollectionID,
-            publicAlbumsCredentials,
-            collectionKey,
-            onGenericError,
-        ],
-    );
-
     // Callback invoked when the download action is triggered by activating the
     // download button in the PhotoSwipe bar.
     const handleDownloadBarAction = useCallback(
@@ -1520,8 +1235,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // Logged in users see the download option in the more menu.
                     return "menu";
                 } else {
-                    // In public albums, the download option is shown in the bar
-                    // buttons, in lieu of the favorite option.
+                    // Guest viewers show download in the bar buttons, in lieu
+                    // of the favorite option.
                     return "bar";
                 }
             })();
@@ -1585,10 +1300,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const haveUser = !!user;
 
     // Determine if social buttons (like, comment) should be shown.
-    // They're shown for public albums or when viewing a shared collection.
     const showSocialButtons = useMemo(() => {
-        // Show for public albums (no logged-in user).
-        if (!haveUser) return true;
+        if (!haveUser) return false;
+        if (!enableComment) return false;
         // For logged-in users, check if the comments feature is enabled.
         if (!isCommentsFeatureEnabled) return false;
         // In collection view: check if that specific collection is shared.
@@ -1604,6 +1318,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         return false;
     }, [
         haveUser,
+        enableComment,
         isCommentsFeatureEnabled,
         activeCollectionID,
         collectionSummaries,
@@ -1625,11 +1340,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // Delegate callback to check if social buttons should be shown for a file.
     const shouldShowSocialButtons_ = useCallback(
         ({ file }: FileViewerAnnotatedFile): boolean => {
-            // If showSocialButtons is already true (public album or in shared
-            // collection view), this won't be called. This callback is only
-            // for gallery view where we need to check per-file.
-            //
-            // For logged-in users, require the comments feature to be enabled.
+            // If showSocialButtons is already true in collection view, this
+            // won't be called. This callback is only for gallery view where we
+            // need to check per-file.
             if (!isCommentsFeatureEnabled) return false;
             //
             // If we're in a specific collection context (not gallery view),
@@ -1671,21 +1384,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         if (fileReactionsMap) {
             for (const [collectionId, reactions] of fileReactionsMap) {
-                // Get stored anonymous identity for this specific collection
-                const storedAnonIdentity = getStoredAnonIdentity(collectionId);
-
                 const hasUserLike = reactions.some((r) => {
                     if (r.commentID || r.reactionType !== "green_heart")
                         return false;
-                    // Check for logged-in user
-                    if (user?.id && r.userID === user.id) return true;
-                    // Check for anonymous user
-                    if (
-                        storedAnonIdentity &&
-                        r.anonUserID === storedAnonIdentity.anonUserID
-                    )
-                        return true;
-                    return false;
+                    return r.userID === user?.id;
                 });
                 if (hasUserLike) {
                     likedAlbumIDs.add(collectionId);
@@ -1740,22 +1442,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             if (!fileReactionsMap) return false;
 
             // Check if user has liked this file in any collection
-            for (const [collectionId, reactions] of fileReactionsMap) {
-                // Get stored anonymous identity for this specific collection
-                const storedAnonIdentity = getStoredAnonIdentity(collectionId);
-
+            for (const reactions of fileReactionsMap.values()) {
                 const hasUserLike = reactions.some((r) => {
                     if (r.commentID || r.reactionType !== "green_heart")
                         return false;
-                    // Check for logged-in user
-                    if (user?.id && r.userID === user.id) return true;
-                    // Check for anonymous user
-                    if (
-                        storedAnonIdentity &&
-                        r.anonUserID === storedAnonIdentity.anonUserID
-                    )
-                        return true;
-                    return false;
+                    return r.userID === user?.id;
                 });
                 if (hasUserLike) return true;
             }
@@ -1815,7 +1506,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             openComments ||
             openLikes ||
             openLikeAlbumSelector ||
-            openPublicLikeModal ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
@@ -1848,7 +1538,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         openComments,
         openLikes,
         openLikeAlbumSelector,
-        openPublicLikeModal,
         moreMenuAnchorEl,
         openImageEditor,
         openConfirmDelete,
@@ -2169,123 +1858,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         isCommentsFeatureEnabled,
     ]);
 
-    // Fetch social data (comments + reactions) for public albums (when viewing as anonymous user).
-    useEffect(() => {
-        if (
-            !open ||
-            !enableComment ||
-            !activeFileID ||
-            !publicAlbumsCredentials ||
-            !collectionKey
-        )
-            return;
-
-        const file = files.find((f) => f.id === activeFileID);
-        if (!file) return;
-
-        void (async () => {
-            try {
-                // Fetch both comments and reactions in a single API call
-                const { comments, reactions } = await getPublicSocialDiff(
-                    publicAlbumsCredentials,
-                    activeFileID,
-                    collectionKey,
-                );
-
-                // Convert PublicComment to Comment format
-                const commentsForFile: Comment[] = comments.map((c) => ({
-                    id: c.id,
-                    collectionID: c.collectionID,
-                    fileID: c.fileID,
-                    parentCommentID: c.parentCommentID,
-                    userID: c.userID,
-                    anonUserID: c.anonUserID,
-                    text: c.text,
-                    isDeleted: c.isDeleted,
-                    createdAt: c.createdAt,
-                    updatedAt: c.updatedAt,
-                }));
-
-                const commentsMap = new Map<number, Comment[]>();
-                commentsMap.set(file.collectionID, commentsForFile);
-
-                setFileComments((prev) => {
-                    const next = new Map(prev);
-                    next.set(activeFileID, commentsMap);
-                    return next;
-                });
-
-                // Convert PublicReaction to UnifiedReaction format
-                const unifiedReactions: UnifiedReaction[] = reactions.map(
-                    (r) => ({
-                        id: r.id,
-                        collectionID: file.collectionID,
-                        fileID: r.fileID,
-                        commentID: r.commentID,
-                        reactionType: r.reactionType,
-                        userID: r.userID,
-                        anonUserID: r.anonUserID,
-                        isDeleted: r.isDeleted,
-                        createdAt: r.createdAt,
-                        updatedAt: r.updatedAt,
-                    }),
-                );
-
-                const reactionsMap = new Map<number, UnifiedReaction[]>();
-                reactionsMap.set(file.collectionID, unifiedReactions);
-
-                setAllReactions((prev) => {
-                    const next = new Map(prev);
-                    next.set(activeFileID, reactionsMap);
-                    return next;
-                });
-
-                // Fetch anonymous user profiles for public albums
-                try {
-                    const anonProfiles = await getPublicAnonProfiles(
-                        publicAlbumsCredentials,
-                        collectionKey,
-                    );
-                    setAnonUserNames((prev) => {
-                        const next = new Map(prev);
-                        for (const [id, name] of anonProfiles) {
-                            next.set(id, name);
-                        }
-                        return next;
-                    });
-                } catch {
-                    // Ignore anon profiles fetch failures
-                }
-
-                // Fetch registered participants' masked emails for public albums
-                try {
-                    const participantEmails =
-                        await getPublicParticipantsMaskedEmails(
-                            publicAlbumsCredentials,
-                        );
-                    setUserIDToEmail((prev) => {
-                        const next = new Map(prev);
-                        for (const [id, email] of participantEmails) {
-                            next.set(id, email);
-                        }
-                        return next;
-                    });
-                } catch {
-                    // Ignore participants fetch failures
-                }
-            } catch (e) {
-                log.error("Failed to fetch public social data", e);
-            }
-        })();
-    }, [
-        open,
-        enableComment,
-        activeFileID,
-        publicAlbumsCredentials,
-        collectionKey,
-        files,
-    ]);
-
     // Refresh comment count when fileComments changes.
     useEffect(() => {
         if (open && files.length) {
@@ -2381,113 +1953,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         isCommentsFeatureEnabled,
     ]);
 
-    // Refresh social data for public albums
-    const refreshPublicSocialData = useCallback(async () => {
-        if (
-            !activeFileID ||
-            !publicAlbumsCredentials ||
-            !collectionKey ||
-            !enableComment
-        )
-            return;
-
-        const file = files.find((f) => f.id === activeFileID);
-        if (!file) return;
-
-        try {
-            const { comments, reactions } = await getPublicSocialDiff(
-                publicAlbumsCredentials,
-                activeFileID,
-                collectionKey,
-            );
-
-            const commentsForFile: Comment[] = comments.map((c) => ({
-                id: c.id,
-                collectionID: c.collectionID,
-                fileID: c.fileID,
-                parentCommentID: c.parentCommentID,
-                userID: c.userID,
-                anonUserID: c.anonUserID,
-                text: c.text,
-                isDeleted: c.isDeleted,
-                createdAt: c.createdAt,
-                updatedAt: c.updatedAt,
-            }));
-
-            const commentsMap = new Map<number, Comment[]>();
-            commentsMap.set(file.collectionID, commentsForFile);
-
-            setFileComments((prev) => {
-                const next = new Map(prev);
-                next.set(activeFileID, commentsMap);
-                return next;
-            });
-
-            const unifiedReactions: UnifiedReaction[] = reactions.map((r) => ({
-                id: r.id,
-                collectionID: file.collectionID,
-                fileID: r.fileID,
-                commentID: r.commentID,
-                reactionType: r.reactionType,
-                userID: r.userID,
-                anonUserID: r.anonUserID,
-                isDeleted: r.isDeleted,
-                createdAt: r.createdAt,
-                updatedAt: r.updatedAt,
-            }));
-
-            const reactionsMap = new Map<number, UnifiedReaction[]>();
-            reactionsMap.set(file.collectionID, unifiedReactions);
-
-            setAllReactions((prev) => {
-                const next = new Map(prev);
-                next.set(activeFileID, reactionsMap);
-                return next;
-            });
-
-            // Fetch anon profiles (new anonymous users may have commented)
-            try {
-                const anonProfiles = await getPublicAnonProfiles(
-                    publicAlbumsCredentials,
-                    collectionKey,
-                );
-                setAnonUserNames((prev) => {
-                    const next = new Map(prev);
-                    for (const [id, name] of anonProfiles) {
-                        next.set(id, name);
-                    }
-                    return next;
-                });
-            } catch {
-                // Ignore
-            }
-            // Note: Masked emails for registered participants are fetched only
-            // on initial load since they rarely change during a session.
-        } catch (e) {
-            log.error("Failed to refresh public social data", e);
-        }
-    }, [
-        activeFileID,
-        publicAlbumsCredentials,
-        collectionKey,
-        enableComment,
-        files,
-    ]);
-
-    // Poll for social data when comments or likes sidebar is open (logged-in users)
+    // Poll for social data when comments or likes sidebar is open.
     useInterval(
         refreshSocialData,
-        (openComments || openLikes) && !publicAlbumsCredentials
-            ? SOCIAL_REFRESH_INTERVAL_MS
-            : null,
-    );
-
-    // Poll for social data when comments or likes sidebar is open (public albums)
-    useInterval(
-        refreshPublicSocialData,
-        (openComments || openLikes) && publicAlbumsCredentials
-            ? SOCIAL_REFRESH_INTERVAL_MS
-            : null,
+        openComments || openLikes ? SOCIAL_REFRESH_INTERVAL_MS : null,
     );
 
     useEffect(() => {
@@ -2498,7 +1967,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
-                isPublicAlbum,
                 showSocialButtons,
                 enableComment,
                 showFullscreenButton,
@@ -2546,7 +2014,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         showFullscreenButton,
         disableEscapeClose,
         haveUser,
-        isPublicAlbum,
         handleClose,
         handleAnnotate,
         handleViewInfo,
@@ -2560,8 +2027,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     useEffect(() => {
         if (!open || !shouldCloseOnBrowserBack) return;
 
-        // In public albums, consume one browser-back action to close the
-        // viewer overlay instead of navigating away from the shared link.
+        // Consume one browser-back action to close the viewer overlay instead
+        // of navigating away immediately.
         const stateMarker = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         browserBackStateRef.current = stateMarker;
 
@@ -2654,11 +2121,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onCommentReactionAdded={handleCommentReactionAdded}
                 onCommentReactionDeleted={handleCommentReactionDeleted}
                 highlightCommentID={highlightCommentID}
-                publicAlbumsCredentials={publicAlbumsCredentials}
-                collectionKey={collectionKey}
                 anonUserNames={anonUserNames}
-                onJoinAlbum={onJoinAlbum}
-                enableJoin={enableJoin}
             />
             <LikesSidebar
                 open={openLikes}
@@ -2681,18 +2144,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 likedAlbumIDs={likedAlbumIDs}
                 onToggleAlbum={handleToggleAlbumLike}
                 onLikeAll={handleLikeAll}
-            />
-            <PublicLikeModal
-                open={openPublicLikeModal}
-                onClose={handlePublicLikeModalClose}
-                onLikeAnonymously={handleLikeAnonymously}
-                onJoinAlbumToLike={handleJoinAlbumToLike}
-                enableJoin={enableJoin}
-            />
-            <AddNameModal
-                open={openAddNameModal}
-                onClose={handleAddNameModalClose}
-                onSubmit={handleAddNameSubmit}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}

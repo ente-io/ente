@@ -1,6 +1,10 @@
 import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import { boxSeal, fromB64 } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
+import {
+    clearJoinAlbumContext,
+    getJoinAlbumContext,
+} from "ente-base/join-album";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 
@@ -12,61 +16,7 @@ import { apiURL } from "ente-base/origins";
  */
 const collectionKeyBytes = 32;
 
-/**
- * Service for handling the join album flow for public collections.
- * This manages the process of joining a public album, including:
- * - Storing album context before authentication
- * - Auto-joining after authentication
- * - Cleaning up stored context
- */
-
-export const JOIN_ALBUM_CONTEXT_KEY = "ente_join_album_context";
-
-export interface JoinAlbumContext {
-    accessToken: string;
-    collectionKey: string; // Base64 encoded collection key for API calls
-    collectionKeyHash: string; // Original hash value from URL (base58 or hex)
-    collectionID: number;
-    accessTokenJWT?: string; // JWT token for password-protected albums
-}
-
-/**
- * Retrieve stored album context after authentication.
- * Checks sessionStorage for the stored context.
- */
-export const getJoinAlbumContext = (): JoinAlbumContext | null => {
-    const stored = sessionStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
-    if (!stored) {
-        return null;
-    }
-
-    try {
-        const context = JSON.parse(stored) as JoinAlbumContext;
-        return context;
-    } catch {
-        return null;
-    }
-};
-
-/**
- * Clear the stored album context after successful join or timeout.
- */
-export const clearJoinAlbumContext = () => {
-    sessionStorage.removeItem(JOIN_ALBUM_CONTEXT_KEY);
-};
-
-/**
- * Check if there's a pending album to join.
- */
-export const hasPendingAlbumToJoin = (): boolean => {
-    return getJoinAlbumContext() !== null;
-};
-
-/**
- * Join a public album by sending the encrypted collection key to the server.
- * This adds the album to the user's collection.
- */
-export const joinPublicAlbum = async (
+const joinPublicAlbum = async (
     accessToken: string,
     collectionID: number,
     encryptedKey: string,
@@ -79,7 +29,7 @@ export const joinPublicAlbum = async (
         "Content-Type": "application/json",
         ...authHeaders,
         "X-Auth-Access-Token": accessToken,
-        ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }), // Include JWT for password-protected albums
+        ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }),
     };
 
     const response = await fetch(url, {
