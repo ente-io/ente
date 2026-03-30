@@ -440,7 +440,7 @@ class GalleryState extends State<Gallery> {
               updateFile.creationTime ?? 0,
               file.creationTime ?? 0,
             )) {
-          _allGalleryFiles[i] = updateFile;
+          _allGalleryFiles[i].applyUploadedData(updateFile);
           genIDToUploadedFiles.remove(file.generatedID!);
         }
       }
