@@ -27,21 +27,19 @@ export const extractAccessTokenFromURL = (url: URL): string | null => {
         return tokenFromQuery;
     }
 
-    // Support:
-    // - /<TOKEN>#<SECRET>
-    // - /memory/<TOKEN>#<SECRET>
-    // - /memories/<TOKEN>#<SECRET>
-    // while treating bare /memory and /memories as no-token landing routes.
-    const routePrefixes = new Set(["memory", "memories"]);
     const pathSegments = url.pathname
         .split("/")
         .filter((segment) => segment.length > 0);
-    for (let i = pathSegments.length - 1; i >= 0; i--) {
-        const segment = pathSegments[i]!;
-        if (!routePrefixes.has(segment.toLowerCase())) {
-            return segment;
-        }
+    if (pathSegments.length !== 1) {
+        return null;
     }
 
-    return null;
+    const [segment] = pathSegments;
+    if (!segment) {
+        return null;
+    }
+
+    return ["memory", "memories"].includes(segment.toLowerCase())
+        ? null
+        : segment;
 };
