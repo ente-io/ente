@@ -2,28 +2,13 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BackgroundRunAttempt {
-  const BackgroundRunAttempt._({
+  const BackgroundRunAttempt({
     required this.prefs,
-    required this.leaseToken,
-    required this.skipReason,
-  });
-
-  const BackgroundRunAttempt.run({
-    required SharedPreferences prefs,
-    required String leaseToken,
-  }) : this._(
-          prefs: prefs,
-          leaseToken: leaseToken,
-          skipReason: null,
-        );
-
-  const BackgroundRunAttempt.skip({
-    required SharedPreferences prefs,
-    required BackgroundSkipReason skipReason,
-  }) : this._(
-          prefs: prefs,
-          leaseToken: null,
-          skipReason: skipReason,
+    this.leaseToken,
+    this.skipReason,
+  }) : assert(
+          (leaseToken == null) != (skipReason == null),
+          "Exactly one of leaseToken or skipReason must be set",
         );
 
   final SharedPreferences prefs;
@@ -60,14 +45,14 @@ Future<BackgroundRunAttempt> prepareBackgroundRun({
       (pushPayload == null ||
           pushPayload.isEmpty ||
           pushPayload["action"] != "sync")) {
-    return BackgroundRunAttempt.skip(
+    return BackgroundRunAttempt(
       prefs: prefs,
       skipReason: BackgroundSkipReason.nonSyncPush,
     );
   }
 
   if (await isRunningInForeground()) {
-    return BackgroundRunAttempt.skip(
+    return BackgroundRunAttempt(
       prefs: prefs,
       skipReason: BackgroundSkipReason.foregroundActive,
     );
@@ -81,13 +66,13 @@ Future<BackgroundRunAttempt> prepareBackgroundRun({
     isAnotherBackgroundRunAlive: isAnotherBackgroundRunAlive,
   );
   if (leaseToken == null) {
-    return BackgroundRunAttempt.skip(
+    return BackgroundRunAttempt(
       prefs: prefs,
       skipReason: BackgroundSkipReason.backgroundActive,
     );
   }
 
-  return BackgroundRunAttempt.run(prefs: prefs, leaseToken: leaseToken);
+  return BackgroundRunAttempt(prefs: prefs, leaseToken: leaseToken);
 }
 
 Future<void> finishBackgroundRun(BackgroundRunAttempt attempt) async {
