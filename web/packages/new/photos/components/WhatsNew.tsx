@@ -79,7 +79,7 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut("App Lock Better People Search ")}
+                {ut("App Lock and Better People Search ")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
