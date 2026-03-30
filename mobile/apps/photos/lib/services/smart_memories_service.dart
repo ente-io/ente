@@ -40,6 +40,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/memories/memories_computation_context.dart";
+import "package:photos/services/memories/photo_selector.dart";
 import "package:photos/services/search_service.dart";
 
 part "smart_memories_clip_calculator.dart";
@@ -61,10 +62,11 @@ class SmartMemoriesService {
   MemoriesDB get _memoriesDB =>
       isOfflineMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
 
-  static const _clipSimilarImageThreshold = 0.80;
+  static const _clipSimilarImageThreshold =
+      PhotoSelector.clipSimilarImageThreshold;
   static const _clipActivityQueryThreshold = 0.20;
   static const _clipMemoryTypeQueryThreshold = 0.225;
-  static const _minimumMemoryTimeGap = Duration(minutes: 10);
+  static const _minimumMemoryTimeGap = PhotoSelector.minimumMemoryTimeGap;
 
   static const yearsBefore = 30;
 
@@ -295,62 +297,47 @@ class SmartMemoriesService {
   static List<EmbeddingVector> _getEmbeddingsForFileIDs(
     Map<int, EmbeddingVector> fileIDToImageEmbedding,
     Set<int> fileIDs,
-  ) {
-    final List<EmbeddingVector> embeddings = [];
-    for (final fileID in fileIDs) {
-      final embedding = fileIDToImageEmbedding[fileID];
-      if (embedding != null) embeddings.add(embedding);
-    }
-    return embeddings;
-  }
+  ) =>
+      PhotoSelector.getEmbeddingsForFileIDs(fileIDToImageEmbedding, fileIDs);
 
   static bool _isNearDuplicate(
     int fileID,
     Iterable<int> selectedFileIDs,
     Map<int, EmbeddingVector> fileIDToImageEmbedding, {
     double similarityThreshold = _clipSimilarImageThreshold,
-  }) {
-    final candidate = fileIDToImageEmbedding[fileID];
-    if (candidate == null) return false;
-    for (final selectedID in selectedFileIDs) {
-      final selected = fileIDToImageEmbedding[selectedID];
-      if (selected == null) continue;
-      final similarity = candidate.vector.dot(selected.vector);
-      if (similarity > similarityThreshold) {
-        return true;
-      }
-    }
-    return false;
-  }
+  }) =>
+      PhotoSelector.isNearDuplicate(
+        fileID,
+        selectedFileIDs,
+        fileIDToImageEmbedding,
+        similarityThreshold: similarityThreshold,
+      );
 
   static int? _memoryFileId(
     EnteFile file, {
     required bool isOfflineMode,
-  }) {
-    return isOfflineMode ? file.generatedID : file.uploadedFileID;
-  }
+  }) =>
+      PhotoSelector.memoryFileId(file, isOfflineMode: isOfflineMode);
 
   static int? _memoryFileIdFromMemory(
     Memory memory, {
     required bool isOfflineMode,
-  }) {
-    return _memoryFileId(memory.file, isOfflineMode: isOfflineMode);
-  }
+  }) =>
+      PhotoSelector.memoryFileIdFromMemory(
+        memory,
+        isOfflineMode: isOfflineMode,
+      );
 
   static bool _isTooCloseInTime(
     int? creationTime,
     Iterable<int> selectedCreationTimes, {
     Duration minGap = _minimumMemoryTimeGap,
-  }) {
-    if (creationTime == null) return false;
-    final minGapMicroseconds = minGap.inMicroseconds;
-    for (final selectedTime in selectedCreationTimes) {
-      if ((creationTime - selectedTime).abs() < minGapMicroseconds) {
-        return true;
-      }
-    }
-    return false;
-  }
+  }) =>
+      PhotoSelector.isTooCloseInTime(
+        creationTime,
+        selectedCreationTimes,
+        minGap: minGap,
+      );
 
   static List<Memory> _filterNearDuplicates(
     List<Memory> memories,
@@ -358,121 +345,20 @@ class SmartMemoriesService {
     int? minKeep,
     required bool isOfflineMode,
     double similarityThreshold = _clipSimilarImageThreshold,
-  }) {
-    if (memories.length < 2) return memories;
-    final filtered = <Memory>[];
-    final selectedFileIDs = <int>[];
-    int skipped = 0;
-    final total = memories.length;
-    for (final mem in memories) {
-      final fileID = _memoryFileIdFromMemory(
-        mem,
+  }) =>
+      PhotoSelector.filterNearDuplicates(
+        memories,
+        fileIDToImageEmbedding,
+        minKeep: minKeep,
         isOfflineMode: isOfflineMode,
+        similarityThreshold: similarityThreshold,
       );
-      final bool shouldSkip = fileID != null &&
-          _isNearDuplicate(
-            fileID,
-            selectedFileIDs,
-            fileIDToImageEmbedding,
-            similarityThreshold: similarityThreshold,
-          ) &&
-          (minKeep == null || (total - skipped) > minKeep);
-      if (shouldSkip) {
-        skipped++;
-        continue;
-      }
-      filtered.add(mem);
-      if (fileID != null) {
-        selectedFileIDs.add(fileID);
-      }
-    }
-    return filtered;
-  }
-
-  static List<Memory> _excludeNearDuplicates(
-    List<Memory> candidates,
-    List<Memory> selected,
-    Map<int, EmbeddingVector> fileIDToImageEmbedding, {
-    required bool isOfflineMode,
-    double similarityThreshold = _clipSimilarImageThreshold,
-  }) {
-    if (selected.isEmpty || candidates.isEmpty) return candidates;
-    final selectedFileIDs = selected
-        .map(
-          (mem) => _memoryFileIdFromMemory(
-            mem,
-            isOfflineMode: isOfflineMode,
-          ),
-        )
-        .whereType<int>()
-        .toList(growable: false);
-    if (selectedFileIDs.isEmpty) return candidates;
-    final filtered = <Memory>[];
-    for (final candidate in candidates) {
-      final fileID = _memoryFileIdFromMemory(
-        candidate,
-        isOfflineMode: isOfflineMode,
-      );
-      if (fileID == null ||
-          !_isNearDuplicate(
-            fileID,
-            selectedFileIDs,
-            fileIDToImageEmbedding,
-            similarityThreshold: similarityThreshold,
-          )) {
-        filtered.add(candidate);
-      }
-    }
-    return filtered;
-  }
 
   static List<Memory> _filterByTimeSpacing(
     List<Memory> memories, {
     Duration minGap = _minimumMemoryTimeGap,
-  }) {
-    if (memories.length < 2) return memories;
-    final filtered = <Memory>[];
-    final selectedCreationTimes = <int>[];
-    for (final mem in memories) {
-      final creationTime = mem.file.creationTime;
-      if (_isTooCloseInTime(
-        creationTime,
-        selectedCreationTimes,
-        minGap: minGap,
-      )) {
-        continue;
-      }
-      filtered.add(mem);
-      if (creationTime != null) {
-        selectedCreationTimes.add(creationTime);
-      }
-    }
-    return filtered;
-  }
-
-  static List<Memory> _excludeTooCloseInTime(
-    List<Memory> candidates,
-    List<Memory> selected, {
-    Duration minGap = _minimumMemoryTimeGap,
-  }) {
-    if (selected.isEmpty || candidates.isEmpty) return candidates;
-    final selectedTimes = selected
-        .map((mem) => mem.file.creationTime)
-        .whereType<int>()
-        .toList(growable: false);
-    if (selectedTimes.isEmpty) return candidates;
-    final filtered = <Memory>[];
-    for (final candidate in candidates) {
-      if (!_isTooCloseInTime(
-        candidate.file.creationTime,
-        selectedTimes,
-        minGap: minGap,
-      )) {
-        filtered.add(candidate);
-      }
-    }
-    return filtered;
-  }
+  }) =>
+      PhotoSelector.filterByTimeSpacing(memories, minGap: minGap);
 
   static List<PeopleMemoryCandidate> _buildUnnamedClusterCandidates({
     required Map<String, int> clusterIdToFaceCount,
@@ -1233,168 +1119,21 @@ class SmartMemoriesService {
     return null;
   }
 
-  /// Creates a curated selection of memories for the People memories.
-  /// The selection is based on the following things:
-  /// - Distribution of photos over time
-  /// - Nostalgia score of photos
-  /// - Distribution of photos over locations
   static Future<List<Memory>> _bestSelectionPeople(
     List<Memory> memories, {
     int? prefferedSize,
     required bool isOfflineMode,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
-  }) async {
-    try {
-      final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
-      final fileCount = memories.length;
-      final int targetSize = prefferedSize ?? 10;
-      if (fileCount <= targetSize) return memories;
-
-      // Sort by time
-      final sortedTimeMemories = <Memory>[];
-      for (final memory in memories) {
-        if (memory.file.creationTime != null) {
-          sortedTimeMemories.add(memory);
-        }
-      }
-      sortedTimeMemories.sort(
-        (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+  }) =>
+      PhotoSelector.bestSelectionPeople(
+        memories,
+        prefferedSize: prefferedSize,
+        isOfflineMode: isOfflineMode,
+        fileIDToImageEmbedding: fileIDToImageEmbedding,
+        clipPositiveTextVector: clipPositiveTextVector,
       );
-      if (sortedTimeMemories.length < targetSize) return sortedTimeMemories;
 
-      // Divide into 10 time buckets distributing all memories as evenly as possible.
-      final int total = sortedTimeMemories.length;
-      final int numBuckets = targetSize;
-      final int quotient = total ~/ numBuckets;
-      final int remainder = total % numBuckets;
-      final List<List<Memory>> timeBuckets = [];
-      int offset = 0;
-      for (int i = 0; i < numBuckets; i++) {
-        final int bucketSize = quotient + (i < remainder ? 1 : 0);
-        timeBuckets
-            .add(sortedTimeMemories.sublist(offset, offset + bucketSize));
-        offset += bucketSize;
-      }
-
-      final finalSelection = <Memory>[];
-      for (final bucket in timeBuckets) {
-        // Get X% most nostalgic photos
-        final bucketFileIDs = bucket
-            .map(
-              (memory) => _memoryFileIdFromMemory(
-                memory,
-                isOfflineMode: isOfflineMode,
-              ),
-            )
-            .whereType<int>()
-            .toSet();
-        final bucketVectors = _getEmbeddingsForFileIDs(
-          fileIDToImageEmbedding,
-          bucketFileIDs,
-        );
-        final bool littleEmbeddings =
-            bucketVectors.length < bucket.length * 0.5;
-        final Map<int, double> nostalgiaScores = {};
-        for (final embedding in bucketVectors) {
-          nostalgiaScores[embedding.fileID] =
-              embedding.vector.dot(clipPositiveTextVector);
-        }
-        final sortedNostalgia = bucket
-          ..sort(
-            (a, b) => (nostalgiaScores[_memoryFileIdFromMemory(
-                      b,
-                      isOfflineMode: isOfflineMode,
-                    )] ??
-                    0.0)
-                .compareTo(
-              nostalgiaScores[_memoryFileIdFromMemory(
-                    a,
-                    isOfflineMode: isOfflineMode,
-                  )] ??
-                  0.0,
-            ),
-          );
-        late List<Memory> mostNostalgic;
-        if (littleEmbeddings) {
-          mostNostalgic = sortedNostalgia;
-        } else {
-          mostNostalgic = sortedNostalgia
-              .take((max(bucket.length * 0.3, 1)).toInt())
-              .toList();
-        }
-
-        if (mostNostalgic.isEmpty) {
-          dev.log('No nostalgic photos in bucket');
-        }
-
-        var candidates = mostNostalgic;
-        if (finalSelection.isNotEmpty) {
-          final filteredCandidates = _excludeNearDuplicates(
-            mostNostalgic,
-            finalSelection,
-            fileIDToImageEmbedding,
-            isOfflineMode: isOfflineMode,
-          );
-          if (filteredCandidates.isNotEmpty) {
-            candidates = filteredCandidates;
-          }
-          candidates = _excludeTooCloseInTime(
-            candidates,
-            finalSelection,
-          );
-        }
-        if (candidates.isEmpty) {
-          continue;
-        }
-
-        // If no selection yet, take the most nostalgic photo
-        if (finalSelection.isEmpty) {
-          finalSelection.add(candidates.first);
-          continue;
-        }
-
-        // From nostalgic selection, take the photo furthest away from all currently selected ones
-        double globalMaxMinDistance = 0;
-        int farthestDistanceIdx = 0;
-        for (var i = 0; i < candidates.length; i++) {
-          final mem = candidates[i];
-          double minDistance = double.infinity;
-          for (final selected in finalSelection) {
-            if (selected.file.location == null || mem.file.location == null) {
-              continue;
-            }
-            final distance =
-                calculateDistance(mem.file.location!, selected.file.location!);
-            if (distance < minDistance) {
-              minDistance = distance;
-            }
-          }
-          if (minDistance > globalMaxMinDistance) {
-            globalMaxMinDistance = minDistance;
-            farthestDistanceIdx = i;
-          }
-        }
-        finalSelection.add(candidates[farthestDistanceIdx]);
-      }
-
-      finalSelection
-          .sort((a, b) => b.file.creationTime!.compareTo(a.file.creationTime!));
-
-      dev.log(
-        'People memories selection done, returning ${finalSelection.length} memories',
-      );
-      w?.log('People memories selection done');
-      return finalSelection;
-    } catch (e, s) {
-      dev.log('Error in _bestSelectionPeople $e \n $s');
-      return [];
-    }
-  }
-
-  /// Returns the best selection of files from the given list, for time and trip memories.
-  /// Makes sure that the selection is not more than [prefferedSize] or 10 files,
-  /// and that each year of the original list is represented.
   static Future<List<Memory>> _bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
@@ -1403,247 +1142,14 @@ class SmartMemoriesService {
     required Map<String, String> faceIDsToPersonID,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
-  }) async {
-    final fileCount = memories.length;
-    int targetSize = prefferedSize ?? 10;
-    if (fileCount <= targetSize) return memories;
-    final fileIDs = memories
-        .map(
-          (e) => _memoryFileIdFromMemory(
-            e,
-            isOfflineMode: isOfflineMode,
-          ),
-        )
-        .whereType<int>()
-        .toSet();
-
-    final allYears = memories.map((e) {
-      final creationTime =
-          DateTime.fromMicrosecondsSinceEpoch(e.file.creationTime!);
-      return creationTime.year;
-    }).toSet();
-
-    // Get clip scores for each file
-    final vectors = _getEmbeddingsForFileIDs(
-      fileIDToImageEmbedding,
-      fileIDs,
-    );
-    final Map<int, double> fileToScore = {};
-    for (final embedding in vectors) {
-      fileToScore[embedding.fileID] =
-          embedding.vector.dot(clipPositiveTextVector);
-    }
-
-    // Get face scores for each file
-    final fileToFaceCount = <int, int>{};
-    for (final mem in memories) {
-      final fileID = _memoryFileIdFromMemory(
-        mem,
+  }) =>
+      PhotoSelector.bestSelection(
+        memories,
+        prefferedSize: prefferedSize,
         isOfflineMode: isOfflineMode,
+        fileIdToFaces: fileIdToFaces,
+        faceIDsToPersonID: faceIDsToPersonID,
+        fileIDToImageEmbedding: fileIDToImageEmbedding,
+        clipPositiveTextVector: clipPositiveTextVector,
       );
-      if (fileID == null) continue;
-      fileToFaceCount[fileID] = 0;
-      final faces = fileIdToFaces[fileID];
-      if (faces == null || faces.isEmpty) {
-        continue;
-      }
-      for (final face in faces) {
-        if (faceIDsToPersonID.containsKey(face.faceID)) {
-          fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 10;
-        } else {
-          fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 1;
-        }
-      }
-    }
-
-    final filteredMemories = <Memory>[];
-    if (allYears.length <= 1) {
-      // TODO: lau: eventually this sorting might have to be replaced with some scoring system
-      // sort first on clip embeddings score (descending)
-      memories.sort(
-        (a, b) => (fileToScore[
-                    _memoryFileIdFromMemory(b, isOfflineMode: isOfflineMode)] ??
-                0.0)
-            .compareTo(
-          fileToScore[
-                  _memoryFileIdFromMemory(a, isOfflineMode: isOfflineMode)] ??
-              0.0,
-        ),
-      );
-      // then sort on faces (descending), heavily prioritizing named faces
-      memories.sort(
-        (a, b) => (fileToFaceCount[
-                    _memoryFileIdFromMemory(b, isOfflineMode: isOfflineMode)] ??
-                0)
-            .compareTo(
-          fileToFaceCount[
-                  _memoryFileIdFromMemory(a, isOfflineMode: isOfflineMode)] ??
-              0,
-        ),
-      );
-
-      // then filter out similar images as much as possible
-      filteredMemories.add(memories.first);
-      final selectedCreationTimes = <int>[];
-      final firstCreationTime = memories.first.file.creationTime;
-      if (firstCreationTime != null) {
-        selectedCreationTimes.add(firstCreationTime);
-      }
-      int skipped = 0;
-      filesLoop:
-      for (final mem in memories.sublist(1)) {
-        if (filteredMemories.length >= targetSize) break;
-        final creationTime = mem.file.creationTime;
-        if (_isTooCloseInTime(
-          creationTime,
-          selectedCreationTimes,
-        )) {
-          skipped++;
-          continue filesLoop;
-        }
-        final memFileID = _memoryFileIdFromMemory(
-          mem,
-          isOfflineMode: isOfflineMode,
-        );
-        final clip =
-            memFileID == null ? null : fileIDToImageEmbedding[memFileID];
-        if (clip != null && (fileCount - skipped) > targetSize) {
-          for (final filteredMem in filteredMemories) {
-            final filteredFileID = _memoryFileIdFromMemory(
-              filteredMem,
-              isOfflineMode: isOfflineMode,
-            );
-            final fClip = filteredFileID == null
-                ? null
-                : fileIDToImageEmbedding[filteredFileID];
-            if (fClip == null) continue;
-            final similarity = clip.vector.dot(fClip.vector);
-            if (similarity > _clipSimilarImageThreshold) {
-              skipped++;
-              continue filesLoop;
-            }
-          }
-        }
-        filteredMemories.add(mem);
-        if (creationTime != null) {
-          selectedCreationTimes.add(creationTime);
-        }
-      }
-    } else {
-      // Multiple years, each represented and roughly equally distributed
-      if (prefferedSize == null && (allYears.length * 2) > 10) {
-        targetSize = allYears.length * 3;
-        if (fileCount < targetSize) return memories;
-      }
-
-      // Group files by year and sort each year's list by CLIP then face count
-      final yearToFiles = <int, List<Memory>>{};
-      for (final mem in memories) {
-        final creationTime =
-            DateTime.fromMicrosecondsSinceEpoch(mem.file.creationTime!);
-        final year = creationTime.year;
-        yearToFiles.putIfAbsent(year, () => []).add(mem);
-      }
-
-      for (final year in yearToFiles.keys) {
-        final yearFiles = yearToFiles[year]!;
-        // sort first on clip embeddings score (descending)
-        yearFiles.sort(
-          (a, b) => (fileToScore[_memoryFileIdFromMemory(
-                    b,
-                    isOfflineMode: isOfflineMode,
-                  )] ??
-                  0.0)
-              .compareTo(
-            fileToScore[_memoryFileIdFromMemory(
-                  a,
-                  isOfflineMode: isOfflineMode,
-                )] ??
-                0.0,
-          ),
-        );
-        // then sort on faces (descending), heavily prioritizing named faces
-        yearFiles.sort(
-          (a, b) => (fileToFaceCount[_memoryFileIdFromMemory(
-                    b,
-                    isOfflineMode: isOfflineMode,
-                  )] ??
-                  0)
-              .compareTo(
-            fileToFaceCount[_memoryFileIdFromMemory(
-                  a,
-                  isOfflineMode: isOfflineMode,
-                )] ??
-                0,
-          ),
-        );
-      }
-
-      // Then join the years together one by one and filter similar images
-      final years = yearToFiles.keys.toList()
-        ..sort((a, b) => b.compareTo(a)); // Recent years first
-      int round = 0;
-      int skipped = 0;
-      final selectedCreationTimes = <int>[];
-      whileLoop:
-      while (filteredMemories.length + skipped < fileCount) {
-        yearLoop:
-        for (final year in years) {
-          final yearFiles = yearToFiles[year]!;
-          if (yearFiles.isEmpty) continue;
-          final newMem = yearFiles.removeAt(0);
-          final creationTime = newMem.file.creationTime;
-          if (_isTooCloseInTime(
-            creationTime,
-            selectedCreationTimes,
-          )) {
-            skipped++;
-            continue yearLoop;
-          }
-          if (round != 0 && (fileCount - skipped) > targetSize) {
-            // check for filtering
-            final newMemID = _memoryFileIdFromMemory(
-              newMem,
-              isOfflineMode: isOfflineMode,
-            );
-            final clip =
-                newMemID == null ? null : fileIDToImageEmbedding[newMemID];
-            if (clip != null) {
-              for (final filteredMem in filteredMemories) {
-                final filteredFileID = _memoryFileIdFromMemory(
-                  filteredMem,
-                  isOfflineMode: isOfflineMode,
-                );
-                final fClip = filteredFileID == null
-                    ? null
-                    : fileIDToImageEmbedding[filteredFileID];
-                if (fClip == null) continue;
-                final similarity = clip.vector.dot(fClip.vector);
-                if (similarity > _clipSimilarImageThreshold) {
-                  skipped++;
-                  continue yearLoop;
-                }
-              }
-            }
-          }
-          filteredMemories.add(newMem);
-          if (creationTime != null) {
-            selectedCreationTimes.add(creationTime);
-          }
-          if (filteredMemories.length >= targetSize ||
-              filteredMemories.length + skipped >= fileCount) {
-            break whileLoop;
-          }
-        }
-        round++;
-        // Extra safety to prevent infinite loops
-        if (round > fileCount) break;
-      }
-    }
-
-    // Order the final selection chronologically
-    filteredMemories
-        .sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
-    return filteredMemories;
-  }
 }
