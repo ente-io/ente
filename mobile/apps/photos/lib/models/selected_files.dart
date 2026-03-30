@@ -126,6 +126,7 @@ class SelectedFiles extends ChangeNotifier {
     mutate();
     if (wasInFiles) files.add(file);
     if (wasInLastOp) lastSelectionOperationFiles.add(file);
+    if (wasInFiles || wasInLastOp) notifyListeners();
   }
 
   ///Retains only the files that are present in the [filesToRetain] set in
