@@ -240,7 +240,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    if (flagService.enableMLInBackgroundForCurrentMode &&
+    if ((isOfflineMode || flagService.enableMLInBackground) &&
         hasGrantedMLConsent) {
       await controller.init();
       final canRunML = controller.requestCompute(ml: true);

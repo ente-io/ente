@@ -18,19 +18,12 @@ class FlagService {
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
-  final bool Function() _isOfflineMode;
 
-  FlagService(
-    this._prefs,
-    this._enteDio, {
-    bool Function()? isOfflineMode,
-  }) : _isOfflineMode = isOfflineMode ?? _defaultIsOfflineMode {
+  FlagService(this._prefs, this._enteDio) {
     Future.delayed(const Duration(seconds: 5), () {
       _fetch();
     });
   }
-
-  static bool _defaultIsOfflineMode() => false;
 
   RemoteFlags? _flags;
 
@@ -108,9 +101,6 @@ class FlagService {
   bool get useRustForML => internalUser;
 
   bool get enableMLInBackground => internalUser;
-
-  bool get enableMLInBackgroundForCurrentMode =>
-      _isOfflineMode() || enableMLInBackground;
 
   bool get useRustForFaceThumbnails => internalUser;
 
