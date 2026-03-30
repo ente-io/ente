@@ -9,9 +9,9 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 A QR code reader plugin for Ente.
                        DESC
-  s.homepage         = 'https://ente.com'
+  s.homepage         = 'https://ente.io'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Ente' => 'team@ente.com' }
+  s.author           = { 'Ente' => 'team@ente.io' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
