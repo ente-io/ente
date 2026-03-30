@@ -27,11 +27,11 @@ class QrCodeDetectionHelper {
     final int requestId = ++_requestId;
 
     if (!isEligible) {
-      qrDetectionsNotifier.value = const [];
+      _clearDetections();
       return;
     }
 
-    qrDetectionsNotifier.value = const [];
+    _clearDetections();
 
     _debounceTimer = Timer(_debounceDuration, () {
       _scanFile(file, requestId);
@@ -49,7 +49,7 @@ class QrCodeDetectionHelper {
       final File? localFile = await getFile(file);
       if (_disposed || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        qrDetectionsNotifier.value = const [];
+        _clearDetections();
         return;
       }
       final getFileMs = stopwatch.elapsedMilliseconds;
@@ -78,6 +78,13 @@ class QrCodeDetectionHelper {
     } catch (error, stackTrace) {
       _logger.severe("QR code detection failed", error, stackTrace);
       if (_disposed || requestId != _requestId) return;
+      _clearDetections();
+    }
+  }
+
+  /// Only notify listeners when the value actually changes.
+  void _clearDetections() {
+    if (qrDetectionsNotifier.value.isNotEmpty) {
       qrDetectionsNotifier.value = const [];
     }
   }
