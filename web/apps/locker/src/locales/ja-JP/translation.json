@@ -55,6 +55,7 @@
     "uploadSubscriptionExpiredErrorBody": "Ente Photos のサブスクリプションの有効期限が切れています。アップロードを続けるには更新してください。",
     "uploadFileCountLimitErrorBody": "ファイル制限に達しました。有料プランにアップグレードして、より多くのストレージを利用してください。",
     "uploadFileCountLimitErrorToast": "操作に失敗しました。ファイル制限に達しています。",
+    "uploadEmptyFileErrorBody": "空のファイルはアップロードできません。",
     "uploadFileTooLargeErrorBody": "このファイルはサポートされている最大アップロードサイズ10GBを超えています。",
     "downloading": "ダウンロード中…",
     "downloadFailed": "ダウンロード失敗",

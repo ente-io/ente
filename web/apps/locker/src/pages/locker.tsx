@@ -288,7 +288,9 @@ export const LockerPage: React.FC = () => {
                 onCreateCollection={handleCreateCollection}
                 onEnsureCollections={ensureCollectionsExist}
                 defaultCollectionID={selectedCollectionID}
+                isProductionEndpoint={isProductionEndpoint}
                 initialItems={prefilledUploadItems}
+                userDetails={userDetails}
             />
 
             {editItem && (
@@ -299,6 +301,8 @@ export const LockerPage: React.FC = () => {
                     onSave={handleUpdateItem}
                     onCreateCollection={handleCreateCollection}
                     editItem={editItem}
+                    isProductionEndpoint={isProductionEndpoint}
+                    userDetails={userDetails}
                 />
             )}
 
