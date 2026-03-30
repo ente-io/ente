@@ -2,7 +2,9 @@
 
 ## v1.7.22 (unreleased)
 
--
+- App lock
+- Better people list experience (bigger view with search)
+- Various bug fixes (map view tiles, etc)
 
 ## v1.7.21
 
