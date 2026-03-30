@@ -209,6 +209,22 @@ class BgTaskUtils {
       );
       if (Platform.isIOS && flagService.enableIOSBackgroundHandoff) {
         await requeueIOSBackgroundTasks(source: "configureWorkmanager");
+        final nextSchedule = nextIOSBackgroundProcessingSchedule(
+          isBackgroundHandoffEnabled: true,
+          hasActiveUploads: FileUploader.instance.hasActiveUploads,
+          isBackupEligible: await isIOSBackupEligible(),
+        );
+        if (nextSchedule != null) {
+          await scheduleIOSBackgroundProcessingTask(
+            source: "configureWorkmanager:bootstrap",
+            initialDelay: nextSchedule.delay,
+            reason: nextSchedule.reason,
+          );
+        } else {
+          await cancelIOSBackgroundProcessingTask(
+            source: "configureWorkmanager:handoff",
+          );
+        }
       } else {
         await workmanager.Workmanager().registerPeriodicTask(
           backgroundTaskIdentifier,
@@ -324,7 +340,7 @@ class BgTaskUtils {
     await _clearIOSBackgroundProcessingSchedulingState();
   }
 
-  static Future<void> handleIOSBackgroundProcessingTaskStart({
+  static Future<void> scheduleNextIOSBackgroundProcessingTask({
     required String source,
   }) async {
     if (!Platform.isIOS) {
@@ -343,7 +359,7 @@ class BgTaskUtils {
     );
     if (nextSchedule != null) {
       await scheduleIOSBackgroundProcessingTask(
-        source: "$source:start",
+        source: "$source:postRun",
         initialDelay: nextSchedule.delay,
         reason: nextSchedule.reason,
       );
@@ -432,4 +448,14 @@ enum BackgroundTrigger {
   bgAppRefresh,
   bgProcessing,
   remotePush,
+}
+
+extension BackgroundTriggerLogPrefix on BackgroundTrigger {
+  String get logPrefix {
+    return switch (this) {
+      BackgroundTrigger.remotePush => "[fbg]",
+      BackgroundTrigger.bgAppRefresh => "[bg-refresh]",
+      BackgroundTrigger.bgProcessing || BackgroundTrigger.workmanager => "[bg]",
+    };
+  }
 }
