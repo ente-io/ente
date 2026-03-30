@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import Vision
 
 public class EnteQrPlugin: NSObject, FlutterPlugin {
   private static let detectionQueue = DispatchQueue(label: "io.ente.qr.detection", qos: .userInitiated)
@@ -41,25 +40,10 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
       result(FlutterMethodNotImplemented)
     }
   }
-
-  private func detectBarcodes(in cgImage: CGImage) -> [VNBarcodeObservation] {
-    let request = VNDetectBarcodesRequest()
-    request.symbologies = [.qr]
-
-    let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-    do {
-      try handler.perform([request])
-    } catch {
-      return []
-    }
-
-    return request.results ?? []
-  }
-
+  
   private func scanQrCode(from imagePath: String, result: @escaping FlutterResult) {
     EnteQrPlugin.detectionQueue.async {
-      guard let image = UIImage(contentsOfFile: imagePath),
-            let cgImage = image.cgImage else {
+      guard let image = UIImage(contentsOfFile: imagePath) else {
         DispatchQueue.main.async {
           result([
             "success": false,
@@ -69,14 +53,39 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
         return
       }
 
-      let observations = self.detectBarcodes(in: cgImage)
+      guard let cgImage = image.cgImage else {
+        DispatchQueue.main.async {
+          result([
+            "success": false,
+            "error": "Unable to get CGImage from UIImage"
+          ])
+        }
+        return
+      }
 
-      if let obs = observations.first,
-         let payload = obs.payloadStringValue {
+      let detector = CIDetector(ofType: CIDetectorTypeQRCode,
+                               context: nil,
+                               options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+
+      guard let qrDetector = detector else {
+        DispatchQueue.main.async {
+          result([
+            "success": false,
+            "error": "Unable to create QR code detector"
+          ])
+        }
+        return
+      }
+
+      let ciImage = CIImage(cgImage: cgImage)
+      let features = qrDetector.features(in: ciImage)
+
+      if let qrFeature = features.first as? CIQRCodeFeature,
+         let messageString = qrFeature.messageString {
         DispatchQueue.main.async {
           result([
             "success": true,
-            "content": payload
+            "content": messageString
           ])
         }
       } else {
@@ -92,8 +101,7 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
 
   private func scanAllQrCodes(from imagePath: String, result: @escaping FlutterResult) {
     EnteQrPlugin.detectionQueue.async {
-      guard let image = UIImage(contentsOfFile: imagePath),
-            let cgImage = image.cgImage else {
+      guard let image = UIImage(contentsOfFile: imagePath) else {
         DispatchQueue.main.async {
           result([
             "success": false,
@@ -103,22 +111,72 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
         return
       }
 
-      let observations = self.detectBarcodes(in: cgImage)
+      guard let cgImage = image.cgImage else {
+        DispatchQueue.main.async {
+          result([
+            "success": false,
+            "error": "Unable to get CGImage from UIImage"
+          ])
+        }
+        return
+      }
+
+      let detector = CIDetector(ofType: CIDetectorTypeQRCode,
+                               context: nil,
+                               options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+
+      guard let qrDetector = detector else {
+        DispatchQueue.main.async {
+          result([
+            "success": false,
+            "error": "Unable to create QR code detector"
+          ])
+        }
+        return
+      }
+
+      let ciImage = CIImage(cgImage: cgImage)
+      let features = qrDetector.features(in: ciImage)
+
+      let imageWidth = CGFloat(cgImage.width)
+      let imageHeight = CGFloat(cgImage.height)
 
       var detections: [[String: Any]] = []
 
-      for obs in observations {
-        guard let payload = obs.payloadStringValue else { continue }
+      for feature in features {
+        guard let qrFeature = feature as? CIQRCodeFeature,
+              let messageString = qrFeature.messageString else {
+          continue
+        }
 
-        // Vision's boundingBox is normalized [0,1] with origin at bottom-left.
-        // Convert to top-left origin (y-down) for Flutter.
-        let box = obs.boundingBox
+        // Core Image has origin at bottom-left with y-up.
+        // Convert to normalized [0,1] coords with origin top-left, y-down.
+        let minX = min(qrFeature.topLeft.x, qrFeature.bottomLeft.x)
+        let maxX = max(qrFeature.topRight.x, qrFeature.bottomRight.x)
+        // In CI coords, topLeft.y > bottomLeft.y (y goes up)
+        let minYci = min(qrFeature.bottomLeft.y, qrFeature.bottomRight.y)
+        let maxYci = max(qrFeature.topLeft.y, qrFeature.topRight.y)
+
+        // Add padding around finder patterns (matching Android's 15%)
+        let padX = (maxX - minX) * 0.15
+        let padY = (maxYci - minYci) * 0.15
+        let paddedMinX = max(minX - padX, 0)
+        let paddedMaxX = min(maxX + padX, imageWidth)
+        let paddedMinYci = max(minYci - padY, 0)
+        let paddedMaxYci = min(maxYci + padY, imageHeight)
+
+        // Flip y: top-left origin
+        let normX = paddedMinX / imageWidth
+        let normY = 1.0 - (paddedMaxYci / imageHeight)
+        let normW = (paddedMaxX - paddedMinX) / imageWidth
+        let normH = (paddedMaxYci - paddedMinYci) / imageHeight
+
         detections.append([
-          "content": payload,
-          "x": Double(box.origin.x),
-          "y": Double(1.0 - box.origin.y - box.height),
-          "width": Double(box.width),
-          "height": Double(box.height),
+          "content": messageString,
+          "x": Double(normX),
+          "y": Double(normY),
+          "width": Double(normW),
+          "height": Double(normH),
         ])
       }
 
