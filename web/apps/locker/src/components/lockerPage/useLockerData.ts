@@ -1,4 +1,5 @@
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
+import { isSavedUserTokenMismatch } from "ente-accounts-rs/services/accounts-db";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
@@ -9,6 +10,7 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { savedAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -180,7 +182,15 @@ export const useLockerData = ({
         const canApplyState = () => !cancelled && mountedRef.current;
 
         const load = async () => {
-            const mk = await masterKeyFromSession();
+            const [mk, token, tokenMismatch] = await Promise.all([
+                masterKeyFromSession(),
+                savedAuthToken(),
+                isSavedUserTokenMismatch(),
+            ]);
+            if (tokenMismatch || !token) {
+                void logout();
+                return;
+            }
             if (!mk) {
                 stashRedirect(router.asPath || "/");
                 void router.push("/login");
