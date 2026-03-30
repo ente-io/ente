@@ -38,10 +38,7 @@ export const loadPublicMemoryPage = async (
         const accessToken = extractAccessTokenFromURL(currentURL);
 
         if (!accessToken) {
-            return {
-                kind: "redirect",
-                redirectURL: memoriesAppOrigin(),
-            };
+            return { kind: "redirect", redirectURL: memoriesAppOrigin() };
         }
 
         const shareKey = await extractMemoryShareKeyFromURL(currentURL);
