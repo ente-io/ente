@@ -191,7 +191,7 @@ Future<bool> runBackgroundTask(
             );
           }
         },
-        prefix: _backgroundLogPrefix(trigger),
+        prefix: trigger.logPrefix,
       );
       return result;
     }
@@ -660,7 +660,7 @@ Future<void> _firebaseMessagingBackgroundHandlerWithHandoff(
       budget: kBGPushBudget,
       pushPayload: message.data.map((key, value) => MapEntry(key, "$value")),
     ),
-    prefix: _backgroundLogPrefix(BackgroundTrigger.remotePush),
+    prefix: BackgroundTrigger.remotePush.logPrefix,
   );
 }
 
@@ -672,14 +672,6 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
-}
-
-String _backgroundLogPrefix(BackgroundTrigger trigger) {
-  return switch (trigger) {
-    BackgroundTrigger.remotePush => "[fbg]",
-    BackgroundTrigger.bgAppRefresh => "[bg-refresh]",
-    BackgroundTrigger.bgProcessing || BackgroundTrigger.workmanager => "[bg]",
-  };
 }
 
 Future<bool> _runBackgroundPass({
@@ -707,7 +699,7 @@ Future<bool> _runBackgroundPass({
     await _runMinimally(taskId, TimeLogger());
     if (trigger == BackgroundTrigger.bgProcessing &&
         taskId == BgTaskUtils.iOSBackgroundProcessingTask) {
-      await BgTaskUtils.handleIOSBackgroundProcessingTaskStart(
+      await BgTaskUtils.scheduleNextIOSBackgroundProcessingTask(
         source: "_runBackgroundPass:$taskId",
       );
     }

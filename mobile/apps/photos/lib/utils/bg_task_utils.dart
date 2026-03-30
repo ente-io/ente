@@ -340,7 +340,7 @@ class BgTaskUtils {
     await _clearIOSBackgroundProcessingSchedulingState();
   }
 
-  static Future<void> handleIOSBackgroundProcessingTaskStart({
+  static Future<void> scheduleNextIOSBackgroundProcessingTask({
     required String source,
   }) async {
     if (!Platform.isIOS) {
@@ -359,7 +359,7 @@ class BgTaskUtils {
     );
     if (nextSchedule != null) {
       await scheduleIOSBackgroundProcessingTask(
-        source: "$source:start",
+        source: "$source:postRun",
         initialDelay: nextSchedule.delay,
         reason: nextSchedule.reason,
       );
@@ -448,4 +448,14 @@ enum BackgroundTrigger {
   bgAppRefresh,
   bgProcessing,
   remotePush,
+}
+
+extension BackgroundTriggerLogPrefix on BackgroundTrigger {
+  String get logPrefix {
+    return switch (this) {
+      BackgroundTrigger.remotePush => "[fbg]",
+      BackgroundTrigger.bgAppRefresh => "[bg-refresh]",
+      BackgroundTrigger.bgProcessing || BackgroundTrigger.workmanager => "[bg]",
+    };
+  }
 }
