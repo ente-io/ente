@@ -702,12 +702,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
       faceEmbedding: faceEmbeddingModelPath ?? "",
       clipImage: clipImageModelPath ?? "",
       clipText: "",
-      petFaceDetection: petFaceDetectionModelPath ?? "",
-      petFaceEmbeddingDog: petFaceEmbeddingDogModelPath ?? "",
-      petFaceEmbeddingCat: petFaceEmbeddingCatModelPath ?? "",
-      petBodyDetection: petBodyDetectionModelPath ?? "",
-      petBodyEmbeddingDog: petBodyEmbeddingDogModelPath ?? "",
-      petBodyEmbeddingCat: petBodyEmbeddingCatModelPath ?? "",
     );
     final providerPolicy = rust_ml.RustExecutionProviderPolicy(
       preferCoreml: preferCoreml,
@@ -725,7 +719,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
           imagePath: analyzePath,
           runFaces: runFaces,
           runClip: runClip,
-          runPets: runPets,
           modelPaths: modelPaths,
           providerPolicy: providerPolicy,
         ),
@@ -880,46 +873,7 @@ Future<MLResult> analyzeImageRust(Map args) async {
       );
     }
 
-    if (runPets) {
-      if (rustResult.petFaces != null) {
-        result.petFaces = rustResult.petFaces!.map((face) {
-          final detection = FaceDetectionRelative(
-            score: face.detection.score,
-            box: face.detection.boxXyxy.toList(growable: false),
-            allKeypoints: face.detection.keypoints
-                .map((point) => point.toList(growable: false))
-                .toList(growable: false),
-          );
-          final alignment = AlignmentResult(
-            // Pet alignment is done in Rust; no Dart-side affine matrix needed.
-            affineMatrix: const [],
-            center: face.alignment.center.toList(growable: false),
-            size: face.alignment.cropSize,
-            rotation: face.alignment.angle,
-          );
-          return PetFaceResult(
-            fileId: enteFileID,
-            petFaceId: face.petFaceId,
-            detection: detection,
-            alignment: alignment,
-            species: face.species,
-            embedding: Embedding.from(face.faceEmbedding),
-          );
-        }).toList(growable: false);
-      }
-
-      if (rustResult.petBodies != null) {
-        result.petBodies = rustResult.petBodies!.map((body) {
-          return PetBodyResult(
-            boxXyxy: body.boxXyxy.toList(growable: false),
-            score: body.score,
-            cocoClass: body.cocoClass,
-            petBodyId: body.petBodyId,
-            embedding: Embedding.from(body.bodyEmbedding),
-          );
-        }).toList(growable: false);
-      }
-    }
+    // TODO: pet detection (petFaces/petBodies) pending Rust implementation
 
     return result;
   } catch (e, s) {
