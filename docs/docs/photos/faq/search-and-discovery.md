@@ -130,6 +130,21 @@ Open `Settings > Preferences > Machine learning` and toggle ON face recognition 
 - ✅ ML only works on desktop and mobile apps
 - Initial indexing can take time depending on library size
 
+### Why is the People section empty even though Machine Learning shows 100%? {#people-section-empty}
+
+If Machine Learning shows 100% on both Android and Desktop, the People
+section should normally populate shortly after.
+
+Try these steps first:
+
+1. Refresh the desktop app using `Ctrl + F`
+2. Log out and log back in
+3. Check if People start showing up
+
+If the People section is still empty, please
+[send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app
+so we can investigate further.
+
 ### How do I enable face recognition? {#enable-face-recognition}
 
 Face recognition requires enabling **Machine Learning** first:
@@ -216,6 +231,12 @@ Please note this functionality is currently only available on mobile.
 ### Does face recognition work offline? {#ml-offline}
 
 Yes! Once your photos have been indexed, face recognition and magic search work completely offline. The initial indexing requires downloading your photos (which happens faster over WiFi), but after that all searches happen locally on your device. The indexes are synced across your devices using end-to-end encryption.
+
+### Does ML indexing require internet? {#ml-indexing-internet}
+
+ML indexing requires internet initially to download the ML models and to download any photos not already present locally on your device. Once your photos have been indexed completely, face recognition and magic search work completely offline.
+
+Internet is also required to sync the encrypted indexes across your devices.
 
 ### Is my face data used to train AI models? {#face-data-training}
 

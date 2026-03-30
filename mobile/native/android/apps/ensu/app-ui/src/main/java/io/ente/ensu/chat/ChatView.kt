@@ -11,11 +11,19 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -24,7 +32,10 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
@@ -54,6 +65,9 @@ fun ChatView(
     onOverflowTrim: () -> Unit,
     onOverflowCancel: () -> Unit
 ) {
+    val density = LocalDensity.current
+    var inputBarHeightDp by remember { mutableStateOf(0.dp) }
+
     val showDownloadOnboarding by remember(
         chatState.isModelDownloaded,
         chatState.messages,
@@ -101,24 +115,6 @@ fun ChatView(
                 focusRequestId += 1
             }
             wasDrawerOpen = false
-        }
-    }
-
-    val shouldAutoDownload by remember(
-        chatState.hasRequestedModelDownload,
-        chatState.isDownloading,
-        chatState.isGenerating
-    ) {
-        derivedStateOf {
-            chatState.hasRequestedModelDownload &&
-                !chatState.isDownloading &&
-                !chatState.isGenerating
-        }
-    }
-
-    LaunchedEffect(chatState.isModelDownloaded, shouldAutoDownload) {
-        if (!chatState.isModelDownloaded && shouldAutoDownload) {
-            onStartDownload(false)
         }
     }
 
@@ -195,7 +191,10 @@ fun ChatView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .background(EnsuColor.backgroundBase()),
+                        .background(EnsuColor.backgroundBase())
+                        .onGloballyPositioned { coords ->
+                            inputBarHeightDp = with(density) { coords.size.height.toDp() }
+                        },
                     messageText = chatState.messageText,
                     attachments = chatState.attachments,
                     editingMessage = editingMessage,
@@ -219,6 +218,31 @@ fun ChatView(
             }
         }
 
+        val imeVisible = WindowInsets.ime.getBottom(density) > 0
+        if (imeVisible && inputBarHeightDp > 0.dp) {
+            IconButton(
+                onClick = { focusManager.clearFocus() },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .imePadding()
+                    .padding(
+                        end = EnsuSpacing.pageHorizontal.dp,
+                        bottom = inputBarHeightDp + EnsuSpacing.sm.dp
+                    )
+                    .background(
+                        color = EnsuColor.fillFaint(),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.KeyboardArrowDown,
+                    contentDescription = "Dismiss keyboard",
+                    modifier = Modifier.padding(7.dp),
+                    tint = EnsuColor.textPrimary()
+                )
+            }
+        }
+
         val status = chatState.downloadStatus
         val isLoading = status?.contains("Loading", ignoreCase = true) == true
         val showToast by remember(status, chatState.isDownloading, showDownloadOnboarding, isLoading) {
@@ -233,6 +257,7 @@ fun ChatView(
             DownloadToastOverlay(
                 status = status ?: "",
                 percent = chatState.downloadPercent ?: 0,
+                totalBytes = chatState.modelDownloadSizeBytes,
                 isLoading = isLoading,
                 onCancel = onCancelDownload
             )

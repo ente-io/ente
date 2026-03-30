@@ -8,6 +8,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
+	"github.com/lib/pq"
 )
 
 // UserAuthRepository defines the methods for inserting, updating and retrieving
@@ -177,6 +178,20 @@ func (repo *UserAuthRepository) RemoveAllOtherTokens(userID int64, token string)
 
 func (repo *UserAuthRepository) RemoveDeletedTokens(expiryTime int64) error {
 	_, err := repo.DB.Exec(`DELETE FROM tokens WHERE is_deleted = true AND last_used_at < $1`, expiryTime)
+	return stacktrace.Propagate(err, "")
+}
+
+// RemoveTokensForApps marks all tokens for the given apps as deleted for the user.
+func (repo *UserAuthRepository) RemoveTokensForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	dbApps := make([]string, 0, len(apps))
+	for _, app := range apps {
+		dbApps = append(dbApps, string(app))
+	}
+	_, err := repo.DB.Exec(`UPDATE tokens SET is_deleted = true WHERE user_id = $1 AND app = ANY($2)`,
+		userID, pq.Array(dbApps))
 	return stacktrace.Propagate(err, "")
 }
 

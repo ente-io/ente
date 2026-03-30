@@ -1,5 +1,7 @@
 package io.ente.ensu.modelsettings
 
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +15,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,53 +29,85 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.state.ModelSettingsState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSettingsScreen(
+    defaults: EnsuDefaults,
     state: ModelSettingsState,
     onSave: (ModelSettingsState) -> Unit,
     onReset: () -> Unit
 ) {
-    var modelUrl by remember(state) { mutableStateOf(state.modelUrl) }
-    var mmprojUrl by remember(state) { mutableStateOf(state.mmprojUrl) }
+    val context = LocalContext.current
+    val modelChoices = remember {
+        listOf(
+            ModelChoice(
+                id = DEFAULT_OPTION_ID,
+                title = defaults.mobileDefaultModel.title,
+                url = defaults.mobileDefaultModel.url,
+                mmproj = defaults.mobileDefaultModel.mmprojUrl,
+                isDefault = true
+            )
+        ) + defaults.mobileModelPresets.map { preset ->
+            ModelChoice(
+                id = preset.id,
+                title = preset.title,
+                url = preset.url,
+                mmproj = preset.mmprojUrl
+            )
+        } + listOf(
+            ModelChoice(
+                id = CUSTOM_OPTION_ID,
+                title = "Custom",
+                isCustom = true
+            )
+        )
+    }
+
+    var selectedModelId by remember(state) {
+        mutableStateOf(initialSelectionId(state, modelChoices))
+    }
+    var customModelUrl by remember(state) {
+        mutableStateOf(
+            if (state.useCustomModel && modelChoices.none { !it.isCustom && it.url == state.modelUrl }) {
+                state.modelUrl
+            } else {
+                ""
+            }
+        )
+    }
+    var customMmprojUrl by remember(state) {
+        mutableStateOf(
+            if (state.useCustomModel && modelChoices.none { !it.isCustom && it.url == state.modelUrl }) {
+                state.mmprojUrl
+            } else {
+                ""
+            }
+        )
+    }
     var contextLength by remember(state) { mutableStateOf(state.contextLength) }
     var maxTokens by remember(state) { mutableStateOf(state.maxTokens) }
     var temperature by remember(state) { mutableStateOf(state.temperature) }
-
-    val suggestedModels = listOf(
-        SuggestedModel(
-            title = "Qwen3-VL 2B Instruct (Q4_K_M)",
-            subtitle = "Requires mmproj",
-            url = "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3-VL-2B-Instruct-Q4_K_M.gguf",
-            mmproj = "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-qwen3-vl-2b.gguf"
-        ),
-        SuggestedModel(
-            title = "LFM 2.5 1.2B Instruct (Q4_0)",
-            subtitle = "Smallest download",
-            url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf",
-            mmproj = null
-        ),
-        SuggestedModel(
-            title = "LFM 2.5 VL 1.6B (Q4_0)",
-            subtitle = "Requires mmproj",
-            url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-            mmproj = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
-        ),
-        SuggestedModel(
-            title = "Llama 3.2 1B Instruct (Q4_K_M)",
-            subtitle = "Fastest load",
-            url = "https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-            mmproj = null
+    var showAdvancedLimits by remember(state) {
+        mutableStateOf(
+            state.contextLength.isNotBlank() ||
+                state.maxTokens.isNotBlank() ||
+                state.temperature.isNotBlank()
         )
-    )
+    }
+    var isModelMenuExpanded by remember { mutableStateOf(false) }
 
-    val isCustomSelected = state.useCustomModel && modelUrl.isNotBlank()
+    val selectedModel = modelChoices.firstOrNull { it.id == selectedModelId } ?: modelChoices.first()
+    val isCustomSelected = selectedModel.isCustom
+    val canSave = !isCustomSelected || customModelUrl.isNotBlank()
 
     Column(
         modifier = Modifier
@@ -78,137 +115,193 @@ fun ModelSettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(EnsuSpacing.pageHorizontal.dp)
     ) {
-        SectionHeader("Selected model")
-        val selectedLabel = if (isCustomSelected) "Custom model" else "Default model"
-        Text(text = selectedLabel, style = EnsuTypography.body)
-        if (isCustomSelected) {
-            Text(text = modelUrl, style = EnsuTypography.small, color = EnsuColor.textMuted())
-        } else {
-            Text(text = DEFAULT_MODEL_NAME, style = EnsuTypography.small, color = EnsuColor.textMuted())
-            Text(text = DEFAULT_MODEL_URL, style = EnsuTypography.mini, color = EnsuColor.textMuted())
+        SectionHeader("Select model")
+        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+        Text(
+            text = "Choose a built-in model or switch to Custom.",
+            style = EnsuTypography.small,
+            color = EnsuColor.textMuted()
+        )
+        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+        ExposedDropdownMenuBox(
+            expanded = isModelMenuExpanded,
+            onExpandedChange = { isModelMenuExpanded = !isModelMenuExpanded }
+        ) {
+            OutlinedTextField(
+                value = selectedModel.title,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Model") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isModelMenuExpanded)
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = isModelMenuExpanded,
+                onDismissRequest = { isModelMenuExpanded = false }
+            ) {
+                modelChoices.forEach { choice ->
+                    DropdownMenuItem(
+                        text = { Text(choice.title) },
+                        onClick = {
+                            selectedModelId = choice.id
+                            isModelMenuExpanded = false
+                            if (choice.isCustom) {
+                                customModelUrl = ""
+                                customMmprojUrl = ""
+                            }
+                        }
+                    )
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(EnsuSpacing.xl.dp))
-        SectionHeader("Custom Hugging Face model")
-        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+        AnimatedVisibility(isCustomSelected) {
+            Column {
+                Spacer(modifier = Modifier.height(EnsuSpacing.lg.dp))
+                Text(text = "Model .gguf URL", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                OutlinedTextField(
+                    value = customModelUrl,
+                    onValueChange = { customModelUrl = it },
+                    placeholder = { Text(text = "https://huggingface.co/...") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-        Text(text = "Direct .gguf file URL", style = EnsuTypography.small, color = EnsuColor.textMuted())
-        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-        OutlinedTextField(
-            value = modelUrl,
-            onValueChange = { modelUrl = it },
-            placeholder = { Text(text = "https://huggingface.co/...") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
-
-        Text(text = "mmproj .gguf file URL", style = EnsuTypography.small, color = EnsuColor.textMuted())
-        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-        OutlinedTextField(
-            value = mmprojUrl,
-            onValueChange = { mmprojUrl = it },
-            placeholder = { Text(text = "(optional for multimodal)") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
+                Text(text = "mmproj .gguf URL", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                OutlinedTextField(
+                    value = customMmprojUrl,
+                    onValueChange = { customMmprojUrl = it },
+                    placeholder = { Text(text = "(optional for multimodal)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.lg.dp))
-
-        Text(text = "Suggested models:", style = EnsuTypography.small, color = EnsuColor.textMuted())
-        suggestedModels.forEach { model ->
-            SuggestedModelCard(
-                title = model.title,
-                subtitle = model.subtitle,
-                onFill = {
-                    modelUrl = model.url
-                    mmprojUrl = model.mmproj.orEmpty()
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(EnsuSpacing.xl.dp))
-        SectionHeader("Custom limits (optional)")
-        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-
-        Row {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Context length", style = EnsuTypography.small, color = EnsuColor.textMuted())
-                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-                OutlinedTextField(
-                    value = contextLength,
-                    onValueChange = { contextLength = it },
-                    placeholder = { Text(text = "8192") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-            Spacer(modifier = Modifier.width(EnsuSpacing.md.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Max output", style = EnsuTypography.small, color = EnsuColor.textMuted())
-                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-                OutlinedTextField(
-                    value = maxTokens,
-                    onValueChange = { maxTokens = it },
-                    placeholder = { Text(text = "2048") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
-        Text(text = "Temperature", style = EnsuTypography.small, color = EnsuColor.textMuted())
-        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-        OutlinedTextField(
-            value = temperature,
-            onValueChange = { temperature = it },
-            placeholder = { Text(text = "0.7") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+        ExpandButton(
+            title = "Advanced limits",
+            expanded = showAdvancedLimits,
+            collapsedHint = "Context length, output, temperature",
+            onToggle = { showAdvancedLimits = !showAdvancedLimits }
         )
+        AnimatedVisibility(showAdvancedLimits) {
+            Column {
+                Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                Row {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Context length", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                        OutlinedTextField(
+                            value = contextLength,
+                            onValueChange = { contextLength = it },
+                            placeholder = { Text(text = "8192") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(EnsuSpacing.md.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Max output", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                        OutlinedTextField(
+                            value = maxTokens,
+                            onValueChange = { maxTokens = it },
+                            placeholder = { Text(text = "2048") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
+                }
 
-        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-        Text(text = "Leave blank to use model defaults", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
+                Text(text = "Temperature", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                OutlinedTextField(
+                    value = temperature,
+                    onValueChange = { temperature = it },
+                    placeholder = { Text(text = "0.7") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+
+                Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                Text(text = "Leave blank to use model defaults", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                Text(
+                    text = "Values below 0.35 or above 0.7 are clamped automatically.",
+                    style = EnsuTypography.small,
+                    color = EnsuColor.textMuted()
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.xl.dp))
-        Divider()
+        HorizontalDivider()
         Spacer(modifier = Modifier.height(EnsuSpacing.lg.dp))
 
         Button(
             onClick = {
-                onSave(
-                    state.copy(
-                        useCustomModel = true,
-                        modelUrl = modelUrl,
-                        mmprojUrl = mmprojUrl,
+                val savedState = when {
+                    selectedModel.isDefault -> state.copy(
+                        useCustomModel = false,
+                        modelUrl = "",
+                        mmprojUrl = "",
                         contextLength = contextLength,
                         maxTokens = maxTokens,
                         temperature = temperature
                     )
-                )
+                    selectedModel.isCustom -> state.copy(
+                        useCustomModel = true,
+                        modelUrl = customModelUrl,
+                        mmprojUrl = customMmprojUrl,
+                        contextLength = contextLength,
+                        maxTokens = maxTokens,
+                        temperature = temperature
+                    )
+                    else -> state.copy(
+                        useCustomModel = true,
+                        modelUrl = selectedModel.url.orEmpty(),
+                        mmprojUrl = selectedModel.mmproj.orEmpty(),
+                        contextLength = contextLength,
+                        maxTokens = maxTokens,
+                        temperature = temperature
+                    )
+                }
+                onSave(savedState)
+                Toast.makeText(context, "Model settings saved", Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.fillMaxWidth(),
+            enabled = canSave,
             colors = ButtonDefaults.buttonColors(containerColor = EnsuColor.accent())
         ) {
-            Text(text = "Use Custom Model", style = EnsuTypography.body)
+            Text(text = "Save Model Settings", style = EnsuTypography.body)
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
 
         TextButton(onClick = {
             onReset()
-            modelUrl = ""
-            mmprojUrl = ""
+            selectedModelId = DEFAULT_OPTION_ID
+            customModelUrl = ""
+            customMmprojUrl = ""
             contextLength = ""
             maxTokens = ""
             temperature = ""
+            Toast.makeText(context, "Model settings reset", Toast.LENGTH_SHORT).show()
         }) {
-            Text(text = "Use Default Model", style = EnsuTypography.body, color = EnsuColor.action())
+            Text(text = "Reset to defaults", style = EnsuTypography.body, color = EnsuColor.action())
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
         Text(
-            text = "Changes require redownloading the model.",
+            text = "Changes apply the next time the model loads.",
             style = EnsuTypography.small,
             color = EnsuColor.textMuted()
         )
@@ -217,32 +310,43 @@ fun ModelSettingsScreen(
 
 @Composable
 private fun SectionHeader(title: String) {
-    Text(text = title, style = EnsuTypography.h3Bold)
+    Text(text = title, style = EnsuTypography.body)
 }
 
 @Composable
-private fun SuggestedModelCard(title: String, subtitle: String, onFill: () -> Unit) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = EnsuSpacing.xs.dp)
-    ) {
-        Column(modifier = Modifier.padding(EnsuSpacing.md.dp)) {
-            Text(text = title, style = EnsuTypography.body)
-            Text(text = subtitle, style = EnsuTypography.small, color = EnsuColor.textMuted())
-            TextButton(onClick = onFill) {
-                Text(text = "Fill", style = EnsuTypography.small, color = EnsuColor.action())
+private fun ExpandButton(
+    title: String,
+    expanded: Boolean,
+    collapsedHint: String,
+    onToggle: () -> Unit
+) {
+    TextButton(onClick = onToggle, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(text = title, style = EnsuTypography.body, color = EnsuColor.action())
+            if (!expanded) {
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                Text(text = collapsedHint, style = EnsuTypography.small, color = EnsuColor.textMuted())
             }
         }
     }
 }
 
-private data class SuggestedModel(
+private data class ModelChoice(
+    val id: String,
     val title: String,
-    val subtitle: String,
-    val url: String,
-    val mmproj: String?
+    val url: String? = null,
+    val mmproj: String? = null,
+    val isDefault: Boolean = false,
+    val isCustom: Boolean = false
 )
 
-private const val DEFAULT_MODEL_NAME = "LFM 2.5 VL 1.6B (Q4_0)"
-private const val DEFAULT_MODEL_URL =
-    "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
+private fun initialSelectionId(
+    state: ModelSettingsState,
+    choices: List<ModelChoice>
+): String {
+    if (!state.useCustomModel || state.modelUrl.isBlank()) return DEFAULT_OPTION_ID
+    return choices.firstOrNull { !it.isCustom && it.url == state.modelUrl }?.id ?: CUSTOM_OPTION_ID
+}
+
+private const val DEFAULT_OPTION_ID = "default"
+private const val CUSTOM_OPTION_ID = "custom"

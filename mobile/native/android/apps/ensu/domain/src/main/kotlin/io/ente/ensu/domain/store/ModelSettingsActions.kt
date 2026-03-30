@@ -3,28 +3,51 @@ package io.ente.ensu.domain.store
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.logging.LogRepository
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogLevel
+import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.state.ModelSettingsState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
 
 internal class ModelSettingsActions(
     private val state: MutableStateFlow<AppState>,
+    private val sessionPreferences: SessionPreferences,
     private val llmProvider: LlmProvider,
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
+    private val ensuDefaults: EnsuDefaults
 ) {
     private var scope: CoroutineScope? = null
     private var modelDownloadJob: Job? = null
+    private var downloadProgressMonitorJob: Job? = null
 
     fun setScope(scope: CoroutineScope) {
         this.scope = scope
     }
 
     fun updateModelSettings(settings: ModelSettingsState) {
+        val oldTarget = resolveTarget(state.value.modelSettings)
+        val newTarget = resolveTarget(settings)
+        state.update { appState ->
+            appState.copy(modelSettings = settings)
+        }
+        if (downloadIdentityChanged(oldTarget, newTarget)) {
+            modelDownloadJob?.cancel()
+            modelDownloadJob = null
+            downloadProgressMonitorJob?.cancel()
+            downloadProgressMonitorJob = null
+            llmProvider.cancelDownload()
+        }
+        refreshModelDownloadInfo()
+    }
+
+    fun hydratePersistedModelSettings(settings: ModelSettingsState) {
         state.update { appState ->
             appState.copy(modelSettings = settings)
         }
@@ -41,23 +64,65 @@ internal class ModelSettingsActions(
     fun refreshModelDownloadInfo() {
         val target = resolveTarget(state.value.modelSettings)
         val isDownloaded = llmProvider.isModelDownloaded(target)
+        if (isDownloaded) {
+            downloadProgressMonitorJob?.cancel()
+            persistModelDownloadRequested(false)
+        }
         state.update { appState ->
             appState.copy(
                 chat = appState.chat.copy(
                     isModelDownloaded = isDownloaded,
+                    isDownloading = if (isDownloaded) false else appState.chat.isDownloading,
+                    downloadPercent = if (isDownloaded) null else appState.chat.downloadPercent,
+                    downloadStatus = if (isDownloaded) null else appState.chat.downloadStatus,
                     modelDownloadSizeBytes = if (isDownloaded) null else appState.chat.modelDownloadSizeBytes,
                     hasRequestedModelDownload = appState.chat.hasRequestedModelDownload || isDownloaded
                 )
             )
         }
 
-        if (!isDownloaded) {
-            val scope = scope ?: return
-            scope.launch {
-                val size = llmProvider.estimateModelDownloadSize(target)
+        if (isDownloaded) return
+
+        val scope = scope ?: return
+        scope.launch {
+            val progress = llmProvider.currentDownloadProgress(target)
+            if (progress != null) {
+                val isFailure = progress.percent < 0
+                persistModelDownloadRequested(!isFailure)
                 state.update { appState ->
-                    appState.copy(chat = appState.chat.copy(modelDownloadSizeBytes = size))
+                    appState.copy(
+                        chat = appState.chat.copy(
+                            isDownloading = !isFailure,
+                            downloadPercent = progress.percent.takeIf { it >= 0 },
+                            downloadStatus = progress.status,
+                            hasRequestedModelDownload = !isFailure
+                        )
+                    )
                 }
+                if (!isFailure) {
+                    startDownloadProgressMonitor(target)
+                }
+            } else if (!llmProvider.isManualDownloadActive) {
+                persistModelDownloadRequested(false)
+                state.update { appState ->
+                    appState.copy(
+                        chat = appState.chat.copy(
+                            isDownloading = false,
+                            downloadPercent = null,
+                            downloadStatus = null,
+                            hasRequestedModelDownload = false
+                        )
+                    )
+                }
+            }
+
+            val size = llmProvider.estimateModelDownloadSize(target)
+            state.update { appState ->
+                appState.copy(
+                    chat = appState.chat.copy(
+                        modelDownloadSizeBytes = size ?: appState.chat.modelDownloadSizeBytes
+                    )
+                )
             }
         }
     }
@@ -85,6 +150,7 @@ internal class ModelSettingsActions(
 
         modelDownloadJob?.cancel()
         if (!isDownloaded) {
+            persistModelDownloadRequested(true)
             logRepository.log(
                 LogLevel.Info,
                 "Model download started",
@@ -105,44 +171,67 @@ internal class ModelSettingsActions(
 
         modelDownloadJob = scope.launch {
             var loggedComplete = false
+            startDownloadProgressMonitor(target)
+            val progressTracker = DownloadProgressTracker(
+                initialPercent = if (isDownloaded) null else 0,
+                initialStatus = if (isDownloaded) null else "Starting download..."
+            )
             try {
-                llmProvider.ensureModelReady(target) { progress ->
-                    val downloading = (progress.percent in 0..99) || progress.status.contains("Loading", ignoreCase = true)
-                    val finished = progress.status.contains("Ready", ignoreCase = true)
-                    if (!isDownloaded && finished && !loggedComplete) {
-                        loggedComplete = true
-                        logRepository.log(
-                            LogLevel.Info,
-                            "Model download complete",
-                            details = "model=${target.id}",
-                            tag = "Model"
-                        )
-                    }
-                    state.update { appState ->
-                        appState.copy(
-                            chat = appState.chat.copy(
-                                isDownloading = downloading && !finished,
-                                downloadPercent = progress.percent.takeIf { it >= 0 },
-                                downloadStatus = progress.status,
-                                isModelDownloaded = if (finished) true else appState.chat.isModelDownloaded,
-                                modelDownloadSizeBytes = if (finished) null else appState.chat.modelDownloadSizeBytes
-                            )
-                        )
+                var retryCount = 0
+                while (true) {
+                    try {
+                        llmProvider.ensureModelReady(target) { progress ->
+                            val resolvedProgress = progressTracker.resolve(progress)
+                            if (!isDownloaded && resolvedProgress.isFinished && !loggedComplete) {
+                                loggedComplete = true
+                                logRepository.log(
+                                    LogLevel.Info,
+                                    "Model download complete",
+                                    details = "model=${target.id}",
+                                    tag = "Model"
+                                )
+                            }
+                            state.update { appState ->
+                                appState.copy(
+                                    chat = appState.chat.copy(
+                                        isDownloading = resolvedProgress.isDownloading,
+                                        downloadPercent = resolvedProgress.percent,
+                                        downloadStatus = resolvedProgress.status,
+                                        isModelDownloaded = if (resolvedProgress.isFinished) true else appState.chat.isModelDownloaded,
+                                        modelDownloadSizeBytes = if (resolvedProgress.isFinished) null else appState.chat.modelDownloadSizeBytes
+                                    )
+                                )
+                            }
+                        }
+                        break
+                    } catch (err: Throwable) {
+                        if (!shouldRetryDownload(err, retryCount)) {
+                            throw err
+                        }
+
+                        retryCount += 1
+                        delay(retryDelayMs(retryCount))
                     }
                 }
             } catch (err: Throwable) {
                 val cancelled = err is kotlinx.coroutines.CancellationException ||
                     err.message?.contains("cancel", ignoreCase = true) == true
+                val failureMessage = if (cancelled) {
+                    "Download cancelled"
+                } else {
+                    userFacingDownloadError(err, isDownloaded)
+                }
                 state.update { appState ->
                     appState.copy(
                         chat = appState.chat.copy(
                             isDownloading = false,
                             downloadPercent = null,
-                            downloadStatus = if (cancelled) "Download cancelled" else "Download failed",
-                            hasRequestedModelDownload = if (cancelled) false else appState.chat.hasRequestedModelDownload
+                            downloadStatus = failureMessage,
+                            hasRequestedModelDownload = false
                         )
                     )
                 }
+                persistModelDownloadRequested(false)
                 if (cancelled) {
                     if (!isDownloaded) {
                         logRepository.log(LogLevel.Info, "Model download cancelled", tag = "Model")
@@ -166,7 +255,9 @@ internal class ModelSettingsActions(
     fun cancelModelDownload() {
         modelDownloadJob?.cancel()
         modelDownloadJob = null
+        downloadProgressMonitorJob?.cancel()
         llmProvider.cancelDownload()
+        persistModelDownloadRequested(false)
         state.update { appState ->
             appState.copy(
                 chat = appState.chat.copy(
@@ -180,13 +271,72 @@ internal class ModelSettingsActions(
         refreshModelDownloadInfo()
     }
 
+    private fun startDownloadProgressMonitor(target: LlmModelTarget) {
+        val scope = scope ?: return
+        downloadProgressMonitorJob?.cancel()
+        downloadProgressMonitorJob = scope.launch {
+            var emptyPollCount = 0
+            while (isActive) {
+                val progress = llmProvider.currentDownloadProgress(target)
+                if (progress == null) {
+                    emptyPollCount += 1
+                    if (emptyPollCount >= 6) {
+                        break
+                    }
+                    delay(500)
+                    continue
+                }
+                emptyPollCount = 0
+                val isFailure = progress.percent < 0
+                if (isFailure) {
+                    persistModelDownloadRequested(false)
+                }
+                state.update { appState ->
+                    appState.copy(
+                        chat = appState.chat.copy(
+                            isDownloading = !isFailure,
+                            downloadPercent = progress.percent.takeIf { it >= 0 },
+                            downloadStatus = progress.status,
+                            hasRequestedModelDownload = if (isFailure) false else appState.chat.hasRequestedModelDownload
+                        )
+                    )
+                }
+                if (isFailure) {
+                    break
+                }
+                delay(500)
+            }
+            refreshModelDownloadInfo()
+        }
+    }
+
+    private fun persistModelDownloadRequested(requested: Boolean) {
+        scope?.launch {
+            runCatching {
+                sessionPreferences.setModelDownloadRequested(requested)
+            }.onFailure { error ->
+                logRepository.log(
+                    LogLevel.Error,
+                    "Failed to persist model download state",
+                    details = error.message,
+                    tag = "Model",
+                    throwable = error
+                )
+            }
+        }
+    }
+
     fun resolveTarget(settings: ModelSettingsState): LlmModelTarget {
         val useCustom = settings.useCustomModel && settings.modelUrl.isNotBlank()
-        val url = if (useCustom) settings.modelUrl else DEFAULT_MODEL_URL
-        val mmproj = if (useCustom) settings.mmprojUrl.takeIf { it.isNotBlank() } else DEFAULT_MMPROJ_URL
+        val url = if (useCustom) settings.modelUrl else ensuDefaults.mobileDefaultModel.url
+        val mmproj = if (useCustom) {
+            settings.mmprojUrl.takeIf { it.isNotBlank() }
+        } else {
+            ensuDefaults.mobileDefaultModel.mmprojUrl
+        }
         val contextLength = settings.contextLength.toIntOrNull()
-        val maxTokens = settings.maxTokens.toIntOrNull()
-        val id = if (useCustom) "custom:${url.hashCode()}" else "default"
+        val maxTokens = settings.maxTokens.toIntOrNull()?.takeIf { it > 0 }
+        val id = if (useCustom) "custom:${url.hashCode()}" else "default:${url.hashCode()}"
 
         return LlmModelTarget(
             id = id,
@@ -203,11 +353,62 @@ internal class ModelSettingsActions(
         return resolved.coerceIn(0.35f, 0.7f)
     }
 
+    private fun downloadIdentityChanged(
+        oldTarget: LlmModelTarget,
+        newTarget: LlmModelTarget
+    ): Boolean {
+        return oldTarget.id != newTarget.id ||
+            oldTarget.url != newTarget.url ||
+            oldTarget.mmprojUrl != newTarget.mmprojUrl
+    }
+
     companion object {
-        private const val DEFAULT_MODEL_URL =
-            "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
-        private const val DEFAULT_MMPROJ_URL =
-            "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
+        private const val MAX_DOWNLOAD_RETRIES = 5
+        private const val RETRY_DELAY_BASE_MS = 1500L
+        private const val RETRY_DELAY_MAX_MS = 12000L
         private const val DEFAULT_TEMPERATURE = 0.5f
+    }
+
+    private fun shouldRetryDownload(err: Throwable, retryCount: Int): Boolean {
+        if (retryCount >= MAX_DOWNLOAD_RETRIES) return false
+        if (err is kotlinx.coroutines.CancellationException) return false
+        if (isOutOfStorageError(err)) return false
+        val message = err.message.orEmpty()
+        if (message.contains("not GGUF", ignoreCase = true)) return false
+        if (message.contains("HTTP 401", ignoreCase = true) ||
+            message.contains("HTTP 403", ignoreCase = true) ||
+            message.contains("HTTP 404", ignoreCase = true)
+        ) {
+            return false
+        }
+        return true
+    }
+
+    private fun retryDelayMs(retryCount: Int): Long {
+        val multiplier = 1L shl (retryCount - 1).coerceAtLeast(0)
+        return (RETRY_DELAY_BASE_MS * multiplier).coerceAtMost(RETRY_DELAY_MAX_MS)
+    }
+
+    private fun userFacingDownloadError(err: Throwable, wasAlreadyDownloaded: Boolean): String {
+        if (isOutOfStorageError(err)) {
+            return "Not enough storage space to download the model. Please free up space and try again."
+        }
+        return if (wasAlreadyDownloaded) "Model load failed" else "Download failed. Please try again."
+    }
+
+    private fun isOutOfStorageError(err: Throwable): Boolean {
+        var current: Throwable? = err
+        while (current != null) {
+            val message = current.message.orEmpty()
+            if (message.contains("ENOSPC", ignoreCase = true) ||
+                message.contains("No space left on device", ignoreCase = true) ||
+                message.contains("disk is full", ignoreCase = true) ||
+                message.contains("not enough storage", ignoreCase = true)
+            ) {
+                return true
+            }
+            current = current.cause
+        }
+        return false
     }
 }

@@ -12,7 +12,7 @@ const kDefaultProductionEndpoint = 'https://api.ente.io';
 const String githubDiscussionsUrl =
     "https://github.com/ente-io/ente/discussions";
 
-const supportEmail = 'support@ente.io';
+const supportEmail = 'support@ente.com';
 
 final tempDirCleanUpInterval = kDebugMode
     ? const Duration(hours: 1).inMicroseconds

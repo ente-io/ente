@@ -41,6 +41,16 @@ enum ClipMemoryType {
   riverCruises,
   playfulKids,
   coastalCliffs,
+  candidLaughter,
+  groupSelfies,
+  birthdayJoy,
+  weddingMoments,
+  goldenHourPortraits,
+  concertNights,
+  poolDays,
+  picnicDays,
+  campingMoments,
+  babySmiles,
 }
 
 ClipMemoryType clipMemoryTypeFromString(String type) {
@@ -121,6 +131,26 @@ ClipMemoryType clipMemoryTypeFromString(String type) {
       return ClipMemoryType.playfulKids;
     case "coastalCliffs":
       return ClipMemoryType.coastalCliffs;
+    case "candidLaughter":
+      return ClipMemoryType.candidLaughter;
+    case "groupSelfies":
+      return ClipMemoryType.groupSelfies;
+    case "birthdayJoy":
+      return ClipMemoryType.birthdayJoy;
+    case "weddingMoments":
+      return ClipMemoryType.weddingMoments;
+    case "goldenHourPortraits":
+      return ClipMemoryType.goldenHourPortraits;
+    case "concertNights":
+      return ClipMemoryType.concertNights;
+    case "poolDays":
+      return ClipMemoryType.poolDays;
+    case "picnicDays":
+      return ClipMemoryType.picnicDays;
+    case "campingMoments":
+      return ClipMemoryType.campingMoments;
+    case "babySmiles":
+      return ClipMemoryType.babySmiles;
     default:
       throw ArgumentError("Invalid people memory type: $type");
   }
@@ -204,6 +234,26 @@ String clipQuery(ClipMemoryType clipMemoryType) {
       return "Photo capturing joyful kids playing and laughing";
     case ClipMemoryType.coastalCliffs:
       return "Photo of dramatic coastal cliffs meeting the sea";
+    case ClipMemoryType.candidLaughter:
+      return "Photo capturing candid laughter, joy, and shared smiles";
+    case ClipMemoryType.groupSelfies:
+      return "Photo of friends or family gathered for a fun group selfie";
+    case ClipMemoryType.birthdayJoy:
+      return "Photo of a birthday celebration with cake, candles, and happy faces";
+    case ClipMemoryType.weddingMoments:
+      return "Photo capturing a wedding moment full of love, celebration, and togetherness";
+    case ClipMemoryType.goldenHourPortraits:
+      return "Photo of a beautiful portrait taken in warm golden hour light";
+    case ClipMemoryType.concertNights:
+      return "Photo of a live concert, music performance, or crowd under stage lights";
+    case ClipMemoryType.poolDays:
+      return "Photo of a fun summer day at the pool with splashes and sunshine";
+    case ClipMemoryType.picnicDays:
+      return "Photo of a relaxed picnic outdoors with food, blankets, and loved ones";
+    case ClipMemoryType.campingMoments:
+      return "Photo of a camping trip with tents, campfires, or cozy outdoor moments";
+    case ClipMemoryType.babySmiles:
+      return "Photo capturing a baby smiling, laughing, or sharing a tender family moment";
   }
 }
 
@@ -285,6 +335,26 @@ String clipTitle(AppLocalizations locals, ClipMemoryType clipMemoryType) {
       return locals.playfulKids;
     case ClipMemoryType.coastalCliffs:
       return locals.coastalCliffs;
+    case ClipMemoryType.candidLaughter:
+      return locals.candidLaughter;
+    case ClipMemoryType.groupSelfies:
+      return locals.groupSelfies;
+    case ClipMemoryType.birthdayJoy:
+      return locals.birthdayJoy;
+    case ClipMemoryType.weddingMoments:
+      return locals.weddingMoments;
+    case ClipMemoryType.goldenHourPortraits:
+      return locals.goldenHourPortraits;
+    case ClipMemoryType.concertNights:
+      return locals.concertNights;
+    case ClipMemoryType.poolDays:
+      return locals.poolDays;
+    case ClipMemoryType.picnicDays:
+      return locals.picnicDays;
+    case ClipMemoryType.campingMoments:
+      return locals.campingMoments;
+    case ClipMemoryType.babySmiles:
+      return locals.babySmiles;
   }
 }
 

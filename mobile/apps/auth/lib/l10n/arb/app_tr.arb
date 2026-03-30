@@ -13,7 +13,7 @@
   "signUp": "Kaydol",
   "onBoardingGetStarted": "Başlayın",
   "setupFirstAccount": "İlk hesabını ayarla",
-  "allTabEmptyHint": "Burada henüz bir şey yok. Kod eklemek için + simgesine dokun ya da bir kodu geri yüklemek için Çöp Kutusu’nu aç.",
+  "allTabEmptyHint": "Burada henüz bir şey yok. Kod eklemek için + simgesine dokun ya da bir kodu geri yüklemek için Çöp Kutusu’nu açın.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
   },
@@ -42,7 +42,7 @@
       }
     }
   },
-  "codeAccountHint": "Hesap (ornek@domain.com)",
+  "codeAccountHint": "Hesap (siz@domain.com)",
   "codeTagHint": "Etiket",
   "accountKeyType": "Anahtar türü",
   "sessionExpired": "Oturum süresi doldu",
@@ -58,7 +58,7 @@
   "deleteCodeTitle": "Kodu silmek istiyor musunuz?",
   "deleteCodeMessage": "Bu kodu silmek istediğinize emin misiniz? Bu geri alınamaz bir işlemdir.",
   "trashCode": "Kod çöpe atılsın mı?",
-  "trashCodeMessage": "{account} için kodu çöpe atmak istediğinize emin misiniz?",
+  "trashCodeMessage": "{account} hesabına ait bu kodu silmek istediğinize emin misiniz?",
   "trash": "Çöp",
   "viewLogsAction": "Kayıtları görüntüle",
   "sendLogsDescription": "Kayıtlarınız hatanızı çözmemize yardımcı olacaktır. Hassas bilginin kaydedilmediğine dikkat etsek de bu günlükleri paylaşmadan önce kontrol etmenizi isteriz.",
@@ -121,7 +121,6 @@
   "importAegisGuide": "Aegis'in Ayarlarında \"Kasayı dışa aktar\" seçeneğini kullanın.\n\nKasanız şifrelenmişse, kasanın şifresini çözmek için kasa parolasını girmeniz gerekecektir.",
   "import2FasGuide": "2FAS içindeki \"Ayarlar -> Yedekle-Dışa Aktar\" seçeneğini seçin.\n\nEğer yedeğiniz şifreli ise, şifrenin çözülmesi için şifreleme parolasını girmeniz gerekmekte",
   "importLastpassGuide": "Lastpass Kimlik Doğrulayıcı Ayarları içerisindeki \"Hesapları aktar\" seçeneği kullanın ve \"Hesapları dosyaya dışarı aktar\"a basın. İndirilen JSON'u içeri aktarın.",
-  "importProtonAuthGuide": "Kodlarınızı dışa aktarmak için Proton Doğrulama Ayarlarındaki \"Dışa Aktar\" seçeneğini kullanın.",
   "exportCodes": "Kodu dışa aktar",
   "importLabel": "İçe aktar",
   "importInstruction": "Lütfen aşağıdaki şekilde kodlarınızın listesini içeren dosyayı seçiniz",
@@ -331,7 +330,6 @@
     }
   },
   "sorry": "Üzgünüz",
-  "importFailureDesc": "Seçilen dosya ayrıştırılamadı.\nYardıma ihtiyacınız varsa lütfen support@ente.io adresine yazın!",
   "pendingSyncs": "Uyarı",
   "pendingSyncsWarningBody": "Kodlarınızdan bazıları yedeklenmemiş.\n\nLütfen oturumu kapatmadan önce bu kodların yedeğini aldığınızdan emin olun.",
   "checkInboxAndSpamFolder": "Doğrulamayı tamamlamak için lütfen gelen kutunuzu (ve spam kutunuzu) kontrol edin",
@@ -344,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -525,6 +523,7 @@
   "dropReviewAndroid": "Play Store'da bir inceleme bırakın",
   "supportEnte": "<bold-Green>Ente</bold-Green>'yi destekle",
   "giveUsAStarOnGithub": "Github'da bize bir yıldız verin",
+  "free10GB": "<bold-green>Ente</bold-green> Photos'ta 10 GB ücretsiz",
   "loginWithAuthAccount": "Kimlik Doğrulama hesabınızla giriş yapın",
   "freeStorageOffer": "<bold-green>ente</bold-green> fotoğraflarında %10 indirim",
   "freeStorageOfferDescription": "İlk yılda %10 indirim almak için \"AUTH\" kodunu kullanın",
@@ -624,5 +623,6 @@
   "appIcon": "Uygulama simgesi",
   "importAndOTPGuide": "Ayarlar’daki \"Yedekle\" seçeneğini kullanarak yedeğini andOTP’den dışa aktar.\n\nYedeğin şifreliyse, şifresini çözmek için yedekleme parolasını girmen gerekir.",
   "enterPasswordToDecryptAndOTP": "andOTP yedeğinin şifresini çözmek için parolanı gir",
-  "failedToDecryptAndOTPBackup": "andOTP yedeğinin kilidi açılamadı"
+  "failedToDecryptAndOTPBackup": "andOTP yedeğinin kilidi açılamadı",
+  "notSupportedForHOTP": "HOTP desteklenmiyor"
 }

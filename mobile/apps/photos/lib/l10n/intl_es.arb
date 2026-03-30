@@ -3,8 +3,9 @@
   "enterYourEmailAddress": "Escribe tu correo electrónico",
   "enterYourNewEmailAddress": "Introduce tu nueva dirección de correo electrónico",
   "accountWelcomeBack": "¡Bienvenido de nuevo!",
-  "emailAlreadyRegistered": "Correo electrónico ya registrado.",
-  "emailNotRegistered": "Correo electrónico no registrado.",
+  "emailAlreadyRegistered": "El correo electrónico ya está registrado.",
+  "emailNotRegistered": "Este correo no ha sido registrado.",
+  "accountSetupIncompleteCreateAccount": "Configuración de la cuenta incompleta. Crea una cuenta para finalizar la configuración.",
   "email": "Correo electrónico",
   "cancel": "Cancelar",
   "verify": "Verificar",
@@ -28,10 +29,11 @@
   "deleteReason4": "Mi motivo no se encuentra en la lista",
   "sendEmail": "Enviar correo electrónico",
   "deleteRequestSLAText": "Tu solicitud será procesada dentro de las siguientes 72 horas.",
-  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.io</warning> desde la dirección de correo electrónico que usó para registrarse.",
+  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.com</warning> desde la dirección de correo electrónico que usó para registrarse.",
   "entePhotosPerm": "Ente <i>necesita permiso para</i> preservar tus fotos",
   "ok": "Aceptar",
   "createAccount": "Crear cuenta",
+  "createAccountTitle": "Crear una cuenta",
   "createNewAccount": "Crear nueva cuenta",
   "password": "Contraseña",
   "confirmPassword": "Confirmar contraseña",
@@ -76,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -87,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -162,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -242,6 +244,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Diseño del álbum",
+  "layoutMasonry": "Masonería",
   "layoutGrouped": "Agrupado",
   "layoutContinuous": "Continuo",
   "layoutTrip": "Viaje",
@@ -311,18 +314,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificación",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} no tiene una cuente en Ente.\n\nEnvíale una invitación para compartir fotos.",
-  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.io: {verificationID}?",
+  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.com: {verificationID}?",
   "somethingWentWrong": "Algo salió mal",
   "sendInvite": "Enviar invitación",
-  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y vídeos en calidad original.\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y vídeos en calidad original.\n\nhttps://ente.com",
   "done": "Hecho",
   "applyCodeTitle": "Usar código",
   "enterCodeDescription": "Introduce el código proporcionado por tu amigo para reclamar almacenamiento gratuito para ambos",
@@ -350,7 +353,7 @@
   "theyAlsoGetXGb": "También obtienen {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB para ellos + {storageAmountInGB} GB para ti cuando actualicen.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vez que alguien se registra en un plan de pago y aplica tu código",
-  "shareTextReferralCode": "Ente Fotos es un lugar seguro y privado para tus fotos\n* Descarga Ente Fotos de https://ente.io/app\n* Crea una cuenta\n* Aplica el código de referido {referralCode} en Ajustes → Referido\n* Obtén {referralStorageInGB}GB gratis cuando actualice a un plan de pago",
+  "shareTextReferralCode": "Ente Fotos es un lugar seguro y privado para tus fotos\n* Descarga Ente Fotos de https://ente.com/app\n* Crea una cuenta\n* Aplica el código de referido {referralCode} en Ajustes → Referido\n* Obtén {referralStorageInGB}GB gratis cuando actualice a un plan de pago",
   "claimFreeStorage": "Obtén almacenamiento gratuito",
   "inviteYourFriends": "Invita a tus amigos",
   "earnFreeStorage": "Gana almacenamiento gratuito",
@@ -521,7 +524,6 @@
   "discover_sunset": "Atardecer",
   "discover_hills": "Colinas",
   "discover_greenery": "Verdor",
-  "mlIndexingDescription": "Por favor ten en cuenta que el aprendizaje automático dará como resultado un mayor consumo de ancho de banda y de batería hasta que todos los elementos estén indexados. Considera usar la aplicación de escritorio para una indexación más rápida. Todos los resultados se sincronizarán automáticamente.",
   "loadingModel": "Descargando modelos...",
   "waitingForWifi": "Esperando WiFi...",
   "status": "Estado",
@@ -536,7 +538,7 @@
   "unselectAll": "Desmarcar todos",
   "selectAll": "Seleccionar todos",
   "skip": "Omitir",
-  "chooseBackupModeHeader": "<i>Elige como </i>Ente realiza una copia de tus fotos",
+  "chooseBackupModeHeader": "<i>Elige cómo </i>Ente realiza una copia de tus fotos",
   "startWithLatestPhotos": "Iniciar con las últimas fotos",
   "backingUpLastSevenDaysPhotos": "Respaldar fotos de los últimos 7 días",
   "backupOnlyNewPhotos": "Copia de seguridad de solo fotos nuevas",
@@ -666,8 +668,7 @@
   "familyPlans": "Planes familiares",
   "referrals": "Referidos",
   "notifications": "Notificaciones",
-  "sharedPhotoNotifications": "Nuevas fotos compartidas",
-  "sharedPhotoNotificationsExplanation": "Recibir notificaciones cuando alguien agrega una foto a un álbum compartido contigo",
+  "sharedPhotoNotifications": "Nuevas fotos y álbumes compartidos",
   "socialNotifications": "Me gusta y comentarios",
   "socialNotificationsExplanation": "Recibe notificaciones de likes en tus fotos y comentarios en álbumes de los que formas parte",
   "advanced": "Avanzado",
@@ -698,13 +699,21 @@
   "reportBug": "Reportar error",
   "suggestFeatures": "Sugerir una característica",
   "support": "Soporte",
+  "helpAndSupport": "Ayuda y soporte",
+  "message": "Mensaje",
+  "deviceInfo": "Información de dispositivo",
+  "logs": "Registros",
+  "export": "Exportar",
+  "logsNotCopiedDownloadNote": "Los registros no se copian. Exporta los registros y adjunta a tu correo electrónico.",
+  "copyAllToClipboard": "Copiar todo al portapapeles",
+  "copied": "Copiado",
   "appearance": "Apariencia",
   "theme": "Tema",
   "lightTheme": "Claro",
   "darkTheme": "Oscuro",
   "systemTheme": "Sistema",
   "freeTrial": "Prueba gratuita",
-  "selectYourPlan": "Elegir tu suscripción",
+  "chooseYourPlan": "Elige tu plan",
   "enteSubscriptionPitch": "Ente conserva tus recuerdos, así que siempre están disponibles para ti, incluso si pierdes tu dispositivo.",
   "enteSubscriptionShareWithFamily": "Tu familia también puede ser agregada a tu plan.",
   "currentUsageIs": "El uso actual es de ",
@@ -725,7 +734,7 @@
   "subscription": "Suscripción",
   "paymentDetails": "Detalles de pago",
   "manageFamily": "Administrar familia",
-  "contactToManageSubscription": "Por favor, contáctanos en support@ente.io para gestionar tu suscripción a {provider}.",
+  "contactToManageSubscription": "Por favor, contáctanos en support@ente.com para gestionar tu suscripción a {provider}.",
   "renewSubscription": "Renovar suscripción",
   "cancelSubscription": "Cancelar suscripción",
   "areYouSureYouWantToRenew": "¿Estás seguro de que quieres renovar?",
@@ -773,8 +782,9 @@
   "appstoreSubscription": "Suscripción en la AppStore",
   "subAlreadyLinkedErrMessage": "Tu {id} ya está vinculada a otra cuenta de Ente.\nSi deseas utilizar tu {id} con esta cuenta, ponte en contacto con nuestro servicio de asistencia''",
   "visitWebToManage": "Por favor, visita web.ente.io para administrar tu suscripción",
+  "managePaymentMethod": "Gestionar métodos de pago",
   "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.io y estaremos encantados de ayudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.com y estaremos encantados de ayudar!",
   "paymentFailed": "Pago fallido",
   "paymentFailedTalkToProvider": "Por favor, habla con el soporte de {providerName} si se te cobró",
   "@paymentFailedTalkToProvider": {
@@ -825,7 +835,6 @@
   "grantFullAccessPrompt": "Por favor, permite el acceso a todas las fotos en Ajustes",
   "allowPermTitle": "Permitir el acceso a las fotos",
   "allowPermBody": "Por favor, permite el acceso a tus fotos desde Ajustes para que Ente pueda mostrar y hacer una copia de seguridad de tu biblioteca.",
-  "openSettings": "Abrir Ajustes",
   "selectMorePhotos": "Seleccionar más fotos",
   "existingUser": "Usuario existente",
   "newToEnte": "Nuevo en Ente",
@@ -906,6 +915,8 @@
   "favorite": "Favorito",
   "removeFromFavorite": "Remover desde favoritos",
   "shareLink": "Compartir enlace",
+  "openLink": "Abrir para ver",
+  "pay": "Pagar",
   "createCollage": "Crear un collage",
   "saveCollage": "Guardar collage",
   "collageSaved": "Collage guardado en la galería",
@@ -1249,7 +1260,6 @@
   "fileTypesAndNames": "Tipos de archivo y nombres",
   "location": "Ubicación",
   "moments": "Momentos",
-  "searchFaceEmptySection": "Las personas se mostrarán aquí una vez que se haya hecho la indexación",
   "searchDatesEmptySection": "Buscar por fecha, mes o año",
   "searchLocationEmptySection": "Agrupar las fotos que se tomaron cerca de la localización de una foto",
   "searchPeopleEmptySection": "Invita a gente y verás todas las fotos compartidas aquí",
@@ -1679,7 +1689,6 @@
   },
   "extraPhotosFound": "Fotos adicionales encontradas",
   "configuration": "Configuración",
-  "localIndexing": "Indexado local",
   "processed": "Procesado",
   "resetPerson": "Eliminar",
   "areYouSureYouWantToResetThisPerson": "¿Seguro que desea eliminar esta persona?",
@@ -2143,9 +2152,6 @@
   "curatedMemories": "Memorias revisadas",
   "widgets": "Widgets",
   "memories": "Recuerdos",
-  "peopleWidgetDesc": "Selecciona las personas que deseas ver en tu pantalla de inicio.",
-  "albumsWidgetDesc": "Seleccione los álbumes que desea ver en su pantalla de inicio.",
-  "memoriesWidgetDesc": "Seleccione el tipo de recuerdos que desea ver en su pantalla de inicio.",
   "smartMemories": "Recuerdos inteligentes",
   "pastYearsMemories": "Recuerdos de los últimos años",
   "deleteMultipleAlbumDialog": "¿Quiere borrar también las fotos (y vídeos) presentes en estos {count} álbumes de <bold>todos</bold> los otros álbumes de los que forman parte?",
@@ -2159,9 +2165,6 @@
   "sorryWeHadToPauseYourBackups": "Lo sentimos, tuvimos que pausar tus copias de seguridad",
   "clickToInstallOurBestVersionYet": "Haz clic para instalar nuestra mejor versión hasta la fecha",
   "onThisDayNotificationExplanation": "Recibe recordatorios sobre recuerdos de este día en años anteriores.",
-  "addMemoriesWidgetPrompt": "Añade un widget de recuerdos a tu pantalla de inicio y vuelve aquí para personalizarlo.",
-  "addAlbumWidgetPrompt": "Añade un widget de álbum a tu pantalla de inicio y vuelve aquí para personalizarlo.",
-  "addPeopleWidgetPrompt": "Añade un widget de personas a tu pantalla de inicio y vuelve aquí para personalizarlo.",
   "birthdayNotifications": "Notificaciones de cumpleaños",
   "receiveRemindersOnBirthdays": "Recibe recordatorios cuando es el cumpleaños de alguien. Pulsar en la notificación te llevará a las fotos de la persona que cumple años.",
   "happyBirthday": "¡Feliz cumpleaños! 🥳",
@@ -2191,7 +2194,6 @@
   "same": "Igual",
   "different": "Diferente",
   "sameperson": "¿La misma persona?",
-  "indexingPausedStatusDescription": "La indexación está pausada. Se reanudará automáticamente cuando el dispositivo esté listo. El dispositivo se considera listo cuando su nivel de batería, la salud de la batería y temperatura están en un rango saludable.",
   "thisWeek": "Esta semana",
   "lastWeek": "Semana pasada",
   "thisMonth": "Este mes",
@@ -2566,38 +2568,6 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "likedYourPhoto": "Le ha gustado tu foto",
-  "likedAPhoto": "Le gusto una foto",
-  "likedYourVideo": "Le ha gustado tu video",
-  "commentedOnYourPhoto": "Comentó en tu foto",
-  "commentedOnAPhoto": "Comentó en una foto",
-  "commentedOnYourVideo": "Comentó en tu vídeo",
-  "commentedOnAVideo": "Comentó en un video",
-  "repliedToYourComment": "Respondido a tu comentario",
-  "repliedToAComment": "Respondió a un comentario",
-  "likedYourComment": "Le gusto tu comentario",
-  "likedAComment": "Le gusto un comentario",
-  "likedYourReply": "Le gusto tu respuesta",
-  "likedAReply": "Le gusto una respuesta",
-  "addedAMemoryTo": "Añadió un recuerdo a {albumName}",
-  "@addedAMemoryTo": {
-    "placeholders": {
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
-  "addedNMemoriesTo": "Añadió {count} recuerdos a {albumName}",
-  "@addedNMemoriesTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
   "and1Other": "y 1 más",
   "andXOthers": "y {count} más",
   "@andXOthers": {
@@ -2734,7 +2704,6 @@
   "deleteOnDeviceFiles": "Eliminar en archivos de dispositivo",
   "noHiddenFilesOnDevice": "No hay archivos ocultos en el dispositivo",
   "welcome": "Te damos la bienvenida",
-  "grantGalleryPermissionDesc": "Otorgar permiso para acceder y organizar fotos con reconocimiento facial.\n\nTodo el procesado ocurre en tu dispositivo.",
   "grantPermission": "Conceder permiso",
   "privateAI": "IA privada",
   "privateAIDescription": "Ente usa IA para analizar las fotos en busca de caras, objetos, localizaciones y texto. Estos datos se utilizan para mejorar las características de reconocimiento facial y búsqueda inteligente. Todo se procesa y almacena de manera local, sin salir del dispositivo — nunca se subiran datos a nuestros servidores.",
@@ -2746,19 +2715,20 @@
   "enableOnDeviceMLDescription": "Habilita el aprendizaje automático para buscar por caras, lugares, y más. Tus fotos nunca saldrán del dispositivo.",
   "offlineEnableSharingTitle": "Comienza a compartir aquí",
   "offlineEnableSharingDesc": "Inicia sesión para compartir fotos con todo el mundo - incluso aquellos sin cuenta en Ente",
-  "offlineEnableBackupTitle": "Tus álbumes respaldados aparecerán aquí",
+  "offlineEnableBackupTitle": "Los álbumes con copia de seguridad aparecerán aquí",
   "offlineEnableBackupDesc": "Inicia sesión para preservar tus recuerdos con Ente.",
+  "offlineEnableBackupTagLabel": "¡10 GB GRATIS!",
   "offlineEnableBackupAction": "Empieza con 10 GB GRATIS",
   "offlineSettingsBannerTitle": "Nunca podremos ver tus fotos.",
   "offlineSettingsBannerDesc": "La encriptación Zero-knowledge garantiza que tu información solo será tuya.",
   "alreadyHaveAnAccount": "¿Ya tiene una cuenta?",
+  "dontHaveAnAccount": "¿No tienes una cuenta?",
   "loginToEnte": "Iniciar sesión en Ente",
   "searchAndDiscover": "Busca y descubre",
-  "searchAndDiscoverDesc": "Busca fotos por texto o redescubre viejos recuerdos con aprendizaje automático",
+  "searchAndDiscoverDesc": "Busca fotos y descubre recuerdos con el aprendizaje automático en el dispositivo",
   "shareYourMemories": "Comparte tus recuerdos",
-  "shareYourMemoriesDesc": "Comparte tus álbumes, crea enlaces, colecciona fotos y deja un comentario",
-  "privateAndSecureBackups": "Copias de seguridad privadas y seguras",
-  "privateAndSecureBackupsDesc": "Cifrado de extremo a extremo, triple replicación, y código auditado externamente",
+  "shareYourMemoriesDesc": "Comparte álbumes, recopila fotos y comentarios con enlaces públicos",
+  "privateAndSecureBackups": "Copia de seguridad con privacidad",
   "mlProgressBannerTitle": "¡Espera un momento!",
   "mlProgressBannerDescription": "Tus fotos están siendo procesadas en el dispositivo para detectar caras, objetos y más.",
   "mlProgressBannerStatus": "{indexed} de {total} fotos procesadas",
@@ -2776,5 +2746,7 @@
   "offlineFacesBannerSubtitle": "Regístrate para etiquetar a la gente y encontrarla fácilmente más tarde.",
   "offlineNameFaceBannerTitle": "Dale un nombre a esta cara",
   "offlineNameFaceBannerSubtitle": "Regístrate para etiquetarlos y encontrar sus fotos fácilmente.",
-  "signUp": "Registrarse"
+  "signUp": "Registrarse",
+  "dog": "Perro",
+  "cat": "Gato"
 }

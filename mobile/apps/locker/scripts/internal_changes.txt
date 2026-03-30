@@ -1,0 +1,2 @@
+Latest changes:
+- Bug fixes and improvements

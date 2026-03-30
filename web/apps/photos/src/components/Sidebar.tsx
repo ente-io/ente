@@ -79,6 +79,7 @@ import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSet
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
+    useAppLockSnapshot,
     useHLSGenerationStatusSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
@@ -1161,6 +1162,7 @@ const Account: React.FC<AccountProps> = ({
 const DesktopAppLockSettings: React.FC<
     Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
 > = ({ onAuthenticateUser, onRootClose }) => {
+    const appLock = useAppLockSnapshot();
     const { show, props } = useModalVisibility();
 
     const handleOpen = useCallback(async () => {
@@ -1176,7 +1178,18 @@ const DesktopAppLockSettings: React.FC<
     return (
         <>
             <RowButtonGroup>
-                <RowButton label={t("app_lock")} onClick={handleOpen} />
+                <RowButton
+                    label={t("app_lock")}
+                    caption={
+                        !appLock.supported
+                            ? t("app_lock_not_supported", {
+                                  defaultValue: "App lock is not supported",
+                              })
+                            : undefined
+                    }
+                    disabled={!appLock.supported}
+                    onClick={handleOpen}
+                />
             </RowButtonGroup>
             <AppLockSettings {...props} onRootClose={onRootClose} />
         </>
@@ -1535,7 +1548,7 @@ const DomainSettingsContents: React.FC = () => {
                         components={{
                             a: (
                                 <Link
-                                    href="https://ente.io/help/photos/features/sharing-and-collaboration/custom-domains/"
+                                    href="https://ente.com/help/photos/features/sharing-and-collaboration/custom-domains/"
                                     target="_blank"
                                     rel="noopener"
                                     color="accent"
@@ -1719,11 +1732,11 @@ const Help: React.FC<HelpProps> = ({
     };
 
     const handleHelp = useCallback(
-        () => openURL("https://ente.io/help/photos/"),
+        () => openURL("https://ente.com/help/photos/"),
         [],
     );
 
-    const handleBlog = useCallback(() => openURL("https://ente.io/blog/"), []);
+    const handleBlog = useCallback(() => openURL("https://ente.com/blog/"), []);
 
     const handleRequestFeature = useCallback(
         () => openURL("https://github.com/ente-io/ente/discussions"),
@@ -1731,7 +1744,7 @@ const Help: React.FC<HelpProps> = ({
     );
 
     const handleSupport = useCallback(
-        () => initiateEmail("support@ente.io"),
+        () => initiateEmail("support@ente.com"),
         [],
     );
 
@@ -1822,7 +1835,7 @@ const Help: React.FC<HelpProps> = ({
                     <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={
-                            <Tooltip title="support@ente.io">
+                            <Tooltip title="support@ente.com">
                                 <Typography sx={{ fontWeight: "medium" }}>
                                     {t("support")}
                                 </Typography>

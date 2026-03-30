@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	t "time"
 
@@ -322,7 +323,7 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.io",
+	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.com",
 		ente.EmailChangedSubject, ente.EmailChangedTemplate, map[string]interface{}{
 			"NewEmail": email,
 		}, nil)
@@ -377,7 +378,48 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
+const (
+	StorageWarningDeletionScheduledCode    = "ACCOUNT_SCHEDULED_FOR_DELETION"
+	StorageWarningDeletionScheduledMessage = "Access to this account has been restricted because its Ente Photos and Ente Locker data is scheduled for deletion. If you think this was a mistake, please reply to this email."
+)
+
+func shouldEnforceStorageWarningDeletionLoginBlock(app ente.App) bool {
+	return app == ente.Photos || app == ente.Locker
+}
+
+func storageWarningDeletionScheduledError() error {
+	return stacktrace.Propagate(&ente.ApiError{
+		Code:           StorageWarningDeletionScheduledCode,
+		Message:        StorageWarningDeletionScheduledMessage,
+		HttpStatusCode: http.StatusForbidden,
+	}, "storage warning deletion scheduled")
+}
+
+func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, app ente.App) error {
+	if c.NotificationHistoryRepo == nil || !shouldEnforceStorageWarningDeletionLoginBlock(app) {
+		return nil
+	}
+	deletionScheduled, err := c.NotificationHistoryRepo.IsStorageWarningDeletionScheduled(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to read storage warning deletion state")
+	}
+	if deletionScheduled {
+		return storageWarningDeletionScheduledError()
+	}
+	return nil
+}
+
+func (c *UserController) ClearStorageWarningDeletionLoginBlock(userID int64) error {
+	if c.NotificationHistoryRepo == nil {
+		return nil
+	}
+	return c.NotificationHistoryRepo.ClearStorageWarningDeletionScheduled(userID)
+}
+
 func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, app ente.App, token string, ip string, userAgent string) error {
+	if err := c.ensureStorageWarningDeletionLoginAllowed(userID, app); err != nil {
+		return err
+	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to insert token")
@@ -396,7 +438,7 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 			log.WithError(userErr).Error("Failed to get user")
 			return
 		}
-		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
+		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
 			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
 		}, nil)
 		if emailSendErr != nil {
@@ -406,11 +448,62 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 	return nil
 }
 
+// RemoveTokensForApps marks the given app tokens as deleted and evicts them from the auth cache.
+func (c *UserController) RemoveTokensForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	if err := c.deleteActiveTokenCacheEntriesForApps(userID, apps); err != nil {
+		return err
+	}
+	if err := c.UserAuthRepo.RemoveTokensForApps(userID, apps); err != nil {
+		return stacktrace.Propagate(err, "failed to remove tokens")
+	}
+	return nil
+}
+
+func (c *UserController) RemoveAllTokens(userID int64) error {
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user apps")
+	}
+	if err = c.deleteActiveTokenCacheEntriesForApps(userID, apps); err != nil {
+		return err
+	}
+	if err = c.UserAuthRepo.RemoveAllTokens(userID); err != nil {
+		return stacktrace.Propagate(err, "failed to remove tokens")
+	}
+	return nil
+}
+
 // TerminateSession removes the token for a user from cache and database
 func (c *UserController) TerminateSession(userID int64, token string) error {
-	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Photos, token))
-	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Auth, token))
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user apps")
+	}
+	for _, app := range apps {
+		c.Cache.Delete(fmt.Sprintf("%s:%s", app, token))
+	}
 	return stacktrace.Propagate(c.UserAuthRepo.RemoveToken(userID, token), "")
+}
+
+// Auth middleware trusts cached app:token entries for up to a minute, so token
+// revocation needs to evict those entries as well to take effect immediately.
+func (c *UserController) deleteActiveTokenCacheEntriesForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	for _, app := range apps {
+		sessions, err := c.UserAuthRepo.GetActiveSessions(userID, app)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to get active sessions")
+		}
+		for _, session := range sessions {
+			c.Cache.Delete(fmt.Sprintf("%s:%s", app, session.Token))
+		}
+	}
+	return nil
 }
 
 func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) error {
@@ -425,7 +518,7 @@ func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) 
 		}
 	}
 	subject := fmt.Sprintf("Verification code: %s", ott)
-	err := emailUtil.SendTemplatedEmail([]string{to}, "Ente", "verify@ente.io",
+	err := emailUtil.SendTemplatedEmail([]string{to}, "Ente", "verify@ente.com",
 		subject, templateName, map[string]interface{}{
 			"VerificationCode": ott,
 		}, nil)
@@ -505,6 +598,9 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
+			if err := c.ensureStorageWarningDeletionLoginAllowed(userID, app); err != nil {
+				return ente.EmailAuthorizationResponse{}, err
+			}
 			err = c.UserAuthRepo.AddToken(userID, app, token,
 				network.GetClientIP(context), context.Request.UserAgent())
 			if err != nil {

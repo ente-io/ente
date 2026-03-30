@@ -192,6 +192,29 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
             onChanged: _onRunMLDuringInteractionChanged,
           ),
         ),
+        MenuItemWidgetNew(
+          title: "Pet recognition",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiImage,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.petRecognitionEnabled,
+            onChanged: _onPetRecognitionChanged,
+          ),
+        ),
+        if (flagService.internalUser && flagService.usearchForSearch)
+          MenuItemWidgetNew(
+            title: "Exact semantic search (SimSIMD)",
+            leadingIconWidget: _buildIconWidget(
+              context,
+              HugeIcons.strokeRoundedAiSearch,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () => localSettings.semanticSearchExactInRustEnabled,
+              onChanged: _onSemanticSearchExactChanged,
+            ),
+          ),
       ],
     );
   }
@@ -708,6 +731,46 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       }
     } catch (e, s) {
       logger.warning('run ML during interaction toggle failed ', e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
+  Future<void> _onPetRecognitionChanged() async {
+    try {
+      await localSettings.togglePetRecognition();
+      // Invalidate cached runtime args so pet model paths are rebuilt
+      // with the new toggle state on the next indexing run.
+      await MLIndexingIsolate.instance.releaseRustRuntime();
+      MLIndexingIsolate.instance.invalidateModelDownloadCache();
+      logger.info(
+        'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      logger.warning('Pet recognition toggle failed ', e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
+  Future<void> _onSemanticSearchExactChanged() async {
+    try {
+      final enabled = !localSettings.semanticSearchExactInRustEnabled;
+      await localSettings.setSemanticSearchExactInRustEnabled(enabled);
+      await SemanticSearchService.instance.prepareForInteractiveSearch();
+      logger.info(
+        'exact semantic search in rust is turned ${enabled ? 'on' : 'off'}',
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      logger.warning('exact semantic search toggle failed ', e, s);
       if (mounted) {
         await showGenericErrorDialog(context: context, error: e);
       }

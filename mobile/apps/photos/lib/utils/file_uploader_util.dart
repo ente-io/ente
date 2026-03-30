@@ -193,8 +193,15 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   isDeleted = !(await asset.exists);
   int? h, w;
   if (asset.width != 0 && asset.height != 0) {
-    h = asset.height;
     w = asset.width;
+    h = asset.height;
+    if (Platform.isAndroid &&
+        file.fileType == FileType.image &&
+        _shouldSwapDimensionsForExifOrientation(exifData)) {
+      final temp = w;
+      w = h;
+      h = temp;
+    }
   }
   int? motionPhotoStartingIndex;
   if (Platform.isAndroid && asset.type == AssetType.image) {
@@ -217,6 +224,12 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     motionPhotoStartIndex: motionPhotoStartingIndex,
     exifData: exifData,
   );
+}
+
+bool _shouldSwapDimensionsForExifOrientation(Map<String, IfdTag>? exifData) {
+  final orientation = exifData?['Image Orientation']?.values.firstAsInt() ?? 1;
+  // EXIF orientations 5-8 are rotated 90/270 variants and require w/h swap.
+  return orientation >= 5 && orientation <= 8;
 }
 
 Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
@@ -344,6 +357,13 @@ Future<void> _decorateEnteFileData(
     final Location? exifLocation = locationFromExif(exifData);
     if (Location.isValidLocation(exifLocation)) {
       file.location = exifLocation;
+    }
+  }
+  if (Platform.isIOS) {
+    final originalTitle = await asset.titleAsync;
+    if (originalTitle.isNotEmpty) {
+      file.title = originalTitle;
+      return;
     }
   }
   if (file.title == null || file.title!.isEmpty) {

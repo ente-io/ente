@@ -1,10 +1,34 @@
 package email
 
 import (
+	"io"
+	"mime/quotedprintable"
+	"strings"
 	"testing"
 
+	"github.com/ente-io/museum/internal/testutil"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestBuildHTMLMIMEPartPreservesUnicode(t *testing.T) {
+	htmlBody := "<p>Hello – emoji 😊</p>"
+
+	part, err := buildHTMLMIMEPart(htmlBody)
+	assert.NoError(t, err)
+	assert.Contains(t, part, "Content-Type: text/html; charset=utf-8")
+	assert.Contains(t, part, "Content-Transfer-Encoding: quoted-printable")
+	assert.Contains(t, part, "=E2=80=93")
+	assert.Contains(t, part, "=F0=9F=98=8A")
+
+	sections := strings.SplitN(part, "\n\n", 2)
+	if assert.Len(t, sections, 2) {
+		decodedBody, err := io.ReadAll(
+			quotedprintable.NewReader(strings.NewReader(strings.TrimSuffix(sections[1], "\n"))),
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, htmlBody, string(decodedBody))
+	}
+}
 
 func TestGetMaskedEmailForPublic(t *testing.T) {
 	tests := []struct {
@@ -93,6 +117,30 @@ func TestGetMaskedEmailForPublic(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := GetMaskedEmailForPublic(tt.email)
 			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestInactiveUserDeletionTemplatesIncludeAccountEmail(t *testing.T) {
+	testutil.WithServerRoot(t)
+
+	templateData := map[string]interface{}{
+		"Email":        "alice@example.com",
+		"DeletionDate": "April 1, 2026",
+	}
+	templateNames := []string{
+		"inactive-user-deletion/warn_2m.html",
+		"inactive-user-deletion/warn_1m.html",
+		"inactive-user-deletion/warn_7d.html",
+		"inactive-user-deletion/warn_1d.html",
+		"inactive-user-deletion/confirm_13m.html",
+	}
+
+	for _, templateName := range templateNames {
+		t.Run(templateName, func(t *testing.T) {
+			body, err := getMailBodyWithBase("ente_base.html", templateName, templateData)
+			assert.NoError(t, err)
+			assert.Contains(t, body, "alice@example.com")
 		})
 	}
 }

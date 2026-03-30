@@ -149,5 +149,3 @@ watcher for the watch folders functionality.
 
     To reproduce this locally, add `x64ArchFiles: "ffmpeg"` to
     `electron-builder.yml`, then run `node_modules/.bin/electron-builder --mac`.
-
-- `electron-store` is pinned to 8.2.0 because subsequent versions are ESM only.

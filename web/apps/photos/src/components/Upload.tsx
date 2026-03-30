@@ -86,6 +86,8 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
+import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
+import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
@@ -195,6 +197,10 @@ export const Upload: React.FC<UploadProps> = ({
     const { showNotification, watchFolderView } = usePhotosAppContext();
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
+    const [
+        showCanvasReadbackBlockedDialog,
+        setShowCanvasReadbackBlockedDialog,
+    ] = useState(false);
     const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
@@ -504,6 +510,14 @@ export const Upload: React.FC<UploadProps> = ({
                 );
                 return;
             }
+        }
+
+        if (!electron && !hasReliableCanvasReadback()) {
+            log.warn("Canvas readback integrity check failed; blocking upload");
+            setWebFiles([]);
+            selectedUploadType.current = undefined;
+            setShowCanvasReadbackBlockedDialog(true);
+            return;
         }
 
         uploadRunning.current = true;
@@ -936,6 +950,10 @@ export const Upload: React.FC<UploadProps> = ({
                 retryFailed={retryFailed}
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
+            />
+            <CanvasReadbackBlockedDialog
+                open={showCanvasReadbackBlockedDialog}
+                onClose={() => setShowCanvasReadbackBlockedDialog(false)}
             />
             <SingleInputDialog
                 {...newAlbumNameInputVisibilityProps}
@@ -1389,7 +1407,7 @@ const TakeoutOptions: React.FC<
                     {t("select_zips")}
                 </FocusVisibleButton>
                 <Link
-                    href="https://ente.io/help/photos/migration/from-google-photos/"
+                    href="https://ente.com/help/photos/migration/from-google-photos/"
                     target="_blank"
                     rel="noopener"
                 >

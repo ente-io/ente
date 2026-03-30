@@ -13,13 +13,13 @@ import {
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     parseArrowLottie,
     type ParsedArrow,
     type ParsedArrowPath,
 } from "../utils/lottie";
-import { createQrSvgData } from "../utils/qrCode";
+import { PasteQrCode } from "./PasteQrCode";
 
 interface PasteLinkCardProps {
     link: string;
@@ -50,7 +50,6 @@ export const PasteLinkCard = ({
     const [showCopied, setShowCopied] = useState(false);
     const [showQr, setShowQr] = useState(false);
     const [showViewConfirm, setShowViewConfirm] = useState(false);
-    const qrSvgData = useMemo(() => createQrSvgData(link), [link]);
     const isCompactQrModal = useMediaQuery("(max-width:767px)", {
         noSsr: true,
     });
@@ -585,7 +584,7 @@ export const PasteLinkCard = ({
                             </Typography>
                         </Box>
                     </Stack>
-                    {showQr && qrSvgData && !isCompactQrModal && (
+                    {showQr && !isCompactQrModal && (
                         <Box
                             sx={{
                                 position: "fixed",
@@ -602,36 +601,7 @@ export const PasteLinkCard = ({
                                     "blur(8px) saturate(106%)",
                             }}
                         >
-                            <Box
-                                component="svg"
-                                viewBox={`0 0 ${qrSvgData.viewBoxSize} ${qrSvgData.viewBoxSize}`}
-                                role="img"
-                                aria-label="QR code for paste link"
-                                sx={{
-                                    display: "block",
-                                    width: { xs: 144, sm: 168, md: 184 },
-                                    height: { xs: 144, sm: 168, md: 184 },
-                                    borderRadius: "10px",
-                                    bgcolor: tokens.qr.paperBg,
-                                    p: 1,
-                                }}
-                            >
-                                {qrSvgData.modules.map((module) => (
-                                    <rect
-                                        key={`${module.x}-${module.y}`}
-                                        x={module.x}
-                                        y={module.y}
-                                        width={1}
-                                        height={1}
-                                        rx={module.finder ? 0.08 : 0.34}
-                                        fill={
-                                            module.finder
-                                                ? tokens.qr.finder
-                                                : tokens.qr.module
-                                        }
-                                    />
-                                ))}
-                            </Box>
+                            <PasteQrCode value={link} tokens={tokens} />
                         </Box>
                     )}
                 </Stack>
@@ -770,7 +740,7 @@ export const PasteLinkCard = ({
                         </Stack>
                     </Box>
                 </Dialog>
-                {showQr && qrSvgData && isCompactQrModal && (
+                {showQr && isCompactQrModal && (
                     <Dialog
                         open
                         onClose={() => {
@@ -797,36 +767,13 @@ export const PasteLinkCard = ({
                         }}
                     >
                         <Box sx={{ p: 1.15 }}>
-                            <Box
-                                component="svg"
-                                viewBox={`0 0 ${qrSvgData.viewBoxSize} ${qrSvgData.viewBoxSize}`}
-                                role="img"
-                                aria-label="QR code for paste link"
-                                sx={{
-                                    display: "block",
-                                    width: 226,
-                                    height: 226,
-                                    borderRadius: "12px",
-                                    bgcolor: tokens.qr.mobilePaperBg,
-                                    p: 1.1,
-                                }}
-                            >
-                                {qrSvgData.modules.map((module) => (
-                                    <rect
-                                        key={`${module.x}-${module.y}`}
-                                        x={module.x}
-                                        y={module.y}
-                                        width={1}
-                                        height={1}
-                                        rx={module.finder ? 0.08 : 0.34}
-                                        fill={
-                                            module.finder
-                                                ? tokens.qr.finder
-                                                : tokens.qr.module
-                                        }
-                                    />
-                                ))}
-                            </Box>
+                            <PasteQrCode
+                                value={link}
+                                tokens={tokens}
+                                size={226}
+                                paperBg={tokens.qr.mobilePaperBg}
+                                borderRadius="12px"
+                            />
                         </Box>
                     </Dialog>
                 )}

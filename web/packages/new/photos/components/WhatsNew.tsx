@@ -79,11 +79,11 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut("App lock, Masonry layout, Quick links, and more")}
+                {ut("App Lock and Better People Search ")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "App lock for additional security. Masonry layout for public albums. Quick links with full viewer experience for single-photo/video links. Update album cover. Public album improvements. Catalan language support.",
+                    "App Lock for enhanced security. Better people list experience with search.",
                 )}
             </Typography>
         </Stack>

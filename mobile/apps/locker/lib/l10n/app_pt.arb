@@ -521,7 +521,6 @@
   "youCannotShareWithYourself": "Não podes partilhar contigo mesmo",
   "inviteToEnte": "Convidar para Ente",
   "sendInvite": "Enviar convite",
-  "shareTextRecommendUsingEnte": "Baixe o Ente\n\nhttps://ente.io",
   "thisIsYourVerificationId": "Este é o seu ID de verificação",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguém compartilhando álbuns com você deve ver o mesmo ID no seu dispositivo.",
   "howToViewShareeVerificationID": "Por favor, peça-lhes para pressionar longamente o endereço de e-mail na tela de configurações e verifique se os IDs de ambos os dispositivos coincidem.",
@@ -530,15 +529,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de Verificação",
   "verifyEmailID": "Verificar e-mail",
   "emailNoEnteAccount": "{email} não tem uma conta Ente.\n\nEnvie um convite para compartilhar itens.",
-  "shareMyVerificationID": "Aqui está o meu ID de verificação: {verificationID} para ente.io.",
-  "shareTextConfirmOthersVerificationID": "Ei, você pode confirmar que este é seu ID de verificação do ente.io: {verificationID}",
   "passwordLock": "Bloqueio da palavra-passe",
   "manage": "Gerir",
   "addedAs": "Adicionado como",

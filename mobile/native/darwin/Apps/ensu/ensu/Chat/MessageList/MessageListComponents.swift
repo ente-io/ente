@@ -161,6 +161,7 @@ struct UserMessageBubbleView: View {
 
 struct AssistantMessageBubbleView: View {
     let message: ChatMessage
+    let isLastMessage: Bool
     let onCopy: () -> Void
     let onRetry: () -> Void
     let onBranchChange: (Int) -> Void
@@ -184,18 +185,22 @@ struct AssistantMessageBubbleView: View {
                 .padding(.horizontal, EnsuSpacing.sm)
                 #if os(iOS)
                 .contextMenu {
-                    Button("Copy") {
-                        hapticTap()
-                        onCopy()
+                    if !message.isSynthetic {
+                        Button("Copy") {
+                            hapticTap()
+                            onCopy()
+                        }
                     }
-                    Button("Retry") {
-                        hapticMedium()
-                        onRetry()
+                    if !message.isSynthetic || isLastMessage {
+                        Button("Retry") {
+                            hapticMedium()
+                            onRetry()
+                        }
                     }
                 }
                 #endif
 
-                if showsMetadata {
+                if showsMetadata && !message.isSynthetic {
                     HStack(spacing: EnsuSpacing.sm) {
                         TimestampView(date: message.timestamp)
                         if message.branchCount > 1 {
@@ -352,10 +357,6 @@ struct AssistantMessageRenderer: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.lg) {
-            if let think = parsedMessage.thinkContent {
-                ThinkSectionView(content: think, isStreaming: isStreaming, storageId: storageId)
-            }
-
             ForEach(parsedMessage.todoBlocks) { block in
                 TodoListCardView(title: block.title, status: block.status, items: block.items)
             }
@@ -380,20 +381,16 @@ struct ParsedMessage {
         let items: [String]
     }
 
-    let thinkContent: String?
     let todoBlocks: [TodoBlock]
     let markdown: String
     let markdownBlocks: [MarkdownBlock]
 
     init(text: String) {
         var remaining = text
-        var think: String?
         var todos: [TodoBlock] = []
 
-        if let thinkRange = ParsedMessage.extractTag(using: ChatMessageTagRegex.think, from: remaining) {
-            think = thinkRange.content.trimmingCharacters(in: .whitespacesAndNewlines)
-            remaining = thinkRange.cleaned
-        }
+        let thinkMatches = ParsedMessage.extractTags(using: ChatMessageTagRegex.think, from: remaining)
+        remaining = thinkMatches.cleaned
 
         let todoMatches = ParsedMessage.extractTags(using: ChatMessageTagRegex.todoList, from: remaining)
         remaining = todoMatches.cleaned
@@ -405,19 +402,9 @@ struct ParsedMessage {
             }
         }
 
-        self.thinkContent = think
         self.todoBlocks = todos
         self.markdown = remaining
         self.markdownBlocks = MarkdownParser.parse(remaining)
-    }
-
-    private static func extractTag(using regex: NSRegularExpression?, from text: String) -> (content: String, cleaned: String)? {
-        guard let regex else { return nil }
-        guard let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) else { return nil }
-        guard let range = Range(match.range(at: 1), in: text) else { return nil }
-        let content = String(text[range])
-        let cleaned = regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "")
-        return (content, cleaned)
     }
 
     private static func extractTags(using regex: NSRegularExpression?, from text: String) -> (contents: [String], cleaned: String) {
@@ -438,64 +425,6 @@ struct ParsedMessage {
         let title: String
         let status: String?
         let items: [String]
-    }
-}
-
-struct ThinkSectionView: View {
-    let content: String
-    let isStreaming: Bool
-    let storageId: String
-
-    @SceneStorage private var isExpanded: Bool
-
-    init(content: String, isStreaming: Bool, storageId: String) {
-        self.content = content
-        self.isStreaming = isStreaming
-        self.storageId = storageId
-        _isExpanded = SceneStorage(wrappedValue: false, "thinkExpanded_\(storageId)")
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.16)) {
-                    isExpanded.toggle()
-                }
-            } label: {
-                HStack {
-                    Text("THINK")
-                        .font(EnsuTypography.mini)
-                        .tracking(0.5)
-                        .foregroundStyle(EnsuColor.textMuted)
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                        .foregroundStyle(EnsuColor.textMuted)
-                }
-            }
-            .buttonStyle(.plain)
-
-            if isExpanded {
-                Text(content)
-                    .font(EnsuFont.code(size: 12.5, weight: .regular))
-                    .foregroundStyle(EnsuColor.textPrimary)
-                    .lineSpacing(EnsuLineHeight.spacing(fontSize: 12.5, lineHeight: 1.45))
-                    .textSelection(.enabled)
-            } else if isStreaming {
-                Text("…" + content)
-                    .font(EnsuFont.code(size: 12.5, weight: .regular))
-                    .foregroundStyle(EnsuColor.textMuted)
-                    .lineLimit(4)
-            }
-        }
-        .padding(EnsuSpacing.cardPadding)
-        .background(EnsuColor.fillFaint)
-        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
-        .onChange(of: isStreaming) { newValue in
-            if !newValue {
-                isExpanded = false
-            }
-        }
     }
 }
 
@@ -569,15 +498,35 @@ struct MarkdownView: View {
                 switch block.kind {
                 case .heading(let level, let text):
                     let displayText = showCursor && isLast ? text + StreamingCursor.glyph : text
-                    markdownText(displayText)
-                        .font(headingFont(for: level))
-                        .foregroundStyle(EnsuColor.textPrimary)
+                    if containsInlineMath(displayText) {
+                        InlineMathTextView(
+                            text: displayText,
+                            fonts: InlineFontSet(
+                                normal: headingFont(for: level),
+                                code: EnsuFont.code(size: headingFontSize(for: level), weight: .semibold),
+                                mathSize: headingFontSize(for: level)
+                            ),
+                            textColor: EnsuColor.textPrimary
+                        )
+                    } else {
+                        markdownText(displayText)
+                            .font(headingFont(for: level))
+                            .foregroundStyle(EnsuColor.textPrimary)
+                    }
                 case .paragraph(let text):
                     let displayText = showCursor && isLast ? text + StreamingCursor.glyph : text
-                    markdownText(displayText)
-                        .font(EnsuTypography.message)
-                        .foregroundStyle(EnsuColor.textPrimary)
-                        .lineSpacing(EnsuLineHeight.spacing(fontSize: 15, lineHeight: 1.7))
+                    if containsInlineMath(displayText) {
+                        InlineMathTextView(
+                            text: displayText,
+                            fonts: messageInlineFonts,
+                            textColor: EnsuColor.textPrimary
+                        )
+                    } else {
+                        markdownText(displayText)
+                            .font(EnsuTypography.message)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                            .lineSpacing(EnsuLineHeight.spacing(fontSize: 15, lineHeight: 1.7))
+                    }
                 case .blockquote(let text):
                     let displayText = showCursor && isLast ? text + StreamingCursor.glyph : text
                     BlockQuoteView(text: displayText)
@@ -598,9 +547,17 @@ struct MarkdownView: View {
                                 Text("•")
                                     .font(EnsuTypography.message)
                                     .foregroundStyle(EnsuColor.textPrimary)
-                                markdownText(item)
-                                    .font(EnsuTypography.message)
-                                    .foregroundStyle(EnsuColor.textPrimary)
+                                if containsInlineMath(item) {
+                                    InlineMathTextView(
+                                        text: item,
+                                        fonts: messageInlineFonts,
+                                        textColor: EnsuColor.textPrimary
+                                    )
+                                } else {
+                                    markdownText(item)
+                                        .font(EnsuTypography.message)
+                                        .foregroundStyle(EnsuColor.textPrimary)
+                                }
                             }
                         }
                     }
@@ -619,15 +576,19 @@ struct MarkdownView: View {
         .textSelection(.enabled)
     }
 
-    private func headingFont(for level: Int) -> Font {
+    private func headingFontSize(for level: Int) -> CGFloat {
         switch level {
         case 1:
-            return EnsuFont.message(size: 22, weight: .semibold)
+            return 22
         case 2:
-            return EnsuFont.message(size: 20, weight: .semibold)
+            return 20
         default:
-            return EnsuFont.message(size: 18, weight: .semibold)
+            return 18
         }
+    }
+
+    private func headingFont(for level: Int) -> Font {
+        EnsuFont.message(size: headingFontSize(for: level), weight: .semibold)
     }
 }
 
@@ -636,6 +597,300 @@ func markdownText(_ text: String) -> SwiftUI.Text {
         return SwiftUI.Text(attributed)
     }
     return SwiftUI.Text(text)
+}
+
+private enum InlineMarkdownStyle: Equatable {
+    case normal
+    case bold
+    case italic
+    case code
+}
+
+private enum InlineSegment: Equatable {
+    case text(String, InlineMarkdownStyle)
+    case math(String)
+}
+
+private struct InlineMathMatch {
+    let latex: String
+    let endIndex: Int
+}
+
+private struct InlineFontSet {
+    let normal: Font
+    let code: Font
+    let mathSize: CGFloat
+}
+
+private let messageInlineFonts = InlineFontSet(
+    normal: EnsuTypography.message,
+    code: EnsuFont.code(size: 15, weight: .regular),
+    mathSize: 15
+)
+
+private let inlineMathPattern = try! NSRegularExpression(
+    pattern: #"(?<!\\)\$(?!\$)(?:[^$\n\\]|\\.)+?(?<!\\)\$(?!\$)|\\\((?:[^\n\\]|\\.)+?\\\)"#,
+    options: []
+)
+
+private func parseInlineSegments(_ text: String) -> [InlineSegment] {
+    let characters = Array(text)
+    var segments: [InlineSegment] = []
+    var buffer: [Character] = []
+    var currentStyle: InlineMarkdownStyle = .normal
+    var index = 0
+
+    func flushBuffer() {
+        if !buffer.isEmpty {
+            segments.append(.text(String(buffer), currentStyle))
+            buffer.removeAll(keepingCapacity: true)
+        }
+    }
+
+    while index < characters.count {
+        if let mathMatch = findInlineMathMatch(characters, startIndex: index) {
+            flushBuffer()
+            segments.append(.math(mathMatch.latex))
+            index = mathMatch.endIndex
+            continue
+        }
+
+        switch currentStyle {
+        case .code:
+            if characters[index] == "`" {
+                flushBuffer()
+                currentStyle = .normal
+                index += 1
+            } else {
+                buffer.append(characters[index])
+                index += 1
+            }
+        case .bold:
+            if hasPrefix(characters, at: index, token: ["*", "*"]) {
+                flushBuffer()
+                currentStyle = .normal
+                index += 2
+            } else {
+                buffer.append(characters[index])
+                index += 1
+            }
+        case .italic:
+            if characters[index] == "*" && !hasPrefix(characters, at: index, token: ["*", "*"]) {
+                flushBuffer()
+                currentStyle = .normal
+                index += 1
+            } else {
+                buffer.append(characters[index])
+                index += 1
+            }
+        case .normal:
+            switch true {
+            case hasPrefix(characters, at: index, token: ["*", "*"]) && hasClosingDelimiter(characters, startIndex: index + 2, delimiter: ["*", "*"]):
+                flushBuffer()
+                currentStyle = .bold
+                index += 2
+            case characters[index] == "*" &&
+                !hasPrefix(characters, at: index, token: ["*", "*"]) &&
+                hasClosingSingleAsterisk(characters, startIndex: index + 1):
+                flushBuffer()
+                currentStyle = .italic
+                index += 1
+            case characters[index] == "`" &&
+                hasClosingDelimiter(characters, startIndex: index + 1, delimiter: ["`"]):
+                flushBuffer()
+                currentStyle = .code
+                index += 1
+            default:
+                buffer.append(characters[index])
+                index += 1
+            }
+        }
+    }
+
+    flushBuffer()
+    return segments
+}
+
+private func findInlineMathMatch(_ characters: [Character], startIndex: Int) -> InlineMathMatch? {
+    if startIndex >= characters.count {
+        return nil
+    }
+
+    if hasPrefix(characters, at: startIndex, token: ["\\", "("]) {
+        var index = startIndex + 2
+        while index < characters.count {
+            if characters[index] == "\n" {
+                return nil
+            }
+            if characters[index] == "\\" {
+                if index + 1 >= characters.count {
+                    return nil
+                }
+                if characters[index + 1] == ")" {
+                    return InlineMathMatch(
+                        latex: String(characters[(startIndex + 2)..<index]),
+                        endIndex: index + 2
+                    )
+                }
+                index += 2
+                continue
+            }
+            index += 1
+        }
+        return nil
+    }
+
+    if characters[startIndex] != "$" || (startIndex > 0 && characters[startIndex - 1] == "\\") {
+        return nil
+    }
+    if startIndex + 1 < characters.count && characters[startIndex + 1] == "$" {
+        return nil
+    }
+
+    var index = startIndex + 1
+    while index < characters.count {
+        if characters[index] == "\n" {
+            return nil
+        }
+        if characters[index] == "$" &&
+            characters[index - 1] != "\\" &&
+            (index + 1 >= characters.count || characters[index + 1] != "$") {
+            if index == startIndex + 1 {
+                return nil
+            }
+            return InlineMathMatch(
+                latex: String(characters[(startIndex + 1)..<index]),
+                endIndex: index + 1
+            )
+        }
+        index += 1
+    }
+
+    return nil
+}
+
+private func hasPrefix(_ characters: [Character], at startIndex: Int, token: [Character]) -> Bool {
+    let endIndex = startIndex + token.count
+    if startIndex < 0 || endIndex > characters.count {
+        return false
+    }
+    return Array(characters[startIndex..<endIndex]) == token
+}
+
+private func hasClosingDelimiter(_ characters: [Character], startIndex: Int, delimiter: [Character]) -> Bool {
+    var index = startIndex
+    while index < characters.count {
+        if characters[index] == "\n" {
+            return false
+        }
+        if hasPrefix(characters, at: index, token: delimiter) {
+            return true
+        }
+        index += 1
+    }
+    return false
+}
+
+private func hasClosingSingleAsterisk(_ characters: [Character], startIndex: Int) -> Bool {
+    var index = startIndex
+    while index < characters.count {
+        if characters[index] == "\n" {
+            return false
+        }
+        if characters[index] == "*" && !hasPrefix(characters, at: index, token: ["*", "*"]) {
+            return true
+        }
+        index += 1
+    }
+    return false
+}
+
+private func containsInlineMath(_ text: String) -> Bool {
+    let nsText = text as NSString
+    return inlineMathPattern.firstMatch(in: text, range: NSRange(location: 0, length: nsText.length)) != nil
+}
+
+private func styledInlineText(
+    _ content: String,
+    style: InlineMarkdownStyle,
+    fonts: InlineFontSet,
+    textColor: Color
+) -> some View {
+    switch style {
+    case .normal:
+        return AnyView(
+            markdownText(content)
+                .font(fonts.normal)
+                .foregroundStyle(textColor)
+        )
+    case .bold:
+        return AnyView(
+            markdownText(content)
+                .font(fonts.normal)
+                .fontWeight(.semibold)
+                .foregroundStyle(textColor)
+        )
+    case .italic:
+        return AnyView(
+            markdownText(content)
+                .font(fonts.normal)
+                .italic()
+                .foregroundStyle(textColor)
+        )
+    case .code:
+        return AnyView(
+            Text(verbatim: content)
+                .font(fonts.code)
+                .foregroundStyle(textColor)
+        )
+    }
+}
+
+private func splitTextChunks(_ text: String) -> [String] {
+    var chunks: [String] = []
+    var current = ""
+    for ch in text {
+        if ch.isWhitespace {
+            current.append(ch)
+        } else {
+            if !current.isEmpty && current.last?.isWhitespace == true {
+                chunks.append(current)
+                current = ""
+            }
+            current.append(ch)
+        }
+    }
+    if !current.isEmpty {
+        chunks.append(current)
+    }
+    return chunks
+}
+
+private struct InlineMathTextView: View {
+    let text: String
+    let fonts: InlineFontSet
+    let textColor: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ForEach(Array(text.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, rawLine in
+                let line = String(rawLine)
+                FlowLayout(spacing: 0) {
+                    ForEach(Array(parseInlineSegments(line).enumerated()), id: \.offset) { _, segment in
+                        switch segment {
+                        case .math(let latex):
+                            InlineLaTeXView(latex: latex, fontSize: fonts.mathSize)
+                                .fixedSize()
+                        case .text(let content, let style):
+                            ForEach(Array(splitTextChunks(content).enumerated()), id: \.offset) { _, chunk in
+                                styledInlineText(chunk, style: style, fonts: fonts, textColor: textColor)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 struct MarkdownBlock: Identifiable, Equatable {
@@ -1004,18 +1259,28 @@ struct BlockQuoteView: View {
     let text: String
 
     var body: some View {
-        markdownText(text)
-            .font(EnsuTypography.message)
-            .foregroundStyle(EnsuColor.textPrimary)
-            .padding(EnsuSpacing.cardPadding)
-            .background(EnsuColor.fillFaint)
-            .overlay(
-                Rectangle()
-                    .fill(EnsuColor.border)
-                    .frame(width: 3),
-                alignment: .leading
-            )
-            .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
+        Group {
+            if containsInlineMath(text) {
+                InlineMathTextView(
+                    text: text,
+                    fonts: messageInlineFonts,
+                    textColor: EnsuColor.textPrimary
+                )
+            } else {
+                markdownText(text)
+                    .font(EnsuTypography.message)
+                    .foregroundStyle(EnsuColor.textPrimary)
+            }
+        }
+        .padding(EnsuSpacing.cardPadding)
+        .background(EnsuColor.fillFaint)
+        .overlay(
+            Rectangle()
+                .fill(EnsuColor.border)
+                .frame(width: 3),
+            alignment: .leading
+        )
+        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
     }
 }
 

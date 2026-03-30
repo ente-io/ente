@@ -1,57 +1,19 @@
 use crate::{
-    api::{ApiClient, AuthClient},
+    api::ApiClient,
+    auth_flow::{
+        AuthFlow, AuthFlowUi, AuthenticatedAccount, CreateAccountParams, LoginParams, OtpPurpose,
+        SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
+    },
     cli::account::{AccountCommand, AccountSubcommands},
     models::{
-        account::{Account, AccountSecrets, App},
+        account::{Account, App},
         error::{Error, Result},
     },
     storage::Storage,
 };
 use base64::Engine;
 use dialoguer::{Input, Password, Select};
-use std::path::PathBuf;
-
-use ente_core::auth::{self, DecryptedSecrets, KeyAttributes as CoreKeyAttributes, derive_kek};
-use ente_core::crypto;
-
-fn to_core_key_attributes(attrs: &crate::api::models::KeyAttributes) -> CoreKeyAttributes {
-    CoreKeyAttributes {
-        kek_salt: attrs.kek_salt.clone(),
-        encrypted_key: attrs.encrypted_key.clone(),
-        key_decryption_nonce: attrs.key_decryption_nonce.clone(),
-        public_key: attrs.public_key.clone(),
-        encrypted_secret_key: attrs.encrypted_secret_key.clone(),
-        secret_key_decryption_nonce: attrs.secret_key_decryption_nonce.clone(),
-        mem_limit: Some(attrs.mem_limit as u32),
-        ops_limit: Some(attrs.ops_limit as u32),
-        master_key_encrypted_with_recovery_key: None,
-        master_key_decryption_nonce: None,
-        recovery_key_encrypted_with_master_key: None,
-        recovery_key_decryption_nonce: None,
-    }
-}
-
-fn decrypt_secrets_with_plain_token(
-    kek: &[u8],
-    key_attrs: &CoreKeyAttributes,
-    token: &str,
-) -> auth::Result<DecryptedSecrets> {
-    let (master_key, secret_key) = auth::decrypt_keys_only(kek, key_attrs)?;
-
-    // AuthResponse.token from server is a URL-safe base64 string even in the
-    // "plain token" flow (JWTs are returned via dedicated endpoints). Decode
-    // it before persisting so callers always get raw token bytes.
-    let token = base64::engine::general_purpose::URL_SAFE
-        .decode(token)
-        .or_else(|_| base64::engine::general_purpose::STANDARD.decode(token))
-        .map_err(|e| auth::AuthError::Decode(format!("token: {e}")))?;
-
-    Ok(DecryptedSecrets {
-        master_key,
-        secret_key,
-        token,
-    })
-}
+use std::{path::PathBuf, str::FromStr};
 
 pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> Result<()> {
     match cmd.command {
@@ -62,11 +24,183 @@ pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> R
             app,
             endpoint,
             export_dir,
-        } => add_account(storage, email, password, app, endpoint, export_dir).await,
+            otp,
+            totp_code,
+            second_factor,
+        } => {
+            add_account(
+                storage,
+                email,
+                password,
+                &app,
+                endpoint,
+                export_dir,
+                otp,
+                totp_code,
+                second_factor,
+            )
+            .await
+        }
+        AccountSubcommands::Create {
+            email,
+            password,
+            app,
+            endpoint,
+            export_dir,
+            otp,
+            source,
+            setup_2fa,
+            totp_code,
+            show_recovery_key,
+        } => {
+            create_account(
+                storage,
+                email,
+                password,
+                &app,
+                endpoint,
+                export_dir,
+                otp,
+                source,
+                setup_2fa,
+                totp_code,
+                show_recovery_key,
+            )
+            .await
+        }
         AccountSubcommands::Update { email, dir, app } => {
             update_account(storage, &email, &dir, &app).await
         }
         AccountSubcommands::GetToken { email, app } => get_token(storage, &email, &app).await,
+        AccountSubcommands::TwoFactor {
+            email,
+            app,
+            totp_code,
+            show_recovery_key,
+        } => enable_two_factor(storage, &email, &app, totp_code, show_recovery_key).await,
+    }
+}
+
+struct DialoguerAuthFlowUi {
+    email_otp: Option<String>,
+    totp_code: Option<String>,
+    second_factor: Option<SecondFactorMethod>,
+    passkey_presented: bool,
+}
+
+impl DialoguerAuthFlowUi {
+    fn new(
+        email_otp: Option<String>,
+        totp_code: Option<String>,
+        second_factor: Option<SecondFactorMethod>,
+    ) -> Self {
+        Self {
+            email_otp,
+            totp_code,
+            second_factor,
+            passkey_presented: false,
+        }
+    }
+}
+
+impl AuthFlowUi for DialoguerAuthFlowUi {
+    fn read_email_otp(&mut self, email: &str, purpose: OtpPurpose, resent: bool) -> Result<String> {
+        if let Some(code) = self.email_otp.take() {
+            return Ok(code);
+        }
+
+        let prompt = match (purpose, resent) {
+            (OtpPurpose::Signup, false) => {
+                format!("Enter the signup verification code sent to {email}")
+            }
+            (OtpPurpose::Signup, true) => {
+                format!("Enter the new signup verification code sent to {email}")
+            }
+            (OtpPurpose::Login, false) => {
+                format!("Enter the email-MFA code sent to {email}")
+            }
+            (OtpPurpose::Login, true) => {
+                format!("Enter the new email-MFA code sent to {email}")
+            }
+        };
+
+        read_six_digit_code(&prompt)
+    }
+
+    fn read_totp_code(&mut self, purpose: TotpPurpose) -> Result<String> {
+        if let Some(code) = self.totp_code.take() {
+            return Ok(code);
+        }
+
+        let prompt = match purpose {
+            TotpPurpose::Login => "Enter TOTP code",
+            TotpPurpose::Setup => "Enter the current TOTP from your authenticator app",
+        };
+
+        read_six_digit_code(prompt)
+    }
+
+    fn report_retryable_error(&mut self, message: &str) -> Result<()> {
+        println!("\n{message}");
+        Ok(())
+    }
+
+    fn choose_second_factor(
+        &mut self,
+        methods: &[SecondFactorMethod],
+    ) -> Result<SecondFactorMethod> {
+        if let Some(choice) = self.second_factor {
+            return Ok(choice);
+        }
+
+        let options: Vec<&str> = methods
+            .iter()
+            .map(|method| match method {
+                SecondFactorMethod::Totp => "TOTP (Authenticator app)",
+                SecondFactorMethod::Passkey => "Passkey",
+            })
+            .collect();
+
+        let index = Select::new()
+            .with_prompt("Choose verification method")
+            .items(&options)
+            .default(0)
+            .interact()
+            .map_err(|e| Error::InvalidInput(e.to_string()))?;
+
+        methods
+            .get(index)
+            .copied()
+            .ok_or_else(|| Error::InvalidInput("Invalid second-factor selection".into()))
+    }
+
+    fn present_passkey_verification(&mut self, url: &str) -> Result<()> {
+        println!("\nPasskey verification required");
+        println!("Open this URL in your browser to verify your passkey:\n{url}");
+
+        if !self.passkey_presented {
+            if let Err(error) = open::that(url) {
+                log::error!("failed to open browser: {error}");
+            }
+            self.passkey_presented = true;
+        }
+
+        Ok(())
+    }
+
+    fn wait_for_passkey_verification(&mut self) -> Result<()> {
+        let _: String = Input::new()
+            .with_prompt("Press Enter once you have completed passkey verification")
+            .allow_empty(true)
+            .interact_text()
+            .map_err(|e| Error::InvalidInput(e.to_string()))?;
+        Ok(())
+    }
+
+    fn present_totp_secret(&mut self, secret_code: &str, _qr_code: &str) -> Result<()> {
+        println!("\nTOTP setup secret: {secret_code}");
+        println!("Add this secret to your authenticator app, then enter the current code.");
+        Ok(())
     }
 }
 
@@ -74,7 +208,7 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     let accounts = storage.accounts().list()?;
 
     if accounts.is_empty() {
-        println!("No accounts configured. Use 'ente account add' to add an account.");
+        println!("No accounts configured. Use 'ente account create' or 'ente account add'.");
         return Ok(());
     }
 
@@ -86,7 +220,6 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     println!("{}", "-".repeat(110));
 
     for account in accounts {
-        // Shorten endpoint display for better readability
         let endpoint_display = if account.endpoint == "https://api.ente.io" {
             "api.ente.io (prod)".to_string()
         } else if account.endpoint.starts_with("http://localhost") {
@@ -101,7 +234,7 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
         println!(
             "{:<30} {:<10} {:<30} {:<40}",
             account.email,
-            format!("{:?}", account.app).to_lowercase(),
+            account.app.to_string(),
             endpoint_display,
             account.export_dir.as_deref().unwrap_or("Not configured")
         );
@@ -110,317 +243,222 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn add_account(
     storage: &Storage,
     email_arg: Option<String>,
     password_arg: Option<String>,
-    app_arg: String,
+    app_arg: &str,
     endpoint: String,
     export_dir_arg: Option<String>,
+    otp: Option<String>,
+    totp_code: Option<String>,
+    second_factor: Option<String>,
 ) -> Result<()> {
-    println!("\n=== Add Ente Account ===\n");
+    println!("\n=== Add Existing Ente Account ===\n");
 
-    let email = if let Some(email) = email_arg {
-        email
-    } else {
-        Input::new()
-            .with_prompt("Enter your email address")
-            .interact_text()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?
-    };
+    let email = prompt_email(email_arg)?;
+    let interactive_password = password_arg.is_none();
+    let mut password = prompt_password(password_arg, "Enter your password")?;
+    let app = resolve_app(app_arg)?;
+    let second_factor = parse_second_factor(second_factor.as_deref())?;
 
-    let app = match app_arg.to_lowercase().as_str() {
-        "photos" => App::Photos,
-        "locker" => App::Locker,
-        "auth" => App::Auth,
-        _ => {
-            if password_arg.is_some() {
-                return Err(Error::InvalidInput(format!(
-                    "Invalid app: {app_arg}. Must be one of: photos, locker, auth"
-                )));
-            }
-            let apps = vec!["photos", "locker", "auth"];
-            let app_index = Select::new()
-                .with_prompt("Select the Ente app")
-                .items(&apps)
-                .default(0)
-                .interact()
-                .map_err(|e| Error::InvalidInput(e.to_string()))?;
-            match apps[app_index] {
-                "photos" => App::Photos,
-                "locker" => App::Locker,
-                "auth" => App::Auth,
-                _ => unreachable!(),
-            }
-        }
-    };
-
-    if let Ok(Some(_existing)) = storage.accounts().get(&email, app) {
-        println!("\n❌ Account already exists for {email} with app {app:?}");
+    if let Ok(Some(_)) = storage.accounts().get(&email, app) {
+        println!("\nAccount already exists for {email} with app {app}");
         return Ok(());
     }
 
-    let is_non_interactive = password_arg.is_some();
+    let export_dir = resolve_export_dir(export_dir_arg, &email)?;
+    ensure_export_dir(&export_dir)?;
 
-    let mut password = if let Some(password) = password_arg {
-        password
-    } else {
-        Password::new()
-            .with_prompt("Enter your password")
-            .interact()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?
-    };
-
-    let export_dir = if let Some(dir) = export_dir_arg {
-        dir
-    } else if is_non_interactive {
-        format!("./exports/{email}")
-    } else {
-        Input::new()
-            .with_prompt("Enter export directory path")
-            .default(format!("./exports/{email}"))
-            .interact_text()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?
-    };
-
-    let export_path = PathBuf::from(&export_dir);
-    if !export_path.exists() {
-        println!("Creating export directory: {export_dir}");
-        std::fs::create_dir_all(&export_path).map_err(Error::Io)?;
-    }
-
-    log::info!("Using API endpoint: {endpoint}");
-    let api_client = ApiClient::new(Some(endpoint.clone()))?;
-    let auth_client = AuthClient::new(&api_client);
-
-    println!("\nAuthenticating with Ente servers...");
-
-    let srp_attrs = auth_client.get_srp_attributes(&email).await?;
-
-    let (auth_response, mut key_enc_key) = if srp_attrs.is_email_mfa_enabled {
-        println!("\n📧 Email MFA is enabled. Sending verification code...");
-        auth_client.send_login_otp(&email).await?;
-
-        let auth_response = loop {
-            let otp: String = Input::new()
-                .with_prompt("Enter the 6-digit code from your email")
-                .validate_with(|input: &String| {
-                    if input.len() == 6 && input.chars().all(char::is_numeric) {
-                        Ok(())
-                    } else {
-                        Err("Code must be 6 digits")
-                    }
-                })
-                .interact_text()
-                .map_err(|e| Error::InvalidInput(e.to_string()))?;
-
-            match auth_client.verify_email(&email, &otp).await {
-                Ok(resp) => break resp,
-                Err(Error::ApiError {
-                    status: 400 | 401, ..
-                }) => {
-                    println!("❌ Invalid code, please try again.");
-                }
-                Err(Error::ApiError { status: 410, .. }) => {
-                    println!("❌ Code expired. Sending a new code...");
-                    auth_client.send_login_otp(&email).await?;
-                }
-                Err(e) => return Err(e),
+    let api_client = new_api_client(&endpoint, app)?;
+    let mut ui = DialoguerAuthFlowUi::new(otp, totp_code, second_factor);
+    let mut flow = AuthFlow::new(&api_client, app, &mut ui);
+    let authenticated = loop {
+        match flow
+            .login(LoginParams {
+                email: email.clone(),
+                password: password.clone(),
+            })
+            .await
+        {
+            Ok(authenticated) => break authenticated,
+            Err(error) if interactive_password && is_retryable_password_error(&error) => {
+                println!("\nIncorrect password. Try again.");
+                password = prompt_password(None, "Re-enter your password")?;
             }
-        };
-
-        let auth_response = maybe_verify_2fa(&auth_client, auth_response, app).await?;
-
-        println!("\nPlease wait authenticating...");
-        let key_enc_key = derive_kek(
-            &password,
-            &srp_attrs.kek_salt,
-            srp_attrs.mem_limit as u32,
-            srp_attrs.ops_limit as u32,
-        )?;
-
-        (auth_response, key_enc_key)
-    } else {
-        let (auth_response, key_enc_key) = if is_non_interactive {
-            auth_client.login_with_srp(&email, &password).await?
-        } else {
-            loop {
-                match auth_client.login_with_srp(&email, &password).await {
-                    Ok(result) => break result,
-                    Err(Error::ApiError {
-                        status: 400 | 401, ..
-                    }) => {
-                        println!("❌ Incorrect password, please try again.");
-                        password = Password::new()
-                            .with_prompt("Enter your password")
-                            .interact()
-                            .map_err(|e| Error::InvalidInput(e.to_string()))?;
-                    }
-                    Err(e) => return Err(e),
-                }
-            }
-        };
-
-        let auth_response = maybe_verify_2fa(&auth_client, auth_response, app).await?;
-        (auth_response, key_enc_key)
-    };
-
-    let key_attributes = auth_response
-        .key_attributes
-        .as_ref()
-        .ok_or_else(|| Error::AuthenticationFailed("No key attributes".to_string()))?;
-
-    println!("\nDecrypting account keys...");
-
-    let core_key_attrs = to_core_key_attributes(key_attributes);
-
-    let encrypted_token = auth_response.encrypted_token.as_deref();
-    let response_token = auth_response.token.as_deref();
-
-    let secrets: DecryptedSecrets = loop {
-        let result = if let Some(encrypted_token) = encrypted_token {
-            auth::decrypt_secrets(&key_enc_key, &core_key_attrs, encrypted_token)
-        } else if let Some(token) = response_token {
-            decrypt_secrets_with_plain_token(&key_enc_key, &core_key_attrs, token)
-        } else {
-            return Err(Error::AuthenticationFailed(
-                "No token in response".to_string(),
-            ));
-        };
-
-        match result {
-            Ok(secrets) => break secrets,
-            Err(auth::AuthError::IncorrectPassword) if !is_non_interactive => {
-                println!("❌ Incorrect password.");
-                password = Password::new()
-                    .with_prompt("Enter your password")
-                    .interact()
-                    .map_err(|e| Error::InvalidInput(e.to_string()))?;
-
-                println!("\nPlease wait authenticating...");
-                key_enc_key = derive_kek(
-                    &password,
-                    &key_attributes.kek_salt,
-                    key_attributes.mem_limit as u32,
-                    key_attributes.ops_limit as u32,
-                )?;
-            }
-            Err(e) => return Err(e.into()),
+            Err(error) => return Err(error),
         }
     };
 
-    let public_key = crypto::decode_b64(&key_attributes.public_key)?;
+    persist_account(storage, &email, app, &endpoint, &export_dir, authenticated)?;
 
-    let account = Account {
-        user_id: auth_response.id,
-        email: email.clone(),
-        app,
-        endpoint: endpoint.clone(),
-        export_dir: Some(export_dir.clone()),
-    };
-
-    let secrets = AccountSecrets {
-        token: secrets.token,
-        master_key: secrets.master_key,
-        secret_key: secrets.secret_key,
-        public_key,
-    };
-
-    storage.accounts().add(&account)?;
-    storage
-        .accounts()
-        .store_secrets(account.user_id, account.app, &secrets)?;
-
-    println!("\n✅ Account added successfully!");
-    println!("   Email: {email}");
-    println!("   App: {app:?}");
-    println!("   Endpoint: {endpoint}");
-    println!("   Export directory: {export_dir}");
+    println!("\nAccount added successfully!");
+    println!("  Email: {email}");
+    println!("  App: {app}");
+    println!("  Endpoint: {endpoint}");
+    println!("  Export directory: {export_dir}");
 
     Ok(())
 }
 
-async fn maybe_verify_2fa(
-    auth_client: &AuthClient<'_>,
-    auth_resp: crate::api::models::AuthResponse,
-    app: App,
-) -> Result<crate::api::models::AuthResponse> {
-    let has_totp = auth_resp.get_two_factor_session_id().is_some();
-    let has_passkey = auth_resp
-        .passkey_session_id
-        .as_ref()
-        .is_some_and(|s| !s.is_empty());
+#[allow(clippy::too_many_arguments)]
+async fn create_account(
+    storage: &Storage,
+    email_arg: Option<String>,
+    password_arg: Option<String>,
+    app_arg: &str,
+    endpoint: String,
+    export_dir_arg: Option<String>,
+    otp: Option<String>,
+    source: Option<String>,
+    setup_2fa: bool,
+    totp_code: Option<String>,
+    show_recovery_key: bool,
+) -> Result<()> {
+    println!("\n=== Create Ente Account ===\n");
 
-    if has_totp && has_passkey {
-        println!("\n🔐 Two-factor authentication required");
-        println!("Choose verification method:");
-        let options = vec!["TOTP (Authenticator app)", "Passkey"];
-        let choice = Select::new()
-            .items(&options)
-            .default(0)
-            .interact()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?;
+    let email = prompt_email(email_arg)?;
+    let password = prompt_password(password_arg, "Choose a password")?;
+    let app = resolve_app(app_arg)?;
 
-        if choice == 0 {
-            verify_totp_2fa(auth_client, &auth_resp).await
-        } else {
-            verify_passkey_2fa(auth_client, &auth_resp, app).await
-        }
-    } else if has_totp {
-        verify_totp_2fa(auth_client, &auth_resp).await
-    } else if has_passkey {
-        verify_passkey_2fa(auth_client, &auth_resp, app).await
-    } else {
-        Ok(auth_resp)
+    if let Ok(Some(_)) = storage.accounts().get(&email, app) {
+        println!("\nAccount already exists for {email} with app {app}");
+        return Ok(());
     }
+
+    let export_dir = resolve_export_dir(export_dir_arg, &email)?;
+    ensure_export_dir(&export_dir)?;
+
+    let api_client = new_api_client(&endpoint, app)?;
+    let mut ui = DialoguerAuthFlowUi::new(otp, totp_code, Some(SecondFactorMethod::Totp));
+    let mut flow = AuthFlow::new(&api_client, app, &mut ui);
+    let created = flow
+        .create_account(CreateAccountParams {
+            email: email.clone(),
+            password,
+            source,
+        })
+        .await?;
+
+    let AuthenticatedAccount {
+        user_id,
+        key_attributes,
+        secrets,
+        recovery_key,
+    } = created;
+
+    let two_factor_master_key = secrets.master_key.clone();
+    let two_factor_key_attributes = key_attributes.clone();
+
+    persist_account(
+        storage,
+        &email,
+        app,
+        &endpoint,
+        &export_dir,
+        AuthenticatedAccount {
+            user_id,
+            key_attributes,
+            secrets,
+            recovery_key: recovery_key.clone(),
+        },
+    )?;
+
+    println!("\nAccount created successfully!");
+    println!("  Email: {email}");
+    println!("  App: {app}");
+    println!("  Endpoint: {endpoint}");
+    println!("  Export directory: {export_dir}");
+
+    if show_recovery_key {
+        if let Some(recovery_key) = recovery_key.as_deref() {
+            println!("\nRecovery key: {recovery_key}");
+        } else {
+            println!("\nRecovery key is not available for this account.");
+        }
+    }
+
+    if setup_2fa {
+        let result = flow
+            .setup_two_factor(SetupTwoFactorParams {
+                account_id: email.clone(),
+                master_key: two_factor_master_key,
+                key_attributes: Some(two_factor_key_attributes),
+            })
+            .await?;
+
+        println!("\nTwo-factor authentication enabled.");
+        if show_recovery_key {
+            println!("Recovery key: {}", result.recovery_key);
+        }
+    }
+
+    Ok(())
+}
+
+async fn enable_two_factor(
+    storage: &Storage,
+    email: &str,
+    app_arg: &str,
+    totp_code: Option<String>,
+    show_recovery_key: bool,
+) -> Result<()> {
+    let app = resolve_app(app_arg)?;
+    let account = storage
+        .accounts()
+        .get(email, app)?
+        .ok_or_else(|| Error::NotFound(format!("Account not found: {email}")))?;
+    let secrets = storage
+        .accounts()
+        .get_secrets(account.user_id, account.app)?
+        .ok_or_else(|| Error::NotFound(format!("Secrets not found for account {email}")))?;
+
+    let api_client = new_api_client(&account.endpoint, app)?;
+    let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
+    api_client.add_token(&account.email, &token);
+
+    let mut ui = DialoguerAuthFlowUi::new(None, totp_code, Some(SecondFactorMethod::Totp));
+    let mut flow = AuthFlow::new(&api_client, app, &mut ui);
+    let result = flow
+        .setup_two_factor(SetupTwoFactorParams {
+            account_id: account.email.clone(),
+            master_key: secrets.master_key.clone(),
+            key_attributes: None,
+        })
+        .await?;
+
+    println!("\nTwo-factor authentication enabled for {email}.");
+    if show_recovery_key {
+        println!("Recovery key: {}", result.recovery_key);
+    }
+
+    Ok(())
 }
 
 async fn update_account(storage: &Storage, email: &str, dir: &str, app_str: &str) -> Result<()> {
-    let app = match app_str.to_lowercase().as_str() {
-        "photos" => App::Photos,
-        "locker" => App::Locker,
-        "auth" => App::Auth,
-        _ => {
-            return Err(Error::InvalidInput(format!(
-                "Invalid app: {app_str}. Must be one of: photos, locker, auth"
-            )));
-        }
-    };
+    let app = resolve_app(app_str)?;
 
     if storage.accounts().get(email, app)?.is_none() {
         return Err(Error::NotFound(format!(
-            "Account not found: {} (app: {:?})",
+            "Account not found: {} (app: {})",
             email, app
         )));
     }
 
-    let export_path = PathBuf::from(dir);
-    if !export_path.exists() {
-        println!("Creating export directory: {dir}");
-        std::fs::create_dir_all(&export_path).map_err(Error::Io)?;
-    }
-
+    ensure_export_dir(dir)?;
     storage.accounts().update_export_dir(email, app, dir)?;
 
-    println!("\n✅ Account updated successfully!");
-    println!("   Email: {email}");
-    println!("   App: {app:?}");
-    println!("   New export directory: {dir}");
+    println!("\nAccount updated successfully!");
+    println!("  Email: {email}");
+    println!("  App: {app}");
+    println!("  New export directory: {dir}");
 
     Ok(())
 }
 
 async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> {
-    let app = match app_str.to_lowercase().as_str() {
-        "photos" => App::Photos,
-        "locker" => App::Locker,
-        "auth" => App::Auth,
-        _ => {
-            return Err(Error::InvalidInput(format!(
-                "Invalid app: {app_str}. Must be one of: photos, locker, auth"
-            )));
-        }
-    };
+    let app = resolve_app(app_str)?;
 
     let account = storage
         .accounts()
@@ -432,115 +470,116 @@ async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> 
         .get_secrets(account.user_id, account.app)?
         .ok_or_else(|| Error::NotFound(format!("Secrets not found for account {email}")))?;
 
-    let token_str = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
-
-    println!("{token_str}");
+    let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
+    println!("{token}");
 
     Ok(())
 }
 
-async fn verify_totp_2fa(
-    auth_client: &AuthClient<'_>,
-    auth_resp: &crate::api::models::AuthResponse,
-) -> Result<crate::api::models::AuthResponse> {
-    println!("\n📱 Two-factor authentication required");
+fn persist_account(
+    storage: &Storage,
+    email: &str,
+    app: App,
+    endpoint: &str,
+    export_dir: &str,
+    authenticated: AuthenticatedAccount,
+) -> Result<()> {
+    let account = Account {
+        user_id: authenticated.user_id,
+        email: email.to_string(),
+        app,
+        endpoint: endpoint.to_string(),
+        export_dir: Some(export_dir.to_string()),
+    };
 
-    let session_id = auth_resp
-        .get_two_factor_session_id()
-        .ok_or_else(|| Error::AuthenticationFailed("No 2FA session ID".to_string()))?;
+    storage.accounts().add(&account)?;
+    storage
+        .accounts()
+        .store_secrets(account.user_id, account.app, &authenticated.secrets)?;
 
-    loop {
-        let totp_code: String = Input::new()
-            .with_prompt("Enter TOTP code")
-            .validate_with(|input: &String| {
-                if input.len() == 6 && input.chars().all(char::is_numeric) {
-                    Ok(())
-                } else {
-                    Err("TOTP code must be 6 digits")
-                }
-            })
+    Ok(())
+}
+
+fn prompt_email(email_arg: Option<String>) -> Result<String> {
+    if let Some(email) = email_arg {
+        Ok(email)
+    } else {
+        Input::new()
+            .with_prompt("Enter your email address")
             .interact_text()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?;
-
-        match auth_client.verify_totp(session_id, &totp_code).await {
-            Ok(result) => {
-                println!("✓ Two-factor authentication verified!");
-                return Ok(result);
-            }
-            Err(Error::ApiError {
-                status: 400 | 401, ..
-            }) => {
-                println!("❌ Invalid code, please try again.");
-            }
-            Err(Error::ApiError { status: 410, .. }) => {
-                return Err(Error::AuthenticationFailed(
-                    "TOTP session expired. Please restart login.".to_string(),
-                ));
-            }
-            Err(e) => return Err(e),
-        }
+            .map_err(|e| Error::InvalidInput(e.to_string()))
     }
 }
 
-async fn verify_passkey_2fa(
-    auth_client: &AuthClient<'_>,
-    auth_resp: &crate::api::models::AuthResponse,
-    app: App,
-) -> Result<crate::api::models::AuthResponse> {
-    let passkey_session_id = auth_resp
-        .passkey_session_id
-        .as_ref()
-        .filter(|s| !s.is_empty())
-        .ok_or_else(|| Error::AuthenticationFailed("No passkey session ID".to_string()))?;
-
-    let accounts_url = auth_resp
-        .accounts_url
-        .as_ref()
-        .filter(|s| !s.is_empty())
-        .map(|s| s.as_str())
-        .unwrap_or("https://accounts.ente.io");
-
-    let client_package = match app {
-        App::Photos => "io.ente.photos",
-        App::Auth => "io.ente.auth",
-        App::Locker => "io.ente.locker",
-    };
-
-    let passkey_url = format!(
-        "{}/passkeys/verify?passkeySessionID={}&redirect=ente-cli://passkey&clientPackage={}",
-        accounts_url, passkey_session_id, client_package
-    );
-
-    println!("\n🔑 Passkey verification required");
-    println!("Open this URL in your browser to verify your passkey:\n{passkey_url}");
-
-    if let Err(e) = open::that(&passkey_url) {
-        log::error!("failed to open browser: {e}");
+fn prompt_password(password_arg: Option<String>, prompt: &str) -> Result<String> {
+    if let Some(password) = password_arg {
+        Ok(password)
+    } else {
+        Password::new()
+            .with_prompt(prompt)
+            .interact()
+            .map_err(|e| Error::InvalidInput(e.to_string()))
     }
+}
 
-    loop {
-        let _: String = Input::new()
-            .with_prompt("Press Enter once you have completed passkey verification")
-            .allow_empty(true)
+fn resolve_export_dir(export_dir_arg: Option<String>, email: &str) -> Result<String> {
+    if let Some(dir) = export_dir_arg {
+        Ok(dir)
+    } else {
+        Input::new()
+            .with_prompt("Enter export directory path")
+            .default(format!("./exports/{email}"))
             .interact_text()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?;
-
-        match auth_client.check_passkey_status(passkey_session_id).await {
-            Ok(result) => {
-                println!("✓ Passkey verification completed!");
-                return Ok(result);
-            }
-            Err(Error::ApiError {
-                status: 400 | 404, ..
-            }) => {
-                println!("⏳ Passkey verification not yet complete.");
-            }
-            Err(Error::ApiError { status: 410, .. }) => {
-                return Err(Error::AuthenticationFailed(
-                    "Passkey session expired. Please restart login.".to_string(),
-                ));
-            }
-            Err(e) => return Err(e),
-        }
+            .map_err(|e| Error::InvalidInput(e.to_string()))
     }
+}
+
+fn ensure_export_dir(dir: &str) -> Result<()> {
+    let export_path = PathBuf::from(dir);
+    if !export_path.exists() {
+        println!("Creating export directory: {dir}");
+        std::fs::create_dir_all(&export_path).map_err(Error::Io)?;
+    }
+    Ok(())
+}
+
+fn resolve_app(app_arg: &str) -> Result<App> {
+    App::from_str(app_arg).map_err(Error::InvalidInput)
+}
+
+fn parse_second_factor(second_factor: Option<&str>) -> Result<Option<SecondFactorMethod>> {
+    second_factor
+        .map(|value| match value.trim().to_ascii_lowercase().as_str() {
+            "totp" => Ok(SecondFactorMethod::Totp),
+            "passkey" => Ok(SecondFactorMethod::Passkey),
+            other => Err(Error::InvalidInput(format!(
+                "Invalid second-factor method: {other}. Must be one of: totp, passkey"
+            ))),
+        })
+        .transpose()
+}
+
+fn new_api_client(endpoint: &str, app: App) -> Result<ApiClient> {
+    ApiClient::new_with_client_package(Some(endpoint.to_string()), app.client_package())
+}
+
+fn is_retryable_password_error(error: &Error) -> bool {
+    matches!(
+        error,
+        Error::AuthenticationFailed(message) if message == "Incorrect password"
+    ) || matches!(error, Error::ApiError { status: 401, .. })
+}
+
+fn read_six_digit_code(prompt: &str) -> Result<String> {
+    Input::new()
+        .with_prompt(prompt)
+        .validate_with(|input: &String| {
+            if input.len() == 6 && input.chars().all(char::is_numeric) {
+                Ok(())
+            } else {
+                Err("Code must be 6 digits")
+            }
+        })
+        .interact_text()
+        .map_err(|e| Error::InvalidInput(e.to_string()))
 }

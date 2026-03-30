@@ -2,9 +2,11 @@ import {
     subscribeMainWindowBlur,
     subscribeMainWindowFocus,
 } from "ente-base/electron";
+import log from "ente-base/log";
 import { updateSessionFromElectronSafeStorageIfNeeded } from "ente-base/session";
 import { useEffect, useRef, useState } from "react";
 import {
+    appLockSnapshot,
     clearAutoLockBlurSuppression,
     initAppLock,
     lock,
@@ -13,6 +15,52 @@ import {
     type AppLockState,
 } from "../../services/app-lock";
 
+const hydrateSessionFromSafeStorageIfNeeded = async () => {
+    try {
+        /**
+         * The current session's master key might already exist in the OS's safe
+         * storage, so if found then write it back into browser sessionStorage.
+         *
+         * Without this the user would need to re-enter the password on every
+         * desktop launch.
+         */
+        await updateSessionFromElectronSafeStorageIfNeeded();
+    } catch (e) {
+        log.warn(
+            "Failed to hydrate session from Electron safe storage during app lock bootstrap",
+            e,
+        );
+    }
+};
+
+const refreshBootstrapAppLockState = async () => {
+    try {
+        /**
+         * The app lock config is persisted across sessions, and refreshing it
+         * here recomputes the lock state after session hydration.
+         */
+        await refreshAppLockStateFromSession();
+    } catch (e) {
+        log.error("Failed to refresh app lock state during bootstrap", e);
+    }
+};
+
+const bootstrapAppLock = async () => {
+    try {
+        await initAppLock();
+    } catch (e) {
+        log.error("Failed to initialize app lock during bootstrap", e);
+        return;
+    }
+
+    if (!appLockSnapshot().enabled) {
+        return;
+    }
+
+    await hydrateSessionFromSafeStorageIfNeeded();
+    await refreshBootstrapAppLockState();
+};
+
 /**
  * Initialize app lock and return true once app-lock gated rendering can proceed.
  *
@@ -20,34 +68,24 @@ import {
  */
 export const useSetupAppLock = () => {
     const [isAppLockReady, setIsAppLockReady] = useState(false);
+    const didCancelRef = useRef(false);
 
     useEffect(() => {
-        const isAppLockEnabled =
-            localStorage.getItem("appLock.enabled") === "true";
-        initAppLock();
-        if (!isAppLockEnabled) {
-            setIsAppLockReady(true);
-            return;
-        }
+        didCancelRef.current = false;
 
         void (async () => {
             try {
-                /**
-                 * The current session's master key might be already existing in the OS's safe
-                 * storage, so if that is foudn then writing it to the browser sessionStorage
-                 *
-                 * Without this the user will have to enter the password again on every launch.
-                 */
-                await updateSessionFromElectronSafeStorageIfNeeded();
+                await bootstrapAppLock();
             } finally {
-                /**
-                 * The app lock config is actually persisted across sessions, and for refreshing this
-                 * the user must haveMasterKeyInSession().
-                 */
-                refreshAppLockStateFromSession();
-                setIsAppLockReady(true);
+                if (!didCancelRef.current) {
+                    setIsAppLockReady(true);
+                }
             }
         })();
+
+        return () => {
+            didCancelRef.current = true;
+        };
     }, []);
 
     return isAppLockReady;

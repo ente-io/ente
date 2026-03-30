@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -8,6 +9,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart" show isOfflineMode;
 import 'package:photos/services/search_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -71,8 +73,11 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
 
   Future<void> _loadFiles() async {
     final startTime = DateTime.now();
-    final allFiles =
-        await SearchService.instance.getAllFilesForGenericGallery();
+    final onlyUploadedFiles =
+        !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
+    final allFiles = await SearchService.instance.getAllFilesForGenericGallery(
+      onlyUploadedFiles: onlyUploadedFiles,
+    );
 
     // Ensure minimum loading duration to mask Gallery initialization jank
     final elapsed = DateTime.now().difference(startTime).inMilliseconds;

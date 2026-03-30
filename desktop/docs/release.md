@@ -58,9 +58,9 @@ gh workflow run desktop-release.yml --source=<branch>
 
 5. Update the [help changelog](../../docs/docs/photos/changelog.md) with the release notes (copy paste) for this version (make sure month is correct)
 
-6. Open PR (title should be "[desktop] v1.x.x")
+6. Open PR (title should be "[desktop] v1.x.x") and merge
 
-7. Merge PR then tag the merge commit on `main` in the source repo (this):
+7. Checkout to main, then get the latest upstream and then tag the merge commit on `main` in the source repo (this):
 
     ```sh
     git tag photosd-v1.x.x
@@ -81,7 +81,7 @@ gh workflow run desktop-release.yml --source=<branch>
 
 12. Next, we need to create a new pre-release that'll hold subsequent nightly builds. Following steps are for that.
 
-13. Get latest main from upstream
+13. In the source repo, get latest main from upstream
 
 14. Create new branch called `v1.x.(x+1)-beta` and check out to it
 

@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 46;
+  static const currentChangeLogVersion = 47;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -113,7 +113,7 @@ class UpdateService {
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
     final response = await NetworkClient.instance
         .getDio()
-        .get("https://ente.io/release-info/independent.json");
+        .get("https://ente.com/release-info/independent.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 

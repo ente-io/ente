@@ -112,7 +112,7 @@ class AccountSettingsPage extends StatelessWidget {
                         trailingIconIsMuted: true,
                         onTap: () async {
                           await launchUrlString(
-                            "https://ente.io/help/photos/migration/export/",
+                            "https://ente.com/help/photos/migration/export/",
                           );
                         },
                       ),

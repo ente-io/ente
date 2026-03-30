@@ -1,13 +1,13 @@
 import "dart:math";
 
 import "package:collection/collection.dart";
-import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/app_navigation_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -155,7 +155,6 @@ class PeopleHomeWidgetService {
   Future<void> onLaunchFromWidget(
     int fileId,
     String personId,
-    BuildContext context,
   ) async {
     final file = await FilesDB.instance.getFile(fileId);
     if (file == null) {
@@ -170,31 +169,33 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    routeToPage(
-      context,
-      PeoplePage(
-        person: person,
-        searchResult: null,
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+    AppNavigationService.instance
+        .pushPage(
+          PeoplePage(
+            person: person,
+            searchResult: null,
+          ),
+          forceCustomPageRoute: true,
+        )
+        .ignore();
 
     final files = await SearchService.instance.getFilesForPersonID(
       personId,
       sortOnTime: false,
     );
 
-    routeToPage(
-      context,
-      DetailPage(
-        DetailPageConfiguration(
-          files,
-          files.indexOf(file),
-          "peoplewidget",
-        ),
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+    AppNavigationService.instance
+        .pushPage(
+          DetailPage(
+            DetailPageConfiguration(
+              files,
+              files.indexOf(file),
+              "peoplewidget",
+            ),
+          ),
+          forceCustomPageRoute: true,
+        )
+        .ignore();
     await _refreshPeopleWidget();
   }
 

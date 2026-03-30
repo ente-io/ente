@@ -23,6 +23,7 @@ import {
     authenticatedPublicMemoryRequestHeaders,
     type PublicMemoryCredentials,
 } from "ente-new/albums/services/public-memory";
+import { detectFileTypeInfoFromChunk } from "../utils/detect-type";
 import { playableVideoURL, renderableImageBlob } from "./convert";
 import { hlsPlaylistDataForFile, type HLSPlaylistDataForFile } from "./video";
 
@@ -398,7 +399,9 @@ class DownloadManager {
      * it into a {@link Blob}.
      */
     async fileBlob(file: EnteFile, opts?: FileDownloadOpts) {
-        return this.fileStream(file, opts).then((s) => new Response(s).blob());
+        return this.fileStream(file, opts).then((stream) =>
+            this.blobWithInferredType(file, stream),
+        );
     }
 
     /**
@@ -440,7 +443,7 @@ class DownloadManager {
         if (cachedURL) return cachedURL;
 
         const url = this.downloadFile(file)
-            .then((stream) => new Response(stream).blob())
+            .then((stream) => this.blobWithInferredType(file, stream))
             .then((blob) => URL.createObjectURL(blob));
         this.fileURLPromises.set(file.id, url);
 
@@ -581,6 +584,25 @@ class DownloadManager {
             );
         } else {
             return photos_downloadFile(file, opts);
+        }
+    }
+
+    private async blobWithInferredType(
+        file: EnteFile,
+        stream: ReadableStream<Uint8Array> | null,
+    ) {
+        const blob = await new Response(stream).blob();
+        if (blob.type) return blob;
+
+        try {
+            const { mimeType } = await detectFileTypeInfoFromChunk(
+                async () =>
+                    new Uint8Array(await blob.slice(0, 4100).arrayBuffer()),
+                fileFileName(file),
+            );
+            return mimeType ? blob.slice(0, blob.size, mimeType) : blob;
+        } catch {
+            return blob;
         }
     }
 

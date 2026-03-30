@@ -5,6 +5,7 @@ import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen_password.dart';
 import 'package:ente_lock_screen/ui/lock_screen_pin.dart';
+import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/platform_util.dart';
@@ -40,6 +41,7 @@ class LocalAuthenticationService {
       final result = await requestAuthentication(
         context,
         infoMessage,
+        macOSReason: context.strings.unlock,
         isAuthenticatingForInAppChange: true,
       );
       AppLock.of(context)!.setEnabled(
@@ -115,6 +117,7 @@ class LocalAuthenticationService {
       final result = await requestAuthentication(
         context,
         infoMessage,
+        macOSReason: context.strings.unlock,
       );
       if (result) {
         AppLock.of(context)!.setEnabled(shouldEnableLockScreen);

@@ -121,7 +121,6 @@
   "importAegisGuide": "Скористайтеся опцією «Export the vault» у параметрах Aegis.\n\nЯкщо ваше сховище зашифровано, вам потрібно буде ввести пароль сховища, щоб розшифрувати його.",
   "import2FasGuide": "Скористайтеся опцією «Settings->Backup -Export» у 2FAS.\n\nЯкщо ваша резервна копія зашифрована, вам потрібно буде ввести пароль, щоб розшифрувати її",
   "importLastpassGuide": "Скористайтеся опцією «Transfer accounts» у налаштуваннях Lastpass Authenticator і натисніть «Export accounts to file». Імпортуйте завантажений JSON.",
-  "importProtonAuthGuide": "Скористуйтеся опцією «Export» у налаштуваннях Proton Authenticator для експорту своїх кодів.",
   "exportCodes": "Експортувати коди",
   "importLabel": "Імпортувати",
   "importInstruction": "Будь ласка, виберіть файл, що містить список кодів у наступному форматі",
@@ -331,7 +330,6 @@
     }
   },
   "sorry": "Дуже шкода",
-  "importFailureDesc": "Не вдалось обробити вибраний файл.\nБудь ласка, напишіть на support@ente.io, якщо вам потрібна допомога!",
   "pendingSyncs": "Увага!",
   "pendingSyncsWarningBody": "Деякі з ваших кодів не були збережені.\n\nБудь ласка, переконайтеся, що у вас є резервна копія для цих кодів перед виходом.",
   "checkInboxAndSpamFolder": "Будь ласка, перевірте вашу скриньку електронної пошти (та спам), щоб завершити перевірку",
@@ -344,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

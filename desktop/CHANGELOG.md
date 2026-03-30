@@ -1,12 +1,13 @@
 # CHANGELOG
 
-## v1.7.21 (unreleased)
-
--
-
-## v1.7.20
+## v1.7.22 (unreleased)
 
 - App lock
+- Better people list experience (bigger view with search)
+- Various bug fixes (map view tiles, etc)
+
+## v1.7.21
+
 - Masonry layout for public albums
 - Quick links
 - Full viewer experience for single-photo/video links
@@ -70,7 +71,7 @@
 - Generate streams for videos (beta)
 
     > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://ente.io/help/photos/faq/video-streaming).
+    > [video streaming FAQ](https://ente.com/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 
@@ -294,7 +295,7 @@ Other highlights:
 
 ### Photo Editor
 
-Check out our [blog](https://ente.io/blog/introducing-web-desktop-photo-editor/)
+Check out our [blog](https://ente.com/blog/introducing-web-desktop-photo-editor/)
 to know about feature and functionalities.
 
 ## v1.6.47
@@ -386,4 +387,4 @@ to know about feature and functionalities.
     We have squashed a few pesky bugs that were reported by our community
 
     If you would like to help us improve ente, come join the party @
-    ente.io/community!
+    ente.com/community!
