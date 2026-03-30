@@ -750,8 +750,8 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: "16kb-fix"
-      resolved-ref: "9c7cf4b98289598b67422f3c31e6ef8bb06a4198"
+      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
@@ -759,8 +759,8 @@ packages:
     dependency: transitive
     description:
       path: "flutter/flutter_platform_interface"
-      ref: "16kb-fix"
-      resolved-ref: "9c7cf4b98289598b67422f3c31e6ef8bb06a4198"
+      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "0.2.1"
