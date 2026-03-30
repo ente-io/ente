@@ -303,7 +303,7 @@ abstract class AppLocalizations {
   /// Partial success message for offline save
   ///
   /// In en, this message translates to:
-  /// **'{successCount} files saved offline, {failureCount} failed'**
+  /// **'{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}'**
   String filesAvailableOfflinePartial(int successCount, int failureCount);
 
   /// Failure message when files could not be saved offline

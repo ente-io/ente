@@ -102,7 +102,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String filesAvailableOfflinePartial(int successCount, int failureCount) {
-    return '$successCount files saved offline, $failureCount failed';
+    String _temp0 = intl.Intl.pluralLogic(
+      successCount,
+      locale: localeName,
+      other: 'Saved $successCount files offline',
+      one: 'Saved 1 file offline',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      failureCount,
+      locale: localeName,
+      other: '$failureCount failed',
+      one: '1 failed',
+    );
+    return '$_temp0, $_temp1';
   }
 
   @override

@@ -52,7 +52,7 @@
       }
     }
   },
-  "filesAvailableOfflinePartial": "{successCount} files saved offline, {failureCount} failed",
+  "filesAvailableOfflinePartial": "{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}",
   "@filesAvailableOfflinePartial": {
     "description": "Partial success message for offline save",
     "placeholders": {
