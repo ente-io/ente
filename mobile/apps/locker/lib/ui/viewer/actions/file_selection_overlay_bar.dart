@@ -14,6 +14,7 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/offline/offline_files_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
@@ -31,7 +32,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final List<EnteFile> files;
   final CollectionViewType? collectionViewType;
   final ScrollController? scrollController;
-  final bool isTrashMode; 
+  final bool isTrashMode;
 
   const FileSelectionOverlayBar({
     required this.selectedFiles,
@@ -468,12 +469,10 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final viewType = widget.collectionViewType;
     final colorScheme = getEnteColorScheme(context);
     final actions = <Widget>[];
-    final canToggleOffline =
-        OfflineFilesService.instance.hasEligibleFiles(files);
+    final eligibleFiles = OfflineFilesService.instance.getEligibleFiles(files);
+    final canToggleOffline = eligibleFiles.isNotEmpty;
     final shouldRemoveOffline = canToggleOffline &&
-        OfflineFilesService.instance.shouldRemoveOfflineForSelection(
-          files,
-        );
+        eligibleFiles.every(LockerDB.instance.isFileMarkedOffline);
 
     final showEdit = viewType?.showEditOption ?? true;
     final showShare = viewType?.showShareOption ?? true;

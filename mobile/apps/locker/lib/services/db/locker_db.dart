@@ -580,36 +580,6 @@ class LockerDB extends EnteBaseDatabase {
     await batch.commit();
   }
 
-  Future<List<EnteFile>> getOfflineMarkedFiles() async {
-    final markedIds = _offlineMarkedFileIDsCache.toList(growable: false);
-    if (markedIds.isEmpty) {
-      return [];
-    }
-
-    final placeholders = List.filled(markedIds.length, '?').join(',');
-    final rows = await _db.rawQuery(
-      '''
-      SELECT f.*
-      FROM $_filesTable f
-      WHERE f.uploaded_file_id IN ($placeholders)
-        AND EXISTS (
-          SELECT 1
-          FROM $_collectionFilesTable cf
-          INNER JOIN $_collectionsTable c
-            ON c.id = cf.collection_id
-          WHERE cf.uploaded_file_id = f.uploaded_file_id
-            AND c.is_deleted = 0
-        )
-      ''',
-      markedIds,
-    );
-    final files = <EnteFile>[];
-    for (final row in rows) {
-      files.add(await _mapFromRow(row));
-    }
-    return files;
-  }
-
   bool isFileMarkedOfflineById(int? uploadedFileID) {
     return uploadedFileID != null &&
         _offlineMarkedFileIDsCache.contains(uploadedFileID);

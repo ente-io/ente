@@ -91,20 +91,6 @@ class OfflineFilesService {
     return sharedCount;
   }
 
-  bool hasEligibleFiles(Iterable<EnteFile> files) {
-    return getEligibleFiles(files).isNotEmpty;
-  }
-
-  /// The bottom sheet only shows "Remove offline" when every actionable
-  /// file in the selection is already marked offline on this device.
-  bool shouldRemoveOfflineForSelection(Iterable<EnteFile> files) {
-    final eligibleFiles = getEligibleFiles(files);
-    if (eligibleFiles.isEmpty) {
-      return false;
-    }
-    return eligibleFiles.every(LockerDB.instance.isFileMarkedOffline);
-  }
-
   /// Downloads the encrypted blob and marks the file offline on success.
   Future<bool> markFilesOffline(
     BuildContext context,
@@ -302,17 +288,6 @@ class OfflineFilesService {
     return true;
   }
 
-  Future<void> _setOfflineMarkForFile(
-    EnteFile file,
-    bool isMarkedOffline,
-  ) async {
-    final fileID = file.uploadedFileID!;
-    await LockerDB.instance.setFilesMarkedOffline(
-      [fileID],
-      isMarkedOffline,
-    );
-  }
-
   /// Service-level unmark path used by non-UI flows like trash/delete.
   Future<void> unmarkFilesOfflineById(
     Iterable<int> fileIDs, {
@@ -361,12 +336,10 @@ class OfflineFilesService {
     ProgressCallback? progressCallback,
   }) async {
     final fileID = file.uploadedFileID!;
-    if (await getCurrentOfflineEncryptedCopy(file) == null) {
-      await ensureEncryptedOfflineCopy(
-        file,
-        progressCallback: progressCallback,
-      );
-    }
+    await ensureEncryptedOfflineCopy(
+      file,
+      progressCallback: progressCallback,
+    );
 
     if (!await LockerDB.instance.hasActiveFile(fileID)) {
       _logger.warning(
@@ -379,7 +352,7 @@ class OfflineFilesService {
       return false;
     }
 
-    await _setOfflineMarkForFile(file, true);
+    await LockerDB.instance.setFilesMarkedOffline([fileID], true);
     return true;
   }
 

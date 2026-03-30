@@ -37,14 +37,14 @@ class FileUtil {
     if (file.localPath != null) {
       final localFile = File(file.localPath!);
       if (await localFile.exists()) {
-        await _launchFile(context, localFile, file.displayName);
+        await _launchFile(context, localFile);
         return;
       }
     }
 
     final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
     if (await cachedDecryptedFile.exists()) {
-      await _launchFile(context, cachedDecryptedFile, file.displayName);
+      await _launchFile(context, cachedDecryptedFile);
       return;
     }
 
@@ -57,7 +57,6 @@ class FileUtil {
     try {
       await dialog.show();
       final fileKey = await CollectionService.instance.getFileKey(file);
-      File? decryptedFile;
       void progressCallback(int downloaded, int total) {
         if (total > 0 && downloaded >= 0) {
           final percentage = ((downloaded / total) * 100).clamp(0, 100).round();
@@ -69,7 +68,7 @@ class FileUtil {
         }
       }
 
-      decryptedFile = await file_downloader.openFile(
+      final decryptedFile = await file_downloader.openFile(
         file,
         fileKey,
         progressCallback: progressCallback,
@@ -78,7 +77,7 @@ class FileUtil {
       await dialog.hide();
 
       if (decryptedFile != null) {
-        await _launchFile(context, decryptedFile, file.displayName);
+        await _launchFile(context, decryptedFile);
       } else {
         await showAlertBottomSheet(
           context,
@@ -400,7 +399,6 @@ class FileUtil {
   static Future<void> _launchFile(
     BuildContext context,
     File file,
-    String fileName,
   ) async {
     try {
       final result = await OpenFile.open(file.path);
