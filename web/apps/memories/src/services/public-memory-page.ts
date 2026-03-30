@@ -1,5 +1,6 @@
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
+import { memoriesAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import {
     decryptMemoryShareMetadata,
@@ -39,7 +40,7 @@ export const loadPublicMemoryPage = async (
         if (!accessToken) {
             return {
                 kind: "redirect",
-                redirectURL: "https://ente.io/memories",
+                redirectURL: memoriesAppOrigin(),
             };
         }
 

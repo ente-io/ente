@@ -11,7 +11,7 @@ import { usePublicMemoryPage } from "../hooks/usePublicMemoryPage";
 /**
  * Index page that handles both root redirect and memory share links
  *
- * - Root domain (/) redirects to ente.io/memories
+ * - Root domain (/) redirects to the configured memories landing page
  * - Share links (/TOKEN#key) render the memory viewer
  *
  * This page is served for all routes via:

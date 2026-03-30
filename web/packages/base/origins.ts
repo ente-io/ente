@@ -122,6 +122,17 @@ export const shareAppOrigin = (): string =>
     process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT ?? "https://share.ente.io";
 
 /**
+ * Return the origin/path that serves the memories app landing experience.
+ *
+ * Defaults to our production memories landing page, "https://ente.io/memories",
+ * but can be overridden by setting the `NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT`
+ * environment variable.
+ */
+export const memoriesAppOrigin = (): string =>
+    process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ??
+    "https://ente.io/memories";
+
+/**
  * Return the origin that serves the photos app.
  *
  * Defaults to our production instance, "https://web.ente.io", but can be
@@ -130,22 +141,3 @@ export const shareAppOrigin = (): string =>
  */
 export const photosAppOrigin = (): string =>
     process.env.NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT ?? "https://web.ente.io";
-
-/**
- * Return the origin that serves public memory shares.
- *
- * Defaults to our production instance, "https://memories.ente.io", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT` environment
- * variable. For self-hosted setups, this can be set to the custom API origin.
- */
-export const memoryHost = async (): Promise<string> => {
-    const custom = await customAPIOrigin();
-    if (custom) {
-        // For self-hosted, point to the custom API with the memories path
-        return `${custom}/memories`;
-    }
-    return (
-        process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ??
-        "https://memories.ente.io"
-    );
-};

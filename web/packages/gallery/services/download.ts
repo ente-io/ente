@@ -119,11 +119,6 @@ class DownloadManager {
      */
     publicMemoryCredentials: PublicMemoryCredentials | undefined;
     /**
-     * Access token for downloading files when we're in the context of a
-     * public memory share.
-     */
-    publicMemoryAccessToken: string | undefined;
-    /**
      * Local cache for thumbnail blobs.
      *
      * `undefined` indicates that the cache has not yet been initialized. It is
@@ -203,7 +198,6 @@ class DownloadManager {
     logout() {
         this.publicAlbumsCredentials = undefined;
         this.publicMemoryCredentials = undefined;
-        this.publicMemoryAccessToken = undefined;
         this.thumbnailURLPromises.clear();
         this.fileURLPromises.clear();
         this.renderableSourceURLPromises.clear();
@@ -229,7 +223,6 @@ class DownloadManager {
         credentials: PublicMemoryCredentials | undefined,
     ) {
         this.publicMemoryCredentials = credentials;
-        this.publicMemoryAccessToken = credentials?.accessToken;
     }
 
     /**
