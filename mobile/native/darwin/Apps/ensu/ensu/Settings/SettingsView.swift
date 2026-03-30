@@ -280,7 +280,7 @@ struct SettingsView: View {
     private func openDeleteAccountEmail() {
         let subject = "Request Deletion for Ente Account"
         let encoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject
-        guard let url = URL(string: "mailto:support@ente.io?subject=\(encoded)") else { return }
+        guard let url = URL(string: "mailto:support@ente.com?subject=\(encoded)") else { return }
         openURL(url)
     }
 

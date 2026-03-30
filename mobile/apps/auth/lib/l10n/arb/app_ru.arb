@@ -333,7 +333,7 @@
     }
   },
   "sorry": "Извините",
-  "importFailureDesc": "Не удалось разобрать выбранный файл.\nПожалуйста, напишите на support@ente.io, если вам нужна помощь!",
+  "importFailureDesc": "Не удалось обработать выбранный файл.\nПожалуйста, напишите на support@ente.com, если Вам нужна помощь!",
   "pendingSyncs": "Предупреждение",
   "pendingSyncsWarningBody": "Некоторые из ваших кодов не были сохранены.\n\nПожалуйста, убедитесь, что у вас есть резервная копия для этих кодов перед выходом.",
   "checkInboxAndSpamFolder": "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации",
@@ -346,7 +346,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

@@ -83,7 +83,7 @@ Duplicates can occur:
 2. Disable backup in Google Photos.
 3. Request Google Takeout.
 4. Empty any local photo folders which are part of Google Takeout and also need to be backed up post migration.
-   - External tools can be used to deduplicate Google Takeout before importing into Ente.
+    - External tools can be used to deduplicate Google Takeout before importing into Ente.
 5. Import Google Takeout using Ente desktop app.
 6. After successful import, enable desired photo folder backup on Ente mobile app.
 
@@ -103,6 +103,7 @@ Google Takeout does not reliably export shared albums:
 - Shared albums you own may appear in Takeout and may export as a folder, but not consistently. Some photos may be missing, folders may be split, or the album might not be recreated at all.
 - Shared albums you joined (someone else owns) do not export unless you manually added each photo to your own library.
 - Shared-album names or structure are not preserved in the metadata, hence the shared album cannot be automatically reconstructed.
+- Metadata regarding who shared the photo with you will not be present.
 
 The best way to export shared albums is to manually download each shared album:
 
@@ -113,6 +114,42 @@ The best way to export shared albums is to manually download each shared album:
 
 This will reliably preserve the shared album name and contents.
 
+### How do I move from Google Photos Partner Sharing to Ente? {#migrate-google-photos-partner-sharing}
+
+Google Photos Partner Sharing automatically shares one person's entire library (or photos of specific people) with a partner. Ente achieves a similar result through shared albums. However, saving any shared photos (vs viewing) counts against the user's storage.
+
+#### 1. Both partners export and import their libraries
+
+Each partner should export their own library via [Google Takeout](/photos/migration/from-google-photos/) and import it into their own Ente account.
+
+> **Note**: Photos only visible to you through Partner Sharing (not saved to your library) are **not** included in your Takeout. Only the partner who originally took those photos will have them in their export. There is also no built-in filter to remove partner-shared photos from a Takeout import — so duplicates may occur if both partners import and then share entire libraries on Ente.
+
+#### 2. Set up sharing on Ente
+
+**Share your Camera folder (recommended):**
+
+1. Open the **Camera** folder (Android) or **Recents** (iOS)
+2. Tap the Share icon and add your partner as a [Viewer, Collaborator, or Admin](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
+3. Ask your partner to do the same for you
+
+New photos backed up to these folders will automatically sync to your partner's device.
+
+**Share all existing albums at once:**
+
+1. Long-press any album to enter selection mode
+2. Tap "All" at the bottom right to select every album
+3. Tap Share and add your partner as a [Viewer, Collaborator, or Admin](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)
+
+**Auto-add photos of specific people:**
+
+Use [Smart albums](/photos/features/albums-and-organization/auto-add-people) to automatically add photos of selected people (e.g., your kids) to a shared album.
+
+#### 3. Consider a Family plan
+
+A [Family plan](/photos/features/account/family-plans) lets both partners share a single subscription's storage at no extra cost, while keeping libraries private.
+
+> **Note**: Shared albums on Ente have the extra advantage of [Admin roles](/photos/features/sharing-and-collaboration/collaboration#permissions-explained), E2EE [comments and likes](/photos/features/sharing-and-collaboration/comments-and-likes), [collect links](/photos/features/sharing-and-collaboration/collaboration#collecting-photos-from-anyone), bulk ZIP download, [custom domains](/photos/features/sharing-and-collaboration/custom-domains/), trip layout, and download restrictions — all things Google Photos shared albums do not offer.
+
 ### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
 
 Yes, you can start fresh.
@@ -122,6 +159,7 @@ Yes, you can start fresh.
 - Once synced, empty Trash to permanently remove all items from your account.
 
 Once this is done, you can reupload your entire Google Takeout folder again using the desktop app.
+
 ### Is there a way to remove partner sharing photos when importing via Google Takeout?
 
 There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.

@@ -27,7 +27,7 @@
   "deleteReason4": "La meva raó no està llistada",
   "sendEmail": "Envia correu",
   "deleteRequestSLAText": "La teva sol·licitud es processarà en 72 hores.",
-  "deleteEmailRequest": "Si us plau, envia un correu a <warning>account-deletion@ente.io</warning> des de la teva adreça de correu registrada.",
+  "deleteEmailRequest": "Si us plau, envia un correu a <warning>account-deletion@ente.com</warning> des de la teva adreça de correu registrada.",
   "entePhotosPerm": "Ente <i>necessita permís per</i> preservar les teves fotos",
   "ok": "D'acord",
   "createAccount": "Crea compte",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -287,7 +287,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -695,7 +695,7 @@
   "subscription": "Subscripció",
   "paymentDetails": "Detalls del pagament",
   "manageFamily": "Gestiona família",
-  "contactToManageSubscription": "Si us plau, contacta amb nosaltres a support@ente.io per gestionar la teva subscripció de {provider}.",
+  "contactToManageSubscription": "Si us plau, contacta amb nosaltres a support@ente.com per gestionar la teva subscripció de {provider}.",
   "renewSubscription": "Renova subscripció",
   "cancelSubscription": "Cancel·la subscripció",
   "areYouSureYouWantToRenew": "Estàs segur que vols renovar?",
@@ -744,7 +744,7 @@
   "subAlreadyLinkedErrMessage": "El teu {id} ja està vinculat a un altre compte d'Ente.\nSi vols utilitzar el teu {id} amb aquest compte, si us plau contacta amb el nostre suport''",
   "visitWebToManage": "Si us plau, visita web.ente.io per gestionar la teva subscripció",
   "couldNotUpdateSubscription": "No s'ha pogut actualitzar la subscripció",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Si us plau, contacta amb support@ente.io i estarem encantats d'ajudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Si us plau, contacta amb support@ente.com i estarem encantats d'ajudar!",
   "paymentFailed": "El pagament ha fallat",
   "paymentFailedTalkToProvider": "Si us plau, parla amb el suport de {providerName} si se t'ha cobrat",
   "@paymentFailedTalkToProvider": {

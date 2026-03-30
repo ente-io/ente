@@ -523,7 +523,6 @@
   "youCannotShareWithYourself": "Nie możesz udostępnić samemu sobie",
   "inviteToEnte": "Zaproś do Ente",
   "sendInvite": "Wyślij zaproszenie",
-  "shareTextRecommendUsingEnte": "Pobierz Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "To jest Twój Identyfikator Weryfikacji",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Osoba udostępniająca albumy powinna widzieć ten sam identyfikator na swoim urządzeniu.",
   "howToViewShareeVerificationID": "Poproś ich o przytrzymanie swojego adresu e-mail na ekranie ustawień i sprawdzenie, czy identyfikatory na obu urządzeniach są zgodne.",
@@ -532,15 +531,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Identyfikator weryfikacyjny",
   "verifyEmailID": "Zweryfikuj {email}",
   "emailNoEnteAccount": "{email} nie ma konta Ente.\n\nWyślij zaproszenie, aby udostępniać elementy.",
-  "shareMyVerificationID": "Oto mój identyfikator weryfikacyjny: {verificationID} dla ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hej, czy możesz potwierdzić, że to jest Twój identyfikator weryfikacyjny ente.com: {verificationID}",
   "passwordLock": "Blokada hasłem",
   "manage": "Zarządzaj",
   "addedAs": "Dodano jako",

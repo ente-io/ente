@@ -13,8 +13,19 @@ const ITEM_LENGTH_OFFSET_KEY: &str = "Item:Length";
 const GCAMERA_MOTION_PHOTO: &str = "GCamera:MotionPhoto";
 const ITEM_MIME_TYPE: &str = "Item:Mime";
 const FILE_OFFSET_KEYS: [&str; 2] = [ITEM_LENGTH_OFFSET_KEY, "GCamera:MicroVideoOffset"];
-const MP4_HEADER_PATTERN: [u8; 16] = [
-    0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x6D, 0x70, 0x34, 0x32, 0x00, 0x00, 0x00, 0x00,
+/// Minimum valid ftyp box size: 4 (size) + 4 (type) = 8 bytes.
+const FTYP_BOX_MIN_SIZE: u32 = 8;
+
+/// Maximum ftyp box size we consider plausible for an embedded motion video.
+/// Real ftyp boxes are typically 16–32 bytes. We use a generous ceiling to
+/// handle exotic compatible-brand lists while rejecting garbage matches.
+const FTYP_BOX_MAX_SIZE: u32 = 1024;
+
+/// Known major brands for MP4, QuickTime, and related video container formats.
+/// Image-only brands (heic, heif, mif1, avif) are intentionally excluded.
+const KNOWN_VIDEO_BRANDS: &[[u8; 4]] = &[
+    *b"isom", *b"iso2", *b"iso5", *b"iso6", *b"mp41", *b"mp42", *b"mp71", *b"M4V ", *b"M4VP",
+    *b"avc1", *b"mmp4", *b"3gp4", *b"3gp5", *b"3gp6", *b"qt  ", *b"MSNV", *b"dash", *b"f4v ",
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -58,11 +69,8 @@ pub fn get_motion_video_index_from_path<P: AsRef<Path>>(
 }
 
 fn get_motion_video_index(bytes: &[u8]) -> Option<VideoIndex> {
-    if let Some(start) = find_last_subslice(bytes, &MP4_HEADER_PATTERN) {
-        return Some(VideoIndex {
-            start,
-            end: bytes.len(),
-        });
+    if let Some(index) = find_largest_ftyp_segment(bytes) {
+        return Some(index);
     }
 
     extract_video_index_from_xmp(bytes)
@@ -223,19 +231,94 @@ fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
         .position(|window| window == needle)
 }
 
-fn find_last_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
-    if needle.is_empty() {
-        return Some(haystack.len());
+/// Finds all valid embedded MP4/QuickTime ftyp boxes and returns the bounds of
+/// the **largest** individual segment.
+///
+/// Some motion photos embed two MP4s: a short preview clip and the full
+/// video. The ordering varies by device, so we cannot simply pick the first
+/// or last. Instead we measure each segment from one ftyp to the next
+/// candidate, or to EOF for the last one, and return the largest slice.
+///
+/// A candidate ftyp is accepted when:
+/// 1. The 4 bytes before `ftyp` encode a box size in [8, 1024].
+/// 2. The 4 bytes after `ftyp` are a recognised video brand.
+/// 3. The box does not start at byte 0 (that would be a standalone MP4).
+fn find_largest_ftyp_segment(bytes: &[u8]) -> Option<VideoIndex> {
+    let len = bytes.len();
+    if len < 12 {
+        return None;
     }
-    haystack
-        .windows(needle.len())
-        .rposition(|window| window == needle)
+
+    // Collect all valid ftyp box starts.
+    let mut starts: Vec<usize> = Vec::new();
+    let last = len.saturating_sub(8);
+    let mut i = 4;
+    while i <= last {
+        if bytes[i] == b'f' && bytes[i + 1] == b't' && bytes[i + 2] == b'y' && bytes[i + 3] == b'p'
+        {
+            let box_start = i - 4;
+            let box_size = u32::from_be_bytes([
+                bytes[box_start],
+                bytes[box_start + 1],
+                bytes[box_start + 2],
+                bytes[box_start + 3],
+            ]);
+            if (FTYP_BOX_MIN_SIZE..=FTYP_BOX_MAX_SIZE).contains(&box_size) && box_start > 0 {
+                let brand: [u8; 4] = [bytes[i + 4], bytes[i + 5], bytes[i + 6], bytes[i + 7]];
+                if KNOWN_VIDEO_BRANDS.contains(&brand) {
+                    starts.push(box_start);
+                }
+            }
+        }
+        i += 1;
+    }
+
+    if starts.is_empty() {
+        return None;
+    }
+    if starts.len() == 1 {
+        return Some(VideoIndex {
+            start: starts[0],
+            end: len,
+        });
+    }
+
+    // Pick the segment with the most bytes.
+    // Segment size = next_ftyp_start - this_ftyp_start (or EOF for last).
+    let mut best_index = VideoIndex {
+        start: starts[0],
+        end: starts[1],
+    };
+    let mut best_size = 0usize;
+    for (idx, &start) in starts.iter().enumerate() {
+        let end = if idx + 1 < starts.len() {
+            starts[idx + 1]
+        } else {
+            len
+        };
+        let size = end - start;
+        if size > best_size {
+            best_size = size;
+            best_index = VideoIndex { start, end };
+        }
+    }
+    Some(best_index)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use tempfile::tempdir;
+
+    /// Build a minimal ftyp box with the given major brand (16 bytes).
+    fn make_ftyp_box(brand: &[u8; 4]) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(16);
+        buf.extend_from_slice(&16u32.to_be_bytes()); // box size
+        buf.extend_from_slice(b"ftyp");
+        buf.extend_from_slice(brand);
+        buf.extend_from_slice(&0u32.to_be_bytes()); // minor version
+        buf
+    }
 
     fn xmp_with_offset(offset: usize, extra_attributes: &str) -> String {
         format!(
@@ -255,9 +338,9 @@ mod tests {
     }
 
     #[test]
-    fn finds_mp4_header_in_jpeg_like_file() {
+    fn finds_ftyp_box_in_jpeg_like_file() {
         let mut bytes = b"jpeg-prefix".to_vec();
-        bytes.extend_from_slice(&MP4_HEADER_PATTERN);
+        bytes.extend_from_slice(&make_ftyp_box(b"mp42"));
         bytes.extend_from_slice(&[1, 2, 3, 4]);
 
         let index = get_motion_video_index(&bytes).expect("video index should exist");
@@ -266,17 +349,96 @@ mod tests {
     }
 
     #[test]
-    fn prefers_last_mp4_header_when_multiple_exist() {
+    fn picks_largest_segment_when_multiple_ftyp_exist() {
+        // Scenario 1: first segment is larger (full video first, preview second)
         let mut bytes = b"jpeg-prefix".to_vec();
-        bytes.extend_from_slice(&MP4_HEADER_PATTERN);
-        bytes.extend_from_slice(b"autoplay-segment");
+        let first_start = bytes.len();
+        bytes.extend_from_slice(&make_ftyp_box(b"mp42"));
+        bytes.extend_from_slice(&[0xAA; 500]); // large segment
         let second_start = bytes.len();
-        bytes.extend_from_slice(&MP4_HEADER_PATTERN);
-        bytes.extend_from_slice(b"motion-video-segment");
+        bytes.extend_from_slice(&make_ftyp_box(b"isom"));
+        bytes.extend_from_slice(&[0xBB; 50]); // small segment
 
         let index = get_motion_video_index(&bytes).expect("video index should exist");
-        assert_eq!(index.start, second_start);
-        assert_eq!(index.end, bytes.len());
+        assert_eq!(index.start, first_start);
+        assert_eq!(index.end, second_start);
+        let extracted =
+            extract_motion_video(&bytes, Some(index)).expect("video bytes should extract");
+        assert_eq!(extracted.len(), second_start - first_start);
+
+        // Scenario 2: second segment is larger (preview first, full video second)
+        let mut bytes2 = b"jpeg-prefix".to_vec();
+        bytes2.extend_from_slice(&make_ftyp_box(b"mp42"));
+        bytes2.extend_from_slice(&[0xCC; 50]); // small segment
+        let second_start = bytes2.len();
+        bytes2.extend_from_slice(&make_ftyp_box(b"isom"));
+        bytes2.extend_from_slice(&[0xDD; 500]); // large segment
+
+        let index2 = get_motion_video_index(&bytes2).expect("video index should exist");
+        assert_eq!(index2.start, second_start);
+        assert_eq!(index2.end, bytes2.len());
+    }
+
+    #[test]
+    fn detects_various_mp4_brands() {
+        for brand in [
+            b"isom", b"mp41", b"mp42", b"avc1", b"iso2", b"M4V ", b"qt  ",
+        ] {
+            let mut bytes = b"jpeg-prefix-data".to_vec();
+            bytes.extend_from_slice(&make_ftyp_box(brand));
+            bytes.extend_from_slice(&[0xDE, 0xAD]);
+            let index = get_motion_video_index(&bytes)
+                .unwrap_or_else(|| panic!("should detect brand {:?}", std::str::from_utf8(brand)));
+            assert_eq!(index.start, b"jpeg-prefix-data".len());
+        }
+    }
+
+    #[test]
+    fn rejects_non_video_ftyp_brands() {
+        for brand in [b"heic", b"heif", b"mif1", b"avif"] {
+            let mut bytes = b"jpeg-prefix-data".to_vec();
+            bytes.extend_from_slice(&make_ftyp_box(brand));
+            bytes.extend_from_slice(&[0xDE, 0xAD]);
+            assert_eq!(
+                get_motion_video_index(&bytes),
+                None,
+                "brand {:?} should not be detected as video",
+                std::str::from_utf8(brand)
+            );
+        }
+    }
+
+    #[test]
+    fn detects_ftyp_with_larger_box_size() {
+        let mut bytes = b"jpeg-prefix-data".to_vec();
+        let box_start = bytes.len();
+        // 28-byte ftyp box (like Pixel 6): size + "ftyp" + brand + version + compat brands
+        bytes.extend_from_slice(&28u32.to_be_bytes());
+        bytes.extend_from_slice(b"ftyp");
+        bytes.extend_from_slice(b"isom");
+        bytes.extend_from_slice(&0x00020000u32.to_be_bytes());
+        bytes.extend_from_slice(b"isomiso2mp41");
+        bytes.extend_from_slice(b"video-payload");
+
+        let index = get_motion_video_index(&bytes).expect("should detect 28-byte ftyp box");
+        assert_eq!(index.start, box_start);
+    }
+
+    #[test]
+    fn rejects_ftyp_at_file_start() {
+        let mut bytes = make_ftyp_box(b"mp42");
+        bytes.extend_from_slice(b"moov-data-here");
+        assert_eq!(get_motion_video_index(&bytes), None);
+    }
+
+    #[test]
+    fn rejects_ftyp_with_implausible_box_size() {
+        let mut bytes = b"jpeg-prefix-data".to_vec();
+        bytes.extend_from_slice(&0u32.to_be_bytes()); // box size 0 (invalid)
+        bytes.extend_from_slice(b"ftyp");
+        bytes.extend_from_slice(b"mp42");
+        bytes.extend_from_slice(&0u32.to_be_bytes());
+        assert_eq!(get_motion_video_index(&bytes), None);
     }
 
     #[test]

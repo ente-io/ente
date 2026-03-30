@@ -27,7 +27,7 @@ const (
 	inactiveUserWorkerCount          = 6
 	inactiveUserEmailInFlightLimit   = 4
 	inactiveUserDeletionFromName     = "Ente"
-	inactiveUserDeletionFromEmail    = "team@ente.io"
+	inactiveUserDeletionFromEmail    = "team@ente.com"
 	inactiveUserDeletionBaseTemplate = "ente_base.html"
 
 	InactiveUserDeletionWarn2mTemplateID = "inactive_user_deletion_warn_2m_v2"
@@ -63,7 +63,7 @@ const (
 	inactiveUserGap7dTo1d    = 6 * inactiveUserOneDayInMicroSeconds
 	inactiveUserGap1dToFinal = inactiveUserOneDayInMicroSeconds
 
-	inactiveUserRolloutPercentage = 20
+	inactiveUserRolloutPercentage = 30
 	inactiveUserRolloutNonce      = "inactive-user-deletion-v1"
 )
 

@@ -47,6 +47,7 @@ class SocialSectionWidget extends StatelessWidget {
         "https://shop.ente.io",
         launchInExternalApp: !Platform.isAndroid,
       ),
+      sectionOptionSpacing,
       const SocialsMenuItemWidget("Mastodon", "https://fosstodon.org/@ente"),
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),

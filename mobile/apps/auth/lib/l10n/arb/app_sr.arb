@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Жао ми је",
-  "importFailureDesc": "Нисам могао да анализирам изабрану датотеку.\nПишите на support@ente.io ако вам је потребна помоћ!",
   "pendingSyncs": "Упозорење",
   "pendingSyncsWarningBody": "Неки од ваших кôдова нису сачувани.\n\nМолимо вас осигурајте да имате резервну копију за ове кôдове пре него што се одјавите.",
   "checkInboxAndSpamFolder": "Молимо вас да проверите примљену пошту (и нежељену пошту) да бисте довршили верификацију",
@@ -343,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

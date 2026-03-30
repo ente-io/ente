@@ -231,6 +231,10 @@ Ente backs up a single primary full-resolution image from the Burst. Additional 
 
 iCloud Shared Albums store compressed copies, not the original files. Because of this, Ente sees the shared-album copy as a different file, so it gets backed up separately and appears as a duplicate.
 
+### On my iPhone, why are my photos not seen in the same albums as selected for backup? {#ios-album-assignment}
+
+When a photo belongs to multiple default albums on iOS and those albums are selected for backup, Ente identifies which album has the fewest photos and uploads the photo into that corresponding album on Ente. For example, if both Recents and Live Photos are marked for backup, live photos are added to the Live Photos album on Ente.
+
 ### Why are 2 copies of the same photo seen, one synced and one unsynced (slashed cloud icon) during device migration? {#migration-duplicate-photos}
 
 During migration, Ente rechecks all local photos against what is already uploaded. While this scan is in progress, the same photo can appear twice:
@@ -525,6 +529,20 @@ Yes! You can use Ente on as many devices as you want simultaneously. All your de
 
 The sync happens automatically in the background when devices are connected to the internet.
 
+### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}
+
+This usually occurs due to a network connectivity issue:
+
+- Check your internet connection is active
+- Try switching networks (WiFi to mobile data or vice versa)
+- If network connection is fine and sync is still not occurring, please send us
+  your debug logs via **Settings > Help > View logs** so we can investigate
+  further. You can reach us at [support@ente.com](mailto:support@ente.com).
+
+### Is there a way to filter photos that are backed up to Ente but no longer on my device? {#filter-cloud-only-photos}
+
+No. There is currently no way to filter cloud-only photos (photos that exist in Ente but are no longer on your device).
+
 ## File Support & Upload Limits
 
 ### What file formats does Ente support? {#file-formats}
@@ -533,7 +551,7 @@ Ente supports all files that have a mime type of `image/*` or `video/*` regardle
 
 However, we only have limited support for RAW currently. We are working towards adding full support, and you can watch this [thread](https://github.com/ente-io/ente/discussions/625) for updates.
 
-If you find an issue with ente's ability to parse a certain file type, please write to [support@ente.io](mailto:support@ente.io) with details of the unsupported file format and we will do our best to help you out.
+If you find an issue with ente's ability to parse a certain file type, please write to [support@ente.com](mailto:support@ente.com) with details of the unsupported file format and we will do our best to help you out.
 
 ### Is there a file size limit? {#file-size-limit}
 

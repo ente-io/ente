@@ -329,7 +329,6 @@
     }
   },
   "sorry": "申し訳ありません",
-  "importFailureDesc": "選択されたファイルを解析できませんでした。\n手助けが必要な場合は support@ente.io までご連絡ください。",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "いくつかのコードがバックアップされていません。\n\nログアウトする前に、これらのコードのバックアップがあることを確認してください。",
   "checkInboxAndSpamFolder": "受信トレイ（および迷惑メール）を確認して認証を完了してください",
@@ -342,7 +341,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

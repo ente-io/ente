@@ -521,7 +521,6 @@
   "youCannotShareWithYourself": "Nu poți distribui cu tine însuți",
   "inviteToEnte": "Invitați la Ente",
   "sendInvite": "Trimiteți invitația",
-  "shareTextRecommendUsingEnte": "Descarca Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Acesta este ID-ul dvs. de verificare",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Cineva care distribuie albume cu dvs. ar trebui să vadă același ID pe dispozitivul său.",
   "howToViewShareeVerificationID": "Rugați-i să țină apăsat pe adresa de e-mail din ecranul de setări și să verifice dacă ID-urile de pe ambele dispozitive se potrivesc.",
@@ -530,15 +529,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificare",
   "verifyEmailID": "Verificare {email}",
   "emailNoEnteAccount": "{email} nu are un cont Ente.\n\nTrimite-i o invitatie pentru a partaja elemente.",
-  "shareMyVerificationID": "Acesta este ID-ul meu de verificare: {verificationID} pentru ente.com.",
-  "shareTextConfirmOthersVerificationID": "Poți confirma că acesta este ID-ul tău de verificare ente.com: {verificationID}",
   "passwordLock": "Blocare cu parolă",
   "manage": "Gestionare",
   "addedAs": "Adăugat ca",

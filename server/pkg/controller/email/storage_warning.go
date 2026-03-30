@@ -23,12 +23,12 @@ const (
 
 	storageWarningBaseTemplate = "ente_base.html"
 	storageWarningFromName     = "Ente"
-	storageWarningFromEmail    = "support@ente.io"
+	storageWarningFromEmail    = "support@ente.com"
 
 	storageWarningOverageThreshold             = 25 * (1 << 30)
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
 	storageWarningOneDayInMicroseconds         = 24 * time.MicroSecondsInOneHour
-	storageWarningRolloutPercentage            = 0
+	storageWarningRolloutPercentage            = 5
 	storageWarningRolloutNonce                 = "storage-warning-v1"
 
 	storageWarningActiveOverageNotificationGroup = "storage_warning_active_overage"

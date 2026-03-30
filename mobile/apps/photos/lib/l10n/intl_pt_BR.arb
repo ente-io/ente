@@ -29,7 +29,7 @@
   "deleteReason4": "Meu motivo não está listado",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "Sua solicitação será revisada em até 72 horas.",
-  "deleteEmailRequest": "Por favor, envie um e-mail a <warning>account-deletion@ente.io</warning> do seu e-mail registrado.",
+  "deleteEmailRequest": "Por favor, envie um e-mail a <warning>account-deletion@ente.com</warning> do seu e-mail registrado.",
   "entePhotosPerm": "Ente <i>precisa de permissão para</i> preservar suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -164,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -313,7 +313,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -685,7 +685,7 @@
   "subscription": "Assinatura",
   "paymentDetails": "Detalhes de pagamento",
   "manageFamily": "Gerenciar família",
-  "contactToManageSubscription": "Entre em contato conosco em support@ente.io para gerenciar sua assinatura {provider}.",
+  "contactToManageSubscription": "Entre em contato conosco em support@ente.com para gerenciar sua assinatura {provider}.",
   "renewSubscription": "Renovar assinatura",
   "cancelSubscription": "Cancelar assinatura",
   "areYouSureYouWantToRenew": "Deseja renovar?",
@@ -734,7 +734,7 @@
   "subAlreadyLinkedErrMessage": "Seu {id} já está vinculado a outra conta Ente. Se você gostaria de usar seu {id} com esta conta, entre em contato conosco\"",
   "visitWebToManage": "Visite o web.ente.io para gerenciar sua assinatura",
   "couldNotUpdateSubscription": "Não foi possível atualizar a assinatura",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Entre em contato com support@ente.io e nós ficaremos felizes em ajudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Entre em contato com support@ente.com e nós ficaremos felizes em ajudar!",
   "paymentFailed": "O pagamento falhou",
   "paymentFailedTalkToProvider": "Fale com o suporte {providerName} se você foi cobrado",
   "@paymentFailedTalkToProvider": {

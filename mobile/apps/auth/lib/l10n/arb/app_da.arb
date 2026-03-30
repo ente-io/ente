@@ -308,7 +308,6 @@
     }
   },
   "sorry": "Beklager",
-  "importFailureDesc": "Kunne ikke afkode the valgte fil. Skriv venligst til support@ente.io hvis du har brug for hjælp!",
   "pendingSyncs": "Advarsel",
   "pendingSyncsWarningBody": "Nogle af dine koder er ikke sikkerhedskopieret.\n\nForsikr venligst at du har sikkerhedskopieret dine koder før du logger af.",
   "checkInboxAndSpamFolder": "Tjek venligst din indboks (og spam) for at færdiggøre verificeringen",
@@ -321,7 +320,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

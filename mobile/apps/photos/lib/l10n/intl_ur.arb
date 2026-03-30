@@ -28,7 +28,7 @@
   "deleteReason4": "میری وجہ فہرست میں نہیں ہے",
   "sendEmail": "ای میل بھیجیں",
   "deleteRequestSLAText": "آپ کی درخواست پر 72 گھنٹوں کے اندر عمل کیا جائے گا.",
-  "deleteEmailRequest": "براہ کرم اپنے رجسٹرڈ ای میل ایڈریس سے <warning>account-deletion@ente.io</warning> پر ای میل بھیجیں.",
+  "deleteEmailRequest": "براہ کرم اپنے رجسٹرڈ ای میل ایڈریس سے <warning>account-deletion@ente.com</warning> پر ای میل بھیجیں.",
   "entePhotosPerm": "Ente کو آپ کی تصاویر محفوظ کرنے کے لیے <i>اجازت درکار ہے</i>",
   "ok": "ٹھیک ہے",
   "createAccount": "اکاؤنٹ بنائیں",
@@ -76,7 +76,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -87,7 +87,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -160,7 +160,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -308,7 +308,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -716,7 +716,7 @@
   "subscription": "سبسکرپشن",
   "paymentDetails": "ادائیگی کی تفصیلات",
   "manageFamily": "فیملی کا انتظام کریں",
-  "contactToManageSubscription": "اپنی {provider} سبسکرپشن کا انتظام کرنے کے لیے براہ کرم support@ente.io پر ہم سے رابطہ کریں.",
+  "contactToManageSubscription": "اپنی {provider} سبسکرپشن کا انتظام کرنے کے لیے براہ کرم support@ente.com پر ہم سے رابطہ کریں.",
   "renewSubscription": "سبسکرپشن کی تجدید کریں",
   "cancelSubscription": "سبسکرپشن منسوخ کریں",
   "areYouSureYouWantToRenew": "کیا آپ واقعی تجدید کرنا چاہتے ہیں؟",
@@ -765,7 +765,7 @@
   "subAlreadyLinkedErrMessage": "آپ کی {id} پہلے سے ہی کسی دوسرے Ente اکاؤنٹ سے منسلک ہے.\nاگر آپ اپنی {id} کو اس اکاؤنٹ کے ساتھ استعمال کرنا چاہتے ہیں، تو براہ کرم ہماری سپورٹ سے رابطہ کریں''",
   "visitWebToManage": "اپنی سبسکرپشن کا انتظام کرنے کے لیے براہ کرم web.ente.io پر جائیں",
   "couldNotUpdateSubscription": "سبسکرپشن اپ ڈیٹ نہیں کی جا سکی",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "براہ کرم support@ente.io پر رابطہ کریں اور ہمیں مدد کرنے میں خوشی ہوگی!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "براہ کرم support@ente.com پر رابطہ کریں اور ہمیں مدد کرنے میں خوشی ہوگی!",
   "paymentFailed": "ادائیگی ناکام",
   "paymentFailedTalkToProvider": "اگر آپ سے چارج کیا گیا تھا تو براہ کرم {providerName} سپورٹ سے بات کریں",
   "@paymentFailedTalkToProvider": {

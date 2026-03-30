@@ -27,7 +27,7 @@
   "deleteReason4": "Причина не перерахована",
   "sendEmail": "Надіслати електронного листа",
   "deleteRequestSLAText": "Ваш запит буде оброблений протягом 72 годин.",
-  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.io</warning> зі скриньки, зазначеної при реєстрації.",
+  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.com</warning> зі скриньки, зазначеної при реєстрації.",
   "entePhotosPerm": "Ente <i>потребує дозволу</i> до ваших світлин",
   "ok": "Добре",
   "createAccount": "Створити обліковий запис",
@@ -71,7 +71,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -134,7 +134,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -274,7 +274,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -604,7 +604,7 @@
   "subscription": "Передплата",
   "paymentDetails": "Деталі платежу",
   "manageFamily": "Керування сім'єю",
-  "contactToManageSubscription": "Зв'яжіться з нами за адресою support@ente.io для управління вашою передплатою {provider}.",
+  "contactToManageSubscription": "Зв'яжіться з нами за адресою support@ente.com для управління вашою передплатою {provider}.",
   "renewSubscription": "Поновити передплату",
   "cancelSubscription": "Скасувати передплату",
   "areYouSureYouWantToRenew": "Ви впевнені, що хочете поновити?",
@@ -653,7 +653,7 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} вже пов'язаний з іншим обліковим записом Ente.\nЯкщо ви хочете використовувати свій {id} з цим обліковим записом, зверніться до нашої служби підтримки",
   "visitWebToManage": "Відвідайте web.ente.io, щоб керувати передплатою",
   "couldNotUpdateSubscription": "Не вдалося оновити передплату",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Зв'яжіться з support@ente.io і ми будемо раді допомогти!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Зв'яжіться з support@ente.com і ми будемо раді допомогти!",
   "paymentFailed": "Не вдалося оплатити",
   "paymentFailedTalkToProvider": "Зверніться до {providerName}, якщо було знято платіж",
   "@paymentFailedTalkToProvider": {

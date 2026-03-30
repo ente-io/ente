@@ -316,7 +316,6 @@
     }
   },
   "sorry": "Maaf",
-  "importFailureDesc": "Tidak dapat mengurai berkas yang dipilih.\nMohon kirimkan surel ke support@ente.io jika Anda memerlukan bantuan!",
   "pendingSyncs": "Peringatan",
   "pendingSyncsWarningBody": "Ada sebagian kode yang belum dicadangkan.\n\nMohon pastikan bahwa Anda telah mencadangkan kode-kode ini sebelum Anda keluar log.",
   "checkInboxAndSpamFolder": "Mohon cek",
@@ -329,7 +328,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

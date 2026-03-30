@@ -264,6 +264,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                             Icon(
                                               Icons.close,
                                               color: colorScheme.textBase,
+                                              semanticLabel: "close",
                                               size: 20,
                                             ),
                                           ],

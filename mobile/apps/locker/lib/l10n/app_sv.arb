@@ -522,7 +522,6 @@
   "youCannotShareWithYourself": "Du kan inte dela med dig själv",
   "inviteToEnte": "Bjud in till Ente",
   "sendInvite": "Skicka inbjudan",
-  "shareTextRecommendUsingEnte": "Ladda ner Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Detta är ditt verifierings-ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Någon som delar album med dig bör se samma ID på deras enhet.",
   "howToViewShareeVerificationID": "Be dem att långtrycka på sin e-postadress på inställningsskärmen och verifiera att ID:n på båda enheterna matchar.",
@@ -531,15 +530,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verifierings-ID",
   "verifyEmailID": "Bekräfta {email}",
   "emailNoEnteAccount": "{email} har inget Ente-konto.\n\nSkicka en inbjudan foer att dela objekt.",
-  "shareMyVerificationID": "Här är mitt verifierings-ID: {verificationID} för ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hallå, kan du bekräfta att detta är ditt ente.com verifierings-ID: {verificationID}",
   "passwordLock": "Lösenordskydd",
   "manage": "Hantera",
   "addedAs": "Lades till som",

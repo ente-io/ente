@@ -27,7 +27,7 @@
   "deleteReason4": "Прычына адсутнічае ў спісе",
   "sendEmail": "Адправіць ліст",
   "deleteRequestSLAText": "Ваш запыт будзе апрацаваны цягам 72 гадзін.",
-  "deleteEmailRequest": "Адпраўце ліст на <warning>account-deletion@ente.io</warning> з вашага зарэгістраванага адраса электроннай пошты.",
+  "deleteEmailRequest": "Адпраўце ліст на <warning>account-deletion@ente.com</warning> з вашага зарэгістраванага адраса электроннай пошты.",
   "entePhotosPerm": "Праграме <i>неабходны доступ</i> для захавання вашых фатаграфій",
   "ok": "OK",
   "createAccount": "Стварыць уліковы запіс",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -281,7 +281,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
@@ -629,7 +629,7 @@
   "subscription": "Падпіска",
   "paymentDetails": "Падрабязнасці плацяжу",
   "manageFamily": "Кіраванне сям'ёй",
-  "contactToManageSubscription": "Адпраўце ліст на паштовы адрас support@ente.io, каб кіраваць сваёй падпіскай {provider}.",
+  "contactToManageSubscription": "Адпраўце ліст на паштовы адрас support@ente.com, каб кіраваць сваёй падпіскай {provider}.",
   "renewSubscription": "Падоўжыць падпіску",
   "cancelSubscription": "Скасаваць падпіску",
   "areYouSureYouWantToRenew": "Вы сапраўды хочаце падоўжыць?",
@@ -678,7 +678,7 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} ужо звязаны з іншым уліковым запісам Ente.\nКалі вы хочаце выкарыстоўваць ваш {id} з гэтым уліковым запісам, звярніцеся ў нашу службу падтрымкі",
   "visitWebToManage": "Наведайце web.ente.io, каб кіраваць сваёй падпіскай",
   "couldNotUpdateSubscription": "Не ўдалося абнавіць падпіску",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Адпраўце ліст на паштовы адрас support@ente.io і мы будзем рады дапамагчы!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Адпраўце ліст на паштовы адрас support@ente.com і мы будзем рады дапамагчы!",
   "paymentFailed": "Збой плацяжу",
   "paymentFailedTalkToProvider": "Звярніцеся ў падтрымку {providerName}, калі з вас спагналі грашовыя сродкі",
   "@paymentFailedTalkToProvider": {

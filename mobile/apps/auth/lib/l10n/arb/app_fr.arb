@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Sécurisez vos codes A2F",
+  "onBoardingBody": "Sécurisez vos codes 2FA-Double authentification",
   "featureBackupCodes": "Synchronisation et sauvegarde cryptés de bout-en-bout",
   "featureSearchEtc": "Recherche, Tags, Partage,\nCode suivant et bien plus encore",
   "featureOpenSource": "Open source et\naudité par des experts en sécurité",
@@ -333,7 +333,7 @@
     }
   },
   "sorry": "Désolé",
-  "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.io si vous avez besoin d'aide !",
+  "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.com si vous avez besoin d'aide !",
   "pendingSyncs": "Attention",
   "pendingSyncsWarningBody": "Certains de vos codes n'ont pas été sauvegardés.\n\nVeuillez vous assurer que vous avez une sauvegarde de ces codes avant de vous déconnecter.",
   "checkInboxAndSpamFolder": "Veuillez consulter votre boîte de courriels (et les spam) pour compléter la vérification",
@@ -346,7 +346,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
