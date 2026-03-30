@@ -119,7 +119,7 @@ class _QrTapRegionState extends State<_QrTapRegion> {
       width: screenW,
       height: screenH,
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.translucent,
         onLongPress: _onLongPress,
         child: const SizedBox.expand(),
       ),
