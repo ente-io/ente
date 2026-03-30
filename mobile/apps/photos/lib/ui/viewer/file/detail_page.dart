@@ -90,7 +90,7 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
   final _isInSharedCollectionNotifier = ValueNotifier(false);
-  final _showingThumbnailFallbackNotifier = ValueNotifier<int?>(null);
+  final _showingThumbnailFallbackNotifier = ValueNotifier<String?>(null);
   final _isZoomedNotifier = ValueNotifier(false);
 
   @override

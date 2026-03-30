@@ -20,7 +20,7 @@ var ctrl *pkg.ClICtrl
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ente",
-	Short: "CLI tool for exporting your photos from ente.io",
+	Short: "CLI tool for exporting your photos from Ente",
 }
 
 func GenerateDocs() error {

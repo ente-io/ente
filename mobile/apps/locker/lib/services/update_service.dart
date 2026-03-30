@@ -14,7 +14,7 @@ class UpdateService {
   static const String kUpdateAvailableShownTimeKey =
       "update_available_shown_time_key";
   static const String kChangeLogShownVersionKey = "update_change_log_key";
-  static const int currentChangeLogVersion = 1;
+  static const int currentChangeLogVersion = 0;
   static const String _lockerIndependentPackageName =
       "io.ente.locker.independent";
   static const String _lockerIndependentPackagePrefix =
@@ -22,7 +22,7 @@ class UpdateService {
   static const String _lockerFDroidPackagePrefix = "io.ente.locker.fdroid";
   static const String _releaseInfoUrl = String.fromEnvironment(
     "locker.release_info_url",
-    defaultValue: "https://ente.io/release-info/locker-independent.json",
+    defaultValue: "https://ente.com/release-info/locker-independent.json",
   );
 
   final _logger = Logger("UpdateService");

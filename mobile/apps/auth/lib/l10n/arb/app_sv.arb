@@ -121,7 +121,6 @@
   "importAegisGuide": "Använd alternativet \"Exportera valvet\" i Aegis inställningar.\n\nOm ditt valv är krypterat måste du ange valvlösenordet för att dekryptera valvet.",
   "import2FasGuide": "Använd alternativet \"Inställningar->Säkerhetskopiera -Exportera\" i 2FAS.\n\nOm din säkerhetskopia är krypterad måste du ange lösenordet för att dekryptera säkerhetskopian.",
   "importLastpassGuide": "Använd alternativet \"Överför konton\" i LastPass Authenticators inställningar och tryck på \"Exportera konton till fil\". Importera JSON-filen som laddas ner.",
-  "importProtonAuthGuide": "Använd alternativet \"Exportera\" i Proton Authenticator-inställningarna för att exportera koder.",
   "exportCodes": "Exportera koder",
   "importLabel": "Importera",
   "importInstruction": "Vänligen välj en fil som innehåller en lista över dina koder i följande format",
@@ -331,7 +330,7 @@
     }
   },
   "sorry": "Tyvärr",
-  "importFailureDesc": "Det gick inte att tolka den valda filen.\nSkriv till support@ente.io om du behöver hjälp!",
+  "importFailureDesc": "Det gick inte att tolka den valda filen.\nSkriv till support@ente.com om du behöver hjälp!",
   "pendingSyncs": "Varning",
   "pendingSyncsWarningBody": "En del av dina koder har inte säkerhetskopierats.\n\nSe till att du har en säkerhetskopia för dessa koder innan du loggar ut.",
   "checkInboxAndSpamFolder": "Vänligen kontrollera din inkorg (och skräppost) för att slutföra verifieringen",
@@ -344,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

@@ -59,7 +59,7 @@ class HeaderErrorWidget extends StatelessWidget {
             sendLogs(
               context,
               AppLocalizations.of(context).raiseTicket,
-              "support@ente.io",
+              "support@ente.com",
               subject: AppLocalizations.of(context).backupFailed,
             ),
           },

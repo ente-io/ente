@@ -30,7 +30,7 @@ ente ayrıca, ente'de olmasalar bile albümlerinizi sevdiklerinizle paylaşmanı
 ente, burada gözden geçirilebilecek bir fotoğraf depolama sağlayıcısının amacına hizmet etmek için belirli izinler ister: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 FİYATLANDIRMA
-Sonsuza kadar ücretsiz planlar sunmuyoruz, çünkü sürdürülebilir kalmamız ve zamanın testine dayanmamız bizim için önemli. Bunun yerine, ailenizle özgürce paylaşabileceğiniz uygun fiyatlı planlar sunuyoruz. Daha fazla bilgiyi ente.io adresinde bulabilirsiniz.
+Sonsuza kadar ücretsiz planlar sunmuyoruz, çünkü sürdürülebilir kalmamız ve zamanın testine dayanmamız bizim için önemli. Bunun yerine, ailenizle özgürce paylaşabileceğiniz uygun fiyatlı planlar sunuyoruz. Daha fazla bilgiyi ente.com adresinde bulabilirsiniz.
 
 DESTEK
-İnsan desteği sunmaktan gurur duyuyoruz. Ücretli müşterimiz iseniz team@ente.io adresine ulaşabilir ve ekibimizden 24 saat içinde yanıt bekleyebilirsiniz.
+İnsan desteği sunmaktan gurur duyuyoruz. Ücretli müşterimiz iseniz team@ente.com adresine ulaşabilir ve ekibimizden 24 saat içinde yanıt bekleyebilirsiniz.

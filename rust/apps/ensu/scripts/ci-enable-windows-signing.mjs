@@ -16,24 +16,34 @@ if (!endpoint || !accountName || !profileName) {
 }
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-config.bundle = config.bundle || {};
-config.bundle.windows = config.bundle.windows || {};
+if (config.tauri && typeof config.tauri === "object" && config.bundle && typeof config.bundle === "object") {
+    config.tauri.bundle = {
+        ...(config.tauri.bundle || {}),
+        ...config.bundle,
+    };
+    delete config.bundle;
+}
+
+const bundleConfig = config.bundle ?? config.tauri?.bundle;
+if (!bundleConfig || typeof bundleConfig !== "object") {
+    throw new Error(`Unable to locate bundle config in ${configPath}`);
+}
+
+bundleConfig.windows = bundleConfig.windows || {};
 
 const signerBinary = trustedSigningCliPath || "trusted-signing-cli";
-config.bundle.windows.signCommand = {
-    cmd: signerBinary,
-    args: [
-        "-e",
-        endpoint,
-        "-a",
-        accountName,
-        "-c",
-        profileName,
-        "-d",
-        "Ensu",
-        "%1",
-    ],
-};
+bundleConfig.windows.signCommand = [
+    signerBinary,
+    "-e",
+    endpoint,
+    "-a",
+    accountName,
+    "-c",
+    profileName,
+    "-d",
+    "Ensu",
+    "%1",
+].join(" ");
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log(`Updated windows signCommand in ${configPath}`);

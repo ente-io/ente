@@ -55,7 +55,7 @@ pub struct VerifySrpSessionRequest {
     pub srp_m1: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyAttributes {
     pub kek_salt: String,
@@ -67,6 +67,10 @@ pub struct KeyAttributes {
     pub secret_key_decryption_nonce: String,
     pub mem_limit: i32,
     pub ops_limit: i32,
+    pub master_key_encrypted_with_recovery_key: Option<String>,
+    pub master_key_decryption_nonce: Option<String>,
+    pub recovery_key_encrypted_with_master_key: Option<String>,
+    pub recovery_key_decryption_nonce: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -119,6 +123,8 @@ pub struct SendOtpRequest {
 pub struct VerifyEmailRequest {
     pub email: String,
     pub ott: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -126,6 +132,70 @@ pub struct VerifyEmailRequest {
 pub struct VerifyTotpRequest {
     pub session_id: String,
     pub code: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SetUserAttributesRequest {
+    pub key_attributes: KeyAttributes,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetupSrpRequest {
+    #[serde(rename = "srpUserID")]
+    pub srp_user_id: String,
+    #[serde(rename = "srpSalt")]
+    pub srp_salt: String,
+    #[serde(rename = "srpVerifier")]
+    pub srp_verifier: String,
+    #[serde(rename = "srpA")]
+    pub srp_a: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SetupSrpResponse {
+    #[serde(rename = "setupID")]
+    pub setup_id: Uuid,
+    #[serde(rename = "srpB")]
+    pub srp_b: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CompleteSrpSetupRequest {
+    #[serde(rename = "setupID")]
+    pub setup_id: String,
+    #[serde(rename = "srpM1")]
+    pub srp_m1: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CompleteSrpSetupResponse {
+    #[serde(rename = "setupID")]
+    pub setup_id: Uuid,
+    #[serde(rename = "srpM2")]
+    pub srp_m2: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionValidityResponse {
+    pub has_set_keys: bool,
+    pub key_attributes: Option<KeyAttributes>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TwoFactorSecret {
+    pub secret_code: String,
+    pub qr_code: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnableTwoFactorRequest {
+    pub code: String,
+    pub encrypted_two_factor_secret: String,
+    pub two_factor_secret_decryption_nonce: String,
 }
 
 // ========== User Models ==========

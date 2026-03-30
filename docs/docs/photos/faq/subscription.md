@@ -1,10 +1,14 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Subscription FAQ
+description: FAQ about Ente Photos plans, pricing, and payment options
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
-# This Page Has Moved
+# Subscription FAQ
 
 The content from **Subscription FAQ** has been reorganized. You can find it in the following locations:
 

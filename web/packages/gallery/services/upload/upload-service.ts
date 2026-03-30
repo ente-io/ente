@@ -1290,8 +1290,11 @@ const extractImageOrVideoMetadata = async (
 
     const caption =
         parsedMetadataJSON?.description ?? parsedMetadata?.description;
-    if (caption) {
-        publicMagicMetadata.caption = caption;
+    if (
+        caption != null &&
+        (typeof caption == "string" || typeof caption == "number")
+    ) {
+        publicMagicMetadata.caption = String(caption);
     }
 
     if (parsedMetadata?.cameraMake) {

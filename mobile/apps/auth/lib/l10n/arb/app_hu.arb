@@ -121,7 +121,6 @@
   "importAegisGuide": "Használd az Aegis beállításaiban található \"Export the vault\" opciót.\n\nHa a vault titkosított, akkor meg kell adni a vault jelszót a tároló visszafejtéséhez.",
   "import2FasGuide": "Használd a \"Beállítások->Biztonsági mentés - Exportálás\" opciót a 2FAS-ban.\n\nHa a biztonsági másolat titkosított, akkor meg kell adni a jelszót a biztonsági másolat visszafejtéséhez",
   "importLastpassGuide": "Használd a Lastpass Authenticator beállításaiban található \"Fiókok átvitele\" opciót, és nyomd meg a \"Fiókok exportálása fájlba\" gombot. Importáld a letöltött JSON-t.",
-  "importProtonAuthGuide": "A kódok exportálásához használd az „Exportálás” opciót a Proton Authenticator beállításaiban.",
   "exportCodes": "Kódok exportálása",
   "importLabel": "Importálás",
   "importInstruction": "Kérjük, válassz egy fájlt, amely tartalmazza a kódok listáját a következő formátumban",
@@ -331,7 +330,7 @@
     }
   },
   "sorry": "Bocsánat",
-  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.\nKérjük, írj a support@ente.io címre, ha segítségre van szükséged!",
+  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.\nKérjük, írj a support@ente.com címre, ha segítségre van szükséged!",
   "pendingSyncs": "Figyelmeztetés",
   "pendingSyncsWarningBody": "Néhány kódról nem készült biztonsági másolat.\n\nKérjük, győződj meg arról, hogy van biztonsági másolata ezekről a kódokról, mielőtt kijelentkezel.",
   "checkInboxAndSpamFolder": "Kérjük, ellenőrizd beérkező leveleid (spam mappát is) az ellenőrzés befejezéséhez",
@@ -344,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

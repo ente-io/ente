@@ -121,7 +121,9 @@
   "importAegisGuide": "Naudokite „Aegis“ nustatymuose esančią parinktį Eksportuoti slėptuvę.\n\nJei jūsų saugykla užšifruota, turėsite įvesti saugyklos slaptažodį, kad iššifruotumėte saugyklą.",
   "import2FasGuide": "Naudokite programoje 2FAS esančią parinktį „Settings->2FAS Backup->Export to file“.\n\nJei atsarginė kopija užšifruota, turėsite įvesti slaptažodį, kad iššifruotumėte atsarginę kopiją.",
   "importLastpassGuide": "Naudokite „Lastpass Authenticator“ nustatymuose esančią parinktį „Transfer accounts“ (perkelti paskyras) ir paspauskite „Export accounts to file“ (eksportuoti paskyras į failą). Importuokite atsisiųstą JSON failą.",
-  "importProtonAuthGuide": "Naudokite „Proton Authenticator“ nustatymuose esančią parinktį „Export“ (eksportuoti), kad eksportuotumėte savo kodus.",
+  "importProtonAuthGuide": "Naudokite „Proton Authenticator“ nustatymuose esančią parinktį „Export“ (eksportuoti), kad eksportuotumėte savo kodus.\n\nJei eksportuotas failas apsaugotas slaptažodžiu, turėsite įvesti, kad jį iššifruotumėte.",
+  "invalidProtonExportTitle": "Netinkamas „Proton“ eksportas",
+  "invalidProtonExportMessage": "Pasirinktas failas nėra tinkamas „Proton Authenticator“ eksportas.",
   "exportCodes": "Eksportuoti kodus",
   "importLabel": "Importuoti",
   "importInstruction": "Pasirinkite failą, kuriame yra tokio formato jūsų kodų sąrašas",
@@ -331,7 +333,7 @@
     }
   },
   "sorry": "Atsiprašome",
-  "importFailureDesc": "Nepavyko išanalizuoti pasirinkto failo.\nJei reikia pagalbos, rašykite adresu support@ente.io.",
+  "importFailureDesc": "Nepavyko išanalizuoti pasirinkto failo.\nJei reikia pagalbos, rašykite adresu support@ente.com.",
   "pendingSyncs": "Įspėjimas",
   "pendingSyncsWarningBody": "Kai kurių jūsų kodų atsarginės kopijos nebuvo sukurtos.\n\nPrieš atsijungdami įsitikinkite, kad turite atsarginę šių kodų kopiją.",
   "checkInboxAndSpamFolder": "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą.",
@@ -344,7 +346,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

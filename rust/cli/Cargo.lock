@@ -222,6 +222,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "55248b47b0caf0546f7988906588779981c43bb1bc9d0c44087278f80cdb44ba"
 
 [[package]]
+name = "bip39"
+version = "2.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90dbd31c98227229239363921e60fcf5e558e43ec69094d46fc4996f08d1d5bc"
+dependencies = [
+ "bitcoin_hashes",
+ "serde",
+ "unicode-normalization",
+]
+
+[[package]]
+name = "bitcoin_hashes"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26ec84b80c482df901772e931a9a681e26a1b9ee2302edeff23cb30328745c8b"
+dependencies = [
+ "hex-conservative",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -708,6 +728,7 @@ version = "0.0.1"
 dependencies = [
  "argon2",
  "base64",
+ "bip39",
  "blake2b_simd",
  "crypto_secretstream",
  "getrandom 0.2.16",
@@ -739,6 +760,7 @@ dependencies = [
  "ente-core",
  "env_logger",
  "futures",
+ "hmac",
  "indicatif",
  "log",
  "mockito",
@@ -747,7 +769,10 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
+ "sha1",
+ "sha2",
  "sqlx",
+ "srp",
  "tempdir",
  "thiserror 2.0.16",
  "tokio",
@@ -1116,6 +1141,15 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "hex-conservative"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fda06d18ac606267c40c04e41b9947729bf8b9efe74bd4e82b61a5f26a510b9f"
+dependencies = [
+ "arrayvec",
+]
 
 [[package]]
 name = "hkdf"

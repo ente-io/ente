@@ -28,6 +28,7 @@ class SharedPhotosGrid extends StatefulWidget {
 
   /// Called when user taps the +N extra-count badge.
   final VoidCallback? onExtraCountTap;
+
   /// Prefix used for Hero tags while opening shared photos.
   final String heroTagPrefix;
 

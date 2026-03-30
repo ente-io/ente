@@ -120,7 +120,6 @@
   "importAegisGuide": "Usa l'opzione \"Esporta la cassaforte\" nelle impostazioni di Aegis.\n\nSe la tua cassaforte è criptata, dovrai inserire la password della cassaforte per decriptarla.",
   "import2FasGuide": "Utilizza l'opzione \"Impostazioni->Backup -Export\" in 2FAS.\n\nSe il backup è crittografato, è necessario inserire la password per decriptare il backup",
   "importLastpassGuide": "Usa l'opzione \"Trasferisci account\" all'interno delle impostazioni di Lastpass Authenticator e premi \"Esporta account su file\". Importa il JSON scaricato.",
-  "importProtonAuthGuide": "Usa l'opzione \"Esporta\" nelle impostazioni di Proton Authenticator per esportare i tuoi codici.",
   "exportCodes": "Esporta codici",
   "importLabel": "Importa",
   "importInstruction": "Per favore seleziona un file contenente una lista dei tuoi codici nel seguente formato",
@@ -330,7 +329,7 @@
     }
   },
   "sorry": "Scusa",
-  "importFailureDesc": "Impossibile analizzare il file selezionato.\nPer favore scrivi a support@ente.io se hai bisogno di aiuto!",
+  "importFailureDesc": "Impossibile analizzare il file selezionato.\nPer favore scrivi a support@ente.com se hai bisogno di aiuto!",
   "pendingSyncs": "Attenzione",
   "pendingSyncsWarningBody": "Non hai effettuato il backup di alcuni codici.\n\nPer favore assicurati di effettuare il backup di questi codici prima di disconnetterti.",
   "checkInboxAndSpamFolder": "Per favore, controlla la tua casella di posta (e lo spam) per completare la verifica",
@@ -343,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

@@ -4,7 +4,7 @@
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
-    "author": "Ente <code@ente.io>",
+    "author": "Ente <code@ente.com>",
     "main": "app/main.js",
     "scripts": {
         "build": "yarn build-renderer && yarn build-main",
@@ -40,12 +40,12 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.30.1",
-        "@tsconfig/node22": "^22.0.2",
         "@types/auto-launch": "^5.0.5",
+        "@types/node": "^24.12.0",
         "ajv": "^8.17.1",
         "concurrently": "^9.2.1",
         "cross-env": "^10.1.0",
-        "electron": "^38.2.2",
+        "electron": "^41.0.0",
         "electron-builder": "26.0.14",
         "eslint": "^9",
         "prettier": "3.6.2",

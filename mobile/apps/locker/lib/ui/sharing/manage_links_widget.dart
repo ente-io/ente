@@ -182,7 +182,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                 onTap: () async {
                                   await sendLogs(
                                     context,
-                                    "support@ente.io",
+                                    "support@ente.com",
                                     postShare: () {},
                                   );
                                 },

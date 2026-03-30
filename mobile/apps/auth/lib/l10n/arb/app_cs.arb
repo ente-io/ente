@@ -121,7 +121,6 @@
   "importAegisGuide": "Použijte možnost \"Export the vault\" v nastavení aplikace Aegis.\n\nPokud je Váš trezor šifrován, budete muset zadat heslo pro dešifrování trezoru.",
   "import2FasGuide": "Použijte možnost \"Settings->Backup -Export\" v aplikaci 2FAS.\n\nPokud je Vaše záloha šifrovaná, budete muset zadat heslo pro její odemčení",
   "importLastpassGuide": "V nastavení aplikace Lastpass Authenticator vyberte možnost \"Transfer accounts\" a poté \"Export accounts to file\". Vygenerovaný soubor JSON následně nahrajte sem.",
-  "importProtonAuthGuide": "Použijte možnost \"Export\" v nastavení aplikace Proton Authenticator pro export Vašich kódů.",
   "exportCodes": "Exportovat kódy",
   "importLabel": "Importovat",
   "importInstruction": "Vyberte, prosím, soubor obsahující seznam Vašich kódů v následujícím formátu",
@@ -331,7 +330,7 @@
     }
   },
   "sorry": "Omlouváme se",
-  "importFailureDesc": "Nelze analyzovat vybraný soubor.\nProsím napište na support@ente.io, pokud potřebujete pomoc!",
+  "importFailureDesc": "Nelze analyzovat vybraný soubor.\nProsím napište na support@ente.com, pokud potřebujete pomoc!",
   "pendingSyncs": "Varování",
   "pendingSyncsWarningBody": "Některé z Vašich kódů nebyly zálohovány.\n\nProsím, ujistěte se, že máte zálohu těchto kódů před odhlášením.",
   "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření",
@@ -344,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

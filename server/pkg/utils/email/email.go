@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"mime/quotedprintable"
 	"net/http"
 	"net/smtp"
 	"path"
@@ -90,6 +91,21 @@ func wrapToMaxLineLength(s string, maxLen int) string {
 	return b.String()
 }
 
+func buildHTMLMIMEPart(htmlBody string) (string, error) {
+	var encodedBody bytes.Buffer
+	writer := quotedprintable.NewWriter(&encodedBody)
+	if _, err := writer.Write([]byte(htmlBody)); err != nil {
+		return "", err
+	}
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
+
+	return "Content-Type: text/html; charset=utf-8\n" +
+		"Content-Transfer-Encoding: quoted-printable\n\n" +
+		encodedBody.String() + "\n", nil
+}
+
 // Send sends an email
 func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	smtpHost := viper.GetString("smtp.host")
@@ -159,7 +175,10 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		"MIME-Version: 1.0\n" +
 		"Content-Type: multipart/related; boundary=boundary\n\n" +
 		"--boundary\n"
-	htmlContent := "Content-Type: text/html; charset=us-ascii\n\n" + htmlBody + "\n"
+	htmlContent, err := buildHTMLMIMEPart(htmlBody)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to encode html body")
+	}
 
 	emailMessage = header + htmlContent
 

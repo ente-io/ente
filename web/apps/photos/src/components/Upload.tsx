@@ -1407,7 +1407,7 @@ const TakeoutOptions: React.FC<
                     {t("select_zips")}
                 </FocusVisibleButton>
                 <Link
-                    href="https://ente.io/help/photos/migration/from-google-photos/"
+                    href="https://ente.com/help/photos/migration/from-google-photos/"
                     target="_blank"
                     rel="noopener"
                 >

@@ -42,7 +42,7 @@ This organization will be reflected in Ente if you choose the "Separate albums" 
 
 ### Step 3: Upload to Ente
 
-1. Download and install the [Ente desktop app](https://ente.io/download/desktop)
+1. Download and install the [Ente desktop app](https://ente.com/download/desktop)
 2. Sign in to your Ente account
 3. Drag and drop the downloaded folder(s) into the Ente app
 4. Choose how to organize: single album or separate albums per folder
@@ -77,4 +77,4 @@ Once your photos are in Ente:
 ## Need Help?
 
 If you run into any issues during this migration, please reach out to
-[support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+[support@ente.com](mailto:support@ente.com) and we will be happy to help you!

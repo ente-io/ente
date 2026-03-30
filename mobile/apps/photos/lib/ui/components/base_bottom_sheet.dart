@@ -6,23 +6,37 @@ Future<T?> showBaseBottomSheet<T>(
   BuildContext context, {
   required String title,
   required Widget child,
+  TextStyle? titleStyle,
   bool showCloseButton = true,
   VoidCallback? onClose,
   double headerSpacing = 20,
   Color? backgroundColor,
+  Color? modalBackgroundColor,
   CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
   EdgeInsets padding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
   bool isDismissible = true,
   bool enableDrag = true,
   bool isKeyboardAware = true,
+  double topCornerRadius = 20,
+  Color? closeButtonBackgroundColor,
+  double closeButtonSize = 40,
+  double closeIconSize = 24,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
+    backgroundColor: modalBackgroundColor,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(topCornerRadius),
+      ),
+    ),
+    clipBehavior: Clip.antiAlias,
     builder: (context) => BaseBottomSheet(
       title: title,
+      titleStyle: titleStyle,
       showCloseButton: showCloseButton,
       onClose: onClose,
       headerSpacing: headerSpacing,
@@ -30,6 +44,10 @@ Future<T?> showBaseBottomSheet<T>(
       crossAxisAlignment: crossAxisAlignment,
       padding: padding,
       isKeyboardAware: isKeyboardAware,
+      topCornerRadius: topCornerRadius,
+      closeButtonBackgroundColor: closeButtonBackgroundColor,
+      closeButtonSize: closeButtonSize,
+      closeIconSize: closeIconSize,
       child: child,
     ),
   );
@@ -38,6 +56,7 @@ Future<T?> showBaseBottomSheet<T>(
 class BaseBottomSheet extends StatelessWidget {
   final Widget child;
   final String title;
+  final TextStyle? titleStyle;
   final bool showCloseButton;
   final VoidCallback? onClose;
   final CrossAxisAlignment crossAxisAlignment;
@@ -45,10 +64,15 @@ class BaseBottomSheet extends StatelessWidget {
   final Color? backgroundColor;
   final double headerSpacing;
   final bool isKeyboardAware;
+  final double topCornerRadius;
+  final Color? closeButtonBackgroundColor;
+  final double closeButtonSize;
+  final double closeIconSize;
 
   const BaseBottomSheet({
     required this.child,
     required this.title,
+    this.titleStyle,
     this.showCloseButton = true,
     this.onClose,
     this.crossAxisAlignment = CrossAxisAlignment.start,
@@ -56,6 +80,10 @@ class BaseBottomSheet extends StatelessWidget {
     this.backgroundColor,
     this.headerSpacing = 20,
     this.isKeyboardAware = true,
+    this.topCornerRadius = 20,
+    this.closeButtonBackgroundColor,
+    this.closeButtonSize = 40,
+    this.closeIconSize = 24,
     super.key,
   });
 
@@ -69,9 +97,9 @@ class BaseBottomSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? colorScheme.fill,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(topCornerRadius),
+          topRight: Radius.circular(topCornerRadius),
         ),
       ),
       child: Padding(
@@ -87,9 +115,14 @@ class BaseBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: textTheme.largeBold),
+                    Text(title, style: titleStyle ?? textTheme.largeBold),
                     if (showCloseButton)
-                      BottomSheetCloseButton(onTap: onClose)
+                      BottomSheetCloseButton(
+                        onTap: onClose,
+                        backgroundColor: closeButtonBackgroundColor,
+                        buttonSize: closeButtonSize,
+                        iconSize: closeIconSize,
+                      )
                     else
                       const SizedBox.shrink(),
                   ],
@@ -107,8 +140,17 @@ class BaseBottomSheet extends StatelessWidget {
 
 class BottomSheetCloseButton extends StatelessWidget {
   final VoidCallback? onTap;
+  final Color? backgroundColor;
+  final double buttonSize;
+  final double iconSize;
 
-  const BottomSheetCloseButton({super.key, this.onTap});
+  const BottomSheetCloseButton({
+    super.key,
+    this.onTap,
+    this.backgroundColor,
+    this.buttonSize = 40,
+    this.iconSize = 24,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -117,14 +159,16 @@ class BottomSheetCloseButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap ?? () => Navigator.of(context).pop(),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        width: buttonSize,
+        height: buttonSize,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: colorScheme.fillDark,
+          color: backgroundColor ?? colorScheme.fillDark,
         ),
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedCancel01,
-          size: 24,
+          size: iconSize,
           color: colorScheme.textBase,
         ),
       ),

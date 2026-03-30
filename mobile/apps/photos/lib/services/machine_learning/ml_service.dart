@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert" show jsonEncode;
 import "dart:io" show Platform;
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List;
@@ -8,9 +9,11 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/main.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -18,6 +21,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -97,7 +101,7 @@ class MLService {
     // Listen on ComputeController
     Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!hasGrantedMLConsent) {
-        if (event.shouldRun) {
+        if (!isProcessBg && event.shouldRun) {
           VideoPreviewService.instance.queueFiles(duration: Duration.zero);
         }
         return;
@@ -115,7 +119,11 @@ class MLService {
             "MLController allowed running ML, faces indexing starting",
           );
         }
-        unawaited(runAllML());
+        // Background start is driven manually from _runMinimally to avoid
+        // duplicate runAllML invocations in the same cycle.
+        if (!isProcessBg) {
+          unawaited(runAllML());
+        }
       } else {
         _logger.info(
           "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -123,13 +131,27 @@ class MLService {
         pauseIndexingAndClustering();
       }
     });
+    _syncMlControllerStatusForBg();
 
     _isInitialized = true;
     unawaited(_maybePredownloadLocalModels());
     _logger.info('init done');
   }
 
+  void _syncMlControllerStatusForBg() {
+    if (!isProcessBg || !hasGrantedMLConsent) {
+      return;
+    }
+    _mlControllerStatus = computeController.shouldRunCompute;
+    _logger.info(
+      "Background init synced MLController status to $_mlControllerStatus",
+    );
+  }
+
   Future<void> _maybePredownloadLocalModels() async {
+    if (isProcessBg) {
+      return;
+    }
     if (!hasGrantedMLConsent) {
       return;
     }
@@ -169,6 +191,10 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (_isRunningML) {
+      _logger.info("runAllML called while already running, skipping");
+      return;
+    }
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -197,9 +223,9 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
+        // Refresh discover/memories caches before indexing using the same
+        // path in foreground and background runs.
         magicCacheService.updateCache(forced: force).ignore();
-        // refresh memories section
         memoriesCacheService.updateCache(forced: force).ignore();
       }
       if (canFetch()) {
@@ -217,9 +243,9 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
+        // Persist refreshed caches after ML so foreground can pick them up
+        // on the next resume, even when the work ran headlessly in background.
         magicCacheService.updateCache().ignore();
-        // refresh memories section (only runs if forced is true)
         memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
@@ -229,7 +255,9 @@ class MLService {
       _logger.info("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      VideoPreviewService.instance.queueFiles();
+      if (!isProcessBg) {
+        VideoPreviewService.instance.queueFiles();
+      }
     }
   }
 
@@ -334,6 +362,7 @@ class MLService {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
       await MLIndexingIsolate.instance.releaseRustRuntime();
+      MLIndexingIsolate.instance.invalidateModelDownloadCache();
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
     }
@@ -602,7 +631,7 @@ class MLService {
           );
         }
       }
-      if (!isOffline) {
+      if (!isOffline && (result.facesRan || result.clipRan)) {
         // Storing results on remote
         await fileDataService.putFileData(
           instruction.file,
@@ -626,41 +655,118 @@ class MLService {
           );
         }
       }
+
+      // Pet results locally — delete stale rows before writing so
+      // re-indexing with fewer detections doesn't leave old data behind.
+      final rustPets = result.petFaces != null || result.petBodies != null;
+      if (rustPets) {
+        await mlDataDB.deletePetDataForFiles([result.fileId]);
+        if (result.petFaces != null && result.petFaces!.isNotEmpty) {
+          final dbPetFaces = result.petFaces!.map((pf) {
+            return DBPetFace(
+              fileId: result.fileId,
+              petFaceId: pf.petFaceId,
+              detection: jsonEncode(pf.detection.toJson()),
+              faceVectorId: null,
+              species: pf.species,
+              faceScore: pf.detection.score,
+              imageHeight: result.decodedImageSize.height,
+              imageWidth: result.decodedImageSize.width,
+              mlVersion: petMlVersion,
+            );
+          }).toList();
+          await mlDataDB.bulkInsertPetFaces(dbPetFaces);
+          await mlDataDB.storePetFaceEmbeddings(
+            dbPetFaces,
+            result.petFaces!,
+          );
+        } else if (instruction.shouldRunPets) {
+          // No pet faces detected; insert empty marker so the file is
+          // considered pet-indexed (mirrors Face.empty for human faces).
+          await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
+        }
+
+        if (result.petBodies != null && result.petBodies!.isNotEmpty) {
+          final dbPetBodies = result.petBodies!.map((obj) {
+            final detectionObj = FaceDetectionRelative(
+              score: obj.score,
+              box: [
+                obj.boxXyxy[0],
+                obj.boxXyxy[1],
+                obj.boxXyxy[2],
+                obj.boxXyxy[3],
+              ],
+              allKeypoints: const [],
+            );
+            return DBPetBody(
+              fileId: result.fileId,
+              petBodyId: obj.petBodyId,
+              detection: jsonEncode(detectionObj.toJson()),
+              bodyVectorId: null,
+              species: obj.cocoClass == 15 ? 1 : 0,
+              score: obj.score,
+              imageHeight: result.decodedImageSize.height,
+              imageWidth: result.decodedImageSize.width,
+              mlVersion: petMlVersion,
+            );
+          }).toList();
+          await mlDataDB.bulkInsertPetBodies(dbPetBodies);
+          await mlDataDB.storePetBodyEmbeddings(
+            dbPetBodies,
+            result.petBodies!,
+          );
+        }
+      }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
-      final String errorString = e.toString();
       final String format = instruction.file.displayName.split('.').last;
       final int? size = instruction.file.fileSize;
       final fileType = instruction.file.fileType;
-      final bool acceptedIssue =
-          errorString.contains('ThumbnailRetrievalException') ||
-              errorString.contains('InvalidImageFormatException') ||
-              errorString.contains('UnhandledExifOrientation') ||
-              errorString.contains('FileSizeTooLargeForMobileIndexing');
+      final bool acceptedIssue = isExpectedMlSkipError(e);
       if (acceptedIssue) {
-        _logger.severe(
-          '$errorString for fileID ${instruction.fileKey} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
-          e,
-          s,
+        _logger.warning(
+          "Skipping ML indexing for fileID ${instruction.fileKey} (format $format, type $fileType, size $size): ${formatExpectedMlSkipReasonForLogs(e)}",
         );
-        await mlDataDB.bulkInsertFaces(
-          [Face.empty(instruction.fileKey, error: true)],
-        );
-        if (instruction.isOffline) {
-          await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
-        } else {
-          await SemanticSearchService.instance.storeEmptyClipImageResult(
-            instruction.file,
+        final storedMarkers = <String>[];
+        if (instruction.shouldRunFaces) {
+          await mlDataDB.bulkInsertFaces(
+            [Face.empty(instruction.fileKey, error: true)],
           );
+          storedMarkers.add("faces");
         }
+        if (instruction.shouldRunClip) {
+          if (instruction.isOffline) {
+            await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
+          } else {
+            await SemanticSearchService.instance.storeEmptyClipImageResult(
+              instruction.file,
+            );
+          }
+          storedMarkers.add("clip");
+        }
+        if (instruction.shouldRunPets) {
+          await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
+          await mlDataDB.bulkInsertPetFaces(
+            [DBPetFace.empty(instruction.fileKey, error: true)],
+          );
+          storedMarkers.add("pets");
+        }
+        _logger.info(
+          "Stored empty ML result markers for fileID ${instruction.fileKey}: ${storedMarkers.join(', ')}",
+        );
         return true;
       }
       _logger.severe(
-        "Failed to index file for fileID ${instruction.fileKey} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to index file for fileID ${instruction.fileKey} (format $format, type $fileType, size $size). Cleaning up partial results so the file will be automatically retried later.",
         e,
         s,
       );
+      // Clean up any pet rows that were already committed before the
+      // failure so the file is not treated as fully indexed.
+      if (instruction.shouldRunPets) {
+        await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
+      }
       return false;
     }
   }
