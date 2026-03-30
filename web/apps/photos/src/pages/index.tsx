@@ -112,11 +112,14 @@ const Page: React.FC = () => {
             }
 
             const albumsURL = new URL(albumsAppOrigin());
-            currentURL.pathname = router.pathname;
+            const isMemoryRoute =
+                currentURL.pathname === "/memory" ||
+                currentURL.pathname.startsWith("/memory/");
             if (
                 (shouldOnlyServeAlbumsApp ||
                     currentURL.host == albumsURL.host) &&
-                currentURL.pathname != "/shared-albums"
+                currentURL.pathname != "/shared-albums" &&
+                !isMemoryRoute
             ) {
                 const [hash] = currentURL.hash.slice(1).split("&", 1);
                 await router.replace({

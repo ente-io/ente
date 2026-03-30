@@ -9,6 +9,10 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
+import {
+    authenticatedPublicMemoryRequestHeaders,
+    type PublicMemoryCredentials,
+} from "ente-new/albums/services/public-memory";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
@@ -125,6 +129,7 @@ export const fetchFileData = async (
     type: FileDataType,
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
+    publicMemoryCredentials?: PublicMemoryCredentials,
 ): Promise<RemoteFileData | undefined> => {
     const params = new URLSearchParams({
         type,
@@ -135,7 +140,13 @@ export const fetchFileData = async (
     });
 
     let res: Response;
-    if (publicAlbumsCredentials) {
+    if (publicMemoryCredentials) {
+        const url = await apiURL("/public-memory/file-data");
+        const headers = authenticatedPublicMemoryRequestHeaders(
+            publicMemoryCredentials,
+        );
+        res = await fetch(`${url}?${params.toString()}`, { headers });
+    } else if (publicAlbumsCredentials) {
         const url = await apiURL("/public-collection/files/data/fetch");
         const headers = authenticatedPublicAlbumsRequestHeaders(
             publicAlbumsCredentials,
@@ -357,11 +368,18 @@ export const fetchFilePreviewData = async (
     type: FileDataType,
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
+    publicMemoryCredentials?: PublicMemoryCredentials,
 ): Promise<string | undefined> => {
     const params = new URLSearchParams({ type, fileID: fileID.toString() });
 
     let res: Response;
-    if (publicAlbumsCredentials) {
+    if (publicMemoryCredentials) {
+        const headers = authenticatedPublicMemoryRequestHeaders(
+            publicMemoryCredentials,
+        );
+        const url = await apiURL("/public-memory/files/data/preview");
+        res = await fetch(`${url}?${params.toString()}`, { headers });
+    } else if (publicAlbumsCredentials) {
         const headers = authenticatedPublicAlbumsRequestHeaders(
             publicAlbumsCredentials,
         );
