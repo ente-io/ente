@@ -31,7 +31,6 @@ import "package:photos/ui/viewer/file/inline_text_detection.dart";
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
 import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
-import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -269,13 +268,7 @@ class _BodyState extends State<_Body> {
                       isGuestView: isGuestView,
                     );
                   }
-                  return TextDetectionOverlayButton(
-                    file: _files![selectedIndex],
-                    enableFullScreenNotifier:
-                        InheritedDetailPageState.of(context)
-                            .enableFullScreenNotifier,
-                    isGuestView: isGuestView,
-                  );
+                  return const SizedBox.shrink();
                 },
               ),
               if (_qrHelper != null)

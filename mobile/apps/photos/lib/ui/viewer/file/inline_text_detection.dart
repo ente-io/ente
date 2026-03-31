@@ -11,6 +11,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
 import "package:photos/states/detail_page_state.dart";
+import "package:photos/ui/viewer/file/image_animation_demo.dart";
 import "package:photos/utils/file_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
@@ -47,7 +48,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   String? _localFilePath;
   int _requestId = 0;
   bool _overlayActive = false;
-  Timer? _activationTimer;
   bool _userTriggered = false;
   Offset? _pendingLongPressPosition;
 
@@ -68,13 +68,11 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   @override
   void dispose() {
-    _activationTimer?.cancel();
     _detectorController.dispose();
     super.dispose();
   }
 
   void _resetState() {
-    _activationTimer?.cancel();
     setState(() {
       _localFilePath = null;
       _overlayActive = false;
@@ -129,7 +127,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       setState(() {
         _localFilePath = cached.localPath;
       });
-      if (cached.hasText) _activateOrSchedule(requestId);
+      if (cached.hasText) _activateOverlay();
       return;
     }
 
@@ -146,11 +144,19 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       _logger.info("running hasText check");
       bool hasText = false;
       try {
-        hasText = await _mobileOcr.hasText(imagePath: localFile.path);
+        hasText = await _mobileOcr
+            .hasText(imagePath: localFile.path)
+            .timeout(const Duration(seconds: 5));
         _logger.info("hasText result: $hasText");
       } catch (error, stackTrace) {
-        _logger.warning("hasText error: $error");
-        _logger.severe("Failed to run hasText", error, stackTrace);
+        // On error or timeout, optimistically assume text may be present
+        // so the full detection pipeline can make the final determination.
+        hasText = true;
+        _logger.warning(
+          "hasText failed, falling back to optimistic",
+          error,
+          stackTrace,
+        );
       }
 
       if (!mounted || requestId != _requestId) return;
@@ -165,9 +171,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _localFilePath = result.localPath;
       });
 
-      // If text found, activate immediately if user already long pressed,
-      // otherwise schedule activation after 1 second delay.
-      if (hasText) _activateOrSchedule(requestId);
+      if (hasText) _activateOverlay();
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
@@ -175,30 +179,14 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
   }
 
-  void _activateOrSchedule(int requestId) {
-    if (_userTriggered) {
-      // User already long pressed — skip delay, activate immediately
-      setState(() {
-        _overlayActive = true;
-      });
-    } else {
-      _scheduleActivation(requestId);
-    }
-  }
-
-  void _scheduleActivation(int requestId) {
-    _activationTimer?.cancel();
-    _activationTimer = Timer(const Duration(seconds: 1), () {
-      if (!mounted || requestId != _requestId) return;
-      setState(() {
-        _overlayActive = true;
-      });
+  void _activateOverlay() {
+    setState(() {
+      _overlayActive = true;
     });
   }
 
   void _handleLongPress(LongPressStartDetails details) {
     if (_overlayActive) return; // Already active, let overlay handle it
-    _activationTimer?.cancel();
     setState(() {
       _userTriggered = true;
       _pendingLongPressPosition = details.globalPosition;
@@ -218,8 +206,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       return const SizedBox.shrink();
     }
 
-    final isZoomedNotifier = InheritedDetailPageState.maybeOf(context)
-        ?.isZoomedNotifier;
+    final isZoomedNotifier =
+        InheritedDetailPageState.maybeOf(context)?.isZoomedNotifier;
 
     // During the wait period (hasText passed but 1s timer hasn't fired),
     // show a transparent gesture layer to capture long press.
@@ -257,31 +245,48 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   Widget _buildInlineOverlay(BuildContext context) {
     final l10n = context.l10n;
-    return TextDetectorWidget(
-      key: ValueKey("ocr_$_localFilePath"),
-      imagePath: _localFilePath!,
-      autoDetect: !_userTriggered,
-      backgroundColor: Colors.transparent,
-      showUnselectedBoundaries: true,
-      overlayOnly: true,
-      showProcessingOverlay: false,
-      showEditorHint: false,
-      initialInteractionPosition: _pendingLongPressPosition,
-      controller: _detectorController,
-      strings: TextDetectorStrings(
-        processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
-        selectionHint: l10n.ocrSelectionHint,
-        noTextDetected: l10n.ocrNoTextDetected,
-        retryButtonLabel: l10n.ocrRetryButtonLabel,
-        modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
-        modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
-        imageNotFoundError: l10n.ocrImageNotFoundError,
-        imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
-        genericDetectError: l10n.ocrGenericDetectError,
-      ),
-      onTextCopied: (text) {
-        HapticFeedback.lightImpact();
-      },
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        TextDetectorWidget(
+          key: ValueKey("ocr_$_localFilePath"),
+          imagePath: _localFilePath!,
+          autoDetect: !_userTriggered,
+          backgroundColor: Colors.transparent,
+          showUnselectedBoundaries: true,
+          overlayOnly: true,
+          showProcessingOverlay: false,
+          showEditorHint: false,
+          initialInteractionPosition: _pendingLongPressPosition,
+          controller: _detectorController,
+          strings: TextDetectorStrings(
+            processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
+            selectionHint: l10n.ocrSelectionHint,
+            noTextDetected: l10n.ocrNoTextDetected,
+            retryButtonLabel: l10n.ocrRetryButtonLabel,
+            modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
+            modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
+            imageNotFoundError: l10n.ocrImageNotFoundError,
+            imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
+            genericDetectError: l10n.ocrGenericDetectError,
+          ),
+          onTextCopied: (text) {
+            HapticFeedback.lightImpact();
+          },
+        ),
+        ListenableBuilder(
+          listenable: _detectorController,
+          builder: (context, _) {
+            if (_detectorController.isProcessing &&
+                !_detectorController.hasSelectableText) {
+              return const IgnorePointer(
+                child: ScanPulseOverlay(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
     );
   }
 }

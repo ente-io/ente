@@ -95,5 +95,6 @@ class InheritedDetailPageState extends InheritedWidget {
       oldWidget.enableFullScreenNotifier != enableFullScreenNotifier ||
       oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier ||
       oldWidget.showingThumbnailFallbackNotifier !=
-          showingThumbnailFallbackNotifier;
+          showingThumbnailFallbackNotifier ||
+      oldWidget.isZoomedNotifier != isZoomedNotifier;
 }
