@@ -4,6 +4,8 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
+use crate::crypto::SecretVec;
+
 /// Attributes stored on server for key derivation and encrypted keys.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -67,9 +69,9 @@ pub struct KeyGenResult {
     /// Private keys to store locally
     pub private_key_attributes: PrivateKeyAttributes,
     /// Key-encryption-key used to encrypt the master key and seed SRP setup.
-    pub key_encryption_key: Vec<u8>,
+    pub key_encryption_key: SecretVec,
     /// Login key for SRP registration (16 bytes)
-    pub login_key: Vec<u8>,
+    pub login_key: SecretVec,
 }
 
 impl fmt::Debug for KeyGenResult {
@@ -86,13 +88,13 @@ impl fmt::Debug for KeyGenResult {
 /// Result of successful login/decryption.
 pub struct LoginResult {
     /// Decrypted master key
-    pub master_key: Vec<u8>,
+    pub master_key: SecretVec,
     /// Decrypted X25519 secret key
-    pub secret_key: Vec<u8>,
+    pub secret_key: SecretVec,
     /// Decrypted auth token
-    pub token: Vec<u8>,
+    pub token: SecretVec,
     /// Key-encryption-key (for SRP setup if needed)
-    pub key_encryption_key: Vec<u8>,
+    pub key_encryption_key: SecretVec,
 }
 
 impl fmt::Debug for LoginResult {
@@ -203,8 +205,8 @@ mod tests {
                 recovery_key: "private-recovery-key".to_string(),
                 secret_key: "private-secret-key".to_string(),
             },
-            key_encryption_key: vec![1, 2, 3],
-            login_key: vec![4, 5, 6],
+            key_encryption_key: SecretVec::new(vec![1, 2, 3]),
+            login_key: SecretVec::new(vec![4, 5, 6]),
         };
 
         let debug = format!("{result:?}");
@@ -220,10 +222,10 @@ mod tests {
     #[test]
     fn test_login_result_debug_redacts_secret_material() {
         let result = LoginResult {
-            master_key: vec![1, 2, 3],
-            secret_key: vec![4, 5, 6],
-            token: vec![7, 8, 9],
-            key_encryption_key: vec![10, 11, 12],
+            master_key: SecretVec::new(vec![1, 2, 3]),
+            secret_key: SecretVec::new(vec![4, 5, 6]),
+            token: SecretVec::new(vec![7, 8, 9]),
+            key_encryption_key: SecretVec::new(vec![10, 11, 12]),
         };
 
         let debug = format!("{result:?}");

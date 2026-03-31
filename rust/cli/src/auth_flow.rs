@@ -21,7 +21,7 @@ use ente_core::{
         KeyDerivationStrength, derive_kek, generate_keys_with_strength, generate_srp_setup,
         get_recovery_key,
     },
-    crypto::{self, secretbox},
+    crypto::{self, SecretVec, secretbox},
 };
 use uuid::Uuid;
 
@@ -312,9 +312,9 @@ where
             user_id: auth_response.id,
             key_attributes,
             secrets: AccountSecrets {
-                token: secrets.token,
-                master_key: secrets.master_key,
-                secret_key: secrets.secret_key,
+                token: secrets.token.into_vec(),
+                master_key: secrets.master_key.into_vec(),
+                secret_key: secrets.secret_key.into_vec(),
                 public_key,
             },
             recovery_key,
@@ -556,7 +556,7 @@ fn decrypt_auth_response(
         Ok(DecryptedSecrets {
             master_key,
             secret_key,
-            token: decode_plain_token(token)?,
+            token: SecretVec::new(decode_plain_token(token)?),
         })
     } else {
         Err(Error::AuthenticationFailed("No token in response".into()))

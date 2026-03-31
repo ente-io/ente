@@ -10,6 +10,7 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use uuid::Uuid;
 
 use ente_core::auth::{SrpAttributes as CoreSrpAttributes, SrpSession};
+use ente_core::crypto::SecretVec;
 
 const SRP_A_LEN: usize = 512; // 4096-bit group
 
@@ -84,7 +85,7 @@ impl<'a> AuthClient<'a> {
         &self,
         email: &str,
         password: &str,
-    ) -> Result<(AuthResponse, Vec<u8>)> {
+    ) -> Result<(AuthResponse, SecretVec)> {
         // Step 1: Get SRP attributes
         let srp_attrs = self.get_srp_attributes(email).await?;
 

@@ -17,6 +17,7 @@
 use blake2b_simd::Params as Blake2bParams;
 use rand_core::{OsRng, RngCore};
 use salsa20::hsalsa;
+use subtle::ConstantTimeEq;
 use x25519_dalek::{PublicKey, StaticSecret};
 use xsalsa20poly1305::XSalsa20Poly1305;
 use xsalsa20poly1305::aead::generic_array::GenericArray;
@@ -70,8 +71,10 @@ fn derive_box_key(shared_secret: &[u8; 32]) -> [u8; 32] {
 /// Check if shared secret is contributory (not all zeros).
 ///
 /// This prevents attacks using small-order points.
+/// Uses constant-time comparison to avoid leaking information about the
+/// shared secret through timing.
 fn is_contributory(shared_secret: &[u8; 32]) -> bool {
-    shared_secret.iter().any(|&b| b != 0)
+    shared_secret.ct_ne(&[0u8; 32]).into()
 }
 
 /// Seal (encrypt) plaintext for a recipient's public key.

@@ -61,6 +61,11 @@ use base64::{
     Engine,
     engine::general_purpose::{STANDARD as BASE64, URL_SAFE as BASE64_URL_SAFE},
 };
+use std::{
+    fmt,
+    ops::{Deref, DerefMut},
+};
+use zeroize::Zeroize;
 
 mod error;
 
@@ -72,11 +77,75 @@ pub use impl_pure::*;
 
 pub use error::{CryptoError, Result};
 
-/// A heap-allocated byte buffer that is **zeroized on drop**.
+/// A heap-allocated byte buffer for sensitive material.
 ///
-/// Prefer this type for sensitive key material that should not remain in memory
-/// after it goes out of scope.
-pub type SecretVec = zeroize::Zeroizing<Vec<u8>>;
+/// `SecretVec` zeroizes its contents on drop and requires an explicit
+/// [`SecretVec::into_vec`] when crossing out of the trusted Rust layer.
+#[repr(transparent)]
+#[derive(Clone, Default, Eq, PartialEq, Hash)]
+pub struct SecretVec(Vec<u8>);
+
+impl SecretVec {
+    /// Wrap a byte vector so it is zeroized on drop.
+    pub fn new(value: Vec<u8>) -> Self {
+        Self(value)
+    }
+
+    /// Explicitly unwrap the secret bytes when crossing a trust boundary.
+    pub fn into_vec(mut self) -> Vec<u8> {
+        std::mem::take(&mut self.0)
+    }
+}
+
+impl fmt::Debug for SecretVec {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("[REDACTED]")
+    }
+}
+
+impl Deref for SecretVec {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_slice()
+    }
+}
+
+impl DerefMut for SecretVec {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.0.as_mut_slice()
+    }
+}
+
+impl AsRef<[u8]> for SecretVec {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_slice()
+    }
+}
+
+impl AsMut<[u8]> for SecretVec {
+    fn as_mut(&mut self) -> &mut [u8] {
+        self.0.as_mut_slice()
+    }
+}
+
+impl From<Vec<u8>> for SecretVec {
+    fn from(value: Vec<u8>) -> Self {
+        Self::new(value)
+    }
+}
+
+impl Zeroize for SecretVec {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}
+
+impl Drop for SecretVec {
+    fn drop(&mut self) {
+        self.zeroize();
+    }
+}
 
 /// Decode a base64 string to bytes.
 ///

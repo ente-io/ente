@@ -42,7 +42,7 @@ pub fn decrypt_secrets_with_kek(
     let key_nonce = crypto::decode_b64(&attributes.key_decryption_nonce)
         .map_err(|e| AuthError::Decode(format!("key_decryption_nonce: {}", e)))?;
 
-    let mut master_key = SecretVec::new(
+    let master_key = SecretVec::new(
         secretbox::decrypt(&encrypted_key, &key_nonce, key_encryption_key)
             .map_err(|_| AuthError::IncorrectPassword)?,
     );
@@ -52,7 +52,7 @@ pub fn decrypt_secrets_with_kek(
     let secret_key_nonce = crypto::decode_b64(&attributes.secret_key_decryption_nonce)
         .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
 
-    let mut secret_key = SecretVec::new(
+    let secret_key = SecretVec::new(
         secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
             .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
@@ -62,19 +62,24 @@ pub fn decrypt_secrets_with_kek(
     let sealed_token = crypto::decode_b64(encrypted_token)
         .map_err(|e| AuthError::Decode(format!("encrypted_token: {}", e)))?;
 
-    let token = sealed::open(&sealed_token, &public_key, &secret_key)
-        .map_err(|_| AuthError::InvalidKeyAttributes)?;
+    let token = SecretVec::new(
+        sealed::open(&sealed_token, &public_key, &secret_key)
+            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+    );
 
     Ok(LoginResult {
-        master_key: std::mem::take(&mut *master_key),
-        secret_key: std::mem::take(&mut *secret_key),
+        master_key,
+        secret_key,
         token,
-        key_encryption_key: key_encryption_key.to_vec(),
+        key_encryption_key: SecretVec::new(key_encryption_key.to_vec()),
     })
 }
 
 /// Derive the login key from password for SRP authentication.
-pub fn derive_login_key_for_srp(password: &str, srp_attributes: &SrpAttributes) -> Result<Vec<u8>> {
+pub fn derive_login_key_for_srp(
+    password: &str,
+    srp_attributes: &SrpAttributes,
+) -> Result<SecretVec> {
     let kek_salt = crypto::decode_b64(&srp_attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
@@ -84,7 +89,7 @@ pub fn derive_login_key_for_srp(password: &str, srp_attributes: &SrpAttributes) 
         srp_attributes.mem_limit,
         srp_attributes.ops_limit,
     )?;
-    let login_key = kdf::derive_login_key(&kek)?;
+    let login_key = kdf::derive_login_key_secure(&kek)?;
 
     Ok(login_key)
 }
@@ -93,19 +98,19 @@ pub fn derive_login_key_for_srp(password: &str, srp_attributes: &SrpAttributes) 
 pub fn derive_keys_for_login(
     password: &str,
     srp_attributes: &SrpAttributes,
-) -> Result<(Vec<u8>, Vec<u8>)> {
+) -> Result<(SecretVec, SecretVec)> {
     let kek_salt = crypto::decode_b64(&srp_attributes.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    let mut kek = argon::derive_key_secure(
+    let kek = argon::derive_key_secure(
         password,
         &kek_salt,
         srp_attributes.mem_limit,
         srp_attributes.ops_limit,
     )?;
-    let login_key = kdf::derive_login_key(&kek)?;
+    let login_key = kdf::derive_login_key_secure(&kek)?;
 
-    Ok((std::mem::take(&mut *kek), login_key))
+    Ok((kek, login_key))
 }
 
 #[cfg(test)]
@@ -139,13 +144,19 @@ mod tests {
 
         let original_master_key =
             crypto::decode_b64(&gen_result.private_key_attributes.key).unwrap();
-        assert_eq!(login_result.master_key, original_master_key);
+        assert_eq!(
+            login_result.master_key.as_ref(),
+            original_master_key.as_slice()
+        );
 
         let original_secret_key =
             crypto::decode_b64(&gen_result.private_key_attributes.secret_key).unwrap();
-        assert_eq!(login_result.secret_key, original_secret_key);
+        assert_eq!(
+            login_result.secret_key.as_ref(),
+            original_secret_key.as_slice()
+        );
 
-        assert_eq!(login_result.token, token);
+        assert_eq!(login_result.token.as_ref(), token);
     }
 
     #[test]
@@ -182,6 +193,6 @@ mod tests {
 
         let login_key = derive_login_key_for_srp(password, &srp_attrs).unwrap();
         assert_eq!(login_key.len(), 16);
-        assert_eq!(login_key, gen_result.login_key);
+        assert_eq!(login_key.as_ref(), gen_result.login_key.as_ref());
     }
 }

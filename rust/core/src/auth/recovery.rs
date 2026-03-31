@@ -40,7 +40,7 @@ pub fn recover_with_key(
     let master_key_nonce_bytes = crypto::decode_b64(master_key_nonce)
         .map_err(|e| AuthError::Decode(format!("master_key_decryption_nonce: {}", e)))?;
 
-    let mut master_key = SecretVec::new(
+    let master_key = SecretVec::new(
         secretbox::decrypt(
             &encrypted_master_key_bytes,
             &master_key_nonce_bytes,
@@ -54,7 +54,7 @@ pub fn recover_with_key(
     let secret_key_nonce = crypto::decode_b64(&attributes.secret_key_decryption_nonce)
         .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
 
-    let mut secret_key = SecretVec::new(
+    let secret_key = SecretVec::new(
         secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
             .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
@@ -64,16 +64,16 @@ pub fn recover_with_key(
     let sealed_token = crypto::decode_b64(encrypted_token)
         .map_err(|e| AuthError::Decode(format!("encrypted_token: {}", e)))?;
 
-    let mut token = SecretVec::new(
+    let token = SecretVec::new(
         sealed::open(&sealed_token, &public_key, &secret_key)
             .map_err(|_| AuthError::InvalidKeyAttributes)?,
     );
 
     Ok(LoginResult {
-        master_key: std::mem::take(&mut *master_key),
-        secret_key: std::mem::take(&mut *secret_key),
-        token: std::mem::take(&mut *token),
-        key_encryption_key: Vec::new(),
+        master_key,
+        secret_key,
+        token,
+        key_encryption_key: SecretVec::new(Vec::new()),
     })
 }
 
@@ -108,7 +108,7 @@ pub fn get_recovery_key(master_key: &[u8], attributes: &KeyAttributes) -> Result
 ///
 /// The mnemonic form must be a 24-word English BIP-39 phrase. The legacy hex
 /// form is still accepted for compatibility.
-pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> Result<Vec<u8>> {
+pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> Result<SecretVec> {
     let trimmed_input = recovery_key_mnemonic_or_hex
         .split_whitespace()
         .map(str::trim)
@@ -116,7 +116,7 @@ pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> 
         .collect::<Vec<_>>()
         .join(" ");
 
-    let mut recovery_key = SecretVec::new(if trimmed_input.contains(' ') {
+    let recovery_key = SecretVec::new(if trimmed_input.contains(' ') {
         if trimmed_input.split(' ').count() != 24 {
             return Err(AuthError::IncorrectRecoveryKey);
         }
@@ -132,7 +132,7 @@ pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> 
         return Err(AuthError::IncorrectRecoveryKey);
     }
 
-    Ok(std::mem::take(&mut *recovery_key))
+    Ok(recovery_key)
 }
 
 /// Convert a base64-encoded recovery key into its 24-word English mnemonic.
@@ -182,8 +182,11 @@ mod tests {
         .unwrap();
 
         let expected_master = crypto::decode_b64(&gen_result.private_key_attributes.key).unwrap();
-        assert_eq!(recovery_result.master_key, expected_master);
-        assert_eq!(recovery_result.token, b"my_token");
+        assert_eq!(
+            recovery_result.master_key.as_ref(),
+            expected_master.as_slice()
+        );
+        assert_eq!(recovery_result.token.as_ref(), b"my_token");
     }
 
     #[test]
@@ -222,7 +225,10 @@ mod tests {
         let mnemonic = recovery_key_to_mnemonic(&recovery_key_b64).unwrap();
         let decoded = recovery_key_from_mnemonic_or_hex(&mnemonic).unwrap();
 
-        assert_eq!(decoded, crypto::decode_hex(&recovery_key_hex).unwrap());
+        assert_eq!(
+            decoded.as_ref(),
+            crypto::decode_hex(&recovery_key_hex).unwrap().as_slice()
+        );
     }
 
     #[test]
@@ -235,8 +241,10 @@ mod tests {
                 .unwrap();
 
         assert_eq!(
-            decoded,
-            crypto::decode_hex(&gen_result.private_key_attributes.recovery_key).unwrap()
+            decoded.as_ref(),
+            crypto::decode_hex(&gen_result.private_key_attributes.recovery_key)
+                .unwrap()
+                .as_slice()
         );
     }
 }

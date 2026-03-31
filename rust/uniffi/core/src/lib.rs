@@ -105,17 +105,17 @@ fn to_core_srp_attrs(attrs: &SrpAttributes) -> auth::SrpAttributes {
 
 fn secrets_from_login_result(result: auth::LoginResult) -> AuthSecrets {
     AuthSecrets {
-        master_key: result.master_key,
-        secret_key: result.secret_key,
-        token: result.token,
+        master_key: result.master_key.into_vec(),
+        secret_key: result.secret_key.into_vec(),
+        token: result.token.into_vec(),
     }
 }
 
 fn secrets_from_decrypted(result: auth::DecryptedSecrets) -> AuthSecrets {
     AuthSecrets {
-        master_key: result.master_key,
-        secret_key: result.secret_key,
-        token: result.token,
+        master_key: result.master_key.into_vec(),
+        secret_key: result.secret_key.into_vec(),
+        token: result.token.into_vec(),
     }
 }
 
@@ -161,7 +161,7 @@ pub fn srp_start(
 
     *guard = Some(SrpState {
         session,
-        kek: crypto::SecretVec::new(creds.kek),
+        kek: creds.kek,
     });
 
     Ok(SrpSessionResult { srp_a })
@@ -220,8 +220,8 @@ pub fn srp_decrypt_secrets(
         let (master_key, secret_key) = auth::decrypt_keys_only(&state.kek, &core_attrs)?;
         let token_bytes = decode_token(&token)?;
         return Ok(AuthSecrets {
-            master_key,
-            secret_key,
+            master_key: master_key.into_vec(),
+            secret_key: secret_key.into_vec(),
             token: token_bytes,
         });
     }
@@ -238,7 +238,7 @@ pub fn derive_kek_for_login(
     ops_limit: u32,
 ) -> Result<Vec<u8>, EnsuError> {
     let kek = auth::derive_kek(&password, &kek_salt, mem_limit, ops_limit)?;
-    Ok(kek)
+    Ok(kek.into_vec())
 }
 
 pub fn decrypt_secrets_with_kek(
@@ -259,8 +259,8 @@ pub fn decrypt_secrets_with_kek(
         let (master_key, secret_key) = auth::decrypt_keys_only(&kek, &core_attrs)?;
         let token_bytes = decode_token(&token)?;
         return Ok(AuthSecrets {
-            master_key,
-            secret_key,
+            master_key: master_key.into_vec(),
+            secret_key: secret_key.into_vec(),
             token: token_bytes,
         });
     }

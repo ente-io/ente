@@ -286,7 +286,10 @@ mod tests {
 
         assert_eq!(m1, expected_m1);
         assert_eq!(session.m1.as_ref().unwrap(), &expected_m1);
-        assert_eq!(session.k.as_ref().unwrap().as_slice(), expected_k.as_slice());
+        assert_eq!(
+            session.k.as_ref().unwrap().as_ref(),
+            expected_k.as_slice()
+        );
 
         let mut m2_hasher = Sha256::new();
         m2_hasher.update(&a_padded);

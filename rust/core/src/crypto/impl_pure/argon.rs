@@ -7,12 +7,11 @@ use std::fmt;
 use argon2::{Algorithm, Argon2, Params, Version};
 
 use crate::crypto::{CryptoError, Result, SecretVec};
-use zeroize::Zeroizing;
 
 /// Result of key derivation with password.
 pub struct DerivedKeyResult {
     /// The derived key.
-    pub key: Vec<u8>,
+    pub key: SecretVec,
     /// The salt used for derivation.
     pub salt: Vec<u8>,
     /// Memory limit used.
@@ -147,7 +146,7 @@ pub fn derive_key_secure(
     ops_limit: u32,
 ) -> Result<SecretVec> {
     let key = derive_key(password, salt, mem_limit, ops_limit)?;
-    Ok(Zeroizing::new(key))
+    Ok(SecretVec::new(key))
 }
 
 /// Derive a key with interactive parameters (fast, for UI responsiveness).
@@ -164,7 +163,7 @@ pub fn derive_interactive_key(password: &str) -> Result<DerivedKeyResult> {
     let salt = super::keys::generate_salt();
     let key = derive_key(password, &salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE)?;
     Ok(DerivedKeyResult {
-        key,
+        key: SecretVec::new(key),
         salt,
         mem_limit: MEMLIMIT_INTERACTIVE,
         ops_limit: OPSLIMIT_INTERACTIVE,
@@ -250,7 +249,7 @@ pub fn derive_sensitive_key_with_salt_adaptive(
         match derive_key_bytes(password, salt, mem_limit, ops_limit) {
             Ok(key) => {
                 return Ok(DerivedKeyResult {
-                    key,
+                    key: SecretVec::new(key),
                     salt: salt.to_vec(),
                     mem_limit,
                     ops_limit,
@@ -468,7 +467,7 @@ mod tests {
     #[test]
     fn test_derived_key_result_debug_redacts_secret_material() {
         let result = DerivedKeyResult {
-            key: vec![1, 2, 3],
+            key: SecretVec::new(vec![1, 2, 3]),
             salt: vec![4, 5, 6],
             mem_limit: 123,
             ops_limit: 456,
