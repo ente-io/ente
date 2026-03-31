@@ -653,5 +653,5 @@ This will mark the account as active.
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
 Contact support at [support@ente.com](mailto:support@ente.com) and share a
-screenshot of the `Settings > Account` page showing the registered email address
-(green box), so we can verify the account.
+screenshot of the Settings showing the registered email address at the top so we
+can verify the account.
