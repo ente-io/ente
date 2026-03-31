@@ -96,9 +96,18 @@ impl HttpClient {
             ));
         }
 
-        let path_only = path
-            .split_once(['?', '#'])
-            .map_or(path, |(path_only, _)| path_only);
+        let (path_and_query, fragment) = path
+            .split_once('#')
+            .map_or((path, None), |(path, fragment)| (path, Some(fragment)));
+        if fragment.is_some() {
+            return Err(Error::InvalidUrl(
+                "request paths must not contain fragments".to_string(),
+            ));
+        }
+
+        let (path_only, query) = path_and_query
+            .split_once('?')
+            .map_or((path_and_query, None), |(path, query)| (path, Some(query)));
         if path_only
             .split('/')
             .any(|segment| matches!(segment, "." | ".."))
@@ -110,15 +119,18 @@ impl HttpClient {
 
         let mut base = Url::parse(&self.base_url)
             .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
+        base.set_query(None);
+        base.set_fragment(None);
 
         let base_path = base.path().trim_end_matches('/');
         let resolved_path = if base_path.is_empty() || base_path == "/" {
-            path.to_string()
+            path_only.to_string()
         } else {
-            format!("{base_path}{path}")
+            format!("{base_path}{path_only}")
         };
 
         base.set_path(&resolved_path);
+        base.set_query(query);
         Ok(base)
     }
 
@@ -163,6 +175,13 @@ mod tests {
     }
 
     #[test]
+    fn test_resolve_url_preserves_request_query_without_base_query() {
+        let client = test_client("https://api.ente.io/v1?stale=true#old");
+        let url = client.resolve_url("/ping?fresh=true").unwrap();
+        assert_eq!(url.as_str(), "https://api.ente.io/v1/ping?fresh=true");
+    }
+
+    #[test]
     fn test_resolve_url_rejects_host_confusion_payload() {
         let client = test_client("https://api.ente.io");
         let err = client.resolve_url("@attacker.com").unwrap_err();
@@ -180,6 +199,13 @@ mod tests {
     fn test_resolve_url_rejects_dot_segments() {
         let client = test_client("https://api.ente.io/v1");
         let err = client.resolve_url("/../admin").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_resolve_url_rejects_fragments() {
+        let client = test_client("https://api.ente.io");
+        let err = client.resolve_url("/ping#frag").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 

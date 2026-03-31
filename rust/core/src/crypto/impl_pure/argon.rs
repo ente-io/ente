@@ -41,6 +41,11 @@ pub const MEMLIMIT_MODERATE: u32 = 268_435_456;
 /// Memory limit for sensitive operations (1 GiB).
 pub const MEMLIMIT_SENSITIVE: u32 = 1_073_741_824;
 
+/// Minimum memory limit for adaptive sensitive derivation (128 MiB).
+///
+/// This matches the server-side floor for accepted account key attributes.
+pub const MEMLIMIT_SENSITIVE_MIN: u32 = 134_217_728;
+
 /// Minimum memory limit.
 pub const MEMLIMIT_MIN: u32 = 8_192;
 
@@ -241,7 +246,7 @@ pub fn derive_sensitive_key_with_salt_adaptive(
     }
 
     let mut last_error = None;
-    while mem_limit > MEMLIMIT_MIN {
+    while mem_limit >= MEMLIMIT_SENSITIVE_MIN {
         match derive_key_bytes(password, salt, mem_limit, ops_limit) {
             Ok(key) => {
                 return Ok(DerivedKeyResult {
@@ -431,7 +436,7 @@ mod tests {
         );
         assert!(result.mem_limit <= MEMLIMIT_MODERATE);
         assert!(result.ops_limit >= OPSLIMIT_SENSITIVE);
-        assert!(result.mem_limit > MEMLIMIT_MIN);
+        assert!(result.mem_limit >= MEMLIMIT_SENSITIVE_MIN);
     }
 
     #[test]
@@ -442,7 +447,7 @@ mod tests {
         let mut ops_limit = OPSLIMIT_SENSITIVE * factor;
         let mut attempts = Vec::new();
 
-        while mem_limit > MEMLIMIT_MIN {
+        while mem_limit >= MEMLIMIT_SENSITIVE_MIN {
             attempts.push((mem_limit, ops_limit));
             mem_limit /= 2;
             ops_limit *= 2;
@@ -452,7 +457,7 @@ mod tests {
             attempts.first(),
             Some(&(MEMLIMIT_MODERATE, OPSLIMIT_SENSITIVE * factor))
         );
-        assert!(attempts.last().unwrap().0 > MEMLIMIT_MIN);
+        assert_eq!(attempts.last(), Some(&(MEMLIMIT_SENSITIVE_MIN, 32)));
         assert!(
             attempts
                 .iter()

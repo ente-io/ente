@@ -13,7 +13,7 @@ pub struct HttpError {
 
 #[wasm_bindgen]
 impl HttpError {
-    /// Error code: "network", "http", or "parse".
+    /// Error code: "invalid_url", "network", "http", or "parse".
     #[wasm_bindgen(getter)]
     pub fn code(&self) -> String {
         self.code.clone()
