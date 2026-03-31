@@ -21,6 +21,13 @@ If any duplicates slip through and you temporarily hit your storage limit, you c
 
 This removes exact duplicates while keeping one original safely.
 
+### What causes storage discrepancies after a Google Takeout import? {#google-takeout-storage-discrepancies}
+
+- Older Google Photos uploads that didn't count toward Google storage are stored fully in Ente.
+- Edited photos, motion photos, videos, and shared or partner-shared items often appear as separate files.
+- Takeout exports frequently repeat files across folders, leading to duplicates.
+- Duplicates due to storage saver/simultaneous backup. [Learn more](https://ente.com/help/photos/faq/migration#prevent-duplicates-migration)
+
 ### How does Ente handle Google Takeout metadata? {#google-takeout-metadata}
 
 When you export your data using Google Takeout, Google provides both your photos and their associated metadata JSON files. However, Google sometimes splits the JSON and photo across different zip files.
