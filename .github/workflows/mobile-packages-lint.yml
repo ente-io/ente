@@ -14,7 +14,6 @@ on:
 env:
     FLUTTER_VERSION: "3.32.8"
     RUST_VERSION: "1.90.0"
-    FLUTTER_RUST_BRIDGE_VERSION: "2.11.1"
     RUSTFLAGS: -D warnings
 
 permissions:
@@ -123,7 +122,7 @@ jobs:
                   key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
 
             - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }}
+              run: cargo install flutter_rust_bridge_codegen
 
             - name: Generate Rust bindings (Core)
               run: flutter_rust_bridge_codegen generate
@@ -267,7 +266,7 @@ jobs:
                   key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
 
             - name: Install Flutter Rust Bridge
-              run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }}
+              run: cargo install flutter_rust_bridge_codegen
 
             - name: Generate Rust bindings (Core)
               run: flutter_rust_bridge_codegen generate
@@ -344,7 +343,7 @@ jobs:
 
             - name: Install Flutter Rust Bridge
               if: needs.detect-changes.outputs.lint_photos == 'true'
-              run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }}
+              run: cargo install flutter_rust_bridge_codegen
 
             - name: Generate Rust bindings (Core package)
               if: needs.detect-changes.outputs.lint_photos == 'true'
