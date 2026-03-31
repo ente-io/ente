@@ -35,6 +35,25 @@ const lockerPaidStorageLimit = 10 * 1024 * 1024 * 1024 // 10 GiB
 
 const hundredMBInBytes = 100 * 1024 * 1024
 
+type LockerLimits struct {
+	IsPaid       bool
+	FileLimit    int64
+	StorageLimit int64
+}
+
+func GetLockerLimitsForTier(isPaid bool) LockerLimits {
+	limits := LockerLimits{
+		IsPaid:       isPaid,
+		FileLimit:    int64(lockerFreeFileLimit),
+		StorageLimit: int64(lockerFreeStorageLimit),
+	}
+	if isPaid {
+		limits.FileLimit = int64(lockerPaidFileLimit)
+		limits.StorageLimit = int64(lockerPaidStorageLimit)
+	}
+	return limits
+}
+
 // CanUploadFile returns error if the file of given size (with StorageOverflowAboveSubscriptionLimit buffer) can be
 // uploaded or not. If size is not passed, it validates if current usage is less than subscription storage.
 func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
@@ -124,16 +143,10 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 			isPaidUser = true
 		}
 
-		// Apply tiered file and storage limits
-		maxFiles := int64(lockerFreeFileLimit)
-		maxStorage := int64(lockerFreeStorageLimit)
-		if isPaidUser {
-			maxFiles = int64(lockerPaidFileLimit)
-			maxStorage = int64(lockerPaidStorageLimit)
-		}
+		limits := GetLockerLimitsForTier(isPaidUser)
 
 		// Check file count limit
-		if lockerUsage.TotalFileCount >= maxFiles {
+		if lockerUsage.TotalFileCount >= limits.FileLimit {
 			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
 		}
 
@@ -142,9 +155,9 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		if size != nil {
 			projectedLockerUsage += *size
 		}
-		if projectedLockerUsage >= maxStorage {
+		if projectedLockerUsage >= limits.StorageLimit {
 			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
-				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", maxStorage, projectedLockerUsage))
+				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", limits.StorageLimit, projectedLockerUsage))
 		}
 		// Locker uploads should not be blocked by Photos subscription limits.
 		return nil

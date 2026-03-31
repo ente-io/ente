@@ -639,7 +639,7 @@ packages:
   ente_qr:
     dependency: "direct main"
     description:
-      path: "../auth/plugins/qr"
+      path: "plugins/ente_qr"
       relative: true
     source: path
     version: "0.0.1"
