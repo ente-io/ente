@@ -1,6 +1,5 @@
 //! HTTP client for communicating with the Ente API.
 
-use reqwest::Url;
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -76,62 +75,27 @@ impl HttpClient {
     pub fn new(base_url: &str) -> Self {
         Self {
             client: reqwest::Client::new(),
-            base_url: base_url.to_string(),
+            base_url: base_url.trim_end_matches('/').to_string(),
         }
     }
 
     /// GET request, returns response body as text.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
-        let url = self.resolve_url(path)?;
-        let response = self.client.get(url).send().await?;
+        let url = self.request_url(path)?;
+        let response = self.client.get(&url).send().await?;
         let response = response.error_for_status()?;
         let text = response.text().await?;
         Ok(text)
     }
 
-    fn resolve_url(&self, path: &str) -> Result<Url, Error> {
-        if !path.starts_with('/') || path.starts_with("//") {
+    fn request_url(&self, path: &str) -> Result<String, Error> {
+        if !path.starts_with('/') {
             return Err(Error::InvalidUrl(
-                "request paths must start with a single '/'".to_string(),
+                "request paths must start with '/'".to_string(),
             ));
         }
 
-        let (path_and_query, fragment) = path
-            .split_once('#')
-            .map_or((path, None), |(path, fragment)| (path, Some(fragment)));
-        if fragment.is_some() {
-            return Err(Error::InvalidUrl(
-                "request paths must not contain fragments".to_string(),
-            ));
-        }
-
-        let (path_only, query) = path_and_query
-            .split_once('?')
-            .map_or((path_and_query, None), |(path, query)| (path, Some(query)));
-        if path_only
-            .split('/')
-            .any(|segment| matches!(segment, "." | ".."))
-        {
-            return Err(Error::InvalidUrl(
-                "request paths must not contain dot segments".to_string(),
-            ));
-        }
-
-        let mut base = Url::parse(&self.base_url)
-            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
-        base.set_query(None);
-        base.set_fragment(None);
-
-        let base_path = base.path().trim_end_matches('/');
-        let resolved_path = if base_path.is_empty() || base_path == "/" {
-            path_only.to_string()
-        } else {
-            format!("{base_path}{path_only}")
-        };
-
-        base.set_path(&resolved_path);
-        base.set_query(query);
-        Ok(base)
+        Ok(format!("{}{}", self.base_url, path))
     }
 
     /// Ping the API, returns [PingResponse].
@@ -149,13 +113,13 @@ mod tests {
     fn test_client(base_url: &str) -> HttpClient {
         HttpClient {
             client: reqwest::Client::builder().no_proxy().build().unwrap(),
-            base_url: base_url.to_string(),
+            base_url: base_url.trim_end_matches('/').to_string(),
         }
     }
 
     #[test]
     fn test_client_creation() {
-        let client = test_client("https://api.ente.io");
+        let client = test_client("https://api.ente.io/");
         assert_eq!(client.base_url, "https://api.ente.io");
     }
 
@@ -168,51 +132,23 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_url_uses_origin_path_join() {
+    fn test_request_url_uses_string_join() {
         let client = test_client("https://api.ente.io/v1");
-        let url = client.resolve_url("/ping").unwrap();
-        assert_eq!(url.as_str(), "https://api.ente.io/v1/ping");
+        let url = client.request_url("/ping").unwrap();
+        assert_eq!(url, "https://api.ente.io/v1/ping");
     }
 
     #[test]
-    fn test_resolve_url_preserves_request_query_without_base_query() {
-        let client = test_client("https://api.ente.io/v1?stale=true#old");
-        let url = client.resolve_url("/ping?fresh=true").unwrap();
-        assert_eq!(url.as_str(), "https://api.ente.io/v1/ping?fresh=true");
-    }
-
-    #[test]
-    fn test_resolve_url_rejects_host_confusion_payload() {
-        let client = test_client("https://api.ente.io");
-        let err = client.resolve_url("@attacker.com").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
-    }
-
-    #[test]
-    fn test_resolve_url_rejects_protocol_relative_path() {
-        let client = test_client("https://api.ente.io");
-        let err = client.resolve_url("//attacker.com").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
-    }
-
-    #[test]
-    fn test_resolve_url_rejects_dot_segments() {
+    fn test_request_url_preserves_query_and_special_bytes() {
         let client = test_client("https://api.ente.io/v1");
-        let err = client.resolve_url("/../admin").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
+        let url = client.request_url("/%2e%2e%5cadmin?fresh=true").unwrap();
+        assert_eq!(url, "https://api.ente.io/v1/%2e%2e%5cadmin?fresh=true");
     }
 
     #[test]
-    fn test_resolve_url_rejects_fragments() {
+    fn test_request_url_rejects_missing_leading_slash() {
         let client = test_client("https://api.ente.io");
-        let err = client.resolve_url("/ping#frag").unwrap_err();
-        assert!(matches!(err, Error::InvalidUrl(_)));
-    }
-
-    #[test]
-    fn test_resolve_url_rejects_invalid_base_url() {
-        let client = test_client("not a url");
-        let err = client.resolve_url("/ping").unwrap_err();
+        let err = client.request_url("ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 }

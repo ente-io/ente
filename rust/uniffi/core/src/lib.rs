@@ -130,6 +130,20 @@ fn decode_token(token: &str) -> Result<Vec<u8>, EnsuError> {
         })
 }
 
+fn verify_srp_m2(session: &auth::SrpSession, srp_m2_b64: &str) -> Result<(), EnsuError> {
+    if srp_m2_b64.is_empty() {
+        return Err(EnsuError::Message {
+            reason: "Missing server proof".to_string(),
+        });
+    }
+
+    let srp_m2 = crypto::decode_b64(srp_m2_b64).map_err(|e| EnsuError::Message {
+        reason: format!("srp_m2: {}", e),
+    })?;
+    session.verify_m2(&srp_m2)?;
+    Ok(())
+}
+
 pub fn init_crypto() -> Result<(), EnsuError> {
     crypto::init().map_err(|e| EnsuError::Message {
         reason: e.to_string(),
@@ -197,17 +211,21 @@ pub fn srp_clear() {
 }
 
 pub fn srp_decrypt_secrets(
+    srp_m2: String,
     key_attrs: KeyAttributes,
     encrypted_token: Option<String>,
     plain_token: Option<String>,
 ) -> Result<AuthSecrets, EnsuError> {
+    let mut guard = lock_srp_state()?;
+    let state = guard.as_mut().ok_or_else(|| EnsuError::Message {
+        reason: "SRP session not initialized".to_string(),
+    })?;
+    verify_srp_m2(&state.session, &srp_m2)?;
+
     // Consume the SRP state so KEK doesn't linger in memory if the caller forgets srp_clear().
-    let state = {
-        let mut guard = lock_srp_state()?;
-        guard.take().ok_or_else(|| EnsuError::Message {
-            reason: "SRP session not initialized".to_string(),
-        })?
-    };
+    let state = guard.take().ok_or_else(|| EnsuError::Message {
+        reason: "SRP session not initialized".to_string(),
+    })?;
 
     let core_attrs = to_core_key_attrs(&key_attrs);
 
@@ -229,6 +247,29 @@ pub fn srp_decrypt_secrets(
     Err(EnsuError::Message {
         reason: "Missing auth token".to_string(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_session() -> auth::SrpSession {
+        auth::SrpSession::new("test-user-id", &[0u8; 16], &[0u8; 16]).unwrap()
+    }
+
+    #[test]
+    fn test_verify_srp_m2_rejects_missing_server_proof() {
+        let session = sample_session();
+        let err = verify_srp_m2(&session, "").unwrap_err();
+        assert_eq!(err.to_string(), "Missing server proof");
+    }
+
+    #[test]
+    fn test_verify_srp_m2_rejects_invalid_base64() {
+        let session = sample_session();
+        let err = verify_srp_m2(&session, "%%%").unwrap_err();
+        assert!(err.to_string().starts_with("srp_m2: "));
+    }
 }
 
 pub fn derive_kek_for_login(
