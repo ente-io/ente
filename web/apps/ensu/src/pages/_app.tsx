@@ -20,6 +20,7 @@ import { logStartupBanner } from "ente-base/log-web";
 import "katex/dist/katex.min.css";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
+import { setupAutoAppUpdates } from "services/app-update";
 import { ensuLogout } from "services/logout";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
@@ -32,6 +33,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
     }, []);
+
+    useEffect(() => setupAutoAppUpdates(), []);
 
     useEffect(() => {
         if (typeof window === "undefined") return;

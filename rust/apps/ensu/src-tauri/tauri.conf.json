@@ -56,6 +56,11 @@
     },
     "security": {
       "csp": null
+    },
+    "updater": {
+      "active": false,
+      "dialog": false,
+      "endpoints": ["https://ente.com/release-info/ensu-desktop.json"]
     }
   }
 }

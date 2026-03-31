@@ -221,7 +221,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ format('--target {0} --bundles {1}', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
+                  args: ${{ format('--target {0} --bundles {1} --features updater', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
 
     build-android:
         runs-on: ubuntu-22.04

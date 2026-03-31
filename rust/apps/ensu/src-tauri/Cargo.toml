@@ -20,6 +20,7 @@ keyring = { version = "3", default-features = false, features = ["apple-native",
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
+updater = ["tauri/updater"]
 
 [profile.release]
 opt-level = 3
