@@ -2,7 +2,7 @@
 
 use bip39::{Language, Mnemonic};
 
-use crate::crypto::{self, sealed, secretbox};
+use crate::crypto::{self, SecretVec, sealed, secretbox};
 
 use super::{AuthError, KeyAttributes, LoginResult, Result};
 
@@ -14,8 +14,10 @@ pub fn recover_with_key(
     attributes: &KeyAttributes,
     encrypted_token: &str,
 ) -> Result<LoginResult> {
-    let recovery_key = crypto::decode_hex(recovery_key_hex)
-        .map_err(|e| AuthError::Decode(format!("recovery_key: {}", e)))?;
+    let recovery_key = SecretVec::new(
+        crypto::decode_hex(recovery_key_hex)
+            .map_err(|e| AuthError::Decode(format!("recovery_key: {}", e)))?,
+    );
 
     if recovery_key.len() != 32 {
         return Err(AuthError::IncorrectRecoveryKey);
@@ -38,33 +40,39 @@ pub fn recover_with_key(
     let master_key_nonce_bytes = crypto::decode_b64(master_key_nonce)
         .map_err(|e| AuthError::Decode(format!("master_key_decryption_nonce: {}", e)))?;
 
-    let master_key = secretbox::decrypt(
-        &encrypted_master_key_bytes,
-        &master_key_nonce_bytes,
-        &recovery_key,
-    )
-    .map_err(|_| AuthError::IncorrectRecoveryKey)?;
+    let mut master_key = SecretVec::new(
+        secretbox::decrypt(
+            &encrypted_master_key_bytes,
+            &master_key_nonce_bytes,
+            &recovery_key,
+        )
+        .map_err(|_| AuthError::IncorrectRecoveryKey)?,
+    );
 
     let encrypted_secret_key = crypto::decode_b64(&attributes.encrypted_secret_key)
         .map_err(|e| AuthError::Decode(format!("encrypted_secret_key: {}", e)))?;
     let secret_key_nonce = crypto::decode_b64(&attributes.secret_key_decryption_nonce)
         .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
 
-    let secret_key = secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
-        .map_err(|_| AuthError::InvalidKeyAttributes)?;
+    let mut secret_key = SecretVec::new(
+        secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
+            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+    );
 
     let public_key = crypto::decode_b64(&attributes.public_key)
         .map_err(|e| AuthError::Decode(format!("public_key: {}", e)))?;
     let sealed_token = crypto::decode_b64(encrypted_token)
         .map_err(|e| AuthError::Decode(format!("encrypted_token: {}", e)))?;
 
-    let token = sealed::open(&sealed_token, &public_key, &secret_key)
-        .map_err(|_| AuthError::InvalidKeyAttributes)?;
+    let mut token = SecretVec::new(
+        sealed::open(&sealed_token, &public_key, &secret_key)
+            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+    );
 
     Ok(LoginResult {
-        master_key,
-        secret_key,
-        token,
+        master_key: std::mem::take(&mut *master_key),
+        secret_key: std::mem::take(&mut *secret_key),
+        token: std::mem::take(&mut *token),
         key_encryption_key: Vec::new(),
     })
 }
@@ -88,8 +96,10 @@ pub fn get_recovery_key(master_key: &[u8], attributes: &KeyAttributes) -> Result
     let nonce_bytes = crypto::decode_b64(nonce)
         .map_err(|e| AuthError::Decode(format!("recovery_key_decryption_nonce: {}", e)))?;
 
-    let recovery_key = secretbox::decrypt(&encrypted_bytes, &nonce_bytes, master_key)
-        .map_err(|_| AuthError::InvalidKeyAttributes)?;
+    let recovery_key = SecretVec::new(
+        secretbox::decrypt(&encrypted_bytes, &nonce_bytes, master_key)
+            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+    );
 
     Ok(crypto::encode_hex(&recovery_key))
 }
@@ -106,7 +116,7 @@ pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> 
         .collect::<Vec<_>>()
         .join(" ");
 
-    let recovery_key = if trimmed_input.contains(' ') {
+    let mut recovery_key = SecretVec::new(if trimmed_input.contains(' ') {
         if trimmed_input.split(' ').count() != 24 {
             return Err(AuthError::IncorrectRecoveryKey);
         }
@@ -116,19 +126,21 @@ pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> 
         mnemonic.to_entropy()
     } else {
         crypto::decode_hex(&trimmed_input).map_err(|_| AuthError::IncorrectRecoveryKey)?
-    };
+    });
 
     if recovery_key.len() != 32 {
         return Err(AuthError::IncorrectRecoveryKey);
     }
 
-    Ok(recovery_key)
+    Ok(std::mem::take(&mut *recovery_key))
 }
 
 /// Convert a base64-encoded recovery key into its 24-word English mnemonic.
 pub fn recovery_key_to_mnemonic(recovery_key_b64: &str) -> Result<String> {
-    let recovery_key = crypto::decode_b64(recovery_key_b64)
-        .map_err(|e| AuthError::Decode(format!("recovery_key: {}", e)))?;
+    let recovery_key = SecretVec::new(
+        crypto::decode_b64(recovery_key_b64)
+            .map_err(|e| AuthError::Decode(format!("recovery_key: {}", e)))?,
+    );
 
     if recovery_key.len() != 32 {
         return Err(AuthError::IncorrectRecoveryKey);

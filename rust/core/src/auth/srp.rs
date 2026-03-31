@@ -4,6 +4,7 @@
 //! step ordering (e.g. calling set_b before compute_m1). Callers only need to
 //! exchange the public value and proofs with the server.
 
+use crate::crypto::SecretVec;
 use sha2::{Digest, Sha256};
 use srp::client::SrpClient as SrpClientInner;
 use srp::groups::G_4096;
@@ -22,12 +23,12 @@ use super::{AuthError, Result};
 pub struct SrpSession {
     inner: SrpClientInner<'static, Sha256>,
     identity: Vec<u8>,
-    login_key: Vec<u8>,
+    login_key: SecretVec,
     salt: Vec<u8>,
-    a_private: Vec<u8>,
+    a_private: SecretVec,
     a_public: Vec<u8>,
     m1: Option<Vec<u8>>,
-    k: Option<Vec<u8>>,
+    k: Option<SecretVec>,
 }
 
 const SRP_N_BYTES: usize = 512; // 4096-bit group size
@@ -73,9 +74,9 @@ impl SrpSession {
         Ok(Self {
             inner: client,
             identity,
-            login_key: login_key.to_vec(),
+            login_key: SecretVec::new(login_key.to_vec()),
             salt: srp_salt.to_vec(),
-            a_private,
+            a_private: SecretVec::new(a_private),
             a_public,
             m1: None,
             k: None,
@@ -126,7 +127,7 @@ impl SrpSession {
         let k = k_hasher.finalize().to_vec();
 
         self.m1 = Some(m1.clone());
-        self.k = Some(k);
+        self.k = Some(SecretVec::new(k));
 
         // No longer needed after we have computed M1/K.
         self.login_key.zeroize();
@@ -205,9 +206,9 @@ mod tests {
         let session = SrpSession {
             inner: SrpClientInner::<Sha256>::new(&G_4096),
             identity: b"test-user".to_vec(),
-            login_key: vec![0u8; 16],
+            login_key: SecretVec::new(vec![0u8; 16]),
             salt: vec![0u8; 16],
-            a_private: vec![0u8; 64],
+            a_private: SecretVec::new(vec![0u8; 64]),
             a_public: a_public.clone(),
             m1: None,
             k: None,
@@ -247,9 +248,9 @@ mod tests {
         let mut session = SrpSession {
             inner: SrpClientInner::<Sha256>::new(&G_4096),
             identity: srp_user_id.as_bytes().to_vec(),
-            login_key: login_key.to_vec(),
+            login_key: SecretVec::new(login_key.to_vec()),
             salt: srp_salt.to_vec(),
-            a_private: a_private.clone(),
+            a_private: SecretVec::new(a_private.clone()),
             a_public: a_public.clone(),
             m1: None,
             k: None,
@@ -285,7 +286,7 @@ mod tests {
 
         assert_eq!(m1, expected_m1);
         assert_eq!(session.m1.as_ref().unwrap(), &expected_m1);
-        assert_eq!(session.k.as_ref().unwrap(), &expected_k);
+        assert_eq!(session.k.as_ref().unwrap().as_slice(), expected_k.as_slice());
 
         let mut m2_hasher = Sha256::new();
         m2_hasher.update(&a_padded);

@@ -7,7 +7,7 @@ use std::fmt;
 
 #[cfg(feature = "srp")]
 use crate::crypto::keys;
-use crate::crypto::{self, argon, kdf, sealed, secretbox};
+use crate::crypto::{self, SecretVec, argon, kdf, sealed, secretbox};
 
 use super::{AuthError, KeyAttributes, Result, SrpAttributes};
 
@@ -100,6 +100,33 @@ impl fmt::Debug for GeneratedSrpSetup {
     }
 }
 
+fn decrypt_keys_only_secure(
+    kek: &[u8],
+    key_attrs: &KeyAttributes,
+) -> Result<(SecretVec, SecretVec)> {
+    let encrypted_key = crypto::decode_b64(&key_attrs.encrypted_key)
+        .map_err(|e| AuthError::Decode(format!("encrypted_key: {}", e)))?;
+    let key_nonce = crypto::decode_b64(&key_attrs.key_decryption_nonce)
+        .map_err(|e| AuthError::Decode(format!("key_decryption_nonce: {}", e)))?;
+
+    let master_key = SecretVec::new(
+        secretbox::decrypt(&encrypted_key, &key_nonce, kek)
+            .map_err(|_| AuthError::IncorrectPassword)?,
+    );
+
+    let encrypted_secret_key = crypto::decode_b64(&key_attrs.encrypted_secret_key)
+        .map_err(|e| AuthError::Decode(format!("encrypted_secret_key: {}", e)))?;
+    let secret_key_nonce = crypto::decode_b64(&key_attrs.secret_key_decryption_nonce)
+        .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
+
+    let secret_key = SecretVec::new(
+        secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
+            .map_err(|_| AuthError::InvalidKeyAttributes)?,
+    );
+
+    Ok((master_key, secret_key))
+}
+
 /// Derive SRP credentials from password.
 ///
 /// This is the first step in the SRP login flow. Call this after password entry
@@ -115,7 +142,7 @@ pub fn derive_srp_credentials(password: &str, srp_attrs: &SrpAttributes) -> Resu
     let kek_salt = crypto::decode_b64(&srp_attrs.kek_salt)
         .map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
-    let kek = argon::derive_key(
+    let mut kek = argon::derive_key_secure(
         password,
         &kek_salt,
         srp_attrs.mem_limit,
@@ -124,7 +151,10 @@ pub fn derive_srp_credentials(password: &str, srp_attrs: &SrpAttributes) -> Resu
 
     let login_key = kdf::derive_login_key(&kek)?;
 
-    Ok(SrpCredentials { kek, login_key })
+    Ok(SrpCredentials {
+        kek: std::mem::take(&mut *kek),
+        login_key,
+    })
 }
 
 /// Derive only the KEK from password.
@@ -200,25 +230,11 @@ pub fn generate_srp_setup(kek: &[u8], srp_user_id: &str) -> Result<GeneratedSrpS
 /// Use this when you only need access to the decrypted keys (e.g. when the
 /// auth token comes from a different source than a sealed box).
 pub fn decrypt_keys_only(kek: &[u8], key_attrs: &KeyAttributes) -> Result<(Vec<u8>, Vec<u8>)> {
-    // Decrypt master key with KEK
-    let encrypted_key = crypto::decode_b64(&key_attrs.encrypted_key)
-        .map_err(|e| AuthError::Decode(format!("encrypted_key: {}", e)))?;
-    let key_nonce = crypto::decode_b64(&key_attrs.key_decryption_nonce)
-        .map_err(|e| AuthError::Decode(format!("key_decryption_nonce: {}", e)))?;
-
-    let master_key = secretbox::decrypt(&encrypted_key, &key_nonce, kek)
-        .map_err(|_| AuthError::IncorrectPassword)?;
-
-    // Decrypt secret key with master key
-    let encrypted_secret_key = crypto::decode_b64(&key_attrs.encrypted_secret_key)
-        .map_err(|e| AuthError::Decode(format!("encrypted_secret_key: {}", e)))?;
-    let secret_key_nonce = crypto::decode_b64(&key_attrs.secret_key_decryption_nonce)
-        .map_err(|e| AuthError::Decode(format!("secret_key_decryption_nonce: {}", e)))?;
-
-    let secret_key = secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)
-        .map_err(|_| AuthError::InvalidKeyAttributes)?;
-
-    Ok((master_key, secret_key))
+    let (mut master_key, mut secret_key) = decrypt_keys_only_secure(kek, key_attrs)?;
+    Ok((
+        std::mem::take(&mut *master_key),
+        std::mem::take(&mut *secret_key),
+    ))
 }
 
 /// Decrypt secrets after successful authentication.
@@ -238,7 +254,7 @@ pub fn decrypt_secrets(
     key_attrs: &KeyAttributes,
     encrypted_token: &str,
 ) -> Result<DecryptedSecrets> {
-    let (master_key, secret_key) = decrypt_keys_only(kek, key_attrs)?;
+    let (mut master_key, mut secret_key) = decrypt_keys_only_secure(kek, key_attrs)?;
 
     // Decrypt token with sealed box (public key crypto)
     let public_key = crypto::decode_b64(&key_attrs.public_key)
@@ -250,8 +266,8 @@ pub fn decrypt_secrets(
         .map_err(|_| AuthError::InvalidKeyAttributes)?;
 
     Ok(DecryptedSecrets {
-        master_key,
-        secret_key,
+        master_key: std::mem::take(&mut *master_key),
+        secret_key: std::mem::take(&mut *secret_key),
         token,
     })
 }
@@ -275,13 +291,15 @@ pub(crate) fn start_srp_session(
     srp_attrs: &SrpAttributes,
 ) -> Result<(SrpSession, Vec<u8>)> {
     let mut creds = derive_srp_credentials(password, srp_attrs)?;
+    let mut kek = SecretVec::new(std::mem::take(&mut creds.kek));
+    let login_key = SecretVec::new(std::mem::take(&mut creds.login_key));
 
     let srp_salt = crypto::decode_b64(&srp_attrs.srp_salt)
         .map_err(|e| AuthError::Decode(format!("srp_salt: {}", e)))?;
 
-    let session = SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &creds.login_key)?;
+    let session = SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &login_key)?;
 
-    Ok((session, std::mem::take(&mut creds.kek)))
+    Ok((session, std::mem::take(&mut *kek)))
 }
 
 #[cfg(test)]

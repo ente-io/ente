@@ -1,6 +1,6 @@
 //! Key generation for new account sign-up.
 
-use crate::crypto::{self, argon, kdf, keys, secretbox};
+use crate::crypto::{self, SecretVec, argon, kdf, keys, secretbox};
 
 use super::{KeyAttributes, KeyGenResult, PrivateKeyAttributes, Result};
 
@@ -36,8 +36,8 @@ pub fn generate_keys_with_strength(
     strength: KeyDerivationStrength,
 ) -> Result<KeyGenResult> {
     // Create master key and recovery key
-    let master_key = keys::generate_key();
-    let recovery_key = keys::generate_key();
+    let master_key = keys::generate_key_secure();
+    let recovery_key = keys::generate_key_secure();
 
     // Encrypt master key with recovery key and vice versa
     let (enc_master_with_recovery, nonce_master_recovery) =
@@ -50,13 +50,14 @@ pub fn generate_keys_with_strength(
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key(&derived.key)?;
+    let mut derived_key = SecretVec::new(std::mem::take(&mut derived.key));
+    let login_key = kdf::derive_login_key(&derived_key)?;
 
     // Encrypt master key with derived key
-    let (enc_key, key_nonce) = encrypt_to_b64(&master_key, &derived.key)?;
+    let (enc_key, key_nonce) = encrypt_to_b64(&master_key, &derived_key)?;
 
     // Generate X25519 keypair
-    let (public_key, secret_key) = keys::generate_keypair()?;
+    let (public_key, secret_key) = keys::generate_keypair_secure()?;
 
     // Encrypt secret key with master key
     let (enc_secret_key, secret_key_nonce) = encrypt_to_b64(&secret_key, &master_key)?;
@@ -87,7 +88,7 @@ pub fn generate_keys_with_strength(
     Ok(KeyGenResult {
         key_attributes,
         private_key_attributes,
-        key_encryption_key: std::mem::take(&mut derived.key),
+        key_encryption_key: std::mem::take(&mut *derived_key),
         login_key,
     })
 }
@@ -118,14 +119,15 @@ pub fn generate_key_attributes_for_new_password_with_strength(
     strength: KeyDerivationStrength,
 ) -> Result<(KeyAttributes, Vec<u8>)> {
     // Derive new KEK from new password
-    let derived = match strength {
+    let mut derived = match strength {
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
-    let login_key = kdf::derive_login_key(&derived.key)?;
+    let derived_key = SecretVec::new(std::mem::take(&mut derived.key));
+    let login_key = kdf::derive_login_key(&derived_key)?;
 
     // Encrypt master key with new derived key
-    let (enc_key, key_nonce) = encrypt_to_b64(master_key, &derived.key)?;
+    let (enc_key, key_nonce) = encrypt_to_b64(master_key, &derived_key)?;
 
     let key_attributes = KeyAttributes {
         kek_salt: crypto::encode_b64(&derived.salt),
@@ -153,7 +155,7 @@ pub fn generate_key_attributes_for_new_password_with_strength(
 pub fn create_new_recovery_key(
     master_key: &[u8],
 ) -> Result<(String, String, String, String, String)> {
-    let recovery_key = keys::generate_key();
+    let recovery_key = keys::generate_key_secure();
 
     let (enc_master, nonce_master) = encrypt_to_b64(master_key, &recovery_key)?;
     let (enc_recovery, nonce_recovery) = encrypt_to_b64(&recovery_key, master_key)?;
