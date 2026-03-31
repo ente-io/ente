@@ -87,7 +87,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
+      ref: 16kb-fix
   figma_squircle: ^0.6.3
   file_saver: ^0.2.14
   firebase_core: ^3.6.0
