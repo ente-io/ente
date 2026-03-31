@@ -642,8 +642,8 @@ The email includes the email address associated with the inactive account.
 If you are using Ente regularly, check the registered email address shown inside
 the app to confirm which account you are currently using.
 
-Open `Settings > Account`. The registered email address will appear in a green
-box.
+Open Settings in the Ente app. The registered email address will appear at the
+very top.
 
 ### What should I do if I received this email? {#inactive-account-action}
 
