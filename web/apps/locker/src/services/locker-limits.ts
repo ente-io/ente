@@ -1,27 +1,8 @@
-import { apiOrigin } from "ente-base/origins";
-
 export const LOCKER_FILE_LIMIT_FREE = 100;
 export const LOCKER_FILE_LIMIT_PAID = 1000;
+export const LOCKER_STORAGE_LIMIT_FREE_BYTES = 1 * 1024 * 1024 * 1024;
+export const LOCKER_STORAGE_LIMIT_PAID_BYTES = 10 * 1024 * 1024 * 1024;
 export const LOCKER_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024 * 1024;
-export const LOCKER_STORAGE_BUFFER_BYTES = 20 * 1024 * 1024;
-
-const ENTE_PRODUCTION_API_ORIGIN = "https://api.ente.io";
-
-const normalizedOrigin = (origin: string) => new URL(origin).origin;
-
-export const isEnteProductionEndpoint = async () =>
-    normalizedOrigin(await apiOrigin()) ===
-    normalizedOrigin(ENTE_PRODUCTION_API_ORIGIN);
-
-export const effectiveLockerFileLimit = (
-    lockerFileLimit: number,
-    isProductionEndpoint: boolean,
-) => {
-    const normalizedLimit = Math.max(lockerFileLimit, 1);
-    return !isProductionEndpoint && normalizedLimit < LOCKER_FILE_LIMIT_PAID
-        ? LOCKER_FILE_LIMIT_PAID
-        : normalizedLimit;
-};
 
 export interface LockerUploadLimitState {
     usage: number;
@@ -32,8 +13,14 @@ export interface LockerUploadLimitState {
     lockerFamilyFileCount?: number;
 }
 
+export interface LockerUploadAllowance {
+    maxFileCount: number;
+    currentFileCount: number;
+    remainingFileCount: number;
+    freeStorage: number;
+}
+
 export type LockerUploadPreflightFailureReason =
-    | "emptyFile"
     | "fileCountLimit"
     | "fileTooLarge"
     | "storageLimit";
@@ -43,16 +30,41 @@ export interface LockerUploadPreflightFailure {
     fileName?: string;
 }
 
+export const lockerUploadAllowance = (
+    userDetails: LockerUploadLimitState,
+): LockerUploadAllowance => {
+    const maxFileCount = Math.max(userDetails.lockerFileLimit, 1);
+    const currentFileCount =
+        userDetails.isPartOfFamily &&
+        typeof userDetails.lockerFamilyFileCount === "number"
+            ? userDetails.lockerFamilyFileCount
+            : userDetails.fileCount;
+
+    return {
+        maxFileCount,
+        currentFileCount,
+        remainingFileCount: Math.max(maxFileCount - currentFileCount, 0),
+        freeStorage: Math.max(userDetails.storageLimit - userDetails.usage, 0),
+    };
+};
+
+export const exceedsPaidLockerHardLimit = (
+    files: File[],
+    userDetails: LockerUploadLimitState,
+) => {
+    const allowance = lockerUploadAllowance(userDetails);
+    const totalUploadSize = files.reduce((total, file) => total + file.size, 0);
+
+    return (
+        allowance.currentFileCount + files.length > LOCKER_FILE_LIMIT_PAID ||
+        userDetails.usage + totalUploadSize > LOCKER_STORAGE_LIMIT_PAID_BYTES
+    );
+};
+
 export const validateLockerUploadBatch = (
     files: File[],
     userDetails: LockerUploadLimitState | undefined,
-    isProductionEndpoint: boolean,
 ): LockerUploadPreflightFailure | null => {
-    const emptyFile = files.find((file) => file.size === 0);
-    if (emptyFile) {
-        return { reason: "emptyFile", fileName: emptyFile.name };
-    }
-
     const oversizedFile = files.find(
         (file) => file.size > LOCKER_MAX_FILE_SIZE_BYTES,
     );
@@ -64,24 +76,13 @@ export const validateLockerUploadBatch = (
         return null;
     }
 
-    const maxFileCount = effectiveLockerFileLimit(
-        userDetails.lockerFileLimit,
-        isProductionEndpoint,
-    );
-    const currentFileCount =
-        userDetails.isPartOfFamily &&
-        typeof userDetails.lockerFamilyFileCount === "number"
-            ? userDetails.lockerFamilyFileCount
-            : userDetails.fileCount;
-    if (currentFileCount + files.length > maxFileCount) {
+    const allowance = lockerUploadAllowance(userDetails);
+    if (files.length > allowance.remainingFileCount) {
         return { reason: "fileCountLimit" };
     }
 
-    const freeStorage =
-        Math.max(userDetails.storageLimit - userDetails.usage, 0) +
-        LOCKER_STORAGE_BUFFER_BYTES;
     const totalUploadSize = files.reduce((total, file) => total + file.size, 0);
-    if (totalUploadSize > freeStorage) {
+    if (totalUploadSize > allowance.freeStorage) {
         return { reason: "storageLimit" };
     }
 

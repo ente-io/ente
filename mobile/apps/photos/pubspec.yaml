@@ -89,7 +89,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: 2bbef7d03361d104e26fbe648de31f1f6a4d7e44
+      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
   figma_squircle: 0.6.3
   file_saver: 0.2.14
   firebase_core: 3.15.1
@@ -110,7 +110,7 @@ dependencies:
   flutter_map: 7.0.2
   flutter_map_marker_cluster: 1.4.0
   flutter_password_strength: 0.1.6
-  flutter_rust_bridge: 2.11.1
+  flutter_rust_bridge: 2.12.0
   # Do not upgrade this package unless this issue is resolved:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
   # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
@@ -121,7 +121,7 @@ dependencies:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 342ed3a42febd2dcc8b532c0ff07bd327a472d82
+      ref: 1eb375e639dc86df69b544642b177a710ae43db0
   flutter_spinkit: 5.2.1
   flutter_staggered_grid_view: 0.7.0
   flutter_svg: 2.2.0
@@ -234,7 +234,7 @@ dependencies:
   shared_preferences: 2.5.3
   sqflite: 2.4.2
   sqflite_migration: 0.3.0
-  sqlite3_flutter_libs: 0.5.34
+  sqlite3_flutter_libs: 0.5.41
   sqlite_async: 0.11.7
   step_progress_indicator: 1.0.2
   styled_text: 8.1.0
@@ -268,7 +268,7 @@ dependency_overrides:
   flutter_sodium: # update source if there is any update
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 342ed3a42febd2dcc8b532c0ff07bd327a472d82
+      ref: 1eb375e639dc86df69b544642b177a710ae43db0
   intl: 0.20.2
   js: 0.6.7
   media_kit: # update media_kit* if there is any update
