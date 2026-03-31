@@ -1,6 +1,11 @@
 Latest changes:
 - Ashil: Bug fixes and improvements on Gallery
 - Laurens: Make asset downloads (ML models) resumable (internal + offline)
+- Neeraj: Fix startup auto-logout cleanup
+- Neeraj: Refresh storage card on quota updates
+- Neeraj: Guard shared favorites removal resolution
+- Neeraj: Handle incomplete signup login errors with localized error copy
+- Neeraj: Improve motion photo video detection in rust layer
 
 Still behind internal flag:
 - Ashil, Setal (I): Native family management screens
