@@ -32,6 +32,7 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
 import React, { useRef } from "react";
 import { Trans } from "react-i18next";
+import type { LockerUploadLimitState } from "services/locker-limits";
 import type { LockerUploadProgress } from "services/remote";
 import type {
     LockerCollection,
@@ -104,9 +105,13 @@ interface CreateItemDialogProps {
     onEnsureCollections?: (
         names: string[],
     ) => Promise<Map<string, number> | Record<string, number>>;
+    onEnsureUploadLimitState?: () => Promise<
+        { userDetails: LockerUploadLimitState } | undefined
+    >;
     defaultCollectionID?: number | null;
     initialItems?: LockerUploadCandidate[];
     editItem?: CreateItemDialogEditItem | null;
+    userDetails?: LockerUploadLimitState;
 }
 
 export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
@@ -119,9 +124,11 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     onUploadsFinished,
     onCreateCollection,
     onEnsureCollections,
+    onEnsureUploadLimitState,
     defaultCollectionID,
     initialItems,
     editItem,
+    userDetails,
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const {
@@ -173,9 +180,11 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         onUploadItemComplete,
         onUploadsFinished,
         onEnsureCollections,
+        onEnsureUploadLimitState,
         defaultCollectionID,
         initialItems,
         editItem,
+        userDetails,
     });
 
     return (

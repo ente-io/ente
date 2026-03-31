@@ -8,6 +8,12 @@ import {
     lockerUpgradeCTAType,
     type LockerUpgradeCTAType,
 } from "services/locker-errors";
+import {
+    exceedsPaidLockerHardLimit,
+    validateLockerUploadBatch,
+    type LockerUploadLimitState,
+    type LockerUploadPreflightFailure,
+} from "services/locker-limits";
 import type { LockerUploadProgress } from "services/remote";
 import type {
     LockerCollection,
@@ -22,6 +28,7 @@ import {
 import {
     collectionNamesByUploadItem,
     dedupeCollectionNames,
+    filterNonEmptyUploadItems,
     normalizeCollectionName,
     uploadQueueItemKey,
 } from "./fileUploadHelpers";
@@ -57,9 +64,13 @@ interface UseCreateItemDialogStateProps {
     onEnsureCollections?: (
         names: string[],
     ) => Promise<Map<string, number> | Record<string, number>>;
+    onEnsureUploadLimitState?: () => Promise<
+        { userDetails: LockerUploadLimitState } | undefined
+    >;
     defaultCollectionID?: number | null;
     initialItems?: LockerUploadCandidate[];
     editItem?: CreateItemDialogEditItem | null;
+    userDetails?: LockerUploadLimitState;
 }
 
 interface UploadState {
@@ -111,9 +122,11 @@ export const useCreateItemDialogState = ({
     onUploadItemComplete,
     onUploadsFinished,
     onEnsureCollections,
+    onEnsureUploadLimitState,
     defaultCollectionID,
     initialItems,
     editItem,
+    userDetails,
 }: UseCreateItemDialogStateProps) => {
     const isEditMode = !!editItem;
     const currentUserID = savedLocalUser()?.id;
@@ -164,7 +177,7 @@ export const useCreateItemDialogState = ({
     const [showPassword, setShowPassword] = useState(false);
     const [selectedUploadItems, setSelectedUploadItems] = useState<
         LockerUploadCandidate[]
-    >(initialItems ?? []);
+    >(filterNonEmptyUploadItems(initialItems ?? []));
     const [
         selectedCollectionNamesByFileKey,
         setSelectedCollectionNamesByFileKey,
@@ -251,11 +264,14 @@ export const useCreateItemDialogState = ({
         );
         setFormData(editFormData(editItem));
         setShowPassword(false);
-        setSelectedUploadItems(initialItems ?? []);
+        const filteredInitialItems = filterNonEmptyUploadItems(
+            initialItems ?? [],
+        );
+        setSelectedUploadItems(filteredInitialItems);
         setCustomCollectionNames([]);
         setSelectedCollectionNamesByFileKey(
             collectionNamesByUploadItem(
-                initialItems ?? [],
+                filteredInitialItems,
                 defaultCollectionName,
             ),
         );
@@ -393,10 +409,14 @@ export const useCreateItemDialogState = ({
                 relativePath: file.webkitRelativePath || file.name,
                 suggestedCollectionNames: [],
             }));
-            setSelectedUploadItems(items);
+            const nonEmptyItems = filterNonEmptyUploadItems(items);
+            setSelectedUploadItems(nonEmptyItems);
             setCustomCollectionNames([]);
             setSelectedCollectionNamesByFileKey(
-                collectionNamesByUploadItem(items, defaultCollectionName),
+                collectionNamesByUploadItem(
+                    nonEmptyItems,
+                    defaultCollectionName,
+                ),
             );
             resetUploadState();
             setError(null);
@@ -446,10 +466,66 @@ export const useCreateItemDialogState = ({
             return;
         }
 
-        const pendingUploadItems = selectedUploadItems.filter(
-            (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+        const pendingUploadItems = filterNonEmptyUploadItems(
+            selectedUploadItems.filter(
+                (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+            ),
         );
         if (pendingUploadItems.length === 0) {
+            return;
+        }
+
+        let effectiveUserDetails = userDetails;
+        if (!effectiveUserDetails) {
+            const uploadLimitState = await onEnsureUploadLimitState?.();
+            effectiveUserDetails = uploadLimitState?.userDetails;
+        }
+
+        if (!effectiveUserDetails) {
+            setError(t("generic_error_retry"));
+            setUpgradeCTAType(null);
+            return;
+        }
+
+        const preflightFailure = validateLockerUploadBatch(
+            pendingUploadItems.map(({ file }) => file),
+            effectiveUserDetails,
+        );
+        if (preflightFailure) {
+            const hitsPaidHardCap = exceedsPaidLockerHardLimit(
+                pendingUploadItems.map(({ file }) => file),
+                effectiveUserDetails,
+            );
+            const preflightFailureMessage = (
+                failure: LockerUploadPreflightFailure,
+            ) => {
+                if (
+                    hitsPaidHardCap &&
+                    (failure.reason === "fileCountLimit" ||
+                        failure.reason === "storageLimit")
+                ) {
+                    return t("uploadLockerHardCapErrorBody");
+                }
+                switch (failure.reason) {
+                    case "fileCountLimit":
+                        return t("uploadFileCountLimitErrorBody");
+                    case "fileTooLarge":
+                        return t("uploadFileTooLargeErrorBody");
+                    case "storageLimit":
+                        return t("uploadStorageLimitErrorBody");
+                }
+            };
+
+            setError(preflightFailureMessage(preflightFailure));
+            setUpgradeCTAType(
+                hitsPaidHardCap
+                    ? null
+                    : preflightFailure.reason === "fileCountLimit"
+                      ? "fileCountLimit"
+                      : preflightFailure.reason === "storageLimit"
+                        ? "storageLimit"
+                        : null,
+            );
             return;
         }
 
@@ -620,11 +696,13 @@ export const useCreateItemDialogState = ({
         displayCollections,
         handleClose,
         onEnsureCollections,
+        onEnsureUploadLimitState,
         onUploadItemComplete,
         onUploadProgress,
         onUploadsFinished,
         selectedCollectionNamesByFileKey,
         selectedUploadItems,
+        userDetails,
     ]);
 
     const canSave =

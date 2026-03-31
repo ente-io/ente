@@ -1,0 +1,18 @@
+{
+    "name": "memories",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "build:post": "rm -f out/404.html"
+    },
+    "dependencies": {
+        "@fontsource/itim": "^5.2.7",
+        "ente-base": "*",
+        "ente-gallery": "*",
+        "ente-media": "*",
+        "ente-new": "*"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}

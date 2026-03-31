@@ -7,6 +7,14 @@ import type { DragEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
+    LOCKER_FILE_LIMIT_PAID,
+    LOCKER_MAX_FILE_SIZE_BYTES,
+    LOCKER_STORAGE_LIMIT_PAID_BYTES,
+    lockerUploadAllowance,
+    type LockerUploadLimitState,
+    type LockerUploadPreflightFailure,
+} from "services/locker-limits";
+import {
     createCollection as createCollectionAPI,
     createInfoItem,
     deleteCollection as deleteCollectionAPI,
@@ -33,6 +41,7 @@ import type {
     LockerUploadCandidate,
 } from "types";
 import { getItemTitle, isCollectionOwner } from "types";
+import { filterNonEmptyUploadItems } from "../createItemDialog/fileUploadHelpers";
 import type { CreateItemDialogEditItem } from "../createItemDialog/useCreateItemDialogState";
 
 type DragDataTransferItem = DataTransferItem & {
@@ -105,34 +114,165 @@ const uploadCandidateFromFile = (
     suggestedCollectionNames: collectionNamesFromRelativePath(relativePath),
 });
 
-const uploadCandidatesFromEntry = async (
-    entry: FileSystemEntry,
-    parentPath = "",
-): Promise<LockerUploadCandidate[]> => {
-    if (entry.isFile) {
-        const file = await fileFromEntry(entry as FileSystemFileEntry);
-        const relativePath = parentPath
-            ? `${parentPath}/${file.name}`
-            : file.name;
-        return [uploadCandidateFromFile(file, relativePath)];
+const droppedUploadCandidateKey = (file: File, relativePath?: string) =>
+    `${relativePath ?? file.name}:${file.size}:${file.lastModified}`;
+
+interface DropUploadScanOptions {
+    remainingFileCount: number;
+    freeStorage: number;
+}
+
+interface DropUploadScanResult {
+    items: LockerUploadCandidate[];
+    preflightFailure?: LockerUploadPreflightFailure;
+    scannedNonEmptyFileCount: number;
+    scannedTotalSize: number;
+}
+
+type PendingDroppedNode =
+    | { type: "entry"; entry: FileSystemEntry; parentPath: string }
+    | { type: "file"; file: File; relativePath: string };
+
+const collectUploadCandidatesFromDrop = async (
+    droppedItems: DragDataTransferItem[],
+    fallbackFiles: File[],
+    options: DropUploadScanOptions,
+): Promise<DropUploadScanResult> => {
+    const items: LockerUploadCandidate[] = [];
+    const pendingNodes: PendingDroppedNode[] = [];
+    const seenUploadCandidateKeys = new Set<string>();
+    let scannedNonEmptyFileCount = 0;
+    let scannedTotalSize = 0;
+
+    const addFile = (
+        file: File,
+        relativePath: string,
+    ): LockerUploadPreflightFailure | undefined => {
+        if (file.size === 0) {
+            return undefined;
+        }
+
+        const dedupeKey = droppedUploadCandidateKey(file, relativePath);
+        if (seenUploadCandidateKeys.has(dedupeKey)) {
+            return undefined;
+        }
+        seenUploadCandidateKeys.add(dedupeKey);
+
+        if (file.size > LOCKER_MAX_FILE_SIZE_BYTES) {
+            return { reason: "fileTooLarge", fileName: file.name };
+        }
+
+        scannedNonEmptyFileCount += 1;
+        if (scannedNonEmptyFileCount > options.remainingFileCount) {
+            return { reason: "fileCountLimit" };
+        }
+
+        scannedTotalSize += file.size;
+        if (scannedTotalSize > options.freeStorage) {
+            return { reason: "storageLimit" };
+        }
+
+        items.push(uploadCandidateFromFile(file, relativePath));
+        return undefined;
+    };
+
+    for (let index = droppedItems.length - 1; index >= 0; index -= 1) {
+        const item = droppedItems[index]!;
+        if (item.kind !== "file") {
+            continue;
+        }
+
+        const getAsEntry = item.webkitGetAsEntry;
+        const entry =
+            typeof getAsEntry === "function" ? getAsEntry.call(item) : null;
+        if (entry) {
+            pendingNodes.push({ type: "entry", entry, parentPath: "" });
+            continue;
+        }
+
+        const file = item.getAsFile();
+        if (file) {
+            pendingNodes.push({
+                type: "file",
+                file,
+                relativePath: file.webkitRelativePath || file.name,
+            });
+        }
     }
 
-    if (entry.isDirectory) {
-        const directoryPath = parentPath
-            ? `${parentPath}/${entry.name}`
-            : entry.name;
-        const entries = await readDirectoryEntries(
-            entry as FileSystemDirectoryEntry,
-        );
-        const items = await Promise.all(
-            entries.map((childEntry) =>
-                uploadCandidatesFromEntry(childEntry, directoryPath),
-            ),
-        );
-        return items.flat();
+    if (pendingNodes.length === 0) {
+        for (const file of fallbackFiles) {
+            const preflightFailure = addFile(
+                file,
+                file.webkitRelativePath || file.name,
+            );
+            if (preflightFailure) {
+                return {
+                    items,
+                    preflightFailure,
+                    scannedNonEmptyFileCount,
+                    scannedTotalSize,
+                };
+            }
+        }
+        return { items, scannedNonEmptyFileCount, scannedTotalSize };
     }
 
-    return [];
+    while (pendingNodes.length > 0) {
+        const node = pendingNodes.pop()!;
+
+        if (node.type === "file") {
+            const preflightFailure = addFile(node.file, node.relativePath);
+            if (preflightFailure) {
+                return {
+                    items,
+                    preflightFailure,
+                    scannedNonEmptyFileCount,
+                    scannedTotalSize,
+                };
+            }
+            continue;
+        }
+
+        if (node.entry.isFile) {
+            const file = await fileFromEntry(node.entry as FileSystemFileEntry);
+            const relativePath = node.parentPath
+                ? `${node.parentPath}/${file.name}`
+                : file.name;
+            const preflightFailure = addFile(file, relativePath);
+            if (preflightFailure) {
+                return {
+                    items,
+                    preflightFailure,
+                    scannedNonEmptyFileCount,
+                    scannedTotalSize,
+                };
+            }
+            continue;
+        }
+
+        if (node.entry.isDirectory) {
+            const directoryPath = node.parentPath
+                ? `${node.parentPath}/${node.entry.name}`
+                : node.entry.name;
+            const directoryEntries = await readDirectoryEntries(
+                node.entry as FileSystemDirectoryEntry,
+            );
+            for (
+                let index = directoryEntries.length - 1;
+                index >= 0;
+                index -= 1
+            ) {
+                pendingNodes.push({
+                    type: "entry",
+                    entry: directoryEntries[index]!,
+                    parentPath: directoryPath,
+                });
+            }
+        }
+    }
+
+    return { items, scannedNonEmptyFileCount, scannedTotalSize };
 };
 
 const collectionIDsForItemMutation = (
@@ -154,6 +294,9 @@ interface UseLockerActionsProps {
     masterKey?: string;
     selectedCollectionID: number | null;
     routerPathname: string;
+    ensureUploadLimitState: () => Promise<
+        { userDetails: LockerUploadLimitState } | undefined
+    >;
     refreshData: (masterKey?: string) => Promise<void>;
     navigateHome: () => void;
     removeCollectionFromState: (collectionID: number) => void;
@@ -163,6 +306,7 @@ interface UseLockerActionsProps {
 
 export const useLockerActions = ({
     collections,
+    ensureUploadLimitState,
     masterKey,
     selectedCollectionID,
     routerPathname,
@@ -255,6 +399,34 @@ export const useLockerActions = ({
 
     const visibleDeleteCollectionDialog =
         deleteCollectionDialog ?? deleteCollectionDialogRef.current;
+
+    const uploadPreflightFailureMessage = useCallback(
+        (
+            failure: LockerUploadPreflightFailure,
+            projectedFileCount: number,
+            projectedUsage: number,
+        ) => {
+            if (
+                (projectedFileCount > LOCKER_FILE_LIMIT_PAID ||
+                    projectedUsage > LOCKER_STORAGE_LIMIT_PAID_BYTES) &&
+                (failure.reason === "fileCountLimit" ||
+                    failure.reason === "storageLimit")
+            ) {
+                return t("uploadLockerHardCapErrorBody");
+            }
+            switch (failure.reason) {
+                case "fileCountLimit":
+                    return t("uploadFileCountLimitErrorBody");
+                case "fileTooLarge":
+                    return t("uploadFileTooLargeErrorBody", {
+                        fileName: failure.fileName ?? "",
+                    });
+                case "storageLimit":
+                    return t("uploadStorageLimitErrorBody");
+            }
+        },
+        [],
+    );
 
     const refreshCollectionsAfterMutation = useCallback(async () => {
         await new Promise((resolve) =>
@@ -612,10 +784,11 @@ export const useLockerActions = ({
 
     const openUploadDialogForItems = useCallback(
         (items: LockerUploadCandidate[]) => {
-            if (items.length === 0) {
+            const nonEmptyItems = filterNonEmptyUploadItems(items);
+            if (nonEmptyItems.length === 0) {
                 return;
             }
-            setPrefilledUploadItems(items);
+            setPrefilledUploadItems(nonEmptyItems);
             setCreateDialogOpen(true);
         },
         [],
@@ -664,60 +837,53 @@ export const useLockerActions = ({
             dragDepthRef.current = 0;
             setIsDragActive(false);
 
-            const droppedItems = Array.from(
-                event.dataTransfer.items,
-            ) as DragDataTransferItem[];
-            const entryItems = (
-                await Promise.all(
-                    droppedItems
-                        .filter((item) => item.kind === "file")
-                        .map(async (item) => {
-                            const getAsEntry = item.webkitGetAsEntry;
-                            const entry =
-                                typeof getAsEntry === "function"
-                                    ? getAsEntry.call(item)
-                                    : null;
-                            if (!entry) {
-                                const file = item.getAsFile();
-                                return file
-                                    ? [
-                                          uploadCandidateFromFile(
-                                              file,
-                                              file.webkitRelativePath ||
-                                                  file.name,
-                                          ),
-                                      ]
-                                    : [];
-                            }
-                            return uploadCandidatesFromEntry(entry);
-                        }),
-                )
-            ).flat();
+            try {
+                const uploadLimitState = await ensureUploadLimitState();
+                if (!uploadLimitState) {
+                    setToast(t("generic_error_retry"));
+                    return;
+                }
 
-            const droppedItemsList =
-                entryItems.length > 0
-                    ? entryItems
-                    : Array.from(event.dataTransfer.files).map((file) =>
-                          uploadCandidateFromFile(
-                              file,
-                              file.webkitRelativePath || file.name,
-                          ),
-                      );
-            const uniqueItems = droppedItemsList.filter(
-                (item, index, items) =>
-                    items.findIndex(
-                        (candidate) =>
-                            (candidate.relativePath ?? candidate.file.name) ===
-                                (item.relativePath ?? item.file.name) &&
-                            candidate.file.size === item.file.size &&
-                            candidate.file.lastModified ===
-                                item.file.lastModified,
-                    ) === index,
-            );
+                const allowance = lockerUploadAllowance(
+                    uploadLimitState.userDetails,
+                );
+                const droppedItems = Array.from(
+                    event.dataTransfer.items,
+                ) as DragDataTransferItem[];
+                const scanResult = await collectUploadCandidatesFromDrop(
+                    droppedItems,
+                    Array.from(event.dataTransfer.files),
+                    {
+                        remainingFileCount: allowance.remainingFileCount,
+                        freeStorage: allowance.freeStorage,
+                    },
+                );
 
-            openUploadDialogForItems(uniqueItems);
+                if (scanResult.preflightFailure) {
+                    setToast(
+                        uploadPreflightFailureMessage(
+                            scanResult.preflightFailure,
+                            lockerUploadAllowance(uploadLimitState.userDetails)
+                                .currentFileCount +
+                                scanResult.scannedNonEmptyFileCount,
+                            uploadLimitState.userDetails.usage +
+                                scanResult.scannedTotalSize,
+                        ),
+                    );
+                    return;
+                }
+
+                openUploadDialogForItems(scanResult.items);
+            } catch (error) {
+                log.error("Failed to process dropped Locker files", error);
+                setToast(t("generic_error_retry"));
+            }
         },
-        [openUploadDialogForItems],
+        [
+            ensureUploadLimitState,
+            openUploadDialogForItems,
+            uploadPreflightFailureMessage,
+        ],
     );
 
     const handleRenameCollection = useCallback(

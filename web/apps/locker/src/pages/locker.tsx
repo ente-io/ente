@@ -44,9 +44,9 @@ export const LockerPage: React.FC = () => {
 
     const {
         collections,
+        ensureUploadLimitState,
         hasFetched,
         initialLoadError,
-        isProductionEndpoint,
         masterKey,
         refreshData,
         removeCollectionFromState,
@@ -96,6 +96,7 @@ export const LockerPage: React.FC = () => {
         visibleDeleteCollectionDialog,
     } = useLockerActions({
         collections,
+        ensureUploadLimitState,
         masterKey,
         selectedCollectionID,
         routerPathname: router.pathname,
@@ -223,7 +224,6 @@ export const LockerPage: React.FC = () => {
                 isHomeView={isHomeView}
                 isTrashView={isTrashView}
                 isCollectionsView={isCollectionsView}
-                isProductionEndpoint={isProductionEndpoint}
                 userDetails={userDetails}
             />
             <LockerCollectionShareDrawer
@@ -287,8 +287,10 @@ export const LockerPage: React.FC = () => {
                 onUploadsFinished={handleUploadsFinished}
                 onCreateCollection={handleCreateCollection}
                 onEnsureCollections={ensureCollectionsExist}
+                onEnsureUploadLimitState={ensureUploadLimitState}
                 defaultCollectionID={selectedCollectionID}
                 initialItems={prefilledUploadItems}
+                userDetails={userDetails}
             />
 
             {editItem && (
@@ -299,6 +301,7 @@ export const LockerPage: React.FC = () => {
                     onSave={handleUpdateItem}
                     onCreateCollection={handleCreateCollection}
                     editItem={editItem}
+                    userDetails={userDetails}
                 />
             )}
 

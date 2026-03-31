@@ -107,6 +107,10 @@ android {
         }
     }
 
+    packagingOptions {
+        pickFirst 'lib/*/libc++_shared.so'
+    }
+
     buildTypes {
         release {
             signingConfig signingConfigs.release

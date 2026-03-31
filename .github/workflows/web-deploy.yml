@@ -126,6 +126,16 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/share web/apps/share/out
 
+            - name: Build memories
+              run: yarn build:memories
+
+            - name: Publish memories
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/memories web/apps/memories/out
+
             - name: Build paste
               run: yarn build:paste
 

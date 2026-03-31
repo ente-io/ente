@@ -121,9 +121,7 @@ const LocalUser = z.object({
 export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
     const jsonString = localStorage.getItem("user");
     if (!jsonString) return undefined;
-    const result = PartialLocalUser.parse(JSON.parse(jsonString));
-    void ensureTokensMatch(result);
-    return result;
+    return PartialLocalUser.parse(JSON.parse(jsonString));
 };
 
 /**
@@ -169,7 +167,6 @@ export const savedLocalUser = (): LocalUser | undefined => {
     if (!jsonString) return undefined;
     // We might have some data, but not all of it. So do a non-throwing parse.
     const { success, data } = LocalUser.safeParse(JSON.parse(jsonString));
-    if (success) void ensureTokensMatch(data);
     return success ? data : undefined;
 };
 
@@ -183,6 +180,20 @@ export const ensureTokensMatch = async (user: PartialLocalUser | undefined) => {
     if (user?.token !== (await savedAuthToken())) {
         throw new Error("Token mismatch");
     }
+};
+
+/**
+ * Return true if the saved user token in local storage and the persisted auth
+ * token are out of sync.
+ *
+ * Call this explicitly when validating app startup state. The synchronous local
+ * user accessors intentionally avoid triggering async mismatch checks because
+ * they are often used during render.
+ */
+export const isSavedUserTokenMismatch = async () => {
+    const savedUserToken = savedPartialLocalUser()?.token;
+    const authToken = await savedAuthToken();
+    return authToken ? savedUserToken !== authToken : !!savedUserToken;
 };
 
 /**
