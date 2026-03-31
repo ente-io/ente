@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/ente-io/museum/ente/details"
 	"github.com/ente-io/museum/pkg/controller"
+	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 )
@@ -20,13 +21,13 @@ func (c *UserController) GetLockerUsage(ctx *gin.Context, userID int64) (details
 		isFamily = true
 		subscriptionAdminID = *user.FamilyAdminID
 
-		familyData, err := c.FamilyController.FetchMembersForAdminID(ctx, *user.FamilyAdminID)
+		familyMembers, err := c.FamilyController.FamilyRepo.GetMembersWithStatus(*user.FamilyAdminID, repo.ActiveFamilyMemberStatus)
 		if err != nil {
 			return details.LockerUsageResponse{}, stacktrace.Propagate(err, "failed to fetch family usage scope")
 		}
 
-		subscriptionUserIDs = make([]int64, 0, len(familyData.Members))
-		for _, familyMember := range familyData.Members {
+		subscriptionUserIDs = make([]int64, 0, len(familyMembers))
+		for _, familyMember := range familyMembers {
 			subscriptionUserIDs = append(subscriptionUserIDs, familyMember.MemberUserID)
 		}
 	}
