@@ -138,9 +138,7 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
                         endAdornment: (
                             <ShowHidePasswordInputAdornment
                                 showPassword={showConfirmPassword}
-                                onToggle={
-                                    handleToggleShowHideConfirmPassword
-                                }
+                                onToggle={handleToggleShowHideConfirmPassword}
                             />
                         ),
                     },
