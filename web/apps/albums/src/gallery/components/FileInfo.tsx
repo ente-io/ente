@@ -344,13 +344,12 @@ const RawExif: React.FC<RawExifProps> = ({
                     description = tag;
                 } else if (typeof tag == "number") {
                     description = `${tag}`;
-                } else if (
-                    tag &&
-                    typeof tag == "object" &&
-                    "description" in tag &&
-                    typeof tag.description == "string"
-                ) {
-                    description = tag.description;
+                } else if (tag && typeof tag == "object") {
+                    const descriptionField = (tag as Record<string, unknown>)
+                        .description;
+                    if (typeof descriptionField == "string") {
+                        description = descriptionField;
+                    }
                 }
 
                 return [key, namespace, tagName, description] as const;

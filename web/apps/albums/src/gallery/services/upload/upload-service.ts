@@ -129,9 +129,13 @@ class UploadService {
         this.publicAlbumsCredentials = undefined;
     }
 
-    async setFileCount(_fileCount: number) {}
+    setFileCount(fileCount: number) {
+        void fileCount;
+    }
 
-    reducePendingUploadCount() {}
+    reducePendingUploadCount() {
+        return undefined;
+    }
 
     async getUploadURL(metadata?: {
         contentLength: number;
@@ -352,8 +356,8 @@ export const areLivePhotoAssets = async (
     // we use doesn't support stream as a input.
 
     const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
-    const fSize = await uploadItemSize(f.uploadItem);
-    const gSize = await uploadItemSize(g.uploadItem);
+    const fSize = uploadItemSize(f.uploadItem);
+    const gSize = uploadItemSize(g.uploadItem);
     if (fSize > maxAssetSize || gSize > maxAssetSize) {
         log.info(
             `Not classifying files with too large sizes (${fSize} and ${gSize} bytes) as a live photo`,
@@ -449,7 +453,7 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
 /**
  * Return the size of the given {@link uploadItem}.
  */
-const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
+const uploadItemSize = (uploadItem: UploadItem): number => {
     return uploadItem.size;
 };
 
@@ -480,7 +484,7 @@ const uploadItemCreationDate = async (
 
     let parsedMetadata: ParsedMetadata | undefined;
     if (fileType == FileType.image) {
-        parsedMetadata = await tryExtractImageMetadata(uploadItem, undefined);
+        parsedMetadata = await tryExtractImageMetadata(uploadItem);
     } else if (fileType == FileType.video) {
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
@@ -800,7 +804,7 @@ const translateURLFetchErrorIfNeeded = (e: unknown) => {
  * The public albums uploader only deals with browser-provided
  * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) objects.
  */
-const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
+const readUploadItem = (uploadItem: UploadItem): FileStream => {
     const file = uploadItem;
     const underlyingStream = file.stream();
     const fileSize = file.size;
@@ -890,8 +894,7 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
  * @param uploadItem See: [Note: Reading a UploadItem]
  */
 const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
-    const { stream, fileSize, lastModifiedMs } =
-        await readUploadItem(uploadItem);
+    const { stream, fileSize, lastModifiedMs } = readUploadItem(uploadItem);
 
     // @ts-ignore
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
@@ -1010,10 +1013,7 @@ const extractImageOrVideoMetadata = async (
 
     let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
-        parsedMetadata = await tryExtractImageMetadata(
-            uploadItem,
-            lastModifiedMs,
-        );
+        parsedMetadata = await tryExtractImageMetadata(uploadItem);
     } else if (fileType == FileType.video) {
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
@@ -1121,7 +1121,6 @@ const extractImageOrVideoMetadata = async (
 
 const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
-    _lastModifiedMs: number | undefined,
 ): Promise<ParsedMetadata | undefined> => {
     try {
         return await extractExif(uploadItem);
@@ -1166,7 +1165,7 @@ const tryDetermineVideoDuration = async (uploadItem: UploadItem) => {
  * @param worker A {@link CryptoWorker} to use for computing the hash.
  */
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
-    const { stream, chunkCount } = await readUploadItem(uploadItem);
+    const { stream, chunkCount } = readUploadItem(uploadItem);
     const hashState = await worker.chunkHashInit();
 
     const streamReader = stream.getReader();
@@ -1226,9 +1225,9 @@ const readLivePhoto = async (
         // For live photos, the extension field in the file type info is the
         // extension of the image component of the live photo.
         { fileType: FileType.image, extension: fileTypeInfo.extension },
-        await readUploadItem(livePhotoAssets.image),
+        readUploadItem(livePhotoAssets.image),
     );
-    const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
+    const videoFileStreamOrData = readUploadItem(livePhotoAssets.video);
 
     // The JS zip library that encodeLivePhoto uses does not support
     // ReadableStreams, so pass the file (blob) if we have one, otherwise read
@@ -1259,7 +1258,7 @@ const readImageOrVideo = async (
     uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const fileStream = await readUploadItem(uploadItem);
+    const fileStream = readUploadItem(uploadItem);
     return augmentWithThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 

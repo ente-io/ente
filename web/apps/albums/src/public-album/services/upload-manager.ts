@@ -410,7 +410,7 @@ class UploadManager {
     private async uploadMediaItems(mediaItems: ClusteredUploadItem[]) {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
         this.uiService.reset(mediaItems.length);
-        await UploadService.setFileCount(mediaItems.length);
+        UploadService.setFileCount(mediaItems.length);
         this.uiService.setUploadPhase("uploading");
 
         const uploadProcesses = new Array<Promise<void>>();

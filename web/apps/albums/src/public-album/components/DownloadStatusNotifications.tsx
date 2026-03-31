@@ -105,8 +105,6 @@ export const DownloadStatusNotifications: React.FC<
         }
     };
 
-    const createOnClick = (_group: SaveGroup) => undefined;
-
     return (
         <>
             {saveGroups.map((group, index) => {
@@ -269,7 +267,6 @@ export const DownloadStatusNotifications: React.FC<
                             startIcon,
                             title: truncatedName,
                             caption,
-                            onClick: createOnClick(group),
                             endIcon: canRetry ? (
                                 <ReplayIcon
                                     titleAccess={t("retry")}

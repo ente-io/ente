@@ -12,7 +12,7 @@ class UploadState {
     checksumProtectedUploadsEnabled = false;
 }
 
-let _state = new UploadState();
+const _state = new UploadState();
 
 /**
  * The public albums uploader only handles browser-provided Files.

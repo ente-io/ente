@@ -1,8 +1,6 @@
 // TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
@@ -435,7 +433,7 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
-    const handlePublicUpload = async (name: string) => {
+    const handlePublicUpload = (name: string) => {
         if (!publicAlbumsCredentials) {
             throw new Error("Missing public album credentials");
         }

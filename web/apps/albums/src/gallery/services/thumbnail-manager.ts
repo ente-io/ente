@@ -113,8 +113,7 @@ class NetworkThumbnailError extends Error {
             `NetworkThumbnailError: ${e instanceof Error ? e.message : String(e)}`,
         );
 
-        if (Error.captureStackTrace)
-            Error.captureStackTrace(this, NetworkThumbnailError);
+        Error.captureStackTrace(this, NetworkThumbnailError);
 
         this.error = e;
     }

@@ -686,7 +686,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const isFavoritePending = useCallback(() => false, []);
 
-    const toggleFavorite = useCallback(async () => undefined, []);
+    const toggleFavorite = useCallback(() => Promise.resolve(undefined), []);
 
     const isLiked = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {

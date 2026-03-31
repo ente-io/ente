@@ -588,7 +588,6 @@ export const FileList: React.FC<FileListProps> = ({
         },
         [
             checkedTimelineDateStrings,
-            haveSelection,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
