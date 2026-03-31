@@ -633,8 +633,8 @@ Use our [referral program](/photos/features/account/referral-program/). When fri
 ### Why did I receive this email? {#inactive-account-email-received}
 
 We recently sent an email to accounts that have not shown activity for 12
-months as part of our inactive-account policy. (Free accounts with no active
-paid subscription are deleted after 12 consecutive months of inactivity.)
+months as part of our inactive-account policy. Free accounts with no active
+paid subscription are deleted after 12 consecutive months of inactivity.
 
 ### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
 
