@@ -6,7 +6,6 @@ import {
     isSavedUserTokenMismatch,
     savedLocalUser,
 } from "ente-accounts-rs/services/accounts-db";
-import { accountLogout } from "ente-accounts-rs/services/logout";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
@@ -24,6 +23,7 @@ import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
+import { lockerLogout } from "services/logout";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -37,18 +37,25 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, []);
 
     const logout = useCallback(() => {
-        void accountLogout().then(() => window.location.replace("/login"));
+        void lockerLogout().then(() => window.location.replace("/login"));
     }, []);
 
     useEffect(() => {
-        void isSavedUserTokenMismatch().then((mismatch) => {
-            if (!mismatch) {
-                return;
-            }
+        void isSavedUserTokenMismatch()
+            .then((mismatch) => {
+                if (!mismatch) {
+                    return;
+                }
 
-            log.error("Logging out (saved user token mismatch)");
-            logout();
-        });
+                log.error("Logging out (saved user token mismatch)");
+                logout();
+            })
+            .catch((error: unknown) => {
+                log.error(
+                    "Failed to validate saved user token mismatch",
+                    error,
+                );
+            });
     }, [logout]);
 
     const baseContext = useMemo(

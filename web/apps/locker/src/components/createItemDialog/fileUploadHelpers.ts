@@ -71,6 +71,9 @@ export const collectionNamesByUploadItem = (
         ]),
     );
 
+export const filterNonEmptyUploadItems = (items: LockerUploadCandidate[]) =>
+    items.filter((item) => item.file.size > 0);
+
 export const uploadProgressValue = (
     progress: LockerUploadProgress | null | undefined,
     uploadCap: number,
