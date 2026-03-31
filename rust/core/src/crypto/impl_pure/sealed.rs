@@ -388,6 +388,40 @@ mod tests {
     }
 
     #[test]
+    fn test_seal_rejects_small_order_point() {
+        // The all-zero public key is a small-order point. X25519 DH with it
+        // produces an all-zero shared secret, which is_contributory must reject.
+        let zero_pk = [0u8; 32];
+        let result = seal(b"test", &zero_pk);
+        assert!(
+            matches!(result, Err(CryptoError::InvalidPublicKey)),
+            "seal() should reject small-order public key, got: {:?}",
+            result
+        );
+    }
+
+    #[test]
+    fn test_open_rejects_small_order_ephemeral_key() {
+        let (pk, sk) = keys::generate_keypair().unwrap();
+
+        // Craft a ciphertext with an all-zero ephemeral public key (32 zero
+        // bytes) followed by enough garbage to pass the length check.
+        let mut fake_ciphertext = vec![0u8; SEAL_OVERHEAD + 16];
+        // Fill the MAC + ciphertext portion with non-zero data so we know
+        // the rejection is from is_contributory, not from decryption.
+        for b in &mut fake_ciphertext[32..] {
+            *b = 0xFF;
+        }
+
+        let result = open(&fake_ciphertext, &pk, &sk);
+        assert!(
+            matches!(result, Err(CryptoError::InvalidPublicKey)),
+            "open() should reject small-order ephemeral key, got: {:?}",
+            result
+        );
+    }
+
+    #[test]
     fn test_multiple_recipients() {
         let (pk1, sk1) = keys::generate_keypair().unwrap();
         let (pk2, sk2) = keys::generate_keypair().unwrap();

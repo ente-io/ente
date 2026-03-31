@@ -210,7 +210,10 @@ mod tests {
         let master_key = crypto::decode_b64(&gen_result.private_key_attributes.key).unwrap();
 
         let recovered = get_recovery_key(&master_key, &gen_result.key_attributes).unwrap();
-        assert_eq!(recovered, gen_result.private_key_attributes.recovery_key);
+        assert_eq!(
+            recovered,
+            gen_result.private_key_attributes.recovery_key.as_ref()
+        );
     }
 
     #[test]

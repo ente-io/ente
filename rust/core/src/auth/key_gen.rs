@@ -1,6 +1,6 @@
 //! Key generation for new account sign-up.
 
-use crate::crypto::{self, SecretVec, argon, kdf, keys, secretbox};
+use crate::crypto::{self, SecretString, SecretVec, argon, kdf, keys, secretbox};
 
 use super::{KeyAttributes, KeyGenResult, PrivateKeyAttributes, Result};
 
@@ -79,9 +79,9 @@ pub fn generate_keys_with_strength(
 
     // Build private key attributes for local storage
     let private_key_attributes = PrivateKeyAttributes {
-        key: crypto::encode_b64(&master_key),
-        recovery_key: crypto::encode_hex(&recovery_key),
-        secret_key: crypto::encode_b64(&secret_key),
+        key: SecretString::new(crypto::encode_b64(&master_key)),
+        recovery_key: SecretString::new(crypto::encode_hex(&recovery_key)),
+        secret_key: SecretString::new(crypto::encode_b64(&secret_key)),
     };
 
     Ok(KeyGenResult {

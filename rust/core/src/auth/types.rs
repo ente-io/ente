@@ -4,7 +4,7 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-use crate::crypto::SecretVec;
+use crate::crypto::{SecretString, SecretVec};
 
 /// Attributes stored on server for key derivation and encrypted keys.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -45,11 +45,11 @@ pub struct KeyAttributes {
 /// Private key material (never sent to server).
 pub struct PrivateKeyAttributes {
     /// Master key (base64)
-    pub key: String,
+    pub key: SecretString,
     /// Recovery key (hex for display to user)
-    pub recovery_key: String,
+    pub recovery_key: SecretString,
     /// X25519 secret key (base64)
-    pub secret_key: String,
+    pub secret_key: SecretString,
 }
 
 impl fmt::Debug for PrivateKeyAttributes {
@@ -201,9 +201,9 @@ mod tests {
         let result = KeyGenResult {
             key_attributes: sample_key_attributes(),
             private_key_attributes: PrivateKeyAttributes {
-                key: "private-master-key".to_string(),
-                recovery_key: "private-recovery-key".to_string(),
-                secret_key: "private-secret-key".to_string(),
+                key: SecretString::new("private-master-key".to_string()),
+                recovery_key: SecretString::new("private-recovery-key".to_string()),
+                secret_key: SecretString::new("private-secret-key".to_string()),
             },
             key_encryption_key: SecretVec::new(vec![1, 2, 3]),
             login_key: SecretVec::new(vec![4, 5, 6]),

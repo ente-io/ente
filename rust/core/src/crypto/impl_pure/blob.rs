@@ -252,6 +252,38 @@ mod tests {
     }
 
     #[test]
+    fn test_decrypt_json_wrong_type_returns_json_error() {
+        let key = keys::generate_stream_key();
+
+        #[derive(serde::Serialize)]
+        struct Original {
+            name: String,
+        }
+
+        #[derive(serde::Deserialize, Debug)]
+        #[allow(dead_code)]
+        struct Different {
+            count: u64,
+        }
+
+        let encrypted = encrypt_json(
+            &Original {
+                name: "test".to_string(),
+            },
+            &key,
+        )
+        .unwrap();
+
+        // Decrypt into a mismatched type — should be CryptoError::Json
+        let result: std::result::Result<Different, _> = decrypt_json(&encrypted, &key);
+        assert!(
+            matches!(result, Err(CryptoError::Json(_))),
+            "Expected CryptoError::Json, got: {:?}",
+            result
+        );
+    }
+
+    #[test]
     fn test_invalid_key_length() {
         let short_key = vec![0u8; 16];
         let result = encrypt(b"test", &short_key);

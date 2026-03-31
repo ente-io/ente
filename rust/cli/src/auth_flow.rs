@@ -248,7 +248,12 @@ where
             user_id: verification.id,
             key_attributes,
             secrets,
-            recovery_key: Some(key_gen_result.private_key_attributes.recovery_key),
+            recovery_key: Some(
+                key_gen_result
+                    .private_key_attributes
+                    .recovery_key
+                    .into_string(),
+            ),
         })
     }
 
@@ -814,9 +819,9 @@ mod tests {
         (
             key_attributes,
             encrypted_token,
-            key_gen.private_key_attributes.recovery_key,
-            key_gen.private_key_attributes.key,
-            key_gen.private_key_attributes.secret_key,
+            key_gen.private_key_attributes.recovery_key.into_string(),
+            key_gen.private_key_attributes.key.into_string(),
+            key_gen.private_key_attributes.secret_key.into_string(),
         )
     }
 
@@ -1016,7 +1021,7 @@ mod tests {
         let key_gen =
             auth::generate_keys_with_strength(password, auth::KeyDerivationStrength::Interactive)
                 .unwrap();
-        let recovery_key = key_gen.private_key_attributes.recovery_key.clone();
+        let recovery_key = key_gen.private_key_attributes.recovery_key.into_string();
         let master_key = crypto::decode_b64(&key_gen.private_key_attributes.key).unwrap();
         let key_attributes = to_api_key_attributes(&key_gen.key_attributes);
 

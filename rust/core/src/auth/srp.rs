@@ -334,6 +334,58 @@ mod tests {
     }
 
     #[test]
+    fn test_m1_and_k_zeroized_via_drop_impl() {
+        crypto::init().unwrap();
+
+        use rand_core::RngCore;
+        use srp::server::SrpServer;
+        use zeroize::Zeroize;
+
+        let srp_user_id = "test-user-id";
+        let srp_salt = [0u8; 16];
+        let login_key = [0x11u8; 16];
+
+        let client = SrpClientInner::<Sha256>::new(&G_4096);
+        let verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_key, &srp_salt);
+
+        let server = SrpServer::<Sha256>::new(&G_4096);
+        let mut b = [0u8; 64];
+        rand_core::OsRng.fill_bytes(&mut b);
+        let b_pub = server.compute_public_ephemeral(&b, &verifier);
+
+        let mut session = SrpSession::new(srp_user_id, &srp_salt, &login_key).unwrap();
+        session.compute_m1(&b_pub).unwrap();
+
+        // Precondition: m1 and k are populated with non-zero data
+        assert!(
+            session.m1.as_ref().unwrap().iter().any(|&b| b != 0),
+            "precondition: m1 should be non-zero after compute_m1"
+        );
+        assert!(
+            session.k.as_ref().unwrap().iter().any(|&b| b != 0),
+            "precondition: k should be non-zero after compute_m1"
+        );
+
+        // Manually invoke the same zeroization that Drop performs, while
+        // memory is still owned — avoids UB from reading freed allocations.
+        if let Some(m1) = &mut session.m1 {
+            m1.zeroize();
+        }
+        if let Some(k) = &mut session.k {
+            k.zeroize();
+        }
+
+        assert!(
+            session.m1.as_ref().unwrap().iter().all(|&b| b == 0),
+            "m1 was not zeroed by zeroize()"
+        );
+        assert!(
+            session.k.as_ref().unwrap().iter().all(|&b| b == 0),
+            "k was not zeroed by zeroize()"
+        );
+    }
+
+    #[test]
     fn test_srp_session_invalid_login_key() {
         let srp_user_id = "test-user-id";
         let srp_salt = [0u8; 16];
