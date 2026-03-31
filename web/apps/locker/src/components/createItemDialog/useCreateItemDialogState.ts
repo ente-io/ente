@@ -9,6 +9,7 @@ import {
     type LockerUpgradeCTAType,
 } from "services/locker-errors";
 import {
+    exceedsPaidLockerHardLimit,
     validateLockerUploadBatch,
     type LockerUploadLimitState,
     type LockerUploadPreflightFailure,
@@ -500,9 +501,21 @@ export const useCreateItemDialogState = ({
             effectiveIsProductionEndpoint,
         );
         if (preflightFailure) {
+            const hitsPaidHardCap = exceedsPaidLockerHardLimit(
+                pendingUploadItems.map(({ file }) => file),
+                effectiveUserDetails,
+                effectiveIsProductionEndpoint,
+            );
             const preflightFailureMessage = (
                 failure: LockerUploadPreflightFailure,
             ) => {
+                if (
+                    hitsPaidHardCap &&
+                    (failure.reason === "fileCountLimit" ||
+                        failure.reason === "storageLimit")
+                ) {
+                    return t("uploadLockerHardCapErrorBody");
+                }
                 switch (failure.reason) {
                     case "fileCountLimit":
                         return t("uploadFileCountLimitErrorBody");
@@ -515,7 +528,9 @@ export const useCreateItemDialogState = ({
 
             setError(preflightFailureMessage(preflightFailure));
             setUpgradeCTAType(
-                preflightFailure.reason === "fileCountLimit"
+                hitsPaidHardCap
+                    ? null
+                    : preflightFailure.reason === "fileCountLimit"
                     ? "fileCountLimit"
                     : preflightFailure.reason === "storageLimit"
                       ? "storageLimit"

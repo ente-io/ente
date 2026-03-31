@@ -2,8 +2,9 @@ import { apiOrigin } from "ente-base/origins";
 
 export const LOCKER_FILE_LIMIT_FREE = 100;
 export const LOCKER_FILE_LIMIT_PAID = 1000;
+export const LOCKER_STORAGE_LIMIT_FREE_BYTES = 1 * 1024 * 1024 * 1024;
+export const LOCKER_STORAGE_LIMIT_PAID_BYTES = 10 * 1024 * 1024 * 1024;
 export const LOCKER_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024 * 1024;
-export const LOCKER_STORAGE_BUFFER_BYTES = 20 * 1024 * 1024;
 
 const ENTE_PRODUCTION_API_ORIGIN = "https://api.ente.io";
 
@@ -67,10 +68,22 @@ export const lockerUploadAllowance = (
         maxFileCount,
         currentFileCount,
         remainingFileCount: Math.max(maxFileCount - currentFileCount, 0),
-        freeStorage:
-            Math.max(userDetails.storageLimit - userDetails.usage, 0) +
-            LOCKER_STORAGE_BUFFER_BYTES,
+        freeStorage: Math.max(userDetails.storageLimit - userDetails.usage, 0),
     };
+};
+
+export const exceedsPaidLockerHardLimit = (
+    files: File[],
+    userDetails: LockerUploadLimitState,
+    isProductionEndpoint: boolean,
+) => {
+    const allowance = lockerUploadAllowance(userDetails, isProductionEndpoint);
+    const totalUploadSize = files.reduce((total, file) => total + file.size, 0);
+
+    return (
+        allowance.currentFileCount + files.length > LOCKER_FILE_LIMIT_PAID ||
+        userDetails.usage + totalUploadSize > LOCKER_STORAGE_LIMIT_PAID_BYTES
+    );
 };
 
 export const validateLockerUploadBatch = (

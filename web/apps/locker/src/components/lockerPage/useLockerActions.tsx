@@ -27,8 +27,10 @@ import {
     type LockerUploadProgress,
 } from "services/remote";
 import {
+    LOCKER_FILE_LIMIT_PAID,
     lockerUploadAllowance,
     LOCKER_MAX_FILE_SIZE_BYTES,
+    LOCKER_STORAGE_LIMIT_PAID_BYTES,
     type LockerUploadLimitState,
     type LockerUploadPreflightFailure,
 } from "services/locker-limits";
@@ -123,6 +125,8 @@ interface DropUploadScanOptions {
 interface DropUploadScanResult {
     items: LockerUploadCandidate[];
     preflightFailure?: LockerUploadPreflightFailure;
+    scannedNonEmptyFileCount: number;
+    scannedTotalSize: number;
 }
 
 type PendingDroppedNode =
@@ -215,10 +219,15 @@ const collectUploadCandidatesFromDrop = async (
                 file.webkitRelativePath || file.name,
             );
             if (preflightFailure) {
-                return { items, preflightFailure };
+                return {
+                    items,
+                    preflightFailure,
+                    scannedNonEmptyFileCount,
+                    scannedTotalSize,
+                };
             }
         }
-        return { items };
+        return { items, scannedNonEmptyFileCount, scannedTotalSize };
     }
 
     while (pendingNodes.length > 0) {
@@ -227,7 +236,12 @@ const collectUploadCandidatesFromDrop = async (
         if (node.type === "file") {
             const preflightFailure = addFile(node.file, node.relativePath);
             if (preflightFailure) {
-                return { items, preflightFailure };
+                return {
+                    items,
+                    preflightFailure,
+                    scannedNonEmptyFileCount,
+                    scannedTotalSize,
+                };
             }
             continue;
         }
@@ -239,7 +253,12 @@ const collectUploadCandidatesFromDrop = async (
                 : file.name;
             const preflightFailure = addFile(file, relativePath);
             if (preflightFailure) {
-                return { items, preflightFailure };
+                return {
+                    items,
+                    preflightFailure,
+                    scannedNonEmptyFileCount,
+                    scannedTotalSize,
+                };
             }
             continue;
         }
@@ -265,7 +284,7 @@ const collectUploadCandidatesFromDrop = async (
         }
     }
 
-    return { items };
+    return { items, scannedNonEmptyFileCount, scannedTotalSize };
 };
 
 const collectionIDsForItemMutation = (
@@ -398,7 +417,19 @@ export const useLockerActions = ({
         deleteCollectionDialog ?? deleteCollectionDialogRef.current;
 
     const uploadPreflightFailureMessage = useCallback(
-        (failure: LockerUploadPreflightFailure) => {
+        (
+            failure: LockerUploadPreflightFailure,
+            projectedFileCount: number,
+            projectedUsage: number,
+        ) => {
+            if (
+                (projectedFileCount > LOCKER_FILE_LIMIT_PAID ||
+                    projectedUsage > LOCKER_STORAGE_LIMIT_PAID_BYTES) &&
+                (failure.reason === "fileCountLimit" ||
+                    failure.reason === "storageLimit")
+            ) {
+                return t("uploadLockerHardCapErrorBody");
+            }
             switch (failure.reason) {
                 case "fileCountLimit":
                     return t("uploadFileCountLimitErrorBody");
@@ -849,6 +880,13 @@ export const useLockerActions = ({
                     setToast(
                         uploadPreflightFailureMessage(
                             scanResult.preflightFailure,
+                            lockerUploadAllowance(
+                                uploadLimitState.userDetails,
+                                uploadLimitState.isProductionEndpoint,
+                            ).currentFileCount +
+                                scanResult.scannedNonEmptyFileCount,
+                            uploadLimitState.userDetails.usage +
+                                scanResult.scannedTotalSize,
                         ),
                     );
                     return;
