@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Üzgünüz",
-  "importFailureDesc": "Seçilen dosya ayrıştırılamadı.\nYardıma ihtiyacınız varsa lütfen support@ente.com adresine yazın!",
   "pendingSyncs": "Uyarı",
   "pendingSyncsWarningBody": "Kodlarınızdan bazıları yedeklenmemiş.\n\nLütfen oturumu kapatmadan önce bu kodların yedeğini aldığınızdan emin olun.",
   "checkInboxAndSpamFolder": "Doğrulamayı tamamlamak için lütfen gelen kutunuzu (ve spam kutunuzu) kontrol edin",

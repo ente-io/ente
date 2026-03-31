@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Sorry",
-  "importFailureDesc": "Kan het geselecteerde bestand niet analyseren.\nStuur een e-mail naar support@ente.com als u hulp nodig heeft!",
   "pendingSyncs": "Waarschuwing",
   "pendingSyncsWarningBody": "Sommige van uw codes zijn niet geback-upt.\n\nZorg ervoor dat u een back-up voor deze codes heeft voordat u uitlogt.",
   "checkInboxAndSpamFolder": "Controleer je inbox (en spam) om verificatie te voltooien",

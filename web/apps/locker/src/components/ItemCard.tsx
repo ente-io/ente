@@ -344,13 +344,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                                 />
                             </Box>
                         )}
-                        <ItemOverflowMenu
-                            item={item}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            deleteDisabledHint={deleteDisabledHint}
-                            onShareLink={onShareLink}
-                        />
+                        {!isIncomingShared && (
+                            <ItemOverflowMenu
+                                item={item}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
+                                deleteDisabledHint={deleteDisabledHint}
+                                onShareLink={onShareLink}
+                            />
+                        )}
                     </Stack>
                 )}
             </ButtonBase>
@@ -383,7 +385,7 @@ const ItemOverflowMenu: React.FC<{
         triggerButtonIcon={<MoreVertIcon sx={{ fontSize: 20 }} />}
         triggerButtonSxProps={{ color: "text.faint", p: 0.5 }}
     >
-        {item.type !== "file" && onEdit && (
+        {onEdit && (
             <OverflowMenuOption
                 startIcon={<EditOutlinedIcon />}
                 onClick={() => onEdit(item)}
@@ -391,7 +393,7 @@ const ItemOverflowMenu: React.FC<{
                 {t("edit")}
             </OverflowMenuOption>
         )}
-        {item.type === "file" && onShareLink && (
+        {onShareLink && (
             <OverflowMenuOption
                 startIcon={<ShareOutlinedIcon />}
                 onClick={() => onShareLink(item)}

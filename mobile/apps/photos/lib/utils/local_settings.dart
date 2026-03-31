@@ -88,6 +88,8 @@ class LocalSettings {
       "ml_debug.default_clustering_distance";
   static const _kRunMLDuringInteractionOverride =
       "ml_debug.run_ml_during_interaction";
+  static const _kSemanticSearchExactInRustEnabled =
+      "ml_debug.semantic_search_exact_in_rust";
   static const _kAppMode = "ls.app_mode";
   static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
 
@@ -306,6 +308,13 @@ class LocalSettings {
 
   Future<void> setRunMLDuringInteractionOverride(bool value) async {
     await _prefs.setBool(_kRunMLDuringInteractionOverride, value);
+  }
+
+  bool get semanticSearchExactInRustEnabled =>
+      _prefs.getBool(_kSemanticSearchExactInRustEnabled) ?? false;
+
+  Future<void> setSemanticSearchExactInRustEnabled(bool value) async {
+    await _prefs.setBool(_kSemanticSearchExactInRustEnabled, value);
   }
 
   Future<bool> setSmartMemories(bool value) async {
