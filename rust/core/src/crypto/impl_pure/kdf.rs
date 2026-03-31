@@ -6,7 +6,6 @@
 use blake2b_simd::Params as Blake2bParams;
 
 use crate::crypto::{Result, SecretVec};
-use zeroize::Zeroizing;
 
 /// Size of KDF context in bytes.
 pub const CONTEXT_BYTES: usize = 8;
@@ -94,7 +93,7 @@ pub fn derive_subkey_secure(
     context: &[u8],
 ) -> Result<SecretVec> {
     let subkey = derive_subkey(key, subkey_len, subkey_id, context)?;
-    Ok(Zeroizing::new(subkey))
+    Ok(SecretVec::new(subkey))
 }
 
 /// Derive a login key from a master key.
@@ -122,7 +121,7 @@ pub fn derive_login_key(master_key: &[u8]) -> Result<Vec<u8>> {
 /// Derive a login key from a master key, returning a [`SecretVec`].
 pub fn derive_login_key_secure(master_key: &[u8]) -> Result<SecretVec> {
     let login_key = derive_login_key(master_key)?;
-    Ok(Zeroizing::new(login_key))
+    Ok(SecretVec::new(login_key))
 }
 
 #[cfg(test)]
