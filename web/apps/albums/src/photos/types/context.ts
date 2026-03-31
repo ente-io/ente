@@ -19,8 +19,6 @@ export interface PhotosAppContextT {
      * using the provided {@link NotificationAttributes}.
      */
     showNotification: (attributes: NotificationAttributes) => void;
-    watchFolderView: boolean;
-    setWatchFolderView: (isOpen: boolean) => void;
 }
 
 /**

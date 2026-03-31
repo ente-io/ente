@@ -18,7 +18,7 @@ import { useLoadingBar } from "@/photos/components/utils/use-loading-bar";
 import { PhotosAppContext } from "@/photos/types/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import "photoswipe/dist/photoswipe.css";
 import "../public-album/styles/global.css";
@@ -31,7 +31,6 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
-    const [watchFolderView, setWatchFolderView] = useState(false);
     const logout = useCallback(() => {
         // Public albums does not maintain a logged-in app session.
     }, []);
@@ -45,16 +44,8 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
             showLoadingBar,
             hideLoadingBar,
             showNotification,
-            watchFolderView,
-            setWatchFolderView,
         }),
-        [
-            showLoadingBar,
-            hideLoadingBar,
-            showNotification,
-            watchFolderView,
-            setWatchFolderView,
-        ],
+        [showLoadingBar, hideLoadingBar, showNotification],
     );
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
