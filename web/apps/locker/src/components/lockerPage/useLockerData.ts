@@ -20,7 +20,7 @@ import {
     LOCKER_FILE_LIMIT_PAID,
     type LockerUploadLimitState,
 } from "services/locker-limits";
-import { fetchLockerData, fetchLockerTrash } from "services/remote";
+import { loadPersistedLockerState, syncLockerState } from "services/remote";
 import type { LockerCollection, LockerItem } from "types";
 
 interface LockerBonus {
@@ -71,6 +71,21 @@ interface UseLockerDataProps {
     showMiniDialog: (attributes: MiniDialogAttributes) => void;
 }
 
+interface UserDetailsRefreshTrigger {
+    collectionsSinceTime: number;
+    trashSinceTime: number;
+}
+
+interface UploadLimitStateSnapshot {
+    isProductionEndpoint: boolean;
+    userDetails: UserDetails;
+}
+
+interface LoadUserDetailsResult {
+    applied: boolean;
+    snapshot?: UploadLimitStateSnapshot;
+}
+
 export const useLockerData = ({
     router,
     logout,
@@ -90,6 +105,12 @@ export const useLockerData = ({
     const mountedRef = useRef(true);
     const latestDataRequestRef = useRef(0);
     const latestUserDetailsRequestRef = useRef(0);
+    const lastUserDetailsRefreshKeyRef = useRef<string | undefined>(undefined);
+    const pendingUserDetailsRefreshRef =
+        useRef<UserDetailsRefreshTrigger | undefined>(undefined);
+    const isRefreshingUserDetailsRef = useRef(false);
+    const userDetailsRef = useRef<UserDetails | undefined>(undefined);
+    const isProductionEndpointRef = useRef(isProductionEndpoint);
 
     useEffect(
         () => () => {
@@ -98,7 +119,15 @@ export const useLockerData = ({
         [],
     );
 
-    const loadUserDetails = useCallback(async () => {
+    useEffect(() => {
+        userDetailsRef.current = userDetails;
+    }, [userDetails]);
+
+    useEffect(() => {
+        isProductionEndpointRef.current = isProductionEndpoint;
+    }, [isProductionEndpoint]);
+
+    const loadUserDetails = useCallback(async (): Promise<LoadUserDetailsResult> => {
         const requestID = ++latestUserDetailsRequestRef.current;
         try {
             const [res, isProduction] = await Promise.all([
@@ -109,17 +138,8 @@ export const useLockerData = ({
                 isEnteProductionEndpoint(),
             ]);
             ensureOk(res);
-
-            if (
-                !mountedRef.current ||
-                requestID !== latestUserDetailsRequestRef.current
-            ) {
-                return;
-            }
-
-            setIsProductionEndpoint(isProduction);
             const json = (await res.json()) as LockerUserDetailsResponse;
-            setUserDetails({
+            const nextUserDetails = {
                 email: json.email ?? "",
                 usage: json.usage ?? 0,
                 storageLimit: json.subscription?.storage ?? 0,
@@ -129,19 +149,84 @@ export const useLockerData = ({
                     : LOCKER_FILE_LIMIT_FREE,
                 isPartOfFamily: (json.familyData?.members?.length ?? 0) > 0,
                 lockerFamilyFileCount: json.lockerFamilyUsage?.familyFileCount,
-            });
+            };
+            const snapshot = {
+                isProductionEndpoint: isProduction,
+                userDetails: nextUserDetails,
+            } satisfies UploadLimitStateSnapshot;
+
+            if (
+                !mountedRef.current ||
+                requestID !== latestUserDetailsRequestRef.current
+            ) {
+                return { applied: false, snapshot };
+            }
+
+            setIsProductionEndpoint(isProduction);
+            setUserDetails(nextUserDetails);
+            return { applied: true, snapshot };
         } catch (error) {
             log.error("Failed to fetch user details", error);
+            return { applied: false };
         }
     }, []);
+
+    const refreshUserDetailsForSyncState = useCallback(
+        async (trigger: UserDetailsRefreshTrigger) => {
+            const key = `${trigger.collectionsSinceTime}:${trigger.trashSinceTime}`;
+            if (key === lastUserDetailsRefreshKeyRef.current) {
+                return;
+            }
+            if (isRefreshingUserDetailsRef.current) {
+                pendingUserDetailsRefreshRef.current = trigger;
+                return;
+            }
+
+            isRefreshingUserDetailsRef.current = true;
+            let pendingTrigger: UserDetailsRefreshTrigger | undefined;
+            try {
+                const result = await loadUserDetails();
+                if (result.applied) {
+                    lastUserDetailsRefreshKeyRef.current = key;
+                }
+            } finally {
+                isRefreshingUserDetailsRef.current = false;
+                pendingTrigger = pendingUserDetailsRefreshRef.current;
+                pendingUserDetailsRefreshRef.current = undefined;
+            }
+
+            if (!pendingTrigger) {
+                return;
+            }
+
+            const pendingKey = `${pendingTrigger.collectionsSinceTime}:${pendingTrigger.trashSinceTime}`;
+            if (pendingKey !== lastUserDetailsRefreshKeyRef.current) {
+                void refreshUserDetailsForSyncState(pendingTrigger);
+            }
+        },
+        [loadUserDetails],
+    );
+
+    const ensureUploadLimitState = useCallback(async () => {
+        if (userDetailsRef.current) {
+            return {
+                isProductionEndpoint: isProductionEndpointRef.current,
+                userDetails: userDetailsRef.current,
+            } satisfies UploadLimitStateSnapshot;
+        }
+
+        const result = await loadUserDetails();
+        if (result.snapshot) {
+            return result.snapshot;
+        }
+        return undefined;
+    }, [loadUserDetails]);
 
     const fetchAndStoreLockerData = useCallback(
         async (key: string) => {
             const requestID = ++latestDataRequestRef.current;
-            void loadUserDetails();
 
-            const data = await fetchLockerData(key);
-            const trash = await fetchLockerTrash(key);
+            const data = await syncLockerState(key);
 
             if (
                 !mountedRef.current ||
@@ -150,12 +235,13 @@ export const useLockerData = ({
                 return;
             }
 
-            setCollections(data);
-            setTrashItems(trash.items);
-            setTrashLastUpdatedAt(trash.lastUpdatedAt);
+            setCollections(data.collections);
+            setTrashItems(data.trashItems);
+            setTrashLastUpdatedAt(data.trashLastUpdatedAt);
             setInitialLoadError(null);
+            void refreshUserDetailsForSyncState(data);
         },
-        [loadUserDetails],
+        [refreshUserDetailsForSyncState],
     );
 
     const refreshData = useCallback(
@@ -182,27 +268,37 @@ export const useLockerData = ({
         const canApplyState = () => !cancelled && mountedRef.current;
 
         const load = async () => {
-            const [mk, token, tokenMismatch] = await Promise.all([
-                masterKeyFromSession(),
-                savedAuthToken(),
-                isSavedUserTokenMismatch(),
-            ]);
-            if (tokenMismatch || !token) {
-                void logout();
-                return;
-            }
-            if (!mk) {
-                stashRedirect(router.asPath || "/");
-                void router.push("/login");
-                return;
-            }
-            if (cancelled || !mountedRef.current) {
-                return;
-            }
-
-            setMasterKey(mk);
-
             try {
+                const [mk, token, tokenMismatch] = await Promise.all([
+                    masterKeyFromSession(),
+                    savedAuthToken(),
+                    isSavedUserTokenMismatch(),
+                ]);
+                if (tokenMismatch || !token) {
+                    void logout();
+                    return;
+                }
+                if (!mk) {
+                    stashRedirect(router.asPath || "/");
+                    void router.push("/login");
+                    return;
+                }
+                if (cancelled || !mountedRef.current) {
+                    return;
+                }
+
+                setMasterKey(mk);
+
+                const persisted = await loadPersistedLockerState(mk);
+                if (canApplyState() && persisted.hasPersistedState) {
+                    setCollections(persisted.collections);
+                    setTrashItems(persisted.trashItems);
+                    setTrashLastUpdatedAt(persisted.trashLastUpdatedAt);
+                    setInitialLoadError(null);
+                    setHasFetched(true);
+                    void refreshUserDetailsForSyncState(persisted);
+                }
+
                 await fetchAndStoreLockerData(mk);
             } catch (error) {
                 log.error("Failed to fetch locker data", error);
@@ -249,5 +345,6 @@ export const useLockerData = ({
         trashItems,
         trashLastUpdatedAt,
         userDetails,
+        ensureUploadLimitState,
     };
 };

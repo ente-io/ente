@@ -6,7 +6,12 @@ import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
-import type { LockerCollection, LockerItem, LockerItemType } from "types";
+import type {
+    LockerCollection,
+    LockerCollectionParticipant,
+    LockerItem,
+    LockerItemType,
+} from "types";
 import { z } from "zod";
 import {
     boxSealOpen,
@@ -14,18 +19,33 @@ import {
     decryptBox,
     decryptBoxBytes,
     decryptMetadataJSON,
+    encryptBox,
+    stringToB64,
 } from "./crypto";
 import {
     type EncryptedCollectionRecord,
     type EncryptedFileRecord,
+    type LockerCollectionPayload,
     type LockerEncryptedCache,
-    createEmptyLockerCache,
     getEncryptedFileRecord,
     getLockerCacheSnapshot,
-    mergeEncryptedFileRecordsIntoCache,
     replaceLockerCache,
     setEncryptedFileRecord,
 } from "./remote-cache";
+import {
+    deleteCollectionSinceTime,
+    deleteFileRecords,
+    deleteFileRecordsForCollection,
+    deleteTrashFileRecords,
+    loadLockerSnapshotFromDB,
+    type StoredTrashFileRecord,
+    saveCollectionRecords,
+    saveCollectionSinceTime,
+    saveCollectionsSinceTime,
+    saveFileRecords,
+    saveTrashFileRecords,
+    saveTrashSinceTime,
+} from "./locker-db";
 import {
     RemoteCollectionUserSchema,
     toLockerCollectionParticipant,
@@ -130,7 +150,20 @@ export interface LockerTrashData {
     lastUpdatedAt: number;
 }
 
-const collectionNameDecoder = new TextDecoder();
+export interface LockerHydratedState {
+    collections: LockerCollection[];
+    trashItems: LockerItem[];
+    trashLastUpdatedAt: number;
+    collectionsSinceTime: number;
+    trashSinceTime: number;
+}
+
+export interface LockerPersistedState extends LockerHydratedState {
+    hasPersistedState: boolean;
+}
+
+const COLLECTION_PAYLOAD_VERSION = 1;
+const collectionTextDecoder = new TextDecoder();
 const DOWNLOAD_URL_REVOKE_DELAY_MS = 30_000;
 
 const describeCryptoError = (error: unknown): string => {
@@ -188,47 +221,258 @@ const buildEncryptedFileRecord = (file: RemoteFile): EncryptedFileRecord => ({
     updationTime: file.updationTime,
 });
 
-const fetchEncryptedCollections = async () => {
-    const response = await fetch(
-        await apiURL("/collections/v2", { sinceTime: 0 }),
-        { headers: await authenticatedRequestHeaders() },
-    );
-    ensureOk(response);
-    const { collections } = CollectionsResponse.parse(await response.json());
+const normalizeCollectionParticipant = (
+    value: unknown,
+    fallback?: Partial<LockerCollectionParticipant> & { id: number },
+): LockerCollectionParticipant | undefined => {
+    const participant =
+        typeof value === "object" && value ? (value as Record<string, unknown>) : undefined;
+    const id =
+        typeof participant?.id === "number" ? participant.id : fallback?.id;
+    if (id === undefined) {
+        return undefined;
+    }
 
-    const nextCollections = new Map<number, EncryptedCollectionRecord>();
-    for (const collection of collections) {
-        nextCollections.set(collection.id, {
-            id: collection.id,
+    const email =
+        typeof participant?.email === "string"
+            ? participant.email
+            : fallback?.email;
+    const role =
+        typeof participant?.role === "string"
+            ? participant.role
+            : fallback?.role;
+
+    return {
+        id,
+        email: email || undefined,
+        role: role
+            ? (role.toUpperCase() as LockerCollectionParticipant["role"])
+            : undefined,
+    };
+};
+
+const fallbackCollectionPayload = (
+    record: Pick<EncryptedCollectionRecord, "ownerID" | "payload">,
+): LockerCollectionPayload => ({
+    owner: record.payload?.owner ?? {
+        id: record.ownerID,
+        role: "OWNER",
+    },
+    sharees: record.payload?.sharees ?? [],
+    name: record.payload?.name,
+});
+
+const decryptCollectionPayload = async (
+    record: EncryptedCollectionRecord,
+    collectionKey: string,
+): Promise<LockerCollectionPayload | undefined> => {
+    if (record.payload) {
+        return record.payload;
+    }
+
+    if (!record.payloadEncryptedData || !record.payloadDecryptionNonce) {
+        return undefined;
+    }
+
+    try {
+        const payloadBytes = await decryptBoxBytes(
+            {
+                encryptedData: record.payloadEncryptedData,
+                nonce: record.payloadDecryptionNonce,
+            },
+            collectionKey,
+        );
+        const payload = JSON.parse(
+            collectionTextDecoder.decode(payloadBytes),
+        ) as unknown;
+        const payloadObject =
+            typeof payload === "object" && payload
+                ? (payload as Record<string, unknown>)
+                : undefined;
+        const owner =
+            normalizeCollectionParticipant(payloadObject?.owner, {
+                id: record.ownerID,
+                role: "OWNER",
+            }) ?? {
+                id: record.ownerID,
+                role: "OWNER",
+            };
+        const sharees = Array.isArray(payloadObject?.sharees)
+            ? payloadObject.sharees
+                  .map((sharee) => normalizeCollectionParticipant(sharee))
+                  .filter(
+                      (
+                          participant,
+                      ): participant is LockerCollectionParticipant =>
+                          participant !== undefined,
+                  )
+            : [];
+        const name =
+            typeof payloadObject?.name === "string" && payloadObject.name
+                ? payloadObject.name
+                : undefined;
+
+        return { owner, sharees, name };
+    } catch (error) {
+        log.error(`Failed to decrypt collection payload for ${record.id}`, error);
+        return undefined;
+    }
+};
+
+const decryptCollectionNameFromRemote = async (
+    collectionID: number,
+    encryptedName: string | undefined,
+    nameDecryptionNonce: string | undefined,
+    collectionKey: string,
+): Promise<string | undefined> => {
+    if (!encryptedName || !nameDecryptionNonce) {
+        return undefined;
+    }
+
+    try {
+        const nameBytes = await decryptBoxBytes(
+            {
+                encryptedData: encryptedName,
+                nonce: nameDecryptionNonce,
+            },
+            collectionKey,
+        );
+        return collectionTextDecoder.decode(nameBytes);
+    } catch (error) {
+        log.error(`Failed to decrypt collection name for ${collectionID}`, error);
+        return undefined;
+    }
+};
+
+const encryptCollectionPayload = async (
+    payload: LockerCollectionPayload,
+    collectionKey: string,
+) => {
+    const encryptedPayload = await encryptBox(
+        stringToB64(JSON.stringify(payload)),
+        collectionKey,
+    );
+
+    return {
+        payloadEncryptedData: encryptedPayload.encryptedData,
+        payloadDecryptionNonce: encryptedPayload.nonce,
+        payloadVersion: COLLECTION_PAYLOAD_VERSION,
+    };
+};
+
+const toEncryptedCollectionRecord = (
+    collection: RemoteCollection,
+    masterKey: string,
+): Promise<EncryptedCollectionRecord> => {
+    const record: EncryptedCollectionRecord = {
+        id: collection.id,
+        ownerID: collection.owner.id,
+        encryptedKey: collection.encryptedKey,
+        keyDecryptionNonce: collection.keyDecryptionNonce ?? undefined,
+        encryptedName: collection.encryptedName ?? undefined,
+        nameDecryptionNonce: collection.nameDecryptionNonce ?? undefined,
+        type: collection.type,
+        isDeleted: !!collection.isDeleted,
+        updationTime: collection.updationTime,
+    };
+
+    const buildEncryptedRecord = async () => {
+        const collectionKey = await decryptCollectionKey(record, masterKey);
+        const payload: LockerCollectionPayload = {
             owner: {
                 ...toLockerCollectionParticipant(collection.owner),
                 role: "OWNER",
             },
-            ownerID: collection.owner.id,
-            sharees: (collection.sharees ?? []).map(
-                toLockerCollectionParticipant,
-            ),
-            encryptedKey: collection.encryptedKey,
-            keyDecryptionNonce: collection.keyDecryptionNonce ?? undefined,
-            encryptedName: collection.encryptedName ?? undefined,
-            nameDecryptionNonce: collection.nameDecryptionNonce ?? undefined,
-            name: collection.name ?? undefined,
-            type: collection.type,
-            isShared: (collection.sharees?.length ?? 0) > 0,
-            isDeleted: !!collection.isDeleted,
-            updationTime: collection.updationTime,
-        });
+            sharees: (collection.sharees ?? []).map(toLockerCollectionParticipant),
+            name:
+                collection.name ??
+                (await decryptCollectionNameFromRemote(
+                    collection.id,
+                    record.encryptedName,
+                    record.nameDecryptionNonce,
+                    collectionKey,
+                )),
+        };
+
+        return {
+            ...record,
+            ...(await encryptCollectionPayload(payload, collectionKey)),
+        };
+    };
+
+    return buildEncryptedRecord().catch((error: unknown) => {
+        log.error(
+            `Failed to locally encrypt collection payload for ${collection.id}`,
+            error,
+        );
+        return record;
+    });
+};
+
+const decryptCollectionDetails = async (
+    record: EncryptedCollectionRecord,
+    collectionKey: string,
+): Promise<LockerCollectionPayload & { name: string }> => {
+    const payload =
+        (await decryptCollectionPayload(record, collectionKey)) ??
+        fallbackCollectionPayload(record);
+    const name =
+        payload.name ??
+        (await decryptCollectionNameFromRemote(
+            record.id,
+            record.encryptedName,
+            record.nameDecryptionNonce,
+            collectionKey,
+        )) ??
+        "Untitled";
+
+    return {
+        owner: payload.owner,
+        sharees: payload.sharees,
+        name,
+    };
+};
+
+const buildLockerCache = (
+    collections: Map<number, EncryptedCollectionRecord>,
+    files: EncryptedFileRecord[],
+    trashFiles: StoredTrashFileRecord[],
+): LockerEncryptedCache => {
+    const nextFiles = new Map<number, Map<number, EncryptedFileRecord>>();
+    for (const record of files) {
+        setEncryptedFileRecord(nextFiles, record);
+    }
+    for (const record of trashFiles) {
+        setEncryptedFileRecord(nextFiles, record);
     }
 
-    return nextCollections;
+    return { collections, files: nextFiles };
 };
+
+const fetchEncryptedCollections = async (sinceTime: number) => {
+    const response = await fetch(
+        await apiURL("/collections/v2", { sinceTime }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(response);
+    const { collections } = CollectionsResponse.parse(await response.json());
+    return collections;
+};
+
+interface CollectionFileDiff {
+    recordsToSave: EncryptedFileRecord[];
+    fileKeysToDelete: [number, number][];
+    sinceTime: number;
+}
 
 const fetchEncryptedFilesForCollection = async (
     collectionID: number,
-): Promise<EncryptedFileRecord[]> => {
-    let sinceTime = 0;
+    initialSinceTime: number,
+): Promise<CollectionFileDiff> => {
+    let sinceTime = initialSinceTime;
     let hasMore = true;
-    const records: EncryptedFileRecord[] = [];
+    const recordsToSave: EncryptedFileRecord[] = [];
+    const fileKeysToDelete: [number, number][] = [];
 
     while (hasMore) {
         const response = await fetch(
@@ -240,38 +484,68 @@ const fetchEncryptedFilesForCollection = async (
 
         for (const file of parsed.diff) {
             sinceTime = Math.max(sinceTime, file.updationTime);
-            if (!file.isDeleted) {
-                records.push(buildEncryptedFileRecord(file));
+            if (file.isDeleted) {
+                fileKeysToDelete.push([file.id, collectionID]);
+            } else {
+                recordsToSave.push(buildEncryptedFileRecord(file));
             }
         }
 
         hasMore = parsed.hasMore;
     }
 
-    return records;
+    return { recordsToSave, fileKeysToDelete, sinceTime };
 };
 
-const fetchAllEncryptedFiles = async (
-    collections: Map<number, EncryptedCollectionRecord>,
-) => {
-    const activeCollections = [...collections.values()].filter(
-        (collection) => !collection.isDeleted,
-    );
-    const fileResults = await Promise.all(
-        activeCollections.map((collection) =>
-            fetchEncryptedFilesForCollection(collection.id),
-        ),
-    );
+const decryptStoredTrash = async (
+    masterKey: string,
+    cache: LockerEncryptedCache,
+    trashFiles: StoredTrashFileRecord[],
+    lastUpdatedAt: number,
+): Promise<LockerTrashData> => {
+    const trashItems: LockerItem[] = [];
+    for (const record of trashFiles) {
+        const collectionRecord = cache.collections.get(record.collectionID);
+        if (!collectionRecord) {
+            log.warn(
+                `Skipping trash file ${record.id}: collection ${record.collectionID} not in cache`,
+            );
+            continue;
+        }
 
-    const nextFiles = createEmptyLockerCache().files;
-    for (const records of fileResults) {
-        for (const record of records) {
-            setEncryptedFileRecord(nextFiles, record);
+        try {
+            const collectionKey = await decryptCollectionKey(
+                collectionRecord,
+                masterKey,
+            );
+            const item = await decryptFileToLockerItem(
+                record,
+                collectionKey,
+                collectionRecord.ownerID,
+            );
+            if (item) {
+                trashItems.push({
+                    ...item,
+                    updatedAt: record.updatedAt,
+                    deleteBy: record.deleteBy,
+                });
+            }
+        } catch (error) {
+            log.error(`Failed to decrypt trash file ${record.id}`, error);
         }
     }
 
-    return nextFiles;
+    trashItems.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+    return { items: trashItems, lastUpdatedAt };
 };
+
+const buildStoredTrashFileRecord = (
+    entry: z.infer<typeof RemoteTrashItem>,
+): StoredTrashFileRecord => ({
+    ...buildEncryptedFileRecord(entry.file),
+    updatedAt: entry.updatedAt,
+    deleteBy: entry.deleteBy,
+});
 
 export const decryptCollectionKey = async (
     record: EncryptedCollectionRecord,
@@ -289,35 +563,6 @@ export const decryptCollectionKey = async (
     }
 
     return boxSealOpen(record.encryptedKey, await ensureUserKeyPair());
-};
-
-const decryptCollectionName = async (
-    record: EncryptedCollectionRecord,
-    collectionKey: string,
-): Promise<string> => {
-    if (record.name) {
-        return record.name;
-    }
-
-    if (record.encryptedName && record.nameDecryptionNonce) {
-        try {
-            const nameBytes = await decryptBoxBytes(
-                {
-                    encryptedData: record.encryptedName,
-                    nonce: record.nameDecryptionNonce,
-                },
-                collectionKey,
-            );
-            return collectionNameDecoder.decode(nameBytes);
-        } catch (error) {
-            log.error(
-                `Failed to decrypt collection name for ${record.id}`,
-                error,
-            );
-        }
-    }
-
-    return "Untitled";
 };
 
 const decryptFileKeyForRecordFromCollections = async (
@@ -474,7 +719,7 @@ const decryptAllData = async (
                 collectionRecord,
                 masterKey,
             );
-            const name = await decryptCollectionName(
+            const collectionDetails = await decryptCollectionDetails(
                 collectionRecord,
                 collectionKey,
             );
@@ -499,12 +744,12 @@ const decryptAllData = async (
 
             result.push({
                 id: collectionRecord.id,
-                name,
-                owner: collectionRecord.owner,
-                sharees: collectionRecord.sharees,
+                name: collectionDetails.name,
+                owner: collectionDetails.owner,
+                sharees: collectionDetails.sharees,
                 items,
                 type: collectionRecord.type,
-                isShared: collectionRecord.isShared,
+                isShared: collectionDetails.sharees.length > 0,
             });
         } catch (error) {
             failedCollectionIDs.push(collectionRecord.id);
@@ -556,17 +801,16 @@ const withoutFailedCollections = (
     };
 };
 
-export const fetchLockerData = async (
+const hydrateLockerState = async (
     masterKey: string,
-): Promise<LockerCollection[]> => {
-    const stagedCollections = await fetchEncryptedCollections();
-    const stagedFiles = await fetchAllEncryptedFiles(stagedCollections);
-    const stagedCache: LockerEncryptedCache = {
-        collections: stagedCollections,
-        files: stagedFiles,
-    };
+    collections: Map<number, EncryptedCollectionRecord>,
+    files: EncryptedFileRecord[],
+    trashFiles: StoredTrashFileRecord[],
+    trashLastUpdatedAt: number,
+): Promise<LockerHydratedState> => {
+    const activeCache = buildLockerCache(collections, files, []);
 
-    const decrypted = await decryptAllData(masterKey, stagedCache);
+    const decrypted = await decryptAllData(masterKey, activeCache);
     if (
         decrypted.totalCollectionCount > 0 &&
         decrypted.collections.length === 0
@@ -576,9 +820,11 @@ export const fetchLockerData = async (
         );
     }
 
-    replaceLockerCache(
-        withoutFailedCollections(stagedCache, decrypted.failedCollectionIDs),
+    const hydratedCache = withoutFailedCollections(
+        buildLockerCache(collections, files, trashFiles),
+        decrypted.failedCollectionIDs,
     );
+    replaceLockerCache(hydratedCache);
 
     if (decrypted.failedCollectionIDs.length > 0) {
         log.warn(
@@ -586,72 +832,166 @@ export const fetchLockerData = async (
         );
     }
 
-    return decrypted.collections;
+    const trash = await decryptStoredTrash(
+        masterKey,
+        hydratedCache,
+        trashFiles,
+        trashLastUpdatedAt,
+    );
+
+    return {
+        collections: decrypted.collections,
+        trashItems: trash.items,
+        trashLastUpdatedAt: trash.lastUpdatedAt,
+        collectionsSinceTime: 0,
+        trashSinceTime: 0,
+    };
 };
 
-export const fetchLockerTrash = async (
+export const loadPersistedLockerState = async (
     masterKey: string,
-): Promise<LockerTrashData> => {
-    const cacheSnapshot = getLockerCacheSnapshot();
-    const trashItems: LockerItem[] = [];
-    const stagedTrashFileRecords: EncryptedFileRecord[] = [];
-    let sinceTime = 0;
-    let hasMore = true;
+): Promise<LockerPersistedState> => {
+    const snapshot = await loadLockerSnapshotFromDB();
+    const hydrated = await hydrateLockerState(
+        masterKey,
+        snapshot.collections,
+        snapshot.files,
+        snapshot.trashFiles,
+        snapshot.trashSinceTime,
+    );
 
+    return {
+        ...hydrated,
+        collectionsSinceTime: snapshot.collectionsSinceTime,
+        trashSinceTime: snapshot.trashSinceTime,
+        hasPersistedState: snapshot.hasPersistedState,
+    };
+};
+
+export const syncLockerState = async (
+    masterKey: string,
+): Promise<LockerHydratedState> => {
+    const snapshot = await loadLockerSnapshotFromDB();
+    const collectionChanges = await fetchEncryptedCollections(
+        snapshot.collectionsSinceTime,
+    );
+
+    let latestCollectionsSinceTime = snapshot.collectionsSinceTime;
+    const changedCollections: EncryptedCollectionRecord[] = [];
+    const deletedCollectionIDs: number[] = [];
+
+    for (const change of collectionChanges) {
+        latestCollectionsSinceTime = Math.max(
+            latestCollectionsSinceTime,
+            change.updationTime,
+        );
+        const record = await toEncryptedCollectionRecord(change, masterKey);
+        changedCollections.push(record);
+        if (record.isDeleted) {
+            deletedCollectionIDs.push(record.id);
+        }
+    }
+
+    if (changedCollections.length > 0) {
+        await saveCollectionRecords(changedCollections);
+    }
+    for (const collectionID of deletedCollectionIDs) {
+        await deleteFileRecordsForCollection(collectionID);
+        await deleteCollectionSinceTime(collectionID);
+    }
+    await saveCollectionsSinceTime(latestCollectionsSinceTime);
+
+    const postCollectionSnapshot = await loadLockerSnapshotFromDB();
+    for (const collection of postCollectionSnapshot.collections.values()) {
+        if (collection.isDeleted) {
+            continue;
+        }
+
+        const savedSinceTime =
+            postCollectionSnapshot.collectionSinceTimeByID.get(collection.id) ??
+            0;
+        if (savedSinceTime >= collection.updationTime) {
+            continue;
+        }
+
+        const diff = await fetchEncryptedFilesForCollection(
+            collection.id,
+            savedSinceTime,
+        );
+        if (diff.recordsToSave.length > 0) {
+            await saveFileRecords(diff.recordsToSave);
+        }
+        if (diff.fileKeysToDelete.length > 0) {
+            await deleteFileRecords(diff.fileKeysToDelete);
+        }
+
+        await saveCollectionSinceTime(
+            collection.id,
+            Math.max(diff.sinceTime, collection.updationTime),
+        );
+    }
+
+    let trashSinceTime = postCollectionSnapshot.trashSinceTime;
+    let hasMore = true;
     while (hasMore) {
         const response = await fetch(
-            await apiURL("/trash/v2/diff", { sinceTime }),
+            await apiURL("/trash/v2/diff", { sinceTime: trashSinceTime }),
             { headers: await authenticatedRequestHeaders() },
         );
         ensureOk(response);
         const parsed = TrashDiffResponse.parse(await response.json());
 
+        const recordsToSave: StoredTrashFileRecord[] = [];
+        const fileIDsToDelete: number[] = [];
         for (const entry of parsed.diff) {
-            sinceTime = Math.max(sinceTime, entry.updatedAt);
+            trashSinceTime = Math.max(trashSinceTime, entry.updatedAt);
             if (entry.isDeleted || entry.isRestored) {
-                continue;
+                fileIDsToDelete.push(entry.file.id);
+            } else {
+                recordsToSave.push(buildStoredTrashFileRecord(entry));
             }
+        }
 
-            const collectionRecord = cacheSnapshot.collections.get(
-                entry.file.collectionID,
-            );
-            if (!collectionRecord) {
-                log.warn(
-                    `Skipping trash file ${entry.file.id}: collection ${entry.file.collectionID} not in cache`,
-                );
-                continue;
-            }
-
-            const fileRecord = buildEncryptedFileRecord(entry.file);
-            stagedTrashFileRecords.push(fileRecord);
-
-            try {
-                const collectionKey = await decryptCollectionKey(
-                    collectionRecord,
-                    masterKey,
-                );
-                const item = await decryptFileToLockerItem(
-                    fileRecord,
-                    collectionKey,
-                    collectionRecord.ownerID,
-                );
-                if (item) {
-                    trashItems.push({ ...item, deleteBy: entry.deleteBy });
-                }
-            } catch (error) {
-                log.error(
-                    `Failed to decrypt trash file ${entry.file.id}`,
-                    error,
-                );
-            }
+        if (recordsToSave.length > 0) {
+            await saveTrashFileRecords(recordsToSave);
+        }
+        if (fileIDsToDelete.length > 0) {
+            await deleteTrashFileRecords(fileIDsToDelete);
         }
 
         hasMore = parsed.hasMore;
     }
 
-    mergeEncryptedFileRecordsIntoCache(stagedTrashFileRecords);
-    trashItems.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-    return { items: trashItems, lastUpdatedAt: sinceTime };
+    await saveTrashSinceTime(trashSinceTime);
+
+    const nextSnapshot = await loadLockerSnapshotFromDB();
+    const hydrated = await hydrateLockerState(
+        masterKey,
+        nextSnapshot.collections,
+        nextSnapshot.files,
+        nextSnapshot.trashFiles,
+        nextSnapshot.trashSinceTime,
+    );
+
+    return {
+        ...hydrated,
+        collectionsSinceTime: nextSnapshot.collectionsSinceTime,
+        trashSinceTime: nextSnapshot.trashSinceTime,
+    };
+};
+
+export const fetchLockerData = async (
+    masterKey: string,
+): Promise<LockerCollection[]> => (await syncLockerState(masterKey)).collections;
+
+export const fetchLockerTrash = async (
+    masterKey: string,
+): Promise<LockerTrashData> => {
+    const state = await syncLockerState(masterKey);
+    return {
+        items: state.trashItems,
+        lastUpdatedAt: state.trashLastUpdatedAt,
+    };
 };
 
 export const downloadLockerFile = async (

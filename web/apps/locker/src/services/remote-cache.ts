@@ -1,19 +1,22 @@
 import type { LockerCollectionParticipant } from "types";
 
+export interface LockerCollectionPayload {
+    owner: LockerCollectionParticipant;
+    sharees: LockerCollectionParticipant[];
+    name?: string;
+}
+
 /**
- * An encrypted collection record stored in-memory. All sensitive fields remain
- * encrypted exactly as received from remote — we never persist decrypted keys
- * or names. Decryption is done on-the-fly when the UI requests the data.
+ * A collection record stored in the Locker cache. The persisted form keeps only
+ * structural metadata plus encrypted fields. Decrypted collection details can
+ * be attached transiently in-memory via `payload`, but must never be written to
+ * IndexedDB.
  */
 export interface EncryptedCollectionRecord {
     /** Collection ID. */
     id: number;
-    /** Owner info (plaintext — structural metadata only). */
-    owner: LockerCollectionParticipant;
     /** Owner user ID (plaintext — structural metadata only). */
     ownerID: number;
-    /** Participants excluding the owner. */
-    sharees: LockerCollectionParticipant[];
     /** Encrypted collection key (base64). */
     encryptedKey: string;
     /** Nonce for key decryption (base64), null for shared collections. */
@@ -22,16 +25,23 @@ export interface EncryptedCollectionRecord {
     encryptedName: string | undefined;
     /** Nonce for name decryption (base64). */
     nameDecryptionNonce: string | undefined;
-    /** Unencrypted name (legacy, may be blank). */
-    name: string | undefined;
+    /**
+     * Locally encrypted collection payload that mirrors mobile's encrypted
+     * collection payload storage for name and participant metadata.
+     */
+    payloadEncryptedData?: string;
+    /** Nonce for local collection payload decryption. */
+    payloadDecryptionNonce?: string;
+    /** Version of the local encrypted collection payload. */
+    payloadVersion?: number;
     /** Collection type (structural metadata). */
     type: string;
-    /** Whether the collection has sharees. */
-    isShared: boolean;
     /** Whether this collection is deleted on remote (key still needed for trash restore). */
     isDeleted: boolean;
     /** Updation time (structural metadata). */
     updationTime: number;
+    /** Transient decrypted collection details kept only in memory. */
+    payload?: LockerCollectionPayload;
 }
 
 /**
@@ -127,8 +137,14 @@ export const updateCollectionShareesInCache = (
 
     encryptedCollections.set(collectionID, {
         ...record,
-        sharees,
-        isShared: sharees.length > 0,
+        payload: {
+            owner: record.payload?.owner ?? {
+                id: record.ownerID,
+                role: "OWNER",
+            },
+            sharees,
+            name: record.payload?.name,
+        },
     });
 };
 
