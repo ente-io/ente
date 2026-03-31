@@ -27,6 +27,7 @@ import {
 import {
     collectionNamesByUploadItem,
     dedupeCollectionNames,
+    filterNonEmptyUploadItems,
     normalizeCollectionName,
     uploadQueueItemKey,
 } from "./fileUploadHelpers";
@@ -62,6 +63,13 @@ interface UseCreateItemDialogStateProps {
     onEnsureCollections?: (
         names: string[],
     ) => Promise<Map<string, number> | Record<string, number>>;
+    onEnsureUploadLimitState?: () => Promise<
+        | {
+              isProductionEndpoint: boolean;
+              userDetails: LockerUploadLimitState;
+          }
+        | undefined
+    >;
     defaultCollectionID?: number | null;
     isProductionEndpoint: boolean;
     initialItems?: LockerUploadCandidate[];
@@ -118,6 +126,7 @@ export const useCreateItemDialogState = ({
     onUploadItemComplete,
     onUploadsFinished,
     onEnsureCollections,
+    onEnsureUploadLimitState,
     defaultCollectionID,
     isProductionEndpoint,
     initialItems,
@@ -173,7 +182,7 @@ export const useCreateItemDialogState = ({
     const [showPassword, setShowPassword] = useState(false);
     const [selectedUploadItems, setSelectedUploadItems] = useState<
         LockerUploadCandidate[]
-    >(initialItems ?? []);
+    >(filterNonEmptyUploadItems(initialItems ?? []));
     const [
         selectedCollectionNamesByFileKey,
         setSelectedCollectionNamesByFileKey,
@@ -260,11 +269,12 @@ export const useCreateItemDialogState = ({
         );
         setFormData(editFormData(editItem));
         setShowPassword(false);
-        setSelectedUploadItems(initialItems ?? []);
+        const filteredInitialItems = filterNonEmptyUploadItems(initialItems ?? []);
+        setSelectedUploadItems(filteredInitialItems);
         setCustomCollectionNames([]);
         setSelectedCollectionNamesByFileKey(
             collectionNamesByUploadItem(
-                initialItems ?? [],
+                filteredInitialItems,
                 defaultCollectionName,
             ),
         );
@@ -402,10 +412,14 @@ export const useCreateItemDialogState = ({
                 relativePath: file.webkitRelativePath || file.name,
                 suggestedCollectionNames: [],
             }));
-            setSelectedUploadItems(items);
+            const nonEmptyItems = filterNonEmptyUploadItems(items);
+            setSelectedUploadItems(nonEmptyItems);
             setCustomCollectionNames([]);
             setSelectedCollectionNamesByFileKey(
-                collectionNamesByUploadItem(items, defaultCollectionName),
+                collectionNamesByUploadItem(
+                    nonEmptyItems,
+                    defaultCollectionName,
+                ),
             );
             resetUploadState();
             setError(null);
@@ -455,25 +469,41 @@ export const useCreateItemDialogState = ({
             return;
         }
 
-        const pendingUploadItems = selectedUploadItems.filter(
-            (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+        const pendingUploadItems = filterNonEmptyUploadItems(
+            selectedUploadItems.filter(
+                (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+            ),
         );
         if (pendingUploadItems.length === 0) {
             return;
         }
 
+        let effectiveUserDetails = userDetails;
+        let effectiveIsProductionEndpoint = isProductionEndpoint;
+        if (!effectiveUserDetails) {
+            const uploadLimitState = await onEnsureUploadLimitState?.();
+            effectiveUserDetails = uploadLimitState?.userDetails;
+            effectiveIsProductionEndpoint =
+                uploadLimitState?.isProductionEndpoint ??
+                effectiveIsProductionEndpoint;
+        }
+
+        if (!effectiveUserDetails) {
+            setError(t("generic_error_retry"));
+            setUpgradeCTAType(null);
+            return;
+        }
+
         const preflightFailure = validateLockerUploadBatch(
             pendingUploadItems.map(({ file }) => file),
-            userDetails,
-            isProductionEndpoint,
+            effectiveUserDetails,
+            effectiveIsProductionEndpoint,
         );
         if (preflightFailure) {
             const preflightFailureMessage = (
                 failure: LockerUploadPreflightFailure,
             ) => {
                 switch (failure.reason) {
-                    case "emptyFile":
-                        return t("uploadEmptyFileErrorBody");
                     case "fileCountLimit":
                         return t("uploadFileCountLimitErrorBody");
                     case "fileTooLarge":
@@ -661,6 +691,7 @@ export const useCreateItemDialogState = ({
         displayCollections,
         handleClose,
         onEnsureCollections,
+        onEnsureUploadLimitState,
         isProductionEndpoint,
         onUploadItemComplete,
         onUploadProgress,

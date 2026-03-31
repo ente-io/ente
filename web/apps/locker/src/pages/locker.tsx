@@ -44,6 +44,7 @@ export const LockerPage: React.FC = () => {
 
     const {
         collections,
+        ensureUploadLimitState,
         hasFetched,
         initialLoadError,
         isProductionEndpoint,
@@ -287,6 +288,7 @@ export const LockerPage: React.FC = () => {
                 onUploadsFinished={handleUploadsFinished}
                 onCreateCollection={handleCreateCollection}
                 onEnsureCollections={ensureCollectionsExist}
+                onEnsureUploadLimitState={ensureUploadLimitState}
                 defaultCollectionID={selectedCollectionID}
                 isProductionEndpoint={isProductionEndpoint}
                 initialItems={prefilledUploadItems}

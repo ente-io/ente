@@ -33,6 +33,7 @@ import type {
     LockerUploadCandidate,
 } from "types";
 import { getItemTitle, isCollectionOwner } from "types";
+import { filterNonEmptyUploadItems } from "../createItemDialog/fileUploadHelpers";
 import type { CreateItemDialogEditItem } from "../createItemDialog/useCreateItemDialogState";
 
 type DragDataTransferItem = DataTransferItem & {
@@ -612,10 +613,11 @@ export const useLockerActions = ({
 
     const openUploadDialogForItems = useCallback(
         (items: LockerUploadCandidate[]) => {
-            if (items.length === 0) {
+            const nonEmptyItems = filterNonEmptyUploadItems(items);
+            if (nonEmptyItems.length === 0) {
                 return;
             }
-            setPrefilledUploadItems(items);
+            setPrefilledUploadItems(nonEmptyItems);
             setCreateDialogOpen(true);
         },
         [],

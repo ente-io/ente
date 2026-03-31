@@ -33,7 +33,6 @@ export interface LockerUploadLimitState {
 }
 
 export type LockerUploadPreflightFailureReason =
-    | "emptyFile"
     | "fileCountLimit"
     | "fileTooLarge"
     | "storageLimit";
@@ -48,11 +47,6 @@ export const validateLockerUploadBatch = (
     userDetails: LockerUploadLimitState | undefined,
     isProductionEndpoint: boolean,
 ): LockerUploadPreflightFailure | null => {
-    const emptyFile = files.find((file) => file.size === 0);
-    if (emptyFile) {
-        return { reason: "emptyFile", fileName: emptyFile.name };
-    }
-
     const oversizedFile = files.find(
         (file) => file.size > LOCKER_MAX_FILE_SIZE_BYTES,
     );
