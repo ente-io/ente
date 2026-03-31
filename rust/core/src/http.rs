@@ -1,5 +1,6 @@
 //! HTTP client for communicating with the Ente API.
 
+use reqwest::Url;
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -95,6 +96,14 @@ impl HttpClient {
             ));
         }
 
+        let base = Url::parse(&self.base_url)
+            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
+        if base.query().is_some() || base.fragment().is_some() {
+            return Err(Error::InvalidUrl(
+                "base URL must not contain a query or fragment".to_string(),
+            ));
+        }
+
         Ok(format!("{}{}", self.base_url, path))
     }
 
@@ -149,6 +158,27 @@ mod tests {
     fn test_request_url_rejects_missing_leading_slash() {
         let client = test_client("https://api.ente.io");
         let err = client.request_url("ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_request_url_rejects_invalid_base_url() {
+        let client = test_client("not a url");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_request_url_rejects_base_url_with_query() {
+        let client = test_client("https://api.ente.io/v1?stale=true");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_request_url_rejects_base_url_with_fragment() {
+        let client = test_client("https://api.ente.io/v1#old");
+        let err = client.request_url("/ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 }

@@ -216,16 +216,13 @@ pub fn srp_decrypt_secrets(
     encrypted_token: Option<String>,
     plain_token: Option<String>,
 ) -> Result<AuthSecrets, EnsuError> {
+    // Consume the SRP state up front so any downstream failure also clears the
+    // KEK and lets callers start a fresh session.
     let mut guard = lock_srp_state()?;
-    let state = guard.as_mut().ok_or_else(|| EnsuError::Message {
-        reason: "SRP session not initialized".to_string(),
-    })?;
-    verify_srp_m2(&state.session, &srp_m2)?;
-
-    // Consume the SRP state so KEK doesn't linger in memory if the caller forgets srp_clear().
     let state = guard.take().ok_or_else(|| EnsuError::Message {
         reason: "SRP session not initialized".to_string(),
     })?;
+    verify_srp_m2(&state.session, &srp_m2)?;
 
     let core_attrs = to_core_key_attrs(&key_attrs);
 
@@ -257,6 +254,19 @@ mod tests {
         auth::SrpSession::new("test-user-id", &[0u8; 16], &[0u8; 16]).unwrap()
     }
 
+    fn sample_key_attributes() -> KeyAttributes {
+        KeyAttributes {
+            kek_salt: String::new(),
+            encrypted_key: String::new(),
+            key_decryption_nonce: String::new(),
+            public_key: String::new(),
+            encrypted_secret_key: String::new(),
+            secret_key_decryption_nonce: String::new(),
+            mem_limit: None,
+            ops_limit: None,
+        }
+    }
+
     #[test]
     fn test_verify_srp_m2_rejects_missing_server_proof() {
         let session = sample_session();
@@ -269,6 +279,25 @@ mod tests {
         let session = sample_session();
         let err = verify_srp_m2(&session, "%%%").unwrap_err();
         assert!(err.to_string().starts_with("srp_m2: "));
+    }
+
+    #[test]
+    fn test_srp_decrypt_secrets_clears_state_on_bad_server_proof() {
+        srp_clear();
+        *SRP_STATE.lock().unwrap() = Some(SrpState {
+            session: sample_session(),
+            kek: crypto::SecretVec::new(vec![0u8; 32]),
+        });
+
+        let err = srp_decrypt_secrets(
+            String::new(),
+            sample_key_attributes(),
+            None,
+            Some("token".to_string()),
+        )
+        .unwrap_err();
+        assert_eq!(err.to_string(), "Missing server proof");
+        assert!(SRP_STATE.lock().unwrap().is_none());
     }
 }
 
