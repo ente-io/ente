@@ -44,12 +44,11 @@ interface FormattedDateOptions {
  * - Otherwise, the year is included, e.g., "Fri, 21 Feb 2025".
  */
 export const formattedDate = (date: Date, options?: FormattedDateOptions) =>
-    (
-        isSameYear(date)
-            ? _dateWithoutYearFormat
-            : options?.omitWeekdayWhenYearIncluded
-              ? _dateWithoutWeekdayFormat
-              : _dateFormat
+    (isSameYear(date)
+        ? _dateWithoutYearFormat
+        : options?.omitWeekdayWhenYearIncluded
+          ? _dateWithoutWeekdayFormat
+          : _dateFormat
     ).format(date);
 
 const isSameYear = (date: Date) =>
