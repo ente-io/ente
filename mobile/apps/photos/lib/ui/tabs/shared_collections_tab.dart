@@ -11,6 +11,7 @@ import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/events/memory_share_updated_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -30,6 +31,7 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/ui/social/widgets/feed_preview_widget.dart";
 import "package:photos/ui/tabs/section_title.dart";
+import "package:photos/ui/tabs/shared/all_memory_links_page.dart";
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/memory_link_item.dart";
@@ -54,6 +56,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
+  late StreamSubscription<MemoryShareUpdatedEvent> _memoryShareUpdatedEvent;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   final _debouncer = Debouncer(
@@ -104,6 +107,12 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     });
     _albumSortOrderChangeEvent =
         Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _memoryShareUpdatedEvent =
+        Bus.instance.on<MemoryShareUpdatedEvent>().listen((event) {
       if (mounted) {
         setState(() {});
       }
@@ -245,6 +254,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         (screenWidth - totalHorizontalPadding - horizontalPadding) /
             albumsCountInRow;
     const quickLinkTitleHeroTag = "quick_link_title";
+    const memoryLinkTitleHeroTag = "memory_link_title";
     final SectionTitle sharedWithYou =
         SectionTitle(title: AppLocalizations.of(context).sharedWithYou);
     final SectionTitle sharedByYou =
@@ -504,11 +514,33 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             memoryLinks.isNotEmpty
                 ? Column(
                     children: [
-                      const SectionOptions(
+                      SectionOptions(
+                        onTap: memoryLinks.length > maxMemoryLinks
+                            ? () {
+                                unawaited(
+                                  routeToPage(
+                                    context,
+                                    AllMemoryLinksPage(
+                                      titleHeroTag: memoryLinkTitleHeroTag,
+                                      memoryShares: memoryLinks,
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,
                         Hero(
-                          tag: "memory_links",
-                          child: SectionTitle(title: "Memory Links"),
+                          tag: memoryLinkTitleHeroTag,
+                          child: SectionTitle(
+                            title: AppLocalizations.of(context).memoryLinks,
+                          ),
                         ),
+                        trailingWidget: memoryLinks.length > maxMemoryLinks
+                            ? IconButtonWidget(
+                                icon: Icons.chevron_right,
+                                iconButtonType: IconButtonType.secondary,
+                                iconColor: colorTheme.blurStrokePressed,
+                              )
+                            : null,
                       ),
                       const SizedBox(height: 2),
                       ListView.separated(
@@ -540,7 +572,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               fileCount: share.fileCount,
                               previewUploadedFileID:
                                   share.previewUploadedFileID,
-                              shareUrl: share.url,
                             ),
                           );
                         },
@@ -593,6 +624,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _albumSortOrderChangeEvent.cancel();
+    _memoryShareUpdatedEvent.cancel();
     _loggedOutEvent.cancel();
     _appModeChangedEvent.cancel();
     _debouncer.cancelDebounceTimer();
