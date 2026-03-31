@@ -1,5 +1,6 @@
 //! HTTP client for communicating with the Ente API.
 
+use reqwest::Url;
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -22,6 +23,10 @@ pub enum Error {
     /// Failed to parse JSON response.
     #[error("JSON parse error: {0}")]
     Parse(String),
+
+    /// Invalid base URL or request path.
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(String),
 }
 
 impl From<reqwest::Error> for Error {
@@ -77,11 +82,44 @@ impl HttpClient {
 
     /// GET request, returns response body as text.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
-        let url = format!("{}{}", self.base_url, path);
-        let response = self.client.get(&url).send().await?;
+        let url = self.resolve_url(path)?;
+        let response = self.client.get(url).send().await?;
         let response = response.error_for_status()?;
         let text = response.text().await?;
         Ok(text)
+    }
+
+    fn resolve_url(&self, path: &str) -> Result<Url, Error> {
+        if !path.starts_with('/') || path.starts_with("//") {
+            return Err(Error::InvalidUrl(
+                "request paths must start with a single '/'".to_string(),
+            ));
+        }
+
+        let path_only = path
+            .split_once(['?', '#'])
+            .map_or(path, |(path_only, _)| path_only);
+        if path_only
+            .split('/')
+            .any(|segment| matches!(segment, "." | ".."))
+        {
+            return Err(Error::InvalidUrl(
+                "request paths must not contain dot segments".to_string(),
+            ));
+        }
+
+        let mut base = Url::parse(&self.base_url)
+            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
+
+        let base_path = base.path().trim_end_matches('/');
+        let resolved_path = if base_path.is_empty() || base_path == "/" {
+            path.to_string()
+        } else {
+            format!("{base_path}{path}")
+        };
+
+        base.set_path(&resolved_path);
+        Ok(base)
     }
 
     /// Ping the API, returns [PingResponse].
@@ -96,9 +134,16 @@ impl HttpClient {
 mod tests {
     use super::*;
 
+    fn test_client(base_url: &str) -> HttpClient {
+        HttpClient {
+            client: reqwest::Client::builder().no_proxy().build().unwrap(),
+            base_url: base_url.to_string(),
+        }
+    }
+
     #[test]
     fn test_client_creation() {
-        let client = HttpClient::new("https://api.ente.io");
+        let client = test_client("https://api.ente.io");
         assert_eq!(client.base_url, "https://api.ente.io");
     }
 
@@ -108,5 +153,40 @@ mod tests {
         let err: Result<PingResponse, Error> = serde_json::from_str(bad_json).map_err(|e| e.into());
         println!("{:?}", err);
         assert!(matches!(err, Err(Error::Parse(_))))
+    }
+
+    #[test]
+    fn test_resolve_url_uses_origin_path_join() {
+        let client = test_client("https://api.ente.io/v1");
+        let url = client.resolve_url("/ping").unwrap();
+        assert_eq!(url.as_str(), "https://api.ente.io/v1/ping");
+    }
+
+    #[test]
+    fn test_resolve_url_rejects_host_confusion_payload() {
+        let client = test_client("https://api.ente.io");
+        let err = client.resolve_url("@attacker.com").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_resolve_url_rejects_protocol_relative_path() {
+        let client = test_client("https://api.ente.io");
+        let err = client.resolve_url("//attacker.com").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_resolve_url_rejects_dot_segments() {
+        let client = test_client("https://api.ente.io/v1");
+        let err = client.resolve_url("/../admin").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_resolve_url_rejects_invalid_base_url() {
+        let client = test_client("not a url");
+        let err = client.resolve_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
     }
 }

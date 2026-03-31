@@ -3,6 +3,8 @@
 //! This module provides the main entry points that CLI/GUI applications should use
 //! for authentication flows. It wraps the lower-level crypto operations.
 
+use std::fmt;
+
 #[cfg(feature = "srp")]
 use crate::crypto::keys;
 use crate::crypto::{self, argon, kdf, sealed, secretbox};
@@ -17,7 +19,6 @@ use sha2::Sha256;
 use srp::{client::SrpClient as SrpClientInner, groups::G_4096};
 
 /// Credentials derived from password for SRP authentication.
-#[derive(Debug)]
 pub struct SrpCredentials {
     /// Key encryption key (32 bytes) - used to decrypt master key after auth.
     pub kek: Vec<u8>,
@@ -25,8 +26,16 @@ pub struct SrpCredentials {
     pub login_key: Vec<u8>,
 }
 
+impl fmt::Debug for SrpCredentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SrpCredentials")
+            .field("kek", &"[REDACTED]")
+            .field("login_key", &"[REDACTED]")
+            .finish()
+    }
+}
+
 /// Decrypted secrets after successful authentication.
-#[derive(Debug)]
 pub struct DecryptedSecrets {
     /// Master key for encrypting/decrypting data.
     pub master_key: Vec<u8>,
@@ -36,8 +45,17 @@ pub struct DecryptedSecrets {
     pub token: Vec<u8>,
 }
 
+impl fmt::Debug for DecryptedSecrets {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DecryptedSecrets")
+            .field("master_key", &"[REDACTED]")
+            .field("secret_key", &"[REDACTED]")
+            .field("token", &"[REDACTED]")
+            .finish()
+    }
+}
+
 /// A derived key-encryption-key and the parameters used to derive it.
-#[derive(Debug)]
 pub struct GeneratedKek {
     /// Derived KEK bytes.
     pub key: Vec<u8>,
@@ -49,9 +67,19 @@ pub struct GeneratedKek {
     pub ops_limit: u32,
 }
 
+impl fmt::Debug for GeneratedKek {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GeneratedKek")
+            .field("key", &"[REDACTED]")
+            .field("salt_len", &self.salt.len())
+            .field("mem_limit", &self.mem_limit)
+            .field("ops_limit", &self.ops_limit)
+            .finish()
+    }
+}
+
 /// Attributes needed to register or update SRP for a user.
 #[cfg(feature = "srp")]
-#[derive(Debug)]
 pub struct GeneratedSrpSetup {
     /// SRP salt bytes.
     pub srp_salt: Vec<u8>,
@@ -59,6 +87,17 @@ pub struct GeneratedSrpSetup {
     pub srp_verifier: Vec<u8>,
     /// Derived 16-byte login sub-key bytes.
     pub login_sub_key: Vec<u8>,
+}
+
+#[cfg(feature = "srp")]
+impl fmt::Debug for GeneratedSrpSetup {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GeneratedSrpSetup")
+            .field("srp_salt_len", &self.srp_salt.len())
+            .field("srp_verifier", &"[REDACTED]")
+            .field("login_sub_key", &"[REDACTED]")
+            .finish()
+    }
 }
 
 /// Derive SRP credentials from password.
@@ -110,16 +149,18 @@ pub fn derive_kek(
     argon::derive_key(password, &salt, mem_limit, ops_limit).map_err(AuthError::from)
 }
 
-/// Generate a KEK using the current sensitive web policy.
+/// Generate a KEK using the current adaptive sensitive client policy.
 pub fn generate_sensitive_kek(password: &str) -> Result<GeneratedKek> {
-    let derived = argon::derive_sensitive_key(password).map_err(|e| match e {
+    let mut derived = argon::derive_sensitive_key(password).map_err(|e| match e {
         crypto::CryptoError::InvalidKeyDerivationParams(_) => AuthError::Crypto(e),
         _ => AuthError::InsufficientMemory,
     })?;
+    let key = std::mem::take(&mut derived.key);
+    let salt = std::mem::take(&mut derived.salt);
 
     Ok(GeneratedKek {
-        key: derived.key,
-        salt: derived.salt,
+        key,
+        salt,
         mem_limit: derived.mem_limit,
         ops_limit: derived.ops_limit,
     })
@@ -127,10 +168,13 @@ pub fn generate_sensitive_kek(password: &str) -> Result<GeneratedKek> {
 
 /// Generate a KEK using the current interactive web policy.
 pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
-    let derived = argon::derive_interactive_key(password)?;
+    let mut derived = argon::derive_interactive_key(password)?;
+    let key = std::mem::take(&mut derived.key);
+    let salt = std::mem::take(&mut derived.salt);
+
     Ok(GeneratedKek {
-        key: derived.key,
-        salt: derived.salt,
+        key,
+        salt,
         mem_limit: derived.mem_limit,
         ops_limit: derived.ops_limit,
     })
@@ -230,14 +274,14 @@ pub(crate) fn start_srp_session(
     password: &str,
     srp_attrs: &SrpAttributes,
 ) -> Result<(SrpSession, Vec<u8>)> {
-    let creds = derive_srp_credentials(password, srp_attrs)?;
+    let mut creds = derive_srp_credentials(password, srp_attrs)?;
 
     let srp_salt = crypto::decode_b64(&srp_attrs.srp_salt)
         .map_err(|e| AuthError::Decode(format!("srp_salt: {}", e)))?;
 
     let session = SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &creds.login_key)?;
 
-    Ok((session, creds.kek))
+    Ok((session, std::mem::take(&mut creds.kek)))
 }
 
 #[cfg(test)]
@@ -343,6 +387,21 @@ mod tests {
         assert_eq!(generated.salt.len(), 16);
         assert!(generated.mem_limit > 0);
         assert!(generated.ops_limit > 0);
+    }
+
+    #[test]
+    fn test_generated_kek_debug_redacts_secret_material() {
+        let generated = GeneratedKek {
+            key: vec![1, 2, 3],
+            salt: vec![4, 5, 6],
+            mem_limit: 123,
+            ops_limit: 456,
+        };
+
+        let debug = format!("{generated:?}");
+        assert!(debug.contains("[REDACTED]"));
+        assert!(!debug.contains("[1, 2, 3]"));
+        assert!(debug.contains("salt_len"));
     }
 
     #[test]

@@ -6,6 +6,11 @@ use flutter_rust_bridge::frb;
 /// HTTP client errors.
 #[frb]
 pub enum HttpError {
+    /// Invalid base URL or request path.
+    InvalidUrl {
+        /// Error message.
+        message: String,
+    },
     /// Network error - connection failed, timeout, etc.
     Network {
         /// Error message.
@@ -28,6 +33,7 @@ pub enum HttpError {
 impl From<CoreError> for HttpError {
     fn from(e: CoreError) -> Self {
         match e {
+            CoreError::InvalidUrl(message) => HttpError::InvalidUrl { message },
             CoreError::Network(message) => HttpError::Network { message },
             CoreError::Http { status, message } => HttpError::Http { status, message },
             CoreError::Parse(message) => HttpError::Parse { message },

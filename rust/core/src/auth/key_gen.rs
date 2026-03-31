@@ -46,7 +46,7 @@ pub fn generate_keys_with_strength(
         encrypt_to_b64(&recovery_key, &master_key)?;
 
     // Derive key-encryption-key from password
-    let derived = match strength {
+    let mut derived = match strength {
         KeyDerivationStrength::Interactive => argon::derive_interactive_key(password)?,
         KeyDerivationStrength::Sensitive => argon::derive_sensitive_key(password)?,
     };
@@ -87,7 +87,7 @@ pub fn generate_keys_with_strength(
     Ok(KeyGenResult {
         key_attributes,
         private_key_attributes,
-        key_encryption_key: derived.key,
+        key_encryption_key: std::mem::take(&mut derived.key),
         login_key,
     })
 }

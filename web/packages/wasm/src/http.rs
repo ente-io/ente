@@ -35,6 +35,11 @@ impl HttpError {
 impl From<CoreError> for HttpError {
     fn from(e: CoreError) -> Self {
         match e {
+            CoreError::InvalidUrl(message) => HttpError {
+                code: "invalid_url".to_string(),
+                message,
+                status: None,
+            },
             CoreError::Network(message) => HttpError {
                 code: "network".to_string(),
                 message,
