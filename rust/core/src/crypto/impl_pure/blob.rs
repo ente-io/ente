@@ -132,9 +132,8 @@ pub fn decrypt_blob(blob: &EncryptedBlob, key: &[u8]) -> Result<Vec<u8>> {
 /// # Returns
 /// An [`EncryptedBlob`] containing the encrypted JSON.
 pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<EncryptedBlob> {
-    let json = serde_json::to_vec(value).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON serialization failed: {}", e))
-    })?;
+    let json = serde_json::to_vec(value)
+        .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
     encrypt(&json, key)
 }
 
@@ -148,9 +147,8 @@ pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Encryp
 /// The deserialized JSON value.
 pub fn decrypt_json<T: serde::de::DeserializeOwned>(blob: &EncryptedBlob, key: &[u8]) -> Result<T> {
     let plaintext = decrypt_blob(blob, key)?;
-    serde_json::from_slice(&plaintext).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON deserialization failed: {}", e))
-    })
+    serde_json::from_slice(&plaintext)
+        .map_err(|e| CryptoError::Json(format!("JSON deserialization failed: {}", e)))
 }
 
 #[cfg(test)]

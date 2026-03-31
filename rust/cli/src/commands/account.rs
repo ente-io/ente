@@ -13,7 +13,9 @@ use crate::{
 };
 use base64::Engine;
 use dialoguer::{Input, Password, Select};
+use ente_core::crypto::SecretVec;
 use std::{path::PathBuf, str::FromStr};
+use zeroize::Zeroizing;
 
 pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> Result<()> {
     match cmd.command {
@@ -259,7 +261,7 @@ async fn add_account(
 
     let email = prompt_email(email_arg)?;
     let interactive_password = password_arg.is_none();
-    let mut password = prompt_password(password_arg, "Enter your password")?;
+    let mut password = Zeroizing::new(prompt_password(password_arg, "Enter your password")?);
     let app = resolve_app(app_arg)?;
     let second_factor = parse_second_factor(second_factor.as_deref())?;
 
@@ -285,7 +287,7 @@ async fn add_account(
             Ok(authenticated) => break authenticated,
             Err(error) if interactive_password && is_retryable_password_error(&error) => {
                 println!("\nIncorrect password. Try again.");
-                password = prompt_password(None, "Re-enter your password")?;
+                password = Zeroizing::new(prompt_password(None, "Re-enter your password")?);
             }
             Err(error) => return Err(error),
         }
@@ -319,7 +321,7 @@ async fn create_account(
     println!("\n=== Create Ente Account ===\n");
 
     let email = prompt_email(email_arg)?;
-    let password = prompt_password(password_arg, "Choose a password")?;
+    let password = Zeroizing::new(prompt_password(password_arg, "Choose a password")?);
     let app = resolve_app(app_arg)?;
 
     if let Ok(Some(_)) = storage.accounts().get(&email, app) {
@@ -383,7 +385,7 @@ async fn create_account(
         let result = flow
             .setup_two_factor(SetupTwoFactorParams {
                 account_id: email.clone(),
-                master_key: two_factor_master_key,
+                master_key: SecretVec::new(two_factor_master_key),
                 key_attributes: Some(two_factor_key_attributes),
             })
             .await?;
@@ -423,7 +425,7 @@ async fn enable_two_factor(
     let result = flow
         .setup_two_factor(SetupTwoFactorParams {
             account_id: account.email.clone(),
-            master_key: secrets.master_key.clone(),
+            master_key: SecretVec::new(secrets.master_key.clone()),
             key_attributes: None,
         })
         .await?;

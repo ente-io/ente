@@ -117,7 +117,7 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
     }
 
     // Derive encryption key
-    let box_key = derive_box_key(shared_secret.as_bytes());
+    let mut box_key = derive_box_key(shared_secret.as_bytes());
 
     // Compute nonce
     let nonce = seal_nonce(ephemeral_public.as_bytes(), &recipient_pk_arr);
@@ -127,7 +127,10 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
     let cipher = XSalsa20Poly1305::new(GenericArray::from_slice(&box_key));
     let encrypted = cipher
         .encrypt(GenericArray::from_slice(&nonce), plaintext)
-        .map_err(|_| CryptoError::EncryptionFailed)?;
+        .map_err(|_| {
+            box_key.zeroize();
+            CryptoError::EncryptionFailed
+        })?;
 
     // Build output: ephemeral_pk || MAC || ciphertext
     let mut result = Vec::with_capacity(32 + encrypted.len());
@@ -136,6 +139,7 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
 
     // Clean up sensitive data
     ephemeral_secret_bytes.zeroize();
+    box_key.zeroize();
 
     Ok(result)
 }
@@ -178,10 +182,11 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
     let encrypted = &ciphertext[32..]; // MAC || ciphertext
 
     let ephemeral_pk = PublicKey::from(ephemeral_pk_bytes);
-    let recipient_sk_arr: [u8; 32] = recipient_sk
+    let mut recipient_sk_arr: [u8; 32] = recipient_sk
         .try_into()
         .map_err(|_| CryptoError::ArrayConversion)?;
     let recipient_sk_key = StaticSecret::from(recipient_sk_arr);
+    recipient_sk_arr.zeroize();
     let recipient_pk_arr: [u8; 32] = recipient_pk
         .try_into()
         .map_err(|_| CryptoError::ArrayConversion)?;
@@ -195,16 +200,21 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
     }
 
     // Derive encryption key
-    let box_key = derive_box_key(shared_secret.as_bytes());
+    let mut box_key = derive_box_key(shared_secret.as_bytes());
 
     // Compute nonce
     let nonce = seal_nonce(&ephemeral_pk_bytes, &recipient_pk_arr);
 
     // Decrypt (RustCrypto expects same format: MAC || ciphertext)
     let cipher = XSalsa20Poly1305::new(GenericArray::from_slice(&box_key));
-    cipher
+    let plaintext = cipher
         .decrypt(GenericArray::from_slice(&nonce), encrypted)
-        .map_err(|_| CryptoError::DecryptionFailed)
+        .map_err(|_| {
+            box_key.zeroize();
+            CryptoError::DecryptionFailed
+        })?;
+    box_key.zeroize();
+    Ok(plaintext)
 }
 
 #[cfg(test)]

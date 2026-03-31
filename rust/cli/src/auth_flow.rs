@@ -23,7 +23,9 @@ use ente_core::{
     },
     crypto::{self, SecretVec, secretbox},
 };
+use std::fmt;
 use uuid::Uuid;
+use zeroize::Zeroizing;
 
 const SRP_A_LEN: usize = 512; // 4096-bit group
 
@@ -67,27 +69,52 @@ pub trait AuthFlowUi {
     fn present_totp_secret(&mut self, secret_code: &str, qr_code: &str) -> Result<()>;
 }
 
-#[derive(Debug)]
 pub struct CreateAccountParams {
     pub email: String,
-    pub password: String,
+    pub password: Zeroizing<String>,
     pub source: Option<String>,
 }
 
-#[derive(Debug)]
-pub struct LoginParams {
-    pub email: String,
-    pub password: String,
+impl fmt::Debug for CreateAccountParams {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CreateAccountParams")
+            .field("email", &self.email)
+            .field("password", &"[REDACTED]")
+            .field("source", &self.source)
+            .finish()
+    }
 }
 
-#[derive(Debug)]
+pub struct LoginParams {
+    pub email: String,
+    pub password: Zeroizing<String>,
+}
+
+impl fmt::Debug for LoginParams {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LoginParams")
+            .field("email", &self.email)
+            .field("password", &"[REDACTED]")
+            .finish()
+    }
+}
+
 pub struct SetupTwoFactorParams {
     pub account_id: String,
-    pub master_key: Vec<u8>,
+    pub master_key: SecretVec,
     pub key_attributes: Option<KeyAttributes>,
 }
 
-#[derive(Debug)]
+impl fmt::Debug for SetupTwoFactorParams {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SetupTwoFactorParams")
+            .field("account_id", &self.account_id)
+            .field("master_key", &"[REDACTED]")
+            .field("key_attributes", &self.key_attributes)
+            .finish()
+    }
+}
+
 pub struct AuthenticatedAccount {
     pub user_id: i64,
     pub key_attributes: KeyAttributes,
@@ -95,11 +122,31 @@ pub struct AuthenticatedAccount {
     pub recovery_key: Option<String>,
 }
 
-#[derive(Debug)]
+impl fmt::Debug for AuthenticatedAccount {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AuthenticatedAccount")
+            .field("user_id", &self.user_id)
+            .field("key_attributes", &self.key_attributes)
+            .field("secrets", &self.secrets)
+            .field("recovery_key", &"[REDACTED]")
+            .finish()
+    }
+}
+
 pub struct SetupTwoFactorResult {
     pub secret_code: String,
     pub qr_code: String,
     pub recovery_key: String,
+}
+
+impl fmt::Debug for SetupTwoFactorResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SetupTwoFactorResult")
+            .field("secret_code", &"[REDACTED]")
+            .field("qr_code", &"[REDACTED]")
+            .field("recovery_key", &"[REDACTED]")
+            .finish()
+    }
 }
 
 pub struct AuthFlow<'a, U> {
@@ -191,7 +238,7 @@ where
         )?;
 
         let secrets = AccountSecrets {
-            token: decode_plain_token(&token)?,
+            token: decode_plain_token(&token)?.into_vec(),
             master_key: crypto::decode_b64(&key_gen_result.private_key_attributes.key)?,
             secret_key: crypto::decode_b64(&key_gen_result.private_key_attributes.secret_key)?,
             public_key: crypto::decode_b64(&key_attributes.public_key)?,
@@ -537,11 +584,12 @@ fn to_api_key_attributes(attributes: &CoreKeyAttributes) -> KeyAttributes {
     }
 }
 
-fn decode_plain_token(token: &str) -> Result<Vec<u8>> {
-    URL_SAFE
+fn decode_plain_token(token: &str) -> Result<SecretVec> {
+    let bytes = URL_SAFE
         .decode(token)
         .or_else(|_| STANDARD.decode(token))
-        .map_err(|e| Error::Crypto(format!("token: {e}")))
+        .map_err(|e| Error::Crypto(format!("token: {e}")))?;
+    Ok(SecretVec::new(bytes))
 }
 
 fn decrypt_auth_response(
@@ -556,7 +604,7 @@ fn decrypt_auth_response(
         Ok(DecryptedSecrets {
             master_key,
             secret_key,
-            token: SecretVec::new(decode_plain_token(token)?),
+            token: decode_plain_token(token)?,
         })
     } else {
         Err(Error::AuthenticationFailed("No token in response".into()))
@@ -843,7 +891,7 @@ mod tests {
         let result = flow
             .login(LoginParams {
                 email: "user@example.org".into(),
-                password: password.into(),
+                password: Zeroizing::new(password.into()),
             })
             .await
             .unwrap();
@@ -942,7 +990,7 @@ mod tests {
         let result = flow
             .login(LoginParams {
                 email: "user@example.org".into(),
-                password: password.into(),
+                password: Zeroizing::new(password.into()),
             })
             .await
             .unwrap();
@@ -1007,7 +1055,7 @@ mod tests {
         let result = flow
             .setup_two_factor(SetupTwoFactorParams {
                 account_id: "user@example.org".into(),
-                master_key,
+                master_key: SecretVec::new(master_key),
                 key_attributes: Some(key_attributes),
             })
             .await
@@ -1219,7 +1267,7 @@ mod tests {
         let result = flow
             .create_account(CreateAccountParams {
                 email: email.into(),
-                password: "correct horse battery staple".into(),
+                password: Zeroizing::new("correct horse battery staple".into()),
                 source: Some("testAccount".into()),
             })
             .await

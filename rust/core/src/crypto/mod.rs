@@ -82,7 +82,7 @@ pub use error::{CryptoError, Result};
 /// `SecretVec` zeroizes its contents on drop and requires an explicit
 /// [`SecretVec::into_vec`] when crossing out of the trusted Rust layer.
 #[repr(transparent)]
-#[derive(Clone, Default, Eq, PartialEq, Hash)]
+#[derive(Default, Eq, PartialEq, Hash)]
 pub struct SecretVec(Vec<u8>);
 
 impl SecretVec {

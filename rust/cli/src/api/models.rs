@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -73,7 +75,7 @@ pub struct KeyAttributes {
     pub recovery_key_decryption_nonce: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthResponse {
     pub id: i64,
@@ -88,6 +90,34 @@ pub struct AuthResponse {
     pub passkey_session_id: Option<String>,
     pub srp_m2: Option<String>,
     pub accounts_url: Option<String>,
+}
+
+impl fmt::Debug for AuthResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AuthResponse")
+            .field("id", &self.id)
+            .field("has_key_attributes", &self.key_attributes.is_some())
+            .field(
+                "encrypted_token",
+                &self.encrypted_token.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("token", &self.token.as_ref().map(|_| "[REDACTED]"))
+            .field(
+                "two_factor_session_id",
+                &self.two_factor_session_id.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field(
+                "two_factor_session_id_v2",
+                &self.two_factor_session_id_v2.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field(
+                "passkey_session_id",
+                &self.passkey_session_id.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("srp_m2", &self.srp_m2.as_ref().map(|_| "[REDACTED]"))
+            .field("accounts_url", &self.accounts_url)
+            .finish()
+    }
 }
 
 impl AuthResponse {
@@ -119,7 +149,7 @@ pub struct SendOtpRequest {
     pub purpose: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct VerifyEmailRequest {
     pub email: String,
     pub ott: String,
@@ -127,11 +157,30 @@ pub struct VerifyEmailRequest {
     pub source: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+impl fmt::Debug for VerifyEmailRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VerifyEmailRequest")
+            .field("email", &self.email)
+            .field("ott", &"[REDACTED]")
+            .field("source", &self.source)
+            .finish()
+    }
+}
+
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VerifyTotpRequest {
     pub session_id: String,
     pub code: String,
+}
+
+impl fmt::Debug for VerifyTotpRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VerifyTotpRequest")
+            .field("session_id", &"[REDACTED]")
+            .field("code", &"[REDACTED]")
+            .finish()
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -183,19 +232,38 @@ pub struct SessionValidityResponse {
     pub key_attributes: Option<KeyAttributes>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TwoFactorSecret {
     pub secret_code: String,
     pub qr_code: String,
 }
 
-#[derive(Debug, Serialize)]
+impl fmt::Debug for TwoFactorSecret {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TwoFactorSecret")
+            .field("secret_code", &"[REDACTED]")
+            .field("qr_code", &"[REDACTED]")
+            .finish()
+    }
+}
+
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EnableTwoFactorRequest {
     pub code: String,
     pub encrypted_two_factor_secret: String,
     pub two_factor_secret_decryption_nonce: String,
+}
+
+impl fmt::Debug for EnableTwoFactorRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EnableTwoFactorRequest")
+            .field("code", &"[REDACTED]")
+            .field("encrypted_two_factor_secret", &"[REDACTED]")
+            .field("two_factor_secret_decryption_nonce", &"[REDACTED]")
+            .finish()
+    }
 }
 
 // ========== User Models ==========

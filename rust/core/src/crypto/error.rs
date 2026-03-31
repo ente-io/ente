@@ -102,6 +102,10 @@ pub enum CryptoError {
     #[error("Hash computation failed")]
     HashFailed,
 
+    /// JSON serialization or deserialization failed.
+    #[error("JSON error: {0}")]
+    Json(String),
+
     /// Argon2 error.
     #[error("Argon2 error: {0:?}")]
     Argon2(argon2::Error),

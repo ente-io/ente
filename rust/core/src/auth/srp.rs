@@ -27,7 +27,7 @@ pub struct SrpSession {
     salt: Vec<u8>,
     a_private: SecretVec,
     a_public: Vec<u8>,
-    m1: Option<Vec<u8>>,
+    m1: Option<SecretVec>,
     k: Option<SecretVec>,
 }
 
@@ -126,7 +126,7 @@ impl SrpSession {
         k_hasher.update(&s_padded);
         let k = k_hasher.finalize().to_vec();
 
-        self.m1 = Some(m1.clone());
+        self.m1 = Some(SecretVec::new(m1.clone()));
         self.k = Some(SecretVec::new(k));
 
         // No longer needed after we have computed M1/K.
@@ -173,6 +173,9 @@ impl Drop for SrpSession {
     fn drop(&mut self) {
         self.login_key.zeroize();
         self.a_private.zeroize();
+        if let Some(m1) = &mut self.m1 {
+            m1.zeroize();
+        }
         if let Some(k) = &mut self.k {
             k.zeroize();
         }
@@ -285,11 +288,11 @@ mod tests {
         let expected_k = k_hasher.finalize().to_vec();
 
         assert_eq!(m1, expected_m1);
-        assert_eq!(session.m1.as_ref().unwrap(), &expected_m1);
         assert_eq!(
-            session.k.as_ref().unwrap().as_ref(),
-            expected_k.as_slice()
+            session.m1.as_ref().unwrap().as_ref(),
+            expected_m1.as_slice()
         );
+        assert_eq!(session.k.as_ref().unwrap().as_ref(), expected_k.as_slice());
 
         let mut m2_hasher = Sha256::new();
         m2_hasher.update(&a_padded);
