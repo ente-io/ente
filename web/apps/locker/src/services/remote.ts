@@ -1,10 +1,10 @@
 /**
  * @file Service layer for fetching, decrypting, and caching Locker data.
  *
- * Follows the mobile app's encryption-at-rest pattern: all data stored in
- * the browser's storage (sessionStorage / in-memory) remains encrypted.
- * Decryption happens only in-memory at read time and decrypted values are
- * never persisted.
+ * Follows the mobile app's encryption-at-rest pattern: all Locker metadata
+ * stored locally in the browser (IndexedDB plus the in-memory cache) remains
+ * encrypted. Decryption happens only in-memory at read time and decrypted
+ * values are never persisted.
  *
  * Key hierarchy (mirrors mobile):
  *   masterKey → collectionKey → fileKey → file metadata (pubMagicMetadata)
@@ -68,6 +68,8 @@ import {
     downloadLockerFile,
     fetchLockerData,
     fetchLockerTrash,
+    loadPersistedLockerState,
+    syncLockerState,
 } from "./remote-read";
 import { RemoteIDResponseSchema } from "./remote-types";
 import {
@@ -80,6 +82,8 @@ export {
     downloadLockerFile,
     fetchLockerData,
     fetchLockerTrash,
+    loadPersistedLockerState,
+    syncLockerState,
 };
 
 const utf8Decoder = new TextDecoder();

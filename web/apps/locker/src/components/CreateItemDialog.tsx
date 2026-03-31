@@ -105,8 +105,10 @@ interface CreateItemDialogProps {
     onEnsureCollections?: (
         names: string[],
     ) => Promise<Map<string, number> | Record<string, number>>;
+    onEnsureUploadLimitState?: () => Promise<
+        { userDetails: LockerUploadLimitState } | undefined
+    >;
     defaultCollectionID?: number | null;
-    isProductionEndpoint: boolean;
     initialItems?: LockerUploadCandidate[];
     editItem?: CreateItemDialogEditItem | null;
     userDetails?: LockerUploadLimitState;
@@ -122,8 +124,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     onUploadsFinished,
     onCreateCollection,
     onEnsureCollections,
+    onEnsureUploadLimitState,
     defaultCollectionID,
-    isProductionEndpoint,
     initialItems,
     editItem,
     userDetails,
@@ -178,8 +180,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         onUploadItemComplete,
         onUploadsFinished,
         onEnsureCollections,
+        onEnsureUploadLimitState,
         defaultCollectionID,
-        isProductionEndpoint,
         initialItems,
         editItem,
         userDetails,
