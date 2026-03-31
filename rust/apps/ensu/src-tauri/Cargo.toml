@@ -1,6 +1,6 @@
 [package]
 name = "ensu-tauri"
-version = "0.1.12"
+version = "0.1.14"
 description = "Ensu Desktop (Tauri)"
 edition = "2021"
 
