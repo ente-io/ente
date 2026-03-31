@@ -1,4 +1,4 @@
-import { downloadManager } from "@/gallery/services/download";
+import { downloadManager } from "@/public-album/download/services/download-manager";
 import { type EnteFile } from "ente-media/file";
 import {
     fileCreationTime,

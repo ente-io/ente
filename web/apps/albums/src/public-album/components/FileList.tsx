@@ -1,13 +1,13 @@
-import { thumbnailManager } from "@/gallery/services/thumbnail-manager";
+import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
 import {
     LoadingThumbnail,
     StaticThumbnail,
-} from "@/photos/components/PlaceholderThumbnails";
+} from "@/shared/ui/media/PlaceholderThumbnails";
 import {
     computeThumbnailGridLayoutParams,
     thumbnailGap,
     type ThumbnailGridLayoutParams,
-} from "@/photos/components/utils/thumbnail-grid-layout";
+} from "@/shared/utils/thumbnail-grid-layout";
 import { type SelectedState } from "@/public-album/utils/file";
 import {
     handleSelectCreator,

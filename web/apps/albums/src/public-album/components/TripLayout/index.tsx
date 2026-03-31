@@ -1,13 +1,13 @@
-import { useSaveGroupsActions } from "@/gallery/components/utils/save-groups";
-import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
-import { type PublicFeedItemClickInfo } from "@/gallery/components/viewer/PublicFeedSidebar";
+import { useSaveGroupsActions } from "@/shared/state/save-groups";
+import { type FileViewerInitialSidebar } from "@/public-album/viewer/components/FileViewer";
+import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
 import {
     LazyFileViewer,
     LazyPublicFeedSidebar,
     scheduleFileViewerPreload,
-} from "@/gallery/components/viewer/lazy";
-import { ActiveDownloadStatusNotifications } from "@/public-album/components/ActiveDownloadStatusNotifications";
-import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
+} from "@/public-album/viewer/lib/lazy";
+import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
+import { useJoinAlbum } from "@/public-album/access/hooks/useJoinAlbum";
 import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
@@ -153,7 +153,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     // Download all files functionality
     const downloadAllFiles = () => {
         if (!collection) return;
-        void import("@/gallery/services/save").then(
+        void import("@/public-album/download/services/save").then(
             ({ downloadAndSaveCollectionFiles }) =>
                 downloadAndSaveCollectionFiles(
                     collectionTitle,
