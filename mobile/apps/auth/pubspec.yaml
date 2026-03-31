@@ -7,25 +7,25 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
-  adaptive_theme: ^3.1.0
-  app_links: ^6.3.3
-  archive: ^4.0.7
-  auto_size_text: ^3.0.0
+  adaptive_theme: 3.7.0
+  app_links: 6.4.0
+  archive: 4.0.7
+  auto_size_text: 3.0.0
   backup_exclusion:
     path: ../../packages/backup_exclusion
-  base32: ^2.1.3
-  bip39: ^1.0.6
-  clipboard: ^0.1.3
-  collection: ^1.18.0
-  confetti: ^0.8.0
-  connectivity_plus: ^6.0.5
-  convert: ^3.1.1
-  device_info_plus: ^11.5.0
-  dio: ^5.8.0+1
-  dots_indicator: ^3.0.0
-  dotted_border: ^3.1.0
-  dropdown_button2: ^2.3.9
-  email_validator: ^3.0.0
+  base32: 2.1.3
+  bip39: 1.0.6
+  clipboard: 0.1.3
+  collection: 1.19.1
+  confetti: 0.8.0
+  connectivity_plus: 6.1.4
+  convert: 3.1.2
+  device_info_plus: 11.5.0
+  dio: 5.8.0+1
+  dots_indicator: 3.1.0
+  dotted_border: 3.1.0
+  dropdown_button2: 2.3.9
+  email_validator: 3.0.0
   ente_accounts:
     path: ../../packages/accounts
   ente_base:
@@ -54,36 +54,36 @@ dependencies:
     path: ../../packages/ui
   ente_utils:
     path: ../../packages/utils
-  event_bus: ^2.0.0
-  expandable: ^5.0.1
-  expansion_tile_card: ^3.0.0
-  ffi: ^2.1.0
-  figma_squircle: ^0.6.3
-  file_picker: ^10.3.2
-  file_saver: ^0.3.1
-  fixnum: ^1.1.0
+  event_bus: 2.0.1
+  expandable: 5.0.1
+  expansion_tile_card: 3.0.0
+  ffi: 2.1.4
+  figma_squircle: 0.6.3
+  file_picker: 10.3.2
+  file_saver: 0.3.1
+  fixnum: 1.1.1
   fk_user_agent: # no package updates on pub.dev
     git:
       url: https://github.com/flutter-fast-kit/fk_user_agent
       ref: 458046cd9a88924e5074d96ba45397219d53b230
   flutter:
     sdk: flutter
-  flutter_animate: ^4.1.0
-  flutter_context_menu: ^0.2.0
-  flutter_displaymode: ^0.6.0
-  flutter_email_sender: ^7.0.0
+  flutter_animate: 4.5.2
+  flutter_context_menu: 0.2.4
+  flutter_displaymode: 0.6.0
+  flutter_email_sender: 7.0.0
   # revert to pub.dev when merged
   # https://github.com/pichillilorenzo/flutter_inappwebview/pull/2548
-  flutter_inappwebview: ^6.1.4
-  flutter_launcher_icons: ^0.14.1
+  flutter_inappwebview: 6.1.5
+  flutter_launcher_icons: 0.14.4
   flutter_local_authentication: # linux fprintd fix is not published on pub.dev
     git:
       url: https://github.com/eaceto/flutter_local_authentication
       ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: 18.0.1
   flutter_localizations:
     sdk: flutter
-  flutter_native_splash: ^2.2.13
+  flutter_native_splash: 2.4.6
   # Do not upgrade this package unless this issue is resolved:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
   # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
@@ -91,74 +91,74 @@ dependencies:
   # Let's wait till the issue is resolved by the package maintainer.
   # If not resolved and we need to upgrade, write a migration script.
   flutter_secure_storage: 9.0.0
-  flutter_speed_dial: ^7.0.0
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_svg: ^2.0.16
-  fluttertoast: ^8.1.1
-  google_nav_bar: ^5.0.5 #supported
-  gradient_borders: ^1.0.0
-  http: ^1.1.0
-  hugeicons: ^1.1.0
-  image: ^4.5.4
-  intl: ^0.20.2
-  io: ^1.0.4
-  json_annotation: ^4.5.0
-  launcher_icon_switcher: ^0.0.2
-  local_auth: ^2.3.0
-  local_auth_android: ^1.0.37
-  local_auth_darwin: ^1.2.2
-  logging: ^1.0.1
-  modal_bottom_sheet: ^3.0.0
+  flutter_speed_dial: 7.0.0
+  flutter_staggered_grid_view: 0.7.0
+  flutter_svg: 2.2.0
+  fluttertoast: 8.2.12
+  google_nav_bar: 5.0.7 #supported
+  gradient_borders: 1.0.1
+  http: 1.4.0
+  hugeicons: 1.1.1
+  image: 4.5.4
+  intl: 0.20.2
+  io: 1.0.5
+  json_annotation: 4.9.0
+  launcher_icon_switcher: 0.0.2
+  local_auth: 2.3.0
+  local_auth_android: 1.0.49
+  local_auth_darwin: 1.5.0
+  logging: 1.3.0
+  modal_bottom_sheet: 3.0.0
   move_to_background: # no updates in git, replace package
     git:
       url: https://github.com/ente-io/move_to_background.git
-      ref: v2-only
-  native_dio_adapter: ^1.4.0
-  otp: ^3.1.1
-  package_info_plus: ^8.0.2
-  password_strength: ^0.2.0
-  path: ^1.8.3
-  path_provider: ^2.0.11
-  pinput: ^5.0.0
-  pointycastle: ^3.7.3
-  privacy_screen: ^0.0.6
-  protobuf: ^4.1.0
+      ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
+  native_dio_adapter: 1.4.0
+  otp: 3.1.4
+  package_info_plus: 8.3.0
+  password_strength: 0.2.0
+  path: 1.9.1
+  path_provider: 2.1.5
+  pinput: 5.0.1
+  pointycastle: 3.9.1
+  privacy_screen: 0.0.8
+  protobuf: 4.1.0
   qr_code_scanner: # no package updates on pub.dev
     git:
       url: https://github.com/juliuscanute/qr_code_scanner
       ref: a2d31633d4744f72ada87cfa85d221358ab082af
-  qr_flutter: ^4.1.0
-  saf_stream: any
-  saf_util: any
+  qr_flutter: 4.1.0
+  saf_stream: 0.12.3
+  saf_util: 0.11.0
   scoped_dir_access:
     path: ../../packages/scoped_dir_access
-  sentry: ^8.14.2
-  sentry_flutter: ^8.14.2
-  share_plus: ^11.0.0
-  shared_preferences: ^2.0.5
-  sqflite: ^2.4.2
-  sqflite_common_ffi: ^2.3.0+4
-  sqlite3: ^2.4.3
-  sqlite3_flutter_libs: ^0.5.24
-  steam_totp: ^0.0.1
-  step_progress_indicator: ^1.0.2
-  styled_text: ^8.1.0
-  tray_manager: ^0.5.0
-  tuple: ^2.0.0
-  url_launcher: ^6.3.1
-  url_launcher_ios: ^6.3.1
-  uuid: ^4.2.2
-  win32: ^5.1.1
-  window_manager: ^0.5.0
-  xdg_directories: ^1.0.4
+  sentry: 8.14.2
+  sentry_flutter: 8.14.2
+  share_plus: 11.0.0
+  shared_preferences: 2.5.3
+  sqflite: 2.4.2
+  sqflite_common_ffi: 2.3.6
+  sqlite3: 2.7.6
+  sqlite3_flutter_libs: 0.5.34
+  steam_totp: 0.0.2
+  step_progress_indicator: 1.0.2
+  styled_text: 8.1.0
+  tray_manager: 0.5.0
+  tuple: 2.0.2
+  url_launcher: 6.3.2
+  url_launcher_ios: 6.3.3
+  uuid: 4.5.1
+  win32: 5.13.0
+  window_manager: 0.5.0
+  xdg_directories: 1.1.0
 
 dev_dependencies:
-  build_runner: ^2.1.11
+  build_runner: 2.5.4
   flutter_test:
     sdk: flutter
-  json_serializable: ^6.2.0
-  lints: ^5.1.1
-  mocktail: ^1.0.3
+  json_serializable: 6.9.5
+  lints: 5.1.1
+  mocktail: 1.0.4
 
 # The following section is specific to Flutter.
 flutter:

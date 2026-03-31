@@ -1189,7 +1189,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: v2-only
+      ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
       resolved-ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
       url: "https://github.com/ente-io/move_to_background.git"
     source: git

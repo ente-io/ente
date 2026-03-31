@@ -9,15 +9,14 @@ dependencies:
   cast:
     git:
       url: https://github.com/guyluz11/flutter_cast.git
-      ref: multicast_version
-      commit: 1f39cd4
+      ref: 1f39cd4d6efa9363e77b2439f0317bae0c92dda1
   ente_cast:
     path: ../ente_cast
   flutter:
     sdk: flutter
-  stack_trace:
+  stack_trace: 1.12.1
 
 dev_dependencies:
-  flutter_lints:
+  flutter_lints: 3.0.2
 
 flutter:

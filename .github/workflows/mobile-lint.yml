@@ -30,6 +30,9 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Verify frozen mobile pubspecs
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
+
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
               with:
@@ -53,7 +56,7 @@ jobs:
                       mobile/apps/photos/rust/target
                   key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
 
-            - run: flutter pub get
+            - run: flutter pub get --enforce-lockfile
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen

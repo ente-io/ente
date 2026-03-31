@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for new privileged workflow triggers
+      - name: Check workflow security guardrails
         shell: bash
         run: |
           extract_sensitive_triggers() {
@@ -63,6 +63,27 @@ jobs:
             '
           }
 
+          extract_unpinned_third_party_actions() {
+            local revision=$1
+            local file=$2
+
+            if ! git cat-file -e "${revision}:${file}" 2>/dev/null; then
+              return 0
+            fi
+
+            git show "${revision}:${file}" | ruby -e '
+              FULL_SHA = /\A[0-9a-f]{40}\z/
+
+              refs = STDIN.read.scan(/^\s*uses:\s*([A-Za-z0-9._-]+\/[A-Za-z0-9._-]+)@([^\s#]+)/)
+              refs.each do |action, ref|
+                next if action.start_with?("actions/")
+                next if ref.match?(FULL_SHA)
+
+                puts "#{action}@#{ref}"
+              end
+            ' | sort -u
+          }
+
           mapfile -t modified_workflows < <(
             git diff --name-only --diff-filter=AMR "origin/${{ github.base_ref }}...HEAD" |
             grep -E '^\.github/workflows/.*\.ya?ml$' || true
@@ -84,6 +105,7 @@ jobs:
             "workflow_run"
           )
           violations=()
+          unpinned_violations=()
 
           for file in "${modified_workflows[@]}"; do
             if ! current_triggers=$(extract_sensitive_triggers HEAD "$file"); then
@@ -106,6 +128,27 @@ jobs:
                 fi
               fi
             done
+
+            if ! current_unpinned=$(extract_unpinned_third_party_actions HEAD "$file"); then
+              echo "❌ ERROR: Failed to parse action refs in HEAD:$file"
+              exit 1
+            fi
+
+            if ! base_unpinned=$(extract_unpinned_third_party_actions "origin/${{ github.base_ref }}" "$file"); then
+              echo "❌ ERROR: Failed to parse action refs in origin/${{ github.base_ref }}:$file"
+              exit 1
+            fi
+
+            while IFS= read -r action_ref; do
+              [ -z "$action_ref" ] && continue
+
+              if grep -Fxq "$action_ref" <<< "$base_unpinned"; then
+                echo "✓ $file: ${action_ref} already existed unpinned (allowed for now)"
+              else
+                echo "✗ $file: NEW unpinned third-party action ${action_ref} detected!"
+                unpinned_violations+=("$file:${action_ref}")
+              fi
+            done <<< "$current_unpinned"
           done
 
           if [ "${#violations[@]}" -gt 0 ]; then
@@ -123,4 +166,13 @@ jobs:
             exit 1
           fi
 
-          echo "✓ No new privileged workflow triggers detected"
+          if [ "${#unpinned_violations[@]}" -gt 0 ]; then
+            echo ""
+            echo "❌ ERROR: New unpinned third-party workflow actions detected:"
+            printf ' - %s\n' "${unpinned_violations[@]}"
+            echo ""
+            echo "Pin third-party actions to a full commit SHA before merging."
+            exit 1
+          fi
+
+          echo "✓ No new privileged triggers or unpinned third-party actions detected"

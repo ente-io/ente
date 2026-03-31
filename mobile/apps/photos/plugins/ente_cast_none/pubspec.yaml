@@ -10,9 +10,9 @@ dependencies:
     path: ../ente_cast
   flutter:
     sdk: flutter
-  stack_trace:
+  stack_trace: 1.12.1
 
 dev_dependencies:
-  flutter_lints:
+  flutter_lints: 4.0.0
 
 flutter:
