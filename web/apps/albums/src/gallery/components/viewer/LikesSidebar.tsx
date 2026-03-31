@@ -15,7 +15,6 @@ import { downloadManager } from "@/gallery/services/download";
 import { getAvatarColor } from "@/gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import { getStoredAnonIdentity } from "@/albums/services/public-reaction";
-import type { CollectionSummaries } from "@/photos/services/collection-summary";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -120,14 +119,6 @@ export interface LikesSidebarProps extends ModalVisibilityProps {
      */
     activeCollectionID?: number;
     /**
-     * A mapping from file IDs to the IDs of collections they belong to.
-     */
-    fileNormalCollectionIDs?: Map<number, number[]>;
-    /**
-     * Collection summaries indexed by their IDs.
-     */
-    collectionSummaries?: CollectionSummaries;
-    /**
      * The current user's ID.
      */
     currentUserID?: number;
@@ -153,8 +144,6 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     onClose,
     file,
     activeCollectionID,
-    fileNormalCollectionIDs,
-    collectionSummaries,
     currentUserID,
     prefetchedReactions,
     prefetchedUserIDToEmail,
@@ -182,39 +171,23 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     const hasCollectionContext =
         activeCollectionID !== undefined && activeCollectionID !== 0;
 
-    // Get shared collections the file belongs to
-    const fileCollectionIDs = useMemo(() => {
-        if (!file) return [];
-        const allCollectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
-
-        // If no collection IDs from fileNormalCollectionIDs (e.g., public album),
-        // use the file's collection ID directly
-        if (allCollectionIDs.length === 0) {
-            return [file.collectionID];
-        }
-
-        // Filter to only include shared collections
-        return allCollectionIDs.filter((id) =>
-            collectionSummaries?.get(id)?.attributes.has("shared"),
-        );
-    }, [file, fileNormalCollectionIDs, collectionSummaries]);
-
-    // Build collection info list with like counts and cover files
+    // Build collection info for the current public album.
     const collectionsInfo = useMemo((): CollectionInfo[] => {
-        return fileCollectionIDs.map((collectionID) => {
-            const summary = collectionSummaries?.get(collectionID);
-            return {
-                id: collectionID,
-                name: summary?.name ?? `Album ${collectionID}`,
+        if (!file) return [];
+
+        return [
+            {
+                id: file.collectionID,
+                name: "Album",
                 likeCount:
                     reactionsByCollection
-                        .get(collectionID)
+                        .get(file.collectionID)
                         ?.filter((r) => r.reactionType === "green_heart")
                         .length ?? 0,
-                coverFile: summary?.coverFile,
-            };
-        });
-    }, [fileCollectionIDs, collectionSummaries, reactionsByCollection]);
+                coverFile: file,
+            },
+        ];
+    }, [file, reactionsByCollection]);
 
     // Collections sorted by like count (descending) for dropdown
     const sortedCollectionsInfo = useMemo(() => {

@@ -67,7 +67,6 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/photos/components/gallery/ListHeader";
-import { PseudoCollectionID } from "@/photos/services/collection-summary";
 import { usePhotosAppContext } from "@/photos/types/context";
 import { t } from "i18next";
 import dynamic from "next/dynamic";
@@ -128,6 +127,8 @@ const loadShareService = () => import("@/gallery/services/share");
 
 const loadJoinPublicAlbumRedirect = () =>
     import("@/public-album/services/join-public-album-redirect");
+
+const publicAlbumAllFilesCollectionID = 0;
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -742,7 +743,7 @@ export default function PublicCollectionGallery() {
                         enableSelect={downloadEnabled}
                         selected={selected}
                         setSelected={setSelected}
-                        activeCollectionID={PseudoCollectionID.all}
+                        activeCollectionID={publicAlbumAllFilesCollectionID}
                         onAddSaveGroup={onAddSaveGroup}
                         publicAlbumsCredentials={credentials.current}
                         collectionKey={collectionKey.current}

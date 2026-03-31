@@ -28,7 +28,6 @@ import {
     deletePublicReaction,
     getStoredAnonIdentity,
 } from "@/albums/services/public-reaction";
-import type { CollectionSummaries } from "@/photos/services/collection-summary";
 import i18n, { t } from "i18next";
 import React, {
     useCallback,
@@ -367,14 +366,6 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      */
     activeCollectionID?: number;
     /**
-     * A mapping from file IDs to the IDs of collections they belong to.
-     */
-    fileNormalCollectionIDs?: Map<number, number[]>;
-    /**
-     * Collection summaries indexed by their IDs.
-     */
-    collectionSummaries?: CollectionSummaries;
-    /**
      * The current user's ID.
      */
     currentUserID?: number;
@@ -457,8 +448,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     onClose,
     file,
     activeCollectionID,
-    fileNormalCollectionIDs,
-    collectionSummaries,
     currentUserID,
     prefetchedComments,
     prefetchedReactions,
@@ -643,56 +632,22 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const hasCollectionContext =
         activeCollectionID !== undefined && activeCollectionID !== 0;
 
-    // Get all collections the file belongs to
-    const fileCollectionIDs = useMemo(() => {
-        if (!file) return [];
-        return fileNormalCollectionIDs?.get(file.id) ?? [];
-    }, [file, fileNormalCollectionIDs]);
-
-    const isPublicAlbum = true;
-
-    // Build collection info list with comment counts and cover files (shared albums only)
+    // Build collection info for the current public album.
     const collectionsInfo = useMemo((): CollectionInfo[] => {
-        // For public albums, use the file's collection directly
-        if (isPublicAlbum && file) {
-            return [
-                {
-                    id: file.collectionID,
-                    name: "Album",
-                    commentCount:
-                        commentsByCollection
-                            .get(file.collectionID)
-                            ?.filter((c) => !c.isDeleted).length ?? 0,
-                    coverFile: file,
-                },
-            ];
-        }
+        if (!file) return [];
 
-        return fileCollectionIDs
-            .filter((collectionID) =>
-                collectionSummaries
-                    ?.get(collectionID)
-                    ?.attributes.has("shared"),
-            )
-            .map((collectionID) => {
-                const summary = collectionSummaries?.get(collectionID);
-                return {
-                    id: collectionID,
-                    name: summary?.name ?? `Album ${collectionID}`,
-                    commentCount:
-                        commentsByCollection
-                            .get(collectionID)
-                            ?.filter((c) => !c.isDeleted).length ?? 0,
-                    coverFile: summary?.coverFile,
-                };
-            });
-    }, [
-        isPublicAlbum,
-        file,
-        fileCollectionIDs,
-        collectionSummaries,
-        commentsByCollection,
-    ]);
+        return [
+            {
+                id: file.collectionID,
+                name: "Album",
+                commentCount:
+                    commentsByCollection
+                        .get(file.collectionID)
+                        ?.filter((c) => !c.isDeleted).length ?? 0,
+                coverFile: file,
+            },
+        ];
+    }, [file, commentsByCollection]);
 
     // Collections sorted by comment count (descending) for dropdown
     const sortedCollectionsInfo = useMemo(() => {
@@ -719,7 +674,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     ]);
 
     // Check if the current user can delete a given comment.
-    // User can delete if: they authored the comment, OR they are owner/admin of the collection.
+    // In public albums, only the original author can delete their comment.
     const canDeleteComment = useCallback(
         (comment: Comment): boolean => {
             // Comment author can always delete their own comment
@@ -739,25 +694,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     return true;
                 }
             }
-
-            // Check if user is owner or admin of the selected collection
-            const collectionID = selectedCollectionInfo?.id;
-            if (!collectionID || !collectionSummaries) {
-                return false;
-            }
-
-            const summary = collectionSummaries.get(collectionID);
-            if (!summary) {
-                return false;
-            }
-
-            // User is owner (not sharedIncoming) or admin (sharedIncomingAdmin)
-            return (
-                !summary.attributes.has("sharedIncoming") ||
-                summary.attributes.has("sharedIncomingAdmin")
-            );
+            return false;
         },
-        [currentUserID, selectedCollectionInfo, collectionSummaries],
+        [currentUserID, selectedCollectionInfo],
     );
 
     // Load comments and reactions from prefetched data.
@@ -792,23 +731,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         return currentSelection;
                     }
 
-                    // Initial selection: find collection with most comments
-                    // Only consider shared collections (non-shared ones won't appear in the UI)
-                    // For public albums, skip the shared check since there's no collectionSummaries
+                    // Initial selection: find collection with most comments.
                     let maxCount = -1;
                     let bestCollectionID: number | undefined;
                     for (const [
                         collectionID,
                         collectionComments,
                     ] of prefetchedComments) {
-                        // Skip non-shared collections (except for public albums)
-                        if (!isPublicAlbum) {
-                            const isShared = collectionSummaries
-                                ?.get(collectionID)
-                                ?.attributes.has("shared");
-                            if (!isShared) continue;
-                        }
-
                         const count = collectionComments.filter(
                             (c) => !c.isDeleted,
                         ).length;
@@ -840,8 +769,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         prefetchedReactions,
         hasCollectionContext,
         activeCollectionID,
-        collectionSummaries,
-        isPublicAlbum,
     ]);
 
     // Load comments when the sidebar opens
@@ -859,23 +786,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             selectedCollectionID === undefined &&
             commentsByCollection.size > 0
         ) {
-            // Find the collection with the most comments
-            // Only consider shared collections (non-shared ones won't appear in the UI)
-            // For public albums, skip the shared check since there's no collectionSummaries
+            // Find the collection with the most comments.
             let maxCount = -1;
             let bestCollectionID: number | undefined;
             for (const [
                 collectionID,
                 collectionComments,
             ] of commentsByCollection) {
-                // Skip non-shared collections (except for public albums)
-                if (!isPublicAlbum) {
-                    const isShared = collectionSummaries
-                        ?.get(collectionID)
-                        ?.attributes.has("shared");
-                    if (!isShared) continue;
-                }
-
                 const count = collectionComments.filter(
                     (c) => !c.isDeleted,
                 ).length;
@@ -893,8 +810,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         hasCollectionContext,
         selectedCollectionID,
         commentsByCollection,
-        collectionSummaries,
-        isPublicAlbum,
     ]);
 
     // Update displayed comments when selected collection changes (gallery view)
@@ -906,15 +821,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     }, [hasCollectionContext, selectedCollectionID, commentsByCollection]);
 
-    // Update hasAnonIdentity when collection changes (for public albums)
+    // Update hasAnonIdentity when collection changes.
     useEffect(() => {
-        if (isPublicAlbum && selectedCollectionInfo) {
+        if (selectedCollectionInfo) {
             const storedIdentity = getStoredAnonIdentity(
                 selectedCollectionInfo.id,
             );
             setHasAnonIdentity(!!storedIdentity);
         }
-    }, [isPublicAlbum, selectedCollectionInfo]);
+    }, [selectedCollectionInfo]);
 
     // Fetch thumbnails for each collection's cover file
     useEffect(() => {
@@ -971,10 +886,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             return;
         }
 
-        // Get stored anon identity for public albums
-        const storedIdentity = isPublicAlbum
-            ? getStoredAnonIdentity(selectedCollectionInfo.id)
-            : undefined;
+        const storedIdentity = getStoredAnonIdentity(selectedCollectionInfo.id);
 
         // Find comment reactions that are likes from the current user (or anon user)
         const newLikedComments = new Map<string, string>();
@@ -996,7 +908,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         selectedCollectionInfo,
         reactionsByCollection,
         currentUserID,
-        isPublicAlbum,
     ]);
 
     const handleSend = async () => {
@@ -1189,9 +1100,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     };
 
-    // Check if user needs to set up identity before commenting (public album without identity)
+    // Check if user needs to set up identity before commenting.
     const needsIdentityToComment =
-        isPublicAlbum && selectedCollectionInfo && !hasAnonIdentity;
+        !!selectedCollectionInfo && !hasAnonIdentity;
 
     const handleReply = (commentToReply: Comment) => {
         setReplyingTo(commentToReply);
