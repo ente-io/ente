@@ -1,5 +1,8 @@
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
-import { isSavedUserTokenMismatch } from "ente-accounts-rs/services/accounts-db";
+import {
+    isSavedUserTokenMismatch,
+    savedLocalUser,
+} from "ente-accounts-rs/services/accounts-db";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
@@ -23,47 +26,26 @@ import {
 import { loadPersistedLockerState, syncLockerState } from "services/remote";
 import type { LockerCollection, LockerItem } from "types";
 
-interface LockerBonus {
-    type?: string;
+interface LockerUserProfileResponse {
+    email?: string;
 }
 
-interface LockerUserDetailsResponse {
-    email?: string;
-    usage?: number;
-    fileCount?: number;
-    lockerFamilyUsage?: { familyFileCount?: number };
-    familyData?: { members?: unknown[] };
-    bonusData?: { storageBonuses?: LockerBonus[] };
-    subscription?: {
-        storage?: number;
-        productID?: string;
-        expiryTime?: number;
-    };
+interface LockerUsageResponse {
+    isPaid?: boolean;
+    isFamily?: boolean;
+    usedFileCount?: number;
+    fileLimit?: number;
+    remainingFileCount?: number;
+    usedStorage?: number;
+    storageLimit?: number;
+    remainingStorage?: number;
+    userFileCount?: number;
+    userStorage?: number;
 }
 
 export interface UserDetails extends LockerUploadLimitState {
     email: string;
 }
-
-const hasPaidLockerAccess = (json: {
-    subscription?: { productID?: string; expiryTime?: number };
-    familyData?: { members?: unknown[] };
-    bonusData?: { storageBonuses?: LockerBonus[] };
-}) => {
-    const hasActivePaidSubscription =
-        json.subscription?.productID !== "free" &&
-        (json.subscription?.expiryTime ?? 0) > Date.now() * 1000;
-    const isPartOfFamily = (json.familyData?.members?.length ?? 0) > 0;
-    const hasPaidAddon =
-        json.bonusData?.storageBonuses?.some(
-            (bonus) =>
-                bonus.type !== undefined &&
-                bonus.type !== "SIGN_UP" &&
-                bonus.type !== "REFERRAL",
-        ) ?? false;
-
-    return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
-};
 
 interface UseLockerDataProps {
     router: NextRouter;
@@ -74,6 +56,11 @@ interface UseLockerDataProps {
 interface UserDetailsRefreshTrigger {
     collectionsSinceTime: number;
     trashSinceTime: number;
+}
+
+interface LockerUsageSnapshot {
+    isProductionEndpoint: boolean;
+    userDetails: LockerUploadLimitState;
 }
 
 interface UploadLimitStateSnapshot {
@@ -127,31 +114,77 @@ export const useLockerData = ({
         isProductionEndpointRef.current = isProductionEndpoint;
     }, [isProductionEndpoint]);
 
-    const loadUserDetails = useCallback(async (): Promise<LoadUserDetailsResult> => {
-        const requestID = ++latestUserDetailsRequestRef.current;
-        try {
-            const [res, isProduction] = await Promise.all([
+    const loadLockerUsage = useCallback(
+        async (
+            headers?: Awaited<ReturnType<typeof authenticatedRequestHeaders>>,
+        ) => {
+            const requestHeaders = headers ?? (await authenticatedRequestHeaders());
+            const [lockerUsageRes, isProduction] = await Promise.all([
                 fetch(
-                    await apiURL("/users/details/v2", { memoryCount: true }),
-                    { headers: await authenticatedRequestHeaders() },
+                    await apiURL("/users/locker-usage"),
+                    { headers: requestHeaders },
                 ),
                 isEnteProductionEndpoint(),
             ]);
-            ensureOk(res);
-            const json = (await res.json()) as LockerUserDetailsResponse;
+            ensureOk(lockerUsageRes);
+            const lockerUsage =
+                (await lockerUsageRes.json()) as LockerUsageResponse;
+
+            const isFamily = !!lockerUsage.isFamily;
+            return {
+                isProductionEndpoint: isProduction,
+                userDetails: {
+                    usage: lockerUsage.usedStorage ?? 0,
+                    storageLimit: lockerUsage.storageLimit ?? 0,
+                    fileCount: isFamily
+                        ? (lockerUsage.userFileCount ?? 0)
+                        : (lockerUsage.usedFileCount ?? 0),
+                    lockerFileLimit:
+                        lockerUsage.fileLimit ??
+                        (lockerUsage.isPaid
+                            ? LOCKER_FILE_LIMIT_PAID
+                            : LOCKER_FILE_LIMIT_FREE),
+                    isPartOfFamily: isFamily,
+                    lockerFamilyFileCount: isFamily
+                        ? (lockerUsage.usedFileCount ?? 0)
+                        : undefined,
+                },
+            } satisfies LockerUsageSnapshot;
+        },
+        [],
+    );
+
+    const loadUserEmail = useCallback(
+        async (
+            headers?: Awaited<ReturnType<typeof authenticatedRequestHeaders>>,
+        ) => {
+            const requestHeaders = headers ?? (await authenticatedRequestHeaders());
+            const userProfileRes = await fetch(
+                await apiURL("/users/details/v2", { memoryCount: false }),
+                { headers: requestHeaders },
+            );
+            ensureOk(userProfileRes);
+            const userProfile =
+                (await userProfileRes.json()) as LockerUserProfileResponse;
+            return userProfile.email ?? savedLocalUser()?.email ?? "";
+        },
+        [],
+    );
+
+    const loadUserDetails = useCallback(async (): Promise<LoadUserDetailsResult> => {
+        const requestID = ++latestUserDetailsRequestRef.current;
+        try {
+            const headers = await authenticatedRequestHeaders();
+            const [lockerUsage, email] = await Promise.all([
+                loadLockerUsage(headers),
+                loadUserEmail(headers),
+            ]);
             const nextUserDetails = {
-                email: json.email ?? "",
-                usage: json.usage ?? 0,
-                storageLimit: json.subscription?.storage ?? 0,
-                fileCount: json.fileCount ?? 0,
-                lockerFileLimit: hasPaidLockerAccess(json)
-                    ? LOCKER_FILE_LIMIT_PAID
-                    : LOCKER_FILE_LIMIT_FREE,
-                isPartOfFamily: (json.familyData?.members?.length ?? 0) > 0,
-                lockerFamilyFileCount: json.lockerFamilyUsage?.familyFileCount,
+                ...lockerUsage.userDetails,
+                email,
             };
             const snapshot = {
-                isProductionEndpoint: isProduction,
+                isProductionEndpoint: lockerUsage.isProductionEndpoint,
                 userDetails: nextUserDetails,
             } satisfies UploadLimitStateSnapshot;
 
@@ -162,14 +195,14 @@ export const useLockerData = ({
                 return { applied: false, snapshot };
             }
 
-            setIsProductionEndpoint(isProduction);
+            setIsProductionEndpoint(lockerUsage.isProductionEndpoint);
             setUserDetails(nextUserDetails);
             return { applied: true, snapshot };
         } catch (error) {
             log.error("Failed to fetch user details", error);
             return { applied: false };
         }
-    }, []);
+    }, [loadLockerUsage, loadUserEmail]);
 
     const refreshUserDetailsForSyncState = useCallback(
         async (trigger: UserDetailsRefreshTrigger) => {
@@ -215,12 +248,20 @@ export const useLockerData = ({
             } satisfies UploadLimitStateSnapshot;
         }
 
-        const result = await loadUserDetails();
-        if (result.snapshot) {
-            return result.snapshot;
+        try {
+            const lockerUsage = await loadLockerUsage();
+            return {
+                isProductionEndpoint: lockerUsage.isProductionEndpoint,
+                userDetails: {
+                    ...lockerUsage.userDetails,
+                    email: savedLocalUser()?.email ?? "",
+                },
+            } satisfies UploadLimitStateSnapshot;
+        } catch (error) {
+            log.error("Failed to fetch locker upload limit state", error);
+            return undefined;
         }
-        return undefined;
-    }, [loadUserDetails]);
+    }, [loadLockerUsage]);
 
     const fetchAndStoreLockerData = useCallback(
         async (key: string) => {
