@@ -281,7 +281,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         imagePath: _localFilePath!,
         autoDetect: true,
         backgroundColor: Colors.transparent,
-        showUnselectedBoundaries: true,
+        showUnselectedBoundaries: false,
         overlayOnly: true,
         showProcessingOverlay: false,
         showScanAnimation: false,
