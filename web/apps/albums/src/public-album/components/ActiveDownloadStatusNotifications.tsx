@@ -6,7 +6,8 @@ const LazyDownloadStatusNotifications =
     dynamic<DownloadStatusNotificationsProps>(
         () =>
             import("./DownloadStatusNotifications").then(
-                ({ DownloadStatusNotifications }) => DownloadStatusNotifications,
+                ({ DownloadStatusNotifications }) =>
+                    DownloadStatusNotifications,
             ),
         { ssr: false },
     );

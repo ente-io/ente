@@ -1,6 +1,29 @@
 // TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
 /* eslint-disable react-hooks/exhaustive-deps */
+import { UploaderNameInput } from "@/albums/components/UploaderNameInput";
+import {
+    savedPublicCollectionUploaderName,
+    savePublicCollectionUploaderName,
+} from "@/albums/services/public-albums-fdb";
+import { useFileInput } from "@/gallery/components/utils/use-file-input";
+import { uploadPathPrefix, type UploadPhase } from "@/gallery/services/upload";
+import type { ParsedMetadataJSON } from "@/gallery/services/upload/metadata-json";
+import {
+    sessionExpiredErrorMessage,
+    storageLimitExceededErrorMessage,
+    subscriptionExpiredErrorMessage,
+} from "@/gallery/services/upload/upload-service";
+import { usePhotosAppContext } from "@/photos/types/context";
+import type {
+    InProgressUpload,
+    SegregatedFinishedUploads,
+    UploadCounter,
+    UploadFileNames,
+    UploadItemWithCollection,
+} from "@/public-album/services/upload-manager";
+import { uploadManager } from "@/public-album/services/upload-manager";
+import { hasReliableCanvasReadback } from "@/public-album/utils/canvas-integrity";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
@@ -25,37 +48,11 @@ import { useBaseContext } from "ente-base/context";
 import { basename } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
-import {
-    uploadPathPrefix,
-    type UploadPhase,
-} from "@/gallery/services/upload";
-import type { ParsedMetadataJSON } from "@/gallery/services/upload/metadata-json";
-import {
-    sessionExpiredErrorMessage,
-    storageLimitExceededErrorMessage,
-    subscriptionExpiredErrorMessage,
-} from "@/gallery/services/upload/upload-service";
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { UploaderNameInput } from "@/albums/components/UploaderNameInput";
-import {
-    savedPublicCollectionUploaderName,
-    savePublicCollectionUploaderName,
-} from "@/albums/services/public-albums-fdb";
-import { usePhotosAppContext } from "@/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import type {
-    InProgressUpload,
-    SegregatedFinishedUploads,
-    UploadCounter,
-    UploadFileNames,
-    UploadItemWithCollection,
-} from "@/public-album/services/upload-manager";
-import { uploadManager } from "@/public-album/services/upload-manager";
-import { hasReliableCanvasReadback } from "@/public-album/utils/canvas-integrity";
 import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 import { UploadProgress } from "./UploadProgress";
 

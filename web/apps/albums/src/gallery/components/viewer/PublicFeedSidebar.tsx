@@ -1,3 +1,12 @@
+import {
+    getPublicAlbumFeed,
+    getPublicAnonProfiles,
+    getPublicParticipantsMaskedEmails,
+    type PublicFeedComment,
+    type PublicFeedReaction,
+} from "@/albums/services/public-reaction";
+import { downloadManager } from "@/gallery/services/download";
+import { getAvatarColor } from "@/gallery/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
@@ -14,17 +23,8 @@ import { useInterval } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { getAvatarColor } from "@/gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import {
-    getPublicAlbumFeed,
-    getPublicAnonProfiles,
-    getPublicParticipantsMaskedEmails,
-    type PublicFeedComment,
-    type PublicFeedReaction,
-} from "@/albums/services/public-reaction";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 

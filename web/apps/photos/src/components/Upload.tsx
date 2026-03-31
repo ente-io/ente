@@ -590,7 +590,9 @@ export const Upload: React.FC<UploadProps> = ({
                 collectionID: collection.id,
             }),
         );
-        await waitInQueueAndUploadFiles(uploadItemsWithCollection, [collection]);
+        await waitInQueueAndUploadFiles(uploadItemsWithCollection, [
+            collection,
+        ]);
         uploadItemsAndPaths.current = [];
     };
 

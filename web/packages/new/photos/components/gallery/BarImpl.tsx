@@ -11,10 +11,8 @@ import { Ellipsized2LineTypography } from "ente-base/components/Typography";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
-import {
-    PeopleSortOptions,
-    type PeopleSortBy,
-} from "ente-new/photos/components/PeopleSortOptions";
+import type { PeopleSortBy } from "ente-new/photos/components/people-sort";
+import { PeopleSortOptions } from "ente-new/photos/components/PeopleSortOptions";
 import {
     BarItemTile,
     ItemCard,

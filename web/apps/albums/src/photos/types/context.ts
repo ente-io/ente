@@ -1,5 +1,5 @@
-import type { NotificationAttributes } from "../components/Notification";
 import { createContext, useContext } from "react";
+import type { NotificationAttributes } from "../components/Notification";
 
 /**
  * The type of the React context available to all pages in the photos app.

@@ -1,6 +1,15 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
+import { extractExif } from "@/gallery/services/exif";
+import {
+    determineVideoDuration,
+    extractVideoMetadata,
+} from "@/gallery/services/ffmpeg";
+import {
+    detectFileTypeInfoFromChunk,
+    isFileTypeNotSupportedError,
+} from "@/gallery/utils/detect-type";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { streamEncryptionChunkSize } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -13,15 +22,6 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import { extractExif } from "@/gallery/services/exif";
-import {
-    determineVideoDuration,
-    extractVideoMetadata,
-} from "@/gallery/services/ffmpeg";
-import {
-    detectFileTypeInfoFromChunk,
-    isFileTypeNotSupportedError,
-} from "@/gallery/utils/detect-type";
 import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
     fileFileName,
@@ -63,10 +63,7 @@ import {
     type MultipartCompletedPart,
     type PostEnteFileRequest,
 } from "./remote";
-import {
-    fallbackThumbnail,
-    generateThumbnailWeb,
-} from "./thumbnail";
+import { fallbackThumbnail, generateThumbnailWeb } from "./thumbnail";
 
 const bitFlipErrorPrefix = "BitFlipDetected";
 
@@ -145,11 +142,7 @@ class UploadService {
         if (!credentials) {
             throw new Error("Missing public album credentials");
         }
-        if (
-            !metadata ||
-            metadata.contentLength < 0 ||
-            !metadata.contentMd5
-        ) {
+        if (!metadata || metadata.contentLength < 0 || !metadata.contentMd5) {
             throw new Error("Public uploads require content metadata");
         }
         try {
@@ -180,7 +173,9 @@ class UploadService {
             metadata.partLength <= 0 ||
             metadata.partMd5s.length == 0
         ) {
-            throw new Error("Public multipart uploads require content metadata");
+            throw new Error(
+                "Public multipart uploads require content metadata",
+            );
         }
         return fetchPublicAlbumsMultipartUploadURLsWithMetadata(
             metadata,
@@ -1293,11 +1288,7 @@ const augmentWithThumbnail = async (
         hasStaticThumbnail = true;
     }
 
-    return {
-        fileStreamOrData: fileStream,
-        thumbnail,
-        hasStaticThumbnail,
-    };
+    return { fileStreamOrData: fileStream, thumbnail, hasStaticThumbnail };
 };
 
 const encryptFile = async (
@@ -1664,12 +1655,10 @@ const uploadStreamUsingMultipart = async (
         throw new Error("Multipart part length missing");
     }
 
-    const multipartUploadURLs =
-        await uploadService.fetchMultipartUploadURLs(uploadPartCount, {
-            contentLength: fileSize,
-            partLength,
-            partMd5s,
-        });
+    const multipartUploadURLs = await uploadService.fetchMultipartUploadURLs(
+        uploadPartCount,
+        { contentLength: fileSize, partLength, partMd5s },
+    );
 
     const percentPerPart = maxPercent / uploadPartCount;
     const completedParts: MultipartCompletedPart[] = [];

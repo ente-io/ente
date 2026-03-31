@@ -28,7 +28,7 @@ export const PublicAccessPageContents: React.FC<React.PropsWithChildren> = ({
                 (theme) =>
                     theme.applyStyles("dark", {
                         bgcolor: "background.default",
-                }),
+                    }),
             ]}
         >
             <PublicAccessPagePaper>{children}</PublicAccessPagePaper>

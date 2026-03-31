@@ -1,6 +1,6 @@
 import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import { useEffect, useState } from "react";
 
 import { MapEvents } from "./MapEvents";
 import { createIcon, getMapCenter } from "./mapHelpers";

@@ -1,3 +1,13 @@
+import {
+    addPublicReaction,
+    createAnonIdentity,
+    deletePublicReaction,
+    getPublicAnonProfiles,
+    getPublicParticipantsMaskedEmails,
+    getPublicSocialDiff,
+    getStoredAnonIdentity,
+} from "@/albums/services/public-reaction";
+import { FileInfo, type FileInfoExif } from "@/gallery/components/FileInfo";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
@@ -18,28 +28,10 @@ import { useBaseContext } from "ente-base/context";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { formattedListJoin, ut } from "ente-base/i18n";
 import log from "ente-base/log";
-import {
-    FileInfo,
-    type FileInfoExif,
-} from "@/gallery/components/FileInfo";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
-import {
-    addPublicReaction,
-    createAnonIdentity,
-    deletePublicReaction,
-    getPublicAnonProfiles,
-    getPublicParticipantsMaskedEmails,
-    getPublicSocialDiff,
-    getStoredAnonIdentity,
-} from "@/albums/services/public-reaction";
 import { t } from "i18next";
-import React, {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AddNameModal } from "./AddNameModal";
 import { CommentsSidebar } from "./CommentsSidebar";
 import { fileInfoExifForFile, type ItemData } from "./data-source";
@@ -675,10 +667,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const showSocialButtons = true;
 
     // Delegate callback to check if social buttons should be shown for a file.
-    const shouldShowSocialButtons_ = useCallback(
-        (): boolean => false,
-        [],
-    );
+    const shouldShowSocialButtons_ = useCallback((): boolean => false, []);
 
     const getFiles = useCallback(() => files, [files]);
 
@@ -1497,7 +1486,6 @@ const Shortcut: React.FC<ShortcutProps> = ({ action, shortcut }) => (
         </Typography>
     </tr>
 );
-
 
 /**
  * Return a promise that resolves with a "image/png" blob derived from the given

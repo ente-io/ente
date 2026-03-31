@@ -1,14 +1,4 @@
-import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
-import { Overlay } from "ente-base/components/containers";
-import log from "ente-base/log";
 import { thumbnailManager } from "@/gallery/services/thumbnail-manager";
-import type { EnteFile } from "ente-media/file";
-import { fileDurationString } from "ente-media/file-metadata";
-import { FileType } from "ente-media/file-type";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -18,6 +8,21 @@ import {
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "@/photos/components/utils/thumbnail-grid-layout";
+import { type SelectedState } from "@/public-album/utils/file";
+import {
+    handleSelectCreator,
+    handleSelectCreatorMulti,
+} from "@/public-album/utils/photo-frame";
+import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
+import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
+import { Overlay } from "ente-base/components/containers";
+import log from "ente-base/log";
+import type { EnteFile } from "ente-media/file";
+import { fileDurationString } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
@@ -34,11 +39,6 @@ import {
     areEqual,
     type ListChildComponentProps,
 } from "react-window";
-import { type SelectedState } from "@/public-album/utils/file";
-import {
-    handleSelectCreator,
-    handleSelectCreatorMulti,
-} from "@/public-album/utils/photo-frame";
 
 /**
  * A component with an explicit height suitable for being plugged in as the
@@ -323,7 +323,10 @@ export const FileList: React.FC<FileListProps> = ({
 
         let pendingSplits = new Array<FileListAnnotatedFile[]>();
         for (const split of splitByDate(annotatedFiles)) {
-            const filledColumns = pendingSplits.reduce((a, s) => a + s.length, 0);
+            const filledColumns = pendingSplits.reduce(
+                (a, s) => a + s.length,
+                0,
+            );
             const incomingColumns = split.length;
 
             // Check if the files in this split can be added to same row.
@@ -797,22 +800,19 @@ export const FileList: React.FC<FileListProps> = ({
     ]);
 
     const handleMasonryScroll: React.UIEventHandler<HTMLDivElement> =
-        useCallback(
-            (event) => {
-                const scrollOffset = event.currentTarget.scrollTop;
-                setShowBackToTop(scrollOffset > 500);
-                setMasonryScrollTop(scrollOffset);
-                setMasonryIsScrolling(true);
-                if (masonryScrollIdleTimeoutRef.current) {
-                    clearTimeout(masonryScrollIdleTimeoutRef.current);
-                }
-                masonryScrollIdleTimeoutRef.current = setTimeout(() => {
-                    setMasonryIsScrolling(false);
-                    masonryScrollIdleTimeoutRef.current = undefined;
-                }, masonryScrollIdleMs);
-            },
-            [],
-        );
+        useCallback((event) => {
+            const scrollOffset = event.currentTarget.scrollTop;
+            setShowBackToTop(scrollOffset > 500);
+            setMasonryScrollTop(scrollOffset);
+            setMasonryIsScrolling(true);
+            if (masonryScrollIdleTimeoutRef.current) {
+                clearTimeout(masonryScrollIdleTimeoutRef.current);
+            }
+            masonryScrollIdleTimeoutRef.current = setTimeout(() => {
+                setMasonryIsScrolling(false);
+                masonryScrollIdleTimeoutRef.current = undefined;
+            }, masonryScrollIdleMs);
+        }, []);
 
     useEffect(
         () => () => {
@@ -903,11 +903,7 @@ export const FileList: React.FC<FileListProps> = ({
             <Box sx={{ position: "relative", width, height }}>
                 <Box
                     ref={outerRef}
-                    sx={{
-                        width: "100%",
-                        height: "100%",
-                        overflowY: "auto",
-                    }}
+                    sx={{ width: "100%", height: "100%", overflowY: "auto" }}
                     onScroll={handleMasonryScroll}
                 >
                     {header && (

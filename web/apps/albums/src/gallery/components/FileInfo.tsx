@@ -1,3 +1,6 @@
+import { CopyButton } from "@/gallery/components/FileInfoComponents";
+import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
+import { formattedByteSize } from "@/gallery/utils/units";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
@@ -25,9 +28,6 @@ import {
 } from "ente-base/components/utils/modal";
 import { formattedDate, formattedTime } from "ente-base/i18n-date";
 import type { Location } from "ente-base/types";
-import { CopyButton } from "@/gallery/components/FileInfoComponents";
-import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
-import { formattedByteSize } from "@/gallery/utils/units";
 import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
@@ -67,7 +67,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const { show: showRawExif, props: rawExifVisibilityProps } =
         useModalVisibility();
 
-    const caption = file.pubMagicMetadata?.data.caption ?? exif?.parsed?.description;
+    const caption =
+        file.pubMagicMetadata?.data.caption ?? exif?.parsed?.description;
     const location = fileLocation(file) ?? exif?.parsed?.location;
     const uploaderName = file.pubMagicMetadata?.data.uploaderName;
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
@@ -83,7 +84,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 {caption ? (
                     <Box sx={{ px: 1 }}>
                         <Typography
-                            sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                            sx={{
+                                whiteSpace: "pre-wrap",
+                                wordBreak: "break-word",
+                            }}
                         >
                             {caption}
                         </Typography>
@@ -202,9 +206,7 @@ const FileInfoSidebar = styled(
         />
     ),
 )(({ theme }) => ({
-    "& .MuiDrawer-paper": {
-        overflowX: "hidden",
-    },
+    "& .MuiDrawer-paper": { overflowX: "hidden" },
     ...theme.applyStyles("light", {
         ".MuiBackdrop-root": {
             backgroundColor: theme.vars.palette.backdrop.faint,

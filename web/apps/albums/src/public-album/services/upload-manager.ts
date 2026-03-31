@@ -1,11 +1,6 @@
 // TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
-import { createComlinkCryptoWorker } from "ente-base/crypto";
-import { type CryptoWorker } from "ente-base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
-import log from "ente-base/log";
-import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import { savedPublicCollectionFiles } from "@/albums/services/public-albums-fdb";
 import {
     shouldDisableCFUploadProxy,
     type ClusteredUploadItem,
@@ -27,11 +22,16 @@ import UploadService, {
     type PotentialLivePhotoAsset,
     type UploadAsset,
 } from "@/gallery/services/upload/upload-service";
+import { createComlinkCryptoWorker } from "ente-base/crypto";
+import { type CryptoWorker } from "ente-base/crypto/worker";
+import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
-import { savedPublicCollectionFiles } from "@/albums/services/public-albums-fdb";
 import { wait } from "ente-utils/promise";
 
 export type FileID = number;

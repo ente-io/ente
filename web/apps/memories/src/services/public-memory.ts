@@ -1,9 +1,7 @@
 import { decryptBoxBytes } from "ente-base/crypto";
 import { ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import {
-    authenticatedPublicMemoryRequestHeaders,
-} from "ente-base/public-memory";
+import { authenticatedPublicMemoryRequestHeaders } from "ente-base/public-memory";
 import {
     decryptRemoteFile,
     RemoteEnteFile,

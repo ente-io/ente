@@ -174,7 +174,8 @@ export const playableVideoURL = async (
     const isPlayable = await isPlaybackPossible(videoObjectURL);
 
     const shouldConvert =
-        !isPlayable && videoBlob.size < 100 * 1024 * 1024 /* 100 MB, arbitrary */;
+        !isPlayable &&
+        videoBlob.size < 100 * 1024 * 1024; /* 100 MB, arbitrary */
 
     if (shouldConvert) {
         try {

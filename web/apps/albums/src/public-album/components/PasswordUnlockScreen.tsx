@@ -1,13 +1,13 @@
+import {
+    PublicAccessPageContents,
+    PublicAccessPageTitle,
+} from "@/public-album/components/PublicAccessPage";
 import { Stack, Typography } from "@mui/material";
 import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { t } from "i18next";
-import {
-    PublicAccessPageContents,
-    PublicAccessPageTitle,
-} from "@/public-album/components/PublicAccessPage";
 
 export interface PasswordUnlockScreenProps {
     onSubmit: SingleInputFormProps["onSubmit"];

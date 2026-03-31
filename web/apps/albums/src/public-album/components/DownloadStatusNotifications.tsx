@@ -1,4 +1,10 @@
 import {
+    isSaveComplete,
+    isSaveCompleteWithErrors,
+    type SaveGroup,
+} from "@/gallery/components/utils/save-groups";
+import { Notification } from "@/photos/components/Notification";
+import {
     Download01Icon,
     Loading03Icon,
     Tick02Icon,
@@ -15,12 +21,6 @@ import {
     Typography,
 } from "@mui/material";
 import { useBaseContext } from "ente-base/context";
-import {
-    isSaveComplete,
-    isSaveCompleteWithErrors,
-    type SaveGroup,
-} from "@/gallery/components/utils/save-groups";
-import { Notification } from "@/photos/components/Notification";
 import { t } from "i18next";
 import { useState } from "react";
 

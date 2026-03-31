@@ -1,12 +1,9 @@
 /** @file Dealing with the JSON metadata sidecar files */
 
+import type { UploadItem, UploadPathPrefix } from "@/gallery/services/upload";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Location } from "ente-base/types";
-import type {
-    UploadItem,
-    UploadPathPrefix,
-} from "@/gallery/services/upload";
 
 /**
  * The data we read from the JSON metadata sidecar files.
@@ -192,7 +189,8 @@ export const tryParseTakeoutMetadataJSON = async (
     }
 };
 
-const uploadItemText = async (uploadItem: UploadItem) => await uploadItem.text();
+const uploadItemText = async (uploadItem: UploadItem) =>
+    await uploadItem.text();
 
 const parseMetadataJSONText = (text: string) => {
     const metadataJSON_ = JSON.parse(text) as unknown;

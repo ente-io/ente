@@ -1,7 +1,7 @@
+import { joinPublicAlbumViaRedirect } from "@/public-album/services/join-public-album-redirect";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
 import type { RefObject } from "react";
-import { joinPublicAlbumViaRedirect } from "@/public-album/services/join-public-album-redirect";
 
 export interface UseJoinAlbumProps {
     /** Collection to join */

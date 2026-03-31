@@ -1,3 +1,9 @@
+import type { AddSaveGroup } from "@/gallery/components/utils/save-groups";
+import { FileViewer } from "@/gallery/components/viewer/FileViewer";
+import { createPSRegisterElementIconHTML } from "@/gallery/components/viewer/icons";
+import { downloadManager } from "@/gallery/services/download";
+import { LazyNotification } from "@/public-album/components/lazy-ui";
+import { getEnteURL } from "@/public-album/utils/public-album";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
@@ -22,17 +28,11 @@ import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { useBaseContext } from "ente-base/context";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import { LazyNotification } from "@/public-album/components/lazy-ui";
-import type { AddSaveGroup } from "@/gallery/components/utils/save-groups";
-import { FileViewer } from "@/gallery/components/viewer/FileViewer";
-import { createPSRegisterElementIconHTML } from "@/gallery/components/viewer/icons";
-import { downloadManager } from "@/gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getEnteURL } from "@/public-album/utils/public-album";
 
 export interface PublicAlbumSingleFileViewerProps {
     file: EnteFile;

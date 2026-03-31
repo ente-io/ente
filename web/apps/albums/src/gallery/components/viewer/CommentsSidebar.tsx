@@ -1,3 +1,15 @@
+import {
+    addPublicComment,
+    deletePublicComment,
+} from "@/albums/services/public-comment";
+import {
+    addPublicCommentReaction,
+    createAnonIdentity,
+    deletePublicReaction,
+    getStoredAnonIdentity,
+} from "@/albums/services/public-reaction";
+import { downloadManager } from "@/gallery/services/download";
+import { getAvatarColor } from "@/gallery/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
@@ -15,19 +27,7 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { getAvatarColor } from "@/gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
-import {
-    addPublicComment,
-    deletePublicComment,
-} from "@/albums/services/public-comment";
-import {
-    addPublicCommentReaction,
-    createAnonIdentity,
-    deletePublicReaction,
-    getStoredAnonIdentity,
-} from "@/albums/services/public-reaction";
 import i18n, { t } from "i18next";
 import React, {
     useCallback,
@@ -903,12 +903,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             }
         }
         setLikedComments(newLikedComments);
-    }, [
-        open,
-        selectedCollectionInfo,
-        reactionsByCollection,
-        currentUserID,
-    ]);
+    }, [open, selectedCollectionInfo, reactionsByCollection, currentUserID]);
 
     const handleSend = async () => {
         if (!commentText.trim() || !file || !selectedCollectionInfo) return;
@@ -1101,8 +1096,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     };
 
     // Check if user needs to set up identity before commenting.
-    const needsIdentityToComment =
-        !!selectedCollectionInfo && !hasAnonIdentity;
+    const needsIdentityToComment = !!selectedCollectionInfo && !hasAnonIdentity;
 
     const handleReply = (commentToReply: Comment) => {
         setReplyingTo(commentToReply);
@@ -1253,7 +1247,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             case "delete":
                 try {
                     if (!publicAlbumsCredentials) {
-                        log.error("Missing credentials for public comment delete");
+                        log.error(
+                            "Missing credentials for public comment delete",
+                        );
                         return;
                     }
 
@@ -1268,7 +1264,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             storedIdentity,
                         );
                     } else {
-                        log.error("No stored identity for public comment delete");
+                        log.error(
+                            "No stored identity for public comment delete",
+                        );
                         return;
                     }
 

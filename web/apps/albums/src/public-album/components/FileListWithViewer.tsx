@@ -1,24 +1,19 @@
-import { styled } from "@mui/material";
-import { isSameDay } from "ente-base/date";
-import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "@/gallery/components/utils/save-groups";
 import {
-    type FileViewerProps,
     type FileViewerInitialSidebar,
+    type FileViewerProps,
 } from "@/gallery/components/viewer/FileViewer";
 import {
     LazyFileViewer,
     scheduleFileViewerPreload,
 } from "@/gallery/components/viewer/lazy";
+import { styled } from "@mui/material";
+import { isSameDay } from "ente-base/date";
+import { formattedDate } from "ente-base/i18n-date";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { t } from "i18next";
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     FileList,

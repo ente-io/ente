@@ -49,9 +49,7 @@ export const scheduleFileViewerPreload = () => {
                 : undefined;
 
         if (requestIdleCallback) {
-            idleCallbackID = requestIdleCallback(warmViewer, {
-                timeout: 1500,
-            });
+            idleCallbackID = requestIdleCallback(warmViewer, { timeout: 1500 });
         } else {
             idleCallbackID = window.setTimeout(warmViewer, 0);
         }

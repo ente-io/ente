@@ -17,13 +17,13 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import { detectFileTypeInfoFromChunk } from "../utils/detect-type";
+import { playableVideoURL, renderableImageBlob } from "./convert";
 import {
     getPublicAlbumsCredentials,
     requirePublicAlbumsCredentials,
     setPublicAlbumsCredentials,
 } from "./public-albums-credentials";
-import { detectFileTypeInfoFromChunk } from "../utils/detect-type";
-import { playableVideoURL, renderableImageBlob } from "./convert";
 
 /**
  * URL(s) for the original image or video, alongwith with potential conversions

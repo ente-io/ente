@@ -137,8 +137,9 @@ const parseFFMetadataDate = (s: string | undefined) => {
     return d;
 };
 
-export const determineVideoDuration = async (uploadItem: File): Promise<number> =>
-    determineVideoDurationWeb(uploadItem);
+export const determineVideoDuration = async (
+    uploadItem: File,
+): Promise<number> => determineVideoDurationWeb(uploadItem);
 
 export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
     const command = [

@@ -1,4 +1,3 @@
-import log from "ente-base/log";
 import type { FileInfoExif } from "@/gallery/components/FileInfo";
 import { downloadManager } from "@/gallery/services/download";
 import { extractRawExif, parseExif } from "@/gallery/services/exif";
@@ -6,6 +5,7 @@ import {
     hlsPlaylistDataForFile,
     type HLSPlaylistDataForFile,
 } from "@/gallery/services/video";
+import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";

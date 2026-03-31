@@ -1,11 +1,14 @@
-import "@fontsource-variable/inter";
-import { CssBaseline } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemedLoadingBar } from "@/photos/components/ThemedLoadingBar";
+import { useLoadingBar } from "@/photos/components/utils/use-loading-bar";
+import { PhotosAppContext } from "@/photos/types/context";
 import {
     LazyAttributedMiniDialog,
     LazyNotification,
 } from "@/public-album/components/lazy-ui";
 import { useNotification } from "@/public-album/hooks/useNotification";
+import "@fontsource-variable/inter";
+import { CssBaseline } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHeadAlbums } from "ente-base/components/Head";
 import { LoadingIndicator } from "ente-base/components/loaders";
@@ -13,9 +16,6 @@ import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import { useSetupI18n } from "ente-base/components/utils/hooks-app";
 import { photosTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
-import { ThemedLoadingBar } from "@/photos/components/ThemedLoadingBar";
-import { useLoadingBar } from "@/photos/components/utils/use-loading-bar";
-import { PhotosAppContext } from "@/photos/types/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useCallback, useMemo } from "react";
@@ -40,11 +40,7 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
         [logout, showMiniDialog],
     );
     const appContext = useMemo(
-        () => ({
-            showLoadingBar,
-            hideLoadingBar,
-            showNotification,
-        }),
+        () => ({ showLoadingBar, hideLoadingBar, showNotification }),
         [showLoadingBar, hideLoadingBar, showNotification],
     );
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
@@ -58,7 +54,9 @@ const App: React.FC<AlbumsAppProps> = ({ Component, pageProps }) => {
             {miniDialogProps.open && (
                 <LazyAttributedMiniDialog {...miniDialogProps} />
             )}
-            {notificationProps.open && <LazyNotification {...notificationProps} />}
+            {notificationProps.open && (
+                <LazyNotification {...notificationProps} />
+            )}
 
             <BaseContext value={baseContext}>
                 <PhotosAppContext value={appContext}>

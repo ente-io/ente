@@ -17,7 +17,10 @@ import { decryptThumbnailBlobBytes } from "./thumbnail-crypto";
 
 class ThumbnailManager {
     private thumbnailCache: BlobCache | null | undefined;
-    private thumbnailURLPromises = new Map<number, Promise<string | undefined>>();
+    private thumbnailURLPromises = new Map<
+        number,
+        Promise<string | undefined>
+    >();
 
     get publicAlbumsCredentials() {
         return getPublicAlbumsCredentials();

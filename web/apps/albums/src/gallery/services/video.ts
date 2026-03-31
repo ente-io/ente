@@ -1,10 +1,10 @@
 import { decryptBlobBytes } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { ensurePrecondition } from "ente-utils/ensure";
-import log from "ente-base/log";
 import { z } from "zod";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 

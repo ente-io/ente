@@ -1,5 +1,8 @@
 // TODO: Audit this file
-import type { SelectedState, SetSelectedState } from "@/public-album/utils/file";
+import type {
+    SelectedState,
+    SetSelectedState,
+} from "@/public-album/utils/file";
 
 export const handleSelectCreator =
     (
@@ -48,10 +51,7 @@ export const handleSelectCreatorMulti =
                 }
             }
 
-            return {
-                ...newSelected,
-                count: newCount,
-            };
+            return { ...newSelected, count: newCount };
         });
     };
 

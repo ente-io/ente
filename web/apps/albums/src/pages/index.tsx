@@ -1,5 +1,35 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import type { FullScreenDropZoneProps } from "@/gallery/components/FullScreenDropZone";
+import {
+    useSaveGroupsActions,
+    type AddSaveGroup,
+} from "@/gallery/components/utils/save-groups";
+import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
+import { LazyPublicFeedSidebar } from "@/gallery/components/viewer/lazy";
+import { type PublicFeedItemClickInfo } from "@/gallery/components/viewer/PublicFeedSidebar";
+import { setPublicAlbumsCredentials } from "@/gallery/services/public-albums-credentials";
+import { sortFiles } from "@/gallery/utils/file";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "@/photos/components/gallery/ListHeader";
+import { usePhotosAppContext } from "@/photos/types/context";
+import { ActiveDownloadStatusNotifications } from "@/public-album/components/ActiveDownloadStatusNotifications";
+import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
+import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
+import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
+import { LazyNotification } from "@/public-album/components/lazy-ui";
+import type { PasswordUnlockScreenProps } from "@/public-album/components/PasswordUnlockScreen";
+import type { PublicAlbumSingleFileViewerProps } from "@/public-album/components/PublicAlbumSingleFileViewer";
+import type { TripLayoutProps } from "@/public-album/components/TripLayout";
+import type { UploadProps } from "@/public-album/components/Upload";
+import {
+    getSelectedFiles,
+    type SelectedState,
+} from "@/public-album/utils/file";
+import { getEnteURL } from "@/public-album/utils/public-album";
+import { quickLinkDateRangeForFiles } from "@/public-album/utils/quick-link";
 import {
     Download01Icon,
     ImageAdd02Icon,
@@ -18,13 +48,6 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { ActiveDownloadStatusNotifications } from "@/public-album/components/ActiveDownloadStatusNotifications";
-import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
-import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
-import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
-import type { PublicAlbumSingleFileViewerProps } from "@/public-album/components/PublicAlbumSingleFileViewer";
-import type { TripLayoutProps } from "@/public-album/components/TripLayout";
-import type { UploadProps } from "@/public-album/components/Upload";
 import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
@@ -49,49 +72,32 @@ import {
     isOfficialAlbumsApp,
     photosAppOrigin,
 } from "ente-base/origins";
-import type { FullScreenDropZoneProps } from "@/gallery/components/FullScreenDropZone";
-import {
-    useSaveGroupsActions,
-    type AddSaveGroup,
-} from "@/gallery/components/utils/save-groups";
-import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
-import { type PublicFeedItemClickInfo } from "@/gallery/components/viewer/PublicFeedSidebar";
-import { LazyPublicFeedSidebar } from "@/gallery/components/viewer/lazy";
-import { setPublicAlbumsCredentials } from "@/gallery/services/public-albums-credentials";
-import { sortFiles } from "@/gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/photos/components/gallery/ListHeader";
-import { usePhotosAppContext } from "@/photos/types/context";
 import { t } from "i18next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
-    type ComponentType,
-    type PropsWithChildren,
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState,
+    type ComponentType,
+    type PropsWithChildren,
 } from "react";
 import { type FileWithPath } from "react-dropzone";
-import { LazyNotification } from "@/public-album/components/lazy-ui";
-import type { PasswordUnlockScreenProps } from "@/public-album/components/PasswordUnlockScreen";
-import { getSelectedFiles, type SelectedState } from "@/public-album/utils/file";
-import { getEnteURL } from "@/public-album/utils/public-album";
-import { quickLinkDateRangeForFiles } from "@/public-album/utils/quick-link";
 
 const LazyPublicAlbumSingleFileViewer =
     dynamic<PublicAlbumSingleFileViewerProps>(
         () =>
-            import("@/public-album/components/PublicAlbumSingleFileViewer").then(
-                ({ PublicAlbumSingleFileViewer }) => PublicAlbumSingleFileViewer,
+            import(
+                "@/public-album/components/PublicAlbumSingleFileViewer"
+            ).then(
+                ({ PublicAlbumSingleFileViewer }) =>
+                    PublicAlbumSingleFileViewer,
             ),
         { ssr: false, loading: () => <LoadingIndicator /> },
     );
@@ -105,7 +111,8 @@ const LazyTripLayout = dynamic<TripLayoutProps>(
 );
 
 const LazyUpload = dynamic<UploadProps>(
-    () => import("@/public-album/components/Upload").then(({ Upload }) => Upload),
+    () =>
+        import("@/public-album/components/Upload").then(({ Upload }) => Upload),
     { ssr: false },
 );
 
@@ -117,8 +124,7 @@ const LazyPasswordUnlockScreen = dynamic<PasswordUnlockScreenProps>(
     { ssr: false, loading: () => <LoadingIndicator /> },
 );
 
-const loadPublicAlbumsFDB = () =>
-    import("@/albums/services/public-albums-fdb");
+const loadPublicAlbumsFDB = () => import("@/albums/services/public-albums-fdb");
 
 const loadPublicCollectionService = () =>
     import("@/albums/services/public-collection");
@@ -151,9 +157,7 @@ export default function PublicCollectionGallery() {
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
     );
-    const [selected, setSelected] = useState<SelectedState>({
-        count: 0,
-    });
+    const [selected, setSelected] = useState<SelectedState>({ count: 0 });
 
     // TODO: Can we convert these to state
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
@@ -314,7 +318,8 @@ export default function PublicCollectionGallery() {
 
     const downloadEnabled =
         publicCollection?.publicURLs[0]?.enableDownload ?? true;
-    const collectEnabled = publicCollection?.publicURLs[0]?.enableCollect ?? false;
+    const collectEnabled =
+        publicCollection?.publicURLs[0]?.enableCollect ?? false;
 
     useEffect(() => {
         if (!collectEnabled) return;
@@ -519,9 +524,7 @@ export default function PublicCollectionGallery() {
         if (!selected.count) {
             return;
         }
-        setSelected({
-            count: 0,
-        });
+        setSelected({ count: 0 });
     };
 
     const handleUploadFile = (file: EnteFile) =>
@@ -781,14 +784,14 @@ export default function PublicCollectionGallery() {
             {publicFeedVisibilityProps.open &&
                 publicCollection &&
                 collectionKey.current && (
-                <LazyPublicFeedSidebar
-                    {...publicFeedVisibilityProps}
-                    files={publicFiles}
-                    credentials={credentials.current}
-                    collectionKey={collectionKey.current}
-                    onItemClick={handleFeedItemClick}
-                />
-            )}
+                    <LazyPublicFeedSidebar
+                        {...publicFeedVisibilityProps}
+                        files={publicFiles}
+                        credentials={credentials.current}
+                        collectionKey={collectionKey.current}
+                        onItemClick={handleFeedItemClick}
+                    />
+                )}
         </>
     );
 
@@ -822,9 +825,10 @@ const normalizedPublicAlbumLayout = (layout: string | undefined) => {
 };
 
 type LazyCollectDropZoneProps = PropsWithChildren<
-    {
-        enabled: boolean;
-    } & Pick<FullScreenDropZoneProps, "disabled" | "message" | "onDrop">
+    { enabled: boolean } & Pick<
+        FullScreenDropZoneProps,
+        "disabled" | "message" | "onDrop"
+    >
 >;
 
 const LazyCollectDropZone: React.FC<LazyCollectDropZoneProps> = ({
@@ -832,10 +836,9 @@ const LazyCollectDropZone: React.FC<LazyCollectDropZoneProps> = ({
     children,
     ...props
 }) => {
-    const [DropZoneComponent, setDropZoneComponent] =
-        useState<
-            ComponentType<PropsWithChildren<FullScreenDropZoneProps>> | null
-        >(null);
+    const [DropZoneComponent, setDropZoneComponent] = useState<ComponentType<
+        PropsWithChildren<FullScreenDropZoneProps>
+    > | null>(null);
 
     useEffect(() => {
         if (!enabled || DropZoneComponent) return;

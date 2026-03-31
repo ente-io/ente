@@ -1,17 +1,17 @@
+import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
+import { LazyNotification } from "@/public-album/components/lazy-ui";
+import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
+import { getEnteURL } from "@/public-album/utils/public-album";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
-import { FeedIcon } from "@/public-album/components/Collections/FeedIcon";
-import { LazyNotification } from "@/public-album/components/lazy-ui";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
-import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useState } from "react";
-import { getEnteURL } from "@/public-album/utils/public-album";
 
 interface MobileNavBarProps {
     onAddPhotos?: () => void;

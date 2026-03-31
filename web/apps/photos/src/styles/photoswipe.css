@@ -194,7 +194,6 @@
     .pswp-ente .pswp__button--close {
         margin-right: -2px;
     }
-
 }
 
 @media (width < 350px) {
@@ -209,7 +208,6 @@
     .pswp-ente .pswp__button--close {
         margin-right: -4px;
     }
-
 }
 
 /* Caption styling */

@@ -1,22 +1,18 @@
-import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
-import { ActiveDownloadStatusNotifications } from "@/public-album/components/ActiveDownloadStatusNotifications";
-import { useModalVisibility } from "ente-base/components/utils/modal";
-import type { PublicAlbumsCredentials } from "ente-base/http";
 import { useSaveGroupsActions } from "@/gallery/components/utils/save-groups";
-import {
-    type FileViewerInitialSidebar,
-} from "@/gallery/components/viewer/FileViewer";
-import {
-    type PublicFeedItemClickInfo,
-} from "@/gallery/components/viewer/PublicFeedSidebar";
+import { type FileViewerInitialSidebar } from "@/gallery/components/viewer/FileViewer";
+import { type PublicFeedItemClickInfo } from "@/gallery/components/viewer/PublicFeedSidebar";
 import {
     LazyFileViewer,
     LazyPublicFeedSidebar,
     scheduleFileViewerPreload,
 } from "@/gallery/components/viewer/lazy";
+import { ActiveDownloadStatusNotifications } from "@/public-album/components/ActiveDownloadStatusNotifications";
+import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
+import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { useJoinAlbum } from "@/public-album/hooks/useJoinAlbum";
 import { useEffect, useRef, useState } from "react";
 
 // Import extracted components
@@ -612,14 +608,14 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 collection &&
                 credentials?.current &&
                 collectionKey && (
-                <LazyPublicFeedSidebar
-                    {...publicFeedVisibilityProps}
-                    files={files}
-                    credentials={credentials.current}
-                    collectionKey={collectionKey}
-                    onItemClick={handleFeedItemClick}
-                />
-            )}
+                    <LazyPublicFeedSidebar
+                        {...publicFeedVisibilityProps}
+                        files={files}
+                        credentials={credentials.current}
+                        collectionKey={collectionKey}
+                        onItemClick={handleFeedItemClick}
+                    />
+                )}
         </TripLayoutContainer>
     );
 };

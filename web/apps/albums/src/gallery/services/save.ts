@@ -1,8 +1,8 @@
+import { downloadManager } from "@/gallery/services/download";
 import { assertionFailed } from "ente-base/assert";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
-import { downloadManager } from "@/gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -32,9 +32,8 @@ const createJSZip = async (): Promise<JSZip> => {
     const JSZipConstructor = await (jsZipConstructorPromise ??= import(
         "jszip"
     ).then((module) => {
-        const candidate = (
-            module as unknown as { default?: JSZipConstructor }
-        ).default;
+        const candidate = (module as unknown as { default?: JSZipConstructor })
+            .default;
         return candidate ?? (module as unknown as JSZipConstructor);
     }));
     return new JSZipConstructor();

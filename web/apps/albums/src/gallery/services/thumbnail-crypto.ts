@@ -1,5 +1,5 @@
-import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import type { BytesOrB64, EncryptedBlob } from "ente-base/crypto/types";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import type { ThumbnailCryptoWorker } from "./thumbnail-crypto.worker";
 
 let _comlinkWorker: ComlinkWorker<typeof ThumbnailCryptoWorker> | undefined;

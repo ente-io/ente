@@ -1,5 +1,13 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { type UploadPhase } from "@/gallery/services/upload";
+import type {
+    FinishedUploadType,
+    InProgressUpload,
+    SegregatedFinishedUploads,
+    UploadCounter,
+    UploadFileNames,
+} from "@/public-album/services/upload-manager";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -29,7 +37,6 @@ import { SpacedRow } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
 import { formattedListJoin } from "ente-base/i18n";
-import { type UploadPhase } from "@/gallery/services/upload";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
@@ -47,13 +54,6 @@ import {
     type ListChildComponentProps,
     type ListItemKeySelector,
 } from "react-window";
-import type {
-    FinishedUploadType,
-    InProgressUpload,
-    SegregatedFinishedUploads,
-    UploadCounter,
-    UploadFileNames,
-} from "@/public-album/services/upload-manager";
 
 interface UploadProgressProps {
     open: boolean;
