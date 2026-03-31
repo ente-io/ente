@@ -23,7 +23,7 @@ jobs:
                 platform:
                     - os: ubuntu-22.04
                       rust-target: x86_64-unknown-linux-gnu
-                      bundle-targets: appimage,deb,updater
+                      bundle-targets: appimage,deb,rpm,updater
                     - os: macos-latest
                       rust-target: x86_64-apple-darwin
                       bundle-targets: app,dmg,updater
