@@ -90,6 +90,10 @@ pub enum CryptoError {
     #[error("Stream truncated: EOF before final tag")]
     StreamTruncated,
 
+    /// Stream had trailing ciphertext after the final tag.
+    #[error("Stream has trailing data after final tag")]
+    StreamTrailingData,
+
     /// Sealed box open failed.
     #[error("Sealed box open failed")]
     SealedBoxOpenFailed,

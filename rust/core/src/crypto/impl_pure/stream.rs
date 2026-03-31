@@ -485,6 +485,19 @@ pub struct StreamingDecryptor<R: Read> {
     seen_final: bool,
 }
 
+fn ensure_reader_exhausted<R: Read>(reader: &mut R) -> Result<()> {
+    let mut extra = [0u8; 1];
+
+    loop {
+        match reader.read(&mut extra) {
+            Ok(0) => return Ok(()),
+            Ok(_) => return Err(CryptoError::StreamTrailingData),
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e.into()),
+        }
+    }
+}
+
 impl<R: Read> StreamingDecryptor<R> {
     /// Create a new streaming decryptor.
     ///
@@ -572,6 +585,7 @@ impl<R: Read> StreamingDecryptor<R> {
 
         if tag == TAG_FINAL {
             self.seen_final = true;
+            ensure_reader_exhausted(&mut self.reader)?;
             self.finished = true;
         }
 
@@ -746,6 +760,7 @@ pub fn encrypt_file_with_md5<R: Read, W: Write>(
 /// # Errors
 /// Returns `CryptoError::StreamTruncated` if EOF is reached without seeing TAG_FINAL.
 /// This prevents silent truncation attacks at chunk boundaries.
+/// Returns `CryptoError::StreamTrailingData` if bytes remain after a TAG_FINAL chunk.
 pub fn decrypt_file<R: Read, W: Write>(
     reader: &mut R,
     writer: &mut W,
@@ -784,6 +799,7 @@ pub fn decrypt_file<R: Read, W: Write>(
 
         if tag == TAG_FINAL {
             // Successfully decrypted the final chunk - stream is complete
+            ensure_reader_exhausted(reader)?;
             return Ok(());
         }
     }
@@ -1715,6 +1731,27 @@ mod tests {
     }
 
     #[test]
+    fn test_decrypt_file_rejects_trailing_data_after_exact_final_chunk() {
+        let key = generate_test_key();
+        let plaintext = vec![0xA5; ENCRYPTION_CHUNK_SIZE];
+
+        let mut encryptor = StreamEncryptor::new(&key).expect("encryptor creation failed");
+        let header = encryptor.header.clone();
+        let mut ciphertext = encryptor.push(&plaintext, true).expect("push failed");
+        ciphertext.extend_from_slice(b"TRAILING");
+
+        let mut reader = Cursor::new(&ciphertext);
+        let mut output = Vec::new();
+        let result = decrypt_file(&mut reader, &mut output, &header, &key);
+
+        assert!(
+            matches!(result, Err(CryptoError::StreamTrailingData)),
+            "Expected StreamTrailingData for trailing bytes after FINAL, got {:?}",
+            result
+        );
+    }
+
+    #[test]
     fn test_decrypt_file_via_encrypt_file_roundtrip() {
         // Verify that encrypt_file + decrypt_file work together properly
         // encrypt_file creates properly formatted chunks with FINAL tag
@@ -1755,6 +1792,25 @@ mod tests {
     }
 
     #[test]
+    fn test_decrypt_file_data_rejects_trailing_data_after_exact_final_chunk() {
+        let key = generate_test_key();
+        let plaintext = vec![0x5A; ENCRYPTION_CHUNK_SIZE];
+
+        let mut encryptor = StreamEncryptor::new(&key).expect("encryptor creation failed");
+        let header = encryptor.header.clone();
+        let mut ciphertext = encryptor.push(&plaintext, true).expect("push failed");
+        ciphertext.extend_from_slice(b"TRAILING");
+
+        let result = decrypt_file_data(&ciphertext, &header, &key);
+
+        assert!(
+            matches!(result, Err(CryptoError::StreamTrailingData)),
+            "Expected StreamTrailingData from decrypt_file_data, got {:?}",
+            result
+        );
+    }
+
+    #[test]
     fn test_decrypt_oneshot_requires_final_tag() {
         // Test that the one-shot decrypt() helper requires TAG_FINAL
         let key = generate_test_key();
@@ -1787,6 +1843,29 @@ mod tests {
 
         let decrypted = decrypt(&ciphertext, &header, &key).expect("decrypt failed");
         assert_eq!(decrypted, plaintext);
+    }
+
+    #[test]
+    fn test_streaming_decryptor_rejects_trailing_data_after_exact_final_chunk() {
+        let key = generate_test_key();
+        let plaintext = vec![0x3C; ENCRYPTION_CHUNK_SIZE];
+
+        let mut encryptor = StreamEncryptor::new(&key).expect("encryptor creation failed");
+        let mut encrypted = encryptor.header.clone();
+        let mut ciphertext = encryptor.push(&plaintext, true).expect("push failed");
+        ciphertext.extend_from_slice(b"TRAILING");
+        encrypted.extend_from_slice(&ciphertext);
+
+        let reader = Cursor::new(&encrypted);
+        let mut decryptor =
+            StreamingDecryptor::new(&key, reader).expect("decryptor creation failed");
+        let result = decryptor.read_to_end();
+
+        assert!(
+            matches!(result, Err(CryptoError::StreamTrailingData)),
+            "Expected StreamTrailingData from StreamingDecryptor, got {:?}",
+            result
+        );
     }
 
     // ============ Size estimation consistency tests ============
