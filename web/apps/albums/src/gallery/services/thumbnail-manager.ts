@@ -1,17 +1,16 @@
 import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
     authenticatedPublicAlbumsRequestHeaders,
-    authenticatedRequestHeaders,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import { ensureAuthToken } from "ente-base/token";
 import type { EnteFile } from "ente-media/file";
 import {
     getPublicAlbumsCredentials,
+    requirePublicAlbumsCredentials,
     setPublicAlbumsCredentials,
 } from "./public-albums-credentials";
 import { decryptThumbnailBlobBytes } from "./thumbnail-crypto";
@@ -97,14 +96,10 @@ class ThumbnailManager {
     };
 
     private async _downloadThumbnail(file: EnteFile) {
-        if (this.publicAlbumsCredentials) {
-            return publicAlbums_downloadThumbnail(
-                file,
-                this.publicAlbumsCredentials,
-            );
-        } else {
-            return photos_downloadThumbnail(file);
-        }
+        return publicAlbums_downloadThumbnail(
+            file,
+            requirePublicAlbumsCredentials(this.publicAlbumsCredentials),
+        );
     }
 }
 
@@ -129,28 +124,6 @@ const wrapErrors = <T>(op: () => Promise<T>) =>
     op().catch((e: unknown) => {
         throw new NetworkThumbnailError(e);
     });
-
-const photos_downloadThumbnail = async (file: EnteFile) => {
-    const customOrigin = await customAPIOrigin();
-
-    const getThumbnail = async () => {
-        if (customOrigin) {
-            const token = await ensureAuthToken();
-            const params = new URLSearchParams({ token });
-            return fetch(
-                `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
-                { headers: publicRequestHeaders() },
-            );
-        } else {
-            return fetch(`https://thumbnails.ente.io/?fileID=${file.id}`, {
-                headers: await authenticatedRequestHeaders(),
-            });
-        }
-    };
-
-    const res = await retryEnsuringHTTPOk(getThumbnail);
-    return new Uint8Array(await res.arrayBuffer());
-};
 
 const publicAlbums_downloadThumbnail = async (
     file: EnteFile,

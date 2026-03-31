@@ -7,20 +7,19 @@ import {
 } from "ente-base/crypto";
 import {
     authenticatedPublicAlbumsRequestHeaders,
-    authenticatedRequestHeaders,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import { apiURL, customAPIOrigin } from "ente-base/origins";
-import { ensureAuthToken } from "ente-base/token";
+import { customAPIOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
     getPublicAlbumsCredentials,
+    requirePublicAlbumsCredentials,
     setPublicAlbumsCredentials,
 } from "./public-albums-credentials";
 import { detectFileTypeInfoFromChunk } from "../utils/detect-type";
@@ -104,8 +103,6 @@ export type RenderableSourceURLs =
  * including caching them for subsequent retrieval if appropriate.
  *
  * External code can use it via its singleton instance, {@link downloadManager}.
- * The class will initialize itself on first use, however {@link logout} should
- * be called on logout to reset its internal state.
  */
 class DownloadManager {
     get publicAlbumsCredentials() {
@@ -312,14 +309,10 @@ class DownloadManager {
     };
 
     private async _downloadThumbnail(file: EnteFile) {
-        if (this.publicAlbumsCredentials) {
-            return publicAlbums_downloadThumbnail(
-                file,
-                this.publicAlbumsCredentials,
-            );
-        } else {
-            return photos_downloadThumbnail(file);
-        }
+        return publicAlbums_downloadThumbnail(
+            file,
+            requirePublicAlbumsCredentials(this.publicAlbumsCredentials),
+        );
     }
 
     /**
@@ -525,19 +518,15 @@ class DownloadManager {
     }
 
     /**
-     * Download the full contents of {@link file}, automatically choosing the
-     * credentials for the logged in user or the public albums depending on the
-     * current app context we are in.
+     * Download the full contents of {@link file} using the current public album
+     * credentials.
      */
     private async _downloadFile(file: EnteFile, opts?: FileDownloadOpts) {
-        if (this.publicAlbumsCredentials) {
-            return publicAlbums_downloadFile(
-                file,
-                this.publicAlbumsCredentials,
-            );
-        } else {
-            return photos_downloadFile(file, opts);
-        }
+        return publicAlbums_downloadFile(
+            file,
+            requirePublicAlbumsCredentials(this.publicAlbumsCredentials),
+            opts,
+        );
     }
 
     private async blobWithInferredType(
@@ -695,32 +684,8 @@ const createRenderableSourceURLs = async (
 };
 
 /**
- * The various photos_* functions are used for the actual downloads when
- * we're running in the context of the the photos app.
+ * Options for file downloads.
  */
-const photos_downloadThumbnail = async (file: EnteFile) => {
-    const customOrigin = await customAPIOrigin();
-
-    const getThumbnail = async () => {
-        if (customOrigin) {
-            // See: [Note: Passing credentials for self-hosted file fetches]
-            const token = await ensureAuthToken();
-            const params = new URLSearchParams({ token });
-            return fetch(
-                `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
-                { headers: publicRequestHeaders() },
-            );
-        } else {
-            return fetch(`https://thumbnails.ente.io/?fileID=${file.id}`, {
-                headers: await authenticatedRequestHeaders(),
-            });
-        }
-    };
-
-    const res = await retryEnsuringHTTPOk(getThumbnail);
-    return new Uint8Array(await res.arrayBuffer());
-};
-
 interface FileDownloadOpts {
     /**
      * `true` if the request is for a background task. These are considered less
@@ -728,82 +693,11 @@ interface FileDownloadOpts {
      *
      * See: [Note: User initiated vs background downloads of files].
      *
-     * This parameter is ignored for requests made when using public albums
-     * credentials to download files; those are always considered interactive.
+     * Public album downloads ignore this today; the app only performs
+     * interactive file fetches.
      */
     background?: boolean;
 }
-
-/**
- * Download the full contents of the given {@link EnteFile}
- */
-const photos_downloadFile = async (
-    file: EnteFile,
-    opts?: FileDownloadOpts,
-): Promise<Response> => {
-    const { background } = opts ?? {};
-
-    const customOrigin = await customAPIOrigin();
-
-    // [Note: Passing credentials for self-hosted file fetches]
-    //
-    // Fetching files (or thumbnails) in the default self-hosted Ente
-    // configuration involves a redirection:
-    //
-    // 1. The browser makes a HTTP GET to a museum with credentials. Museum
-    //    inspects the credentials, in this case the auth token, and if they're
-    //    valid, returns a HTTP 307 redirect to the pre-signed S3 URL that to
-    //    the file in the configured S3 bucket.
-    //
-    // 2. The browser follows the redirect to get the actual file. The URL is
-    //    pre-signed, i.e. already has all credentials needed to prove to the S3
-    //    object storage that it should serve this response.
-    //
-    // For the first step normally we'd pass the auth the token via the
-    // "X-Auth-Token" HTTP header. In this case though, that would be
-    // problematic because the browser preserves the request headers when it
-    // follows the HTTP 307 redirect, and the "X-Auth-Token" header also gets
-    // sent to the redirected S3 request made in second step.
-    //
-    // To avoid this, we pass the token as a query parameter. Generally this is
-    // not a good idea, but in this case (a) the URL is not a user visible one
-    // and (b) even if it gets logged, it'll be in the self-hosters own service.
-    //
-    // Note that Ente's own servers don't have these concerns because we use a
-    // slightly different flow involving a proxy instead of directly connecting
-    // to the S3 storage.
-    //
-    // 1. The web browser makes a HTTP GET request to a proxy passing it the
-    //    credentials in the "X-Auth-Token".
-    //
-    // 2. The proxy then does both the original steps: (a). Use the credentials
-    //    to get the pre-signed URL, and (b) fetch that pre-signed URL and
-    //    stream back the response.
-    //
-    // [Note: User initiated vs background downloads of files]
-    //
-    // The faster proxy approach is used for interactive requests to reduce the
-    // latency for the user (e.g. when the user is waiting to see a full
-    // resolution file). It can be faster than a direct connection as the proxy
-    // is network-nearer to the user (See: [Note: Faster uploads via workers])
-    //
-    // For background processing (e.g., ML indexing, HLS generation), the direct
-    // S3 connection (as what'd happen when self hosting) gets used.
-
-    const getFile = async () => {
-        if (customOrigin || background) {
-            const token = await ensureAuthToken();
-            const url = await apiURL(`/files/download/${file.id}`, { token });
-            return fetch(url, { headers: publicRequestHeaders() });
-        } else {
-            return fetch(`https://files.ente.io/?fileID=${file.id}`, {
-                headers: await authenticatedRequestHeaders(),
-            });
-        }
-    };
-
-    return retryEnsuringHTTPOk(getFile);
-};
 
 /**
  * The various publicAlbums_* functions are used for the actual downloads when
@@ -845,11 +739,13 @@ const publicAlbums_downloadThumbnail = async (
 const publicAlbums_downloadFile = async (
     file: EnteFile,
     credentials: PublicAlbumsCredentials,
+    opts?: FileDownloadOpts,
 ) => {
+    const { background } = opts ?? {};
     const customOrigin = await customAPIOrigin();
 
     const getFile = () => {
-        if (customOrigin) {
+        if (customOrigin || background) {
             // See: [Note: Passing credentials for self-hosted file fetches]
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({

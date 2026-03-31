@@ -9,3 +9,13 @@ export const setPublicAlbumsCredentials = (
 ) => {
     publicAlbumsCredentials = credentials;
 };
+
+export const requirePublicAlbumsCredentials = (
+    credentials?: PublicAlbumsCredentials,
+): PublicAlbumsCredentials => {
+    const resolvedCredentials = credentials ?? publicAlbumsCredentials;
+    if (!resolvedCredentials) {
+        throw new Error("Missing public album credentials");
+    }
+    return resolvedCredentials;
+};

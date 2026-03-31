@@ -1,12 +1,12 @@
 import {
     authenticatedPublicAlbumsRequestHeaders,
-    authenticatedRequestHeaders,
     ensureOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
+import { requirePublicAlbumsCredentials } from "./public-albums-credentials";
 
 /**
  * [Note: File data APIs]
@@ -56,15 +56,15 @@ type RemoteFileData = z.infer<typeof RemoteFileData>;
  * this file yet (e.g. if type was "vid_preview", this would indicate that a
  * video preview has been generated for this file yet).
  *
- * @param publicAlbumsCredentials Credentials to use when we are running in the
- * context of the public albums app. If these are not specified, then the
- * credentials of the logged in user are used.
+ * @param publicAlbumsCredentials Credentials for the current public album. If
+ * omitted, the currently configured public album credentials are used.
  */
 export const fetchFileData = async (
     type: FileDataType,
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<RemoteFileData | undefined> => {
+    const credentials = requirePublicAlbumsCredentials(publicAlbumsCredentials);
     const params = new URLSearchParams({
         type,
         fileID: fileID.toString(),
@@ -73,19 +73,9 @@ export const fetchFileData = async (
         preferNoContent: "true",
     });
 
-    let res: Response;
-    if (publicAlbumsCredentials) {
-        const url = await apiURL("/public-collection/files/data/fetch");
-        const headers = authenticatedPublicAlbumsRequestHeaders(
-            publicAlbumsCredentials,
-        );
-        res = await fetch(`${url}?${params.toString()}`, { headers });
-    } else {
-        const url = await apiURL("/files/data/fetch");
-        res = await fetch(`${url}?${params.toString()}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
-    }
+    const url = await apiURL("/public-collection/files/data/fetch");
+    const headers = authenticatedPublicAlbumsRequestHeaders(credentials);
+    const res = await fetch(`${url}?${params.toString()}`, { headers });
 
     if (res.status == 204) return undefined;
     // We're passing `preferNoContent` so the expected response is 204, but this
@@ -104,9 +94,8 @@ export const fetchFileData = async (
  *
  * @param fileIDs The id of the files for which we want the file preview data.
  *
- * @param publicAlbumsCredentials Credentials to use when we are running in the
- * context of the public albums app. If these are not specified, then the
- * credentials of the logged in user are used.
+ * @param publicAlbumsCredentials Credentials for the current public album. If
+ * omitted, the currently configured public album credentials are used.
  *
  * @returns the (pre-signed) URL to the preview data, or undefined if there is
  * not preview data of the given type for the given file yet.
@@ -141,21 +130,12 @@ export const fetchFilePreviewData = async (
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<string | undefined> => {
+    const credentials = requirePublicAlbumsCredentials(publicAlbumsCredentials);
     const params = new URLSearchParams({ type, fileID: fileID.toString() });
 
-    let res: Response;
-    if (publicAlbumsCredentials) {
-        const headers = authenticatedPublicAlbumsRequestHeaders(
-            publicAlbumsCredentials,
-        );
-        const url = await apiURL("/public-collection/files/data/preview");
-        res = await fetch(`${url}?${params.toString()}`, { headers });
-    } else {
-        const url = await apiURL("/files/data/preview");
-        res = await fetch(`${url}?${params.toString()}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
-    }
+    const headers = authenticatedPublicAlbumsRequestHeaders(credentials);
+    const url = await apiURL("/public-collection/files/data/preview");
+    const res = await fetch(`${url}?${params.toString()}`, { headers });
 
     if (res.status == 404) return undefined;
     ensureOk(res);
