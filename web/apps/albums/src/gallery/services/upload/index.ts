@@ -66,7 +66,6 @@ export type UploadResult =
     | { type: "blocked" }
     | { type: "failed" }
     | { type: "alreadyUploaded"; file: EnteFile }
-    | { type: "addedSymlink"; file: EnteFile }
     | { type: "uploadedWithStaticThumbnail"; file: EnteFile }
     | { type: "uploaded"; file: EnteFile };
 

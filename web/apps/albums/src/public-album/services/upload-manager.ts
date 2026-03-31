@@ -52,10 +52,9 @@ export interface InProgressUpload {
 
 /**
  * A variant of {@link UploadResult}'s {@link type} values used when segregating
- * finished uploads in the UI. "addedSymlink" is treated as "uploaded",
- * everything else remains as it were.
+ * finished uploads in the UI.
  */
-export type FinishedUploadType = Exclude<UploadResult["type"], "addedSymlink">;
+export type FinishedUploadType = UploadResult["type"];
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
@@ -482,14 +481,13 @@ class UploadManager {
                 this.failedItems.push(uploadableItem);
                 break;
 
-            case "addedSymlink":
             case "uploaded":
             case "uploadedWithStaticThumbnail":
                 this.updateExistingFiles(uploadResult.file);
                 break;
         }
 
-        return type == "addedSymlink" ? "uploaded" : type;
+        return type;
     }
 
     public cancelRunningUpload() {

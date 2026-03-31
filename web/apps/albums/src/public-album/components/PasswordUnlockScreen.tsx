@@ -5,9 +5,9 @@ import {
 } from "ente-base/components/SingleInputForm";
 import { t } from "i18next";
 import {
-    AccountsPageContents,
-    AccountsPageTitle,
-} from "@/public-album/components/AccountsPage";
+    PublicAccessPageContents,
+    PublicAccessPageTitle,
+} from "@/public-album/components/PublicAccessPage";
 
 export interface PasswordUnlockScreenProps {
     onSubmit: SingleInputFormProps["onSubmit"];
@@ -16,8 +16,8 @@ export interface PasswordUnlockScreenProps {
 export const PasswordUnlockScreen: React.FC<PasswordUnlockScreenProps> = ({
     onSubmit,
 }) => (
-    <AccountsPageContents>
-        <AccountsPageTitle>{t("password")}</AccountsPageTitle>
+    <PublicAccessPageContents>
+        <PublicAccessPageTitle>{t("password")}</PublicAccessPageTitle>
         <Stack>
             <Typography variant="small" sx={{ color: "text.muted", mb: 2 }}>
                 {t("link_password_description")}
@@ -30,5 +30,5 @@ export const PasswordUnlockScreen: React.FC<PasswordUnlockScreenProps> = ({
                 onSubmit={onSubmit}
             />
         </Stack>
-    </AccountsPageContents>
+    </PublicAccessPageContents>
 );

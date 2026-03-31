@@ -3,7 +3,7 @@ import { CenteredFill } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { NavbarBase } from "ente-base/components/Navbar";
 
-export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
+export const PublicAccessPageContents: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
     <Stack
@@ -28,15 +28,15 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
                 (theme) =>
                     theme.applyStyles("dark", {
                         bgcolor: "background.default",
-                    }),
+                }),
             ]}
         >
-            <AccountsPagePaper>{children}</AccountsPagePaper>
+            <PublicAccessPagePaper>{children}</PublicAccessPagePaper>
         </CenteredFill>
     </Stack>
 );
 
-const AccountsPagePaper = styled(Paper)(({ theme }) => ({
+const PublicAccessPagePaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
     padding: theme.spacing(5, 3),
     [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
@@ -49,7 +49,7 @@ const AccountsPagePaper = styled(Paper)(({ theme }) => ({
     borderRadius: "20px",
 }));
 
-export const AccountsPageTitle: React.FC<React.PropsWithChildren> = ({
+export const PublicAccessPageTitle: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
     <Typography variant="h3" sx={{ flex: 1 }}>
