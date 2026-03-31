@@ -47,7 +47,6 @@ export const LockerPage: React.FC = () => {
         ensureUploadLimitState,
         hasFetched,
         initialLoadError,
-        isProductionEndpoint,
         masterKey,
         refreshData,
         removeCollectionFromState,
@@ -225,7 +224,6 @@ export const LockerPage: React.FC = () => {
                 isHomeView={isHomeView}
                 isTrashView={isTrashView}
                 isCollectionsView={isCollectionsView}
-                isProductionEndpoint={isProductionEndpoint}
                 userDetails={userDetails}
             />
             <LockerCollectionShareDrawer
@@ -291,7 +289,6 @@ export const LockerPage: React.FC = () => {
                 onEnsureCollections={ensureCollectionsExist}
                 onEnsureUploadLimitState={ensureUploadLimitState}
                 defaultCollectionID={selectedCollectionID}
-                isProductionEndpoint={isProductionEndpoint}
                 initialItems={prefilledUploadItems}
                 userDetails={userDetails}
             />
@@ -304,7 +301,6 @@ export const LockerPage: React.FC = () => {
                     onSave={handleUpdateItem}
                     onCreateCollection={handleCreateCollection}
                     editItem={editItem}
-                    isProductionEndpoint={isProductionEndpoint}
                     userDetails={userDetails}
                 />
             )}

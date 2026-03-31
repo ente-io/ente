@@ -7,6 +7,14 @@ import type { DragEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
+    LOCKER_FILE_LIMIT_PAID,
+    LOCKER_MAX_FILE_SIZE_BYTES,
+    LOCKER_STORAGE_LIMIT_PAID_BYTES,
+    lockerUploadAllowance,
+    type LockerUploadLimitState,
+    type LockerUploadPreflightFailure,
+} from "services/locker-limits";
+import {
     createCollection as createCollectionAPI,
     createInfoItem,
     deleteCollection as deleteCollectionAPI,
@@ -26,14 +34,6 @@ import {
     uploadLockerFile,
     type LockerUploadProgress,
 } from "services/remote";
-import {
-    LOCKER_FILE_LIMIT_PAID,
-    lockerUploadAllowance,
-    LOCKER_MAX_FILE_SIZE_BYTES,
-    LOCKER_STORAGE_LIMIT_PAID_BYTES,
-    type LockerUploadLimitState,
-    type LockerUploadPreflightFailure,
-} from "services/locker-limits";
 import type {
     LockerCollection,
     LockerItem,
@@ -130,16 +130,8 @@ interface DropUploadScanResult {
 }
 
 type PendingDroppedNode =
-    | {
-          type: "entry";
-          entry: FileSystemEntry;
-          parentPath: string;
-      }
-    | {
-          type: "file";
-          file: File;
-          relativePath: string;
-      };
+    | { type: "entry"; entry: FileSystemEntry; parentPath: string }
+    | { type: "file"; file: File; relativePath: string };
 
 const collectUploadCandidatesFromDrop = async (
     droppedItems: DragDataTransferItem[],
@@ -194,11 +186,7 @@ const collectUploadCandidatesFromDrop = async (
         const entry =
             typeof getAsEntry === "function" ? getAsEntry.call(item) : null;
         if (entry) {
-            pendingNodes.push({
-                type: "entry",
-                entry,
-                parentPath: "",
-            });
+            pendingNodes.push({ type: "entry", entry, parentPath: "" });
             continue;
         }
 
@@ -307,11 +295,7 @@ interface UseLockerActionsProps {
     selectedCollectionID: number | null;
     routerPathname: string;
     ensureUploadLimitState: () => Promise<
-        | {
-              isProductionEndpoint: boolean;
-              userDetails: LockerUploadLimitState;
-          }
-        | undefined
+        { userDetails: LockerUploadLimitState } | undefined
     >;
     refreshData: (masterKey?: string) => Promise<void>;
     navigateHome: () => void;
@@ -862,7 +846,6 @@ export const useLockerActions = ({
 
                 const allowance = lockerUploadAllowance(
                     uploadLimitState.userDetails,
-                    uploadLimitState.isProductionEndpoint,
                 );
                 const droppedItems = Array.from(
                     event.dataTransfer.items,
@@ -880,10 +863,8 @@ export const useLockerActions = ({
                     setToast(
                         uploadPreflightFailureMessage(
                             scanResult.preflightFailure,
-                            lockerUploadAllowance(
-                                uploadLimitState.userDetails,
-                                uploadLimitState.isProductionEndpoint,
-                            ).currentFileCount +
+                            lockerUploadAllowance(uploadLimitState.userDetails)
+                                .currentFileCount +
                                 scanResult.scannedNonEmptyFileCount,
                             uploadLimitState.userDetails.usage +
                                 scanResult.scannedTotalSize,

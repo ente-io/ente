@@ -65,14 +65,9 @@ interface UseCreateItemDialogStateProps {
         names: string[],
     ) => Promise<Map<string, number> | Record<string, number>>;
     onEnsureUploadLimitState?: () => Promise<
-        | {
-              isProductionEndpoint: boolean;
-              userDetails: LockerUploadLimitState;
-          }
-        | undefined
+        { userDetails: LockerUploadLimitState } | undefined
     >;
     defaultCollectionID?: number | null;
-    isProductionEndpoint: boolean;
     initialItems?: LockerUploadCandidate[];
     editItem?: CreateItemDialogEditItem | null;
     userDetails?: LockerUploadLimitState;
@@ -129,7 +124,6 @@ export const useCreateItemDialogState = ({
     onEnsureCollections,
     onEnsureUploadLimitState,
     defaultCollectionID,
-    isProductionEndpoint,
     initialItems,
     editItem,
     userDetails,
@@ -270,7 +264,9 @@ export const useCreateItemDialogState = ({
         );
         setFormData(editFormData(editItem));
         setShowPassword(false);
-        const filteredInitialItems = filterNonEmptyUploadItems(initialItems ?? []);
+        const filteredInitialItems = filterNonEmptyUploadItems(
+            initialItems ?? [],
+        );
         setSelectedUploadItems(filteredInitialItems);
         setCustomCollectionNames([]);
         setSelectedCollectionNamesByFileKey(
@@ -480,13 +476,9 @@ export const useCreateItemDialogState = ({
         }
 
         let effectiveUserDetails = userDetails;
-        let effectiveIsProductionEndpoint = isProductionEndpoint;
         if (!effectiveUserDetails) {
             const uploadLimitState = await onEnsureUploadLimitState?.();
             effectiveUserDetails = uploadLimitState?.userDetails;
-            effectiveIsProductionEndpoint =
-                uploadLimitState?.isProductionEndpoint ??
-                effectiveIsProductionEndpoint;
         }
 
         if (!effectiveUserDetails) {
@@ -498,13 +490,11 @@ export const useCreateItemDialogState = ({
         const preflightFailure = validateLockerUploadBatch(
             pendingUploadItems.map(({ file }) => file),
             effectiveUserDetails,
-            effectiveIsProductionEndpoint,
         );
         if (preflightFailure) {
             const hitsPaidHardCap = exceedsPaidLockerHardLimit(
                 pendingUploadItems.map(({ file }) => file),
                 effectiveUserDetails,
-                effectiveIsProductionEndpoint,
             );
             const preflightFailureMessage = (
                 failure: LockerUploadPreflightFailure,
@@ -531,10 +521,10 @@ export const useCreateItemDialogState = ({
                 hitsPaidHardCap
                     ? null
                     : preflightFailure.reason === "fileCountLimit"
-                    ? "fileCountLimit"
-                    : preflightFailure.reason === "storageLimit"
-                      ? "storageLimit"
-                      : null,
+                      ? "fileCountLimit"
+                      : preflightFailure.reason === "storageLimit"
+                        ? "storageLimit"
+                        : null,
             );
             return;
         }
@@ -707,7 +697,6 @@ export const useCreateItemDialogState = ({
         handleClose,
         onEnsureCollections,
         onEnsureUploadLimitState,
-        isProductionEndpoint,
         onUploadItemComplete,
         onUploadProgress,
         onUploadsFinished,

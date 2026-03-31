@@ -1,28 +1,8 @@
-import { apiOrigin } from "ente-base/origins";
-
 export const LOCKER_FILE_LIMIT_FREE = 100;
 export const LOCKER_FILE_LIMIT_PAID = 1000;
 export const LOCKER_STORAGE_LIMIT_FREE_BYTES = 1 * 1024 * 1024 * 1024;
 export const LOCKER_STORAGE_LIMIT_PAID_BYTES = 10 * 1024 * 1024 * 1024;
 export const LOCKER_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024 * 1024;
-
-const ENTE_PRODUCTION_API_ORIGIN = "https://api.ente.io";
-
-const normalizedOrigin = (origin: string) => new URL(origin).origin;
-
-export const isEnteProductionEndpoint = async () =>
-    normalizedOrigin(await apiOrigin()) ===
-    normalizedOrigin(ENTE_PRODUCTION_API_ORIGIN);
-
-export const effectiveLockerFileLimit = (
-    lockerFileLimit: number,
-    isProductionEndpoint: boolean,
-) => {
-    const normalizedLimit = Math.max(lockerFileLimit, 1);
-    return !isProductionEndpoint && normalizedLimit < LOCKER_FILE_LIMIT_PAID
-        ? LOCKER_FILE_LIMIT_PAID
-        : normalizedLimit;
-};
 
 export interface LockerUploadLimitState {
     usage: number;
@@ -52,12 +32,8 @@ export interface LockerUploadPreflightFailure {
 
 export const lockerUploadAllowance = (
     userDetails: LockerUploadLimitState,
-    isProductionEndpoint: boolean,
 ): LockerUploadAllowance => {
-    const maxFileCount = effectiveLockerFileLimit(
-        userDetails.lockerFileLimit,
-        isProductionEndpoint,
-    );
+    const maxFileCount = Math.max(userDetails.lockerFileLimit, 1);
     const currentFileCount =
         userDetails.isPartOfFamily &&
         typeof userDetails.lockerFamilyFileCount === "number"
@@ -75,9 +51,8 @@ export const lockerUploadAllowance = (
 export const exceedsPaidLockerHardLimit = (
     files: File[],
     userDetails: LockerUploadLimitState,
-    isProductionEndpoint: boolean,
 ) => {
-    const allowance = lockerUploadAllowance(userDetails, isProductionEndpoint);
+    const allowance = lockerUploadAllowance(userDetails);
     const totalUploadSize = files.reduce((total, file) => total + file.size, 0);
 
     return (
@@ -89,7 +64,6 @@ export const exceedsPaidLockerHardLimit = (
 export const validateLockerUploadBatch = (
     files: File[],
     userDetails: LockerUploadLimitState | undefined,
-    isProductionEndpoint: boolean,
 ): LockerUploadPreflightFailure | null => {
     const oversizedFile = files.find(
         (file) => file.size > LOCKER_MAX_FILE_SIZE_BYTES,
@@ -102,7 +76,7 @@ export const validateLockerUploadBatch = (
         return null;
     }
 
-    const allowance = lockerUploadAllowance(userDetails, isProductionEndpoint);
+    const allowance = lockerUploadAllowance(userDetails);
     if (files.length > allowance.remainingFileCount) {
         return { reason: "fileCountLimit" };
     }

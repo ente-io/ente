@@ -18,7 +18,6 @@ import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    isEnteProductionEndpoint,
     LOCKER_FILE_LIMIT_FREE,
     LOCKER_FILE_LIMIT_PAID,
     type LockerUploadLimitState,
@@ -58,13 +57,7 @@ interface UserDetailsRefreshTrigger {
     trashSinceTime: number;
 }
 
-interface LockerUsageSnapshot {
-    isProductionEndpoint: boolean;
-    userDetails: LockerUploadLimitState;
-}
-
 interface UploadLimitStateSnapshot {
-    isProductionEndpoint: boolean;
     userDetails: UserDetails;
 }
 
@@ -84,7 +77,6 @@ export const useLockerData = ({
     const [initialLoadError, setInitialLoadError] = useState<string | null>(
         null,
     );
-    const [isProductionEndpoint, setIsProductionEndpoint] = useState(true);
     const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
     const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
     const [trashLastUpdatedAt, setTrashLastUpdatedAt] = useState(0);
@@ -93,11 +85,11 @@ export const useLockerData = ({
     const latestDataRequestRef = useRef(0);
     const latestUserDetailsRequestRef = useRef(0);
     const lastUserDetailsRefreshKeyRef = useRef<string | undefined>(undefined);
-    const pendingUserDetailsRefreshRef =
-        useRef<UserDetailsRefreshTrigger | undefined>(undefined);
+    const pendingUserDetailsRefreshRef = useRef<
+        UserDetailsRefreshTrigger | undefined
+    >(undefined);
     const isRefreshingUserDetailsRef = useRef(false);
     const userDetailsRef = useRef<UserDetails | undefined>(undefined);
-    const isProductionEndpointRef = useRef(isProductionEndpoint);
 
     useEffect(
         () => () => {
@@ -110,29 +102,22 @@ export const useLockerData = ({
         userDetailsRef.current = userDetails;
     }, [userDetails]);
 
-    useEffect(() => {
-        isProductionEndpointRef.current = isProductionEndpoint;
-    }, [isProductionEndpoint]);
-
     const loadLockerUsage = useCallback(
         async (
             headers?: Awaited<ReturnType<typeof authenticatedRequestHeaders>>,
         ) => {
-            const requestHeaders = headers ?? (await authenticatedRequestHeaders());
-            const [lockerUsageRes, isProduction] = await Promise.all([
-                fetch(
-                    await apiURL("/users/locker-usage"),
-                    { headers: requestHeaders },
-                ),
-                isEnteProductionEndpoint(),
-            ]);
+            const requestHeaders =
+                headers ?? (await authenticatedRequestHeaders());
+            const lockerUsageRes = await fetch(
+                await apiURL("/users/locker-usage"),
+                { headers: requestHeaders },
+            );
             ensureOk(lockerUsageRes);
             const lockerUsage =
                 (await lockerUsageRes.json()) as LockerUsageResponse;
 
             const isFamily = !!lockerUsage.isFamily;
             return {
-                isProductionEndpoint: isProduction,
                 userDetails: {
                     usage: lockerUsage.usedStorage ?? 0,
                     storageLimit: lockerUsage.storageLimit ?? 0,
@@ -149,7 +134,7 @@ export const useLockerData = ({
                         ? (lockerUsage.usedFileCount ?? 0)
                         : undefined,
                 },
-            } satisfies LockerUsageSnapshot;
+            };
         },
         [],
     );
@@ -158,7 +143,8 @@ export const useLockerData = ({
         async (
             headers?: Awaited<ReturnType<typeof authenticatedRequestHeaders>>,
         ) => {
-            const requestHeaders = headers ?? (await authenticatedRequestHeaders());
+            const requestHeaders =
+                headers ?? (await authenticatedRequestHeaders());
             const userProfileRes = await fetch(
                 await apiURL("/users/details/v2", { memoryCount: false }),
                 { headers: requestHeaders },
@@ -171,38 +157,34 @@ export const useLockerData = ({
         [],
     );
 
-    const loadUserDetails = useCallback(async (): Promise<LoadUserDetailsResult> => {
-        const requestID = ++latestUserDetailsRequestRef.current;
-        try {
-            const headers = await authenticatedRequestHeaders();
-            const [lockerUsage, email] = await Promise.all([
-                loadLockerUsage(headers),
-                loadUserEmail(headers),
-            ]);
-            const nextUserDetails = {
-                ...lockerUsage.userDetails,
-                email,
-            };
-            const snapshot = {
-                isProductionEndpoint: lockerUsage.isProductionEndpoint,
-                userDetails: nextUserDetails,
-            } satisfies UploadLimitStateSnapshot;
+    const loadUserDetails =
+        useCallback(async (): Promise<LoadUserDetailsResult> => {
+            const requestID = ++latestUserDetailsRequestRef.current;
+            try {
+                const headers = await authenticatedRequestHeaders();
+                const [lockerUsage, email] = await Promise.all([
+                    loadLockerUsage(headers),
+                    loadUserEmail(headers),
+                ]);
+                const nextUserDetails = { ...lockerUsage.userDetails, email };
+                const snapshot = {
+                    userDetails: nextUserDetails,
+                } satisfies UploadLimitStateSnapshot;
 
-            if (
-                !mountedRef.current ||
-                requestID !== latestUserDetailsRequestRef.current
-            ) {
-                return { applied: false, snapshot };
+                if (
+                    !mountedRef.current ||
+                    requestID !== latestUserDetailsRequestRef.current
+                ) {
+                    return { applied: false, snapshot };
+                }
+
+                setUserDetails(nextUserDetails);
+                return { applied: true, snapshot };
+            } catch (error) {
+                log.error("Failed to fetch user details", error);
+                return { applied: false };
             }
-
-            setIsProductionEndpoint(lockerUsage.isProductionEndpoint);
-            setUserDetails(nextUserDetails);
-            return { applied: true, snapshot };
-        } catch (error) {
-            log.error("Failed to fetch user details", error);
-            return { applied: false };
-        }
-    }, [loadLockerUsage, loadUserEmail]);
+        }, [loadLockerUsage, loadUserEmail]);
 
     const refreshUserDetailsForSyncState = useCallback(
         async (trigger: UserDetailsRefreshTrigger) => {
@@ -243,7 +225,6 @@ export const useLockerData = ({
     const ensureUploadLimitState = useCallback(async () => {
         if (userDetailsRef.current) {
             return {
-                isProductionEndpoint: isProductionEndpointRef.current,
                 userDetails: userDetailsRef.current,
             } satisfies UploadLimitStateSnapshot;
         }
@@ -251,7 +232,6 @@ export const useLockerData = ({
         try {
             const lockerUsage = await loadLockerUsage();
             return {
-                isProductionEndpoint: lockerUsage.isProductionEndpoint,
                 userDetails: {
                     ...lockerUsage.userDetails,
                     email: savedLocalUser()?.email ?? "",
@@ -379,7 +359,6 @@ export const useLockerData = ({
         collections,
         hasFetched,
         initialLoadError,
-        isProductionEndpoint,
         masterKey,
         refreshData,
         removeCollectionFromState,
