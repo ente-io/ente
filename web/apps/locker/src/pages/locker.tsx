@@ -97,6 +97,7 @@ export const LockerPage: React.FC = () => {
         visibleDeleteCollectionDialog,
     } = useLockerActions({
         collections,
+        ensureUploadLimitState,
         masterKey,
         selectedCollectionID,
         routerPathname: router.pathname,

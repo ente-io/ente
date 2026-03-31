@@ -32,6 +32,13 @@ export interface LockerUploadLimitState {
     lockerFamilyFileCount?: number;
 }
 
+export interface LockerUploadAllowance {
+    maxFileCount: number;
+    currentFileCount: number;
+    remainingFileCount: number;
+    freeStorage: number;
+}
+
 export type LockerUploadPreflightFailureReason =
     | "fileCountLimit"
     | "fileTooLarge"
@@ -41,6 +48,30 @@ export interface LockerUploadPreflightFailure {
     reason: LockerUploadPreflightFailureReason;
     fileName?: string;
 }
+
+export const lockerUploadAllowance = (
+    userDetails: LockerUploadLimitState,
+    isProductionEndpoint: boolean,
+): LockerUploadAllowance => {
+    const maxFileCount = effectiveLockerFileLimit(
+        userDetails.lockerFileLimit,
+        isProductionEndpoint,
+    );
+    const currentFileCount =
+        userDetails.isPartOfFamily &&
+        typeof userDetails.lockerFamilyFileCount === "number"
+            ? userDetails.lockerFamilyFileCount
+            : userDetails.fileCount;
+
+    return {
+        maxFileCount,
+        currentFileCount,
+        remainingFileCount: Math.max(maxFileCount - currentFileCount, 0),
+        freeStorage:
+            Math.max(userDetails.storageLimit - userDetails.usage, 0) +
+            LOCKER_STORAGE_BUFFER_BYTES,
+    };
+};
 
 export const validateLockerUploadBatch = (
     files: File[],
@@ -58,24 +89,13 @@ export const validateLockerUploadBatch = (
         return null;
     }
 
-    const maxFileCount = effectiveLockerFileLimit(
-        userDetails.lockerFileLimit,
-        isProductionEndpoint,
-    );
-    const currentFileCount =
-        userDetails.isPartOfFamily &&
-        typeof userDetails.lockerFamilyFileCount === "number"
-            ? userDetails.lockerFamilyFileCount
-            : userDetails.fileCount;
-    if (currentFileCount + files.length > maxFileCount) {
+    const allowance = lockerUploadAllowance(userDetails, isProductionEndpoint);
+    if (files.length > allowance.remainingFileCount) {
         return { reason: "fileCountLimit" };
     }
 
-    const freeStorage =
-        Math.max(userDetails.storageLimit - userDetails.usage, 0) +
-        LOCKER_STORAGE_BUFFER_BYTES;
     const totalUploadSize = files.reduce((total, file) => total + file.size, 0);
-    if (totalUploadSize > freeStorage) {
+    if (totalUploadSize > allowance.freeStorage) {
         return { reason: "storageLimit" };
     }
 
