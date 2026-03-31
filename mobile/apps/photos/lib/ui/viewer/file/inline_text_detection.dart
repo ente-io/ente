@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:io";
+import "dart:math" as math;
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -11,7 +12,6 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
 import "package:photos/states/detail_page_state.dart";
-import "package:photos/ui/viewer/file/image_animation_demo.dart";
 import "package:photos/utils/file_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
@@ -39,7 +39,9 @@ class InlineTextDetection extends StatefulWidget {
 }
 
 class _InlineTextDetectionState extends State<InlineTextDetection> {
+  static const int _maxCacheSize = 200;
   static final Map<String, _HasTextResult> _hasTextCache = {};
+  static final ValueNotifier<bool> _defaultZoomNotifier = ValueNotifier(false);
   final Logger _logger = Logger("InlineTextDetection");
   final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
@@ -48,7 +50,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   String? _localFilePath;
   int _requestId = 0;
   bool _overlayActive = false;
-  bool _userTriggered = false;
   Offset? _pendingLongPressPosition;
 
   @override
@@ -76,7 +77,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     setState(() {
       _localFilePath = null;
       _overlayActive = false;
-      _userTriggered = false;
       _pendingLongPressPosition = null;
     });
   }
@@ -92,6 +92,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     if (file.uploadedFileID != null) return "uploaded_${file.uploadedFileID}";
     if (file.localID != null) return "local_${file.localID}";
     return "generated_${file.generatedID}";
+  }
+
+  static void _cacheResult(String key, _HasTextResult result) {
+    if (_hasTextCache.length >= _maxCacheSize) {
+      _hasTextCache.remove(_hasTextCache.keys.first);
+    }
+    _hasTextCache[key] = result;
   }
 
   bool _isFileEligible(EnteFile file) {
@@ -136,7 +143,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       final File? localFile = await getFile(widget.file);
       if (!mounted || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
+        _cacheResult(cacheKey, const _HasTextResult(hasText: false));
         return;
       }
 
@@ -165,7 +172,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         hasText: hasText,
         localPath: hasText ? localFile.path : null,
       );
-      _hasTextCache[cacheKey] = result;
+      _cacheResult(cacheKey, result);
 
       setState(() {
         _localFilePath = result.localPath;
@@ -175,7 +182,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
-      _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
+      _cacheResult(cacheKey, const _HasTextResult(hasText: false));
     }
   }
 
@@ -188,7 +195,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   void _handleLongPress(LongPressStartDetails details) {
     if (_overlayActive) return; // Already active, let overlay handle it
     setState(() {
-      _userTriggered = true;
       _pendingLongPressPosition = details.globalPosition;
     });
     // If hasText already completed and file path is ready, activate now
@@ -225,7 +231,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
 
     return ValueListenableBuilder<bool>(
-      valueListenable: isZoomedNotifier ?? ValueNotifier(false),
+      valueListenable: isZoomedNotifier ?? _defaultZoomNotifier,
       builder: (context, isZoomed, _) {
         final bool shouldHide = widget.isGuestView || isZoomed;
 
@@ -245,48 +251,61 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   Widget _buildInlineOverlay(BuildContext context) {
     final l10n = context.l10n;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        TextDetectorWidget(
-          key: ValueKey("ocr_$_localFilePath"),
-          imagePath: _localFilePath!,
-          autoDetect: !_userTriggered,
-          backgroundColor: Colors.transparent,
-          showUnselectedBoundaries: true,
-          overlayOnly: true,
-          showProcessingOverlay: false,
-          showEditorHint: false,
-          initialInteractionPosition: _pendingLongPressPosition,
-          controller: _detectorController,
-          strings: TextDetectorStrings(
-            processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
-            selectionHint: l10n.ocrSelectionHint,
-            noTextDetected: l10n.ocrNoTextDetected,
-            retryButtonLabel: l10n.ocrRetryButtonLabel,
-            modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
-            modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
-            imageNotFoundError: l10n.ocrImageNotFoundError,
-            imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
-            genericDetectError: l10n.ocrGenericDetectError,
+    return ListenableBuilder(
+      listenable: _detectorController,
+      builder: (context, child) {
+        final bool isProcessing =
+            _detectorController.userAttemptedInteraction &&
+                _detectorController.isProcessing &&
+                !_detectorController.hasSelectableText;
+        return IgnorePointer(
+          ignoring: isProcessing,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              child!,
+              if (isProcessing)
+                IgnorePointer(
+                  child: Center(
+                    child: widget.file.hasDimensions
+                        ? AspectRatio(
+                            aspectRatio: widget.file.width / widget.file.height,
+                            child: const _WhiteDotWaveOverlay(),
+                          )
+                        : const _WhiteDotWaveOverlay(),
+                  ),
+                ),
+            ],
           ),
-          onTextCopied: (text) {
-            HapticFeedback.lightImpact();
-          },
+        );
+      },
+      child: TextDetectorWidget(
+        key: ValueKey("ocr_$_localFilePath"),
+        imagePath: _localFilePath!,
+        autoDetect: true,
+        backgroundColor: Colors.transparent,
+        showUnselectedBoundaries: true,
+        overlayOnly: true,
+        showProcessingOverlay: false,
+        showScanAnimation: false,
+        showEditorHint: false,
+        initialInteractionPosition: _pendingLongPressPosition,
+        controller: _detectorController,
+        strings: TextDetectorStrings(
+          processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
+          selectionHint: l10n.ocrSelectionHint,
+          noTextDetected: l10n.ocrNoTextDetected,
+          retryButtonLabel: l10n.ocrRetryButtonLabel,
+          modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
+          modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
+          imageNotFoundError: l10n.ocrImageNotFoundError,
+          imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
+          genericDetectError: l10n.ocrGenericDetectError,
         ),
-        ListenableBuilder(
-          listenable: _detectorController,
-          builder: (context, _) {
-            if (_detectorController.isProcessing &&
-                !_detectorController.hasSelectableText) {
-              return const IgnorePointer(
-                child: ScanPulseOverlay(),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-      ],
+        onTextCopied: (text) {
+          HapticFeedback.lightImpact();
+        },
+      ),
     );
   }
 }
@@ -296,4 +315,101 @@ class _HasTextResult {
   final String? localPath;
 
   const _HasTextResult({required this.hasText, this.localPath});
+}
+
+/// White dot grid that pulses in a radial wave from center outward.
+class _WhiteDotWaveOverlay extends StatefulWidget {
+  const _WhiteDotWaveOverlay();
+
+  @override
+  State<_WhiteDotWaveOverlay> createState() => _WhiteDotWaveOverlayState();
+}
+
+class _WhiteDotWaveOverlayState extends State<_WhiteDotWaveOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return CustomPaint(
+          painter: _WhiteDotWavePainter(progress: _controller.value),
+          size: Size.infinite,
+        );
+      },
+    );
+  }
+}
+
+class _WhiteDotWavePainter extends CustomPainter {
+  static const int _cols = 20;
+  static const int _rows = 14;
+  static const double _maxDelay = 0.72; // 1.8s / 2.5s
+
+  final double progress;
+
+  _WhiteDotWavePainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double cx = size.width / 2;
+    final double cy = size.height / 2;
+    final double maxDist = math.sqrt(cx * cx + cy * cy);
+
+    for (int r = 0; r < _rows; r++) {
+      for (int c = 0; c < _cols; c++) {
+        final double x = ((c + 0.5) / _cols) * size.width;
+        final double y = ((r + 0.5) / _rows) * size.height;
+
+        final double dist = math.sqrt(
+          math.pow(x - cx, 2) + math.pow(y - cy, 2),
+        );
+        final double delay = (dist / maxDist) * _maxDelay;
+
+        double phase = (progress - delay) % 1.0;
+        if (phase < 0) phase += 1.0;
+
+        // Ping-pong with ease-in-out in each half
+        double t;
+        if (phase < 0.5) {
+          t = _easeInOut(phase * 2);
+        } else {
+          t = _easeInOut((1.0 - phase) * 2);
+        }
+
+        if (t < 0.01) continue;
+
+        final double radius = 2.0 * t;
+        final double opacity = 0.5 * t;
+
+        final paint = Paint()..color = Color.fromRGBO(255, 255, 255, opacity);
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  static double _easeInOut(double t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  }
+
+  @override
+  bool shouldRepaint(_WhiteDotWavePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
