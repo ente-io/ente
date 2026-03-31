@@ -366,7 +366,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const electron = globalThis.electron;
 
-    const closeUploadProgress = () => setUploadProgressView(false);
+    const closeUploadProgress = () => uploadManager.hideUploadProgressDialog();
 
     const handleCollectionMappingChoiceClose = () => {
         setOpenCollectionMappingChoice(false);
@@ -401,7 +401,7 @@ export const Upload: React.FC<UploadProps> = ({
         );
 
         if (uploadManager.isUploadRunning()) {
-            setUploadProgressView(true);
+            uploadManager.showUploadProgressDialog();
         }
 
         if (electron) {
@@ -636,7 +636,7 @@ export const Upload: React.FC<UploadProps> = ({
         onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
-        setUploadProgressView(true);
+        uploadManager.showUploadProgressDialog();
     };
 
     const uploadFilesToExistingCollection = async (
@@ -750,7 +750,7 @@ export const Upload: React.FC<UploadProps> = ({
         parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
     ) => {
         uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
-        setUploadProgressView(true);
+        uploadManager.showUploadProgressDialog();
         await onRemotePull({ silent: true });
     };
 
