@@ -9,11 +9,11 @@ Future<T?> showBaseBottomSheet<T>(
   TextStyle? titleStyle,
   bool showCloseButton = true,
   VoidCallback? onClose,
-  double headerSpacing = 20,
+  double headerSpacing = 16,
   Color? backgroundColor,
   Color? modalBackgroundColor,
   CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-  EdgeInsets padding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+  EdgeInsets padding = const EdgeInsets.all(20),
   bool isDismissible = true,
   bool enableDrag = true,
   bool isKeyboardAware = true,
@@ -76,9 +76,9 @@ class BaseBottomSheet extends StatelessWidget {
     this.showCloseButton = true,
     this.onClose,
     this.crossAxisAlignment = CrossAxisAlignment.start,
-    this.padding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    this.padding = const EdgeInsets.all(20),
     this.backgroundColor,
-    this.headerSpacing = 20,
+    this.headerSpacing = 16,
     this.isKeyboardAware = true,
     this.topCornerRadius = 20,
     this.closeButtonBackgroundColor,
@@ -115,7 +115,7 @@ class BaseBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: titleStyle ?? textTheme.largeBold),
+                    Text(title, style: titleStyle ?? textTheme.h4Bold),
                     if (showCloseButton)
                       BottomSheetCloseButton(
                         onTap: onClose,
