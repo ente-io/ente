@@ -51,7 +51,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 logout();
             })
             .catch((error: unknown) => {
-                log.error("Failed to validate saved user token mismatch", error);
+                log.error(
+                    "Failed to validate saved user token mismatch",
+                    error,
+                );
             });
     }, [logout]);
 

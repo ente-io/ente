@@ -23,6 +23,20 @@ import {
     stringToB64,
 } from "./crypto";
 import {
+    type StoredTrashFileRecord,
+    deleteCollectionSinceTime,
+    deleteFileRecords,
+    deleteFileRecordsForCollection,
+    deleteTrashFileRecords,
+    loadLockerSnapshotFromDB,
+    saveCollectionRecords,
+    saveCollectionSinceTime,
+    saveCollectionsSinceTime,
+    saveFileRecords,
+    saveTrashFileRecords,
+    saveTrashSinceTime,
+} from "./locker-db";
+import {
     type EncryptedCollectionRecord,
     type EncryptedFileRecord,
     type LockerCollectionPayload,
@@ -32,20 +46,6 @@ import {
     replaceLockerCache,
     setEncryptedFileRecord,
 } from "./remote-cache";
-import {
-    deleteCollectionSinceTime,
-    deleteFileRecords,
-    deleteFileRecordsForCollection,
-    deleteTrashFileRecords,
-    loadLockerSnapshotFromDB,
-    type StoredTrashFileRecord,
-    saveCollectionRecords,
-    saveCollectionSinceTime,
-    saveCollectionsSinceTime,
-    saveFileRecords,
-    saveTrashFileRecords,
-    saveTrashSinceTime,
-} from "./locker-db";
 import {
     RemoteCollectionUserSchema,
     toLockerCollectionParticipant,
@@ -226,7 +226,9 @@ const normalizeCollectionParticipant = (
     fallback?: Partial<LockerCollectionParticipant> & { id: number },
 ): LockerCollectionParticipant | undefined => {
     const participant =
-        typeof value === "object" && value ? (value as Record<string, unknown>) : undefined;
+        typeof value === "object" && value
+            ? (value as Record<string, unknown>)
+            : undefined;
     const id =
         typeof participant?.id === "number" ? participant.id : fallback?.id;
     if (id === undefined) {
@@ -254,10 +256,7 @@ const normalizeCollectionParticipant = (
 const fallbackCollectionPayload = (
     record: Pick<EncryptedCollectionRecord, "ownerID" | "payload">,
 ): LockerCollectionPayload => ({
-    owner: record.payload?.owner ?? {
-        id: record.ownerID,
-        role: "OWNER",
-    },
+    owner: record.payload?.owner ?? { id: record.ownerID, role: "OWNER" },
     sharees: record.payload?.sharees ?? [],
     name: record.payload?.name,
 });
@@ -289,14 +288,10 @@ const decryptCollectionPayload = async (
             typeof payload === "object" && payload
                 ? (payload as Record<string, unknown>)
                 : undefined;
-        const owner =
-            normalizeCollectionParticipant(payloadObject?.owner, {
-                id: record.ownerID,
-                role: "OWNER",
-            }) ?? {
-                id: record.ownerID,
-                role: "OWNER",
-            };
+        const owner = normalizeCollectionParticipant(payloadObject?.owner, {
+            id: record.ownerID,
+            role: "OWNER",
+        }) ?? { id: record.ownerID, role: "OWNER" };
         const sharees = Array.isArray(payloadObject?.sharees)
             ? payloadObject.sharees
                   .map((sharee) => normalizeCollectionParticipant(sharee))
@@ -314,7 +309,10 @@ const decryptCollectionPayload = async (
 
         return { owner, sharees, name };
     } catch (error) {
-        log.error(`Failed to decrypt collection payload for ${record.id}`, error);
+        log.error(
+            `Failed to decrypt collection payload for ${record.id}`,
+            error,
+        );
         return undefined;
     }
 };
@@ -331,15 +329,15 @@ const decryptCollectionNameFromRemote = async (
 
     try {
         const nameBytes = await decryptBoxBytes(
-            {
-                encryptedData: encryptedName,
-                nonce: nameDecryptionNonce,
-            },
+            { encryptedData: encryptedName, nonce: nameDecryptionNonce },
             collectionKey,
         );
         return collectionTextDecoder.decode(nameBytes);
     } catch (error) {
-        log.error(`Failed to decrypt collection name for ${collectionID}`, error);
+        log.error(
+            `Failed to decrypt collection name for ${collectionID}`,
+            error,
+        );
         return undefined;
     }
 };
@@ -383,7 +381,9 @@ const toEncryptedCollectionRecord = (
                 ...toLockerCollectionParticipant(collection.owner),
                 role: "OWNER",
             },
-            sharees: (collection.sharees ?? []).map(toLockerCollectionParticipant),
+            sharees: (collection.sharees ?? []).map(
+                toLockerCollectionParticipant,
+            ),
             name:
                 collection.name ??
                 (await decryptCollectionNameFromRemote(
@@ -426,11 +426,7 @@ const decryptCollectionDetails = async (
         )) ??
         "Untitled";
 
-    return {
-        owner: payload.owner,
-        sharees: payload.sharees,
-        name,
-    };
+    return { owner: payload.owner, sharees: payload.sharees, name };
 };
 
 const buildLockerCache = (
@@ -982,16 +978,14 @@ export const syncLockerState = async (
 
 export const fetchLockerData = async (
     masterKey: string,
-): Promise<LockerCollection[]> => (await syncLockerState(masterKey)).collections;
+): Promise<LockerCollection[]> =>
+    (await syncLockerState(masterKey)).collections;
 
 export const fetchLockerTrash = async (
     masterKey: string,
 ): Promise<LockerTrashData> => {
     const state = await syncLockerState(masterKey);
-    return {
-        items: state.trashItems,
-        lastUpdatedAt: state.trashLastUpdatedAt,
-    };
+    return { items: state.trashItems, lastUpdatedAt: state.trashLastUpdatedAt };
 };
 
 export const downloadLockerFile = async (

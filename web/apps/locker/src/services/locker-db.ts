@@ -32,22 +32,10 @@ export interface StoredTrashFileRecord extends EncryptedFileRecord {
 type StoredCollectionRecord = Omit<EncryptedCollectionRecord, "payload">;
 
 interface LockerDBSchema extends DBSchema {
-    collections: {
-        key: number;
-        value: StoredCollectionRecord;
-    };
-    files: {
-        key: [number, number];
-        value: EncryptedFileRecord;
-    };
-    trashFiles: {
-        key: number;
-        value: StoredTrashFileRecord;
-    };
-    meta: {
-        key: string;
-        value: number;
-    };
+    collections: { key: number; value: StoredCollectionRecord };
+    files: { key: [number, number]; value: EncryptedFileRecord };
+    trashFiles: { key: number; value: StoredTrashFileRecord };
+    meta: { key: string; value: number };
 }
 
 interface CachedLockerDB {
@@ -90,9 +78,7 @@ const recreateLockerObjectStores = (db: IDBPDatabase<LockerDBSchema>) => {
     }
 
     db.createObjectStore("collections", { keyPath: "id" });
-    db.createObjectStore("files", {
-        keyPath: ["id", "collectionID"],
-    });
+    db.createObjectStore("files", { keyPath: ["id", "collectionID"] });
     db.createObjectStore("trashFiles", { keyPath: "id" });
     db.createObjectStore("meta");
 };
@@ -189,14 +175,20 @@ export const loadLockerSnapshotFromDB = async (
             tx.objectStore("collections").getAll(),
             tx.objectStore("files").getAll(),
             tx.objectStore("trashFiles").getAll(),
-            tx.objectStore("meta").getAllKeys().then(async (keys) =>
-                Promise.all(
-                    keys.map(async (key) => [
-                        key,
-                        await tx.objectStore("meta").get(key),
-                    ] as const),
+            tx
+                .objectStore("meta")
+                .getAllKeys()
+                .then(async (keys) =>
+                    Promise.all(
+                        keys.map(
+                            async (key) =>
+                                [
+                                    key,
+                                    await tx.objectStore("meta").get(key),
+                                ] as const,
+                        ),
+                    ),
                 ),
-            ),
         ],
     );
     await tx.done;
