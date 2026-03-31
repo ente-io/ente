@@ -22,9 +22,9 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/share_util.dart";
 
 class MemoryLanePage extends StatefulWidget {
   final PersonEntity person;
@@ -627,10 +627,9 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                               if (!context.mounted || shareLinkData == null) {
                                 return;
                               }
-                              await showMemoryLinkDetailsSheet(
-                                context,
-                                shareUrl: shareLinkData.$1,
-                                shareId: shareLinkData.$2,
+                              await shareText(
+                                shareLinkData.$1,
+                                context: context,
                               );
                             },
                           ),

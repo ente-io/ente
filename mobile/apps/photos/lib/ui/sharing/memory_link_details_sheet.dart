@@ -19,7 +19,6 @@ Future<bool?> showMemoryLinkDetailsSheet(
   return showBaseBottomSheet<bool>(
     context,
     title: l10n.shareLink,
-    padding: const EdgeInsets.all(16),
     child: Builder(
       builder: (context) {
         final colorScheme = getEnteColorScheme(context);
@@ -28,23 +27,30 @@ Future<bool?> showMemoryLinkDetailsSheet(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l10n.memoryShareLinkDescription, style: textTheme.smallMuted),
+            Text(
+              l10n.memoryShareLinkDescription,
+              style:
+                  textTheme.bodyMuted.copyWith(color: colorScheme.contentLight),
+            ),
             const SizedBox(height: 14),
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
                 color: colorScheme.fillDark,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
-                    child: SelectableText(shareUrl, style: textTheme.small),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 56, 20),
+                    child: SelectableText(
+                      shareUrl,
+                      style: textTheme.body.copyWith(height: 1.5),
+                    ),
                   ),
                   Positioned(
-                    right: 0,
-                    top: 0,
+                    right: 8,
+                    top: 8,
                     child: IconButton(
                       tooltip: l10n.copyLink,
                       iconSize: 20,
@@ -74,11 +80,12 @@ Future<bool?> showMemoryLinkDetailsSheet(
                 await shareText(shareUrl, context: context);
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Center(
               child: ButtonWidgetV2(
-                buttonType: ButtonTypeV2.critical,
+                buttonType: ButtonTypeV2.tertiaryCritical,
                 labelText: l10n.deleteLink,
+                shouldSurfaceExecutionStates: false,
                 onTap: () async {
                   final shouldDelete = await showAlertBottomSheet<bool>(
                     context,

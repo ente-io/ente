@@ -7,10 +7,12 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memory_shares_db.dart';
 import 'package:photos/db/ml/db.dart';
+import 'package:photos/events/memory_share_updated_event.dart';
 import 'package:photos/gateways/entity/models/type.dart';
 import 'package:photos/models/api/memory_share/memory_share.dart';
 import 'package:photos/models/file/file.dart';
@@ -111,6 +113,7 @@ class MemoryShareService {
       );
       await _db.upsert(localShare);
       _updateMemoryShareCache(localShare);
+      Bus.instance.fire(MemoryShareUpdatedEvent("create-memory-share"));
 
       return (shareUrl, memoryShare.id);
     } catch (e, s) {
@@ -183,6 +186,7 @@ class MemoryShareService {
       );
       await _db.upsert(localShare);
       _updateMemoryShareCache(localShare);
+      Bus.instance.fire(MemoryShareUpdatedEvent("create-memory-lane-link"));
 
       return (shareUrl, memoryShare.id);
     } catch (e, s) {
@@ -350,6 +354,7 @@ class MemoryShareService {
       await _enteDio.delete('/memory-share/$shareID');
       await _db.delete(shareID);
       _removeMemoryShareFromCache(shareID);
+      Bus.instance.fire(MemoryShareUpdatedEvent("delete-memory-share"));
     } catch (e, s) {
       _logger.severe("Failed to delete memory share $shareID", e, s);
       rethrow;

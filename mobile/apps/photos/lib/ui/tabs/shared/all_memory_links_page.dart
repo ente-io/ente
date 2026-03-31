@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/memory_share/memory_share.dart";
 import "package:photos/services/memory_share_service.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
@@ -62,7 +63,7 @@ class _AllMemoryLinksPageState extends State<AllMemoryLinksPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TitleBarTitleWidget(
-                  title: "Memory Links",
+                  title: AppLocalizations.of(context).memoryLinks,
                   heroTag: widget.titleHeroTag,
                 ),
                 Text(widget.memoryShares.length.toString()),
@@ -91,7 +92,6 @@ class _AllMemoryLinksPageState extends State<AllMemoryLinksPage> {
                       title: title,
                       fileCount: share.fileCount,
                       previewUploadedFileID: share.previewUploadedFileID,
-                      shareUrl: share.url,
                     ),
                   );
                 },

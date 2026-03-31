@@ -14,6 +14,7 @@ import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/events/resume_video_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -28,7 +29,6 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart"
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
-import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -630,7 +630,7 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await _showMemoryShareSheet(
+              await _shareMemory(
                 context,
                 inheritedData,
                 memoryTitle,
@@ -829,12 +829,16 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
   }
 }
 
-Future<void> _showMemoryShareSheet(
+Future<void> _shareMemory(
   BuildContext context,
   FullScreenMemoryData inheritedData,
   String memoryTitle,
 ) async {
   final l10n = AppLocalizations.of(context);
+  final currentFile =
+      inheritedData.memories[inheritedData.indexNotifier.value].file;
+  final shareSingleItemLabel =
+      currentFile.isVideo ? l10n.shareThisVideo : l10n.shareThisPhoto;
   final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
       !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
   final shouldShareLink = await showBaseBottomSheet<bool>(
@@ -849,7 +853,7 @@ Future<void> _showMemoryShareSheet(
           children: [
             if (canShowMemoryShareLinkOption)
               MenuItemWidgetNew(
-                title: l10n.shareALinkToThisMemory,
+                title: l10n.shareTheseMemories,
                 trailingWidget: HugeIcon(
                   icon: HugeIcons.strokeRoundedLink02,
                   color: colorScheme.textBase,
@@ -861,7 +865,7 @@ Future<void> _showMemoryShareSheet(
                 },
               ),
             MenuItemWidgetNew(
-              title: l10n.shareThisPhoto,
+              title: shareSingleItemLabel,
               trailingWidget: HugeIcon(
                 icon: HugeIcons.strokeRoundedShare04,
                 color: colorScheme.textBase,
@@ -890,16 +894,10 @@ Future<void> _showMemoryShareSheet(
     if (!context.mounted || shareLinkData == null) {
       return;
     }
-    await showMemoryLinkDetailsSheet(
-      context,
-      shareUrl: shareLinkData.$1,
-      shareId: shareLinkData.$2,
-    );
+    await shareText(shareLinkData.$1, context: context);
     return;
   }
 
-  final currentFile =
-      inheritedData.memories[inheritedData.indexNotifier.value].file;
   await share(context, [currentFile]);
 }
 

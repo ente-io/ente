@@ -62,7 +62,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,15 +81,13 @@ class AlertBottomSheet<T> extends StatelessWidget {
               ],
               Text(
                 title,
-                style: textTheme.h3Bold,
+                style: textTheme.h4Bold,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               Text(
                 message,
-                style: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                ),
+                style: textTheme.bodyMuted,
                 textAlign: TextAlign.center,
               ),
               ..._buildButtonsSection(),
