@@ -27,6 +27,7 @@ jobs:
 
             - name: Verify frozen mobile pubspecs
               run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/locker
+              working-directory: ${{ github.workspace }}
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2

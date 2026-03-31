@@ -74,7 +74,9 @@ jobs:
             git show "${revision}:${file}" | ruby -e '
               FULL_SHA = /\A[0-9a-f]{40}\z/
 
-              refs = STDIN.read.scan(/^\s*uses:\s*([A-Za-z0-9._-]+\/[A-Za-z0-9._-]+)@([^\s#]+)/)
+              refs = STDIN.read.scan(
+                /^\s*uses:\s*([A-Za-z0-9._-]+\/[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._\/-]+)?)@([^\s#]+)/
+              )
               refs.each do |action, ref|
                 next if action.start_with?("actions/")
                 next if ref.match?(FULL_SHA)
