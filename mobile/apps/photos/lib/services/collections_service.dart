@@ -610,15 +610,15 @@ class CollectionsService {
     return SharedCollections(outgoing, incoming, quickLinks);
   }
 
-  Future<SharedCollectionsWithMemoryLinks>
-      getSharedCollectionsWithMemoryLinks() async {
+  Future<SharedCollectionsAndMemoryLinks>
+      getSharedCollectionsAndMemoryLinks() async {
     final collections = await getSharedCollections();
     try {
       final memoryLinks = await MemoryShareService.instance.listMemoryShares();
-      return SharedCollectionsWithMemoryLinks(collections, memoryLinks);
+      return SharedCollectionsAndMemoryLinks(collections, memoryLinks);
     } catch (e, s) {
       _logger.severe("failed to load memory links", e, s);
-      return SharedCollectionsWithMemoryLinks(collections, []);
+      return SharedCollectionsAndMemoryLinks(collections, []);
     }
   }
 

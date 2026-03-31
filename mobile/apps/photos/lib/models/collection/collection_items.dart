@@ -24,13 +24,13 @@ class SharedCollections {
   }
 }
 
-class SharedCollectionsWithMemoryLinks {
+class SharedCollectionsAndMemoryLinks {
   final SharedCollections collections;
   final List<MemoryShare> memoryLinks;
 
-  SharedCollectionsWithMemoryLinks(this.collections, this.memoryLinks);
+  SharedCollectionsAndMemoryLinks(this.collections, this.memoryLinks);
 
-  static SharedCollectionsWithMemoryLinks empty() {
-    return SharedCollectionsWithMemoryLinks(SharedCollections.empty(), []);
+  static SharedCollectionsAndMemoryLinks empty() {
+    return SharedCollectionsAndMemoryLinks(SharedCollections.empty(), []);
   }
 }

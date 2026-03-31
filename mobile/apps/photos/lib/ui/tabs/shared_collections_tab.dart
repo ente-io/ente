@@ -200,10 +200,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     super.build(context);
     final bool offlineUiMode =
         isOfflineMode && !Configuration.instance.hasConfiguredAccount();
-    return FutureBuilder<SharedCollectionsWithMemoryLinks>(
+    return FutureBuilder<SharedCollectionsAndMemoryLinks>(
       future: offlineUiMode
-          ? Future.value(SharedCollectionsWithMemoryLinks.empty())
-          : CollectionsService.instance.getSharedCollectionsWithMemoryLinks(),
+          ? Future.value(SharedCollectionsAndMemoryLinks.empty())
+          : CollectionsService.instance.getSharedCollectionsAndMemoryLinks(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data!;
