@@ -14,7 +14,7 @@ dependency_overrides:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: v2-embeddings-only
+      ref: 16kb-fix
   intl: ^0.20.2
   js: ^0.6.7
   media_kit:
