@@ -200,12 +200,6 @@ interface RowButtonProps {
      * if it is not a string.
      */
     caption?: React.ReactNode;
-    /**
-     * The typography variant to use for the caption, when present.
-     *
-     * Default: "small".
-     */
-    captionVariant?: TypographyProps["variant"];
 }
 
 /**
@@ -222,7 +216,6 @@ export const RowButton: React.FC<RowButtonProps> = ({
     endIcon,
     label,
     caption,
-    captionVariant = "small",
     onClick,
 }) => (
     <RowButtonRoot rbVariant={variant} fullWidth {...{ disabled, onClick }}>
@@ -262,10 +255,7 @@ export const RowButton: React.FC<RowButtonProps> = ({
                             <CaptionTypography color={color}>
                                 {"•"}
                             </CaptionTypography>
-                            <CaptionTypography
-                                color={color}
-                                variant={captionVariant}
-                            >
+                            <CaptionTypography color={color}>
                                 {caption}
                             </CaptionTypography>
                         </Stack>
@@ -314,13 +304,10 @@ const RowButtonRoot = styled(FocusVisibleButton, {
 }));
 
 const CaptionTypography: React.FC<
-    React.PropsWithChildren<{
-        color: RowButtonProps["color"];
-        variant?: TypographyProps["variant"];
-    }>
-> = ({ color, variant = "small", children }) => (
+    React.PropsWithChildren<{ color: RowButtonProps["color"] }>
+> = ({ color, children }) => (
     <Typography
-        variant={variant}
+        variant="small"
         sx={[
             color == "critical"
                 ? { color: "critical.main" }

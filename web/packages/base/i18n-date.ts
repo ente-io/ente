@@ -13,6 +13,12 @@ const _dateFormat = new Intl.DateTimeFormat(i18n.language, {
     year: "numeric",
 });
 
+const _dateWithoutWeekdayFormat = new Intl.DateTimeFormat(i18n.language, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+});
+
 const _dateWithoutYearFormat = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
     day: "numeric",
@@ -22,6 +28,10 @@ const _dateWithoutYearFormat = new Intl.DateTimeFormat(i18n.language, {
 const _timeFormat = new Intl.DateTimeFormat(i18n.language, {
     timeStyle: "short",
 });
+
+interface FormattedDateOptions {
+    omitWeekdayWhenYearIncluded?: boolean;
+}
 
 /**
  * Return a locale aware formatted date from the given {@link Date}.
@@ -33,8 +43,14 @@ const _timeFormat = new Intl.DateTimeFormat(i18n.language, {
  *
  * - Otherwise, the year is included, e.g., "Fri, 21 Feb 2025".
  */
-export const formattedDate = (date: Date) =>
-    (isSameYear(date) ? _dateWithoutYearFormat : _dateFormat).format(date);
+export const formattedDate = (date: Date, options?: FormattedDateOptions) =>
+    (
+        isSameYear(date)
+            ? _dateWithoutYearFormat
+            : options?.omitWeekdayWhenYearIncluded
+              ? _dateWithoutWeekdayFormat
+              : _dateFormat
+    ).format(date);
 
 const isSameYear = (date: Date) =>
     new Date().getFullYear() === date.getFullYear();
@@ -66,11 +82,13 @@ export const formattedTime = (date: Date) => _timeFormat.format(date);
  * date, or it can be given the raw epoch microseconds value and it'll convert
  * internally.
  */
-export const formattedDateTime = (dateOrEpochMicroseconds: Date | number) =>
-    _formattedDateTime(toDate(dateOrEpochMicroseconds));
+export const formattedDateTime = (
+    dateOrEpochMicroseconds: Date | number,
+    options?: FormattedDateOptions,
+) => _formattedDateTime(toDate(dateOrEpochMicroseconds), options);
 
-const _formattedDateTime = (date: Date) =>
-    [formattedDate(date), t("at"), formattedTime(date)].join(" ");
+const _formattedDateTime = (date: Date, options?: FormattedDateOptions) =>
+    [formattedDate(date, options), t("at"), formattedTime(date)].join(" ");
 
 const toDate = (dm: Date | number) =>
     typeof dm == "number" ? new Date(dm / 1000) : dm;

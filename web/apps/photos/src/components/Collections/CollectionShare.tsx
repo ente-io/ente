@@ -1998,7 +1998,6 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                     onClick={showExpiryOptions}
                     endIcon={<ChevronRightIcon />}
                     label={t("link_expiry")}
-                    captionVariant="mini"
                     color={
                         isLinkExpired(publicURL.validTill)
                             ? "critical"
@@ -2008,7 +2007,9 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                         isLinkExpired(publicURL.validTill)
                             ? t("link_expired")
                             : publicURL.validTill
-                              ? formattedDateTime(publicURL.validTill)
+                              ? formattedDateTime(publicURL.validTill, {
+                                    omitWeekdayWhenYearIncluded: true,
+                                })
                               : t("never")
                     }
                 />
