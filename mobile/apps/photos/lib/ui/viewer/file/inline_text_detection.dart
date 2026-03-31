@@ -208,7 +208,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isEligible || widget.file is TrashFile) {
+    if (!_isEligible || widget.file is TrashFile || widget.isGuestView) {
       return const SizedBox.shrink();
     }
 
@@ -218,9 +218,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     // During the wait period (hasText passed but 1s timer hasn't fired),
     // show a transparent gesture layer to capture long press.
     if (!_overlayActive || _localFilePath == null) {
-      if (!_isEligible || widget.isGuestView) {
-        return const SizedBox.shrink();
-      }
       return Positioned.fill(
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -233,7 +230,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return ValueListenableBuilder<bool>(
       valueListenable: isZoomedNotifier ?? _defaultZoomNotifier,
       builder: (context, isZoomed, _) {
-        final bool shouldHide = widget.isGuestView || isZoomed;
+        final bool shouldHide = isZoomed;
 
         return Positioned.fill(
           child: IgnorePointer(
