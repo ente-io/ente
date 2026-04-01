@@ -7,6 +7,7 @@ Latest changes:
 - Neeraj: Guard shared favorites removal resolution
 - Neeraj: Handle incomplete signup login errors with localized error copy
 - Neeraj: Improve motion photo video detection in rust layer
+- Amrithesh: OCR inline text detection
 - Ashil, Setal: Native family management screens
 - Prateek: 16 KB page size fix
 
