@@ -51,6 +51,7 @@ const LEGACY_ATTACHMENTS_DIR_NAME: &str = "ensu_llmchat_attachments";
 const SYNC_CURSOR_META_KEY: &str = "llmchat.sync.cursor";
 const SYNC_CHAT_KEY_META_KEY: &str = "llmchat.chat.key";
 const SYNC_OFFLINE_SEED_META_KEY: &str = "llmchat.offline.seeded.v1";
+const LLM_PANIC_JOB_ID: i64 = 0;
 
 #[derive(Debug, Serialize)]
 pub struct ApiError {
@@ -1705,13 +1706,20 @@ pub fn llm_generate_chat_stream(
 
     async_runtime::spawn_blocking(move || {
         match catch_unwind(AssertUnwindSafe(|| {
-            let mut sink = LlmEventSink::new(window);
+            let mut sink = LlmEventSink::new(window.clone());
             let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
         })) {
             Ok(()) => {}
             Err(payload) => {
                 let message = panic_message(payload);
                 log_command_panic("llm_generate_chat_stream", &message);
+                let _ = window.emit(
+                    "llm-event",
+                    LlmEvent::Error {
+                        job_id: LLM_PANIC_JOB_ID,
+                        message: format!("Generation panicked: {message}"),
+                    },
+                );
             }
         }
     });

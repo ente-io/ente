@@ -177,6 +177,7 @@ jobs:
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
                   ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
+                  ENSU_TAURI_REQUIRE_UPDATER_PUBKEY: "1"
               run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
 
             - name: Ensure ENSU Tauri signing key is configured
