@@ -122,6 +122,13 @@ export const shareAppOrigin = (): string =>
     process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT ?? "https://share.ente.io";
 
 /**
+ * A static build time constant that is `true` if {@link memoriesAppOrigin} has
+ * been customized.
+ */
+export const isCustomMemoriesAppOrigin =
+    !!process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT;
+
+/**
  * Return the origin/path that serves the memories app landing experience.
  *
  * Defaults to our production memories app, "https://memories.ente.io",
