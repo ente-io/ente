@@ -282,12 +282,6 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			want: expiredWarningStageNone,
 		},
 		{
-			name:    "long expired backfill without history starts at first reminder",
-			now:     expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10,
-			history: map[string]int64{},
-			want:    expiredWarningStage0,
-		},
-		{
 			name: "old cycle reminder ignored after renewal",
 			now:  expiredWarningAnchor,
 			history: map[string]int64{
@@ -307,41 +301,64 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 	}
 }
 
-func TestResolveExpiredWarningStageLateBackfillSequence(t *testing.T) {
+func TestResolveExpiredWarningUsesBufferedCycleForLateBackfill(t *testing.T) {
 	expiredWarningAnchor := int64(100)
 	now := expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10
-	history := map[string]int64{}
+	got := resolveExpiredWarning(expiredWarningAnchor, now, map[string]int64{})
 
-	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage0 {
-		t.Fatalf("expected first late-backfill stage %q, got %q", expiredWarningStage0, got)
+	if got.Stage != expiredWarningStage0 {
+		t.Fatalf("unexpected stage: got %q want %q", got.Stage, expiredWarningStage0)
+	}
+	if !got.BufferedCycle {
+		t.Fatal("expected late backfill to use a buffered cycle")
+	}
+	if got.CycleStart != now {
+		t.Fatalf("unexpected cycle start: got %d want %d", got.CycleStart, now)
+	}
+	wantAutoDeleteDate := now + storageWarningExpiredBackfillMinRecoveryDelay
+	if got.AutoDeleteDate != wantAutoDeleteDate {
+		t.Fatalf("unexpected auto delete date: got %d want %d", got.AutoDeleteDate, wantAutoDeleteDate)
+	}
+}
+
+func TestResolveExpiredWarningBufferedCycleKeepsLaterHistoricalDeleteDate(t *testing.T) {
+	expiredWarningAnchor := int64(100)
+	now := expiredWarningAnchor + storageWarningExpiredBackfillThreshold + 10
+
+	got := resolveExpiredWarning(expiredWarningAnchor, now, map[string]int64{})
+
+	if got.Stage != expiredWarningStage0 {
+		t.Fatalf("unexpected stage: got %q want %q", got.Stage, expiredWarningStage0)
+	}
+	if !got.BufferedCycle {
+		t.Fatal("expected late first contact to use buffered cycle")
+	}
+	wantAutoDeleteDate := expiredWarningAnchor + storageWarningExpiredDeletionDelay
+	if got.AutoDeleteDate != wantAutoDeleteDate {
+		t.Fatalf("unexpected auto delete date: got %d want %d", got.AutoDeleteDate, wantAutoDeleteDate)
+	}
+}
+
+func TestResolveExpiredWarningBufferedCycleProgressesFromPersistedHistory(t *testing.T) {
+	cycleStart := int64(100)
+	autoDeleteDate := cycleStart + storageWarningExpiredBackfillMinRecoveryDelay
+	now := expiredBufferedWarning119At(autoDeleteDate) + 10
+	history := map[string]int64{
+		storageWarningExpired0TemplateID:  cycleStart,
+		storageWarningExpired60TemplateID: expiredBufferedWarning60At(cycleStart, autoDeleteDate),
 	}
 
-	history[storageWarningExpired0TemplateID] = expiredWarningAnchor
-	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage30 {
-		t.Fatalf("expected second late-backfill stage %q, got %q", expiredWarningStage30, got)
-	}
-
-	history[storageWarningExpired30TemplateID] = expiredWarningAnchor + storageWarningExpiredWarning30Delay
-	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage60 {
-		t.Fatalf("expected third late-backfill stage %q, got %q", expiredWarningStage60, got)
-	}
-
-	history[storageWarningExpired60TemplateID] = expiredWarningAnchor + storageWarningExpiredWarning60Delay
-	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage90 {
-		t.Fatalf("expected fourth late-backfill stage %q, got %q", expiredWarningStage90, got)
-	}
-
-	history[storageWarningExpired90TemplateID] = expiredWarningAnchor + storageWarningExpiredWarning90Delay
-	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage119 {
-		t.Fatalf("expected final late-backfill reminder %q, got %q", expiredWarningStage119, got)
+	got := resolveExpiredBufferedWarningStage(cycleStart, autoDeleteDate, now, history)
+	if got != expiredWarningStage119 {
+		t.Fatalf("unexpected buffered stage: got %q want %q", got, expiredWarningStage119)
 	}
 }
 
 func TestExpiredWarningAutoDeleteDateClampsOverdueFinalStage(t *testing.T) {
 	now := int64(1000)
-	expiredWarningAnchor := now - storageWarningExpiredDeletionDelay - 10
+	autoDeleteDate := now - 10
 
-	got := expiredWarningAutoDeleteDate(expiredWarningAnchor, expiredWarningStage119, now)
+	got := expiredWarningAutoDeleteDate(autoDeleteDate, expiredWarningStage119, now)
 	want := now + storageWarningOneDayInMicroseconds
 	if got != want {
 		t.Fatalf("unexpected auto delete date: got %d want %d", got, want)
@@ -611,6 +628,33 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 				WarningCycleStart: now - storageWarningExpiredWarning119Delay,
 				NotificationHistory: map[string]int64{
 					storageWarningExpired90TemplateID: now - storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: false,
+		},
+		{
+			name: "buffered expired stage 60 requires initial expired notice",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage60,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          now,
+				WarningCycleStart:    now - (storageWarningExpiredBackfillMinRecoveryDelay / 2),
+				NotificationHistory:  map[string]int64{},
+			},
+			wantBroken: true,
+			wantStage:  string(expiredWarningStage0),
+		},
+		{
+			name: "buffered expired final reminder uses the buffered midpoint stage",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage119,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          now,
+				WarningCycleStart:    now - storageWarningExpiredBackfillMinRecoveryDelay + storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired60TemplateID: now - storageWarningOneDayInMicroseconds,
 				},
 			},
 			wantBroken: false,

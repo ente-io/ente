@@ -9,13 +9,15 @@ const (
 	storageWarningExpiredTemplate                  = "storage-warning/storage_warning_expired.html"
 	storageWarningExpiredScheduledDeletionTemplate = "storage-warning/storage_warning_expired_scheduled_deletion.html"
 
-	storageWarningExpiredAnchorDelay     = 30 * 24 * time.MicroSecondsInOneHour
-	storageWarningExpiredDeletionDelay   = 120 * 24 * time.MicroSecondsInOneHour
-	storageWarningExpiredWarning0Delay   = 0
-	storageWarningExpiredWarning30Delay  = 30 * 24 * time.MicroSecondsInOneHour
-	storageWarningExpiredWarning60Delay  = 60 * 24 * time.MicroSecondsInOneHour
-	storageWarningExpiredWarning90Delay  = 90 * 24 * time.MicroSecondsInOneHour
-	storageWarningExpiredWarning119Delay = 119 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredAnchorDelay              = 30 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredDeletionDelay            = 120 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredWarning0Delay            = 0
+	storageWarningExpiredWarning30Delay           = 30 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredWarning60Delay           = 60 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredWarning90Delay           = 90 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredWarning119Delay          = 119 * 24 * time.MicroSecondsInOneHour
+	storageWarningExpiredBackfillThreshold        = storageWarningExpiredWarning30Delay
+	storageWarningExpiredBackfillMinRecoveryDelay = 30 * 24 * time.MicroSecondsInOneHour
 
 	storageWarningExpired0TemplateID   = "storage_warning_expired_0d"
 	storageWarningExpired30TemplateID  = "storage_warning_expired_30d"
@@ -42,6 +44,13 @@ const (
 	expiredWarningStage119               expiredWarningStage = "expired_119d"
 	expiredWarningStageScheduledDeletion expiredWarningStage = "expired_scheduled_deletion"
 )
+
+type expiredWarningResolution struct {
+	Stage          expiredWarningStage
+	CycleStart     int64
+	AutoDeleteDate int64
+	BufferedCycle  bool
+}
 
 func expiredWarningTemplateDetails(stage expiredWarningStage) (templateID string, templateName string, subject string, ok bool) {
 	switch stage {
@@ -107,8 +116,109 @@ func resolveExpiredWarningStage(expiredWarningAnchor int64, now int64, history m
 	return expiredWarningStageNone
 }
 
-func expiredWarningAutoDeleteDate(expiredWarningAnchor int64, stage expiredWarningStage, now int64) int64 {
-	autoDeleteDate := expiredWarningAnchor + storageWarningExpiredDeletionDelay
+func resolveExpiredWarning(expiredWarningAnchor int64, now int64, history map[string]int64) expiredWarningResolution {
+	if expiredWarningAnchor <= 0 || expiredWarningAnchor > now {
+		return expiredWarningResolution{}
+	}
+
+	standardAutoDeleteDate := expiredWarningAnchor + storageWarningExpiredDeletionDelay
+	if cycleStart, ok := expiredBufferedCycleStart(expiredWarningAnchor, history); ok {
+		autoDeleteDate := cycleStart + storageWarningExpiredBackfillMinRecoveryDelay
+		if standardAutoDeleteDate > autoDeleteDate {
+			autoDeleteDate = standardAutoDeleteDate
+		}
+		stage := resolveExpiredBufferedWarningStage(cycleStart, autoDeleteDate, now, history)
+		return expiredWarningResolution{
+			Stage:          stage,
+			CycleStart:     cycleStart,
+			AutoDeleteDate: expiredWarningAutoDeleteDate(autoDeleteDate, stage, now),
+			BufferedCycle:  true,
+		}
+	}
+
+	if shouldUseExpiredBufferedCycle(expiredWarningAnchor, now, history) {
+		cycleStart := now
+		autoDeleteDate := cycleStart + storageWarningExpiredBackfillMinRecoveryDelay
+		if standardAutoDeleteDate > autoDeleteDate {
+			autoDeleteDate = standardAutoDeleteDate
+		}
+
+		stage := resolveExpiredBufferedWarningStage(cycleStart, autoDeleteDate, now, history)
+		return expiredWarningResolution{
+			Stage:          stage,
+			CycleStart:     cycleStart,
+			AutoDeleteDate: expiredWarningAutoDeleteDate(autoDeleteDate, stage, now),
+			BufferedCycle:  true,
+		}
+	}
+
+	stage := resolveExpiredWarningStage(expiredWarningAnchor, now, history)
+	return expiredWarningResolution{
+		Stage:          stage,
+		CycleStart:     expiredWarningAnchor,
+		AutoDeleteDate: expiredWarningAutoDeleteDate(standardAutoDeleteDate, stage, now),
+	}
+}
+
+func shouldUseExpiredBufferedCycle(expiredWarningAnchor int64, now int64, history map[string]int64) bool {
+	if expiredWarningAnchor <= 0 || now < expiredWarningAnchor+storageWarningExpiredBackfillThreshold {
+		return false
+	}
+	return !hasExpiredWarningHistoryInCycle(history, expiredWarningAnchor)
+}
+
+func expiredBufferedCycleStart(expiredWarningAnchor int64, history map[string]int64) (int64, bool) {
+	sentAt := history[storageWarningExpired0TemplateID]
+	if sentAt <= 0 || sentAt < expiredWarningAnchor+storageWarningExpiredBackfillThreshold {
+		return 0, false
+	}
+	return sentAt, true
+}
+
+func hasExpiredWarningHistoryInCycle(history map[string]int64, cycleStart int64) bool {
+	for _, templateID := range expiredWarningTemplateIDs() {
+		if storageWarningTemplateSentInCycle(history, templateID, cycleStart) {
+			return true
+		}
+	}
+	return false
+}
+
+func resolveExpiredBufferedWarningStage(cycleStart int64, autoDeleteDate int64, now int64, history map[string]int64) expiredWarningStage {
+	if cycleStart <= 0 || cycleStart > now {
+		return expiredWarningStageNone
+	}
+
+	if !storageWarningTemplateSentInCycle(history, storageWarningExpired0TemplateID, cycleStart) {
+		return expiredWarningStage0
+	}
+	if now >= expiredBufferedWarning60At(cycleStart, autoDeleteDate) &&
+		!storageWarningTemplateSentInCycle(history, storageWarningExpired60TemplateID, cycleStart) {
+		return expiredWarningStage60
+	}
+	if now >= expiredBufferedWarning119At(autoDeleteDate) &&
+		!storageWarningTemplateSentInCycle(history, storageWarningExpired119TemplateID, cycleStart) {
+		return expiredWarningStage119
+	}
+	if now >= autoDeleteDate &&
+		!storageWarningTemplateSentInCycle(history, repo.StorageWarningExpiredScheduledDeletionTemplateID, cycleStart) {
+		return expiredWarningStageScheduledDeletion
+	}
+	return expiredWarningStageNone
+}
+
+func expiredBufferedWarning60At(cycleStart int64, autoDeleteDate int64) int64 {
+	if autoDeleteDate <= cycleStart {
+		return cycleStart
+	}
+	return cycleStart + ((autoDeleteDate - cycleStart) / 2)
+}
+
+func expiredBufferedWarning119At(autoDeleteDate int64) int64 {
+	return autoDeleteDate - storageWarningOneDayInMicroseconds
+}
+
+func expiredWarningAutoDeleteDate(autoDeleteDate int64, stage expiredWarningStage, now int64) int64 {
 	if stage == expiredWarningStage119 && autoDeleteDate <= now {
 		return now + storageWarningOneDayInMicroseconds
 	}

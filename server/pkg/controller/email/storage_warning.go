@@ -59,6 +59,7 @@ type storageWarningSnapshot struct {
 	Bucket               storageWarningBucket
 	ActiveOverageStage   activeOverageWarningStage
 	ExpiredStage         expiredWarningStage
+	ExpiredBufferedCycle bool
 	AutoDeleteDate       int64
 	IsFamilyPlan         bool
 	WarningCycleStart    int64
@@ -414,13 +415,15 @@ func (c *EmailNotificationController) decorateStorageWarningSnapshot(snapshot st
 			return storageWarningSnapshot{}, err
 		}
 		snapshot.NotificationHistory = history
-		snapshot.WarningCycleStart = snapshot.ExpiredWarningAnchor
-		snapshot.ExpiredStage = resolveExpiredWarningStage(snapshot.ExpiredWarningAnchor, now, history)
+		expiredResolution := resolveExpiredWarning(snapshot.ExpiredWarningAnchor, now, history)
+		snapshot.WarningCycleStart = expiredResolution.CycleStart
+		snapshot.ExpiredStage = expiredResolution.Stage
+		snapshot.ExpiredBufferedCycle = expiredResolution.BufferedCycle
+		snapshot.AutoDeleteDate = expiredResolution.AutoDeleteDate
 		if snapshot.ExpiredStage == expiredWarningStageNone {
 			snapshot.Bucket = storageWarningBucketNone
 			return snapshot, nil
 		}
-		snapshot.AutoDeleteDate = expiredWarningAutoDeleteDate(snapshot.ExpiredWarningAnchor, snapshot.ExpiredStage, now)
 	case storageWarningBucketActiveOverage:
 		history, err := c.NotificationHistoryRepo.GetLastNotificationTimes(snapshot.RecipientID, activeOverageWarningTemplateIDs())
 		if err != nil {
@@ -658,10 +661,16 @@ func storageWarningPreviousStage(snapshot storageWarningSnapshot) (templateID st
 		case expiredWarningStage30:
 			return storageWarningExpired0TemplateID, string(expiredWarningStage0), true
 		case expiredWarningStage60:
+			if snapshot.ExpiredBufferedCycle {
+				return storageWarningExpired0TemplateID, string(expiredWarningStage0), true
+			}
 			return storageWarningExpired30TemplateID, string(expiredWarningStage30), true
 		case expiredWarningStage90:
 			return storageWarningExpired60TemplateID, string(expiredWarningStage60), true
 		case expiredWarningStage119:
+			if snapshot.ExpiredBufferedCycle {
+				return storageWarningExpired60TemplateID, string(expiredWarningStage60), true
+			}
 			return storageWarningExpired90TemplateID, string(expiredWarningStage90), true
 		case expiredWarningStageScheduledDeletion:
 			return storageWarningExpired119TemplateID, string(expiredWarningStage119), true
