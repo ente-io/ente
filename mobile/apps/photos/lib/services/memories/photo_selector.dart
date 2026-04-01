@@ -462,11 +462,21 @@ class PhotoSelector {
     try {
       final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
       final int targetSize = prefferedSize ?? 10;
+      if (memories.length <= targetSize) return memories;
 
       // Pre-compute nostalgia scores.
       final Map<int, double> scores = {};
-      for (final entry in fileIDToImageEmbedding.entries) {
-        scores[entry.key] = entry.value.vector.dot(clipPositiveTextVector);
+      for (final mem in memories) {
+        final fileID = memoryFileIdFromMemory(
+          mem,
+          isOfflineMode: isOfflineMode,
+        );
+        if (fileID == null) continue;
+
+        final embedding = fileIDToImageEmbedding[fileID];
+        if (embedding == null) continue;
+
+        scores[fileID] = embedding.vector.dot(clipPositiveTextVector);
       }
 
       final result = await select(

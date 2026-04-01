@@ -654,6 +654,33 @@ void main() {
       expect(result.length, equals(5));
     });
 
+    test('ignores unrelated embeddings when precomputing people scores',
+        () async {
+      final memories = List.generate(20, (i) {
+        return _mem(
+          _file(uploadedFileID: i, creationTime: _baseTime + i * _hour),
+        );
+      });
+      final embeddings =
+          memories.map((m) => _emb(m.file.uploadedFileID!)).toList()
+            ..add(
+              EmbeddingVector(
+                fileID: 9999,
+                embedding: const [1.0, 0.0],
+              ),
+            );
+
+      final result = await PhotoSelector.bestSelectionPeople(
+        memories,
+        isOfflineMode: false,
+        fileIDToImageEmbedding: _embMap(embeddings),
+        clipPositiveTextVector: _positiveTextVector,
+      );
+
+      expect(result, isNotEmpty);
+      expect(result.length, lessThanOrEqualTo(10));
+    });
+
     test('limits output to targetSize', () async {
       final memories = List.generate(30, (i) {
         return _mem(
