@@ -1,11 +1,9 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
@@ -20,7 +18,7 @@ import 'package:share_plus/share_plus.dart';
 class RecoveryKeyPage extends StatefulWidget {
   final String recoveryKey;
   final String doneText;
-  final FutureOr<void> Function()? onDone;
+  final Function()? onDone;
   final String? title;
   final String? text;
   final String? subText;
@@ -42,11 +40,9 @@ class RecoveryKeyPage extends StatefulWidget {
 }
 
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
-  static final _logger = Logger("RecoveryKeyPage");
   final _recoveryKeyFile = File(
     Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",
   );
-  bool _isSavingKeys = false;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +167,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.secondary,
                         shouldStickToLightTheme: true,
-                        shouldSurfaceExecutionStates: false,
                         labelText: AppLocalizations.of(context).shareKey,
                         onTap: () async {
                           await _shareRecoveryKey(recoveryKey);
@@ -193,7 +188,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             child: ButtonWidgetV2(
               buttonType: ButtonTypeV2.primary,
               labelText: widget.doneText,
-              isDisabled: _isSavingKeys,
               onTap: () async {
                 await _saveKeys();
               },
@@ -204,7 +198,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   }
 
   Future _shareRecoveryKey(String recoveryKey) async {
-    await _cleanupRecoveryKeyFile();
+    if (_recoveryKeyFile.existsSync()) {
+      await _recoveryKeyFile.delete();
+    }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
 
     await SharePlus.instance.share(
@@ -216,39 +212,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   }
 
   Future<void> _saveKeys() async {
-    if (_isSavingKeys) {
-      return;
-    }
-
-    if (mounted) {
-      setState(() {
-        _isSavingKeys = true;
-      });
-    }
-
-    try {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-      await _cleanupRecoveryKeyFile();
-      await Future.sync(() => widget.onDone?.call());
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSavingKeys = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _cleanupRecoveryKeyFile() async {
-    if (!_recoveryKeyFile.existsSync()) {
-      return;
-    }
-    try {
+    Navigator.of(context).pop();
+    if (_recoveryKeyFile.existsSync()) {
       await _recoveryKeyFile.delete();
-    } catch (e, s) {
-      _logger.warning("Failed to clean up recovery key temp file", e, s);
     }
+    widget.onDone!();
   }
 }

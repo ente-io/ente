@@ -105,7 +105,6 @@ class _QrContentEntry extends StatelessWidget {
           ButtonWidgetV2(
             buttonType: ButtonTypeV2.secondary,
             labelText: l10n.shareLink,
-            shouldSurfaceExecutionStates: false,
             onTap: () async {
               await shareText(content, context: context);
             },
@@ -135,7 +134,6 @@ class _QrContentEntry extends StatelessWidget {
           ButtonWidgetV2(
             buttonType: ButtonTypeV2.primary,
             labelText: l10n.shareLink,
-            shouldSurfaceExecutionStates: false,
             onTap: () async {
               await shareText(content, context: context);
             },
