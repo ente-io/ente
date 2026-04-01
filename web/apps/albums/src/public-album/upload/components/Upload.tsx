@@ -1,12 +1,12 @@
 // TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
 /* eslint-disable react-hooks/exhaustive-deps */
-import { UploaderNameInput } from "@/public-album/upload/components/UploaderNameInput";
+import { useAlbumsAppContext } from "@/app/context/albums-app-context";
 import {
     savedPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "@/public-album/data/storage/public-albums-fdb";
-import { useFileInput } from "@/shared/hooks/useFileInput";
+import { UploaderNameInput } from "@/public-album/upload/components/UploaderNameInput";
 import {
     uploadPathPrefix,
     type UploadPhase,
@@ -17,7 +17,6 @@ import {
     storageLimitExceededErrorMessage,
     subscriptionExpiredErrorMessage,
 } from "@/public-album/upload/pipeline/upload-service";
-import { useAlbumsAppContext } from "@/app/context/albums-app-context";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -27,6 +26,7 @@ import type {
 } from "@/public-album/upload/services/upload-manager";
 import { uploadManager } from "@/public-album/upload/services/upload-manager";
 import { hasReliableCanvasReadback } from "@/public-album/upload/utils/canvas-integrity";
+import { useFileInput } from "@/shared/hooks/useFileInput";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";

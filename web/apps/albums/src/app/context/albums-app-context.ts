@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
 import type { NotificationAttributes } from "@/shared/ui/feedback/Notification";
+import { createContext, useContext } from "react";
 
 /**
  * The type of the React context available to all pages in the albums app.

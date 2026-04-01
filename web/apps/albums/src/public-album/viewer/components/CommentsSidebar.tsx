@@ -1,3 +1,4 @@
+import { downloadManager } from "@/public-album/download/services/download-manager";
 import {
     addPublicComment,
     deletePublicComment,
@@ -8,7 +9,6 @@ import {
     deletePublicReaction,
     getStoredAnonIdentity,
 } from "@/public-album/social/api/public-reaction";
-import { downloadManager } from "@/public-album/download/services/download-manager";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {

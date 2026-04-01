@@ -1,4 +1,7 @@
-import { tagNumericValue, type RawExifTags } from "@/public-album/media/metadata/exif";
+import {
+    tagNumericValue,
+    type RawExifTags,
+} from "@/public-album/media/metadata/exif";
 import { formattedByteSize } from "@/shared/utils/byte-size";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";

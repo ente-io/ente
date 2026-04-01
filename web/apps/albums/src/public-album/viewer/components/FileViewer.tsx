@@ -7,16 +7,6 @@ import {
     getPublicSocialDiff,
     getStoredAnonIdentity,
 } from "@/public-album/social/api/public-reaction";
-import { type Comment, type UnifiedReaction } from "../lib/social-types";
-import { fileInfoExifForFile, type ItemData } from "../lib/data-source";
-import {
-    FileViewerPhotoSwipe,
-    moreButtonID,
-    moreMenuID,
-    resetMoreMenuButtonOnMenuClose,
-    type FileViewerPhotoSwipeDelegate,
-} from "../lib/photoswipe";
-import { FileInfo, type FileInfoExif } from "./FileInfo";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
@@ -41,8 +31,18 @@ import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { fileInfoExifForFile, type ItemData } from "../lib/data-source";
+import {
+    FileViewerPhotoSwipe,
+    moreButtonID,
+    moreMenuID,
+    resetMoreMenuButtonOnMenuClose,
+    type FileViewerPhotoSwipeDelegate,
+} from "../lib/photoswipe";
+import { type Comment, type UnifiedReaction } from "../lib/social-types";
 import { AddNameModal } from "./AddNameModal";
 import { CommentsSidebar } from "./CommentsSidebar";
+import { FileInfo, type FileInfoExif } from "./FileInfo";
 import { LikesSidebar } from "./LikesSidebar";
 import { PublicLikeModal } from "./PublicLikeModal";
 

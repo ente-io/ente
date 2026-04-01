@@ -1,7 +1,7 @@
-import { FeedIcon } from "@/public-album/social/components/FeedIcon";
 import { LazyNotification } from "@/app/lazy/global-ui";
 import { useJoinAlbum } from "@/public-album/access/hooks/useJoinAlbum";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
+import { FeedIcon } from "@/public-album/social/components/FeedIcon";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";

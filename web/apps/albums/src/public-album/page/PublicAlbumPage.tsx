@@ -1,14 +1,5 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import type { FullScreenDropZoneProps } from "@/public-album/upload/components/CollectDropZone";
-import {
-    useSaveGroupsActions,
-    type AddSaveGroup,
-} from "@/shared/state/save-groups";
-import { type FileViewerInitialSidebar } from "@/public-album/viewer/components/FileViewer";
-import { LazyPublicFeedSidebar } from "@/public-album/viewer/lib/lazy";
-import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
-import { sortFiles } from "@/public-album/media/utils/sort-files";
 import { useAlbumsAppContext } from "@/app/context/albums-app-context";
 import { LazyNotification } from "@/app/lazy/global-ui";
 import {
@@ -16,23 +7,32 @@ import {
     type PasswordUnlockScreenProps,
 } from "@/public-album/access/components/PasswordUnlockScreen";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
-import { setPublicAlbumsCredentials } from "@/public-album/data/auth/public-link-credentials";
-import { quickLinkDateRangeForFiles } from "@/public-album/data/utils/quick-link";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/shared/ui/gallery/GalleryItemsHeader";
-import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
-import { FeedIcon } from "@/public-album/social/components/FeedIcon";
 import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
 import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
-import type { PublicAlbumSingleFileViewerProps } from "@/public-album/viewer/components/PublicAlbumSingleFileViewer";
 import type { TripLayoutProps } from "@/public-album/components/TripLayout";
+import { setPublicAlbumsCredentials } from "@/public-album/data/auth/public-link-credentials";
+import { quickLinkDateRangeForFiles } from "@/public-album/data/utils/quick-link";
+import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
+import { sortFiles } from "@/public-album/media/utils/sort-files";
+import { FeedIcon } from "@/public-album/social/components/FeedIcon";
+import type { FullScreenDropZoneProps } from "@/public-album/upload/components/CollectDropZone";
 import type { UploadProps } from "@/public-album/upload/components/Upload";
 import {
     getSelectedFiles,
     type SelectedState,
 } from "@/public-album/utils/file";
+import { type FileViewerInitialSidebar } from "@/public-album/viewer/components/FileViewer";
+import type { PublicAlbumSingleFileViewerProps } from "@/public-album/viewer/components/PublicAlbumSingleFileViewer";
+import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
+import { LazyPublicFeedSidebar } from "@/public-album/viewer/lib/lazy";
+import {
+    useSaveGroupsActions,
+    type AddSaveGroup,
+} from "@/shared/state/save-groups";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "@/shared/ui/gallery/GalleryItemsHeader";
 import {
     Download01Icon,
     ImageAdd02Icon,
@@ -493,7 +493,9 @@ export default function PublicAlbumPage() {
                 { verifyPublicAlbumPassword },
                 { savePublicCollectionAccessTokenJWT },
             ] = await Promise.all([
-                import("@/public-album/access/services/verify-public-album-password"),
+                import(
+                    "@/public-album/access/services/verify-public-album-password"
+                ),
                 loadPublicAlbumsFDB(),
             ]);
             const accessTokenJWT = await verifyPublicAlbumPassword(

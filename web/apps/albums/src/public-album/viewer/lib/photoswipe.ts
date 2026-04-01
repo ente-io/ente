@@ -9,6 +9,10 @@ import "media-chrome/menu";
 import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
+    type FileViewerAnnotatedFile,
+    type FileViewerProps,
+} from "../components/FileViewer";
+import {
     fileViewerDidClose,
     fileViewerWillOpen,
     forgetExifForItemData,
@@ -18,10 +22,6 @@ import {
     updateFileInfoExifIfNeeded,
     type ItemData,
 } from "./data-source";
-import {
-    type FileViewerAnnotatedFile,
-    type FileViewerProps,
-} from "../components/FileViewer";
 import {
     commentSVGPath,
     createPSRegisterElementIconHTML,

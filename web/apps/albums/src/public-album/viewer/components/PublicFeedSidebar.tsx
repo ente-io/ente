@@ -1,3 +1,4 @@
+import { downloadManager } from "@/public-album/download/services/download-manager";
 import {
     getPublicAlbumFeed,
     getPublicAnonProfiles,
@@ -5,7 +6,6 @@ import {
     type PublicFeedComment,
     type PublicFeedReaction,
 } from "@/public-album/social/api/public-reaction";
-import { downloadManager } from "@/public-album/download/services/download-manager";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {

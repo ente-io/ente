@@ -1,3 +1,8 @@
+import {
+    getPublicAlbumsCredentials,
+    requirePublicAlbumsCredentials,
+    setPublicAlbumsCredentials,
+} from "@/public-album/data/auth/public-link-credentials";
 import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
     authenticatedPublicAlbumsRequestHeaders,
@@ -8,11 +13,6 @@ import {
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
-import {
-    getPublicAlbumsCredentials,
-    requirePublicAlbumsCredentials,
-    setPublicAlbumsCredentials,
-} from "@/public-album/data/auth/public-link-credentials";
 import { decryptThumbnailBlobBytes } from "./thumbnail-crypto";
 
 class ThumbnailManager {
@@ -121,10 +121,9 @@ class NetworkThumbnailError extends Error {
             `NetworkThumbnailError: ${e instanceof Error ? e.message : String(e)}`,
         );
 
-        const captureStackTrace = Reflect.get(
-            Error,
-            "captureStackTrace",
-        ) as CaptureStackTrace | undefined;
+        const captureStackTrace = Reflect.get(Error, "captureStackTrace") as
+            | CaptureStackTrace
+            | undefined;
         if (captureStackTrace) captureStackTrace(this, NetworkThumbnailError);
 
         this.error = e;

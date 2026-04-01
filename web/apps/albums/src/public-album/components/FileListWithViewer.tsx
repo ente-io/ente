@@ -1,4 +1,3 @@
-import type { AddSaveGroup } from "@/shared/state/save-groups";
 import {
     type FileViewerInitialSidebar,
     type FileViewerProps,
@@ -7,6 +6,7 @@ import {
     LazyFileViewer,
     scheduleFileViewerPreload,
 } from "@/public-album/viewer/lib/lazy";
+import type { AddSaveGroup } from "@/shared/state/save-groups";
 import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";

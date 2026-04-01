@@ -1,4 +1,5 @@
-import { useSaveGroupsActions } from "@/shared/state/save-groups";
+import { useJoinAlbum } from "@/public-album/access/hooks/useJoinAlbum";
+import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
 import { type FileViewerInitialSidebar } from "@/public-album/viewer/components/FileViewer";
 import { type PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
 import {
@@ -6,8 +7,7 @@ import {
     LazyPublicFeedSidebar,
     scheduleFileViewerPreload,
 } from "@/public-album/viewer/lib/lazy";
-import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
-import { useJoinAlbum } from "@/public-album/access/hooks/useJoinAlbum";
+import { useSaveGroupsActions } from "@/shared/state/save-groups";
 import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";

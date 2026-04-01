@@ -1,6 +1,9 @@
 /** @file Dealing with the JSON metadata sidecar files */
 
-import type { UploadItem, UploadPathPrefix } from "@/public-album/upload/pipeline";
+import type {
+    UploadItem,
+    UploadPathPrefix,
+} from "@/public-album/upload/pipeline";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Location } from "ente-base/types";

@@ -1,8 +1,5 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
-import type {
-    AddSaveGroup,
-    UpdateSaveGroup,
-} from "@/shared/state/save-groups";
+import type { AddSaveGroup, UpdateSaveGroup } from "@/shared/state/save-groups";
 import { assertionFailed } from "ente-base/assert";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";

@@ -1,3 +1,4 @@
+import { requirePublicAlbumsCredentials } from "@/public-album/data/auth/public-link-credentials";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     ensureOk,
@@ -6,7 +7,6 @@ import {
 import { apiURL } from "ente-base/origins";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
-import { requirePublicAlbumsCredentials } from "@/public-album/data/auth/public-link-credentials";
 
 /**
  * [Note: File data APIs]

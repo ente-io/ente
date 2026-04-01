@@ -1,4 +1,9 @@
 import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
+import { type SelectedState } from "@/public-album/utils/file";
+import {
+    handleSelectCreator,
+    handleSelectCreatorMulti,
+} from "@/public-album/utils/photo-frame";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -8,11 +13,6 @@ import {
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "@/shared/utils/thumbnail-grid-layout";
-import { type SelectedState } from "@/public-album/utils/file";
-import {
-    handleSelectCreator,
-    handleSelectCreatorMulti,
-} from "@/public-album/utils/photo-frame";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
