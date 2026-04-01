@@ -88,7 +88,7 @@ class FlagService {
   bool get enableOnlyBackupFuturePhotos =>
       internalUser || _isServerFlagEnabled(_backupOptionsFlag);
 
-  bool get facesTimeline => internalUser;
+  bool get facesTimeline => true;
   bool get ritualsFlag => true;
 
   bool get stopStreamProcess => true;
@@ -112,7 +112,7 @@ class FlagService {
 
   bool get petEnabled => internalUser;
 
-  bool get qrFeatureEnabled => internalUser;
+  bool get qrFeatureEnabled => true;
 
   bool get enableBgLocalUploadPriority => internalUser;
 

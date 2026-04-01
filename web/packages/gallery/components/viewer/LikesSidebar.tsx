@@ -14,7 +14,6 @@ import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
-import { getStoredAnonIdentity } from "ente-new/albums/services/public-reaction";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
 import { t } from "i18next";
@@ -187,7 +186,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
         if (!file) return [];
         const allCollectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
 
-        // If no collection IDs from fileNormalCollectionIDs (e.g., public album),
+        // If no collection IDs from fileNormalCollectionIDs,
         // use the file's collection ID directly
         if (allCollectionIDs.length === 0) {
             return [file.collectionID];
@@ -244,11 +243,6 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
         const reactions =
             reactionsByCollection.get(selectedCollectionInfo.id) ?? [];
 
-        // Get stored anonymous identity for this collection to check if current anon user
-        const storedAnonIdentity = getStoredAnonIdentity(
-            selectedCollectionInfo.id,
-        );
-
         return reactions
             .filter((r) => r.reactionType === "green_heart")
             .sort((a, b) => b.createdAt - a.createdAt) // Most recent first
@@ -257,11 +251,8 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                 const isAnonymous =
                     r.anonUserID || r.userID === 0 || r.userID === -1;
 
-                // Check if this is the current user (logged-in or anonymous)
+                // Check if this is the current logged-in user.
                 const isCurrentUser = r.userID === currentUserID;
-                const isCurrentAnonUser =
-                    storedAnonIdentity &&
-                    r.anonUserID === storedAnonIdentity.anonUserID;
 
                 let email: string;
                 let userName: string;
@@ -277,13 +268,11 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                         `${t("anonymous")} ${r.anonUserID?.slice(-4) ?? ""}`;
                     // Use actualName for avatar color (varying length like mobile emails)
                     email = actualName;
-                    userName = isCurrentAnonUser ? t("you") : actualName;
+                    userName = actualName;
                 } else {
                     const emailFromMap = prefetchedUserIDToEmail?.get(r.userID);
                     // Use userID as string for unique avatar color
                     email = emailFromMap ?? String(r.userID);
-                    // In public albums (no currentUserID), non-anonymous
-                    // users are album owner or collaborators
                     actualName = emailFromMap ?? t("anonymous");
                     userName = isCurrentUser ? t("you") : actualName;
                 }

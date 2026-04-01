@@ -63,7 +63,8 @@ This is a **monorepo** containing multiple Ente web applications using **Yarn wo
 ```
 web/
 ├── apps/              # Individual applications
-│   ├── photos/        # Main photo management app + shared albums
+│   ├── photos/        # Main photo management app
+│   ├── albums/        # Public albums app for shared album and file links
 │   ├── auth/          # 2FA authentication app
 │   ├── embed/         # Embeddable photo viewer (iframe-friendly)
 │   ├── accounts/      # Passkey support

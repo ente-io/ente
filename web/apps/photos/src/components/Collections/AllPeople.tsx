@@ -29,10 +29,8 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useBaseContext } from "ente-base/context";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
-import {
-    PeopleSortOptions,
-    type PeopleSortBy,
-} from "ente-new/photos/components/PeopleSortOptions";
+import type { PeopleSortBy } from "ente-new/photos/components/people-sort";
+import { PeopleSortOptions } from "ente-new/photos/components/PeopleSortOptions";
 import {
     ItemCard,
     LargeTileButton,

@@ -9,11 +9,8 @@ import 'package:logging/logging.dart';
 import "package:photos/gateways/billing/billing_gateway.dart";
 import 'package:photos/gateways/billing/models/billing_plan.dart';
 import 'package:photos/gateways/billing/models/subscription.dart';
-import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/account/user_service.dart';
-import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/family/family_plan_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -136,11 +133,6 @@ class BillingService {
     _isOnSubscriptionPage = isOnSubscriptionPage;
   }
 
-  // Temporary rollout gate for the native family flow. When the native
-  // experience is ready for all users, remove this getter and the legacy
-  // launcher below, then call _launchNativeFamilyPortal directly.
-  bool get _useNativeFamilyFlow => flagService.internalUser;
-
   Future<void> launchFamilyPortal(
     BuildContext context,
     UserDetails userDetails, {
@@ -148,81 +140,16 @@ class BillingService {
     bool refreshOnOpen = true,
   }) async {
     try {
-      if (_useNativeFamilyFlow) {
-        await _launchNativeFamilyPortal(
-          context,
-          userDetails,
+      await routeToPage(
+        context,
+        FamilyPlanPage(
+          initialUserDetails: userDetails,
           popOnFreeAdvertViewPlans: popOnFreeAdvertViewPlans,
           refreshOnOpen: refreshOnOpen,
-        );
-        return;
-      }
-
-      await _launchLegacyFamilyPortal(context, userDetails);
-    } catch (e) {
-      await showGenericErrorDialog(context: context, error: e);
-    }
-  }
-
-  Future<void> _launchNativeFamilyPortal(
-    BuildContext context,
-    UserDetails userDetails, {
-    required bool popOnFreeAdvertViewPlans,
-    required bool refreshOnOpen,
-  }) {
-    return routeToPage(
-      context,
-      FamilyPlanPage(
-        initialUserDetails: userDetails,
-        popOnFreeAdvertViewPlans: popOnFreeAdvertViewPlans,
-        refreshOnOpen: refreshOnOpen,
-      ),
-    );
-  }
-
-  Future<void> _launchLegacyFamilyPortal(
-    BuildContext context,
-    UserDetails userDetails,
-  ) async {
-    if (userDetails.subscription.productID == freeProductID &&
-        !userDetails.hasPaidAddon()) {
-      await showErrorDialog(
-        context,
-        AppLocalizations.of(context).familyPlans,
-        AppLocalizations.of(context).familyPlanOverview,
-      );
-      return;
-    }
-
-    final dialog = createProgressDialog(
-      context,
-      AppLocalizations.of(context).pleaseWait,
-      isDismissible: true,
-    );
-    await dialog.show();
-    var isDialogHidden = false;
-    try {
-      final familyExist = userDetails.isPartOfFamily();
-      final url = await UserService.instance.getFamilyPortalUrl(familyExist);
-      await dialog.hide();
-      isDialogHidden = true;
-      if (!context.mounted) {
-        return;
-      }
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) {
-            return WebPage(
-              AppLocalizations.of(context).familyPlanPortalTitle,
-              url,
-            );
-          },
         ),
       );
-    } finally {
-      if (!isDialogHidden) {
-        await dialog.hide();
-      }
+    } catch (e) {
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 }

@@ -2,18 +2,18 @@ import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { memoriesAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
+import { alignLaneFilesWithMetadata } from "../utils/lane";
+import {
+    extractAccessTokenFromURL,
+    extractMemoryShareKeyFromURL,
+} from "../utils/public-memory-url";
 import {
     decryptMemoryShareMetadata,
     getPublicMemoryFiles,
     getPublicMemoryInfo,
     type PublicMemoryShareFrame,
     type PublicMemoryShareMetadata,
-} from "ente-new/albums/services/public-memory";
-import { alignLaneFilesWithMetadata } from "../utils/lane";
-import {
-    extractAccessTokenFromURL,
-    extractMemoryShareKeyFromURL,
-} from "../utils/public-memory-url";
+} from "./public-memory";
 
 export type PublicMemoryViewerVariant = "share" | "lane";
 

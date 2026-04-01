@@ -5,7 +5,6 @@ import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import {
@@ -39,7 +38,6 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
-import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
@@ -262,8 +260,6 @@ class UploadManager {
     private onUploadFile: ((file: EnteFile) => void) | undefined;
     private collections = new Map<number, Collection>();
     private uploadInProgress = false;
-    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
-    private uploaderName: string | undefined;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
@@ -276,12 +272,10 @@ class UploadManager {
     public init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
-        publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
     ) {
         this.uiService.init(progressUpdater);
-        UploadService.init(publicAlbumsCredentials);
+        UploadService.init(undefined);
         this.onUploadFile = onUploadFile;
-        this.publicAlbumsCredentials = publicAlbumsCredentials;
     }
 
     logout() {
@@ -300,7 +294,6 @@ class UploadManager {
         this.failedItems = [];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
-        this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
 
         this.uiService.reset();
@@ -337,14 +330,12 @@ class UploadManager {
     public async uploadItems(
         itemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-        uploaderName?: string,
     ) {
         if (this.uploadInProgress)
             throw new Error("Cannot run multiple uploads at once");
 
         log.info(`Uploading ${itemsWithCollection.length} files`);
         this.uploadInProgress = true;
-        this.uploaderName = uploaderName;
 
         const logInterval = setInterval(logAboutMemoryPressureIfNeeded, 1000);
 
@@ -447,15 +438,9 @@ class UploadManager {
     };
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicAlbumsCredentials) {
-            this.existingFiles = await savedPublicCollectionFiles(
-                this.publicAlbumsCredentials.accessToken,
-            );
-        } else {
-            const files = await computeNormalCollectionFilesFromSaved();
-            const userID = ensureLocalUser().id;
-            this.existingFiles = files.filter((file) => file.ownerID == userID);
-        }
+        const files = await computeNormalCollectionFilesFromSaved();
+        const userID = ensureLocalUser().id;
+        this.existingFiles = files.filter((file) => file.ownerID == userID);
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),
         );
@@ -507,7 +492,6 @@ class UploadManager {
         const uiService = this.uiService;
         const uploadContext = {
             isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
-            publicAlbumsCredentials: this.publicAlbumsCredentials,
             abortIfCancelled: this.abortIfCancelled.bind(this),
             updateUploadProgress:
                 uiService.updateUploadProgress.bind(uiService),
@@ -527,7 +511,7 @@ class UploadManager {
 
             const uploadResult = await upload(
                 uploadableItem,
-                this.uploaderName,
+                undefined,
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
@@ -606,10 +590,6 @@ class UploadManager {
             collections: [...this.collections.values()],
             parsedMetadataJSONMap: this.parsedMetadataJSONMap,
         };
-    }
-
-    public getUploaderName() {
-        return this.uploaderName;
     }
 
     private updateExistingFiles(file: EnteFile) {
