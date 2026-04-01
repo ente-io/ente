@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -29,8 +31,8 @@ Future<bool?> showMemoryLinkDetailsSheet(
           children: [
             Text(
               l10n.memoryShareLinkDescription,
-              style:
-                  textTheme.bodyMuted.copyWith(color: colorScheme.contentLight),
+              style: textTheme.smallMuted
+                  .copyWith(color: colorScheme.contentLight),
             ),
             const SizedBox(height: 14),
             Container(
@@ -45,7 +47,7 @@ Future<bool?> showMemoryLinkDetailsSheet(
                     padding: const EdgeInsets.fromLTRB(20, 20, 56, 20),
                     child: SelectableText(
                       shareUrl,
-                      style: textTheme.body.copyWith(height: 1.5),
+                      style: textTheme.small.copyWith(height: 1.5),
                     ),
                   ),
                   Positioned(
@@ -77,7 +79,7 @@ Future<bool?> showMemoryLinkDetailsSheet(
               labelText: l10n.shareLink,
               shouldSurfaceExecutionStates: false,
               onTap: () async {
-                await shareText(shareUrl, context: context);
+                unawaited(shareText(shareUrl, context: context));
               },
             ),
             const SizedBox(height: 12),
