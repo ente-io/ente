@@ -86,6 +86,16 @@ generate_swift_binding() {
   )
 }
 
+sanitize_generated_swift_bindings() {
+  swift_file="$1"
+
+  if [ ! -f "${swift_file}" ]; then
+    return
+  fi
+
+  perl -0pi -e 's@try! rustCall \{ (uniffi_(?:db|sync)_fn_free_[^(]+\([^)]*\), \$0) \}@// Avoid aborting the host app if Rust-side teardown fails during process shutdown.\n        try? rustCall { $1 }@g' "${swift_file}"
+}
+
 ensure_generated_bindings() {
   if ! bindings_missing; then
     return
@@ -102,6 +112,8 @@ ensure_generated_bindings() {
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/core" "libcore.dylib"
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.dylib"
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
+  sanitize_generated_swift_bindings "${GENERATED_DIR}/db.swift"
+  sanitize_generated_swift_bindings "${GENERATED_DIR}/sync.swift"
 }
 
 if [ "$(uname -s)" = "Darwin" ]; then
@@ -143,6 +155,7 @@ generate_swift_bindings() {
   fi
 
   (cd "${crate_dir}" && uniffi-bindgen generate "${host_lib_path}" --language swift --out-dir "${GENERATED_DIR}" --crate "${crate_name}")
+  sanitize_generated_swift_bindings "${GENERATED_DIR}/${crate_name}.swift"
 }
 
 # Map Xcode platform+arch to Rust target triple.
