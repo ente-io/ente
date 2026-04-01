@@ -646,12 +646,41 @@ func storageWarningCadenceBroken(snapshot storageWarningSnapshot) (bool, string)
 	}
 
 	previousSentAt := snapshot.NotificationHistory[previousTemplateID]
+	freshnessWindow := storageWarningPreviousStageFreshnessWindowForSnapshot(snapshot)
 	if !storageWarningTemplateSentInCycle(snapshot.NotificationHistory, previousTemplateID, snapshot.WarningCycleStart) ||
-		previousSentAt < snapshot.EvaluatedAt-storageWarningPreviousStageFreshnessWindow {
+		previousSentAt < snapshot.EvaluatedAt-freshnessWindow {
 		return true, buildStorageWarningCadenceAlert(snapshot, previousStageKey, previousSentAt)
 	}
 
 	return false, ""
+}
+
+func storageWarningPreviousStageFreshnessWindowForSnapshot(snapshot storageWarningSnapshot) int64 {
+	if snapshot.Bucket != storageWarningBucketExpired || !snapshot.ExpiredBufferedCycle {
+		return storageWarningPreviousStageFreshnessWindow
+	}
+
+	switch snapshot.ExpiredStage {
+	case expiredWarningStage60:
+		return maxStorageWarningFreshnessWindow(
+			storageWarningPreviousStageFreshnessWindow,
+			expiredBufferedWarning60At(snapshot.WarningCycleStart, snapshot.AutoDeleteDate)-snapshot.WarningCycleStart+storageWarningOneDayInMicroseconds,
+		)
+	case expiredWarningStage119:
+		return maxStorageWarningFreshnessWindow(
+			storageWarningPreviousStageFreshnessWindow,
+			expiredBufferedWarning119At(snapshot.AutoDeleteDate)-expiredBufferedWarning60At(snapshot.WarningCycleStart, snapshot.AutoDeleteDate)+storageWarningOneDayInMicroseconds,
+		)
+	default:
+		return storageWarningPreviousStageFreshnessWindow
+	}
+}
+
+func maxStorageWarningFreshnessWindow(lhs int64, rhs int64) int64 {
+	if lhs >= rhs {
+		return lhs
+	}
+	return rhs
 }
 
 func storageWarningPreviousStage(snapshot storageWarningSnapshot) (templateID string, stageKey string, ok bool) {

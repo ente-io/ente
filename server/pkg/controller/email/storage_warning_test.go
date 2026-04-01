@@ -660,6 +660,52 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			wantBroken: false,
 		},
 		{
+			name: "buffered expired stage 60 allows predecessor older than default window",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage60,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          148 * storageWarningOneDayInMicroseconds,
+				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired0TemplateID: 107 * storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: false,
+		},
+		{
+			name: "buffered expired final reminder allows predecessor older than default window",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage119,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          150 * storageWarningOneDayInMicroseconds,
+				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired60TemplateID: 108 * storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: false,
+		},
+		{
+			name: "buffered expired stage 60 still breaks once predecessor is too stale",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage60,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          149 * storageWarningOneDayInMicroseconds,
+				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired0TemplateID: 105 * storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: true,
+			wantStage:  string(expiredWarningStage0),
+		},
+		{
 			name: "terminal active overage stage requires final reminder",
 			snapshot: storageWarningSnapshot{
 				Bucket:             storageWarningBucketActiveOverage,
@@ -685,6 +731,46 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 				t.Fatalf("expected alert to include previous stage %q, got %q", tc.wantStage, alert)
 			}
 		})
+	}
+}
+
+func TestStorageWarningPreviousStageFreshnessWindowForSnapshot(t *testing.T) {
+	buffered60Snapshot := storageWarningSnapshot{
+		Bucket:               storageWarningBucketExpired,
+		ExpiredStage:         expiredWarningStage60,
+		ExpiredBufferedCycle: true,
+		WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+		AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+	}
+	got := storageWarningPreviousStageFreshnessWindowForSnapshot(buffered60Snapshot)
+	want := expiredBufferedWarning60At(buffered60Snapshot.WarningCycleStart, buffered60Snapshot.AutoDeleteDate) -
+		buffered60Snapshot.WarningCycleStart + storageWarningOneDayInMicroseconds
+	if got != want {
+		t.Fatalf("unexpected buffered stage 60 freshness window: got %d want %d", got, want)
+	}
+
+	buffered119Snapshot := storageWarningSnapshot{
+		Bucket:               storageWarningBucketExpired,
+		ExpiredStage:         expiredWarningStage119,
+		ExpiredBufferedCycle: true,
+		WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+		AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+	}
+	got = storageWarningPreviousStageFreshnessWindowForSnapshot(buffered119Snapshot)
+	want = expiredBufferedWarning119At(buffered119Snapshot.AutoDeleteDate) -
+		expiredBufferedWarning60At(buffered119Snapshot.WarningCycleStart, buffered119Snapshot.AutoDeleteDate) +
+		storageWarningOneDayInMicroseconds
+	if got != want {
+		t.Fatalf("unexpected buffered stage 119 freshness window: got %d want %d", got, want)
+	}
+
+	standardSnapshot := storageWarningSnapshot{
+		Bucket:       storageWarningBucketExpired,
+		ExpiredStage: expiredWarningStage60,
+	}
+	got = storageWarningPreviousStageFreshnessWindowForSnapshot(standardSnapshot)
+	if got != storageWarningPreviousStageFreshnessWindow {
+		t.Fatalf("unexpected standard freshness window: got %d want %d", got, storageWarningPreviousStageFreshnessWindow)
 	}
 }
 

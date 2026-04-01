@@ -256,6 +256,9 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillWithExisting0dAnd30
 	if snapshot.AutoDeleteDate != wantAutoDeleteDate {
 		t.Fatalf("unexpected auto delete date: got %d want %d", snapshot.AutoDeleteDate, wantAutoDeleteDate)
 	}
+	if broken, alert := storageWarningCadenceBroken(snapshot); broken {
+		t.Fatalf("expected buffered expired stage 60 cadence to pass, got alert %q", alert)
+	}
 }
 
 func setupExpiredBackfillWithOld0dAnd30dHistory(t *testing.T, db *sql.DB, subscriptionExpiry int64, firstSendAt int64) int64 {
