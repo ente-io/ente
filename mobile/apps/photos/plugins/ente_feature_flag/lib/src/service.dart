@@ -108,7 +108,7 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
-  bool get ocrOverlayEnabled => internalUser;
+  bool get ocrOverlayEnabled => true;
 
   bool get enableBgLocalUploadPriority => internalUser;
 

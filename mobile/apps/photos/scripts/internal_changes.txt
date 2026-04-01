@@ -6,12 +6,12 @@ Latest changes:
 - Neeraj: Guard shared favorites removal resolution
 - Neeraj: Handle incomplete signup login errors with localized error copy
 - Neeraj: Improve motion photo video detection in rust layer
+- Amrithesh: OCR inline text detection
 - Prateek: 16 KB page size fix
 
 Still behind internal flag:
 - Ashil, Setal (I): Native family management screens
 - Amrithesh: (I) ML/Pet recognition [Indexing]
-- Amrithesh: (I) OCR inline text detection
 - Amrithesh: (I) QR code detection
 - Laurens: (I) Clip text encoding in rust
 - Laurens: (I) Generate and compress face thumbnails in rust
