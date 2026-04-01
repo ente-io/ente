@@ -33,6 +33,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { handleManualAppUpdateCheck } from "services/app-update";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
@@ -3515,6 +3516,10 @@ const Page: React.FC = () => {
         saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     }, [isTauriRuntime, showMiniDialog]);
 
+    const handleCheckForUpdates = useCallback(async () => {
+        await handleManualAppUpdateCheck(showMiniDialog);
+    }, [showMiniDialog]);
+
     const openModelSettings = useCallback(() => {
         if (!advancedUnlocked) return;
         setShowModelSettings(true);
@@ -4410,6 +4415,7 @@ const Page: React.FC = () => {
                 isLoggedIn={isLoggedIn}
                 signedInEmail={savedLocalUser()?.email ?? ""}
                 saveLogs={saveLogs}
+                handleCheckForUpdates={handleCheckForUpdates}
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}

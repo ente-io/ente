@@ -15,10 +15,6 @@ import {
 } from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
 import {
-    sortPeople,
-    type PeopleSortBy,
-} from "ente-new/photos/components/PeopleSortOptions";
-import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
@@ -27,6 +23,10 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
+import {
+    sortPeople,
+    type PeopleSortBy,
+} from "ente-new/photos/components/people-sort";
 import {
     collectionsSortBy,
     haveOnlySystemCollections,

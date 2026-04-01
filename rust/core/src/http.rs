@@ -1,5 +1,6 @@
 //! HTTP client for communicating with the Ente API.
 
+use reqwest::Url;
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -22,6 +23,10 @@ pub enum Error {
     /// Failed to parse JSON response.
     #[error("JSON parse error: {0}")]
     Parse(String),
+
+    /// Invalid base URL or request path.
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(String),
 }
 
 impl From<reqwest::Error> for Error {
@@ -71,17 +76,35 @@ impl HttpClient {
     pub fn new(base_url: &str) -> Self {
         Self {
             client: reqwest::Client::new(),
-            base_url: base_url.to_string(),
+            base_url: base_url.trim_end_matches('/').to_string(),
         }
     }
 
     /// GET request, returns response body as text.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
-        let url = format!("{}{}", self.base_url, path);
+        let url = self.request_url(path)?;
         let response = self.client.get(&url).send().await?;
         let response = response.error_for_status()?;
         let text = response.text().await?;
         Ok(text)
+    }
+
+    fn request_url(&self, path: &str) -> Result<String, Error> {
+        if !path.starts_with('/') {
+            return Err(Error::InvalidUrl(
+                "request paths must start with '/'".to_string(),
+            ));
+        }
+
+        let base = Url::parse(&self.base_url)
+            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
+        if base.query().is_some() || base.fragment().is_some() {
+            return Err(Error::InvalidUrl(
+                "base URL must not contain a query or fragment".to_string(),
+            ));
+        }
+
+        Ok(format!("{}{}", self.base_url, path))
     }
 
     /// Ping the API, returns [PingResponse].
@@ -96,9 +119,16 @@ impl HttpClient {
 mod tests {
     use super::*;
 
+    fn test_client(base_url: &str) -> HttpClient {
+        HttpClient {
+            client: reqwest::Client::builder().no_proxy().build().unwrap(),
+            base_url: base_url.trim_end_matches('/').to_string(),
+        }
+    }
+
     #[test]
     fn test_client_creation() {
-        let client = HttpClient::new("https://api.ente.io");
+        let client = test_client("https://api.ente.io/");
         assert_eq!(client.base_url, "https://api.ente.io");
     }
 
@@ -108,5 +138,47 @@ mod tests {
         let err: Result<PingResponse, Error> = serde_json::from_str(bad_json).map_err(|e| e.into());
         println!("{:?}", err);
         assert!(matches!(err, Err(Error::Parse(_))))
+    }
+
+    #[test]
+    fn test_request_url_uses_string_join() {
+        let client = test_client("https://api.ente.io/v1");
+        let url = client.request_url("/ping").unwrap();
+        assert_eq!(url, "https://api.ente.io/v1/ping");
+    }
+
+    #[test]
+    fn test_request_url_preserves_query_and_special_bytes() {
+        let client = test_client("https://api.ente.io/v1");
+        let url = client.request_url("/%2e%2e%5cadmin?fresh=true").unwrap();
+        assert_eq!(url, "https://api.ente.io/v1/%2e%2e%5cadmin?fresh=true");
+    }
+
+    #[test]
+    fn test_request_url_rejects_missing_leading_slash() {
+        let client = test_client("https://api.ente.io");
+        let err = client.request_url("ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_request_url_rejects_invalid_base_url() {
+        let client = test_client("not a url");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_request_url_rejects_base_url_with_query() {
+        let client = test_client("https://api.ente.io/v1?stale=true");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_request_url_rejects_base_url_with_fragment() {
+        let client = test_client("https://api.ente.io/v1#old");
+        let err = client.request_url("/ping").unwrap_err();
+        assert!(matches!(err, Error::InvalidUrl(_)));
     }
 }

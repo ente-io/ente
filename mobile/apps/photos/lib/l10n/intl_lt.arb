@@ -27,7 +27,6 @@
   "deleteReason4": "Mano priežastis nenurodyta",
   "sendEmail": "Siųsti el. laišką",
   "deleteRequestSLAText": "Jūsų prašymas bus apdorotas per 72 valandas.",
-  "deleteEmailRequest": "Iš savo registruoto el. pašto adreso siųskite el. laišką adresu <warning>account-deletion@ente.com</warning>.",
   "entePhotosPerm": "„Ente“ <i>reikia leidimo</i> išsaugoti jūsų nuotraukas",
   "ok": "Gerai",
   "createAccount": "Kurti paskyrą",
@@ -708,7 +707,6 @@
   "subscription": "Prenumerata",
   "paymentDetails": "Mokėjimo duomenys",
   "manageFamily": "Tvarkyti šeimą",
-  "contactToManageSubscription": "Susisiekite su mumis adresu support@ente.com, kad sutvarkytumėte savo {provider} prenumeratą.",
   "renewSubscription": "Pratęsti prenumeratą",
   "cancelSubscription": "Atsisakyti prenumeratos",
   "areYouSureYouWantToRenew": "Ar tikrai norite pratęsti?",
@@ -757,7 +755,6 @@
   "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
   "visitWebToManage": "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą",
   "couldNotUpdateSubscription": "Nepavyko atnaujinti prenumeratos",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Susisiekite adresu support@ente.com ir mes mielai padėsime!",
   "paymentFailed": "Mokėjimas nepavyko",
   "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
   "@paymentFailedTalkToProvider": {
@@ -1501,7 +1498,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1586,7 +1583,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {

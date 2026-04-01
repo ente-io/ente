@@ -37,6 +37,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
+import 'package:photos/services/memory_share_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -207,6 +208,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     // Initialize early so thermal/battery listeners can warm up while the
     // rest of background services are being initialized.
     final controller = computeController;
+    await MemoryShareService.instance.init();
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -326,6 +328,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    await MemoryShareService.instance.init();
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();

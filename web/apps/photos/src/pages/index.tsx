@@ -7,22 +7,18 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
-import log from "ente-base/log";
 import {
-    albumsAppOrigin,
-    customAPIHost,
-    shouldOnlyServeAlbumsApp,
-} from "ente-base/origins";
+    JOIN_ALBUM_CONTEXT_KEY,
+    type JoinAlbumContext,
+} from "ente-base/join-album";
+import log from "ente-base/log";
+import { customAPIHost } from "ente-base/origins";
 import {
     masterKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
-import {
-    JOIN_ALBUM_CONTEXT_KEY,
-    type JoinAlbumContext,
-} from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -111,28 +107,11 @@ const Page: React.FC = () => {
                 }
             }
 
-            const albumsURL = new URL(albumsAppOrigin());
-            if (
-                (shouldOnlyServeAlbumsApp ||
-                    currentURL.host == albumsURL.host) &&
-                currentURL.pathname != "/shared-albums"
-            ) {
-                const [hash] = currentURL.hash.slice(1).split("&", 1);
-                await router.replace({
-                    pathname: "/shared-albums",
-                    search: currentURL.search,
-                    hash: hash,
-                });
-            } else {
-                await updateSessionFromElectronSafeStorageIfNeeded();
-                if (
-                    (await masterKeyFromSession()) &&
-                    (await savedAuthToken())
-                ) {
-                    await router.push("/gallery");
-                } else if (savedPartialLocalUser()?.email) {
-                    await router.push("/verify");
-                }
+            await updateSessionFromElectronSafeStorageIfNeeded();
+            if ((await masterKeyFromSession()) && (await savedAuthToken())) {
+                await router.push("/gallery");
+            } else if (savedPartialLocalUser()?.email) {
+                await router.push("/verify");
             }
             if (!(await canAccessIndexedDB())) {
                 showMiniDialog({

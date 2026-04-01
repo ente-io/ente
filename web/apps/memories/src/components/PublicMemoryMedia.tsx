@@ -7,7 +7,6 @@ import {
 } from "ente-gallery/services/download";
 import type { HLSPlaylistData } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
-import type { PublicMemoryShareFrameCrop } from "ente-new/albums/services/public-memory";
 import "hls-video-element";
 import {
     type CSSProperties,
@@ -17,6 +16,7 @@ import {
     useRef,
     useState,
 } from "react";
+import type { PublicMemoryShareFrameCrop } from "../services/public-memory";
 import { computeMediaCropStyle } from "../utils/lane";
 
 const DEFAULT_MEDIA_MAX_WIDTH_CSS = "min(1264px, calc(100vw - 48px))";

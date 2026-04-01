@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -167,9 +168,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.secondary,
                         shouldStickToLightTheme: true,
+                        shouldSurfaceExecutionStates: false,
                         labelText: AppLocalizations.of(context).shareKey,
                         onTap: () async {
-                          await _shareRecoveryKey(recoveryKey);
+                          unawaited(_shareRecoveryKey(recoveryKey));
                         },
                       ),
                     ],
