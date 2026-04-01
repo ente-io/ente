@@ -19,7 +19,7 @@ class QrCodeHighlightOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (detections.isEmpty || !file.hasDimensions) {
+    if (detections.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -34,17 +34,22 @@ class QrCodeHighlightOverlay extends StatelessWidget {
           builder: (context, constraints) {
             final screenWidth = constraints.maxWidth;
             final screenHeight = constraints.maxHeight;
-            final imageAspect = file.width / file.height;
-            final screenAspect = screenWidth / screenHeight;
 
             double displayWidth;
             double displayHeight;
-            if (imageAspect > screenAspect) {
-              displayWidth = screenWidth;
-              displayHeight = screenWidth / imageAspect;
+            if (file.hasDimensions) {
+              final imageAspect = file.width / file.height;
+              final screenAspect = screenWidth / screenHeight;
+              if (imageAspect > screenAspect) {
+                displayWidth = screenWidth;
+                displayHeight = screenWidth / imageAspect;
+              } else {
+                displayHeight = screenHeight;
+                displayWidth = screenHeight * imageAspect;
+              }
             } else {
+              displayWidth = screenWidth;
               displayHeight = screenHeight;
-              displayWidth = screenHeight * imageAspect;
             }
 
             final offsetX = (screenWidth - displayWidth) / 2;
