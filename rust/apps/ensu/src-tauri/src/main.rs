@@ -3,17 +3,28 @@
 use tauri::Manager;
 
 mod commands;
+mod logging;
 
 fn main() {
+    logging::install_panic_hook();
+    logging::log("App", "starting Tauri backend");
+
     tauri::Builder::default()
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
+            logging::init_logging(&app.handle());
+            logging::log("App", "setup started");
+
             // Show the main window after setup is complete
             if let Some(window) = app.get_window("main") {
-                window.show().unwrap();
+                if let Err(err) = window.show() {
+                    logging::log("App", format!("failed to show main window error={err}"));
+                    return Err(Box::new(err));
+                }
             }
+            logging::log("App", "setup complete");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -70,5 +81,8 @@ fn main() {
             commands::fs_append_bytes,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .unwrap_or_else(|err| {
+            logging::log("App", format!("tauri run failed error={err}"));
+            panic!("error while running tauri application: {err}");
+        });
 }

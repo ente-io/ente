@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
 #[cfg(target_os = "macos")]
 use std::process::Command;
@@ -16,6 +17,8 @@ use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
 use tauri::{AppHandle, State, Window};
 use uuid::Uuid;
+
+use crate::logging;
 
 #[derive(Default)]
 pub struct SrpState {
@@ -137,6 +140,20 @@ fn chat_db_thread_error() -> ApiError {
 
 fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
+}
+
+fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
+    match payload.downcast::<String>() {
+        Ok(message) => *message,
+        Err(payload) => match payload.downcast::<&'static str>() {
+            Ok(message) => (*message).to_string(),
+            Err(_) => "non-string panic payload".to_string(),
+        },
+    }
+}
+
+fn log_command_panic(command: &str, message: &str) {
+    logging::log("Panic", format!("command={command} panic={message}"));
 }
 
 fn secure_storage_entry(key: &str) -> Result<keyring::Entry, ApiError> {
@@ -1307,38 +1324,90 @@ pub async fn chat_sync(
     input: ChatSyncInput,
 ) -> Result<ChatSyncResultDto, ApiError> {
     async_runtime::spawn_blocking(move || {
-        let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
-        let master_key = core_crypto::decode_b64(&input.master_key_b64).map_err(ApiError::from)?;
+        match catch_unwind(AssertUnwindSafe(|| {
+            logging::log(
+                "Sync",
+                format!(
+                    "chat_sync start base_url={} has_user_agent={} has_client_package={} has_client_version={}",
+                    input.base_url,
+                    input.user_agent.is_some(),
+                    input.client_package.is_some(),
+                    input.client_version.is_some()
+                ),
+            );
+            let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+            let master_key =
+                core_crypto::decode_b64(&input.master_key_b64).map_err(ApiError::from)?;
 
-        let db_path = chat_db_path(&app)?;
-        let sync_path = sync_db_path(&app)?;
-        let attachments_dir = attachments_dir_path(&app)?;
-        let meta_dir = sync_meta_dir_path(&app)?;
+            let db_path = chat_db_path(&app)?;
+            let sync_path = sync_db_path(&app)?;
+            let attachments_dir = attachments_dir_path(&app)?;
+            let meta_dir = sync_meta_dir_path(&app)?;
 
-        let engine = chat_sync::SyncEngine::new(
-            db_path.to_string_lossy().to_string(),
-            sync_path.to_string_lossy().to_string(),
-            key,
-            attachments_dir.to_string_lossy().to_string(),
-            meta_dir.to_string_lossy().to_string(),
-            None,
-        )
-        .map_err(|err| ApiError::new("sync", err.to_string()))?;
+            logging::log(
+                "Sync",
+                format!(
+                    "chat_sync paths db={} sync={} attachments_dir={} meta_dir={}",
+                    db_path.display(),
+                    sync_path.display(),
+                    attachments_dir.display(),
+                    meta_dir.display()
+                ),
+            );
 
-        let auth = chat_sync::SyncAuth {
-            base_url: input.base_url,
-            auth_token: input.auth_token,
-            master_key: master_key.into(),
-            user_agent: input.user_agent,
-            client_package: input.client_package,
-            client_version: input.client_version,
-        };
+            let engine = chat_sync::SyncEngine::new(
+                db_path.to_string_lossy().to_string(),
+                sync_path.to_string_lossy().to_string(),
+                key,
+                attachments_dir.to_string_lossy().to_string(),
+                meta_dir.to_string_lossy().to_string(),
+                None,
+            )
+            .map_err(|err| {
+                logging::log("Sync", format!("failed to create sync engine error={err}"));
+                ApiError::new("sync", err.to_string())
+            })?;
 
-        let result = engine.sync(auth).map_err(map_sync_error)?;
-        Ok(ChatSyncResultDto::from(result))
+            let auth = chat_sync::SyncAuth {
+                base_url: input.base_url,
+                auth_token: input.auth_token,
+                master_key: master_key.into(),
+                user_agent: input.user_agent,
+                client_package: input.client_package,
+                client_version: input.client_version,
+            };
+
+            let result = engine.sync(auth).map_err(|err| {
+                logging::log("Sync", format!("sync failed error={err}"));
+                map_sync_error(err)
+            })?;
+            logging::log(
+                "Sync",
+                format!(
+                    "chat_sync success pulled_sessions={} pulled_messages={} pushed_sessions={} pushed_messages={} uploaded_attachments={} downloaded_attachments={}",
+                    result.pulled.sessions,
+                    result.pulled.messages,
+                    result.pushed.sessions,
+                    result.pushed.messages,
+                    result.uploaded_attachments,
+                    result.downloaded_attachments
+                ),
+            );
+            Ok(ChatSyncResultDto::from(result))
+        })) {
+            Ok(result) => result,
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("chat_sync", &message);
+                Err(ApiError::new("sync_panic", format!("chat_sync panicked: {message}")))
+            }
+        }
     })
     .await
-    .map_err(|_| ApiError::new("sync", "Sync task failed"))?
+    .map_err(|err| {
+        logging::log("Sync", format!("sync task join failed error={err}"));
+        ApiError::new("sync", "Sync task failed")
+    })?
 }
 
 #[derive(Serialize, Clone)]
@@ -1480,9 +1549,24 @@ pub fn get_ensu_defaults() -> TauriEnsuDefaults {
 
 #[tauri::command]
 pub async fn llm_init_backend() -> Result<(), ApiError> {
-    async_runtime::spawn_blocking(|| llm::init_backend().map_err(llm_error))
+    logging::log("LLM", "init backend requested");
+    async_runtime::spawn_blocking(|| match catch_unwind(AssertUnwindSafe(|| llm::init_backend())) {
+        Ok(result) => result.map_err(llm_error),
+        Err(payload) => {
+            let message = panic_message(payload);
+            log_command_panic("llm_init_backend", &message);
+            Err(ApiError::new(
+                "llm_panic",
+                format!("llm_init_backend panicked: {message}"),
+            ))
+        }
+    })
         .await
-        .map_err(|_| llm_thread_error())??;
+        .map_err(|err| {
+            logging::log("LLM", format!("init backend join failed error={err}"));
+            llm_thread_error()
+        })??;
+    logging::log("LLM", "init backend succeeded");
     Ok(())
 }
 
@@ -1491,9 +1575,25 @@ pub async fn llm_load_model(
     state: State<'_, LlmState>,
     params: llm::ModelLoadParams,
 ) -> Result<(), ApiError> {
-    let model = async_runtime::spawn_blocking(move || llm::load_model(params).map_err(llm_error))
+    logging::log("LLM", format!("load model requested model_path={}", params.model_path));
+    let model = async_runtime::spawn_blocking(move || {
+        match catch_unwind(AssertUnwindSafe(|| llm::load_model(params))) {
+            Ok(result) => result.map_err(llm_error),
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_load_model", &message);
+                Err(ApiError::new(
+                    "llm_panic",
+                    format!("llm_load_model panicked: {message}"),
+                ))
+            }
+        }
+    })
         .await
-        .map_err(|_| llm_thread_error())??;
+        .map_err(|err| {
+            logging::log("LLM", format!("load model join failed error={err}"));
+            llm_thread_error()
+        })??;
     let mut model_guard = state
         .model
         .lock()
@@ -1506,6 +1606,7 @@ pub async fn llm_load_model(
     *model_guard = Some(model);
     *context_guard = None;
 
+    logging::log("LLM", "load model succeeded");
     Ok(())
 }
 
@@ -1525,12 +1626,32 @@ pub async fn llm_create_context(
     if params.n_threads.is_none() {
         params.n_threads = Some(default_llm_threads());
     }
+    logging::log(
+        "LLM",
+        format!(
+            "create context requested context_size={:?} n_threads={:?} n_batch={:?}",
+            params.context_size, params.n_threads, params.n_batch
+        ),
+    );
 
     let context = async_runtime::spawn_blocking(move || {
-        llm::create_context(model, params).map_err(llm_error)
+        match catch_unwind(AssertUnwindSafe(|| llm::create_context(model, params))) {
+            Ok(result) => result.map_err(llm_error),
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_create_context", &message);
+                Err(ApiError::new(
+                    "llm_panic",
+                    format!("llm_create_context panicked: {message}"),
+                ))
+            }
+        }
     })
     .await
-    .map_err(|_| llm_thread_error())??;
+    .map_err(|err| {
+        logging::log("LLM", format!("create context join failed error={err}"));
+        llm_thread_error()
+    })??;
 
     let mut context_guard = state
         .context
@@ -1538,6 +1659,7 @@ pub async fn llm_create_context(
         .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
     *context_guard = Some(context);
 
+    logging::log("LLM", "create context succeeded");
     Ok(())
 }
 
@@ -1581,8 +1703,16 @@ pub fn llm_generate_chat_stream(
         .ok_or_else(|| ApiError::new("llm_not_ready", "Model context not loaded"))?;
 
     async_runtime::spawn_blocking(move || {
-        let mut sink = LlmEventSink::new(window);
-        let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
+        match catch_unwind(AssertUnwindSafe(|| {
+            let mut sink = LlmEventSink::new(window);
+            let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
+        })) {
+            Ok(()) => {}
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_generate_chat_stream", &message);
+            }
+        }
     });
 
     Ok(())
@@ -2064,12 +2194,24 @@ where
             let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
             let path = chat_db_path(app)?;
             let sync_path = sync_db_path(app)?;
+            logging::log(
+                "ChatDb",
+                format!(
+                    "opening chat DB db={} sync={}",
+                    path.display(),
+                    sync_path.display()
+                ),
+            );
             let db =
-                EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(ApiError::from)?;
+                EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(|err| {
+                    logging::log("ChatDb", format!("failed to open chat DB error={err}"));
+                    ApiError::from(err)
+                })?;
             *guard = Some(ChatDbHolder {
                 key_b64: key_b64.to_string(),
                 db: Arc::new(db),
             });
+            logging::log("ChatDb", "chat DB opened");
         }
 
         guard
