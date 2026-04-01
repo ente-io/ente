@@ -19,8 +19,8 @@ Future<T?> showBaseBottomSheet<T>(
   bool isKeyboardAware = true,
   double topCornerRadius = 20,
   Color? closeButtonBackgroundColor,
-  double closeButtonSize = 40,
-  double closeIconSize = 24,
+  double closeButtonSize = 36,
+  double closeIconSize = 20,
 }) {
   return showModalBottomSheet<T>(
     context: context,
@@ -82,8 +82,8 @@ class BaseBottomSheet extends StatelessWidget {
     this.isKeyboardAware = true,
     this.topCornerRadius = 20,
     this.closeButtonBackgroundColor,
-    this.closeButtonSize = 40,
-    this.closeIconSize = 24,
+    this.closeButtonSize = 36,
+    this.closeIconSize = 20,
     super.key,
   });
 
@@ -115,7 +115,7 @@ class BaseBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: titleStyle ?? textTheme.h4Bold),
+                    Text(title, style: titleStyle ?? textTheme.largeBold),
                     if (showCloseButton)
                       BottomSheetCloseButton(
                         onTap: onClose,
@@ -148,8 +148,8 @@ class BottomSheetCloseButton extends StatelessWidget {
     super.key,
     this.onTap,
     this.backgroundColor,
-    this.buttonSize = 40,
-    this.iconSize = 24,
+    this.buttonSize = 36,
+    this.iconSize = 20,
   });
 
   @override

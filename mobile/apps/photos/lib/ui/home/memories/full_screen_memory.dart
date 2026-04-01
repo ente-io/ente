@@ -6,6 +6,7 @@ import "dart:ui";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -25,8 +26,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
@@ -837,48 +836,17 @@ Future<void> _shareMemory(
   final l10n = AppLocalizations.of(context);
   final currentFile =
       inheritedData.memories[inheritedData.indexNotifier.value].file;
-  final shareSingleItemLabel =
-      currentFile.isVideo ? l10n.shareThisVideo : l10n.shareThisPhoto;
+  final shareSingleItemLabel = currentFile.isVideo
+      ? _titleCase(l10n.videoSmallCase)
+      : _titleCase(l10n.photoSmallCase);
   final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
       !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
   final shouldShareLink = await showBaseBottomSheet<bool>(
     context,
-    backgroundColor: getEnteColorScheme(context).backgroundColour,
-    padding: const EdgeInsets.all(16),
-    title: l10n.shareMemory,
-    child: Builder(
-      builder: (context) {
-        final colorScheme = getEnteColorScheme(context);
-        return SettingsGroupedCard(
-          children: [
-            if (canShowMemoryShareLinkOption)
-              MenuItemWidgetNew(
-                title: l10n.shareTheseMemories,
-                trailingWidget: HugeIcon(
-                  icon: HugeIcons.strokeRoundedLink02,
-                  color: colorScheme.textBase,
-                  size: 20,
-                ),
-                borderRadius: 0,
-                onTap: () async {
-                  Navigator.of(context).pop(true);
-                },
-              ),
-            MenuItemWidgetNew(
-              title: shareSingleItemLabel,
-              trailingWidget: HugeIcon(
-                icon: HugeIcons.strokeRoundedShare04,
-                color: colorScheme.textBase,
-                size: 20,
-              ),
-              borderRadius: 0,
-              onTap: () async {
-                Navigator.of(context).pop(false);
-              },
-            ),
-          ],
-        );
-      },
+    title: l10n.shareMemories,
+    child: _MemoryShareSheet(
+      canShowMemoryShareLinkOption: canShowMemoryShareLinkOption,
+      shareSingleItemLabel: shareSingleItemLabel,
     ),
   );
   if (!context.mounted || shouldShareLink == null) {
@@ -924,5 +892,104 @@ Future<(String, int)?> _getOrCreateMemoryLink(
       await showGenericErrorBottomSheet(context: context, error: e);
     }
     return null;
+  }
+}
+
+String _titleCase(String value) {
+  if (value.isEmpty) return value;
+  return value[0].toUpperCase() + value.substring(1);
+}
+
+class _MemoryShareSheet extends StatelessWidget {
+  final bool canShowMemoryShareLinkOption;
+  final String shareSingleItemLabel;
+
+  const _MemoryShareSheet({
+    required this.canShowMemoryShareLinkOption,
+    required this.shareSingleItemLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      children: [
+        if (canShowMemoryShareLinkOption)
+          _MemoryShareOption(
+            icon: HugeIcons.strokeRoundedLink02,
+            svgAssetPath: "assets/icons/memory-share-link-icon.svg",
+            label: l10n.memories,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
+        if (canShowMemoryShareLinkOption) const SizedBox(width: 24),
+        _MemoryShareOption(
+          icon: HugeIcons.strokeRoundedShare05,
+          label: shareSingleItemLabel,
+          onTap: () => Navigator.of(context).pop(false),
+        ),
+      ],
+    );
+  }
+}
+
+class _MemoryShareOption extends StatelessWidget {
+  final List<List<dynamic>> icon;
+  final String label;
+  final VoidCallback onTap;
+  final String? svgAssetPath;
+
+  const _MemoryShareOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.svgAssetPath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.fillDark,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (svgAssetPath != null)
+                SvgPicture.asset(
+                  svgAssetPath!,
+                  width: 26,
+                  height: 26,
+                  colorFilter: ColorFilter.mode(
+                    colorScheme.textBase,
+                    BlendMode.srcIn,
+                  ),
+                )
+              else
+                HugeIcon(
+                  icon: icon,
+                  color: colorScheme.textBase,
+                  size: 24,
+                ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: textTheme.small.copyWith(color: colorScheme.textBase),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
