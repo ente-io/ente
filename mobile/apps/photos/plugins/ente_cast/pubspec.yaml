@@ -6,6 +6,11 @@ environment:
   sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
+  cast:
+    git:
+      url: https://github.com/guyluz11/flutter_cast.git
+      ref: multicast_version
+      commit: 1f39cd4
   collection:
   dio: ^5.8.0+1
   flutter:
