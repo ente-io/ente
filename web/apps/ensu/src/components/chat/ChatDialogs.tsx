@@ -461,28 +461,30 @@ export const ChatDialogs = memo(
                                     />
                                 </ListItemButton>
 
-                                <ListItemButton
-                                    onClick={() => {
-                                        closeSettingsModal();
-                                        void handleCheckForUpdates();
-                                    }}
-                                    sx={settingsItemSx}
-                                >
-                                    <HugeiconsIcon
-                                        icon={InformationCircleIcon}
-                                        {...compactIconProps}
-                                    />
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1 }}
+                                {isTauriRuntime && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            void handleCheckForUpdates();
+                                        }}
+                                        sx={settingsItemSx}
                                     >
-                                        Check for updates
-                                    </Typography>
-                                    <HugeiconsIcon
-                                        icon={ArrowRight01Icon}
-                                        {...smallIconProps}
-                                    />
-                                </ListItemButton>
+                                        <HugeiconsIcon
+                                            icon={InformationCircleIcon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Check for updates
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
 
                                 <ListItemButton
                                     onClick={() => {
