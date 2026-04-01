@@ -24,7 +24,10 @@ pub fn init_logging(app: &AppHandle) {
     }
 
     let _ = LOG_PATH.set(path.clone());
-    log("App", format!("backend logging initialized path={}", path.display()));
+    log(
+        "App",
+        format!("backend logging initialized path={}", path.display()),
+    );
 }
 
 pub fn install_panic_hook() {

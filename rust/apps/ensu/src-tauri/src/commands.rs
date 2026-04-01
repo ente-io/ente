@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
-use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
 #[cfg(target_os = "macos")]
 use std::process::Command;
@@ -1569,7 +1569,7 @@ pub fn get_ensu_defaults() -> TauriEnsuDefaults {
 #[tauri::command]
 pub async fn llm_init_backend() -> Result<(), ApiError> {
     logging::log("LLM", "init backend requested");
-    async_runtime::spawn_blocking(|| match catch_unwind(AssertUnwindSafe(|| llm::init_backend())) {
+    async_runtime::spawn_blocking(|| match catch_unwind(AssertUnwindSafe(llm::init_backend)) {
         Ok(result) => result.map_err(llm_error),
         Err(payload) => {
             let message = panic_message(payload);
@@ -1580,11 +1580,11 @@ pub async fn llm_init_backend() -> Result<(), ApiError> {
             ))
         }
     })
-        .await
-        .map_err(|err| {
-            logging::log("LLM", format!("init backend join failed error={err}"));
-            llm_thread_error()
-        })??;
+    .await
+    .map_err(|err| {
+        logging::log("LLM", format!("init backend join failed error={err}"));
+        llm_thread_error()
+    })??;
     logging::log("LLM", "init backend succeeded");
     Ok(())
 }
@@ -1594,7 +1594,10 @@ pub async fn llm_load_model(
     state: State<'_, LlmState>,
     params: llm::ModelLoadParams,
 ) -> Result<(), ApiError> {
-    logging::log("LLM", format!("load model requested model_path={}", params.model_path));
+    logging::log(
+        "LLM",
+        format!("load model requested model_path={}", params.model_path),
+    );
     let model = async_runtime::spawn_blocking(move || {
         match catch_unwind(AssertUnwindSafe(|| llm::load_model(params))) {
             Ok(result) => result.map_err(llm_error),
@@ -1608,11 +1611,11 @@ pub async fn llm_load_model(
             }
         }
     })
-        .await
-        .map_err(|err| {
-            logging::log("LLM", format!("load model join failed error={err}"));
-            llm_thread_error()
-        })??;
+    .await
+    .map_err(|err| {
+        logging::log("LLM", format!("load model join failed error={err}"));
+        llm_thread_error()
+    })??;
     replace_llm_state(&state, Some(model), None)?;
 
     logging::log("LLM", "load model succeeded");
@@ -1841,7 +1844,13 @@ pub fn cleanup_for_exit(app: &AppHandle) {
                 logging::log("App", "cleared LLM context");
             }
             Err(error) => {
-                logging::log("App", format!("failed to clear LLM state during exit error={}", error.message));
+                logging::log(
+                    "App",
+                    format!(
+                        "failed to clear LLM state during exit error={}",
+                        error.message
+                    ),
+                );
             }
         }
     } else {
@@ -2232,11 +2241,10 @@ where
                     sync_path.display()
                 ),
             );
-            let db =
-                EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(|err| {
-                    logging::log("ChatDb", format!("failed to open chat DB error={err}"));
-                    ApiError::from(err)
-                })?;
+            let db = EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(|err| {
+                logging::log("ChatDb", format!("failed to open chat DB error={err}"));
+                ApiError::from(err)
+            })?;
             *guard = Some(ChatDbHolder {
                 key_b64: key_b64.to_string(),
                 db: Arc::new(db),

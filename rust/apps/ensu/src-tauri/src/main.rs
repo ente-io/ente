@@ -89,7 +89,7 @@ fn main() {
 
     app.run(|app_handle, event| {
         if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
-            commands::cleanup_for_exit(&app_handle);
+            commands::cleanup_for_exit(app_handle);
         }
     });
 }

@@ -33,6 +33,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { handleManualAppUpdateCheck } from "services/app-update";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
@@ -72,7 +73,6 @@ import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     SIGN_IN_ENABLED,
 } from "services/featureFlags";
-import { handleManualAppUpdateCheck } from "services/app-update";
 import {
     DEFAULT_MODEL,
     FALLBACK_DESKTOP_MODEL_PRESETS,
