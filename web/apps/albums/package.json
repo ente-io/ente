@@ -17,6 +17,7 @@
         "dayjs": "^1.11.18",
         "debounce": "^2.2.0",
         "ente-base": "*",
+        "ente-gallery": "*",
         "ente-media": "*",
         "ente-utils": "*",
         "exifreader": "^4.32.0",
