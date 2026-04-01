@@ -108,6 +108,11 @@ class ThumbnailManager {
 
 export const thumbnailManager = new ThumbnailManager();
 
+type CaptureStackTrace = (
+    targetObject: object,
+    constructorOpt?: object,
+) => void;
+
 class NetworkThumbnailError extends Error {
     error: unknown;
 
@@ -116,7 +121,11 @@ class NetworkThumbnailError extends Error {
             `NetworkThumbnailError: ${e instanceof Error ? e.message : String(e)}`,
         );
 
-        Error.captureStackTrace(this, NetworkThumbnailError);
+        const captureStackTrace = Reflect.get(
+            Error,
+            "captureStackTrace",
+        ) as CaptureStackTrace | undefined;
+        if (captureStackTrace) captureStackTrace(this, NetworkThumbnailError);
 
         this.error = e;
     }
