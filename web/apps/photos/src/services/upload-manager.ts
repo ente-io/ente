@@ -304,6 +304,10 @@ class UploadManager {
         this.uiService.setUploadProgressView(true);
     }
 
+    hideUploadProgressDialog() {
+        this.uiService.setUploadProgressView(false);
+    }
+
     /**
      * Upload files
      *

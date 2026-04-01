@@ -2007,7 +2007,9 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                         isLinkExpired(publicURL.validTill)
                             ? t("link_expired")
                             : publicURL.validTill
-                              ? formattedDateTime(publicURL.validTill)
+                              ? formattedDateTime(publicURL.validTill, {
+                                    omitWeekdayWhenYearIncluded: true,
+                                })
                               : t("never")
                     }
                 />
