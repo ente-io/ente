@@ -35,6 +35,12 @@ const TextStyle h3 = TextStyle(
   fontWeight: _regularWeight,
   fontFamily: _fontFamily,
 );
+const TextStyle h4 = TextStyle(
+  fontSize: 20,
+  height: 24 / 20.0,
+  fontWeight: _regularWeight,
+  fontFamily: _fontFamily,
+);
 const TextStyle large = TextStyle(
   fontSize: 18,
   height: 22 / 18.0,
@@ -73,6 +79,8 @@ class EnteTextTheme {
   final TextStyle h2Bold;
   final TextStyle h3;
   final TextStyle h3Bold;
+  final TextStyle h4;
+  final TextStyle h4Bold;
   final TextStyle large;
   final TextStyle largeBold;
   final TextStyle body;
@@ -90,6 +98,7 @@ class EnteTextTheme {
   final TextStyle h1Muted;
   final TextStyle h2Muted;
   final TextStyle h3Muted;
+  final TextStyle h4Muted;
   final TextStyle largeMuted;
   final TextStyle bodyMuted;
   final TextStyle smallMuted;
@@ -101,6 +110,7 @@ class EnteTextTheme {
   final TextStyle h1Faint;
   final TextStyle h2Faint;
   final TextStyle h3Faint;
+  final TextStyle h4Faint;
   final TextStyle largeFaint;
   final TextStyle bodyFaint;
   final TextStyle smallFaint;
@@ -114,6 +124,8 @@ class EnteTextTheme {
     required this.h2Bold,
     required this.h3,
     required this.h3Bold,
+    required this.h4,
+    required this.h4Bold,
     required this.large,
     required this.largeBold,
     required this.body,
@@ -129,6 +141,7 @@ class EnteTextTheme {
     required this.h1Muted,
     required this.h2Muted,
     required this.h3Muted,
+    required this.h4Muted,
     required this.largeMuted,
     required this.bodyMuted,
     required this.smallMuted,
@@ -138,6 +151,7 @@ class EnteTextTheme {
     required this.h1Faint,
     required this.h2Faint,
     required this.h3Faint,
+    required this.h4Faint,
     required this.largeFaint,
     required this.bodyFaint,
     required this.smallFaint,
@@ -170,6 +184,8 @@ EnteTextTheme _buildEnteTextStyle(
     h2Bold: h2.copyWith(color: color, fontWeight: _boldWeight),
     h3: h3.copyWith(color: color),
     h3Bold: h3.copyWith(color: color, fontWeight: _boldWeight),
+    h4: h4.copyWith(color: color),
+    h4Bold: h4.copyWith(color: color, fontWeight: _boldWeight),
     large: large.copyWith(color: color),
     largeBold: large.copyWith(color: color, fontWeight: _boldWeight),
     body: body.copyWith(color: color),
@@ -185,6 +201,7 @@ EnteTextTheme _buildEnteTextStyle(
     h1Muted: h1.copyWith(color: textMuted),
     h2Muted: h2.copyWith(color: textMuted),
     h3Muted: h3.copyWith(color: textMuted),
+    h4Muted: h4.copyWith(color: textMuted),
     largeMuted: large.copyWith(color: textMuted),
     bodyMuted: body.copyWith(color: textMuted),
     smallMuted: small.copyWith(color: textMuted),
@@ -194,6 +211,7 @@ EnteTextTheme _buildEnteTextStyle(
     h1Faint: h1.copyWith(color: textFaint),
     h2Faint: h2.copyWith(color: textFaint),
     h3Faint: h3.copyWith(color: textFaint),
+    h4Faint: h4.copyWith(color: textFaint),
     largeFaint: large.copyWith(color: textFaint),
     bodyFaint: body.copyWith(color: textFaint),
     smallFaint: small.copyWith(color: textFaint),

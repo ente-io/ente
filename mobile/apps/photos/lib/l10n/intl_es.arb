@@ -29,7 +29,6 @@
   "deleteReason4": "Mi motivo no se encuentra en la lista",
   "sendEmail": "Enviar correo electrónico",
   "deleteRequestSLAText": "Tu solicitud será procesada dentro de las siguientes 72 horas.",
-  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.com</warning> desde la dirección de correo electrónico que usó para registrarse.",
   "entePhotosPerm": "Ente <i>necesita permiso para</i> preservar tus fotos",
   "ok": "Aceptar",
   "createAccount": "Crear cuenta",
@@ -123,6 +122,7 @@
   "generatingEncryptionKeys": "Generando claves de cifrado...",
   "pleaseWait": "Por favor, espera...",
   "continueLabel": "Continuar",
+  "continueInMailApp": "Continuar en la aplicación de correo",
   "insecureDevice": "Dispositivo inseguro",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Lo sentimos, no hemos podido generar claves seguras en este dispositivo.\n\nPor favor, regístrate desde un dispositivo diferente.",
   "howItWorks": "Cómo funciona",
@@ -321,11 +321,8 @@
   "verificationId": "ID de verificación",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} no tiene una cuente en Ente.\n\nEnvíale una invitación para compartir fotos.",
-  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.com: {verificationID}?",
   "somethingWentWrong": "Algo salió mal",
   "sendInvite": "Enviar invitación",
-  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y vídeos en calidad original.\n\nhttps://ente.com",
   "done": "Hecho",
   "applyCodeTitle": "Usar código",
   "enterCodeDescription": "Introduce el código proporcionado por tu amigo para reclamar almacenamiento gratuito para ambos",
@@ -353,7 +350,6 @@
   "theyAlsoGetXGb": "También obtienen {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB para ellos + {storageAmountInGB} GB para ti cuando actualicen.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vez que alguien se registra en un plan de pago y aplica tu código",
-  "shareTextReferralCode": "Ente Fotos es un lugar seguro y privado para tus fotos\n* Descarga Ente Fotos de https://ente.com/app\n* Crea una cuenta\n* Aplica el código de referido {referralCode} en Ajustes → Referido\n* Obtén {referralStorageInGB}GB gratis cuando actualice a un plan de pago",
   "claimFreeStorage": "Obtén almacenamiento gratuito",
   "inviteYourFriends": "Invita a tus amigos",
   "earnFreeStorage": "Gana almacenamiento gratuito",
@@ -666,6 +662,97 @@
     }
   },
   "familyPlans": "Planes familiares",
+  "family": "Familia",
+  "designedForFamilies": "Diseñado para familias",
+  "shareYourSubscription": "Comparte tu suscripción con tus seres queridos",
+  "shareStorageWith5Members": "Comparte almacenamiento con 5 miembros",
+  "privateSpaceForEveryMember": "Espacio privado para cada miembro",
+  "plansStartAt": "Los planes comienzan a partir de {price}/mes",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Ver planes",
+  "bringYourFamilyAlong": "Trae a tu familia",
+  "addUpTo5MembersFree": "Añadir hasta 5 miembros gratis",
+  "addFamilyMember": "Añadir un miembro de la familia",
+  "addMember": "Añadir miembro",
+  "inviteMembers": "Invitar miembros",
+  "enterEmailAddresses": "Introduce sus direcciones de correo electrónico. Necesitan una cuenta de Ente.",
+  "inviteLimitReached": "Has enviado 5 invitaciones. Quita una para añadir otra",
+  "emailAddress": "Correo electrónico",
+  "sendInvites": "Enviar invitaciones",
+  "enterAnEmailAddress": "Introduce una dirección de correo electrónico",
+  "enterAValidEmailAddress": "Introduce una dirección de correo válida",
+  "alreadyAdded": "Ya añadido",
+  "thisUserIsNotOnEnte": "Este usuario no está en Ente",
+  "emailNeedsEnteAccountForFamily": "{email} no tiene una cuenta de Ente.\n\nEnvíale una invitación y añádele a tu familia una vez que haya creado una cuenta en Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInvite": "No se pudo invitar a {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "members": "Miembros",
+  "pending": "Pendiente",
+  "closeFamilyPlan": "Cerrar plan familiar",
+  "closeFamilyConfirmTitle": "¿Cerrar el plan familiar?",
+  "closeFamilyConfirmBody": "Todos los miembros perderán el acceso al almacenamiento compartido. Esto no se puede deshacer.",
+  "editStorageLimit": "Editar límite de almacenamiento",
+  "noLimitSet": "Sin límite establecido",
+  "removeFromFamily": "Eliminar de la familia",
+  "removeMemberConfirmTitle": "¿Eliminar miembro?",
+  "removeMemberConfirmBody": "{email} perderá el acceso al almacenamiento compartido.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Reenviar invitación",
+  "revokeInviteConfirmTitle": "¿Revocar invitación?",
+  "revokeInviteConfirmBody": "Se cancelará la invitación a {email}.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Revocar",
+  "inviteResent": "Invitación reenviada",
+  "memberStorageUsed": "{amount} usado",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Límite de almacenamiento",
+  "limit": "Límite",
+  "noLimit": "Sin límite",
+  "leaveFamilyConfirmTitle": "¿Abandonar plan familiar?",
+  "leaveFamilyConfirmBody": "Perderás el acceso al almacenamiento compartido.",
   "referrals": "Referidos",
   "notifications": "Notificaciones",
   "sharedPhotoNotifications": "Nuevas fotos y álbumes compartidos",
@@ -700,6 +787,16 @@
   "suggestFeatures": "Sugerir una característica",
   "support": "Soporte",
   "helpAndSupport": "Ayuda y soporte",
+  "browseHelpPages": "Explorar páginas de ayuda",
+  "searchAndDiscovery": "Búsqueda y descubrimiento",
+  "searchAndDiscoveryDesc": "Caras, ubicaciones, descripciones y más",
+  "backupAndSync": "Copia de seguridad y sincronización",
+  "sharingAndCollaboration": "Compartir y colaborar",
+  "sharingAndCollaborationDesc": "Álbumes, enlaces y planes familiares",
+  "storageAndPlans": "Almacenamiento y planes",
+  "storageAndPlansDesc": "Planos, facturación y uso de almacenamiento",
+  "troubleshooting": "Solución de problemas",
+  "troubleshootingDesc": "Problemas comunes y sus soluciones",
   "message": "Mensaje",
   "deviceInfo": "Información de dispositivo",
   "logs": "Registros",
@@ -734,7 +831,6 @@
   "subscription": "Suscripción",
   "paymentDetails": "Detalles de pago",
   "manageFamily": "Administrar familia",
-  "contactToManageSubscription": "Por favor, contáctanos en support@ente.com para gestionar tu suscripción a {provider}.",
   "renewSubscription": "Renovar suscripción",
   "cancelSubscription": "Cancelar suscripción",
   "areYouSureYouWantToRenew": "¿Estás seguro de que quieres renovar?",
@@ -784,7 +880,6 @@
   "visitWebToManage": "Por favor, visita web.ente.io para administrar tu suscripción",
   "managePaymentMethod": "Gestionar métodos de pago",
   "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.com y estaremos encantados de ayudar!",
   "paymentFailed": "Pago fallido",
   "paymentFailedTalkToProvider": "Por favor, habla con el soporte de {providerName} si se te cobró",
   "@paymentFailedTalkToProvider": {
@@ -917,6 +1012,7 @@
   "shareLink": "Compartir enlace",
   "openLink": "Abrir para ver",
   "pay": "Pagar",
+  "noPaymentAppFound": "No se encontró una aplicación de pago",
   "createCollage": "Crear un collage",
   "saveCollage": "Guardar collage",
   "collageSaved": "Collage guardado en la galería",
@@ -1260,6 +1356,7 @@
   "fileTypesAndNames": "Tipos de archivo y nombres",
   "location": "Ubicación",
   "moments": "Momentos",
+  "searchFaceEmptySection": "Las personas se mostrarán aquí cuando se complete el procesamiento",
   "searchDatesEmptySection": "Buscar por fecha, mes o año",
   "searchLocationEmptySection": "Agrupar las fotos que se tomaron cerca de la localización de una foto",
   "searchPeopleEmptySection": "Invita a gente y verás todas las fotos compartidas aquí",
@@ -1268,6 +1365,14 @@
   "searchCaptionEmptySection": "Agrega descripciones como \"#viaje\" en la información de la foto para encontrarlas aquí rápidamente",
   "language": "Idioma",
   "selectLanguage": "Seleccionar idioma",
+  "noLocation": "Sin ubicación",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Sin etiqueta de ubicación",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Nombre de la ubicación",
   "addLocation": "Agregar ubicación",
   "groupNearbyPhotos": "Agrupar fotos cercanas",
@@ -1689,6 +1794,9 @@
   },
   "extraPhotosFound": "Fotos adicionales encontradas",
   "configuration": "Configuración",
+  "localIndexing": "Procesamiento local",
+  "offlineLocalIndexingDisabledDescription": "Este dispositivo mantiene el procesamiento local desactivado por defecto para reducir el uso de memoria.",
+  "offlineLocalIndexingDisabledCardDescription": "Este dispositivo mantiene el procesamiento local desactivado por defecto para reducir el uso de memoria. Actívalo en la configuración si desea una búsqueda inteligente y cara sin conexión.",
   "processed": "Procesado",
   "resetPerson": "Eliminar",
   "areYouSureYouWantToResetThisPerson": "¿Seguro que desea eliminar esta persona?",
@@ -2152,6 +2260,9 @@
   "curatedMemories": "Memorias revisadas",
   "widgets": "Widgets",
   "memories": "Recuerdos",
+  "peopleWidgetDesc": "Selecciona las personas que quieres ver en tu pantalla de inicio.",
+  "albumsWidgetDesc": "Selecciona los álbumes que quieres ver en tu pantalla de inicio.",
+  "memoriesWidgetDesc": "Selecciona los tipos de memorias que quieres ver en tu pantalla de inicio.",
   "smartMemories": "Recuerdos inteligentes",
   "pastYearsMemories": "Recuerdos de los últimos años",
   "deleteMultipleAlbumDialog": "¿Quiere borrar también las fotos (y vídeos) presentes en estos {count} álbumes de <bold>todos</bold> los otros álbumes de los que forman parte?",
@@ -2468,6 +2579,10 @@
   },
   "playfulKids": "Niños jugando",
   "coastalCliffs": "Acantilados marinos",
+  "candidLaughter": "Explosión de risas",
+  "groupSelfies": "Todos nosotros",
+  "concertNights": "Noches de conciertos",
+  "picnicDays": "Memorias de picnic",
   "ritualsTitle": "Rituales",
   "ritualAddTooltip": "Añadir ritual",
   "ritualActivityHeading": "Actividad",
@@ -2567,6 +2682,30 @@
   "newLikeNotificationTitle": "Tienes un me gusta",
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "commentedOnYourPhoto": "comentó en tu foto",
+  "@commentedOnYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAPhoto": "comentó en una foto",
+  "@commentedOnAPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourVideo": "comentó en tu vídeo",
+  "@commentedOnYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAVideo": "comentó en un video",
+  "@commentedOnAVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToYourComment": "respondió a tu comentario",
+  "@repliedToYourComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToAComment": "respondió a un comentario",
+  "@repliedToAComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
   },
   "and1Other": "y 1 más",
   "andXOthers": "y {count} más",

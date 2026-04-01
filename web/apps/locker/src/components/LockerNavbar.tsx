@@ -20,6 +20,8 @@ interface LockerNavbarProps {
     onOpenSidebar: () => void;
     /** True when the mobile drawer trigger should be shown. */
     showMenuButton: boolean;
+    /** Sticky top offset to account for any pinned content above the navbar. */
+    stickyTop?: number;
     /** Current value of the Locker search query. */
     searchTerm: string;
     /** Update callback for the Locker search query. */
@@ -36,13 +38,14 @@ interface LockerNavbarProps {
 export const LockerNavbar: React.FC<LockerNavbarProps> = ({
     onOpenSidebar,
     showMenuButton,
+    stickyTop = 0,
     searchTerm,
     onSearchTermChange,
 }) => (
     <Box
         sx={{
             position: "sticky",
-            top: 0,
+            top: stickyTop,
             left: 0,
             zIndex: 1,
             background: "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
@@ -124,52 +127,60 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
 );
 
 export const LockerUnstableToast: React.FC = () => (
-    <Stack
-        direction="row"
-        role="status"
-        aria-live="polite"
-        sx={{
-            position: "fixed",
-            left: "50%",
-            bottom: { xs: 16, sm: 24 },
-            transform: "translateX(-50%)",
-            width: "calc(100% - 32px)",
-            maxWidth: contentMaxWidth,
-            px: 1.5,
-            py: 1,
-            gap: 1,
-            alignItems: "center",
-            borderRadius: "16px",
-            backgroundColor: "#FFE08A",
-            border: "1px solid #FFD057",
-            boxShadow: "0 12px 30px rgba(0, 0, 0, 0.24)",
-            zIndex: 1400,
-        }}
-    >
-        <WarningAmberRoundedIcon
-            sx={{ fontSize: 20, color: "#5C3A00", flexShrink: 0 }}
-        />
-        <Typography
-            variant="mini"
+    <Box sx={{ position: "sticky", top: 0, zIndex: 2 }}>
+        <Stack
+            direction="row"
+            role="status"
+            aria-live="polite"
             sx={{
-                px: 0.75,
-                py: 0.25,
-                borderRadius: "999px",
-                border: "1px solid rgba(92, 58, 0, 0.3)",
-                backgroundColor: "rgba(255, 255, 255, 0.45)",
-                color: "#5C3A00",
-                fontWeight: 800,
-                letterSpacing: "0.03em",
-                flexShrink: 0,
+                width: "100%",
+                px: { xs: 2, sm: 3 },
+                py: 1.25,
+                gap: 1,
+                alignItems: "center",
+                backgroundColor: "#FFE08A",
+                border: "1px solid #FFD057",
+                borderRadius: 0,
+                boxShadow: "0 6px 18px rgba(0, 0, 0, 0.12)",
             }}
         >
-            WARNING
-        </Typography>
-        <Typography
-            variant="small"
-            sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
-        >
-            You are using an unstable version of Locker.
-        </Typography>
-    </Stack>
+            <Stack
+                direction="row"
+                sx={{
+                    width: "100%",
+                    maxWidth: contentMaxWidth,
+                    mx: "auto",
+                    gap: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <WarningAmberRoundedIcon
+                    sx={{ fontSize: 20, color: "#5C3A00", flexShrink: 0 }}
+                />
+                <Typography
+                    variant="mini"
+                    sx={{
+                        px: 0.75,
+                        py: 0.25,
+                        borderRadius: "999px",
+                        border: "1px solid rgba(92, 58, 0, 0.3)",
+                        backgroundColor: "rgba(255, 255, 255, 0.45)",
+                        color: "#5C3A00",
+                        fontWeight: 800,
+                        letterSpacing: "0.03em",
+                        flexShrink: 0,
+                    }}
+                >
+                    WARNING
+                </Typography>
+                <Typography
+                    variant="small"
+                    sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
+                >
+                    You are using an unstable version of Locker.
+                </Typography>
+            </Stack>
+        </Stack>
+    </Box>
 );

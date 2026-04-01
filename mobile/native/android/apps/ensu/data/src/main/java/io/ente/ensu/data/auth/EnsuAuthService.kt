@@ -191,6 +191,7 @@ class EnsuAuthService(
             val keyAttributes = payload.keyAttributes ?: throw IllegalStateException("Invalid response")
             val secrets = withContext(Dispatchers.Default) {
                 EnsuCryptoBridge.srpDecryptSecrets(
+                    srpM2 = response.srpM2.orEmpty(),
                     keyAttributes = keyAttributes.toCrypto(),
                     encryptedToken = payload.encryptedToken,
                     plainToken = payload.token

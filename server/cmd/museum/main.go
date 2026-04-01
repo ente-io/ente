@@ -672,6 +672,7 @@ func main() {
 	privateAPI.GET("/users/families-token", userHandler.GetFamiliesToken)
 	privateAPI.GET("/users/accounts-token", userHandler.GetAccountsToken)
 	privateAPI.GET("/users/details/v2", userHandler.GetDetailsV2)
+	privateAPI.GET("/users/locker-usage", userHandler.GetLockerUsage)
 	privateAPI.POST("/users/change-email", userHandler.ChangeEmail)
 	privateAPI.GET("/users/sessions", userHandler.GetActiveSessions)
 	privateAPI.DELETE("/users/session", userHandler.TerminateSession)

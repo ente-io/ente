@@ -521,7 +521,7 @@ export const ChatDialogs = memo(
                                         />
                                         <Typography
                                             variant="small"
-                                            sx={{ flex: 1, fontWeight: 600 }}
+                                            sx={{ flex: 1 }}
                                         >
                                             Sign In to Backup
                                         </Typography>

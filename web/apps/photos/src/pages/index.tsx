@@ -112,7 +112,6 @@ const Page: React.FC = () => {
             }
 
             const albumsURL = new URL(albumsAppOrigin());
-            currentURL.pathname = router.pathname;
             if (
                 (shouldOnlyServeAlbumsApp ||
                     currentURL.host == albumsURL.host) &&

@@ -1,4 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
     Avatar,
@@ -13,7 +14,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
+import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -25,6 +26,7 @@ import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+    canLeaveCollection,
     canManageCollectionSharing,
     type LockerCollection,
     type LockerCollectionParticipant,
@@ -36,6 +38,7 @@ interface LockerCollectionShareDrawerProps {
     onClose: () => void;
     onShareCollection: (collectionID: number, email: string) => Promise<void>;
     onUnshareCollection: (collectionID: number, email: string) => Promise<void>;
+    onLeaveCollection: (collection: LockerCollection) => void;
     onRefreshSharees?: (
         collectionID: number,
     ) => Promise<LockerCollectionParticipant[]>;
@@ -51,10 +54,11 @@ export const LockerCollectionShareDrawer: React.FC<
     onClose,
     onShareCollection,
     onUnshareCollection,
+    onLeaveCollection,
     onRefreshSharees,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const currentUser = ensureLocalUser();
+    const currentUser = savedLocalUser() ?? { id: Number.NaN, email: "" };
     const [sharees, setSharees] = useState<LockerCollectionParticipant[]>([]);
     const [isRefreshingSharees, setIsRefreshingSharees] = useState(false);
     const [addViewerOpen, setAddViewerOpen] = useState(false);
@@ -69,6 +73,9 @@ export const LockerCollectionShareDrawer: React.FC<
         (collection?.owner.id === currentUser.id ? currentUser.email : "");
     const canManageParticipants = !!(
         collection && canManageCollectionSharing(collection, currentUser.id)
+    );
+    const canLeaveSharedCollection = !!(
+        collection && canLeaveCollection(collection, currentUser.id)
     );
 
     useEffect(() => {
@@ -388,6 +395,18 @@ export const LockerCollectionShareDrawer: React.FC<
                                 }}
                             >
                                 {t("addEmail")}
+                            </Button>
+                        )}
+
+                        {canLeaveSharedCollection && (
+                            <Button
+                                color="critical"
+                                variant="outlined"
+                                startIcon={<LogoutOutlinedIcon />}
+                                onClick={() => onLeaveCollection(collection)}
+                                sx={{ minHeight: 48, borderRadius: "14px" }}
+                            >
+                                {t("leaveCollection")}
                             </Button>
                         )}
                     </Stack>

@@ -58,6 +58,9 @@ class MLService {
   bool _isIndexingOrClusteringRunning = false;
   bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
+  Timer? _predownloadLocalModelsTimer;
+
+  static const _kPredownloadLocalModelsDelay = Duration(seconds: 10);
 
   bool get isRunningML =>
       _isRunningML || memoriesCacheService.isUpdatingMemories;
@@ -86,7 +89,7 @@ class MLService {
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
     if (_isInitialized) {
-      unawaited(_maybePredownloadLocalModels());
+      _schedulePredownloadLocalModels();
       scheduleStartupOwnedRemoteHydration();
       return;
     }
@@ -138,7 +141,7 @@ class MLService {
     _syncMlControllerStatusForBg();
 
     _isInitialized = true;
-    unawaited(_maybePredownloadLocalModels());
+    _schedulePredownloadLocalModels();
     scheduleStartupOwnedRemoteHydration();
     _logger.info('init done');
   }
@@ -311,6 +314,16 @@ class MLService {
         s,
       );
     }
+  }
+
+  void _schedulePredownloadLocalModels() {
+    if (isProcessBg || _predownloadLocalModelsTimer?.isActive == true) {
+      return;
+    }
+    _predownloadLocalModelsTimer = Timer(_kPredownloadLocalModelsDelay, () {
+      _predownloadLocalModelsTimer = null;
+      unawaited(_maybePredownloadLocalModels());
+    });
   }
 
   bool canFetch() {

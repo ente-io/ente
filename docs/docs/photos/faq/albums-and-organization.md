@@ -63,6 +63,7 @@ Google Takeout does not reliably export shared albums:
 - Shared albums you own may appear in Takeout and may export as a folder, but not consistently. Some photos may be missing, folders may be split, or the album might not be recreated at all.
 - Shared albums you joined (someone else owns) do not export unless you manually added each photo to your own library.
 - Shared-album names or structure are not preserved in the metadata, hence the shared album cannot be automatically reconstructed.
+- Metadata regarding who shared the photo with you will not be present.
 
 The best way to export shared albums is to manually download each shared album:
 
@@ -330,7 +331,7 @@ If you accidentally deleted photos, you can restore them from Trash within 30 da
 - Select the items to restore
 - Click the "Restore" button
 
-Restored photos will be moved back to their original albums.
+Restored photos will be moved to an album of choice.
 
 ### How do I permanently delete photos or empty trash? {#empty-trash}
 

@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:math" as math;
-import "dart:typed_data";
 import "dart:ui" as ui;
 
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
@@ -17,10 +17,14 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memory_lane/memory_lane_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/share_util.dart";
 
 class MemoryLanePage extends StatefulWidget {
   final PersonEntity person;
@@ -57,7 +61,6 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   // Wait for this many frames (or the available total) before auto-starting playback.
   static const int _initialFrameTarget = 120;
   static const int _frameBuildConcurrency = 6;
-  static const double _appBarSideWidth = kToolbarHeight;
 
   final Logger _logger = Logger("MemoryLanePage");
   late final AnimationController _cardTransitionController;
@@ -89,6 +92,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
   int _maxCaptionDigits = 1;
   bool get _featureEnabled => flagService.facesTimeline;
+  bool get _showShareAction =>
+      _featureEnabled && flagService.enableMemoryShareLink && !isOfflineMode;
 
   @override
   void initState() {
@@ -580,7 +585,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
           final title = l10n.facesTimelineAppBarTitle;
           final colorScheme = getEnteColorScheme(context);
           final textTheme = getEnteTextTheme(context);
-          final titleStyle = textTheme.h2Bold.copyWith(
+          final titleStyle = textTheme.h3Bold.copyWith(
             letterSpacing: -2,
           );
           return DecoratedBox(
@@ -594,29 +599,55 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
+                centerTitle: false,
                 foregroundColor: colorScheme.textBase,
                 automaticallyImplyLeading: false,
-                title: Row(
-                  children: [
-                    const SizedBox(
-                      width: _appBarSideWidth,
-                      height: kToolbarHeight,
-                      child: BackButton(),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          title,
-                          style: titleStyle,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: _appBarSideWidth),
-                  ],
+                titleSpacing: 24,
+                title: Text(
+                  title,
+                  style: titleStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_showShareAction)
+                          _buildAppBarActionButton(
+                            context: context,
+                            icon: Icons.share,
+                            tooltip: l10n.shareLink,
+                            onTap: () async {
+                              _pausePlayback();
+                              final shareLinkData =
+                                  await _getOrCreateMemoryLaneLinkData(context);
+                              if (!context.mounted || shareLinkData == null) {
+                                return;
+                              }
+                              await shareText(
+                                shareLinkData.$1,
+                                context: context,
+                              );
+                            },
+                          ),
+                        if (_showShareAction) const SizedBox(width: 12),
+                        _buildAppBarActionButton(
+                          context: context,
+                          icon: Icons.close,
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).closeButtonTooltip,
+                          onTap: () async {
+                            await Navigator.of(context).maybePop();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               body: Stack(
                 children: [
@@ -1015,6 +1046,71 @@ class _MemoryLanePageState extends State<MemoryLanePage>
         ),
       ],
     );
+  }
+
+  Widget _buildAppBarActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String tooltip,
+    required Future<void> Function() onTap,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: () async {
+          await onTap();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.fillFaint,
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 20,
+            color: colorScheme.textBase,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<(String, int)?> _getOrCreateMemoryLaneLinkData(
+    BuildContext context,
+  ) async {
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.creatingLink);
+    await dialog.show();
+    try {
+      final timeline = await MemoryLaneService.instance.getTimeline(
+        widget.person.remoteID,
+      );
+      if (timeline == null || !timeline.isReady || timeline.entries.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          showShortToast(context, l10n.somethingWentWrong);
+        }
+        return null;
+      }
+      final shareLinkData =
+          await MemoryShareService.instance.getOrCreateMemoryLaneLink(
+        entries: timeline.entries,
+        title: l10n.facesTimelineAppBarTitle,
+        personId: widget.person.remoteID,
+        personName: widget.person.data.name,
+        birthDate: widget.person.data.birthDate,
+      );
+      await dialog.hide();
+      return shareLinkData;
+    } catch (e) {
+      await dialog.hide();
+      if (context.mounted) {
+        await showGenericErrorBottomSheet(context: context, error: e);
+      }
+      return null;
+    }
   }
 
   void _togglePlayback() {

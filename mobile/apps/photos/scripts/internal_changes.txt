@@ -1,8 +1,12 @@
 Latest changes:
-- Ashil: Help & Support screen improvements
-- Neeraj: Refresh Home favorites state on toggle
-- Ashil: Stop showing unknown user avatar on shared albums opened via deeplinking
-- Ashil: Fix album sorting state not persisting
+- Ashil: Bug fixes and improvements on Gallery
+- Laurens: Make asset downloads (ML models) resumable (internal + offline)
+- Neeraj: Fix startup auto-logout cleanup
+- Neeraj: Refresh storage card on quota updates
+- Neeraj: Guard shared favorites removal resolution
+- Neeraj: Handle incomplete signup login errors with localized error copy
+- Neeraj: Improve motion photo video detection in rust layer
+- Prateek: 16 KB page size fix
 
 Still behind internal flag:
 - Ashil, Setal (I): Native family management screens

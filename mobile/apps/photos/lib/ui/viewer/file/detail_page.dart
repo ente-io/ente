@@ -382,6 +382,7 @@ class _BodyState extends State<_Body> {
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
+          qrDetectionsNotifier: _qrHelper?.qrDetectionsNotifier,
         );
         return GestureDetector(
           onTap: () {

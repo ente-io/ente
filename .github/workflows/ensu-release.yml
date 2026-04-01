@@ -23,12 +23,16 @@ jobs:
                 platform:
                     - os: ubuntu-22.04
                       rust-target: x86_64-unknown-linux-gnu
+                      bundle-targets: appimage,deb,rpm,updater
                     - os: macos-latest
                       rust-target: x86_64-apple-darwin
+                      bundle-targets: app,dmg,updater
                     - os: macos-latest
                       rust-target: aarch64-apple-darwin
+                      bundle-targets: app,dmg,updater
                     - os: windows-latest
                       rust-target: x86_64-pc-windows-msvc
+                      bundle-targets: nsis,updater
 
         runs-on: ${{ matrix.platform.os }}
         env:
@@ -217,7 +221,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+                  args: ${{ format('--target {0} --bundles {1}', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
 
     build-android:
         runs-on: ubuntu-22.04
