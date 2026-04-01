@@ -607,6 +607,7 @@ class TauriInference implements InferenceBackend {
         request: GenerateChatRequest,
         onEvent?: (event: GenerateEvent) => void,
     ): Promise<GenerateSummary> {
+        const panicJobId = 0;
         let resolvedJobId: number | null = null;
         let errorMessage: string | null = null;
 
@@ -636,6 +637,11 @@ class TauriInference implements InferenceBackend {
             }
 
             if (payload.type === "error") {
+                if (payload.job_id === panicJobId) {
+                    rejectSummary(new Error(payload.message));
+                    void unlisten();
+                    return;
+                }
                 errorMessage = payload.message;
             }
 
