@@ -57,14 +57,16 @@ const LANE_COMPACT_LAYOUT_BREAKPOINT_PX = 900;
 const EDGE_NAV_TAP_ZONE_RATIO = 0.2;
 const HOLD_TO_PAUSE_NAV_SUPPRESSION_MS = 250;
 const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 280;
+const MOBILE_VIDEO_MEDIA_RESERVED_VERTICAL_SPACE_PX = 244;
 const LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 340;
-const DESKTOP_MEDIA_MAX_WIDTH_PX = 1264;
-const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 48;
-const DESKTOP_MEDIA_VERTICAL_RESERVED_PX = 220;
+const DESKTOP_MEDIA_MAX_WIDTH_PX = 1360;
+const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 32;
+const DESKTOP_MEDIA_VERTICAL_RESERVED_PX = 184;
 const DESKTOP_LANE_MEDIA_VERTICAL_RESERVED_PX = 320;
 const LANE_CARD_ASPECT_RATIO = 0.68;
 const LANE_MOBILE_CARD_MAX_WIDTH_PX = 326;
 const LANE_MOBILE_CARD_MIN_WIDTH_PX = 220;
+const MOBILE_VIDEO_MAX_WIDTH_PX = 344;
 const LANE_DESKTOP_CARD_MAX_WIDTH_PX = 420;
 const LANE_DESKTOP_CARD_MIN_WIDTH_PX = 280;
 const MEDIA_SWITCH_TRANSITION_DURATION_MS = 380;
@@ -77,6 +79,11 @@ const LANE_GRID_CELL_SIZE_PX = 80;
 const LANE_GRID_LINE_COLOR = "#08c225";
 const LANE_GRID_LINE_OPACITY = 0.06;
 const LANE_GRID_DISPLACEMENT_SCALE = 9;
+
+const readViewport = () => ({
+    width: window.visualViewport?.width ?? window.innerWidth,
+    height: window.visualViewport?.height ?? window.innerHeight,
+});
 
 interface LaneMemoryViewerProps {
     files: EnteFile[];
@@ -230,15 +237,18 @@ export const LaneMemoryViewer: React.FC<LaneMemoryViewerProps> = ({
     );
 
     useEffect(() => {
-        const updateViewport = () =>
-            setViewport({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
+        const updateViewport = () => setViewport(readViewport());
 
         updateViewport();
         window.addEventListener("resize", updateViewport);
-        return () => window.removeEventListener("resize", updateViewport);
+        window.visualViewport?.addEventListener("resize", updateViewport);
+        return () => {
+            window.removeEventListener("resize", updateViewport);
+            window.visualViewport?.removeEventListener(
+                "resize",
+                updateViewport,
+            );
+        };
     }, []);
 
     useEffect(() => {
@@ -535,9 +545,9 @@ export const LaneMemoryViewer: React.FC<LaneMemoryViewerProps> = ({
                         ? {
                               maxWidth: isMobileLayout ? "375px" : "440px",
                               padding: isMobileLayout
-                                  ? "24px 24px 26px"
+                                  ? "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))"
                                   : "32px 28px 30px",
-                              gap: isMobileLayout ? "16px" : "20px",
+                              gap: isMobileLayout ? "14px" : "20px",
                           }
                         : undefined
                 }
@@ -654,9 +664,10 @@ export const LaneMemoryViewer: React.FC<LaneMemoryViewerProps> = ({
                                 const opacity = calculateLaneOpacity(
                                     slice.distance,
                                 );
-                                const blurSigma = isScrubbing
-                                    ? 0
-                                    : calculateLaneBlur(slice.distance);
+                                const blurSigma =
+                                    isScrubbing || isCompactLaneLayout
+                                        ? 0
+                                        : calculateLaneBlur(slice.distance);
                                 const rotation =
                                     (calculateLaneRotation(slice.distance) *
                                         180) /
@@ -933,6 +944,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
     const [progressDuration, setProgressDuration] = useState(
         IMAGE_AUTO_PROGRESS_DURATION_MS,
     );
+    const [finishedPlayback, setFinishedPlayback] = useState(false);
     const [mediaAspectRatio, setMediaAspectRatio] = useState<number>();
     const [viewport, setViewport] = useState({ width: 1280, height: 720 });
     const [outgoingFile, setOutgoingFile] = useState<EnteFile | null>(null);
@@ -954,6 +966,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
     // Reset loaded state and duration when file changes.
     useEffect(() => {
         setPaused(false);
+        setFinishedPlayback(false);
         setFileLoaded(false);
         setVideoDurationKnown(false);
         setMediaAspectRatio(undefined);
@@ -1016,6 +1029,15 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
         [],
     );
 
+    const handleAdvanceOrFinish = useCallback(() => {
+        if (currentIndex >= files.length - 1) {
+            setFinishedPlayback(true);
+            setPaused(true);
+            return;
+        }
+        onNext();
+    }, [currentIndex, files.length, onNext]);
+
     // Preload next file's thumbnail for smoother navigation.
     useEffect(() => {
         if (currentIndex < files.length - 1) {
@@ -1025,15 +1047,18 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
     }, [currentIndex, files]);
 
     useEffect(() => {
-        const updateViewport = () =>
-            setViewport({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
+        const updateViewport = () => setViewport(readViewport());
 
         updateViewport();
         window.addEventListener("resize", updateViewport);
-        return () => window.removeEventListener("resize", updateViewport);
+        window.visualViewport?.addEventListener("resize", updateViewport);
+        return () => {
+            window.removeEventListener("resize", updateViewport);
+            window.visualViewport?.removeEventListener(
+                "resize",
+                updateViewport,
+            );
+        };
     }, []);
 
     const currentFileDate = useMemo(() => {
@@ -1053,6 +1078,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
             return `${memoryName} • ${currentFileDate}`;
         return memoryName || currentFileDate || "Memory";
     }, [memoryName, currentFileDate]);
+    const isLaneVariant = variant === "lane";
 
     const handleScreenTap = (e: React.MouseEvent<HTMLDivElement>) => {
         if (suppressTapNavigationRef.current) {
@@ -1090,13 +1116,23 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
     }, [currentFile, mediaAspectRatio]);
 
     const mobileFrameSize = useMemo(() => {
-        const availableWidth = Math.max(220, viewport.width - 48);
-        const maxWidth = Math.min(326, availableWidth);
+        const isShareVideo = isVideo && !isLaneVariant;
+        const availableWidth = Math.max(
+            220,
+            viewport.width - (isShareVideo ? 32 : 48),
+        );
+        const maxWidth = Math.min(
+            isShareVideo ? MOBILE_VIDEO_MAX_WIDTH_PX : 326,
+            availableWidth,
+        );
         const maxHeight = Math.max(
             180,
-            viewport.height - MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX,
+            viewport.height -
+                (isShareVideo
+                    ? MOBILE_VIDEO_MEDIA_RESERVED_VERTICAL_SPACE_PX
+                    : MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX),
         );
-        const ratio = resolvedMediaAspectRatio ?? 4 / 3;
+        const ratio = resolvedMediaAspectRatio ?? (isShareVideo ? 16 / 9 : 4 / 3);
 
         let width = maxWidth;
         let height = width / ratio;
@@ -1107,7 +1143,13 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
         }
 
         return { width: Math.round(width), height: Math.round(height) };
-    }, [resolvedMediaAspectRatio, viewport.height, viewport.width]);
+    }, [
+        isLaneVariant,
+        isVideo,
+        resolvedMediaAspectRatio,
+        viewport.height,
+        viewport.width,
+    ]);
 
     const desktopFrameSize = useMemo(() => {
         const availableWidth = Math.max(
@@ -1173,7 +1215,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
     const mediaFrameStyle = isMobileLayout
         ? {
               width: `${mobileFrameSize.width}px`,
-              aspectRatio: `${resolvedMediaAspectRatio ?? 4 / 3}`,
+              aspectRatio: `${resolvedMediaAspectRatio ?? (isVideo && !isLaneVariant ? 16 / 9 : 4 / 3)}`,
           }
         : {
               width: `${desktopFrameSize.width}px`,
@@ -1185,7 +1227,6 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
         height: `${laneFrameSize.height}px`,
     };
 
-    const isLaneVariant = variant === "lane";
     const isProgressPaused =
         paused || !fileLoaded || (isVideo && !videoDurationKnown);
     const laneTitle = useMemo(() => {
@@ -1225,7 +1266,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                         file={currentFile}
                         onReady={handleFullLoad}
                         onDuration={handleVideoDuration}
-                        onEnded={onNext}
+                        onEnded={handleAdvanceOrFinish}
                         paused={paused}
                         fillFrame
                         objectFit={mediaObjectFit}
@@ -1290,9 +1331,9 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             ? {
                                   maxWidth: isMobileLayout ? "375px" : "440px",
                                   padding: isMobileLayout
-                                      ? "24px 24px 26px"
+                                      ? "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))"
                                       : "32px 28px 30px",
-                                  gap: isMobileLayout ? "16px" : "20px",
+                                  gap: isMobileLayout ? "14px" : "20px",
                               }
                             : undefined
                     }
@@ -1383,11 +1424,27 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             <LaneCardStack style={laneMediaFrameStyle}>
                                 <LaneBackCardPrimary
                                     key={`lane-back-primary-${currentIndex}`}
+                                    style={
+                                        isCompactLaneLayout
+                                            ? { borderRadius: "18px" }
+                                            : undefined
+                                    }
                                 />
                                 <LaneBackCardSecondary
                                     key={`lane-back-secondary-${currentIndex}`}
+                                    style={
+                                        isCompactLaneLayout
+                                            ? { borderRadius: "18px" }
+                                            : undefined
+                                    }
                                 />
-                                <LaneFrontCard>
+                                <LaneFrontCard
+                                    style={
+                                        isCompactLaneLayout
+                                            ? { borderRadius: "18px" }
+                                            : undefined
+                                    }
+                                >
                                     <MediaFrame
                                         style={{
                                             width: "100%",
@@ -1490,8 +1547,9 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     isMobileLayout
                         ? {
                               maxWidth: "375px",
-                              padding: "24px 24px 26px",
-                              gap: "16px",
+                              padding:
+                                  "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
+                              gap: "14px",
                           }
                         : undefined
                 }
@@ -1504,7 +1562,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             current={currentIndex}
                             paused={isProgressPaused}
                             duration={progressDuration}
-                            onComplete={onNext}
+                            onComplete={handleAdvanceOrFinish}
                             isVideo={isVideo}
                             compact
                         />
@@ -1515,6 +1573,15 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             type="button"
                             onClick={(event) => {
                                 event.stopPropagation();
+                                if (finishedPlayback) {
+                                    if (currentIndex > 0) {
+                                        onSeek(0);
+                                        return;
+                                    }
+                                    setFinishedPlayback(false);
+                                    setPaused(false);
+                                    return;
+                                }
                                 setPaused((state) => !state);
                             }}
                             aria-label={paused ? "Play" : "Pause"}
@@ -1532,7 +1599,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                                 current={currentIndex}
                                 paused={isProgressPaused}
                                 duration={progressDuration}
-                                onComplete={onNext}
+                                onComplete={handleAdvanceOrFinish}
                                 isVideo={isVideo}
                             />
                         </HeaderSection>
@@ -1644,12 +1711,17 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
 const ViewerRoot = styled("div")({
     position: "relative",
     width: "100vw",
-    minHeight: "100vh",
+    minHeight: "100svh",
     height: "100dvh",
     overflow: "hidden",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    WebkitTouchCallout: "none",
+    WebkitTapHighlightColor: "transparent",
+    touchAction: "manipulation",
 });
 
 const BackgroundPattern = styled("div")({
@@ -1855,7 +1927,7 @@ const ContentContainer = styled("div")({
     gap: "32px",
     width: "100%",
     maxWidth: `${DESKTOP_MEDIA_MAX_WIDTH_PX}px`,
-    minHeight: "100vh",
+    minHeight: "100svh",
     height: "100dvh",
     padding: "42px 24px 24px",
     boxSizing: "border-box",
@@ -1870,12 +1942,12 @@ const LaneContentContainer = styled("div")({
     gap: "26px",
     width: "100%",
     maxWidth: `${DESKTOP_MEDIA_MAX_WIDTH_PX}px`,
-    minHeight: "100vh",
+    minHeight: "100svh",
     height: "100dvh",
     padding: "56px 48px 40px",
     boxSizing: "border-box",
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        padding: "24px 24px 26px",
+        padding: "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
     },
 });
 
@@ -1889,14 +1961,16 @@ const LaneMobileHeaderSection = styled("div")({
 
 const LaneMobileTitle = styled(Typography)({
     color: "white",
-    fontWeight: 700,
-    fontSize: "16px",
-    lineHeight: "17px",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 600,
+    fontSize: "20px",
+    lineHeight: "20px",
     letterSpacing: 0,
     textAlign: "left",
-    maxWidth: "326px",
-    whiteSpace: "normal",
-    overflowWrap: "anywhere",
+    maxWidth: "100%",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
 });
 
 const LaneTopBar = styled("div")({
@@ -1951,7 +2025,11 @@ const LaneFooter = styled("div")({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    marginTop: "auto",
     paddingBottom: "max(8px, env(safe-area-inset-bottom, 0px))",
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        paddingBottom: 0,
+    },
 });
 
 const LaneSharedUsingLabel = styled("span")({
@@ -1985,11 +2063,17 @@ const LaneCardSurface = styled("div")({
     backgroundColor: "black",
 });
 
-const LaneCardMediaLayer = styled("div")({ position: "absolute", inset: 0 });
+const LaneCardMediaLayer = styled("div")({
+    position: "absolute",
+    inset: 0,
+    overflow: "hidden",
+    borderRadius: "inherit",
+});
 
 const LaneCardOverlayLayer = styled("div")({
     position: "absolute",
     inset: 0,
+    borderRadius: "inherit",
     backgroundColor: "rgba(0, 0, 0, 1)",
 });
 
@@ -2064,7 +2148,7 @@ const LaneCaption = styled("div")({
     fontStyle: "normal",
     fontWeight: 400,
     fontSize: "24px",
-    lineHeight: "7.801px",
+    lineHeight: 1.15,
     textAlign: "center",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
@@ -2096,7 +2180,8 @@ const TopControls = styled("div")({
     alignItems: "center",
     justifyContent: "center",
     minHeight: "64px",
-    width: "100%",
+    width: `${DESKTOP_MEDIA_MAX_WIDTH_PX}px`,
+    maxWidth: "100%",
     boxSizing: "border-box",
     "@media (max-width: 900px)": { minHeight: "56px" },
 });
@@ -2166,14 +2251,12 @@ const JoinNowButton = styled("a")({
 
 const TopRightActions = styled("div")({
     position: "absolute",
-    right: "-72px",
+    right: 0,
     top: "50%",
     transform: "translateY(-50%)",
     display: "flex",
     alignItems: "center",
     gap: "16px",
-    "@media (max-width: 1200px)": { right: "-36px" },
-    "@media (max-width: 1000px)": { right: 0 },
     "@media (max-width: 900px)": { gap: "10px" },
 });
 
@@ -2200,7 +2283,7 @@ const MobileBottomBar = styled("div")({
     justifyContent: "center",
     gap: "10px",
     marginTop: "auto",
-    paddingBottom: "2px",
+    paddingBottom: "max(2px, env(safe-area-inset-bottom, 0px))",
 });
 
 const LaneMobileFooterBar = styled("div")({
@@ -2209,7 +2292,8 @@ const LaneMobileFooterBar = styled("div")({
     alignItems: "center",
     justifyContent: "center",
     gap: "10px",
-    paddingBottom: "2px",
+    marginTop: "auto",
+    paddingBottom: "max(2px, env(safe-area-inset-bottom, 0px))",
 });
 
 const MobileJoinNowButton = styled("a")({
@@ -2282,7 +2366,7 @@ const MediaSwitchLayer = styled("div", {
  */
 const formatMemoryDate = (date: Date): string => {
     const day = date.getDate();
-    const month = date.toLocaleString("en", { month: "short" }).toLowerCase();
+    const month = date.toLocaleString("en", { month: "short" });
     const year = date.getFullYear();
     const ordinal = getOrdinalSuffix(day);
     return `${day}${ordinal} ${month}, ${year}`;
