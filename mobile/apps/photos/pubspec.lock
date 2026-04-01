@@ -594,13 +594,6 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  ente_cast_normal:
-    dependency: "direct main"
-    description:
-      path: "plugins/ente_cast_normal"
-      relative: true
-    source: path
-    version: "0.0.1"
   ente_crypto:
     dependency: "direct main"
     description:

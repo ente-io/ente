@@ -54,8 +54,6 @@ dependencies:
   encrypt: ^5.0.3
   ente_cast:
     path: plugins/ente_cast
-  ente_cast_normal:
-    path: plugins/ente_cast_normal
   ente_crypto:
     path: plugins/ente_crypto
   ente_feature_flag:
