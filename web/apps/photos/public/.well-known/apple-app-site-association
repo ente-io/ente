@@ -1,22 +1,4 @@
 {
-  "applinks": {
-    "apps": [],
-    "details": [
-      {
-        "appIDs": [
-          "6Z68YJY9Q2.io.ente.frame"
-        ],
-        "components": [
-          {
-            "/": "/",
-            "?": { "t": "*" },
-            "#": "*",
-            "comment": "Matches URLs with no path, any query item 't', and any or no fragment"
-          }
-        ]
-      }
-    ]
-  },
   "webcredentials": {
     "apps": [
       "6Z68YJY9Q2.io.ente.frame",
@@ -26,4 +8,3 @@
     ]
   }
 }
-

@@ -1,7 +1,7 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
+import { CustomHead } from "ente-base/components/Head";
 import {
     useIsRouteChangeInProgress,
     useSetupI18n,
@@ -70,7 +70,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     return (
         <>
-            <CustomHeadPhotosOrAlbums title="Ente Photos" />
+            <CustomHead title="Ente Photos" />
             <ThemeProvider theme={photosTheme}>
                 <CssBaseline enableColorScheme />
                 <BaseContext.Provider value={baseContext}>

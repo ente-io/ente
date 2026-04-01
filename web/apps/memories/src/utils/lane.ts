@@ -6,7 +6,7 @@ import type {
     PublicMemoryShareFrame,
     PublicMemoryShareFrameCrop,
     PublicMemoryShareMetadata,
-} from "ente-new/albums/services/public-memory";
+} from "../services/public-memory";
 
 const LANE_CROP_REGULAR_PADDING = 0.4;
 const LANE_CROP_MINIMUM_PADDING = 0.1;

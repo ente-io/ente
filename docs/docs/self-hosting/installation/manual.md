@@ -193,13 +193,16 @@ Values you used for `database name` and `username` correspond to the values you 
     # Replace this with actual endpoint for Photos
     export NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=http://localhost:3000
     ```
-3. Build the needed applications (Photos, Accounts, Auth, Cast, Public Locker, Embed) as per
-   your needs:
+3. Build the needed applications (Photos, Albums, Accounts, Auth, Cast, Public
+   Locker, Embed) as per your needs:
 
     ```shell
     # These commands are executed inside web directory
     # Build photos. Build output to be served is present at apps/photos/out
     yarn build
+
+    # Build albums. Build output to be served is present at apps/albums/out
+    yarn build:albums
 
     # Build accounts. Build output to be served is present at apps/accounts/out
     yarn build:accounts
@@ -224,6 +227,8 @@ Values you used for `database name` and `username` correspond to the values you 
 
     # Photos
     sudo cp -r apps/photos/out /var/www/ente/apps/photos
+    # Albums
+    sudo cp -r apps/albums/out /var/www/ente/apps/albums
     # Accounts
     sudo cp -r apps/accounts/out /var/www/ente/apps/accounts
     # Auth
@@ -254,7 +259,7 @@ Values you used for `database name` and `username` correspond to the values you 
     }
 
     :3002 {
-        root * /var/www/ente/apps/photos
+        root * /var/www/ente/apps/albums
         file_server
         try_files {path} {path}.html /index.html
     }
@@ -290,8 +295,8 @@ Values you used for `database name` and `username` correspond to the values you 
 
     :::
 
-    The web application for Ente Photos should be accessible at
-    http://localhost:3000, check out the
+    The Ente Photos web app should be accessible at http://localhost:3000, and
+    the Ente Albums app at http://localhost:3002. Check out the
     [default ports](/self-hosting/installation/env-var#ports) for more
     information.
 

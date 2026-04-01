@@ -4,11 +4,11 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationPhotoDate } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     type PublicMemoryShareFrame,
     type PublicMemoryShareMetadata,
-} from "ente-new/albums/services/public-memory";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+} from "../services/public-memory";
 import {
     buildLaneCaptionModel,
     buildLaneTitle,
