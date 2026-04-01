@@ -11,6 +11,7 @@ Latest changes:
 Still behind internal flag:
 - Ashil, Setal (I): Native family management screens
 - Amrithesh: (I) ML/Pet recognition [Indexing]
+- Amrithesh: (I) OCR inline text detection
 - Amrithesh: (I) QR code detection
 - Laurens: (I) Clip text encoding in rust
 - Laurens: (I) Generate and compress face thumbnails in rust
