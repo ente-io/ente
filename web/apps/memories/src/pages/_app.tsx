@@ -32,10 +32,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                             overflow: "hidden",
                             overscrollBehavior: "none",
                         },
-                        "#__next": {
-                            height: "100%",
-                            overflow: "hidden",
-                        },
+                        "#__next": { height: "100%", overflow: "hidden" },
                     }}
                 />
                 <Component {...pageProps} />

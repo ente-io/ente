@@ -1132,7 +1132,8 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     ? MOBILE_VIDEO_MEDIA_RESERVED_VERTICAL_SPACE_PX
                     : MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX),
         );
-        const ratio = resolvedMediaAspectRatio ?? (isShareVideo ? 16 / 9 : 4 / 3);
+        const ratio =
+            resolvedMediaAspectRatio ?? (isShareVideo ? 16 / 9 : 4 / 3);
 
         let width = maxWidth;
         let height = width / ratio;
