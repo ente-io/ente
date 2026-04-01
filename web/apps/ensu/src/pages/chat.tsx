@@ -2432,10 +2432,6 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (!firstPaintDone) return;
-        if (providerRef.current?.getBackendKind() === "tauri") {
-            setModelGateStatus("missing");
-            return;
-        }
         const cancelIdle = scheduleIdleTask(() => {
             void preloadModelIfAvailable();
         }, 2000);

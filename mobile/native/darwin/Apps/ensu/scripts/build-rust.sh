@@ -93,7 +93,7 @@ sanitize_generated_swift_bindings() {
     return
   fi
 
-  perl -0pi -e 's@try! rustCall \{ (uniffi_(?:db|sync)_fn_free_[^(]+\([^)]*\), \$0) \}@// Avoid aborting the host app if Rust-side teardown fails during process shutdown.\n        try? rustCall { $1 }@g' "${swift_file}"
+  perl -0pi -e 's@try! rustCall \{ (uniffi_(?:db|sync)_fn_free_[^(]+\([^)]*\)) \}@// Avoid aborting the host app if Rust-side teardown fails during process shutdown.\n        try? rustCall { $1 }@g' "${swift_file}"
 }
 
 ensure_generated_bindings() {
