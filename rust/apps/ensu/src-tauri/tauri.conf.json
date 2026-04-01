@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Ensu",
-    "version": "0.1.13"
+    "version": "0.1.15"
   },
   "tauri": {
     "windows": [
