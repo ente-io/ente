@@ -87,8 +87,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   final GlobalKey _controlsKey = GlobalKey();
   bool _isScrubbing = false;
   double _sliderValue = 0;
-  double _previousCaptionValue = 0;
-  double _currentCaptionValue = 0;
+  int _previousCaptionValue = 0;
+  int _currentCaptionValue = 0;
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
   int _maxCaptionDigits = 1;
   bool get _featureEnabled => flagService.facesTimeline;
@@ -287,9 +287,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     }
   }
 
-  int _captionDigitCount(double value) {
-    final int rounded = value.round().abs();
-    return math.max(1, rounded.toString().length);
+  int _captionDigitCount(int value) {
+    return math.max(1, value.abs().toString().length);
   }
 
   Future<void> _buildFramesInParallel({
@@ -401,19 +400,27 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     final captionType = widget.person.data.birthDate != null
         ? _CaptionType.age
         : _CaptionType.yearsAgo;
-    double captionValue;
+    int captionValue;
     if (captionType == _CaptionType.age) {
       final birthDateString = widget.person.data.birthDate!;
       final birthDate = DateTime.tryParse(birthDateString);
       if (birthDate == null) {
-        captionValue = _yearsBetween(creationDate, DateTime.now());
+        captionValue = MemoryLaneService.completedYearsBetween(
+          creationDate,
+          DateTime.now(),
+        );
       } else {
-        captionValue = _yearsBetween(birthDate, creationDate);
+        captionValue = MemoryLaneService.completedYearsBetween(
+          birthDate,
+          creationDate,
+        );
       }
     } else {
-      captionValue = _yearsBetween(creationDate, DateTime.now());
+      captionValue = MemoryLaneService.completedYearsBetween(
+        creationDate,
+        DateTime.now(),
+      );
     }
-    captionValue = captionValue.clamp(0, double.infinity);
     final timelineFrame = _TimelineFrame(
       entry: entry,
       image: image,
@@ -855,10 +862,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final localeName = l10n.localeName;
     final numberFormat = NumberFormat.decimalPattern(localeName);
-    final int currentRounded =
-        _currentCaptionValue.round().clamp(0, 1000).toInt();
-    final int previousRounded =
-        _previousCaptionValue.round().clamp(0, 1000).toInt();
+    final int currentRounded = _currentCaptionValue.clamp(0, 1000);
+    final int previousRounded = _previousCaptionValue.clamp(0, 1000);
     final TextStyle baseStyle = textTheme.bodyMuted.copyWith(
       color: isDark
           ? colorScheme.textMuted
@@ -1184,7 +1189,7 @@ class _TimelineFrame {
   final MemoryImage? image;
   final DateTime creationDate;
   final _CaptionType captionType;
-  final double captionValue;
+  final int captionValue;
 
   _TimelineFrame({
     required this.entry,
@@ -1463,11 +1468,6 @@ class _MemoryLaneCard extends StatelessWidget {
 }
 
 enum _CaptionType { age, yearsAgo }
-
-double _yearsBetween(DateTime start, DateTime end) {
-  final days = end.difference(start).inDays;
-  return days / 365.25;
-}
 
 class _MemoryLaneSliderThumbShape extends SliderComponentShape {
   const _MemoryLaneSliderThumbShape();

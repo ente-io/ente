@@ -2633,7 +2633,7 @@
   "artisticPortraits": "Artful portraits",
   "streetFood": "Street food bites",
   "riverCruises": "River cruise views",
-  "facesTimelineBannerTitle": "Memory Lane",
+  "facesTimelineBannerTitle": "Memory lane",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
