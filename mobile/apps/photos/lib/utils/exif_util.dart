@@ -174,7 +174,10 @@ Location? locationFromExif(Map<String, IfdTag> exif) {
 }
 
 Future<Map<String, IfdTag>> _readExifArgs(Map<String, dynamic> args) {
-  return readExifFromFile(args["file"]);
+  final file = args["file"] as File;
+  return file
+      .readAsBytes()
+      .then((bytes) => readExifFromBytes(bytes).then(_normalizeExifResult));
 }
 
 Future<Map<String, IfdTag>> readExifAsync(File file) async {
@@ -183,6 +186,17 @@ Future<Map<String, IfdTag>> readExifAsync(File file) async {
     param: {"file": file},
     taskName: "readExifAsync",
   );
+}
+
+Map<String, IfdTag> _normalizeExifResult(dynamic result) {
+  if (result is Map<String, IfdTag>) {
+    return result;
+  }
+  final dynamic tags = result.tags;
+  if (tags is Map<String, IfdTag>) {
+    return tags;
+  }
+  throw ArgumentError("Unsupported EXIF result type: ${result.runtimeType}");
 }
 
 GPSData gpsDataFromExif(Map<String, IfdTag> exif) {
