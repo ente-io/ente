@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::Manager;
+use tauri::RunEvent;
 
 mod commands;
 mod logging;
@@ -9,7 +10,7 @@ fn main() {
     logging::install_panic_hook();
     logging::log("App", "starting Tauri backend");
 
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
@@ -80,9 +81,15 @@ fn main() {
             commands::fs_read_head,
             commands::fs_append_bytes,
         ])
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())
         .unwrap_or_else(|err| {
-            logging::log("App", format!("tauri run failed error={err}"));
-            panic!("error while running tauri application: {err}");
+            logging::log("App", format!("tauri build failed error={err}"));
+            panic!("error while building tauri application: {err}");
         });
+
+    app.run(|app_handle, event| {
+        if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
+            commands::cleanup_for_exit(&app_handle);
+        }
+    });
 }

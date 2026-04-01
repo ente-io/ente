@@ -15,7 +15,7 @@ use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
-use tauri::{AppHandle, State, Window};
+use tauri::{AppHandle, Manager, State, Window};
 use uuid::Uuid;
 
 use crate::logging;
@@ -1831,6 +1831,44 @@ fn app_data_dir(app: &AppHandle) -> Result<PathBuf, ApiError> {
         .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
     std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(dir)
+}
+
+pub fn cleanup_for_exit(app: &AppHandle) {
+    logging::log("App", "cleanup_for_exit start");
+
+    if let Some(llm_state) = app.try_state::<LlmState>() {
+        match llm_state.context.lock() {
+            Ok(mut context_guard) => {
+                *context_guard = None;
+                logging::log("App", "cleared LLM context");
+            }
+            Err(_) => logging::log("App", "failed to lock LLM context during exit"),
+        }
+
+        match llm_state.model.lock() {
+            Ok(mut model_guard) => {
+                *model_guard = None;
+                logging::log("App", "cleared LLM model");
+            }
+            Err(_) => logging::log("App", "failed to lock LLM model during exit"),
+        }
+    } else {
+        logging::log("App", "LLM state unavailable during exit");
+    }
+
+    if let Some(chat_db_state) = app.try_state::<ChatDbState>() {
+        match chat_db_state.inner.lock() {
+            Ok(mut guard) => {
+                *guard = None;
+                logging::log("App", "cleared chat DB state");
+            }
+            Err(_) => logging::log("App", "failed to lock chat DB state during exit"),
+        }
+    } else {
+        logging::log("App", "chat DB state unavailable during exit");
+    }
+
+    logging::log("App", "cleanup_for_exit complete");
 }
 
 fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
