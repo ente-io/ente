@@ -52,6 +52,10 @@
       },
       "path": {
         "all": true
+      },
+      "process": {
+        "all": false,
+        "relaunch": true
       }
     },
     "security": {
