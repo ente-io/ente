@@ -1,6 +1,5 @@
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { isCustomMemoriesAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import {
     decryptMemoryShareMetadata,
@@ -38,13 +37,7 @@ export const loadPublicMemoryPage = async (
         const accessToken = extractAccessTokenFromURL(currentURL);
 
         if (!accessToken) {
-            if (!isCustomMemoriesAppOrigin) {
-                return { kind: "redirect", redirectURL: "https://ente.com" };
-            }
-            return {
-                kind: "error",
-                errorMessage: "Invalid memory link. Missing access token.",
-            };
+            return { kind: "redirect", redirectURL: "https://ente.com" };
         }
 
         const shareKey = await extractMemoryShareKeyFromURL(currentURL);
