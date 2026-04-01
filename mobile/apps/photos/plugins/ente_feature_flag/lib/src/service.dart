@@ -106,7 +106,7 @@ class FlagService {
 
   bool get petEnabled => internalUser;
 
-  bool get qrFeatureEnabled => internalUser;
+  bool get qrFeatureEnabled => true;
 
   bool get enableBgLocalUploadPriority => internalUser;
 
