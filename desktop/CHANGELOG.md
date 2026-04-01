@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.23 (unreleased)
+
+-
+
 ## v1.7.22
 
 - App lock
