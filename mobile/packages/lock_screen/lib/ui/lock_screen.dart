@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:logging/logging.dart';
+import 'package:privacy_screen/privacy_screen.dart';
 
 class LockScreen extends StatefulWidget {
   final BaseConfiguration config;
@@ -331,6 +332,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       _isShowingLockScreen = false;
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
+        await PrivacyScreen.instance.disable();
         AppLock.of(context)?.didUnlock();
         await _lockscreenSetting.setInvalidAttemptCount(0);
         setState(() {
