@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:io";
-import "dart:math" as math;
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -356,9 +355,8 @@ class _WhiteDotWaveOverlayState extends State<_WhiteDotWaveOverlay>
 }
 
 class _WhiteDotWavePainter extends CustomPainter {
-  static const int _cols = 20;
-  static const int _rows = 14;
-  static const double _maxDelay = 0.72; // 1.8s / 2.5s
+  static const double _spacing = 16.0;
+  static const double _maxDelay = 0.85;
 
   final double progress;
 
@@ -368,16 +366,19 @@ class _WhiteDotWavePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double cx = size.width / 2;
     final double cy = size.height / 2;
-    final double maxDist = math.sqrt(cx * cx + cy * cy);
+    final double maxDist = Offset(cx, cy).distance;
 
-    for (int r = 0; r < _rows; r++) {
-      for (int c = 0; c < _cols; c++) {
-        final double x = ((c + 0.5) / _cols) * size.width;
-        final double y = ((r + 0.5) / _rows) * size.height;
+    final int cols = (size.width / _spacing).floor();
+    final int rows = (size.height / _spacing).floor();
+    final double offsetX = (size.width - (cols - 1) * _spacing) / 2;
+    final double offsetY = (size.height - (rows - 1) * _spacing) / 2;
 
-        final double dist = math.sqrt(
-          math.pow(x - cx, 2) + math.pow(y - cy, 2),
-        );
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        final double x = offsetX + c * _spacing;
+        final double y = offsetY + r * _spacing;
+
+        final double dist = (Offset(x, y) - Offset(cx, cy)).distance;
         final double delay = (dist / maxDist) * _maxDelay;
 
         double phase = (progress - delay) % 1.0;
@@ -393,7 +394,7 @@ class _WhiteDotWavePainter extends CustomPainter {
 
         if (t < 0.01) continue;
 
-        final double radius = 2.0 * t;
+        final double radius = 3.0 * t;
         final double opacity = 0.5 * t;
 
         final paint = Paint()..color = Color.fromRGBO(255, 255, 255, opacity);
