@@ -142,6 +142,25 @@ fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
 }
 
+fn replace_llm_state(
+    llm_state: &LlmState,
+    model: Option<llm::ModelHandleRef>,
+    context: Option<llm::ContextHandleRef>,
+) -> Result<(), ApiError> {
+    let mut model_guard = llm_state
+        .model
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
+    let mut context_guard = llm_state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+
+    *model_guard = model;
+    *context_guard = context;
+    Ok(())
+}
+
 fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
     match payload.downcast::<String>() {
         Ok(message) => *message,
@@ -1594,17 +1613,7 @@ pub async fn llm_load_model(
             logging::log("LLM", format!("load model join failed error={err}"));
             llm_thread_error()
         })??;
-    let mut model_guard = state
-        .model
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
-    let mut context_guard = state
-        .context
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
-
-    *model_guard = Some(model);
-    *context_guard = None;
+    replace_llm_state(&state, Some(model), None)?;
 
     logging::log("LLM", "load model succeeded");
     Ok(())
@@ -1675,18 +1684,7 @@ pub fn llm_free_context(state: State<LlmState>) -> Result<(), ApiError> {
 
 #[tauri::command]
 pub fn llm_free_model(state: State<LlmState>) -> Result<(), ApiError> {
-    let mut context_guard = state
-        .context
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
-    let mut model_guard = state
-        .model
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
-
-    *context_guard = None;
-    *model_guard = None;
-    Ok(())
+    replace_llm_state(&state, None, None)
 }
 
 #[tauri::command]
@@ -1837,20 +1835,14 @@ pub fn cleanup_for_exit(app: &AppHandle) {
     logging::log("App", "cleanup_for_exit start");
 
     if let Some(llm_state) = app.try_state::<LlmState>() {
-        match llm_state.context.lock() {
-            Ok(mut context_guard) => {
-                *context_guard = None;
+        match replace_llm_state(&llm_state, None, None) {
+            Ok(()) => {
+                logging::log("App", "cleared LLM model");
                 logging::log("App", "cleared LLM context");
             }
-            Err(_) => logging::log("App", "failed to lock LLM context during exit"),
-        }
-
-        match llm_state.model.lock() {
-            Ok(mut model_guard) => {
-                *model_guard = None;
-                logging::log("App", "cleared LLM model");
+            Err(error) => {
+                logging::log("App", format!("failed to clear LLM state during exit error={}", error.message));
             }
-            Err(_) => logging::log("App", "failed to lock LLM model during exit"),
         }
     } else {
         logging::log("App", "LLM state unavailable during exit");
