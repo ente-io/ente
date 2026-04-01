@@ -57,7 +57,7 @@ class MLService {
   bool _shouldPauseIndexingAndClustering = false;
   Timer? _predownloadLocalModelsTimer;
 
-  static const _kPredownloadLocalModelsDelay = Duration(seconds: 6);
+  static const _kPredownloadLocalModelsDelay = Duration(seconds: 10);
 
   bool get isRunningML =>
       _isRunningML || memoriesCacheService.isUpdatingMemories;
