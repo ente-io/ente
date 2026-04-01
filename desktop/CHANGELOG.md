@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.7.22 (unreleased)
+## v1.7.22
 
 - App lock
 - Better people list experience (bigger view with search)
