@@ -12,6 +12,7 @@ import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/utils/file_util.dart';
+import 'package:random_access_source/random_access_source.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
 const kImageDateTime = "Image DateTime";
@@ -175,9 +176,13 @@ Location? locationFromExif(Map<String, IfdTag> exif) {
 
 Future<Map<String, IfdTag>> _readExifArgs(Map<String, dynamic> args) {
   final file = args["file"] as File;
-  return file
-      .readAsBytes()
-      .then((bytes) => readExifFromBytes(bytes).then(_normalizeExifResult));
+  return FileRASource.loadFile(file).then((src) async {
+    try {
+      return _normalizeExifResult(await readExifFromSource(src));
+    } finally {
+      await src.close();
+    }
+  });
 }
 
 Future<Map<String, IfdTag>> readExifAsync(File file) async {

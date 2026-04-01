@@ -2300,7 +2300,7 @@ packages:
     source: hosted
     version: "3.2.2"
   random_access_source:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: random_access_source
       sha256: "2cb3578e3027d6f7e44a66ec9bf72f5e0b73e9c0e62f4768977a0ed962d08be7"
