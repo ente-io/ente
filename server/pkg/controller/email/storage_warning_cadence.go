@@ -57,7 +57,7 @@ func expiredWarningCadenceRequirement(snapshot storageWarningSnapshot) (storageW
 			requirement.StageKey = string(expiredWarningStage0)
 			requirement.FreshnessWindow = maxStorageWarningFreshnessWindow(
 				requirement.FreshnessWindow,
-				expiredBufferedWarning60At(snapshot.WarningCycleStart, snapshot.AutoDeleteDate)-snapshot.WarningCycleStart+storageWarningOneDayInMicroseconds,
+				expiredBufferedWarning60At(snapshot.WarningCycleStart, snapshot.AutoDeleteDate)-snapshot.WarningCycleStart+storageWarningOneDayInMicroseconds+storageWarningBufferedCadenceExtraGrace,
 			)
 		}
 	case expiredWarningStage90:
@@ -71,7 +71,7 @@ func expiredWarningCadenceRequirement(snapshot storageWarningSnapshot) (storageW
 			requirement.StageKey = string(expiredWarningStage60)
 			requirement.FreshnessWindow = maxStorageWarningFreshnessWindow(
 				requirement.FreshnessWindow,
-				expiredBufferedWarning119At(snapshot.AutoDeleteDate)-expiredBufferedWarning60At(snapshot.WarningCycleStart, snapshot.AutoDeleteDate)+storageWarningOneDayInMicroseconds,
+				expiredBufferedWarning119At(snapshot.AutoDeleteDate)-expiredBufferedWarning60At(snapshot.WarningCycleStart, snapshot.AutoDeleteDate)+storageWarningOneDayInMicroseconds+storageWarningBufferedCadenceExtraGrace,
 			)
 		}
 	case expiredWarningStageScheduledDeletion:

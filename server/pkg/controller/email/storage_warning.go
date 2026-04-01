@@ -28,6 +28,7 @@ const (
 	storageWarningOverageThreshold             = 25 * (1 << 30)
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
 	storageWarningOneDayInMicroseconds         = 24 * time.MicroSecondsInOneHour
+	storageWarningBufferedCadenceExtraGrace    = 2 * storageWarningOneDayInMicroseconds
 	storageWarningRolloutPercentage            = 5
 	storageWarningRolloutNonce                 = "storage-warning-v1"
 

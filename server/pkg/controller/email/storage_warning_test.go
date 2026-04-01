@@ -675,6 +675,21 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			wantBroken: false,
 		},
 		{
+			name: "buffered expired stage 60 tolerates a two-day outage beyond midpoint",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage60,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          150 * storageWarningOneDayInMicroseconds,
+				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired0TemplateID: 105 * storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: false,
+		},
+		{
 			name: "buffered expired final reminder allows predecessor older than default window",
 			snapshot: storageWarningSnapshot{
 				Bucket:               storageWarningBucketExpired,
@@ -690,12 +705,27 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			wantBroken: false,
 		},
 		{
-			name: "buffered expired stage 60 still breaks once predecessor is too stale",
+			name: "buffered expired final reminder tolerates a two-day outage beyond final reminder threshold",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage119,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          152 * storageWarningOneDayInMicroseconds,
+				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired60TemplateID: 108 * storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: false,
+		},
+		{
+			name: "buffered expired stage 60 still breaks once predecessor is too stale after extra grace",
 			snapshot: storageWarningSnapshot{
 				Bucket:               storageWarningBucketExpired,
 				ExpiredStage:         expiredWarningStage60,
 				ExpiredBufferedCycle: true,
-				EvaluatedAt:          149 * storageWarningOneDayInMicroseconds,
+				EvaluatedAt:          151 * storageWarningOneDayInMicroseconds,
 				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
 				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
 				NotificationHistory: map[string]int64{
@@ -704,6 +734,22 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			},
 			wantBroken: true,
 			wantStage:  string(expiredWarningStage0),
+		},
+		{
+			name: "buffered expired final reminder still breaks once predecessor is too stale after extra grace",
+			snapshot: storageWarningSnapshot{
+				Bucket:               storageWarningBucketExpired,
+				ExpiredStage:         expiredWarningStage119,
+				ExpiredBufferedCycle: true,
+				EvaluatedAt:          153 * storageWarningOneDayInMicroseconds,
+				WarningCycleStart:    65 * storageWarningOneDayInMicroseconds,
+				AutoDeleteDate:       150 * storageWarningOneDayInMicroseconds,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired60TemplateID: 108 * storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: true,
+			wantStage:  string(expiredWarningStage60),
 		},
 		{
 			name: "terminal active overage stage requires final reminder",
@@ -744,7 +790,7 @@ func TestStorageWarningPreviousStageFreshnessWindowForSnapshot(t *testing.T) {
 	}
 	got := storageWarningPreviousStageFreshnessWindowForSnapshot(buffered60Snapshot)
 	want := expiredBufferedWarning60At(buffered60Snapshot.WarningCycleStart, buffered60Snapshot.AutoDeleteDate) -
-		buffered60Snapshot.WarningCycleStart + storageWarningOneDayInMicroseconds
+		buffered60Snapshot.WarningCycleStart + storageWarningOneDayInMicroseconds + storageWarningBufferedCadenceExtraGrace
 	if got != want {
 		t.Fatalf("unexpected buffered stage 60 freshness window: got %d want %d", got, want)
 	}
@@ -759,7 +805,7 @@ func TestStorageWarningPreviousStageFreshnessWindowForSnapshot(t *testing.T) {
 	got = storageWarningPreviousStageFreshnessWindowForSnapshot(buffered119Snapshot)
 	want = expiredBufferedWarning119At(buffered119Snapshot.AutoDeleteDate) -
 		expiredBufferedWarning60At(buffered119Snapshot.WarningCycleStart, buffered119Snapshot.AutoDeleteDate) +
-		storageWarningOneDayInMicroseconds
+		storageWarningOneDayInMicroseconds + storageWarningBufferedCadenceExtraGrace
 	if got != want {
 		t.Fatalf("unexpected buffered stage 119 freshness window: got %d want %d", got, want)
 	}
