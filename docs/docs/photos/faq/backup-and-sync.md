@@ -30,9 +30,12 @@ Once configured, new photos added to these albums will automatically sync in the
 
 ### Can I backup only new photos without uploading my existing library? {#backup-only-new-photos}
 
-Yes. Open `Settings > Backup > Backup settings` and toggle on **Backup only new photos**.
+Yes. You can enable this during signup/login on the permissions screen, or later via `Settings > Backup > Backup settings` by toggling on **Backup only new photos**.
 
-When enabled, Ente sets a cutoff timestamp to the current moment and only backs up photos created after that point. Photos already on your device will not be uploaded.
+- **During onboarding**: Ente backs up from the **last 7 days** onward, so you have some recent photos available right away.
+- **Via the settings toggle**: Ente uses the current moment as the cutoff — only photos taken from that point forward are backed up.
+
+In both cases, photos older than the cutoff will not be uploaded to Ente.
 
 To resume backing up your full library, toggle the setting off.
 
