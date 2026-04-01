@@ -34,7 +34,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         logStartupBanner(savedLocalUser()?.id);
     }, []);
 
-    useEffect(() => setupAutoAppUpdates(), []);
+    useEffect(() => setupAutoAppUpdates(showMiniDialog), [showMiniDialog]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;

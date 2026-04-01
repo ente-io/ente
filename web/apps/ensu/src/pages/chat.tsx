@@ -72,6 +72,7 @@ import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     SIGN_IN_ENABLED,
 } from "services/featureFlags";
+import { handleManualAppUpdateCheck } from "services/app-update";
 import {
     DEFAULT_MODEL,
     FALLBACK_DESKTOP_MODEL_PRESETS,
@@ -3515,6 +3516,10 @@ const Page: React.FC = () => {
         saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     }, [isTauriRuntime, showMiniDialog]);
 
+    const handleCheckForUpdates = useCallback(async () => {
+        await handleManualAppUpdateCheck(showMiniDialog);
+    }, [showMiniDialog]);
+
     const openModelSettings = useCallback(() => {
         if (!advancedUnlocked) return;
         setShowModelSettings(true);
@@ -4410,6 +4415,7 @@ const Page: React.FC = () => {
                 isLoggedIn={isLoggedIn}
                 signedInEmail={savedLocalUser()?.email ?? ""}
                 saveLogs={saveLogs}
+                handleCheckForUpdates={handleCheckForUpdates}
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}
