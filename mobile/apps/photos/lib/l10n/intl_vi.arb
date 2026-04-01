@@ -1119,7 +1119,17 @@
   "unarchive": "Bỏ lưu trữ",
   "favorite": "Thích",
   "removeFromFavorite": "Xóa khỏi mục đã thích",
+  "shareMemory": "Chia sẻ kỷ niệm",
+  "shareTheseMemories": "Chia sẻ những kỷ niệm này",
+  "shareThisPhoto": "Chia sẻ ảnh này",
+  "shareThisVideo": "Chia sẻ video này",
   "shareLink": "Chia sẻ liên kết",
+  "memoryShareLinkDescription": "Liên kết này sẽ tự hết hạn sau 7 ngày.",
+  "deleteLink": "Xóa liên kết",
+  "deleteLinkQuestion": "Xóa liên kết?",
+  "deleteMemoryLinkMessage": "Những người mà bạn đã chia sẻ liên kết sẽ không thể truy cập.",
+  "linkDeletedSuccessfully": "Xóa liên kết thành công",
+  "memoryLinks": "Liên kết kỷ niệm",
   "openLink": "Mở liên kết",
   "pay": "Thanh toán",
   "noPaymentAppFound": "Không tìm thấy ứng dụng thanh toán",
@@ -1475,6 +1485,14 @@
   "searchCaptionEmptySection": "Thêm mô tả như \"#phượt\" trong thông tin ảnh để tìm nhanh thấy chúng ở đây",
   "language": "Ngôn ngữ",
   "selectLanguage": "Chọn ngôn ngữ",
+  "noLocation": "Không có địa điểm",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Không có thẻ địa điểm",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Tên vị trí",
   "addLocation": "Thêm vị trí",
   "groupNearbyPhotos": "Nhóm ảnh gần nhau",
