@@ -1,5 +1,6 @@
 import "dart:io" show Directory, File, Platform;
 import "dart:math" as math show sqrt, min, max;
+import "dart:typed_data" show Float32List;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
@@ -1075,4 +1076,28 @@ Future<void> _cleanupDecodeFallback(_DecodeFallbackFile fallback) async {
   } catch (e, s) {
     _logger.warning("Could not cleanup decode fallback file", e, s);
   }
+}
+
+/// Compute L2-normalized mean centroid from a list of Float32 embeddings.
+Float32List computeL2MeanCentroid(List<Float32List> embeddings) {
+  final dim = embeddings.first.length;
+  final centroid = Float32List(dim);
+  for (final emb in embeddings) {
+    for (int i = 0; i < dim; i++) {
+      centroid[i] += emb[i];
+    }
+  }
+  final n = embeddings.length.toDouble();
+  double norm = 0;
+  for (int i = 0; i < dim; i++) {
+    centroid[i] /= n;
+    norm += centroid[i] * centroid[i];
+  }
+  norm = math.sqrt(norm);
+  if (norm > 0) {
+    for (int i = 0; i < dim; i++) {
+      centroid[i] /= norm;
+    }
+  }
+  return centroid;
 }

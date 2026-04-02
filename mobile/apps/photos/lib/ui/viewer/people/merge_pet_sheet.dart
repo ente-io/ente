@@ -133,7 +133,7 @@ class _MergePetPageState extends State<_MergePetPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
-                      "No named pets to merge with.\nName a pet first, then merge.",
+                      context.l10n.noNamedPetsToMerge,
                       style:
                           textTheme.body.copyWith(color: colorScheme.textMuted),
                       textAlign: TextAlign.center,

@@ -15,7 +15,6 @@ import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final _logger = Logger("PetFaceWidget");
@@ -68,11 +67,8 @@ class _PetFaceWidgetState extends State<PetFaceWidget> {
         final localId =
             await OfflineFilesDB.instance.getLocalIdForIntId(dbPetFace.fileId);
         if (localId != null) {
-          final allFiles = await SearchService.instance.getAllFilesForSearch();
-          enteFile = allFiles.cast<EnteFile?>().firstWhere(
-                (f) => f!.localID == localId,
-                orElse: () => null,
-              );
+          final files = await FilesDB.instance.getLocalFiles([localId]);
+          enteFile = files.firstOrNull;
         }
       } else {
         enteFile = await FilesDB.instance.getAnyUploadedFile(dbPetFace.fileId);

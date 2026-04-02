@@ -113,6 +113,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetClusterCentroidVectorIdMappingTable,
     createPetClusterPetTable,
     createNotPetFeedbackTable,
+    petFacesSpeciesIndex,
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,
@@ -2485,26 +2486,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final embs = await vdb.getEmbeddings(vectorIds);
         if (embs.isEmpty) continue;
 
-        // L2-normalized mean centroid
-        final dim = embs.first.length;
-        final centroid = Float32List(dim);
-        for (final emb in embs) {
-          for (int i = 0; i < dim; i++) {
-            centroid[i] += emb[i];
-          }
-        }
-        final n = embs.length.toDouble();
-        double norm = 0;
-        for (int i = 0; i < dim; i++) {
-          centroid[i] /= n;
-          norm += centroid[i] * centroid[i];
-        }
-        norm = sqrt(norm);
-        if (norm > 0) {
-          for (int i = 0; i < dim; i++) {
-            centroid[i] /= norm;
-          }
-        }
+        final centroid = computeL2MeanCentroid(embs);
 
         summaries[clusterId] = (faceRows.length, species);
         centroidsBySpecies

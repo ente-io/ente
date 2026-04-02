@@ -1,4 +1,3 @@
-import "dart:math" show sqrt;
 import "dart:typed_data" show Float32List;
 
 import "package:logging/logging.dart";
@@ -9,6 +8,7 @@ import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/events/pets_changed_event.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/utils/ml_util.dart" show computeL2MeanCentroid;
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("PetClusterFeedbackService");
@@ -170,7 +170,7 @@ class PetClusterFeedbackService {
         final embs = await vdb.getEmbeddings(vectorIds);
         if (embs.isEmpty) continue;
 
-        final centroid = _meanCentroid(embs);
+        final centroid = computeL2MeanCentroid(embs);
         sqlSummaries[clusterId] = (faceIds.length, species);
         centroidsBySpecies
             .putIfAbsent(species, () => {})
@@ -243,29 +243,5 @@ class PetClusterFeedbackService {
     } catch (e, s) {
       _logger.warning("Failed to recompute cluster summaries", e, s);
     }
-  }
-
-  /// Compute L2-normalized mean centroid from a list of Float32 embeddings.
-  static Float32List _meanCentroid(List<Float32List> embs) {
-    final dim = embs.first.length;
-    final centroid = Float32List(dim);
-    for (final emb in embs) {
-      for (int i = 0; i < dim; i++) {
-        centroid[i] += emb[i];
-      }
-    }
-    final n = embs.length.toDouble();
-    double norm = 0;
-    for (int i = 0; i < dim; i++) {
-      centroid[i] /= n;
-      norm += centroid[i] * centroid[i];
-    }
-    norm = sqrt(norm);
-    if (norm > 0) {
-      for (int i = 0; i < dim; i++) {
-        centroid[i] /= norm;
-      }
-    }
-    return centroid;
   }
 }

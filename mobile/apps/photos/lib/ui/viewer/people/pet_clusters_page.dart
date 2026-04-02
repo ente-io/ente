@@ -81,7 +81,7 @@ class _PetClustersPageState extends State<PetClustersPage> {
           : _clusters == null || _clusters!.isEmpty
               ? Center(
                   child: Text(
-                    "No clusters",
+                    context.l10n.noClusters,
                     style:
                         textTheme.body.copyWith(color: colorScheme.textMuted),
                   ),

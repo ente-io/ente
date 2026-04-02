@@ -1,6 +1,6 @@
 import "dart:convert" show jsonDecode, jsonEncode;
 import "dart:io" show File;
-import "dart:math" show min, sqrt;
+import "dart:math" show min;
 import "dart:typed_data" show Float32List, Float64List;
 
 import "package:logging/logging.dart";
@@ -11,6 +11,8 @@ import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/ml/schema.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/src/rust/api/ml_indexing_api.dart";
+import "package:photos/utils/ml_util.dart" show computeL2MeanCentroid;
+import "package:synchronized/synchronized.dart";
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("PetClusteringService");
@@ -22,7 +24,7 @@ class PetClusteringService {
   PetClusteringService._();
   static final instance = PetClusteringService._();
 
-  bool _isRunning = false;
+  final Lock _clusterLock = Lock();
 
   /// Export all pet face/body embeddings with cluster assignments to a JSON
   /// file for offline threshold tuning. Call from a debug menu or test.
@@ -111,36 +113,31 @@ class PetClusteringService {
     required MLDataDB mlDataDB,
     bool isOffline = false,
   }) async {
-    if (_isRunning) {
-      _logger.info("Pet clustering already running, skipping");
-      return false;
-    }
-    _isRunning = true;
-    try {
-      final unclusteredCount =
-          await mlDataDB.getUnclusteredPetFaceCount(isOffline: isOffline);
-      if (unclusteredCount == 0) {
-        _logger.info("No unclustered pet faces, skipping");
+    return _clusterLock.synchronized(() async {
+      try {
+        final unclusteredCount =
+            await mlDataDB.getUnclusteredPetFaceCount(isOffline: isOffline);
+        if (unclusteredCount == 0) {
+          _logger.info("No unclustered pet faces, skipping");
+          return false;
+        }
+        _logger.info("Starting pet clustering: $unclusteredCount unclustered");
+
+        bool changed = false;
+        for (final species in [0, 1]) {
+          final speciesChanged = await _clusterSpecies(
+            species: species,
+            mlDataDB: mlDataDB,
+            isOffline: isOffline,
+          );
+          changed = changed || speciesChanged;
+        }
+        return changed;
+      } catch (e, s) {
+        _logger.severe("Pet clustering failed", e, s);
         return false;
       }
-      _logger.info("Starting pet clustering: $unclusteredCount unclustered");
-
-      bool changed = false;
-      for (final species in [0, 1]) {
-        final speciesChanged = await _clusterSpecies(
-          species: species,
-          mlDataDB: mlDataDB,
-          isOffline: isOffline,
-        );
-        changed = changed || speciesChanged;
-      }
-      return changed;
-    } catch (e, s) {
-      _logger.severe("Pet clustering failed", e, s);
-      return false;
-    } finally {
-      _isRunning = false;
-    }
+    });
   }
 
   Future<bool> _clusterSpecies({
@@ -391,34 +388,10 @@ class PetClusteringService {
     try {
       final embs = await faceVdb.getEmbeddings(vectorIds);
       if (embs.isEmpty) return null;
-      return _computeMeanCentroidF32(embs);
+      return computeL2MeanCentroid(embs);
     } catch (e) {
       return null;
     }
-  }
-
-  /// Compute L2-normalized mean centroid from Float32List embeddings.
-  static Float32List _computeMeanCentroidF32(List<Float32List> embeddings) {
-    final dim = embeddings.first.length;
-    final centroid = Float32List(dim);
-    for (final emb in embeddings) {
-      for (int i = 0; i < dim; i++) {
-        centroid[i] += emb[i];
-      }
-    }
-    final n = embeddings.length.toDouble();
-    double norm = 0;
-    for (int i = 0; i < dim; i++) {
-      centroid[i] /= n;
-      norm += centroid[i] * centroid[i];
-    }
-    norm = sqrt(norm);
-    if (norm > 0) {
-      for (int i = 0; i < dim; i++) {
-        centroid[i] /= norm;
-      }
-    }
-    return centroid;
   }
 
   static Float32List _doublesToFloat32(List<double> values) {

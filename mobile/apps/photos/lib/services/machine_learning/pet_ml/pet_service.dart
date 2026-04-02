@@ -15,10 +15,6 @@ import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 
 /// Manages pet entities synced via the entity sync service.
-///
-/// Reuses [EntityType.person] because PersonService migrated to
-/// [EntityType.cgroup]. The "person" type slot is unused and safe for pets.
-/// If a dedicated EntityType.pet is added later, a migration will be needed.
 class PetService {
   final EntityService entityService;
   final MLDataDB mlDataDB;
@@ -59,7 +55,7 @@ class PetService {
   }
 
   int _lastRemoteSyncTime() {
-    return entityService.lastSyncTime(EntityType.person);
+    return entityService.lastSyncTime(EntityType.pet);
   }
 
   Future<List<PetEntity>> getPets() async {
@@ -73,7 +69,7 @@ class PetService {
 
   Future<List<PetEntity>> _fetchAndCachePets() async {
     _logger.finest("reading all pets from local db");
-    final entities = await entityService.getEntities(EntityType.person);
+    final entities = await entityService.getEntities(EntityType.pet);
     final pets = await Computer.shared().compute(
       _decodePetEntities,
       param: {"entity": entities},
@@ -95,7 +91,7 @@ class PetService {
   }
 
   Future<PetEntity?> getPet(String id) async {
-    final e = await entityService.getEntity(EntityType.person, id);
+    final e = await entityService.getEntity(EntityType.pet, id);
     if (e == null) return null;
     return PetEntity(e.id, PetData.fromJson(json.decode(e.data)));
   }
@@ -138,8 +134,7 @@ class PetService {
       _logger.finest("Skip syncing pets in offline mode");
       return false;
     }
-    final int changedEntities =
-        await entityService.syncEntity(EntityType.person);
+    final int changedEntities = await entityService.syncEntity(EntityType.pet);
     return changedEntities > 0;
   }
 
@@ -164,14 +159,13 @@ class PetService {
       _logger.finest("Skip fetching remote pet clusters in offline mode");
       return false;
     }
-    final int changedEntities =
-        await entityService.syncEntity(EntityType.person);
+    final int changedEntities = await entityService.syncEntity(EntityType.pet);
     final bool changed = changedEntities > 0;
     if (!changed && skipIfNoChange) {
       return false;
     }
 
-    final entities = await entityService.getEntities(EntityType.person);
+    final entities = await entityService.getEntities(EntityType.pet);
     final remotePetIDs = entities.map((e) => e.id).toSet();
 
     // Remove local mappings for pets that no longer exist remotely
@@ -286,7 +280,7 @@ class PetService {
     String? id,
   }) async {
     final result =
-        await entityService.addOrUpdate(EntityType.person, jsonMap, id: id);
+        await entityService.addOrUpdate(EntityType.pet, jsonMap, id: id);
     _invalidateCache();
     return result;
   }

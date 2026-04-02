@@ -213,6 +213,9 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
 
 const deletePetFacesTable = 'DELETE FROM $petFacesTable';
 
+const petFacesSpeciesIndex =
+    'CREATE INDEX IF NOT EXISTS idx_pet_faces_species ON $petFacesTable ($speciesColumn)';
+
 // ── Pet Bodies Table ──
 
 const petBodiesTable = 'pet_bodies';
