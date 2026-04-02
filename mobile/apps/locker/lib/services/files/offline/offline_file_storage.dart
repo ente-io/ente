@@ -27,8 +27,6 @@ String getCachedDecryptedFilePath(EnteFile file) {
   return "$cacheDir${file.uploadedFileID}.decrypted$extension";
 }
 
-/// Persistent encrypted offline blobs live in app support so they survive app
-/// restarts and are not mixed with temporary cache files.
 Future<Directory> _getOfflineEncryptedDirectory() async {
   final supportDirectory = await getApplicationSupportDirectory();
   final directory = Directory(
@@ -45,8 +43,6 @@ Future<String> getOfflineEncryptedFilePath(EnteFile file) async {
   return p.join(directory.path, '${file.uploadedFileID}.encrypted');
 }
 
-/// Returns the current encrypted offline blob for a file from the current
-/// `<fileId>.encrypted` layout.
 Future<File?> getCurrentOfflineEncryptedCopy(EnteFile file) async {
   final finalPath = await getOfflineEncryptedFilePath(file);
   final encryptedFile = File(finalPath);
@@ -64,8 +60,6 @@ Future<File?> getCurrentOfflineEncryptedCopy(EnteFile file) async {
   return null;
 }
 
-/// Remove persistent encrypted copies and, optionally, temporary decrypted
-/// working copies for the given Locker file IDs from local disk only.
 Future<void> removeOfflineFileCopiesFromDisk(
   Iterable<int> fileIds, {
   bool removeWorkingCopies = true,
@@ -96,27 +90,13 @@ Future<void> removeOfflineFileCopiesFromDisk(
 
 Future<void> clearAllOfflineFileCopies() async {
   _logger.info('Clearing all offline file copies');
-  final encryptedDirectory = await _getOfflineEncryptedDirectory();
-  if (await encryptedDirectory.exists()) {
-    await encryptedDirectory.delete(recursive: true);
-  }
+  await _deleteFilesFromDirectory(
+    await _getOfflineEncryptedDirectory(),
+    (_) => true,
+  );
 
   final cacheDirectory = Directory(Configuration.instance.getCacheDirectory());
-  if (!await cacheDirectory.exists()) {
-    return;
-  }
-
-  await for (final entity in cacheDirectory.list(followLinks: false)) {
-    try {
-      await entity.delete(recursive: true);
-    } catch (e, s) {
-      _logger.warning(
-        'Failed to delete ${entity.path} while clearing directory contents',
-        e,
-        s,
-      );
-    }
-  }
+  await _deleteFilesFromDirectory(cacheDirectory, _isOfflineWorkingCopyBaseName);
 }
 
 Future<void> cleanupOfflineWorkingFiles({
@@ -135,8 +115,7 @@ Future<void> cleanupOfflineWorkingFiles({
     }
 
     final baseName = p.basename(entity.path);
-    if (_parseEncryptedFileId(baseName) == null &&
-        _parseCachedDecryptedFileId(baseName) == null) {
+    if (!_isOfflineWorkingCopyBaseName(baseName)) {
       continue;
     }
 
@@ -152,6 +131,11 @@ Future<void> cleanupOfflineWorkingFiles({
       _logger.warning('Failed to delete cached offline working file', e, s);
     }
   }
+}
+
+bool _isOfflineWorkingCopyBaseName(String baseName) {
+  return _parseEncryptedFileId(baseName) != null ||
+      _parseCachedDecryptedFileId(baseName) != null;
 }
 
 int? _parseEncryptedFileId(String baseName) {

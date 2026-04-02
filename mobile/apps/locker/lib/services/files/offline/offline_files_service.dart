@@ -44,13 +44,10 @@ class OfflineFilesService {
 
   List<EnteFile> getEligibleFiles(Iterable<EnteFile> files) {
     final eligibleFilesById = <int, EnteFile>{};
-    final seenFileIDs = <int>{};
 
     for (final file in files) {
       final fileId = file.uploadedFileID;
-      if (fileId == null ||
-          !seenFileIDs.add(fileId) ||
-          !_canMarkOffline(file)) {
+      if (fileId == null || !_canMarkOffline(file)) {
         continue;
       }
       eligibleFilesById[fileId] = file;
@@ -77,7 +74,7 @@ class OfflineFilesService {
     final total = eligibleFiles.length;
     final dialog = createProgressDialog(
       context,
-      _buildMarkProgressMessage(context, 0, total),
+      total == 1 ? context.l10n.savingOffline : '${context.l10n.savingOffline} 0/$total',
       isDismissible: false,
     );
 
@@ -93,11 +90,9 @@ class OfflineFilesService {
         final currentStep = index + 1;
 
         dialog.update(
-          message: _buildMarkProgressMessage(
-            context,
-            currentStep,
-            total,
-          ),
+          message: total == 1
+              ? context.l10n.savingOffline
+              : '${context.l10n.savingOffline} $currentStep/$total',
         );
 
         final alreadyHasOfflineCopy =
@@ -125,7 +120,10 @@ class OfflineFilesService {
             e,
             s,
           );
-          await _cleanupFailedMark(file);
+          await _clearOfflineState(
+            [fileID],
+            removeWorkingCopies: false,
+          );
         }
       }
     } finally {
@@ -264,32 +262,5 @@ class OfflineFilesService {
 
     await LockerDB.instance.setFilesMarkedOffline([fileID], true);
     return true;
-  }
-
-  /// Keep decrypted working files intact; only clear offline state.
-  Future<void> _cleanupFailedMark(EnteFile file) async {
-    final fileID = file.uploadedFileID;
-    if (fileID == null) {
-      return;
-    }
-    _logger.fine(
-      'Cleaning up failed offline mark for file $fileID',
-    );
-    await _clearOfflineState(
-      [fileID],
-      removeWorkingCopies: false,
-    );
-  }
-
-  String _buildMarkProgressMessage(
-    BuildContext context,
-    int current,
-    int total,
-  ) {
-    final progressLabel = context.l10n.savingOffline;
-    if (total == 1) {
-      return progressLabel;
-    }
-    return '$progressLabel $current/$total';
   }
 }
