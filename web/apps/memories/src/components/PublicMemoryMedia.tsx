@@ -1,3 +1,8 @@
+/**
+ * Shared media primitives for the public memories viewers.
+ * This file contains the image and video renderers, loading overlay, and media
+ * sizing/crop helpers used by both `MemoryViewer` and `LaneMemoryViewer`.
+ */
 import { Box, CircularProgress, Typography } from "@mui/material";
 import log from "ente-base/log";
 import {
@@ -54,6 +59,10 @@ const buildMediaStyle = ({
     };
 };
 
+/**
+ * Shared loading mask for public memory media while the image or video source is resolving.
+ * Used internally by `PhotoImage` and `VideoPlayer` in this file.
+ */
 function MediaLoadingOverlay() {
     return (
         <Box
@@ -85,6 +94,10 @@ export interface PhotoImageProps {
     showLoadingOverlay?: boolean;
 }
 
+/**
+ * Public-memory image renderer that handles thumbnail-to-full-image loading and lane crops.
+ * Used by `MemoryViewer` for share items and by `LaneMemoryViewer` for lane cards.
+ */
 export function PhotoImage({
     file,
     onFullLoad,
@@ -268,6 +281,10 @@ export interface VideoPlayerProps {
     showLoadingOverlay?: boolean;
 }
 
+/**
+ * Public-memory video renderer that supports HLS playback, local video fallbacks, and lane crops.
+ * Used by `MemoryViewer` for share playback and by `LaneMemoryViewer` for the active lane card.
+ */
 export function VideoPlayer({
     file,
     onReady,

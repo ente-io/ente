@@ -1,3 +1,9 @@
+/**
+ * Shared playback and progress controls for the public memories viewers.
+ * This file contains the share viewer progress bar plus the lane-specific
+ * caption, glyph, and scrubber controls used by `MemoryViewer` and
+ * `LaneMemoryViewer`.
+ */
 import { keyframes } from "@emotion/react";
 import { Box, styled } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
@@ -68,6 +74,10 @@ const LaneProgressThumb = styled("div")({
     transform: "translate(-50%, -50%)",
 });
 
+/**
+ * Play/pause glyph used by the share viewer's playback button.
+ * Used by `MemoryViewer`.
+ */
 export const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
     if (paused) {
         return (
@@ -106,6 +116,10 @@ export const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
     );
 };
 
+/**
+ * Smaller play/pause glyph sized for the lane viewer footer controls.
+ * Used by `LaneMemoryViewer`.
+ */
 export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
     paused,
 }) => {
@@ -146,6 +160,10 @@ export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
     );
 };
 
+/**
+ * Formats and renders the lane caption text, including the animated numeric counter state.
+ * Used by `LaneMemoryViewer`.
+ */
 export const LaneCaptionText: React.FC<{
     model: LaneCaptionModel;
     previousValue?: number;
@@ -191,6 +209,10 @@ interface LaneProgressSliderProps {
     onScrubEnd?: (value: number) => void;
 }
 
+/**
+ * Scrubbable progress control for lane shares.
+ * Used by `LaneMemoryViewer`.
+ */
 export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
     total,
     current,
@@ -292,6 +314,10 @@ interface ProgressIndicatorProps {
     minimal?: boolean;
 }
 
+/**
+ * Segmented autoplay progress bar for the share viewer header.
+ * Used by `MemoryViewer`.
+ */
 export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     total,
     current,
@@ -365,6 +391,10 @@ interface ProgressBarProps {
     onComplete?: () => void;
 }
 
+/**
+ * Single progress segment used to build `ProgressIndicator`.
+ * Used only within `PublicMemoryControls.tsx`.
+ */
 const ProgressBar: React.FC<ProgressBarProps> = ({
     state,
     paused,
