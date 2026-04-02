@@ -1,5 +1,4 @@
 import "package:ente_qr/ente_qr.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/models/file/file.dart";
@@ -8,12 +7,10 @@ import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
 class QrCodeHighlightOverlay extends StatelessWidget {
   final List<QrDetection> detections;
   final EnteFile file;
-  final ValueListenable<bool> enableFullScreenNotifier;
 
   const QrCodeHighlightOverlay({
     required this.detections,
     required this.file,
-    required this.enableFullScreenNotifier,
     super.key,
   });
 
@@ -23,14 +20,7 @@ class QrCodeHighlightOverlay extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: enableFullScreenNotifier,
-      builder: (context, isFullScreen, _) {
-        if (isFullScreen) {
-          return const SizedBox.shrink();
-        }
-
-        return LayoutBuilder(
+    return LayoutBuilder(
           builder: (context, constraints) {
             final screenWidth = constraints.maxWidth;
             final screenHeight = constraints.maxHeight;
@@ -71,8 +61,6 @@ class QrCodeHighlightOverlay extends StatelessWidget {
             );
           },
         );
-      },
-    );
   }
 }
 
