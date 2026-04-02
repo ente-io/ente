@@ -997,6 +997,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
             trackHeight: 4,
             activeTrackColor: activeTrackColor,
             inactiveTrackColor: inactiveTrackColor,
+            tickMarkShape: SliderTickMarkShape.noTickMark,
             thumbColor: Colors.white,
             overlayColor: Colors.transparent,
             trackShape: const RoundedRectSliderTrackShape(),

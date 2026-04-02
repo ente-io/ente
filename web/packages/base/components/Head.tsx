@@ -12,14 +12,30 @@ interface CustomHeadProps {
     title: string;
 }
 
+const AlbumsFontPreloads: React.FC = () => (
+    <>
+        <link
+            rel="preload"
+            href="/fonts/inter-latin-wght-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+        />
+    </>
+);
+
 /**
  * A custom version of "next/head" that sets the title, description, favicon and
  * some other boilerplate <head> tags.
  *
  * This assumes the existence of `public/images/favicon.png`.
  */
-export const CustomHead: React.FC<CustomHeadProps> = ({ title }) => (
+export const CustomHead: React.FC<React.PropsWithChildren<CustomHeadProps>> = ({
+    title,
+    children,
+}) => (
     <Head>
+        {children}
         <title>{title}</title>
         <link rel="icon" href="/images/favicon.png" type="image/png" />
         <meta
@@ -48,6 +64,7 @@ export const CustomHead: React.FC<CustomHeadProps> = ({ title }) => (
  */
 export const CustomHeadAlbumsStatic: React.FC = () => (
     <Head>
+        <AlbumsFontPreloads />
         <title>Ente Photos</title>
         <link rel="icon" href="/images/favicon.png" type="image/png" />
         <meta
@@ -80,7 +97,9 @@ export const CustomHeadAlbums: React.FC<CustomHeadProps> = ({ title }) =>
     isCustomAlbumsAppOrigin ||
     (haveWindow() &&
         new URL(window.location.href).origin != albumsAppOrigin()) ? (
-        <CustomHead {...{ title }} />
+        <CustomHead {...{ title }}>
+            <AlbumsFontPreloads />
+        </CustomHead>
     ) : (
         <CustomHeadAlbumsStatic />
     );

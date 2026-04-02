@@ -151,7 +151,8 @@ class _BodyState extends State<_Body> {
         swipeLocked = event.swipeLocked;
       });
     });
-    if (flagService.qrFeatureEnabled) {
+    if (flagService.qrFeatureEnabled &&
+        widget.config.mode != DetailPageMode.minimalistic) {
       _qrHelper = QrCodeDetectionHelper();
     }
 
@@ -159,7 +160,7 @@ class _BodyState extends State<_Body> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
-      _qrHelper?.evaluateFile(_files![_selectedIndexNotifier.value]);
+      _evaluateQrIfEligible(_files![_selectedIndexNotifier.value]);
       widget.config.onPageReady?.call(context);
     });
   }
@@ -286,9 +287,6 @@ class _BodyState extends State<_Body> {
                         return QrCodeHighlightOverlay(
                           detections: detections,
                           file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
                         );
                       },
                     );
@@ -414,7 +412,7 @@ class _BodyState extends State<_Body> {
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _updateSharedCollectionState(_files![index]);
-        _qrHelper?.evaluateFile(_files![index]);
+        _evaluateQrIfEligible(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -422,6 +420,11 @@ class _BodyState extends State<_Body> {
       controller: _pageController,
       itemCount: _files!.length,
     );
+  }
+
+  void _evaluateQrIfEligible(EnteFile file) {
+    if (_qrHelper == null || isGuestView || file is TrashFile) return;
+    _qrHelper!.evaluateFile(file);
   }
 
   bool shouldAutoPlay() {

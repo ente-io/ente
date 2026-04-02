@@ -42,9 +42,14 @@ extension FileDataTable on MLDataDB {
         );
   }
 
-  Future<Set<int>> getFileIDsWithFDData() async {
+  Future<Set<int>> getFileIDsWithFDData({DataType? type}) async {
     final db = await MLDataDB.instance.asyncDB;
-    final res = await db.execute('SELECT $fileIDColumn FROM $fileDataTable');
+    final String query = type == null
+        ? 'SELECT $fileIDColumn FROM $fileDataTable'
+        : 'SELECT $fileIDColumn FROM $fileDataTable WHERE type = ?';
+    final List<Object?> args = type == null ? const [] : [type.toJson()];
+    final res =
+        args.isEmpty ? await db.execute(query) : await db.execute(query, args);
     return res.map((e) => e[fileIDColumn] as int).toSet();
   }
 }

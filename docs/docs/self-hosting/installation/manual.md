@@ -180,7 +180,7 @@ Values you used for `database name` and `username` correspond to the values you 
     cd ../web
 
     # Install dependencies
-    yarn install
+    yarn install --frozen-lockfile
     ```
 
 2. Configure the environment variables in your corresponding shell's
