@@ -81,9 +81,9 @@ accessible on all devices signed into the same account.
 ### I'm not receiving the verification email. What should I do? {#locker-verification-email}
 
 1. Check your spam or junk folder
-2. Add `noreply@ente.io` to your contacts
+2. Add `noreply@ente.com` to your contacts
 3. Wait a few minutes and try again
-4. If still not received, contact [support@ente.io](mailto:support@ente.io)
+4. If still not received, contact [support@ente.com](mailto:support@ente.com)
 
 ## Pricing and Plans
 
@@ -104,7 +104,7 @@ subscribe to Ente Photos, your Locker limits automatically increase to:
 - Up to 1000 items
 - Up to 10GB total storage
 
-View pricing options at [ente.io/pricing](https://ente.io/pricing).
+View pricing options at [ente.com/pricing](https://ente.com/pricing).
 
 ### Is Locker storage separate from Photos storage? {#locker-storage-separate}
 
@@ -159,7 +159,7 @@ When you reach your item or storage limit:
 Subscribe to any Ente Photos plan to increase your limits to 1000 items and
 10GB storage. Your Locker limits increase automatically when you subscribe.
 
-View plans at [ente.io/pricing](https://ente.io/pricing).
+View plans at [ente.com/pricing](https://ente.com/pricing).
 
 ## Export and Data
 

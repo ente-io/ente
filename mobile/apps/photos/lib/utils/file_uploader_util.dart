@@ -359,6 +359,13 @@ Future<void> _decorateEnteFileData(
       file.location = exifLocation;
     }
   }
+  if (Platform.isIOS) {
+    final originalTitle = await asset.titleAsync;
+    if (originalTitle.isNotEmpty) {
+      file.title = originalTitle;
+      return;
+    }
+  }
   if (file.title == null || file.title!.isEmpty) {
     _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;

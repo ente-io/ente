@@ -41,7 +41,7 @@ Future<ButtonResult?> showErrorDialog(
         onTap: () async {
           await sendEmail(
             context,
-            to: "support@ente.io",
+            to: "support@ente.com",
             body: body,
           );
         },
@@ -153,7 +153,7 @@ Future<ButtonResult?> showGenericErrorDialog({
             PlatformUtil.openWebView(
               context,
               context.strings.faq,
-              "https://ente.io/help/auth/troubleshooting/windows-login",
+              "https://ente.com/help/auth/troubleshooting/windows-login",
             );
           },
         ),
@@ -162,7 +162,7 @@ Future<ButtonResult?> showGenericErrorDialog({
         labelText: context.strings.contactSupport,
         buttonAction: ButtonAction.second,
         onTap: () async {
-          await sendLogs(context, "support@ente.io", postShare: () {});
+          await sendLogs(context, "support@ente.com", postShare: () {});
         },
       ),
     ],
@@ -187,7 +187,7 @@ Future<void> showGenericErrorBottomSheet({
       GradientButton(
         text: context.strings.contactSupport,
         onTap: () async {
-          await sendLogs(context, "support@ente.io", postShare: () {});
+          await sendLogs(context, "support@ente.com", postShare: () {});
         },
       ),
     ],

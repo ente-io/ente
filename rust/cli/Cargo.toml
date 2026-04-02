@@ -2,8 +2,8 @@
 name = "ente-rs"
 version = "0.0.1"
 edition = "2024"
-description = "Rust bindings and CLI for ente.io"
-homepage = "https://ente.io"
+description = "Rust bindings and CLI for Ente"
+homepage = "https://ente.com"
 repository = "https://github.com/ente-io/ente"
 license = "AGPL-3.0-only"
 
@@ -43,5 +43,9 @@ open = "5.0"
 zip = "2.2"
 
 [dev-dependencies]
+hmac = "0.12"
 mockito = "1.6"
+sha2 = "0.10"
+srp = "0.6"
+sha1 = "0.10"
 tempdir = "0.3"

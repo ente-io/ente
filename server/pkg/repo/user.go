@@ -81,6 +81,16 @@ func (repo *UserRepository) GetUserByIDInternal(id int64) (ente.User, error) {
 	return user, nil
 }
 
+// Return true if userId 1 doesn't exists in the system.
+func (repo *UserRepository) IsLikelySelfHosted() bool {
+	var userOneExists bool
+	if err := repo.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE user_id = 1)`).Scan(&userOneExists); err != nil {
+		return false
+	}
+
+	return !userOneExists
+}
+
 // Delete removes the email_hash and encrypted email information for the user. It replaces email_hash with placeholder value
 // based on DELETED_EMAIL_HASH_FORMAT
 func (repo *UserRepository) Delete(userID int64) error {

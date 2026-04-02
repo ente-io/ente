@@ -429,7 +429,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                 builder: (BuildContext context) {
                   return WebPage(
                     AppLocalizations.of(context).termsOfServicesTitle,
-                    "https://ente.io/terms",
+                    "https://ente.com/terms",
                   );
                 },
               ),
@@ -446,7 +446,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                 builder: (BuildContext context) {
                   return WebPage(
                     AppLocalizations.of(context).privacyPolicyTitle,
-                    "https://ente.io/privacy",
+                    "https://ente.com/privacy",
                   );
                 },
               ),

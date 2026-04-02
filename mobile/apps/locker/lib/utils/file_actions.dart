@@ -11,6 +11,7 @@ import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
+import "package:locker/services/trash/models/trash_file.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_sheet.dart";
@@ -33,6 +34,13 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
+    if (file is TrashFile) {
+      _logger.warning(
+        'Ignoring edit request for trashed file ${file.uploadedFileID}',
+      );
+      return;
+    }
+
     if (InfoFileService.instance.isInfoFile(file)) {
       await _editInfoFile(context, file);
       return;

@@ -11,6 +11,8 @@ dependencies:
   app_links: ^6.3.3
   archive: ^4.0.7
   auto_size_text: ^3.0.0
+  backup_exclusion:
+    path: ../../packages/backup_exclusion
   base32: ^2.1.3
   bip39: ^1.0.6
   clipboard: ^0.1.3

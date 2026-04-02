@@ -330,7 +330,7 @@
     }
   },
   "sorry": "Ospravedlňujeme sa",
-  "importFailureDesc": "Vybraný súbor nie je možné spracovať.\nAk potrebujete pomoc, napíšte na adresu support@ente.io!",
+  "importFailureDesc": "Vybraný súbor nie je možné spracovať.\nAk potrebujete pomoc, napíšte na adresu support@ente.com!",
   "pendingSyncs": "Upozornenie",
   "pendingSyncsWarningBody": "Niektoré z vašich kódov neboli zálohované.\n\nPred odhlásením sa uistite, že máte zálohu pre tieto kódy.",
   "checkInboxAndSpamFolder": "Skontrolujte svoju doručenú poštu (a spam) pre dokončenie overenia",
@@ -343,7 +343,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

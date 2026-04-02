@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
-final _logger = Logger('IosBackupUtil');
-const _channel = MethodChannel('io.ente.photos/backup');
+final _logger = Logger('BackupExclusion');
+const _channel = MethodChannel('io.ente.backup_exclusion');
 
 /// Marks [path] as excluded from iCloud and local backups on iOS.
 ///
@@ -29,15 +29,14 @@ Future<void> invokeExcludeFromBackup(String path) =>
 
 Future<void> _invokeExcludeFromBackup(String path) async {
   try {
-    final ok = await _channel.invokeMethod<bool>(
-      'excludeFromBackup',
-      {'path': path},
-    );
+    final ok = await _channel.invokeMethod<bool>('excludeFromBackup', {
+      'path': path,
+    });
     if (ok != true) {
       _logger.warning('excludeFromBackup returned false for: $path');
     }
   } on PlatformException catch (e) {
-    _logger.warning('Failed to exclude path from backup: $path — ${e.message}');
+    _logger.warning('Failed to exclude path from backup: $path - ${e.message}');
   } on MissingPluginException {
     // Channel not registered in headless background execution (Workmanager).
     // Safe to ignore: backup exclusion is a best-effort attribute set on
