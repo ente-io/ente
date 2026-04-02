@@ -341,7 +341,7 @@ impl ContactsCtx {
         Ok(ContactRecord {
             id: entity.id,
             contact_user_id: entity.contact_user_id,
-            email: Some(data.email),
+            email: entity.email,
             name: Some(data.name),
             birth_date: data.birth_date,
             profile_picture_attachment_id: entity.profile_picture_attachment_id,

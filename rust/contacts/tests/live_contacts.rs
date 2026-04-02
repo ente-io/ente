@@ -113,7 +113,6 @@ async fn live_contacts_crud_and_profile_picture_flow() {
 
     let initial_data = ContactData {
         contact_user_id: account_b.user_id,
-        email: account_b.email.clone(),
         name: "B Contact".to_string(),
         birth_date: Some("2001-04-01".to_string()),
     };
@@ -139,7 +138,6 @@ async fn live_contacts_crud_and_profile_picture_flow() {
             &contact.id,
             &ContactData {
                 contact_user_id: account_b.user_id,
-                email: account_b.email.clone(),
                 name: "B Contact Updated".to_string(),
                 birth_date: Some("2001-04-02".to_string()),
             },
