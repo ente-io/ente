@@ -32,8 +32,8 @@ import {
 } from "../utils/lane";
 import {
     LaneCaptionText,
-    LanePlaybackGlyph,
     LaneProgressSlider,
+    PlaybackGlyph,
 } from "./PublicMemoryControls";
 import { PhotoImage, VideoPlayer } from "./PublicMemoryMedia";
 import {
@@ -41,15 +41,12 @@ import {
     EDGE_NAV_TAP_ZONE_RATIO,
     ENTE_BRAND_TAG_IMAGE_PATH,
     EnteBrandTagImage,
-    HOLD_TO_PAUSE_NAV_SUPPRESSION_MS,
     isInteractiveTapTarget,
     JoinNowButton,
     type LaneMemoryViewerProps,
     MOBILE_LAYOUT_BREAKPOINT_PX,
-    MobileJoinNowButton,
     PhotoContainer,
     readViewport,
-    ViewerFooterBar,
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
@@ -104,9 +101,6 @@ export function LaneMemoryViewer({
         });
         return initialModel.value;
     });
-    const pressStartedAtRef = useRef<number | null>(null);
-    const suppressTapNavigationRef = useRef(false);
-    const shouldResumeAfterHoldRef = useRef(false);
     const finishedLanePlaybackRef = useRef(false);
     const restartOnResumeRef = useRef(false);
     const animationFrameRef = useRef<number | null>(null);
@@ -127,7 +121,6 @@ export function LaneMemoryViewer({
     const currentFile = files[displayIndex]!;
     const currentLaneFrame = laneFrames?.[displayIndex];
     const isVideo = currentFile.metadata.fileType === FileType.video;
-    const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
     const isCompactLaneLayout =
         viewport.width <= LANE_COMPACT_LAYOUT_BREAKPOINT_PX;
 
@@ -367,20 +360,24 @@ export function LaneMemoryViewer({
         [],
     );
 
+    const toggleLanePlayback = useCallback(() => {
+        setPaused((previous) => {
+            const nextPaused = !previous;
+            restartOnResumeRef.current =
+                !nextPaused && finishedLanePlaybackRef.current;
+            if (!nextPaused) {
+                finishedLanePlaybackRef.current = false;
+            }
+            return nextPaused;
+        });
+    }, []);
+
     const handlePlaybackToggle = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            setPaused((previous) => {
-                const nextPaused = !previous;
-                restartOnResumeRef.current =
-                    !nextPaused && finishedLanePlaybackRef.current;
-                if (!nextPaused) {
-                    finishedLanePlaybackRef.current = false;
-                }
-                return nextPaused;
-            });
+            toggleLanePlayback();
         },
-        [],
+        [toggleLanePlayback],
     );
 
     const handleVideoEnded = useCallback(() => {
@@ -394,10 +391,6 @@ export function LaneMemoryViewer({
 
     const handleScreenTap = useCallback(
         (event: ReactMouseEvent<HTMLDivElement>) => {
-            if (suppressTapNavigationRef.current) {
-                suppressTapNavigationRef.current = false;
-                return;
-            }
             if (isInteractiveTapTarget(event.target)) {
                 return;
             }
@@ -416,6 +409,33 @@ export function LaneMemoryViewer({
             }
         },
         [onNext, onPrev, viewport.width],
+    );
+
+    const handleLaneMediaFrameClick = useCallback(
+        (event: ReactMouseEvent<HTMLDivElement>) => {
+            if (isInteractiveTapTarget(event.target)) {
+                return;
+            }
+            if (isAnimatingStackRef.current || isScrubbingRef.current) {
+                return;
+            }
+
+            event.stopPropagation();
+
+            const clickX = event.clientX;
+            if (clickX <= viewport.width * EDGE_NAV_TAP_ZONE_RATIO) {
+                onPrev();
+                return;
+            }
+
+            if (clickX >= viewport.width * (1 - EDGE_NAV_TAP_ZONE_RATIO)) {
+                onNext();
+                return;
+            }
+
+            toggleLanePlayback();
+        },
+        [onNext, onPrev, toggleLanePlayback, viewport.width],
     );
 
     const laneFrameSize = useMemo(() => {
@@ -516,126 +536,56 @@ export function LaneMemoryViewer({
         [commitDisplayIndex, files.length, onSeek, trackScrubValue],
     );
 
+    const showPlaybackOverlay = paused && !isScrubbing;
+    const playbackOverlayLabel = finishedLanePlaybackRef.current
+        ? "Restart memory lane"
+        : "Resume playback";
+
     return (
         <ViewerRoot onClick={handleScreenTap}>
             <LaneBackground isCompactLayout={isCompactLaneLayout} />
-            <LaneContentContainer
-                style={
-                    isCompactLaneLayout
-                        ? {
-                              maxWidth: isMobileLayout ? "375px" : "440px",
-                              padding: isMobileLayout
-                                  ? "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))"
-                                  : "32px 28px 30px",
-                              gap: isMobileLayout ? "14px" : "20px",
-                          }
-                        : undefined
-                }
-            >
-                {isCompactLaneLayout ? (
-                    <LaneMobileHeaderSection>
-                        <LaneMobileTitle variant="h6">
-                            {laneTitle}
-                        </LaneMobileTitle>
-                    </LaneMobileHeaderSection>
-                ) : (
-                    <LaneTopBar>
-                        <LaneTopBrandSection>
-                            <LaneHeaderBrandLink
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
-                                data-memory-control="true"
-                            >
-                                <EnteBrandTagImage
-                                    src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                    alt="Ente Photos"
-                                />
-                            </LaneHeaderBrandLink>
-                        </LaneTopBrandSection>
-                        <LaneTopActionSection>
-                            <LaneHeaderJoinNowButton
-                                variant="contained"
-                                color="accent"
-                                disableElevation
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                Try Ente
-                            </LaneHeaderJoinNowButton>
-                        </LaneTopActionSection>
-                    </LaneTopBar>
-                )}
+            <LaneContentContainer>
+                <LaneTopBar>
+                    <LaneTopBrandSection>
+                        <LaneHeaderBrandLink
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            data-memory-control="true"
+                        >
+                            <EnteBrandTagImage
+                                src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                alt="Ente Photos"
+                            />
+                        </LaneHeaderBrandLink>
+                    </LaneTopBrandSection>
+                    <LaneTopActionSection>
+                        <JoinNowButton
+                            variant="contained"
+                            color="accent"
+                            disableElevation
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            sx={laneHeaderJoinNowButtonSx}
+                        >
+                            Try Ente
+                        </JoinNowButton>
+                    </LaneTopActionSection>
+                </LaneTopBar>
 
                 <LaneCenterSection>
                     <PhotoContainer
                         style={{ flex: "0 0 auto", minHeight: "auto" }}
                         onContextMenu={(event) => event.preventDefault()}
                         onDragStart={(event) => event.preventDefault()}
-                        onPointerDown={
-                            isCompactLaneLayout
-                                ? () => {
-                                      pressStartedAtRef.current = Date.now();
-                                      suppressTapNavigationRef.current = false;
-                                      shouldResumeAfterHoldRef.current =
-                                          !paused;
-                                      setPaused(true);
-                                  }
-                                : undefined
-                        }
-                        onPointerUp={
-                            isCompactLaneLayout
-                                ? () => {
-                                      const startedAt =
-                                          pressStartedAtRef.current;
-                                      pressStartedAtRef.current = null;
-                                      if (
-                                          startedAt &&
-                                          Date.now() - startedAt >
-                                              HOLD_TO_PAUSE_NAV_SUPPRESSION_MS
-                                      ) {
-                                          suppressTapNavigationRef.current = true;
-                                      }
-                                      if (shouldResumeAfterHoldRef.current) {
-                                          setPaused(false);
-                                      }
-                                      shouldResumeAfterHoldRef.current = false;
-                                  }
-                                : undefined
-                        }
-                        onPointerCancel={
-                            isCompactLaneLayout
-                                ? () => {
-                                      pressStartedAtRef.current = null;
-                                      if (shouldResumeAfterHoldRef.current) {
-                                          setPaused(false);
-                                      }
-                                      shouldResumeAfterHoldRef.current = false;
-                                  }
-                                : undefined
-                        }
-                        onPointerLeave={
-                            isCompactLaneLayout
-                                ? () => {
-                                      if (pressStartedAtRef.current !== null) {
-                                          pressStartedAtRef.current = null;
-                                          if (
-                                              shouldResumeAfterHoldRef.current
-                                          ) {
-                                              setPaused(false);
-                                          }
-                                          shouldResumeAfterHoldRef.current = false;
-                                      }
-                                  }
-                                : undefined
-                        }
                     >
                         <LaneCardStack
                             style={{
                                 width: `${laneFrameSize.width}px`,
                                 height: `${laneFrameSize.height}px`,
                             }}
+                            onClick={handleLaneMediaFrameClick}
                         >
                             {laneSlices.map((slice) => {
                                 const file = files[slice.index]!;
@@ -768,18 +718,25 @@ export function LaneMemoryViewer({
                                     </LaneStackSlice>
                                 );
                             })}
+                            {showPlaybackOverlay && (
+                                <LaneCenteredPlaybackOverlay>
+                                    <LaneCenteredPlaybackControl
+                                        type="button"
+                                        onClick={handlePlaybackToggle}
+                                        aria-label={playbackOverlayLabel}
+                                        data-memory-control="true"
+                                    >
+                                        <LaneCenteredPlaybackGlyph>
+                                            <PlaybackGlyph paused={paused} />
+                                        </LaneCenteredPlaybackGlyph>
+                                    </LaneCenteredPlaybackControl>
+                                </LaneCenteredPlaybackOverlay>
+                            )}
                         </LaneCardStack>
                     </PhotoContainer>
 
                     <LaneBottomSection>
                         <LaneCaptionRow>
-                            <LanePlaybackButton
-                                type="button"
-                                data-memory-control="true"
-                                onClick={handlePlaybackToggle}
-                            >
-                                <LanePlaybackGlyph paused={paused} />
-                            </LanePlaybackButton>
                             <LaneCaption>
                                 <LaneCaptionText
                                     model={laneCaptionModel}
@@ -795,40 +752,11 @@ export function LaneMemoryViewer({
                             onScrub={handleScrub}
                             onScrubEnd={handleScrubEnd}
                         />
-                        {!isCompactLaneLayout && (
-                            <LaneSliderTitle variant="h6">
-                                {laneTitle}
-                            </LaneSliderTitle>
-                        )}
+                        <LaneSliderTitle variant="h6">
+                            {laneTitle}
+                        </LaneSliderTitle>
                     </LaneBottomSection>
                 </LaneCenterSection>
-                <LaneFooter>
-                    {isMobileLayout ? (
-                        <ViewerFooterBar>
-                            <BrandLink
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
-                                data-memory-control="true"
-                            >
-                                <EnteBrandTagImage
-                                    src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                    alt="Ente Photos"
-                                />
-                            </BrandLink>
-                            <MobileJoinNowButton
-                                variant="contained"
-                                color="accent"
-                                disableElevation
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                Try Ente
-                            </MobileJoinNowButton>
-                        </ViewerFooterBar>
-                    ) : null}
-                </LaneFooter>
             </LaneContentContainer>
         </ViewerRoot>
     );
@@ -1052,31 +980,14 @@ const LaneContentContainer = styled("div")({
     height: "100dvh",
     padding: "42px 24px 24px",
     boxSizing: "border-box",
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        padding: "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
+    "@media (max-width: 900px)": {
+        gap: "22px",
+        padding: "36px 24px 24px",
     },
-});
-
-const LaneMobileHeaderSection = styled("div")({
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    minHeight: "40px",
-});
-
-const LaneMobileTitle = styled(Typography)({
-    color: "white",
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 600,
-    fontSize: "20px",
-    lineHeight: "20px",
-    letterSpacing: 0,
-    textAlign: "left",
-    maxWidth: "100%",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        gap: "18px",
+        padding: "32px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
+    },
 });
 
 const LaneTopBar = styled("div")({
@@ -1088,6 +999,14 @@ const LaneTopBar = styled("div")({
     minHeight: "64px",
     gap: "20px",
     boxSizing: "border-box",
+    "@media (max-width: 900px)": {
+        minHeight: "56px",
+        gap: "14px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        minHeight: "48px",
+        gap: "12px",
+    },
 });
 
 const LaneTopBrandSection = styled("div")({
@@ -1099,6 +1018,9 @@ const LaneTopBrandSection = styled("div")({
 const LaneHeaderBrandLink = styled(BrandLink)({
     "& img": { width: "98px" },
     "@media (max-width: 900px)": { "& img": { width: "84px" } },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        "& img": { width: "72px" },
+    },
 });
 
 const LaneTopActionSection = styled("div")({
@@ -1106,11 +1028,23 @@ const LaneTopActionSection = styled("div")({
     alignItems: "center",
 });
 
-const LaneHeaderJoinNowButton = styled(JoinNowButton)({
+const laneHeaderJoinNowButtonSx = {
     fontSize: "17px",
     paddingBlock: "14px",
     paddingInline: "30px",
-});
+    "@media (max-width: 900px)": {
+        fontSize: "15px",
+        paddingBlock: "11px",
+        paddingInline: "22px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        borderRadius: "14px",
+        fontSize: "14px",
+        paddingBlock: "9px",
+        paddingInline: "18px",
+        minWidth: "auto",
+    },
+} as const;
 
 const LaneSliderTitle = styled(Typography)({
     color: "rgba(255, 255, 255, 0.42)",
@@ -1122,6 +1056,13 @@ const LaneSliderTitle = styled(Typography)({
     whiteSpace: "normal",
     overflowWrap: "anywhere",
     maxWidth: "min(42vw, 420px)",
+    "@media (max-width: 900px)": {
+        maxWidth: "min(56vw, 360px)",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: "14px",
+        maxWidth: "min(100%, 280px)",
+    },
 });
 
 const LaneCenterSection = styled("div")({
@@ -1134,19 +1075,8 @@ const LaneCenterSection = styled("div")({
     justifyContent: "center",
     gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
     transform: "translateY(-28px)",
-    "@media (max-width: 900px)": { transform: "translateY(0)" },
-});
-
-const LaneFooter = styled("div")({
-    width: "100%",
-    flexShrink: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto",
-    paddingBottom: "max(8px, env(safe-area-inset-bottom, 0px))",
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        paddingBottom: 0,
+    "@media (max-width: 900px)": {
+        transform: "translateY(0)",
     },
 });
 
@@ -1168,6 +1098,13 @@ const LaneCardSurface = styled("div")({
     border: "3px solid white",
     boxSizing: "border-box",
     backgroundColor: "black",
+    "@media (max-width: 900px)": {
+        borderRadius: "24px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        borderRadius: "22px",
+        borderWidth: "2px",
+    },
 });
 
 const LaneCardMediaLayer = styled("div")({
@@ -1198,22 +1135,8 @@ const LaneBottomSection = styled("div")({
 const LaneCaptionRow = styled("div")({
     display: "flex",
     alignItems: "center",
-    gap: "10px",
-});
-
-const LanePlaybackButton = styled("button")({
-    border: 0,
-    outline: "none",
-    width: "28px",
-    height: "28px",
-    borderRadius: "999px",
-    padding: 0,
-    cursor: "pointer",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    display: "flex",
-    alignItems: "center",
     justifyContent: "center",
-    color: "white",
+    width: "100%",
 });
 
 const LaneCaption = styled("div")({
@@ -1225,4 +1148,62 @@ const LaneCaption = styled("div")({
     textAlign: "center",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
+    "@media (max-width: 900px)": {
+        fontSize: "21px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: "18px",
+        lineHeight: 1.2,
+    },
+});
+
+const LaneCenteredPlaybackOverlay = styled("div")({
+    position: "absolute",
+    inset: 0,
+    zIndex: 4,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
+});
+
+const LaneCenteredPlaybackControl = styled("button")({
+    width: "88px",
+    height: "88px",
+    borderRadius: "999px",
+    border: 0,
+    cursor: "pointer",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    backgroundColor: "rgba(18, 18, 18, 0.64)",
+    boxShadow: "0 18px 40px rgba(0, 0, 0, 0.34)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    transition:
+        "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
+    pointerEvents: "auto",
+    "&:hover": {
+        backgroundColor: "rgba(18, 18, 18, 0.72)",
+        transform: "scale(1.03)",
+    },
+    "&:active": { transform: "scale(0.98)" },
+    "@media (max-width: 900px)": { width: "80px", height: "80px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        width: "72px",
+        height: "72px",
+    },
+});
+
+const LaneCenteredPlaybackGlyph = styled("span")({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transform: "scale(1.65)",
+    transformOrigin: "center",
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        transform: "scale(1.45)",
+    },
 });
