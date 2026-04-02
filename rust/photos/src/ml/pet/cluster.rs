@@ -583,6 +583,7 @@ mod tests {
         normalized(v)
     }
 
+    #[allow(dead_code)]
     fn perturb(base: &[f32], dim: usize, amount: f32) -> Vec<f32> {
         let mut v = base.to_vec();
         let idx = dim % v.len();
@@ -1082,7 +1083,7 @@ mod tests {
         let result = run_pet_clustering(&inputs, &config);
 
         // Every cluster with a centroid should also have exemplars
-        for (cid, _centroid) in &result.cluster_centroids {
+        for cid in result.cluster_centroids.keys() {
             assert!(
                 result.cluster_exemplars.contains_key(cid),
                 "Cluster {} should have exemplars",
