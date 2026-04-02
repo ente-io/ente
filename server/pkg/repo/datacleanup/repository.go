@@ -88,6 +88,14 @@ func (r *Repository) DeleteTableData(ctx context.Context, userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to delete entity data")
 	}
+	_, err = r.DB.ExecContext(ctx, `DELETE FROM user_attachments WHERE user_id = $1`, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to delete contact attachment data")
+	}
+	_, err = r.DB.ExecContext(ctx, `DELETE FROM contact_entity WHERE user_id = $1`, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to delete contact data")
+	}
 	// deleting casting data
 	_, err = r.DB.ExecContext(ctx, `DELETE FROM casting WHERE cast_user = $1`, userID)
 	if err != nil {
