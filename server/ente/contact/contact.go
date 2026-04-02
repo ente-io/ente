@@ -136,6 +136,10 @@ type Attachment struct {
 	UpdatedAt          int64          `json:"updatedAt" binding:"required"`
 }
 
+func (a Attachment) ObjectKey() string {
+	return AttachmentObjectKey(a.UserID, a.AttachmentType, a.AttachmentID)
+}
+
 func (at AttachmentType) IsValid() error {
 	switch at {
 	case ProfilePicture:

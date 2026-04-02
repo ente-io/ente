@@ -1,10 +1,13 @@
 package contact
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"net/http/httptest"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -18,6 +21,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/museum/pkg/utils/s3config"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"github.com/spf13/viper"
 )
 
@@ -734,6 +738,114 @@ func TestDeleteContactMarksCurrentProfilePictureDeleted(t *testing.T) {
 	}
 }
 
+func TestAttachmentReplicationLifecycle(t *testing.T) {
+	ctrl, db, _, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+	viper.Set("s3.attachment-config.profile_picture.primaryBucket", "b2-eu-cen")
+	viper.Set("s3.attachment-config.profile_picture.replicaBuckets", []string{"scw-eu-fr"})
+	ctrl.S3Config = s3config.NewS3Config()
+
+	mustInsertAttachmentRow(t, db, "ua_replication", 1, false, "b2-eu-cen", nil, nil, nil)
+
+	replicatedTo := make([]string, 0)
+	ctrl.replicateAttachmentFn = func(_ context.Context, row contactmodel.Attachment, dstBucketID string) error {
+		replicatedTo = append(replicatedTo, dstBucketID)
+		if row.AttachmentID != "ua_replication" {
+			t.Fatalf("unexpected attachment id %q", row.AttachmentID)
+		}
+		return nil
+	}
+
+	if err := ctrl.tryReplicate(); err != nil {
+		t.Fatalf("tryReplicate() first pass error = %v", err)
+	}
+	if !reflect.DeepEqual(replicatedTo, []string{"scw-eu-fr"}) {
+		t.Fatalf("replicated buckets = %v, want [scw-eu-fr]", replicatedTo)
+	}
+
+	attachment, err := ctrl.Repo.GetAttachment(context.Background(), 1, "ua_replication")
+	if err != nil {
+		t.Fatalf("GetAttachment() error = %v", err)
+	}
+	if !reflect.DeepEqual(attachment.ReplicatedBuckets, []string{"scw-eu-fr"}) {
+		t.Fatalf("replicated buckets after first pass = %v", attachment.ReplicatedBuckets)
+	}
+	if attachment.PendingSync {
+		t.Fatal("attachment should not be pending after replication is complete")
+	}
+}
+
+func TestAttachmentDeletionLifecycle(t *testing.T) {
+	ctrl, db, _, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+
+	mustInsertAttachmentRow(t, db, "ua_delete", 1, true, "b2-eu-cen", nil, []string{"scw-eu-fr"}, nil)
+
+	deletedFrom := make([]string, 0)
+	ctrl.deleteAttachmentFn = func(row contactmodel.Attachment, bucketID string) error {
+		deletedFrom = append(deletedFrom, bucketID)
+		if row.AttachmentID != "ua_delete" {
+			t.Fatalf("unexpected attachment id %q", row.AttachmentID)
+		}
+		return nil
+	}
+
+	if err := ctrl.tryDelete(); err != nil {
+		t.Fatalf("tryDelete() error = %v", err)
+	}
+
+	if _, err := ctrl.Repo.GetAttachment(context.Background(), 1, "ua_delete"); err == nil {
+		t.Fatal("attachment row should be removed after deletion")
+	} else if !errors.Is(err, &ente.ErrNotFoundError) {
+		t.Fatalf("unexpected GetAttachment error = %v", err)
+	}
+
+	sort.Strings(deletedFrom)
+	if !reflect.DeepEqual(deletedFrom, []string{"b2-eu-cen", "scw-eu-fr"}) {
+		t.Fatalf("deleted buckets = %v", deletedFrom)
+	}
+}
+
 func ptrInt64(v int64) *int64 {
 	return &v
+}
+
+func mustInsertAttachmentRow(
+	t *testing.T,
+	db *sql.DB,
+	attachmentID string,
+	userID int64,
+	isDeleted bool,
+	latestBucket string,
+	replicatedBuckets []string,
+	deleteFromBuckets []string,
+	inflightBuckets []string,
+) {
+	t.Helper()
+	if replicatedBuckets == nil {
+		replicatedBuckets = []string{}
+	}
+	if deleteFromBuckets == nil {
+		deleteFromBuckets = []string{}
+	}
+	if inflightBuckets == nil {
+		inflightBuckets = []string{}
+	}
+	if _, err := db.Exec(
+		`INSERT INTO user_attachments(
+		    attachment_id, user_id, attachment_type, size, latest_bucket, replicated_buckets,
+		    delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted
+		) VALUES($1, $2, $3, $4, $5, $6::s3region[], $7::s3region[], $8::s3region[], TRUE, $9)`,
+		attachmentID,
+		userID,
+		"profile_picture",
+		128,
+		latestBucket,
+		pq.Array(replicatedBuckets),
+		pq.Array(deleteFromBuckets),
+		pq.Array(inflightBuckets),
+		isDeleted,
+	); err != nil {
+		t.Fatalf("failed to insert attachment row: %v", err)
+	}
 }

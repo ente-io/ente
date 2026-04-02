@@ -71,9 +71,20 @@ func TestDeleteTableDataDeletesContactsAndAttachmentsForUser(t *testing.T) {
 	}
 
 	assertCleanupRowCount(t, db, `SELECT COUNT(*) FROM contact_entity WHERE user_id = $1`, targetUserID, 0)
-	assertCleanupRowCount(t, db, `SELECT COUNT(*) FROM user_attachments WHERE user_id = $1`, targetUserID, 0)
+	assertCleanupRowCount(t, db, `SELECT COUNT(*) FROM user_attachments WHERE user_id = $1`, targetUserID, 1)
 	assertCleanupRowCount(t, db, `SELECT COUNT(*) FROM contact_entity WHERE user_id = $1`, otherUserID, 1)
 	assertCleanupRowCount(t, db, `SELECT COUNT(*) FROM user_attachments WHERE user_id = $1`, otherUserID, 1)
+
+	var isDeleted, pendingSync bool
+	if err := db.QueryRow(
+		`SELECT is_deleted, pending_sync FROM user_attachments WHERE attachment_id = $1`,
+		"ua_target",
+	).Scan(&isDeleted, &pendingSync); err != nil {
+		t.Fatalf("failed to query target attachment row: %v", err)
+	}
+	if !isDeleted || !pendingSync {
+		t.Fatalf("target attachment row = {is_deleted:%v pending_sync:%v}, want both true", isDeleted, pendingSync)
+	}
 }
 
 func mustExecCleanupTest(t *testing.T, db *sql.DB, query string, args ...any) {
