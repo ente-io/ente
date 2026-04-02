@@ -124,8 +124,7 @@ pub fn analyze_image(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
             // positives (human faces detected as pets) are rejected inline,
             // before allocating PetFaceDetection structs — single pass, zero
             // extra allocations for discarded detections.
-            let pet_face_detections =
-                run_pet_face_detection(runtime, &decoded, &human_face_boxes)?;
+            let pet_face_detections = run_pet_face_detection(runtime, &decoded, &human_face_boxes)?;
 
             if !pet_face_detections.is_empty() {
                 let (aligned, mut pet_results) =
@@ -237,4 +236,3 @@ fn validate_request_model_paths(req: &AnalyzeImageRequest) -> MlResult<()> {
         missing.join(", ")
     )))
 }
-
