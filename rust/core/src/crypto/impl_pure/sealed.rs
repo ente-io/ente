@@ -17,6 +17,7 @@
 use blake2b_simd::Params as Blake2bParams;
 use rand_core::{OsRng, RngCore};
 use salsa20::hsalsa;
+use subtle::ConstantTimeEq;
 use x25519_dalek::{PublicKey, StaticSecret};
 use xsalsa20poly1305::XSalsa20Poly1305;
 use xsalsa20poly1305::aead::generic_array::GenericArray;
@@ -70,8 +71,10 @@ fn derive_box_key(shared_secret: &[u8; 32]) -> [u8; 32] {
 /// Check if shared secret is contributory (not all zeros).
 ///
 /// This prevents attacks using small-order points.
+/// Uses constant-time comparison to avoid leaking information about the
+/// shared secret through timing.
 fn is_contributory(shared_secret: &[u8; 32]) -> bool {
-    shared_secret.iter().any(|&b| b != 0)
+    shared_secret.ct_ne(&[0u8; 32]).into()
 }
 
 /// Seal (encrypt) plaintext for a recipient's public key.
@@ -114,7 +117,7 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
     }
 
     // Derive encryption key
-    let box_key = derive_box_key(shared_secret.as_bytes());
+    let mut box_key = derive_box_key(shared_secret.as_bytes());
 
     // Compute nonce
     let nonce = seal_nonce(ephemeral_public.as_bytes(), &recipient_pk_arr);
@@ -124,7 +127,10 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
     let cipher = XSalsa20Poly1305::new(GenericArray::from_slice(&box_key));
     let encrypted = cipher
         .encrypt(GenericArray::from_slice(&nonce), plaintext)
-        .map_err(|_| CryptoError::EncryptionFailed)?;
+        .map_err(|_| {
+            box_key.zeroize();
+            CryptoError::EncryptionFailed
+        })?;
 
     // Build output: ephemeral_pk || MAC || ciphertext
     let mut result = Vec::with_capacity(32 + encrypted.len());
@@ -133,6 +139,7 @@ pub fn seal(plaintext: &[u8], recipient_pk: &[u8]) -> Result<Vec<u8>> {
 
     // Clean up sensitive data
     ephemeral_secret_bytes.zeroize();
+    box_key.zeroize();
 
     Ok(result)
 }
@@ -175,10 +182,11 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
     let encrypted = &ciphertext[32..]; // MAC || ciphertext
 
     let ephemeral_pk = PublicKey::from(ephemeral_pk_bytes);
-    let recipient_sk_arr: [u8; 32] = recipient_sk
+    let mut recipient_sk_arr: [u8; 32] = recipient_sk
         .try_into()
         .map_err(|_| CryptoError::ArrayConversion)?;
     let recipient_sk_key = StaticSecret::from(recipient_sk_arr);
+    recipient_sk_arr.zeroize();
     let recipient_pk_arr: [u8; 32] = recipient_pk
         .try_into()
         .map_err(|_| CryptoError::ArrayConversion)?;
@@ -192,16 +200,21 @@ pub fn open(ciphertext: &[u8], recipient_pk: &[u8], recipient_sk: &[u8]) -> Resu
     }
 
     // Derive encryption key
-    let box_key = derive_box_key(shared_secret.as_bytes());
+    let mut box_key = derive_box_key(shared_secret.as_bytes());
 
     // Compute nonce
     let nonce = seal_nonce(&ephemeral_pk_bytes, &recipient_pk_arr);
 
     // Decrypt (RustCrypto expects same format: MAC || ciphertext)
     let cipher = XSalsa20Poly1305::new(GenericArray::from_slice(&box_key));
-    cipher
+    let plaintext = cipher
         .decrypt(GenericArray::from_slice(&nonce), encrypted)
-        .map_err(|_| CryptoError::DecryptionFailed)
+        .map_err(|_| {
+            box_key.zeroize();
+            CryptoError::DecryptionFailed
+        })?;
+    box_key.zeroize();
+    Ok(plaintext)
 }
 
 #[cfg(test)]
@@ -372,6 +385,40 @@ mod tests {
         let opened = open(&sealed, &pk, &sk).unwrap();
 
         assert_eq!(opened, plaintext);
+    }
+
+    #[test]
+    fn test_seal_rejects_small_order_point() {
+        // The all-zero public key is a small-order point. X25519 DH with it
+        // produces an all-zero shared secret, which is_contributory must reject.
+        let zero_pk = [0u8; 32];
+        let result = seal(b"test", &zero_pk);
+        assert!(
+            matches!(result, Err(CryptoError::InvalidPublicKey)),
+            "seal() should reject small-order public key, got: {:?}",
+            result
+        );
+    }
+
+    #[test]
+    fn test_open_rejects_small_order_ephemeral_key() {
+        let (pk, sk) = keys::generate_keypair().unwrap();
+
+        // Craft a ciphertext with an all-zero ephemeral public key (32 zero
+        // bytes) followed by enough garbage to pass the length check.
+        let mut fake_ciphertext = vec![0u8; SEAL_OVERHEAD + 16];
+        // Fill the MAC + ciphertext portion with non-zero data so we know
+        // the rejection is from is_contributory, not from decryption.
+        for b in &mut fake_ciphertext[32..] {
+            *b = 0xFF;
+        }
+
+        let result = open(&fake_ciphertext, &pk, &sk);
+        assert!(
+            matches!(result, Err(CryptoError::InvalidPublicKey)),
+            "open() should reject small-order ephemeral key, got: {:?}",
+            result
+        );
     }
 
     #[test]

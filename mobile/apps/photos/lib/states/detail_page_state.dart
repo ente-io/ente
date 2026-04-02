@@ -32,6 +32,10 @@ class InheritedDetailPageState extends InheritedWidget {
   /// Holds the stable identifier of the file currently showing thumbnail
   /// fallback. Only the file with matching ID should display the indicator.
   final ValueNotifier<String?> showingThumbnailFallbackNotifier;
+
+  /// Whether the photo viewer is currently zoomed in.
+  final ValueNotifier<bool> isZoomedNotifier;
+
   // Cannot be const because we accept a ValueNotifier instance at runtime
   // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({
@@ -40,6 +44,7 @@ class InheritedDetailPageState extends InheritedWidget {
     required this.enableFullScreenNotifier,
     required this.isInSharedCollectionNotifier,
     required this.showingThumbnailFallbackNotifier,
+    required this.isZoomedNotifier,
   });
 
   static InheritedDetailPageState of(BuildContext context) =>
@@ -90,5 +95,6 @@ class InheritedDetailPageState extends InheritedWidget {
       oldWidget.enableFullScreenNotifier != enableFullScreenNotifier ||
       oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier ||
       oldWidget.showingThumbnailFallbackNotifier !=
-          showingThumbnailFallbackNotifier;
+          showingThumbnailFallbackNotifier ||
+      oldWidget.isZoomedNotifier != isZoomedNotifier;
 }

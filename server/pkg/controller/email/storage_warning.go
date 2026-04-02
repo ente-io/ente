@@ -28,7 +28,8 @@ const (
 	storageWarningOverageThreshold             = 25 * (1 << 30)
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
 	storageWarningOneDayInMicroseconds         = 24 * time.MicroSecondsInOneHour
-	storageWarningRolloutPercentage            = 0
+	storageWarningBufferedCadenceExtraGrace    = 2 * storageWarningOneDayInMicroseconds
+	storageWarningRolloutPercentage            = 5
 	storageWarningRolloutNonce                 = "storage-warning-v1"
 
 	storageWarningActiveOverageNotificationGroup = "storage_warning_active_overage"
@@ -59,6 +60,7 @@ type storageWarningSnapshot struct {
 	Bucket               storageWarningBucket
 	ActiveOverageStage   activeOverageWarningStage
 	ExpiredStage         expiredWarningStage
+	ExpiredBufferedCycle bool
 	AutoDeleteDate       int64
 	IsFamilyPlan         bool
 	WarningCycleStart    int64
@@ -143,26 +145,43 @@ func hasAnyStorageWarningStageCount(counts map[string]int) bool {
 	return false
 }
 
-func formatStorageWarningStageCounts(counts map[string]int) string {
+func formatStorageWarningNonZeroStageCounts(counts map[string]int) string {
 	parts := make([]string, 0, len(storageWarningStageOrder))
 	for _, stage := range storageWarningStageOrder {
+		if counts[stage] <= 0 {
+			continue
+		}
 		parts = append(parts, fmt.Sprintf("%s=%d", stage, counts[stage]))
 	}
 	return strings.Join(parts, ", ")
 }
 
 func buildStorageWarningRunSummary(stats storageWarningRunStats, runAt int64) string {
+	parts := []string{
+		fmt.Sprintf("processed=%d", stats.ProcessedUsers),
+		fmt.Sprintf("sent=%d", stats.SentEmails),
+	}
+	if hasAnyStorageWarningStageCount(stats.SuccessByStage) {
+		parts = append(parts, fmt.Sprintf("success={%s}", formatStorageWarningNonZeroStageCounts(stats.SuccessByStage)))
+	}
+	if hasAnyStorageWarningStageCount(stats.FailureByStage) {
+		parts = append(parts, fmt.Sprintf("failures={%s}", formatStorageWarningNonZeroStageCounts(stats.FailureByStage)))
+	}
+	if hasAnyStorageWarningStageCount(stats.SkippedRolloutByStage) {
+		parts = append(parts, fmt.Sprintf("skipped_rollout={%s}", formatStorageWarningNonZeroStageCounts(stats.SkippedRolloutByStage)))
+	}
+	if stats.PreStageFailures > 0 {
+		parts = append(parts, fmt.Sprintf("pre_stage_failures=%d", stats.PreStageFailures))
+	}
+	if stats.SkippedRolloutPct > 0 {
+		parts = append(parts, fmt.Sprintf("skipped_rollout_percentage=%d", stats.SkippedRolloutPct))
+	}
+	parts = append(parts, fmt.Sprintf("rollout_percentage=%d", storageWarningRolloutPercentage))
+
 	return fmt.Sprintf(
-		"Storage warning run summary (%s): processed=%d sent=%d | success={%s} | failures={%s} | skipped_rollout={%s} | pre_stage_failures=%d | skipped_rollout_percentage=%d | rollout_percentage=%d",
+		"Storage warning run summary (%s): %s",
 		stdtime.UnixMicro(runAt).UTC().Format(stdtime.RFC3339),
-		stats.ProcessedUsers,
-		stats.SentEmails,
-		formatStorageWarningStageCounts(stats.SuccessByStage),
-		formatStorageWarningStageCounts(stats.FailureByStage),
-		formatStorageWarningStageCounts(stats.SkippedRolloutByStage),
-		stats.PreStageFailures,
-		stats.SkippedRolloutPct,
-		storageWarningRolloutPercentage,
+		strings.Join(parts, " | "),
 	)
 }
 
@@ -414,13 +433,15 @@ func (c *EmailNotificationController) decorateStorageWarningSnapshot(snapshot st
 			return storageWarningSnapshot{}, err
 		}
 		snapshot.NotificationHistory = history
-		snapshot.WarningCycleStart = snapshot.ExpiredWarningAnchor
-		snapshot.ExpiredStage = resolveExpiredWarningStage(snapshot.ExpiredWarningAnchor, now, history)
+		expiredResolution := resolveExpiredWarning(snapshot.ExpiredWarningAnchor, now, history)
+		snapshot.WarningCycleStart = expiredResolution.CycleStart
+		snapshot.ExpiredStage = expiredResolution.Stage
+		snapshot.ExpiredBufferedCycle = expiredResolution.BufferedCycle
+		snapshot.AutoDeleteDate = expiredResolution.AutoDeleteDate
 		if snapshot.ExpiredStage == expiredWarningStageNone {
 			snapshot.Bucket = storageWarningBucketNone
 			return snapshot, nil
 		}
-		snapshot.AutoDeleteDate = expiredWarningAutoDeleteDate(snapshot.ExpiredWarningAnchor, snapshot.ExpiredStage, now)
 	case storageWarningBucketActiveOverage:
 		history, err := c.NotificationHistoryRepo.GetLastNotificationTimes(snapshot.RecipientID, activeOverageWarningTemplateIDs())
 		if err != nil {
@@ -634,52 +655,6 @@ func formatTimestamp(microseconds int64) string {
 		return "missing"
 	}
 	return stdtime.UnixMicro(microseconds).UTC().Format(stdtime.RFC3339)
-}
-
-func storageWarningCadenceBroken(snapshot storageWarningSnapshot) (bool, string) {
-	previousTemplateID, previousStageKey, ok := storageWarningPreviousStage(snapshot)
-	if !ok {
-		return false, ""
-	}
-
-	previousSentAt := snapshot.NotificationHistory[previousTemplateID]
-	if !storageWarningTemplateSentInCycle(snapshot.NotificationHistory, previousTemplateID, snapshot.WarningCycleStart) ||
-		previousSentAt < snapshot.EvaluatedAt-storageWarningPreviousStageFreshnessWindow {
-		return true, buildStorageWarningCadenceAlert(snapshot, previousStageKey, previousSentAt)
-	}
-
-	return false, ""
-}
-
-func storageWarningPreviousStage(snapshot storageWarningSnapshot) (templateID string, stageKey string, ok bool) {
-	switch snapshot.Bucket {
-	case storageWarningBucketExpired:
-		switch snapshot.ExpiredStage {
-		case expiredWarningStage30:
-			return storageWarningExpired0TemplateID, string(expiredWarningStage0), true
-		case expiredWarningStage60:
-			return storageWarningExpired30TemplateID, string(expiredWarningStage30), true
-		case expiredWarningStage90:
-			return storageWarningExpired60TemplateID, string(expiredWarningStage60), true
-		case expiredWarningStage119:
-			return storageWarningExpired90TemplateID, string(expiredWarningStage90), true
-		case expiredWarningStageScheduledDeletion:
-			return storageWarningExpired119TemplateID, string(expiredWarningStage119), true
-		}
-	case storageWarningBucketActiveOverage:
-		switch snapshot.ActiveOverageStage {
-		case activeOverageWarningStage30:
-			return StorageWarningActiveOverageAnchorTemplateID, string(activeOverageWarningStage0), true
-		case activeOverageWarningStage60:
-			return storageWarningActiveOverage30TemplateID, string(activeOverageWarningStage30), true
-		case activeOverageWarningStage89:
-			return storageWarningActiveOverage60TemplateID, string(activeOverageWarningStage60), true
-		case activeOverageWarningStageScheduledDeletion:
-			return storageWarningActiveOverage89TemplateID, string(activeOverageWarningStage89), true
-		}
-	}
-
-	return "", "", false
 }
 
 func buildStorageWarningCadenceAlert(snapshot storageWarningSnapshot, previousStageKey string, previousSentAt int64) string {

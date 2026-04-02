@@ -307,7 +307,7 @@ Follow https://ente.com/help/self-hosting/installation/post-install and enjoy th
 
     - For non-Windows setups, find the recommended service manager for your OS (e.g. `systemd`), and configure it to use the following startup command: `cd /path/to/ente && docker stack deploy -c docker-compose.yaml ente`
 
-2. To expose ente on your local network or custom domain, update the three endpoints in `museum.yamls` and two ORIGIN values in `docker-compose.yaml` (if you want web support).
+2. To expose ente on your local network or custom domain, update the relevant app endpoints in `museum.yaml` and the three ORIGIN values in `docker-compose.yaml` (if you want web support).
     - For custom domains, I use a Cloudflare tunnel. Cloudflare client comes with a reverse proxy.
     - If you don't want to use a custom domain, but still want your ente service exposed publicly, Tailscale is a good choice. However, their "funnel" only routes to a single port, so you will need to set up your own reverse proxy. Caddy and Nginx are both great options which can be deployed as part of your existing `docker-compose.yaml`.
     - If you just want to connect through a VPN, Tailscale is the ideal choice, no reverse proxy necessary.

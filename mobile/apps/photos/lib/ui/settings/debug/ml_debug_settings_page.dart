@@ -203,6 +203,18 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
             onChanged: _onPetRecognitionChanged,
           ),
         ),
+        if (flagService.internalUser && flagService.usearchForSearch)
+          MenuItemWidgetNew(
+            title: "Exact semantic search (SimSIMD)",
+            leadingIconWidget: _buildIconWidget(
+              context,
+              HugeIcons.strokeRoundedAiSearch,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () => localSettings.semanticSearchExactInRustEnabled,
+              onChanged: _onSemanticSearchExactChanged,
+            ),
+          ),
       ],
     );
   }
@@ -740,6 +752,25 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       }
     } catch (e, s) {
       logger.warning('Pet recognition toggle failed ', e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
+  Future<void> _onSemanticSearchExactChanged() async {
+    try {
+      final enabled = !localSettings.semanticSearchExactInRustEnabled;
+      await localSettings.setSemanticSearchExactInRustEnabled(enabled);
+      await SemanticSearchService.instance.prepareForInteractiveSearch();
+      logger.info(
+        'exact semantic search in rust is turned ${enabled ? 'on' : 'off'}',
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      logger.warning('exact semantic search toggle failed ', e, s);
       if (mounted) {
         await showGenericErrorDialog(context: context, error: e);
       }

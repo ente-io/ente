@@ -1,8 +1,14 @@
 # CHANGELOG
 
-## v1.7.22 (unreleased)
+## v1.7.23 (unreleased)
 
 -
+
+## v1.7.22
+
+- App lock
+- Better people list experience (bigger view with search)
+- Various bug fixes (map view tiles, etc)
 
 ## v1.7.21
 

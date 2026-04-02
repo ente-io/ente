@@ -175,6 +175,7 @@ final class EnsuAuthService {
 
             let secrets = try await Task.detached(priority: .userInitiated) {
                 try srpDecryptSecrets(
+                    srpM2: authResponse.srpM2 ?? "",
                     keyAttrs: keyAttrs,
                     encryptedToken: authResponse.encryptedToken,
                     plainToken: authResponse.token

@@ -315,7 +315,6 @@
     }
   },
   "sorry": "Oprostite",
-  "importFailureDesc": "Izbrane datoteke ni bilo možno prebrati. Če potrebujete pomoč, nam pišite na support@ente.com",
   "pendingSyncs": "Opozorilo",
   "pendingSyncsWarningBody": "Nekatere vaše kode niso varnostno kopirane.\n\nProsimo, prepričajte se, da so te kode varnostno kopirane preden se odjavite.",
   "checkInboxAndSpamFolder": "Prosimo, preverite svoj e-poštni predal (in nezaželeno pošto), da končate verifikacijo",

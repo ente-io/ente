@@ -1,5 +1,6 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use ente_core::crypto::SecretVec;
 use ente_rs::{
     api::ApiClient,
     auth_flow::{
@@ -11,6 +12,7 @@ use ente_rs::{
 use hmac::{Hmac, Mac};
 use sha1::Sha1;
 use uuid::Uuid;
+use zeroize::Zeroizing;
 
 type HmacSha1 = Hmac<Sha1>;
 
@@ -105,7 +107,7 @@ async fn live_create_login_and_enable_totp() {
         let mut flow = AuthFlow::new(&create_api, App::Photos, &mut ui);
         flow.create_account(CreateAccountParams {
             email: email.clone(),
-            password: password.clone(),
+            password: Zeroizing::new(password.clone()),
             source: Some("testAccount".into()),
         })
         .await
@@ -126,7 +128,7 @@ async fn live_create_login_and_enable_totp() {
         let mut flow = AuthFlow::new(&login_api, App::Photos, &mut ui);
         flow.login(LoginParams {
             email: email.clone(),
-            password: password.clone(),
+            password: Zeroizing::new(password.clone()),
         })
         .await
     })
@@ -141,7 +143,7 @@ async fn live_create_login_and_enable_totp() {
         let mut flow = AuthFlow::new(&create_api, App::Photos, &mut ui);
         flow.setup_two_factor(SetupTwoFactorParams {
             account_id: email.clone(),
-            master_key: created_master_key.clone(),
+            master_key: SecretVec::new(created_master_key.clone()),
             key_attributes: Some(created_key_attributes),
         })
         .await
@@ -162,7 +164,7 @@ async fn live_create_login_and_enable_totp() {
         let mut flow = AuthFlow::new(&login_after_2fa_api, App::Photos, &mut ui);
         flow.login(LoginParams {
             email: email.clone(),
-            password: password.clone(),
+            password: Zeroizing::new(password.clone()),
         })
         .await
     })

@@ -406,6 +406,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
             buttonType: ButtonTypeV2.neutral,
             labelText: l10n.sendInvite,
             leadingWidget: const Icon(Icons.ios_share_outlined),
+            shouldSurfaceExecutionStates: false,
             onTap: () async {
               await shareText(l10n.shareTextRecommendUsingEnteForFamily);
               if (mounted) {

@@ -10,6 +10,7 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use uuid::Uuid;
 
 use ente_core::auth::{SrpAttributes as CoreSrpAttributes, SrpSession};
+use ente_core::crypto::SecretVec;
 
 const SRP_A_LEN: usize = 512; // 4096-bit group
 
@@ -21,6 +22,16 @@ fn pad_left(data: &[u8], len: usize) -> Vec<u8> {
     let mut padded = vec![0u8; len - data.len()];
     padded.extend_from_slice(data);
     padded
+}
+
+fn require_srp_m2(auth_response: &AuthResponse) -> Result<&str> {
+    auth_response
+        .srp_m2
+        .as_deref()
+        .filter(|srp_m2| !srp_m2.is_empty())
+        .ok_or_else(|| {
+            crate::models::error::Error::AuthenticationFailed("Missing server proof".to_string())
+        })
 }
 
 /// SRP authentication implementation for Ente API
@@ -84,7 +95,7 @@ impl<'a> AuthClient<'a> {
         &self,
         email: &str,
         password: &str,
-    ) -> Result<(AuthResponse, Vec<u8>)> {
+    ) -> Result<(AuthResponse, SecretVec)> {
         // Step 1: Get SRP attributes
         let srp_attrs = self.get_srp_attributes(email).await?;
 
@@ -124,14 +135,13 @@ impl<'a> AuthClient<'a> {
             .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, &proof)
             .await?;
 
-        if let Some(srp_m2) = &auth_response.srp_m2 {
-            let server_proof = STANDARD.decode(srp_m2)?;
-            srp_session.verify_m2(&server_proof).map_err(|_| {
-                crate::models::error::Error::AuthenticationFailed(
-                    "Server proof verification failed".to_string(),
-                )
-            })?;
-        }
+        let srp_m2 = require_srp_m2(&auth_response)?;
+        let server_proof = STANDARD.decode(srp_m2)?;
+        srp_session.verify_m2(&server_proof).map_err(|_| {
+            crate::models::error::Error::AuthenticationFailed(
+                "Server proof verification failed".to_string(),
+            )
+        })?;
 
         Ok((auth_response, creds.kek))
     }
@@ -272,5 +282,37 @@ mod tests {
         assert_eq!(creds.kek.len(), 32);
         assert_eq!(creds.login_key.len(), 16);
         assert!(!session.public_a().is_empty());
+    }
+
+    fn sample_auth_response(srp_m2: Option<&str>) -> AuthResponse {
+        AuthResponse {
+            id: 1,
+            key_attributes: None,
+            encrypted_token: None,
+            token: None,
+            two_factor_session_id: None,
+            two_factor_session_id_v2: None,
+            passkey_session_id: None,
+            srp_m2: srp_m2.map(str::to_string),
+            accounts_url: None,
+        }
+    }
+
+    #[test]
+    fn test_require_srp_m2_rejects_missing_server_proof() {
+        let err = require_srp_m2(&sample_auth_response(None)).unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "Authentication failed: Missing server proof"
+        );
+    }
+
+    #[test]
+    fn test_require_srp_m2_rejects_empty_server_proof() {
+        let err = require_srp_m2(&sample_auth_response(Some(""))).unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "Authentication failed: Missing server proof"
+        );
     }
 }

@@ -137,6 +137,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     ),
                   );
                 }
+                final faceSectionIndex = searchTypes.indexOf(SectionType.face);
+                final hasSurfacedOfflineFaces = isOfflineMode &&
+                    faceSectionIndex >= 0 &&
+                    faceSectionIndex < snapshot.data!.length &&
+                    snapshot.data!.elementAt(faceSectionIndex).isNotEmpty;
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
@@ -144,6 +149,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       if (!isOfflineMode) return const SizedBox.shrink();
+                      if (hasSurfacedOfflineFaces) {
+                        return const SizedBox.shrink();
+                      }
                       return const MLProgressBanner();
                     }
                     final sectionIndex = index - 1;

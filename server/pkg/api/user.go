@@ -74,6 +74,18 @@ func (h *UserHandler) GetDetailsV2(c *gin.Context) {
 	c.JSON(http.StatusOK, details)
 }
 
+// GetLockerUsage returns locker usage details for the requesting user.
+func (h *UserHandler) GetLockerUsage(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+
+	lockerUsage, err := h.UserController.GetLockerUsage(c, userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, lockerUsage)
+}
+
 // SetAttributes sets the attributes for a user
 func (h *UserHandler) SetAttributes(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
