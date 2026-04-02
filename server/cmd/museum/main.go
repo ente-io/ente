@@ -29,6 +29,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller/cast"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
+	contactCtrl "github.com/ente-io/museum/pkg/controller/contact"
 
 	cache2 "github.com/ente-io/museum/ente/cache"
 	"github.com/ente-io/museum/pkg/controller/discord"
@@ -57,6 +58,7 @@ import (
 	"github.com/ente-io/museum/pkg/repo"
 	authenticatorRepo "github.com/ente-io/museum/pkg/repo/authenticator"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
+	contactRepo "github.com/ente-io/museum/pkg/repo/contact"
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
 	discountCouponRepo "github.com/ente-io/museum/pkg/repo/discountcoupon"
 	"github.com/ente-io/museum/pkg/repo/embedding"
@@ -176,6 +178,7 @@ func main() {
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
+	contactRepository := &contactRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
 	objectCopiesRepo := &repo.ObjectCopiesRepository{DB: db}
 	usageRepo := &repo.UsageRepository{DB: db, UserRepo: userRepo}
 	fileRepo := &repo.FileRepository{DB: db, S3Config: s3Config, QueueRepo: queueRepo,
@@ -935,6 +938,19 @@ func main() {
 	privateAPI.PUT("/user-entity/entity", userEntityHandler.UpdateEntity)
 	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
 	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
+
+	contactController := contactCtrl.New(contactRepository, objectCleanupController, s3Config)
+	contactHandler := &api.ContactHandler{Controller: contactController}
+
+	privateAPI.POST("/contacts", contactHandler.Create)
+	privateAPI.GET("/contacts/:id", contactHandler.Get)
+	privateAPI.GET("/contacts/diff", contactHandler.GetDiff)
+	privateAPI.PUT("/contacts/:id", contactHandler.Update)
+	privateAPI.DELETE("/contacts/:id", contactHandler.Delete)
+	privateAPI.POST("/contacts/:id/profile-picture/upload-url", contactHandler.GetProfilePictureUploadURL)
+	privateAPI.PUT("/contacts/:id/profile-picture", contactHandler.AttachProfilePicture)
+	privateAPI.GET("/contacts/:id/profile-picture", contactHandler.GetProfilePicture)
+	privateAPI.DELETE("/contacts/:id/profile-picture", contactHandler.DeleteProfilePicture)
 
 	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
