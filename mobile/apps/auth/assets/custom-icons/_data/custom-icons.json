@@ -1804,7 +1804,10 @@
       "hex": "000000"
     },
     {
-      "title": "Samsung"
+      "title": "Samsung",
+      "altNames": [
+        "Samsung Account"
+      ]
     },
     {
       "title": "SBI",
