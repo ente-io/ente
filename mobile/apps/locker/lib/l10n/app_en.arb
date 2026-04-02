@@ -32,16 +32,6 @@
   "saveOffline": "Save offline",
   "unsave": "Unsave",
   "savingOffline": "Saving offline...",
-  "savingOfflineProgress": "Saving offline... {percentage}%",
-  "@savingOfflineProgress": {
-    "description": "Offline save progress message",
-    "placeholders": {
-      "percentage": {
-        "type": "int",
-        "example": "75"
-      }
-    }
-  },
   "filesAvailableOffline": "{count, plural, =1{1 file saved offline} other{{count} files saved offline}}",
   "@filesAvailableOffline": {
     "description": "Success message when files are saved offline",
@@ -69,26 +59,6 @@
   "failedToSaveFilesOffline": "{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}",
   "@failedToSaveFilesOffline": {
     "description": "Failure message when files could not be saved offline",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
-  "failedToSaveFilesOfflineNetwork": "{count, plural, =1{No internet connection. Failed to save 1 file offline} other{No internet connection. Failed to save {count} files offline}}",
-  "@failedToSaveFilesOfflineNetwork": {
-    "description": "Failure message when files could not be saved offline because the device was offline",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
-  "failedToSaveFilesOfflineStorage": "{count, plural, =1{Failed to save 1 file offline. Check device storage} other{Failed to save {count} files offline. Check device storage}}",
-  "@failedToSaveFilesOfflineStorage": {
-    "description": "Failure message when files could not be saved offline because local storage failed",
     "placeholders": {
       "count": {
         "type": "int",
