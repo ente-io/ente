@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Sécurisez vos codes A2F",
+  "onBoardingBody": "Sécurisez vos codes 2FA-Double authentification",
   "featureBackupCodes": "Synchronisation et sauvegarde cryptés de bout-en-bout",
   "featureSearchEtc": "Recherche, Tags, Partage,\nCode suivant et bien plus encore",
   "featureOpenSource": "Open source et\naudité par des experts en sécurité",

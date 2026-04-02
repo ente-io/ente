@@ -234,7 +234,7 @@ is used to derive your `keyEncryptionKey` from your password.
 used as the limits for computation and memory respectively. If the operation
 fails due to insufficient memory, the former is doubled and the latter is halved
 progressively, until a key can be derived. If during this process the memory
-limit is reduced to a value less than `crypto_pwhash_MEMLIMIT_MIN`, the client
+limit is reduced to a value less than the server-accepted floor of 128 MiB, the client
 will not let you register from that device.
 
 Internally, this uses [Argon2

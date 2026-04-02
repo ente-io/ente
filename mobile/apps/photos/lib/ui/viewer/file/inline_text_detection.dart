@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:io";
-import "dart:math" as math;
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -39,7 +38,9 @@ class InlineTextDetection extends StatefulWidget {
 }
 
 class _InlineTextDetectionState extends State<InlineTextDetection> {
+  static const int _maxCacheSize = 200;
   static final Map<String, _HasTextResult> _hasTextCache = {};
+  static final ValueNotifier<bool> _defaultZoomNotifier = ValueNotifier(false);
   final Logger _logger = Logger("InlineTextDetection");
   final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
@@ -92,6 +93,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return "generated_${file.generatedID}";
   }
 
+  static void _cacheResult(String key, _HasTextResult result) {
+    if (_hasTextCache.length >= _maxCacheSize) {
+      _hasTextCache.remove(_hasTextCache.keys.first);
+    }
+    _hasTextCache[key] = result;
+  }
+
   bool _isFileEligible(EnteFile file) {
     return file.fileType == FileType.image ||
         file.fileType == FileType.livePhoto;
@@ -134,7 +142,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       final File? localFile = await getFile(widget.file);
       if (!mounted || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
+        _cacheResult(cacheKey, const _HasTextResult(hasText: false));
         return;
       }
 
@@ -163,7 +171,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         hasText: hasText,
         localPath: hasText ? localFile.path : null,
       );
-      _hasTextCache[cacheKey] = result;
+      _cacheResult(cacheKey, result);
 
       setState(() {
         _localFilePath = result.localPath;
@@ -173,7 +181,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
-      _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
+      _cacheResult(cacheKey, const _HasTextResult(hasText: false));
     }
   }
 
@@ -199,7 +207,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isEligible || widget.file is TrashFile) {
+    if (!_isEligible || widget.file is TrashFile || widget.isGuestView) {
       return const SizedBox.shrink();
     }
 
@@ -209,9 +217,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     // During the wait period (hasText passed but 1s timer hasn't fired),
     // show a transparent gesture layer to capture long press.
     if (!_overlayActive || _localFilePath == null) {
-      if (!_isEligible || widget.isGuestView) {
-        return const SizedBox.shrink();
-      }
       return Positioned.fill(
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -222,9 +227,9 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
 
     return ValueListenableBuilder<bool>(
-      valueListenable: isZoomedNotifier ?? ValueNotifier(false),
+      valueListenable: isZoomedNotifier ?? _defaultZoomNotifier,
       builder: (context, isZoomed, _) {
-        final bool shouldHide = widget.isGuestView || isZoomed;
+        final bool shouldHide = isZoomed;
 
         return Positioned.fill(
           child: IgnorePointer(
@@ -242,62 +247,61 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   Widget _buildInlineOverlay(BuildContext context) {
     final l10n = context.l10n;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Block touches during processing so the package's internal
-        // long-press handler cannot trigger its green scan animation.
-        ListenableBuilder(
-          listenable: _detectorController,
-          builder: (context, child) {
-            final bool isProcessing = _detectorController.isProcessing &&
+    return ListenableBuilder(
+      listenable: _detectorController,
+      builder: (context, child) {
+        final bool isProcessing =
+            _detectorController.userAttemptedInteraction &&
+                _detectorController.isProcessing &&
                 !_detectorController.hasSelectableText;
-            return AbsorbPointer(
-              absorbing: isProcessing,
-              child: child,
-            );
-          },
-          child: TextDetectorWidget(
-            key: ValueKey("ocr_$_localFilePath"),
-            imagePath: _localFilePath!,
-            autoDetect: true,
-            backgroundColor: Colors.transparent,
-            showUnselectedBoundaries: true,
-            overlayOnly: true,
-            showProcessingOverlay: false,
-            showEditorHint: false,
-            controller: _detectorController,
-            strings: TextDetectorStrings(
-              processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
-              selectionHint: l10n.ocrSelectionHint,
-              noTextDetected: l10n.ocrNoTextDetected,
-              retryButtonLabel: l10n.ocrRetryButtonLabel,
-              modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
-              modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
-              imageNotFoundError: l10n.ocrImageNotFoundError,
-              imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
-              genericDetectError: l10n.ocrGenericDetectError,
-            ),
-            onTextCopied: (text) {
-              HapticFeedback.lightImpact();
-            },
-          ),
-        ),
-        ListenableBuilder(
-          listenable: _detectorController,
-          builder: (context, _) {
-            if (_detectorController.isProcessing &&
-                !_detectorController.hasSelectableText) {
-              return IgnorePointer(
-                child: _RippleDotAnimation(
-                  origin: _pendingLongPressPosition,
+        return IgnorePointer(
+          ignoring: isProcessing,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              child!,
+              if (isProcessing)
+                IgnorePointer(
+                  child: Center(
+                    child: widget.file.hasDimensions
+                        ? AspectRatio(
+                            aspectRatio: widget.file.width / widget.file.height,
+                            child: const _WhiteDotWaveOverlay(),
+                          )
+                        : const _WhiteDotWaveOverlay(),
+                  ),
                 ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
+            ],
+          ),
+        );
+      },
+      child: TextDetectorWidget(
+        key: ValueKey("ocr_$_localFilePath"),
+        imagePath: _localFilePath!,
+        autoDetect: true,
+        backgroundColor: Colors.transparent,
+        showUnselectedBoundaries: false,
+        overlayOnly: true,
+        showProcessingOverlay: false,
+        showScanAnimation: false,
+        showEditorHint: false,
+        initialInteractionPosition: _pendingLongPressPosition,
+        controller: _detectorController,
+        strings: TextDetectorStrings(
+          processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
+          selectionHint: l10n.ocrSelectionHint,
+          noTextDetected: l10n.ocrNoTextDetected,
+          retryButtonLabel: l10n.ocrRetryButtonLabel,
+          modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
+          modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
+          imageNotFoundError: l10n.ocrImageNotFoundError,
+          imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
+          genericDetectError: l10n.ocrGenericDetectError,
         ),
-      ],
+        onTextCopied: (text) {
+          HapticFeedback.lightImpact();
+        },
+      ),
     );
   }
 }
@@ -309,18 +313,15 @@ class _HasTextResult {
   const _HasTextResult({required this.hasText, this.localPath});
 }
 
-/// Ripple-dot animation that radiates outward from the touch point.
-/// Dots pulse in a wave pattern, fading as the ripple expands.
-class _RippleDotAnimation extends StatefulWidget {
-  final Offset? origin;
-
-  const _RippleDotAnimation({this.origin});
+/// White dot grid that pulses in a radial wave from center outward.
+class _WhiteDotWaveOverlay extends StatefulWidget {
+  const _WhiteDotWaveOverlay();
 
   @override
-  State<_RippleDotAnimation> createState() => _RippleDotAnimationState();
+  State<_WhiteDotWaveOverlay> createState() => _WhiteDotWaveOverlayState();
 }
 
-class _RippleDotAnimationState extends State<_RippleDotAnimation>
+class _WhiteDotWaveOverlayState extends State<_WhiteDotWaveOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -329,7 +330,7 @@ class _RippleDotAnimationState extends State<_RippleDotAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2400),
+      duration: const Duration(milliseconds: 2500),
     )..repeat();
   }
 
@@ -344,18 +345,8 @@ class _RippleDotAnimationState extends State<_RippleDotAnimation>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        Offset? localOrigin;
-        if (widget.origin != null) {
-          final RenderBox? box = context.findRenderObject() as RenderBox?;
-          if (box != null && box.hasSize) {
-            localOrigin = box.globalToLocal(widget.origin!);
-          }
-        }
         return CustomPaint(
-          painter: _RippleDotPainter(
-            progress: _controller.value,
-            origin: localOrigin,
-          ),
+          painter: _WhiteDotWavePainter(progress: _controller.value),
           size: Size.infinite,
         );
       },
@@ -363,63 +354,60 @@ class _RippleDotAnimationState extends State<_RippleDotAnimation>
   }
 }
 
-class _RippleDotPainter extends CustomPainter {
-  static const int _cols = 24;
-  static const int _rows = 16;
-
-  /// Max stagger delay: 1.8s / 2.4s = 0.75
-  static const double _maxDelayRatio = 0.75;
+class _WhiteDotWavePainter extends CustomPainter {
+  static const double _spacing = 16.0;
+  static const double _maxDelay = 0.85;
 
   final double progress;
-  final Offset? origin;
 
-  _RippleDotPainter({required this.progress, this.origin});
+  _WhiteDotWavePainter({required this.progress});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double cy = origin?.dy ?? size.height / 2;
-    final double maxDist =
-        math.max(cy, size.height - cy).clamp(1.0, double.infinity);
+    final double cx = size.width / 2;
+    final double cy = size.height / 2;
+    final double maxDist = Offset(cx, cy).distance;
 
-    for (int r = 0; r < _rows; r++) {
-      for (int c = 0; c < _cols; c++) {
-        final double x = ((c + 0.5) / _cols) * size.width;
-        final double y = ((r + 0.5) / _rows) * size.height;
+    final int cols = (size.width / _spacing).floor();
+    final int rows = (size.height / _spacing).floor();
+    final double offsetX = (size.width - (cols - 1) * _spacing) / 2;
+    final double offsetY = (size.height - (rows - 1) * _spacing) / 2;
 
-        // Vertical distance from origin row — all dots in the same
-        // row pulse together, creating a top-to-bottom wave.
-        final double dist = (y - cy).abs();
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        final double x = offsetX + c * _spacing;
+        final double y = offsetY + r * _spacing;
 
-        final double delay = (dist / maxDist) * _maxDelayRatio;
+        final double dist = (Offset(x, y) - Offset(cx, cy)).distance;
+        final double delay = (dist / maxDist) * _maxDelay;
 
-        double t = (progress - delay) % 1.0;
-        if (t < 0) t += 1.0;
+        double phase = (progress - delay) % 1.0;
+        if (phase < 0) phase += 1.0;
 
-        // Cubic ease-in-out
-        final double eased =
-            t < 0.5 ? 4 * t * t * t : 1 - math.pow(-2 * t + 2, 3) / 2;
+        // Ping-pong with ease-in-out in each half
+        double t;
+        if (phase < 0.5) {
+          t = _easeInOut(phase * 2);
+        } else {
+          t = _easeInOut((1.0 - phase) * 2);
+        }
 
-        // Ping-pong: full → 25% → full
-        final double pingPong = eased < 0.5 ? eased * 2 : 2 - eased * 2;
+        if (t < 0.01) continue;
 
-        final double opacity = 1.0 - pingPong * 0.75;
-        final double radius = 2.0 - pingPong * 1.0;
+        final double radius = 3.0 * t;
+        final double opacity = 0.5 * t;
 
         final paint = Paint()..color = Color.fromRGBO(255, 255, 255, opacity);
         canvas.drawCircle(Offset(x, y), radius, paint);
-
-        // Subtle white glow
-        if (opacity > 0.4) {
-          final glowPaint = Paint()
-            ..color = Color.fromRGBO(255, 255, 255, opacity * 0.15)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-          canvas.drawCircle(Offset(x, y), radius + 2, glowPaint);
-        }
       }
     }
   }
 
+  static double _easeInOut(double t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  }
+
   @override
-  bool shouldRepaint(_RippleDotPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.origin != origin;
+  bool shouldRepaint(_WhiteDotWavePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

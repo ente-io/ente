@@ -1119,7 +1119,17 @@
   "unarchive": "Unarchive",
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorites",
+  "shareMemories": "Share memories",
+  "shareTheseMemories": "Share these memories",
+  "shareThisPhoto": "Share this photo",
+  "shareThisVideo": "Share this video",
   "shareLink": "Share link",
+  "memoryShareLinkDescription": "This link will automatically expire in 7 days.",
+  "deleteLink": "Delete link",
+  "deleteLinkQuestion": "Delete link?",
+  "deleteMemoryLinkMessage": "People you shared this link with will lose access once it is deleted.",
+  "linkDeletedSuccessfully": "Link deleted successfully",
+  "memoryLinks": "Memory links",
   "openLink": "Open link",
   "pay": "Pay",
   "noPaymentAppFound": "No payment app found",
@@ -1539,8 +1549,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Set radius",
-  "familyPlanPortalTitle": "Family",
-  "familyPlanOverview": "Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other's files unless they're shared.\n\nFamily plans are available to customers who have a paid Ente subscription.\n\nSubscribe now to get started!",
   "androidBiometricHint": "Verify identity",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2627,7 +2635,7 @@
   "artisticPortraits": "Artful portraits",
   "streetFood": "Street food bites",
   "riverCruises": "River cruise views",
-  "facesTimelineBannerTitle": "Memory Lane",
+  "facesTimelineBannerTitle": "Memory lane",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },

@@ -24,7 +24,8 @@ is a change in `yarn.lock` (e.g. when pulling the latest upstream).
 Launch the app in development mode. There is one `yarn dev:foo` for each app,
 e.g. `yarn dev:auth`. `yarn dev` is a shortcut for `yarn dev:photos`.
 
-The ports are different for the main apps (3000), various sidecars (3001, 3002).
+Common ports are `3000` for photos, `3002` for albums, `3003` for auth,
+`3005` for share, and `3006` for embed. See `package.json` for the full list.
 
 ### yarn build:\*
 

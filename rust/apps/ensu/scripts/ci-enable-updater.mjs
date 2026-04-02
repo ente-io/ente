@@ -5,6 +5,9 @@ const configPath =
     "rust/apps/ensu/src-tauri/tauri.conf.json";
 
 const pubkey = process.env.ENSU_TAURI_UPDATER_PUBKEY?.trim();
+const requirePubkey =
+    process.env.ENSU_TAURI_REQUIRE_UPDATER_PUBKEY === "1" ||
+    process.env.ENSU_TAURI_REQUIRE_UPDATER_PUBKEY === "true";
 const endpoint = (
     process.env.ENSU_TAURI_UPDATER_ENDPOINT ||
     "https://ente.com/release-info/ensu-desktop.json"
@@ -55,6 +58,12 @@ if (pubkey) {
     }
     console.log(`Enabled updater config in ${configPath}`);
 } else {
+    if (requirePubkey) {
+        console.error(
+            `Missing ENSU_TAURI_UPDATER_PUBKEY for ${configPath}; refusing to continue`,
+        );
+        process.exit(1);
+    }
     console.log(
         `No updater key configured for ${configPath}; leaving updater config unchanged`,
     );

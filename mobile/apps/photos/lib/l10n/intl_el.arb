@@ -27,7 +27,6 @@
   "deleteReason4": "Ο λόγος δεν συμπεριλαμβάνεται στη λίστα",
   "sendEmail": "Αποστολή email",
   "deleteRequestSLAText": "Το αίτημά σας θα εξεταστεί εντός 72 ωρών.",
-  "deleteEmailRequest": "Παρακαλούμε στείλτε ένα μήνυμα ηλ. ταχυδρομείου στο <warning>account-deletion@ente.com</warning> από την καταχωρημένη διεύθυνσή σας.",
   "entePhotosPerm": "Το Ente <i>χρειάζεται άδεια</i> για να διατηρεί τις φωτογραφίες σας",
   "ok": "OK",
   "createAccount": "Δημιουργία λογαριασμού",
@@ -219,11 +218,8 @@
   "verificationId": "Κωδικός επαλήθευσης",
   "verifyEmailID": "Επαλήθευση {email}",
   "emailNoEnteAccount": "Η διεύθυνση {email} δεν αντιστοιχεί σε λογαριασμό Ente.\n\nΣτείλτε μια πρόσκληση για να μοιραστείτε φωτογραφίες.",
-  "shareMyVerificationID": "Αυτός είναι ο κωδικός επαλήθευσής μου: {verificationID} για το ente.com.",
-  "shareTextConfirmOthersVerificationID": "Γεια σας, θα μπορούσατε να επιβεβαιώσετε ότι αυτό είναι το αναγνωριστικό επαλήθευσής σας για το ente.com: {verificationID}",
   "somethingWentWrong": "Κάτι πήγε στραβά",
   "sendInvite": "Αποστολή πρόσκλησης",
-  "shareTextRecommendUsingEnte": "Κατεβάστε το Ente ώστε να μπορούμε εύκολα να μοιραστούμε φωτογραφίες και βίντεο στην αυθεντική τους ποιότητα\n\nhttps://ente.com",
   "done": "Ολοκληρώθηκε",
   "applyCodeTitle": "Εφαρμογή κωδικού",
   "enterCodeDescription": "Εισάγετε τον κωδικό που παρέχεται από το φίλο σας για να κερδίσετε δωρεάν αποθήκευση και για τους δύο σας",
@@ -540,7 +536,6 @@
     "type": "text"
   },
   "couldNotUpdateSubscription": "Αδυναμία ενημέρωσης συνδρομής",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Παρακαλούμε επικοινωνήστε με το support@ente.com και θα χαρούμε να βοηθήσουμε!",
   "paymentFailed": "Η πληρωμή απέτυχε",
   "paymentFailedTalkToProvider": "Παρακαλούμε επικοινωνήστε με την υποστήριξη του {providerName} εάν έχετε χρεωθεί",
   "@paymentFailedTalkToProvider": {

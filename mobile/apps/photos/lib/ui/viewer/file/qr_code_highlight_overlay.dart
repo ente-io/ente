@@ -4,7 +4,6 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
-import "package:url_launcher/url_launcher.dart";
 
 class QrCodeHighlightOverlay extends StatelessWidget {
   final List<QrDetection> detections;
@@ -51,17 +50,19 @@ class QrCodeHighlightOverlay extends StatelessWidget {
             final offsetX = (screenWidth - displayWidth) / 2;
             final offsetY = (screenHeight - displayHeight) / 2;
 
-            return Stack(
-              children: [
-                for (final detection in detections)
-                  _QrTapRegion(
-                    detection: detection,
-                    offsetX: offsetX,
-                    offsetY: offsetY,
-                    displayWidth: displayWidth,
-                    displayHeight: displayHeight,
-                  ),
-              ],
+            return SizedBox.expand(
+              child: Stack(
+                children: [
+                  for (final detection in detections)
+                    _QrTapRegion(
+                      detection: detection,
+                      offsetX: offsetX,
+                      offsetY: offsetY,
+                      displayWidth: displayWidth,
+                      displayHeight: displayHeight,
+                    ),
+                ],
+              ),
             );
           },
         );
@@ -92,32 +93,11 @@ class _QrTapRegion extends StatefulWidget {
 class _QrTapRegionState extends State<_QrTapRegion> {
   Future<void> _onLongPress() async {
     await HapticFeedback.lightImpact();
-    final uri = Uri.tryParse(widget.detection.content);
-    final isUpi = uri != null && uri.scheme == "upi";
-    if (isUpi) {
-      try {
-        final launched =
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-        if (!launched && mounted) {
-          await showQrCodeContentSheet(
-            context,
-            detections: [widget.detection],
-          );
-        }
-      } catch (_) {
-        if (mounted) {
-          await showQrCodeContentSheet(
-            context,
-            detections: [widget.detection],
-          );
-        }
-      }
-    } else {
-      await showQrCodeContentSheet(
-        context,
-        detections: [widget.detection],
-      );
-    }
+    if (!mounted) return;
+    await showQrCodeContentSheet(
+      context,
+      detections: [widget.detection],
+    );
   }
 
   @override
@@ -139,8 +119,7 @@ class _QrTapRegionState extends State<_QrTapRegion> {
       width: screenW,
       height: screenH,
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {},
+        behavior: HitTestBehavior.translucent,
         onLongPress: _onLongPress,
         child: const SizedBox.expand(),
       ),
