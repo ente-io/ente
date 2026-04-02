@@ -70,8 +70,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     labelText: AppLocalizations.of(context).continueLabel,
                     icon: Icons.arrow_forward_outlined,
                     onTap: () async {
-                      await updateService.hideChangeLog();
-                      if (mounted && Navigator.of(context).canPop()) {
+                      if (Navigator.of(context).canPop()) {
                         Navigator.of(context).pop();
                       }
                     },

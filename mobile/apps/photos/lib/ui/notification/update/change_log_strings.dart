@@ -49,6 +49,17 @@ class ChangeLogStrings {
     return strings;
   }
 
+  static bool hasContentForLocale(
+    Locale locale, {
+    bool isOffline = false,
+  }) {
+    return maybeForLocale(
+          locale,
+          isOffline: isOffline,
+        ) !=
+        null;
+  }
+
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
       title1: 'Better People Suggestions',

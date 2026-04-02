@@ -53,6 +53,7 @@ import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/services/update_service.dart";
 import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -72,7 +73,6 @@ import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
-import "package:photos/ui/notification/update/change_log_strings.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/ritual_privacy.dart";
@@ -1090,20 +1090,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     _isShowingChangeLog = true;
     try {
-      final bool show = await updateService.showChangeLog();
-      if (!mounted || !show) {
+      final action = await updateService.getChangeLogAction(
+        locale: Localizations.localeOf(context),
+        isOffline: isOfflineMode,
+        isSignedIn: Configuration.instance.isLoggedIn(),
+      );
+      if (!mounted || action == ChangeLogAction.skip) {
         return;
       }
-      final bool canShow = isOfflineMode || Configuration.instance.isLoggedIn();
-      final hasContent = ChangeLogStrings.maybeForLocale(
-            Localizations.localeOf(context),
-            isOffline: isOfflineMode,
-          ) !=
-          null;
-      if (!canShow) {
-        return;
-      }
-      if (!hasContent) {
+      if (action == ChangeLogAction.consumeWithoutShowing) {
         updateService.hideChangeLog().ignore();
         return;
       }
