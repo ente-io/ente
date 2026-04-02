@@ -33,12 +33,11 @@ import {
     MobileJoinNowButton,
     PhotoContainer,
     readViewport,
-    ViewerFooterBar,
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
-const SHARE_FOOTER_ACTIONS_BREAKPOINT_PX = 960;
-const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 280;
+const MOBILE_MEDIA_HORIZONTAL_INSET_PX = 8;
+const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 220;
 const MOBILE_VIDEO_MEDIA_RESERVED_VERTICAL_SPACE_PX = 244;
 const DESKTOP_MEDIA_MAX_WIDTH_PX = 1360;
 const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 32;
@@ -58,6 +57,7 @@ interface SharedMemoryHeaderProps {
     duration: number;
     onComplete: () => void;
     isVideo: boolean;
+    titleBelowProgress?: boolean;
 }
 
 /**
@@ -72,19 +72,33 @@ function SharedMemoryHeader({
     duration,
     onComplete,
     isVideo,
+    titleBelowProgress = false,
 }: SharedMemoryHeaderProps) {
+    const progressIndicator = (
+        <ProgressIndicator
+            total={total}
+            current={current}
+            paused={paused}
+            duration={duration}
+            onComplete={onComplete}
+            isVideo={isVideo}
+            minimal
+        />
+    );
+
     return (
         <HeaderSection>
-            <MemoryTitle variant="h6">{title}</MemoryTitle>
-            <ProgressIndicator
-                total={total}
-                current={current}
-                paused={paused}
-                duration={duration}
-                onComplete={onComplete}
-                isVideo={isVideo}
-                minimal
-            />
+            {titleBelowProgress ? (
+                <>
+                    {progressIndicator}
+                    <MemoryTitle variant="h6">{title}</MemoryTitle>
+                </>
+            ) : (
+                <>
+                    <MemoryTitle variant="h6">{title}</MemoryTitle>
+                    {progressIndicator}
+                </>
+            )}
         </HeaderSection>
     );
 }
@@ -122,8 +136,6 @@ export function MemoryViewer({
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
     const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
-    const useFooterShareActions =
-        viewport.width <= SHARE_FOOTER_ACTIONS_BREAKPOINT_PX;
 
     useEffect(() => {
         setPaused(false);
@@ -323,12 +335,11 @@ export function MemoryViewer({
     const mobileFrameSize = useMemo(() => {
         const availableWidth = Math.max(
             220,
-            viewport.width - (isVideo ? 32 : 48),
+            viewport.width - (isVideo ? 32 : MOBILE_MEDIA_HORIZONTAL_INSET_PX),
         );
-        const maxWidth = Math.min(
-            isVideo ? MOBILE_VIDEO_MAX_WIDTH_PX : 326,
-            availableWidth,
-        );
+        const maxWidth = isVideo
+            ? Math.min(MOBILE_VIDEO_MAX_WIDTH_PX, availableWidth)
+            : availableWidth;
         const maxHeight = Math.max(
             180,
             viewport.height -
@@ -398,6 +409,7 @@ export function MemoryViewer({
             duration={progressDuration}
             onComplete={handleAdvanceOrFinish}
             isVideo={isVideo}
+            titleBelowProgress={isMobileLayout}
         />
     );
 
@@ -460,45 +472,60 @@ export function MemoryViewer({
                 style={
                     isMobileLayout
                         ? {
-                              maxWidth: "375px",
+                              maxWidth: "100%",
                               padding:
-                                  "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
+                                  "24px 0 calc(18px + env(safe-area-inset-bottom, 0px))",
                               gap: "14px",
                           }
                         : undefined
                 }
             >
                 {isMobileLayout ? (
-                    sharedHeader
+                    <MobileTopActions>
+                        <BrandLink
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            data-memory-control="true"
+                        >
+                            <EnteBrandTagImage
+                                src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                alt="Ente Photos"
+                            />
+                        </BrandLink>
+                        <MobileJoinNowButton
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Try now
+                        </MobileJoinNowButton>
+                    </MobileTopActions>
                 ) : (
                     <TopControls>
-                        {!useFooterShareActions && (
-                            <TopLeftBrandLink
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
-                                data-memory-control="true"
-                            >
-                                <EnteBrandTagImage
-                                    src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                    alt="Ente Photos"
-                                />
-                            </TopLeftBrandLink>
-                        )}
+                        <TopLeftBrandLink
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            data-memory-control="true"
+                        >
+                            <EnteBrandTagImage
+                                src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                alt="Ente Photos"
+                            />
+                        </TopLeftBrandLink>
 
                         {sharedHeader}
 
-                        {!useFooterShareActions && (
-                            <TopRightActions>
-                                <JoinNowButton
-                                    href="https://ente.io"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    Try now
-                                </JoinNowButton>
-                            </TopRightActions>
-                        )}
+                        <TopRightActions>
+                            <JoinNowButton
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                Try now
+                            </JoinNowButton>
+                        </TopRightActions>
                     </TopControls>
                 )}
 
@@ -524,7 +551,7 @@ export function MemoryViewer({
                                     data-memory-control="true"
                                 >
                                     <CenteredPlaybackGlyph>
-                                        <PlaybackGlyph paused />
+                                        <PlaybackGlyph paused={paused} />
                                     </CenteredPlaybackGlyph>
                                 </CenteredPlaybackControl>
                             </CenteredPlaybackOverlay>
@@ -532,28 +559,7 @@ export function MemoryViewer({
                     </MediaFrame>
                 </PhotoContainer>
 
-                {useFooterShareActions && (
-                    <ViewerFooterBar>
-                        <BrandLink
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noreferrer"
-                            data-memory-control="true"
-                        >
-                            <EnteBrandTagImage
-                                src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                alt="Ente Photos"
-                            />
-                        </BrandLink>
-                        <MobileJoinNowButton
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Join now
-                        </MobileJoinNowButton>
-                    </ViewerFooterBar>
-                )}
+                {isMobileLayout && sharedHeader}
             </ContentContainer>
         </ViewerRoot>
     );
@@ -638,8 +644,12 @@ const HeaderSection = styled("div")({
     flexDirection: "column",
     alignItems: "center",
     gap: "18px",
+    boxSizing: "border-box",
+    "@media (max-width: 900px)": { width: "min(100%, 344px)", gap: "14px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        paddingTop: "8px",
+        width: "100%",
+        gap: "18px",
+        padding: "8px 24px",
     },
 });
 
@@ -657,12 +667,23 @@ const MemoryTitle = styled(Typography)({
     "@media (max-width: 700px)": { fontSize: "14px", lineHeight: 1.2 },
 });
 
+const MobileTopActions = styled("div")({
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "16px",
+    padding: "0 24px",
+    boxSizing: "border-box",
+});
+
 const TopLeftBrandLink = styled(BrandLink)({
     position: "absolute",
     left: 0,
     top: "50%",
     transform: "translateY(-50%)",
     "& img": { width: "98px" },
+    "@media (max-width: 900px)": { "& img": { width: "84px" } },
 });
 
 const TopRightActions = styled("div")({
@@ -714,8 +735,6 @@ const CenteredPlaybackOverlay = styled("div")({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background:
-        "linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.18) 100%)",
 });
 
 const CenteredPlaybackControl = styled("button")({
