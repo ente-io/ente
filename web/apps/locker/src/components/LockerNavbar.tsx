@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useDeferredValue, useState } from "react";
+import React, { useDeferredValue, useEffect, useState } from "react";
 
 const contentMaxWidth = 560;
 
@@ -55,88 +55,93 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
     }, [searchTerm]);
 
     return (
-    <Box
-        sx={{
-            position: "sticky",
-            top: stickyTop,
-            left: 0,
-            zIndex: 1,
-            background: "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
-            color: "#fff",
-            px: { xs: 2, sm: 3 },
-            pt: 1,
-            pb: 0.25,
-        }}
-    >
-        <Stack
-            direction="row"
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
+        <Box
+            sx={{
+                position: "sticky",
+                top: stickyTop,
+                left: 0,
+                zIndex: 1,
+                background: "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
+                color: "#fff",
+                px: { xs: 2, sm: 3 },
+                pt: 1,
+                pb: 0.25,
+            }}
         >
-            {showMenuButton ? (
-                <IconButton onClick={onOpenSidebar} sx={{ color: "#fff" }}>
-                    <HugeiconsIcon
-                        icon={Menu01Icon}
-                        size={24}
-                        strokeWidth={2.25}
-                    />
-                </IconButton>
-            ) : (
+            <Stack
+                direction="row"
+                sx={{ alignItems: "center", justifyContent: "space-between" }}
+            >
+                {showMenuButton ? (
+                    <IconButton onClick={onOpenSidebar} sx={{ color: "#fff" }}>
+                        <HugeiconsIcon
+                            icon={Menu01Icon}
+                            size={24}
+                            strokeWidth={2.25}
+                        />
+                    </IconButton>
+                ) : (
+                    <Box sx={{ width: 40 }} />
+                )}
+
+                <Box
+                    component="img"
+                    src="/images/locker.svg"
+                    alt="Locker"
+                    sx={{
+                        height: 20,
+                        width: "auto",
+                        filter: "brightness(0) invert(1)",
+                    }}
+                ></Box>
+
                 <Box sx={{ width: 40 }} />
-            )}
+            </Stack>
 
             <Box
-                component="img"
-                src="/images/locker.svg"
-                alt="Locker"
-                sx={{
-                    height: 20,
-                    width: "auto",
-                    filter: "brightness(0) invert(1)",
-                }}
-            ></Box>
-
-            <Box sx={{ width: 40 }} />
-        </Stack>
-
-        <Box sx={{ maxWidth: contentMaxWidth, mx: "auto", mt: 0.5, pb: 1.5 }}>
-            <TextField
-                size="small"
-                placeholder={t("searchHint")}
-                value={localSearchTerm}
-                onChange={(event) => setLocalSearchTerm(event.target.value)}
-                variant="outlined"
-                fullWidth
-                slotProps={{
-                    input: {
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon
-                                    sx={{ fontSize: 20, color: "text.faint" }}
-                                />
-                            </InputAdornment>
-                        ),
-                    },
-                }}
-                sx={{
-                    "& .MuiOutlinedInput-root": {
-                        minHeight: 48,
-                        borderRadius: "24px",
-                        backgroundColor: "background.paper",
-                        "& .MuiOutlinedInput-input": { py: 1.5 },
-                        "& fieldset": { borderColor: "transparent" },
-                        "&:hover fieldset": { borderColor: "transparent" },
-                        "&.Mui-focused fieldset": {
-                            borderColor: "rgba(255, 255, 255, 0.28)",
-                            borderWidth: "1px",
+                sx={{ maxWidth: contentMaxWidth, mx: "auto", mt: 0.5, pb: 1.5 }}
+            >
+                <TextField
+                    size="small"
+                    placeholder={t("searchHint")}
+                    value={localSearchTerm}
+                    onChange={(event) => setLocalSearchTerm(event.target.value)}
+                    variant="outlined"
+                    fullWidth
+                    slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon
+                                        sx={{
+                                            fontSize: 20,
+                                            color: "text.faint",
+                                        }}
+                                    />
+                                </InputAdornment>
+                            ),
                         },
-                        "&.Mui-focused": {
-                            boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.1)",
+                    }}
+                    sx={{
+                        "& .MuiOutlinedInput-root": {
+                            minHeight: 48,
+                            borderRadius: "24px",
+                            backgroundColor: "background.paper",
+                            "& .MuiOutlinedInput-input": { py: 1.5 },
+                            "& fieldset": { borderColor: "transparent" },
+                            "&:hover fieldset": { borderColor: "transparent" },
+                            "&.Mui-focused fieldset": {
+                                borderColor: "rgba(255, 255, 255, 0.28)",
+                                borderWidth: "1px",
+                            },
+                            "&.Mui-focused": {
+                                boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.1)",
+                            },
                         },
-                    },
-                }}
-            />
+                    }}
+                />
+            </Box>
         </Box>
-    </Box>
     );
 };
 
