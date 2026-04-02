@@ -25,7 +25,6 @@ import {
     EDGE_NAV_TAP_ZONE_RATIO,
     ENTE_BRAND_TAG_IMAGE_PATH,
     EnteBrandTagImage,
-    HOLD_TO_PAUSE_NAV_SUPPRESSION_MS,
     IMAGE_AUTO_PROGRESS_DURATION_MS,
     isInteractiveTapTarget,
     JoinNowButton,
@@ -117,8 +116,6 @@ export function MemoryViewer({
     );
     const [outgoingIsVideo, setOutgoingIsVideo] = useState(false);
     const [outgoingIndex, setOutgoingIndex] = useState<number | null>(null);
-    const pressStartedAtRef = useRef<number | null>(null);
-    const suppressTapNavigationRef = useRef(false);
     const previousFileRef = useRef(currentFile);
     const previousIndexRef = useRef(currentIndex);
     const outgoingClearTimeoutRef = useRef<number | null>(null);
@@ -235,12 +232,32 @@ export function MemoryViewer({
         return memoryName || currentFileDate || "Memory";
     }, [currentFileDate, memoryName]);
 
-    const handleScreenTap = useCallback(
-        (event: ReactMouseEvent<HTMLDivElement>) => {
-            if (suppressTapNavigationRef.current) {
-                suppressTapNavigationRef.current = false;
+    const handleRestartPlayback = useCallback(() => {
+        if (currentIndex > 0) {
+            onSeek(0);
+            return;
+        }
+
+        setFinishedPlayback(false);
+        setPaused(false);
+    }, [currentIndex, onSeek]);
+
+    const handlePlaybackOverlayClick = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+
+            if (finishedPlayback) {
+                handleRestartPlayback();
                 return;
             }
+
+            setPaused(false);
+        },
+        [finishedPlayback, handleRestartPlayback],
+    );
+
+    const handleViewerClick = useCallback(
+        (event: ReactMouseEvent<HTMLDivElement>) => {
             if (isInteractiveTapTarget(event.target)) {
                 return;
             }
@@ -256,6 +273,32 @@ export function MemoryViewer({
             }
         },
         [onNext, onPrev, viewport.width],
+    );
+
+    const handleMediaFrameClick = useCallback(
+        (event: ReactMouseEvent<HTMLDivElement>) => {
+            if (isInteractiveTapTarget(event.target)) {
+                return;
+            }
+
+            event.stopPropagation();
+
+            const clickX = event.clientX;
+            if (clickX <= viewport.width * EDGE_NAV_TAP_ZONE_RATIO) {
+                onPrev();
+                return;
+            }
+
+            if (clickX >= viewport.width * (1 - EDGE_NAV_TAP_ZONE_RATIO)) {
+                onNext();
+                return;
+            }
+
+            if (!paused) {
+                setPaused(true);
+            }
+        },
+        [onNext, onPrev, paused, viewport.width],
     );
 
     const resolvedMediaAspectRatio = useMemo(() => {
@@ -344,6 +387,7 @@ export function MemoryViewer({
 
     const isProgressPaused =
         paused || !fileLoaded || (isVideo && !videoDurationKnown);
+    const showPlaybackOverlay = paused;
 
     const sharedHeader = (
         <SharedMemoryHeader
@@ -410,7 +454,7 @@ export function MemoryViewer({
     );
 
     return (
-        <ViewerRoot onClick={handleScreenTap}>
+        <ViewerRoot onClick={handleViewerClick}>
             <BackgroundPattern />
             <ContentContainer
                 style={
@@ -428,48 +472,30 @@ export function MemoryViewer({
                     sharedHeader
                 ) : (
                     <TopControls>
-                        <PlaybackControl
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                if (finishedPlayback) {
-                                    if (currentIndex > 0) {
-                                        onSeek(0);
-                                        return;
-                                    }
-                                    setFinishedPlayback(false);
-                                    setPaused(false);
-                                    return;
-                                }
-                                setPaused((state) => !state);
-                            }}
-                            aria-label={paused ? "Play" : "Pause"}
-                            data-memory-control="true"
-                        >
-                            <PlaybackGlyph paused={paused} />
-                        </PlaybackControl>
+                        {!useFooterShareActions && (
+                            <TopLeftBrandLink
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                                data-memory-control="true"
+                            >
+                                <EnteBrandTagImage
+                                    src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                    alt="Ente Photos"
+                                />
+                            </TopLeftBrandLink>
+                        )}
 
                         {sharedHeader}
 
                         {!useFooterShareActions && (
                             <TopRightActions>
-                                <BrandLink
-                                    href="https://ente.io"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    data-memory-control="true"
-                                >
-                                    <EnteBrandTagImage
-                                        src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                        alt="Ente Photos"
-                                    />
-                                </BrandLink>
                                 <JoinNowButton
                                     href="https://ente.io"
                                     target="_blank"
                                     rel="noreferrer"
                                 >
-                                    Join now
+                                    Try now
                                 </JoinNowButton>
                             </TopRightActions>
                         )}
@@ -479,52 +505,30 @@ export function MemoryViewer({
                 <PhotoContainer
                     onContextMenu={(event) => event.preventDefault()}
                     onDragStart={(event) => event.preventDefault()}
-                    onPointerDown={
-                        isMobileLayout
-                            ? () => {
-                                  pressStartedAtRef.current = Date.now();
-                                  suppressTapNavigationRef.current = false;
-                                  setPaused(true);
-                              }
-                            : undefined
-                    }
-                    onPointerUp={
-                        isMobileLayout
-                            ? () => {
-                                  const startedAt = pressStartedAtRef.current;
-                                  pressStartedAtRef.current = null;
-                                  if (
-                                      startedAt &&
-                                      Date.now() - startedAt >
-                                          HOLD_TO_PAUSE_NAV_SUPPRESSION_MS
-                                  ) {
-                                      suppressTapNavigationRef.current = true;
-                                  }
-                                  setPaused(false);
-                              }
-                            : undefined
-                    }
-                    onPointerCancel={
-                        isMobileLayout
-                            ? () => {
-                                  pressStartedAtRef.current = null;
-                                  setPaused(false);
-                              }
-                            : undefined
-                    }
-                    onPointerLeave={
-                        isMobileLayout
-                            ? () => {
-                                  if (pressStartedAtRef.current !== null) {
-                                      pressStartedAtRef.current = null;
-                                      setPaused(false);
-                                  }
-                              }
-                            : undefined
-                    }
                 >
-                    <MediaFrame style={mediaFrameStyle}>
+                    <MediaFrame
+                        style={mediaFrameStyle}
+                        onClick={handleMediaFrameClick}
+                    >
                         {mediaLayers}
+                        {showPlaybackOverlay && (
+                            <CenteredPlaybackOverlay>
+                                <CenteredPlaybackControl
+                                    type="button"
+                                    onClick={handlePlaybackOverlayClick}
+                                    aria-label={
+                                        finishedPlayback
+                                            ? "Restart memories"
+                                            : "Resume playback"
+                                    }
+                                    data-memory-control="true"
+                                >
+                                    <CenteredPlaybackGlyph>
+                                        <PlaybackGlyph paused />
+                                    </CenteredPlaybackGlyph>
+                                </CenteredPlaybackControl>
+                            </CenteredPlaybackOverlay>
+                        )}
                     </MediaFrame>
                 </PhotoContainer>
 
@@ -586,6 +590,12 @@ const BackgroundPattern = styled("div")({
     backgroundSize: "cover",
     backgroundPosition: "center",
     zIndex: 1,
+    "&::after": {
+        content: '""',
+        position: "absolute",
+        inset: 0,
+        backgroundColor: "rgba(18, 18, 18, 0.72)",
+    },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         backgroundImage: `url(${MOBILE_BACKGROUND_IMAGE_PATH})`,
         backgroundRepeat: "no-repeat",
@@ -647,29 +657,12 @@ const MemoryTitle = styled(Typography)({
     "@media (max-width: 700px)": { fontSize: "14px", lineHeight: 1.2 },
 });
 
-const PlaybackControl = styled("button")({
+const TopLeftBrandLink = styled(BrandLink)({
     position: "absolute",
     left: 0,
     top: "50%",
     transform: "translateY(-50%)",
-    width: "56px",
-    height: "56px",
-    borderRadius: "16px",
-    border: 0,
-    cursor: "pointer",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "white",
-    padding: 0,
-    transition: "background-color 150ms ease",
-    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.28)" },
-    "@media (max-width: 900px)": {
-        width: "52px",
-        height: "52px",
-        borderRadius: "15px",
-    },
+    "& img": { width: "98px" },
 });
 
 const TopRightActions = styled("div")({
@@ -695,6 +688,7 @@ const MediaFrame = styled("div")({
     maxHeight: DESKTOP_MEDIA_MAX_HEIGHT_CSS,
     flexShrink: 0,
     lineHeight: 0,
+    cursor: "pointer",
 });
 
 const MediaSwitchLayer = styled("div", {
@@ -712,6 +706,53 @@ const MediaSwitchLayer = styled("div", {
     willChange: "opacity, transform",
     pointerEvents: "none",
 }));
+
+const CenteredPlaybackOverlay = styled("div")({
+    position: "absolute",
+    inset: 0,
+    zIndex: 3,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background:
+        "linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.18) 100%)",
+});
+
+const CenteredPlaybackControl = styled("button")({
+    width: "88px",
+    height: "88px",
+    borderRadius: "999px",
+    border: 0,
+    cursor: "pointer",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    backgroundColor: "rgba(18, 18, 18, 0.64)",
+    boxShadow: "0 18px 40px rgba(0, 0, 0, 0.34)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    transition:
+        "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
+    "&:hover": {
+        backgroundColor: "rgba(18, 18, 18, 0.72)",
+        transform: "scale(1.03)",
+    },
+    "&:active": { transform: "scale(0.98)" },
+    "@media (max-width: 900px)": { width: "80px", height: "80px" },
+});
+
+const CenteredPlaybackGlyph = styled("span")({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transform: "scale(1.65)",
+    transformOrigin: "center",
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        transform: "scale(1.5)",
+    },
+});
 
 function formatMemoryDate(date: Date): string {
     const day = date.getDate();
