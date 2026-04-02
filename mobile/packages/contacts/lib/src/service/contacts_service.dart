@@ -16,9 +16,9 @@ class ContactsService {
     required SharedPreferences preferences,
     ContactsDatabase? database,
     ContactsRustApi? rustApi,
-  }) : _preferences = preferences,
-       _database = database ?? ContactsDatabase(),
-       _rustApi = rustApi ?? const FrbContactsRustApi();
+  })  : _preferences = preferences,
+        _database = database ?? ContactsDatabase(),
+        _rustApi = rustApi ?? const FrbContactsRustApi();
 
   final SharedPreferences _preferences;
   final ContactsDatabase _database;
@@ -115,9 +115,8 @@ class ContactsService {
     final ctx = _requireCtx();
     await ctx.deleteContact(contactId);
     final deleted = await ctx.getDiff(0, _syncLimit);
-    final matching = deleted
-        .where((element) => element.id == contactId)
-        .toList();
+    final matching =
+        deleted.where((element) => element.id == contactId).toList();
     if (matching.isNotEmpty) {
       await _database.upsertContacts([matching.first]);
     } else {
@@ -128,11 +127,36 @@ class ContactsService {
   Future<ContactRecord> setProfilePicture(
     String contactId,
     Uint8List bytes,
+  ) {
+    return _setAttachment(
+      contactId,
+      ContactAttachmentType.profilePicture,
+      bytes,
+    );
+  }
+
+  Future<Uint8List> getProfilePicture(String contactId) {
+    return _getAttachment(contactId, ContactAttachmentType.profilePicture);
+  }
+
+  Future<ContactRecord> deleteProfilePicture(String contactId) {
+    return _deleteAttachment(contactId, ContactAttachmentType.profilePicture);
+  }
+
+  Future<ContactRecord> _setAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+    Uint8List bytes,
   ) async {
     final previousAttachmentId = (await _database.getContact(
       contactId,
-    ))?.profilePictureAttachmentId;
-    final updated = await _requireCtx().setProfilePicture(contactId, bytes);
+    ))
+        ?.profilePictureAttachmentId;
+    final updated = await _requireCtx().setAttachment(
+      contactId,
+      attachmentType,
+      bytes,
+    );
     await _database.upsertContacts([updated]);
     final nextAttachmentId = updated.profilePictureAttachmentId;
     if (nextAttachmentId != null) {
@@ -145,26 +169,37 @@ class ContactsService {
     return updated;
   }
 
-  Future<Uint8List> getProfilePicture(String contactId) async {
+  Future<Uint8List> _getAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+  ) async {
     final contact = await _database.getContact(contactId);
     final attachmentId = contact?.profilePictureAttachmentId;
     if (attachmentId == null) {
-      throw StateError('Contact $contactId does not have a profile picture');
+      throw StateError(
+        'Contact $contactId does not have attachment $attachmentType',
+      );
     }
     final cached = await _database.getCachedAttachment(attachmentId);
     if (cached != null) {
       return cached;
     }
-    final bytes = await _requireCtx().getProfilePicture(contactId);
+    final bytes =
+        await _requireCtx().getAttachment(attachmentType, attachmentId);
     await _database.upsertCachedAttachment(attachmentId, bytes);
     return bytes;
   }
 
-  Future<ContactRecord> deleteProfilePicture(String contactId) async {
+  Future<ContactRecord> _deleteAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+  ) async {
     final previousAttachmentId = (await _database.getContact(
       contactId,
-    ))?.profilePictureAttachmentId;
-    final updated = await _requireCtx().deleteProfilePicture(contactId);
+    ))
+        ?.profilePictureAttachmentId;
+    final updated =
+        await _requireCtx().deleteAttachment(contactId, attachmentType);
     await _database.upsertContacts([updated]);
     if (previousAttachmentId != null) {
       await _database.deleteCachedAttachment(previousAttachmentId);
@@ -203,6 +238,5 @@ class ContactsService {
 
   String _entityKeyPref(int userId) => 'entity_key_contact_$userId';
 
-  String _entityHeaderPref(int userId) =>
-      'entity_key_header_contact_$userId';
+  String _entityHeaderPref(int userId) => 'entity_key_header_contact_$userId';
 }

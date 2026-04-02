@@ -110,7 +110,7 @@ void main() {
       await service.getProfilePicture(created.id),
       Uint8List.fromList([1, 2, 3, 4]),
     );
-    expect(rustApi.ctx.getProfilePictureCalls, 0);
+    expect(rustApi.ctx.getAttachmentCalls, 0);
 
     final deletedPicture = await service.deleteProfilePicture(created.id);
     expect(deletedPicture.profilePictureAttachmentId, isNull);
@@ -150,7 +150,7 @@ void main() {
       ],
       const [],
     ];
-    rustApi.ctx.pictures['ct_1'] = Uint8List.fromList([7, 8, 9]);
+    rustApi.ctx.attachments['att_1'] = Uint8List.fromList([7, 8, 9]);
 
     await service.open(
       ContactsSession(
@@ -166,12 +166,12 @@ void main() {
       await service.getProfilePicture('ct_1'),
       Uint8List.fromList([7, 8, 9]),
     );
-    expect(rustApi.ctx.getProfilePictureCalls, 1);
+    expect(rustApi.ctx.getAttachmentCalls, 1);
     expect(
       await service.getProfilePicture('ct_1'),
       Uint8List.fromList([7, 8, 9]),
     );
-    expect(rustApi.ctx.getProfilePictureCalls, 1);
+    expect(rustApi.ctx.getAttachmentCalls, 1);
   });
 
   test('replacing profile picture removes stale cached bytes', () async {
@@ -285,9 +285,9 @@ class FakeContactsRustApi implements ContactsRustApi {
 class FakeContactsRustContext implements ContactsRustContext {
   int userIdValue = 0;
   final Map<String, ContactRecord> records = {};
-  final Map<String, Uint8List> pictures = {};
+  final Map<String, Uint8List> attachments = {};
   List<List<ContactRecord>> diffPages = [];
-  int getProfilePictureCalls = 0;
+  int getAttachmentCalls = 0;
   String nextAttachmentId = 'att_profile';
 
   @override
@@ -330,7 +330,10 @@ class FakeContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  Future<ContactRecord> deleteProfilePicture(String contactId) async {
+  Future<ContactRecord> deleteAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+  ) async {
     final existing = records[contactId]!;
     final updated = ContactRecord(
       id: existing.id,
@@ -343,8 +346,16 @@ class FakeContactsRustContext implements ContactsRustContext {
       updatedAt: existing.updatedAt + 1,
     );
     records[contactId] = updated;
-    pictures.remove(contactId);
+    final previousAttachmentId = existing.profilePictureAttachmentId;
+    if (previousAttachmentId != null) {
+      attachments.remove(previousAttachmentId);
+    }
     return updated;
+  }
+
+  @override
+  Future<ContactRecord> deleteProfilePicture(String contactId) {
+    return deleteAttachment(contactId, ContactAttachmentType.profilePicture);
   }
 
   @override
@@ -365,15 +376,25 @@ class FakeContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  Future<Uint8List> getProfilePicture(String contactId) async {
-    getProfilePictureCalls += 1;
-    return pictures[contactId]!;
+  Future<Uint8List> getAttachment(
+    ContactAttachmentType attachmentType,
+    String attachmentId,
+  ) async {
+    getAttachmentCalls += 1;
+    return attachments[attachmentId]!;
   }
 
   @override
-  Future<ContactRecord> setProfilePicture(
+  Future<Uint8List> getProfilePicture(String contactId) {
+    final attachmentId = records[contactId]!.profilePictureAttachmentId!;
+    return getAttachment(ContactAttachmentType.profilePicture, attachmentId);
+  }
+
+  @override
+  Future<ContactRecord> setAttachment(
     String contactId,
-    Uint8List profilePicture,
+    ContactAttachmentType attachmentType,
+    Uint8List attachmentBytes,
   ) async {
     final existing = records[contactId]!;
     final updated = ContactRecord(
@@ -387,8 +408,20 @@ class FakeContactsRustContext implements ContactsRustContext {
       updatedAt: existing.updatedAt + 1,
     );
     records[contactId] = updated;
-    pictures[contactId] = profilePicture;
+    attachments[nextAttachmentId] = attachmentBytes;
     return updated;
+  }
+
+  @override
+  Future<ContactRecord> setProfilePicture(
+    String contactId,
+    Uint8List profilePicture,
+  ) {
+    return setAttachment(
+      contactId,
+      ContactAttachmentType.profilePicture,
+      profilePicture,
+    );
   }
 
   @override

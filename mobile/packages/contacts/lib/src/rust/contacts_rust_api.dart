@@ -14,6 +14,8 @@ class WrappedRootContactKey {
   });
 }
 
+enum ContactAttachmentType { profilePicture }
+
 enum RootKeySource { cache, server, created }
 
 class OpenContactsContextInput {
@@ -66,6 +68,22 @@ abstract class ContactsRustContext {
   Future<ContactRecord> updateContact(String contactId, ContactData data);
 
   Future<void> deleteContact(String contactId);
+
+  Future<ContactRecord> setAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+    Uint8List attachmentBytes,
+  );
+
+  Future<Uint8List> getAttachment(
+    ContactAttachmentType attachmentType,
+    String attachmentId,
+  );
+
+  Future<ContactRecord> deleteAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+  );
 
   Future<ContactRecord> setProfilePicture(
     String contactId,
@@ -188,29 +206,78 @@ class _FrbContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  Future<ContactRecord> setProfilePicture(
+  Future<ContactRecord> setAttachment(
     String contactId,
-    Uint8List profilePicture,
+    ContactAttachmentType attachmentType,
+    Uint8List attachmentBytes,
   ) async {
     return _fromRustRecord(
-      await _inner.setProfilePicture(
+      await _inner.setAttachment(
         contactId: contactId,
-        profilePicture: profilePicture,
+        attachmentType: _toRustAttachmentType(attachmentType),
+        attachmentBytes: attachmentBytes,
       ),
     );
   }
 
   @override
-  Future<Uint8List> getProfilePicture(String contactId) {
-    return _inner.getProfilePicture(contactId: contactId);
+  Future<Uint8List> getAttachment(
+    ContactAttachmentType attachmentType,
+    String attachmentId,
+  ) {
+    return _inner.getAttachment(
+      attachmentType: _toRustAttachmentType(attachmentType),
+      attachmentId: attachmentId,
+    );
+  }
+
+  @override
+  Future<ContactRecord> deleteAttachment(
+    String contactId,
+    ContactAttachmentType attachmentType,
+  ) async {
+    return _fromRustRecord(
+      await _inner.deleteAttachment(
+        contactId: contactId,
+        attachmentType: _toRustAttachmentType(attachmentType),
+      ),
+    );
+  }
+
+  @override
+  Future<ContactRecord> setProfilePicture(
+    String contactId,
+    Uint8List profilePicture,
+  ) async {
+    return setAttachment(
+      contactId,
+      ContactAttachmentType.profilePicture,
+      profilePicture,
+    );
+  }
+
+  @override
+  Future<Uint8List> getProfilePicture(String contactId) async {
+    final contact = await getContact(contactId);
+    final attachmentId = contact.profilePictureAttachmentId;
+    if (attachmentId == null) {
+      throw StateError('Contact $contactId does not have a profile picture');
+    }
+    return getAttachment(ContactAttachmentType.profilePicture, attachmentId);
   }
 
   @override
   Future<ContactRecord> deleteProfilePicture(String contactId) async {
-    return _fromRustRecord(
-      await _inner.deleteProfilePicture(contactId: contactId),
-    );
+    return deleteAttachment(contactId, ContactAttachmentType.profilePicture);
   }
+}
+
+rust.AttachmentType _toRustAttachmentType(
+  ContactAttachmentType attachmentType,
+) {
+  return switch (attachmentType) {
+    ContactAttachmentType.profilePicture => rust.AttachmentType.profilePicture,
+  };
 }
 
 ContactRecord _fromRustRecord(rust.ContactRecord record) {
