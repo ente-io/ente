@@ -309,9 +309,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     const progressGap = total > 15 ? "4px" : minimal ? "8px" : "12px";
     const progressHeight = minimal ? "2px" : "4px";
     const progressTrackOpacity = minimal ? 0.24 : 0.45;
-    const progressFillColor = minimal
-        ? "rgba(255, 255, 255, 0.78)"
-        : "white";
+    const progressFillColor = minimal ? "rgba(255, 255, 255, 0.78)" : "white";
 
     return (
         <Box
@@ -324,7 +322,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                     ? `${MOBILE_PROGRESS_MAX_WIDTH_PX}px`
                     : minimal
                       ? `${MINIMAL_DESKTOP_PROGRESS_MAX_WIDTH_PX}px`
-                    : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
+                      : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
                 minWidth: 0,
                 height: progressHeight,
             }}

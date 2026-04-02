@@ -6,6 +6,10 @@ import {
     PublicMemoryLoadingState,
     PublicMemoryPageShell,
 } from "../components/PublicMemoryPageShell";
+import type {
+    LaneMemoryViewerProps,
+    MemoryViewerProps,
+} from "../components/PublicMemoryViewerShared";
 import { usePublicMemoryPage } from "../hooks/usePublicMemoryPage";
 
 /**
@@ -51,23 +55,27 @@ export default function PublicMemoryPage() {
         return <PublicMemoryEmptyState />;
     }
 
-    const sharedViewerProps = {
+    const sharedViewerProps: MemoryViewerProps = {
         files,
         currentIndex,
         memoryName,
-        memoryMetadata,
-        laneFrames,
         onNext: goToNext,
         onPrev: goToPrev,
         onSeek: handleSeek,
     };
 
+    const laneViewerProps: LaneMemoryViewerProps = {
+        ...sharedViewerProps,
+        memoryMetadata,
+        laneFrames,
+    };
+
     return (
         <PublicMemoryPageShell>
             {viewerVariant === "lane" ? (
-                <LaneMemoryViewer {...sharedViewerProps} />
+                <LaneMemoryViewer {...laneViewerProps} />
             ) : (
-                <MemoryViewer {...sharedViewerProps} variant={viewerVariant} />
+                <MemoryViewer {...sharedViewerProps} />
             )}
         </PublicMemoryPageShell>
     );
