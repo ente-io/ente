@@ -9,7 +9,6 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-const DEFAULT_BASE_URL: &str = "https://api.ente.io";
 const TOKEN_HEADER: &str = "X-Auth-Token";
 const CLIENT_PKG_HEADER: &str = "X-Client-Package";
 const CLIENT_VERSION_HEADER: &str = "X-Client-Version";
@@ -115,16 +114,9 @@ impl HttpClient {
             }
         });
 
-        let is_http = base_url.starts_with("http://");
-        let is_default = base_url.starts_with(DEFAULT_BASE_URL);
-        let allow_insecure = is_http || !is_default;
-
         let mut builder = reqwest::Client::builder();
         if let Some(timeout) = config.timeout_secs {
             builder = builder.timeout(Duration::from_secs(timeout));
-        }
-        if allow_insecure {
-            builder = builder.danger_accept_invalid_certs(true);
         }
 
         let client = builder.build().unwrap_or_else(|e| {
