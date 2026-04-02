@@ -69,8 +69,11 @@ void main() {
       ),
     );
 
-    expect(preferences.getString('entity_key_contact'), 'enc-key');
-    expect(preferences.getString('entity_key_header_contact'), 'enc-header');
+    expect(preferences.getString('entity_key_contact_1'), 'enc-key');
+    expect(
+      preferences.getString('entity_key_header_contact_1'),
+      'enc-header',
+    );
 
     final synced = await service.sync();
     expect(synced, hasLength(1));

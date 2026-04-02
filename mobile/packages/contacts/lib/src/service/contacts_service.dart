@@ -10,8 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ContactsService {
-  static const _entityKeyPref = 'entity_key_contact';
-  static const _entityHeaderPref = 'entity_key_header_contact';
   static const _syncLimit = 5000;
 
   ContactsService({
@@ -32,7 +30,7 @@ class ContactsService {
 
   Future<void> open(ContactsSession session) async {
     final accountKey = await session.resolveAccountKey();
-    final cachedRootKey = _cachedRootKey();
+    final cachedRootKey = _cachedRootKey(session.userId);
     final opened = await _rustApi.open(
       OpenContactsContextInput(
         baseUrl: session.baseUrl,
@@ -49,7 +47,7 @@ class ContactsService {
     _ctx = opened.ctx;
     _session = session;
     await _database.configure(userId: session.userId);
-    await _persistWrappedRootKey(opened.wrappedRootKey);
+    await _persistWrappedRootKey(session.userId, opened.wrappedRootKey);
     _logger.info('Opened contacts context for user ${session.userId}');
   }
 
@@ -186,17 +184,25 @@ class ContactsService {
     return ctx;
   }
 
-  WrappedRootContactKey? _cachedRootKey() {
-    final encryptedKey = _preferences.getString(_entityKeyPref);
-    final header = _preferences.getString(_entityHeaderPref);
+  WrappedRootContactKey? _cachedRootKey(int userId) {
+    final encryptedKey = _preferences.getString(_entityKeyPref(userId));
+    final header = _preferences.getString(_entityHeaderPref(userId));
     if (encryptedKey == null || header == null) {
       return null;
     }
     return WrappedRootContactKey(encryptedKey: encryptedKey, header: header);
   }
 
-  Future<void> _persistWrappedRootKey(WrappedRootContactKey key) async {
-    await _preferences.setString(_entityKeyPref, key.encryptedKey);
-    await _preferences.setString(_entityHeaderPref, key.header);
+  Future<void> _persistWrappedRootKey(
+    int userId,
+    WrappedRootContactKey key,
+  ) async {
+    await _preferences.setString(_entityKeyPref(userId), key.encryptedKey);
+    await _preferences.setString(_entityHeaderPref(userId), key.header);
   }
+
+  String _entityKeyPref(int userId) => 'entity_key_contact_$userId';
+
+  String _entityHeaderPref(int userId) =>
+      'entity_key_header_contact_$userId';
 }
