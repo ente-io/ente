@@ -87,6 +87,40 @@ Ente automatically detects duplicates during upload. If you try to upload the sa
 
 Learn more about how [Duplicate detection](/photos/features/backup-and-sync/duplicate-detection) works.
 
+## Backup only new photos {#backup-only-new-photos}
+
+By default, Ente backs up your entire photo library from selected folders. If you only want to back up photos going forward — without uploading your existing library — you can enable **Backup only new photos**.
+
+This option is available in two places:
+
+- **During signup/login**: On the permissions screen, you can choose to back up only new photos instead of your full library.
+- **In settings**: Open `Settings > Backup > Backup settings` and toggle on **Backup only new photos**.
+
+### What "new photos" means
+
+When you select this option during onboarding, Ente backs up photos from the **last 7 days** onward. This ensures you have some recent photos available right away rather than starting with an empty library.
+
+When you enable the toggle in settings after onboarding, Ente uses the **current moment** as the cutoff — only photos created from that point forward will be backed up.
+
+In both cases, photos older than the cutoff date on your device will not be uploaded.
+
+### Folder selection prompt
+
+When you first enable this setting, Ente may prompt you to select which folders to back up:
+
+- If you haven't selected any folders yet, tap **Select folders** to choose which folders to include.
+- Tap **Continue** to proceed with your existing folder selection.
+
+### Disabling backup only new photos
+
+To resume backing up all photos (including your existing library), toggle **Backup only new photos** off. Ente will then include all photos from selected folders in the next sync.
+
+### Use cases
+
+- **New devices**: Back up only photos taken on a new device without uploading photos already backed up elsewhere.
+- **Privacy**: Exclude older photos from your library while still keeping new ones backed up automatically.
+- **Storage management**: Avoid uploading a large existing library while still protecting new memories.
+
 ## Backup frequency
 
 - **Mobile**: Background sync happens automatically. The exact timing depends on your device's operating system.
@@ -94,6 +128,7 @@ Learn more about how [Duplicate detection](/photos/features/backup-and-sync/dupl
 
 ## Related FAQs
 
+- [Can I backup only new photos without uploading my existing library?](/photos/faq/backup-and-sync#backup-only-new-photos)
 - [How does automatic backup work?](/photos/faq/backup-and-sync#automatic-backup)
 - [How do I select which albums to back up?](/photos/faq/backup-and-sync#select-albums)
 - [Why isn't background sync working?](/photos/faq/backup-and-sync#background-sync-not-working)
