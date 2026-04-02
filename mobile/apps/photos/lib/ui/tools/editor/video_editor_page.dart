@@ -574,12 +574,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           final assetEntity = await widget.file.getAsset;
           if (assetEntity != null) {
             final latLong = await assetEntity.latlngAsync();
-            if (latLong != null) {
-              newFile.location = Location(
-                latitude: latLong.latitude,
-                longitude: latLong.longitude,
-              );
-            }
+            newFile.location = Location(
+              latitude: latLong.latitude,
+              longitude: latLong.longitude,
+            );
           }
         }
 
