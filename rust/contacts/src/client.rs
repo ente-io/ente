@@ -6,10 +6,10 @@ use ente_core::http::{Error as HttpError, HttpClient, HttpConfig};
 
 use crate::crypto as contacts_crypto;
 use crate::error::{ContactsError, Result};
-use crate::models::{ContactData, ContactRecord, WrappedRootContactKey};
+use crate::models::{AttachmentType, ContactData, ContactRecord, WrappedRootContactKey};
 use crate::transport::{
-    CommitProfilePictureRequest, ContactDiffResponse, ContactEntityResponse, CreateContactRequest,
-    CreateRootKeyRequest, ProfilePictureUploadUrlRequest, ProfilePictureUploadUrlResponse,
+    AttachmentUploadUrlRequest, AttachmentUploadUrlResponse, CommitAttachmentRequest,
+    ContactDiffResponse, ContactEntityResponse, CreateContactRequest, CreateRootKeyRequest,
     RootKeyResponse, SignedUrlResponse, UpdateContactRequest,
 };
 
@@ -234,10 +234,11 @@ impl ContactsCtx {
         Ok(())
     }
 
-    pub async fn set_profile_picture(
+    pub async fn set_attachment(
         &self,
         contact_id: &str,
-        profile_picture: &[u8],
+        attachment_type: AttachmentType,
+        attachment_bytes: &[u8],
     ) -> Result<ContactRecord> {
         self.ensure_root_key_confirmed().await?;
 
@@ -256,16 +257,16 @@ impl ContactsCtx {
                 .expect("root contact key lock poisoned");
             contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
         };
-        let encrypted_picture =
-            contacts_crypto::encrypt_profile_picture(profile_picture, &contact_key)?;
-        let content_md5 = contacts_crypto::content_md5_base64(&encrypted_picture);
+        let encrypted_attachment =
+            contacts_crypto::encrypt_profile_picture(attachment_bytes, &contact_key)?;
+        let content_md5 = contacts_crypto::content_md5_base64(&encrypted_attachment);
 
         let upload = self
             .http
-            .post_json::<ProfilePictureUploadUrlResponse, _>(
-                &format!("/contacts/{contact_id}/profile-picture/upload-url"),
-                &ProfilePictureUploadUrlRequest {
-                    content_length: encrypted_picture.len() as i64,
+            .post_json::<AttachmentUploadUrlResponse, _>(
+                &format!("/attachments/{}/upload-url", attachment_type.as_str()),
+                &AttachmentUploadUrlRequest {
+                    content_length: encrypted_attachment.len() as i64,
                     content_md5: content_md5.clone(),
                 },
             )
@@ -274,7 +275,7 @@ impl ContactsCtx {
         self.object_store_http
             .put_bytes(
                 &upload.url,
-                &encrypted_picture,
+                &encrypted_attachment,
                 &[("Content-MD5", content_md5)],
             )
             .await?;
@@ -282,15 +283,36 @@ impl ContactsCtx {
         let response = self
             .http
             .put_json::<ContactEntityResponse, _>(
-                &format!("/contacts/{contact_id}/profile-picture"),
-                &CommitProfilePictureRequest {
+                &format!(
+                    "/contacts/{contact_id}/attachments/{}",
+                    attachment_type.as_str()
+                ),
+                &CommitAttachmentRequest {
                     attachment_id: &upload.attachment_id,
-                    size: encrypted_picture.len() as i64,
+                    size: encrypted_attachment.len() as i64,
                 },
             )
             .await?;
 
         self.decode_contact(response)
+    }
+
+    pub async fn get_attachment(
+        &self,
+        attachment_type: AttachmentType,
+        attachment_id: &str,
+    ) -> Result<Vec<u8>> {
+        let download = self
+            .http
+            .get_json::<SignedUrlResponse>(
+                &format!("/attachments/{}/{attachment_id}", attachment_type.as_str()),
+                &[],
+            )
+            .await?;
+        self.object_store_http
+            .get_bytes(&download.url)
+            .await
+            .map_err(Into::into)
     }
 
     pub async fn get_profile_picture(&self, contact_id: &str) -> Result<Vec<u8>> {
@@ -313,24 +335,46 @@ impl ContactsCtx {
                 .expect("root contact key lock poisoned");
             contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
         };
-        let download = self
-            .http
-            .get_json::<SignedUrlResponse>(&format!("/contacts/{contact_id}/profile-picture"), &[])
+        let encrypted_picture = self
+            .get_attachment(
+                AttachmentType::ProfilePicture,
+                current.profile_picture_attachment_id.as_deref().unwrap(),
+            )
             .await?;
-        let encrypted_picture = self.object_store_http.get_bytes(&download.url).await?;
         contacts_crypto::decrypt_profile_picture(&encrypted_picture, &contact_key)
     }
 
-    pub async fn delete_profile_picture(&self, contact_id: &str) -> Result<ContactRecord> {
+    pub async fn delete_attachment(
+        &self,
+        contact_id: &str,
+        attachment_type: AttachmentType,
+    ) -> Result<ContactRecord> {
         self.ensure_root_key_confirmed().await?;
         let response = self
             .http
             .delete_json::<ContactEntityResponse>(
-                &format!("/contacts/{contact_id}/profile-picture"),
+                &format!(
+                    "/contacts/{contact_id}/attachments/{}",
+                    attachment_type.as_str()
+                ),
                 &[],
             )
             .await?;
         self.decode_contact(response)
+    }
+
+    pub async fn set_profile_picture(
+        &self,
+        contact_id: &str,
+        profile_picture: &[u8],
+    ) -> Result<ContactRecord> {
+        self.set_attachment(contact_id, AttachmentType::ProfilePicture, profile_picture)
+            .await
+    }
+
+    pub async fn delete_profile_picture(&self, contact_id: &str) -> Result<ContactRecord> {
+        self.delete_attachment(contact_id, AttachmentType::ProfilePicture)
+            .await
     }
 
     fn decode_contact(&self, entity: ContactEntityResponse) -> Result<ContactRecord> {

@@ -1,6 +1,6 @@
 use ente_contacts::client::{ContactsCtx, OpenContactsCtxInput, RootKeySource};
 use ente_contacts::crypto as contacts_crypto;
-use ente_contacts::models::{ContactData, WrappedRootContactKey};
+use ente_contacts::models::{AttachmentType, ContactData, WrappedRootContactKey};
 use ente_core::crypto::{encode_b64, keys};
 use md5::Digest;
 use mockito::{Matcher, Server};
@@ -197,7 +197,7 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
 
     let upload_url = format!("{}/upload/ua_picture1", server.url());
     let upload_url_mock = server
-        .mock("POST", "/contacts/ct_picture1/profile-picture/upload-url")
+        .mock("POST", "/attachments/profile_picture/upload-url")
         .with_status(200)
         .with_body(
             serde_json::json!({
@@ -233,7 +233,7 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
         Some("ua_picture1"),
     );
     let commit_mock = server
-        .mock("PUT", "/contacts/ct_picture1/profile-picture")
+        .mock("PUT", "/contacts/ct_picture1/attachments/profile_picture")
         .with_status(200)
         .with_body(attached_entity.to_string())
         .expect(1)
@@ -313,7 +313,7 @@ async fn get_profile_picture_uses_signed_download_url() {
 
     let signed_download_url = format!("{}/download/ua_picture1", server.url());
     let signed_url_mock = server
-        .mock("GET", "/contacts/ct_picture1/profile-picture")
+        .mock("GET", "/attachments/profile_picture/ua_picture1")
         .with_status(200)
         .with_body(
             serde_json::json!({
@@ -349,6 +349,73 @@ async fn get_profile_picture_uses_signed_download_url() {
     signed_url_mock.assert_async().await;
     download_mock.assert_async().await;
     assert_eq!(downloaded, picture_bytes);
+}
+
+#[tokio::test]
+async fn get_attachment_uses_generic_signed_download_url() {
+    let mut server = Server::new_async().await;
+    let master_key = keys::generate_key();
+    let root_key = keys::generate_key();
+    let wrapped_root = wrap_root(&root_key, &master_key);
+    let payload = b"generic-attachment-bytes".to_vec();
+
+    let root_mock = server
+        .mock("GET", "/user-entity/key")
+        .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
+        .with_status(200)
+        .with_body(
+            serde_json::json!({
+                "userID": 7,
+                "type": "contact",
+                "encryptedKey": wrapped_root.encrypted_key,
+                "header": wrapped_root.header,
+                "createdAt": 1
+            })
+            .to_string(),
+        )
+        .create_async()
+        .await;
+
+    let signed_download_url = format!("{}/download/ua_generic1", server.url());
+    let signed_url_mock = server
+        .mock("GET", "/attachments/profile_picture/ua_generic1")
+        .with_status(200)
+        .with_body(
+            serde_json::json!({
+                "url": signed_download_url
+            })
+            .to_string(),
+        )
+        .expect(1)
+        .create_async()
+        .await;
+
+    let download_mock = server
+        .mock("GET", "/download/ua_generic1")
+        .match_header("x-auth-token", Matcher::Missing)
+        .match_header("x-client-package", Matcher::Missing)
+        .match_header("x-client-version", Matcher::Missing)
+        .match_header("user-agent", Matcher::Missing)
+        .with_status(200)
+        .with_body(payload.clone())
+        .expect(1)
+        .create_async()
+        .await;
+
+    let ctx = ContactsCtx::open(open_input(server.url(), master_key))
+        .await
+        .unwrap()
+        .ctx;
+
+    let downloaded = ctx
+        .get_attachment(AttachmentType::ProfilePicture, "ua_generic1")
+        .await
+        .unwrap();
+
+    root_mock.assert_async().await;
+    signed_url_mock.assert_async().await;
+    download_mock.assert_async().await;
+    assert_eq!(downloaded, payload);
 }
 
 #[tokio::test]

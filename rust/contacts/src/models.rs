@@ -1,5 +1,19 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AttachmentType {
+    ProfilePicture,
+}
+
+impl AttachmentType {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::ProfilePicture => "profile_picture",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct WrappedRootContactKey {

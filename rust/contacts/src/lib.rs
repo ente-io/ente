@@ -6,4 +6,4 @@ pub mod transport;
 
 pub use client::{ContactsCtx, OpenContactsCtxInput, OpenContactsCtxResult, RootKeySource};
 pub use error::{ContactsError, Result};
-pub use models::{ContactData, ContactRecord, WrappedRootContactKey};
+pub use models::{AttachmentType, ContactData, ContactRecord, WrappedRootContactKey};

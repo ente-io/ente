@@ -55,7 +55,7 @@ pub struct ContactDiffResponse {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ProfilePictureUploadUrlRequest {
+pub struct AttachmentUploadUrlRequest {
     pub content_length: i64,
     #[serde(rename = "contentMD5")]
     pub content_md5: String,
@@ -63,7 +63,7 @@ pub struct ProfilePictureUploadUrlRequest {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ProfilePictureUploadUrlResponse {
+pub struct AttachmentUploadUrlResponse {
     #[serde(rename = "attachmentID")]
     pub attachment_id: String,
     pub url: String,
@@ -71,7 +71,7 @@ pub struct ProfilePictureUploadUrlResponse {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CommitProfilePictureRequest<'a> {
+pub struct CommitAttachmentRequest<'a> {
     #[serde(rename = "attachmentID")]
     pub attachment_id: &'a str,
     pub size: i64,
