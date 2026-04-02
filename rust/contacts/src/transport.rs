@@ -38,6 +38,7 @@ pub struct ContactEntityResponse {
     pub id: String,
     #[serde(rename = "contactUserID")]
     pub contact_user_id: i64,
+    pub email: Option<String>,
     #[serde(rename = "profilePictureAttachmentID")]
     pub profile_picture_attachment_id: Option<String>,
     pub encrypted_key: Option<String>,

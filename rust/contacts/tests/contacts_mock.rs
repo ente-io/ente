@@ -8,7 +8,6 @@ use mockito::{Matcher, Server};
 fn sample_contact() -> ContactData {
     ContactData {
         contact_user_id: 42,
-        email: "b@test.test".to_string(),
         name: "B Test".to_string(),
         birth_date: Some("2001-04-01".to_string()),
     }
@@ -34,6 +33,7 @@ fn wrap_root(root_key: &[u8], master_key: &[u8]) -> WrappedRootContactKey {
 fn live_entity_json(
     id: &str,
     data: &ContactData,
+    email: Option<&str>,
     root_key: &[u8],
     profile_picture_attachment_id: Option<&str>,
 ) -> serde_json::Value {
@@ -44,6 +44,7 @@ fn live_entity_json(
     serde_json::json!({
         "id": id,
         "contactUserID": data.contact_user_id,
+        "email": email,
         "profilePictureAttachmentID": profile_picture_attachment_id,
         "encryptedKey": encrypted_key,
         "encryptedData": encrypted_data,
@@ -93,6 +94,7 @@ async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
     let root_key = keys::generate_key();
     let wrapped_root = wrap_root(&root_key, &master_key);
     let contact = sample_contact();
+    let resolved_email = "b@test.test";
 
     let root_mock = server
         .mock("GET", "/user-entity/key")
@@ -119,7 +121,16 @@ async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
             "contactUserID": contact.contact_user_id
         })))
         .with_status(200)
-        .with_body(live_entity_json("ct_contact1", &contact, &root_key, None).to_string())
+        .with_body(
+            live_entity_json(
+                "ct_contact1",
+                &contact,
+                Some(resolved_email),
+                &root_key,
+                None,
+            )
+            .to_string(),
+        )
         .expect(1)
         .create_async()
         .await;
@@ -138,7 +149,7 @@ async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
     create_mock.assert_async().await;
     assert_eq!(created.id, "ct_contact1");
     assert_eq!(created.contact_user_id, contact.contact_user_id);
-    assert_eq!(created.email.as_deref(), Some(contact.email.as_str()));
+    assert_eq!(created.email.as_deref(), Some(resolved_email));
 }
 
 #[tokio::test]
@@ -149,6 +160,7 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
     let wrapped_root = wrap_root(&root_key, &master_key);
     let contact = sample_contact();
     let picture_bytes = b"profile-picture-bytes".to_vec();
+    let resolved_email = "b@test.test";
 
     let root_mock = server
         .mock("GET", "/user-entity/key")
@@ -167,7 +179,13 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
         .create_async()
         .await;
 
-    let current_entity = live_entity_json("ct_picture1", &contact, &root_key, None);
+    let current_entity = live_entity_json(
+        "ct_picture1",
+        &contact,
+        Some(resolved_email),
+        &root_key,
+        None,
+    );
 
     let get_contact_for_upload = server
         .mock("GET", "/contacts/ct_picture1")
@@ -209,7 +227,13 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
         .create_async()
         .await;
 
-    let attached_entity = live_entity_json("ct_picture1", &contact, &root_key, Some("ua_picture1"));
+    let attached_entity = live_entity_json(
+        "ct_picture1",
+        &contact,
+        Some(resolved_email),
+        &root_key,
+        Some("ua_picture1"),
+    );
     let commit_mock = server
         .mock("PUT", "/contacts/ct_picture1/profile-picture")
         .with_status(200)
@@ -266,7 +290,13 @@ async fn get_profile_picture_uses_signed_download_url() {
         .create_async()
         .await;
 
-    let attached_entity = live_entity_json("ct_picture1", &contact, &root_key, Some("ua_picture1"));
+    let attached_entity = live_entity_json(
+        "ct_picture1",
+        &contact,
+        Some("b@test.test"),
+        &root_key,
+        Some("ua_picture1"),
+    );
     let contact_key = contacts_crypto::unwrap_contact_key(
         attached_entity["encryptedKey"].as_str().unwrap(),
         &root_key,

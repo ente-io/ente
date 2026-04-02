@@ -64,9 +64,6 @@ pub fn validate_contact_data(data: &ContactData) -> Result<()> {
             "contact_user_id must be greater than 0".to_string(),
         ));
     }
-    if data.email.trim().is_empty() {
-        return Err(ContactsError::InvalidInput("email is required".to_string()));
-    }
     if data.name.trim().is_empty() {
         return Err(ContactsError::InvalidInput("name is required".to_string()));
     }

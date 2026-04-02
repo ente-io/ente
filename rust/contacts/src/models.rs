@@ -11,7 +11,6 @@ pub struct WrappedRootContactKey {
 #[serde(rename_all = "camelCase")]
 pub struct ContactData {
     pub contact_user_id: i64,
-    pub email: String,
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub birth_date: Option<String>,

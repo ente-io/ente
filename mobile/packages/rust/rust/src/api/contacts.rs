@@ -78,7 +78,6 @@ impl From<WrappedRootContactKey> for CoreWrappedRootContactKey {
 #[derive(Clone)]
 pub struct ContactData {
     pub contact_user_id: i64,
-    pub email: String,
     pub name: String,
     pub birth_date: Option<String>,
 }
@@ -87,7 +86,6 @@ impl From<ContactData> for CoreContactData {
     fn from(value: ContactData) -> Self {
         Self {
             contact_user_id: value.contact_user_id,
-            email: value.email,
             name: value.name,
             birth_date: value.birth_date,
         }
