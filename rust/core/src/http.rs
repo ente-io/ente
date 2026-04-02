@@ -95,6 +95,12 @@ pub struct HttpClient {
     client_version: Option<String>,
 }
 
+/// Bare HTTP client for presigned object-store transfers.
+#[derive(Clone)]
+pub struct ObjectStoreHttpClient {
+    client: reqwest::Client,
+}
+
 impl HttpClient {
     /// Create a client with the given base URL.
     pub fn new(base_url: &str) -> Result<Self, Error> {
@@ -140,6 +146,13 @@ impl HttpClient {
     /// Replace the auth token used for authenticated requests.
     pub fn set_auth_token(&self, auth_token: Option<String>) {
         *self.auth_token.write().expect("auth token lock poisoned") = auth_token;
+    }
+
+    /// Create a bare client for presigned object-store requests.
+    pub fn object_store(&self) -> ObjectStoreHttpClient {
+        ObjectStoreHttpClient {
+            client: self.client.clone(),
+        }
     }
 
     /// GET request, returns response body as text.
@@ -295,9 +308,21 @@ impl HttpClient {
 
     /// Download bytes from a URL, following redirects safely.
     pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>, Error> {
+        self.get_bytes_with_headers(url, |current_url| self.build_headers_for_url(current_url))
+            .await
+    }
+
+    async fn get_bytes_with_headers<F>(
+        &self,
+        url: &str,
+        headers_for_url: F,
+    ) -> Result<Vec<u8>, Error>
+    where
+        F: Fn(&Url) -> Result<HeaderMap, Error>,
+    {
         let mut current_url = self.parse_url(url)?;
         for _ in 0..5 {
-            let headers = self.build_headers_for_url(&current_url)?;
+            let headers = headers_for_url(&current_url)?;
             let response = self
                 .client
                 .get(current_url.clone())
@@ -374,28 +399,9 @@ impl HttpClient {
 
         Ok(format!("{}{}", self.base_url, path))
     }
-
     /// Ping the API, returns [PingResponse].
     pub async fn ping(&self) -> Result<PingResponse, Error> {
         self.get_json("/ping", &[]).await
-    }
-
-    fn request_url(&self, path: &str) -> Result<String, Error> {
-        if !path.starts_with('/') {
-            return Err(Error::InvalidUrl(
-                "request paths must start with '/'".to_string(),
-            ));
-        }
-
-        let base = Url::parse(&self.base_url)
-            .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
-        if base.query().is_some() || base.fragment().is_some() {
-            return Err(Error::InvalidUrl(
-                "base URL must not contain a query or fragment".to_string(),
-            ));
-        }
-
-        Ok(format!("{}{}", self.base_url, path))
     }
 
     fn parse_url(&self, url: &str) -> Result<Url, Error> {
@@ -463,6 +469,102 @@ impl HttpClient {
     }
 }
 
+impl ObjectStoreHttpClient {
+    /// Download bytes from a presigned URL without Ente headers.
+    pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>, Error> {
+        get_bytes_with_client(&self.client, url, |_| Ok(HeaderMap::new())).await
+    }
+
+    /// Upload raw bytes to a presigned URL without Ente headers.
+    pub async fn put_bytes(
+        &self,
+        url: &str,
+        body: &[u8],
+        headers: &[(&str, String)],
+    ) -> Result<(), Error> {
+        put_bytes_with_client(&self.client, url, body, headers).await
+    }
+}
+
+async fn get_bytes_with_client<F>(
+    client: &reqwest::Client,
+    url: &str,
+    headers_for_url: F,
+) -> Result<Vec<u8>, Error>
+where
+    F: Fn(&Url) -> Result<HeaderMap, Error>,
+{
+    let mut current_url = parse_url(url)?;
+    for _ in 0..5 {
+        let headers = headers_for_url(&current_url)?;
+        let response = client
+            .get(current_url.clone())
+            .headers(headers)
+            .send()
+            .await?;
+        if response.status().is_redirection()
+            && let Some(location) = response.headers().get(LOCATION)
+        {
+            current_url = resolve_redirect(&current_url, location)?;
+            continue;
+        }
+        return parse_bytes_response(response).await;
+    }
+
+    Err(Error::InvalidUrl("too many redirects".to_string()))
+}
+
+async fn put_bytes_with_client(
+    client: &reqwest::Client,
+    url: &str,
+    body: &[u8],
+    headers: &[(&str, String)],
+) -> Result<(), Error> {
+    let header_map = build_header_map(headers)?;
+    let mut current_url = parse_url(url)?;
+    for _ in 0..5 {
+        let response = client
+            .put(current_url.clone())
+            .headers(header_map.clone())
+            .body(body.to_vec())
+            .send()
+            .await?;
+        if response.status().is_redirection()
+            && let Some(location) = response.headers().get(LOCATION)
+        {
+            current_url = resolve_redirect(&current_url, location)?;
+            continue;
+        }
+        return parse_empty_response(response).await;
+    }
+
+    Err(Error::InvalidUrl("too many redirects".to_string()))
+}
+
+fn build_header_map(headers: &[(&str, String)]) -> Result<HeaderMap, Error> {
+    let mut header_map = HeaderMap::new();
+    for (name, value) in headers {
+        let header_name =
+            HeaderName::from_bytes(name.as_bytes()).map_err(|e| Error::Parse(e.to_string()))?;
+        let header_value = HeaderValue::from_str(value).map_err(|e| Error::Parse(e.to_string()))?;
+        header_map.insert(header_name, header_value);
+    }
+    Ok(header_map)
+}
+
+fn parse_url(url: &str) -> Result<Url, Error> {
+    Url::parse(url).map_err(|e| Error::InvalidUrl(format!("invalid url: {e}")))
+}
+
+fn resolve_redirect(current_url: &Url, location: &HeaderValue) -> Result<Url, Error> {
+    let next = location
+        .to_str()
+        .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))?;
+    Url::parse(next)
+        .or_else(|_| current_url.join(next))
+        .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))
+}
+
 async fn parse_text_response(response: Response) -> Result<String, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
@@ -523,6 +625,7 @@ fn path_contains_dot_segments(path: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mockito::{Matcher, Server};
 
     fn test_client(base_url: &str) -> HttpClient {
         HttpClient::new_with_config(HttpConfig {
@@ -605,5 +708,91 @@ mod tests {
         );
         client.set_auth_token(None);
         assert_eq!(client.auth_token.read().unwrap().clone(), None);
+    }
+
+    #[tokio::test]
+    async fn api_download_includes_auth_and_public_headers_for_same_origin_urls() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/download")
+            .match_header("x-auth-token", "auth-token")
+            .match_header("x-client-package", "io.ente.photos")
+            .match_header("x-client-version", "1.0.0")
+            .match_header("user-agent", "ente-core-test")
+            .with_status(200)
+            .with_body("ok")
+            .create_async()
+            .await;
+
+        let client = HttpClient::new_with_config(HttpConfig {
+            base_url: server.url(),
+            auth_token: Some("auth-token".to_string()),
+            user_agent: Some("ente-core-test".to_string()),
+            client_package: Some("io.ente.photos".to_string()),
+            client_version: Some("1.0.0".to_string()),
+            timeout_secs: None,
+        })
+        .unwrap();
+
+        let bytes = client
+            .get_bytes(&format!("{}/download", server.url()))
+            .await
+            .unwrap();
+
+        mock.assert_async().await;
+        assert_eq!(bytes, b"ok");
+    }
+
+    #[tokio::test]
+    async fn object_store_client_only_sends_explicit_headers() {
+        let mut server = Server::new_async().await;
+        let get_mock = server
+            .mock("GET", "/download")
+            .match_header("x-auth-token", Matcher::Missing)
+            .match_header("x-client-package", Matcher::Missing)
+            .match_header("x-client-version", Matcher::Missing)
+            .match_header("user-agent", Matcher::Missing)
+            .with_status(200)
+            .with_body("ok")
+            .create_async()
+            .await;
+        let put_mock = server
+            .mock("PUT", "/upload")
+            .match_header("content-md5", "digest")
+            .match_header("x-auth-token", Matcher::Missing)
+            .match_header("x-client-package", Matcher::Missing)
+            .match_header("x-client-version", Matcher::Missing)
+            .match_header("user-agent", Matcher::Missing)
+            .with_status(200)
+            .create_async()
+            .await;
+
+        let client = HttpClient::new_with_config(HttpConfig {
+            base_url: server.url(),
+            auth_token: Some("auth-token".to_string()),
+            user_agent: Some("ente-core-test".to_string()),
+            client_package: Some("io.ente.photos".to_string()),
+            client_version: Some("1.0.0".to_string()),
+            timeout_secs: None,
+        })
+        .unwrap();
+        let object_store = client.object_store();
+
+        let bytes = object_store
+            .get_bytes(&format!("{}/download", server.url()))
+            .await
+            .unwrap();
+        object_store
+            .put_bytes(
+                &format!("{}/upload", server.url()),
+                b"payload",
+                &[("Content-MD5", "digest".to_string())],
+            )
+            .await
+            .unwrap();
+
+        get_mock.assert_async().await;
+        put_mock.assert_async().await;
+        assert_eq!(bytes, b"ok");
     }
 }

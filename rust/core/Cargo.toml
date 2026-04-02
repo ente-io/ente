@@ -40,6 +40,7 @@ zeroize = { version = "1.8", features = ["derive"] }
 [dev-dependencies]
 chacha20 = "0.9.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+mockito = "1.6"
 
 # Keep SRP deps available for unit tests (the SRP module is compiled under cfg(test))
 srp = "0.6"
