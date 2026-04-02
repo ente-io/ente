@@ -964,14 +964,8 @@ class SearchService {
           ? kMinimumClusterSizeAllFaces
           : kMinimumClusterSizeSearchResult,
     );
-    final l10n = context != null ? AppLocalizations.of(context) : null;
     final pets = flagService.petEnabled
-        ? await getAllPets(
-            null,
-            dogLabel: l10n?.dog ?? "Dog",
-            catLabel: l10n?.cat ?? "Cat",
-            petLabel: l10n?.pet ?? "Pet",
-          )
+        ? await getAllPets(null)
         : <GenericSearchResult>[];
     if (limit != null && people.length + pets.length > limit) {
       // Reserve up to 1/3 of slots for pets, but no more than available.
@@ -1927,11 +1921,8 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getAllPets(
-    int? limit, {
-    String dogLabel = "Dog",
-    String catLabel = "Cat",
-    String petLabel = "Pet",
-  }) async {
+    int? limit,
+  ) async {
     try {
       final mlDataDB =
           isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
@@ -2035,19 +2026,10 @@ class SearchService {
       groups.sort((a, b) => b.$2.length.compareTo(a.$2.length));
 
       final List<GenericSearchResult> results = [];
-      final speciesCounters = <String, int>{};
-
       for (final (primaryClusterId, files, species, customName) in groups) {
-        final speciesLabel = species == 0
-            ? dogLabel
-            : species == 1
-                ? catLabel
-                : petLabel;
-        speciesCounters[speciesLabel] =
-            (speciesCounters[speciesLabel] ?? 0) + 1;
         final label = (customName != null && customName.isNotEmpty)
             ? customName
-            : "$speciesLabel ${speciesCounters[speciesLabel]}";
+            : "";
 
         results.add(
           GenericSearchResult(

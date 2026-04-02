@@ -251,18 +251,22 @@ dependency_overrides:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   media_kit_libs_ios_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: libs/ios/media_kit_libs_ios_video
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   media_kit_libs_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: libs/universal/media_kit_libs_video
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   media_kit_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   protobuf: ^3.1.0
   watcher: ^1.1.0
   win32: "5.10.1"

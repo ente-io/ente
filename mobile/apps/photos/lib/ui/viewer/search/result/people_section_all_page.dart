@@ -477,14 +477,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       showIgnoredOnly: _showingIgnoredPeople,
     );
     if (!_showingIgnoredPeople && flagService.petEnabled) {
-      final l10n = AppLocalizations.of(context);
       allFaces.addAll(
-        await SearchService.instance.getAllPets(
-          null,
-          dogLabel: l10n.dog,
-          catLabel: l10n.cat,
-          petLabel: l10n.pet,
-        ),
+        await SearchService.instance.getAllPets(null),
       );
     }
     normalFaces.clear();

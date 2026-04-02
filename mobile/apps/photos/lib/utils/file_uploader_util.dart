@@ -343,8 +343,10 @@ Future<void> _decorateEnteFileData(
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
     final latLong = await asset.latlngAsync();
-    file.location =
-        Location(latitude: latLong.latitude, longitude: latLong.longitude);
+    if (latLong != null) {
+      file.location =
+          Location(latitude: latLong.latitude, longitude: latLong.longitude);
+    }
   }
   if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
     final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
