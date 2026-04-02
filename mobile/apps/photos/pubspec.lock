@@ -594,6 +594,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_contacts:
+    dependency: "direct main"
+    description:
+      path: "../../packages/contacts"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_crypto:
     dependency: "direct main"
     description:
@@ -2577,6 +2584,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.5"
+  sqflite_common_ffi:
+    dependency: transitive
+    description:
+      name: sqflite_common_ffi
+      sha256: "9faa2fedc5385ef238ce772589f7718c24cdddd27419b609bb9c6f703ea27988"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
   sqflite_darwin:
     dependency: transitive
     description:
