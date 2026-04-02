@@ -96,7 +96,7 @@ pub struct HttpClient {
 
 impl HttpClient {
     /// Create a client with the given base URL.
-    pub fn new(base_url: &str) -> Self {
+    pub fn new(base_url: &str) -> Result<Self, Error> {
         Self::new_with_config(HttpConfig {
             base_url: base_url.to_string(),
             ..HttpConfig::default()
@@ -104,7 +104,7 @@ impl HttpClient {
     }
 
     /// Create a client with auth/header configuration.
-    pub fn new_with_config(config: HttpConfig) -> Self {
+    pub fn new_with_config(config: HttpConfig) -> Result<Self, Error> {
         let base_url = config.base_url.trim_end_matches('/').to_string();
         let base_origin = Url::parse(&base_url).ok().and_then(|base| {
             if base.query().is_none() && base.fragment().is_none() {
@@ -119,11 +119,9 @@ impl HttpClient {
             builder = builder.timeout(Duration::from_secs(timeout));
         }
 
-        let client = builder.build().unwrap_or_else(|e| {
-            panic!("failed to build HTTP client for '{}': {}", base_url, e);
-        });
+        let client = builder.build().map_err(Error::from)?;
 
-        Self {
+        Ok(Self {
             client,
             base_url,
             base_origin,
@@ -131,7 +129,7 @@ impl HttpClient {
             user_agent: config.user_agent,
             client_package: config.client_package,
             client_version: config.client_version,
-        }
+        })
     }
 
     /// Replace the auth token used for authenticated requests.
@@ -488,6 +486,7 @@ mod tests {
             base_url: base_url.to_string(),
             ..HttpConfig::default()
         })
+        .expect("test client creation should succeed")
     }
 
     #[test]
