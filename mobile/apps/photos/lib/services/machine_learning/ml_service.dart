@@ -19,12 +19,12 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
-import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
-import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
@@ -44,6 +44,9 @@ class MLService {
 
   int? lastRemoteFetch;
   static const int _kRemoteFetchCooldownOnLite = 1000 * 60 * 5;
+  static const int _kStartupOwnedRemoteHydrationMissingFileThreshold = 200;
+  Future<void>? _ownedRemoteHydrationFuture;
+  bool _hasScheduledStartupOwnedRemoteHydration = false;
 
   late String client;
 
@@ -87,6 +90,7 @@ class MLService {
   Future<void> init() async {
     if (_isInitialized) {
       _schedulePredownloadLocalModels();
+      scheduleStartupOwnedRemoteHydration();
       return;
     }
     _logger.info("init called");
@@ -138,6 +142,7 @@ class MLService {
 
     _isInitialized = true;
     _schedulePredownloadLocalModels();
+    scheduleStartupOwnedRemoteHydration();
     _logger.info('init done');
   }
 
@@ -171,6 +176,143 @@ class MLService {
       await MLIndexingIsolate.instance.ensureDownloadedModels();
     } catch (e, s) {
       _logger.warning("Failed to predownload local ML models", e, s);
+    }
+  }
+
+  void scheduleStartupOwnedRemoteHydration() {
+    if (_hasScheduledStartupOwnedRemoteHydration ||
+        isProcessBg ||
+        !hasGrantedMLConsent ||
+        isOfflineMode ||
+        !localSettings.remoteFetchEnabled) {
+      return;
+    }
+    _hasScheduledStartupOwnedRemoteHydration = true;
+    unawaited(_runStartupOwnedRemoteHydration());
+  }
+
+  Future<void> _runStartupOwnedRemoteHydration() async {
+    if (!hasGrantedMLConsent || isOfflineMode) {
+      return;
+    }
+    try {
+      await fileDataService.syncFDStatus();
+    } catch (e, s) {
+      _logger.warning(
+        "Skipping startup-owned remote ML hydration because FD status refresh failed",
+        e,
+        s,
+      );
+      return;
+    }
+    try {
+      await hydrateRemoteEmbeddingsForOwnedFiles(
+        reason: "startup",
+        skipHydrationIfCandidateFileCountAtMost:
+            _kStartupOwnedRemoteHydrationMissingFileThreshold,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Skipping startup-owned remote ML hydration because owned hydration failed",
+        e,
+        s,
+      );
+    }
+  }
+
+  Future<void> hydrateRemoteEmbeddingsForOwnedFiles({
+    required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
+  }) async {
+    if (isProcessBg ||
+        isOfflineMode ||
+        !hasGrantedMLConsent ||
+        !localSettings.remoteFetchEnabled) {
+      return;
+    }
+    final existing = _ownedRemoteHydrationFuture;
+    if (existing != null) {
+      _logger.info(
+        "Owned remote ML hydration already running, joining existing run ($reason)",
+      );
+      return existing;
+    }
+    final future = _runOwnedRemoteHydrationSafely(
+      reason: reason,
+      skipHydrationIfCandidateFileCountAtMost:
+          skipHydrationIfCandidateFileCountAtMost,
+    );
+    _ownedRemoteHydrationFuture = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_ownedRemoteHydrationFuture, future)) {
+        _ownedRemoteHydrationFuture = null;
+      }
+    }
+  }
+
+  Future<void> _runOwnedRemoteHydrationSafely({
+    required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
+  }) async {
+    try {
+      await _hydrateRemoteEmbeddingsForOwnedFilesInternal(
+        reason: reason,
+        skipHydrationIfCandidateFileCountAtMost:
+            skipHydrationIfCandidateFileCountAtMost,
+      );
+    } catch (e, s) {
+      _logger.warning("Owned remote ML hydration ($reason) failed", e, s);
+    }
+  }
+
+  Future<void> _hydrateRemoteEmbeddingsForOwnedFilesInternal({
+    required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
+  }) async {
+    final summary = await hydrateOwnedRemoteMLData(
+      mlDataDB: MLDataDB.instance,
+      skipHydrationIfCandidateFileCountAtMost:
+          skipHydrationIfCandidateFileCountAtMost,
+    );
+    if (summary.candidateFiles == 0) {
+      _logger.info(
+        "Skipping owned remote ML hydration ($reason): no owned files need remote hydration",
+      );
+      return;
+    }
+    if (summary.skippedDueToCandidateThreshold) {
+      _logger.info(
+        "Skipping owned remote ML hydration ($reason): only ${summary.candidateFiles} "
+        "owned files are missing remote ML data (threshold: > "
+        "$skipHydrationIfCandidateFileCountAtMost)",
+      );
+      return;
+    }
+    _logger.info(
+      "Owned remote ML hydration ($reason) finished for ${summary.candidateFiles} files "
+      "(faces hydrated: ${summary.hydratedFaces}, clip hydrated: ${summary.hydratedClips}, "
+      "still pending local ML: ${summary.remainingLocalMl})",
+    );
+  }
+
+  Future<void> _waitForOwnedRemoteHydrationIfRunning() async {
+    final existing = _ownedRemoteHydrationFuture;
+    if (existing == null) {
+      return;
+    }
+    _logger.info(
+      "Waiting for owned remote ML hydration to finish before indexing",
+    );
+    try {
+      await existing;
+    } catch (e, s) {
+      _logger.warning(
+        "Owned remote ML hydration failed while indexing was waiting, continuing",
+        e,
+        s,
+      );
     }
   }
 
@@ -299,6 +441,10 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
+    if (!_canRunMLFunction(function: "Indexing")) return;
+    if (mode == MLMode.online && !isOfflineMode) {
+      await _waitForOwnedRemoteHydrationIfRunning();
+    }
     if (!_canRunMLFunction(function: "Indexing")) return;
 
     bool rustRuntimePrepared = false;
