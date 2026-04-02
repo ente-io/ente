@@ -2,6 +2,7 @@ package contact
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"time"
@@ -31,6 +32,7 @@ type Controller struct {
 	tempStorage             string
 	replicateAttachmentFn   func(context.Context, contactmodel.Attachment, string) error
 	deleteAttachmentFn      func(contactmodel.Attachment, string) error
+	verifyAttachmentFn      func(string, string, int64) error
 }
 
 func New(
@@ -61,6 +63,7 @@ func New(
 	}
 	ctrl.replicateAttachmentFn = ctrl.replicateAttachmentObject
 	ctrl.deleteAttachmentFn = ctrl.deleteAttachmentObject
+	ctrl.verifyAttachmentFn = ctrl.verifyAttachmentSize
 	return ctrl
 }
 
@@ -144,26 +147,19 @@ func (c *Controller) Delete(ctx *gin.Context, contactID string) error {
 	return c.Repo.Delete(ctx, userID, contactID)
 }
 
-func (c *Controller) GetProfilePictureUploadURL(ctx *gin.Context, contactID string, req contactmodel.ProfilePictureUploadURLRequest) (*contactmodel.ProfilePictureUploadURL, error) {
-	if !contactmodel.IsValidContactID(contactID) {
-		return nil, ente.NewBadRequestWithMessage("invalid contact id")
+func (c *Controller) GetAttachmentUploadURL(ctx *gin.Context, attachmentTypeRaw string, req contactmodel.AttachmentUploadURLRequest) (*contactmodel.AttachmentUploadURL, error) {
+	attachmentType, policy, err := c.attachmentTypeAndPolicy(attachmentTypeRaw)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attachment type")
 	}
-	if err := req.Validate(); err != nil {
-		return nil, stacktrace.Propagate(err, "invalid profile picture upload-url request")
+	if err := req.Validate(policy); err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attachment upload-url request")
 	}
 
 	userID := auth.GetUserID(ctx.Request.Header)
-	entity, err := c.Repo.Get(ctx, userID, contactID)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	if entity.IsDeleted {
-		return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("contact is already deleted"), "")
-	}
-
 	attachmentID := contactmodel.NewAttachmentID()
-	objectKey := contactmodel.AttachmentObjectKey(userID, contactmodel.ProfilePicture, attachmentID)
-	dc := c.S3Config.GetAttachmentBucketID(string(contactmodel.ProfilePicture))
+	objectKey := contactmodel.AttachmentObjectKey(userID, attachmentType, attachmentID)
+	dc := c.S3Config.GetAttachmentBucketID(string(attachmentType))
 
 	s3Client := c.S3Config.GetS3Client(dc)
 	putReq, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
@@ -177,46 +173,68 @@ func (c *Controller) GetProfilePictureUploadURL(ctx *gin.Context, contactID stri
 		return nil, stacktrace.Propagate(err, "failed to presign profile picture upload url")
 	}
 	if err := c.ObjectCleanupController.AddTempObjectKey(objectKey, dc); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to stage temp object for profile picture upload")
+		return nil, stacktrace.Propagate(err, "failed to stage temp object for attachment upload")
 	}
 
-	return &contactmodel.ProfilePictureUploadURL{
+	return &contactmodel.AttachmentUploadURL{
 		AttachmentID: attachmentID,
 		URL:          url,
 	}, nil
 }
 
-func (c *Controller) AttachProfilePicture(ctx *gin.Context, contactID string, req contactmodel.CommitProfilePictureRequest) (*contactmodel.Entity, error) {
-	if !contactmodel.IsValidContactID(contactID) {
-		return nil, ente.NewBadRequestWithMessage("invalid contact id")
-	}
-	if err := req.Validate(); err != nil {
-		return nil, stacktrace.Propagate(err, "invalid attach profile picture request")
-	}
-	userID := auth.GetUserID(ctx.Request.Header)
-	return c.Repo.AttachProfilePicture(ctx, userID, contactID, req.AttachmentID, req.Size)
+func (c *Controller) GetProfilePictureUploadURL(ctx *gin.Context, req contactmodel.AttachmentUploadURLRequest) (*contactmodel.AttachmentUploadURL, error) {
+	return c.GetAttachmentUploadURL(ctx, string(contactmodel.ProfilePicture), req)
 }
 
-func (c *Controller) GetProfilePictureURL(ctx *gin.Context, contactID string) (*contactmodel.SignedURLResponse, error) {
+func (c *Controller) AttachContactAttachment(ctx *gin.Context, contactID string, attachmentTypeRaw string, req contactmodel.CommitAttachmentRequest) (*contactmodel.Entity, error) {
 	if !contactmodel.IsValidContactID(contactID) {
 		return nil, ente.NewBadRequestWithMessage("invalid contact id")
 	}
+	attachmentType, policy, err := c.attachmentTypeAndPolicy(attachmentTypeRaw)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attachment type")
+	}
+	if err := req.Validate(policy); err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attach attachment request")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
-	entity, err := c.Repo.Get(ctx, userID, contactID)
+	stagedBucketID, err := c.Repo.GetStagedAttachmentBucket(ctx, userID, attachmentType, req.AttachmentID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
+		if errors.Is(err, &ente.ErrNotFoundError) {
+			return nil, stacktrace.Propagate(
+				ente.NewBadRequestWithMessage("staged attachment upload not found"),
+				"",
+			)
+		}
+		return nil, stacktrace.Propagate(err, "failed to look up staged attachment")
 	}
-	if entity.IsDeleted || entity.ProfilePictureAttachmentID == nil {
-		return nil, &ente.ErrNotFoundError
+	objectKey := contactmodel.AttachmentObjectKey(userID, attachmentType, req.AttachmentID)
+	if err := c.verifyAttachmentFn(stagedBucketID, objectKey, req.Size); err != nil {
+		return nil, stacktrace.Propagate(err, "staged attachment verification failed")
 	}
-	attachment, err := c.Repo.GetAttachment(ctx, userID, *entity.ProfilePictureAttachmentID)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	if attachment.IsDeleted || attachment.AttachmentType != contactmodel.ProfilePicture {
-		return nil, &ente.ErrNotFoundError
-	}
+	return c.Repo.AttachContactAttachment(ctx, userID, contactID, attachmentType, req.AttachmentID, req.Size)
+}
 
+func (c *Controller) AttachProfilePicture(ctx *gin.Context, contactID string, req contactmodel.CommitAttachmentRequest) (*contactmodel.Entity, error) {
+	return c.AttachContactAttachment(ctx, contactID, string(contactmodel.ProfilePicture), req)
+}
+
+func (c *Controller) GetAttachmentURL(ctx *gin.Context, attachmentTypeRaw string, attachmentID string) (*contactmodel.SignedURLResponse, error) {
+	attachmentType, _, err := c.attachmentTypeAndPolicy(attachmentTypeRaw)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attachment type")
+	}
+	if !contactmodel.IsValidAttachmentID(attachmentID) {
+		return nil, ente.NewBadRequestWithMessage("invalid attachment id")
+	}
+	userID := auth.GetUserID(ctx.Request.Header)
+	attachment, err := c.Repo.GetAttachment(ctx, userID, attachmentID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if attachment.IsDeleted || attachment.AttachmentType != attachmentType {
+		return nil, &ente.ErrNotFoundError
+	}
 	objectKey := contactmodel.AttachmentObjectKey(userID, attachment.AttachmentType, attachment.AttachmentID)
 	s3Client := c.S3Config.GetS3Client(attachment.LatestBucket)
 	input := &s3.GetObjectInput{
@@ -232,12 +250,68 @@ func (c *Controller) GetProfilePictureURL(ctx *gin.Context, contactID string) (*
 	return &contactmodel.SignedURLResponse{URL: url}, nil
 }
 
-func (c *Controller) DeleteProfilePicture(ctx *gin.Context, contactID string) (*contactmodel.Entity, error) {
+func (c *Controller) GetCurrentContactAttachmentURL(ctx *gin.Context, contactID string, attachmentTypeRaw string) (*contactmodel.SignedURLResponse, error) {
 	if !contactmodel.IsValidContactID(contactID) {
 		return nil, ente.NewBadRequestWithMessage("invalid contact id")
 	}
+	attachmentType, _, err := c.attachmentTypeAndPolicy(attachmentTypeRaw)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attachment type")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
-	return c.Repo.DeleteProfilePicture(ctx, userID, contactID)
+	entity, err := c.Repo.Get(ctx, userID, contactID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if entity.IsDeleted {
+		return nil, &ente.ErrNotFoundError
+	}
+	attachmentID := c.currentAttachmentID(entity, attachmentType)
+	if attachmentID == nil {
+		return nil, &ente.ErrNotFoundError
+	}
+	return c.GetAttachmentURL(ctx, attachmentTypeRaw, *attachmentID)
+}
+
+func (c *Controller) GetProfilePictureURL(ctx *gin.Context, contactID string) (*contactmodel.SignedURLResponse, error) {
+	return c.GetCurrentContactAttachmentURL(ctx, contactID, string(contactmodel.ProfilePicture))
+}
+
+func (c *Controller) DeleteContactAttachment(ctx *gin.Context, contactID string, attachmentTypeRaw string) (*contactmodel.Entity, error) {
+	if !contactmodel.IsValidContactID(contactID) {
+		return nil, ente.NewBadRequestWithMessage("invalid contact id")
+	}
+	attachmentType, _, err := c.attachmentTypeAndPolicy(attachmentTypeRaw)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "invalid attachment type")
+	}
+	userID := auth.GetUserID(ctx.Request.Header)
+	return c.Repo.DeleteContactAttachment(ctx, userID, contactID, attachmentType)
+}
+
+func (c *Controller) DeleteProfilePicture(ctx *gin.Context, contactID string) (*contactmodel.Entity, error) {
+	return c.DeleteContactAttachment(ctx, contactID, string(contactmodel.ProfilePicture))
+}
+
+func (c *Controller) attachmentTypeAndPolicy(raw string) (contactmodel.AttachmentType, contactmodel.AttachmentPolicy, error) {
+	attachmentType, err := contactmodel.ParseAttachmentType(raw)
+	if err != nil {
+		return "", contactmodel.AttachmentPolicy{}, err
+	}
+	policy, err := attachmentType.Policy()
+	if err != nil {
+		return "", contactmodel.AttachmentPolicy{}, err
+	}
+	return attachmentType, policy, nil
+}
+
+func (c *Controller) currentAttachmentID(entity *contactmodel.Entity, attachmentType contactmodel.AttachmentType) *string {
+	switch attachmentType {
+	case contactmodel.ProfilePicture:
+		return entity.ProfilePictureAttachmentID
+	default:
+		return nil
+	}
 }
 
 func (c *Controller) StartReplication() error {

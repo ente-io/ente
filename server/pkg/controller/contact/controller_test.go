@@ -64,6 +64,9 @@ func setupContactControllerTest(t *testing.T) (*Controller, *sql.DB, *gin.Contex
 		SecretEncryptionKey: testutil.SecretEncryptionKey(),
 	}
 	ctrl := New(contactRepository, objectCleanupCtrl, s3Cfg)
+	ctrl.verifyAttachmentFn = func(bucketID string, objectKey string, expectedSize int64) error {
+		return nil
+	}
 	return ctrl, db, ctx, s3Cfg
 }
 
@@ -614,18 +617,18 @@ func TestUserAttachmentsRejectDuplicateBucketMembership(t *testing.T) {
 	}
 }
 
-func TestProfilePictureLifecycle(t *testing.T) {
+func TestAttachmentLifecycle(t *testing.T) {
 	ctrl, db, ctx, s3Cfg := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
 	created := createContactForTest(t, db, ctrl, ctx, 41, "wrapped-key-1", "payload-1")
 
-	upload1, err := ctrl.GetProfilePictureUploadURL(ctx, created.ID, contactmodel.ProfilePictureUploadURLRequest{
+	upload1, err := ctrl.GetAttachmentUploadURL(ctx, string(contactmodel.ProfilePicture), contactmodel.AttachmentUploadURLRequest{
 		ContentLength: 128,
 		ContentMD5:    "ZmFrZS1tZDU=",
 	})
 	if err != nil {
-		t.Fatalf("GetProfilePictureUploadURL() error = %v", err)
+		t.Fatalf("GetAttachmentUploadURL() error = %v", err)
 	}
 	if !strings.HasPrefix(upload1.AttachmentID, "ua_") {
 		t.Fatalf("attachment id = %q, want ua_ prefix", upload1.AttachmentID)
@@ -640,12 +643,12 @@ func TestProfilePictureLifecycle(t *testing.T) {
 		t.Fatalf("bucket_id = %q, want %q", bucketID, s3Cfg.GetAttachmentBucketID(string(contactmodel.ProfilePicture)))
 	}
 
-	withPicture, err := ctrl.AttachProfilePicture(ctx, created.ID, contactmodel.CommitProfilePictureRequest{
+	withPicture, err := ctrl.AttachContactAttachment(ctx, created.ID, string(contactmodel.ProfilePicture), contactmodel.CommitAttachmentRequest{
 		AttachmentID: upload1.AttachmentID,
 		Size:         128,
 	})
 	if err != nil {
-		t.Fatalf("AttachProfilePicture() error = %v", err)
+		t.Fatalf("AttachContactAttachment() error = %v", err)
 	}
 	if withPicture.ProfilePictureAttachmentID == nil || *withPicture.ProfilePictureAttachmentID != upload1.AttachmentID {
 		t.Fatalf("unexpected profile picture ref after attach: %+v", withPicture)
@@ -654,27 +657,27 @@ func TestProfilePictureLifecycle(t *testing.T) {
 		t.Fatalf("temp_objects row should be removed after attach, got err=%v bucket=%q", err, bucketID)
 	}
 
-	signedURL, err := ctrl.GetProfilePictureURL(ctx, created.ID)
+	signedURL, err := ctrl.GetAttachmentURL(ctx, string(contactmodel.ProfilePicture), upload1.AttachmentID)
 	if err != nil {
-		t.Fatalf("GetProfilePictureURL() error = %v", err)
+		t.Fatalf("GetAttachmentURL() error = %v", err)
 	}
 	if signedURL.URL == "" {
-		t.Fatal("expected signed profile picture url")
+		t.Fatal("expected signed attachment url")
 	}
 
-	upload2, err := ctrl.GetProfilePictureUploadURL(ctx, created.ID, contactmodel.ProfilePictureUploadURLRequest{
+	upload2, err := ctrl.GetAttachmentUploadURL(ctx, string(contactmodel.ProfilePicture), contactmodel.AttachmentUploadURLRequest{
 		ContentLength: 256,
 		ContentMD5:    "ZmFrZS1tZDUtMg==",
 	})
 	if err != nil {
-		t.Fatalf("second GetProfilePictureUploadURL() error = %v", err)
+		t.Fatalf("second GetAttachmentUploadURL() error = %v", err)
 	}
-	replaced, err := ctrl.AttachProfilePicture(ctx, created.ID, contactmodel.CommitProfilePictureRequest{
+	replaced, err := ctrl.AttachContactAttachment(ctx, created.ID, string(contactmodel.ProfilePicture), contactmodel.CommitAttachmentRequest{
 		AttachmentID: upload2.AttachmentID,
 		Size:         256,
 	})
 	if err != nil {
-		t.Fatalf("second AttachProfilePicture() error = %v", err)
+		t.Fatalf("second AttachContactAttachment() error = %v", err)
 	}
 	if replaced.ProfilePictureAttachmentID == nil || *replaced.ProfilePictureAttachmentID != upload2.AttachmentID {
 		t.Fatalf("unexpected profile picture ref after replace: %+v", replaced)
@@ -688,9 +691,9 @@ func TestProfilePictureLifecycle(t *testing.T) {
 		t.Fatalf("old attachment should be marked deleted after replace")
 	}
 
-	cleared, err := ctrl.DeleteProfilePicture(ctx, created.ID)
+	cleared, err := ctrl.DeleteContactAttachment(ctx, created.ID, string(contactmodel.ProfilePicture))
 	if err != nil {
-		t.Fatalf("DeleteProfilePicture() error = %v", err)
+		t.Fatalf("DeleteContactAttachment() error = %v", err)
 	}
 	if cleared.ProfilePictureAttachmentID != nil {
 		t.Fatalf("profile picture should be cleared, got %+v", cleared.ProfilePictureAttachmentID)
@@ -704,24 +707,68 @@ func TestProfilePictureLifecycle(t *testing.T) {
 	}
 }
 
+func TestAttachContactAttachmentFailsWhenStagedObjectVerificationFails(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+
+	created := createContactForTest(t, db, ctrl, ctx, 42, "wrapped-key-1", "payload-1")
+	upload, err := ctrl.GetAttachmentUploadURL(ctx, string(contactmodel.ProfilePicture), contactmodel.AttachmentUploadURLRequest{
+		ContentLength: 128,
+		ContentMD5:    "ZmFrZS1tZDU=",
+	})
+	if err != nil {
+		t.Fatalf("GetAttachmentUploadURL() error = %v", err)
+	}
+
+	ctrl.verifyAttachmentFn = func(bucketID string, objectKey string, expectedSize int64) error {
+		return errors.New("staged object missing")
+	}
+
+	if _, err := ctrl.AttachContactAttachment(ctx, created.ID, string(contactmodel.ProfilePicture), contactmodel.CommitAttachmentRequest{
+		AttachmentID: upload.AttachmentID,
+		Size:         128,
+	}); err == nil {
+		t.Fatal("expected attach to fail when staged object verification fails")
+	}
+
+	objectKey := contactmodel.AttachmentObjectKey(1, contactmodel.ProfilePicture, upload.AttachmentID)
+	var bucketID string
+	if err := db.QueryRow(`SELECT bucket_id FROM temp_objects WHERE object_key = $1`, objectKey).Scan(&bucketID); err != nil {
+		t.Fatalf("temp_objects row should remain after failed attach, err=%v", err)
+	}
+	if _, err := ctrl.Repo.GetAttachment(ctx, 1, upload.AttachmentID); err == nil {
+		t.Fatal("attachment row should not be created when staged verification fails")
+	} else if !errors.Is(err, &ente.ErrNotFoundError) {
+		t.Fatalf("unexpected GetAttachment error = %v", err)
+	}
+
+	refetched, err := ctrl.Get(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if refetched.ProfilePictureAttachmentID != nil {
+		t.Fatalf("contact should not reference profile picture after failed attach")
+	}
+}
+
 func TestDeleteContactMarksCurrentProfilePictureDeleted(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
 	created := createContactForTest(t, db, ctrl, ctx, 51, "wrapped-key-1", "payload-1")
-	upload, err := ctrl.GetProfilePictureUploadURL(ctx, created.ID, contactmodel.ProfilePictureUploadURLRequest{
+	upload, err := ctrl.GetAttachmentUploadURL(ctx, string(contactmodel.ProfilePicture), contactmodel.AttachmentUploadURLRequest{
 		ContentLength: 128,
 		ContentMD5:    "ZmFrZS1tZDU=",
 	})
 	if err != nil {
-		t.Fatalf("GetProfilePictureUploadURL() error = %v", err)
+		t.Fatalf("GetAttachmentUploadURL() error = %v", err)
 	}
-	withPicture, err := ctrl.AttachProfilePicture(ctx, created.ID, contactmodel.CommitProfilePictureRequest{
+	withPicture, err := ctrl.AttachContactAttachment(ctx, created.ID, string(contactmodel.ProfilePicture), contactmodel.CommitAttachmentRequest{
 		AttachmentID: upload.AttachmentID,
 		Size:         128,
 	})
 	if err != nil {
-		t.Fatalf("AttachProfilePicture() error = %v", err)
+		t.Fatalf("AttachContactAttachment() error = %v", err)
 	}
 	if withPicture.ProfilePictureAttachmentID == nil {
 		t.Fatal("expected profile picture ref before delete")
@@ -743,6 +790,45 @@ func TestDeleteContactMarksCurrentProfilePictureDeleted(t *testing.T) {
 	}
 	if deleted.ProfilePictureAttachmentID != nil {
 		t.Fatalf("deleted contact should not reference profile picture")
+	}
+}
+
+func TestAttachmentUploadURLRejectsInvalidType(t *testing.T) {
+	ctrl, _, ctx, _ := setupContactControllerTest(t)
+
+	_, err := ctrl.GetAttachmentUploadURL(ctx, "unknown_type", contactmodel.AttachmentUploadURLRequest{
+		ContentLength: 128,
+		ContentMD5:    "ZmFrZS1tZDU=",
+	})
+	if err == nil {
+		t.Fatal("expected invalid attachment type error")
+	}
+}
+
+func TestGetAttachmentURLRejectsWrongUserAndDeletedRows(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+	mustInsertTestUser(t, db, 2)
+
+	mustInsertAttachmentRow(t, db, "ua_owned", 1, false, "b2-eu-cen", nil, nil, nil)
+	if _, err := ctrl.GetAttachmentURL(ctx, string(contactmodel.ProfilePicture), "ua_owned"); err != nil {
+		t.Fatalf("GetAttachmentURL() for owner error = %v", err)
+	}
+
+	ctxOther := ctx.Copy()
+	ctxOther.Request = ctx.Request.Clone(ctx.Request.Context())
+	ctxOther.Request.Header.Set("X-Auth-User-ID", "2")
+	if _, err := ctrl.GetAttachmentURL(ctxOther, string(contactmodel.ProfilePicture), "ua_owned"); err == nil {
+		t.Fatal("expected wrong-user attachment lookup to fail")
+	}
+
+	mustInsertAttachmentRow(t, db, "ua_deleted", 1, true, "b2-eu-cen", nil, []string{"scw-eu-fr"}, nil)
+	if _, err := ctrl.GetAttachmentURL(ctx, string(contactmodel.ProfilePicture), "ua_deleted"); err == nil {
+		t.Fatal("expected deleted attachment lookup to fail")
+	}
+
+	if _, err := ctrl.GetAttachmentURL(ctx, "unknown_type", "ua_owned"); err == nil {
+		t.Fatal("expected invalid attachment type error")
 	}
 }
 

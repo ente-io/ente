@@ -233,7 +233,7 @@ func (r *Repository) Delete(ctx context.Context, userID int64, id string) error 
 	}
 
 	if entity.ProfilePictureAttachmentID != nil {
-		if err := markAttachmentDeletedTx(ctx, tx, userID, *entity.ProfilePictureAttachmentID); err != nil {
+		if err := markAttachmentDeletedTx(ctx, tx, userID, contactmodel.ProfilePicture, *entity.ProfilePictureAttachmentID); err != nil {
 			return stacktrace.Propagate(err, "")
 		}
 	}
@@ -295,7 +295,18 @@ func (r *Repository) TouchContactsForContactUser(ctx context.Context, contactUse
 	return stacktrace.Propagate(err, "failed to touch contacts for contact user")
 }
 
-func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, contactID string, attachmentID string, size int64) (*contactmodel.Entity, error) {
+func (r *Repository) AttachContactAttachment(
+	ctx context.Context,
+	userID int64,
+	contactID string,
+	attachmentType contactmodel.AttachmentType,
+	attachmentID string,
+	size int64,
+) (*contactmodel.Entity, error) {
+	policy, err := attachmentType.Policy()
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -310,7 +321,7 @@ func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, con
 		return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("contact is already deleted"), "")
 	}
 
-	objectKey := contactmodel.AttachmentObjectKey(userID, contactmodel.ProfilePicture, attachmentID)
+	objectKey := contactmodel.AttachmentObjectKey(userID, attachmentType, attachmentID)
 	var latestBucket string
 	if err := tx.QueryRowContext(
 		ctx,
@@ -318,9 +329,9 @@ func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, con
 		objectKey,
 	).Scan(&latestBucket); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("staged profile picture upload not found"), "")
+			return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("staged attachment upload not found"), "")
 		}
-		return nil, stacktrace.Propagate(err, "failed to fetch staged profile picture")
+		return nil, stacktrace.Propagate(err, "failed to fetch staged attachment")
 	}
 
 	if _, err := tx.ExecContext(
@@ -329,7 +340,7 @@ func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, con
 		 VALUES($1, $2, $3, $4, $5)`,
 		attachmentID,
 		userID,
-		string(contactmodel.ProfilePicture),
+		string(attachmentType),
 		size,
 		latestBucket,
 	); err != nil {
@@ -340,26 +351,31 @@ func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, con
 		return nil, stacktrace.Propagate(err, "failed to insert attachment row")
 	}
 
-	if entity.ProfilePictureAttachmentID != nil && *entity.ProfilePictureAttachmentID != "" {
-		if err := markAttachmentDeletedTx(ctx, tx, userID, *entity.ProfilePictureAttachmentID); err != nil {
+	currentAttachmentID := attachmentIDForPolicy(entity, policy)
+	if currentAttachmentID != nil && *currentAttachmentID != "" {
+		if err := markAttachmentDeletedTx(ctx, tx, userID, attachmentType, *currentAttachmentID); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 	}
 
+	updateSlotQuery := fmt.Sprintf(
+		`UPDATE contact_entity
+		    SET %s = $1
+		  WHERE id = $2 AND user_id = $3 AND is_deleted = FALSE`,
+		policy.SlotColumn,
+	)
 	if _, err := tx.ExecContext(
 		ctx,
-		`UPDATE contact_entity
-		    SET profile_picture_attachment_id = $1
-		  WHERE id = $2 AND user_id = $3 AND is_deleted = FALSE`,
+		updateSlotQuery,
 		attachmentID,
 		contactID,
 		userID,
 	); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to update contact profile picture")
+		return nil, stacktrace.Propagate(err, "failed to update contact attachment")
 	}
 
 	if err := r.ObjectCleanupRepo.RemoveTempObjectFromDC(ctx, tx, objectKey, latestBucket); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to remove profile picture from temp_objects")
+		return nil, stacktrace.Propagate(err, "failed to remove attachment from temp_objects")
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -368,7 +384,16 @@ func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, con
 	return r.Get(ctx, userID, contactID)
 }
 
-func (r *Repository) DeleteProfilePicture(ctx context.Context, userID int64, contactID string) (*contactmodel.Entity, error) {
+func (r *Repository) DeleteContactAttachment(
+	ctx context.Context,
+	userID int64,
+	contactID string,
+	attachmentType contactmodel.AttachmentType,
+) (*contactmodel.Entity, error) {
+	policy, err := attachmentType.Policy()
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -382,19 +407,24 @@ func (r *Repository) DeleteProfilePicture(ctx context.Context, userID int64, con
 	if entity.IsDeleted {
 		return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("contact is already deleted"), "")
 	}
-	if entity.ProfilePictureAttachmentID != nil {
-		if err := markAttachmentDeletedTx(ctx, tx, userID, *entity.ProfilePictureAttachmentID); err != nil {
+	currentAttachmentID := attachmentIDForPolicy(entity, policy)
+	if currentAttachmentID != nil {
+		if err := markAttachmentDeletedTx(ctx, tx, userID, attachmentType, *currentAttachmentID); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
+		clearSlotQuery := fmt.Sprintf(
+			`UPDATE contact_entity
+			    SET %s = NULL
+			  WHERE id = $1 AND user_id = $2 AND is_deleted = FALSE`,
+			policy.SlotColumn,
+		)
 		if _, err := tx.ExecContext(
 			ctx,
-			`UPDATE contact_entity
-			    SET profile_picture_attachment_id = NULL
-			  WHERE id = $1 AND user_id = $2 AND is_deleted = FALSE`,
+			clearSlotQuery,
 			contactID,
 			userID,
 		); err != nil {
-			return nil, stacktrace.Propagate(err, "failed to clear contact profile picture")
+			return nil, stacktrace.Propagate(err, "failed to clear contact attachment")
 		}
 	}
 	if err := tx.Commit(); err != nil {
@@ -422,6 +452,30 @@ func (r *Repository) GetAttachment(ctx context.Context, userID int64, attachment
 		return nil, stacktrace.Propagate(err, "failed to get attachment")
 	}
 	return attachment, nil
+}
+
+func (r *Repository) GetStagedAttachmentBucket(
+	ctx context.Context,
+	userID int64,
+	attachmentType contactmodel.AttachmentType,
+	attachmentID string,
+) (string, error) {
+	objectKey := contactmodel.AttachmentObjectKey(userID, attachmentType, attachmentID)
+	var bucketID string
+	err := r.DB.QueryRowContext(
+		ctx,
+		`SELECT bucket_id
+		   FROM temp_objects
+		  WHERE object_key = $1`,
+		objectKey,
+	).Scan(&bucketID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", &ente.ErrNotFoundError
+		}
+		return "", stacktrace.Propagate(err, "failed to fetch staged attachment bucket")
+	}
+	return bucketID, nil
 }
 
 func (r *Repository) AddBucket(row contactmodel.Attachment, bucketID string, columnName string) error {
@@ -661,7 +715,7 @@ func (r *Repository) getForUpdate(ctx context.Context, tx *sql.Tx, userID int64,
 	return entity, nil
 }
 
-func markAttachmentDeletedTx(ctx context.Context, tx *sql.Tx, userID int64, attachmentID string) error {
+func markAttachmentDeletedTx(ctx context.Context, tx *sql.Tx, userID int64, attachmentType contactmodel.AttachmentType, attachmentID string) error {
 	_, err := tx.ExecContext(
 		ctx,
 		`UPDATE user_attachments
@@ -681,9 +735,18 @@ func markAttachmentDeletedTx(ctx context.Context, tx *sql.Tx, userID int64, atta
 		    AND is_deleted = FALSE`,
 		attachmentID,
 		userID,
-		string(contactmodel.ProfilePicture),
+		string(attachmentType),
 	)
 	return stacktrace.Propagate(err, "failed to mark attachment deleted")
+}
+
+func attachmentIDForPolicy(entity *contactmodel.Entity, policy contactmodel.AttachmentPolicy) *string {
+	switch policy.Type {
+	case contactmodel.ProfilePicture:
+		return entity.ProfilePictureAttachmentID
+	default:
+		return nil
+	}
 }
 
 type rowScanner interface {
