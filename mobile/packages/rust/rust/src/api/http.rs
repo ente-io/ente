@@ -52,7 +52,7 @@ impl HttpClient {
     #[frb(sync)]
     pub fn new(base_url: String) -> HttpClient {
         Self {
-            inner: CoreHttpClient::new(&base_url),
+            inner: CoreHttpClient::new(&base_url).expect("failed to build HTTP client"),
         }
     }
 
