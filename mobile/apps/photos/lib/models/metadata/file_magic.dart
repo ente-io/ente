@@ -108,7 +108,8 @@ class PubMagicMetadata {
     return PubMagicMetadata(
       editedTime: map[editTimeKey],
       editedName: map[editNameKey],
-      caption: map[captionKey],
+      // Some legacy remote records have been seen with numeric captions.
+      caption: safeParseCaption(map[captionKey]),
       uploaderName: map[uploaderNameKey],
       w: safeParseInt(map[widthKey], widthKey),
       h: safeParseInt(map[heightKey], heightKey),
@@ -123,6 +124,13 @@ class PubMagicMetadata {
       offsetTime: map[offsetTimeKey],
       sv: safeParseInt(map[streamVersionKey], streamVersionKey),
     );
+  }
+
+  static String? safeParseCaption(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is num) return value.toString();
+    return null;
   }
 
   static int? safeParseInt(dynamic value, String key) {
