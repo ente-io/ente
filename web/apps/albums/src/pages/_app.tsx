@@ -1,7 +1,7 @@
 import { AlbumsAppProviders } from "@/app/providers/AlbumsAppProviders";
-import "@fontsource-variable/inter";
 import type { AppProps } from "next/app";
 
+import "@/app/styles/fonts.css";
 import "@/app/styles/global.css";
 import "photoswipe/dist/photoswipe.css";
 // Keep our PhotoSwipe overrides after the library CSS so the reduced z-index
