@@ -67,6 +67,7 @@ const LANE_GRID_CELL_SIZE_PX = 80;
 const LANE_GRID_LINE_COLOR = "#08c225";
 const LANE_GRID_LINE_OPACITY = 0.06;
 const LANE_GRID_DISPLACEMENT_SCALE = 9;
+const LANE_VERTICAL_STACK_GAP_PX = 32;
 
 /**
  * Primary viewer for lane-style public memory shares.
@@ -539,14 +540,8 @@ export function LaneMemoryViewer({
                     </LaneMobileHeaderSection>
                 ) : (
                     <LaneTopBar>
-                        <LaneDesktopTitle variant="h6">
-                            {laneTitle}
-                        </LaneDesktopTitle>
                         <LaneTopBrandSection>
-                            <LaneSharedUsingLabel>
-                                Shared using
-                            </LaneSharedUsingLabel>
-                            <BrandLink
+                            <LaneHeaderBrandLink
                                 href="https://ente.io"
                                 target="_blank"
                                 rel="noreferrer"
@@ -556,8 +551,20 @@ export function LaneMemoryViewer({
                                     src={ENTE_BRAND_TAG_IMAGE_PATH}
                                     alt="Ente Photos"
                                 />
-                            </BrandLink>
+                            </LaneHeaderBrandLink>
                         </LaneTopBrandSection>
+                        <LaneTopActionSection>
+                            <LaneHeaderJoinNowButton
+                                variant="contained"
+                                color="accent"
+                                disableElevation
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                Try Ente
+                            </LaneHeaderJoinNowButton>
+                        </LaneTopActionSection>
                     </LaneTopBar>
                 )}
 
@@ -788,6 +795,11 @@ export function LaneMemoryViewer({
                             onScrub={handleScrub}
                             onScrubEnd={handleScrubEnd}
                         />
+                        {!isCompactLaneLayout && (
+                            <LaneSliderTitle variant="h6">
+                                {laneTitle}
+                            </LaneSliderTitle>
+                        )}
                     </LaneBottomSection>
                 </LaneCenterSection>
                 <LaneFooter>
@@ -812,21 +824,10 @@ export function LaneMemoryViewer({
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                Join now
+                                Try Ente
                             </MobileJoinNowButton>
                         </ViewerFooterBar>
-                    ) : (
-                        <JoinNowButton
-                            variant="contained"
-                            color="accent"
-                            disableElevation
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Join now
-                        </JoinNowButton>
-                    )}
+                    ) : null}
                 </LaneFooter>
             </LaneContentContainer>
         </ViewerRoot>
@@ -1085,31 +1086,42 @@ const LaneTopBar = styled("div")({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "48px",
-});
-
-const LaneDesktopTitle = styled(Typography)({
-    color: "white",
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 500,
-    fontSize: "27px",
-    lineHeight: "24px",
-    letterSpacing: "-1px",
-    textAlign: "left",
-    whiteSpace: "normal",
-    overflowWrap: "anywhere",
-    maxWidth: "70%",
-    "@media (max-width: 900px)": {
-        fontSize: "22px",
-        lineHeight: "22px",
-        letterSpacing: "0px",
-    },
+    minHeight: "64px",
+    gap: "20px",
 });
 
 const LaneTopBrandSection = styled("div")({
     display: "flex",
     alignItems: "center",
     gap: "12px",
+});
+
+const LaneHeaderBrandLink = styled(BrandLink)({
+    "& img": { width: "98px" },
+    "@media (max-width: 900px)": { "& img": { width: "84px" } },
+});
+
+const LaneTopActionSection = styled("div")({
+    display: "flex",
+    alignItems: "center",
+});
+
+const LaneHeaderJoinNowButton = styled(JoinNowButton)({
+    fontSize: "17px",
+    paddingBlock: "14px",
+    paddingInline: "30px",
+});
+
+const LaneSliderTitle = styled(Typography)({
+    color: "rgba(255, 255, 255, 0.42)",
+    fontWeight: 300,
+    fontSize: "14px",
+    lineHeight: 1.15,
+    letterSpacing: "-0.01em",
+    textAlign: "center",
+    whiteSpace: "normal",
+    overflowWrap: "anywhere",
+    maxWidth: "min(42vw, 420px)",
 });
 
 const LaneCenterSection = styled("div")({
@@ -1120,8 +1132,9 @@ const LaneCenterSection = styled("div")({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "38px",
-    "@media (max-width: 900px)": { gap: "28px" },
+    gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
+    transform: "translateY(-28px)",
+    "@media (max-width: 900px)": { transform: "translateY(0)" },
 });
 
 const LaneFooter = styled("div")({
@@ -1135,17 +1148,6 @@ const LaneFooter = styled("div")({
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         paddingBottom: 0,
     },
-});
-
-const LaneSharedUsingLabel = styled("span")({
-    color: "rgba(255, 255, 255, 0.53)",
-    fontFamily: "var(--font-itim), cursive",
-    fontStyle: "normal",
-    fontWeight: 400,
-    fontSize: "24px",
-    lineHeight: "13px",
-    textAlign: "center",
-    whiteSpace: "nowrap",
 });
 
 const LaneCardStack = styled("div")({ position: "relative", flexShrink: 0 });
@@ -1188,7 +1190,7 @@ const LaneBottomSection = styled("div")({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "flex-end",
-    gap: "20px",
+    gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
     width: "100%",
     paddingBottom: 0,
 });
@@ -1216,10 +1218,9 @@ const LanePlaybackButton = styled("button")({
 
 const LaneCaption = styled("div")({
     color: "rgba(255, 255, 255, 0.53)",
-    fontFamily: "var(--font-itim), cursive",
-    fontStyle: "normal",
-    fontWeight: 400,
+    fontWeight: 600,
     fontSize: "24px",
+    letterSpacing: "-0.01em",
     lineHeight: 1.15,
     textAlign: "center",
     whiteSpace: "normal",

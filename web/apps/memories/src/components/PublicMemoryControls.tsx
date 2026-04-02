@@ -32,10 +32,9 @@ const LaneCaptionInline = styled("span")({
 
 const LaneCaptionNumber = styled("span")({
     color: "rgba(255, 255, 255, 0.9)",
-    fontFamily: "var(--font-itim), cursive",
     fontSize: "24px",
-    fontStyle: "normal",
-    fontWeight: 400,
+    fontWeight: 600,
+    letterSpacing: "-0.01em",
     lineHeight: 1.1,
     display: "inline-flex",
     minWidth: "2ch",
