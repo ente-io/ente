@@ -1,7 +1,6 @@
-import { Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import { Stack100vhCenter } from "ente-base/components/containers";
 import { CustomHead } from "ente-base/components/Head";
-import { LoadingIndicator } from "ente-base/components/loaders";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
 
@@ -28,7 +27,9 @@ export function PublicMemoryPageShell({ children }: PropsWithChildren) {
 export function PublicMemoryLoadingState() {
     return (
         <PublicMemoryPageShell>
-            <LoadingIndicator />
+            <Stack100vhCenter sx={{ minHeight: "100dvh" }}>
+                <CircularProgress sx={{ color: "#08c225" }} size={32} />
+            </Stack100vhCenter>
         </PublicMemoryPageShell>
     );
 }

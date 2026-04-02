@@ -17,6 +17,7 @@ const LaneCaptionInline = styled("span")({
     alignItems: "center",
     justifyContent: "center",
     flexWrap: "wrap",
+    gap: "4px",
     textAlign: "center",
 });
 
@@ -26,7 +27,7 @@ const LaneCaptionNumber = styled("span")({
     fontSize: "24px",
     fontStyle: "normal",
     fontWeight: 400,
-    lineHeight: "7.801px",
+    lineHeight: 1.1,
     display: "inline-flex",
     minWidth: "2ch",
     justifyContent: "center",

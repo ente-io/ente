@@ -1,5 +1,4 @@
-import { Box, Typography } from "@mui/material";
-import { LoadingIndicator } from "ente-base/components/loaders";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import log from "ente-base/log";
 import {
     downloadManager,
@@ -19,8 +18,8 @@ import {
 import type { PublicMemoryShareFrameCrop } from "../services/public-memory";
 import { computeMediaCropStyle } from "../utils/lane";
 
-const DEFAULT_MEDIA_MAX_WIDTH_CSS = "min(1264px, calc(100vw - 48px))";
-const DEFAULT_MEDIA_MAX_HEIGHT_CSS = "calc(min(100vh, 100dvh) - 220px)";
+const DEFAULT_MEDIA_MAX_WIDTH_CSS = "min(1360px, calc(100vw - 32px))";
+const DEFAULT_MEDIA_MAX_HEIGHT_CSS = "calc(100dvh - 184px)";
 
 const buildMediaStyle = ({
     cropRect,
@@ -68,7 +67,7 @@ function MediaLoadingOverlay() {
                 zIndex: 2,
             }}
         >
-            <LoadingIndicator />
+            <CircularProgress sx={{ color: "#08c225" }} size={32} />
         </Box>
     );
 }
