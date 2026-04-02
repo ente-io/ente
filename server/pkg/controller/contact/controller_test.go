@@ -3,10 +3,12 @@ package contact
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/ente-io/museum/ente"
 	contactmodel "github.com/ente-io/museum/ente/contact"
 	"github.com/ente-io/museum/internal/testutil"
 	basecontroller "github.com/ente-io/museum/pkg/controller"
@@ -51,8 +53,18 @@ func setupContactControllerTest(t *testing.T) (*Controller, *sql.DB, *gin.Contex
 	return ctrl, db, ctx, s3Cfg
 }
 
-func createContactForTest(t *testing.T, ctrl *Controller, ctx *gin.Context, contactUserID int64, encryptedKey string, encryptedData string) *contactmodel.Entity {
+func createContactForTest(
+	t *testing.T,
+	db *sql.DB,
+	ctrl *Controller,
+	ctx *gin.Context,
+	contactUserID int64,
+	encryptedKey string,
+	encryptedData string,
+) *contactmodel.Entity {
 	t.Helper()
+	mustInsertTestUser(t, db, contactUserID)
+	mustInsertEmergencyContact(t, db, 1, contactUserID, ente.UserInvitedContact)
 	entity, err := ctrl.Create(ctx, contactmodel.CreateRequest{
 		ContactUserID: contactUserID,
 		EncryptedKey:  []byte(encryptedKey),
@@ -66,18 +78,159 @@ func createContactForTest(t *testing.T, ctrl *Controller, ctx *gin.Context, cont
 
 func mustInsertTestUser(t *testing.T, db *sql.DB, userID int64) {
 	t.Helper()
+	var existing int64
+	err := db.QueryRow(`SELECT user_id FROM users WHERE user_id = $1`, userID).Scan(&existing)
+	if err == nil {
+		return
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("failed to check existing user %d: %v", userID, err)
+	}
+
 	testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       userID,
-		Email:        "contacts-owner@ente.io",
+		Email:        fmt.Sprintf("contacts-%d@ente.io", userID),
 		CreationTime: 1,
 	})
+}
+
+func mustInsertEmergencyContact(
+	t *testing.T,
+	db *sql.DB,
+	userID int64,
+	emergencyContactID int64,
+	state ente.ContactState,
+) {
+	t.Helper()
+	mustInsertTestUser(t, db, userID)
+	mustInsertTestUser(t, db, emergencyContactID)
+
+	var encryptedKey *string
+	if state == ente.UserInvitedContact || state == ente.ContactAccepted {
+		value := "encrypted-emergency-key"
+		encryptedKey = &value
+	}
+	_, err := db.Exec(
+		`INSERT INTO emergency_contact(
+		    user_id, emergency_contact_id, state, notice_period_in_hrs, encrypted_key
+		) VALUES($1, $2, $3, $4, $5)`,
+		userID,
+		emergencyContactID,
+		state,
+		24,
+		encryptedKey,
+	)
+	if err != nil {
+		t.Fatalf(
+			"failed to insert emergency contact relationship %d->%d in state %s: %v",
+			userID,
+			emergencyContactID,
+			state,
+			err,
+		)
+	}
+}
+
+func mustSetSharedFamilyAdmin(t *testing.T, db *sql.DB, adminID int64, memberIDs ...int64) {
+	t.Helper()
+	mustInsertTestUser(t, db, adminID)
+
+	if _, err := db.Exec(
+		`UPDATE users SET family_admin_id = $1 WHERE user_id = $1`,
+		adminID,
+	); err != nil {
+		t.Fatalf("failed to set family_admin_id for admin %d: %v", adminID, err)
+	}
+	if _, err := db.Exec(
+		`INSERT INTO families(id, admin_id, member_id, status) VALUES(gen_random_uuid(), $1, $1, $2)
+		 ON CONFLICT (admin_id, member_id) DO NOTHING`,
+		adminID,
+		ente.SELF,
+	); err != nil {
+		t.Fatalf("failed to insert self family membership for admin %d: %v", adminID, err)
+	}
+
+	for _, memberID := range memberIDs {
+		mustInsertTestUser(t, db, memberID)
+		if _, err := db.Exec(
+			`UPDATE users SET family_admin_id = $1 WHERE user_id = $2`,
+			adminID,
+			memberID,
+		); err != nil {
+			t.Fatalf("failed to set family_admin_id for member %d: %v", memberID, err)
+		}
+		if _, err := db.Exec(
+			`INSERT INTO families(id, admin_id, member_id, status) VALUES(gen_random_uuid(), $1, $2, $3)
+			 ON CONFLICT (admin_id, member_id) DO NOTHING`,
+			adminID,
+			memberID,
+			ente.ACCEPTED,
+		); err != nil {
+			t.Fatalf("failed to insert active family membership %d->%d: %v", adminID, memberID, err)
+		}
+	}
+}
+
+func mustInsertFamilyInvite(t *testing.T, db *sql.DB, adminID int64, memberID int64) {
+	t.Helper()
+	mustInsertTestUser(t, db, adminID)
+	mustInsertTestUser(t, db, memberID)
+	if _, err := db.Exec(
+		`INSERT INTO families(id, admin_id, member_id, status, token) VALUES(gen_random_uuid(), $1, $2, $3, $4)`,
+		adminID,
+		memberID,
+		ente.INVITED,
+		fmt.Sprintf("invite-token-%d-%d", adminID, memberID),
+	); err != nil {
+		t.Fatalf("failed to insert invited family relationship %d->%d: %v", adminID, memberID, err)
+	}
+}
+
+func mustInsertSharedCollection(t *testing.T, db *sql.DB, ownerID int64, shareeIDs ...int64) int64 {
+	t.Helper()
+	mustInsertTestUser(t, db, ownerID)
+	var collectionID int64
+	err := db.QueryRow(
+		`INSERT INTO collections(owner_id, encrypted_key, key_decryption_nonce, name, type, attributes, updation_time, is_deleted, app)
+		 VALUES($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9)
+		 RETURNING collection_id`,
+		ownerID,
+		"encrypted-key",
+		"key-nonce",
+		"Test collection",
+		"album",
+		"{}",
+		int64(1),
+		false,
+		string(ente.Photos),
+	).Scan(&collectionID)
+	if err != nil {
+		t.Fatalf("failed to insert shared collection for owner %d: %v", ownerID, err)
+	}
+	for _, shareeID := range shareeIDs {
+		mustInsertTestUser(t, db, shareeID)
+		if _, err := db.Exec(
+			`INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type, shared_at)
+			 VALUES($1, $2, $3, $4, $5, $6, $7)`,
+			collectionID,
+			ownerID,
+			shareeID,
+			"share-key",
+			int64(1),
+			string(ente.VIEWER),
+			int64(1),
+		); err != nil {
+			t.Fatalf("failed to insert collection share for collection %d to user %d: %v", collectionID, shareeID, err)
+		}
+	}
+	return collectionID
 }
 
 func TestContactCRUDAndDiff(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
-	created := createContactForTest(t, ctrl, ctx, 11, "wrapped-key-1", "payload-1")
+	created := createContactForTest(t, db, ctrl, ctx, 11, "wrapped-key-1", "payload-1")
 	if !strings.HasPrefix(created.ID, "ct_") {
 		t.Fatalf("contact id = %q, want ct_ prefix", created.ID)
 	}
@@ -143,7 +296,7 @@ func TestCreateContactRejectsDuplicateContactUserID(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
-	createContactForTest(t, ctrl, ctx, 21, "wrapped-key-1", "payload-1")
+	createContactForTest(t, db, ctrl, ctx, 21, "wrapped-key-1", "payload-1")
 	_, err := ctrl.Create(ctx, contactmodel.CreateRequest{
 		ContactUserID: 21,
 		EncryptedKey:  []byte("wrapped-key-2"),
@@ -154,11 +307,174 @@ func TestCreateContactRejectsDuplicateContactUserID(t *testing.T) {
 	}
 }
 
+func TestCreateContactRequiresEligibleRelationship(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+	mustInsertTestUser(t, db, 71)
+
+	_, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+		ContactUserID: 71,
+		EncryptedKey:  []byte("wrapped-key"),
+		EncryptedData: []byte("payload"),
+	})
+	if err == nil {
+		t.Fatal("expected ineligible contact create to fail")
+	}
+	if !strings.Contains(err.Error(), "not eligible to be added as a contact") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestCreateContactAllowedForEmergencyRelationshipInEitherDirection(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup func(t *testing.T, db *sql.DB)
+	}{
+		{
+			name: "actor invited target",
+			setup: func(t *testing.T, db *sql.DB) {
+				mustInsertEmergencyContact(t, db, 1, 72, ente.UserInvitedContact)
+			},
+		},
+		{
+			name: "target invited actor",
+			setup: func(t *testing.T, db *sql.DB) {
+				mustInsertEmergencyContact(t, db, 72, 1, ente.UserInvitedContact)
+			},
+		},
+		{
+			name: "accepted relationship",
+			setup: func(t *testing.T, db *sql.DB) {
+				mustInsertEmergencyContact(t, db, 1, 72, ente.ContactAccepted)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl, db, ctx, _ := setupContactControllerTest(t)
+			mustInsertTestUser(t, db, 1)
+			mustInsertTestUser(t, db, 72)
+			tc.setup(t, db)
+
+			created, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+				ContactUserID: 72,
+				EncryptedKey:  []byte("wrapped-key"),
+				EncryptedData: []byte("payload"),
+			})
+			if err != nil {
+				t.Fatalf("Create() error = %v", err)
+			}
+			if created.ContactUserID != 72 {
+				t.Fatalf("contactUserID = %d, want 72", created.ContactUserID)
+			}
+		})
+	}
+}
+
+func TestCreateContactRejectsHistoricalEmergencyRelationship(t *testing.T) {
+	states := []ente.ContactState{
+		ente.UserRevokedContact,
+		ente.ContactLeft,
+		ente.ContactDenied,
+	}
+
+	for _, state := range states {
+		t.Run(string(state), func(t *testing.T) {
+			ctrl, db, ctx, _ := setupContactControllerTest(t)
+			mustInsertTestUser(t, db, 1)
+			mustInsertEmergencyContact(t, db, 1, 73, state)
+
+			_, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+				ContactUserID: 73,
+				EncryptedKey:  []byte("wrapped-key"),
+				EncryptedData: []byte("payload"),
+			})
+			if err == nil {
+				t.Fatalf("expected state %s to be ineligible", state)
+			}
+		})
+	}
+}
+
+func TestCreateContactAllowedForSharedActiveFamily(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustSetSharedFamilyAdmin(t, db, 90, 1, 74)
+
+	created, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+		ContactUserID: 74,
+		EncryptedKey:  []byte("wrapped-key"),
+		EncryptedData: []byte("payload"),
+	})
+	if err != nil {
+		t.Fatalf("Create() error = %v", err)
+	}
+	if created.ContactUserID != 74 {
+		t.Fatalf("contactUserID = %d, want 74", created.ContactUserID)
+	}
+}
+
+func TestCreateContactRejectsInactiveFamilyRelationship(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+	mustInsertFamilyInvite(t, db, 91, 75)
+
+	_, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+		ContactUserID: 75,
+		EncryptedKey:  []byte("wrapped-key"),
+		EncryptedData: []byte("payload"),
+	})
+	if err == nil {
+		t.Fatal("expected invited-only family relationship to be ineligible")
+	}
+}
+
+func TestCreateContactAllowedForSharedCollectionAccess(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup func(t *testing.T, db *sql.DB)
+	}{
+		{
+			name: "owner shared directly with contact",
+			setup: func(t *testing.T, db *sql.DB) {
+				mustInsertSharedCollection(t, db, 1, 76)
+			},
+		},
+		{
+			name: "both share same third-party collection",
+			setup: func(t *testing.T, db *sql.DB) {
+				mustInsertSharedCollection(t, db, 300, 1, 76)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl, db, ctx, _ := setupContactControllerTest(t)
+			mustInsertTestUser(t, db, 1)
+			mustInsertTestUser(t, db, 76)
+			tc.setup(t, db)
+
+			created, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+				ContactUserID: 76,
+				EncryptedKey:  []byte("wrapped-key"),
+				EncryptedData: []byte("payload"),
+			})
+			if err != nil {
+				t.Fatalf("Create() error = %v", err)
+			}
+			if created.ContactUserID != 76 {
+				t.Fatalf("contactUserID = %d, want 76", created.ContactUserID)
+			}
+		})
+	}
+}
+
 func TestContactEntityEncryptedKeyIsImmutable(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
-	created := createContactForTest(t, ctrl, ctx, 31, "wrapped-key-1", "payload-1")
+	created := createContactForTest(t, db, ctrl, ctx, 31, "wrapped-key-1", "payload-1")
 	if _, err := db.Exec(`UPDATE contact_entity SET encrypted_key = $1 WHERE id = $2`, []byte("wrapped-key-2"), created.ID); err == nil {
 		t.Fatal("expected encrypted_key update to fail")
 	}
@@ -168,7 +484,7 @@ func TestDeletedContactMustClearProfilePictureReference(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
-	created := createContactForTest(t, ctrl, ctx, 35, "wrapped-key-1", "payload-1")
+	created := createContactForTest(t, db, ctrl, ctx, 35, "wrapped-key-1", "payload-1")
 	if _, err := db.Exec(
 		`UPDATE contact_entity
 		    SET is_deleted = TRUE, encrypted_data = NULL, profile_picture_attachment_id = $1
@@ -204,7 +520,7 @@ func TestProfilePictureLifecycle(t *testing.T) {
 	ctrl, db, ctx, s3Cfg := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
-	created := createContactForTest(t, ctrl, ctx, 41, "wrapped-key-1", "payload-1")
+	created := createContactForTest(t, db, ctrl, ctx, 41, "wrapped-key-1", "payload-1")
 
 	upload1, err := ctrl.GetProfilePictureUploadURL(ctx, created.ID, contactmodel.ProfilePictureUploadURLRequest{
 		ContentLength: 128,
@@ -294,7 +610,7 @@ func TestDeleteContactMarksCurrentProfilePictureDeleted(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)
 
-	created := createContactForTest(t, ctrl, ctx, 51, "wrapped-key-1", "payload-1")
+	created := createContactForTest(t, db, ctrl, ctx, 51, "wrapped-key-1", "payload-1")
 	upload, err := ctrl.GetProfilePictureUploadURL(ctx, created.ID, contactmodel.ProfilePictureUploadURLRequest{
 		ContentLength: 128,
 		ContentMD5:    "ZmFrZS1tZDU=",
