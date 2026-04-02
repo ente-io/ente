@@ -20,7 +20,8 @@ ENV NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=ENTE_PHOTOS_ORIGIN_PLACEHOLDER
 # `yarn install` is flaky on the GitHub arm64 runners otherwise.
 RUN yarn config set network-timeout 900000 -g
 
-RUN yarn install
+RUN corepack enable && corepack prepare yarn@1.22.22 --activate
+RUN yarn install --frozen-lockfile
 RUN yarn build:photos
 RUN yarn build:albums
 RUN yarn build:accounts
