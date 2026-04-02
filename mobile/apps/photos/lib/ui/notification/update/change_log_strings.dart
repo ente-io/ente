@@ -15,12 +15,12 @@ class ChangeLogStrings {
   const ChangeLogStrings({
     required this.title1,
     required this.desc1,
-    required this.desc1Item1,
-    required this.desc1Item2,
-    required this.title2,
-    required this.desc2,
-    required this.title3,
-    required this.desc3,
+    this.desc1Item1 = '',
+    this.desc1Item2 = '',
+    this.title2 = '',
+    this.desc2 = '',
+    this.title3 = '',
+    this.desc3 = '',
     this.title4 = '',
     this.desc4 = '',
   });
