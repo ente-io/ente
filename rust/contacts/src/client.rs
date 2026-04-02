@@ -42,6 +42,7 @@ pub struct OpenContactsCtxResult {
 pub struct ContactsCtx {
     user_id: i64,
     http: HttpClient,
+    object_store_http: ente_core::http::ObjectStoreHttpClient,
     master_key: Arc<RwLock<SecretVec>>,
     root_contact_key: Arc<RwLock<SecretVec>>,
     wrapped_root_key: Arc<RwLock<WrappedRootContactKey>>,
@@ -101,6 +102,7 @@ impl ContactsCtx {
 
         let ctx = Self {
             user_id: input.user_id,
+            object_store_http: http.object_store(),
             http,
             master_key: Arc::new(RwLock::new(SecretVec::new(input.master_key))),
             root_contact_key: Arc::new(RwLock::new(SecretVec::new(root_contact_key))),
@@ -269,7 +271,7 @@ impl ContactsCtx {
             )
             .await?;
 
-        self.http
+        self.object_store_http
             .put_bytes(
                 &upload.url,
                 &encrypted_picture,
@@ -315,7 +317,7 @@ impl ContactsCtx {
             .http
             .get_json::<SignedUrlResponse>(&format!("/contacts/{contact_id}/profile-picture"), &[])
             .await?;
-        let encrypted_picture = self.http.get_bytes(&download.url).await?;
+        let encrypted_picture = self.object_store_http.get_bytes(&download.url).await?;
         contacts_crypto::decrypt_profile_picture(&encrypted_picture, &contact_key)
     }
 

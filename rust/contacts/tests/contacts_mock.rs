@@ -196,16 +196,6 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
         .await;
 
     let upload_url = format!("{}/upload/ua_picture1", server.url());
-    let encrypted_picture = {
-        let contact_key = contacts_crypto::unwrap_contact_key(
-            current_entity["encryptedKey"].as_str().unwrap(),
-            &root_key,
-        )
-        .unwrap();
-        contacts_crypto::encrypt_profile_picture(&picture_bytes, &contact_key).unwrap()
-    };
-    let _content_md5 = contacts_crypto::content_md5_base64(&encrypted_picture);
-
     let upload_url_mock = server
         .mock("POST", "/contacts/ct_picture1/profile-picture/upload-url")
         .with_status(200)
@@ -222,6 +212,14 @@ async fn set_profile_picture_uses_signed_upload_url_and_commit() {
 
     let upload_bytes_mock = server
         .mock("PUT", "/upload/ua_picture1")
+        .match_header("x-auth-token", Matcher::Missing)
+        .match_header("x-client-package", Matcher::Missing)
+        .match_header("x-client-version", Matcher::Missing)
+        .match_header("user-agent", Matcher::Missing)
+        .match_header(
+            "content-md5",
+            Matcher::Regex(r"^[A-Za-z0-9+/]+={0,2}$".to_string()),
+        )
         .with_status(200)
         .expect(1)
         .create_async()
@@ -329,6 +327,10 @@ async fn get_profile_picture_uses_signed_download_url() {
 
     let download_mock = server
         .mock("GET", "/download/ua_picture1")
+        .match_header("x-auth-token", Matcher::Missing)
+        .match_header("x-client-package", Matcher::Missing)
+        .match_header("x-client-version", Matcher::Missing)
+        .match_header("user-agent", Matcher::Missing)
         .with_status(200)
         .with_body(encrypted_picture.clone())
         .expect(1)
