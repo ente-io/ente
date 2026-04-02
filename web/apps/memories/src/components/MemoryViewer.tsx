@@ -494,11 +494,14 @@ export function MemoryViewer({
                             />
                         </BrandLink>
                         <MobileJoinNowButton
+                            variant="contained"
+                            color="accent"
+                            disableElevation
                             href="https://ente.io"
                             target="_blank"
                             rel="noreferrer"
                         >
-                            Try now
+                            Try Ente
                         </MobileJoinNowButton>
                     </MobileTopActions>
                 ) : (
@@ -519,11 +522,14 @@ export function MemoryViewer({
 
                         <TopRightActions>
                             <JoinNowButton
+                                variant="contained"
+                                color="accent"
+                                disableElevation
                                 href="https://ente.io"
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                Try now
+                                Try Ente
                             </JoinNowButton>
                         </TopRightActions>
                     </TopControls>

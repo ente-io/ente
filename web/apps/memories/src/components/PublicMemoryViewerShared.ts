@@ -4,7 +4,7 @@
  * `LaneMemoryViewer`, and is also imported by `pages/index.tsx` for viewer prop
  * types.
  */
-import { styled } from "@mui/material";
+import { Button, styled } from "@mui/material";
 import type { EnteFile } from "ente-media/file";
 import type {
     PublicMemoryShareFrame,
@@ -87,34 +87,27 @@ export const EnteBrandTagImage = styled("img")({
     userSelect: "none",
 });
 
-// Desktop-sized CTA used by both `MemoryViewer` and `LaneMemoryViewer`.
-export const JoinNowButton = styled("a")({
-    backgroundColor: "#08c225",
-    color: "white",
-    textDecoration: "none",
-    borderRadius: "39px",
-    padding: "18px 32px",
-    fontWeight: 700,
-    fontSize: "16px",
-    lineHeight: "14px",
-    whiteSpace: "nowrap",
-    transition: "filter 150ms ease",
-    "&:hover": { filter: "brightness(1.08)" },
-    "@media (max-width: 900px)": { padding: "14px 24px", fontSize: "14px" },
+const joinNowButtonStyles = {
+    backgroundColor: "#08C225",
+    borderRadius: "16px",
+    paddingBlock: "11px",
+    paddingInline: "20px",
+    "&:hover": { backgroundColor: "#07A820" },
+};
+
+const JoinNowButtonRoot = styled(Button)({
+    ...joinNowButtonStyles,
+    fontSize: "17px",
+    paddingBlock: "14px",
+    paddingInline: "30px",
 });
+const MobileJoinNowButtonRoot = styled(Button)(joinNowButtonStyles);
+
+// Desktop-sized CTA used by both `MemoryViewer` and `LaneMemoryViewer`.
+export const JoinNowButton = JoinNowButtonRoot as typeof Button;
 
 // Mobile CTA used by both viewer variants when actions collapse into the footer.
-export const MobileJoinNowButton = styled("a")({
-    backgroundColor: "#08c225",
-    color: "white",
-    textDecoration: "none",
-    borderRadius: "33px",
-    padding: "16px 28px",
-    fontWeight: 700,
-    fontSize: "14px",
-    lineHeight: "12px",
-    whiteSpace: "nowrap",
-});
+export const MobileJoinNowButton = MobileJoinNowButtonRoot as typeof Button;
 
 // Shared mobile footer action row used by both viewers.
 export const ViewerFooterBar = styled("div")({

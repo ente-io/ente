@@ -13,6 +13,8 @@ const MOBILE_LAYOUT_BREAKPOINT_PX = 600;
 const DESKTOP_PROGRESS_MAX_WIDTH_PX = 448;
 const MOBILE_PROGRESS_MAX_WIDTH_PX = 326;
 const MINIMAL_DESKTOP_PROGRESS_MAX_WIDTH_PX = 392;
+const MINIMAL_PROGRESS_COMPACT_BREAKPOINT_PX = 700;
+const MINIMAL_PROGRESS_COMPACT_MAX_WIDTH_PX = 352;
 
 const progressFillAnimation = keyframes`
     from { width: 0%; }
@@ -334,6 +336,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     );
     const progressGap = total > 15 ? "4px" : minimal ? "8px" : "12px";
     const progressHeight = minimal ? "2px" : "4px";
+    const compactMinimalProgressGap = total > 15 ? "3px" : "6px";
     const progressTrackOpacity = minimal ? 0.24 : 0.45;
     const progressFillColor = minimal ? "rgba(255, 255, 255, 0.78)" : "white";
 
@@ -351,6 +354,14 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                       : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
                 minWidth: 0,
                 height: progressHeight,
+                ...(minimal && {
+                    [`@media (max-width: ${MINIMAL_PROGRESS_COMPACT_BREAKPOINT_PX}px)`]:
+                        {
+                            gap: compactMinimalProgressGap,
+                            maxWidth: `${MINIMAL_PROGRESS_COMPACT_MAX_WIDTH_PX}px`,
+                            height: "1.5px",
+                        },
+                }),
             }}
         >
             {segments.map((i) => (
@@ -370,6 +381,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                     paused={paused}
                     duration={duration}
                     height={progressHeight}
+                    minimal={minimal}
                     trackOpacity={progressTrackOpacity}
                     fillColor={progressFillColor}
                     onComplete={
@@ -386,6 +398,7 @@ interface ProgressBarProps {
     paused: boolean;
     duration: number;
     height: string;
+    minimal?: boolean;
     trackOpacity: number;
     fillColor: string;
     onComplete?: () => void;
@@ -400,6 +413,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     paused,
     duration,
     height,
+    minimal,
     trackOpacity,
     fillColor,
     onComplete,
@@ -414,6 +428,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 borderRadius: "999px",
                 backgroundColor: `rgba(255, 255, 255, ${trackOpacity})`,
                 overflow: "hidden",
+                ...(minimal && {
+                    [`@media (max-width: ${MINIMAL_PROGRESS_COMPACT_BREAKPOINT_PX}px)`]:
+                        {
+                            height: "1.5px",
+                        },
+                }),
             }}
         >
             <Box

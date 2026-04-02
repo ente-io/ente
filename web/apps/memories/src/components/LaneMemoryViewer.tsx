@@ -805,6 +805,9 @@ export function LaneMemoryViewer({
                                 />
                             </BrandLink>
                             <MobileJoinNowButton
+                                variant="contained"
+                                color="accent"
+                                disableElevation
                                 href="https://ente.io"
                                 target="_blank"
                                 rel="noreferrer"
@@ -814,6 +817,9 @@ export function LaneMemoryViewer({
                         </ViewerFooterBar>
                     ) : (
                         <JoinNowButton
+                            variant="contained"
+                            color="accent"
+                            disableElevation
                             href="https://ente.io"
                             target="_blank"
                             rel="noreferrer"
