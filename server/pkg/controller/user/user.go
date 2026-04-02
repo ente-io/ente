@@ -21,6 +21,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/family"
 	"github.com/ente-io/museum/pkg/repo"
+	contactrepo "github.com/ente-io/museum/pkg/repo/contact"
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -53,6 +54,7 @@ type UserController struct {
 	DiscordController       *discord.DiscordController
 	MailingListsController  *controller.MailingListsController
 	PushController          *controller.PushController
+	ContactRepo             *contactrepo.Repository
 	HashingKey              []byte
 	SecretEncryptionKey     []byte
 	JwtSecret               []byte
@@ -127,6 +129,7 @@ func NewUserController(
 	pushController *controller.PushController,
 	userCache *cache2.UserCache,
 	userCacheController *usercache.Controller,
+	contactRepo *contactrepo.Repository,
 ) *UserController {
 	srpLimiter := util.NewRateLimiter("100-H")
 	ottLimiter := util.NewRateLimiter("100-H")
@@ -153,6 +156,7 @@ func NewUserController(
 		DiscordController:       discordController,
 		MailingListsController:  mailingListsController,
 		PushController:          pushController,
+		ContactRepo:             contactRepo,
 		HardCodedOTT:            ReadHardCodedOTTFromConfig(),
 		UserCache:               userCache,
 		UserCacheController:     userCacheController,
@@ -415,6 +419,7 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to update email")
 	}
+	c.touchContactsAfterEmailUpdate(ctx, req.UserID)
 	err = c.DataCleanupRepo.RemoveScheduledDelete(ctx, req.UserID)
 	if err != nil {
 		logrus.WithError(err).Error("failed to remove scheduled delete")
