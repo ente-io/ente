@@ -469,14 +469,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final viewType = widget.collectionViewType;
     final colorScheme = getEnteColorScheme(context);
     final actions = <Widget>[];
-    final eligibleFiles = OfflineFilesService.instance.getEligibleFiles(files);
-    final canToggleOffline = eligibleFiles.isNotEmpty;
-    final shouldRemoveOffline = canToggleOffline &&
-        eligibleFiles.every(LockerDB.instance.isFileMarkedOffline);
+    final eligibleOfflineFiles =
+        OfflineFilesService.instance.getEligibleFiles(files);
 
     final showEdit = viewType?.showEditOption ?? true;
     final showShare = viewType?.showShareOption ?? true;
     final showAddTo = viewType?.showAddToCollectionOption ?? true;
+    final showOffline = viewType?.showOfflineOption ?? true;
 
     if (isSingleSelection && showEdit) {
       actions.add(
@@ -514,7 +513,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    if (canToggleOffline) {
+    if (showOffline) {
+      if (eligibleOfflineFiles.isEmpty) {
+        return actions;
+      }
+
+      final shouldRemoveOffline = isSingleSelection &&
+          eligibleOfflineFiles.length == 1 &&
+          LockerDB.instance.isFileMarkedOffline(eligibleOfflineFiles.first);
+
       actions.add(
         SelectionActionButton(
           hugeIcon: HugeIcon(

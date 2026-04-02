@@ -9,6 +9,7 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
+import "package:locker/services/trash/models/trash_file.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
@@ -46,7 +47,9 @@ class FileListWidget extends StatelessWidget {
     final bool hasSharees = sharees.isNotEmpty;
     final bool isOutgoing = isOwner && hasSharees;
     final bool isIncoming = collection != null && !isOwner;
-    final bool showSharingIndicator = isOutgoing || isIncoming;
+    final bool isTrashFile = file is TrashFile;
+    final bool showSharingIndicator =
+        !isTrashFile && (isOutgoing || isIncoming);
     final isMarkedOffline = LockerDB.instance.isFileMarkedOffline(file);
 
     final fileRowWidget = Flexible(
@@ -62,24 +65,6 @@ class FileListWidget extends StatelessWidget {
                   padding: const EdgeInsets.all(10.0),
                   child: _buildFileIcon(),
                 ),
-                if (isMarkedOffline)
-                  Positioned(
-                    right: 2,
-                    bottom: 6,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.backdropBase,
-                      ),
-                      padding: const EdgeInsets.all(2.0),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedBookmark02,
-                        color: colorScheme.primary700,
-                        size: 16.0,
-                        strokeWidth: 2.0,
-                      ),
-                    ),
-                  ),
                 if (showSharingIndicator)
                   Positioned(
                     right: 1,
@@ -159,7 +144,7 @@ class FileListWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: SizedBox(
-                    width: 44,
+                    width: 24,
                     height: 24,
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
@@ -174,18 +159,13 @@ class FileListWidget extends StatelessWidget {
                           ],
                         );
                       },
-                      child: isSelected
-                          ? Icon(
-                              key: const ValueKey("selected"),
-                              Icons.check_circle_rounded,
-                              color: colorScheme.primary700,
-                              size: 24,
-                            )
-                          : isIncoming
-                              ? _buildOwnerAvatar(collection.owner)
-                              : const SizedBox(
-                                  key: ValueKey("unselected"),
-                                ),
+                      child: _buildTrailingIndicator(
+                        primaryColor: colorScheme.primary700,
+                        isSelected: isSelected,
+                        isIncoming: isIncoming,
+                        isMarkedOffline: !isTrashFile && isMarkedOffline,
+                        owner: collection?.owner,
+                      ),
                     ),
                   ),
                 ),
@@ -225,5 +205,38 @@ class FileListWidget extends StatelessWidget {
         config: Configuration.instance,
       ),
     );
+  }
+
+  Widget _buildTrailingIndicator({
+    required Color primaryColor,
+    required bool isSelected,
+    required bool isIncoming,
+    required bool isMarkedOffline,
+    required User? owner,
+  }) {
+    if (isSelected) {
+      return Icon(
+        key: const ValueKey("selected"),
+        Icons.check_circle_rounded,
+        color: primaryColor,
+        size: 24,
+      );
+    }
+
+    if (isMarkedOffline) {
+      return HugeIcon(
+        key: const ValueKey("offline"),
+        icon: HugeIcons.strokeRoundedBookmark02,
+        color: primaryColor,
+        size: 20.0,
+        strokeWidth: 2.0,
+      );
+    }
+
+    if (isIncoming && owner != null) {
+      return _buildOwnerAvatar(owner);
+    }
+
+    return const SizedBox(key: ValueKey("unselected"));
   }
 }

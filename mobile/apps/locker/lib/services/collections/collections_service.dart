@@ -134,6 +134,7 @@ class CollectionService {
       );
     }
     await Future.wait(fileFutures);
+    await OfflineFilesService.instance.cleanupInactiveOfflineFiles();
     if (updatedCollections.isNotEmpty) {
       Bus.instance.fire(CollectionsUpdatedEvent('sync'));
     }
@@ -348,10 +349,6 @@ class CollectionService {
       requests.add(TrashRequest(file.uploadedFileID!, collection.id));
       await _apiClient.trash(requests);
 
-      await OfflineFilesService.instance.unmarkFilesOfflineLocally(
-        [file],
-        removeWorkingCopies: false,
-      );
       await _db.deleteFilesFromCollection(collection, [file]);
 
       if (runSync) {

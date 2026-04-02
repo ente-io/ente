@@ -1,7 +1,3 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:dio/dio.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
@@ -15,12 +11,6 @@ import 'package:locker/services/files/offline/offline_file_storage.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:logging/logging.dart';
-
-enum _OfflineSaveFailureKind {
-  generic,
-  network,
-  storage,
-}
 
 /// Handles Locker's explicit per-file offline save flow.
 ///
@@ -44,7 +34,7 @@ class OfflineFilesService {
   }
 
   /// Shared files and info records are intentionally excluded from offline save.
-  bool canMarkOffline(EnteFile file) {
+  bool _canMarkOffline(EnteFile file) {
     final currentUserID = Configuration.instance.getUserID();
     return file.uploadedFileID != null &&
         file.fileDecryptionHeader != null &&
@@ -52,43 +42,21 @@ class OfflineFilesService {
         !InfoFileService.instance.isInfoFile(file);
   }
 
-  /// Deduplicate selections by uploaded file ID so bulk actions only process
-  /// each file once.
   List<EnteFile> getEligibleFiles(Iterable<EnteFile> files) {
-    final filesById = <int, EnteFile>{};
-
-    for (final file in files) {
-      final fileId = file.uploadedFileID;
-      if (fileId == null || !canMarkOffline(file)) {
-        continue;
-      }
-      filesById[fileId] = file;
-    }
-
-    return filesById.values.toList();
-  }
-
-  /// Count shared files for UI messaging while still allowing owned files in
-  /// the same selection to continue.
-  int countSharedFiles(Iterable<EnteFile> files) {
-    final currentUserID = Configuration.instance.getUserID();
-    var sharedCount = 0;
+    final eligibleFilesById = <int, EnteFile>{};
     final seenFileIDs = <int>{};
 
     for (final file in files) {
       final fileId = file.uploadedFileID;
-      if (fileId == null || !seenFileIDs.add(fileId)) {
+      if (fileId == null ||
+          !seenFileIDs.add(fileId) ||
+          !_canMarkOffline(file)) {
         continue;
       }
-      if (InfoFileService.instance.isInfoFile(file)) {
-        continue;
-      }
-      if (file.ownerID != null && file.ownerID != currentUserID) {
-        sharedCount += 1;
-      }
+      eligibleFilesById[fileId] = file;
     }
 
-    return sharedCount;
+    return eligibleFilesById.values.toList();
   }
 
   /// Downloads the encrypted blob and marks the file offline on success.
@@ -97,18 +65,9 @@ class OfflineFilesService {
     Iterable<EnteFile> files,
   ) async {
     final eligibleFiles = getEligibleFiles(files);
-    final sharedCount = countSharedFiles(files);
     _logger.info(
-      'Mark offline requested for ${eligibleFiles.length} eligible files'
-      '${sharedCount > 0 ? ' ($sharedCount shared skipped)' : ''}',
+      'Mark offline requested for ${eligibleFiles.length} eligible files',
     );
-
-    if (sharedCount > 0 && context.mounted) {
-      showToast(
-        context,
-        context.l10n.actionNotSupportedForSharedFiles(sharedCount),
-      );
-    }
 
     if (eligibleFiles.isEmpty || !context.mounted) {
       _logger.fine('No eligible files to mark offline');
@@ -118,15 +77,12 @@ class OfflineFilesService {
     final total = eligibleFiles.length;
     final dialog = createProgressDialog(
       context,
-      total == 1
-          ? context.l10n.savingOffline
-          : '${context.l10n.savingOffline} 0/$total',
+      _buildMarkProgressMessage(context, 0, total),
       isDismissible: false,
     );
 
     var successCount = 0;
     var failureCount = 0;
-    final failureKinds = <_OfflineSaveFailureKind>{};
 
     await dialog.show();
 
@@ -154,24 +110,7 @@ class OfflineFilesService {
         }
 
         try {
-          final didMarkFile = await _ensureOfflineCopyAndMark(
-            file,
-            progressCallback: (downloaded, totalBytes) {
-              if (!context.mounted || totalBytes <= 0) {
-                return;
-              }
-              final percentage =
-                  ((downloaded / totalBytes) * 100).clamp(0, 100).round();
-              dialog.update(
-                message: _buildMarkProgressMessage(
-                  context,
-                  currentStep,
-                  total,
-                  percentage: percentage,
-                ),
-              );
-            },
-          );
+          final didMarkFile = await _ensureOfflineCopyAndMark(file);
           if (didMarkFile) {
             _logger.info('Marked file $fileID available offline');
             successCount += 1;
@@ -179,21 +118,14 @@ class OfflineFilesService {
           }
 
           failureCount += 1;
-          failureKinds.add(_OfflineSaveFailureKind.generic);
         } catch (e, s) {
-          final failureKind = _classifyOfflineSaveFailure(e);
           failureCount += 1;
-          failureKinds.add(failureKind);
           _logger.warning(
             'Failed to mark file $fileID available offline',
             e,
             s,
           );
           await _cleanupFailedMark(file);
-          if (_shouldStopBatchOnFailure(failureKind)) {
-            failureCount += total - currentStep;
-            break;
-          }
         }
       }
     } finally {
@@ -228,7 +160,7 @@ class OfflineFilesService {
     } else {
       showToast(
         context,
-        _buildMarkFailureMessage(context, failureCount, failureKinds),
+        context.l10n.failedToSaveFilesOffline(failureCount),
       );
     }
 
@@ -241,36 +173,28 @@ class OfflineFilesService {
     Iterable<EnteFile> files,
   ) async {
     final eligibleFiles = getEligibleFiles(files);
-    final sharedCount = countSharedFiles(files);
     _logger.info(
-      'Remove offline requested for ${eligibleFiles.length} eligible files'
-      '${sharedCount > 0 ? ' ($sharedCount shared skipped)' : ''}',
+      'Remove offline requested for ${eligibleFiles.length} eligible files',
     );
-
-    if (sharedCount > 0 && context.mounted) {
-      showToast(
-        context,
-        context.l10n.actionNotSupportedForSharedFiles(sharedCount),
-      );
-    }
 
     if (eligibleFiles.isEmpty) {
       _logger.fine('No eligible files to remove from offline');
       return false;
     }
 
-    final filesToUnmark = <EnteFile>[];
+    final fileIDsToUnmark = <int>{};
     for (final file in eligibleFiles) {
+      final fileID = file.uploadedFileID!;
       final hasOfflineCopy = await getCurrentOfflineEncryptedCopy(file) != null;
       if (!LockerDB.instance.isFileMarkedOffline(file) && !hasOfflineCopy) {
         continue;
       }
-      filesToUnmark.add(file);
+      fileIDsToUnmark.add(fileID);
     }
 
-    final changedCount = filesToUnmark.length;
+    final changedCount = fileIDsToUnmark.length;
     _logger.fine('Removing offline state for $changedCount files');
-    await unmarkFilesOfflineLocally(filesToUnmark);
+    await _clearOfflineState(fileIDsToUnmark);
 
     if (changedCount > 0) {
       Bus.instance
@@ -288,8 +212,7 @@ class OfflineFilesService {
     return true;
   }
 
-  /// Service-level unmark path used by non-UI flows like trash/delete.
-  Future<void> unmarkFilesOfflineById(
+  Future<void> _clearOfflineState(
     Iterable<int> fileIDs, {
     bool removeWorkingCopies = true,
   }) async {
@@ -310,43 +233,30 @@ class OfflineFilesService {
     );
   }
 
-  Future<void> unmarkFilesOfflineLocally(
-    Iterable<EnteFile> files, {
-    bool removeWorkingCopies = true,
-  }) async {
-    final ids = <int>{};
-    for (final file in files) {
-      final fileID = file.uploadedFileID;
-      if (fileID == null) {
-        continue;
-      }
-      ids.add(fileID);
+  Future<void> cleanupInactiveOfflineFiles() async {
+    final staleFileIDs = await LockerDB.instance.getStaleOfflineMarkedFileIDs();
+    if (staleFileIDs.isEmpty) {
+      return;
     }
 
-    await unmarkFilesOfflineById(
-      ids,
-      removeWorkingCopies: removeWorkingCopies,
+    _logger.info(
+      'Clearing offline state for ${staleFileIDs.length} stale files after sync',
     );
+    await _clearOfflineState(staleFileIDs);
   }
 
   /// Downloads first, then writes the local offline mark if the file is still
   /// active in the current library view.
-  Future<bool> _ensureOfflineCopyAndMark(
-    EnteFile file, {
-    ProgressCallback? progressCallback,
-  }) async {
+  Future<bool> _ensureOfflineCopyAndMark(EnteFile file) async {
     final fileID = file.uploadedFileID!;
-    await ensureEncryptedOfflineCopy(
-      file,
-      progressCallback: progressCallback,
-    );
+    await ensureEncryptedOfflineCopy(file);
 
     if (!await LockerDB.instance.hasActiveFile(fileID)) {
       _logger.warning(
         'Skipping offline mark for file $fileID because it is no longer active',
       );
-      await unmarkFilesOfflineLocally(
-        [file],
+      await _clearOfflineState(
+        [fileID],
         removeWorkingCopies: false,
       );
       return false;
@@ -358,11 +268,15 @@ class OfflineFilesService {
 
   /// Keep decrypted working files intact; only clear offline state.
   Future<void> _cleanupFailedMark(EnteFile file) async {
+    final fileID = file.uploadedFileID;
+    if (fileID == null) {
+      return;
+    }
     _logger.fine(
-      'Cleaning up failed offline mark for file ${file.uploadedFileID}',
+      'Cleaning up failed offline mark for file $fileID',
     );
-    await unmarkFilesOfflineLocally(
-      [file],
+    await _clearOfflineState(
+      [fileID],
       removeWorkingCopies: false,
     );
   }
@@ -370,61 +284,12 @@ class OfflineFilesService {
   String _buildMarkProgressMessage(
     BuildContext context,
     int current,
-    int total, {
-    int? percentage,
-  }) {
-    final progressLabel = percentage == null
-        ? context.l10n.savingOffline
-        : context.l10n.savingOfflineProgress(percentage);
+    int total,
+  ) {
+    final progressLabel = context.l10n.savingOffline;
     if (total == 1) {
       return progressLabel;
     }
     return '$progressLabel $current/$total';
-  }
-
-  _OfflineSaveFailureKind _classifyOfflineSaveFailure(Object error) {
-    if (error is FileSystemException) {
-      return _OfflineSaveFailureKind.storage;
-    }
-    if (_isNetworkError(error)) {
-      return _OfflineSaveFailureKind.network;
-    }
-    return _OfflineSaveFailureKind.generic;
-  }
-
-  bool _shouldStopBatchOnFailure(_OfflineSaveFailureKind failureKind) {
-    return failureKind == _OfflineSaveFailureKind.network ||
-        failureKind == _OfflineSaveFailureKind.storage;
-  }
-
-  bool _isNetworkError(Object error) {
-    if (error is SocketException) {
-      return true;
-    }
-    if (error is DioException) {
-      return error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.connectionError ||
-          (error.type == DioExceptionType.unknown && error.response == null);
-    }
-    return false;
-  }
-
-  String _buildMarkFailureMessage(
-    BuildContext context,
-    int failureCount,
-    Set<_OfflineSaveFailureKind> failureKinds,
-  ) {
-    final failureKind = failureKinds.length == 1
-        ? failureKinds.first
-        : _OfflineSaveFailureKind.generic;
-
-    switch (failureKind) {
-      case _OfflineSaveFailureKind.network:
-        return context.l10n.failedToSaveFilesOfflineNetwork(failureCount);
-      case _OfflineSaveFailureKind.storage:
-        return context.l10n.failedToSaveFilesOfflineStorage(failureCount);
-      case _OfflineSaveFailureKind.generic:
-        return context.l10n.failedToSaveFilesOffline(failureCount);
-    }
   }
 }

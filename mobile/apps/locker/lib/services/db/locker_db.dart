@@ -638,6 +638,25 @@ class LockerDB extends EnteBaseDatabase {
     return rows.isNotEmpty;
   }
 
+  Future<List<int>> getStaleOfflineMarkedFileIDs() async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT om.uploaded_file_id
+      FROM $_offlineFilesTable om
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM $_collectionFilesTable cf
+        INNER JOIN $_collectionsTable c
+          ON c.id = cf.collection_id
+        WHERE cf.uploaded_file_id = om.uploaded_file_id
+          AND c.is_deleted = 0
+      )
+      ''',
+    );
+
+    return rows.map((row) => row['uploaded_file_id'] as int).toList();
+  }
+
   Map<String, dynamic> _collectionToMap(Collection collection) {
     final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
     final encryptedPayload = CryptoUtil.encryptSync(
