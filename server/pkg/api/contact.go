@@ -75,36 +75,62 @@ func (h *ContactHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (h *ContactHandler) GetProfilePictureUploadURL(c *gin.Context) {
-	var request contactmodel.ProfilePictureUploadURLRequest
+func (h *ContactHandler) GetAttachmentUploadURL(c *gin.Context) {
+	var request contactmodel.AttachmentUploadURLRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("request binding failed %s", err)))
 		return
 	}
-	resp, err := h.Controller.GetProfilePictureUploadURL(c, c.Param("id"), request)
+	resp, err := h.Controller.GetAttachmentUploadURL(c, c.Param("type"), request)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "failed to create profile picture upload url"))
+		handler.Error(c, stacktrace.Propagate(err, "failed to create attachment upload url"))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *ContactHandler) GetProfilePictureUploadURL(c *gin.Context) {
+	c.Params = append(c.Params, gin.Param{Key: "type", Value: string(contactmodel.ProfilePicture)})
+	h.GetAttachmentUploadURL(c)
+}
+
+func (h *ContactHandler) AttachContactAttachment(c *gin.Context) {
+	var request contactmodel.CommitAttachmentRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("request binding failed %s", err)))
+		return
+	}
+	resp, err := h.Controller.AttachContactAttachment(c, c.Param("id"), c.Param("type"), request)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to attach contact attachment"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
 
 func (h *ContactHandler) AttachProfilePicture(c *gin.Context) {
-	var request contactmodel.CommitProfilePictureRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("request binding failed %s", err)))
-		return
-	}
-	resp, err := h.Controller.AttachProfilePicture(c, c.Param("id"), request)
+	c.Params = append(c.Params, gin.Param{Key: "type", Value: string(contactmodel.ProfilePicture)})
+	h.AttachContactAttachment(c)
+}
+
+func (h *ContactHandler) GetAttachment(c *gin.Context) {
+	resp, err := h.Controller.GetAttachmentURL(c, c.Param("type"), c.Param("attachmentID"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "failed to attach profile picture"))
+		handler.Error(c, stacktrace.Propagate(err, "failed to get attachment url"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
 
 func (h *ContactHandler) GetProfilePicture(c *gin.Context) {
-	resp, err := h.Controller.GetProfilePictureURL(c, c.Param("id"))
+	attachmentID := c.Query("attachmentID")
+	if attachmentID != "" {
+		c.Params = append(c.Params, gin.Param{Key: "type", Value: string(contactmodel.ProfilePicture)})
+		c.Params = append(c.Params, gin.Param{Key: "attachmentID", Value: attachmentID})
+		h.GetAttachment(c)
+		return
+	}
+	resp, err := h.Controller.GetCurrentContactAttachmentURL(c, c.Param("id"), string(contactmodel.ProfilePicture))
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to get profile picture url"))
 		return
@@ -112,10 +138,24 @@ func (h *ContactHandler) GetProfilePicture(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func (h *ContactHandler) DeleteProfilePicture(c *gin.Context) {
-	resp, err := h.Controller.DeleteProfilePicture(c, c.Param("id"))
+func (h *ContactHandler) DeleteContactAttachment(c *gin.Context) {
+	resp, err := h.Controller.DeleteContactAttachment(c, c.Param("id"), c.Param("type"))
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "failed to delete profile picture"))
+		handler.Error(c, stacktrace.Propagate(err, "failed to delete contact attachment"))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *ContactHandler) DeleteProfilePicture(c *gin.Context) {
+	c.Params = append(c.Params, gin.Param{Key: "type", Value: string(contactmodel.ProfilePicture)})
+	h.DeleteContactAttachment(c)
+}
+
+func (h *ContactHandler) GetCurrentContactAttachment(c *gin.Context) {
+	resp, err := h.Controller.GetCurrentContactAttachmentURL(c, c.Param("id"), c.Param("type"))
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get current contact attachment url"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)

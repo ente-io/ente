@@ -19,6 +19,20 @@ const (
 	MaxProfilePictureEncryptedSize int64 = 512 * 1024
 )
 
+type AttachmentPolicy struct {
+	Type             AttachmentType
+	SlotColumn       string
+	MaxEncryptedSize int64
+}
+
+var attachmentPolicies = map[AttachmentType]AttachmentPolicy{
+	ProfilePicture: {
+		Type:             ProfilePicture,
+		SlotColumn:       "profile_picture_attachment_id",
+		MaxEncryptedSize: MaxProfilePictureEncryptedSize,
+	},
+}
+
 type Entity struct {
 	ID                         string  `json:"id" binding:"required"`
 	UserID                     int64   `json:"userID" binding:"required"`
@@ -71,18 +85,18 @@ type DiffRequest struct {
 	Limit     int16  `form:"limit" binding:"required"`
 }
 
-type ProfilePictureUploadURLRequest struct {
+type AttachmentUploadURLRequest struct {
 	ContentLength int64  `json:"contentLength" binding:"required"`
 	ContentMD5    string `json:"contentMD5" binding:"required"`
 }
 
-func (r ProfilePictureUploadURLRequest) Validate() error {
+func (r AttachmentUploadURLRequest) Validate(policy AttachmentPolicy) error {
 	if r.ContentLength <= 0 {
 		return ente.NewBadRequestWithMessage("contentLength must be greater than 0")
 	}
-	if r.ContentLength > MaxProfilePictureEncryptedSize {
+	if r.ContentLength > policy.MaxEncryptedSize {
 		return ente.NewBadRequestWithMessage(
-			fmt.Sprintf("profile picture must be <= %d bytes", MaxProfilePictureEncryptedSize),
+			fmt.Sprintf("%s must be <= %d bytes", policy.Type, policy.MaxEncryptedSize),
 		)
 	}
 	if strings.TrimSpace(r.ContentMD5) == "" {
@@ -91,26 +105,26 @@ func (r ProfilePictureUploadURLRequest) Validate() error {
 	return nil
 }
 
-type ProfilePictureUploadURL struct {
+type AttachmentUploadURL struct {
 	AttachmentID string `json:"attachmentID" binding:"required"`
 	URL          string `json:"url" binding:"required"`
 }
 
-type CommitProfilePictureRequest struct {
+type CommitAttachmentRequest struct {
 	AttachmentID string `json:"attachmentID" binding:"required"`
 	Size         int64  `json:"size" binding:"required"`
 }
 
-func (r CommitProfilePictureRequest) Validate() error {
+func (r CommitAttachmentRequest) Validate(policy AttachmentPolicy) error {
 	if !IsValidAttachmentID(r.AttachmentID) {
 		return ente.NewBadRequestWithMessage("invalid attachmentID")
 	}
 	if r.Size <= 0 {
 		return ente.NewBadRequestWithMessage("size must be greater than 0")
 	}
-	if r.Size > MaxProfilePictureEncryptedSize {
+	if r.Size > policy.MaxEncryptedSize {
 		return ente.NewBadRequestWithMessage(
-			fmt.Sprintf("profile picture must be <= %d bytes", MaxProfilePictureEncryptedSize),
+			fmt.Sprintf("%s must be <= %d bytes", policy.Type, policy.MaxEncryptedSize),
 		)
 	}
 	return nil
@@ -141,11 +155,28 @@ func (a Attachment) ObjectKey() string {
 }
 
 func (at AttachmentType) IsValid() error {
-	switch at {
-	case ProfilePicture:
+	if _, ok := attachmentPolicies[at]; ok {
 		return nil
 	}
 	return ente.NewBadRequestWithMessage(fmt.Sprintf("invalid attachment type: %s", at))
+}
+
+func (at AttachmentType) Policy() (AttachmentPolicy, error) {
+	policy, ok := attachmentPolicies[at]
+	if !ok {
+		return AttachmentPolicy{}, ente.NewBadRequestWithMessage(
+			fmt.Sprintf("invalid attachment type: %s", at),
+		)
+	}
+	return policy, nil
+}
+
+func ParseAttachmentType(raw string) (AttachmentType, error) {
+	attachmentType := AttachmentType(raw)
+	if err := attachmentType.IsValid(); err != nil {
+		return "", err
+	}
+	return attachmentType, nil
 }
 
 func NewContactID() string {
