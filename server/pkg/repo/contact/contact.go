@@ -11,6 +11,30 @@ import (
 	"github.com/lib/pq"
 )
 
+func (r *Repository) CanCreateContact(ctx context.Context, actorUserID int64, contactUserID int64) (bool, error) {
+	eligible, err := r.hasActiveEmergencyRelationship(ctx, actorUserID, contactUserID)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "failed to check emergency relationship")
+	}
+	if eligible {
+		return true, nil
+	}
+
+	eligible, err = r.hasSharedActiveFamily(ctx, actorUserID, contactUserID)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "failed to check family relationship")
+	}
+	if eligible {
+		return true, nil
+	}
+
+	eligible, err = r.hasCommonSharedCollection(ctx, actorUserID, contactUserID)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "failed to check shared collections")
+	}
+	return eligible, nil
+}
+
 func (r *Repository) Create(ctx context.Context, userID int64, req contactmodel.CreateRequest) (string, error) {
 	id := contactmodel.NewContactID()
 	err := r.DB.QueryRowContext(
@@ -35,6 +59,80 @@ func (r *Repository) Create(ctx context.Context, userID int64, req contactmodel.
 		return "", stacktrace.Propagate(err, "failed to create contact")
 	}
 	return id, nil
+}
+
+func (r *Repository) hasActiveEmergencyRelationship(ctx context.Context, actorUserID int64, contactUserID int64) (bool, error) {
+	var exists bool
+	err := r.DB.QueryRowContext(
+		ctx,
+		`SELECT EXISTS(
+			SELECT 1
+			FROM emergency_contact
+			WHERE state = ANY($3)
+			  AND (
+					(user_id = $1 AND emergency_contact_id = $2)
+				 OR (user_id = $2 AND emergency_contact_id = $1)
+			  )
+		)`,
+		actorUserID,
+		contactUserID,
+		pq.Array([]ente.ContactState{ente.UserInvitedContact, ente.ContactAccepted}),
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (r *Repository) hasSharedActiveFamily(ctx context.Context, actorUserID int64, contactUserID int64) (bool, error) {
+	var exists bool
+	err := r.DB.QueryRowContext(
+		ctx,
+		`SELECT EXISTS(
+			SELECT 1
+			FROM users actor
+			JOIN users contact ON actor.family_admin_id = contact.family_admin_id
+			WHERE actor.user_id = $1
+			  AND contact.user_id = $2
+			  AND actor.family_admin_id IS NOT NULL
+		)`,
+		actorUserID,
+		contactUserID,
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (r *Repository) hasCommonSharedCollection(ctx context.Context, actorUserID int64, contactUserID int64) (bool, error) {
+	var exists bool
+	err := r.DB.QueryRowContext(
+		ctx,
+		`WITH shared_access AS (
+			SELECT collection_id
+			FROM collection_shares
+			WHERE collection_shares.is_deleted = FALSE
+			  AND (collection_shares.to_user_id = $1 OR collection_shares.from_user_id = $1)
+		), contact_shared_access AS (
+			SELECT collection_id
+			FROM collection_shares
+			WHERE collection_shares.is_deleted = FALSE
+			  AND (collection_shares.to_user_id = $2 OR collection_shares.from_user_id = $2)
+		)
+		SELECT EXISTS(
+			SELECT 1
+			FROM shared_access actor
+			INNER JOIN contact_shared_access contact
+				ON actor.collection_id = contact.collection_id
+		)`,
+		actorUserID,
+		contactUserID,
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func (r *Repository) Get(ctx context.Context, userID int64, id string) (*contactmodel.Entity, error) {

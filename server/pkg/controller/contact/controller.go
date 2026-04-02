@@ -36,6 +36,16 @@ func (c *Controller) Create(ctx *gin.Context, req contactmodel.CreateRequest) (*
 		return nil, stacktrace.Propagate(err, "invalid create contact request")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
+	canCreate, err := c.Repo.CanCreateContact(ctx, userID, req.ContactUserID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to validate contact eligibility")
+	}
+	if !canCreate {
+		return nil, stacktrace.Propagate(
+			ente.NewBadRequestWithMessage("contactUserID is not eligible to be added as a contact"),
+			"",
+		)
+	}
 	id, err := c.Repo.Create(ctx, userID, req)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
