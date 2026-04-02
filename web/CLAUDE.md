@@ -22,8 +22,8 @@ Format markdown files with Prettier for consistent styling
 ### Development
 
 ```bash
-# Install dependencies (uses Yarn classic 1.22.22)
-yarn install
+# Install dependencies from the committed lockfile (uses Yarn classic 1.22.22)
+yarn install --frozen-lockfile
 
 # Run development servers
 yarn dev              # Photos app (port 3000)
@@ -47,6 +47,9 @@ yarn build:cast       # Cast app
 yarn lint             # Check formatting, linting, and TypeScript types
 yarn lint-fix         # Auto-fix linting and formatting issues
 ```
+
+Use plain `yarn install` only when intentionally updating dependencies and
+reviewing the resulting `yarn.lock` changes.
 
 ## Architecture
 

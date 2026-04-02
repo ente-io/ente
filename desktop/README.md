@@ -20,8 +20,11 @@ cd ente/desktop
 Install dependencies (requires Yarn v1):
 
 ```sh
-yarn install
+yarn install --frozen-lockfile
 ```
+
+Use plain `yarn install` only when you are intentionally updating dependencies
+and reviewing the resulting `yarn.lock` changes.
 
 Now you can run in development mode (supports hot reload for the renderer
 process)

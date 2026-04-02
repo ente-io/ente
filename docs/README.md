@@ -32,8 +32,11 @@ cd ente/docs
 Install dependencies
 
 ```sh
-yarn install
+yarn install --frozen-lockfile
 ```
+
+Use plain `yarn install` only when you are intentionally updating dependencies
+and reviewing the resulting `yarn.lock` changes.
 
 Then start a local server
 
