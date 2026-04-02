@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
+import React, { useEffect, useDeferredValue, useState } from "react";
 
 const contentMaxWidth = 560;
 
@@ -41,7 +41,20 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
     stickyTop = 0,
     searchTerm,
     onSearchTermChange,
-}) => (
+}) => {
+    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+    const deferredSearchTerm = useDeferredValue(localSearchTerm);
+
+    useEffect(() => {
+        onSearchTermChange(deferredSearchTerm);
+    }, [deferredSearchTerm, onSearchTermChange]);
+
+    // Sync local state when parent resets searchTerm (e.g. navigation).
+    useEffect(() => {
+        setLocalSearchTerm(searchTerm);
+    }, [searchTerm]);
+
+    return (
     <Box
         sx={{
             position: "sticky",
@@ -89,8 +102,8 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
             <TextField
                 size="small"
                 placeholder={t("searchHint")}
-                value={searchTerm}
-                onChange={(event) => onSearchTermChange(event.target.value)}
+                value={localSearchTerm}
+                onChange={(event) => setLocalSearchTerm(event.target.value)}
                 variant="outlined"
                 fullWidth
                 slotProps={{
@@ -124,7 +137,8 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
             />
         </Box>
     </Box>
-);
+    );
+};
 
 export const LockerUnstableToast: React.FC = () => (
     <Box sx={{ position: "sticky", top: 0, zIndex: 2 }}>
