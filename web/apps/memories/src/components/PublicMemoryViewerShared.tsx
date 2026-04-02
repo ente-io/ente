@@ -96,6 +96,41 @@ interface LaneMemoryViewerProps {
     onSeek: (index: number) => void;
 }
 
+interface SharedMemoryHeaderProps {
+    title: string;
+    total: number;
+    current: number;
+    paused: boolean;
+    duration: number;
+    onComplete: () => void;
+    isVideo: boolean;
+}
+
+function SharedMemoryHeader({
+    title,
+    total,
+    current,
+    paused,
+    duration,
+    onComplete,
+    isVideo,
+}: SharedMemoryHeaderProps) {
+    return (
+        <HeaderSection>
+            <MemoryTitle variant="h6">{title}</MemoryTitle>
+            <ProgressIndicator
+                total={total}
+                current={current}
+                paused={paused}
+                duration={duration}
+                onComplete={onComplete}
+                isVideo={isVideo}
+                minimal
+            />
+        </HeaderSection>
+    );
+}
+
 export const LaneMemoryViewer: React.FC<LaneMemoryViewerProps> = ({
     files,
     currentIndex,
@@ -1255,6 +1290,17 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
     const outgoingCropRect = isLaneVariant
         ? resolveLaneCropRect(outgoingLaneFrame)
         : undefined;
+    const sharedHeader = (
+        <SharedMemoryHeader
+            title={headerTitle}
+            total={files.length}
+            current={currentIndex}
+            paused={isProgressPaused}
+            duration={progressDuration}
+            onComplete={handleAdvanceOrFinish}
+            isVideo={isVideo}
+        />
+    );
     const mediaLayers = (
         <>
             <MediaSwitchLayer
@@ -1503,6 +1549,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             />
                         </LaneBottomSection>
                     </LaneCenterSection>
+
                     <LaneFooter>
                         {isCompactLaneLayout ? (
                             <LaneMobileFooterBar>
@@ -1556,18 +1603,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                 }
             >
                 {isMobileLayout ? (
-                    <MobileHeaderSection>
-                        <MobileTitle variant="h6">{headerTitle}</MobileTitle>
-                        <ProgressIndicator
-                            total={files.length}
-                            current={currentIndex}
-                            paused={isProgressPaused}
-                            duration={progressDuration}
-                            onComplete={handleAdvanceOrFinish}
-                            isVideo={isVideo}
-                            compact
-                        />
-                    </MobileHeaderSection>
+                    sharedHeader
                 ) : (
                     <TopControls>
                         <PlaybackControl
@@ -1591,19 +1627,7 @@ export const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             <PlaybackGlyph paused={paused} />
                         </PlaybackControl>
 
-                        <HeaderSection>
-                            <MemoryTitle variant="h6">
-                                {headerTitle}
-                            </MemoryTitle>
-                            <ProgressIndicator
-                                total={files.length}
-                                current={currentIndex}
-                                paused={isProgressPaused}
-                                duration={progressDuration}
-                                onComplete={handleAdvanceOrFinish}
-                                isVideo={isVideo}
-                            />
-                        </HeaderSection>
+                        {sharedHeader}
 
                         {!useFooterShareActions && (
                             <TopRightActions>
@@ -2155,26 +2179,6 @@ const LaneCaption = styled("div")({
     overflowWrap: "anywhere",
 });
 
-const MobileHeaderSection = styled("div")({
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "12px",
-});
-
-const MobileTitle = styled(Typography)({
-    color: "white",
-    fontWeight: 700,
-    fontSize: "16px",
-    lineHeight: "17px",
-    letterSpacing: 0,
-    textAlign: "left",
-    maxWidth: "326px",
-    whiteSpace: "normal",
-    overflowWrap: "anywhere",
-});
-
 const TopControls = styled("div")({
     position: "relative",
     display: "flex",
@@ -2188,26 +2192,29 @@ const TopControls = styled("div")({
 });
 
 const HeaderSection = styled("div")({
-    width: "min(100%, 448px)",
+    width: "min(100%, 392px)",
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "24px",
+    gap: "18px",
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        paddingTop: "8px",
+    },
 });
 
 const MemoryTitle = styled(Typography)({
-    color: "white",
-    fontWeight: 700,
-    fontSize: "24px",
-    lineHeight: 1.25,
-    letterSpacing: "0px",
+    color: "rgba(255, 255, 255, 0.84)",
+    fontWeight: 600,
+    fontSize: "16px",
+    lineHeight: 1.15,
+    letterSpacing: "-0.01em",
     textAlign: "center",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
     maxWidth: "100%",
-    "@media (max-width: 900px)": { fontSize: "20px" },
-    "@media (max-width: 700px)": { fontSize: "17px", lineHeight: 1.3 },
+    "@media (max-width: 900px)": { fontSize: "15px" },
+    "@media (max-width: 700px)": { fontSize: "14px", lineHeight: 1.2 },
 });
 
 const PlaybackControl = styled("button")({
@@ -2215,9 +2222,9 @@ const PlaybackControl = styled("button")({
     left: 0,
     top: "50%",
     transform: "translateY(-50%)",
-    width: "64px",
-    height: "64px",
-    borderRadius: "19px",
+    width: "56px",
+    height: "56px",
+    borderRadius: "16px",
     border: 0,
     cursor: "pointer",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
@@ -2229,9 +2236,9 @@ const PlaybackControl = styled("button")({
     transition: "background-color 150ms ease",
     "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.28)" },
     "@media (max-width: 900px)": {
-        width: "56px",
-        height: "56px",
-        borderRadius: "16px",
+        width: "52px",
+        height: "52px",
+        borderRadius: "15px",
     },
 });
 
@@ -2271,8 +2278,8 @@ const BrandLink = styled("a")({
 });
 
 const EnteBrandTagImage = styled("img")({
-    width: "58px",
-    height: "42px",
+    width: "76px",
+    height: "auto",
     display: "block",
     userSelect: "none",
 });

@@ -6,6 +6,7 @@ import type { LaneCaptionModel } from "../utils/lane";
 const MOBILE_LAYOUT_BREAKPOINT_PX = 600;
 const DESKTOP_PROGRESS_MAX_WIDTH_PX = 448;
 const MOBILE_PROGRESS_MAX_WIDTH_PX = 326;
+const MINIMAL_DESKTOP_PROGRESS_MAX_WIDTH_PX = 392;
 
 const progressFillAnimation = keyframes`
     from { width: 0%; }
@@ -288,6 +289,7 @@ interface ProgressIndicatorProps {
     onComplete: () => void;
     isVideo?: boolean;
     compact?: boolean;
+    minimal?: boolean;
 }
 
 export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
@@ -298,12 +300,18 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     onComplete,
     isVideo,
     compact,
+    minimal,
 }) => {
     const segments = useMemo(
         () => Array.from({ length: total }, (_, i) => i),
         [total],
     );
-    const progressGap = total > 15 ? "4px" : "12px";
+    const progressGap = total > 15 ? "4px" : minimal ? "8px" : "12px";
+    const progressHeight = minimal ? "2px" : "4px";
+    const progressTrackOpacity = minimal ? 0.24 : 0.45;
+    const progressFillColor = minimal
+        ? "rgba(255, 255, 255, 0.78)"
+        : "white";
 
     return (
         <Box
@@ -314,9 +322,11 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                 width: "100%",
                 maxWidth: compact
                     ? `${MOBILE_PROGRESS_MAX_WIDTH_PX}px`
+                    : minimal
+                      ? `${MINIMAL_DESKTOP_PROGRESS_MAX_WIDTH_PX}px`
                     : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
                 minWidth: 0,
-                height: "4px",
+                height: progressHeight,
             }}
         >
             {segments.map((i) => (
@@ -335,6 +345,9 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                     }
                     paused={paused}
                     duration={duration}
+                    height={progressHeight}
+                    trackOpacity={progressTrackOpacity}
+                    fillColor={progressFillColor}
                     onComplete={
                         i === current && !isVideo ? onComplete : undefined
                     }
@@ -348,6 +361,9 @@ interface ProgressBarProps {
     state: "past" | "active" | "future";
     paused: boolean;
     duration: number;
+    height: string;
+    trackOpacity: number;
+    fillColor: string;
     onComplete?: () => void;
 }
 
@@ -355,6 +371,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     state,
     paused,
     duration,
+    height,
+    trackOpacity,
+    fillColor,
     onComplete,
 }) => {
     return (
@@ -363,9 +382,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 position: "relative",
                 flex: 1,
                 minWidth: 0,
-                height: "4px",
-                borderRadius: "14px",
-                backgroundColor: "rgba(255, 255, 255, 0.45)",
+                height,
+                borderRadius: "999px",
+                backgroundColor: `rgba(255, 255, 255, ${trackOpacity})`,
                 overflow: "hidden",
             }}
         >
@@ -381,8 +400,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                     top: 0,
                     left: 0,
                     height: "100%",
-                    borderRadius: "14px",
-                    backgroundColor: "white",
+                    borderRadius: "999px",
+                    backgroundColor: fillColor,
                     width:
                         state === "past"
                             ? "100%"
