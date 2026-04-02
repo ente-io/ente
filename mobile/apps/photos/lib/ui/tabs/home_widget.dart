@@ -72,6 +72,7 @@ import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
+import "package:photos/ui/notification/update/change_log_strings.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/ritual_privacy.dart";
@@ -124,6 +125,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _showShowBackupHook = false;
   bool _personSyncTriggered = false;
   bool _collectionsSyncTriggered = false;
+  bool _isShowingChangeLog = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
@@ -222,6 +224,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AppModeChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
+        _scheduleChangeLogCheck(
+          delay: const Duration(milliseconds: 250),
+        );
       }
     });
     _firstImportEvent =
@@ -294,13 +299,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => Future.delayed(
-        const Duration(seconds: 1),
-        () => {
-          if (mounted) {showChangeLog(context)},
-        },
-      ),
+    _scheduleChangeLogCheck(
+      delay: const Duration(seconds: 1),
     );
 
     if (Platform.isAndroid &&
@@ -341,6 +341,18 @@ class _HomeWidgetState extends State<HomeWidget> {
     await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
     await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
     await MemoryHomeWidgetService.instance.checkPendingMemorySync();
+  }
+
+  void _scheduleChangeLogCheck({
+    required Duration delay,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(delay, () {
+        if (mounted) {
+          showChangeLog(context);
+        }
+      });
+    });
   }
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
@@ -1073,31 +1085,53 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   showChangeLog(BuildContext context) async {
-    final bool show = await updateService.showChangeLog();
-    if (!show || !Configuration.instance.isLoggedIn()) {
+    if (_isShowingChangeLog) {
       return;
     }
-    final colorScheme = getEnteColorScheme(context);
-    await showBarModalBottomSheet(
-      topControl: const SizedBox.shrink(),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
+    _isShowingChangeLog = true;
+    try {
+      final bool show = await updateService.showChangeLog();
+      if (!mounted || !show) {
+        return;
+      }
+      final bool canShow = isOfflineMode || Configuration.instance.isLoggedIn();
+      final hasContent = ChangeLogStrings.maybeForLocale(
+            Localizations.localeOf(context),
+            isOffline: isOfflineMode,
+          ) !=
+          null;
+      if (!canShow) {
+        return;
+      }
+      if (!hasContent) {
+        updateService.hideChangeLog().ignore();
+        return;
+      }
+      final colorScheme = getEnteColorScheme(context);
+      await showBarModalBottomSheet(
+        topControl: const SizedBox.shrink(),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
         ),
-      ),
-      backgroundColor: colorScheme.backgroundElevated,
-      enableDrag: false,
-      barrierColor: backdropFaintDark,
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: const ChangeLogPage(),
-        );
-      },
-    );
+        backgroundColor: colorScheme.backgroundElevated,
+        enableDrag: false,
+        barrierColor: backdropFaintDark,
+        context: context,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: const ChangeLogPage(),
+          );
+        },
+      );
+    } finally {
+      _isShowingChangeLog = false;
+    }
     // Do not show change dialog again
     updateService.hideChangeLog().ignore();
   }

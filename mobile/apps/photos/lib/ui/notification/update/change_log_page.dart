@@ -49,7 +49,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
           const SizedBox(
             height: 24,
           ),
-          Flexible(child: _getChangeLog(context)),
+          Flexible(child: _getChangeLog()),
           const DividerWidget(
             dividerType: DividerType.solid,
           ),
@@ -97,8 +97,14 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     );
   }
 
-  Widget _getChangeLog(BuildContext ctx) {
-    final strings = ChangeLogStrings.forLocale(Localizations.localeOf(context));
+  Widget _getChangeLog() {
+    final strings = ChangeLogStrings.maybeForLocale(
+      Localizations.localeOf(context),
+      isOffline: isOfflineMode,
+    );
+    if (strings == null) {
+      return const SizedBox.shrink();
+    }
     final items = <ChangeLogEntry>[
       ChangeLogEntry(
         strings.title1,

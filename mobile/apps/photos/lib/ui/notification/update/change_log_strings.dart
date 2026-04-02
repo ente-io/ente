@@ -21,14 +21,32 @@ class ChangeLogStrings {
     required this.desc3,
   });
 
-  static ChangeLogStrings forLocale(Locale locale) {
+  bool get hasVisibleEntries =>
+      title1.trim().isNotEmpty ||
+      desc1.trim().isNotEmpty ||
+      desc1Item1.trim().isNotEmpty ||
+      desc1Item2.trim().isNotEmpty ||
+      title2.trim().isNotEmpty ||
+      desc2.trim().isNotEmpty ||
+      title3.trim().isNotEmpty ||
+      desc3.trim().isNotEmpty;
+
+  static ChangeLogStrings? maybeForLocale(
+    Locale locale, {
+    bool isOffline = false,
+  }) {
     final key = locale.countryCode != null && locale.countryCode!.isNotEmpty
         ? '${locale.languageCode}_${locale.countryCode}'
         : locale.languageCode;
+    final translations = isOffline ? _offlineTranslations : _translations;
+    final strings = translations[key] ??
+        translations[locale.languageCode] ??
+        translations['en'];
 
-    return _translations[key] ??
-        _translations[locale.languageCode] ??
-        _translations['en']!;
+    if (strings == null || !strings.hasVisibleEntries) {
+      return null;
+    }
+    return strings;
   }
 
   static const Map<String, ChangeLogStrings> _translations = {
@@ -264,6 +282,19 @@ class ChangeLogStrings {
       title3: '重新设计的帮助与支持',
       desc3:
           '我们让帮助与支持页面变得更易用，你可以在那里报告问题、提出疑问或提交功能请求。我们还新增了一个版块，带你前往常见问题页面，方便你快速找到答案。',
+    ),
+  };
+
+  static const Map<String, ChangeLogStrings> _offlineTranslations = {
+    'en': ChangeLogStrings(
+      title1: '',
+      desc1: '',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: '',
+      desc2: '',
+      title3: '',
+      desc3: '',
     ),
   };
 }
