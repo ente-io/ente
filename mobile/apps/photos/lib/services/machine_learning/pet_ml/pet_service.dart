@@ -138,16 +138,18 @@ class PetService {
     return changedEntities > 0;
   }
 
-  /// Sync remote pet entities to local DB, then push local changes back.
+  /// Sync local and remote pet-to-cluster mappings in both directions.
   ///
-  /// Direction 1 (remote → local): Fetch pet entities from server, update
-  /// local `pet_cluster_pet` mappings and face-to-cluster assignments.
+  /// Direction 1 (local → remote): Push local pet-to-cluster mappings to
+  /// the server first, so fresh assignments (e.g. user just named or merged
+  /// a pet) are persisted before the stale-cleanup pass runs.
   ///
-  /// Direction 2 (local → remote): Read local pet-to-cluster mappings,
-  /// compare with PetData.assigned, and sync any differences to the server.
+  /// Direction 2 (remote → local): Fetch pet entities from server, update
+  /// local `pet_cluster_pet` mappings, and remove stale entries whose
+  /// clusters no longer appear in any remote PetData.assigned.
   Future<void> reconcileClusters() async {
-    await fetchRemoteClusterFeedback(skipIfNoChange: false);
     await _pushLocalClustersToRemote();
+    await fetchRemoteClusterFeedback(skipIfNoChange: false);
   }
 
   /// Fetch remote pet entities and update local ML DB mappings.
@@ -256,6 +258,20 @@ class PetService {
 
       _addOrUpdateEntity(petData.toJson(), id: petID).ignore();
       petData.logStats();
+    }
+
+    // Clear remote assigned list for pets that lost all local clusters
+    // (e.g. after unmerging the last cluster). Without this, stale
+    // assignments stay on the server and get re-imported on next sync.
+    for (final pet in pets.values) {
+      if (dbPetClusterInfo.containsKey(pet.remoteID)) continue;
+      if (pet.data.assigned.isEmpty) continue;
+
+      pet.data.assigned = [];
+      _addOrUpdateEntity(pet.data.toJson(), id: pet.remoteID).ignore();
+      _logger.info(
+        "Cleared remote assignments for pet ${pet.remoteID} (no local clusters)",
+      );
     }
   }
 
