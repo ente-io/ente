@@ -33,6 +33,14 @@ func setupContactControllerTest(t *testing.T) (*Controller, *sql.DB, *gin.Contex
 	if err := config.ConfigureViper("local"); err != nil {
 		t.Fatalf("failed to configure viper: %v", err)
 	}
+	viper.Set("s3.b2-eu-cen.key", "test-key")
+	viper.Set("s3.b2-eu-cen.secret", "test-secret")
+	viper.Set("s3.b2-eu-cen.endpoint", "http://localhost:9000")
+	viper.Set("s3.b2-eu-cen.region", "us-east-1")
+	viper.Set("s3.b2-eu-cen.bucket", "test-bucket")
+	viper.Set("s3.b2-eu-cen.disable_ssl", true)
+	viper.Set("s3.use_path_style_urls", true)
+	viper.Set("s3.attachment-config.profile_picture.primaryBucket", "b2-eu-cen")
 	t.Cleanup(viper.Reset)
 
 	db := testutil.RequireTestDB(t)
