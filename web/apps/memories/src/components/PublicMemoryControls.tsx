@@ -51,7 +51,7 @@ const LaneProgressTrack = styled("div")({
     cursor: "pointer",
     "@media (max-width: 900px)": { maxWidth: "320px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        maxWidth: "248px",
+        maxWidth: "min(calc(100vw - 48px), 304px)",
     },
 });
 

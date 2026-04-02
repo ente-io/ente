@@ -329,17 +329,6 @@ export const calculateLaneScale = (distance: number) => {
     return Math.min(Math.max(1.0 - Math.abs(distance) * 0.02, 0.82), 1.02);
 };
 
-export const calculateLaneYOffset = (distance: number, cardHeight: number) => {
-    if (distance >= 0) {
-        const compression = Math.pow(0.72, distance);
-        return -cardHeight * 0.14 * distance * compression;
-    }
-    const downward = Math.abs(distance);
-    const easedComponent = Math.pow(downward, 1.45);
-    const travel = downward * (2.8 + 1.8 * downward);
-    return cardHeight * (travel + easedComponent * 0.65);
-};
-
 export const calculateLaneBlur = (distance: number) => {
     if (distance <= 0) {
         return 0;
@@ -362,11 +351,7 @@ export const calculateLaneOpacity = (distance: number) => {
         return Math.max(0.35, 1 - distance * 0.22);
     }
     const drop = Math.abs(distance);
-    if (drop <= 0.9) {
-        return 1;
-    }
-    const t = Math.min(Math.max((drop - 0.9) / 0.55, 0), 1);
-    return Math.max(0, 1 - t);
+    return Math.max(0, 1 - drop * 0.85);
 };
 
 export const calculateLaneOverlayOpacity = (distance: number) => {

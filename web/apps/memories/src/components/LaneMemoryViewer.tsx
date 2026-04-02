@@ -22,7 +22,6 @@ import {
     calculateLaneOverlayOpacity,
     calculateLaneRotation,
     calculateLaneScale,
-    calculateLaneYOffset,
     easeInOutCubic,
     getFileAspectRatio,
     getLaneStackSlices,
@@ -51,7 +50,7 @@ import {
 } from "./PublicMemoryViewerShared";
 
 const LANE_FRAME_INTERVAL_MS = 800;
-const LANE_CARD_TRANSITION_DURATION_MS = 520;
+const LANE_CARD_TRANSITION_DURATION_MS = 440;
 const LANE_COMPACT_LAYOUT_BREAKPOINT_PX = 900;
 const LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 340;
 const DESKTOP_LANE_MEDIA_VERTICAL_RESERVED_PX = 320;
@@ -65,6 +64,23 @@ const LANE_GRID_LINE_COLOR = "#08c225";
 const LANE_GRID_LINE_OPACITY = 0.06;
 const LANE_GRID_DISPLACEMENT_SCALE = 9;
 const LANE_VERTICAL_STACK_GAP_PX = 32;
+const LANE_CARD_TO_CONTROLS_GAP_PX = 40;
+const LANE_CARD_SIZE_SCALE = 0.94;
+
+function calculateLaneXOffset(
+    distance: number,
+    cardWidth: number,
+    viewportWidth: number,
+): number {
+    if (distance >= 0) {
+        const compression = Math.pow(0.78, distance);
+        return -cardWidth * 0.12 * distance * compression;
+    }
+    const sideways = Math.abs(distance);
+    const exitDistance = Math.max(cardWidth * 1.8, viewportWidth * 0.82);
+    const overshoot = Math.max(0, sideways - 1) * cardWidth * 0.4;
+    return sideways * exitDistance + overshoot;
+}
 
 /**
  * Primary viewer for lane-style public memory shares.
@@ -470,6 +486,9 @@ export function LaneMemoryViewer({
             width = height * LANE_CARD_ASPECT_RATIO;
         }
 
+        width *= LANE_CARD_SIZE_SCALE;
+        height *= LANE_CARD_SIZE_SCALE;
+
         return { width: Math.round(width), height: Math.round(height) };
     }, [isCompactLaneLayout, viewport.height, viewport.width]);
 
@@ -593,9 +612,10 @@ export function LaneMemoryViewer({
                                 const scale = calculateLaneScale(
                                     slice.distance,
                                 );
-                                const yOffset = calculateLaneYOffset(
+                                const xOffset: number = calculateLaneXOffset(
                                     slice.distance,
-                                    laneFrameSize.height,
+                                    laneFrameSize.width,
+                                    viewport.width,
                                 );
                                 const opacity = calculateLaneOpacity(
                                     slice.distance,
@@ -629,7 +649,7 @@ export function LaneMemoryViewer({
                                         key={`lane-slice-${slice.index}`}
                                         style={{
                                             opacity,
-                                            transform: `translateY(${yOffset}px) rotate(${rotation}deg) scale(${scale})`,
+                                            transform: `translateX(${xOffset}px) rotate(${rotation}deg) scale(${scale})`,
                                         }}
                                     >
                                         <LaneCardSurface
@@ -1073,7 +1093,7 @@ const LaneCenterSection = styled("div")({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
+    gap: `${LANE_CARD_TO_CONTROLS_GAP_PX}px`,
     transform: "translateY(-28px)",
     "@media (max-width: 900px)": {
         transform: "translateY(0)",
