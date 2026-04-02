@@ -20,7 +20,7 @@ class ContactsDatabase {
   static const _stateTable = 'contact_state';
 
   ContactsDatabase({ContactsDatabaseDirectoryResolver? directoryResolver})
-    : _directoryResolver = directoryResolver;
+      : _directoryResolver = directoryResolver;
 
   final ContactsDatabaseDirectoryResolver? _directoryResolver;
 
@@ -63,10 +63,10 @@ class ContactsDatabase {
         _contactsTable,
         {
           'id': contact.id,
-          'contact_user_id': contact.data?.contactUserId ?? -1,
-          'data_json': contact.data == null
-              ? null
-              : jsonEncode(contact.data!.toJson()),
+          'contact_user_id': contact.contactUserId,
+          'email': contact.email,
+          'data_json':
+              contact.data == null ? null : jsonEncode(contact.data!.toJson()),
           'profile_picture_attachment_id': contact.profilePictureAttachmentId,
           'is_deleted': contact.isDeleted ? 1 : 0,
           'created_at': contact.createdAt,
@@ -174,8 +174,7 @@ class ContactsDatabase {
     final db = await database;
     await db.delete(
       _attachmentsTable,
-      where:
-          '''
+      where: '''
         attachment_id NOT IN (
           SELECT profile_picture_attachment_id
           FROM $_contactsTable
@@ -231,6 +230,7 @@ class ContactsDatabase {
       CREATE TABLE $_contactsTable (
         id TEXT PRIMARY KEY,
         contact_user_id INTEGER NOT NULL,
+        email TEXT,
         data_json TEXT,
         profile_picture_attachment_id TEXT,
         is_deleted INTEGER NOT NULL DEFAULT 0,
@@ -284,6 +284,8 @@ class ContactsDatabase {
     final dataJson = row['data_json'] as String?;
     return ContactRecord(
       id: row['id']! as String,
+      contactUserId: row['contact_user_id']! as int,
+      email: row['email'] as String?,
       data: dataJson == null
           ? null
           : ContactData.fromJson(jsonDecode(dataJson) as Map<String, dynamic>),

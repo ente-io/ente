@@ -147,7 +147,6 @@ class _FrbContactsRustContext implements ContactsRustContext {
       await _inner.createContact(
         data: rust.ContactData(
           contactUserId: data.contactUserId,
-          email: data.email,
           name: data.name,
           birthDate: data.birthDate,
         ),
@@ -176,7 +175,6 @@ class _FrbContactsRustContext implements ContactsRustContext {
         contactId: contactId,
         data: rust.ContactData(
           contactUserId: data.contactUserId,
-          email: data.email,
           name: data.name,
           birthDate: data.birthDate,
         ),
@@ -220,12 +218,13 @@ ContactRecord _fromRustRecord(rust.ContactRecord record) {
       ? null
       : ContactData(
           contactUserId: record.contactUserId,
-          email: record.email!,
           name: record.name!,
           birthDate: record.birthDate,
         );
   return ContactRecord(
     id: record.id,
+    contactUserId: record.contactUserId,
+    email: record.email,
     data: data,
     profilePictureAttachmentId: record.profilePictureAttachmentId,
     isDeleted: record.isDeleted,

@@ -44,9 +44,10 @@ void main() {
       [
         const ContactRecord(
           id: 'ct_1',
+          contactUserId: 2,
+          email: 'b@test.test',
           data: ContactData(
             contactUserId: 2,
-            email: 'b@test.test',
             name: 'B',
             birthDate: '2001-04-02',
           ),
@@ -74,7 +75,7 @@ void main() {
     final synced = await service.sync();
     expect(synced, hasLength(1));
     final cached = await service.getContacts();
-    expect(cached.single.data!.email, 'b@test.test');
+    expect(cached.single.email, 'b@test.test');
     expect(cached.single.profilePictureAttachmentId, 'att_1');
   });
 
@@ -89,7 +90,7 @@ void main() {
     );
 
     final created = await service.createContact(
-      const ContactData(contactUserId: 2, email: 'b@test.test', name: 'B'),
+      const ContactData(contactUserId: 2, name: 'B'),
     );
     expect((await service.getContact(created.id))!.data!.name, 'B');
 
@@ -135,7 +136,9 @@ void main() {
       [
         const ContactRecord(
           id: 'ct_1',
-          data: ContactData(contactUserId: 2, email: 'b@test.test', name: 'B'),
+          contactUserId: 2,
+          email: 'b@test.test',
+          data: ContactData(contactUserId: 2, name: 'B'),
           profilePictureAttachmentId: 'att_1',
           isDeleted: false,
           createdAt: 10,
@@ -179,7 +182,7 @@ void main() {
     );
 
     final created = await service.createContact(
-      const ContactData(contactUserId: 2, email: 'b@test.test', name: 'B'),
+      const ContactData(contactUserId: 2, name: 'B'),
     );
     await service.setProfilePicture(created.id, Uint8List.fromList([1, 2, 3]));
     expect(
@@ -212,9 +215,10 @@ void main() {
         [
           const ContactRecord(
             id: 'ct_1',
+            contactUserId: 2,
+            email: 'b@test.test',
             data: ContactData(
               contactUserId: 2,
-              email: 'b@test.test',
               name: 'B',
             ),
             profilePictureAttachmentId: 'att_keep',
@@ -287,6 +291,8 @@ class FakeContactsRustContext implements ContactsRustContext {
   Future<ContactRecord> createContact(ContactData data) async {
     final record = ContactRecord(
       id: 'ct_created',
+      contactUserId: data.contactUserId,
+      email: 'b@test.test',
       data: data,
       profilePictureAttachmentId: null,
       isDeleted: false,
@@ -299,9 +305,9 @@ class FakeContactsRustContext implements ContactsRustContext {
 
   @override
   WrappedRootContactKey currentWrappedRootKey() => const WrappedRootContactKey(
-    encryptedKey: 'enc-key',
-    header: 'enc-header',
-  );
+        encryptedKey: 'enc-key',
+        header: 'enc-header',
+      );
 
   @override
   Future<void> deleteContact(String contactId) async {
@@ -309,6 +315,8 @@ class FakeContactsRustContext implements ContactsRustContext {
     if (existing != null) {
       records[contactId] = ContactRecord(
         id: existing.id,
+        contactUserId: existing.contactUserId,
+        email: existing.email,
         data: null,
         profilePictureAttachmentId: null,
         isDeleted: true,
@@ -323,6 +331,8 @@ class FakeContactsRustContext implements ContactsRustContext {
     final existing = records[contactId]!;
     final updated = ContactRecord(
       id: existing.id,
+      contactUserId: existing.contactUserId,
+      email: existing.email,
       data: existing.data,
       profilePictureAttachmentId: null,
       isDeleted: existing.isDeleted,
@@ -365,6 +375,8 @@ class FakeContactsRustContext implements ContactsRustContext {
     final existing = records[contactId]!;
     final updated = ContactRecord(
       id: existing.id,
+      contactUserId: existing.contactUserId,
+      email: existing.email,
       data: existing.data,
       profilePictureAttachmentId: nextAttachmentId,
       isDeleted: existing.isDeleted,
@@ -387,6 +399,8 @@ class FakeContactsRustContext implements ContactsRustContext {
     final existing = records[contactId]!;
     final updated = ContactRecord(
       id: existing.id,
+      contactUserId: existing.contactUserId,
+      email: existing.email,
       data: data,
       profilePictureAttachmentId: existing.profilePictureAttachmentId,
       isDeleted: existing.isDeleted,

@@ -29,7 +29,9 @@ void main() {
     await database.upsertContacts([
       const ContactRecord(
         id: 'ct_1',
-        data: ContactData(contactUserId: 200, email: 'a@test.test', name: 'A'),
+        contactUserId: 200,
+        email: 'a@test.test',
+        data: ContactData(contactUserId: 200, name: 'A'),
         profilePictureAttachmentId: null,
         isDeleted: false,
         createdAt: 10,
@@ -44,6 +46,7 @@ void main() {
 
     await database.configure(userId: 1);
     expect((await database.getContacts()).single.id, 'ct_1');
+    expect((await database.getContacts()).single.email, 'a@test.test');
   });
 
   test('clearTable removes all contacts databases', () async {
@@ -51,7 +54,9 @@ void main() {
     await database.upsertContacts([
       const ContactRecord(
         id: 'ct_1',
-        data: ContactData(contactUserId: 200, email: 'a@test.test', name: 'A'),
+        contactUserId: 200,
+        email: 'a@test.test',
+        data: ContactData(contactUserId: 200, name: 'A'),
         profilePictureAttachmentId: null,
         isDeleted: false,
         createdAt: 10,
@@ -62,7 +67,9 @@ void main() {
     await database.upsertContacts([
       const ContactRecord(
         id: 'ct_2',
-        data: ContactData(contactUserId: 201, email: 'b@test.test', name: 'B'),
+        contactUserId: 201,
+        email: 'b@test.test',
+        data: ContactData(contactUserId: 201, name: 'B'),
         profilePictureAttachmentId: null,
         isDeleted: false,
         createdAt: 11,
@@ -85,7 +92,9 @@ void main() {
     await database.upsertContacts([
       const ContactRecord(
         id: 'ct_1',
-        data: ContactData(contactUserId: 200, email: 'a@test.test', name: 'A'),
+        contactUserId: 200,
+        email: 'a@test.test',
+        data: ContactData(contactUserId: 200, name: 'A'),
         profilePictureAttachmentId: 'att_keep',
         isDeleted: false,
         createdAt: 10,
