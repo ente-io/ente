@@ -35,6 +35,16 @@ func (c *Controller) Create(ctx *gin.Context, req contactmodel.CreateRequest) (*
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "invalid create contact request")
 	}
+	exists, err := c.Repo.ContactUserExists(ctx, req.ContactUserID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to validate contact user")
+	}
+	if !exists {
+		return nil, stacktrace.Propagate(
+			ente.NewBadRequestWithMessage("contactUserID does not exist"),
+			"",
+		)
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	canCreate, err := c.Repo.CanCreateContact(ctx, userID, req.ContactUserID)
 	if err != nil {
@@ -75,6 +85,16 @@ func (c *Controller) Update(ctx *gin.Context, contactID string, req contactmodel
 	}
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "invalid update contact request")
+	}
+	exists, err := c.Repo.ContactUserExists(ctx, req.ContactUserID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to validate contact user")
+	}
+	if !exists {
+		return nil, stacktrace.Propagate(
+			ente.NewBadRequestWithMessage("contactUserID does not exist"),
+			"",
+		)
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	if err := c.Repo.Update(ctx, userID, contactID, req); err != nil {

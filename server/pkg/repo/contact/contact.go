@@ -7,6 +7,7 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	contactmodel "github.com/ente-io/museum/ente/contact"
+	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 )
@@ -59,6 +60,24 @@ func (r *Repository) Create(ctx context.Context, userID int64, req contactmodel.
 		return "", stacktrace.Propagate(err, "failed to create contact")
 	}
 	return id, nil
+}
+
+func (r *Repository) ContactUserExists(ctx context.Context, contactUserID int64) (bool, error) {
+	var exists bool
+	err := r.DB.QueryRowContext(
+		ctx,
+		`SELECT EXISTS(
+			SELECT 1
+			  FROM users
+			 WHERE user_id = $1
+			   AND encrypted_email IS NOT NULL
+		)`,
+		contactUserID,
+	).Scan(&exists)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "failed to check contact user existence")
+	}
+	return exists, nil
 }
 
 func (r *Repository) hasActiveEmergencyRelationship(ctx context.Context, actorUserID int64, contactUserID int64) (bool, error) {
@@ -138,14 +157,16 @@ func (r *Repository) hasCommonSharedCollection(ctx context.Context, actorUserID 
 func (r *Repository) Get(ctx context.Context, userID int64, id string) (*contactmodel.Entity, error) {
 	row := r.DB.QueryRowContext(
 		ctx,
-		`SELECT id, user_id, contact_user_id, profile_picture_attachment_id, encrypted_key, encrypted_data,
-		        is_deleted, created_at, updated_at
-		   FROM contact_entity
-		  WHERE id = $1 AND user_id = $2`,
+		`SELECT c.id, c.user_id, c.contact_user_id, c.profile_picture_attachment_id, c.encrypted_key, c.encrypted_data,
+		        c.is_deleted, c.created_at, c.updated_at, u.encrypted_email, u.email_decryption_nonce
+		   FROM contact_entity c
+		   LEFT JOIN users u
+		     ON u.user_id = c.contact_user_id
+		  WHERE c.id = $1 AND c.user_id = $2`,
 		id,
 		userID,
 	)
-	entity, err := scanEntity(row)
+	entity, err := r.scanEntityWithEmail(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, &ente.ErrNotFoundError
@@ -231,11 +252,13 @@ func (r *Repository) Delete(ctx context.Context, userID int64, id string) error 
 func (r *Repository) GetDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]contactmodel.Entity, error) {
 	rows, err := r.DB.QueryContext(
 		ctx,
-		`SELECT id, user_id, contact_user_id, profile_picture_attachment_id, encrypted_key, encrypted_data,
-		        is_deleted, created_at, updated_at
-		   FROM contact_entity
-		  WHERE user_id = $1 AND updated_at > $2
-		  ORDER BY updated_at
+		`SELECT c.id, c.user_id, c.contact_user_id, c.profile_picture_attachment_id, c.encrypted_key, c.encrypted_data,
+		        c.is_deleted, c.created_at, c.updated_at, u.encrypted_email, u.email_decryption_nonce
+		   FROM contact_entity c
+		   LEFT JOIN users u
+		     ON u.user_id = c.contact_user_id
+		  WHERE c.user_id = $1 AND c.updated_at > $2
+		  ORDER BY c.updated_at
 		  LIMIT $3`,
 		userID,
 		sinceTime,
@@ -248,13 +271,25 @@ func (r *Repository) GetDiff(ctx context.Context, userID int64, sinceTime int64,
 
 	entities := make([]contactmodel.Entity, 0)
 	for rows.Next() {
-		entity, scanErr := scanEntity(rows)
+		entity, scanErr := r.scanEntityWithEmail(rows)
 		if scanErr != nil {
 			return nil, stacktrace.Propagate(scanErr, "failed to scan contact diff row")
 		}
 		entities = append(entities, *entity)
 	}
 	return entities, nil
+}
+
+func (r *Repository) TouchContactsForContactUser(ctx context.Context, contactUserID int64) error {
+	_, err := r.DB.ExecContext(
+		ctx,
+		`UPDATE contact_entity
+		    SET contact_user_id = contact_user_id
+		  WHERE contact_user_id = $1
+		    AND is_deleted = FALSE`,
+		contactUserID,
+	)
+	return stacktrace.Propagate(err, "failed to touch contacts for contact user")
 }
 
 func (r *Repository) AttachProfilePicture(ctx context.Context, userID int64, contactID string, attachmentID string, size int64) (*contactmodel.Entity, error) {
@@ -468,6 +503,67 @@ func scanEntity(scanner rowScanner) (*contactmodel.Entity, error) {
 	entity.EncryptedKey = &encryptedKey
 	entity.EncryptedData = &encryptedData
 	return &entity, nil
+}
+
+func (r *Repository) scanEntityWithEmail(scanner rowScanner) (*contactmodel.Entity, error) {
+	entity, encryptedEmail, nonce, err := scanEntityWithEncryptedEmail(scanner)
+	if err != nil {
+		return nil, err
+	}
+	if entity.IsDeleted || encryptedEmail == nil || nonce == nil {
+		entity.Email = nil
+		return entity, nil
+	}
+	email, err := crypto.Decrypt(*encryptedEmail, r.SecretEncryptionKey, *nonce)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to decrypt contact email")
+	}
+	entity.Email = &email
+	return entity, nil
+}
+
+func scanEntityWithEncryptedEmail(scanner rowScanner) (*contactmodel.Entity, *[]byte, *[]byte, error) {
+	var (
+		entity            contactmodel.Entity
+		pictureID         sql.NullString
+		encryptedKey      []byte
+		encryptedData     []byte
+		contactEmail      []byte
+		contactEmailNonce []byte
+	)
+	if err := scanner.Scan(
+		&entity.ID,
+		&entity.UserID,
+		&entity.ContactUserID,
+		&pictureID,
+		&encryptedKey,
+		&encryptedData,
+		&entity.IsDeleted,
+		&entity.CreatedAt,
+		&entity.UpdatedAt,
+		&contactEmail,
+		&contactEmailNonce,
+	); err != nil {
+		return nil, nil, nil, err
+	}
+	if pictureID.Valid {
+		entity.ProfilePictureAttachmentID = &pictureID.String
+	}
+	if entity.IsDeleted {
+		entity.ProfilePictureAttachmentID = nil
+		entity.EncryptedKey = nil
+		entity.EncryptedData = nil
+		return &entity, nil, nil, nil
+	}
+	entity.EncryptedKey = &encryptedKey
+	entity.EncryptedData = &encryptedData
+	var emailPtr *[]byte
+	var noncePtr *[]byte
+	if len(contactEmail) > 0 && len(contactEmailNonce) > 0 {
+		emailPtr = &contactEmail
+		noncePtr = &contactEmailNonce
+	}
+	return &entity, emailPtr, noncePtr, nil
 }
 
 func scanAttachment(scanner rowScanner) (*contactmodel.Attachment, error) {
