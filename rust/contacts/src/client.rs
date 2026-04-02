@@ -135,12 +135,13 @@ impl ContactsCtx {
         self.ensure_root_key_confirmed().await?;
 
         let contact_key = keys::generate_stream_key();
-        let root_contact_key = self
-            .root_contact_key
-            .read()
-            .expect("root contact key lock poisoned");
-        let wrapped_contact_key =
-            contacts_crypto::wrap_contact_key(&contact_key, &root_contact_key)?;
+        let wrapped_contact_key = {
+            let root_contact_key = self
+                .root_contact_key
+                .read()
+                .expect("root contact key lock poisoned");
+            contacts_crypto::wrap_contact_key(&contact_key, &root_contact_key)?
+        };
         let encrypted_data = contacts_crypto::encrypt_contact_data(data, &contact_key)?;
         let response = self
             .http
@@ -200,11 +201,13 @@ impl ContactsCtx {
             .encrypted_key
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedKey)?;
-        let root_contact_key = self
-            .root_contact_key
-            .read()
-            .expect("root contact key lock poisoned");
-        let contact_key = contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?;
+        let contact_key = {
+            let root_contact_key = self
+                .root_contact_key
+                .read()
+                .expect("root contact key lock poisoned");
+            contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
+        };
         let encrypted_data = contacts_crypto::encrypt_contact_data(data, &contact_key)?;
 
         let response = self
@@ -244,11 +247,13 @@ impl ContactsCtx {
             .encrypted_key
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedKey)?;
-        let root_contact_key = self
-            .root_contact_key
-            .read()
-            .expect("root contact key lock poisoned");
-        let contact_key = contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?;
+        let contact_key = {
+            let root_contact_key = self
+                .root_contact_key
+                .read()
+                .expect("root contact key lock poisoned");
+            contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
+        };
         let encrypted_picture =
             contacts_crypto::encrypt_profile_picture(profile_picture, &contact_key)?;
         let content_md5 = contacts_crypto::content_md5_base64(&encrypted_picture);
@@ -299,11 +304,13 @@ impl ContactsCtx {
             .encrypted_key
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedKey)?;
-        let root_contact_key = self
-            .root_contact_key
-            .read()
-            .expect("root contact key lock poisoned");
-        let contact_key = contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?;
+        let contact_key = {
+            let root_contact_key = self
+                .root_contact_key
+                .read()
+                .expect("root contact key lock poisoned");
+            contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
+        };
         let download = self
             .http
             .get_json::<SignedUrlResponse>(&format!("/contacts/{contact_id}/profile-picture"), &[])
