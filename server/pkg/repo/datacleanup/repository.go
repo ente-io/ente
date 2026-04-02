@@ -88,9 +88,21 @@ func (r *Repository) DeleteTableData(ctx context.Context, userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to delete entity data")
 	}
-	_, err = r.DB.ExecContext(ctx, `DELETE FROM user_attachments WHERE user_id = $1`, userID)
+	_, err = r.DB.ExecContext(ctx, `UPDATE user_attachments
+		SET is_deleted = TRUE,
+		    pending_sync = TRUE,
+		    sync_locked_till = 0,
+		    delete_from_buckets = array(
+		        SELECT DISTINCT elem
+		          FROM unnest(array_cat(array_cat(replicated_buckets, delete_from_buckets), inflight_rep_buckets)) AS elem
+		         WHERE elem IS NOT NULL
+		    ),
+		    replicated_buckets = ARRAY[]::s3region[],
+		    inflight_rep_buckets = ARRAY[]::s3region[]
+		WHERE user_id = $1
+		  AND is_deleted = FALSE`, userID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to delete contact attachment data")
+		return stacktrace.Propagate(err, "failed to mark contact attachment data deleted")
 	}
 	_, err = r.DB.ExecContext(ctx, `DELETE FROM contact_entity WHERE user_id = $1`, userID)
 	if err != nil {

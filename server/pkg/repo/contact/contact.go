@@ -4,9 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/ente-io/museum/ente"
 	contactmodel "github.com/ente-io/museum/ente/contact"
+	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
@@ -419,6 +422,222 @@ func (r *Repository) GetAttachment(ctx context.Context, userID int64, attachment
 		return nil, stacktrace.Propagate(err, "failed to get attachment")
 	}
 	return attachment, nil
+}
+
+func (r *Repository) AddBucket(row contactmodel.Attachment, bucketID string, columnName string) error {
+	query := fmt.Sprintf(`
+		UPDATE user_attachments
+		SET %s = array(
+			SELECT DISTINCT elem FROM unnest(
+				array_append(user_attachments.%s, $1)
+			) AS elem
+			WHERE elem IS NOT NULL
+		)
+		WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`, columnName, columnName)
+	result, err := r.DB.Exec(query, bucketID, row.AttachmentID, row.UserID, string(row.AttachmentType))
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to add bucket to "+columnName)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if rowsAffected == 0 {
+		return stacktrace.NewError("bucket not added to " + columnName)
+	}
+	return nil
+}
+
+func (r *Repository) RemoveBucket(row contactmodel.Attachment, bucketID string, columnName string) error {
+	query := fmt.Sprintf(`
+		UPDATE user_attachments
+		SET %s = array(
+			SELECT DISTINCT elem FROM unnest(
+				array_remove(user_attachments.%s, $1)
+			) AS elem
+			WHERE elem IS NOT NULL
+		)
+		WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`, columnName, columnName)
+	result, err := r.DB.Exec(query, bucketID, row.AttachmentID, row.UserID, string(row.AttachmentType))
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to remove bucket from "+columnName)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if rowsAffected == 0 {
+		return stacktrace.NewError("bucket not removed from " + columnName)
+	}
+	return nil
+}
+
+func (r *Repository) MoveBetweenBuckets(row contactmodel.Attachment, bucketID string, sourceColumn string, destColumn string) error {
+	query := fmt.Sprintf(`
+		UPDATE user_attachments
+		SET %s = array(
+			SELECT DISTINCT elem FROM unnest(
+				array_append(user_attachments.%s, $1)
+			) AS elem
+			WHERE elem IS NOT NULL
+		),
+		%s = array(
+			SELECT DISTINCT elem FROM unnest(
+				array_remove(user_attachments.%s, $1)
+			) AS elem
+			WHERE elem IS NOT NULL
+		)
+		WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`, destColumn, destColumn, sourceColumn, sourceColumn)
+	result, err := r.DB.Exec(query, bucketID, row.AttachmentID, row.UserID, string(row.AttachmentType))
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to move bucket from "+sourceColumn+" to "+destColumn)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if rowsAffected == 0 {
+		return stacktrace.NewError("bucket not moved from " + sourceColumn + " to " + destColumn)
+	}
+	return nil
+}
+
+func (r *Repository) GetPendingSyncAttachmentAndExtendLock(
+	ctx context.Context,
+	newSyncLockTime int64,
+	forDeletion bool,
+) (*contactmodel.Attachment, error) {
+	if newSyncLockTime < time.Now().Add(5*time.Minute).UnixMicro() {
+		return nil, stacktrace.NewError("newSyncLockTime should be at least 5min in the future")
+	}
+	tx, err := r.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer tx.Rollback()
+
+	row := tx.QueryRowContext(
+		ctx,
+		`SELECT attachment_id, user_id, attachment_type, size, latest_bucket, replicated_buckets,
+		        delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till,
+		        created_at, updated_at
+		   FROM user_attachments
+		  WHERE pending_sync = TRUE
+		    AND is_deleted = $1
+		    AND sync_locked_till < now_utc_micro_seconds()
+		  LIMIT 1
+		  FOR UPDATE SKIP LOCKED`,
+		forDeletion,
+	)
+	attachment, err := scanAttachment(row)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if attachment.SyncLockedTill > newSyncLockTime {
+		return nil, stacktrace.NewError(
+			fmt.Sprintf(
+				"newSyncLockTime (%d) is less than existing SyncLockedTill(%d)",
+				newSyncLockTime,
+				attachment.SyncLockedTill,
+			),
+		)
+	}
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE user_attachments
+		    SET sync_locked_till = $1
+		  WHERE attachment_id = $2 AND user_id = $3 AND attachment_type = $4`,
+		newSyncLockTime,
+		attachment.AttachmentID,
+		attachment.UserID,
+		string(attachment.AttachmentType),
+	); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to extend attachment sync lock")
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return attachment, nil
+}
+
+func (r *Repository) MarkAttachmentReplicationAsDone(ctx context.Context, row contactmodel.Attachment) error {
+	_, err := r.DB.ExecContext(
+		ctx,
+		`UPDATE user_attachments
+		    SET pending_sync = FALSE
+		  WHERE is_deleted = FALSE
+		    AND attachment_id = $1
+		    AND user_id = $2
+		    AND attachment_type = $3`,
+		row.AttachmentID,
+		row.UserID,
+		string(row.AttachmentType),
+	)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+func (r *Repository) RegisterReplicationAttempt(ctx context.Context, row contactmodel.Attachment, dstBucketID string) error {
+	if array.StringInList(dstBucketID, row.DeleteFromBuckets) {
+		return r.MoveBetweenBuckets(row, dstBucketID, DeletionColumn, InflightRepColumn)
+	}
+	if !array.StringInList(dstBucketID, row.InflightRepBuckets) {
+		return r.AddBucket(row, dstBucketID, InflightRepColumn)
+	}
+	return nil
+}
+
+func (r *Repository) ResetAttachmentSyncLock(ctx context.Context, row contactmodel.Attachment, syncLockedTill int64) error {
+	_, err := r.DB.ExecContext(
+		ctx,
+		`UPDATE user_attachments
+		    SET sync_locked_till = now_utc_micro_seconds()
+		  WHERE pending_sync = FALSE
+		    AND attachment_id = $1
+		    AND user_id = $2
+		    AND attachment_type = $3
+		    AND sync_locked_till = $4`,
+		row.AttachmentID,
+		row.UserID,
+		string(row.AttachmentType),
+		syncLockedTill,
+	)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+func (r *Repository) DeleteAttachment(ctx context.Context, row contactmodel.Attachment) error {
+	res, err := r.DB.ExecContext(
+		ctx,
+		`DELETE FROM user_attachments
+		  WHERE attachment_id = $1
+		    AND attachment_type = $2
+		    AND latest_bucket = $3
+		    AND user_id = $4
+		    AND replicated_buckets = ARRAY[]::s3region[]
+		    AND delete_from_buckets = ARRAY[]::s3region[]
+		    AND inflight_rep_buckets = ARRAY[]::s3region[]
+		    AND is_deleted = TRUE`,
+		row.AttachmentID,
+		string(row.AttachmentType),
+		row.LatestBucket,
+		row.UserID,
+	)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if rowsAffected == 0 {
+		return stacktrace.NewError("attachment not deleted")
+	}
+	return nil
 }
 
 func (r *Repository) getForUpdate(ctx context.Context, tx *sql.Tx, userID int64, id string) (*contactmodel.Entity, error) {
