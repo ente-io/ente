@@ -1,6 +1,7 @@
 //! HTTP client for communicating with the Ente API.
 
 use std::sync::RwLock;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
@@ -114,7 +115,11 @@ impl HttpClient {
             }
         });
 
+        #[cfg(not(target_arch = "wasm32"))]
         let mut builder = reqwest::Client::builder();
+        #[cfg(target_arch = "wasm32")]
+        let builder = reqwest::Client::builder();
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(timeout) = config.timeout_secs {
             builder = builder.timeout(Duration::from_secs(timeout));
         }
@@ -295,11 +300,11 @@ impl HttpClient {
                 .headers(headers)
                 .send()
                 .await?;
-            if response.status().is_redirection() {
-                if let Some(location) = response.headers().get(LOCATION) {
-                    current_url = self.resolve_redirect(&current_url, location)?;
-                    continue;
-                }
+            if response.status().is_redirection()
+                && let Some(location) = response.headers().get(LOCATION)
+            {
+                current_url = self.resolve_redirect(&current_url, location)?;
+                continue;
             }
             return parse_bytes_response(response).await;
         }
@@ -332,11 +337,11 @@ impl HttpClient {
                 .body(body.to_vec())
                 .send()
                 .await?;
-            if response.status().is_redirection() {
-                if let Some(location) = response.headers().get(LOCATION) {
-                    current_url = self.resolve_redirect(&current_url, location)?;
-                    continue;
-                }
+            if response.status().is_redirection()
+                && let Some(location) = response.headers().get(LOCATION)
+            {
+                current_url = self.resolve_redirect(&current_url, location)?;
+                continue;
             }
             return parse_empty_response(response).await;
         }
