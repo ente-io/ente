@@ -1,8 +1,18 @@
 //! HTTP client for communicating with the Ente API.
 
-use reqwest::Url;
-use serde::Deserialize;
+use std::sync::RwLock;
+use std::time::Duration;
+
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
+use reqwest::{Response, Url};
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+const DEFAULT_BASE_URL: &str = "https://api.ente.io";
+const TOKEN_HEADER: &str = "X-Auth-Token";
+const CLIENT_PKG_HEADER: &str = "X-Client-Package";
+const CLIENT_VERSION_HEADER: &str = "X-Client-Version";
 
 /// HTTP client errors.
 #[derive(Error, Debug)]
@@ -48,7 +58,7 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-/// Response from the /ping endpoint
+/// Response from the /ping endpoint.
 #[derive(Deserialize, Debug)]
 pub struct PingResponse {
     /// "pong"
@@ -57,36 +67,296 @@ pub struct PingResponse {
     pub id: String,
 }
 
-// TODO: Future HTTP features to implement:
-// - POST/PUT/DELETE methods
-// - JSON request bodies
-// - Streaming uploads/downloads
-// - Custom headers / auth tokens
-// - Retry logic
-// - Configurable timeouts
+/// Authenticated HTTP client configuration.
+#[derive(Debug, Clone, Default)]
+pub struct HttpConfig {
+    /// Base API URL.
+    pub base_url: String,
+    /// Optional auth token sent via `X-Auth-Token`.
+    pub auth_token: Option<String>,
+    /// Optional user agent.
+    pub user_agent: Option<String>,
+    /// Optional client package header.
+    pub client_package: Option<String>,
+    /// Optional client version header.
+    pub client_version: Option<String>,
+    /// Optional request timeout.
+    pub timeout_secs: Option<u64>,
+}
 
 /// HTTP client for making requests to the Ente API.
 pub struct HttpClient {
     client: reqwest::Client,
     base_url: String,
+    base_origin: Option<Url>,
+    auth_token: RwLock<Option<String>>,
+    user_agent: Option<String>,
+    client_package: Option<String>,
+    client_version: Option<String>,
 }
 
 impl HttpClient {
     /// Create a client with the given base URL.
     pub fn new(base_url: &str) -> Self {
-        Self {
-            client: reqwest::Client::new(),
-            base_url: base_url.trim_end_matches('/').to_string(),
+        Self::new_with_config(HttpConfig {
+            base_url: base_url.to_string(),
+            ..HttpConfig::default()
+        })
+    }
+
+    /// Create a client with auth/header configuration.
+    pub fn new_with_config(config: HttpConfig) -> Self {
+        let base_url = config.base_url.trim_end_matches('/').to_string();
+        let base_origin = Url::parse(&base_url).ok().and_then(|base| {
+            if base.query().is_none() && base.fragment().is_none() {
+                Some(base)
+            } else {
+                None
+            }
+        });
+
+        let is_http = base_url.starts_with("http://");
+        let is_default = base_url.starts_with(DEFAULT_BASE_URL);
+        let allow_insecure = is_http || !is_default;
+
+        let mut builder = reqwest::Client::builder();
+        if let Some(timeout) = config.timeout_secs {
+            builder = builder.timeout(Duration::from_secs(timeout));
         }
+        if allow_insecure {
+            builder = builder.danger_accept_invalid_certs(true);
+        }
+
+        let client = builder.build().unwrap_or_else(|e| {
+            panic!("failed to build HTTP client for '{}': {}", base_url, e);
+        });
+
+        Self {
+            client,
+            base_url,
+            base_origin,
+            auth_token: RwLock::new(config.auth_token),
+            user_agent: config.user_agent,
+            client_package: config.client_package,
+            client_version: config.client_version,
+        }
+    }
+
+    /// Replace the auth token used for authenticated requests.
+    pub fn set_auth_token(&self, auth_token: Option<String>) {
+        *self.auth_token.write().expect("auth token lock poisoned") = auth_token;
     }
 
     /// GET request, returns response body as text.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
         let url = self.request_url(path)?;
-        let response = self.client.get(&url).send().await?;
-        let response = response.error_for_status()?;
-        let text = response.text().await?;
-        Ok(text)
+        let response = self
+            .client
+            .get(&url)
+            .headers(self.build_headers()?)
+            .send()
+            .await?;
+        parse_text_response(response).await
+    }
+
+    /// GET request returning JSON.
+    pub async fn get_json<T: DeserializeOwned>(
+        &self,
+        path: &str,
+        query: &[(&str, String)],
+    ) -> Result<T, Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .get(&url)
+            .headers(self.build_headers()?)
+            .query(query)
+            .send()
+            .await?;
+        parse_json_response(response).await
+    }
+
+    /// GET request returning `None` for 404.
+    pub async fn get_json_optional<T: DeserializeOwned>(
+        &self,
+        path: &str,
+        query: &[(&str, String)],
+    ) -> Result<Option<T>, Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .get(&url)
+            .headers(self.build_headers()?)
+            .query(query)
+            .send()
+            .await?;
+        if response.status().as_u16() == 404 {
+            return Ok(None);
+        }
+        parse_json_response(response).await.map(Some)
+    }
+
+    /// POST JSON request.
+    pub async fn post_json<T: DeserializeOwned, B: Serialize + ?Sized>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<T, Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .post(&url)
+            .headers(self.build_headers()?)
+            .json(body)
+            .send()
+            .await?;
+        parse_json_response(response).await
+    }
+
+    /// POST JSON request expecting an empty response body.
+    pub async fn post_empty<B: Serialize + ?Sized>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<(), Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .post(&url)
+            .headers(self.build_headers()?)
+            .json(body)
+            .send()
+            .await?;
+        parse_empty_response(response).await
+    }
+
+    /// PUT JSON request.
+    pub async fn put_json<T: DeserializeOwned, B: Serialize + ?Sized>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<T, Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .put(&url)
+            .headers(self.build_headers()?)
+            .json(body)
+            .send()
+            .await?;
+        parse_json_response(response).await
+    }
+
+    /// PUT JSON request expecting an empty response body.
+    pub async fn put_empty<B: Serialize + ?Sized>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<(), Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .put(&url)
+            .headers(self.build_headers()?)
+            .json(body)
+            .send()
+            .await?;
+        parse_empty_response(response).await
+    }
+
+    /// DELETE request expecting an empty response body.
+    pub async fn delete_empty(&self, path: &str, query: &[(&str, String)]) -> Result<(), Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .delete(&url)
+            .headers(self.build_headers()?)
+            .query(query)
+            .send()
+            .await?;
+        parse_empty_response(response).await
+    }
+
+    /// DELETE request returning JSON.
+    pub async fn delete_json<T: DeserializeOwned>(
+        &self,
+        path: &str,
+        query: &[(&str, String)],
+    ) -> Result<T, Error> {
+        let url = self.request_url(path)?;
+        let response = self
+            .client
+            .delete(&url)
+            .headers(self.build_headers()?)
+            .query(query)
+            .send()
+            .await?;
+        parse_json_response(response).await
+    }
+
+    /// Download bytes from a URL, following redirects safely.
+    pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>, Error> {
+        let mut current_url = self.parse_url(url)?;
+        for _ in 0..5 {
+            let headers = self.build_headers_for_url(&current_url)?;
+            let response = self
+                .client
+                .get(current_url.clone())
+                .headers(headers)
+                .send()
+                .await?;
+            if response.status().is_redirection() {
+                if let Some(location) = response.headers().get(LOCATION) {
+                    current_url = self.resolve_redirect(&current_url, location)?;
+                    continue;
+                }
+            }
+            return parse_bytes_response(response).await;
+        }
+
+        Err(Error::InvalidUrl("too many redirects".to_string()))
+    }
+
+    /// Upload raw bytes to a presigned URL, following redirects safely.
+    pub async fn put_bytes(
+        &self,
+        url: &str,
+        body: &[u8],
+        headers: &[(&str, String)],
+    ) -> Result<(), Error> {
+        let mut header_map = HeaderMap::new();
+        for (name, value) in headers {
+            let header_name =
+                HeaderName::from_bytes(name.as_bytes()).map_err(|e| Error::Parse(e.to_string()))?;
+            let header_value =
+                HeaderValue::from_str(value).map_err(|e| Error::Parse(e.to_string()))?;
+            header_map.insert(header_name, header_value);
+        }
+
+        let mut current_url = self.parse_url(url)?;
+        for _ in 0..5 {
+            let response = self
+                .client
+                .put(current_url.clone())
+                .headers(header_map.clone())
+                .body(body.to_vec())
+                .send()
+                .await?;
+            if response.status().is_redirection() {
+                if let Some(location) = response.headers().get(LOCATION) {
+                    current_url = self.resolve_redirect(&current_url, location)?;
+                    continue;
+                }
+            }
+            return parse_empty_response(response).await;
+        }
+
+        Err(Error::InvalidUrl("too many redirects".to_string()))
+    }
+
+    /// Ping the API, returns [PingResponse].
+    pub async fn ping(&self) -> Result<PingResponse, Error> {
+        self.get_json("/ping", &[]).await
     }
 
     fn request_url(&self, path: &str) -> Result<String, Error> {
@@ -107,12 +377,114 @@ impl HttpClient {
         Ok(format!("{}{}", self.base_url, path))
     }
 
-    /// Ping the API, returns [PingResponse].
-    pub async fn ping(&self) -> Result<PingResponse, Error> {
-        let text = self.get("/ping").await?;
-        let response: PingResponse = serde_json::from_str(&text)?;
-        Ok(response)
+    fn parse_url(&self, url: &str) -> Result<Url, Error> {
+        Url::parse(url).map_err(|e| Error::InvalidUrl(format!("invalid url: {e}")))
     }
+
+    fn resolve_redirect(&self, current_url: &Url, location: &HeaderValue) -> Result<Url, Error> {
+        let next = location
+            .to_str()
+            .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))?;
+        Url::parse(next)
+            .or_else(|_| current_url.join(next))
+            .map_err(|e| Error::InvalidUrl(format!("invalid redirect location: {e}")))
+    }
+
+    fn is_same_origin(&self, url: &Url) -> bool {
+        self.base_origin.as_ref().is_some_and(|base| {
+            base.scheme() == url.scheme()
+                && base.host_str() == url.host_str()
+                && base.port_or_known_default() == url.port_or_known_default()
+        })
+    }
+
+    fn build_headers_for_url(&self, url: &Url) -> Result<HeaderMap, Error> {
+        if self.is_same_origin(url) {
+            self.build_headers()
+        } else {
+            self.build_public_headers()
+        }
+    }
+
+    fn build_headers(&self) -> Result<HeaderMap, Error> {
+        let mut headers = self.build_public_headers()?;
+        if let Some(auth_token) = self
+            .auth_token
+            .read()
+            .expect("auth token lock poisoned")
+            .clone()
+        {
+            let token =
+                HeaderValue::from_str(&auth_token).map_err(|e| Error::Parse(e.to_string()))?;
+            headers.insert(TOKEN_HEADER, token);
+        }
+        Ok(headers)
+    }
+
+    fn build_public_headers(&self) -> Result<HeaderMap, Error> {
+        let mut headers = HeaderMap::new();
+        if let Some(user_agent) = &self.user_agent {
+            let value =
+                HeaderValue::from_str(user_agent).map_err(|e| Error::Parse(e.to_string()))?;
+            headers.insert(reqwest::header::USER_AGENT, value);
+        }
+        if let Some(client_package) = &self.client_package {
+            let value =
+                HeaderValue::from_str(client_package).map_err(|e| Error::Parse(e.to_string()))?;
+            headers.insert(CLIENT_PKG_HEADER, value);
+        }
+        if let Some(client_version) = &self.client_version {
+            let value =
+                HeaderValue::from_str(client_version).map_err(|e| Error::Parse(e.to_string()))?;
+            headers.insert(CLIENT_VERSION_HEADER, value);
+        }
+        Ok(headers)
+    }
+}
+
+async fn parse_text_response(response: Response) -> Result<String, Error> {
+    if !response.status().is_success() {
+        let status = response.status().as_u16();
+        let message = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "failed to read error body".to_string());
+        return Err(Error::Http { status, message });
+    }
+    response.text().await.map_err(Into::into)
+}
+
+async fn parse_json_response<T: DeserializeOwned>(response: Response) -> Result<T, Error> {
+    let text = parse_text_response(response).await?;
+    serde_json::from_str(&text).map_err(Into::into)
+}
+
+async fn parse_empty_response(response: Response) -> Result<(), Error> {
+    if !response.status().is_success() {
+        let status = response.status().as_u16();
+        let message = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "failed to read error body".to_string());
+        return Err(Error::Http { status, message });
+    }
+    Ok(())
+}
+
+async fn parse_bytes_response(response: Response) -> Result<Vec<u8>, Error> {
+    if !response.status().is_success() {
+        let status = response.status().as_u16();
+        let message = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "failed to read error body".to_string());
+        return Err(Error::Http { status, message });
+    }
+    response
+        .bytes()
+        .await
+        .map(|bytes| bytes.to_vec())
+        .map_err(Into::into)
 }
 
 #[cfg(test)]
@@ -120,10 +492,10 @@ mod tests {
     use super::*;
 
     fn test_client(base_url: &str) -> HttpClient {
-        HttpClient {
-            client: reqwest::Client::builder().no_proxy().build().unwrap(),
-            base_url: base_url.trim_end_matches('/').to_string(),
-        }
+        HttpClient::new_with_config(HttpConfig {
+            base_url: base_url.to_string(),
+            ..HttpConfig::default()
+        })
     }
 
     #[test]
@@ -136,7 +508,6 @@ mod tests {
     fn test_parse_error_conversion() {
         let bad_json = "not json";
         let err: Result<PingResponse, Error> = serde_json::from_str(bad_json).map_err(|e| e.into());
-        println!("{:?}", err);
         assert!(matches!(err, Err(Error::Parse(_))))
     }
 
@@ -180,5 +551,17 @@ mod tests {
         let client = test_client("https://api.ente.io/v1#old");
         let err = client.request_url("/ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
+    }
+
+    #[test]
+    fn test_set_auth_token_replaces_token() {
+        let client = test_client("https://api.ente.io");
+        client.set_auth_token(Some("token-1".to_string()));
+        assert_eq!(
+            client.auth_token.read().unwrap().clone(),
+            Some("token-1".to_string())
+        );
+        client.set_auth_token(None);
+        assert_eq!(client.auth_token.read().unwrap().clone(), None);
     }
 }
