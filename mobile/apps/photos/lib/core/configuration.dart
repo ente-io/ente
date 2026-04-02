@@ -4,6 +4,7 @@ import "dart:io";
 
 import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:ente_contacts/contacts.dart';
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -240,6 +241,7 @@ class Configuration {
     await MLDataDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
     await TrashDB.instance.clearTable();
+    await ContactsDatabase().clearTable();
 
     // Clear all in-memory caches
     ThumbnailInMemoryLruCache.clearAll();
