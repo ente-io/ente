@@ -325,8 +325,7 @@ pub fn run_pet_clustering_incremental_with_exemplars(
         // Assign if:
         // 1. Similarity to best exemplar exceeds threshold
         // 2. Clear winner (margin > 0.05) to avoid ambiguous assignments
-        let has_clear_winner =
-            existing_exemplars.len() <= 1 || (best_sim - second_best_sim) > 0.05;
+        let has_clear_winner = existing_exemplars.len() <= 1 || (best_sim - second_best_sim) > 0.05;
 
         if best_sim > min_sim
             && has_clear_winner
