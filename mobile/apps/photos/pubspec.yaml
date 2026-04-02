@@ -56,12 +56,19 @@ dependencies:
   encrypt: 5.0.3
   ente_cast:
     path: plugins/ente_cast
+<<<<<<< HEAD
+=======
+  ente_cast_normal:
+    path: plugins/ente_cast_normal
+  ente_contacts:
+    path: ../../packages/contacts
+  ente_contacts:
+    path: ../../packages/contacts
+>>>>>>> 61b0ffe23f ([mob][contacts] fix mobile lint for contacts bindings)
   ente_crypto:
     path: plugins/ente_crypto
   ente_feature_flag:
     path: plugins/ente_feature_flag
-  ente_contacts:
-    path: ../../packages/contacts
   ente_icons:
     path: ../../packages/ente_icons
   ente_photos_rust:
