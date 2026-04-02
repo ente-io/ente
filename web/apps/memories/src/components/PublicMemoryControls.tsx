@@ -235,6 +235,12 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
         null,
     );
 
+    const isPointerDragActive = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) =>
+            event.pointerType !== "mouse" || (event.buttons & 1) === 1,
+        [],
+    );
+
     const getScrubValue = useCallback(
         (event: React.PointerEvent<HTMLDivElement>) => {
             const rect = event.currentTarget.getBoundingClientRect();
@@ -253,6 +259,9 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             if (total <= 1) {
                 return;
             }
+            if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+            }
             setDraggingPointerId(event.pointerId);
             event.currentTarget.setPointerCapture(event.pointerId);
             const value = getScrubValue(event);
@@ -267,10 +276,17 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             if (draggingPointerId !== event.pointerId) {
                 return;
             }
+            if (!isPointerDragActive(event)) {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                }
+                setDraggingPointerId(null);
+                return;
+            }
             event.stopPropagation();
             onScrub?.(getScrubValue(event));
         },
-        [draggingPointerId, getScrubValue, onScrub],
+        [draggingPointerId, getScrubValue, isPointerDragActive, onScrub],
     );
 
     const endScrub = useCallback(
@@ -290,10 +306,15 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
         [draggingPointerId, getScrubValue, onScrubEnd, onSeek],
     );
 
+    const handleLostPointerCapture = useCallback(() => {
+        setDraggingPointerId(null);
+    }, []);
+
     return (
         <LaneProgressTrack
             data-memory-control="true"
             onPointerDown={handlePointerDown}
+            onLostPointerCapture={handleLostPointerCapture}
             onPointerMove={handlePointerMove}
             onPointerUp={endScrub}
             onPointerCancel={endScrub}

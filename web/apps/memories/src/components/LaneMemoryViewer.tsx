@@ -1050,7 +1050,7 @@ const LaneContentContainer = styled("div")({
     maxWidth: "1360px",
     minHeight: "100svh",
     height: "100dvh",
-    padding: "56px 48px 40px",
+    padding: "42px 24px 24px",
     boxSizing: "border-box",
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         padding: "24px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
@@ -1080,14 +1080,14 @@ const LaneMobileTitle = styled(Typography)({
 });
 
 const LaneTopBar = styled("div")({
-    width: "calc(100% + 48px)",
-    marginLeft: "-24px",
-    marginRight: "-24px",
+    width: "100%",
+    maxWidth: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     minHeight: "64px",
     gap: "20px",
+    boxSizing: "border-box",
 });
 
 const LaneTopBrandSection = styled("div")({
@@ -1115,7 +1115,7 @@ const LaneHeaderJoinNowButton = styled(JoinNowButton)({
 const LaneSliderTitle = styled(Typography)({
     color: "rgba(255, 255, 255, 0.42)",
     fontWeight: 300,
-    fontSize: "14px",
+    fontSize: "15px",
     lineHeight: 1.15,
     letterSpacing: "-0.01em",
     textAlign: "center",
