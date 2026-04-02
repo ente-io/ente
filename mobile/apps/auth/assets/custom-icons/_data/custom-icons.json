@@ -1002,6 +1002,13 @@
       "title": "INWX"
     },
     {
+      "title": "IPQualityScore",
+      "slug": "ipqualityscore",
+      "altNames": [
+        "IPQS"
+      ]
+    },
+    {
       "title": "IRCTC",
       "slug": "irctc",
       "altNames": [
