@@ -15,6 +15,7 @@ import (
 	repo "github.com/ente-io/museum/pkg/repo"
 	contactrepo "github.com/ente-io/museum/pkg/repo/contact"
 	"github.com/ente-io/museum/pkg/utils/config"
+	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/museum/pkg/utils/s3config"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -46,8 +47,9 @@ func setupContactControllerTest(t *testing.T) (*Controller, *sql.DB, *gin.Contex
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
 	objectCleanupCtrl := &basecontroller.ObjectCleanupController{Repo: objectCleanupRepo}
 	contactRepository := &contactrepo.Repository{
-		DB:                db,
-		ObjectCleanupRepo: objectCleanupRepo,
+		DB:                  db,
+		ObjectCleanupRepo:   objectCleanupRepo,
+		SecretEncryptionKey: testutil.SecretEncryptionKey(),
 	}
 	ctrl := New(contactRepository, objectCleanupCtrl, s3Cfg)
 	return ctrl, db, ctx, s3Cfg
@@ -237,6 +239,10 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	if created.ContactUserID != 11 {
 		t.Fatalf("contactUserID = %d, want 11", created.ContactUserID)
 	}
+	expectedCreateEmail := "contacts-11@ente.io"
+	if created.Email == nil || *created.Email != expectedCreateEmail {
+		t.Fatalf("email = %v, want %q", created.Email, expectedCreateEmail)
+	}
 	if created.EncryptedKey == nil || string(*created.EncryptedKey) != "wrapped-key-1" {
 		t.Fatalf("unexpected encrypted key: %v", created.EncryptedKey)
 	}
@@ -248,6 +254,12 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	if got.ID != created.ID {
 		t.Fatalf("Get().ID = %q, want %q", got.ID, created.ID)
 	}
+	if got.Email == nil || *got.Email != expectedCreateEmail {
+		t.Fatalf("Get().Email = %v, want %q", got.Email, expectedCreateEmail)
+	}
+
+	mustInsertTestUser(t, db, 12)
+	mustInsertEmergencyContact(t, db, 1, 12, ente.UserInvitedContact)
 
 	updated, err := ctrl.Update(ctx, created.ID, contactmodel.UpdateRequest{
 		ContactUserID: 12,
@@ -258,6 +270,10 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	}
 	if updated.ContactUserID != 12 {
 		t.Fatalf("updated contactUserID = %d, want 12", updated.ContactUserID)
+	}
+	expectedUpdatedEmail := "contacts-12@ente.io"
+	if updated.Email == nil || *updated.Email != expectedUpdatedEmail {
+		t.Fatalf("updated email = %v, want %q", updated.Email, expectedUpdatedEmail)
 	}
 	if updated.EncryptedData == nil || string(*updated.EncryptedData) != "payload-2" {
 		t.Fatalf("updated encrypted data = %v", updated.EncryptedData)
@@ -276,6 +292,9 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	if diff[0].ID != created.ID || diff[0].ContactUserID != 12 {
 		t.Fatalf("unexpected diff row: %+v", diff[0])
 	}
+	if diff[0].Email == nil || *diff[0].Email != expectedUpdatedEmail {
+		t.Fatalf("unexpected diff email: %v", diff[0].Email)
+	}
 
 	if err := ctrl.Delete(ctx, created.ID); err != nil {
 		t.Fatalf("Delete() error = %v", err)
@@ -289,6 +308,9 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	}
 	if deleted.EncryptedKey != nil || deleted.EncryptedData != nil || deleted.ProfilePictureAttachmentID != nil {
 		t.Fatalf("deleted contact leaked encrypted fields or attachment ref: %+v", deleted)
+	}
+	if deleted.Email != nil {
+		t.Fatalf("deleted contact leaked email: %+v", deleted)
 	}
 }
 
@@ -322,6 +344,29 @@ func TestCreateContactRequiresEligibleRelationship(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "not eligible to be added as a contact") {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestCreateAndUpdateRejectUnknownContactUserID(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+
+	_, err := ctrl.Create(ctx, contactmodel.CreateRequest{
+		ContactUserID: 9999,
+		EncryptedKey:  []byte("wrapped-key"),
+		EncryptedData: []byte("payload"),
+	})
+	if err == nil || !strings.Contains(err.Error(), "contactUserID does not exist") {
+		t.Fatalf("expected unknown contact user create to fail, got %v", err)
+	}
+
+	created := createContactForTest(t, db, ctrl, ctx, 21, "wrapped-key-1", "payload-1")
+	_, err = ctrl.Update(ctx, created.ID, contactmodel.UpdateRequest{
+		ContactUserID: 9999,
+		EncryptedData: []byte("payload-2"),
+	})
+	if err == nil || !strings.Contains(err.Error(), "contactUserID does not exist") {
+		t.Fatalf("expected unknown contact user update to fail, got %v", err)
 	}
 }
 
@@ -467,6 +512,47 @@ func TestCreateContactAllowedForSharedCollectionAccess(t *testing.T) {
 				t.Fatalf("contactUserID = %d, want 76", created.ContactUserID)
 			}
 		})
+	}
+}
+
+func TestTouchContactsForContactUserRefreshesResolvedEmailInDiff(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+
+	created := createContactForTest(t, db, ctrl, ctx, 82, "wrapped-key-1", "payload-1")
+
+	userRepo := &repo.UserRepository{
+		DB:                  db,
+		SecretEncryptionKey: testutil.SecretEncryptionKey(),
+		HashingKey:          testutil.HashingKey(),
+	}
+	encryptedEmail, err := crypto.Encrypt("updated-82@ente.io", testutil.SecretEncryptionKey())
+	if err != nil {
+		t.Fatalf("failed to encrypt email: %v", err)
+	}
+	emailHash, err := crypto.GetHash("updated-82@ente.io", testutil.HashingKey())
+	if err != nil {
+		t.Fatalf("failed to hash email: %v", err)
+	}
+	if err := userRepo.UpdateEmail(82, encryptedEmail, emailHash); err != nil {
+		t.Fatalf("failed to update user email: %v", err)
+	}
+	if err := ctrl.Repo.TouchContactsForContactUser(ctx, 82); err != nil {
+		t.Fatalf("failed to touch contacts for updated email: %v", err)
+	}
+
+	diff, err := ctrl.GetDiff(ctx, contactmodel.DiffRequest{
+		SinceTime: ptrInt64(created.UpdatedAt),
+		Limit:     10,
+	})
+	if err != nil {
+		t.Fatalf("GetDiff() error = %v", err)
+	}
+	if len(diff) != 1 {
+		t.Fatalf("diff length = %d, want 1", len(diff))
+	}
+	if diff[0].Email == nil || *diff[0].Email != "updated-82@ente.io" {
+		t.Fatalf("resolved email = %v, want updated email", diff[0].Email)
 	}
 }
 

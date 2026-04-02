@@ -7,6 +7,7 @@ import (
 )
 
 type Repository struct {
-	DB                *sql.DB
-	ObjectCleanupRepo *repo.ObjectCleanupRepository
+	DB                  *sql.DB
+	ObjectCleanupRepo   *repo.ObjectCleanupRepository
+	SecretEncryptionKey []byte
 }

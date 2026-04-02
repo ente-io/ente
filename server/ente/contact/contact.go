@@ -23,6 +23,7 @@ type Entity struct {
 	ID                         string  `json:"id" binding:"required"`
 	UserID                     int64   `json:"userID" binding:"required"`
 	ContactUserID              int64   `json:"contactUserID" binding:"required"`
+	Email                      *string `json:"email"`
 	ProfilePictureAttachmentID *string `json:"profilePictureAttachmentID"`
 	EncryptedKey               *[]byte `json:"encryptedKey"`
 	EncryptedData              *[]byte `json:"encryptedData"`

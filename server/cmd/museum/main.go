@@ -178,7 +178,11 @@ func main() {
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
-	contactRepository := &contactRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
+	contactRepository := &contactRepo.Repository{
+		DB:                  db,
+		ObjectCleanupRepo:   objectCleanupRepo,
+		SecretEncryptionKey: secretEncryptionKeyBytes,
+	}
 	objectCopiesRepo := &repo.ObjectCopiesRepository{DB: db}
 	usageRepo := &repo.UsageRepository{DB: db, UserRepo: userRepo}
 	fileRepo := &repo.FileRepository{DB: db, S3Config: s3Config, QueueRepo: queueRepo,
@@ -425,6 +429,7 @@ func main() {
 		pushController,
 		userCache,
 		userCacheCtrl,
+		contactRepository,
 	)
 	emailNotificationCtrl.UserAccessResetter = userController
 	inactiveUserOrchestrator := user.NewInactiveUserOrchestrator(
