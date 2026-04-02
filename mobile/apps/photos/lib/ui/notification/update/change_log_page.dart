@@ -124,6 +124,11 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         description: strings.desc3,
         isFeature: true,
       ),
+      ChangeLogEntry(
+        strings.title4,
+        description: strings.desc4,
+        isFeature: true,
+      ),
     ]
         .where(
           (entry) =>

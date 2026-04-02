@@ -9,6 +9,8 @@ class ChangeLogStrings {
   final String desc2;
   final String title3;
   final String desc3;
+  final String title4;
+  final String desc4;
 
   const ChangeLogStrings({
     required this.title1,
@@ -19,6 +21,8 @@ class ChangeLogStrings {
     required this.desc2,
     required this.title3,
     required this.desc3,
+    this.title4 = '',
+    this.desc4 = '',
   });
 
   bool get hasVisibleEntries =>
@@ -29,7 +33,9 @@ class ChangeLogStrings {
       title2.trim().isNotEmpty ||
       desc2.trim().isNotEmpty ||
       title3.trim().isNotEmpty ||
-      desc3.trim().isNotEmpty;
+      desc3.trim().isNotEmpty ||
+      title4.trim().isNotEmpty ||
+      desc4.trim().isNotEmpty;
 
   static ChangeLogStrings? maybeForLocale(
     Locale locale, {
