@@ -10,7 +10,6 @@ import type {
     LockerCollection,
     LockerCollectionParticipant,
     LockerItem,
-    LockerItemType,
 } from "types";
 import { z } from "zod";
 import {
@@ -22,6 +21,7 @@ import {
     encryptBox,
     stringToB64,
 } from "./crypto";
+import { fromInfoTypeWireValue } from "./info-type-wire";
 import {
     type StoredTrashFileRecord,
     deleteCollectionSinceTime,
@@ -636,17 +636,15 @@ const decryptFileToLockerItem = async (
             | { type?: string; data?: Record<string, unknown> }
             | undefined;
 
-        const validInfoTypes = new Set<string>([
-            "note",
-            "accountCredential",
-            "physicalRecord",
-            "emergencyContact",
-        ]);
+        const normalizedInfoType =
+            typeof info?.type === "string"
+                ? fromInfoTypeWireValue(info.type)
+                : undefined;
 
-        if (info?.type && info.data && validInfoTypes.has(info.type)) {
+        if (normalizedInfoType && normalizedInfoType !== "file" && info?.data) {
             return {
                 id: record.id,
-                type: info.type as LockerItemType,
+                type: normalizedInfoType,
                 data: info.data as unknown as LockerItem["data"],
                 collectionID: record.collectionID,
                 collectionIDs: [record.collectionID],
