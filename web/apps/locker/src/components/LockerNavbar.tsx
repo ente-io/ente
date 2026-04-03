@@ -1,7 +1,4 @@
-import {
-    InformationCircleIcon,
-    Menu01Icon,
-} from "@hugeicons/core-free-icons";
+import { InformationCircleIcon, Menu01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import SearchIcon from "@mui/icons-material/Search";
 import {
