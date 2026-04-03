@@ -126,7 +126,9 @@ const decryptPubMagicMetadata = async (
     }
 };
 
-const normalizeLockerInfoType = (type: string | undefined): string | undefined => {
+const normalizeLockerInfoType = (
+    type: string | undefined,
+): string | undefined => {
     switch (type) {
         case "note":
             return "note";
@@ -167,10 +169,7 @@ const parseLockerInfo = (
         return undefined;
     }
 
-    return {
-        ...parsedInfo,
-        type: normalizeLockerInfoType(parsedInfo.type),
-    };
+    return { ...parsedInfo, type: normalizeLockerInfoType(parsedInfo.type) };
 };
 
 /**

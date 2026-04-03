@@ -36,6 +36,7 @@ import {
     generateKey,
     stringToB64,
 } from "./crypto";
+import { toInfoTypeWireValue } from "./info-type-wire";
 import {
     clearLockerCache,
     findCollectionByType,
@@ -76,7 +77,6 @@ import {
     type LockerUploadProgress,
     uploadLockerFileWithDeps,
 } from "./remote-uploads";
-import { toInfoTypeWireValue } from "./info-type-wire";
 
 export {
     clearLockerCache,

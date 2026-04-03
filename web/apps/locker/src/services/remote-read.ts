@@ -21,6 +21,7 @@ import {
     encryptBox,
     stringToB64,
 } from "./crypto";
+import { fromInfoTypeWireValue } from "./info-type-wire";
 import {
     type StoredTrashFileRecord,
     deleteCollectionSinceTime,
@@ -49,7 +50,6 @@ import {
     RemoteCollectionUserSchema,
     toLockerCollectionParticipant,
 } from "./remote-types";
-import { fromInfoTypeWireValue } from "./info-type-wire";
 
 const RemoteMagicMetadata = z.object({
     version: z.number(),

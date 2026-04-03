@@ -6,8 +6,10 @@ type LockerInfoWireType =
     | "account-credential"
     | "emergency-contact";
 
+type LockerInfoInternalType = Exclude<LockerItemType, "file">;
+
 const wireTypeByInternalType: Record<
-    Exclude<LockerItemType, "file">,
+    LockerInfoInternalType,
     LockerInfoWireType
 > = {
     note: "note",
@@ -16,20 +18,20 @@ const wireTypeByInternalType: Record<
     emergencyContact: "emergency-contact",
 };
 
-const internalTypeByWireType: Record<string, Exclude<LockerItemType, "file">> = {
-    note: "note",
-    "physical-record": "physicalRecord",
-    physicalRecord: "physicalRecord",
-    "account-credential": "accountCredential",
-    accountCredential: "accountCredential",
-    "emergency-contact": "emergencyContact",
-    emergencyContact: "emergencyContact",
-};
+const internalTypeByWireType = new Map<string, LockerInfoInternalType>([
+    ["note", "note"],
+    ["physical-record", "physicalRecord"],
+    ["physicalRecord", "physicalRecord"],
+    ["account-credential", "accountCredential"],
+    ["accountCredential", "accountCredential"],
+    ["emergency-contact", "emergencyContact"],
+    ["emergencyContact", "emergencyContact"],
+]);
 
 export const toInfoTypeWireValue = (
-    type: Exclude<LockerItemType, "file">,
+    type: LockerInfoInternalType,
 ): LockerInfoWireType => wireTypeByInternalType[type];
 
 export const fromInfoTypeWireValue = (
     value: string,
-): LockerItemType | undefined => internalTypeByWireType[value];
+): LockerItemType | undefined => internalTypeByWireType.get(value);
