@@ -119,10 +119,7 @@ class InfoFileService {
         file.fileType = FileType.info;
       }
 
-      final infoType = InfoType.values.firstWhere(
-        (type) => type.name == typeString,
-        orElse: () => InfoType.note,
-      );
+      final infoType = InfoTypeExtension.fromString(typeString);
 
       InfoData infoDataObj;
       switch (infoType) {
