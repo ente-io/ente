@@ -1,7 +1,9 @@
-import { Menu01Icon } from "@hugeicons/core-free-icons";
+import {
+    InformationCircleIcon,
+    Menu01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import SearchIcon from "@mui/icons-material/Search";
-import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import {
     Box,
     IconButton,
@@ -157,10 +159,10 @@ export const LockerUnstableToast: React.FC = () => (
                 py: 1.25,
                 gap: 1,
                 alignItems: "center",
-                backgroundColor: "#FFE08A",
-                border: "1px solid #FFD057",
+                backgroundColor: "#EEF5FF",
+                border: "1px solid #C9DEFF",
                 borderRadius: 0,
-                boxShadow: "0 6px 18px rgba(0, 0, 0, 0.12)",
+                boxShadow: "0 6px 18px rgba(16, 113, 255, 0.08)",
             }}
         >
             <Stack
@@ -174,8 +176,11 @@ export const LockerUnstableToast: React.FC = () => (
                     justifyContent: "center",
                 }}
             >
-                <WarningAmberRoundedIcon
-                    sx={{ fontSize: 20, color: "#5C3A00", flexShrink: 0 }}
+                <HugeiconsIcon
+                    icon={InformationCircleIcon}
+                    size={20}
+                    strokeWidth={2.1}
+                    color="#0056CC"
                 />
                 <Typography
                     variant="mini"
@@ -183,21 +188,21 @@ export const LockerUnstableToast: React.FC = () => (
                         px: 0.75,
                         py: 0.25,
                         borderRadius: "999px",
-                        border: "1px solid rgba(92, 58, 0, 0.3)",
-                        backgroundColor: "rgba(255, 255, 255, 0.45)",
-                        color: "#5C3A00",
-                        fontWeight: 800,
+                        border: "1px solid rgba(16, 113, 255, 0.18)",
+                        backgroundColor: "rgba(16, 113, 255, 0.08)",
+                        color: "#0056CC",
+                        fontWeight: 700,
                         letterSpacing: "0.03em",
                         flexShrink: 0,
                     }}
                 >
-                    WARNING
+                    Note
                 </Typography>
                 <Typography
                     variant="small"
-                    sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
+                    sx={{ color: "#163B72", lineHeight: 1.4, fontWeight: 700 }}
                 >
-                    You are using an unstable version of Locker.
+                    This is a beta version of Locker web.
                 </Typography>
             </Stack>
         </Stack>
