@@ -10,20 +10,20 @@ enum InfoType {
 
 // Extension to convert enum to string and vice versa.
 //
-// Locker file metadata uses hyphenated strings on the wire. Keep parsing
-// tolerant of the briefly-shipped camelCase representation so any existing
-// serialized JSON can still be read safely.
+// Locker file metadata currently uses the enum's camelCase name on the wire.
+// Keep parsing tolerant of the older hyphenated representation so any
+// previously serialized JSON can still be read safely.
 extension InfoTypeExtension on InfoType {
   String get value {
     switch (this) {
       case InfoType.note:
         return 'note';
       case InfoType.physicalRecord:
-        return 'physical-record';
+        return 'physicalRecord';
       case InfoType.accountCredential:
-        return 'account-credential';
+        return 'accountCredential';
       case InfoType.emergencyContact:
-        return 'emergency-contact';
+        return 'emergencyContact';
     }
   }
 

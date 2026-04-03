@@ -126,26 +126,6 @@ const decryptPubMagicMetadata = async (
     }
 };
 
-const normalizeLockerInfoType = (
-    type: string | undefined,
-): string | undefined => {
-    switch (type) {
-        case "note":
-            return "note";
-        case "physical-record":
-        case "physicalRecord":
-            return "physicalRecord";
-        case "account-credential":
-        case "accountCredential":
-            return "accountCredential";
-        case "emergency-contact":
-        case "emergencyContact":
-            return "emergencyContact";
-        default:
-            return undefined;
-    }
-};
-
 /**
  * Parse locker info from pubMagicMetadata
  */
@@ -154,22 +134,15 @@ const parseLockerInfo = (
 ): LockerInfo | undefined => {
     if (!rawInfo) return undefined;
 
-    const parsedInfo =
-        typeof rawInfo === "string"
-            ? (() => {
-                  try {
-                      return JSON.parse(rawInfo) as LockerInfo;
-                  } catch {
-                      return undefined;
-                  }
-              })()
-            : rawInfo;
-
-    if (!parsedInfo) {
-        return undefined;
+    if (typeof rawInfo === "string") {
+        try {
+            return JSON.parse(rawInfo) as LockerInfo;
+        } catch {
+            return undefined;
+        }
     }
 
-    return { ...parsedInfo, type: normalizeLockerInfoType(parsedInfo.type) };
+    return rawInfo;
 };
 
 /**
