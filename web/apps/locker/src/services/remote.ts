@@ -76,6 +76,7 @@ import {
     type LockerUploadProgress,
     uploadLockerFileWithDeps,
 } from "./remote-uploads";
+import { toInfoTypeWireValue } from "./info-type-wire";
 
 export {
     clearLockerCache,
@@ -319,6 +320,10 @@ export const createInfoItem = async (
     infoData: Record<string, unknown>,
     masterKey: string,
 ): Promise<void> => {
+    if (infoType === "file") {
+        throw new Error("Cannot create a generic file via createInfoItem");
+    }
+
     const [collectionID, ...additionalCollectionIDs] =
         await resolveCollectionIDsWithUncategorizedFallback(
             collectionIDs,
@@ -360,7 +365,7 @@ export const createInfoItem = async (
 
     // Build pubMagicMetadata with info field
     const pubMagicMetadata = {
-        info: { type: infoType, data: infoData },
+        info: { type: toInfoTypeWireValue(infoType), data: infoData },
         noThumb: true,
     };
     const pubMMJSON = JSON.stringify(pubMagicMetadata);
@@ -420,6 +425,10 @@ export const updateInfoItem = async (
     infoData: Record<string, unknown>,
     masterKey: string,
 ): Promise<void> => {
+    if (infoType === "file") {
+        throw new Error("Cannot update a generic file via updateInfoItem");
+    }
+
     const fileRecord = getEncryptedFileRecord(fileID);
     if (!fileRecord) throw new Error(`File ${fileID} not in cache`);
 
@@ -455,7 +464,7 @@ export const updateInfoItem = async (
     const title = infoItemTitle(infoType, infoData);
     const pubMagicMetadata = {
         ...existingPubMagicMetadata,
-        info: { type: infoType, data: infoData },
+        info: { type: toInfoTypeWireValue(infoType), data: infoData },
         noThumb: true,
         editedName: title,
         editedTime: Date.now(),
