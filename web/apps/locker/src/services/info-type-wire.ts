@@ -1,22 +1,6 @@
 import type { LockerItemType } from "types";
 
-type LockerInfoWireType =
-    | "note"
-    | "physical-record"
-    | "account-credential"
-    | "emergency-contact";
-
 type LockerInfoInternalType = Exclude<LockerItemType, "file">;
-
-const wireTypeByInternalType: Record<
-    LockerInfoInternalType,
-    LockerInfoWireType
-> = {
-    note: "note",
-    physicalRecord: "physical-record",
-    accountCredential: "account-credential",
-    emergencyContact: "emergency-contact",
-};
 
 const internalTypeByWireType = new Map<string, LockerInfoInternalType>([
     ["note", "note"],
@@ -27,10 +11,6 @@ const internalTypeByWireType = new Map<string, LockerInfoInternalType>([
     ["emergency-contact", "emergencyContact"],
     ["emergencyContact", "emergencyContact"],
 ]);
-
-export const toInfoTypeWireValue = (
-    type: LockerInfoInternalType,
-): LockerInfoWireType => wireTypeByInternalType[type];
 
 export const fromInfoTypeWireValue = (
     value: string,

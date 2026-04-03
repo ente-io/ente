@@ -636,16 +636,17 @@ const decryptFileToLockerItem = async (
             | { type?: string; data?: Record<string, unknown> }
             | undefined;
 
-        const normalizedInfoType =
+        const infoType =
             typeof info?.type === "string"
                 ? fromInfoTypeWireValue(info.type)
                 : undefined;
+        const infoData = info?.data;
 
-        if (normalizedInfoType && normalizedInfoType !== "file" && info?.data) {
+        if (infoType && infoData) {
             return {
                 id: record.id,
-                type: normalizedInfoType,
-                data: info.data as unknown as LockerItem["data"],
+                type: infoType,
+                data: infoData as unknown as LockerItem["data"],
                 collectionID: record.collectionID,
                 collectionIDs: [record.collectionID],
                 ownerID: record.ownerID ?? collectionOwnerID,
