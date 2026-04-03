@@ -103,6 +103,7 @@
       <p>
       We detected a new login to your Ente account at {{ .Date }} UTC.
       </p>
+      {{ if .App }}
       <table>
         <tr>
           <td><strong>App</strong></td>
@@ -117,6 +118,7 @@
           <td>{{ .IP }}</td>
         </tr>
       </table>
+      {{ end }}
       <p>
       If this is not you, please reset your password. For any assistance or questions, please reply to this email.
       </p>

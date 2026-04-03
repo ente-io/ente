@@ -447,29 +447,34 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 		return nil
 	}
 
-	appDisplayNames := map[ente.App]string{
-		ente.Photos: "Ente Photos",
-		ente.Auth:   "Ente Auth",
-		ente.Locker: "Ente Locker",
-	}
-	appName, ok := appDisplayNames[app]
-	if !ok {
-		appName = "Ente"
-	}
-	prettyUA := network.GetPrettyUA(userAgent)
-
 	go func() {
 		user, userErr := c.UserRepo.GetUserByIDInternal(userID)
 		if userErr != nil {
 			log.WithError(userErr).Error("Failed to get user")
 			return
 		}
-		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
-			"Date":   t.Now().UTC().Format("02 Jan, 2006 15:04"),
-			"App":    appName,
-			"Device": prettyUA,
-			"IP":     ip,
-		}, nil)
+		templateData := map[string]interface{}{
+			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
+		}
+		if strings.HasSuffix(emailUtil.NormalizeEmail(user.Email), "@ente.io") {
+			appDisplayNames := map[ente.App]string{
+				ente.Photos: "Ente Photos",
+				ente.Auth:   "Ente Auth",
+				ente.Locker: "Ente Locker",
+			}
+			appName, ok := appDisplayNames[app]
+			if !ok {
+				appName = "Ente"
+			}
+			device := "Unknown Device"
+			if strings.TrimSpace(userAgent) != "" {
+				device = network.GetPrettyUA(userAgent)
+			}
+			templateData["App"] = appName
+			templateData["Device"] = device
+			templateData["IP"] = ip
+		}
+		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, templateData, nil)
 		if emailSendErr != nil {
 			log.WithError(emailSendErr).Error("Failed to send email")
 		}
