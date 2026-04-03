@@ -81,6 +81,10 @@ impl HttpClient {
     }
 
     /// GET request, returns response body as text.
+    ///
+    /// `path` is expected to be a trusted API endpoint path chosen by the
+    /// caller. This helper intentionally preserves the request path verbatim
+    /// after basic validation, so attacker-controlled paths must not be passed.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
         let url = self.request_url(path)?;
         let response = self.client.get(&url).send().await?;
@@ -95,6 +99,10 @@ impl HttpClient {
                 "request paths must start with '/'".to_string(),
             ));
         }
+        debug_assert!(
+            !path_contains_dot_segments(path),
+            "request paths must be trusted endpoint paths without dot segments"
+        );
 
         let base = Url::parse(&self.base_url)
             .map_err(|e| Error::InvalidUrl(format!("invalid base URL: {e}")))?;
@@ -113,6 +121,18 @@ impl HttpClient {
         let response: PingResponse = serde_json::from_str(&text)?;
         Ok(response)
     }
+}
+
+fn path_contains_dot_segments(path: &str) -> bool {
+    path.split(['?', '#'])
+        .next()
+        .unwrap_or(path)
+        .split('/')
+        .any(|segment| {
+            matches!(segment, "." | "..")
+                || segment.eq_ignore_ascii_case("%2e")
+                || segment.eq_ignore_ascii_case("%2e%2e")
+        })
 }
 
 #[cfg(test)]
@@ -152,6 +172,14 @@ mod tests {
         let client = test_client("https://api.ente.io/v1");
         let url = client.request_url("/%2e%2e%5cadmin?fresh=true").unwrap();
         assert_eq!(url, "https://api.ente.io/v1/%2e%2e%5cadmin?fresh=true");
+    }
+
+    #[test]
+    fn test_path_contains_dot_segments() {
+        assert!(!path_contains_dot_segments("/ping?fresh=true"));
+        assert!(path_contains_dot_segments("/../admin"));
+        assert!(path_contains_dot_segments("/safe/%2e%2e/admin"));
+        assert!(path_contains_dot_segments("/safe/%2E/admin"));
     }
 
     #[test]
