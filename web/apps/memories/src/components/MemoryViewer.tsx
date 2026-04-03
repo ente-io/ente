@@ -497,7 +497,7 @@ export function MemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.io"
+                            href="https://ente.io/get"
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -525,7 +525,7 @@ export function MemoryViewer({
                                 variant="contained"
                                 color="accent"
                                 disableElevation
-                                href="https://ente.io"
+                                href="https://ente.io/get"
                                 target="_blank"
                                 rel="noreferrer"
                             >

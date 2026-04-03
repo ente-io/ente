@@ -124,13 +124,13 @@ export const shareAppOrigin = (): string =>
 /**
  * Return the origin/path that serves the memories app landing experience.
  *
- * Defaults to our production memories app, "https://memories.ente.io",
+ * Defaults to our production memories app, "https://ente.com",
  * but can be overridden by setting the `NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT`
  * environment variable.
  */
 export const memoriesAppOrigin = (): string =>
     process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ??
-    "https://memories.ente.io";
+    "https://ente.com";
 
 /**
  * Return the origin that serves the photos app.

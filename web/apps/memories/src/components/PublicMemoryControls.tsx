@@ -49,7 +49,9 @@ const LaneProgressTrack = styled("div")({
     borderRadius: "999px",
     backgroundColor: "rgba(193, 246, 235, 0.32)",
     cursor: "pointer",
-    "@media (max-width: 900px)": { maxWidth: "320px" },
+    "@media (max-width: 900px)": {
+        maxWidth: "320px",
+    },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         maxWidth: "min(calc(100vw - 48px), 304px)",
     },
@@ -204,6 +206,7 @@ interface LaneProgressSliderProps {
     total: number;
     current?: number;
     currentProgress?: number;
+    width?: number;
     onSeek: (index: number) => void;
     onScrubStart?: () => void;
     onScrub?: (value: number) => void;
@@ -218,6 +221,7 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
     total,
     current,
     currentProgress,
+    width,
     onSeek,
     onScrubStart,
     onScrub,
@@ -313,6 +317,9 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
     return (
         <LaneProgressTrack
             data-memory-control="true"
+            style={{
+                maxWidth: typeof width === "number" ? `${width}px` : undefined,
+            }}
             onPointerDown={handlePointerDown}
             onLostPointerCapture={handleLostPointerCapture}
             onPointerMove={handlePointerMove}

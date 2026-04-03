@@ -210,9 +210,7 @@ export const formatLaneCaption = ({
     const yearsLabel = `${roundedValue} year${roundedValue === 1 ? "" : "s"}`;
 
     if (captionType === "age") {
-        return personName
-            ? `${personName} ${yearsLabel} old`
-            : `${yearsLabel} old`;
+        return `${yearsLabel} old`;
     }
 
     return personName ? `${personName} ${yearsLabel} ago` : `${yearsLabel} ago`;
@@ -247,7 +245,8 @@ export const buildLaneCaptionModel = ({
         }
         return Math.max(0, Math.round(yearsBetween(creationDate, new Date())));
     })();
-    const prefix = personName ? `${personName} ` : "";
+    const prefix =
+        captionType === "age" ? "" : personName ? `${personName} ` : "";
     const suffix =
         captionType === "age"
             ? ` year${roundedValue === 1 ? "" : "s"} old`

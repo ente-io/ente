@@ -6,6 +6,7 @@
 import { CircularProgress, Typography } from "@mui/material";
 import { Stack100vhCenter } from "ente-base/components/containers";
 import { CustomHead } from "ente-base/components/Head";
+import { memoriesAppOrigin } from "ente-base/origins";
 import Head from "next/head";
 import type { PropsWithChildren } from "react";
 
@@ -14,11 +15,19 @@ import type { PropsWithChildren } from "react";
  * Used only by `PublicMemoryPageShell` in this file.
  */
 function PublicMemoryDocumentHead() {
+    const previewImage = `${memoriesAppOrigin()}/images/memories-meta.png`;
+
     return (
         <>
             <CustomHead title="Ente Memories" />
             <Head>
                 <meta name="robots" content="noindex, nofollow" />
+                <meta property="og:image" content={previewImage} />
+                <meta property="og:image:secure_url" content={previewImage} />
+                <meta property="og:image:type" content="image/png" />
+                <meta property="og:image:width" content="720" />
+                <meta property="og:image:height" content="405" />
+                <meta name="twitter:image" content={previewImage} />
             </Head>
         </>
     );

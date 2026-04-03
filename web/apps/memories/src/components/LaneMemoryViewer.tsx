@@ -31,8 +31,8 @@ import {
 } from "../utils/lane";
 import {
     LaneCaptionText,
+    LanePlaybackGlyph,
     LaneProgressSlider,
-    PlaybackGlyph,
 } from "./PublicMemoryControls";
 import { PhotoImage, VideoPlayer } from "./PublicMemoryMedia";
 import {
@@ -64,7 +64,7 @@ const LANE_GRID_LINE_COLOR = "#08c225";
 const LANE_GRID_LINE_OPACITY = 0.06;
 const LANE_GRID_DISPLACEMENT_SCALE = 9;
 const LANE_VERTICAL_STACK_GAP_PX = 32;
-const LANE_CARD_TO_CONTROLS_GAP_PX = 40;
+const LANE_CARD_TO_CONTROLS_GAP_PX = 52;
 const LANE_CARD_SIZE_SCALE = 0.94;
 
 function calculateLaneXOffset(
@@ -545,7 +545,10 @@ export function LaneMemoryViewer({
                 Math.max(Math.round(clampedValue), 0),
                 files.length - 1,
             );
+            restartOnResumeRef.current = false;
+            finishedLanePlaybackRef.current = false;
             setIsScrubbing(false);
+            setPaused(false);
             setStackProgress(roundedIndex);
             if (displayIndexRef.current !== roundedIndex) {
                 commitDisplayIndex(roundedIndex);
@@ -583,7 +586,7 @@ export function LaneMemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.io"
+                            href="https://ente.io/get"
                             target="_blank"
                             rel="noreferrer"
                             sx={laneHeaderJoinNowButtonSx}
@@ -594,187 +597,200 @@ export function LaneMemoryViewer({
                 </LaneTopBar>
 
                 <LaneCenterSection>
-                    <PhotoContainer
-                        style={{ flex: "0 0 auto", minHeight: "auto" }}
-                        onContextMenu={(event) => event.preventDefault()}
-                        onDragStart={(event) => event.preventDefault()}
-                    >
-                        <LaneCardStack
-                            style={{
-                                width: `${laneFrameSize.width}px`,
-                                height: `${laneFrameSize.height}px`,
-                            }}
-                            onClick={handleLaneMediaFrameClick}
-                        >
-                            {laneSlices.map((slice) => {
-                                const file = files[slice.index]!;
-                                const frame = laneFrames?.[slice.index];
-                                const scale = calculateLaneScale(
-                                    slice.distance,
-                                );
-                                const xOffset: number = calculateLaneXOffset(
-                                    slice.distance,
-                                    laneFrameSize.width,
-                                    viewport.width,
-                                );
-                                const opacity = calculateLaneOpacity(
-                                    slice.distance,
-                                );
-                                const blurSigma =
-                                    isScrubbing || isCompactLaneLayout
-                                        ? 0
-                                        : calculateLaneBlur(slice.distance);
-                                const rotation =
-                                    (calculateLaneRotation(slice.distance) *
-                                        180) /
-                                    Math.PI;
-                                const overlayOpacity =
-                                    calculateLaneOverlayOpacity(slice.distance);
-                                const cropRect = resolveLaneCropRect(frame);
-                                const containerAspectRatio =
-                                    laneFrameSize.width / laneFrameSize.height;
-                                const isDisplayCard =
-                                    slice.index === displayIndex;
-                                const prefersRichImage =
-                                    file.metadata.fileType === FileType.video
-                                        ? isDisplayCard
-                                        : Math.abs(slice.distance) < 1.1;
-                                const mediaAspectRatio = isDisplayCard
-                                    ? (activeMediaAspectRatio ??
-                                      getFileAspectRatio(file))
-                                    : getFileAspectRatio(file);
-
-                                return (
-                                    <LaneStackSlice
-                                        key={`lane-slice-${slice.index}`}
-                                        style={{
-                                            opacity,
-                                            transform: `translateX(${xOffset}px) rotate(${rotation}deg) scale(${scale})`,
-                                        }}
-                                    >
-                                        <LaneCardSurface
-                                            style={{
-                                                boxShadow: laneCardShadow(
-                                                    slice.distance,
-                                                ),
-                                            }}
-                                        >
-                                            <LaneCardMediaLayer
-                                                style={{
-                                                    filter:
-                                                        blurSigma > 0
-                                                            ? `blur(${blurSigma}px)`
-                                                            : undefined,
-                                                }}
-                                            >
-                                                {file.metadata.fileType ===
-                                                    FileType.video &&
-                                                isDisplayCard ? (
-                                                    <VideoPlayer
-                                                        file={file}
-                                                        paused={paused}
-                                                        mediaRef={
-                                                            activeVideoElementRef
-                                                        }
-                                                        fillFrame
-                                                        objectFit="cover"
-                                                        cropRect={cropRect}
-                                                        cropContainerAspectRatio={
-                                                            containerAspectRatio
-                                                        }
-                                                        mediaAspectRatio={
-                                                            mediaAspectRatio
-                                                        }
-                                                        onReady={handleFullLoad}
-                                                        onDuration={
-                                                            handleVideoDuration
-                                                        }
-                                                        onEnded={
-                                                            handleVideoEnded
-                                                        }
-                                                        onAspectRatio={
-                                                            handleActiveAspectRatio
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <PhotoImage
-                                                        file={file}
-                                                        fillFrame
-                                                        objectFit="cover"
-                                                        cropRect={cropRect}
-                                                        cropContainerAspectRatio={
-                                                            containerAspectRatio
-                                                        }
-                                                        mediaAspectRatio={
-                                                            mediaAspectRatio
-                                                        }
-                                                        onFullLoad={
-                                                            isDisplayCard
-                                                                ? handleFullLoad
-                                                                : undefined
-                                                        }
-                                                        onAspectRatio={
-                                                            isDisplayCard
-                                                                ? handleActiveAspectRatio
-                                                                : undefined
-                                                        }
-                                                        showLoadingOverlay={
-                                                            isDisplayCard
-                                                        }
-                                                        thumbnailOnly={
-                                                            !prefersRichImage
-                                                        }
-                                                    />
-                                                )}
-                                            </LaneCardMediaLayer>
-                                            {overlayOpacity > 0 && (
-                                                <LaneCardOverlayLayer
-                                                    style={{
-                                                        opacity: overlayOpacity,
-                                                    }}
-                                                />
-                                            )}
-                                        </LaneCardSurface>
-                                    </LaneStackSlice>
-                                );
-                            })}
-                            {showPlaybackOverlay && (
-                                <LaneCenteredPlaybackOverlay>
-                                    <LaneCenteredPlaybackControl
-                                        type="button"
-                                        onClick={handlePlaybackToggle}
-                                        aria-label={playbackOverlayLabel}
-                                        data-memory-control="true"
-                                    >
-                                        <LaneCenteredPlaybackGlyph>
-                                            <PlaybackGlyph paused={paused} />
-                                        </LaneCenteredPlaybackGlyph>
-                                    </LaneCenteredPlaybackControl>
-                                </LaneCenteredPlaybackOverlay>
-                            )}
-                        </LaneCardStack>
-                    </PhotoContainer>
-
-                    <LaneBottomSection>
-                        <LaneCaptionRow>
-                            <LaneCaption>
-                                <LaneCaptionText
-                                    model={laneCaptionModel}
-                                    previousValue={previousCaptionValue}
-                                />
-                            </LaneCaption>
-                        </LaneCaptionRow>
-                        <LaneProgressSlider
-                            total={files.length}
-                            currentProgress={stackProgress}
-                            onSeek={onSeek}
-                            onScrubStart={handleScrubStart}
-                            onScrub={handleScrub}
-                            onScrubEnd={handleScrubEnd}
-                        />
+                    <LaneMediaSection>
                         <LaneSliderTitle variant="h6">
                             {laneTitle}
                         </LaneSliderTitle>
+                        <PhotoContainer
+                            style={{ flex: "0 0 auto", minHeight: "auto" }}
+                            onContextMenu={(event) => event.preventDefault()}
+                            onDragStart={(event) => event.preventDefault()}
+                        >
+                            <LaneCardStack
+                                style={{
+                                    width: `${laneFrameSize.width}px`,
+                                    height: `${laneFrameSize.height}px`,
+                                }}
+                                onClick={handleLaneMediaFrameClick}
+                            >
+                                {laneSlices.map((slice) => {
+                                    const file = files[slice.index]!;
+                                    const frame = laneFrames?.[slice.index];
+                                    const scale = calculateLaneScale(
+                                        slice.distance,
+                                    );
+                                    const xOffset: number = calculateLaneXOffset(
+                                        slice.distance,
+                                        laneFrameSize.width,
+                                        viewport.width,
+                                    );
+                                    const opacity = calculateLaneOpacity(
+                                        slice.distance,
+                                    );
+                                    const blurSigma =
+                                        isScrubbing || isCompactLaneLayout
+                                            ? 0
+                                            : calculateLaneBlur(slice.distance);
+                                    const rotation =
+                                        (calculateLaneRotation(slice.distance) *
+                                            180) /
+                                        Math.PI;
+                                    const overlayOpacity =
+                                        calculateLaneOverlayOpacity(
+                                            slice.distance,
+                                        );
+                                    const cropRect = resolveLaneCropRect(frame);
+                                    const containerAspectRatio =
+                                        laneFrameSize.width /
+                                        laneFrameSize.height;
+                                    const isDisplayCard =
+                                        slice.index === displayIndex;
+                                    const prefersRichImage =
+                                        file.metadata.fileType === FileType.video
+                                            ? isDisplayCard
+                                            : Math.abs(slice.distance) < 1.1;
+                                    const mediaAspectRatio = isDisplayCard
+                                        ? (activeMediaAspectRatio ??
+                                          getFileAspectRatio(file))
+                                        : getFileAspectRatio(file);
+
+                                    return (
+                                        <LaneStackSlice
+                                            key={`lane-slice-${slice.index}`}
+                                            style={{
+                                                opacity,
+                                                transform: `translateX(${xOffset}px) rotate(${rotation}deg) scale(${scale})`,
+                                            }}
+                                        >
+                                            <LaneCardSurface
+                                                style={{
+                                                    boxShadow: laneCardShadow(
+                                                        slice.distance,
+                                                    ),
+                                                }}
+                                            >
+                                                <LaneCardMediaLayer
+                                                    style={{
+                                                        filter:
+                                                            blurSigma > 0
+                                                                ? `blur(${blurSigma}px)`
+                                                                : undefined,
+                                                    }}
+                                                >
+                                                    {file.metadata.fileType ===
+                                                        FileType.video &&
+                                                    isDisplayCard ? (
+                                                        <VideoPlayer
+                                                            file={file}
+                                                            paused={paused}
+                                                            mediaRef={
+                                                                activeVideoElementRef
+                                                            }
+                                                            fillFrame
+                                                            objectFit="cover"
+                                                            cropRect={cropRect}
+                                                            cropContainerAspectRatio={
+                                                                containerAspectRatio
+                                                            }
+                                                            mediaAspectRatio={
+                                                                mediaAspectRatio
+                                                            }
+                                                            onReady={
+                                                                handleFullLoad
+                                                            }
+                                                            onDuration={
+                                                                handleVideoDuration
+                                                            }
+                                                            onEnded={
+                                                                handleVideoEnded
+                                                            }
+                                                            onAspectRatio={
+                                                                handleActiveAspectRatio
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <PhotoImage
+                                                            file={file}
+                                                            fillFrame
+                                                            objectFit="cover"
+                                                            cropRect={cropRect}
+                                                            cropContainerAspectRatio={
+                                                                containerAspectRatio
+                                                            }
+                                                            mediaAspectRatio={
+                                                                mediaAspectRatio
+                                                            }
+                                                            onFullLoad={
+                                                                isDisplayCard
+                                                                    ? handleFullLoad
+                                                                    : undefined
+                                                            }
+                                                            onAspectRatio={
+                                                                isDisplayCard
+                                                                    ? handleActiveAspectRatio
+                                                                    : undefined
+                                                            }
+                                                            showLoadingOverlay={
+                                                                isDisplayCard
+                                                            }
+                                                            thumbnailOnly={
+                                                                !prefersRichImage
+                                                            }
+                                                        />
+                                                    )}
+                                                </LaneCardMediaLayer>
+                                                {overlayOpacity > 0 && (
+                                                    <LaneCardOverlayLayer
+                                                        style={{
+                                                            opacity:
+                                                                overlayOpacity,
+                                                        }}
+                                                    />
+                                                )}
+                                            </LaneCardSurface>
+                                        </LaneStackSlice>
+                                    );
+                                })}
+                                {showPlaybackOverlay && (
+                                    <LaneCornerPlaybackOverlay>
+                                        <LaneCornerPlaybackControl
+                                            type="button"
+                                            onClick={handlePlaybackToggle}
+                                            aria-label={playbackOverlayLabel}
+                                            data-memory-control="true"
+                                        >
+                                            <LaneCornerPlaybackGlyph>
+                                                <LanePlaybackGlyph
+                                                    paused={paused}
+                                                />
+                                            </LaneCornerPlaybackGlyph>
+                                        </LaneCornerPlaybackControl>
+                                    </LaneCornerPlaybackOverlay>
+                                )}
+                            </LaneCardStack>
+                        </PhotoContainer>
+                    </LaneMediaSection>
+
+                    <LaneBottomSection>
+                        <LaneSliderMetaStack>
+                            <LaneProgressSlider
+                                total={files.length}
+                                currentProgress={stackProgress}
+                                width={laneFrameSize.width}
+                                onSeek={onSeek}
+                                onScrubStart={handleScrubStart}
+                                onScrub={handleScrub}
+                                onScrubEnd={handleScrubEnd}
+                            />
+                            <LaneCaptionRow>
+                                <LaneCaption>
+                                    <LaneCaptionText
+                                        model={laneCaptionModel}
+                                        previousValue={previousCaptionValue}
+                                    />
+                                </LaneCaption>
+                            </LaneCaptionRow>
+                        </LaneSliderMetaStack>
                     </LaneBottomSection>
                 </LaneCenterSection>
             </LaneContentContainer>
@@ -1068,19 +1084,24 @@ const laneHeaderJoinNowButtonSx = {
 
 const LaneSliderTitle = styled(Typography)({
     color: "rgba(255, 255, 255, 0.42)",
-    fontWeight: 300,
-    fontSize: "15px",
+    fontWeight: 600,
+    fontSize: "24px",
     lineHeight: 1.15,
     letterSpacing: "-0.01em",
     textAlign: "center",
+    paddingBottom: "10px",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
     maxWidth: "min(42vw, 420px)",
     "@media (max-width: 900px)": {
+        fontSize: "21px",
+        paddingBottom: "8px",
         maxWidth: "min(56vw, 360px)",
     },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        fontSize: "14px",
+        fontSize: "18px",
+        lineHeight: 1.2,
+        paddingBottom: "6px",
         maxWidth: "min(100%, 280px)",
     },
 });
@@ -1097,6 +1118,20 @@ const LaneCenterSection = styled("div")({
     transform: "translateY(-28px)",
     "@media (max-width: 900px)": {
         transform: "translateY(0)",
+    },
+});
+
+const LaneMediaSection = styled("div")({
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "26px",
+    "@media (max-width: 900px)": {
+        gap: "22px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        gap: "18px",
     },
 });
 
@@ -1152,6 +1187,14 @@ const LaneBottomSection = styled("div")({
     paddingBottom: 0,
 });
 
+const LaneSliderMetaStack = styled("div")({
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
+});
+
 const LaneCaptionRow = styled("div")({
     display: "flex",
     alignItems: "center",
@@ -1177,19 +1220,26 @@ const LaneCaption = styled("div")({
     },
 });
 
-const LaneCenteredPlaybackOverlay = styled("div")({
+const LaneCornerPlaybackOverlay = styled("div")({
     position: "absolute",
     inset: 0,
     zIndex: 4,
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    padding: "20px",
     pointerEvents: "none",
+    "@media (max-width: 900px)": {
+        padding: "18px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        padding: "14px",
+    },
 });
 
-const LaneCenteredPlaybackControl = styled("button")({
-    width: "88px",
-    height: "88px",
+const LaneCornerPlaybackControl = styled("button")({
+    width: "58px",
+    height: "58px",
     borderRadius: "999px",
     border: 0,
     cursor: "pointer",
@@ -1210,20 +1260,20 @@ const LaneCenteredPlaybackControl = styled("button")({
         transform: "scale(1.03)",
     },
     "&:active": { transform: "scale(0.98)" },
-    "@media (max-width: 900px)": { width: "80px", height: "80px" },
+    "@media (max-width: 900px)": { width: "54px", height: "54px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        width: "72px",
-        height: "72px",
+        width: "48px",
+        height: "48px",
     },
 });
 
-const LaneCenteredPlaybackGlyph = styled("span")({
+const LaneCornerPlaybackGlyph = styled("span")({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    transform: "scale(1.65)",
+    transform: "scale(1.55)",
     transformOrigin: "center",
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        transform: "scale(1.45)",
+        transform: "scale(1.35)",
     },
 });
