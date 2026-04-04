@@ -177,7 +177,7 @@ s3:
       # Set this to false if using subdomain-style URL. This is set to true for ensuring compatibility with MinIO when SSL is enabled.
       use_path_style_urls: true
       b2-eu-cen:
-         # Uncomment the below configuration to override the top-level configuration 
+         # Uncomment the below configuration to override the top-level configuration
          # are_local_buckets: true
          # use_path_style_urls: true
          key: $minio_user
@@ -185,6 +185,12 @@ s3:
          endpoint: localhost:3200
          region: eu-central-2
          bucket: b2-eu-cen
+         # If you want to use the mobile app or access from any device other than
+         # this machine, uncomment and set this to your server's LAN IP or domain.
+         # Museum uses endpoint for its own internal S3 calls, and public_endpoint
+         # only for the pre-signed URLs it hands to clients. Without this, uploads
+         # from external clients will silently fail.
+         # public_endpoint: 192.168.1.100:3200
       wasabi-eu-central-2-v3:
          # are_local_buckets: true
          # use_path_style_urls: true
@@ -194,6 +200,7 @@ s3:
          region: eu-central-2
          bucket: wasabi-eu-central-2-v3
          compliance: false
+         # public_endpoint: 192.168.1.100:3200
       scw-eu-fr-v3:
          # are_local_buckets: true
          # use_path_style_urls: true
@@ -202,6 +209,7 @@ s3:
          endpoint: localhost:3200
          region: eu-central-2
          bucket: scw-eu-fr-v3
+         # public_endpoint: 192.168.1.100:3200
 
 # Specify the base endpoints for various web apps
 apps:

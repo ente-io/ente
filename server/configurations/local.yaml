@@ -161,6 +161,16 @@ s3:
         endpoint:
         region:
         bucket:
+        # If clients (mobile apps, browsers) reach MinIO at a different address than museum does
+        # internally, set public_endpoint to the externally reachable host:port. Museum will use
+        # this address when generating pre-signed URLs handed to clients, while continuing to use
+        # endpoint for its own S3 API calls (HeadObject etc.).
+        #
+        # This is the common case when self-hosting on a LAN: museum reaches MinIO via Docker
+        # service DNS (endpoint: minio:3200) or socat (endpoint: localhost:3200), but mobile
+        # clients need a LAN IP in their upload URLs.
+        #
+        # public_endpoint: 192.168.1.100:3200
     wasabi-eu-central-2-v3:
         # are_local_buckets: true
         # use_path_style_urls: true
@@ -169,6 +179,7 @@ s3:
         endpoint:
         region:
         bucket:
+        # public_endpoint: 192.168.1.100:3200
         # If enabled, this causes us to opt the object out of the compliance
         # lock when the object is deleted. See "Wasabi Compliance".
         #
@@ -182,6 +193,7 @@ s3:
         endpoint:
         region:
         bucket:
+        # public_endpoint: 192.168.1.100:3200
     wasabi-eu-central-2-derived:
         key:
         secret:

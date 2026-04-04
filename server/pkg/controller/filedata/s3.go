@@ -22,7 +22,7 @@ import (
 const PreSignedRequestValidityDuration = 7 * 24 * stime.Hour
 
 func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL, error) {
-	s3Client := c.S3Config.GetS3Client(dc)
+	s3Client := c.S3Config.GetS3PresignClient(dc)
 	r, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,
@@ -45,6 +45,7 @@ func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL,
 }
 func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *int64) (*ente.MultipartUploadURLs, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
+	s3PresignClient := c.S3Config.GetS3PresignClient(dc)
 	bucket := c.S3Config.GetBucket(dc)
 	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
 		Bucket: bucket,
@@ -60,7 +61,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
 	urls := make([]string, 0)
 	for i := int64(1); i <= *count; i++ {
-		partReq, _ := s3Client.UploadPartRequest(&s3.UploadPartInput{
+		partReq, _ := s3PresignClient.UploadPartRequest(&s3.UploadPartInput{
 			Bucket:     bucket,
 			Key:        &objectKey,
 			UploadId:   r.UploadId,
@@ -73,7 +74,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 		urls = append(urls, partUrl)
 	}
 	multipartUploadURLs.PartURLs = urls
-	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
+	r2, _ := s3PresignClient.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
 		Bucket:   bucket,
 		Key:      &objectKey,
 		UploadId: r.UploadId,
@@ -87,7 +88,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 }
 
 func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
-	s3Client := c.S3Config.GetS3Client(dc)
+	s3Client := c.S3Config.GetS3PresignClient(dc)
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,

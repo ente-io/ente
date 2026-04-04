@@ -36,6 +36,9 @@ type S3Config struct {
 	s3Configs map[string]*aws.Config
 	// A map from data centers to pre-created S3 clients
 	s3Clients map[string]s3.S3
+	// A map from data centers to S3 clients configured with public_endpoint for presigning URLs.
+	// If public_endpoint is not set for a DC, the regular s3Client is used for presigning.
+	s3PresignClients map[string]s3.S3
 	// Indicates if compliance is enabled for the Wasabi DC.
 	isWasabiComplianceEnabled bool
 	// Indicates if local minio buckets are being used. Enables various
@@ -123,6 +126,7 @@ func (config *S3Config) initialize() {
 	config.buckets = make(map[string]string)
 	config.s3Configs = make(map[string]*aws.Config)
 	config.s3Clients = make(map[string]s3.S3)
+	config.s3PresignClients = make(map[string]s3.S3)
 
 	usePathStyleURLs := viper.GetBool("s3.use_path_style_urls")
 	areLocalBuckets := viper.GetBool("s3.are_local_buckets")
@@ -149,6 +153,29 @@ func (config *S3Config) initialize() {
 		s3Client := *s3.New(s3Session)
 		config.s3Configs[dc] = &s3Config
 		config.s3Clients[dc] = s3Client
+		// If a public_endpoint is configured, create a separate client for presigning URLs.
+		// This allows internal operations (HeadObject etc.) to use a Docker-internal hostname
+		// while pre-signed URLs served to clients use the externally-accessible endpoint.
+		if publicEndpoint := viper.GetString("s3." + dc + ".public_endpoint"); publicEndpoint != "" {
+			presignConfig := aws.Config{
+				Credentials: credentials.NewStaticCredentials(viper.GetString("s3."+dc+".key"),
+					viper.GetString("s3."+dc+".secret"), ""),
+				Endpoint: aws.String(publicEndpoint),
+				Region:   aws.String(viper.GetString("s3." + dc + ".region")),
+			}
+			if usePathStyleURLs || viper.GetBool("s3."+dc+".use_path_style_urls") || areLocalBuckets {
+				presignConfig.S3ForcePathStyle = aws.Bool(true)
+			}
+			if areLocalBuckets || viper.GetBool("s3."+dc+".disable_ssl") {
+				presignConfig.DisableSSL = aws.Bool(true)
+			}
+			presignSession, presignErr := session.NewSession(&presignConfig)
+			if presignErr != nil {
+				log.Fatal("Could not create presign session for " + dc)
+			}
+			config.s3PresignClients[dc] = *s3.New(presignSession)
+			log.Infof("Using public_endpoint %s for presigning URLs in %s", publicEndpoint, dc)
+		}
 		if dc == dcWasabiEuropeCentral_v3 {
 			config.isWasabiComplianceEnabled = viper.GetBool("s3." + dc + ".compliance")
 		}
@@ -198,6 +225,16 @@ func (config *S3Config) GetS3Client(dcOrBucketID string) s3.S3 {
 	return config.s3Clients[dcOrBucketID]
 }
 
+// GetS3PresignClient returns the S3 client to use for generating pre-signed URLs.
+// If a public_endpoint is configured for the DC, it returns the presign-specific client;
+// otherwise it falls back to the regular client.
+func (config *S3Config) GetS3PresignClient(dcOrBucketID string) s3.S3 {
+	if client, ok := config.s3PresignClients[dcOrBucketID]; ok {
+		return client
+	}
+	return config.s3Clients[dcOrBucketID]
+}
+
 func (config *S3Config) GetHotDataCenter() string {
 	return config.hotDC
 }
@@ -216,6 +253,12 @@ func (config *S3Config) GetHotS3Config() *aws.Config {
 
 func (config *S3Config) GetHotS3Client() *s3.S3 {
 	s3Client := config.GetS3Client(config.hotDC)
+	return &s3Client
+}
+
+// GetHotS3PresignClient returns the presign S3 client for the hot DC.
+func (config *S3Config) GetHotS3PresignClient() *s3.S3 {
+	s3Client := config.GetS3PresignClient(config.hotDC)
 	return &s3Client
 }
 

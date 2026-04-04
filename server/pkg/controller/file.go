@@ -326,7 +326,7 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 	if err != nil {
 		return []ente.UploadURL{}, stacktrace.Propagate(err, "")
 	}
-	s3Client := c.S3Config.GetHotS3Client()
+	s3Client := c.S3Config.GetHotS3PresignClient()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
 	urls := make([]ente.UploadURL, 0)
@@ -362,7 +362,7 @@ func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID in
 	if err := c.UsageCtrl.CanUploadFile(ctx, userID, &req.ContentLength, app); err != nil {
 		return ente.UploadURL{}, stacktrace.Propagate(err, "")
 	}
-	s3Client := c.S3Config.GetHotS3Client()
+	s3Client := c.S3Config.GetHotS3PresignClient()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
 	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
@@ -867,7 +867,7 @@ func (c *FileController) cleanupDeletedFile(qItem repo.QueueItem) {
 }
 
 func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.ObjectType) (string, error) {
-	s3Client := c.S3Config.GetHotS3Client()
+	s3Client := c.S3Config.GetHotS3PresignClient()
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
 		Key:    &objectKey,
@@ -881,7 +881,7 @@ func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.Object
 }
 
 func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objType ente.ObjectType) (string, error) {
-	s3Client := c.S3Config.GetS3Client(dc)
+	s3Client := c.S3Config.GetS3PresignClient(dc)
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,
@@ -1069,6 +1069,7 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
+	s3PresignClient := c.S3Config.GetHotS3PresignClient()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
 	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
@@ -1086,14 +1087,14 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
 	urls := make([]string, 0)
 	for i := 0; i < count; i++ {
-		url, err := c.getPartURL(*s3Client, objectKey, int64(i+1), r.UploadId, nil, nil)
+		url, err := c.getPartURL(*s3PresignClient, objectKey, int64(i+1), r.UploadId, nil, nil)
 		if err != nil {
 			return multipartUploadURLs, stacktrace.Propagate(err, "")
 		}
 		urls = append(urls, url)
 	}
 	multipartUploadURLs.PartURLs = urls
-	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
+	r2, _ := s3PresignClient.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
 		Bucket:   c.S3Config.GetHotBucket(),
 		Key:      &objectKey,
 		UploadId: r.UploadId,
@@ -1141,6 +1142,7 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
+	s3PresignClient := c.S3Config.GetHotS3PresignClient()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
 	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
@@ -1161,14 +1163,14 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 		length := partLengths[i]
 		lengthCopy := length
 		checksumCopy := normalizedChecksums[i]
-		url, err := c.getPartURL(*s3Client, objectKey, partNumber, r.UploadId, &lengthCopy, &checksumCopy)
+		url, err := c.getPartURL(*s3PresignClient, objectKey, partNumber, r.UploadId, &lengthCopy, &checksumCopy)
 		if err != nil {
 			return multipartUploadURLs, stacktrace.Propagate(err, "")
 		}
 		urls = append(urls, url)
 	}
 	multipartUploadURLs.PartURLs = urls
-	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
+	r2, _ := s3PresignClient.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
 		Bucket:   c.S3Config.GetHotBucket(),
 		Key:      &objectKey,
 		UploadId: r.UploadId,
