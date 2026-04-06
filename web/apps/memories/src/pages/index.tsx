@@ -21,9 +21,7 @@ const LaneMemoryViewer = dynamic<LaneMemoryViewerProps>(
         import("../components/LaneMemoryViewer").then(
             (module) => module.LaneMemoryViewer,
         ),
-    {
-        loading: ViewerChunkLoadingFallback,
-    },
+    { loading: ViewerChunkLoadingFallback },
 );
 
 const MemoryViewer = dynamic<MemoryViewerProps>(
@@ -31,9 +29,7 @@ const MemoryViewer = dynamic<MemoryViewerProps>(
         import("../components/MemoryViewer").then(
             (module) => module.MemoryViewer,
         ),
-    {
-        loading: ViewerChunkLoadingFallback,
-    },
+    { loading: ViewerChunkLoadingFallback },
 );
 
 /**

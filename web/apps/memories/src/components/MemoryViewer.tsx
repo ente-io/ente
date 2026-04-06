@@ -683,10 +683,7 @@ const TopControls = styled("div")({
     maxWidth: "100%",
     boxSizing: "border-box",
     "@media (max-width: 900px)": { minHeight: "56px" },
-    [SHARE_TABLET_MEDIA_QUERY]: {
-        minHeight: "56px",
-        paddingInline: "124px",
-    },
+    [SHARE_TABLET_MEDIA_QUERY]: { minHeight: "56px", paddingInline: "124px" },
 });
 
 const HeaderSection = styled("div")({
@@ -698,10 +695,7 @@ const HeaderSection = styled("div")({
     gap: "18px",
     boxSizing: "border-box",
     "@media (max-width: 900px)": { width: "min(100%, 344px)", gap: "14px" },
-    [SHARE_TABLET_MEDIA_QUERY]: {
-        width: "min(100%, 296px)",
-        gap: "12px",
-    },
+    [SHARE_TABLET_MEDIA_QUERY]: { width: "min(100%, 296px)", gap: "12px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         width: "100%",
         gap: "18px",
