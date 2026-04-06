@@ -841,8 +841,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Ορισμός ακτίνας",
-  "familyPlanPortalTitle": "Οικογένεια",
-  "familyPlanOverview": "Προσθέστε 5 μέλη της οικογένειας στη συνδρομή σας χωρίς να πληρώσετε επιπλέον.\n\nΚάθε μέλος έχει τον δικό του ιδιωτικό χώρο και δεν μπορεί να δει τα αρχεία των άλλων εκτός αν του κοινοποιηθούν.\n\nΤα οικογενειακά σχέδια είναι διαθέσιμα σε χρήστες που έχουν συνδρομή επί πληρωμή στο Ente.\n\nΕγγραφείτε τώρα για να ξεκινήσετε!",
   "androidBiometricHint": "Επαλήθευση ταυτότητας",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

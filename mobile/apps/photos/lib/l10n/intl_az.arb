@@ -1292,8 +1292,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radiusu təyin et",
-  "familyPlanPortalTitle": "Ailə",
-  "familyPlanOverview": "Əlavə ödəniş etmədən mövcud planınıza 5 ailə üzvü əlavə edin.\n\nHər bir üzv öz şəxsi sahəsini əldə edir və paylanmadıqca bir-birinin fayllarını görə bilmirlər.\n\nAilə planları ödənişli Ente abunəliyi olan müştərilər üçün əlçatandır.\n\nBaşlamaq üçün indi abunə olun!",
   "androidBiometricHint": "Kimliyi təsdiqlə",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2368,10 +2366,6 @@
   "artisticPortraits": "Bədii portretlər",
   "streetFood": "Küçə yeməkləri",
   "riverCruises": "Çay kruizi mənzərələri",
-  "facesTimelineBannerTitle": "Yaddaş Zolağı",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "{name} adlı şəxsin illər ərzindəki şəkillərinə baxın",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

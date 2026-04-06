@@ -946,7 +946,6 @@
   "verifyIDLabel": "Verifiera",
   "fileInfoAddDescHint": "Lägg till en beskrivning...",
   "editLocationTagTitle": "Redigera plats",
-  "familyPlanPortalTitle": "Familj",
   "androidBiometricHint": "Verifiera identitet",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
