@@ -33,9 +33,11 @@ import {
     MobileJoinNowButton,
     PhotoContainer,
     readViewport,
+    ViewerFooterBar,
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
+const SHARE_COMPACT_LAYOUT_BREAKPOINT_PX = 960;
 const MOBILE_MEDIA_HORIZONTAL_INSET_PX = 8;
 const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 220;
 const MOBILE_VIDEO_MEDIA_RESERVED_VERTICAL_SPACE_PX = 244;
@@ -136,6 +138,8 @@ export function MemoryViewer({
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
     const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
+    const isCompactShareLayout =
+        viewport.width <= SHARE_COMPACT_LAYOUT_BREAKPOINT_PX;
 
     useEffect(() => {
         setPaused(false);
@@ -506,32 +510,36 @@ export function MemoryViewer({
                     </MobileTopActions>
                 ) : (
                     <TopControls>
-                        <TopLeftBrandLink
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noreferrer"
-                            data-memory-control="true"
-                        >
-                            <EnteBrandTagImage
-                                src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                alt="Ente Photos"
-                            />
-                        </TopLeftBrandLink>
+                        {!isCompactShareLayout && (
+                            <TopLeftBrandLink
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                                data-memory-control="true"
+                            >
+                                <EnteBrandTagImage
+                                    src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                    alt="Ente Photos"
+                                />
+                            </TopLeftBrandLink>
+                        )}
 
                         {sharedHeader}
 
-                        <TopRightActions>
-                            <JoinNowButton
-                                variant="contained"
-                                color="accent"
-                                disableElevation
-                                href="https://ente.io/get"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                Try Ente
-                            </JoinNowButton>
-                        </TopRightActions>
+                        {!isCompactShareLayout && (
+                            <TopRightActions>
+                                <JoinNowButton
+                                    variant="contained"
+                                    color="accent"
+                                    disableElevation
+                                    href="https://ente.io/get"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    Try Ente
+                                </JoinNowButton>
+                            </TopRightActions>
+                        )}
                     </TopControls>
                 )}
 
@@ -566,6 +574,32 @@ export function MemoryViewer({
                 </PhotoContainer>
 
                 {isMobileLayout && sharedHeader}
+
+                {!isMobileLayout && isCompactShareLayout && (
+                    <ViewerFooterBar>
+                        <BrandLink
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            data-memory-control="true"
+                        >
+                            <EnteBrandTagImage
+                                src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                alt="Ente Photos"
+                            />
+                        </BrandLink>
+                        <MobileJoinNowButton
+                            variant="contained"
+                            color="accent"
+                            disableElevation
+                            href="https://ente.io/get"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Try Ente
+                        </MobileJoinNowButton>
+                    </ViewerFooterBar>
+                )}
             </ContentContainer>
         </ViewerRoot>
     );

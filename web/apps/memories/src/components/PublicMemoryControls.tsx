@@ -6,7 +6,7 @@
  */
 import { keyframes } from "@emotion/react";
 import { Box, styled } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type { LaneCaptionModel } from "../utils/lane";
 
 const MOBILE_LAYOUT_BREAKPOINT_PX = 600;
@@ -235,9 +235,8 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
         return (value / (total - 1)) * 100;
     }, [current, currentProgress, total]);
 
-    const [draggingPointerId, setDraggingPointerId] = useState<number | null>(
-        null,
-    );
+    const draggingPointerIdRef = useRef<number | null>(null);
+    const lastScrubValueRef = useRef(currentProgress ?? current ?? 0);
 
     const isPointerDragActive = useCallback(
         (event: React.PointerEvent<HTMLDivElement>) =>
@@ -266,53 +265,77 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;
             }
-            setDraggingPointerId(event.pointerId);
-            event.currentTarget.setPointerCapture(event.pointerId);
             const value = getScrubValue(event);
+            draggingPointerIdRef.current = event.pointerId;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            lastScrubValueRef.current = value;
             onScrubStart?.();
             onScrub?.(value);
         },
         [getScrubValue, onScrub, onScrubStart, total],
     );
 
-    const handlePointerMove = useCallback(
-        (event: React.PointerEvent<HTMLDivElement>) => {
-            if (draggingPointerId !== event.pointerId) {
+    const commitScrub = useCallback(
+        (
+            event: React.PointerEvent<HTMLDivElement>,
+            value: number,
+            releasePointerCapture: boolean,
+        ) => {
+            if (draggingPointerIdRef.current !== event.pointerId) {
                 return;
             }
-            if (!isPointerDragActive(event)) {
-                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-                    event.currentTarget.releasePointerCapture(event.pointerId);
-                }
-                setDraggingPointerId(null);
-                return;
-            }
-            event.stopPropagation();
-            onScrub?.(getScrubValue(event));
-        },
-        [draggingPointerId, getScrubValue, isPointerDragActive, onScrub],
-    );
 
-    const endScrub = useCallback(
-        (event: React.PointerEvent<HTMLDivElement>) => {
-            if (draggingPointerId !== event.pointerId) {
-                return;
-            }
             event.stopPropagation();
-            const value = getScrubValue(event);
-            event.currentTarget.releasePointerCapture(event.pointerId);
-            setDraggingPointerId(null);
+            lastScrubValueRef.current = value;
+            draggingPointerIdRef.current = null;
+
+            if (
+                releasePointerCapture &&
+                event.currentTarget.hasPointerCapture(event.pointerId)
+            ) {
+                event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+
             onScrubEnd?.(value);
             if (!onScrubEnd) {
                 onSeek(Math.round(value));
             }
         },
-        [draggingPointerId, getScrubValue, onScrubEnd, onSeek],
+        [onScrubEnd, onSeek],
     );
 
-    const handleLostPointerCapture = useCallback(() => {
-        setDraggingPointerId(null);
-    }, []);
+    const handlePointerMove = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            if (draggingPointerIdRef.current !== event.pointerId) {
+                return;
+            }
+
+            const value = getScrubValue(event);
+            if (!isPointerDragActive(event)) {
+                commitScrub(event, value, true);
+                return;
+            }
+
+            event.stopPropagation();
+            lastScrubValueRef.current = value;
+            onScrub?.(value);
+        },
+        [commitScrub, getScrubValue, isPointerDragActive, onScrub],
+    );
+
+    const endScrub = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            commitScrub(event, getScrubValue(event), true);
+        },
+        [commitScrub, getScrubValue],
+    );
+
+    const handleLostPointerCapture = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            commitScrub(event, lastScrubValueRef.current, false);
+        },
+        [commitScrub],
+    );
 
     return (
         <LaneProgressTrack

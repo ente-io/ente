@@ -125,6 +125,7 @@ export function LaneMemoryViewer({
     const displayIndexRef = useRef(currentIndex);
     const currentIndexRef = useRef(currentIndex);
     const pausedRef = useRef(paused);
+    const wasPausedBeforeScrubRef = useRef(paused);
     const isVideoRef = useRef(false);
     const isAnimatingStackRef = useRef(false);
     const isScrubbingRef = useRef(false);
@@ -517,6 +518,7 @@ export function LaneMemoryViewer({
     );
 
     const handleScrubStart = useCallback(() => {
+        wasPausedBeforeScrubRef.current = pausedRef.current;
         setPaused(true);
         setIsScrubbing(true);
         cancelStackAnimation();
@@ -548,7 +550,7 @@ export function LaneMemoryViewer({
             restartOnResumeRef.current = false;
             finishedLanePlaybackRef.current = false;
             setIsScrubbing(false);
-            setPaused(false);
+            setPaused(wasPausedBeforeScrubRef.current);
             setStackProgress(roundedIndex);
             if (displayIndexRef.current !== roundedIndex) {
                 commitDisplayIndex(roundedIndex);
