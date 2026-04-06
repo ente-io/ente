@@ -519,7 +519,13 @@ export function LaneMemoryViewer({
                 pauseLanePlayback();
             }
         },
-        [onNext, onPrev, pauseLanePlayback, resumeLanePlaybackFromGesture, viewport.width],
+        [
+            onNext,
+            onPrev,
+            pauseLanePlayback,
+            resumeLanePlaybackFromGesture,
+            viewport.width,
+        ],
     );
 
     const laneFrameSize = useMemo(() => {

@@ -90,11 +90,7 @@ const parseCalendarDate = (value: string): Date | undefined => {
 };
 
 const safeDateInYear = (date: Date, year: number) => {
-    const daysInTargetMonth = new Date(
-        year,
-        date.getMonth() + 1,
-        0,
-    ).getDate();
+    const daysInTargetMonth = new Date(year, date.getMonth() + 1, 0).getDate();
     const targetDay = Math.min(date.getDate(), daysInTargetMonth);
     return new Date(year, date.getMonth(), targetDay);
 };

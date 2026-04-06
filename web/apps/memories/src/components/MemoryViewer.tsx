@@ -337,7 +337,12 @@ export function MemoryViewer({
                 resumeCurrentVideoPlayback();
             }
         },
-        [finishedPlayback, handleRestartPlayback, isVideo, resumeCurrentVideoPlayback],
+        [
+            finishedPlayback,
+            handleRestartPlayback,
+            isVideo,
+            resumeCurrentVideoPlayback,
+        ],
     );
 
     const handleViewerClick = useCallback(
