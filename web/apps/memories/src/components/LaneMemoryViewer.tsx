@@ -5,6 +5,8 @@
  * rendered by `pages/index.tsx` for the `"lane"` variant.
  */
 import { styled, Typography } from "@mui/material";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
 import { FileType } from "ente-media/file-type";
 import {
     type MouseEvent as ReactMouseEvent,
@@ -366,6 +368,37 @@ export function LaneMemoryViewer({
         void durationSeconds;
         setVideoDurationKnown(true);
     }, []);
+
+    useEffect(() => {
+        if (!fileLoaded || displayIndex >= files.length - 1) {
+            return;
+        }
+
+        const nextFile = files[displayIndex + 1]!;
+
+        void (async () => {
+            const prefetchTasks: Promise<unknown>[] = [
+                downloadManager.renderableThumbnailURL(nextFile),
+                downloadManager.renderableSourceURLs(nextFile),
+            ];
+
+            if (nextFile.metadata.fileType === FileType.video) {
+                prefetchTasks.unshift(
+                    downloadManager.hlsPlaylistDataForPublicMemory(nextFile),
+                );
+            }
+
+            const results = await Promise.allSettled(prefetchTasks);
+            results.forEach((result) => {
+                if (result.status === "rejected") {
+                    log.warn(
+                        "Failed to prefetch next lane memory media",
+                        result.reason,
+                    );
+                }
+            });
+        })();
+    }, [displayIndex, fileLoaded, files]);
 
     const handleActiveAspectRatio = useCallback(
         (width: number, height: number) => {
