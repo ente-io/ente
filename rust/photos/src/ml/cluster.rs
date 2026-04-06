@@ -3,6 +3,8 @@
 //! Contains agglomerative clustering (average linkage) and helper functions.
 
 use std::collections::HashMap;
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 // ── Agglomerative clustering (average linkage, precomputed) ─────────────
 
@@ -18,6 +20,21 @@ pub fn agglomerative_precomputed(dist: &[f32], n: usize, threshold: f32) -> Vec<
 /// Same as [agglomerative_precomputed] but clusters smaller than
 /// `min_cluster_size` are marked as noise (-1).
 pub fn agglomerative_precomputed_min_size(
+    dist: &[f32],
+    n: usize,
+    threshold: f32,
+    min_cluster_size: usize,
+) -> Vec<i32> {
+    agglomerative_precomputed_min_size_heap(dist, n, threshold, min_cluster_size)
+}
+
+/// Naive exact average-linkage agglomerative clustering.
+///
+/// This retains the original O(n^3)-like merge selection logic for
+/// verification and benchmarking. Production code should use
+/// [agglomerative_precomputed_min_size], which now routes to the optimized
+/// heap-based exact implementation.
+pub fn agglomerative_precomputed_min_size_naive(
     dist: &[f32],
     n: usize,
     threshold: f32,
@@ -105,6 +122,191 @@ pub fn agglomerative_precomputed_min_size(
     }
 
     labels
+}
+
+/// Optimized exact average-linkage agglomerative clustering using
+/// lazy nearest-neighbor tracking plus a heap of best merge candidates.
+///
+/// This keeps the same distance-matrix representation as
+/// [agglomerative_precomputed_min_size], but avoids a full O(n^2) scan
+/// for the best merge on every iteration.
+pub fn agglomerative_precomputed_min_size_heap(
+    dist: &[f32],
+    n: usize,
+    threshold: f32,
+    min_cluster_size: usize,
+) -> Vec<i32> {
+    if n == 0 {
+        return vec![];
+    }
+    if n == 1 {
+        return if min_cluster_size <= 1 {
+            vec![0]
+        } else {
+            vec![-1]
+        };
+    }
+
+    let mut clusters: Vec<Option<Vec<usize>>> = (0..n).map(|i| Some(vec![i])).collect();
+    let mut active = vec![true; n];
+    let mut sizes = vec![1usize; n];
+    let mut cdist: Vec<f32> = dist.to_vec();
+    let cap = n;
+
+    let mut nearest: Vec<Option<(usize, f32)>> = vec![None; n];
+    let mut heap = BinaryHeap::new();
+
+    for i in 0..n {
+        if let Some((j, d)) = recompute_nearest(i, &active, &cdist, cap) {
+            nearest[i] = Some((j, d));
+            heap.push(Candidate { dist: d, from: i, to: j });
+        }
+    }
+
+    let mut active_count = n;
+    while active_count >= 2 {
+        let Some(Candidate { dist: best_d, from: ci, to: cj }) = heap.pop() else {
+            break;
+        };
+
+        if !active[ci] || !active[cj] {
+            continue;
+        }
+        if let Some((n_to, n_dist)) = nearest[ci] {
+            if n_to != cj || !same_distance(n_dist, best_d) {
+                continue;
+            }
+        } else {
+            continue;
+        }
+
+        if best_d > threshold {
+            break;
+        }
+
+        let size_i = sizes[ci];
+        let size_j = sizes[cj];
+        let merged_size = size_i + size_j;
+
+        for ck in 0..n {
+            if !active[ck] || ck == ci || ck == cj {
+                continue;
+            }
+            let d_ik = cdist[ci * cap + ck];
+            let d_jk = cdist[cj * cap + ck];
+            let new_d = (size_i as f32 * d_ik + size_j as f32 * d_jk) / merged_size as f32;
+            cdist[ci * cap + ck] = new_d;
+            cdist[ck * cap + ci] = new_d;
+        }
+
+        let cj_members = clusters[cj].take().unwrap();
+        clusters[ci].as_mut().unwrap().extend(cj_members);
+        active[cj] = false;
+        nearest[cj] = None;
+        sizes[ci] = merged_size;
+        active_count -= 1;
+
+        if let Some((to, d)) = recompute_nearest(ci, &active, &cdist, cap) {
+            nearest[ci] = Some((to, d));
+            heap.push(Candidate { dist: d, from: ci, to });
+        } else {
+            nearest[ci] = None;
+        }
+
+        for ck in 0..n {
+            if !active[ck] || ck == ci {
+                continue;
+            }
+
+            let should_recompute = match nearest[ck] {
+                None => true,
+                Some((to, d)) => to == ci || to == cj || cdist[ck * cap + ci] < d,
+            };
+
+            if should_recompute {
+                if let Some((to, d)) = recompute_nearest(ck, &active, &cdist, cap) {
+                    nearest[ck] = Some((to, d));
+                    heap.push(Candidate { dist: d, from: ck, to });
+                } else {
+                    nearest[ck] = None;
+                }
+            }
+        }
+    }
+
+    let mut labels = vec![-1i32; n];
+    let mut next_label = 0i32;
+    for ci in 0..n {
+        if active[ci]
+            && let Some(members) = &clusters[ci]
+            && members.len() >= min_cluster_size
+        {
+            for &m in members {
+                labels[m] = next_label;
+            }
+            next_label += 1;
+        }
+    }
+
+    labels
+}
+
+#[derive(Clone, Copy, Debug)]
+struct Candidate {
+    dist: f32,
+    from: usize,
+    to: usize,
+}
+
+impl PartialEq for Candidate {
+    fn eq(&self, other: &Self) -> bool {
+        self.from == other.from && self.to == other.to && same_distance(self.dist, other.dist)
+    }
+}
+
+impl Eq for Candidate {}
+
+impl PartialOrd for Candidate {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Candidate {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other
+            .dist
+            .total_cmp(&self.dist)
+            .then_with(|| other.from.cmp(&self.from))
+            .then_with(|| other.to.cmp(&self.to))
+    }
+}
+
+fn recompute_nearest(i: usize, active: &[bool], cdist: &[f32], cap: usize) -> Option<(usize, f32)> {
+    if !active[i] {
+        return None;
+    }
+
+    let mut best: Option<(usize, f32)> = None;
+    for j in 0..active.len() {
+        if !active[j] || i == j {
+            continue;
+        }
+        let d = cdist[i * cap + j];
+        match best {
+            None => best = Some((j, d)),
+            Some((best_j, best_d)) => {
+                if d < best_d || (same_distance(d, best_d) && j < best_j) {
+                    best = Some((j, d));
+                }
+            }
+        }
+    }
+    best
+}
+
+fn same_distance(a: f32, b: f32) -> bool {
+    (a - b).abs() <= 1e-7
 }
 
 // ── Helper functions ────────────────────────────────────────────────────
@@ -267,4 +469,5 @@ mod tests {
         let labels = agglomerative_precomputed(&[0.0], 1, 0.5);
         assert_eq!(labels, vec![0]);
     }
+
 }
