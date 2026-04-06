@@ -2339,6 +2339,10 @@
     },
     {
       "title": "Zoom"
+    },
+    {
+      "title": "DLsite",
+      "slug": "dlsite"
     }
   ]
 }
