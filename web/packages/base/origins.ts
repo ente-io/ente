@@ -129,8 +129,7 @@ export const shareAppOrigin = (): string =>
  * environment variable.
  */
 export const memoriesAppOrigin = (): string =>
-    process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ??
-    "https://ente.com";
+    process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ?? "https://ente.com";
 
 /**
  * Return the origin that serves the photos app.

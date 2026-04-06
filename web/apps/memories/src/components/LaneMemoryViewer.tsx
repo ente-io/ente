@@ -621,11 +621,12 @@ export function LaneMemoryViewer({
                                     const scale = calculateLaneScale(
                                         slice.distance,
                                     );
-                                    const xOffset: number = calculateLaneXOffset(
-                                        slice.distance,
-                                        laneFrameSize.width,
-                                        viewport.width,
-                                    );
+                                    const xOffset: number =
+                                        calculateLaneXOffset(
+                                            slice.distance,
+                                            laneFrameSize.width,
+                                            viewport.width,
+                                        );
                                     const opacity = calculateLaneOpacity(
                                         slice.distance,
                                     );
@@ -648,7 +649,8 @@ export function LaneMemoryViewer({
                                     const isDisplayCard =
                                         slice.index === displayIndex;
                                     const prefersRichImage =
-                                        file.metadata.fileType === FileType.video
+                                        file.metadata.fileType ===
+                                        FileType.video
                                             ? isDisplayCard
                                             : Math.abs(slice.distance) < 1.1;
                                     const mediaAspectRatio = isDisplayCard
@@ -1018,10 +1020,7 @@ const LaneContentContainer = styled("div")({
     height: "100dvh",
     padding: "42px 24px 24px",
     boxSizing: "border-box",
-    "@media (max-width: 900px)": {
-        gap: "22px",
-        padding: "36px 24px 24px",
-    },
+    "@media (max-width: 900px)": { gap: "22px", padding: "36px 24px 24px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         gap: "18px",
         padding: "32px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
@@ -1037,10 +1036,7 @@ const LaneTopBar = styled("div")({
     minHeight: "64px",
     gap: "20px",
     boxSizing: "border-box",
-    "@media (max-width: 900px)": {
-        minHeight: "56px",
-        gap: "14px",
-    },
+    "@media (max-width: 900px)": { minHeight: "56px", gap: "14px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         minHeight: "48px",
         gap: "12px",
@@ -1118,9 +1114,7 @@ const LaneCenterSection = styled("div")({
     justifyContent: "center",
     gap: `${LANE_CARD_TO_CONTROLS_GAP_PX}px`,
     transform: "translateY(-28px)",
-    "@media (max-width: 900px)": {
-        transform: "translateY(0)",
-    },
+    "@media (max-width: 900px)": { transform: "translateY(0)" },
 });
 
 const LaneMediaSection = styled("div")({
@@ -1129,12 +1123,8 @@ const LaneMediaSection = styled("div")({
     flexDirection: "column",
     alignItems: "center",
     gap: "26px",
-    "@media (max-width: 900px)": {
-        gap: "22px",
-    },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        gap: "18px",
-    },
+    "@media (max-width: 900px)": { gap: "22px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: { gap: "18px" },
 });
 
 const LaneCardStack = styled("div")({ position: "relative", flexShrink: 0 });
@@ -1155,9 +1145,7 @@ const LaneCardSurface = styled("div")({
     border: "3px solid white",
     boxSizing: "border-box",
     backgroundColor: "black",
-    "@media (max-width: 900px)": {
-        borderRadius: "24px",
-    },
+    "@media (max-width: 900px)": { borderRadius: "24px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         borderRadius: "22px",
         borderWidth: "2px",
@@ -1213,9 +1201,7 @@ const LaneCaption = styled("div")({
     textAlign: "center",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
-    "@media (max-width: 900px)": {
-        fontSize: "21px",
-    },
+    "@media (max-width: 900px)": { fontSize: "21px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         fontSize: "18px",
         lineHeight: 1.2,
@@ -1231,9 +1217,7 @@ const LaneCornerPlaybackOverlay = styled("div")({
     justifyContent: "flex-end",
     padding: "20px",
     pointerEvents: "none",
-    "@media (max-width: 900px)": {
-        padding: "18px",
-    },
+    "@media (max-width: 900px)": { padding: "18px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         padding: "14px",
     },
