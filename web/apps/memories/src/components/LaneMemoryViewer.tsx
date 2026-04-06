@@ -379,7 +379,6 @@ export function LaneMemoryViewer({
         void (async () => {
             const prefetchTasks: Promise<unknown>[] = [
                 downloadManager.renderableThumbnailURL(nextFile),
-                downloadManager.renderableSourceURLs(nextFile),
             ];
 
             if (nextFile.metadata.fileType === FileType.video) {
