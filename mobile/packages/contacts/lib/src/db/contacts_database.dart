@@ -92,6 +92,25 @@ class ContactsDatabase {
     return _fromRow(rows.first);
   }
 
+  Future<ContactRecord?> getContactByUserId(
+    int contactUserId, {
+    bool includeDeleted = false,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      _contactsTable,
+      where: includeDeleted
+          ? 'contact_user_id = ?'
+          : 'contact_user_id = ? AND is_deleted = 0',
+      whereArgs: [contactUserId],
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return null;
+    }
+    return _fromRow(rows.first);
+  }
+
   Future<List<ContactRecord>> getContacts({bool includeDeleted = false}) async {
     final db = await database;
     final rows = await db.query(

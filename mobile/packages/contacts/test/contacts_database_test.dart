@@ -47,6 +47,7 @@ void main() {
     await database.configure(userId: 1);
     expect((await database.getContacts()).single.id, 'ct_1');
     expect((await database.getContacts()).single.email, 'a@test.test');
+    expect((await database.getContactByUserId(200))?.id, 'ct_1');
   });
 
   test('clearTable removes all contacts databases', () async {

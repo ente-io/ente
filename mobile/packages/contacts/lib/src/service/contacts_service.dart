@@ -96,6 +96,16 @@ class ContactsService {
     return _database.getContact(contactId);
   }
 
+  Future<ContactRecord?> getContactByUserId(
+    int contactUserId, {
+    bool includeDeleted = false,
+  }) {
+    return _database.getContactByUserId(
+      contactUserId,
+      includeDeleted: includeDeleted,
+    );
+  }
+
   Future<ContactRecord> createContact(ContactData data) async {
     final created = await _requireCtx().createContact(data);
     await _database.upsertContacts([created]);
