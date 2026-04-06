@@ -156,9 +156,9 @@ pub fn agglomerative_precomputed_min_size_heap(
     let mut nearest: Vec<Option<(usize, f32)>> = vec![None; n];
     let mut heap = BinaryHeap::new();
 
-    for i in 0..n {
+    for (i, nearest_i) in nearest.iter_mut().enumerate() {
         if let Some((j, d)) = recompute_nearest(i, &active, &cdist, cap) {
-            nearest[i] = Some((j, d));
+            *nearest_i = Some((j, d));
             heap.push(Candidate {
                 dist: d,
                 from: i,
