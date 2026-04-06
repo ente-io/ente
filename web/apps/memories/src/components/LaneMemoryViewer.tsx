@@ -51,7 +51,7 @@ import {
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
-const LANE_FRAME_INTERVAL_MS = 800;
+const LANE_FRAME_INTERVAL_MS = 1500;
 const LANE_CARD_TRANSITION_DURATION_MS = 440;
 const LANE_COMPACT_LAYOUT_BREAKPOINT_PX = 900;
 const LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 340;
@@ -768,7 +768,7 @@ export function LaneMemoryViewer({
                                                                     : undefined
                                                             }
                                                             showLoadingOverlay={
-                                                                isDisplayCard
+                                                                false
                                                             }
                                                             thumbnailOnly={
                                                                 !prefersRichImage
