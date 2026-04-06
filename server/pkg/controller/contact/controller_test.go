@@ -329,6 +329,40 @@ func TestContactCRUDAndDiff(t *testing.T) {
 	}
 }
 
+func TestUpdateRevivesDeletedContact(t *testing.T) {
+	ctrl, db, ctx, _ := setupContactControllerTest(t)
+	mustInsertTestUser(t, db, 1)
+
+	created := createContactForTest(t, db, ctrl, ctx, 31, "wrapped-key-1", "payload-1")
+	if err := ctrl.Delete(ctx, created.ID); err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+
+	mustInsertTestUser(t, db, 32)
+	mustInsertEmergencyContact(t, db, 1, 32, ente.UserInvitedContact)
+
+	revived, err := ctrl.Update(ctx, created.ID, contactmodel.UpdateRequest{
+		ContactUserID: 32,
+		EncryptedData: []byte("payload-2"),
+	})
+	if err != nil {
+		t.Fatalf("Update() revive error = %v", err)
+	}
+	if revived.IsDeleted {
+		t.Fatal("revived contact should not remain deleted")
+	}
+	if revived.ContactUserID != 32 {
+		t.Fatalf("revived contactUserID = %d, want 32", revived.ContactUserID)
+	}
+	if revived.EncryptedData == nil || string(*revived.EncryptedData) != "payload-2" {
+		t.Fatalf("revived encrypted data = %v, want payload-2", revived.EncryptedData)
+	}
+	expectedEmail := "contacts-32@ente.io"
+	if revived.Email == nil || *revived.Email != expectedEmail {
+		t.Fatalf("revived email = %v, want %q", revived.Email, expectedEmail)
+	}
+}
+
 func TestCreateContactRejectsDuplicateContactUserID(t *testing.T) {
 	ctrl, db, ctx, _ := setupContactControllerTest(t)
 	mustInsertTestUser(t, db, 1)

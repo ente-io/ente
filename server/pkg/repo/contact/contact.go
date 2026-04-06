@@ -183,8 +183,10 @@ func (r *Repository) Update(ctx context.Context, userID int64, id string, req co
 	result, err := r.DB.ExecContext(
 		ctx,
 		`UPDATE contact_entity
-		    SET contact_user_id = $1, encrypted_data = $2
-		  WHERE id = $3 AND user_id = $4 AND is_deleted = FALSE`,
+		    SET contact_user_id = $1,
+		        encrypted_data = $2,
+		        is_deleted = FALSE
+		  WHERE id = $3 AND user_id = $4`,
 		req.ContactUserID,
 		req.EncryptedData,
 		id,
@@ -207,12 +209,8 @@ func (r *Repository) Update(ctx context.Context, userID int64, id string, req co
 	if rowsAffected == 1 {
 		return nil
 	}
-	entity, getErr := r.Get(ctx, userID, id)
-	if getErr != nil {
+	if _, getErr := r.Get(ctx, userID, id); getErr != nil {
 		return stacktrace.Propagate(getErr, "failed to fetch contact after update miss")
-	}
-	if entity.IsDeleted {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("contact is already deleted"), "")
 	}
 	return stacktrace.NewError("exactly one row should be updated")
 }
