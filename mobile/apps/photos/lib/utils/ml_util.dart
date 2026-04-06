@@ -624,6 +624,21 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
         s,
       );
     }
+    // If local file retrieval failed but file is uploaded, try server as fallback
+    if (file == null && enteFile.uploadedFileID != null) {
+      _logger.info(
+        "Local file unavailable for fileID ${enteFile.uploadedFileID}, falling back to server download for ML indexing",
+      );
+      try {
+        file = await getFileFromServer(enteFile);
+      } catch (e, s) {
+        _logger.severe(
+          "Could not get file from server for $enteFile",
+          e,
+          s,
+        );
+      }
+    }
   }
   imagePath = file?.path;
   stopwatch.stop();
