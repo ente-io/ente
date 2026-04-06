@@ -23,7 +23,7 @@ class Detection {
 
   // empty box
   Detection.empty()
-      : box = FaceBox(
+      : box = const FaceBox(
           x: 0,
           y: 0,
           width: 0,

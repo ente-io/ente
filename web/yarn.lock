@@ -650,6 +650,11 @@
   resolved "https://registry.npmjs.org/@fontsource/cormorant-garamond/-/cormorant-garamond-5.2.11.tgz"
   integrity sha512-5JjpN023lhA5soijgVT0BdRGzmlijm402ppjccMd6h+vRE0mX2lJnE+41UPfnlidrkV9/rCo1mf58WZlHnB0CA==
 
+"@fontsource/itim@^5.2.7":
+  version "5.2.7"
+  resolved "https://registry.yarnpkg.com/@fontsource/itim/-/itim-5.2.7.tgz#c966f5d12688057821599f8a2b9f6342bb661251"
+  integrity sha512-ssx6eGnPXJ1grG1/nWjZWvv0bMvCHOf6L7iRqA00Hz0QGukZjETH6tJV7ps/998YdhHFgCQ8KzsBHwQrsNt7EQ==
+
 "@fontsource/jetbrains-mono@^5.2.7":
   version "5.2.8"
   resolved "https://registry.npmjs.org/@fontsource/jetbrains-mono/-/jetbrains-mono-5.2.8.tgz"
@@ -659,6 +664,11 @@
   version "5.2.9"
   resolved "https://registry.npmjs.org/@fontsource/source-serif-4/-/source-serif-4-5.2.9.tgz"
   integrity sha512-er/Pym9emsEVJNf947umJ4kXarXfsiN6CN7kTYinefKRaHLwiquiiHOZvKvxWgkV8JMCf3pV3g0NcsPFpVCH9w==
+
+"@fontsource/space-grotesk@^5.2.10":
+  version "5.2.10"
+  resolved "https://registry.yarnpkg.com/@fontsource/space-grotesk/-/space-grotesk-5.2.10.tgz#36eef6a105be125d1025c206eb48f1a3d37ad512"
+  integrity sha512-XNXEbT74OIITPqw2H6HXwPDp85fy43uxfBwFR5PU+9sLnjuLj12KlhVM9nZVN6q6dlKjkuN8JisW/OBxwxgUew==
 
 "@hugeicons/core-free-icons@^1.0.5", "@hugeicons/core-free-icons@^1.1.0":
   version "1.2.1"
@@ -1219,31 +1229,10 @@
   dependencies:
     tslib "^2.8.0"
 
-"@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.10.1", "@tauri-apps/api@^2.8.0":
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.10.1.tgz#57c1bae6114ec33d977eb2b50dfefc25fa84fc93"
-  integrity sha512-hKL/jWf293UDSUN09rR69hrToyIXBb8CjGaWC7gfinvnQrBVvnLr08FeFi38gxtugAVyVcTa5/FD/Xnkb1siBw==
-
-"@tauri-apps/plugin-dialog@^2.0.0":
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-dialog/-/plugin-dialog-2.6.0.tgz#e09bb26ab7008bfc4a1a044a5fb29ac0575f8898"
-  integrity sha512-q4Uq3eY87TdcYzXACiYSPhmpBA76shgmQswGkSVio4C82Sz2W4iehe9TnKYwbq7weHiL88Yw19XZm7v28+Micg==
-  dependencies:
-    "@tauri-apps/api" "^2.8.0"
-
-"@tauri-apps/plugin-fs@^2.0.0":
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-fs/-/plugin-fs-2.4.5.tgz#4b32b6de32e2ee735632bff356fab09fcc281b42"
-  integrity sha512-dVxWWGE6VrOxC7/jlhyE+ON/Cc2REJlM35R3PJX3UvFw2XwYhLGQVAIyrehenDdKjotipjYEVc4YjOl3qq90fA==
-  dependencies:
-    "@tauri-apps/api" "^2.8.0"
-
-"@tauri-apps/plugin-shell@^2.0.0":
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-shell/-/plugin-shell-2.3.5.tgz#ec7b5c2aedaae9e4641cd3ccf1106e443e193919"
-  integrity sha512-jewtULhiQ7lI7+owCKAjc8tYLJr92U16bPOeAa472LHJdgaibLP83NcfAF2e+wkEcA53FxKQAZ7byDzs2eeizg==
-  dependencies:
-    "@tauri-apps/api" "^2.10.1"
+"@tauri-apps/api@^1.5.0":
+  version "1.6.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/api/-/api-1.6.0.tgz"
+  integrity sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==
 
 "@tokenizer/inflate@^0.4.1":
   version "0.4.1"
@@ -1806,9 +1795,9 @@ base-x@5.0.1, base-x@^5.0.0:
   resolved "https://registry.yarnpkg.com/base-x/-/base-x-5.0.1.tgz#16bf35254be1df8aca15e36b7c1dda74b2aa6b03"
   integrity sha512-M7uio8Zt++eg3jPj+rHMfCC+IuygQHHCOU+IYsVtik6FWjuYpVt/+MRKcgsAMHh8mMFAwnB+Bs+mTrFiXjMzKg==
 
-binary-install@^1.0.1:
+binary-install@^1.1.2:
   version "1.1.2"
-  resolved "https://registry.npmjs.org/binary-install/-/binary-install-1.1.2.tgz"
+  resolved "https://registry.yarnpkg.com/binary-install/-/binary-install-1.1.2.tgz#06f059e5475e2a208d65ead8cb523d7845a83038"
   integrity sha512-ZS2cqFHPZOy4wLxvzqfQvDjCOifn+7uCPqNmYRIBM/03+yllON+4fNnsD0VJdW0p97y+E+dTRNPStWNqMBq+9g==
   dependencies:
     axios "^0.26.1"
@@ -2017,7 +2006,7 @@ concat-map@0.0.1:
   resolved "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
-concurrently@^9.2.1:
+concurrently@9.2.1, concurrently@^9.2.1:
   version "9.2.1"
   resolved "https://registry.npmjs.org/concurrently/-/concurrently-9.2.1.tgz"
   integrity sha512-fsfrO0MxV64Znoy8/l1vVIjjHa29SZyyqPgQBwhiDcaW8wJc2W3XWVOGx4M3oJBnv/zdUZIIp1gDeS98GzP8Ng==
@@ -2468,7 +2457,7 @@ eslint-visitor-keys@^4.2.1:
   resolved "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-4.2.1.tgz"
   integrity sha512-Uhdk5sfqcee/9H/rCOJikYz67o0a2Tw2hGRPOG2Y1R2dg7brRe1uG0yaNQDHu+TO/uQPF/5eCapvYSmHUjt7JQ==
 
-eslint@^9.30.1:
+eslint@9.30.1, eslint@^9.30.1:
   version "9.30.1"
   resolved "https://registry.npmjs.org/eslint/-/eslint-9.30.1.tgz"
   integrity sha512-zmxXPNMOXmwm9E0yQLi5uqXHs7uq2UIiqEKo3Gq+3fwo1XrJ+hijAZImyF7hclW3E6oHz43Yk3RP8at6OTKflQ==
@@ -4515,7 +4504,7 @@ prettier-plugin-packagejson@^2.5.17:
     sort-package-json "3.3.1"
     synckit "0.11.8"
 
-prettier@^3.6.2:
+prettier@3.6.2, prettier@^3.6.2:
   version "3.6.2"
   resolved "https://registry.npmjs.org/prettier/-/prettier-3.6.2.tgz"
   integrity sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==
@@ -4543,6 +4532,23 @@ punycode@^2.1.0:
   version "2.3.1"
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
+
+qr-code-styling@^1.9.2:
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/qr-code-styling/-/qr-code-styling-1.9.2.tgz#071714860a7e59829e8822c9575e989042139d2d"
+  integrity sha512-RgJaZJ1/RrXJ6N0j7a+pdw3zMBmzZU4VN2dtAZf8ZggCfRB5stEQ3IoDNGaNhYY3nnZKYlYSLl5YkfWN5dPutg==
+  dependencies:
+    qrcode-generator "^1.4.4"
+
+qr@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/qr/-/qr-0.5.5.tgz#0fbe55a97a8641b04ace23d3a07052f8db7d8827"
+  integrity sha512-iQBvKj7MRKO+co+MY0IZpyLO+ezvttxsmV86WywrgPuAmgBkv0pytyi03wourniSoPgzffeBW6cBgIkpqcvjTg==
+
+qrcode-generator@^1.4.4:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/qrcode-generator/-/qrcode-generator-1.5.2.tgz#43faea8061a60d2b4ca5e9b0c0c0fb99e2d93e3a"
+  integrity sha512-pItrW0Z9HnDBnFmgiNrY1uxRdri32Uh9EjNYLPVC2zZ3ZRIIEqBoDgm4DkvDwNNDHTK7FNkmr8zAa77BYc9xNw==
 
 queue-microtask@^1.2.2:
   version "1.2.3"
@@ -5452,7 +5458,7 @@ typescript-eslint@^8.35.1:
     "@typescript-eslint/parser" "8.35.1"
     "@typescript-eslint/utils" "8.35.1"
 
-typescript@^5.8.3:
+typescript@5.8.3, typescript@^5.8.3:
   version "5.8.3"
   resolved "https://registry.npmjs.org/typescript/-/typescript-5.8.3.tgz"
   integrity sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==
@@ -5686,12 +5692,12 @@ void-elements@3.1.0:
   resolved "https://registry.npmjs.org/void-elements/-/void-elements-3.1.0.tgz"
   integrity sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==
 
-wasm-pack@^0.13.1:
-  version "0.13.1"
-  resolved "https://registry.npmjs.org/wasm-pack/-/wasm-pack-0.13.1.tgz"
-  integrity sha512-P9exD4YkjpDbw68xUhF3MDm/CC/3eTmmthyG5bHJ56kalxOTewOunxTke4SyF8MTXV6jUtNjXggPgrGmMtczGg==
+wasm-pack@^0.14.0:
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/wasm-pack/-/wasm-pack-0.14.0.tgz#ef9d1328a6fd708686883c505873d763d462ee02"
+  integrity sha512-7uKj+483b6ETTnuWHK3zKNB3Ca3M159tPZ5shyXxI4j7i9Lk82rL2ck/L6E9O5VMWk9JgowdtTBOSfWmGBRFtw==
   dependencies:
-    binary-install "^1.0.1"
+    binary-install "^1.1.2"
 
 web-namespaces@^2.0.0:
   version "2.0.1"

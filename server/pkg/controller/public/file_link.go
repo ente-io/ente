@@ -177,6 +177,7 @@ func (c *FileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLin
 		FileID:                row.FileID,
 		URL:                   url,
 		OwnerID:               row.OwnerID,
+		IsDisabled:            row.IsDisabled,
 		ValidTill:             row.ValidTill,
 		DeviceLimit:           row.DeviceLimit,
 		PasswordEnabled:       row.PassHash != nil,

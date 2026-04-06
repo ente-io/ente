@@ -9,8 +9,10 @@
   "cancel": "Zrušiť",
   "verify": "Overiť",
   "invalidEmailAddress": "Neplatná emailová adresa",
+  "validEmailAddress": "Platný email",
   "enterValidEmail": "Prosím, zadajte platnú emailovú adresu.",
   "deleteAccount": "Odstrániť účet",
+  "deleteAccountWarning": "Týmto sa odstránia vaše účty Ente Auth, Ente Photos a Ente Locker.",
   "askDeleteReason": "Aký je hlavný dôvod, prečo si odstraňujete svoj účet?",
   "deleteAccountFeedbackPrompt": "Mrzí nás, že odchádzate. Podeľte sa s nami o spätnú väzbu, aby sme mohli zlepšiť našu aplikáciu.",
   "feedback": "Spätná väzba",
@@ -22,10 +24,10 @@
   "selectReason": "Zvoľte dôvod",
   "deleteReason1": "Chýba kľúčová funkcia, ktorú potrebujem",
   "deleteReason2": "Aplikácia alebo určitá funkcia sa nespráva ako si myslím, že by mala",
+  "deleteReason3": "Našiel som in",
   "deleteReason4": "Môj dôvod nie je uvedený",
   "sendEmail": "Poslať email",
   "deleteRequestSLAText": "Vaša požiadavka bude spracovaná do 72 hodín.",
-  "deleteEmailRequest": "Prosíme zašlite email na <warning>account-deletion@ente.io</warning> z vašej zaregistrovanej emailovej adresy.",
   "entePhotosPerm": "Ente <i>potrebuje povolenie</i> na uchovávanie vašich fotiek",
   "ok": "Ok",
   "createAccount": "Vytvoriť účet",
@@ -33,6 +35,16 @@
   "password": "Heslo",
   "confirmPassword": "Potvrdiť heslo",
   "activeSessions": "Aktívne relácie",
+  "ocrProcessingOverlayMessage": "Rozpoznávanie textu…",
+  "ocrLoadingIndicatorLabel": "Rozpoznávanie Textu",
+  "ocrSelectionHint": "Potiahnite prstom alebo dvojitým klepnutím vyberte iba to, čo potrebujete",
+  "ocrNoTextDetected": "Žiadny text nebol rozpoznaný",
+  "ocrRetryButtonLabel": "Zopakovať",
+  "ocrModelsNetworkRequiredError": "Na prvé použitie je potrebné internetové pripojenie na stiahnutie OCR modelov",
+  "ocrModelsPrepareFailed": "Nepodarilo sa pripraviť OCR modely",
+  "ocrImageNotFoundError": "Súbor obrázka sa nenašiel",
+  "ocrImageDecodeFailedError": "Nepodarilo sa načítať súbor obrázka",
+  "ocrGenericDetectError": "Nepodarilo sa rozpoznať text na obrázku",
   "oops": "Ups",
   "somethingWentWrongPleaseTryAgain": "Niečo nieje v poriadku, prosíme skúste znova",
   "thisWillLogYouOutOfThisDevice": "Týmto budete odhlásený z tohto zariadenia!",
@@ -42,27 +54,86 @@
   "thisDevice": "Toto zariadenie",
   "recoverButton": "Obnoviť",
   "recoverySuccessful": "Obnovenie bolo úspešné!",
+  "decrypting": "Dešifrovanie...",
+  "incorrectRecoveryKeyTitle": "Nesprávny kľúč obnovenia",
+  "incorrectRecoveryKeyBody": "Zadaný kľúč obnovenia je nesprávny",
   "forgotPassword": "Zabudnuté heslo",
+  "enterYourRecoveryKey": "Zadajte svoj kľúč obnovenia",
+  "noRecoveryKey": "Zabudli ste váš kľúč obnovenia?",
   "sorry": "Prepáčte",
+  "noRecoveryKeyNoDecryption": "Vzhľadom na povahu nášho end-to-end šifrovacieho protokolu nie je možné vaše dáta dešifrovať bez hesla alebo obnovovacieho kľúča",
   "verifyEmail": "Overiť email",
+  "toResetVerifyEmail": "Ak chcete obnoviť heslo, najprv overte svoj e-mail.",
+  "checkInboxAndSpamFolder": "Na dokončenie overenia skontrolujte doručenú poštu (vrátane spamu)",
+  "tapToEnterCode": "Klepnutím zadať kód",
+  "resendEmail": "Znova odoslať email",
+  "resendCode": "Znova odoslať kód",
+  "weHaveSendEmailTo": "Odoslali sme email na adresu <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.com"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Odoslali sme email na adresu {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.com"
+      }
+    }
+  },
   "setPasswordTitle": "Nastaviť heslo",
   "changePasswordTitle": "Zmeniť heslo",
   "resetPasswordTitle": "Obnoviť heslo",
   "weakStrength": "Slabé",
   "strongStrength": "Silné",
+  "moderateStrength": "Stredne silné",
+  "strongPassword": "Silné heslo",
+  "passwordsMatch": "Heslá sa zhodujú",
+  "passwordsDontMatch": "Heslá sa nezhodujú",
   "pleaseWait": "Prosíme čakajte...",
   "continueLabel": "Pokračovať",
   "howItWorks": "Ako to funguje",
   "encryption": "Šifrovanie",
   "termsOfServicesTitle": "Podmienky",
+  "logInLabel": "Prihlásiť sa",
   "changeEmail": "Zmeniť email",
   "enterYourPassword": "Zadajte svoje heslo",
   "welcomeBack": "Vitajte, späť!",
   "contactSupport": "Kontaktovať podporu",
   "incorrectPasswordTitle": "Nesprávne heslo",
   "pleaseTryAgain": "Prosíme skúste znova",
+  "useRecoveryKey": "Použite kľúč na obnovenie",
+  "recreatePasswordBody": "Toto zariadenie nemá dostatočný výkon na overenie vášho hesla, ale môžeme ho znovu vygenerovať spôsobom, ktorý bude fungovať na všetkých zariadeniach.\n\nPrihláste sa pomocou obnovovacieho kľúča a znova si vygenerujte heslo (môžete použiť aj to isté).",
+  "verifyPassword": "Overiť heslo",
+  "recoveryKey": "Kľúč na obnovenie",
+  "recoveryKeyOnForgotPassword": "Ak zabudnete heslo, jediná možnosť ako obnoviť vaše dáta, je s pomocou tohto kľúča.",
+  "recoveryKeySaveDescription": "Uložte si tento kľúč. Na bezpečné miesto.",
   "doThisLater": "Urobiť to pozdejšie",
   "saveKey": "Uložiť kľúč",
+  "shareKey": "Zdieľať kľúč",
+  "recoveryKeyCopiedToClipboard": "Kľúč na obnovenie bol skopírovaný do schránky",
   "recoverAccount": "Obnoviť účet",
-  "recover": "Obnoviť"
+  "recover": "Obnoviť",
+  "dropSupportEmail": "Pošlite e-mail na adresu {supportEmail} zo svojej registrovanej e-mailovej adresy",
+  "@dropSupportEmail": {
+    "placeholders": {
+      "supportEmail": {
+        "description": "The support email address",
+        "type": "String",
+        "example": "support@ente.com"
+      }
+    }
+  },
+  "twofactorSetup": "Nastavenie dvojfaktorového overenia",
+  "enterCode": "Zadajte kód",
+  "scanCode": "Oskenujte kód"
 }

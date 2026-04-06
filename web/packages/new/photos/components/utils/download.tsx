@@ -11,7 +11,7 @@ export const downloadAppDialogAttributes = (): MiniDialogAttributes => ({
     continue: { text: t("download"), action: downloadApp },
 });
 
-const downloadApp = () => openURL("https://ente.io/download/desktop");
+const downloadApp = () => openURL("https://ente.com/download/desktop");
 
 export const updateReadyToInstallDialogAttributes = ({
     version,

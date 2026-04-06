@@ -30,6 +30,7 @@ import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_info_faces_item_widget.dart";
+import "package:photos/ui/viewer/file_details/file_info_pets_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/preview_properties_item_widget.dart";
@@ -305,6 +306,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         FacesItemWidget(file),
         const FileDetailsDivider(),
       ]);
+      if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+        fileDetailsTiles.addAll([
+          PetsItemWidget(file),
+          const FileDetailsDivider(),
+        ]);
+      }
     }
 
     if (file.uploadedFileID != null && file.updationTime != null) {
@@ -401,10 +408,20 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).numerator /
               (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).denominator;
     }
-    final imageWidth = exif["EXIF ExifImageWidth"] ?? exif["Image ImageWidth"];
-    final imageLength = exif["EXIF ExifImageLength"] ??
-        exif["Image "
-            "ImageLength"];
+    final imageWidth = _firstPositiveDimensionTag(
+      exif,
+      const [
+        "EXIF ExifImageWidth",
+        "Image ImageWidth",
+      ],
+    );
+    final imageLength = _firstPositiveDimensionTag(
+      exif,
+      const [
+        "EXIF ExifImageLength",
+        "Image ImageLength",
+      ],
+    );
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
       final double megaPixels =
@@ -465,6 +482,19 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       final reciprocal = (1 / seconds).round();
       return "1/$reciprocal";
     }
+  }
+
+  IfdTag? _firstPositiveDimensionTag(
+    Map<String, IfdTag> exif,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final tag = exif[key];
+      if (tag != null && tag.values.firstAsInt() > 0) {
+        return tag;
+      }
+    }
+    return null;
   }
 }
 

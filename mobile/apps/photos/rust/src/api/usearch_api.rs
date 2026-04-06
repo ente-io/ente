@@ -1,151 +1,284 @@
+use ente_media_inspector::vector_db;
 use flutter_rust_bridge::frb;
-use usearch::{Index, IndexOptions, MetricKind, ScalarKind};
-
-use std::collections::HashSet;
-use std::path::PathBuf;
-use std::sync::atomic::{AtomicU64, Ordering};
-
-const FAST_SEARCH_STEP_COUNTS: [usize; 5] = [200, 500, 2000, 5000, 10000];
-static INDEX_SAVE_TEMP_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 type SearchMatch = (Vec<u64>, Vec<f32>);
 type BulkSearchMatch = (Vec<Vec<u64>>, Vec<Vec<f32>>);
 type BulkSearchByKeyMatch = (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>);
 
+// USearch already vendors and links SimSIMD. Call that single exported symbol
+// directly to avoid pulling a second copy of SimSIMD into the final app binary.
+unsafe extern "C" {
+    fn simsimd_dot_f32(a: *const f32, b: *const f32, n: u64, d: *mut f64);
+}
+
+fn simsimd_dot_product(a: &[f32], b: &[f32]) -> f64 {
+    debug_assert_eq!(a.len(), b.len());
+    let mut score = 0.0_f64;
+    // SAFETY:
+    // - `a` and `b` are valid, non-null slices for `a.len()` elements.
+    // - SimSIMD only reads from the input buffers and writes one f64 to `score`.
+    unsafe {
+        simsimd_dot_f32(a.as_ptr(), b.as_ptr(), a.len() as u64, &mut score);
+    }
+    score
+}
+
+fn validate_semantic_search_exact_image_embeddings(
+    image_file_ids: &[i64],
+    image_embeddings: &[Vec<f32>],
+) -> Result<Option<usize>, String> {
+    if image_file_ids.len() != image_embeddings.len() {
+        return Err(format!(
+            "image_file_ids length {} does not match image_embeddings length {}",
+            image_file_ids.len(),
+            image_embeddings.len()
+        ));
+    }
+
+    let Some(first_image_embedding) = image_embeddings.first() else {
+        return Ok(None);
+    };
+    let expected_dimension = first_image_embedding.len();
+
+    for (file_id, image_embedding) in image_file_ids.iter().zip(image_embeddings.iter()) {
+        if image_embedding.len() != expected_dimension {
+            return Err(format!(
+                "image embedding dimension mismatch for file_id {file_id}: image={} expected={expected_dimension}",
+                image_embedding.len(),
+            ));
+        }
+    }
+
+    Ok(Some(expected_dimension))
+}
+
+fn validate_semantic_search_exact_queries(
+    query_embeddings: &[Vec<f32>],
+    minimum_similarities: &[f32],
+    expected_dimension: Option<usize>,
+) -> Result<(), String> {
+    if query_embeddings.len() != minimum_similarities.len() {
+        return Err(format!(
+            "query_embeddings length {} does not match minimum_similarities length {}",
+            query_embeddings.len(),
+            minimum_similarities.len()
+        ));
+    }
+
+    let Some(expected_dimension) = expected_dimension else {
+        return Ok(());
+    };
+
+    for (query_index, query_embedding) in query_embeddings.iter().enumerate() {
+        if query_embedding.len() != expected_dimension {
+            return Err(format!(
+                "query embedding dimension mismatch at index {query_index}: query={} expected={expected_dimension}",
+                query_embedding.len(),
+            ));
+        }
+    }
+
+    Ok(())
+}
+
+
+fn flatten_semantic_search_exact_image_embeddings(
+    image_embeddings: &[Vec<f32>],
+    expected_dimension: Option<usize>,
+) -> Vec<f32> {
+    let Some(expected_dimension) = expected_dimension else {
+        return Vec::new();
+    };
+
+    let mut flattened_image_embeddings =
+        Vec::with_capacity(image_embeddings.len() * expected_dimension);
+    for image_embedding in image_embeddings {
+        flattened_image_embeddings.extend_from_slice(image_embedding);
+    }
+    flattened_image_embeddings
+}
+
+fn semantic_search_exact_impl(
+    image_file_ids: &[i64],
+    image_embeddings: &[Vec<f32>],
+    query_embeddings: &[Vec<f32>],
+    minimum_similarities: &[f32],
+) -> Result<SemanticSearchExactResponse, String> {
+    let expected_dimension =
+        validate_semantic_search_exact_image_embeddings(image_file_ids, image_embeddings)?;
+    validate_semantic_search_exact_queries(
+        query_embeddings,
+        minimum_similarities,
+        expected_dimension,
+    )?;
+
+    let matches_per_query = query_embeddings
+        .iter()
+        .zip(minimum_similarities.iter())
+        .map(|(query_embedding, minimum_similarity)| {
+            let minimum_similarity = f64::from(*minimum_similarity);
+            let mut query_matches = Vec::with_capacity(image_embeddings.len());
+
+            for (file_id, image_embedding) in image_file_ids.iter().zip(image_embeddings.iter()) {
+                let score = simsimd_dot_product(image_embedding, query_embedding);
+
+                if score >= minimum_similarity {
+                    query_matches.push(SemanticSearchExactMatch {
+                        file_id: *file_id,
+                        score,
+                    });
+                }
+            }
+
+            query_matches.sort_by(|left, right| right.score.total_cmp(&left.score));
+            query_matches
+        })
+        .collect();
+
+    Ok(SemanticSearchExactResponse { matches_per_query })
+}
+
+fn semantic_search_exact_flattened_impl(
+    image_file_ids: &[i64],
+    flattened_image_embeddings: &[f32],
+    image_embedding_dimension: Option<usize>,
+    query_embeddings: &[Vec<f32>],
+    minimum_similarities: &[f32],
+) -> Result<SemanticSearchExactResponse, String> {
+    validate_semantic_search_exact_queries(
+        query_embeddings,
+        minimum_similarities,
+        image_embedding_dimension,
+    )?;
+
+    let matches_per_query = query_embeddings
+        .iter()
+        .zip(minimum_similarities.iter())
+        .map(|(query_embedding, minimum_similarity)| {
+            let minimum_similarity = f64::from(*minimum_similarity);
+            let mut query_matches = Vec::with_capacity(image_file_ids.len());
+
+            if let Some(image_embedding_dimension) = image_embedding_dimension {
+                for (index, file_id) in image_file_ids.iter().enumerate() {
+                    let offset = index * image_embedding_dimension;
+                    let image_embedding =
+                        &flattened_image_embeddings[offset..offset + image_embedding_dimension];
+                    let score = simsimd_dot_product(image_embedding, query_embedding);
+
+                    if score >= minimum_similarity {
+                        query_matches.push(SemanticSearchExactMatch {
+                            file_id: *file_id,
+                            score,
+                        });
+                    }
+                }
+            }
+
+            query_matches.sort_by(|left, right| right.score.total_cmp(&left.score));
+            query_matches
+        })
+        .collect();
+
+    Ok(SemanticSearchExactResponse { matches_per_query })
+}
+
+#[derive(Clone, Debug)]
+pub struct SemanticSearchExactRequest {
+    pub image_file_ids: Vec<i64>,
+    pub image_embeddings: Vec<Vec<f32>>,
+    pub query_embeddings: Vec<Vec<f32>>,
+    pub minimum_similarities: Vec<f32>,
+}
+
+#[derive(Clone, Debug)]
+pub struct SemanticSearchExactMatch {
+    pub file_id: i64,
+    pub score: f64,
+}
+
+#[derive(Clone, Debug)]
+pub struct SemanticSearchExactResponse {
+    pub matches_per_query: Vec<Vec<SemanticSearchExactMatch>>,
+}
+
+
+#[frb(opaque)]
+pub struct SemanticSearchExactCache {
+    image_file_ids: Vec<i64>,
+    image_embedding_dimension: Option<usize>,
+    flattened_image_embeddings: Vec<f32>,
+}
+
+impl SemanticSearchExactCache {
+    #[frb(sync)]
+    pub fn new(image_file_ids: Vec<i64>, image_embeddings: Vec<Vec<f32>>) -> Result<Self, String> {
+        let image_embedding_dimension =
+            validate_semantic_search_exact_image_embeddings(&image_file_ids, &image_embeddings)?;
+        let flattened_image_embeddings = flatten_semantic_search_exact_image_embeddings(
+            &image_embeddings,
+            image_embedding_dimension,
+        );
+
+        Ok(Self {
+            image_file_ids,
+            image_embedding_dimension,
+            flattened_image_embeddings,
+        })
+    }
+
+    pub fn search(
+        &self,
+        query_embeddings: Vec<Vec<f32>>,
+        minimum_similarities: Vec<f32>,
+    ) -> Result<SemanticSearchExactResponse, String> {
+        semantic_search_exact_flattened_impl(
+            &self.image_file_ids,
+            &self.flattened_image_embeddings,
+            self.image_embedding_dimension,
+            &query_embeddings,
+            &minimum_similarities,
+        )
+    }
+}
+
+pub fn semantic_search_exact(
+    req: SemanticSearchExactRequest,
+) -> Result<SemanticSearchExactResponse, String> {
+    let SemanticSearchExactRequest {
+        image_file_ids,
+        image_embeddings,
+        query_embeddings,
+        minimum_similarities,
+    } = req;
+
+    semantic_search_exact_impl(
+        &image_file_ids,
+        &image_embeddings,
+        &query_embeddings,
+        &minimum_similarities,
+    )
+}
+
+
 #[frb(opaque)]
 pub struct VectorDB {
-    index: Index,
-    path: PathBuf,
+    inner: vector_db::VectorDB,
 }
 
 impl VectorDB {
     #[frb(sync)]
     pub fn new(file_path: &str, dimensions: usize) -> Result<Self, String> {
-        let path = PathBuf::from(file_path);
-        let file_exists = path.try_exists().map_err(|e| {
-            format!(
-                "Failed to check index file existence at {}: {e}",
-                path.display()
-            )
-        })?;
-
-        let mut options = IndexOptions::default();
-        options.dimensions = dimensions;
-        options.metric = MetricKind::IP;
-        options.quantization = ScalarKind::F32;
-        options.connectivity = 0; // auto
-        options.expansion_add = 0; // auto
-        options.expansion_search = 0; // auto
-
-        let index = Index::new(&options).map_err(|e| format!("Failed to create index: {e}"))?;
-        index
-            .reserve(1000)
-            .map_err(|e| format!("Failed to reserve space in index: {e}"))?;
-
-        let db = Self { index, path };
-
-        if file_exists {
-            println!("Loading index from disk.");
-            // Must use load() instead of view() because:
-            // - view() creates a read-only memory-mapped view (immutable)
-            // - load() loads the index into RAM for read/write operations (mutable)
-            // Using view() causes "Can't add to an immutable index" error
-            db.index
-                .load(file_path)
-                .map_err(|e| format!("Failed to load index from {file_path}: {e}"))?;
-        } else {
-            println!("Creating new index.");
-            db.save_index()?;
-        }
-        Ok(db)
-    }
-
-    fn save_index(&self) -> Result<(), String> {
-        // Ensure directory exists
-        if let Some(parent) = self.path.parent() {
-            std::fs::create_dir_all(parent).map_err(|e| {
-                format!(
-                    "Failed to create index parent directory {}: {e}",
-                    parent.display()
-                )
-            })?;
-        }
-
-        // Use atomic write: save to temp file first, then rename
-        // Use a unique temp path per save so concurrent saves can never race
-        // by clobbering the same temporary file.
-        let save_sequence = INDEX_SAVE_TEMP_COUNTER.fetch_add(1, Ordering::Relaxed);
-        let temp_path =
-            self.path
-                .with_extension(format!("tmp.{}.{}", std::process::id(), save_sequence));
-        let temp_path_str = temp_path
-            .to_str()
-            .ok_or_else(|| format!("Invalid temp path: {}", temp_path.display()))?;
-
-        // Save to temporary file
-        self.index.save(temp_path_str).map_err(|e| {
-            let _ = std::fs::remove_file(&temp_path);
-            format!(
-                "Failed to save index to temp file {}: {e}",
-                temp_path.display()
-            )
-        })?;
-
-        // Atomic rename - guaranteed atomic on iOS/Android
-        // This will atomically replace the existing file
-        // The rename ensures we never have a partially written file,
-        // even if the app is suspended or crashes
-        if let Err(e) = std::fs::rename(&temp_path, &self.path) {
-            let _ = std::fs::remove_file(&temp_path);
-            return Err(format!(
-                "Failed to atomically save index (rename {} -> {}): {e}",
-                temp_path.display(),
-                self.path.display()
-            ));
-        }
-
-        println!("Successfully saved index atomically");
-        Ok(())
-    }
-
-    fn ensure_capacity(&self, margin: usize) -> Result<(), String> {
-        let current_size = self.index.size();
-        let capacity = self.index.capacity();
-        if current_size + margin + 1000 >= capacity {
-            self.index
-                .reserve(current_size + margin)
-                .map_err(|e| format!("Failed to reserve space in index: {e}"))?;
-        }
-        Ok(())
+        Ok(Self {
+            inner: vector_db::VectorDB::new(file_path, dimensions)?,
+        })
     }
 
     pub fn add_vector(&mut self, key: u64, vector: &[f32]) -> Result<(), String> {
-        if self.contains_vector(key) {
-            self.index
-                .remove(key)
-                .map_err(|e| format!("Failed to remove existing vector for key {key}: {e}"))?;
-        } else {
-            self.ensure_capacity(1)?;
-        }
-        self.index
-            .add(key, vector)
-            .map_err(|e| format!("Failed to add vector for key {key}: {e}"))?;
-        self.save_index()
+        self.inner.add_vector(key, vector)
     }
 
     pub fn bulk_add_vectors(&mut self, keys: Vec<u64>, vectors: &[Vec<f32>]) -> Result<(), String> {
-        self.ensure_capacity(keys.len())?;
-        for (key, vector) in keys.iter().zip(vectors.iter()) {
-            if self.contains_vector(*key) {
-                self.index.remove(*key).map_err(|e| {
-                    format!("Failed to remove existing vector for key {key} before bulk add: {e}")
-                })?;
-            }
-            self.index
-                .add(*key, vector)
-                .map_err(|e| format!("Failed to bulk add vector for key {key}: {e}"))?;
-        }
-        self.save_index()
+        self.inner.bulk_add_vectors(keys, vectors)
     }
 
     pub fn search_vectors(
@@ -154,16 +287,7 @@ impl VectorDB {
         count: usize,
         exact: bool,
     ) -> Result<SearchMatch, String> {
-        let matches = if exact {
-            self.index
-                .exact_search(query, count)
-                .map_err(|e| format!("Failed to exact search vectors: {e}"))?
-        } else {
-            self.index
-                .search(query, count)
-                .map_err(|e| format!("Failed to search vectors: {e}"))?
-        };
-        Ok((matches.keys, matches.distances))
+        self.inner.search_vectors(query, count, exact)
     }
 
     pub fn approx_search_vectors_within_similarity(
@@ -171,17 +295,8 @@ impl VectorDB {
         query: &[f32],
         minimum_similarity: f32,
     ) -> Result<SearchMatch, String> {
-        let index_size = self.index.size();
-        if index_size == 0 || !minimum_similarity.is_finite() {
-            return Ok((Vec::new(), Vec::new()));
-        }
-
-        let max_distance = 1.0_f32 - minimum_similarity;
-        if !max_distance.is_finite() || max_distance < 0.0 {
-            return Ok((Vec::new(), Vec::new()));
-        }
-
-        self.fast_search_vectors_within_distance(query, max_distance)
+        self.inner
+            .approx_search_vectors_within_similarity(query, minimum_similarity)
     }
 
     pub fn approx_filtered_search_vectors_within_distance(
@@ -191,30 +306,12 @@ impl VectorDB {
         count: usize,
         max_distance: f32,
     ) -> Result<SearchMatch, String> {
-        let index_size = self.index.size();
-        if index_size == 0 || count == 0 || allowed_keys.is_empty() {
-            return Ok((Vec::new(), Vec::new()));
-        }
-        if !max_distance.is_finite() || max_distance < 0.0 {
-            return Ok((Vec::new(), Vec::new()));
-        }
-
-        let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
-        let search_count = count.min(allowed.len()).min(index_size);
-        if search_count == 0 {
-            return Ok((Vec::new(), Vec::new()));
-        }
-
-        let matches = self
-            .index
-            .filtered_search(query, search_count, |key| allowed.contains(&key))
-            .map_err(|e| format!("Failed to run filtered vector search: {e}"))?;
-
-        Ok(Self::truncate_sorted_matches_within_distance(
-            matches.keys,
-            matches.distances,
+        self.inner.approx_filtered_search_vectors_within_distance(
+            query,
+            allowed_keys,
+            count,
             max_distance,
-        ))
+        )
     }
 
     pub fn bulk_approx_filtered_search_vectors_within_distance(
@@ -224,121 +321,13 @@ impl VectorDB {
         count: usize,
         max_distance: f32,
     ) -> Result<BulkSearchMatch, String> {
-        let query_count = queries.len();
-        if query_count == 0 {
-            return Ok((Vec::new(), Vec::new()));
-        }
-
-        let empty_aligned_results = || {
-            (
-                vec![Vec::<u64>::new(); query_count],
-                vec![Vec::<f32>::new(); query_count],
+        self.inner
+            .bulk_approx_filtered_search_vectors_within_distance(
+                queries,
+                allowed_keys,
+                count,
+                max_distance,
             )
-        };
-
-        let index_size = self.index.size();
-        if index_size == 0 || count == 0 || allowed_keys.is_empty() {
-            return Ok(empty_aligned_results());
-        }
-        if !max_distance.is_finite() || max_distance < 0.0 {
-            return Ok(empty_aligned_results());
-        }
-
-        let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
-        let search_count = count.min(allowed.len()).min(index_size);
-        if search_count == 0 {
-            return Ok(empty_aligned_results());
-        }
-
-        let mut all_keys = Vec::with_capacity(query_count);
-        let mut all_distances = Vec::with_capacity(query_count);
-
-        for query in queries {
-            let matches = self
-                .index
-                .filtered_search(query, search_count, |key| allowed.contains(&key))
-                .map_err(|e| format!("Failed to run filtered vector search: {e}"))?;
-
-            let (keys, distances) = Self::truncate_sorted_matches_within_distance(
-                matches.keys,
-                matches.distances,
-                max_distance,
-            );
-            all_keys.push(keys);
-            all_distances.push(distances);
-        }
-
-        Ok((all_keys, all_distances))
-    }
-
-    fn fast_search_vectors_within_distance(
-        &self,
-        query: &[f32],
-        max_distance: f32,
-    ) -> Result<SearchMatch, String> {
-        let index_size = self.index.size();
-        if index_size == 0 {
-            return Ok((Vec::new(), Vec::new()));
-        }
-
-        let mut previous_count = 0_usize;
-        for step_count in FAST_SEARCH_STEP_COUNTS {
-            let count = step_count.min(index_size);
-            if count <= previous_count {
-                continue;
-            }
-            previous_count = count;
-
-            let matches = self
-                .index
-                .search(query, count)
-                .map_err(|e| format!("Failed to search vectors: {e}"))?;
-
-            let should_expand = count < index_size
-                && matches
-                    .distances
-                    .last()
-                    .map(|d| *d <= max_distance)
-                    .unwrap_or(false);
-            if should_expand {
-                continue;
-            }
-
-            return Ok(Self::truncate_sorted_matches_within_distance(
-                matches.keys,
-                matches.distances,
-                max_distance,
-            ));
-        }
-
-        if previous_count < index_size {
-            let matches = self
-                .index
-                .search(query, index_size)
-                .map_err(|e| format!("Failed to search vectors: {e}"))?;
-            return Ok(Self::truncate_sorted_matches_within_distance(
-                matches.keys,
-                matches.distances,
-                max_distance,
-            ));
-        }
-
-        Ok((Vec::new(), Vec::new()))
-    }
-
-    fn truncate_sorted_matches_within_distance(
-        mut keys: Vec<u64>,
-        mut distances: Vec<f32>,
-        max_distance: f32,
-    ) -> SearchMatch {
-        let aligned_len = keys.len().min(distances.len());
-        keys.truncate(aligned_len);
-        distances.truncate(aligned_len);
-
-        let keep_len = distances.partition_point(|distance| *distance <= max_distance);
-        keys.truncate(keep_len);
-        distances.truncate(keep_len);
-        (keys, distances)
     }
 
     pub fn bulk_search_vectors(
@@ -347,15 +336,7 @@ impl VectorDB {
         count: usize,
         exact: bool,
     ) -> Result<BulkSearchMatch, String> {
-        let mut keys = Vec::new();
-        let mut distances = Vec::new();
-
-        for query in queries {
-            let (keys_result, distances_result) = self.search_vectors(query, count, exact)?;
-            keys.push(keys_result);
-            distances.push(distances_result);
-        }
-        Ok((keys, distances))
+        self.inner.bulk_search_vectors(queries, count, exact)
     }
 
     pub fn bulk_search_keys(
@@ -364,127 +345,146 @@ impl VectorDB {
         count: usize,
         exact: bool,
     ) -> Result<BulkSearchByKeyMatch, String> {
-        let dimensions = self.index.dimensions();
-        let mut embedding_data = vec![0.0f32; potential_keys.len() * dimensions];
-        let mut contained_keys = Vec::with_capacity(potential_keys.len());
-        let mut actual_query_count = 0;
-
-        // Fill embeddings directly into flat storage using slices
-        for key in potential_keys {
-            if self.index.contains(*key) {
-                let start_idx = actual_query_count * dimensions;
-                let end_idx = start_idx + dimensions;
-                let embedding_slice = &mut embedding_data[start_idx..end_idx];
-
-                self.index
-                    .get(*key, embedding_slice)
-                    .map_err(|e| format!("Failed to get vector for key {key}: {e}"))?;
-                contained_keys.push(*key);
-                actual_query_count += 1;
-            }
-        }
-        embedding_data.truncate(actual_query_count * dimensions);
-
-        let max_result_size = std::cmp::min(self.index.size(), count);
-        let mut closeby_keys = vec![Vec::with_capacity(max_result_size); actual_query_count];
-        let mut distances = vec![Vec::with_capacity(max_result_size); actual_query_count];
-
-        // Search using slices and fill pre-allocated containers
-        for i in 0..actual_query_count {
-            let start_idx = i * dimensions;
-            let end_idx = start_idx + dimensions;
-            let query_slice = &embedding_data[start_idx..end_idx];
-            let (keys_result, distances_result) = self.search_vectors(query_slice, count, exact)?;
-            closeby_keys[i] = keys_result;
-            distances[i] = distances_result;
-        }
-
-        Ok((contained_keys, closeby_keys, distances))
+        self.inner.bulk_search_keys(potential_keys, count, exact)
     }
 
     /// Check if a vector with the given key exists in the index.
     /// `true` if the index contains the vector with the given key, `false` otherwise.
     pub fn contains_vector(&self, key: u64) -> bool {
-        self.index.contains(key)
+        self.inner.contains_vector(key)
     }
 
     pub fn get_vector(&self, key: u64) -> Result<Vec<f32>, String> {
-        let mut vector: Vec<f32> = vec![0.0; self.index.dimensions()];
-        self.index
-            .get(key, &mut vector)
-            .map_err(|e| format!("Failed to get vector for key {key}: {e}"))?;
-        Ok(vector)
+        self.inner.get_vector(key)
     }
 
     pub fn bulk_get_vectors(&self, keys: Vec<u64>) -> Result<Vec<Vec<f32>>, String> {
-        let mut vectors = Vec::new();
-        for key in keys {
-            let vector = self.get_vector(key)?;
-            vectors.push(vector);
-        }
-        Ok(vectors)
+        self.inner.bulk_get_vectors(keys)
     }
 
     pub fn remove_vector(&mut self, key: u64) -> Result<usize, String> {
-        let removed_count = self
-            .index
-            .remove(key)
-            .map_err(|e| format!("Failed to remove vector for key {key}: {e}"))?;
-        self.save_index()?;
-        Ok(removed_count)
+        self.inner.remove_vector(key)
     }
 
     pub fn bulk_remove_vectors(&mut self, keys: Vec<u64>) -> Result<usize, String> {
-        let mut removed_count = 0;
-        for key in keys {
-            removed_count += self
-                .index
-                .remove(key)
-                .map_err(|e| format!("Failed to bulk remove vector for key {key}: {e}"))?;
-        }
-        self.save_index()?;
-        Ok(removed_count)
+        self.inner.bulk_remove_vectors(keys)
     }
 
     pub fn reset_index(&mut self) -> Result<(), String> {
-        self.index
-            .reset()
-            .map_err(|e| format!("Failed to reset index: {e}"))?;
-        self.index
-            .reserve(1000)
-            .map_err(|e| format!("Failed to reserve space in index after reset: {e}"))?;
-        self.save_index()
+        self.inner.reset_index()
     }
 
     pub fn delete_index(self) -> Result<(), String> {
-        if self.path.exists() {
-            std::fs::remove_file(&self.path)
-                .map_err(|e| format!("Failed to delete index file {}: {e}", self.path.display()))?;
-        } else {
-            println!("Index file does not exist.");
-        }
-        Ok(())
+        self.inner.delete_index()
     }
 
     pub fn get_index_stats(&self) -> (usize, usize, usize, usize, usize, usize, usize) {
-        let size = self.index.size();
-        let capacity = self.index.capacity();
-        let dimensions = self.index.dimensions();
-
-        let file_size = self.index.serialized_length();
-        let memory_usage = self.index.memory_usage();
-
-        let expansion_add = self.index.expansion_add();
-        let expansion_search = self.index.expansion_search();
-
-        (
-            size,
-            capacity,
-            dimensions,
-            file_size,
-            memory_usage,
-            expansion_add,
-            expansion_search,
-        )
+        self.inner.get_index_stats()
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SemanticSearchExactCache, SemanticSearchExactRequest, semantic_search_exact};
+
+    #[test]
+    fn semantic_search_exact_filters_and_sorts_matches() {
+        let response = semantic_search_exact(SemanticSearchExactRequest {
+            image_file_ids: vec![101, 102, 103],
+            image_embeddings: vec![
+                vec![1.0, 0.0, 0.0],
+                vec![0.8, 0.6, 0.0],
+                vec![0.0, 1.0, 0.0],
+            ],
+            query_embeddings: vec![vec![1.0, 0.0, 0.0]],
+            minimum_similarities: vec![0.7],
+        })
+        .expect("semantic search exact should succeed");
+
+        let matches = &response.matches_per_query[0];
+        assert_eq!(matches.len(), 2);
+        assert_eq!(matches[0].file_id, 101);
+        assert_eq!(matches[1].file_id, 102);
+        assert!(matches[0].score > matches[1].score);
+    }
+
+    #[test]
+    fn semantic_search_exact_supports_multiple_queries() {
+        let response = semantic_search_exact(SemanticSearchExactRequest {
+            image_file_ids: vec![201, 202, 203],
+            image_embeddings: vec![vec![1.0, 0.0], vec![0.0, 1.0], vec![0.70710677, 0.70710677]],
+            query_embeddings: vec![vec![1.0, 0.0], vec![0.0, 1.0]],
+            minimum_similarities: vec![0.5, 0.5],
+        })
+        .expect("semantic search exact should succeed");
+
+        assert_eq!(
+            response.matches_per_query[0]
+                .iter()
+                .map(|entry| entry.file_id)
+                .collect::<Vec<_>>(),
+            vec![201, 203]
+        );
+        assert_eq!(
+            response.matches_per_query[1]
+                .iter()
+                .map(|entry| entry.file_id)
+                .collect::<Vec<_>>(),
+            vec![202, 203]
+        );
+    }
+
+    #[test]
+    fn semantic_search_exact_cache_supports_searching_multiple_queries() {
+        let cache = SemanticSearchExactCache::new(
+            vec![401, 402, 403],
+            vec![vec![1.0, 0.0], vec![0.0, 1.0], vec![0.70710677, 0.70710677]],
+        )
+        .expect("semantic search exact cache should succeed");
+
+        let response = cache
+            .search(vec![vec![1.0, 0.0], vec![0.0, 1.0]], vec![0.5, 0.5])
+            .expect("semantic search exact cache search should succeed");
+
+        assert_eq!(
+            response.matches_per_query[0]
+                .iter()
+                .map(|entry| entry.file_id)
+                .collect::<Vec<_>>(),
+            vec![401, 403]
+        );
+        assert_eq!(
+            response.matches_per_query[1]
+                .iter()
+                .map(|entry| entry.file_id)
+                .collect::<Vec<_>>(),
+            vec![402, 403]
+        );
+    }
+
+    #[test]
+    fn semantic_search_exact_cache_rejects_query_dimension_mismatch() {
+        let cache = SemanticSearchExactCache::new(vec![501], vec![vec![1.0, 0.0]])
+            .expect("semantic search exact cache should succeed");
+
+        let err = cache
+            .search(vec![vec![1.0, 0.0, 0.0]], vec![0.1])
+            .expect_err("semantic search exact cache should fail on query dimension mismatch");
+
+        assert!(err.contains("query embedding dimension mismatch"));
+    }
+
+    #[test]
+    fn semantic_search_exact_rejects_dimension_mismatch() {
+        let err = semantic_search_exact(SemanticSearchExactRequest {
+            image_file_ids: vec![301],
+            image_embeddings: vec![vec![1.0, 0.0]],
+            query_embeddings: vec![vec![1.0, 0.0, 0.0]],
+            minimum_similarities: vec![0.1],
+        })
+        .expect_err("semantic search exact should fail on dimension mismatch");
+
+        assert!(err.contains("embedding dimension mismatch"));
+    }
+
 }

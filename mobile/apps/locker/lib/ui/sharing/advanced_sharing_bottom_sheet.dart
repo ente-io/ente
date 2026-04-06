@@ -162,7 +162,7 @@ class _AdvancedSharingBottomSheetState
                                     onTap: () async {
                                       await sendLogs(
                                         context,
-                                        "support@ente.io",
+                                        "support@ente.com",
                                         postShare: () {},
                                       );
                                     },

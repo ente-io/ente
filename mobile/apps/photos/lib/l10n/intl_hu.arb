@@ -26,7 +26,6 @@
   "deleteReason4": "Nincs a listán az ok",
   "sendEmail": "Email küldése",
   "deleteRequestSLAText": "A kérése 72 órán belül feldolgozásra kerül.",
-  "deleteEmailRequest": "Kérem küldjön egy emailt a regisztrált email címéről, erre az emailcímre: <warning>account-deletion@ente.io</warning>.",
   "entePhotosPerm": "Az Entének <i>engedélyre van szüksége </i>, hogy tárolhassa fotóit",
   "ok": "Rendben",
   "createAccount": "Felhasználó létrehozás",
@@ -62,7 +61,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -125,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -257,17 +256,14 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ellenőrző azonosító",
   "emailNoEnteAccount": "{email} címnek nincs Ente fiókja.\n\nKüldjön nekik meghívót fotók megosztására.",
-  "shareMyVerificationID": "Itt az ellenőrző azonosítóm: {verificationID} az ente.io-hoz.",
-  "shareTextConfirmOthersVerificationID": "Szia, meg tudnád erősíteni, hogy ez az ente.io ellenőrző azonosítód? {verificationID}",
   "somethingWentWrong": "Valami hiba történt",
   "sendInvite": "Meghívó küldése",
-  "shareTextRecommendUsingEnte": "Töltsd le az Ente-t, hogy könnyen megoszthassunk eredeti minőségű fotókat és videókat\n\nhttps://ente.io",
   "done": "Kész",
   "applyCodeTitle": "Kód alkalmazása",
   "enterCodeDescription": "Add meg a barátod által megadott kódot, hogy mindkettőtöknek ingyenes tárhelyet igényelhess",
@@ -436,7 +432,6 @@
   "discover_sunset": "Napnyugta",
   "discover_hills": "Dombok",
   "discover_greenery": "Lomb",
-  "mlIndexingDescription": "Kérjük, vegye figyelembe, hogy a gépi tanulás nagyobb sávszélességet és akkumulátorhasználatot eredményez, amíg az összes elem indexelése meg nem történik. A gyorsabb indexelés érdekében érdemes lehet asztali alkalmazást használni, mivel minden eredmény automatikusan szinkronizálódik.",
   "loadingModel": "Modellek letöltése...",
   "waitingForWifi": "Várakozás a WiFi-re...",
   "status": "Állapot",

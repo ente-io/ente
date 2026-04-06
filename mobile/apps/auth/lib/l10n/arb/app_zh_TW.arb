@@ -121,7 +121,6 @@
   "importAegisGuide": "請使用 Aegis 設定中的「匯出密碼庫」選項。\n\n若您的密碼庫已加密，則需要輸入密碼庫密碼來解密。",
   "import2FasGuide": "請使用 2FAS 中的「設定 > 備份 > 匯出」選項。\n\n若您的備份已加密，則需要輸入密碼來解密備份",
   "importLastpassGuide": "請使用 LastPass Authenticator 設定中的「轉移帳號」選項，並按下「匯出帳號至檔案」。匯入下載的 JSON 檔案。",
-  "importProtonAuthGuide": "在 Proton Authenticator 設定中使用「匯出」選項來匯出你的驗證碼。",
   "exportCodes": "匯出驗證碼",
   "importLabel": "匯入",
   "importInstruction": "請選擇一個包含下列格式金鑰清單的檔案",
@@ -331,7 +330,6 @@
     }
   },
   "sorry": "抱歉",
-  "importFailureDesc": "無法解析所選檔案。\n如果您需要幫助，請寄信至 support@ente.io！",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "您的一些驗證碼尚未備份。\n\n請確保您在登出之前備份這些驗證碼。",
   "checkInboxAndSpamFolder": "請檢查您的收件夾 (或者是在您的「垃圾郵件」列表內) 以完成驗證",
@@ -344,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

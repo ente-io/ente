@@ -12,7 +12,7 @@ use tokio::time::sleep;
 const ENTE_API_ENDPOINT: &str = "https://api.ente.io";
 const TOKEN_HEADER: &str = "X-Auth-Token";
 const CLIENT_PKG_HEADER: &str = "X-Client-Package";
-const CLIENT_PACKAGE: &str = "io.ente.cli";
+const DEFAULT_CLIENT_PACKAGE: &str = "io.ente.photos";
 
 /// Maximum number of retry attempts for failed requests
 const MAX_RETRIES: u32 = 3;
@@ -62,6 +62,7 @@ pub struct ApiClient {
     client: Client,
     download_client: Client,
     pub(crate) base_url: String,
+    client_package: String,
     /// Token storage for multi-account support: account_id -> token
     tokens: Arc<RwLock<HashMap<String, String>>>,
     /// Retry configuration
@@ -70,6 +71,13 @@ pub struct ApiClient {
 
 impl ApiClient {
     pub fn new(base_url: Option<String>) -> Result<Self> {
+        Self::new_with_client_package(base_url, DEFAULT_CLIENT_PACKAGE)
+    }
+
+    pub fn new_with_client_package<S>(base_url: Option<String>, client_package: S) -> Result<Self>
+    where
+        S: Into<String>,
+    {
         let client = Client::builder()
             .timeout(Duration::from_secs(30))
             .user_agent(format!("ente-cli-rust/{}", env!("CARGO_PKG_VERSION")))
@@ -86,6 +94,7 @@ impl ApiClient {
             client,
             download_client,
             base_url: base_url.unwrap_or_else(|| ENTE_API_ENDPOINT.to_string()),
+            client_package: client_package.into(),
             tokens: Arc::new(RwLock::new(HashMap::new())),
             retry_config: RetryConfig::default(),
         })
@@ -116,7 +125,7 @@ impl ApiClient {
 
     /// Build a request with common headers
     fn build_request(&self, builder: RequestBuilder, account_id: Option<&str>) -> RequestBuilder {
-        let mut req = builder.header(CLIENT_PKG_HEADER, CLIENT_PACKAGE);
+        let mut req = builder.header(CLIENT_PKG_HEADER, &self.client_package);
 
         if let Some(id) = account_id {
             if let Some(token) = self.get_token(id) {
@@ -296,6 +305,29 @@ impl ApiClient {
             );
             Error::Generic(format!("Deserialization failed: {e}"))
         })
+    }
+
+    /// Make a PUT request that expects no response body
+    pub async fn put_empty<B>(&self, path: &str, body: &B, account_id: Option<&str>) -> Result<()>
+    where
+        B: Serialize,
+    {
+        let url = format!("{}{}", self.base_url, path);
+        let request = self.client.put(&url).json(body);
+        let request = self.build_request(request, account_id);
+
+        let response = self.execute_with_retry(request).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
+            return Err(make_api_error("PUT", path, status, body));
+        }
+
+        Ok(())
     }
 
     /// Make a DELETE request

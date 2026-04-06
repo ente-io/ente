@@ -108,12 +108,13 @@ class PubMagicMetadata {
     return PubMagicMetadata(
       editedTime: map[editTimeKey],
       editedName: map[editNameKey],
-      caption: map[captionKey],
+      // Some legacy remote records have been seen with numeric captions.
+      caption: safeParseCaption(map[captionKey]),
       uploaderName: map[uploaderNameKey],
       w: safeParseInt(map[widthKey], widthKey),
       h: safeParseInt(map[heightKey], heightKey),
-      lat: map[latKey],
-      long: map[longKey],
+      lat: safeParseDouble(map[latKey], latKey),
+      long: safeParseDouble(map[longKey], longKey),
       cameraMake: map[cameraMakeKey],
       cameraModel: map[cameraModelKey],
       mvi: map[motionVideoIndexKey],
@@ -125,11 +126,26 @@ class PubMagicMetadata {
     );
   }
 
+  static String? safeParseCaption(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is num) return value.toString();
+    return null;
+  }
+
   static int? safeParseInt(dynamic value, String key) {
     if (value == null) return null;
     if (value is int) return value;
-    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
     if (value is String) return int.tryParse(value);
+    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
+    return null;
+  }
+
+  static double? safeParseDouble(dynamic value, String key) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
     return null;
   }
 }

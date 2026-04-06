@@ -3,12 +3,12 @@
 Help and documentation for Ente's products.
 
 You can find the live version of these at
-**[ente.io/help](https://ente.io/help)**.
+**[ente.com/help](https://ente.com/help)**.
 
 ## Quick edits
 
 You can edit these files directly on GitHub and open a pull request.
-[ente.io/help](https://ente.io/help) will automatically get updated with your
+[ente.com/help](https://ente.com/help) will automatically get updated with your
 changes in a few minutes after your pull request is merged.
 
 ## Running locally
@@ -32,8 +32,11 @@ cd ente/docs
 Install dependencies
 
 ```sh
-yarn install
+yarn install --frozen-lockfile
 ```
+
+Use plain `yarn install` only when you are intentionally updating dependencies
+and reviewing the resulting `yarn.lock` changes.
 
 Then start a local server
 

@@ -22,7 +22,7 @@ class UpdateService {
   static const String _lockerFDroidPackagePrefix = "io.ente.locker.fdroid";
   static const String _releaseInfoUrl = String.fromEnvironment(
     "locker.release_info_url",
-    defaultValue: "https://ente.io/release-info/locker-independent.json",
+    defaultValue: "https://ente.com/release-info/locker-independent.json",
   );
 
   final _logger = Logger("UpdateService");

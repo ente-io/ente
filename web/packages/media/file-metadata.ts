@@ -409,7 +409,11 @@ export const FilePublicMagicMetadataData = z.looseObject({
     editedName: z.string().nullish().transform(nullToUndefined),
     w: z.number().nullish().transform(nullToUndefined),
     h: z.number().nullish().transform(nullToUndefined),
-    caption: z.string().nullish().transform(nullToUndefined),
+    // Some legacy remote records have been seen with numeric captions.
+    caption: z
+        .union([z.string(), z.number()])
+        .nullish()
+        .transform((v) => (v == null ? undefined : String(v))),
     uploaderName: z.string().nullish().transform(nullToUndefined),
     cameraMake: z.string().nullish().transform(nullToUndefined),
     cameraModel: z.string().nullish().transform(nullToUndefined),

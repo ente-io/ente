@@ -121,7 +121,6 @@
   "importAegisGuide": "Verwenden Sie die Option \"Tresor exportieren\" in den Einstellungen von Aegis.\n\nFalls Ihr Tresor verschlüsselt ist, müssen Sie das Passwort für den Tresor eingeben, um ihn zu entschlüsseln.",
   "import2FasGuide": "Verwenden Sie unter \"Einstellungen → Backup\" die Option \"Exportieren\" in 2FAS.\n\nFalls Ihr Backup verschlüsselt ist, müssen Sie das Passwort eingeben, um das Backup zu entschlüsseln.",
   "importLastpassGuide": "Verwenden Sie die Option \"Konten übertragen → Konten in Datei exportieren\" in den Lastpass Authenticator Einstellungen. \nImportieren Sie anschließend die heruntergeladene JSON-Datei.",
-  "importProtonAuthGuide": "Verwenden Sie die Option \"Exportieren\" in den Proton Authenticator Settings um Ihre Codes zu exportieren.",
   "exportCodes": "Codes exportieren",
   "importLabel": "Importieren",
   "importInstruction": "Bitte wählen Sie eine Datei die Codes in folgendem Format beinhaltet",
@@ -331,7 +330,6 @@
     }
   },
   "sorry": "Entschuldigen Sie",
-  "importFailureDesc": "Ausgewählte Datei ließ sich nicht verarbeiten.\nBitte wenden Sie sich an support@ente.io für Hilfe!",
   "pendingSyncs": "Warnung",
   "pendingSyncsWarningBody": "Einige Codes wurden nicht gesichert.\n\nBitte gehen Sie sicher, dass Sie einen Backupcode für diese Codes haben bevor Sie sich ausloggen.",
   "checkInboxAndSpamFolder": "Bitte überprüfen Sie Ihren E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",
@@ -344,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

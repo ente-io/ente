@@ -121,7 +121,6 @@
   "importAegisGuide": "Aegis کی سیٹنگز میں ”Export the vault“ کا آپشن استعمال کریں۔\n\nاگر آپ کا والٹ انکرپٹڈ ہے، تو آپ کو والٹ کو ڈی کرپٹ کرنے کے لیے والٹ کا پاس ورڈ درج کرنا ہوگا۔",
   "import2FasGuide": "2FAS میں ”Settings->Backup -Export“ کا آپشن استعمال کریں۔\n\nاگر آپ کا بیک اپ انکرپٹڈ ہے، تو آپ کو بیک اپ کو ڈی کرپٹ کرنے کے لیے پاس ورڈ درج کرنا ہوگا۔",
   "importLastpassGuide": "LastPass Authenticator کی سیٹنگز میں ”Transfer accounts“ کا آپشن استعمال کریں اور ”Export accounts to file“ دبائیں۔\n\nڈاؤن لوڈ کردہ JSON کو امپورٹ کریں۔",
-  "importProtonAuthGuide": "اپنے کوڈز ایکسپورٹ کرنے کے لیے Proton Authenticator کی سیٹنگز میں ”Export“ کا آپشن استعمال کریں۔",
   "exportCodes": "کوڈز ایکسپورٹ کریں",
   "importLabel": "امپورٹ",
   "importInstruction": "براہ کرم ایک فائل منتخب کریں جس میں آپ کے کوڈز کی فہرست درج ذیل فارمیٹ میں ہو",
@@ -331,7 +330,6 @@
     }
   },
   "sorry": "معذرت",
-  "importFailureDesc": "منتخب فائل کو پارس (parse) نہیں کیا جا سکا۔\nاگر آپ کو مدد کی ضرورت ہو تو براہ کرم support@ente.io پر لکھیں!",
   "pendingSyncs": "انتباہ",
   "pendingSyncsWarningBody": "آپ کے کچھ کوڈز کا بیک اپ نہیں لیا گیا ہے۔\n\nبراہ کرم لاگ آؤٹ کرنے سے پہلے یقینی بنائیں کہ آپ کے پاس ان کوڈز کا بیک اپ موجود ہے۔",
   "checkInboxAndSpamFolder": "تصدیق مکمل کرنے کے لیے براہ کرم اپنا ان باکس (اور اسپام) چیک کریں",
@@ -344,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

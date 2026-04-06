@@ -161,7 +161,6 @@
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
-  "familyPlanPortalTitle": "Malbat",
   "androidBiometricSuccess": "Serkeftin",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."

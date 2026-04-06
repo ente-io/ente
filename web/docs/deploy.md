@@ -5,7 +5,7 @@ Cloudflare Pages using GitHub workflows.
 
 - Automated production deployments of `main` daily 8:00 AM IST.
 
-- [ente.io/help](https://ente.io/help) gets deployed whenever a PR that changes
+- [ente.com/help](https://ente.com/help) gets deployed whenever a PR that changes
   anything inside `docs/` gets merged to `main`.
 
 - Production deployments can made manually by triggering the
@@ -20,21 +20,17 @@ deployments, and the action that triggers them:
 | -------------------------------------------- | ---------- | ------------------------------------------- |
 | [web.ente.io](https://web.ente.io)           | Production | Daily deploy of `main`                      |
 | [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io) |
+| [albums.ente.io](https://albums.ente.io)     | Production | Daily deploy of `main`                      |
 | [auth.ente.io](https://auth.ente.io)         | Production | Daily deploy of `main`                      |
 | [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                      |
 | [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                      |
 | [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
-| [ente.io/help](https://ente.io/help)         | Production | Changes in `docs/` on push to `main`        |
+| [ente.com/help](https://ente.com/help)       | Production | Changes in `docs/` on push to `main`        |
 | [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
 
 ### Other subdomains
 
 Apart from this, there are also some other deployments:
-
-- `albums.ente.io` is a CNAME alias to the production deployment
-  (`web.ente.io`). However, when the code detects that it is being served from
-  `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
-  serve it as a separate app with a smaller bundle size).
 
 - `family.ente.io` is currently in a separate repository (Enhancement: bring it
   in here).
@@ -99,4 +95,4 @@ to point to these deployments from our user facing DNS names.
 As a concrete example, the GitHub workflow that deploys `docs/` passes "help" as
 the branch name. The resulting deployment is available at "help.ente.pages.dev".
 Finally, we add a custom domain to point to it from
-[ente.io/help](https://ente.io/help).
+[ente.com/help](https://ente.com/help).

@@ -121,7 +121,6 @@
   "importAegisGuide": "Dùng tùy chọn \"Xuất kho\" của Aegis.\n\nNếu kho của bạn có mã hóa, bạn phải có mật khẩu để giải mã.",
   "import2FasGuide": "Dùng tùy chọn \"Cài đặt->Sao lưu -Xuất dữ liệu\" của 2FAS.\n\nNếu bản sao lưu của bạn có mã hóa, bạn phải có mật khẩu để giải mã.",
   "importLastpassGuide": "Dùng tùy chọn \"Chuyển tài khoản\" của Lastpass Authenticator và nhấn \"Xuất tài khoản ra tệp\". Nhập tệp JSON đã tải xuống.",
-  "importProtonAuthGuide": "Dùng \"Xuất\" trong thiết lập Proton Authenticator để xuất mã của bạn.",
   "exportCodes": "Xuất mã",
   "importLabel": "Nhập",
   "importInstruction": "Vui lòng chọn tệp chứa danh sách mã của bạn có định dạng",
@@ -331,7 +330,6 @@
     }
   },
   "sorry": "Rất tiếc",
-  "importFailureDesc": "Không thể phân tích tệp đã chọn.\nVui lòng liên hệ support@ente.io nếu bạn cần trợ giúp!",
   "pendingSyncs": "Cảnh báo",
   "pendingSyncsWarningBody": "Một số mã của bạn chưa được sao lưu.\n\nVui lòng đảm bảo rằng bạn có bản sao lưu cho các mã này trước khi đăng xuất.",
   "checkInboxAndSpamFolder": "Vui lòng kiểm tra hộp thư đến (và thư rác) để hoàn tất xác minh",
@@ -344,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

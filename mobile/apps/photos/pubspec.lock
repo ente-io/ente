@@ -137,6 +137,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
+  backup_exclusion:
+    dependency: "direct main"
+    description:
+      path: "../../packages/backup_exclusion"
+      relative: true
+    source: path
+    version: "1.0.0"
   battery_info:
     dependency: "direct main"
     description:
@@ -587,13 +594,6 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  ente_cast_normal:
-    dependency: "direct main"
-    description:
-      path: "plugins/ente_cast_normal"
-      relative: true
-    source: path
-    version: "0.0.1"
   ente_crypto:
     dependency: "direct main"
     description:
@@ -632,7 +632,7 @@ packages:
   ente_qr:
     dependency: "direct main"
     description:
-      path: "../auth/plugins/qr"
+      path: "plugins/ente_qr"
       relative: true
     source: path
     version: "0.0.1"
@@ -669,12 +669,11 @@ packages:
   exif_reader:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "476f701c084861a8e9de5f4f4e5e067fc85fda96"
-      resolved-ref: "476f701c084861a8e9de5f4f4e5e067fc85fda96"
-      url: "https://github.com/mgenware/exif_reader.git"
-    source: git
-    version: "3.16.1"
+      name: exif_reader
+      sha256: "8491a1733f31b5b0c49d05e3fd2690538f1906b52f156d9d1fe7fad9d76bcced"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   expandable:
     dependency: "direct main"
     description:
@@ -744,7 +743,7 @@ packages:
     description:
       path: "flutter/flutter"
       ref: "16kb-fix"
-      resolved-ref: "9c7cf4b98289598b67422f3c31e6ef8bb06a4198"
+      resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
@@ -753,7 +752,7 @@ packages:
     description:
       path: "flutter/flutter_platform_interface"
       ref: "16kb-fix"
-      resolved-ref: "9c7cf4b98289598b67422f3c31e6ef8bb06a4198"
+      resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "0.2.1"
@@ -1112,10 +1111,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_rust_bridge
-      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
+      sha256: e87d6b9ee934dcd24a128ccb2bd91905d2d5fe5c06245d6a8f5477d4907a437a
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.1"
+    version: "2.12.0"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -1445,10 +1444,10 @@ packages:
     dependency: transitive
     description:
       name: iso_base_media
-      sha256: "0a94fa4ff4ce7e6894d7afc96c1eee6911c12827f8cf184ca752ce3437a818a1"
+      sha256: "0bd81707d2608b63d30e99b4ad89ad189a438c03842a480fb593641939bc534a"
       url: "https://pub.dev"
     source: hosted
-    version: "4.6.1"
+    version: "6.3.0"
   jni:
     dependency: transitive
     description:
@@ -1457,6 +1456,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.14.2"
+  jpeg_markers:
+    dependency: transitive
+    description:
+      name: jpeg_markers
+      sha256: "9417cd62862e5e9f38087bb13193623c1be70c477d93c329540f105643716059"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   js:
     dependency: "direct overridden"
     description:
@@ -1793,8 +1800,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
-      resolved-ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
+      ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
+      resolved-ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
       url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"
@@ -2293,13 +2300,13 @@ packages:
     source: hosted
     version: "3.2.2"
   random_access_source:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: random_access_source
-      sha256: "26d1509a9fd935ab9c77102ab4c94b343d36216387d985975c380efe450b81b8"
+      sha256: "2cb3578e3027d6f7e44a66ec9bf72f5e0b73e9c0e62f4768977a0ed962d08be7"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "4.2.1"
   receive_sharing_intent:
     dependency: "direct main"
     description:

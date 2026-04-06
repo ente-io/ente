@@ -1,5 +1,6 @@
 package io.ente.ensu.domain.state
 
 data class DeveloperSettingsState(
-    val enableDiagnostics: Boolean = false
+    val isAdvancedUnlocked: Boolean = false,
+    val systemPrompt: String = ""
 )

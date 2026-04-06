@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
@@ -8,11 +9,9 @@ import 'package:logging/logging.dart';
 import "package:photos/gateways/billing/billing_gateway.dart";
 import 'package:photos/gateways/billing/models/billing_plan.dart';
 import 'package:photos/gateways/billing/models/subscription.dart';
-import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/account/user_service.dart';
-import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/family/family_plan_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 const kWebPaymentRedirectUrl = String.fromEnvironment(
@@ -136,41 +135,20 @@ class BillingService {
 
   Future<void> launchFamilyPortal(
     BuildContext context,
-    UserDetails userDetails,
-  ) async {
-    if (userDetails.subscription.productID == freeProductID &&
-        !userDetails.hasPaidAddon()) {
-      await showErrorDialog(
-        context,
-        AppLocalizations.of(context).familyPlans,
-        AppLocalizations.of(context).familyPlanOverview,
-      );
-      return;
-    }
-    final dialog = createProgressDialog(
-      context,
-      AppLocalizations.of(context).pleaseWait,
-      isDismissible: true,
-    );
-    await dialog.show();
+    UserDetails userDetails, {
+    bool popOnFreeAdvertViewPlans = false,
+    bool refreshOnOpen = true,
+  }) async {
     try {
-      final bool familyExist = userDetails.isPartOfFamily();
-      final String url =
-          await UserService.instance.getFamilyPortalUrl(familyExist);
-
-      await dialog.hide();
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return WebPage(
-              AppLocalizations.of(context).familyPlanPortalTitle,
-              url,
-            );
-          },
+      await routeToPage(
+        context,
+        FamilyPlanPage(
+          initialUserDetails: userDetails,
+          popOnFreeAdvertViewPlans: popOnFreeAdvertViewPlans,
+          refreshOnOpen: refreshOnOpen,
         ),
       );
     } catch (e) {
-      await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
   }

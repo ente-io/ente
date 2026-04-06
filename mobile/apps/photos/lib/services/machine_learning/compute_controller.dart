@@ -9,6 +9,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/device_health_changed_event.dart";
+import "package:photos/main.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:thermal/thermal.dart";
 
@@ -38,6 +39,7 @@ class ComputeController {
   bool _hasCompletedInitialHealthChecks = false;
   bool _temporaryInteractionOverride = false;
   bool _debugInteractionOverride = false;
+  Future<void>? _initFuture;
 
   /// If true, user interaction is ignored and compute tasks can run regardless of user activity.
   bool get interactionOverride =>
@@ -53,6 +55,11 @@ class ComputeController {
   bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
+  bool get shouldRunCompute =>
+      _hasCompletedInitialHealthChecks &&
+      _isDeviceHealthy &&
+      _canRunMLGivenUserInteraction() &&
+      !computeBlocked;
 
   void _setDeviceHealth(bool healthy) {
     if (_isDeviceHealthy == healthy) return;
@@ -62,19 +69,28 @@ class ComputeController {
 
   ComputeController(this._localSettings) {
     _logger.info('ComputeController constructor');
-    init();
+    unawaited(init());
     _logger.info('init done ');
   }
 
   // Directly assign the values + Attach listener for compute controller
-  Future<void> init() async {
-    // Initialize interaction tracking before any await to avoid first-tap races.
-    _startInteractionTimer(kDefaultInteractionTimeout);
+  Future<void> init() {
+    return _initFuture ??= _initInternal();
+  }
 
-    await setMLDebugInteractionOverride(
-      turnOn: _localSettings.runMLDuringInteractionOverride,
-      persist: false,
-    );
+  Future<void> _initInternal() async {
+    if (!isProcessBg) {
+      // Initialize interaction tracking before any await to avoid first-tap races.
+      _startInteractionTimer(kDefaultInteractionTimeout);
+
+      await setMLDebugInteractionOverride(
+        turnOn: _localSettings.runMLDuringInteractionOverride,
+        persist: false,
+      );
+    } else {
+      // In background there is no user interaction signal, keep this false.
+      _isUserInteracting = false;
+    }
 
     // Thermal related
     _onThermalStateUpdate(await _thermal.thermalStatus);
@@ -260,7 +276,7 @@ class ComputeController {
       return;
     }
     final shouldRunCompute =
-        _isDeviceHealthy && _canRunMLGivenUserInteraction() && !computeBlocked;
+        this.shouldRunCompute;
     if (shouldRunCompute != _canRunCompute) {
       _canRunCompute = shouldRunCompute;
       _logger.info(

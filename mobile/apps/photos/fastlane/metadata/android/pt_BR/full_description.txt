@@ -30,7 +30,7 @@ PERMISSÕES
 ente solicita certas permissões para servir o propósito de um fornecedor de armazenamento de fotos, que pode ser revisado aqui: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 PREÇO
-Nós não oferecemos planos grátis para sempre, porque é importante para nós que permaneçamos sustentáveis e resistamos à prova do tempo. Em vez disso, oferecemos planos acessíveis que você pode compartilhar livremente com seus familiares. Você pode encontrar mais informações em ente.io.
+Nós não oferecemos planos grátis para sempre, porque é importante para nós que permaneçamos sustentáveis e resistamos à prova do tempo. Em vez disso, oferecemos planos acessíveis que você pode compartilhar livremente com seus familiares. You can find more information at ente.com.
 
 AJUDA
-Nós temos orgulho em oferecer apoio humano. Se você é um cliente pago, você pode contatar em team@ente.io e esperar uma resposta de nossa equipe dentro de 1 dia.
+Nós temos orgulho em oferecer apoio humano. If you are our paid customer, you can reach out to team@ente.com and expect a response from our team within 24 hours.

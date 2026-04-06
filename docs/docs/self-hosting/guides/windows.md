@@ -179,6 +179,7 @@ services:
       - 3004:3004  # Cast
       - 3005:3005  # Share
       - 3006:3006  # Embed
+      - 3008:3008  # Paste
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
       # ENTE_API_ORIGIN: http://192.168.1.42:8080
@@ -247,7 +248,7 @@ Use docker CLI or Docker Desktop UI to monitor container health and logs during 
 
 ### Post-installation
 
-Follow https://ente.io/help/self-hosting/installation/post-install and enjoy the following tips:
+Follow https://ente.com/help/self-hosting/installation/post-install and enjoy the following tips:
 
 - You can use the desktop app to register a new account. Click the login screen lock image 7 times and override the endpoint to `http://localhost:8080`.
 - Your user email can be anything. No actual emails will be sent. The one-time code can be found in the museum container logs.
@@ -265,7 +266,7 @@ Follow https://ente.io/help/self-hosting/installation/post-install and enjoy the
         mc admin config set admin api cors\_allow\_origin="\*"
         ```
     3. Restart your minio container and you should be ready to upload!
-- In case you missed it, use the ente CLI to increase your storage limits: https://ente.io/help/self-hosting/administration/cli#step-4-increase-storage-and-account-validity
+- In case you missed it, use the ente CLI to increase your storage limits: https://ente.com/help/self-hosting/administration/cli#step-4-increase-storage-and-account-validity
 
 ## Next steps
 
@@ -306,12 +307,12 @@ Follow https://ente.io/help/self-hosting/installation/post-install and enjoy the
 
     - For non-Windows setups, find the recommended service manager for your OS (e.g. `systemd`), and configure it to use the following startup command: `cd /path/to/ente && docker stack deploy -c docker-compose.yaml ente`
 
-2. To expose ente on your local network or custom domain, update the three endpoints in `museum.yamls` and two ORIGIN values in `docker-compose.yaml` (if you want web support).
+2. To expose ente on your local network or custom domain, update the relevant app endpoints in `museum.yaml` and the three ORIGIN values in `docker-compose.yaml` (if you want web support).
     - For custom domains, I use a Cloudflare tunnel. Cloudflare client comes with a reverse proxy.
     - If you don't want to use a custom domain, but still want your ente service exposed publicly, Tailscale is a good choice. However, their "funnel" only routes to a single port, so you will need to set up your own reverse proxy. Caddy and Nginx are both great options which can be deployed as part of your existing `docker-compose.yaml`.
     - If you just want to connect through a VPN, Tailscale is the ideal choice, no reverse proxy necessary.
 3. Migrating your photos from a different service can be messy. Google Takeout did not get imported into ente correctly, so half my photos had the wrong creation time. I ended up using a custom powershell script to get the JSON metadata associated with each file into the correct format. Your import may work fine.
-4. You're self-hosting, so you have to worry about replication! Be sure to periodically back up either your postgres+minio databases or photos export to local disk. See https://ente.io/help/self-hosting/administration/backup for recommendations.
+4. You're self-hosting, so you have to worry about replication! Be sure to periodically back up either your postgres+minio databases or photos export to local disk. See https://ente.com/help/self-hosting/administration/backup for recommendations.
     - For example, my setup uses ente's continuous export and sync to an external drive, which is then uploaded daily to B2 using Kopia.
 
 ## Troubleshooting tips

@@ -303,13 +303,13 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
-	isSEPA := isSEPASubscription(fullStripeSub)
+	defaultPaymentMethodType := getSubscriptionPaymentMethodType(fullStripeSub)
 
-	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue && !isSEPA {
-		// Unfortunately, customer.subscription.updated is only fired for SEPA
-		// payments in case of updation failures (not for purchase or renewal
-		// failures). So for consistency (and to avoid duplicate mails), we
-		// trigger on-hold emails for SEPA within handlePaymentIntentFailed.
+	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue &&
+		!usesAllowIncompleteSubscriptionUpdate(defaultPaymentMethodType) {
+		// Subscription updates that do not use allow_incomplete surface failures
+		// via customer.subscription.updated. SEPA and UPI are handled within
+		// handlePaymentIntentFailed to avoid duplicate on-hold emails.
 		err = c.sendAccountOnHoldEmail(userID)
 		if err != nil {
 			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
@@ -356,17 +356,18 @@ func (c *StripeController) handleInvoicePaid(event stripe.Event, country ente.St
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: *stripeSubscription, Event: event}, nil
 }
 
-// Event used to ONLY handle failures to SEPA payments, since we set
-// SubscriptionPaymentBehaviorAllowIncomplete only for SEPA. Other payment modes
-// will fail and will be handled synchronously
+// Event used to handle failures for payment methods whose subscription updates
+// use allow_incomplete (currently SEPA and UPI). Other subscription update
+// modes are handled synchronously in UpdateSubscription and
+// customer.subscription.updated.
 func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var paymentIntent stripe.PaymentIntent
 	json.Unmarshal(event.Data.Raw, &paymentIntent)
-	isSEPA := paymentIntent.LastPaymentError.PaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
-	if !isSEPA {
-		// Ignore events for other payment methods, since they will be handled
-		// synchronously
-		log.Info("Ignoring payment intent failed event for non-SEPA payment method")
+	paymentMethodType := getPaymentIntentErrorPaymentMethodType(paymentIntent)
+	if !usesAllowIncompleteSubscriptionUpdate(paymentMethodType) {
+		// Ignore events for payment methods that are already handled
+		// synchronously.
+		log.Info("Ignoring payment intent failed event for payment method handled synchronously")
 		return ente.StripeEventLog{}, nil
 	}
 
@@ -396,7 +397,6 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	productID := stripeSubscription.Items.Data[0].Price.ID
 	// If the current subscription is not the same as the one in the webhook,
 	// then ignore
-	fmt.Printf("productID: %s, currentSubscription.ProductID: %s\n", productID, currentSubscription.ProductID)
 	if currentSubscription.ProductID != productID {
 		// no-op
 		log.Warn("Webhook is reporting un-verified subscription update", stripeSubscription.ID, "invoiceID:", invoiceID)
@@ -451,9 +451,9 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 	if err != nil {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 	}
-	isSEPA := isSEPASubscription(stripeSubscription)
+	defaultPaymentMethodType := getSubscriptionPaymentMethodType(stripeSubscription)
 	var paymentBehavior stripe.SubscriptionPaymentBehavior
-	if isSEPA {
+	if usesAllowIncompleteSubscriptionUpdate(defaultPaymentMethodType) {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
 	} else {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorPendingIfIncomplete
@@ -480,18 +480,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	if isSEPA {
-		if newStripeSubscription.Status == stripe.SubscriptionStatusPastDue {
-			if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresAction {
-				return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
-			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresPaymentMethod {
-				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
-			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusProcessing {
-				return ente.SubscriptionUpdateResponse{Status: "success"}, nil
-			}
-			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
-		}
-	} else {
+	if paymentBehavior == stripe.SubscriptionPaymentBehaviorPendingIfIncomplete {
 		if newStripeSubscription.PendingUpdate != nil {
 			switch newStripeSubscription.LatestInvoice.PaymentIntent.Status {
 			case stripe.PaymentIntentStatusRequiresAction:
@@ -501,6 +490,19 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 				client.Invoices.VoidInvoice(inv.ID, nil)
 				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
 			}
+			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
+		}
+	} else if newStripeSubscription.LatestInvoice != nil && newStripeSubscription.LatestInvoice.PaymentIntent != nil {
+		switch newStripeSubscription.LatestInvoice.PaymentIntent.Status {
+		case stripe.PaymentIntentStatusRequiresAction:
+			return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
+		case stripe.PaymentIntentStatusRequiresPaymentMethod:
+			return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
+		case stripe.PaymentIntentStatusProcessing:
+			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
+		case stripe.PaymentIntentStatusSucceeded:
+			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
+		default:
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 		}
 	}
@@ -567,6 +569,9 @@ func (c *StripeController) getStripeSubscriptionWithPaymentMethod(subscription e
 	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
 	params := &stripe.SubscriptionParams{}
 	params.AddExpand("default_payment_method")
+	params.AddExpand("default_source")
+	params.AddExpand("customer.invoice_settings.default_payment_method")
+	params.AddExpand("customer.default_source")
 	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, params)
 	if err != nil {
 		return stripe.Subscription{}, stacktrace.Propagate(err, "")
@@ -579,7 +584,7 @@ func (c *StripeController) sendAccountOnHoldEmail(userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
+	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.com",
 		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
 			"PaymentProvider": "Stripe",
 		}, nil)
@@ -736,14 +741,44 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 	return nil
 }
 
-func isSEPASubscription(stripeSubscription stripe.Subscription) bool {
-	isSEPA := false
-	if stripeSubscription.DefaultPaymentMethod != nil {
-		isSEPA = stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
-	} else {
-		log.Info("No default payment method found")
+func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) stripe.PaymentMethodType {
+	if stripeSubscription.DefaultPaymentMethod == nil {
+		if stripeSubscription.DefaultSource != nil &&
+			stripeSubscription.DefaultSource.Type == stripe.PaymentSourceTypeCard {
+			return stripe.PaymentMethodTypeCard
+		}
+		if stripeSubscription.Customer != nil {
+			if stripeSubscription.Customer.InvoiceSettings != nil &&
+				stripeSubscription.Customer.InvoiceSettings.DefaultPaymentMethod != nil {
+				return stripeSubscription.Customer.InvoiceSettings.DefaultPaymentMethod.Type
+			}
+			if stripeSubscription.Customer.DefaultSource != nil &&
+				stripeSubscription.Customer.DefaultSource.Type == stripe.PaymentSourceTypeCard {
+				return stripe.PaymentMethodTypeCard
+			}
+		}
+		log.Info("No default payment method found on subscription or customer")
+		return ""
 	}
-	return isSEPA
+	return stripeSubscription.DefaultPaymentMethod.Type
+}
+
+func usesAllowIncompleteSubscriptionUpdate(paymentMethodType stripe.PaymentMethodType) bool {
+	return paymentMethodType == stripe.PaymentMethodTypeSepaDebit || paymentMethodType == stripe.PaymentMethodType("upi")
+}
+
+func getPaymentIntentErrorPaymentMethodType(paymentIntent stripe.PaymentIntent) stripe.PaymentMethodType {
+	if paymentIntent.LastPaymentError == nil {
+		return ""
+	}
+	if paymentIntent.LastPaymentError.PaymentMethod != nil {
+		return paymentIntent.LastPaymentError.PaymentMethod.Type
+	}
+	if paymentIntent.LastPaymentError.Source != nil &&
+		paymentIntent.LastPaymentError.Source.Type == stripe.PaymentSourceTypeCard {
+		return stripe.PaymentMethodTypeCard
+	}
+	return paymentIntent.LastPaymentError.PaymentMethodType
 }
 
 // handleStripeError processes Stripe errors, sends Discord alerts for invalid_request_error,

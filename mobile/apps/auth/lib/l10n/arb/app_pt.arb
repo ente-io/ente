@@ -109,7 +109,6 @@
   "importAegisGuide": "Use a opção \"Exportar cofre\" nas opções de Aegis\n\nSe o cofre estiver criptografado, você precisará inserir a senha do cofre para descriptografá-lo.",
   "import2FasGuide": "Use a opção \"Opções-> Exportar cópia de segurança\" em 2FAS.\n\nSe a cópia de segurança estiver criptografada, você precisará inserir a senha para descriptografá-la",
   "importLastpassGuide": "Use a opção \"Transferir contas\" nas opções do LastPass Authenticator e pressione \"Exportar contas para arquivo\". Importe o arquivo JSON baixado.",
-  "importProtonAuthGuide": "Use a opção \"Exportar\" nas configurações do Proton Authenticator para exportar seus códigos.",
   "exportCodes": "Exportar códigos",
   "importLabel": "Importar",
   "importInstruction": "Selecione um arquivo que contenha uma lista de códigos no formato a seguir",
@@ -317,7 +316,6 @@
     }
   },
   "sorry": "Desculpe",
-  "importFailureDesc": "Não foi possível analisar o arquivo selecionado. Escreva para support@ente.io se precisar de ajuda!",
   "pendingSyncs": "Atenção",
   "pendingSyncsWarningBody": "Alguns de seus códigos não foram salvos.\n\nCertifique-se que você possui uma cópia desses códigos antes de sair.",
   "checkInboxAndSpamFolder": "Verifique sua caixa de entrada (e spam) para concluir a verificação",
@@ -330,7 +328,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

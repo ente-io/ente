@@ -120,7 +120,6 @@
   "importAegisGuide": "Aegis の設定の \"保管庫をエクスポート\" を使用してください。\n\n保管庫が暗号化されている場合、保管庫を復号するためにパスワードの入力が必要になります。",
   "import2FasGuide": "2FAS の \"設定->バックアップ-エクスポート\" オプションを使用します。\n\nバックアップが暗号化されている場合は、バックアップを復号するためにパスワードの入力が必要になります。",
   "importLastpassGuide": "Lastpass Authenticator の設定内にある \"アカウントを転送\" オプションを使用し、\"アカウントをファイルにエクスポート\" を押してください。その後ダウンロードした JSON をインポートしてください。",
-  "importProtonAuthGuide": "Proton Authenticator 設定の \"エクスポート\" オプションを使用してコードをエクスポートします。",
   "exportCodes": "コードをエクスポート",
   "importLabel": "インポート",
   "importInstruction": "以下の形式のコードのリストを含むファイルを選択してください",
@@ -330,7 +329,6 @@
     }
   },
   "sorry": "申し訳ありません",
-  "importFailureDesc": "選択されたファイルを解析できませんでした。\n手助けが必要な場合は support@ente.io までご連絡ください。",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "いくつかのコードがバックアップされていません。\n\nログアウトする前に、これらのコードのバックアップがあることを確認してください。",
   "checkInboxAndSpamFolder": "受信トレイ（および迷惑メール）を確認して認証を完了してください",
@@ -343,7 +341,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

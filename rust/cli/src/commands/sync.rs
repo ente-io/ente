@@ -75,7 +75,8 @@ async fn sync_account(
         .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
 
     // Create API client with account's endpoint
-    let api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    let api_client =
+        ApiClient::new_with_client_package(Some(account.endpoint.clone()), account.app.client_package())?;
 
     // Store token for this account
     let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
@@ -93,7 +94,8 @@ async fn sync_account(
         .ok_or_else(|| crate::Error::Generic("Database path not available".into()))?;
 
     // Create API client for sync engine
-    let sync_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    let sync_api_client =
+        ApiClient::new_with_client_package(Some(account.endpoint.clone()), account.app.client_package())?;
     sync_api_client.add_token(&account.email, &token);
 
     let sync_storage = Storage::new(db_path)?;
@@ -128,7 +130,10 @@ async fn sync_account(
 
             // Create download manager
             // Create a new API client for the download manager
-            let download_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+            let download_api_client = ApiClient::new_with_client_package(
+                Some(account.endpoint.clone()),
+                account.app.client_package(),
+            )?;
             download_api_client.add_token(&account.email, &token);
 
             let mut download_manager = DownloadManager::new(download_api_client)?;

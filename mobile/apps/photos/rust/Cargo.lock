@@ -753,16 +753,8 @@ checksum = "177a59811828ea5dbc8927662d444ffee7b55a44696486f1b1a245ae9e652533"
 name = "ente_media_inspector"
 version = "0.1.0"
 dependencies = [
- "quick-xml",
-]
-
-[[package]]
-name = "ente_photos_rust"
-version = "0.0.1"
-dependencies = [
- "ente_media_inspector",
  "fast_image_resize",
- "flutter_rust_bridge",
+ "half",
  "html-escape",
  "image",
  "imageproc",
@@ -773,10 +765,19 @@ dependencies = [
  "once_cell",
  "ort",
  "plsfix",
+ "quick-xml",
  "regex",
  "thiserror 2.0.18",
  "tiff",
  "usearch",
+]
+
+[[package]]
+name = "ente_photos_rust"
+version = "0.0.1"
+dependencies = [
+ "ente_media_inspector",
+ "flutter_rust_bridge",
 ]
 
 [[package]]
@@ -914,9 +915,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge"
-version = "2.11.1"
+version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dde126295b2acc5f0a712e265e91b6fdc0ed38767496483e592ae7134db83725"
+checksum = "a0884853aae8a6517b5b58cf36f55da487f2fe110e1686938eb29b6640aae4a5"
 dependencies = [
  "allo-isolate",
  "android_logger",
@@ -943,9 +944,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge_macros"
-version = "2.11.1"
+version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5f0420326b13675321b194928bb7830043b68cf8b810e1c651285c747abb080"
+checksum = "6b5ce32f35f710ced8c5aa557f023f1a624e737b5460cee2b70fcd3a8df09e1b"
 dependencies = [
  "hex",
  "md-5",
@@ -2081,6 +2082,7 @@ version = "2.0.0-rc.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86d83095ae3c1258738d70ae7a06195c94d966a8e546f0d3609dc90885fb61f5"
 dependencies = [
+ "half",
  "js-sys",
  "libloading",
  "ndarray 0.15.6",

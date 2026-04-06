@@ -22,16 +22,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Repository Overview
 
-Documentation for Ente's products (Photos, Auth, self-hosting), published at [ente.io/help](https://ente.io/help). Built with VitePress.
+Documentation for Ente's products (Photos, Auth, self-hosting), published at [ente.com/help](https://ente.com/help). Built with VitePress.
 
 ## Development Commands
 
 ```bash
-yarn install       # Install dependencies
+yarn install --frozen-lockfile  # Install dependencies from the committed lockfile
 yarn dev           # Start local dev server
 yarn build         # Build for production
 yarn pretty        # Format all files with Prettier
 ```
+
+Use plain `yarn install` only when intentionally updating dependencies and
+reviewing the resulting `yarn.lock` changes.
 
 ## Critical Architecture Notes
 

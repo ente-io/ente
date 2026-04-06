@@ -26,15 +26,18 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import io.ente.ensu.chat.ChatView
+import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.modelsettings.ModelSettingsScreen
-import io.ente.ensu.settings.DeveloperSettingsScreen
 import io.ente.ensu.settings.LogViewerScreen
+import io.ente.ensu.settings.DeveloperSettingsScreen
 import io.ente.ensu.settings.SettingsScreen
+import io.ente.ensu.settings.SystemPromptSettingsScreen
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -44,6 +47,9 @@ internal fun HomeNavigation(
     logRepository: io.ente.ensu.data.logging.FileLogRepository,
     authService: io.ente.ensu.data.auth.EnsuAuthService,
     currentEndpointFlow: Flow<String>,
+    advancedSettingsDataStore: AdvancedSettingsDataStore,
+    appVersion: String,
+    ensuDefaults: EnsuDefaults,
     navController: NavHostController,
     drawerState: DrawerState,
     currentRoute: String,
@@ -88,8 +94,11 @@ internal fun HomeNavigation(
                 HomeRoute.ModelSettings -> {
                     SimpleTopBar(title = "Model Settings") { navController.popBackStack() }
                 }
-                HomeRoute.DeveloperSettings -> {
-                    SimpleTopBar(title = "Developer Settings") { navController.popBackStack() }
+                HomeRoute.SystemPromptSettings -> {
+                    SimpleTopBar(title = "System Prompt") { navController.popBackStack() }
+                }
+                HomeRoute.EndpointSettings -> {
+                    SimpleTopBar(title = "Endpoint") { navController.popBackStack() }
                 }
                 HomeRoute.Settings -> {
                     SimpleTopBar(title = "Settings") { navController.popBackStack() }
@@ -143,12 +152,18 @@ internal fun HomeNavigation(
                     popEnterTransition = { backEnter() },
                     popExitTransition = { backExit() }
                 ) {
-                    val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.io")
                     SettingsScreen(
-                        currentEndpoint = currentEndpoint,
+                        buildVersion = appVersion,
                         isLoggedIn = appState.auth.isLoggedIn,
                         userEmail = appState.auth.email,
+                        isAdvancedUnlocked = appState.developerSettings.isAdvancedUnlocked,
                         onOpenLogs = { navController.navigate(HomeRoute.Logs) },
+                        onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
+                        onOpenSystemPromptSettings = { navController.navigate(HomeRoute.SystemPromptSettings) },
+                        onUnlockAdvanced = {
+                            store.unlockAdvancedSettings()
+                            advancedSettingsDataStore.persistUnlockAdvancedSettings()
+                        },
                         onSignOut = onSignOut,
                         onSignIn = onSignIn,
                         onDeleteAccount = onDeleteAccount
@@ -173,13 +188,45 @@ internal fun HomeNavigation(
                     popExitTransition = { backExit() }
                 ) {
                     ModelSettingsScreen(
+                        defaults = ensuDefaults,
                         state = appState.modelSettings,
-                        onSave = store::updateModelSettings,
-                        onReset = store::resetModelSettings
+                        onSave = { modelSettings ->
+                            store.updateModelSettings(modelSettings)
+                            advancedSettingsDataStore.persistModelSettings(modelSettings)
+                        },
+                        onReset = {
+                            store.resetModelSettings()
+                            advancedSettingsDataStore.persistResetModelSettings()
+                        }
                     )
                 }
                 composable(
-                    route = HomeRoute.DeveloperSettings,
+                    route = HomeRoute.SystemPromptSettings,
+                    enterTransition = { forwardEnter() },
+                    exitTransition = { forwardExit() },
+                    popEnterTransition = { backEnter() },
+                    popExitTransition = { backExit() }
+                ) {
+                    SystemPromptSettingsScreen(
+                        defaultPromptBody = ensuDefaults.mobileSystemPromptBody,
+                        datePlaceholder = ensuDefaults.systemPromptDatePlaceholder,
+                        systemPrompt = appState.developerSettings.systemPrompt,
+                        onSave = { value ->
+                            val updated = appState.developerSettings.copy(systemPrompt = value)
+                            store.updateDeveloperSettings(updated)
+                            advancedSettingsDataStore.persistSystemPrompt(value)
+                            navController.popBackStack()
+                        },
+                        onReset = {
+                            val updated = appState.developerSettings.copy(systemPrompt = "")
+                            store.updateDeveloperSettings(updated)
+                            advancedSettingsDataStore.persistSystemPrompt("")
+                            navController.popBackStack()
+                        }
+                    )
+                }
+                composable(
+                    route = HomeRoute.EndpointSettings,
                     enterTransition = { forwardEnter() },
                     exitTransition = { forwardExit() },
                     popEnterTransition = { backEnter() },
@@ -202,7 +249,8 @@ internal object HomeRoute {
     const val Settings = "settings"
     const val Logs = "logs"
     const val ModelSettings = "model-settings"
-    const val DeveloperSettings = "developer-settings"
+    const val SystemPromptSettings = "system-prompt-settings"
+    const val EndpointSettings = "endpoint-settings"
 }
 
 internal fun AnimatedContentTransitionScope<NavBackStackEntry>.forwardEnter() =

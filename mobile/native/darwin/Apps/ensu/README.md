@@ -7,6 +7,7 @@ All commands below assume you run them from `darwin/Apps/ensu`.
 ## Quick scripts
 
 ```bash
+./setup-mac.sh             # Check prerequisites, build local xcframework, resolve packages
 ./build.sh                 # Debug build for iOS simulator (prefers booted iPhone)
 ./build.sh device          # Debug build for connected iOS device
 ./build.sh archive         # Release archive (.xcarchive)
@@ -28,14 +29,18 @@ Run `./build.sh --help` or `./run.sh --help` for full options.
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
 - UniFFI Swift bindings are generated locally and gitignored:
   - `ensu/Generated/core*`, `ensu/Generated/db*`, `ensu/Generated/sync*`
-  - `../Packages/Rust/Sources/InferenceRS/inference_rs_uniffi*`
+  - `../Packages/Rust/Sources/InferenceRS/`
   - `../Packages/Rust/InferenceRSFFI.xcframework`
 
 The Xcode build script (`scripts/build-rust.sh`) builds Rust static libs, but it does
-not regenerate the Swift bindings. If bindings are missing, build the corresponding
-`rust/uniffi/core` or `rust/uniffi/ensu/*` crate and run `uniffi-bindgen generate` to output into the paths above.
+regenerate the `core`, `db`, and `sync` Swift bindings into `ensu/Generated/` as part of the build.
 `../Packages/Rust/tool/generate_bindings.sh` and `../Packages/Rust/tool/build_xcframework.sh`
-handle the InferenceRS bindings and xcframework.
+handle the InferenceRS bindings and xcframework. `./build.sh` will build the
+local `InferenceRSFFI.xcframework` automatically if it is missing, then re-resolve
+Swift package dependencies before building.
+
+If Xcode still shows “Missing package product …” in the IDE, use
+`File > Packages > Resolve Package Versions` after the xcframework has been generated.
 
 ### Debug Build (Simulator)
 ```bash
@@ -123,5 +128,3 @@ ENTE_API_ENDPOINT="https://your-endpoint.example" \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
   -derivedDataPath build
 ```
-
-
