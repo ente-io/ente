@@ -9,13 +9,11 @@ import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/viewer/date/date_time_picker.dart";
 import "package:locker/utils/collection_actions.dart";
 
 Future<void> showAddEmailSheet(
@@ -50,11 +48,8 @@ class AddEmailSheet extends StatefulWidget {
 }
 
 class _AddEmailSheetState extends State<AddEmailSheet> {
-  final bool _shareLater = false;
   String _email = "";
   bool _emailIsValid = false;
-  DateTime? _scheduledDate;
-  TimeOfDay? _scheduledTime;
   final CollectionParticipantRole _selectedRole =
       CollectionParticipantRole.viewer;
 
@@ -70,7 +65,7 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     super.initState();
     _collectionActions = CollectionActions();
     _suggestedUsers = _getSuggestedUsers();
-  }
+  } 
 
   @override
   void dispose() {
@@ -94,11 +89,6 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
           if (_suggestedUsers.isNotEmpty) ...[
             const SizedBox(height: 20),
             _buildExistingContactsSection(colorScheme, textTheme),
-          ],
-          // _buildShareLaterCheckbox(colorScheme, textTheme),
-          if (_shareLater) ...[
-            const SizedBox(height: 12),
-            _buildScheduleDateTimeRow(colorScheme, textTheme),
           ],
           const SizedBox(height: 20),
           _buildShareButton(),
@@ -308,121 +298,12 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     );
   }
 
-  Widget _buildScheduleDateTimeRow(colorScheme, textTheme) {
-    final dateText = _scheduledDate != null
-        ? DateFormat("dd/MM/yy").format(_scheduledDate!)
-        : "DD/MM/YY";
-    final timeText = _scheduledTime != null
-        ? "${_scheduledTime!.hour.toString().padLeft(2, '0')}:${_scheduledTime!.minute.toString().padLeft(2, '0')}"
-        : "00:00";
-
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: _selectDate,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 18,
-                    color: colorScheme.textMuted,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    dateText,
-                    style: textTheme.small.copyWith(
-                      color: _scheduledDate != null
-                          ? colorScheme.textBase
-                          : colorScheme.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GestureDetector(
-            onTap: _selectTime,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.access_time_outlined,
-                    size: 18,
-                    color: colorScheme.textMuted,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    timeText,
-                    style: textTheme.small.copyWith(
-                      color: _scheduledTime != null
-                          ? colorScheme.textBase
-                          : colorScheme.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _selectDate() async {
-    final initialDate = _scheduledDate ??
-        DateTime.now().add(
-          const Duration(days: 1),
-        );
-    final pickedDate = await showDatePickerSheet(
-      context,
-      initialDate: initialDate,
-      minDate: DateTime.now(),
-    );
-    if (pickedDate != null && mounted) {
-      setState(() {
-        _scheduledDate = pickedDate;
-      });
-    }
-  }
-
-  Future<void> _selectTime() async {
-    final initialTime = _scheduledTime ?? TimeOfDay.now();
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
-    if (pickedTime != null && mounted) {
-      setState(() {
-        _scheduledTime = pickedTime;
-      });
-    }
-  }
-
   Widget _buildShareButton() {
-    final bool canShare =
-        _emailIsValid && (!_shareLater || _isScheduledDateTimeValid());
-    final buttonText =
-        _shareLater ? context.l10n.scheduleShare : context.l10n.share;
     return SizedBox(
       width: double.infinity,
       child: GradientButton(
-        text: buttonText,
-        onTap: canShare ? _onShareTap : null,
+        text: context.l10n.share,
+        onTap: _emailIsValid ? _onShareTap : null,
       ),
     );
   }
@@ -486,19 +367,5 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
 
   bool _isValidEmail(String email) {
     return EmailValidator.validate(email);
-  }
-
-  bool _isScheduledDateTimeValid() {
-    if (_scheduledDate == null || _scheduledTime == null) {
-      return false;
-    }
-    final scheduledDateTime = DateTime(
-      _scheduledDate!.year,
-      _scheduledDate!.month,
-      _scheduledDate!.day,
-      _scheduledTime!.hour,
-      _scheduledTime!.minute,
-    );
-    return scheduledDateTime.isAfter(DateTime.now());
   }
 }

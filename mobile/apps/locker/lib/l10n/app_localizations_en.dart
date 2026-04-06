@@ -811,6 +811,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageLink => 'Manage link';
 
   @override
+  String get linkLabel => 'Link';
+
+  @override
   String get linkExpiry => 'Link expiry';
 
   @override
@@ -1573,6 +1576,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharedWith => 'Shared with';
+
+  @override
+  String get shareCollection => 'Share collection';
 
   @override
   String get shareLater => 'Share later';

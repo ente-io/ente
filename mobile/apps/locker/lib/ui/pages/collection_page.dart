@@ -17,16 +17,15 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/components/collection_popup_menu_widget.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
-import "package:locker/ui/components/popup_menu_item_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
 import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
-import 'package:locker/utils/collection_actions.dart';
 import "package:logging/logging.dart";
 
 class CollectionPage extends UploaderPage {
@@ -48,9 +47,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   final _logger = Logger("CollectionPage");
   late StreamSubscription<CollectionsUpdatedEvent>
       _collectionUpdateSubscription;
-  bool _isCollectionDeleted = false;
-  bool _isDeletingCollection = false;
-  bool _ignoreCollectionUpdates = false;
 
   late Collection _collection;
   List<EnteFile> _files = [];
@@ -121,9 +117,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     _initializeData(widget.collection);
     _collectionUpdateSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
-      if (_ignoreCollectionUpdates || _isCollectionDeleted) {
-        return;
-      }
       _logger.info(
         "CollectionsUpdatedEvent received on CollectionPage (${widget.collection.id}): ${event.source}",
       );
@@ -142,7 +135,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           _logger.warning(
             'Collection ${widget.collection.id} no longer exists, navigating back',
           );
-          if (!_isCollectionDeleted && mounted) {
+          if (mounted) {
             Navigator.of(context).pop();
           }
         }
@@ -165,43 +158,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     setState(() {});
   }
 
-  Future<void> _deleteCollection() async {
-    if (_isDeletingCollection) {
-      return;
-    }
-    _isDeletingCollection = true;
-    _ignoreCollectionUpdates = true;
-    var didDelete = false;
-    try {
-      await CollectionActions.deleteCollection(
-        context,
-        _collection,
-        onSuccess: () {
-          didDelete = true;
-          _isCollectionDeleted = true;
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-        },
-      );
-    } finally {
-      if (!didDelete) {
-        _ignoreCollectionUpdates = false;
-      }
-      _isDeletingCollection = false;
-    }
-  }
-
-  Future<void> _editCollection() async {
-    await CollectionActions.editCollection(
-      context,
-      _collection,
-      onSuccess: () {
-        setState(() {});
-      },
-    );
-  }
-
   Future<void> _shareCollection() async {
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
@@ -217,7 +173,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       }
 
       await showShareCollectionSheet(context, collection: _collection);
-      // Refresh state after share sheet closes
       if (mounted) {
         setState(() {});
       }
@@ -225,13 +180,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-  }
-
-  Future<void> _leaveCollection() async {
-    await CollectionActions.leaveCollection(
-      context,
-      _collection,
-    );
   }
 
   @override
@@ -308,19 +256,19 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     if (isFavorite) {
       return SizedBox.fromSize();
     }
-    return PopupMenuButton<String>(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.strokeFaint),
-      ),
-      color: colorScheme.backdropBase,
-      surfaceTintColor: Colors.transparent,
-      padding: EdgeInsets.zero,
-      menuPadding: EdgeInsets.zero,
-      elevation: 15,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
-      constraints: const BoxConstraints(minWidth: 120),
-      offset: const Offset(-36, 36),
+    final canManageCollection =
+        collectionViewType == CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        collectionViewType == CollectionViewType.sharedCollectionViewer ||
+        collectionViewType ==
+            CollectionViewType.sharedCollectionCollaborator ||
+        collectionViewType == CollectionViewType.quickLink;
+    if (!canManageCollection) {
+      return SizedBox.fromSize();
+    }
+
+    return CollectionPopupMenuWidget(
+      collection: _collection,
       child: Container(
         height: 44,
         width: 44,
@@ -334,101 +282,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           color: colorScheme.textBase,
         ),
       ),
-      onSelected: (value) {
-        switch (value) {
-          case 'edit':
-            _editCollection();
-            break;
-          case 'delete':
-            _deleteCollection();
-            break;
-          case 'leave_collection':
-            _leaveCollection();
-            break;
-        }
-      },
-      itemBuilder: (BuildContext context) {
-        final items = <PopupMenuItem<String>>[];
-        var itemIndex = 0;
-        var totalItems = 0;
-
-        if (collectionViewType == CollectionViewType.ownedCollection ||
-            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-            collectionViewType == CollectionViewType.quickLink) {
-          totalItems = 2;
-        } else if (collectionViewType ==
-                CollectionViewType.sharedCollectionViewer ||
-            collectionViewType ==
-                CollectionViewType.sharedCollectionCollaborator) {
-          totalItems = 1;
-        }
-
-        if (collectionViewType == CollectionViewType.ownedCollection ||
-            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-            collectionViewType == CollectionViewType.quickLink) {
-          items.add(
-            PopupMenuItem<String>(
-              value: 'edit',
-              height: 0,
-              padding: EdgeInsets.zero,
-              child: PopupMenuItemWidget(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPencilEdit02,
-                  color: colorScheme.textBase,
-                  size: 20,
-                ),
-                label: context.l10n.edit,
-                isFirst: itemIndex == 0,
-                isLast: itemIndex == totalItems - 1,
-              ),
-            ),
-          );
-          itemIndex++;
-
-          items.add(
-            PopupMenuItem<String>(
-              value: 'delete',
-              padding: EdgeInsets.zero,
-              height: 0,
-              child: PopupMenuItemWidget(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.warning500,
-                  size: 20,
-                ),
-                isWarning: true,
-                label: context.l10n.delete,
-                isFirst: itemIndex == 0,
-                isLast: itemIndex == totalItems - 1,
-              ),
-            ),
-          );
-        }
-
-        if (collectionViewType == CollectionViewType.sharedCollectionViewer ||
-            collectionViewType ==
-                CollectionViewType.sharedCollectionCollaborator) {
-          items.add(
-            PopupMenuItem<String>(
-              value: 'leave_collection',
-              padding: EdgeInsets.zero,
-              height: 0,
-              child: PopupMenuItemWidget(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.textBase,
-                  size: 20,
-                ),
-                label: context.l10n.leaveCollection,
-                isFirst: true,
-                isLast: true,
-              ),
-            ),
-          );
-        }
-
-        return items;
-      },
     );
   }
 

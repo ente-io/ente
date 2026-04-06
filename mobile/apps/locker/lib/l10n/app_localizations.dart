@@ -1590,6 +1590,12 @@ abstract class AppLocalizations {
   /// **'Manage link'**
   String get manageLink;
 
+  /// No description provided for @linkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get linkLabel;
+
   /// No description provided for @linkExpiry.
   ///
   /// In en, this message translates to:
@@ -2753,6 +2759,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shared with'**
   String get sharedWith;
+
+  /// No description provided for @shareCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Share collection'**
+  String get shareCollection;
 
   /// No description provided for @shareLater.
   ///

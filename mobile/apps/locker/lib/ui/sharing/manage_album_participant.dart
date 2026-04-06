@@ -136,7 +136,7 @@ class _ManageIndividualParticipantState
                               CollectionParticipantRole.viewer,
                             );
                           } catch (e) {
-                            await showGenericErrorDialog(
+                            await showGenericErrorBottomSheet(
                               context: context,
                               error: e,
                             );

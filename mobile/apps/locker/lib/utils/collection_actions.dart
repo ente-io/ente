@@ -4,11 +4,10 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
-import "package:ente_ui/components/action_sheet_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
+import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
+import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
 import 'package:flutter/material.dart';
@@ -440,41 +439,36 @@ class CollectionActions {
     BuildContext context,
     Collection collection,
   ) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final colorScheme = getEnteColorScheme(context);
+    final shouldRemove = await showAlertBottomSheet<bool>(
+      context,
+      title: context.l10n.removePublicLink,
+      message: context.l10n
+          .removePublicLinkConfirmation(collection.name ?? "this collection"),
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.yesRemove,
-          onTap: () async {
-            await CollectionApiClient.instance.disableShareUrl(collection);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        GradientButton(
+          text: context.l10n.yesRemove,
+          backgroundColor: colorScheme.warning400,
+          onTap: () => Navigator.of(context).pop(true),
         ),
       ],
-      title: context.l10n.removePublicLink,
-      body: context.l10n
-          .removePublicLinkConfirmation(collection.name ?? "this collection"),
     );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.error) {
+
+    if (shouldRemove != true) {
+      return false;
+    }
+
+    try {
+      await CollectionApiClient.instance.disableShareUrl(collection);
+      return true;
+    } catch (e) {
+      if (context.mounted) {
         await showGenericErrorDialog(
           context: context,
-          error: actionResult.exception,
+          error: e,
         );
       }
-      return actionResult.action == ButtonAction.first;
-    } else {
       return false;
     }
   }
