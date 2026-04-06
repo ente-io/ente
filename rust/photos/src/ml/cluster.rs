@@ -2,9 +2,9 @@
 //!
 //! Contains agglomerative clustering (average linkage) and helper functions.
 
-use std::collections::HashMap;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
+use std::collections::HashMap;
 
 // ── Agglomerative clustering (average linkage, precomputed) ─────────────
 
@@ -159,13 +159,22 @@ pub fn agglomerative_precomputed_min_size_heap(
     for i in 0..n {
         if let Some((j, d)) = recompute_nearest(i, &active, &cdist, cap) {
             nearest[i] = Some((j, d));
-            heap.push(Candidate { dist: d, from: i, to: j });
+            heap.push(Candidate {
+                dist: d,
+                from: i,
+                to: j,
+            });
         }
     }
 
     let mut active_count = n;
     while active_count >= 2 {
-        let Some(Candidate { dist: best_d, from: ci, to: cj }) = heap.pop() else {
+        let Some(Candidate {
+            dist: best_d,
+            from: ci,
+            to: cj,
+        }) = heap.pop()
+        else {
             break;
         };
 
@@ -208,7 +217,11 @@ pub fn agglomerative_precomputed_min_size_heap(
 
         if let Some((to, d)) = recompute_nearest(ci, &active, &cdist, cap) {
             nearest[ci] = Some((to, d));
-            heap.push(Candidate { dist: d, from: ci, to });
+            heap.push(Candidate {
+                dist: d,
+                from: ci,
+                to,
+            });
         } else {
             nearest[ci] = None;
         }
@@ -226,7 +239,11 @@ pub fn agglomerative_precomputed_min_size_heap(
             if should_recompute {
                 if let Some((to, d)) = recompute_nearest(ck, &active, &cdist, cap) {
                     nearest[ck] = Some((to, d));
-                    heap.push(Candidate { dist: d, from: ck, to });
+                    heap.push(Candidate {
+                        dist: d,
+                        from: ck,
+                        to,
+                    });
                 } else {
                     nearest[ck] = None;
                 }
@@ -469,5 +486,4 @@ mod tests {
         let labels = agglomerative_precomputed(&[0.0], 1, 0.5);
         assert_eq!(labels, vec![0]);
     }
-
 }
