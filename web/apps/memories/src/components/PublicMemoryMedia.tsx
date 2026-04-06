@@ -25,6 +25,7 @@ import { computeMediaCropStyle } from "../utils/lane";
 
 const DEFAULT_MEDIA_MAX_WIDTH_CSS = "min(1360px, calc(100vw - 32px))";
 const DEFAULT_MEDIA_MAX_HEIGHT_CSS = "calc(100dvh - 184px)";
+const ASPECT_RATIO_CHANGE_EPSILON = 0.00001;
 
 const buildMediaStyle = ({
     cropRect,
@@ -122,6 +123,7 @@ export function PhotoImage({
     const onAspectRatioRef = useRef(onAspectRatio);
     const mediaReadyRef = useRef(false);
     const hasNotifiedDisplayReadyRef = useRef(false);
+    const lastReportedAspectRatioRef = useRef<number | undefined>(undefined);
 
     onFullLoadRef.current = onFullLoad;
     onAspectRatioRef.current = onAspectRatio;
@@ -135,6 +137,25 @@ export function PhotoImage({
         onFullLoadRef.current();
     }, []);
 
+    const reportAspectRatio = useCallback((width: number, height: number) => {
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        const nextAspectRatio = width / height;
+        const previousAspectRatio = lastReportedAspectRatioRef.current;
+        if (
+            typeof previousAspectRatio === "number" &&
+            Math.abs(previousAspectRatio - nextAspectRatio) <
+                ASPECT_RATIO_CHANGE_EPSILON
+        ) {
+            return;
+        }
+
+        lastReportedAspectRatioRef.current = nextAspectRatio;
+        onAspectRatioRef.current?.(width, height);
+    }, []);
+
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
@@ -142,6 +163,7 @@ export function PhotoImage({
         setFullImageURL(undefined);
         mediaReadyRef.current = false;
         hasNotifiedDisplayReadyRef.current = false;
+        lastReportedAspectRatioRef.current = undefined;
 
         const loadThumbnail = async () => {
             try {
@@ -211,9 +233,9 @@ export function PhotoImage({
             return;
         }
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-            onAspectRatioRef.current?.(image.naturalWidth, image.naturalHeight);
+            reportAspectRatio(image.naturalWidth, image.naturalHeight);
         }
-    }, [fullImageURL, thumbnailOnly]);
+    }, [fullImageURL, reportAspectRatio, thumbnailOnly]);
 
     const displayURL = fullImageURL ?? thumbnailURL;
     const mediaStyle = buildMediaStyle({
@@ -243,16 +265,14 @@ export function PhotoImage({
                     alt=""
                     draggable={false}
                     onLoad={(event) => {
+                        reportAspectRatio(
+                            event.currentTarget.naturalWidth,
+                            event.currentTarget.naturalHeight,
+                        );
                         const isFullImageLoad =
                             !thumbnailOnly &&
                             !!fullImageURL &&
                             event.currentTarget.src === fullImageURL;
-                        if (isFullImageLoad) {
-                            onAspectRatioRef.current?.(
-                                event.currentTarget.naturalWidth,
-                                event.currentTarget.naturalHeight,
-                            );
-                        }
                         setIsLoading(false);
                         if (thumbnailOnly || isFullImageLoad) {
                             signalReady();

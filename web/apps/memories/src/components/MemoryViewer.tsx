@@ -7,6 +7,7 @@
  */
 import { keyframes } from "@emotion/react";
 import { styled, Typography } from "@mui/material";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { fileCreationPhotoDate } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -221,11 +222,35 @@ export function MemoryViewer({
     }, [currentIndex, files.length, onNext]);
 
     useEffect(() => {
-        if (currentIndex < files.length - 1) {
-            const nextFile = files[currentIndex + 1]!;
-            void downloadManager.renderableThumbnailURL(nextFile);
+        if (!fileLoaded || currentIndex >= files.length - 1) {
+            return;
         }
-    }, [currentIndex, files]);
+
+        const nextFile = files[currentIndex + 1]!;
+
+        void (async () => {
+            const prefetchTasks: Promise<unknown>[] = [
+                downloadManager.renderableThumbnailURL(nextFile),
+                downloadManager.renderableSourceURLs(nextFile),
+            ];
+
+            if (nextFile.metadata.fileType === FileType.video) {
+                prefetchTasks.unshift(
+                    downloadManager.hlsPlaylistDataForPublicMemory(nextFile),
+                );
+            }
+
+            const results = await Promise.allSettled(prefetchTasks);
+            results.forEach((result) => {
+                if (result.status === "rejected") {
+                    log.warn(
+                        "Failed to prefetch next memory media",
+                        result.reason,
+                    );
+                }
+            });
+        })();
+    }, [currentIndex, fileLoaded, files]);
 
     useEffect(() => {
         const updateViewport = () => setViewport(readViewport());
