@@ -33,11 +33,11 @@ import {
     MobileJoinNowButton,
     PhotoContainer,
     readViewport,
-    ViewerFooterBar,
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
 const SHARE_COMPACT_LAYOUT_BREAKPOINT_PX = 960;
+const SHARE_TABLET_MEDIA_QUERY = `@media (min-width: ${MOBILE_LAYOUT_BREAKPOINT_PX + 1}px) and (max-width: ${SHARE_COMPACT_LAYOUT_BREAKPOINT_PX - 1}px)`;
 const MOBILE_MEDIA_HORIZONTAL_INSET_PX = 8;
 const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 220;
 const MOBILE_VIDEO_MEDIA_RESERVED_VERTICAL_SPACE_PX = 244;
@@ -50,6 +50,14 @@ const DESKTOP_MEDIA_MAX_WIDTH_CSS = `min(${DESKTOP_MEDIA_MAX_WIDTH_PX}px, calc(1
 const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(min(100vh, 100dvh) - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
 const DESKTOP_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-desktop.svg";
 const MOBILE_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-mobile.svg";
+const compactShareHeaderJoinNowButtonSx = {
+    borderRadius: "14px",
+    fontSize: "15px",
+    lineHeight: 1.1,
+    minHeight: "42px",
+    paddingBlock: "10px",
+    paddingInline: "20px",
+};
 
 interface SharedMemoryHeaderProps {
     title: string;
@@ -138,8 +146,9 @@ export function MemoryViewer({
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
     const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
-    const isCompactShareLayout =
-        viewport.width <= SHARE_COMPACT_LAYOUT_BREAKPOINT_PX;
+    const isTabletShareLayout =
+        viewport.width > MOBILE_LAYOUT_BREAKPOINT_PX &&
+        viewport.width < SHARE_COMPACT_LAYOUT_BREAKPOINT_PX;
 
     useEffect(() => {
         setPaused(false);
@@ -510,36 +519,37 @@ export function MemoryViewer({
                     </MobileTopActions>
                 ) : (
                     <TopControls>
-                        {!isCompactShareLayout && (
-                            <TopLeftBrandLink
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
-                                data-memory-control="true"
-                            >
-                                <EnteBrandTagImage
-                                    src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                    alt="Ente Photos"
-                                />
-                            </TopLeftBrandLink>
-                        )}
+                        <TopLeftBrandLink
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            data-memory-control="true"
+                        >
+                            <EnteBrandTagImage
+                                src={ENTE_BRAND_TAG_IMAGE_PATH}
+                                alt="Ente Photos"
+                            />
+                        </TopLeftBrandLink>
 
                         {sharedHeader}
 
-                        {!isCompactShareLayout && (
-                            <TopRightActions>
-                                <JoinNowButton
-                                    variant="contained"
-                                    color="accent"
-                                    disableElevation
-                                    href="https://ente.io/get"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    Try Ente
-                                </JoinNowButton>
-                            </TopRightActions>
-                        )}
+                        <TopRightActions>
+                            <JoinNowButton
+                                variant="contained"
+                                color="accent"
+                                disableElevation
+                                href="https://ente.io/get"
+                                target="_blank"
+                                rel="noreferrer"
+                                sx={
+                                    isTabletShareLayout
+                                        ? compactShareHeaderJoinNowButtonSx
+                                        : undefined
+                                }
+                            >
+                                Try Ente
+                            </JoinNowButton>
+                        </TopRightActions>
                     </TopControls>
                 )}
 
@@ -574,32 +584,6 @@ export function MemoryViewer({
                 </PhotoContainer>
 
                 {isMobileLayout && sharedHeader}
-
-                {!isMobileLayout && isCompactShareLayout && (
-                    <ViewerFooterBar>
-                        <BrandLink
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noreferrer"
-                            data-memory-control="true"
-                        >
-                            <EnteBrandTagImage
-                                src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                alt="Ente Photos"
-                            />
-                        </BrandLink>
-                        <MobileJoinNowButton
-                            variant="contained"
-                            color="accent"
-                            disableElevation
-                            href="https://ente.io/get"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Try Ente
-                        </MobileJoinNowButton>
-                    </ViewerFooterBar>
-                )}
             </ContentContainer>
         </ViewerRoot>
     );
@@ -675,6 +659,10 @@ const TopControls = styled("div")({
     maxWidth: "100%",
     boxSizing: "border-box",
     "@media (max-width: 900px)": { minHeight: "56px" },
+    [SHARE_TABLET_MEDIA_QUERY]: {
+        minHeight: "56px",
+        paddingInline: "124px",
+    },
 });
 
 const HeaderSection = styled("div")({
@@ -686,6 +674,10 @@ const HeaderSection = styled("div")({
     gap: "18px",
     boxSizing: "border-box",
     "@media (max-width: 900px)": { width: "min(100%, 344px)", gap: "14px" },
+    [SHARE_TABLET_MEDIA_QUERY]: {
+        width: "min(100%, 296px)",
+        gap: "12px",
+    },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         width: "100%",
         gap: "18px",
@@ -724,6 +716,7 @@ const TopLeftBrandLink = styled(BrandLink)({
     transform: "translateY(-50%)",
     "& img": { width: "98px" },
     "@media (max-width: 900px)": { "& img": { width: "84px" } },
+    [SHARE_TABLET_MEDIA_QUERY]: { "& img": { width: "72px" } },
 });
 
 const TopRightActions = styled("div")({
@@ -735,6 +728,7 @@ const TopRightActions = styled("div")({
     alignItems: "center",
     gap: "16px",
     "@media (max-width: 900px)": { gap: "10px" },
+    [SHARE_TABLET_MEDIA_QUERY]: { gap: "8px" },
 });
 
 const MediaFrame = styled("div")({

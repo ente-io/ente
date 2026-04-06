@@ -1,8 +1,8 @@
-import { LaneMemoryViewer } from "../components/LaneMemoryViewer";
-import { MemoryViewer } from "../components/MemoryViewer";
+import dynamic from "next/dynamic";
 import {
     PublicMemoryEmptyState,
     PublicMemoryErrorState,
+    PublicMemoryLoadingContent,
     PublicMemoryLoadingState,
     PublicMemoryPageShell,
 } from "../components/PublicMemoryPageShell";
@@ -11,6 +11,30 @@ import type {
     MemoryViewerProps,
 } from "../components/PublicMemoryViewerShared";
 import { usePublicMemoryPage } from "../hooks/usePublicMemoryPage";
+
+function ViewerChunkLoadingFallback() {
+    return <PublicMemoryLoadingContent />;
+}
+
+const LaneMemoryViewer = dynamic<LaneMemoryViewerProps>(
+    () =>
+        import("../components/LaneMemoryViewer").then(
+            (module) => module.LaneMemoryViewer,
+        ),
+    {
+        loading: ViewerChunkLoadingFallback,
+    },
+);
+
+const MemoryViewer = dynamic<MemoryViewerProps>(
+    () =>
+        import("../components/MemoryViewer").then(
+            (module) => module.MemoryViewer,
+        ),
+    {
+        loading: ViewerChunkLoadingFallback,
+    },
+);
 
 /**
  * Index page that handles both root redirect and memory share links

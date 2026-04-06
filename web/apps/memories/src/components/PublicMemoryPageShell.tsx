@@ -47,15 +47,25 @@ export function PublicMemoryPageShell({ children }: PropsWithChildren) {
 }
 
 /**
+ * Shared loading body used before or while a viewer chunk is resolving.
+ * Used by `pages/index.tsx` and composed by `PublicMemoryLoadingState`.
+ */
+export function PublicMemoryLoadingContent() {
+    return (
+        <Stack100vhCenter sx={{ minHeight: "100dvh" }}>
+            <CircularProgress sx={{ color: "#08c225" }} size={32} />
+        </Stack100vhCenter>
+    );
+}
+
+/**
  * Full-screen loading state shown while `usePublicMemoryPage` is resolving the share.
  * Used by `pages/index.tsx`.
  */
 export function PublicMemoryLoadingState() {
     return (
         <PublicMemoryPageShell>
-            <Stack100vhCenter sx={{ minHeight: "100dvh" }}>
-                <CircularProgress sx={{ color: "#08c225" }} size={32} />
-            </Stack100vhCenter>
+            <PublicMemoryLoadingContent />
         </PublicMemoryPageShell>
     );
 }
