@@ -557,12 +557,12 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                         lineHeight: 0,
                                         "& svg": {
                                             width: "auto",
-                                            height: { xs: 15, sm: 19 },
+                                            height: { xs: 17, sm: 21 },
                                         },
                                         "&:hover": { opacity: 1 },
                                     }}
                                 >
-                                    <EnteLogo height={15} />
+                                    <EnteLogo height={17} />
                                 </Box>
                                 {isPhotoSwipeContentLoading ? (
                                     <CircularProgress
