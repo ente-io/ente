@@ -126,7 +126,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 )
               : SvgPicture.asset(
                   "assets/ente-branding.svg",
-                  height: 18,
+                  height: 15,
                   colorFilter: ColorFilter.mode(
                     Theme.of(context).brightness == Brightness.light
                         ? Colors.black
