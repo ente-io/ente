@@ -4,6 +4,8 @@
  * playback timing, scrubbing, captions, and decorative backgrounds. It is
  * rendered by `pages/index.tsx` for the `"lane"` variant.
  */
+import VolumeOffRoundedIcon from "@mui/icons-material/VolumeOffRounded";
+import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
 import { styled, Typography } from "@mui/material";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
@@ -99,6 +101,7 @@ export function LaneMemoryViewer({
     onSeek,
 }: LaneMemoryViewerProps) {
     const [paused, setPaused] = useState(false);
+    const [muted, setMuted] = useState(false);
     const [fileLoaded, setFileLoaded] = useState(false);
     const [videoDurationKnown, setVideoDurationKnown] = useState(false);
     const [viewport, setViewport] = useState({ width: 1280, height: 720 });
@@ -325,12 +328,6 @@ export function LaneMemoryViewer({
         }
 
         if (isVideo) {
-            const activeVideo = activeVideoElementRef.current;
-            if (activeVideo) {
-                void activeVideo.play().catch(() => {
-                    // Browser playback policies may still reject here.
-                });
-            }
             return;
         }
 
@@ -367,6 +364,11 @@ export function LaneMemoryViewer({
     const handleVideoDuration = useCallback((durationSeconds: number) => {
         void durationSeconds;
         setVideoDurationKnown(true);
+    }, []);
+
+    const handleVideoPlaybackBlocked = useCallback(() => {
+        finishedLanePlaybackRef.current = false;
+        setPaused(true);
     }, []);
 
     useEffect(() => {
@@ -409,24 +411,64 @@ export function LaneMemoryViewer({
         [],
     );
 
-    const toggleLanePlayback = useCallback(() => {
-        setPaused((previous) => {
-            const nextPaused = !previous;
-            restartOnResumeRef.current =
-                !nextPaused && finishedLanePlaybackRef.current;
-            if (!nextPaused) {
-                finishedLanePlaybackRef.current = false;
+    const resumeLanePlaybackFromGesture = useCallback(() => {
+        setPaused(false);
+
+        if (finishedLanePlaybackRef.current) {
+            finishedLanePlaybackRef.current = false;
+            restartOnResumeRef.current = false;
+            if (currentIndexRef.current > 0) {
+                onSeek(0);
+                return;
             }
-            return nextPaused;
+
+            const activeVideo = activeVideoElementRef.current;
+            if (activeVideo) {
+                activeVideo.currentTime = 0;
+            }
+        }
+
+        if (!isVideoRef.current) {
+            return;
+        }
+
+        const activeVideo = activeVideoElementRef.current;
+        if (!activeVideo) {
+            return;
+        }
+
+        activeVideo.muted = muted;
+        void activeVideo.play().catch((error: unknown) => {
+            log.warn(
+                "Failed to start lane memory video playback from user gesture",
+                error,
+            );
+            handleVideoPlaybackBlocked();
         });
+    }, [handleVideoPlaybackBlocked, muted, onSeek]);
+
+    const pauseLanePlayback = useCallback(() => {
+        setPaused(true);
     }, []);
+
+    const handleAudioToggle = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            setMuted((previous) => !previous);
+        },
+        [],
+    );
 
     const handlePlaybackToggle = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            toggleLanePlayback();
+            if (pausedRef.current) {
+                resumeLanePlaybackFromGesture();
+            } else {
+                pauseLanePlayback();
+            }
         },
-        [toggleLanePlayback],
+        [pauseLanePlayback, resumeLanePlaybackFromGesture],
     );
 
     const handleVideoEnded = useCallback(() => {
@@ -482,9 +524,13 @@ export function LaneMemoryViewer({
                 return;
             }
 
-            toggleLanePlayback();
+            if (pausedRef.current) {
+                resumeLanePlaybackFromGesture();
+            } else {
+                pauseLanePlayback();
+            }
         },
-        [onNext, onPrev, toggleLanePlayback, viewport.width],
+        [onNext, onPrev, pauseLanePlayback, resumeLanePlaybackFromGesture, viewport.width],
     );
 
     const laneFrameSize = useMemo(() => {
@@ -567,9 +613,8 @@ export function LaneMemoryViewer({
             if (displayIndexRef.current !== roundedIndex) {
                 commitDisplayIndex(roundedIndex);
             }
-            onSeek(roundedIndex);
         },
-        [commitDisplayIndex, files.length, onSeek, trackScrubValue],
+        [commitDisplayIndex, files.length, trackScrubValue],
     );
 
     const handleScrubEnd = useCallback(
@@ -587,10 +632,16 @@ export function LaneMemoryViewer({
             if (displayIndexRef.current !== roundedIndex) {
                 commitDisplayIndex(roundedIndex);
             }
-            onSeek(roundedIndex);
+            if (currentIndexRef.current !== roundedIndex) {
+                onSeek(roundedIndex);
+            }
         },
         [commitDisplayIndex, files.length, onSeek, trackScrubValue],
     );
+
+    useEffect(() => {
+        setMuted(false);
+    }, [displayIndex]);
 
     const showPlaybackOverlay = paused && !isScrubbing;
     const playbackOverlayLabel = finishedLanePlaybackRef.current
@@ -718,6 +769,7 @@ export function LaneMemoryViewer({
                                                     isDisplayCard ? (
                                                         <VideoPlayer
                                                             file={file}
+                                                            muted={muted}
                                                             paused={paused}
                                                             mediaRef={
                                                                 activeVideoElementRef
@@ -739,6 +791,9 @@ export function LaneMemoryViewer({
                                                             }
                                                             onEnded={
                                                                 handleVideoEnded
+                                                            }
+                                                            onPlaybackBlocked={
+                                                                handleVideoPlaybackBlocked
                                                             }
                                                             onAspectRatio={
                                                                 handleActiveAspectRatio
@@ -787,6 +842,26 @@ export function LaneMemoryViewer({
                                         </LaneStackSlice>
                                     );
                                 })}
+                                {isVideo && (
+                                    <LaneTopRightAudioOverlay>
+                                        <LaneAudioControl
+                                            type="button"
+                                            onClick={handleAudioToggle}
+                                            aria-label={
+                                                muted
+                                                    ? "Unmute video"
+                                                    : "Mute video"
+                                            }
+                                            data-memory-control="true"
+                                        >
+                                            {muted ? (
+                                                <VolumeOffRoundedIcon fontSize="small" />
+                                            ) : (
+                                                <VolumeUpRoundedIcon fontSize="small" />
+                                            )}
+                                        </LaneAudioControl>
+                                    </LaneTopRightAudioOverlay>
+                                )}
                                 {showPlaybackOverlay && (
                                     <LaneCornerPlaybackOverlay>
                                         <LaneCornerPlaybackControl
@@ -1237,6 +1312,57 @@ const LaneCaption = styled("div")({
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         fontSize: "18px",
         lineHeight: 1.2,
+    },
+});
+
+const LaneTopRightAudioOverlay = styled("div")({
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 4,
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "flex-end",
+    padding: "20px",
+    pointerEvents: "none",
+    "@media (max-width: 900px)": { padding: "18px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        padding: "14px",
+    },
+});
+
+const LaneAudioControl = styled("button")({
+    width: "42px",
+    height: "42px",
+    borderRadius: "999px",
+    border: 0,
+    cursor: "pointer",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    backgroundColor: "rgba(18, 18, 18, 0.68)",
+    boxShadow: "0 18px 40px rgba(0, 0, 0, 0.34)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    transition:
+        "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
+    pointerEvents: "auto",
+    "&:hover": {
+        backgroundColor: "rgba(18, 18, 18, 0.76)",
+        transform: "scale(1.03)",
+    },
+    "&:active": { transform: "scale(0.98)" },
+    "& .MuiSvgIcon-root": { fontSize: "22px" },
+    "@media (max-width: 900px)": {
+        width: "40px",
+        height: "40px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        width: "36px",
+        height: "36px",
+        "& .MuiSvgIcon-root": { fontSize: "20px" },
     },
 });
 

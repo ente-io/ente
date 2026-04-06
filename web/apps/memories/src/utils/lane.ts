@@ -56,8 +56,85 @@ export const alignLaneFilesWithMetadata = (
     return { files: orderedFiles, frames: orderedFrames };
 };
 
-const yearsBetween = (start: Date, end: Date) =>
-    (end.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+const normalizeCalendarDate = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const parseCalendarDate = (value: string): Date | undefined => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+    if (dateOnlyMatch) {
+        const [, year, month, day] = dateOnlyMatch;
+        const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+        if (
+            Number.isNaN(parsed.getTime()) ||
+            parsed.getFullYear() !== Number(year) ||
+            parsed.getMonth() !== Number(month) - 1 ||
+            parsed.getDate() !== Number(day)
+        ) {
+            return undefined;
+        }
+
+        return parsed;
+    }
+
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) {
+        return undefined;
+    }
+
+    return normalizeCalendarDate(parsed);
+};
+
+const safeDateInYear = (date: Date, year: number) => {
+    const daysInTargetMonth = new Date(
+        year,
+        date.getMonth() + 1,
+        0,
+    ).getDate();
+    const targetDay = Math.min(date.getDate(), daysInTargetMonth);
+    return new Date(year, date.getMonth(), targetDay);
+};
+
+const completedYearsBetween = (start: Date, end: Date) => {
+    const startDate = normalizeCalendarDate(start);
+    const endDate = normalizeCalendarDate(end);
+    if (endDate.getTime() < startDate.getTime()) {
+        return 0;
+    }
+
+    let years = endDate.getFullYear() - startDate.getFullYear();
+    if (
+        endDate.getTime() <
+        safeDateInYear(startDate, endDate.getFullYear()).getTime()
+    ) {
+        years -= 1;
+    }
+
+    return Math.max(0, years);
+};
+
+const laneCaptionValue = ({
+    captionType,
+    creationDate,
+    birthDate,
+}: {
+    captionType: "age" | "yearsAgo";
+    creationDate: Date;
+    birthDate?: string;
+}) => {
+    if (captionType === "age" && birthDate) {
+        const parsedBirthDate = parseCalendarDate(birthDate);
+        if (parsedBirthDate) {
+            return completedYearsBetween(parsedBirthDate, creationDate);
+        }
+    }
+
+    return completedYearsBetween(creationDate, new Date());
+};
 
 export const getFileAspectRatio = (file: EnteFile): number | undefined => {
     const width = file.pubMagicMetadata?.data.w;
@@ -195,18 +272,11 @@ export const formatLaneCaption = ({
     const personName = metadata?.personName?.trim() ?? "";
     const captionType =
         metadata?.captionType ?? (metadata?.birthDate ? "age" : "yearsAgo");
-    const roundedValue = (() => {
-        if (captionType === "age" && metadata?.birthDate) {
-            const birthDate = new Date(metadata.birthDate);
-            if (!Number.isNaN(birthDate.getTime())) {
-                return Math.max(
-                    0,
-                    Math.round(yearsBetween(birthDate, creationDate)),
-                );
-            }
-        }
-        return Math.max(0, Math.round(yearsBetween(creationDate, new Date())));
-    })();
+    const roundedValue = laneCaptionValue({
+        captionType,
+        creationDate,
+        birthDate: metadata?.birthDate,
+    });
     const yearsLabel = `${roundedValue} year${roundedValue === 1 ? "" : "s"}`;
 
     if (captionType === "age") {
@@ -233,18 +303,11 @@ export const buildLaneCaptionModel = ({
     const personName = metadata?.personName?.trim() ?? "";
     const captionType =
         metadata?.captionType ?? (metadata?.birthDate ? "age" : "yearsAgo");
-    const roundedValue = (() => {
-        if (captionType === "age" && metadata?.birthDate) {
-            const birthDate = new Date(metadata.birthDate);
-            if (!Number.isNaN(birthDate.getTime())) {
-                return Math.max(
-                    0,
-                    Math.round(yearsBetween(birthDate, creationDate)),
-                );
-            }
-        }
-        return Math.max(0, Math.round(yearsBetween(creationDate, new Date())));
-    })();
+    const roundedValue = laneCaptionValue({
+        captionType,
+        creationDate,
+        birthDate: metadata?.birthDate,
+    });
     const prefix =
         captionType === "age" ? "" : personName ? `${personName} ` : "";
     const suffix =

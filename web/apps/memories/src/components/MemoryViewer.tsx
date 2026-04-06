@@ -6,6 +6,8 @@
  * variant.
  */
 import { keyframes } from "@emotion/react";
+import VolumeOffRoundedIcon from "@mui/icons-material/VolumeOffRounded";
+import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
 import { styled, Typography } from "@mui/material";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
@@ -128,6 +130,7 @@ export function MemoryViewer({
 }: MemoryViewerProps) {
     const currentFile = files[currentIndex]!;
     const [paused, setPaused] = useState(false);
+    const [muted, setMuted] = useState(false);
     const [fileLoaded, setFileLoaded] = useState(false);
     const [videoDurationKnown, setVideoDurationKnown] = useState(false);
     const [progressDuration, setProgressDuration] = useState(
@@ -144,6 +147,7 @@ export function MemoryViewer({
     const previousFileRef = useRef(currentFile);
     const previousIndexRef = useRef(currentIndex);
     const outgoingClearTimeoutRef = useRef<number | null>(null);
+    const activeVideoElementRef = useRef<HTMLVideoElement | null>(null);
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
     const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
@@ -153,6 +157,7 @@ export function MemoryViewer({
 
     useEffect(() => {
         setPaused(false);
+        setMuted(false);
         setFinishedPlayback(false);
         setFileLoaded(false);
         setVideoDurationKnown(false);
@@ -201,6 +206,34 @@ export function MemoryViewer({
         setProgressDuration(durationSeconds * 1000);
         setVideoDurationKnown(true);
     }, []);
+
+    const handleVideoPlaybackBlocked = useCallback(() => {
+        setFinishedPlayback(false);
+        setPaused(true);
+    }, []);
+
+    const resumeCurrentVideoPlayback = useCallback(
+        ({ restart = false }: { restart?: boolean } = {}) => {
+            const video = activeVideoElementRef.current;
+            if (!video) {
+                return;
+            }
+
+            if (restart) {
+                video.currentTime = 0;
+            }
+
+            video.muted = muted;
+            void video.play().catch((error: unknown) => {
+                log.warn(
+                    "Failed to start memory video playback from user gesture",
+                    error,
+                );
+                handleVideoPlaybackBlocked();
+            });
+        },
+        [handleVideoPlaybackBlocked, muted],
+    );
 
     const handleMediaAspectRatio = useCallback(
         (width: number, height: number) => {
@@ -289,7 +322,10 @@ export function MemoryViewer({
 
         setFinishedPlayback(false);
         setPaused(false);
-    }, [currentIndex, onSeek]);
+        if (isVideo) {
+            resumeCurrentVideoPlayback({ restart: true });
+        }
+    }, [currentIndex, isVideo, onSeek, resumeCurrentVideoPlayback]);
 
     const handlePlaybackOverlayClick = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -301,8 +337,19 @@ export function MemoryViewer({
             }
 
             setPaused(false);
+            if (isVideo) {
+                resumeCurrentVideoPlayback();
+            }
         },
-        [finishedPlayback, handleRestartPlayback],
+        [finishedPlayback, handleRestartPlayback, isVideo, resumeCurrentVideoPlayback],
+    );
+
+    const handleAudioToggle = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            setMuted((previous) => !previous);
+        },
+        [],
     );
 
     const handleViewerClick = useCallback(
@@ -459,6 +506,9 @@ export function MemoryViewer({
                         onReady={handleFullLoad}
                         onDuration={handleVideoDuration}
                         onEnded={handleAdvanceOrFinish}
+                        onPlaybackBlocked={handleVideoPlaybackBlocked}
+                        mediaRef={activeVideoElementRef}
+                        muted={muted}
                         paused={paused}
                         fillFrame
                         objectFit="contain"
@@ -586,6 +636,24 @@ export function MemoryViewer({
                         onClick={handleMediaFrameClick}
                     >
                         {mediaLayers}
+                        {isVideo && (
+                            <TopRightMediaAudioOverlay>
+                                <MediaAudioControl
+                                    type="button"
+                                    onClick={handleAudioToggle}
+                                    aria-label={
+                                        muted ? "Unmute video" : "Mute video"
+                                    }
+                                    data-memory-control="true"
+                                >
+                                    {muted ? (
+                                        <VolumeOffRoundedIcon fontSize="small" />
+                                    ) : (
+                                        <VolumeUpRoundedIcon fontSize="small" />
+                                    )}
+                                </MediaAudioControl>
+                            </TopRightMediaAudioOverlay>
+                        )}
                         {showPlaybackOverlay && (
                             <CenteredPlaybackOverlay>
                                 <CenteredPlaybackControl
@@ -779,6 +847,57 @@ const MediaSwitchLayer = styled("div", {
     willChange: "opacity, transform",
     pointerEvents: "none",
 }));
+
+const TopRightMediaAudioOverlay = styled("div")({
+    position: "absolute",
+    top: "18px",
+    right: "18px",
+    zIndex: 4,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    pointerEvents: "none",
+    "@media (max-width: 900px)": { top: "16px", right: "16px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        top: "12px",
+        right: "12px",
+    },
+});
+
+const MediaAudioControl = styled("button")({
+    width: "42px",
+    height: "42px",
+    borderRadius: "999px",
+    border: 0,
+    cursor: "pointer",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    backgroundColor: "rgba(18, 18, 18, 0.68)",
+    boxShadow: "0 18px 40px rgba(0, 0, 0, 0.34)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    transition:
+        "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
+    pointerEvents: "auto",
+    "&:hover": {
+        backgroundColor: "rgba(18, 18, 18, 0.76)",
+        transform: "scale(1.03)",
+    },
+    "&:active": { transform: "scale(0.98)" },
+    "& .MuiSvgIcon-root": { fontSize: "22px" },
+    "@media (max-width: 900px)": {
+        width: "40px",
+        height: "40px",
+    },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        width: "36px",
+        height: "36px",
+        "& .MuiSvgIcon-root": { fontSize: "20px" },
+    },
+});
 
 const CenteredPlaybackOverlay = styled("div")({
     position: "absolute",
