@@ -1268,8 +1268,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "رداس سیٹ کریں",
-  "familyPlanPortalTitle": "فیملی",
-  "familyPlanOverview": "بغیر کسی اضافی ادائیگی کے اپنے موجودہ پلان میں ۵ فیملی ممبران کو شامل کریں.\n\nہر رکن کو اپنی نجی جگہ ملتی ہے، اور وہ ایک دوسرے کی فائلیں نہیں دیکھ سکتے جب تک کہ وہ شیئر نہ کی جائیں.\n\nفیملی پلانز ان صارفین کے لیے دستیاب ہیں جن کے پاس Ente کی معاوضہ سبسکرپشن ہے.\n\nشروع کرنے کے لیے ابھی سبسکرائب کریں!",
   "androidBiometricHint": "شناخت کی تصدیق کریں",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2246,10 +2244,6 @@
   "artisticPortraits": "فنکارانہ پورٹریٹ",
   "streetFood": "اسٹریٹ فوڈ",
   "riverCruises": "دریا کے کروز کے مناظر",
-  "facesTimelineBannerTitle": "یادوں کی گزرگاہ",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "{name} کی سالوں پرانی تصاویر دیکھیں",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

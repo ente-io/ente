@@ -1186,8 +1186,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "设定半径",
-  "familyPlanPortalTitle": "家庭",
-  "familyPlanOverview": "将 5 名家庭成员添加到您现有的计划中，无需支付额外费用。\n\n每个成员都有自己的私人空间，除非共享，否则无法看到彼此的文件。\n\n家庭计划适用于已付费 Ente 订阅的客户。\n\n立即订阅，开始体验！",
   "androidBiometricHint": "验证身份",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2102,10 +2100,6 @@
   "artisticPortraits": "艺术人像",
   "streetFood": "街头美食一口咬",
   "riverCruises": "河上游览美景",
-  "facesTimelineBannerTitle": "和 TA 的回忆",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "一起看看 {name} 这些年的样子",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

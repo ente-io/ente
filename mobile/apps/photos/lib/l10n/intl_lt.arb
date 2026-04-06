@@ -1206,8 +1206,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Nustatyti spindulį",
-  "familyPlanPortalTitle": "Šeima",
-  "familyPlanOverview": "Įtraukite 5 šeimos narius į jūsų esamą planą nemokėdami papildomai.\n\nKiekvienas narys gauna savo asmeninę vietą ir negali matyti vienas kito failų, nebent jie bendrinami.\n\nŠeimos planai pasiekiami klientams, kurie turi mokamą „Ente“ prenumeratą.\n\nPrenumeruokite dabar, kad pradėtumėte!",
   "androidBiometricHint": "Patvirtinkite tapatybę",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
