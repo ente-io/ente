@@ -53,37 +53,45 @@ interface CollectionShareLoadError {
     isExpired: boolean;
 }
 
-const accessTokenJWTStorageKey = (accessToken: string) =>
-    `share-collection-access-token-jwt:${accessToken}`;
-
-const savedAccessTokenJWT = (accessToken: string): string | null => {
+const readLocalStorageItem = (key: string): string | null => {
     try {
-        return window.localStorage.getItem(
-            accessTokenJWTStorageKey(accessToken),
-        );
+        return window.localStorage.getItem(key);
     } catch {
         return null;
     }
 };
 
-const saveAccessTokenJWT = (accessToken: string, accessTokenJWT: string) => {
+const writeLocalStorageItem = (key: string, value: string) => {
     try {
-        window.localStorage.setItem(
-            accessTokenJWTStorageKey(accessToken),
-            accessTokenJWT,
-        );
+        window.localStorage.setItem(key, value);
     } catch {
         // Ignore storage failures and continue with in-memory state.
     }
 };
 
-const removeAccessTokenJWT = (accessToken: string) => {
+const removeLocalStorageItem = (key: string) => {
     try {
-        window.localStorage.removeItem(accessTokenJWTStorageKey(accessToken));
+        window.localStorage.removeItem(key);
     } catch {
         // Ignore storage failures and continue with in-memory state.
     }
 };
+
+const accessTokenJWTStorageKey = (accessToken: string) =>
+    `share-collection-access-token-jwt:${accessToken}`;
+
+const savedAccessTokenJWT = (accessToken: string): string | null =>
+    readLocalStorageItem(accessTokenJWTStorageKey(accessToken));
+
+const saveAccessTokenJWT = (accessToken: string, accessTokenJWT: string) => {
+    writeLocalStorageItem(
+        accessTokenJWTStorageKey(accessToken),
+        accessTokenJWT,
+    );
+};
+
+const removeAccessTokenJWT = (accessToken: string) =>
+    removeLocalStorageItem(accessTokenJWTStorageKey(accessToken));
 
 const collectionShareLoadError = async (
     err: unknown,
@@ -158,6 +166,16 @@ export const useCollectionShare = (): UseCollectionShareResult => {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>();
     const requiresPassword = !!passwordProtectedPublicURL && !accessTokenJWT;
+    const clearLoadedState = useCallback(() => {
+        setCollectionInfo(null);
+        setSelectedItem(null);
+        setPasswordProtectedPublicURL(null);
+    }, []);
+    const setInvalidLinkState = useCallback(() => {
+        clearLoadedState();
+        setErrorTitle("Invalid collection link");
+        setError("This collection link is invalid.");
+    }, [clearLoadedState]);
 
     const loadCollection = useCallback(
         async (
@@ -178,10 +196,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 const token =
                     opts?.accessToken ?? extractCollectionTokenFromURL(url);
                 if (!token) {
-                    setCollectionInfo(null);
-                    setSelectedItem(null);
-                    setErrorTitle("Invalid collection link");
-                    setError("This collection link is invalid.");
+                    setInvalidLinkState();
                     return;
                 }
 
@@ -189,10 +204,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                     opts?.collectionKey ??
                     (await extractCollectionKeyFromShareURL(url));
                 if (!resolvedCollectionKey) {
-                    setCollectionInfo(null);
-                    setSelectedItem(null);
-                    setErrorTitle("Invalid collection link");
-                    setError("This collection link is invalid.");
+                    setInvalidLinkState();
                     return;
                 }
 
@@ -241,6 +253,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                             metadata.publicURL ?? null,
                         );
                         setCollectionInfo(null);
+                        setSelectedItem(null);
                         return;
                     }
                     throw err;
@@ -249,9 +262,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 setPasswordProtectedPublicURL(null);
                 setCollectionInfo(info);
             } catch (err) {
-                setCollectionInfo(null);
-                setSelectedItem(null);
-                setPasswordProtectedPublicURL(null);
+                clearLoadedState();
                 const loadError = await collectionShareLoadError(err);
                 setErrorTitle(loadError.title);
                 setError(loadError.message);
@@ -260,7 +271,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 setLoading(false);
             }
         },
-        [],
+        [clearLoadedState, setInvalidLinkState],
     );
 
     useEffect(() => {
@@ -275,7 +286,10 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         }
 
         const revalidate = () => {
-            if (document.visibilityState === "hidden" || isRevalidatingRef.current) {
+            if (
+                document.visibilityState === "hidden" ||
+                isRevalidatingRef.current
+            ) {
                 return;
             }
 
@@ -298,7 +312,10 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         return () => {
             window.removeEventListener("focus", revalidate);
             window.removeEventListener("pageshow", revalidate);
-            document.removeEventListener("visibilitychange", onVisibilityChange);
+            document.removeEventListener(
+                "visibilitychange",
+                onVisibilityChange,
+            );
         };
     }, [router.isReady, loadCollection]);
 

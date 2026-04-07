@@ -22,6 +22,11 @@ export const FileShareView: React.FC = () => {
         handleCopyContent,
         setNotificationAttributes,
     } = useFileShare();
+    const iconInfo = fileInfo
+        ? getLockerFileIcon(fileInfo.fileName, {
+              lockerType: fileInfo.lockerType,
+          })
+        : null;
 
     return (
         <>
@@ -144,18 +149,8 @@ export const FileShareView: React.FC = () => {
                         )}
 
                         {/* File Info Display */}
-                        {fileInfo && !loading && (
+                        {fileInfo && iconInfo && !loading && (
                             <>
-                                {(() => {
-                                    const iconInfo = getLockerFileIcon(
-                                        fileInfo.fileName,
-                                        {
-                                            lockerType: fileInfo.lockerType,
-                                        },
-                                    );
-
-                                    return (
-                                        <>
                                 {/* File Info - Centered */}
                                 <Box
                                     sx={{
@@ -227,9 +222,6 @@ export const FileShareView: React.FC = () => {
                                             />
                                         )}
                                 </Box>
-                                        </>
-                                    );
-                                })()}
 
                                 {/* Download Button - Only show if not a LockerInfoType */}
                                 {!fileInfo.lockerType && (

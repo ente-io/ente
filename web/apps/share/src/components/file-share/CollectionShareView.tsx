@@ -52,6 +52,38 @@ const translatedOrFallback = (key: string, fallback: string) => {
 };
 
 const contentMaxWidth = 560;
+const passwordCardSx = {
+    width: "100%",
+    maxWidth: 420,
+    px: { xs: 3, sm: 4 },
+    py: { xs: 3.5, sm: 4 },
+    borderRadius: "20px",
+    backgroundColor: "rgba(19, 21, 24, 0.96)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow:
+        "0 24px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+    color: "#FFFFFF",
+    "& .MuiTypography-root": { color: "inherit" },
+    "& .MuiFormLabel-root": { color: "rgba(255, 255, 255, 0.64)" },
+    "& .MuiFormLabel-root.Mui-focused": { color: "accent.light" },
+    "& .MuiInputBase-root": {
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        color: "#FFFFFF",
+    },
+    "& .MuiInputBase-input": { color: "#FFFFFF" },
+    "& .MuiInputAdornment-root": { color: "rgba(255, 255, 255, 0.52)" },
+    "& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.6)" },
+    "& .MuiButton-root": {
+        backgroundColor: "accent.main",
+        color: "accent.contrastText",
+    },
+    "& .MuiButton-root:hover": { backgroundColor: "accent.dark" },
+    "& .MuiButton-root.Mui-disabled": {
+        backgroundColor: "accent.main",
+        color: "accent.contrastText",
+        opacity: 0.7,
+    },
+} as const;
 
 export const CollectionShareView: React.FC = () => {
     const {
@@ -134,51 +166,7 @@ export const CollectionShareView: React.FC = () => {
                         p: 3,
                     }}
                 >
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            width: "100%",
-                            maxWidth: 420,
-                            px: { xs: 3, sm: 4 },
-                            py: { xs: 3.5, sm: 4 },
-                            borderRadius: "20px",
-                            backgroundColor: "rgba(19, 21, 24, 0.96)",
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
-                            boxShadow:
-                                "0 24px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
-                            color: "#FFFFFF",
-                            "& .MuiTypography-root": { color: "inherit" },
-                            "& .MuiFormLabel-root": {
-                                color: "rgba(255, 255, 255, 0.64)",
-                            },
-                            "& .MuiFormLabel-root.Mui-focused": {
-                                color: "accent.light",
-                            },
-                            "& .MuiInputBase-root": {
-                                backgroundColor: "rgba(255, 255, 255, 0.08)",
-                                color: "#FFFFFF",
-                            },
-                            "& .MuiInputBase-input": { color: "#FFFFFF" },
-                            "& .MuiInputAdornment-root": {
-                                color: "rgba(255, 255, 255, 0.52)",
-                            },
-                            "& .MuiFormHelperText-root": {
-                                color: "rgba(255, 255, 255, 0.6)",
-                            },
-                            "& .MuiButton-root": {
-                                backgroundColor: "accent.main",
-                                color: "accent.contrastText",
-                            },
-                            "& .MuiButton-root:hover": {
-                                backgroundColor: "accent.dark",
-                            },
-                            "& .MuiButton-root.Mui-disabled": {
-                                backgroundColor: "accent.main",
-                                color: "accent.contrastText",
-                                opacity: 0.7,
-                            },
-                        }}
-                    >
+                    <Paper elevation={0} sx={passwordCardSx}>
                         <Typography
                             variant="h4"
                             sx={{ fontWeight: 700, color: "#FFFFFF", mb: 1.5 }}
