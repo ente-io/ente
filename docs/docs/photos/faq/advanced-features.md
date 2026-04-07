@@ -203,9 +203,25 @@ While video streaming is in beta, streams do not count against your storage quot
 Video streaming is still in beta. If something isn't working:
 
 - Create a thread in `#feedback` on [Discord](https://discord.com/channels/948937918347608085/1121126215995113552)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)
 
 For crashes or upload failures with streaming enabled, see [Troubleshooting](/photos/faq/troubleshooting#app-crashes-ml-video).
+
+### How can I check if a video is being streamed? {#check-streaming-detection}
+
+**On mobile:**
+
+If you see a green "Play Original" button, the streamed version is being used.
+
+**On desktop/web:**
+
+Open the video and click the gear icon in the player. If it shows **Auto**, the video is being streamed.
+
+### Why does my shared video start downloading instead of playing immediately? {#shared-video-downloads-instead-of-playing}
+
+If a video hasn't had a stream generated yet, the browser may start downloading the entire file (or a large portion of it) before playback begins. This can happen with large files like 1–2 GB videos.
+
+To avoid this, ensure video streaming is enabled so that streamable versions are generated for your videos. Learn more in the [Video Streaming feature guide](/photos/features/utilities/video-streaming).
 
 ### How does Cast work? {#how-does-cast-work}
 
@@ -369,7 +385,7 @@ Note that these FAQs are primarily for Ente's cloud service. Self-hosting has ad
 You can:
 
 1. **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
-2. **Discord**: Join our [Discord community](https://ente.io/discord) for discussions
-3. **Email**: Contact [support@ente.io](mailto:support@ente.io)
+2. **Discord**: Join our [Discord community](https://ente.com/discord) for discussions
+3. **Email**: Contact [support@ente.com](mailto:support@ente.com)
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

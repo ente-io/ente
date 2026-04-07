@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use std::{fmt, str::FromStr};
 use zeroize::Zeroize;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,13 +31,39 @@ impl App {
     }
 }
 
+impl fmt::Display for App {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let value = match self {
+            App::Photos => "photos",
+            App::Locker => "locker",
+            App::Auth => "auth",
+        };
+        write!(f, "{value}")
+    }
+}
+
+impl FromStr for App {
+    type Err = String;
+
+    fn from_str(value: &str) -> std::result::Result<Self, Self::Err> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "photos" => Ok(App::Photos),
+            "locker" => Ok(App::Locker),
+            "auth" => Ok(App::Auth),
+            other => Err(format!(
+                "Invalid app: {other}. Must be one of: photos, locker, auth"
+            )),
+        }
+    }
+}
+
 impl Account {
     pub fn account_key(&self) -> String {
         format!("{}:{}", self.email, self.app.client_package())
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Zeroize)]
+#[derive(Serialize, Deserialize, Zeroize)]
 #[zeroize(drop)]
 pub struct AccountSecrets {
     pub token: Vec<u8>,
@@ -46,48 +72,35 @@ pub struct AccountSecrets {
     pub public_key: Vec<u8>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct SrpAttributes {
-    #[serde(rename = "srpUserID")]
-    pub srp_user_id: Uuid,
-    #[serde(rename = "srpSalt")]
-    pub srp_salt: String,
-    #[serde(rename = "memLimit")]
-    pub mem_limit: u32,
-    #[serde(rename = "opsLimit")]
-    pub ops_limit: u32,
-    #[serde(rename = "kekSalt")]
-    pub kek_salt: String,
-    #[serde(rename = "isEmailMFAEnabled")]
-    pub is_email_mfa_enabled: bool,
+impl fmt::Debug for AccountSecrets {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AccountSecrets")
+            .field("token", &"[REDACTED]")
+            .field("master_key", &"[REDACTED]")
+            .field("secret_key", &"[REDACTED]")
+            .field("public_key_len", &self.public_key.len())
+            .finish()
+    }
 }
 
-#[derive(Debug, Deserialize)]
-pub struct KeyAttributes {
-    #[serde(rename = "kekSalt")]
-    pub kek_salt: String,
-    #[serde(rename = "encryptedKey")]
-    pub encrypted_key: String,
-    #[serde(rename = "keyDecryptionNonce")]
-    pub key_decryption_nonce: String,
-    #[serde(rename = "publicKey")]
-    pub public_key: String,
-    #[serde(rename = "encryptedSecretKey")]
-    pub encrypted_secret_key: String,
-    #[serde(rename = "secretKeyDecryptionNonce")]
-    pub secret_key_decryption_nonce: String,
-    #[serde(rename = "memLimit")]
-    pub mem_limit: u32,
-    #[serde(rename = "opsLimit")]
-    pub ops_limit: u32,
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[derive(Debug, Deserialize)]
-pub struct AuthResponse {
-    pub id: i64,
-    pub token: Option<String>,
-    #[serde(rename = "encryptedToken")]
-    pub encrypted_token: Option<String>,
-    #[serde(rename = "keyAttributes")]
-    pub key_attributes: Option<KeyAttributes>,
+    #[test]
+    fn test_account_secrets_debug_redacts_secret_material() {
+        let secrets = AccountSecrets {
+            token: vec![1, 2, 3],
+            master_key: vec![4, 5, 6],
+            secret_key: vec![7, 8, 9],
+            public_key: vec![10, 11, 12],
+        };
+
+        let debug = format!("{secrets:?}");
+        assert!(debug.contains("[REDACTED]"));
+        assert!(!debug.contains("[1, 2, 3]"));
+        assert!(!debug.contains("[4, 5, 6]"));
+        assert!(!debug.contains("[7, 8, 9]"));
+        assert!(debug.contains("public_key_len"));
+    }
 }

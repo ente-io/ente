@@ -1,1 +1,1 @@
-photos,photography,family,privacy,cloud,backup,videos,photo,encryption,storage,album,alternative
+ଫଟୋଗୁଡିକ,ଫଟୋଗ୍ରାଫି,ପରିବାର,ଗୋପନୀୟତା,କ୍ଲାଉଡ୍,ବ୍ୟାକଅପ୍,ଭିଡିଓ ଗୁଡିକ,ଫଟୋ,ଏନକ୍ରିପସନ୍,ଷ୍ଟୋରେଜ୍,ଆଲବମ୍,ବୈକଳ୍ପିକ

@@ -25,7 +25,6 @@
   "deleteReason4": "Motivul meu nu apare",
   "sendEmail": "Trimiteți e-mail",
   "deleteRequestSLAText": "Solicitarea dvs. va fi procesată în 72 de ore.",
-  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.io</warning> de pe adresa dvs. de e-mail înregistrată.",
   "entePhotosPerm": "Ente <i>are nevoie de permisiune</i> pentru a vă păstra fotografiile",
   "ok": "Ok",
   "createAccount": "Creare cont",
@@ -61,7 +60,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -124,7 +123,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -256,18 +255,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificare",
   "verifyEmailID": "Verificare {email}",
   "emailNoEnteAccount": "{email} nu are un cont Ente.\n\nTrimiteți-le o invitație pentru a distribui fotografii.",
-  "shareMyVerificationID": "Acesta este ID-ul meu de verificare: {verificationID} pentru ente.io.",
-  "shareTextConfirmOthersVerificationID": "Poți confirma că acesta este ID-ul tău de verificare ente.io: {verificationID}",
   "somethingWentWrong": "Ceva nu a funcţionat corect",
   "sendInvite": "Trimiteți invitația",
-  "shareTextRecommendUsingEnte": "Descarcă Ente pentru a putea distribui cu ușurință fotografii și videoclipuri în calitate originală\n\nhttps://ente.io",
   "done": "Finalizat",
   "applyCodeTitle": "Aplicați codul",
   "enterCodeDescription": "Introduceți codul oferit de prietenul dvs. pentru a beneficia de spațiu gratuit pentru amândoi",
@@ -421,7 +417,6 @@
   "discover_sunset": "Apusuri",
   "discover_hills": "Dealuri",
   "discover_greenery": "Verdeață",
-  "mlIndexingDescription": "Vă rugăm să rețineți că învățarea automată va duce la o utilizare mai mare a lățimii de bandă și a bateriei până când toate elementele sunt indexate. Luați în considerare utilizarea aplicației desktop pentru o indexare mai rapidă, toate rezultatele vor fi sincronizate automat.",
   "loadingModel": "Se descarcă modelele...",
   "waitingForWifi": "Se așteaptă WiFi...",
   "status": "Status",
@@ -534,8 +529,6 @@
   "familyPlans": "Planuri de familie",
   "referrals": "Recomandări",
   "notifications": "Notificări",
-  "sharedPhotoNotifications": "Fotografii partajate noi",
-  "sharedPhotoNotificationsExplanation": "Primiți notificări atunci când cineva adaugă o fotografie la un album distribuit din care faceți parte",
   "advanced": "Avansat",
   "general": "General",
   "security": "Securitate",
@@ -569,7 +562,6 @@
   "darkTheme": "Întunecată",
   "systemTheme": "Sistem",
   "freeTrial": "Perioadă de încercare gratuită",
-  "selectYourPlan": "Selectați planul",
   "enteSubscriptionPitch": "Ente vă păstrează amintirile, astfel încât acestea să vă fie întotdeauna disponibile, chiar dacă vă pierdeți dispozitivul.",
   "enteSubscriptionShareWithFamily": "La planul dvs. vi se poate alătura și familia.",
   "currentUsageIs": "Utilizarea actuală este ",
@@ -590,7 +582,6 @@
   "subscription": "Abonament",
   "paymentDetails": "Detalii de plată",
   "manageFamily": "Administrați familia",
-  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.io pentru a vă gestiona abonamentul {provider}.",
   "renewSubscription": "Reînnoire abonament",
   "cancelSubscription": "Anulare abonament",
   "areYouSureYouWantToRenew": "Sunteți sigur că doriți să reînnoiți?",
@@ -639,7 +630,6 @@
   "subAlreadyLinkedErrMessage": "{id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți {id} cu acest cont, vă rugăm să contactați asistența noastră",
   "visitWebToManage": "Vă rugăm să vizitați web.ente.io pentru a vă gestiona abonamentul",
   "couldNotUpdateSubscription": "Nu s-a putut actualiza abonamentul",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.io și vom fi bucuroși să vă ajutăm!",
   "paymentFailed": "Plata nu a reușit",
   "paymentFailedTalkToProvider": "Vă rugăm să vorbiți cu asistența {providerName} dacă ați fost taxat",
   "@paymentFailedTalkToProvider": {
@@ -670,7 +660,6 @@
   "grantFullAccessPrompt": "Vă rugăm să permiteți accesul la toate fotografiile în aplicația Setări",
   "allowPermTitle": "Permiteți accesul la fotografii",
   "allowPermBody": "Vă rugăm să permiteți accesul la fotografiile dvs. din Setări, astfel încât Ente să vă poată afișa și salva biblioteca.",
-  "openSettings": "Deschideți Setări",
   "selectMorePhotos": "Selectați mai multe fotografii",
   "existingUser": "Utilizator existent",
   "newToEnte": "Nou la Ente",
@@ -982,7 +971,6 @@
   "fileTypesAndNames": "Tipuri de fișiere și denumiri",
   "location": "Locație",
   "moments": "Momente",
-  "searchFaceEmptySection": "Persoanele vor fi afișate aici odată ce indexarea este finalizată",
   "searchDatesEmptySection": "Căutare după o dată, o lună sau un an",
   "searchLocationEmptySection": "Grupare fotografii realizate în raza unei fotografii",
   "searchPeopleEmptySection": "Invitați persoane și veți vedea aici toate fotografiile distribuite de acestea",
@@ -1046,8 +1034,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Setare rază",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Adăugați 5 membri ai familiei la planul dvs. existent fără a plăti suplimentar.\n\nFiecare membru primește propriul spațiu privat și nu poate vedea fișierele celuilalt decât dacă acestea sunt partajate.\n\nPlanurile de familie sunt disponibile pentru clienții care au un abonament Ente plătit.\n\nAbonați-vă acum pentru a începe!",
   "androidBiometricHint": "Verificați-vă identitatea",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1322,7 +1308,6 @@
   },
   "extraPhotosFound": "S-au găsit fotografii extra",
   "configuration": "Configurare",
-  "localIndexing": "Indexare locală",
   "processed": "Procesate",
   "resetPerson": "Eliminare",
   "areYouSureYouWantToResetThisPerson": "Sunteți sigur că doriți să resetaţi această persoană?",

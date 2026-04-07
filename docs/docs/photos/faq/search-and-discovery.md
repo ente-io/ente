@@ -232,6 +232,12 @@ Please note this functionality is currently only available on mobile.
 
 Yes! Once your photos have been indexed, face recognition and magic search work completely offline. The initial indexing requires downloading your photos (which happens faster over WiFi), but after that all searches happen locally on your device. The indexes are synced across your devices using end-to-end encryption.
 
+### Does ML indexing require internet? {#ml-indexing-internet}
+
+ML indexing requires internet initially to download the ML models and to download any photos not already present locally on your device. Once your photos have been indexed completely, face recognition and magic search work completely offline.
+
+Internet is also required to sync the encrypted indexes across your devices.
+
 ### Is my face data used to train AI models? {#face-data-training}
 
 No. All machine learning (face recognition and magic search) happens entirely on your device. Your photos are downloaded to your device, indexed locally, and the indexes are encrypted before being synced across your devices.

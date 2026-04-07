@@ -191,6 +191,28 @@ struct ToastView: View {
     }
 }
 
+@MainActor
+func presentToast(
+    _ message: String,
+    setToastMessage: @escaping (String?) -> Void,
+    duration: TimeInterval = 1.5
+) -> Task<Void, Never> {
+    withAnimation(.easeOut(duration: 0.2)) {
+        setToastMessage(message)
+    }
+    let nanoseconds = UInt64(max(0, duration) * 1_000_000_000)
+    return Task { @MainActor in
+        do {
+            try await Task.sleep(nanoseconds: nanoseconds)
+        } catch {
+            return
+        }
+        withAnimation(.easeIn(duration: 0.2)) {
+            setToastMessage(nil)
+        }
+    }
+}
+
 struct MacSheetHeader<Leading: View, Center: View, Trailing: View>: View {
     let leading: Leading
     let center: Center

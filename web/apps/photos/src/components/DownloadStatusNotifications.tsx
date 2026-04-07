@@ -26,6 +26,7 @@ import { useState } from "react";
 
 /** Maximum characters for album name before truncation */
 const MAX_ALBUM_NAME_LENGTH = 25;
+const SINGLE_FILE_SUCCESS_AUTO_CLOSE_DELAY_MS = 3000;
 
 /** Truncate album name with ellipsis if it exceeds max length */
 const truncateAlbumName = (name: string): string => {
@@ -55,10 +56,9 @@ interface DownloadStatusNotificationsProps {
      *
      * and hidden attribute should be shown.
      *
-     * This is only relevant in the context of the photos app, and can be
-     * omitted by the public albums app. See the documentation of
-     * {@link SaveGroup}'s {@link collectionSummaryID} property for why we don't
-     * store the collection summary itself.
+     * See the documentation of {@link SaveGroup}'s
+     * {@link collectionSummaryID} property for why we don't store the
+     * collection summary itself.
      */
     onShowCollectionSummary?: (
         collectionSummaryID: number | undefined,
@@ -146,6 +146,8 @@ export const DownloadStatusNotifications: React.FC<
                 const hasErrors = isSaveCompleteWithErrors(group);
                 const isComplete = isSaveComplete(group);
                 const canRetry = hasErrors && !!group.retry;
+                const shouldAutoClose =
+                    group.total === 1 && isComplete && !hasErrors;
 
                 // Determine if this is a ZIP download (web with multiple files or live photo)
                 const isZipDownload = !group.downloadDirPath && group.total > 1;
@@ -289,6 +291,11 @@ export const DownloadStatusNotifications: React.FC<
                         })}
                         open={true}
                         onClose={createOnClose(group)}
+                        autoHideDuration={
+                            shouldAutoClose
+                                ? SINGLE_FILE_SUCCESS_AUTO_CLOSE_DELAY_MS
+                                : undefined
+                        }
                         keepOpenOnClick
                         attributes={{
                             color: hasErrors ? "critical" : "secondary",
@@ -333,18 +340,18 @@ export const DownloadStatusNotifications: React.FC<
                             </StopDownloadSubtitle>
                         </StopDownloadTitleSection>
                         <StopDownloadButtonsSection>
-                            <StopDownloadSecondaryButton
-                                fullWidth
-                                onClick={closeCancelDownloadDialog}
-                            >
-                                {t("no")}
-                            </StopDownloadSecondaryButton>
                             <StopDownloadPrimaryButton
                                 fullWidth
                                 onClick={handleConfirmCancelDownload}
                             >
                                 {t("yes_stop_downloads")}
                             </StopDownloadPrimaryButton>
+                            <StopDownloadSecondaryButton
+                                fullWidth
+                                onClick={closeCancelDownloadDialog}
+                            >
+                                {t("no")}
+                            </StopDownloadSecondaryButton>
                         </StopDownloadButtonsSection>
                     </StopDownloadDialogWrapper>
                 </StyledStopDownloadDialog>

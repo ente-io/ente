@@ -2,7 +2,7 @@
 
 use rand_core::{OsRng, RngCore};
 use x25519_dalek::{PublicKey, StaticSecret};
-use zeroize::{Zeroize, Zeroizing};
+use zeroize::Zeroize;
 
 use crate::crypto::{Result, SecretVec};
 
@@ -41,7 +41,7 @@ pub fn generate_key() -> Vec<u8> {
 pub fn generate_key_secure() -> SecretVec {
     let mut key = vec![0u8; SECRETBOX_KEY_BYTES];
     OsRng.fill_bytes(&mut key);
-    Zeroizing::new(key)
+    SecretVec::new(key)
 }
 
 /// Generate a random SecretStream encryption key.
@@ -58,7 +58,7 @@ pub fn generate_stream_key() -> Vec<u8> {
 pub fn generate_stream_key_secure() -> SecretVec {
     let mut key = vec![0u8; STREAM_KEY_BYTES];
     OsRng.fill_bytes(&mut key);
-    Zeroizing::new(key)
+    SecretVec::new(key)
 }
 
 /// Generate a random salt for key derivation.
@@ -78,7 +78,7 @@ pub fn generate_salt() -> Vec<u8> {
 pub fn generate_salt_secure() -> SecretVec {
     let mut salt = vec![0u8; SALT_BYTES];
     OsRng.fill_bytes(&mut salt);
-    Zeroizing::new(salt)
+    SecretVec::new(salt)
 }
 
 /// Generate a random nonce for SecretBox encryption.
@@ -97,7 +97,7 @@ pub fn generate_secretbox_nonce() -> Vec<u8> {
 pub fn generate_secretbox_nonce_secure() -> SecretVec {
     let mut nonce = vec![0u8; SECRETBOX_NONCE_BYTES];
     OsRng.fill_bytes(&mut nonce);
-    Zeroizing::new(nonce)
+    SecretVec::new(nonce)
 }
 
 /// Generate a random X25519 key pair.
@@ -128,7 +128,7 @@ pub fn generate_keypair_secure() -> Result<(Vec<u8>, SecretVec)> {
 
     Ok((
         public.as_bytes().to_vec(),
-        Zeroizing::new(secret.to_bytes().to_vec()),
+        SecretVec::new(secret.to_bytes().to_vec()),
     ))
 }
 
@@ -149,7 +149,7 @@ pub fn random_bytes(len: usize) -> Vec<u8> {
 pub fn random_bytes_secure(len: usize) -> SecretVec {
     let mut buf = vec![0u8; len];
     OsRng.fill_bytes(&mut buf);
-    Zeroizing::new(buf)
+    SecretVec::new(buf)
 }
 
 #[cfg(test)]

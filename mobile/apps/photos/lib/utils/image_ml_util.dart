@@ -7,6 +7,7 @@ import "dart:ui";
 import "package:exif_reader/exif_reader.dart";
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
+import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
@@ -15,6 +16,7 @@ import 'package:photos/services/machine_learning/face_ml/face_alignment/alignmen
 import 'package:photos/services/machine_learning/face_ml/face_alignment/similarity_transform.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/blur_detection_service.dart';
+import "package:photos/utils/file_util.dart";
 
 /// All of the functions in this file are helper functions for using inside an isolate.
 /// Don't use them outside of a isolate, unless you are okay with UI jank!!!!
@@ -62,7 +64,7 @@ Future<DecodedImage> decodeImageFromPath(
   if (skipExifRead) {
     _logger.info('Skipping EXIF read for JXL on iOS');
   } else {
-    exifData = await readExifFromBytes(imageData);
+    exifData = _normalizeExifResult(await readExifFromBytes(imageData));
   }
   final int orientation =
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
@@ -81,6 +83,16 @@ Future<DecodedImage> decodeImageFromPath(
   try {
     image = await decodeImageFromData(imageData);
   } catch (e, s) {
+    if (isRawImageExtension(format)) {
+      _logger.warning(
+        "Skipping JPEG conversion for RAW image format $format because flutter_image_compress is known to crash on unsupported RAW input",
+        e,
+        s,
+      );
+      throw Exception(
+        'InvalidImageFormatException: Error decoding image of format $format',
+      );
+    }
     _logger.info(
       'Cannot decode $format on ${Platform.isAndroid ? "Android" : "iOS"}, converting to jpeg',
     );
@@ -123,6 +135,43 @@ Future<DecodedImage> decodeImageFromPath(
     image: includeDartUiImage ? image : null,
     rawRgbaBytes: rawRgbaBytes,
   );
+}
+
+Map<String, IfdTag> _normalizeExifResult(dynamic result) {
+  if (result is Map<String, IfdTag>) {
+    return result;
+  }
+  final dynamic tags = result.tags;
+  if (tags is Map<String, IfdTag>) {
+    return tags;
+  }
+  throw ArgumentError("Unsupported EXIF result type: ${result.runtimeType}");
+}
+
+Future<Uint8List?> createSafeJpegDecodeFallbackBytes({
+  required String imagePath,
+}) async {
+  final imageData = await File(imagePath).readAsBytes();
+  return createSafeJpegDecodeFallbackBytesFromData(imageData);
+}
+
+Uint8List? createSafeJpegDecodeFallbackBytesFromData(Uint8List imageData) {
+  try {
+    final decoded = img.decodeImage(imageData);
+    if (decoded == null) {
+      return null;
+    }
+    final jpeg = img.encodeJpg(decoded, quality: 95);
+    return Uint8List.fromList(jpeg);
+  } catch (e) {
+    final firstLine = e.toString().split('\n').first.trim();
+    _logger.warning(
+      firstLine.isEmpty
+          ? "Safe JPEG conversion failed"
+          : "Safe JPEG conversion failed: $firstLine",
+    );
+    return null;
+  }
 }
 
 /// Decodes [Uint8List] image data to an ui.[Image] object.

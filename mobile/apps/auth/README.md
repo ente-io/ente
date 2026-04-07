@@ -117,4 +117,4 @@ apksigner verify --print-certs <path_to_apk>
 ## ⭐️ About
 
 To know more about Ente and the ways to get in touch or seek help, see [our main
-README](../../../README.md) or visit [ente.io](https://ente.io).
+README](../../../README.md) or visit [ente.com](https://ente.com).

@@ -939,8 +939,11 @@ class CryptoUtil {
       );
     }
 
+    // Keep the adaptive floor aligned with the server-side minimum accepted
+    // account KDF memory limit (128 MiB), not libsodium's absolute minimum.
+    const int minMemLimit = 128 * 1024 * 1024;
     Uint8List key;
-    while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
+    while (memLimit >= minMemLimit &&
         opsLimit <= Sodium.cryptoPwhashOpslimitMax) {
       try {
         key = await deriveKey(password, salt, memLimit, opsLimit);
@@ -962,7 +965,7 @@ class CryptoUtil {
   // with memory and ops limit hardcoded to their Interactive variants
   // NOTE: This is only used while setting passwords for shared links, as an
   // extra layer of authentication (atop the access token and collection key).
-  // More details @ https://ente.io/blog/building-shareable-links/
+  // More details @ https://ente.com/blog/building-shareable-links/
   static Future<DerivedKeyResult> deriveInteractiveKey(
     Uint8List password,
     Uint8List salt,

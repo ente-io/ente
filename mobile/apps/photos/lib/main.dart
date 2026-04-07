@@ -37,6 +37,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
+import 'package:photos/services/memory_share_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -67,10 +68,11 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
 bool _stopHearBeat = false;
+bool _isRustInitialized = false;
+Future<void>? _rustInitFuture;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
   FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
@@ -105,8 +107,27 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(SemanticSearchService.instance.init());
+      unawaited(_warmForegroundDeferredServices());
+    });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
+}
+
+Future<void> _warmForegroundDeferredServices() async {
+  try {
+    await MemoryLaneService.instance.init();
+    if (flagService.facesTimeline) {
+      MemoryLaneService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Memory Lane disabled via feature flag");
+    }
+  } catch (e, s) {
+    _logger.warning("Deferred MemoryLaneService warm failed", e, s);
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -159,6 +180,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await _scheduleHeartBeat(prefs, true);
+    await _ensureRustInitialized(via: 'workmanager:$taskId');
 
     _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
@@ -183,6 +205,10 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    // Initialize early so thermal/battery listeners can warm up while the
+    // rest of background services are being initialized.
+    final controller = computeController;
+    await MemoryShareService.instance.init();
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -216,9 +242,28 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    // await MLService.instance.init();
-    // await PersonService.init(entityService, MLDataDB.instance, prefs);
-    // await MLService.instance.runAllML(force: true);
+    if ((isOfflineMode || flagService.enableMLInBackground) &&
+        hasGrantedMLConsent) {
+      await controller.init();
+      final canRunML = controller.requestCompute(ml: true);
+      if (!canRunML) {
+        _logger.info(
+          "[BG TASK] skipping ML, compute requirements not satisfied",
+        );
+      } else {
+        bool mlRunStarted = false;
+        try {
+          await MLService.instance.init();
+          PersonService.init(entityService, MLDataDB.instance, prefs);
+          mlRunStarted = true;
+          await MLService.instance.runAllML(force: false);
+        } finally {
+          if (!mlRunStarted) {
+            controller.releaseCompute(ml: true);
+          }
+        }
+      }
+    }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 
@@ -236,7 +281,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       if (!initComplete && !isBackground) {
         _logger.severe("Stuck on splash screen for >= 15 seconds");
         triggerSendLogs(
-          "support@ente.io",
+          "support@ente.com",
           "Stuck on splash screen for >= 15 seconds on ${Platform.operatingSystem}",
           null,
         );
@@ -244,13 +289,18 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
+    await _ensureRustInitialized(
+      via: isBackground ? 'background:$via' : 'foreground:$via',
+    );
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _logFGHeartBeatInfo(preferences);
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
-    await NotificationService.instance.initializeForBackground();
+    if (isBackground) {
+      await NotificationService.instance.initializeForBackground();
+    }
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
@@ -278,6 +328,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    await MemoryShareService.instance.init();
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
@@ -329,17 +380,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }).ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(entityService, MLDataDB.instance, preferences);
-    await MemoryLaneService.instance.init();
-    if (flagService.facesTimeline) {
-      MemoryLaneService.instance
-          .queueFullRecompute(trigger: "startup")
-          .ignore();
-    } else {
-      _logger.info("Memory Lane disabled via feature flag");
-    }
+    PersonService.init(entityService, MLDataDB.instance, preferences);
+    await PersonService.instance.refreshPersonCache();
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();
@@ -349,6 +392,27 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
+  }
+}
+
+Future<void> _ensureRustInitialized({required String via}) async {
+  if (_isRustInitialized) {
+    return;
+  }
+  final inFlightInit = _rustInitFuture;
+  if (inFlightInit != null) {
+    await inFlightInit;
+    return;
+  }
+
+  _logger.info("Initializing Rust bridge via $via");
+  final initFuture = EntePhotosRust.init();
+  _rustInitFuture = initFuture;
+  try {
+    await initFuture;
+    _isRustInitialized = true;
+  } finally {
+    _rustInitFuture = null;
   }
 }
 

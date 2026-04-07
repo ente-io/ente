@@ -544,4 +544,4 @@ Jump to a category:
 - Try using the search function at the top of the page
 - Check the [Getting Started guide](/photos/getting-started/)
 - Visit the [main Photos documentation](/photos/)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)

@@ -1,29 +1,27 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import {
     Box,
     Button,
     ButtonBase,
-    Chip,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     IconButton,
-    Snackbar,
     Stack,
-    TextField,
     Tooltip,
     Typography,
 } from "@mui/material";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
+import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -31,7 +29,13 @@ import {
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { t } from "i18next";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     deleteLockerFileShareLink,
     downloadLockerFile,
@@ -40,16 +44,31 @@ import {
 import type { LockerCollection, LockerItem } from "types";
 import {
     canEditCollection,
+    canLeaveCollection,
     canOpenCollectionSharing,
     canShareLockerFileLink,
     getItemTitle,
     hasDownloadableObject,
     isImportantCollection,
+    isLockerItemOwner,
+    restoreTargetLockerCollections,
+    sortLockerCollections,
     visibleLockerCollections,
 } from "types";
 import { ItemCard } from "./ItemCard";
 import { ItemDetailView } from "./ItemDetailView";
-import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
+import { ItemListDialogs } from "./itemList/ItemListDialogs";
+
+const uniqueCollectionsByID = (collections: LockerCollection[]) => {
+    const seen = new Set<number>();
+    return collections.filter((collection) => {
+        if (seen.has(collection.id)) {
+            return false;
+        }
+        seen.add(collection.id);
+        return true;
+    });
+};
 
 interface ItemListProps {
     collections: LockerCollection[];
@@ -63,13 +82,21 @@ interface ItemListProps {
     onDeleteItem?: (item: LockerItem) => void;
     onDeleteItems?: (items: LockerItem[]) => void;
     onPermanentlyDelete?: (items: LockerItem[]) => void;
-    onRestoreItem?: (item: LockerItem, collectionID: number) => void;
+    onRestoreItem?: (
+        item: LockerItem,
+        collectionID: number,
+    ) => void | Promise<void>;
     onEmptyTrash?: () => void;
-    onRenameCollection?: (collectionID: number, newName: string) => void;
+    onRenameCollection?: (
+        collectionID: number,
+        newName: string,
+    ) => void | Promise<void>;
     onDeleteCollection?: (collectionID: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
     onShareCollection?: (collection: LockerCollection) => void;
+    onLeaveCollection?: (collection: LockerCollection) => void;
     searchTerm: string;
+    onNavigateBack?: () => void;
 }
 
 const contentMaxWidth = 560;
@@ -92,18 +119,24 @@ export const ItemList: React.FC<ItemListProps> = ({
     onDeleteCollection,
     onCreateCollection,
     onShareCollection,
+    onLeaveCollection,
     searchTerm,
+    onNavigateBack,
 }) => {
-    const currentUserID = ensureLocalUser().id;
-    const [selectedItem, setSelectedItem] = useState<LockerItem | null>(null);
-    const [restoreItem, setRestoreItem] = useState<LockerItem | null>(null);
+    const currentUserID = savedLocalUser()?.id;
+    const [selectedItemID, setSelectedItemID] = useState<number | null>(null);
+    const [restoreItemID, setRestoreItemID] = useState<number | null>(null);
     const [restoreCollectionID, setRestoreCollectionID] = useState<
         number | null
     >(null);
+    const [restoreError, setRestoreError] = useState<string | null>(null);
+    const [restoringItem, setRestoringItem] = useState(false);
     const [renameCollectionID, setRenameCollectionID] = useState<number | null>(
         null,
     );
     const [renameValue, setRenameValue] = useState("");
+    const [renameError, setRenameError] = useState<string | null>(null);
+    const [renamingCollection, setRenamingCollection] = useState(false);
     const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
     const [createCollectionName, setCreateCollectionName] = useState("");
     const [creatingCollection, setCreatingCollection] = useState(false);
@@ -113,6 +146,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [homeSelectedCollectionIDs, setHomeSelectedCollectionIDs] = useState<
         number[]
     >([]);
+    const [collectionFilterAnchorEl, setCollectionFilterAnchorEl] =
+        useState<HTMLElement | null>(null);
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedItemIDs, setSelectedItemIDs] = useState<number[]>([]);
     const [bulkDownloading, setBulkDownloading] = useState(false);
@@ -120,19 +155,34 @@ export const ItemList: React.FC<ItemListProps> = ({
         completed: number;
         total: number;
     } | null>(null);
-    const [activeFileLinkItem, setActiveFileLinkItem] =
-        useState<LockerItem | null>(null);
+    const [activeFileLinkItemID, setActiveFileLinkItemID] = useState<
+        number | null
+    >(null);
     const [activeFileLink, setActiveFileLink] = useState<{
         linkID: string;
         url: string;
     } | null>(null);
     const [isCreatingFileLink, setIsCreatingFileLink] = useState(false);
     const [isDeletingFileLink, setIsDeletingFileLink] = useState(false);
+    const [isDeleteFileLinkConfirmOpen, setIsDeleteFileLinkConfirmOpen] =
+        useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     const displayCollections = useMemo(
-        () => visibleLockerCollections(collections),
-        [collections],
+        () =>
+            uniqueCollectionsByID(
+                isCollectionsView
+                    ? sortLockerCollections(collections)
+                    : visibleLockerCollections(collections),
+            ),
+        [collections, isCollectionsView],
+    );
+    const restoreCollections = useMemo(
+        () =>
+            uniqueCollectionsByID(
+                restoreTargetLockerCollections(collections, currentUserID),
+            ),
+        [collections, currentUserID],
     );
     const allItems = useMemo(() => {
         const itemsByID = new Map<number, LockerItem>();
@@ -158,6 +208,14 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
         return [...itemsByID.values()];
     }, [collections]);
+    const allItemsByID = useMemo(
+        () => new Map(allItems.map((item) => [item.id, item])),
+        [allItems],
+    );
+    const trashItemsByID = useMemo(
+        () => new Map((trashItems ?? []).map((item) => [item.id, item])),
+        [trashItems],
+    );
     const selectedCollection = useMemo(
         () =>
             selectedCollectionID === null
@@ -166,6 +224,31 @@ export const ItemList: React.FC<ItemListProps> = ({
                       (collection) => collection.id === selectedCollectionID,
                   ) ?? null),
         [collections, selectedCollectionID],
+    );
+    const selectedItem = useMemo(() => {
+        if (selectedItemID === null) {
+            return null;
+        }
+
+        return (
+            allItemsByID.get(selectedItemID) ??
+            trashItemsByID.get(selectedItemID) ??
+            null
+        );
+    }, [allItemsByID, selectedItemID, trashItemsByID]);
+    const restoreItem = useMemo(
+        () =>
+            restoreItemID === null
+                ? null
+                : (trashItemsByID.get(restoreItemID) ?? null),
+        [restoreItemID, trashItemsByID],
+    );
+    const activeFileLinkItem = useMemo(
+        () =>
+            activeFileLinkItemID === null
+                ? null
+                : (allItemsByID.get(activeFileLinkItemID) ?? null),
+        [activeFileLinkItemID, allItemsByID],
     );
     const trimmedSearch = searchTerm.trim();
     const searchQuery = trimmedSearch.toLowerCase();
@@ -236,6 +319,42 @@ export const ItemList: React.FC<ItemListProps> = ({
             ),
         );
     }, [homeSelectedCollectionIDs, isHomeView, sortedItems]);
+    const orderedHomeCollections = useMemo(() => {
+        if (!isHomeView || homeSelectedCollectionIDs.length === 0) {
+            return displayCollections;
+        }
+
+        const selectedCollectionIDSet = new Set(homeSelectedCollectionIDs);
+        const availableCollectionIDs = new Set<number>();
+        for (const item of homeFilteredItems) {
+            for (const collectionID of item.collectionIDs) {
+                availableCollectionIDs.add(collectionID);
+            }
+        }
+        for (const collectionID of homeSelectedCollectionIDs) {
+            availableCollectionIDs.add(collectionID);
+        }
+
+        const selectedCollections = displayCollections.filter((collection) =>
+            selectedCollectionIDSet.has(collection.id),
+        );
+        const remainingCollections = displayCollections.filter(
+            (collection) =>
+                availableCollectionIDs.has(collection.id) &&
+                !selectedCollectionIDSet.has(collection.id),
+        );
+
+        return [...selectedCollections, ...remainingCollections];
+    }, [
+        displayCollections,
+        homeFilteredItems,
+        homeSelectedCollectionIDs,
+        isHomeView,
+    ]);
+    const dropdownHomeCollections = useMemo(
+        () => displayCollections,
+        [displayCollections],
+    );
     const visibleItems = useMemo(() => {
         if (isCollectionsView) {
             return [];
@@ -262,8 +381,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     );
     const selectedOwnedItems = useMemo(
         () =>
-            selectedVisibleItems.filter(
-                (item) => (item.ownerID ?? currentUserID) === currentUserID,
+            selectedVisibleItems.filter((item) =>
+                isLockerItemOwner(item, currentUserID),
             ),
         [currentUserID, selectedVisibleItems],
     );
@@ -284,25 +403,114 @@ export const ItemList: React.FC<ItemListProps> = ({
         typeof navigator !== "undefined" &&
         typeof navigator.share === "function";
 
-    const handleRestoreConfirm = useCallback(() => {
-        if (restoreItem && restoreCollectionID !== null && onRestoreItem) {
-            onRestoreItem(restoreItem, restoreCollectionID);
+    useEffect(() => {
+        if (selectedItemID !== null && !selectedItem) {
+            setSelectedItemID(null);
         }
-        setRestoreItem(null);
-        setRestoreCollectionID(null);
-    }, [onRestoreItem, restoreCollectionID, restoreItem]);
+    }, [selectedItem, selectedItemID]);
 
-    const handleRenameConfirm = useCallback(() => {
-        if (
-            renameCollectionID !== null &&
-            renameValue.trim() &&
-            onRenameCollection
-        ) {
-            onRenameCollection(renameCollectionID, renameValue.trim());
+    useEffect(() => {
+        if (restoreItemID !== null && !restoreItem) {
+            setRestoreItemID(null);
+            setRestoreCollectionID(null);
         }
-        setRenameCollectionID(null);
-        setRenameValue("");
-    }, [onRenameCollection, renameCollectionID, renameValue]);
+    }, [restoreItem, restoreItemID]);
+
+    useEffect(() => {
+        if (
+            restoreCollectionID !== null &&
+            !restoreCollections.some(
+                (collection) => collection.id === restoreCollectionID,
+            )
+        ) {
+            setRestoreCollectionID(null);
+        }
+    }, [restoreCollectionID, restoreCollections]);
+
+    useEffect(() => {
+        if (restoreItemID === null) {
+            setRestoreError(null);
+            setRestoringItem(false);
+        }
+    }, [restoreItemID]);
+
+    useEffect(() => {
+        if (renameCollectionID === null) {
+            setRenameError(null);
+            setRenamingCollection(false);
+        }
+    }, [renameCollectionID]);
+
+    useEffect(() => {
+        if (activeFileLinkItemID !== null && !activeFileLinkItem) {
+            setActiveFileLinkItemID(null);
+            setActiveFileLink(null);
+            setIsCreatingFileLink(false);
+            setIsDeletingFileLink(false);
+            setIsDeleteFileLinkConfirmOpen(false);
+        }
+    }, [activeFileLinkItem, activeFileLinkItemID]);
+
+    const handleRestoreConfirm = useCallback(async () => {
+        if (
+            !restoreItem ||
+            restoreCollectionID === null ||
+            !onRestoreItem ||
+            restoringItem
+        ) {
+            return;
+        }
+
+        setRestoringItem(true);
+        setRestoreError(null);
+        try {
+            await Promise.resolve(
+                onRestoreItem(restoreItem, restoreCollectionID),
+            );
+            setRestoreItemID(null);
+            setRestoreCollectionID(null);
+        } catch (error) {
+            log.error("Failed to restore Locker item", error);
+            setRestoreError(
+                error instanceof Error ? error.message : t("generic_error"),
+            );
+        } finally {
+            setRestoringItem(false);
+        }
+    }, [onRestoreItem, restoreCollectionID, restoreItem, restoringItem]);
+
+    const handleRenameConfirm = useCallback(async () => {
+        if (
+            renameCollectionID === null ||
+            !renameValue.trim() ||
+            !onRenameCollection ||
+            renamingCollection
+        ) {
+            return;
+        }
+
+        setRenamingCollection(true);
+        setRenameError(null);
+        try {
+            await Promise.resolve(
+                onRenameCollection(renameCollectionID, renameValue.trim()),
+            );
+            setRenameCollectionID(null);
+            setRenameValue("");
+        } catch (error) {
+            log.error("Failed to rename Locker collection", error);
+            setRenameError(
+                error instanceof Error ? error.message : t("generic_error"),
+            );
+        } finally {
+            setRenamingCollection(false);
+        }
+    }, [
+        onRenameCollection,
+        renameCollectionID,
+        renameValue,
+        renamingCollection,
+    ]);
 
     const handleCreateCollectionConfirm = useCallback(async () => {
         if (!onCreateCollection || !createCollectionName.trim()) {
@@ -331,7 +539,12 @@ export const ItemList: React.FC<ItemListProps> = ({
 
     const canEditSelectedCollection =
         selectedCollection !== null &&
+        currentUserID !== undefined &&
         canEditCollection(selectedCollection, currentUserID);
+    const canLeaveSelectedCollection =
+        selectedCollection !== null &&
+        currentUserID !== undefined &&
+        canLeaveCollection(selectedCollection, currentUserID);
     const canShareSelectedCollection =
         selectedCollection !== null &&
         canOpenCollectionSharing(selectedCollection);
@@ -350,10 +563,19 @@ export const ItemList: React.FC<ItemListProps> = ({
     const clearHomeCollectionSelection = useCallback(() => {
         setHomeSelectedCollectionIDs([]);
     }, []);
+    const openCollectionFilterMenu = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            setCollectionFilterAnchorEl(event.currentTarget);
+        },
+        [],
+    );
+    const closeCollectionFilterMenu = useCallback(() => {
+        setCollectionFilterAnchorEl(null);
+    }, []);
     const startSelectionModeForItem = useCallback((item: LockerItem) => {
         setSelectionMode(true);
         setSelectedItemIDs([item.id]);
-        setSelectedItem(null);
+        setSelectedItemID(null);
     }, []);
     const stopSelectionMode = useCallback(() => {
         setSelectionMode(false);
@@ -375,12 +597,16 @@ export const ItemList: React.FC<ItemListProps> = ({
         );
     }, [visibleSelectableItemIDs]);
     const closeFileLinkDialog = useCallback(() => {
-        if (isCreatingFileLink || isDeletingFileLink) {
+        if (
+            isCreatingFileLink ||
+            isDeletingFileLink ||
+            isDeleteFileLinkConfirmOpen
+        ) {
             return;
         }
-        setActiveFileLinkItem(null);
+        setActiveFileLinkItemID(null);
         setActiveFileLink(null);
-    }, [isCreatingFileLink, isDeletingFileLink]);
+    }, [isCreatingFileLink, isDeleteFileLinkConfirmOpen, isDeletingFileLink]);
     const openFileLinkDialog = useCallback(
         async (item: LockerItem) => {
             if (!masterKey) {
@@ -391,7 +617,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 return;
             }
 
-            setActiveFileLinkItem(item);
+            setActiveFileLinkItemID(item.id);
             setActiveFileLink(null);
             setIsCreatingFileLink(true);
             try {
@@ -410,7 +636,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                         ? t("sharingRequiresPaidPlan")
                         : t("failedToCreateShareLink"),
                 );
-                setActiveFileLinkItem(null);
+                setActiveFileLinkItemID(null);
             } finally {
                 setIsCreatingFileLink(false);
             }
@@ -455,13 +681,6 @@ export const ItemList: React.FC<ItemListProps> = ({
         if (!activeFileLinkItem) {
             return;
         }
-        if (
-            !window.confirm(
-                `${t("deleteShareLinkDialogTitle")}\n\n${t("deleteShareLinkConfirmation")}`,
-            )
-        ) {
-            return;
-        }
 
         setIsDeletingFileLink(true);
         try {
@@ -470,7 +689,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 activeFileLink?.linkID,
             );
             setFeedbackMessage(t("shareLinkDeletedSuccessfully"));
-            setActiveFileLinkItem(null);
+            setActiveFileLinkItemID(null);
             setActiveFileLink(null);
         } catch (error) {
             log.error(
@@ -480,6 +699,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             setFeedbackMessage(t("failedToDeleteShareLink"));
         } finally {
             setIsDeletingFileLink(false);
+            setIsDeleteFileLinkConfirmOpen(false);
         }
     }, [activeFileLink?.linkID, activeFileLinkItem]);
     const downloadSelectedFiles = useCallback(async () => {
@@ -551,7 +771,13 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
 
         onDeleteItems?.(selectedOwnedItems);
-    }, [onDeleteItems, selectedOwnedItems, skippedSharedSelectionCount]);
+        stopSelectionMode();
+    }, [
+        onDeleteItems,
+        selectedOwnedItems,
+        skippedSharedSelectionCount,
+        stopSelectionMode,
+    ]);
 
     React.useEffect(() => {
         if (!isHomeView && homeSelectedCollectionIDs.length > 0) {
@@ -626,58 +852,50 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         maxWidth: contentMaxWidth,
                                         mx: "auto",
                                         alignItems: "center",
-                                        gap: 1,
+                                        gap: 0.75,
                                         mt: -0.25,
                                         mb: 1.75,
+                                        minWidth: 0,
                                     }}
                                 >
-                                    <CollectionChipFilters
-                                        collections={displayCollections}
-                                        selectedCollectionIDs={
-                                            homeSelectedCollectionIDs
+                                    <CollectionFilterChip
+                                        selected={
+                                            homeSelectedCollectionIDs.length > 0
                                         }
-                                        onToggleCollection={
-                                            toggleHomeCollection
-                                        }
+                                        onClick={openCollectionFilterMenu}
                                     />
-                                    {homeSelectedCollectionIDs.length > 0 && (
-                                        <Tooltip title={t("clearSelection")}>
-                                            <IconButton
-                                                size="small"
-                                                onClick={
-                                                    clearHomeCollectionSelection
-                                                }
-                                                sx={(theme) => ({
-                                                    width: 32,
-                                                    height: 32,
-                                                    color: "text.muted",
-                                                    border: "1px solid rgba(255, 255, 255, 0.08)",
-                                                    backgroundColor:
-                                                        "rgba(255, 255, 255, 0.035)",
-                                                    "&:hover": {
-                                                        backgroundColor:
-                                                            "rgba(255, 255, 255, 0.065)",
-                                                    },
-                                                    ...theme.applyStyles(
-                                                        "light",
-                                                        {
-                                                            border: "1px solid rgba(17, 24, 39, 0.08)",
-                                                            backgroundColor:
-                                                                "#FFFFFF",
-                                                            "&:hover": {
-                                                                backgroundColor:
-                                                                    "#FFFFFF",
-                                                            },
-                                                        },
-                                                    ),
-                                                })}
-                                            >
-                                                <ClearRoundedIcon
-                                                    sx={{ fontSize: 18 }}
-                                                />
-                                            </IconButton>
-                                        </Tooltip>
-                                    )}
+                                    <Box
+                                        key={orderedHomeCollections
+                                            .map((collection) => collection.id)
+                                            .join("-")}
+                                        sx={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            "@keyframes chipBarRefresh": {
+                                                "0%": {
+                                                    opacity: 0.7,
+                                                    transform:
+                                                        "translateY(2px)",
+                                                },
+                                                "100%": {
+                                                    opacity: 1,
+                                                    transform: "translateY(0)",
+                                                },
+                                            },
+                                            animation:
+                                                "chipBarRefresh 220ms ease-out",
+                                        }}
+                                    >
+                                        <CollectionChipFilters
+                                            collections={orderedHomeCollections}
+                                            selectedCollectionIDs={
+                                                homeSelectedCollectionIDs
+                                            }
+                                            onToggleCollection={
+                                                toggleHomeCollection
+                                            }
+                                        />
+                                    </Box>
                                 </Stack>
                             )}
 
@@ -689,10 +907,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 onDeleteItem={onDeleteItem}
                                 onPermanentlyDelete={onPermanentlyDelete}
                                 onRequestRestore={(item) => {
-                                    setRestoreItem(item);
+                                    setRestoreItemID(item.id);
                                     setRestoreCollectionID(null);
                                 }}
-                                onSelectItem={setSelectedItem}
+                                onSelectItem={(item) =>
+                                    setSelectedItemID(item.id)
+                                }
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
                                 selectionMode={selectionMode}
@@ -730,6 +950,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 countLabel={t("lockerCollectionsCount", {
                                     count: displayCollections.length,
                                 })}
+                                onBack={onNavigateBack}
                                 action={
                                     onCreateCollection ? (
                                         <Tooltip
@@ -778,6 +999,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         collections={displayCollections}
                                         onSelectCollection={onSelectCollection}
                                         onShareCollection={onShareCollection}
+                                        onLeaveCollection={onLeaveCollection}
                                         onRequestRenameCollection={(
                                             collection,
                                         ) => {
@@ -815,6 +1037,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         collections={filteredCollections}
                                         onSelectCollection={onSelectCollection}
                                         onShareCollection={onShareCollection}
+                                        onLeaveCollection={onLeaveCollection}
                                         onRequestRenameCollection={(
                                             collection,
                                         ) => {
@@ -829,7 +1052,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                             )}
 
                             <SectionHeader
-                                title={t("allItems")}
+                                title={t("results")}
                                 countLabel={t("lockerItemsCount", {
                                     count: sortedItems.length,
                                 })}
@@ -843,10 +1066,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 onDeleteItem={onDeleteItem}
                                 onPermanentlyDelete={onPermanentlyDelete}
                                 onRequestRestore={(item) => {
-                                    setRestoreItem(item);
+                                    setRestoreItemID(item.id);
                                     setRestoreCollectionID(null);
                                 }}
-                                onSelectItem={setSelectedItem}
+                                onSelectItem={(item) =>
+                                    setSelectedItemID(item.id)
+                                }
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
                                 selectionMode={selectionMode}
@@ -879,6 +1104,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 countLabel={t("lockerItemsCount", {
                                     count: sortedItems.length,
                                 })}
+                                onBack={onNavigateBack}
                                 action={
                                     <Stack
                                         direction="row"
@@ -918,7 +1144,8 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                     </IconButton>
                                                 </Tooltip>
                                             )}
-                                        {canEditSelectedCollection && (
+                                        {(canEditSelectedCollection ||
+                                            canLeaveSelectedCollection) && (
                                             <CollectionHeaderMenu
                                                 onShare={
                                                     canShareSelectedCollection &&
@@ -946,6 +1173,15 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                               )
                                                         : undefined
                                                 }
+                                                onLeave={
+                                                    onLeaveCollection &&
+                                                    canLeaveSelectedCollection
+                                                        ? () =>
+                                                              onLeaveCollection(
+                                                                  selectedCollection,
+                                                              )
+                                                        : undefined
+                                                }
                                             />
                                         )}
                                     </Stack>
@@ -960,10 +1196,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 onDeleteItem={onDeleteItem}
                                 onPermanentlyDelete={onPermanentlyDelete}
                                 onRequestRestore={(item) => {
-                                    setRestoreItem(item);
+                                    setRestoreItemID(item.id);
                                     setRestoreCollectionID(null);
                                 }}
-                                onSelectItem={setSelectedItem}
+                                onSelectItem={(item) =>
+                                    setSelectedItemID(item.id)
+                                }
                                 currentUserID={currentUserID}
                                 onShareLink={
                                     isTrashView ? undefined : openFileLinkDialog
@@ -1021,14 +1259,14 @@ export const ItemList: React.FC<ItemListProps> = ({
             <ItemDetailView
                 item={selectedItem}
                 masterKey={masterKey}
-                onClose={() => setSelectedItem(null)}
+                onClose={() => setSelectedItemID(null)}
                 onEdit={
                     onEditItem &&
                     !isTrashView &&
                     selectedItem &&
-                    (selectedItem.ownerID ?? currentUserID) === currentUserID
+                    isLockerItemOwner(selectedItem, currentUserID)
                         ? (item) => {
-                              setSelectedItem(null);
+                              setSelectedItemID(null);
                               onEditItem(item);
                           }
                         : undefined
@@ -1037,9 +1275,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                     onDeleteItem &&
                     !isTrashView &&
                     selectedItem &&
-                    (selectedItem.ownerID ?? currentUserID) === currentUserID
+                    isLockerItemOwner(selectedItem, currentUserID)
                         ? (item) => {
-                              setSelectedItem(null);
+                              setSelectedItemID(null);
                               onDeleteItem(item);
                           }
                         : undefined
@@ -1047,7 +1285,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                 onDeleteDisabledHint={
                     !isTrashView &&
                     selectedItem &&
-                    (selectedItem.ownerID ?? currentUserID) !== currentUserID
+                    !isLockerItemOwner(selectedItem, currentUserID)
                         ? t("actionNotSupportedForSharedFiles", { count: 1 })
                         : undefined
                 }
@@ -1061,172 +1299,80 @@ export const ItemList: React.FC<ItemListProps> = ({
                 }
             />
 
-            <LockerFileLinkDialog
-                open={activeFileLinkItem !== null}
-                itemTitle={
+            <ItemListDialogs
+                activeFileLinkItemTitle={
                     activeFileLinkItem ? getItemTitle(activeFileLinkItem) : ""
                 }
-                url={activeFileLink?.url}
-                loading={isCreatingFileLink}
-                deleting={isDeletingFileLink}
-                showShareAction={canNativeShare}
-                onClose={closeFileLinkDialog}
-                onCopy={() => void copyActiveFileLink()}
-                onShare={() => void shareActiveFileLink()}
-                onDelete={() => void deleteActiveFileLink()}
-            />
-
-            <Dialog
-                open={restoreItem !== null}
-                onClose={() => setRestoreItem(null)}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("restoreToCollection")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 1, pt: 0.25, pb: 1 }}>
-                        {displayCollections.length > 0 ? (
-                            displayCollections.map((collection) => (
-                                <Chip
-                                    key={collection.id}
-                                    label={collection.name}
-                                    variant={
-                                        restoreCollectionID === collection.id
-                                            ? "filled"
-                                            : "outlined"
-                                    }
-                                    color={
-                                        restoreCollectionID === collection.id
-                                            ? "primary"
-                                            : "default"
-                                    }
-                                    onClick={() =>
-                                        setRestoreCollectionID(collection.id)
-                                    }
-                                />
-                            ))
-                        ) : (
-                            <Typography
-                                variant="body"
-                                sx={{ color: "text.muted" }}
-                            >
-                                {t("noCollectionsAvailableForSelection")}
-                            </Typography>
-                        )}
-                        <Button
-                            variant="contained"
-                            disabled={restoreCollectionID === null}
-                            onClick={handleRestoreConfirm}
-                            sx={{ mt: 1 }}
-                        >
-                            {t("restore")}
-                        </Button>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
-                open={renameCollectionID !== null}
-                onClose={() => setRenameCollectionID(null)}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("renameCollection")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
-                        <TextField
-                            value={renameValue}
-                            onChange={(event) =>
-                                setRenameValue(event.target.value)
-                            }
-                            label={t("enterCollectionName")}
-                            fullWidth
-                            autoFocus
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter") {
-                                    handleRenameConfirm();
-                                }
-                            }}
-                        />
-                        <Button
-                            variant="contained"
-                            disabled={!renameValue.trim()}
-                            onClick={handleRenameConfirm}
-                        >
-                            {t("save")}
-                        </Button>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
-                open={createCollectionOpen}
-                onClose={() => {
-                    if (!creatingCollection) {
-                        setCreateCollectionOpen(false);
+                activeFileLinkURL={activeFileLink?.url ?? null}
+                canNativeShare={canNativeShare}
+                closeCollectionFilterMenu={closeCollectionFilterMenu}
+                closeFileLinkDialog={closeFileLinkDialog}
+                clearHomeCollectionSelection={clearHomeCollectionSelection}
+                collectionFilterAnchorEl={collectionFilterAnchorEl}
+                createCollectionError={createCollectionError}
+                createCollectionName={createCollectionName}
+                createCollectionOpen={createCollectionOpen}
+                creatingCollection={creatingCollection}
+                deleteFileLink={() => void deleteActiveFileLink()}
+                dropdownHomeCollections={dropdownHomeCollections}
+                feedbackMessage={feedbackMessage}
+                fileLinkDialogOpen={activeFileLinkItem !== null}
+                homeSelectedCollectionIDs={homeSelectedCollectionIDs}
+                isCreatingFileLink={isCreatingFileLink}
+                isDeleteFileLinkConfirmOpen={isDeleteFileLinkConfirmOpen}
+                isDeletingFileLink={isDeletingFileLink}
+                onCloseCreateCollectionDialog={() =>
+                    setCreateCollectionOpen(false)
+                }
+                onCloseFeedback={() => setFeedbackMessage(null)}
+                onCloseRenameDialog={() => {
+                    if (renamingCollection) {
+                        return;
                     }
+                    setRenameCollectionID(null);
+                    setRenameError(null);
                 }}
-                fullWidth
-                maxWidth="xs"
-            >
-                <DialogTitle>{t("createNewCollection")}</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
-                        <TextField
-                            value={createCollectionName}
-                            onChange={(event) => {
-                                setCreateCollectionName(event.target.value);
-                                setCreateCollectionError(null);
-                            }}
-                            label={t("enterCollectionName")}
-                            fullWidth
-                            autoFocus
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter") {
-                                    void handleCreateCollectionConfirm();
-                                }
-                            }}
-                        />
-                        {createCollectionError && (
-                            <Typography
-                                variant="small"
-                                sx={{ color: "critical.main" }}
-                            >
-                                {createCollectionError}
-                            </Typography>
-                        )}
-                        <Stack direction="row" sx={{ gap: 1 }}>
-                            <Button
-                                fullWidth
-                                color="secondary"
-                                onClick={() => setCreateCollectionOpen(false)}
-                                disabled={creatingCollection}
-                            >
-                                {t("cancel")}
-                            </Button>
-                            <Button
-                                fullWidth
-                                variant="contained"
-                                onClick={() =>
-                                    void handleCreateCollectionConfirm()
-                                }
-                                disabled={
-                                    creatingCollection ||
-                                    !createCollectionName.trim()
-                                }
-                            >
-                                {t("createCollectionButton")}
-                            </Button>
-                        </Stack>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            <Snackbar
-                open={feedbackMessage !== null}
-                message={feedbackMessage}
-                autoHideDuration={2500}
-                onClose={() => setFeedbackMessage(null)}
+                onCloseRestoreDialog={() => {
+                    if (restoringItem) {
+                        return;
+                    }
+                    setRestoreItemID(null);
+                    setRestoreCollectionID(null);
+                    setRestoreError(null);
+                }}
+                onConfirmCreateCollection={() =>
+                    void handleCreateCollectionConfirm()
+                }
+                onConfirmRename={handleRenameConfirm}
+                onConfirmRestore={handleRestoreConfirm}
+                onCopyFileLink={() => void copyActiveFileLink()}
+                onRequestDeleteFileLink={() =>
+                    setIsDeleteFileLinkConfirmOpen(true)
+                }
+                onShareFileLink={() => void shareActiveFileLink()}
+                onToggleHomeCollection={toggleHomeCollection}
+                renameError={renameError}
+                renameCollectionOpen={renameCollectionID !== null}
+                renamingCollection={renamingCollection}
+                renameValue={renameValue}
+                restoreCollections={restoreCollections}
+                restoreError={restoreError}
+                restoreCollectionID={restoreCollectionID}
+                restoreDialogOpen={restoreItem !== null}
+                restoringItem={restoringItem}
+                setCreateCollectionName={(value) => {
+                    setCreateCollectionName(value);
+                    setCreateCollectionError(null);
+                }}
+                setDeleteFileLinkConfirmOpen={setIsDeleteFileLinkConfirmOpen}
+                setRenameValue={(value) => {
+                    setRenameValue(value);
+                    setRenameError(null);
+                }}
+                setRestoreCollectionID={(collectionID) => {
+                    setRestoreCollectionID(collectionID);
+                    setRestoreError(null);
+                }}
             />
         </Stack>
     );
@@ -1236,7 +1382,8 @@ const SectionHeader: React.FC<{
     title: string;
     countLabel: string;
     action?: React.ReactNode;
-}> = ({ title, countLabel, action }) => (
+    onBack?: () => void;
+}> = ({ title, countLabel, action, onBack }) => (
     <Stack
         direction="row"
         sx={{
@@ -1246,17 +1393,45 @@ const SectionHeader: React.FC<{
             maxWidth: contentMaxWidth,
             mx: "auto",
             mt: 3,
-            mb: 1.5,
+            mb: 2.25,
         }}
     >
-        <Box>
-            <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-                {title}
-            </Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {countLabel}
-            </Typography>
-        </Box>
+        <Stack
+            direction="row"
+            sx={{ minWidth: 0, gap: 1.5, alignItems: "center" }}
+        >
+            {onBack && (
+                <IconButton
+                    aria-label="Back"
+                    onClick={onBack}
+                    sx={{
+                        alignSelf: "center",
+                        width: 44,
+                        height: 44,
+                        flexShrink: 0,
+                        color: "text.secondary",
+                        border: "1px solid rgba(255, 255, 255, 0.10)",
+                        backgroundColor: "rgba(255, 255, 255, 0.03)",
+                        "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.08)",
+                        },
+                    }}
+                >
+                    <ArrowBackRoundedIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+            )}
+            <Box sx={{ minWidth: 0 }}>
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", minWidth: 0 }}
+                >
+                    {title}
+                </Typography>
+                <Typography variant="small" sx={{ color: "text.muted", mt: 1 }}>
+                    {countLabel}
+                </Typography>
+            </Box>
+        </Stack>
         {action}
     </Stack>
 );
@@ -1270,7 +1445,7 @@ const ItemsSection: React.FC<{
     onPermanentlyDelete?: (items: LockerItem[]) => void;
     onRequestRestore: (item: LockerItem) => void;
     onSelectItem: (item: LockerItem) => void;
-    currentUserID: number;
+    currentUserID?: number;
     onShareLink?: (item: LockerItem) => void;
     selectionMode?: boolean;
     selectedItemIDSet?: Set<number>;
@@ -1299,17 +1474,17 @@ const ItemsSection: React.FC<{
             sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 1.1, mt: 1.25 }}
         >
             {items.map((item) => {
-                const isOwnedByCurrentUser =
-                    (item.ownerID ?? currentUserID) === currentUserID;
+                const isOwnedByCurrentUser = isLockerItemOwner(
+                    item,
+                    currentUserID,
+                );
                 return (
                     <ItemCard
                         key={item.id}
                         item={item}
                         masterKey={masterKey}
                         isTrashView={isTrashView}
-                        isIncomingShared={
-                            (item.ownerID ?? currentUserID) !== currentUserID
-                        }
+                        isIncomingShared={!isOwnedByCurrentUser}
                         onClick={() => onSelectItem(item)}
                         onEdit={
                             onEditItem && isOwnedByCurrentUser
@@ -1378,27 +1553,19 @@ const SelectionActionBar: React.FC<{
     onDelete,
     onDone,
 }) => (
-    <Box
-        sx={{
-            px: { xs: 2, sm: 3 },
-            py: { xs: 1.25, sm: 1.5 },
-            background:
-                "linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.82) 18%, rgba(8, 9, 10, 0.95) 100%)",
-        }}
-    >
+    <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 1.25, sm: 1.5 } }}>
         <Box
-            sx={{
+            sx={(theme) => ({
                 maxWidth: 760,
                 mx: "auto",
                 borderRadius: "20px",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                background:
-                    "linear-gradient(180deg, rgba(24, 26, 30, 0.96) 0%, rgba(14, 16, 19, 0.98) 100%)",
-                boxShadow: "0 18px 42px rgba(0, 0, 0, 0.32)",
+                border: `1px solid ${theme.vars.palette.stroke.faint}`,
+                backgroundColor: theme.vars.palette.background.paper,
+                boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
                 backdropFilter: "blur(18px)",
                 px: { xs: 1.25, sm: 1.5 },
                 py: 1.25,
-            }}
+            })}
         >
             <Stack
                 direction={{ xs: "column", sm: "row" }}
@@ -1425,15 +1592,14 @@ const SelectionActionBar: React.FC<{
                             px: 1.25,
                             py: 0.875,
                             borderRadius: "14px",
-                            background:
-                                "linear-gradient(180deg, rgba(14, 71, 157, 0.26) 0%, rgba(8, 45, 106, 0.18) 100%)",
-                            border: "1px solid rgba(74, 144, 255, 0.18)",
+                            backgroundColor: "rgba(16, 113, 255, 0.10)",
+                            border: "1px solid rgba(16, 113, 255, 0.16)",
                         }}
                     >
                         <CheckCircleRoundedIcon
                             sx={{
                                 fontSize: 18,
-                                color: "#7FB3FF",
+                                color: "#1071FF",
                                 flexShrink: 0,
                             }}
                         />
@@ -1448,17 +1614,18 @@ const SelectionActionBar: React.FC<{
                     <IconButton
                         onClick={onDone}
                         disabled={bulkDownloading}
-                        sx={{
+                        sx={(theme) => ({
                             color: "text.muted",
                             width: 38,
                             height: 38,
                             flexShrink: 0,
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
-                            backgroundColor: "rgba(255, 255, 255, 0.035)",
+                            border: `1px solid ${theme.vars.palette.stroke.faint}`,
+                            backgroundColor: theme.vars.palette.fill.faint,
                             "&:hover": {
-                                backgroundColor: "rgba(255, 255, 255, 0.07)",
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
                             },
-                        }}
+                        })}
                     >
                         <ClearRoundedIcon sx={{ fontSize: 18 }} />
                     </IconButton>
@@ -1471,13 +1638,17 @@ const SelectionActionBar: React.FC<{
                         color="secondary"
                         onClick={onToggleSelectAll}
                         disabled={bulkDownloading}
-                        sx={{
+                        sx={(theme) => ({
                             minHeight: 42,
                             px: 1.5,
                             borderRadius: "14px",
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
-                            backgroundColor: "rgba(255, 255, 255, 0.04)",
-                        }}
+                            border: `1px solid ${theme.vars.palette.stroke.faint}`,
+                            backgroundColor: theme.vars.palette.fill.faint,
+                            "&:hover": {
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
+                            },
+                        })}
                     >
                         {allSelected ? t("deselectAll") : t("selectAll")}
                     </Button>
@@ -1491,8 +1662,10 @@ const SelectionActionBar: React.FC<{
                             px: 1.75,
                             borderRadius: "14px",
                             boxShadow: "none",
+                            color: "#FFFFFF",
                             background:
                                 "linear-gradient(180deg, #1674FF 0%, #0B5FE0 100%)",
+                            "& .MuiButton-startIcon": { color: "#FFFFFF" },
                             "&:hover": {
                                 boxShadow: "none",
                                 background:
@@ -1513,11 +1686,11 @@ const SelectionActionBar: React.FC<{
                             minHeight: 42,
                             px: 1.75,
                             borderRadius: "14px",
-                            border: "1px solid rgba(255, 91, 91, 0.22)",
-                            backgroundColor: "rgba(255, 91, 91, 0.12)",
-                            "&:hover": {
-                                backgroundColor: "rgba(255, 91, 91, 0.18)",
-                            },
+                            color: "#FFFFFF",
+                            border: "1px solid rgba(185, 28, 28, 0.26)",
+                            backgroundColor: "#D14343",
+                            "& .MuiButton-startIcon": { color: "#FFFFFF" },
+                            "&:hover": { backgroundColor: "#B93838" },
                         }}
                     >
                         {t("delete")}
@@ -1532,16 +1705,18 @@ const CollectionGrid: React.FC<{
     collections: LockerCollection[];
     onSelectCollection: (collectionID: number) => void;
     onShareCollection?: (collection: LockerCollection) => void;
+    onLeaveCollection?: (collection: LockerCollection) => void;
     onRequestRenameCollection?: (collection: LockerCollection) => void;
     onDeleteCollection?: (collectionID: number) => void;
 }> = ({
     collections,
     onSelectCollection,
     onShareCollection,
+    onLeaveCollection,
     onRequestRenameCollection,
     onDeleteCollection,
 }) => {
-    const currentUserID = ensureLocalUser().id;
+    const currentUserID = savedLocalUser()?.id;
 
     return (
         <Box
@@ -1549,7 +1724,8 @@ const CollectionGrid: React.FC<{
                 width: "100%",
                 maxWidth: contentMaxWidth,
                 mx: "auto",
-                gap: 1.5,
+                display: "grid",
+                gap: 2,
             }}
         >
             {collections.map((collection) => (
@@ -1561,6 +1737,12 @@ const CollectionGrid: React.FC<{
                         onShareCollection &&
                         canOpenCollectionSharing(collection)
                             ? () => onShareCollection(collection)
+                            : undefined
+                    }
+                    onLeave={
+                        onLeaveCollection &&
+                        canLeaveCollection(collection, currentUserID)
+                            ? () => onLeaveCollection(collection)
                             : undefined
                     }
                     onRename={
@@ -1585,69 +1767,220 @@ const CollectionChipFilters: React.FC<{
     collections: LockerCollection[];
     selectedCollectionIDs: number[];
     onToggleCollection: (collectionID: number) => void;
-}> = ({ collections, selectedCollectionIDs, onToggleCollection }) => (
-    <Box
-        sx={{
-            position: "relative",
-            width: "100%",
-            maxWidth: contentMaxWidth,
-            mx: "auto",
-            mt: 0.5,
-        }}
-    >
-        <Stack
-            direction="row"
+}> = ({ collections, selectedCollectionIDs, onToggleCollection }) => {
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const [showLeftScrollHint, setShowLeftScrollHint] = useState(false);
+    const [showRightScrollHint, setShowRightScrollHint] = useState(false);
+
+    const scrollRight = () => {
+        const container = scrollContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        container.scrollBy({
+            left: Math.max(container.clientWidth * 0.6, 160),
+            behavior: "smooth",
+        });
+    };
+
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        const updateScrollHint = () => {
+            setShowLeftScrollHint(container.scrollLeft > 8);
+            const remainingScroll =
+                container.scrollWidth -
+                container.clientWidth -
+                container.scrollLeft;
+            setShowRightScrollHint(remainingScroll > 8);
+        };
+
+        updateScrollHint();
+        container.addEventListener("scroll", updateScrollHint, {
+            passive: true,
+        });
+        window.addEventListener("resize", updateScrollHint);
+
+        return () => {
+            container.removeEventListener("scroll", updateScrollHint);
+            window.removeEventListener("resize", updateScrollHint);
+        };
+    }, [collections, selectedCollectionIDs]);
+
+    return (
+        <Box
             sx={{
-                flexWrap: "nowrap",
-                overflowX: "auto",
-                overflowY: "hidden",
-                justifyContent: "flex-start",
-                gap: 1,
-                pb: 0.5,
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
+                width: "100%",
+                maxWidth: contentMaxWidth,
+                mx: "auto",
+                mt: 0.5,
             }}
         >
-            {collections.map((collection) => {
-                const isSelected = selectedCollectionIDs.includes(
-                    collection.id,
-                );
+            <Stack direction="row" sx={{ alignItems: "stretch", gap: 0 }}>
+                <Box sx={{ position: "relative", flex: 1, minWidth: 0 }}>
+                    <Stack
+                        ref={scrollContainerRef}
+                        direction="row"
+                        sx={{
+                            gap: 1,
+                            flexWrap: "nowrap",
+                            overflowX: "auto",
+                            overflowY: "hidden",
+                            justifyContent: "flex-start",
+                            pr: 2,
+                            pb: 0.5,
+                            scrollbarWidth: "none",
+                            "&::-webkit-scrollbar": { display: "none" },
+                        }}
+                    >
+                        {collections.map((collection) => {
+                            const isSelected = selectedCollectionIDs.includes(
+                                collection.id,
+                            );
 
-                return (
-                    <Chip
-                        key={collection.id}
-                        clickable
-                        label={collection.name}
-                        onClick={() => onToggleCollection(collection.id)}
-                        sx={(theme) => ({
-                            height: 36,
-                            flexShrink: 0,
-                            borderRadius: "999px",
-                            fontWeight: 600,
-                            color: isSelected
-                                ? theme.vars.palette.text.base
-                                : theme.vars.palette.text.base,
-                            backgroundColor: theme.vars.palette.fill.faint,
-                            border: "1px solid transparent",
-                            boxShadow: isSelected
-                                ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
-                                : "none",
-                            "& .MuiChip-label": { px: 1.5 },
-                            "&:hover": {
-                                backgroundColor:
-                                    theme.vars.palette.fill.faintHover,
-                            },
-                            ...theme.applyStyles("light", {
-                                backgroundColor: "#FFFFFF",
-                                border: "1px solid rgba(17, 24, 39, 0.06)",
-                                "&:hover": { backgroundColor: "#FFFFFF" },
-                            }),
+                            return (
+                                <ButtonBase
+                                    key={collection.id}
+                                    onClick={() =>
+                                        onToggleCollection(collection.id)
+                                    }
+                                    sx={(theme) => ({
+                                        borderRadius: "999px",
+                                        px: 1.5,
+                                        py: 0.875,
+                                        whiteSpace: "nowrap",
+                                        flexShrink: 0,
+                                        backgroundColor: isSelected
+                                            ? "#1071FF"
+                                            : theme.vars.palette.fill.faint,
+                                        color: isSelected
+                                            ? "#FFFFFF"
+                                            : theme.vars.palette.text.base,
+                                        ...theme.applyStyles("light", {
+                                            backgroundColor: isSelected
+                                                ? "#1071FF"
+                                                : "#FFFFFF",
+                                            border: isSelected
+                                                ? "none"
+                                                : "1px solid rgba(17, 24, 39, 0.06)",
+                                        }),
+                                    })}
+                                >
+                                    <Typography variant="small">
+                                        {collection.name}
+                                    </Typography>
+                                </ButtonBase>
+                            );
                         })}
-                    />
-                );
+                    </Stack>
+                    {showLeftScrollHint && (
+                        <Box
+                            sx={(theme) => ({
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                bottom: 0,
+                                width: 40,
+                                pointerEvents: "none",
+                                background:
+                                    "linear-gradient(90deg, #08090A 0%, rgba(8, 9, 10, 0) 100%)",
+                                ...theme.applyStyles("light", {
+                                    background:
+                                        "linear-gradient(90deg, #F3F4F6 0%, rgba(243, 244, 246, 0) 100%)",
+                                }),
+                            })}
+                        />
+                    )}
+                    {showRightScrollHint && (
+                        <Box
+                            sx={(theme) => ({
+                                position: "absolute",
+                                top: 0,
+                                right: 0,
+                                bottom: 0,
+                                width: 72,
+                                pointerEvents: "none",
+                                background:
+                                    "linear-gradient(90deg, rgba(8, 9, 10, 0) 0%, #08090A 100%)",
+                                ...theme.applyStyles("light", {
+                                    background:
+                                        "linear-gradient(90deg, rgba(243, 244, 246, 0) 0%, #F3F4F6 100%)",
+                                }),
+                            })}
+                        />
+                    )}
+                </Box>
+                <Box
+                    sx={{
+                        width: 28,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    {showRightScrollHint && (
+                        <ButtonBase
+                            onClick={scrollRight}
+                            sx={(theme) => ({
+                                width: 28,
+                                height: "100%",
+                                color: "#4A4A4A",
+                                borderRadius: "999px",
+                                ...theme.applyStyles("dark", {
+                                    color: "#FFFFFF",
+                                }),
+                            })}
+                        >
+                            <ChevronRightRoundedIcon sx={{ fontSize: 28 }} />
+                        </ButtonBase>
+                    )}
+                </Box>
+            </Stack>
+        </Box>
+    );
+};
+
+const CollectionFilterChip: React.FC<{
+    selected: boolean;
+    onClick: (event: React.MouseEvent<HTMLElement>) => void;
+}> = ({ selected, onClick }) => (
+    <Tooltip title={t("seeAllCollections")}>
+        <ButtonBase
+            onClick={onClick}
+            sx={(theme) => ({
+                borderRadius: "999px",
+                px: 1.25,
+                py: 0.875,
+                flexShrink: 0,
+                minWidth: 44,
+                color: selected ? "#FFFFFF" : theme.vars.palette.text.base,
+                backgroundColor: selected
+                    ? "#1071FF"
+                    : theme.vars.palette.fill.faint,
+                "&:hover": {
+                    backgroundColor: selected
+                        ? "#1071FF"
+                        : theme.vars.palette.fill.faintHover,
+                },
+                ...theme.applyStyles("light", {
+                    backgroundColor: selected ? "#1071FF" : "#FFFFFF",
+                    border: selected
+                        ? "none"
+                        : "1px solid rgba(17, 24, 39, 0.06)",
+                    "&:hover": {
+                        backgroundColor: selected ? "#1071FF" : "#F8FAFC",
+                    },
+                }),
             })}
-        </Stack>
-    </Box>
+        >
+            <FilterListRoundedIcon sx={{ fontSize: 18 }} />
+        </ButtonBase>
+    </Tooltip>
 );
 
 const EmptyState: React.FC<{ title: string; subtitle: string }> = ({
@@ -1668,9 +2001,10 @@ const CollectionCard: React.FC<{
     collection: LockerCollection;
     onClick: () => void;
     onShare?: () => void;
+    onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ collection, onClick, onShare, onRename, onDelete }) => {
+}> = ({ collection, onClick, onShare, onLeave, onRename, onDelete }) => {
     return (
         <ButtonBase
             component="div"
@@ -1680,26 +2014,26 @@ const CollectionCard: React.FC<{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 1.5,
-                px: 2,
-                py: 1.5,
+                gap: 1.25,
+                px: 1.5,
+                py: 1.25,
                 minHeight: 84,
-                borderRadius: "16px",
+                borderRadius: "18px",
                 backgroundColor:
                     collection.items.length > 0
-                        ? "rgba(255, 255, 255, 0.06)"
+                        ? theme.vars.palette.fill.faint
                         : "rgba(255, 255, 255, 0.03)",
                 border: 1,
                 borderStyle: "solid",
                 borderColor:
                     collection.items.length > 0
-                        ? "rgba(255, 255, 255, 0.10)"
+                        ? "rgba(255, 255, 255, 0.08)"
                         : "rgba(255, 255, 255, 0.08)",
                 transition: "background-color 0.15s, border-color 0.15s",
                 "&:hover": {
                     backgroundColor:
                         collection.items.length > 0
-                            ? "rgba(255, 255, 255, 0.08)"
+                            ? theme.vars.palette.fill.faintHover
                             : "rgba(255, 255, 255, 0.05)",
                     borderColor: "rgba(255, 255, 255, 0.13)",
                 },
@@ -1724,29 +2058,40 @@ const CollectionCard: React.FC<{
             >
                 <Box
                     sx={{
+                        position: "relative",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        backgroundColor: isImportantCollection(collection)
-                            ? "rgba(16, 113, 255, 0.16)"
-                            : "rgba(18, 36, 63, 0.96)",
-                        border: isImportantCollection(collection)
-                            ? "none"
-                            : "1px solid rgba(159, 193, 255, 0.12)",
+                        width: 52,
+                        height: 52,
                         flexShrink: 0,
-                        position: "relative",
                     }}
                 >
-                    {isImportantCollection(collection) ? (
-                        <StarIcon sx={{ fontSize: 20, color: "#1071FF" }} />
-                    ) : (
-                        <FolderOutlinedIcon
-                            sx={{ fontSize: 18, color: "#D6E5FF" }}
-                        />
-                    )}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            m: "6px",
+                            borderRadius: "12px",
+                            backgroundColor: isImportantCollection(collection)
+                                ? "rgba(16, 113, 255, 0.16)"
+                                : "rgba(18, 36, 63, 0.96)",
+                            border: isImportantCollection(collection)
+                                ? "none"
+                                : "1px solid rgba(159, 193, 255, 0.12)",
+                        }}
+                    >
+                        {isImportantCollection(collection) ? (
+                            <StarIcon sx={{ fontSize: 20, color: "#1071FF" }} />
+                        ) : (
+                            <FolderOutlinedIcon
+                                sx={{ fontSize: 20, color: "#D6E5FF" }}
+                            />
+                        )}
+                    </Box>
                     {collection.isShared && <SharedCollectionBadge />}
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -1754,8 +2099,8 @@ const CollectionCard: React.FC<{
                         variant="body"
                         sx={{
                             minWidth: 0,
-                            fontWeight: "medium",
-                            lineHeight: 1.3,
+                            fontWeight: "regular",
+                            lineHeight: 1.45,
                         }}
                         noWrap
                     >
@@ -1771,13 +2116,15 @@ const CollectionCard: React.FC<{
                     </Typography>
                 </Box>
             </Stack>
-            {(onShare || onRename || onDelete) && (
+            {(onShare || onLeave || onRename || onDelete) && (
                 <Box
-                    sx={{ flexShrink: 0 }}
+                    sx={{ flexShrink: 0, ml: 0.25 }}
                     onClick={(event) => event.stopPropagation()}
                 >
                     <CollectionContextMenu
+                        ariaID={`collection-context-menu-${collection.id}`}
                         onShare={onShare}
+                        onLeave={onLeave}
                         onRename={onRename}
                         onDelete={onDelete}
                     />
@@ -1811,12 +2158,14 @@ const SharedCollectionBadge: React.FC = () => {
 };
 
 const CollectionContextMenu: React.FC<{
+    ariaID: string;
     onShare?: () => void;
+    onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ onShare, onRename, onDelete }) => (
+}> = ({ ariaID, onShare, onLeave, onRename, onDelete }) => (
     <OverflowMenu
-        ariaID="collection-context-menu"
+        ariaID={ariaID}
         triggerButtonSxProps={{
             p: 0.25,
             color: "text.faint",
@@ -1830,6 +2179,15 @@ const CollectionContextMenu: React.FC<{
                 onClick={onShare}
             >
                 {t("share")}
+            </OverflowMenuOption>
+        )}
+        {onLeave && (
+            <OverflowMenuOption
+                startIcon={<LogoutOutlinedIcon />}
+                color="critical"
+                onClick={onLeave}
+            >
+                {t("leaveCollection")}
             </OverflowMenuOption>
         )}
         {onRename && (
@@ -1854,9 +2212,10 @@ const CollectionContextMenu: React.FC<{
 
 const CollectionHeaderMenu: React.FC<{
     onShare?: () => void;
+    onLeave?: () => void;
     onRename?: () => void;
     onDelete?: () => void;
-}> = ({ onShare, onRename, onDelete }) => (
+}> = ({ onShare, onLeave, onRename, onDelete }) => (
     <OverflowMenu
         ariaID="collection-header-menu"
         triggerButtonSxProps={{ color: "text.muted" }}
@@ -1867,6 +2226,15 @@ const CollectionHeaderMenu: React.FC<{
                 onClick={onShare}
             >
                 {t("share")}
+            </OverflowMenuOption>
+        )}
+        {onLeave && (
+            <OverflowMenuOption
+                startIcon={<LogoutOutlinedIcon />}
+                color="critical"
+                onClick={onLeave}
+            >
+                {t("leaveCollection")}
             </OverflowMenuOption>
         )}
         {onRename && (

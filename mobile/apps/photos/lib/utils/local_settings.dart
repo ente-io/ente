@@ -88,6 +88,8 @@ class LocalSettings {
       "ml_debug.default_clustering_distance";
   static const _kRunMLDuringInteractionOverride =
       "ml_debug.run_ml_during_interaction";
+  static const _kSemanticSearchExactInRustEnabled =
+      "ml_debug.semantic_search_exact_in_rust";
   static const _kAppMode = "ls.app_mode";
   static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
 
@@ -256,11 +258,17 @@ class LocalSettings {
     await _setFlag(OfflineFlag.mapEnabled, value);
   }
 
+  String get _mlLocalIndexingKey => appMode == AppMode.offline
+      ? _kOfflineMLLocalIndexingEnabled
+      : _kisMLLocalIndexingEnabled;
+
+  bool get _defaultMLLocalIndexingEnabled => appMode == AppMode.offline
+      ? enoughRamForOfflineLocalIndexing
+      : enoughRamForLocalIndexing;
+
   bool get isMLLocalIndexingEnabled {
-    final key = appMode == AppMode.offline
-        ? _kOfflineMLLocalIndexingEnabled
-        : _kisMLLocalIndexingEnabled;
-    return _prefs.getBool(key) ?? enoughRamForLocalIndexing;
+    return _prefs.getBool(_mlLocalIndexingKey) ??
+        _defaultMLLocalIndexingEnabled;
   }
 
   bool get isSmartMemoriesEnabled =>
@@ -302,6 +310,13 @@ class LocalSettings {
     await _prefs.setBool(_kRunMLDuringInteractionOverride, value);
   }
 
+  bool get semanticSearchExactInRustEnabled =>
+      _prefs.getBool(_kSemanticSearchExactInRustEnabled) ?? false;
+
+  Future<void> setSemanticSearchExactInRustEnabled(bool value) async {
+    await _prefs.setBool(_kSemanticSearchExactInRustEnabled, value);
+  }
+
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);
     return value;
@@ -333,11 +348,9 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    final key = appMode == AppMode.offline
-        ? _kOfflineMLLocalIndexingEnabled
-        : _kisMLLocalIndexingEnabled;
-    final nextValue = !(_prefs.getBool(key) ?? enoughRamForLocalIndexing);
-    await _prefs.setBool(key, nextValue);
+    final nextValue = !(_prefs.getBool(_mlLocalIndexingKey) ??
+        _defaultMLLocalIndexingEnabled);
+    await _prefs.setBool(_mlLocalIndexingKey, nextValue);
     return nextValue;
   }
 
@@ -453,10 +466,6 @@ class LocalSettings {
     final cutoff = DateTime.now().microsecondsSinceEpoch;
     _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff).ignore();
     return cutoff;
-  }
-
-  Future<void> clearSharedPhotoFeedCutoffTime() async {
-    await _prefs.remove(_kSharedPhotoFeedCutoffTime);
   }
 
   int wrapped2025ResumeIndex() {

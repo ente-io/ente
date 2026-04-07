@@ -27,7 +27,6 @@
   "deleteReason4": "Min orsak finns inte med",
   "sendEmail": "Skicka e-post",
   "deleteRequestSLAText": "Din begäran kommer att hanteras inom 72 timmar.",
-  "deleteEmailRequest": "Vänligen skicka ett e-postmeddelande till <warning>account-deletion@ente.io</warning> från din registrerade e-postadress.",
   "entePhotosPerm": "Ente <i>behöver tillåtelse att</i> bevara dina foton",
   "ok": "OK",
   "createAccount": "Skapa konto",
@@ -73,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +139,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -287,18 +286,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verifierings-ID",
   "verifyEmailID": "Bekräfta {email}",
   "emailNoEnteAccount": "{email} har inte ett Ente-konto.\n\nSkicka dem en inbjudan för att dela bilder.",
-  "shareMyVerificationID": "Här är mitt verifierings-ID: {verificationID} för ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hallå, kan du bekräfta att detta är ditt ente.io verifierings-ID: {verificationID}",
   "somethingWentWrong": "Något gick fel",
   "sendInvite": "Skicka inbjudan",
-  "shareTextRecommendUsingEnte": "Ladda ner Ente så att vi enkelt kan dela bilder och videor med originell kvalitet\n\nhttps://ente.io",
   "done": "Klar",
   "applyCodeTitle": "Använd kod",
   "enterCodeDescription": "Ange koden som din vän har angett för att få gratis lagring för er båda",
@@ -477,7 +473,6 @@
   "discover_sunset": "Solnedgång",
   "discover_hills": "Berg",
   "discover_greenery": "Grönt landskap",
-  "mlIndexingDescription": "Observera att maskininlärning kommer att resultera i en högre bandbredd och batterianvändning tills alla objekt är indexerade. Överväg att använda skrivbordsappen för snabbare indexering, alla resultat kommer att synkroniseras automatiskt.",
   "loadingModel": "Laddar ner modeller...",
   "waitingForWifi": "Väntar på WiFi...",
   "status": "Status",
@@ -596,8 +591,6 @@
   "familyPlans": "Familjeplaner",
   "referrals": "Hänvisningar",
   "notifications": "Notiser",
-  "sharedPhotoNotifications": "Nya delade foton",
-  "sharedPhotoNotificationsExplanation": "Få notiser när någon lägger till ett foto i ett delat album som du är en del av",
   "advanced": "Avancerad",
   "general": "Allmänt",
   "security": "Säkerhet",
@@ -631,7 +624,6 @@
   "darkTheme": "Mörkt",
   "systemTheme": "System",
   "freeTrial": "Gratis provperiod",
-  "selectYourPlan": "Välj din plan",
   "enteSubscriptionPitch": "Ente bevarar dina minnen, så de är alltid tillgängliga för dig, även om du förlorar din enhet.",
   "enteSubscriptionShareWithFamily": "Din familj kan också läggas till i din plan.",
   "currentUsageIs": "Nuvarande användning är ",
@@ -652,7 +644,6 @@
   "subscription": "Prenumeration",
   "paymentDetails": "Betalningsdetaljer",
   "manageFamily": "Hantera familj",
-  "contactToManageSubscription": "Kontakta oss på support@ente.io för att hantera din {provider} prenumeration.",
   "renewSubscription": "Förnya prenumeration",
   "cancelSubscription": "Avbryt prenumeration",
   "areYouSureYouWantToRenew": "Är du säker på att du vill förnya?",
@@ -701,7 +692,6 @@
   "subAlreadyLinkedErrMessage": "Din {id} är redan kopplad till ett annat Ente-konto.\nOm du vill använda din {id} med detta konto, vänligen kontakta vår support",
   "visitWebToManage": "Vänligen besök web.ente.io för att hantera ditt abonnemang",
   "couldNotUpdateSubscription": "Kunde inte uppdatera prenumeration",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vänligen kontakta support@ente.io så hjälper vi gärna till!",
   "paymentFailed": "Betalning misslyckades",
   "paymentFailedTalkToProvider": "Prata med {providerName} support om du debiterades",
   "@paymentFailedTalkToProvider": {
@@ -724,7 +714,6 @@
   "startBackup": "Starta säkerhetskopiering",
   "preserveMore": "Bevara mer",
   "allowPermTitle": "Tillåt åtkomst till foton",
-  "openSettings": "Öppna inställningar",
   "selectMorePhotos": "Välj fler foton",
   "existingUser": "Befintlig användare",
   "pleaseLoginAgain": "Logga in igen",
@@ -957,7 +946,6 @@
   "verifyIDLabel": "Verifiera",
   "fileInfoAddDescHint": "Lägg till en beskrivning...",
   "editLocationTagTitle": "Redigera plats",
-  "familyPlanPortalTitle": "Familj",
   "androidBiometricHint": "Verifiera identitet",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1116,7 +1104,6 @@
   "addName": "Lägg till namn",
   "add": "Lägg till",
   "configuration": "Konfiguration",
-  "localIndexing": "Lokal indexering",
   "processed": "Bearbetade",
   "resetPerson": "Ta bort",
   "yesResetPerson": "Ja, återställ person",
@@ -1328,15 +1315,5 @@
     "description": "Tooltip or semantics label for the pause button"
   },
   "playfulKids": "Lekfulla barn",
-  "coastalCliffs": "Klippor vid havet",
-  "candidLaughter": "Skratt i stunden",
-  "groupSelfies": "Allihop",
-  "birthdayJoy": "Födelsedagsglädje",
-  "weddingMoments": "Bröllopsglans",
-  "goldenHourPortraits": "Ansikten i gyllene timmen",
-  "concertNights": "Konsertkvällar",
-  "poolDays": "Pooldagar",
-  "picnicDays": "Picknickminnen",
-  "campingMoments": "Campingstunder",
-  "babySmiles": "Bebisleenden"
+  "coastalCliffs": "Klippor vid havet"
 }

@@ -39,6 +39,62 @@ jobs:
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
 
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
+            - name: Increment version code for build
+              run: |
+                  CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+                  VERSION_NAME=$(echo "$CURRENT_VERSION" | cut -d'+' -f1)
+                  CURRENT_BUILD=$(echo "$CURRENT_VERSION" | cut -d'+' -f2)
+                  NEW_VERSION_CODE=$((CURRENT_BUILD + ${{ github.run_number }}))
+                  NEW_VERSION="${VERSION_NAME}+${NEW_VERSION_CODE}"
+
+                  sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+                  echo "Building with version ${NEW_VERSION}"
+
+                  echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+                  echo "NEW_VERSION_CODE=${NEW_VERSION_CODE}" >> $GITHUB_ENV
+
+            - name: Prepare and validate changelog for Play Store
+              run: |
+                  mkdir -p whatsnew
+                  CHANGELOG_FILE="scripts/store_changes.txt"
+                  DISCORD_FILE="scripts/internal_changes.txt"
+                  OUTPUT_FILE="whatsnew/whatsnew-en-US"
+
+                  if [ -f "$CHANGELOG_FILE" ]; then
+                      head -c 500 "$CHANGELOG_FILE" > "$OUTPUT_FILE"
+                  else
+                      echo "Bug fixes and improvements" > "$OUTPUT_FILE"
+                  fi
+
+                  if [ ! -s "$OUTPUT_FILE" ]; then
+                      echo "Changelog is empty."
+                      exit 1
+                  fi
+
+                  LENGTH=$(wc -m < "$OUTPUT_FILE")
+                  if [ "$LENGTH" -gt 500 ]; then
+                      echo "Changelog exceeds 500 characters ($LENGTH)."
+                      exit 1
+                  fi
+
+                  echo "Validated Play Store changelog:"
+                  cat "$OUTPUT_FILE"
+
+                  CHANGELOG_PLAYSTORE=$(cat "$OUTPUT_FILE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+                  echo "CHANGELOG=${CHANGELOG_PLAYSTORE}" >> $GITHUB_ENV
+
+                  if [ -f "$DISCORD_FILE" ]; then
+                      CHANGELOG_DISCORD=$(cat "$DISCORD_FILE" | sed 's/"/\\"/g')
+                  else
+                      CHANGELOG_DISCORD=$(cat "$OUTPUT_FILE" | sed 's/"/\\"/g')
+                  fi
+                  echo "CHANGELOG_DISCORD<<EOF" >> $GITHUB_ENV
+                  echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
+
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:
@@ -61,12 +117,20 @@ jobs:
                   packageName: io.ente.locker
                   releaseFiles: mobile/apps/locker/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
+                  whatsNewDirectory: mobile/apps/locker/whatsnew
+                  mappingFile: mobile/apps/locker/build/app/outputs/mapping/playstoreRelease/mapping.txt
 
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🔒 Internal release available for Locker"
-                  description: "[Download](https://play.google.com/store/apps/details?id=io.ente.locker)"
+                  title: "🔒 Internal release available for Locker v${{ env.NEW_VERSION }}"
+                  description: |
+                      **Version:** ${{ env.NEW_VERSION }}
+                      **Flutter:** ${{ env.FLUTTER_VERSION }}
+                      **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+                      **Download:** [Play Store](https://play.google.com/store/apps/details?id=io.ente.locker)
+                      **Changes:**
+                      ${{ env.CHANGELOG_DISCORD }}
                   color: 0x4CAF50

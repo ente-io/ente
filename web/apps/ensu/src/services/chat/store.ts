@@ -1,7 +1,15 @@
+import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
-import { openDB, type DBSchema, type IDBPDatabase } from "idb";
+import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
+import { base64ToBytes } from "services/base64";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
-import { cachedLocalChatKey } from "./chatKey";
+import {
+    allLegacyKeyCandidates,
+    cachedLocalChatKey,
+    legacyAttachmentChatKey,
+    legacyLocalChatKey,
+    setLegacyAttachmentChatKey,
+} from "./chatKey";
 import {
     decryptChatField,
     decryptChatPayload,
@@ -9,8 +17,10 @@ import {
     encryptChatPayload,
 } from "./crypto";
 
-const DB_NAME = "ensu.chat.db";
-const DB_VERSION = 3;
+const STORAGE_KEY = "ensu.chat.store.v1";
+const NATIVE_MIGRATION_KEY = "ensu.chat.nativeMigration.v2";
+const CHAT_DB_NAME = "ensu-chat";
+const LEGACY_WEB_CHAT_DB_NAME = "ensu.chat.db";
 
 export type AttachmentKind = "image" | "document";
 
@@ -62,10 +72,59 @@ interface StoredAttachmentBytes {
     data: Uint8Array;
 }
 
-interface ChatDbSchema extends DBSchema {
+interface ChatDbSchema {
+    sessions: StoredSession;
+    messages: StoredMessage;
+    attachmentBytes: StoredAttachmentBytes;
+}
+
+type ChatStoreName = keyof ChatDbSchema;
+
+type PersistedAttachmentBytes = { id: string; data: string };
+
+type PersistedChatStore = {
+    sessions: StoredSession[];
+    messages: StoredMessage[];
+    attachmentBytes: PersistedAttachmentBytes[];
+};
+
+type ChatStoreState = {
+    sessions: StoredSession[];
+    messages: StoredMessage[];
+    attachmentBytes: StoredAttachmentBytes[];
+};
+
+interface IndexedChatDBSchema extends DBSchema {
     sessions: { key: string; value: StoredSession };
     messages: { key: string; value: StoredMessage };
     attachmentBytes: { key: string; value: StoredAttachmentBytes };
+}
+
+interface ChatObjectStore<K extends ChatStoreName> {
+    get: (key: string) => Promise<ChatDbSchema[K] | undefined>;
+    getAll: () => Promise<ChatDbSchema[K][]>;
+    put: (value: ChatDbSchema[K]) => Promise<void>;
+    delete: (key: string) => Promise<void>;
+}
+
+interface ChatTransaction {
+    objectStore: <K extends ChatStoreName>(name: K) => ChatObjectStore<K>;
+    done: Promise<void>;
+}
+
+interface ChatDbLike {
+    get: <K extends ChatStoreName>(
+        name: K,
+        key: string,
+    ) => Promise<ChatDbSchema[K] | undefined>;
+    getAll: <K extends ChatStoreName>(name: K) => Promise<ChatDbSchema[K][]>;
+    put: <K extends ChatStoreName>(
+        name: K,
+        value: ChatDbSchema[K],
+    ) => Promise<void>;
+    delete: (name: ChatStoreName, key: string) => Promise<void>;
+    transaction: (names: ChatStoreName[], mode: "readwrite") => ChatTransaction;
+    close: () => void;
 }
 
 export interface ChatSession {
@@ -86,6 +145,7 @@ export interface ChatMessage {
     text: string;
     createdAt: number;
     attachments?: ChatAttachment[];
+    isSynthetic?: boolean;
 }
 
 export interface LocalSessionRecord {
@@ -147,6 +207,13 @@ interface NativeMessage {
     deletedAt?: number | null;
 }
 
+interface NativeLegacyMigrationResult {
+    didMigrate: boolean;
+    migratedSessions: number;
+    migratedMessages: number;
+    migratedAttachments: number;
+}
+
 const nowMicros = () => Date.now() * 1000;
 
 const isTauriRuntime = () =>
@@ -166,22 +233,6 @@ const formatLogError = (error: unknown) => {
     }
 };
 
-const getErrorMessage = (error: unknown) => {
-    if (error instanceof Error) return error.message || error.name;
-    if (typeof error === "string") return error;
-    if (error && typeof error === "object") {
-        const maybeMessage = (error as { message?: unknown }).message;
-        if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-            return maybeMessage;
-        }
-    }
-    try {
-        return JSON.stringify(error);
-    } catch {
-        return String(error);
-    }
-};
-
 const getErrorCode = (error: unknown) => {
     if (!error || typeof error !== "object") return undefined;
     const code = (error as { code?: unknown }).code;
@@ -190,18 +241,10 @@ const getErrorCode = (error: unknown) => {
 
 const shouldResetDbError = (error: unknown) => {
     const code = getErrorCode(error);
-    if (
+    return (
         code === "db_crypto" ||
         code === "db_invalid_blob_length" ||
         code === "db_invalid_encrypted_field"
-    ) {
-        return true;
-    }
-    const message = getErrorMessage(error).toLowerCase();
-    return (
-        message.includes("stream pull failed") ||
-        message.includes("invalid blob") ||
-        message.includes("invalid encrypted")
     );
 };
 
@@ -235,11 +278,171 @@ const withNativeDbRecovery = async <T>(
     }
 };
 
-let _chatDb: Promise<IDBPDatabase<ChatDbSchema>> | undefined;
+const loadChatStoreState = (): ChatStoreState => {
+    if (typeof localStorage === "undefined") {
+        return { sessions: [], messages: [], attachmentBytes: [] };
+    }
+
+    const json = localStorage.getItem(STORAGE_KEY);
+    if (!json) {
+        return { sessions: [], messages: [], attachmentBytes: [] };
+    }
+
+    try {
+        const parsed = JSON.parse(json) as Partial<PersistedChatStore>;
+        return {
+            sessions: (parsed.sessions ?? []).map((session) => ({
+                ...session,
+                remoteId: session.remoteId ?? null,
+                needsSync: session.needsSync ?? true,
+                deletedAt:
+                    session.deletedAt ??
+                    (session.isDeleted ? session.updatedAt : null),
+            })),
+            messages: (parsed.messages ?? []).map((message) => ({
+                ...message,
+                attachments: message.attachments ?? [],
+                remoteId: message.remoteId ?? null,
+                deletedAt:
+                    message.deletedAt ??
+                    (message.isDeleted ? message.createdAt : null),
+            })),
+            attachmentBytes: (parsed.attachmentBytes ?? []).map(
+                (attachment) => ({
+                    id: attachment.id,
+                    data: base64ToBytes(attachment.data),
+                }),
+            ),
+        };
+    } catch (error) {
+        log.error("Failed to parse chat store", error);
+        return { sessions: [], messages: [], attachmentBytes: [] };
+    }
+};
+
+const cloneStoreEntry = <K extends ChatStoreName>(
+    name: K,
+    value: ChatDbSchema[K],
+): ChatDbSchema[K] => {
+    if (name === "attachmentBytes") {
+        const attachment = value as StoredAttachmentBytes;
+        return {
+            ...attachment,
+            data: new Uint8Array(attachment.data),
+        } as ChatDbSchema[K];
+    }
+
+    const cloned = { ...value };
+    if (name === "messages") {
+        const message = cloned as StoredMessage;
+        message.attachments = message.attachments?.map((attachment) => ({
+            ...attachment,
+        }));
+    }
+    return cloned;
+};
+
+let _chatDb: Promise<ChatDbLike> | undefined;
+let _chatPersistenceInitPromise: Promise<void> | undefined;
+let _chatPersistenceInitKey: string | undefined;
+
+const normalizeStoredSession = (session: StoredSession): StoredSession => ({
+    ...session,
+    remoteId: session.remoteId ?? null,
+    needsSync: session.needsSync ?? true,
+    deletedAt:
+        session.deletedAt ?? (session.isDeleted ? session.updatedAt : null),
+});
+
+const normalizeStoredMessage = (message: StoredMessage): StoredMessage => ({
+    ...message,
+    attachments: message.attachments ?? [],
+    remoteId: message.remoteId ?? null,
+    deletedAt:
+        message.deletedAt ?? (message.isDeleted ? message.createdAt : null),
+});
+
+const normalizeStoreEntry = <K extends ChatStoreName>(
+    name: K,
+    value: ChatDbSchema[K],
+): ChatDbSchema[K] => {
+    if (name === "sessions") {
+        return normalizeStoredSession(
+            value as StoredSession,
+        ) as ChatDbSchema[K];
+    }
+    if (name === "messages") {
+        return normalizeStoredMessage(
+            value as StoredMessage,
+        ) as ChatDbSchema[K];
+    }
+    return value;
+};
+
+const createIndexedDbChatDb = (
+    db: IDBPDatabase<IndexedChatDBSchema>,
+): ChatDbLike => ({
+    get: async (name, key) => {
+        const entry = (await db.get(name, key)) as
+            | ChatDbSchema[typeof name]
+            | undefined;
+        if (!entry) return undefined;
+        return cloneStoreEntry(name, normalizeStoreEntry(name, entry));
+    },
+    getAll: async (name) => {
+        const entries = (await db.getAll(name)) as ChatDbSchema[typeof name][];
+        return entries.map((entry) =>
+            cloneStoreEntry(name, normalizeStoreEntry(name, entry)),
+        );
+    },
+    put: async (name, value) => {
+        await db.put(name, cloneStoreEntry(name, value));
+    },
+    delete: async (name, key) => {
+        await db.delete(name, key);
+    },
+    transaction: (names, mode) => {
+        const tx = db.transaction(names, mode);
+        return {
+            objectStore: <K extends ChatStoreName>(
+                name: K,
+            ): ChatObjectStore<K> => ({
+                get: async (key) => {
+                    const entry = (await tx.objectStore(name).get(key)) as
+                        | ChatDbSchema[K]
+                        | undefined;
+                    if (!entry) return undefined;
+                    return cloneStoreEntry(
+                        name,
+                        normalizeStoreEntry(name, entry),
+                    );
+                },
+                getAll: async () => {
+                    const entries = (await tx
+                        .objectStore(name)
+                        .getAll()) as ChatDbSchema[K][];
+                    return entries.map((entry) =>
+                        cloneStoreEntry(name, normalizeStoreEntry(name, entry)),
+                    );
+                },
+                put: async (value: ChatDbSchema[K]) => {
+                    await tx
+                        .objectStore(name)
+                        .put(cloneStoreEntry(name, value));
+                },
+                delete: async (key: string) => {
+                    await tx.objectStore(name).delete(key);
+                },
+            }),
+            done: tx.done,
+        };
+    },
+    close: () => db.close(),
+});
 
 const openChatDb = async () => {
-    const db = await openDB<ChatDbSchema>(DB_NAME, DB_VERSION, {
-        upgrade: async (db, oldVersion, _newVersion, transaction) => {
+    const db = await openDB<IndexedChatDBSchema>(CHAT_DB_NAME, 1, {
+        upgrade(db) {
             if (!db.objectStoreNames.contains("sessions")) {
                 db.createObjectStore("sessions", { keyPath: "sessionUuid" });
             }
@@ -249,60 +452,10 @@ const openChatDb = async () => {
             if (!db.objectStoreNames.contains("attachmentBytes")) {
                 db.createObjectStore("attachmentBytes", { keyPath: "id" });
             }
-
-            if (oldVersion < 2 && transaction) {
-                const now = Date.now() * 1000;
-                const sessionStore = transaction.objectStore("sessions");
-                const sessions = await sessionStore.getAll();
-                for (const session of sessions) {
-                    session.needsSync = session.needsSync ?? true;
-                    session.remoteId = session.remoteId ?? session.sessionUuid;
-                    session.deletedAt =
-                        session.deletedAt ?? (session.isDeleted ? now : null);
-                    await sessionStore.put(session);
-                }
-
-                const messageStore = transaction.objectStore("messages");
-                const messages = await messageStore.getAll();
-                for (const message of messages) {
-                    message.attachments = message.attachments ?? [];
-                    message.deletedAt =
-                        message.deletedAt ?? (message.isDeleted ? now : null);
-                    await messageStore.put(message);
-                }
-            }
-
-            if (oldVersion < 3 && transaction) {
-                const sessionStore = transaction.objectStore("sessions");
-                const sessions = await sessionStore.getAll();
-                for (const session of sessions) {
-                    session.remoteId = session.remoteId ?? session.sessionUuid;
-                    await sessionStore.put(session);
-                }
-
-                const messageStore = transaction.objectStore("messages");
-                const messages = await messageStore.getAll();
-                for (const message of messages) {
-                    message.remoteId = message.remoteId ?? message.messageUuid;
-                    await messageStore.put(message);
-                }
-            }
-        },
-        blocking() {
-            log.info("Another client is trying to open a newer chat DB schema");
-            db.close();
-            _chatDb = undefined;
-        },
-        blocked() {
-            log.warn("Waiting for an existing client to release the chat DB");
-        },
-        terminated() {
-            log.warn("Chat DB connection was terminated");
-            _chatDb = undefined;
         },
     });
 
-    return db;
+    return createIndexedDbChatDb(db);
 };
 
 const chatDb = () => (_chatDb ??= openChatDb());
@@ -377,7 +530,7 @@ const deserializeAttachments = async (
 ): Promise<ChatAttachment[]> => {
     if (!attachments?.length || !isTauriRuntime()) return [];
 
-    const localKey = cachedLocalChatKey();
+    const localKey = cachedLocalChatKey() ?? legacyLocalChatKey();
 
     return Promise.all(
         attachments.map(async (attachment) => {
@@ -431,6 +584,343 @@ const deserializeAttachments = async (
     );
 };
 
+const hasLegacyChatStore = () =>
+    typeof localStorage !== "undefined" && !!localStorage.getItem(STORAGE_KEY);
+
+const hasIndexedDbDatabase = async (name: string) => {
+    if (typeof indexedDB === "undefined") return false;
+
+    if ("databases" in indexedDB && typeof indexedDB.databases === "function") {
+        const databases = await indexedDB.databases();
+        return databases.some((database) => database.name === name);
+    }
+
+    return new Promise<boolean>((resolve, reject) => {
+        let created = false;
+        const request = indexedDB.open(name);
+
+        request.onupgradeneeded = () => {
+            created = true;
+        };
+
+        request.onsuccess = () => {
+            const db = request.result;
+            db.close();
+
+            if (!created) {
+                resolve(true);
+                return;
+            }
+
+            const deleteRequest = indexedDB.deleteDatabase(name);
+            deleteRequest.onsuccess = () => resolve(false);
+            deleteRequest.onerror = () => reject(deleteRequest.error);
+            deleteRequest.onblocked = () => resolve(false);
+        };
+
+        request.onerror = () => reject(request.error);
+    });
+};
+
+const isNativeMigrationDone = () =>
+    typeof localStorage !== "undefined" &&
+    localStorage.getItem(NATIVE_MIGRATION_KEY) === "1";
+
+const markNativeMigrationDone = () => {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(NATIVE_MIGRATION_KEY, "1");
+};
+
+const migrateLegacyLocalChatStoreToIndexedDb = async () => {
+    if (typeof localStorage === "undefined") return;
+
+    const legacy = loadChatStoreState();
+    if (
+        !legacy.sessions.length &&
+        !legacy.messages.length &&
+        !legacy.attachmentBytes.length
+    ) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+    }
+
+    log.info("Migrating legacy local chat store to IndexedDB", {
+        sessions: legacy.sessions.length,
+        messages: legacy.messages.length,
+        attachmentBytes: legacy.attachmentBytes.length,
+    });
+
+    const db = await chatDb();
+    const tx = db.transaction(
+        ["sessions", "messages", "attachmentBytes"],
+        "readwrite",
+    );
+
+    for (const session of legacy.sessions) {
+        await tx.objectStore("sessions").put(normalizeStoredSession(session));
+    }
+
+    for (const message of legacy.messages) {
+        await tx.objectStore("messages").put(normalizeStoredMessage(message));
+    }
+
+    for (const attachment of legacy.attachmentBytes) {
+        await tx
+            .objectStore("attachmentBytes")
+            .put({ id: attachment.id, data: new Uint8Array(attachment.data) });
+    }
+
+    await tx.done;
+    localStorage.removeItem(STORAGE_KEY);
+    log.info("Finished migrating legacy local chat store to IndexedDB");
+};
+
+const migrateLegacyIndexedDbChatStore = async () => {
+    if (typeof indexedDB === "undefined") return;
+    if (!(await hasIndexedDbDatabase(LEGACY_WEB_CHAT_DB_NAME))) return;
+
+    log.info("Migrating legacy IndexedDB chat store", {
+        from: LEGACY_WEB_CHAT_DB_NAME,
+        to: CHAT_DB_NAME,
+    });
+
+    const [legacyDb, db] = await Promise.all([
+        openDB<IndexedChatDBSchema>(LEGACY_WEB_CHAT_DB_NAME),
+        chatDb(),
+    ]);
+
+    let migratedAnyEntries = false;
+    try {
+        const [sessions, messages, attachmentBytes] = await Promise.all([
+            legacyDb.getAll("sessions"),
+            legacyDb.getAll("messages"),
+            legacyDb.getAll("attachmentBytes"),
+        ]);
+        migratedAnyEntries =
+            sessions.length > 0 ||
+            messages.length > 0 ||
+            attachmentBytes.length > 0;
+
+        const tx = db.transaction(
+            ["sessions", "messages", "attachmentBytes"],
+            "readwrite",
+        );
+
+        for (const session of sessions) {
+            await tx
+                .objectStore("sessions")
+                .put(normalizeStoredSession(session));
+        }
+
+        for (const message of messages) {
+            await tx
+                .objectStore("messages")
+                .put(normalizeStoredMessage(message));
+        }
+
+        for (const attachment of attachmentBytes) {
+            await tx
+                .objectStore("attachmentBytes")
+                .put({
+                    id: attachment.id,
+                    data: new Uint8Array(attachment.data),
+                });
+        }
+
+        await tx.done;
+    } finally {
+        legacyDb.close();
+    }
+
+    await deleteDB(LEGACY_WEB_CHAT_DB_NAME, {
+        blocked() {
+            log.warn(
+                "Waiting for an existing client to close the legacy chat DB",
+            );
+        },
+    });
+
+    log.info(
+        migratedAnyEntries
+            ? "Finished migrating legacy IndexedDB chat store"
+            : "Removed empty legacy IndexedDB chat store",
+    );
+};
+
+const migrateLegacyChatStoreToNative = async (chatKey: string) => {
+    if (!isTauriRuntime() || typeof localStorage === "undefined") return;
+
+    const legacy = loadChatStoreState();
+    if (
+        !legacy.sessions.length &&
+        !legacy.messages.length &&
+        !legacy.attachmentBytes.length
+    ) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+    }
+
+    log.info("Migrating legacy local chat store to native DB", {
+        sessions: legacy.sessions.length,
+        messages: legacy.messages.length,
+        attachmentBytes: legacy.attachmentBytes.length,
+    });
+
+    const sessions = [...legacy.sessions].sort(
+        (left, right) => left.createdAt - right.createdAt,
+    );
+    for (const session of sessions) {
+        const title = await decryptSessionTitle(session, chatKey);
+        await invokeChat("chat_db_upsert_session", {
+            keyB64: chatKey,
+            input: {
+                sessionUuid: session.sessionUuid,
+                title,
+                createdAt: session.createdAt,
+                updatedAt: session.updatedAt,
+                remoteId: session.remoteId ?? null,
+                needsSync: session.needsSync ?? false,
+                deletedAt: session.deletedAt ?? null,
+            },
+        });
+    }
+
+    const messages = [...legacy.messages].sort(
+        (left, right) => left.createdAt - right.createdAt,
+    );
+    for (const message of messages) {
+        const attachments = await deserializeAttachments(
+            message.attachments,
+            chatKey,
+        );
+
+        if (!message.remoteId) {
+            const existing = await invokeChat<NativeMessage | null>(
+                "chat_db_get_message",
+                { keyB64: chatKey, messageUuid: message.messageUuid },
+            );
+            if (existing) {
+                continue;
+            }
+        }
+
+        await invokeChat("chat_db_insert_message_with_uuid", {
+            keyB64: chatKey,
+            input: {
+                messageUuid: message.messageUuid,
+                sessionUuid: message.sessionUuid,
+                parentMessageUuid: message.parentMessageUuid ?? null,
+                sender: message.sender,
+                text: await decryptMessageText(message, chatKey),
+                createdAt: message.createdAt,
+                remoteId: message.remoteId ?? null,
+                deletedAt: message.deletedAt ?? null,
+                attachments: attachments.map((attachment) => ({
+                    id: attachment.id,
+                    kind: attachment.kind,
+                    name: attachment.name,
+                    size: attachment.size,
+                    uploadedAt: attachment.uploadedAt ?? null,
+                })),
+            },
+        });
+    }
+
+    for (const attachment of legacy.attachmentBytes) {
+        await writeAttachmentBytes(attachment.id, attachment.data);
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    log.info("Finished migrating legacy local chat store to native DB");
+};
+
+const migrateLegacyNativeChatStoreToV2 = async (
+    chatKey: string,
+): Promise<boolean> => {
+    if (!isTauriRuntime()) return true;
+
+    // Collect all known key candidates. allLegacyKeyCandidates returns every
+    // key found across secure storage, native file, AND localStorage. This is
+    // important because stale OS keyring entries from a previous install can
+    // shadow the correct localStorage key in the normal prioritized lookup.
+    const candidateKeys = allLegacyKeyCandidates();
+    const seen = new Set<string>(candidateKeys);
+    if (chatKey && !seen.has(chatKey)) {
+        candidateKeys.push(chatKey);
+    }
+
+    for (const candidateKey of candidateKeys) {
+        try {
+            const result = await invokeChat<NativeLegacyMigrationResult>(
+                "chat_db_migrate_legacy",
+                { input: { keyB64: chatKey, legacyKeyB64: candidateKey } },
+            );
+            if (result.didMigrate) {
+                await setLegacyAttachmentChatKey(
+                    candidateKey === chatKey ? undefined : candidateKey,
+                );
+                log.info("Migrated legacy native chat store to v2 DB", result);
+            }
+            return true;
+        } catch (error) {
+            const code = getErrorCode(error);
+            if (
+                code === "db_crypto" ||
+                code === "db_invalid_blob_length" ||
+                code === "db_invalid_encrypted_field"
+            ) {
+                continue;
+            }
+            throw error;
+        }
+    }
+
+    log.warn(
+        "Skipping legacy native chat migration because the available legacy keys could not decrypt the legacy DB",
+    );
+    return false;
+};
+
+export const initializeChatStorePersistence = async (chatKey: string) => {
+    if (_chatPersistenceInitKey === chatKey && _chatPersistenceInitPromise) {
+        return _chatPersistenceInitPromise;
+    }
+
+    _chatPersistenceInitKey = chatKey;
+    const initPromise = (async () => {
+        if (isTauriRuntime()) {
+            if (!isNativeMigrationDone()) {
+                const didResolveNativeMigration =
+                    await migrateLegacyNativeChatStoreToV2(chatKey);
+                if (hasLegacyChatStore()) {
+                    await migrateLegacyChatStoreToNative(chatKey);
+                }
+                if (didResolveNativeMigration) {
+                    markNativeMigrationDone();
+                }
+            }
+            return;
+        }
+
+        if (hasLegacyChatStore()) {
+            await migrateLegacyLocalChatStoreToIndexedDb();
+            return;
+        }
+
+        await migrateLegacyIndexedDbChatStore();
+    })().catch((error: unknown) => {
+        if (_chatPersistenceInitPromise === initPromise) {
+            _chatPersistenceInitPromise = undefined;
+            _chatPersistenceInitKey = undefined;
+        }
+        log.error("Failed to initialize chat persistence", error);
+        throw error;
+    });
+
+    _chatPersistenceInitPromise = initPromise;
+    return initPromise;
+};
+
 const fetchStore = async () => {
     const db = await chatDb();
     const [sessions, messages] = await Promise.all([
@@ -444,7 +934,7 @@ const invokeChat = async <T>(
     command: string,
     args?: Record<string, unknown>,
 ) => {
-    const { invoke } = await import("@tauri-apps/api/core");
+    const { invoke } = await import("@tauri-apps/api/tauri");
     return invoke<T>(command, args);
 };
 
@@ -871,83 +1361,58 @@ export const updateMessage = async (
     await tx.done;
 };
 
-const BRANCH_SELECTIONS_KEY = "ensu.chat.branchSelections.v1";
+const branchSelectionsKey = (rootSessionUuid: string) =>
+    `ensu.chat.branchSelections.v1.${rootSessionUuid}`;
 
-type BranchSelectionsStore = Record<string, Record<string, string>>;
+export const getBranchSelections = async (rootSessionUuid: string) => {
+    const stored = await getKV(branchSelectionsKey(rootSessionUuid));
+    if (!stored || typeof stored !== "object") return {};
 
-const loadBranchSelections = (): BranchSelectionsStore => {
-    const json = localStorage.getItem(BRANCH_SELECTIONS_KEY);
-    if (!json) return {};
-    try {
-        const parsed = JSON.parse(json) as BranchSelectionsStore;
-        return parsed ?? {};
-    } catch (error) {
-        log.error("Failed to parse branch selections", error);
-        return {};
-    }
-};
-
-const saveBranchSelections = (store: BranchSelectionsStore) =>
-    localStorage.setItem(BRANCH_SELECTIONS_KEY, JSON.stringify(store));
-
-export const getBranchSelections = (rootSessionUuid: string) => {
-    const store = loadBranchSelections();
-    return store[rootSessionUuid] ?? {};
+    return Object.fromEntries(
+        Object.entries(stored).filter(
+            (entry): entry is [string, string] =>
+                typeof entry[0] === "string" && typeof entry[1] === "string",
+        ),
+    );
 };
 
 export const resetChatStore = async () => {
     if (typeof window === "undefined") return;
 
-    localStorage.removeItem(BRANCH_SELECTIONS_KEY);
+    localStorage.removeItem(STORAGE_KEY);
 
     if (isTauriRuntime()) {
         await invokeChat("chat_db_reset");
         return;
     }
-
-    if (typeof indexedDB === "undefined") return;
-
     try {
         if (_chatDb) {
-            const db = await _chatDb;
-            db.close();
+            (await _chatDb).close();
         }
     } catch (error) {
-        log.error("Failed to close chat DB", error);
+        log.error("Failed to close chat IndexedDB before reset", error);
     }
-
     _chatDb = undefined;
-
-    await new Promise<void>((resolve, reject) => {
-        const request = indexedDB.deleteDatabase(DB_NAME);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-        request.onblocked = () => resolve();
-    });
+    await deleteDB("ensu-chat");
 };
 
-export const setBranchSelection = (
+export const setBranchSelection = async (
     rootSessionUuid: string,
     selectionKey: string,
     selectedMessageUuid: string,
 ) => {
-    const store = loadBranchSelections();
-    const selections = store[rootSessionUuid] ?? {};
+    const selections = await getBranchSelections(rootSessionUuid);
     selections[selectionKey] = selectedMessageUuid;
-    store[rootSessionUuid] = selections;
-    saveBranchSelections(store);
+    await setKV(branchSelectionsKey(rootSessionUuid), selections);
 };
 
-export const deleteBranchSelections = (rootSessionUuid: string) => {
-    const store = loadBranchSelections();
-    delete store[rootSessionUuid];
-    saveBranchSelections(store);
-};
+export const deleteBranchSelections = (rootSessionUuid: string) =>
+    removeKV(branchSelectionsKey(rootSessionUuid));
 
 export const deleteSession = async (sessionUuid: string, chatKey: string) => {
     if (isTauriRuntime()) {
         await deleteSessionNative(sessionUuid, chatKey);
-        deleteBranchSelections(sessionUuid);
+        await deleteBranchSelections(sessionUuid);
         return;
     }
 
@@ -975,7 +1440,7 @@ export const deleteSession = async (sessionUuid: string, chatKey: string) => {
     );
 
     await tx.done;
-    deleteBranchSelections(sessionUuid);
+    await deleteBranchSelections(sessionUuid);
 };
 
 let _attachmentDir: Promise<string> | undefined;
@@ -987,9 +1452,9 @@ const attachmentDir = async () => {
 
     _attachmentDir ??= (async () => {
         const { appDataDir, join } = await import("@tauri-apps/api/path");
-        const { mkdir: createDir } = await import("@tauri-apps/plugin-fs");
+        const { createDir } = await import("@tauri-apps/api/fs");
         const root = await appDataDir();
-        const dir = await join(root, "ensu_llmchat_attachments");
+        const dir = await join(root, "ensu_llmchat_attachments_v2");
         await createDir(dir, { recursive: true });
         return dir;
     })();
@@ -1005,9 +1470,9 @@ const attachmentPath = async (id: string) => {
 
 export const writeAttachmentBytes = async (id: string, data: Uint8Array) => {
     if (isTauriRuntime()) {
-        const { writeFile } = await import("@tauri-apps/plugin-fs");
+        const { writeBinaryFile } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
-        await writeFile(path, data);
+        await writeBinaryFile({ path, contents: data });
         return;
     }
 
@@ -1027,9 +1492,9 @@ export const storeEncryptedAttachmentBytes = async (
 
 export const readAttachmentBytes = async (id: string): Promise<Uint8Array> => {
     if (isTauriRuntime()) {
-        const { readFile } = await import("@tauri-apps/plugin-fs");
+        const { readBinaryFile } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
-        return readFile(path);
+        return readBinaryFile(path);
     }
 
     const db = await chatDb();
@@ -1051,17 +1516,29 @@ export const readDecryptedAttachmentBytes = async (
     try {
         return await decryptAttachmentBytes(encrypted, chatKey, sessionUuid);
     } catch (error) {
-        const localKey = cachedLocalChatKey();
-        if (!localKey || localKey === chatKey) {
-            throw error;
+        for (const fallbackKey of [
+            legacyAttachmentChatKey(),
+            cachedLocalChatKey(),
+            legacyLocalChatKey(),
+        ]) {
+            if (!fallbackKey || fallbackKey === chatKey) continue;
+            try {
+                return await decryptAttachmentBytes(
+                    encrypted,
+                    fallbackKey,
+                    sessionUuid,
+                );
+            } catch {
+                // Try the next known legacy key.
+            }
         }
-        return decryptAttachmentBytes(encrypted, localKey, sessionUuid);
+        throw error;
     }
 };
 
 export const attachmentBytesExists = async (id: string): Promise<boolean> => {
     if (isTauriRuntime()) {
-        const { exists } = await import("@tauri-apps/plugin-fs");
+        const { exists } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
         return exists(path);
     }
@@ -1073,10 +1550,10 @@ export const attachmentBytesExists = async (id: string): Promise<boolean> => {
 
 export const deleteAttachmentBytes = async (id: string) => {
     if (isTauriRuntime()) {
-        const { remove } = await import("@tauri-apps/plugin-fs");
+        const { removeFile } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
         try {
-            await remove(path);
+            await removeFile(path);
         } catch {
             // ignore missing files
         }
@@ -1307,6 +1784,7 @@ export const insertMessageFromRemote = async (
                 sender: input.sender,
                 text: input.text,
                 createdAt: input.createdAt,
+                remoteId: input.remoteId ?? null,
                 deletedAt: input.deletedAt ?? null,
                 attachments: input.attachments?.map((attachment) => ({
                     id: attachment.id,
@@ -1394,7 +1872,7 @@ export const markSessionDeletedAt = async (
             sessionUuid,
             deletedAt,
         });
-        deleteBranchSelections(sessionUuid);
+        await deleteBranchSelections(sessionUuid);
         return;
     }
 
@@ -1420,7 +1898,7 @@ export const markSessionDeletedAt = async (
     );
 
     await tx.done;
-    deleteBranchSelections(sessionUuid);
+    await deleteBranchSelections(sessionUuid);
 };
 
 export const markMessageDeletedAt = async (
@@ -1572,7 +2050,7 @@ export const hardDeleteEntity = async (
             uuid: deletion.uuid,
         });
         if (deletion.type === "session") {
-            deleteBranchSelections(deletion.uuid);
+            await deleteBranchSelections(deletion.uuid);
         }
         return;
     }
@@ -1601,7 +2079,7 @@ export const hardDeleteEntity = async (
             ),
         );
 
-        deleteBranchSelections(deletion.uuid);
+        await deleteBranchSelections(deletion.uuid);
         return;
     }
 

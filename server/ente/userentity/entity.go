@@ -18,11 +18,15 @@ const (
 	CGroup EntityType = "cgroup"
 	// SmartAlbum is a new entity type for storing smart album config data
 	SmartAlbum EntityType = "smart_album"
+	// Memory is the entity type for memory share encryption keys
+	Memory EntityType = "memory"
+	// Contact is the entity type for the shared contact root key.
+	Contact EntityType = "contact"
 )
 
 func (et EntityType) IsValid() error {
 	switch et {
-	case Location, Person, CGroup, SmartAlbum:
+	case Location, Person, CGroup, SmartAlbum, Memory, Contact:
 		return nil
 	}
 	return ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid EntityType: %s", et))

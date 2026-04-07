@@ -659,7 +659,7 @@ class FileAppBarState extends State<FileAppBar> {
     }
 
     final fileToDownload =
-        !file.isRemoteFile ? file.copyWith(localID: null) : file;
+        !file.isRemoteFile ? (file.copyWith()..localID = null) : file;
     if (flagService.internalUser) {
       try {
         await galleryDownloadQueueService.enqueueFiles([fileToDownload]);

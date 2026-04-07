@@ -35,7 +35,7 @@ public struct NetworkConfiguration {
         )
     }
     
-    // Default Ente.io configuration
+    // Default Ente configuration
     public static let `default` = NetworkConfiguration(
         apiEndpoint: URL(string: "https://api.ente.io")!,
         accountsEndpoint: URL(string: "https://accounts.ente.io"),

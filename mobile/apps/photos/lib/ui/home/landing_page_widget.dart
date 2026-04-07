@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import "package:photos/app.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
@@ -21,11 +22,10 @@ import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import "package:photos/ui/settings/developer_settings_page.dart";
+import "package:photos/ui/settings/developer_settings_tap_area.dart";
 import "package:photos/ui/settings/developer_settings_widget.dart";
 import "package:photos/ui/settings/language_picker.dart";
 import 'package:photos/ui/tabs/home_widget.dart';
-import "package:photos/utils/dialog_util.dart";
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({super.key});
@@ -35,13 +35,11 @@ class LandingPageWidget extends StatefulWidget {
 }
 
 class _LandingPageWidgetState extends State<LandingPageWidget> {
-  static const kDeveloperModeTapCountThreshold = 7;
   static const _featureCount = 3;
   static const _autoScrollInterval = Duration(seconds: 4);
 
   int _currentPage = 0;
   int _activeDotIndex = 0;
-  int _developerModeTapCount = 0;
   bool _autoScrollDisabled = false;
   Timer? _autoScrollTimer;
   late final PageController _pageController;
@@ -118,20 +116,22 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
           statusBarBrightness: Brightness.dark,
         ),
         leading: const SizedBox(),
-        title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-            color: Colors.white,
+        title: SvgPicture.asset(
+          "assets/ente-branding.svg",
+          height: 18,
+          colorFilter: const ColorFilter.mode(
+            Colors.white,
+            BlendMode.srcIn,
           ),
         ),
         centerTitle: true,
       ),
       backgroundColor: colorScheme.greenBase,
       body: SafeArea(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _handleDeveloperModeTap,
+        child: DeveloperSettingsTapArea(
+          onSettingsChanged: () {
+            setState(() {});
+          },
           child: Column(
             children: [
               if (kDebugMode) _buildDebugLanguageButton(),
@@ -302,36 +302,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Future<void> _navigateWithoutAccount() async {
-    updateService.hideChangeLog().ignore();
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => const HomeWidget(startWithoutAccount: true),
       ),
     );
-  }
-
-  Future<void> _handleDeveloperModeTap() async {
-    _developerModeTapCount++;
-    if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
-      _developerModeTapCount = 0;
-      final result = await showChoiceDialog(
-        context,
-        title: AppLocalizations.of(context).developerSettings,
-        firstButtonLabel: AppLocalizations.of(context).yes,
-        body: AppLocalizations.of(context).developerSettingsWarning,
-        isDismissible: false,
-      );
-      if (result?.action == ButtonAction.first) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const DeveloperSettingsPage();
-            },
-          ),
-        );
-        setState(() {});
-      }
-    }
   }
 
   Future<void> _navigateToSignUpPage() async {

@@ -26,7 +26,6 @@
   "deleteReason4": "دلیل من ذکر نشده است",
   "sendEmail": "ارسال ایمیل",
   "deleteRequestSLAText": "درخواست شما ظرف مدت ۷۲ ساعت پردازش خواهد شد.",
-  "deleteEmailRequest": "لطفا یک ایمیل به <warning>account-deletion@ente.io</warning> از آدرس ایمیل ثبت شده خود ارسال کنید.",
   "entePhotosPerm": "Ente برای نگه‌داری عکس‌های شما <i>به دسترسی نیاز دارد</i>",
   "ok": "تایید",
   "createAccount": "ایجاد حساب کاربری",
@@ -68,7 +67,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -131,7 +130,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -207,7 +206,6 @@
   "manageParticipants": "مدیریت",
   "collabLinkSectionDescription": "پیوندی ایجاد کنید تا به افراد اجازه دهید بدون نیاز به برنامه یا حساب کاربری Ente عکس‌ها را در آلبوم اشتراک گذاشته شده شما اضافه و مشاهده کنند. برای جمع‌آوری عکس‌های رویداد عالی است.",
   "verifyEmailID": "تایید {email}",
-  "shareTextRecommendUsingEnte": "Ente را دانلود کنید تا بتوانید به راحتی عکس‌ها و ویدیوهای با کیفیت اصلی را به اشتراک بگذارید\n\nhttps://ente.io",
   "details": "جزئیات",
   "faq": "سوالات متداول",
   "archive": "بایگانی",
@@ -248,8 +246,6 @@
   "backup": "پشتیبان گیری",
   "familyPlans": "برنامه‌های خانوادگی",
   "notifications": "آگاه‌سازی‌ها",
-  "sharedPhotoNotifications": "عکس‌های جدید به اشتراک گذاشته شده",
-  "sharedPhotoNotificationsExplanation": "هنگامی که شخصی عکسی را به آلبوم مشترکی که شما بخشی از آن هستید اضافه می‌کند، آگاه‌سازی دریافت می‌کنید",
   "advanced": "پیشرفته",
   "general": "عمومی",
   "security": "امنیت",
@@ -317,7 +313,6 @@
   "verifyIDLabel": "تایید",
   "fileInfoAddDescHint": "افزودن توضیحات...",
   "editLocationTagTitle": "ویرایش مکان",
-  "familyPlanPortalTitle": "خانوادگی",
   "androidBiometricHint": "تایید هویت",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

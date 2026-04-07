@@ -22,8 +22,8 @@ Format markdown files with Prettier for consistent styling
 ### Development
 
 ```bash
-# Install dependencies (uses Yarn classic 1.22.22)
-yarn install
+# Install dependencies from the committed lockfile (uses Yarn classic 1.22.22)
+yarn install --frozen-lockfile
 
 # Run development servers
 yarn dev              # Photos app (port 3000)
@@ -48,6 +48,9 @@ yarn lint             # Check formatting, linting, and TypeScript types
 yarn lint-fix         # Auto-fix linting and formatting issues
 ```
 
+Use plain `yarn install` only when intentionally updating dependencies and
+reviewing the resulting `yarn.lock` changes.
+
 ## Architecture
 
 This is a **monorepo** containing multiple Ente web applications using **Yarn workspaces**.
@@ -63,7 +66,8 @@ This is a **monorepo** containing multiple Ente web applications using **Yarn wo
 ```
 web/
 ├── apps/              # Individual applications
-│   ├── photos/        # Main photo management app + shared albums
+│   ├── photos/        # Main photo management app
+│   ├── albums/        # Public albums app for shared album and file links
 │   ├── auth/          # 2FA authentication app
 │   ├── embed/         # Embeddable photo viewer (iframe-friendly)
 │   ├── accounts/      # Passkey support

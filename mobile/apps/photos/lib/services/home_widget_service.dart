@@ -243,7 +243,7 @@ class HomeWidgetService {
   }
 
   /// Handle app launch from a widget
-  Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
+  Future<void> onLaunchFromWidget(Uri? uri) async {
     if (uri == null) {
       _logger.warning("Widget launch failed: URI is null");
       return;
@@ -259,25 +259,20 @@ class HomeWidgetService {
     // Route to appropriate handler based on widget scheme
     switch (uri.scheme) {
       case MEMORY_WIDGET_SCHEME:
-        _logger.info("Launching app from memory widget");
         await MemoryHomeWidgetService.instance.onLaunchFromWidget(
           generatedId,
-          context,
         );
         break;
 
       case PEOPLE_WIDGET_SCHEME:
-        _logger.info("Launching app from people widget");
         final personId = uri.queryParameters[MAIN_KEY_PARAM] ?? "";
         await PeopleHomeWidgetService.instance.onLaunchFromWidget(
           generatedId,
           personId,
-          context,
         );
         break;
 
       case ALBUM_WIDGET_SCHEME:
-        _logger.info("Launching app from album widget");
         final collectionId =
             int.tryParse(uri.queryParameters[MAIN_KEY_PARAM] ?? "");
         if (collectionId == null) {
@@ -290,7 +285,6 @@ class HomeWidgetService {
         await AlbumHomeWidgetService.instance.onLaunchFromWidget(
           generatedId,
           collectionId,
-          context,
         );
         break;
 

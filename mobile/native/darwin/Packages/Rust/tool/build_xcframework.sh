@@ -9,6 +9,45 @@ PATCH_SCRIPT="$CORE_ROOT/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 LIB_NAME="libinference_rs_uniffi.a"
 
+require_command() {
+  local name="$1"
+  local hint="${2:-}"
+  if command -v "$name" >/dev/null 2>&1; then
+    return
+  fi
+
+  echo "Missing required command: $name" >&2
+  if [[ -n "$hint" ]]; then
+    echo "$hint" >&2
+  fi
+  exit 1
+}
+
+require_command cargo "Install Rust and ensure cargo is on PATH."
+require_command rustup "Install rustup and ensure it is on PATH."
+require_command xcodebuild "Install Xcode command line tools and ensure xcodebuild is on PATH."
+require_command lipo "Install Xcode command line tools and ensure lipo is on PATH."
+require_command cmake "Install CMake, for example with 'brew install cmake'."
+require_command uniffi-bindgen "Install a compatible version with 'cargo install --locked --version 0.31.0 uniffi --features cli --bin uniffi-bindgen'."
+
+require_rust_target() {
+  local target="$1"
+  if rustup target list --installed | grep -qx "$target"; then
+    return
+  fi
+
+  echo "Missing required Rust target: $target" >&2
+  echo "Install Apple targets with:" >&2
+  echo "  rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios aarch64-apple-darwin x86_64-apple-darwin" >&2
+  exit 1
+}
+
+require_rust_target aarch64-apple-ios
+require_rust_target aarch64-apple-ios-sim
+require_rust_target x86_64-apple-ios
+require_rust_target aarch64-apple-darwin
+require_rust_target x86_64-apple-darwin
+
 if [[ "$APPLY_LLAMA_MTMD_PATCH" != "0" && -f "$PATCH_SCRIPT" ]]; then
   if ! command -v python3 >/dev/null 2>&1; then
     echo "python3 is required to apply the llama mtmd patch." >&2

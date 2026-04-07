@@ -107,6 +107,10 @@ android {
         }
     }
 
+    packagingOptions {
+        pickFirst 'lib/*/libc++_shared.so'
+    }
+
     buildTypes {
         release {
             signingConfig signingConfigs.release
@@ -128,6 +132,7 @@ android {
 
     packagingOptions {
         jniLibs {
+            pickFirsts += ['**/libc++_shared.so']
             useLegacyPackaging = false
         }
     }

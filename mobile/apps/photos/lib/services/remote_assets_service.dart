@@ -1,19 +1,25 @@
 import "dart:async";
+import "dart:convert";
 import "dart:io";
 
+import "package:dio/dio.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/service_locator.dart" show flagService, isOfflineMode;
+import "package:synchronized/synchronized.dart";
 
 class RemoteAssetsService {
   static final _logger = Logger("RemoteAssetsService");
+  static const int _resumableThresholdBytes = 10 * 1024 * 1024;
 
   bool checkRemovedOldAssets = false;
 
   RemoteAssetsService._privateConstructor();
   final StreamController<(String, int, int)> _progressController =
       StreamController<(String, int, int)>.broadcast();
+  final Map<String, Lock> _assetLocks = {};
 
   Stream<(String, int, int)> get progressStream => _progressController.stream;
 
@@ -21,17 +27,20 @@ class RemoteAssetsService {
       RemoteAssetsService._privateConstructor();
 
   Future<File> getAsset(String remotePath, {bool refetch = false}) async {
-    final path = await _getLocalPath(remotePath);
-    final file = File(path);
-    if (file.existsSync() && !refetch) {
-      _logger.info("Returning cached file for $remotePath");
-      return file;
-    } else {
-      final tempFile = File(path + ".temp");
+    return _lockFor(remotePath).synchronized(() async {
+      final path = await _getLocalPath(remotePath);
+      final file = File(path);
+      if (await file.exists() && !refetch) {
+        _logger.info("Returning cached file for $remotePath");
+        return file;
+      }
+
+      final tempFile = File(_tempPath(path));
       await _downloadFile(remotePath, tempFile.path);
-      tempFile.renameSync(path);
-      return File(path);
-    }
+      await _replaceFile(tempFile, file);
+      await _deleteResumeMetadata(tempFile.path);
+      return file;
+    });
   }
 
   Future<String> getAssetPath(String remotePath, {bool refetch = false}) async {
@@ -42,31 +51,35 @@ class RemoteAssetsService {
 
   ///Returns asset if the remote asset is new compared to the local copy of it
   Future<File?> getAssetIfUpdated(String remotePath) async {
-    try {
-      final path = await _getLocalPath(remotePath);
-      final file = File(path);
-      if (!file.existsSync()) {
-        final tempFile = File(path + ".temp");
-        await _downloadFile(remotePath, tempFile.path);
-        tempFile.renameSync(path);
-        return File(path);
-      } else {
-        final existingFileSize = File(path).lengthSync();
-        final tempFile = File(path + ".temp");
-        await _downloadFile(remotePath, tempFile.path);
-        final newFileSize = tempFile.lengthSync();
-        if (existingFileSize != newFileSize) {
-          tempFile.renameSync(path);
-          return File(path);
-        } else {
-          tempFile.deleteSync();
-          return null;
+    return _lockFor(remotePath).synchronized(() async {
+      try {
+        final path = await _getLocalPath(remotePath);
+        final file = File(path);
+        final tempFile = File(_tempPath(path));
+
+        if (!await file.exists()) {
+          await _downloadFile(remotePath, tempFile.path);
+          await _replaceFile(tempFile, file);
+          await _deleteResumeMetadata(tempFile.path);
+          return file;
         }
+
+        final existingFileSize = await file.length();
+        await _downloadFile(remotePath, tempFile.path);
+        final newFileSize = await tempFile.length();
+        if (existingFileSize != newFileSize) {
+          await _replaceFile(tempFile, file);
+          await _deleteResumeMetadata(tempFile.path);
+          return file;
+        }
+
+        await _clearResumeArtifacts(tempFile.path);
+        return null;
+      } catch (e) {
+        _logger.warning("Error getting asset if updated", e);
+        return null;
       }
-    } catch (e) {
-      _logger.warning("Error getting asset if updated", e);
-      return null;
-    }
+    });
   }
 
   Future<bool> hasAsset(String remotePath) async {
@@ -94,26 +107,32 @@ class RemoteAssetsService {
     return fileName;
   }
 
-  Future<void> _downloadFile(String url, String savePath) async {
+  Future<void> _downloadFile(
+    String url,
+    String savePath, {
+    bool allowResume = true,
+  }) async {
     _logger.info("Downloading " + url);
-    final existingFile = File(savePath);
-    if (existingFile.existsSync()) {
-      existingFile.deleteSync();
+    final probe = await _probeRemoteAsset(url);
+    if (allowResume && _shouldUseResumableDownload(probe)) {
+      await _downloadFileResumable(url, savePath, probe!);
+    } else {
+      await _downloadFileSingleShot(url, savePath);
     }
 
-    await NetworkClient.instance.getDio().download(
+    _logger.info("Downloaded " + url);
+  }
+
+  Future<void> _downloadFileSingleShot(String url, String savePath) async {
+    await _clearResumeArtifacts(savePath);
+
+    await _dio.download(
       url,
       savePath,
       onReceiveProgress: (received, total) {
-        if (received > 0 && total > 0) {
-          _progressController.add((url, received, total));
-        } else if (kDebugMode) {
-          debugPrint("$url Received: $received, Total: $total");
-        }
+        _emitProgress(url, received, total);
       },
     );
-
-    _logger.info("Downloaded " + url);
   }
 
   Future<void> cleanupOldModelsIfNeeded() async {
@@ -137,12 +156,368 @@ class RemoteAssetsService {
   Future<void> cleanupSelectedModels(List<String> modelRemotePaths) async {
     for (final remotePath in modelRemotePaths) {
       final localPath = await _getLocalPath(remotePath);
-      if (File(localPath).existsSync()) {
+      final hasArtifacts = await File(localPath).exists() ||
+          await File(_tempPath(localPath)).exists() ||
+          await File(_resumeMetadataPath(_tempPath(localPath))).exists();
+      if (hasArtifacts) {
         _logger.info(
           'Removing unused ML model ${remotePath.split('/').last} at $localPath',
         );
-        await File(localPath).delete();
+        await _deleteAssetArtifacts(localPath);
       }
     }
   }
+
+  Dio get _dio => NetworkClient.instance.getDio();
+
+  bool get _resumableDownloadsEnabled =>
+      isOfflineMode || flagService.internalUser;
+
+  Lock _lockFor(String remotePath) =>
+      _assetLocks.putIfAbsent(remotePath, Lock.new);
+
+  String _tempPath(String finalPath) => "$finalPath.temp";
+
+  String _resumeMetadataPath(String tempPath) => "$tempPath.resume.json";
+
+  bool _shouldUseResumableDownload(_RemoteAssetProbe? probe) {
+    if (!_resumableDownloadsEnabled || probe == null) {
+      return false;
+    }
+    return probe.totalBytes > _resumableThresholdBytes && probe.canResume;
+  }
+
+  Future<_RemoteAssetProbe?> _probeRemoteAsset(String url) async {
+    if (!_resumableDownloadsEnabled) {
+      return null;
+    }
+
+    try {
+      final response = await _dio.head<void>(url);
+      return _RemoteAssetProbe.fromHeaders(
+        url,
+        response.headers,
+      );
+    } catch (e) {
+      _logger.fine("HEAD probe failed for $url: $e");
+      return null;
+    }
+  }
+
+  Future<void> _downloadFileResumable(
+    String url,
+    String savePath,
+    _RemoteAssetProbe probe,
+  ) async {
+    final tempFile = File(savePath);
+    final existingBytes = await _prepareTempFileForResume(
+      tempFile,
+      probe,
+    );
+
+    await _writeResumeMetadata(savePath, probe);
+
+    if (existingBytes == probe.totalBytes) {
+      _emitProgress(url, existingBytes, probe.totalBytes);
+      return;
+    }
+    if (existingBytes > 0) {
+      _emitProgress(url, existingBytes, probe.totalBytes);
+    }
+
+    try {
+      await _startResumableDownload(url, savePath, probe, existingBytes);
+    } on DioException catch (e) {
+      if (existingBytes > 0 && _shouldRestartDownloadFromScratch(e)) {
+        _logger.info("Restarting resumable download from scratch for $url");
+        await _clearResumeArtifacts(savePath);
+        await _downloadFile(url, savePath, allowResume: false);
+        return;
+      }
+      rethrow;
+    } on _ResumeValidationException catch (e, s) {
+      if (existingBytes > 0) {
+        _logger.warning(
+          "Resumed download validation failed for $url, restarting from scratch",
+          e,
+          s,
+        );
+        await _clearResumeArtifacts(savePath);
+        await _downloadFile(url, savePath, allowResume: false);
+        return;
+      }
+      await _clearResumeArtifacts(savePath);
+      rethrow;
+    }
+  }
+
+  Future<int> _prepareTempFileForResume(
+    File tempFile,
+    _RemoteAssetProbe probe,
+  ) async {
+    final metadataFile = File(_resumeMetadataPath(tempFile.path));
+    final tempExists = await tempFile.exists();
+    final metadataExists = await metadataFile.exists();
+
+    if (!tempExists) {
+      if (metadataExists) {
+        await metadataFile.delete();
+      }
+      return 0;
+    }
+
+    if (!metadataExists) {
+      await _clearResumeArtifacts(tempFile.path);
+      return 0;
+    }
+
+    final storedProbe = await _readResumeMetadata(tempFile.path);
+    if (storedProbe == null || !storedProbe.matches(probe)) {
+      await _clearResumeArtifacts(tempFile.path);
+      return 0;
+    }
+
+    final existingBytes = await tempFile.length();
+    if (existingBytes <= 0 || existingBytes > probe.totalBytes) {
+      await _clearResumeArtifacts(tempFile.path);
+      return 0;
+    }
+
+    return existingBytes;
+  }
+
+  Future<void> _startResumableDownload(
+    String url,
+    String savePath,
+    _RemoteAssetProbe probe,
+    int existingBytes,
+  ) async {
+    if (existingBytes > 0) {
+      // Revalidate the representation at request time so we never append
+      // bytes from a different asset revision to an older partial file.
+      final response = await _dio.download(
+        url,
+        savePath,
+        deleteOnError: false,
+        fileAccessMode: FileAccessMode.append,
+        options: Options(
+          receiveDataWhenStatusError: false,
+          headers: {
+            HttpHeaders.rangeHeader: "bytes=$existingBytes-",
+            HttpHeaders.ifRangeHeader: probe.ifRangeValidator!,
+          },
+          validateStatus: (status) => status == HttpStatus.partialContent,
+        ),
+        onReceiveProgress: (received, _) {
+          _emitProgress(url, existingBytes + received, probe.totalBytes);
+        },
+      );
+      _validateResumedResponseHeaders(
+        response.headers,
+        expectedStart: existingBytes,
+        expectedTotalBytes: probe.totalBytes,
+      );
+      await _validateDownloadedFileLength(savePath, probe.totalBytes);
+      return;
+    }
+
+    await _dio.download(
+      url,
+      savePath,
+      deleteOnError: false,
+      onReceiveProgress: (received, total) {
+        _emitProgress(
+          url,
+          received,
+          probe.totalBytes > 0 ? probe.totalBytes : total,
+        );
+      },
+    );
+    await _validateDownloadedFileLength(savePath, probe.totalBytes);
+  }
+
+  bool _shouldRestartDownloadFromScratch(DioException error) {
+    if (error.type != DioExceptionType.badResponse) {
+      return false;
+    }
+    final statusCode = error.response?.statusCode;
+    return statusCode == HttpStatus.ok ||
+        statusCode == HttpStatus.requestedRangeNotSatisfiable;
+  }
+
+  Future<_RemoteAssetProbe?> _readResumeMetadata(String tempPath) async {
+    final file = File(_resumeMetadataPath(tempPath));
+    if (!await file.exists()) {
+      return null;
+    }
+    try {
+      final raw = await file.readAsString();
+      return _RemoteAssetProbe.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+    } catch (e, s) {
+      _logger.warning("Failed to parse resume metadata for $tempPath", e, s);
+      return null;
+    }
+  }
+
+  Future<void> _writeResumeMetadata(
+    String tempPath,
+    _RemoteAssetProbe metadata,
+  ) async {
+    final file = File(_resumeMetadataPath(tempPath));
+    await file.parent.create(recursive: true);
+    await file.writeAsString(jsonEncode(metadata.toJson()), flush: true);
+  }
+
+  Future<void> _deleteResumeMetadata(String tempPath) async {
+    await _deleteFileIfExists(File(_resumeMetadataPath(tempPath)));
+  }
+
+  Future<void> _validateDownloadedFileLength(
+    String savePath,
+    int expectedTotalBytes,
+  ) async {
+    final actualBytes = await File(savePath).length();
+    if (actualBytes != expectedTotalBytes) {
+      throw _ResumeValidationException(
+        "Expected $expectedTotalBytes bytes, found $actualBytes",
+      );
+    }
+  }
+
+  void _validateResumedResponseHeaders(
+    Headers headers, {
+    required int expectedStart,
+    required int expectedTotalBytes,
+  }) {
+    final contentRange = headers.value(HttpHeaders.contentRangeHeader);
+    if (contentRange == null) {
+      throw const _ResumeValidationException(
+        "Missing Content-Range on resumed response",
+      );
+    }
+
+    final match = RegExp(r"bytes\s+(\d+)-(\d+)/(\d+)").firstMatch(contentRange);
+    final start = int.tryParse(match?.group(1) ?? "");
+    final end = int.tryParse(match?.group(2) ?? "");
+    final total = int.tryParse(match?.group(3) ?? "");
+    if (start != expectedStart ||
+        end == null ||
+        end < expectedStart ||
+        end >= expectedTotalBytes ||
+        total != expectedTotalBytes) {
+      throw _ResumeValidationException(
+        "Unexpected Content-Range '$contentRange' for resume from "
+        "$expectedStart of $expectedTotalBytes bytes",
+      );
+    }
+  }
+
+  Future<void> _clearResumeArtifacts(String tempPath) async {
+    await _deleteFileIfExists(File(tempPath));
+    await _deleteResumeMetadata(tempPath);
+  }
+
+  Future<void> _replaceFile(File source, File target) async {
+    await target.parent.create(recursive: true);
+    // Keep the swap atomic so readers never observe the target path missing.
+    await source.rename(target.path);
+  }
+
+  Future<void> _deleteAssetArtifacts(String localPath) async {
+    await _deleteFileIfExists(File(localPath));
+    await _clearResumeArtifacts(_tempPath(localPath));
+  }
+
+  Future<void> _deleteFileIfExists(File file) async {
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
+  void _emitProgress(String url, int received, int total) {
+    if (received > 0 && total > 0) {
+      final boundedReceived = received > total ? total : received;
+      _progressController.add((url, boundedReceived, total));
+    } else if (kDebugMode) {
+      debugPrint("$url Received: $received, Total: $total");
+    }
+  }
+}
+
+String? _strongETag(String? etag) {
+  if (etag == null || etag.startsWith("W/") || etag.startsWith("w/")) {
+    return null;
+  }
+  return etag;
+}
+
+class _RemoteAssetProbe {
+  const _RemoteAssetProbe({
+    required this.url,
+    required this.totalBytes,
+    required this.acceptsRanges,
+    required this.etag,
+  });
+
+  static _RemoteAssetProbe? fromHeaders(
+    String url,
+    Headers headers,
+  ) {
+    final contentLength = headers.value(HttpHeaders.contentLengthHeader);
+    final totalBytes = int.tryParse(contentLength ?? "");
+    if (totalBytes == null || totalBytes <= 0) {
+      return null;
+    }
+
+    final acceptRanges = headers.value("accept-ranges")?.trim();
+    return _RemoteAssetProbe(
+      url: url,
+      totalBytes: totalBytes,
+      acceptsRanges: acceptRanges == "bytes",
+      etag: headers.value(HttpHeaders.etagHeader)?.trim(),
+    );
+  }
+
+  factory _RemoteAssetProbe.fromJson(Map<String, dynamic> json) {
+    return _RemoteAssetProbe(
+      url: json["url"] as String,
+      totalBytes: json["totalBytes"] as int,
+      acceptsRanges: false,
+      etag: json["etag"] as String?,
+    );
+  }
+
+  final String url;
+  final int totalBytes;
+  final bool acceptsRanges;
+  final String? etag;
+
+  String? get ifRangeValidator => _strongETag(etag);
+
+  bool get canResume => acceptsRanges && ifRangeValidator != null;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "url": url,
+      "totalBytes": totalBytes,
+      "etag": etag,
+    };
+  }
+
+  bool matches(_RemoteAssetProbe other) {
+    return url == other.url &&
+        totalBytes == other.totalBytes &&
+        ifRangeValidator == other.ifRangeValidator;
+  }
+}
+
+class _ResumeValidationException implements Exception {
+  const _ResumeValidationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => "ResumeValidationException: $message";
 }

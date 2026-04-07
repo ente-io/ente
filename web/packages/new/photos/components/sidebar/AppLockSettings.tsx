@@ -164,7 +164,13 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             // Fallback when macOS device lock setup is unavailable/failed.
             setPinDialogOpen(true);
         })();
-    }, [state.enabled, showMiniDialog, isMacOS, handleSelectDeviceLock]);
+    }, [
+        state.enabled,
+        state.supported,
+        showMiniDialog,
+        isMacOS,
+        handleSelectDeviceLock,
+    ]);
 
     const handleSelectPin = useCallback(() => {
         setPinDialogOpen(true);

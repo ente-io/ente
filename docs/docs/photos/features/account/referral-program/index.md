@@ -53,4 +53,4 @@ Note: You can change your referral code up to **3 times**.
 - [What happens if I refer more people than my plan allows?](/photos/faq/storage-and-plans#referral-overflow)
 - [What counts as abuse of the referral program?](/photos/faq/storage-and-plans#referral-abuse)
 
-More questions? Drop a mail to [referrals@ente.io](mailto:referrals@ente.io)!
+More questions? Drop a mail to [referrals@ente.com](mailto:referrals@ente.com)!

@@ -90,7 +90,7 @@ struct PairingView: View {
                                 .frame(height: geometry.size.height * 0.06)
                             
                             // Help text
-                            Text("Visit ente.io/cast for help")
+                            Text("Visit ente.com/cast for help")
                                 .font(FontUtils.interMedium(size: geometry.size.width * 0.012))
                                 .foregroundColor(.white)
                             

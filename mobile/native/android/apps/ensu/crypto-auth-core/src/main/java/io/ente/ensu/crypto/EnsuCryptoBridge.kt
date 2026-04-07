@@ -24,11 +24,12 @@ object EnsuCryptoBridge {
     }
 
     fun srpDecryptSecrets(
+        srpM2: String,
         keyAttributes: KeyAttributes,
         encryptedToken: String?,
         plainToken: String?
     ): AuthSecrets {
-        return io.ente.ensu.crypto.srpDecryptSecrets(keyAttributes, encryptedToken, plainToken)
+        return io.ente.ensu.crypto.srpDecryptSecrets(srpM2, keyAttributes, encryptedToken, plainToken)
     }
 
     fun deriveKekForLogin(password: String, kekSalt: String, memLimit: Int, opsLimit: Int): ByteArray {

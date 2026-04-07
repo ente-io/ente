@@ -13,17 +13,18 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/main.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
-import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
-import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
@@ -43,6 +44,9 @@ class MLService {
 
   int? lastRemoteFetch;
   static const int _kRemoteFetchCooldownOnLite = 1000 * 60 * 5;
+  static const int _kStartupOwnedRemoteHydrationMissingFileThreshold = 200;
+  Future<void>? _ownedRemoteHydrationFuture;
+  bool _hasScheduledStartupOwnedRemoteHydration = false;
 
   late String client;
 
@@ -54,6 +58,9 @@ class MLService {
   bool _isIndexingOrClusteringRunning = false;
   bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
+  Timer? _predownloadLocalModelsTimer;
+
+  static const _kPredownloadLocalModelsDelay = Duration(seconds: 10);
 
   bool get isRunningML =>
       _isRunningML || memoriesCacheService.isUpdatingMemories;
@@ -82,7 +89,8 @@ class MLService {
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
     if (_isInitialized) {
-      unawaited(_maybePredownloadLocalModels());
+      _schedulePredownloadLocalModels();
+      scheduleStartupOwnedRemoteHydration();
       return;
     }
     _logger.info("init called");
@@ -100,7 +108,7 @@ class MLService {
     // Listen on ComputeController
     Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!hasGrantedMLConsent) {
-        if (event.shouldRun) {
+        if (!isProcessBg && event.shouldRun) {
           VideoPreviewService.instance.queueFiles(duration: Duration.zero);
         }
         return;
@@ -118,7 +126,11 @@ class MLService {
             "MLController allowed running ML, faces indexing starting",
           );
         }
-        unawaited(runAllML());
+        // Background start is driven manually from _runMinimally to avoid
+        // duplicate runAllML invocations in the same cycle.
+        if (!isProcessBg) {
+          unawaited(runAllML());
+        }
       } else {
         _logger.info(
           "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -126,13 +138,28 @@ class MLService {
         pauseIndexingAndClustering();
       }
     });
+    _syncMlControllerStatusForBg();
 
     _isInitialized = true;
-    unawaited(_maybePredownloadLocalModels());
+    _schedulePredownloadLocalModels();
+    scheduleStartupOwnedRemoteHydration();
     _logger.info('init done');
   }
 
+  void _syncMlControllerStatusForBg() {
+    if (!isProcessBg || !hasGrantedMLConsent) {
+      return;
+    }
+    _mlControllerStatus = computeController.shouldRunCompute;
+    _logger.info(
+      "Background init synced MLController status to $_mlControllerStatus",
+    );
+  }
+
   Future<void> _maybePredownloadLocalModels() async {
+    if (isProcessBg) {
+      return;
+    }
     if (!hasGrantedMLConsent) {
       return;
     }
@@ -150,6 +177,153 @@ class MLService {
     } catch (e, s) {
       _logger.warning("Failed to predownload local ML models", e, s);
     }
+  }
+
+  void scheduleStartupOwnedRemoteHydration() {
+    if (_hasScheduledStartupOwnedRemoteHydration ||
+        isProcessBg ||
+        !hasGrantedMLConsent ||
+        isOfflineMode ||
+        !localSettings.remoteFetchEnabled) {
+      return;
+    }
+    _hasScheduledStartupOwnedRemoteHydration = true;
+    unawaited(_runStartupOwnedRemoteHydration());
+  }
+
+  Future<void> _runStartupOwnedRemoteHydration() async {
+    if (!hasGrantedMLConsent || isOfflineMode) {
+      return;
+    }
+    try {
+      await fileDataService.syncFDStatus();
+    } catch (e, s) {
+      _logger.warning(
+        "Skipping startup-owned remote ML hydration because FD status refresh failed",
+        e,
+        s,
+      );
+      return;
+    }
+    try {
+      await hydrateRemoteEmbeddingsForOwnedFiles(
+        reason: "startup",
+        skipHydrationIfCandidateFileCountAtMost:
+            _kStartupOwnedRemoteHydrationMissingFileThreshold,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Skipping startup-owned remote ML hydration because owned hydration failed",
+        e,
+        s,
+      );
+    }
+  }
+
+  Future<void> hydrateRemoteEmbeddingsForOwnedFiles({
+    required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
+  }) async {
+    if (isProcessBg ||
+        isOfflineMode ||
+        !hasGrantedMLConsent ||
+        !localSettings.remoteFetchEnabled) {
+      return;
+    }
+    final existing = _ownedRemoteHydrationFuture;
+    if (existing != null) {
+      _logger.info(
+        "Owned remote ML hydration already running, joining existing run ($reason)",
+      );
+      return existing;
+    }
+    final future = _runOwnedRemoteHydrationSafely(
+      reason: reason,
+      skipHydrationIfCandidateFileCountAtMost:
+          skipHydrationIfCandidateFileCountAtMost,
+    );
+    _ownedRemoteHydrationFuture = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_ownedRemoteHydrationFuture, future)) {
+        _ownedRemoteHydrationFuture = null;
+      }
+    }
+  }
+
+  Future<void> _runOwnedRemoteHydrationSafely({
+    required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
+  }) async {
+    try {
+      await _hydrateRemoteEmbeddingsForOwnedFilesInternal(
+        reason: reason,
+        skipHydrationIfCandidateFileCountAtMost:
+            skipHydrationIfCandidateFileCountAtMost,
+      );
+    } catch (e, s) {
+      _logger.warning("Owned remote ML hydration ($reason) failed", e, s);
+    }
+  }
+
+  Future<void> _hydrateRemoteEmbeddingsForOwnedFilesInternal({
+    required String reason,
+    int? skipHydrationIfCandidateFileCountAtMost,
+  }) async {
+    final summary = await hydrateOwnedRemoteMLData(
+      mlDataDB: MLDataDB.instance,
+      skipHydrationIfCandidateFileCountAtMost:
+          skipHydrationIfCandidateFileCountAtMost,
+    );
+    if (summary.candidateFiles == 0) {
+      _logger.info(
+        "Skipping owned remote ML hydration ($reason): no owned files need remote hydration",
+      );
+      return;
+    }
+    if (summary.skippedDueToCandidateThreshold) {
+      _logger.info(
+        "Skipping owned remote ML hydration ($reason): only ${summary.candidateFiles} "
+        "owned files are missing remote ML data (threshold: > "
+        "$skipHydrationIfCandidateFileCountAtMost)",
+      );
+      return;
+    }
+    _logger.info(
+      "Owned remote ML hydration ($reason) finished for ${summary.candidateFiles} files "
+      "(faces hydrated: ${summary.hydratedFaces}, clip hydrated: ${summary.hydratedClips}, "
+      "still pending local ML: ${summary.remainingLocalMl})",
+    );
+  }
+
+  Future<void> _waitForOwnedRemoteHydrationIfRunning() async {
+    final existing = _ownedRemoteHydrationFuture;
+    if (existing == null) {
+      return;
+    }
+    _logger.info(
+      "Waiting for owned remote ML hydration to finish before indexing",
+    );
+    try {
+      await existing;
+    } catch (e, s) {
+      _logger.warning(
+        "Owned remote ML hydration failed while indexing was waiting, continuing",
+        e,
+        s,
+      );
+    }
+  }
+
+  void _schedulePredownloadLocalModels() {
+    if (isProcessBg || _predownloadLocalModelsTimer?.isActive == true) {
+      return;
+    }
+    _predownloadLocalModelsTimer = Timer(_kPredownloadLocalModelsDelay, () {
+      _predownloadLocalModelsTimer = null;
+      unawaited(_maybePredownloadLocalModels());
+    });
   }
 
   bool canFetch() {
@@ -172,6 +346,10 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (_isRunningML) {
+      _logger.info("runAllML called while already running, skipping");
+      return;
+    }
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -200,9 +378,9 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
+        // Refresh discover/memories caches before indexing using the same
+        // path in foreground and background runs.
         magicCacheService.updateCache(forced: force).ignore();
-        // refresh memories section
         memoriesCacheService.updateCache(forced: force).ignore();
       }
       if (canFetch()) {
@@ -220,9 +398,9 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
+        // Persist refreshed caches after ML so foreground can pick them up
+        // on the next resume, even when the work ran headlessly in background.
         magicCacheService.updateCache().ignore();
-        // refresh memories section (only runs if forced is true)
         memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
@@ -232,7 +410,9 @@ class MLService {
       _logger.info("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      VideoPreviewService.instance.queueFiles();
+      if (!isProcessBg) {
+        VideoPreviewService.instance.queueFiles();
+      }
     }
   }
 
@@ -261,6 +441,10 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
+    if (!_canRunMLFunction(function: "Indexing")) return;
+    if (mode == MLMode.online && !isOfflineMode) {
+      await _waitForOwnedRemoteHydrationIfRunning();
+    }
     if (!_canRunMLFunction(function: "Indexing")) return;
 
     bool rustRuntimePrepared = false;
@@ -695,25 +879,20 @@ class MLService {
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
-      final String errorString = e.toString();
       final String format = instruction.file.displayName.split('.').last;
       final int? size = instruction.file.fileSize;
       final fileType = instruction.file.fileType;
-      final bool acceptedIssue =
-          errorString.contains('ThumbnailRetrievalException') ||
-              errorString.contains('InvalidImageFormatException') ||
-              errorString.contains('UnhandledExifOrientation') ||
-              errorString.contains('FileSizeTooLargeForMobileIndexing');
+      final bool acceptedIssue = isExpectedMlSkipError(e);
       if (acceptedIssue) {
-        _logger.severe(
-          '$errorString for fileID ${instruction.fileKey} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
-          e,
-          s,
+        _logger.warning(
+          "Skipping ML indexing for fileID ${instruction.fileKey} (format $format, type $fileType, size $size): ${formatExpectedMlSkipReasonForLogs(e)}",
         );
+        final storedMarkers = <String>[];
         if (instruction.shouldRunFaces) {
           await mlDataDB.bulkInsertFaces(
             [Face.empty(instruction.fileKey, error: true)],
           );
+          storedMarkers.add("faces");
         }
         if (instruction.shouldRunClip) {
           if (instruction.isOffline) {
@@ -723,13 +902,18 @@ class MLService {
               instruction.file,
             );
           }
+          storedMarkers.add("clip");
         }
         if (instruction.shouldRunPets) {
           await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
           await mlDataDB.bulkInsertPetFaces(
             [DBPetFace.empty(instruction.fileKey, error: true)],
           );
+          storedMarkers.add("pets");
         }
+        _logger.info(
+          "Stored empty ML result markers for fileID ${instruction.fileKey}: ${storedMarkers.join(', ')}",
+        );
         return true;
       }
       _logger.severe(

@@ -115,7 +115,7 @@ Any new photos backed up to these folders will automatically be shared and synce
 
 ### Does Ente have a shared library feature where all photos are shared with another account (similar to Google Photos Partner Sharing/iCloud Shared Photo Library)? {#shared-library}
 
-Ente has shared albums but does not support sharing your entire library in one click. However, you can share all albums by selecting one album, choosing the "all" option on the bottom right, which selects all albums and then you can share in one go with a partner (they can be [viewer or collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)).
+Ente has shared albums but does not support sharing your entire library in one click. However, you can share all albums by selecting one album, choosing the "all" option on the bottom right, which selects all albums and then you can share in one go with a partner (they can be [viewer/collaborator/admin](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)).
 
 [Smart albums](/photos/features/albums-and-organization/auto-add-people#auto-add-people-to-albums-smart-albums) let you auto-add specific people to albums as well.
 
@@ -420,9 +420,17 @@ In collaborative albums (with other Ente users), you can see who uploaded each p
 
 ### Will upgrading to a paid plan automatically remove device limits for existing public links that were shared while on free plan? {#device-limit-upgrade}
 
-For existing album links shared while on the free plan, the device limit will not be removed automatically.
+For existing album links shared while on the free plan, the device limit will not be removed automatically. You can edit the device limit from manage link option (open album>link icon on top)
 
 Once you upgrade to a paid plan, all future public links will have no device limit unless you set one yourself.
+
+### Why do emails on my feed appear masked for public links? {#masked-emails-public-links}
+
+On public links, contributor emails are masked by default to protect privacy.
+
+If you're an album member viewing comments or likes in the mobile app, you'll see names instead of masked emails — but only for people you've already added to your People list with their linked email address.
+
+Anonymous viewers (people without an Ente account) can also show a name if they've entered one themselves when liking or commenting.
 
 ## Public Link Features
 
@@ -505,13 +513,13 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
 
 Free users can:
 
 - Create and receive shared albums
 - Share albums directly with other Ente users
-- Create public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
+- Create public links ([device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 - View public links shared with them
 - Add photos to collect links that allow uploads
 
@@ -553,7 +561,7 @@ Learn more about [public link encryption](/photos/faq/security-and-privacy#publi
 
 The information required to decrypt an album is encrypted with the recipient's public key such that only they can decrypt them.
 
-You can read more about this in our [architecture documentation](https://ente.io/architecture#sharing).
+You can read more about this in our [architecture documentation](https://ente.com/architecture#sharing).
 
 In case of sharable links, the key to decrypt the album is appended by the client as a [fragment to the URL](https://en.wikipedia.org/wiki/URI_fragment), and is never sent to our servers.
 

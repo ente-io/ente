@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/tauri";
 import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
 import {
     ModelManager,
@@ -535,7 +535,7 @@ class TauriInference implements InferenceBackend {
     }
 
     async isModelAvailable(modelPath: string): Promise<boolean> {
-        const { exists } = await import("@tauri-apps/plugin-fs");
+        const { exists } = await import("@tauri-apps/api/fs");
         if (!(await exists(modelPath))) return false;
         try {
             const size = await invoke<number | null>("fs_file_size", {
@@ -607,6 +607,7 @@ class TauriInference implements InferenceBackend {
         request: GenerateChatRequest,
         onEvent?: (event: GenerateEvent) => void,
     ): Promise<GenerateSummary> {
+        const panicJobId = 0;
         let resolvedJobId: number | null = null;
         let errorMessage: string | null = null;
 
@@ -636,6 +637,11 @@ class TauriInference implements InferenceBackend {
             }
 
             if (payload.type === "error") {
+                if (payload.job_id === panicJobId) {
+                    rejectSummary(new Error(payload.message));
+                    void unlisten();
+                    return;
+                }
                 errorMessage = payload.message;
             }
 

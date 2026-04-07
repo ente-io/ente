@@ -13,8 +13,9 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.da
 class MenuItemWidgetNew extends StatefulWidget {
   final String title;
   final String? subText;
+  final int titleMaxLines;
+  final int subTextMaxLines;
   final TextStyle? subTextStyle;
-  final double verticalPaddingWithSubText;
   final double titleToSubTextSpacing;
 
   /// Color for the title text
@@ -64,8 +65,9 @@ class MenuItemWidgetNew extends StatefulWidget {
   const MenuItemWidgetNew({
     required this.title,
     this.subText,
+    this.titleMaxLines = 2,
+    this.subTextMaxLines = 1,
     this.subTextStyle,
-    this.verticalPaddingWithSubText = 9.0,
     this.titleToSubTextSpacing = 0.0,
     this.titleColor,
     this.leadingIcon,
@@ -154,14 +156,12 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     final effectiveMenuItemColor = menuItemColor ?? defaultMenuItemColor;
     final bool hasSubText =
         widget.subText != null && widget.subText!.isNotEmpty;
-    final verticalPadding =
-        hasSubText ? widget.verticalPaddingWithSubText : 16.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
       clipBehavior: Clip.none,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: verticalPadding),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(circularRadius),
         color: effectiveMenuItemColor,
@@ -184,7 +184,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
                     children: [
                       Text(
                         widget.title,
-                        maxLines: 1,
+                        maxLines: widget.titleMaxLines,
                         overflow: TextOverflow.ellipsis,
                         style: widget.titleColor != null
                             ? textTheme.small.copyWith(color: widget.titleColor)
@@ -194,7 +194,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
                         SizedBox(height: widget.titleToSubTextSpacing),
                       Text(
                         widget.subText!,
-                        maxLines: 1,
+                        maxLines: widget.subTextMaxLines,
                         overflow: TextOverflow.ellipsis,
                         style: widget.subTextStyle ??
                             textTheme.tinyMuted.copyWith(height: 17 / 10),
@@ -203,7 +203,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
                   )
                 : Text(
                     widget.title,
-                    maxLines: 1,
+                    maxLines: widget.titleMaxLines,
                     overflow: TextOverflow.ellipsis,
                     style: widget.titleColor != null
                         ? textTheme.small.copyWith(color: widget.titleColor)

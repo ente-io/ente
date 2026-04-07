@@ -103,12 +103,11 @@ class InfoFileService {
   /// Extracts info data from a file
   InfoItem? extractInfoFromFile(EnteFile file) {
     try {
-      if (file.fileType != FileType.info ||
-          file.pubMagicMetadata.info == null) {
+      final infoData = file.pubMagicMetadata.info;
+      if (infoData == null) {
         return null;
       }
 
-      final infoData = file.pubMagicMetadata.info!;
       final typeString = infoData['type'] as String?;
       final data = infoData['data'] as Map<String, dynamic>?;
 
@@ -116,10 +115,11 @@ class InfoFileService {
         return null;
       }
 
-      final infoType = InfoType.values.firstWhere(
-        (type) => type.name == typeString,
-        orElse: () => InfoType.note,
-      );
+      if (file.fileType != FileType.info) {
+        file.fileType = FileType.info;
+      }
+
+      final infoType = InfoTypeExtension.fromString(typeString);
 
       InfoData infoDataObj;
       switch (infoType) {
@@ -150,7 +150,13 @@ class InfoFileService {
 
   /// Checks if a file is an info file
   bool isInfoFile(EnteFile file) {
-    return file.fileType == FileType.info && file.pubMagicMetadata.info != null;
+    if (file.fileType == FileType.info) {
+      return true;
+    }
+    if (file.fileType != null && file.fileType != FileType.other) {
+      return false;
+    }
+    return file.pubMagicMetadata.info != null;
   }
 
   /// Gets the display title for an info file based on its content

@@ -2,6 +2,7 @@ import { HTTPError } from "ente-base/http";
 import { t } from "i18next";
 
 type LockerMutationAction = "createItem" | "uploadFile";
+export type LockerUpgradeCTAType = "fileCountLimit" | "storageLimit";
 
 const museumErrorCode = async (error: HTTPError) => {
     try {
@@ -42,4 +43,21 @@ export const formatLockerMutationError = async (
     }
 
     return t(action === "uploadFile" ? "uploadError" : "failedToSaveRecord");
+};
+
+export const lockerUpgradeCTAType = async (
+    error: unknown,
+): Promise<LockerUpgradeCTAType | null> => {
+    if (!(error instanceof HTTPError)) {
+        return null;
+    }
+
+    if (error.res.status === 426) {
+        return "storageLimit";
+    }
+
+    const code = await museumErrorCode(error);
+    return error.res.status === 403 && code === "FILE_LIMIT_REACHED"
+        ? "fileCountLimit"
+        : null;
 };

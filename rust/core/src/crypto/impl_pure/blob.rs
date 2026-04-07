@@ -123,6 +123,29 @@ pub fn decrypt_blob(blob: &EncryptedBlob, key: &[u8]) -> Result<Vec<u8>> {
     decrypt(&blob.encrypted_data, &blob.decryption_header, key)
 }
 
+/// Encrypt data and return a single combined `header || ciphertext` payload.
+pub fn encrypt_combined(plaintext: &[u8], key: &[u8]) -> Result<Vec<u8>> {
+    let encrypted = encrypt(plaintext, key)?;
+    let mut combined =
+        Vec::with_capacity(encrypted.decryption_header.len() + encrypted.encrypted_data.len());
+    combined.extend_from_slice(&encrypted.decryption_header);
+    combined.extend_from_slice(&encrypted.encrypted_data);
+    Ok(combined)
+}
+
+/// Decrypt a combined `header || ciphertext` payload.
+pub fn decrypt_combined(combined: &[u8], key: &[u8]) -> Result<Vec<u8>> {
+    if combined.len() < HEADER_BYTES + ABYTES {
+        return Err(CryptoError::CiphertextTooShort {
+            minimum: HEADER_BYTES + ABYTES,
+            actual: combined.len(),
+        });
+    }
+
+    let (header, ciphertext) = combined.split_at(HEADER_BYTES);
+    decrypt(ciphertext, header, key)
+}
+
 /// Encrypt a JSON value.
 ///
 /// # Arguments
@@ -132,10 +155,16 @@ pub fn decrypt_blob(blob: &EncryptedBlob, key: &[u8]) -> Result<Vec<u8>> {
 /// # Returns
 /// An [`EncryptedBlob`] containing the encrypted JSON.
 pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<EncryptedBlob> {
-    let json = serde_json::to_vec(value).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON serialization failed: {}", e))
-    })?;
+    let json = serde_json::to_vec(value)
+        .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
     encrypt(&json, key)
+}
+
+/// Encrypt a JSON value and return a combined `header || ciphertext` payload.
+pub fn encrypt_json_combined<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Vec<u8>> {
+    let json = serde_json::to_vec(value)
+        .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
+    encrypt_combined(&json, key)
 }
 
 /// Decrypt to a JSON value.
@@ -148,9 +177,18 @@ pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Encryp
 /// The deserialized JSON value.
 pub fn decrypt_json<T: serde::de::DeserializeOwned>(blob: &EncryptedBlob, key: &[u8]) -> Result<T> {
     let plaintext = decrypt_blob(blob, key)?;
-    serde_json::from_slice(&plaintext).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON deserialization failed: {}", e))
-    })
+    serde_json::from_slice(&plaintext)
+        .map_err(|e| CryptoError::Json(format!("JSON deserialization failed: {}", e)))
+}
+
+/// Decrypt a combined `header || ciphertext` payload into a JSON value.
+pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
+    combined: &[u8],
+    key: &[u8],
+) -> Result<T> {
+    let plaintext = decrypt_combined(combined, key)?;
+    serde_json::from_slice(&plaintext)
+        .map_err(|e| CryptoError::Json(format!("JSON deserialization failed: {}", e)))
 }
 
 #[cfg(test)]
@@ -213,6 +251,31 @@ mod tests {
     }
 
     #[test]
+    fn test_encrypt_decrypt_combined() {
+        let key = keys::generate_stream_key();
+        let plaintext = b"Combined blob payload";
+
+        let encrypted = encrypt_combined(plaintext, &key).unwrap();
+        let decrypted = decrypt_combined(&encrypted, &key).unwrap();
+
+        assert_eq!(decrypted, plaintext);
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_json_combined() {
+        let key = keys::generate_stream_key();
+        let value = serde_json::json!({
+            "name": "Alice",
+            "birthDate": "2001-04-01"
+        });
+
+        let encrypted = encrypt_json_combined(&value, &key).unwrap();
+        let decrypted: serde_json::Value = decrypt_json_combined(&encrypted, &key).unwrap();
+
+        assert_eq!(decrypted, value);
+    }
+
+    #[test]
     fn test_wrong_key_fails() {
         let key1 = keys::generate_stream_key();
         let key2 = keys::generate_stream_key();
@@ -251,6 +314,38 @@ mod tests {
         let encrypted = encrypt_json(&data, &key).unwrap();
         let decrypted: TestData = decrypt_json(&encrypted, &key).unwrap();
         assert_eq!(decrypted, data);
+    }
+
+    #[test]
+    fn test_decrypt_json_wrong_type_returns_json_error() {
+        let key = keys::generate_stream_key();
+
+        #[derive(serde::Serialize)]
+        struct Original {
+            name: String,
+        }
+
+        #[derive(serde::Deserialize, Debug)]
+        #[allow(dead_code)]
+        struct Different {
+            count: u64,
+        }
+
+        let encrypted = encrypt_json(
+            &Original {
+                name: "test".to_string(),
+            },
+            &key,
+        )
+        .unwrap();
+
+        // Decrypt into a mismatched type — should be CryptoError::Json
+        let result: std::result::Result<Different, _> = decrypt_json(&encrypted, &key);
+        assert!(
+            matches!(result, Err(CryptoError::Json(_))),
+            "Expected CryptoError::Json, got: {:?}",
+            result
+        );
     }
 
     #[test]

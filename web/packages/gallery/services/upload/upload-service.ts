@@ -682,7 +682,7 @@ interface UploadContext {
      * credentials for the logged in user, as happens when we're running in the
      * context of the photos app).
      */
-    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    publicAlbumsCredentials?: PublicAlbumsCredentials;
     /**
      * A function that the upload sequence should use to periodically check in
      * and see if the upload has been cancelled by the user.
@@ -1290,8 +1290,11 @@ const extractImageOrVideoMetadata = async (
 
     const caption =
         parsedMetadataJSON?.description ?? parsedMetadata?.description;
-    if (caption) {
-        publicMagicMetadata.caption = caption;
+    if (
+        caption != null &&
+        (typeof caption == "string" || typeof caption == "number")
+    ) {
+        publicMagicMetadata.caption = String(caption);
     }
 
     if (parsedMetadata?.cameraMake) {

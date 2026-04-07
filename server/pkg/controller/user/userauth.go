@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	t "time"
 
@@ -322,7 +323,8 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.io",
+	c.touchContactsAfterEmailUpdate(ctx, userID)
+	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.com",
 		ente.EmailChangedSubject, ente.EmailChangedTemplate, map[string]interface{}{
 			"NewEmail": email,
 		}, nil)
@@ -360,6 +362,20 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	return nil
 }
 
+func (c *UserController) touchContactsAfterEmailUpdate(ctx *gin.Context, userID int64) {
+	if c.ContactRepo == nil {
+		return
+	}
+	if touchErr := c.ContactRepo.TouchContactsForContactUser(ctx, userID); touchErr != nil {
+		log.WithError(touchErr).
+			WithFields(log.Fields{
+				"req_id":  requestid.Get(ctx),
+				"user_id": userID,
+			}).
+			Error("failed to touch contacts after email update")
+	}
+}
+
 // Logout removes the token from the cache and database.
 // known issue: the token may be still cached in other instances till the expiry time (10min), JWTs might remain too
 func (c *UserController) Logout(ctx *gin.Context) error {
@@ -377,7 +393,48 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
+const (
+	StorageWarningDeletionScheduledCode    = "ACCOUNT_SCHEDULED_FOR_DELETION"
+	StorageWarningDeletionScheduledMessage = "Access to this account has been restricted because its Ente Photos and Ente Locker data is scheduled for deletion. If you think this was a mistake, please reply to this email."
+)
+
+func shouldEnforceStorageWarningDeletionLoginBlock(app ente.App) bool {
+	return app == ente.Photos || app == ente.Locker
+}
+
+func storageWarningDeletionScheduledError() error {
+	return stacktrace.Propagate(&ente.ApiError{
+		Code:           StorageWarningDeletionScheduledCode,
+		Message:        StorageWarningDeletionScheduledMessage,
+		HttpStatusCode: http.StatusForbidden,
+	}, "storage warning deletion scheduled")
+}
+
+func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, app ente.App) error {
+	if c.NotificationHistoryRepo == nil || !shouldEnforceStorageWarningDeletionLoginBlock(app) {
+		return nil
+	}
+	deletionScheduled, err := c.NotificationHistoryRepo.IsStorageWarningDeletionScheduled(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to read storage warning deletion state")
+	}
+	if deletionScheduled {
+		return storageWarningDeletionScheduledError()
+	}
+	return nil
+}
+
+func (c *UserController) ClearStorageWarningDeletionLoginBlock(userID int64) error {
+	if c.NotificationHistoryRepo == nil {
+		return nil
+	}
+	return c.NotificationHistoryRepo.ClearStorageWarningDeletionScheduled(userID)
+}
+
 func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, app ente.App, token string, ip string, userAgent string) error {
+	if err := c.ensureStorageWarningDeletionLoginAllowed(userID, app); err != nil {
+		return err
+	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to insert token")
@@ -396,7 +453,7 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 			log.WithError(userErr).Error("Failed to get user")
 			return
 		}
-		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
+		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
 			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
 		}, nil)
 		if emailSendErr != nil {
@@ -476,7 +533,7 @@ func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) 
 		}
 	}
 	subject := fmt.Sprintf("Verification code: %s", ott)
-	err := emailUtil.SendTemplatedEmail([]string{to}, "Ente", "verify@ente.io",
+	err := emailUtil.SendTemplatedEmail([]string{to}, "Ente", "verify@ente.com",
 		subject, templateName, map[string]interface{}{
 			"VerificationCode": ott,
 		}, nil)
@@ -556,6 +613,9 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
+			if err := c.ensureStorageWarningDeletionLoginAllowed(userID, app); err != nil {
+				return ente.EmailAuthorizationResponse{}, err
+			}
 			err = c.UserAuthRepo.AddToken(userID, app, token,
 				network.GetClientIP(context), context.Request.UserAgent())
 			if err != nil {

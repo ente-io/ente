@@ -5,505 +5,107 @@ import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
 import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
-import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
-import { stashRedirect } from "ente-accounts-rs/services/redirect";
-import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { DeleteCollectionDialog } from "components/lockerPage/DeleteCollectionDialog";
+import { LockerDragOverlay } from "components/lockerPage/LockerDragOverlay";
+import { useLockerActions } from "components/lockerPage/useLockerActions";
+import { useLockerData } from "components/lockerPage/useLockerData";
+import { useLockerNavigation } from "components/lockerPage/useLockerNavigation";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
-import {
-    authenticatedRequestHeaders,
-    ensureOk,
-    isHTTP401Error,
-} from "ente-base/http";
-import log from "ente-base/log";
-import { apiURL } from "ente-base/origins";
 import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
-import { Trans } from "react-i18next";
-import {
-    isEnteProductionEndpoint,
-    LOCKER_FILE_LIMIT_FREE,
-    LOCKER_FILE_LIMIT_PAID,
-} from "services/locker-limits";
-import {
-    createCollection as createCollectionAPI,
-    createInfoItem,
-    deleteCollection as deleteCollectionAPI,
-    emptyTrash as emptyTrashAPI,
-    fetchCollectionSharees,
-    fetchLockerData,
-    fetchLockerTrash,
-    permanentlyDeleteFromTrash,
-    renameCollection as renameCollectionAPI,
-    restoreFromTrash,
-    shareCollection as shareCollectionAPI,
-    trashFiles,
-    unshareCollection as unshareCollectionAPI,
-    updateInfoItem,
-    uploadLockerFile,
-} from "services/remote";
-import type { LockerCollection, LockerItem, LockerItemType } from "types";
-import { getItemTitle } from "types";
+import React, { useCallback, useState } from "react";
+import { fetchCollectionSharees } from "services/remote";
 
-/** Subset of /users/details/v2 we need for the sidebar. */
-interface UserDetails {
-    email: string;
-    usage: number;
-    storageLimit: number;
-    fileCount: number;
-    lockerFileLimit: number;
-    isPartOfFamily: boolean;
-    lockerFamilyFileCount?: number;
-}
-
-interface LockerBonus {
-    type?: string;
-}
-
-interface LockerUserDetailsResponse {
-    email?: string;
-    usage?: number;
-    fileCount?: number;
-    lockerFamilyUsage?: { familyFileCount?: number };
-    familyData?: { members?: unknown[] };
-    bonusData?: { storageBonuses?: LockerBonus[] };
-    subscription?: {
-        storage?: number;
-        productID?: string;
-        expiryTime?: number;
-    };
-}
-
-const hasPaidLockerAccess = (json: {
-    subscription?: { productID?: string; expiryTime?: number };
-    familyData?: { members?: unknown[] };
-    bonusData?: { storageBonuses?: LockerBonus[] };
-}) => {
-    const hasActivePaidSubscription =
-        json.subscription?.productID !== "free" &&
-        (json.subscription?.expiryTime ?? 0) > Date.now() * 1000;
-    const isPartOfFamily = (json.familyData?.members?.length ?? 0) > 0;
-    const hasPaidAddon =
-        json.bonusData?.storageBonuses?.some(
-            (bonus) =>
-                bonus.type !== undefined &&
-                bonus.type !== "SIGN_UP" &&
-                bonus.type !== "REFERRAL",
-        ) ?? false;
-
-    return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
-};
-
-const Page: React.FC = () => {
+export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
-
-    const [collections, setCollections] = useState<LockerCollection[]>([]);
-    const [masterKey, setMasterKey] = useState<string | undefined>();
-    const [hasFetched, setHasFetched] = useState(false);
-    const [initialLoadError, setInitialLoadError] = useState<string | null>(
-        null,
-    );
-    const [isProductionEndpoint, setIsProductionEndpoint] = useState(true);
-    const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
-
-    // Sidebar state
     const [sidebarOpen, setSidebarOpen] = useState(false);
-
-    // View mode state
-    const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
-    const [isTrashView, setIsTrashView] = useState(false);
-    const [isCollectionsView, setIsCollectionsView] = useState(false);
-
-    // Collection filter state
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(null);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Create/Edit dialog state
-    const [createDialogOpen, setCreateDialogOpen] = useState(false);
-    const [editItem, setEditItem] = useState<{
-        id: number;
-        type: LockerItemType;
-        data: Record<string, unknown>;
-        collectionID: number;
-    } | null>(null);
-
-    // Toast state
-    const [toast, setToast] = useState<string | null>(null);
-    const [shareCollectionID, setShareCollectionID] = useState<number | null>(
-        null,
-    );
-
-    const loadUserDetails = useCallback(async () => {
-        try {
-            const [res, isProduction] = await Promise.all([
-                fetch(
-                    await apiURL("/users/details/v2", { memoryCount: true }),
-                    { headers: await authenticatedRequestHeaders() },
-                ),
-                isEnteProductionEndpoint(),
-            ]);
-            ensureOk(res);
-            setIsProductionEndpoint(isProduction);
-            const json = (await res.json()) as LockerUserDetailsResponse;
-            setUserDetails({
-                email: json.email ?? "",
-                usage: json.usage ?? 0,
-                storageLimit: json.subscription?.storage ?? 0,
-                fileCount: json.fileCount ?? 0,
-                lockerFileLimit: hasPaidLockerAccess(json)
-                    ? LOCKER_FILE_LIMIT_PAID
-                    : LOCKER_FILE_LIMIT_FREE,
-                isPartOfFamily: (json.familyData?.members?.length ?? 0) > 0,
-                lockerFamilyFileCount: json.lockerFamilyUsage?.familyFileCount,
-            });
-        } catch (e) {
-            log.error("Failed to fetch user details", e);
-        }
-    }, []);
-
-    // Refresh data from remote
-    const refreshData = useCallback(
-        async (mk?: string) => {
-            const key = mk ?? masterKey;
-            if (!key) return;
-            try {
-                void loadUserDetails();
-                // fetchLockerTrash depends on the encrypted caches populated by
-                // fetchLockerData; running both in parallel can race and drop
-                // trash key metadata needed for restore.
-                const data = await fetchLockerData(key);
-                const trash = await fetchLockerTrash(key);
-                setCollections(data);
-                setTrashItems(trash);
-                setInitialLoadError(null);
-            } catch (e) {
-                log.error("Failed to refresh locker data", e);
-                if (isHTTP401Error(e))
-                    showMiniDialog(sessionExpiredDialogAttributes(logout));
-            }
-        },
-        [loadUserDetails, masterKey, logout, showMiniDialog],
-    );
-
-    useEffect(() => {
-        const load = async () => {
-            const mk = await masterKeyFromSession();
-            if (!mk) {
-                stashRedirect("/locker");
-                void router.push("/login");
-                return;
-            }
-            setMasterKey(mk);
-
-            void loadUserDetails();
-
-            try {
-                // See note in refreshData: fetchLockerTrash must run after
-                // fetchLockerData has populated encrypted caches.
-                const data = await fetchLockerData(mk);
-                const trash = await fetchLockerTrash(mk);
-                setCollections(data);
-                setTrashItems(trash);
-                setInitialLoadError(null);
-            } catch (e) {
-                log.error("Failed to fetch locker data", e);
-                if (isHTTP401Error(e))
-                    showMiniDialog(sessionExpiredDialogAttributes(logout));
-                setInitialLoadError(
-                    e instanceof Error
-                        ? t("failedToLoadCollections", { error: e.message })
-                        : t("generic_error_retry"),
-                );
-            }
-            setHasFetched(true);
-        };
-        void load();
-    }, [loadUserDetails, router, logout, showMiniDialog]);
-
-    const handleSelectCollection = useCallback((id: number | null) => {
-        setSelectedCollectionID(id);
-        setIsTrashView(false);
-        setIsCollectionsView(false);
+    const closeSidebar = useCallback(() => {
         setSidebarOpen(false);
     }, []);
 
-    const handleSelectCollections = useCallback(() => {
-        setIsCollectionsView(true);
-        setIsTrashView(false);
-        setSelectedCollectionID(null);
-        setSidebarOpen(false);
-    }, []);
+    const {
+        handleNavigateBack,
+        handleSelectCollection,
+        handleSelectCollections,
+        handleSelectTrash,
+        isCollectionRoutePending,
+        isCollectionsView,
+        isHomeView,
+        isTrashView,
+        navigateHome,
+        selectedCollectionID,
+    } = useLockerNavigation({ router, onAfterNavigate: closeSidebar });
 
-    const handleSelectTrash = useCallback(() => {
-        setIsTrashView(true);
-        setIsCollectionsView(false);
-        setSelectedCollectionID(null);
-        setSidebarOpen(false);
-    }, []);
+    const {
+        collections,
+        ensureUploadLimitState,
+        hasFetched,
+        initialLoadError,
+        masterKey,
+        refreshData,
+        removeCollectionFromState,
+        trashItems,
+        trashLastUpdatedAt,
+        userDetails,
+    } = useLockerData({ router, logout, showMiniDialog });
 
-    const isHomeView =
-        !isTrashView && !isCollectionsView && selectedCollectionID === null;
-
-    // CRUD handlers
-
-    const handleCreateItem = useCallback(
-        async (
-            type: LockerItemType,
-            data: Record<string, unknown>,
-            collectionID: number,
-        ) => {
-            if (!masterKey) throw new Error("No master key");
-            await createInfoItem(collectionID, type, data, masterKey);
-            await refreshData();
-            setToast(t("recordSavedSuccessfully"));
-        },
-        [masterKey, refreshData],
-    );
-
-    const handleUploadFile = useCallback(
-        async (file: File, collectionID: number) => {
-            if (!masterKey) throw new Error("No master key");
-            await uploadLockerFile(file, collectionID, masterKey);
-            await refreshData();
-            setToast(t("uploadComplete"));
-        },
-        [masterKey, refreshData],
-    );
-
-    const handleUpdateItem = useCallback(
-        async (type: LockerItemType, data: Record<string, unknown>) => {
-            if (!masterKey || !editItem)
-                throw new Error("No master key or item");
-            await updateInfoItem(editItem.id, type, data, masterKey);
-            await refreshData();
-            setToast(t("fileUpdatedSuccessfully"));
-        },
-        [masterKey, editItem, refreshData],
-    );
-
-    const handleDeleteItem = useCallback(
-        (item: LockerItem) => {
-            showMiniDialog({
-                title: t("delete"),
-                message: (
-                    <Trans
-                        i18nKey="deleteFileConfirmation"
-                        values={{ fileName: getItemTitle(item) }}
-                        components={{
-                            strong: (
-                                <Box
-                                    component="span"
-                                    sx={{ fontWeight: 700, color: "text.base" }}
-                                />
-                            ),
-                        }}
-                    />
-                ),
-                continue: {
-                    text: t("delete"),
-                    color: "critical",
-                    action: async () => {
-                        await trashFiles([item.id], item.collectionID);
-                        await refreshData();
-                        setToast(t("fileDeletedSuccessfully"));
-                    },
-                },
-            });
-        },
-        [showMiniDialog, refreshData],
-    );
-    const handleDeleteItems = useCallback(
-        (items: LockerItem[]) => {
-            if (items.length === 0) {
-                return;
-            }
-
-            showMiniDialog({
-                title: t("delete"),
-                message: t("deleteMultipleFilesDialogBody", {
-                    count: items.length,
-                }),
-                continue: {
-                    text: t("yesDeleteFiles", { count: items.length }),
-                    color: "critical",
-                    action: async () => {
-                        const fileIDsByCollection = new Map<number, number[]>();
-                        for (const item of items) {
-                            const existing =
-                                fileIDsByCollection.get(item.collectionID) ??
-                                [];
-                            existing.push(item.id);
-                            fileIDsByCollection.set(
-                                item.collectionID,
-                                existing,
-                            );
-                        }
-
-                        for (const [
-                            collectionID,
-                            fileIDs,
-                        ] of fileIDsByCollection.entries()) {
-                            await trashFiles(fileIDs, collectionID);
-                        }
-
-                        await refreshData();
-                        setToast(
-                            t("filesDeletedSuccessfully", {
-                                count: items.length,
-                            }),
-                        );
-                    },
-                },
-            });
-        },
-        [showMiniDialog, refreshData],
-    );
-
-    const handleEditItem = useCallback((item: LockerItem) => {
-        setEditItem({
-            id: item.id,
-            type: item.type,
-            data: item.data as unknown as Record<string, unknown>,
-            collectionID: item.collectionID,
-        });
-    }, []);
-
-    // Trash operations
-
-    const handlePermanentlyDelete = useCallback(
-        (items: LockerItem[]) => {
-            showMiniDialog({
-                title: t("permanentlyDelete"),
-                message: t("permanentlyDeleteFilesBody", {
-                    count: items.length,
-                }),
-                continue: {
-                    text: t("permanentlyDelete"),
-                    color: "critical",
-                    action: async () => {
-                        await permanentlyDeleteFromTrash(
-                            items.map((i) => i.id),
-                        );
-                        await refreshData();
-                        setToast(
-                            t("filesDeletedPermanently", {
-                                count: items.length,
-                            }),
-                        );
-                    },
-                },
-            });
-        },
-        [showMiniDialog, refreshData],
-    );
-
-    const handleRestoreItem = useCallback(
-        async (item: LockerItem, collectionID: number) => {
-            if (!masterKey) return;
-            await restoreFromTrash(
-                [{ id: item.id, collectionID: item.collectionID }],
-                collectionID,
-                masterKey,
-            );
-            await refreshData();
-            setToast(t("filesRestoredSuccessfully", { count: 1 }));
-        },
-        [masterKey, refreshData],
-    );
-
-    const handleEmptyTrash = useCallback(() => {
-        showMiniDialog({
-            title: t("empty_trash"),
-            message: t("confirm_empty_trash"),
-            continue: {
-                text: t("empty_trash"),
-                color: "critical",
-                action: async () => {
-                    await emptyTrashAPI();
-                    await refreshData();
-                    setToast(t("trashClearedSuccessfully"));
-                },
-            },
-        });
-    }, [showMiniDialog, refreshData]);
-
-    // Collection management
-
-    const handleCreateCollection = useCallback(
-        async (name: string): Promise<number> => {
-            if (!masterKey) throw new Error("No master key");
-            const id = await createCollectionAPI(name, masterKey);
-            await refreshData();
-            setToast(t("createCollectionSuccess"));
-            return id;
-        },
-        [masterKey, refreshData],
-    );
-
-    const handleRenameCollection = useCallback(
-        async (collectionID: number, newName: string) => {
-            if (!masterKey) return;
-            await renameCollectionAPI(collectionID, newName, masterKey);
-            await refreshData();
-            setToast(t("collectionRenamedSuccessfully"));
-        },
-        [masterKey, refreshData],
-    );
-
-    const handleDeleteCollection = useCallback(
-        (collectionID: number) => {
-            const collectionName =
-                collections.find((collection) => collection.id === collectionID)
-                    ?.name ?? "";
-            showMiniDialog({
-                title: t("deleteCollection"),
-                message: t("deleteCollectionConfirmation", { collectionName }),
-                continue: {
-                    text: t("delete"),
-                    color: "critical",
-                    action: async () => {
-                        await deleteCollectionAPI(collectionID);
-                        setSelectedCollectionID(null);
-                        await refreshData();
-                        setToast(t("collectionDeletedSuccessfully"));
-                    },
-                },
-            });
-        },
-        [collections, showMiniDialog, refreshData],
-    );
-
-    const handleOpenShareCollection = useCallback(
-        (collection: LockerCollection) => {
-            setShareCollectionID(collection.id);
-        },
-        [],
-    );
-
-    const handleShareCollection = useCallback(
-        async (collectionID: number, email: string) => {
-            if (!masterKey) throw new Error("No master key");
-            await shareCollectionAPI(collectionID, email, masterKey);
-            await refreshData();
-            setToast(t("collectionSharedSuccessfully"));
-        },
-        [masterKey, refreshData],
-    );
-
-    const handleUnshareCollection = useCallback(
-        async (collectionID: number, email: string) => {
-            await unshareCollectionAPI(collectionID, email);
-            await refreshData();
-            setToast(t("viewerRemovedSuccessfully"));
-        },
-        [refreshData],
-    );
+    const {
+        createDialogOpen,
+        deleteCollectionDialog,
+        editItem,
+        ensureCollectionsExist,
+        handleConfirmDeleteCollection,
+        handleCreateCollection,
+        handleCreateDialogClose,
+        handleCreateItem,
+        handleDeleteCollection,
+        handleDeleteItem,
+        handleDeleteItems,
+        handleDragEnter,
+        handleDragLeave,
+        handleDragOver,
+        handleDrop,
+        handleEditItem,
+        handleEmptyTrash,
+        handleLeaveCollection,
+        handleOpenShareCollection,
+        handlePermanentlyDelete,
+        handleRenameCollection,
+        handleRestoreItem,
+        handleShareCollection,
+        handleUnshareCollection,
+        handleUpdateItem,
+        handleUploadFileWithProgress,
+        handleUploadItemComplete,
+        handleUploadsFinished,
+        isDragActive,
+        openCreateDialog,
+        prefilledUploadItems,
+        setDeleteCollectionDialog,
+        setEditItem,
+        setShareCollectionID,
+        shareCollectionID,
+        setToast,
+        toast,
+        visibleDeleteCollectionDialog,
+    } = useLockerActions({
+        collections,
+        ensureUploadLimitState,
+        masterKey,
+        selectedCollectionID,
+        routerPathname: router.pathname,
+        refreshData,
+        navigateHome,
+        removeCollectionFromState,
+        showMiniDialog,
+        trashLastUpdatedAt,
+    });
 
     const sharedCollection =
         shareCollectionID === null
@@ -511,20 +113,24 @@ const Page: React.FC = () => {
             : (collections.find(
                   (collection) => collection.id === shareCollectionID,
               ) ?? null);
+    const isViewLoading =
+        !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
-    if (!hasFetched || !isLockerI18nReady) {
+    if (isViewLoading) {
         return <LoadingIndicator />;
     }
+
     if (initialLoadError && collections.length === 0) {
         return (
             <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+                <LockerUnstableToast />
                 <LockerNavbar
                     onOpenSidebar={() => setSidebarOpen(true)}
                     showMenuButton
+                    stickyTop={44}
                     searchTerm={searchTerm}
                     onSearchTermChange={setSearchTerm}
                 />
-                <LockerUnstableToast />
                 <Box
                     sx={{
                         flex: 1,
@@ -560,14 +166,21 @@ const Page: React.FC = () => {
     }
 
     return (
-        <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+        <Stack
+            sx={{ height: "100dvh", overflow: "hidden", position: "relative" }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
+            <LockerUnstableToast />
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
+                stickyTop={44}
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
             />
-            <LockerUnstableToast />
             <Box
                 sx={{
                     flex: 1,
@@ -595,12 +208,14 @@ const Page: React.FC = () => {
                     onDeleteCollection={handleDeleteCollection}
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
+                    onLeaveCollection={handleLeaveCollection}
                     searchTerm={searchTerm}
+                    onNavigateBack={handleNavigateBack}
                 />
             </Box>
             <LockerSidebar
                 open={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
+                onClose={closeSidebar}
                 collections={collections}
                 trashItemCount={trashItems.length}
                 onSelectHome={() => handleSelectCollection(null)}
@@ -609,7 +224,6 @@ const Page: React.FC = () => {
                 isHomeView={isHomeView}
                 isTrashView={isTrashView}
                 isCollectionsView={isCollectionsView}
-                isProductionEndpoint={isProductionEndpoint}
                 userDetails={userDetails}
             />
             <LockerCollectionShareDrawer
@@ -618,14 +232,28 @@ const Page: React.FC = () => {
                 onClose={() => setShareCollectionID(null)}
                 onShareCollection={handleShareCollection}
                 onUnshareCollection={handleUnshareCollection}
+                onLeaveCollection={handleLeaveCollection}
                 onRefreshSharees={fetchCollectionSharees}
+            />
+            <DeleteCollectionDialog
+                dialogState={deleteCollectionDialog}
+                visibleDialogState={visibleDeleteCollectionDialog}
+                onClose={() => setDeleteCollectionDialog(null)}
+                onConfirm={handleConfirmDeleteCollection}
+                onToggleDeleteFromEverywhere={(checked) =>
+                    setDeleteCollectionDialog((current) =>
+                        current
+                            ? { ...current, deleteFromEverywhere: checked }
+                            : current,
+                    )
+                }
             />
 
             {!isTrashView && (
                 <Fab
                     color="primary"
                     aria-label={t("saveToLocker")}
-                    onClick={() => setCreateDialogOpen(true)}
+                    onClick={openCreateDialog}
                     sx={{
                         position: "fixed",
                         right: "max(24px, env(safe-area-inset-right))",
@@ -649,37 +277,48 @@ const Page: React.FC = () => {
                 </Fab>
             )}
 
-            {/* Create dialog */}
             <CreateItemDialog
                 open={createDialogOpen}
-                onClose={() => setCreateDialogOpen(false)}
+                onClose={handleCreateDialogClose}
                 collections={collections}
                 onSave={handleCreateItem}
-                onUploadFile={handleUploadFile}
+                onUploadProgress={handleUploadFileWithProgress}
+                onUploadItemComplete={handleUploadItemComplete}
+                onUploadsFinished={handleUploadsFinished}
                 onCreateCollection={handleCreateCollection}
+                onEnsureCollections={ensureCollectionsExist}
+                onEnsureUploadLimitState={ensureUploadLimitState}
                 defaultCollectionID={selectedCollectionID}
+                initialItems={prefilledUploadItems}
+                userDetails={userDetails}
             />
 
-            {/* Edit dialog */}
             {editItem && (
                 <CreateItemDialog
                     open={!!editItem}
                     onClose={() => setEditItem(null)}
                     collections={collections}
                     onSave={handleUpdateItem}
+                    onCreateCollection={handleCreateCollection}
                     editItem={editItem}
+                    userDetails={userDetails}
                 />
             )}
 
-            {/* Toast notifications */}
             <Snackbar
                 open={toast !== null}
                 message={toast}
                 autoHideDuration={3000}
-                onClose={() => setToast(null)}
+                onClose={(_event, reason) => {
+                    if (reason === "clickaway") {
+                        return;
+                    }
+                    setToast(null);
+                }}
             />
+            {isDragActive && <LockerDragOverlay />}
         </Stack>
     );
 };
 
-export default Page;
+export default LockerPage;

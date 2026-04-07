@@ -5,7 +5,13 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 # Changelog - Ente Photos
 
-A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
+A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
+
+## v1.7.22 (desktop) - Mar 2026
+
+- App lock
+- Better people list experience (bigger view with search)
+- Various bug fixes (map view tiles, etc)
 
 ## v1.3.22 (mobile) - Mar 2026
 
@@ -16,7 +22,7 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Better people suggestions in person overview
 - Bug fixes and performance improvements
 
-## v1.7.21 (desktop) - Mar 2026
+## v1.7.21 (desktop) - Feb 2026
 
 - Masonry layout for public albums
 - Quick links

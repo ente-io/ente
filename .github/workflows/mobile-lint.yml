@@ -1,10 +1,12 @@
 name: "Lint (mobile)"
 
 on:
-    # Run on every pull request (open or push to it) that changes photos app or rust core
+    # Run on every pull request (open or push to it) that changes the photos app,
+    # shared photos Rust, or rust core
     pull_request:
         paths:
             - "mobile/apps/photos/**"
+            - "rust/photos/**"
             - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 
@@ -27,6 +29,10 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
+
+            - name: Verify frozen mobile pubspecs
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
+              working-directory: ${{ github.workspace }}
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -51,7 +57,7 @@ jobs:
                       mobile/apps/photos/rust/target
                   key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
 
-            - run: flutter pub get
+            - run: flutter pub get --enforce-lockfile
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen

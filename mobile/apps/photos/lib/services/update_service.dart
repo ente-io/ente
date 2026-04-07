@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -7,9 +8,16 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/notification_service.dart';
+import 'package:photos/ui/notification/update/change_log_strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+enum ChangeLogAction {
+  skip,
+  consumeWithoutShowing,
+  show,
+}
 
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
@@ -27,10 +35,37 @@ class UpdateService {
     debugPrint("UpdateService constructor");
   }
 
-  Future<bool> showChangeLog() async {
+  Future<bool> shouldShowChangeLog() async {
     // fetch the change log version which was last shown to user.
-    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
+    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey);
+    if (lastShownAtVersion == null) {
+      // Fresh install: the key was never set, so the user has no previous
+      // version to show a "What's New" for. Silently mark as seen.
+      await hideChangeLog();
+      return false;
+    }
     return lastShownAtVersion < currentChangeLogVersion;
+  }
+
+  Future<ChangeLogAction> getChangeLogAction({
+    required Locale locale,
+    required bool isOffline,
+    required bool isSignedIn,
+  }) async {
+    if (!await shouldShowChangeLog()) {
+      return ChangeLogAction.skip;
+    }
+
+    if (!(isOffline || isSignedIn)) {
+      return ChangeLogAction.skip;
+    }
+
+    return ChangeLogStrings.hasContentForLocale(
+      locale,
+      isOffline: isOffline,
+    )
+        ? ChangeLogAction.show
+        : ChangeLogAction.consumeWithoutShowing;
   }
 
   Future<bool> hideChangeLog() async {
@@ -113,7 +148,7 @@ class UpdateService {
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
     final response = await NetworkClient.instance
         .getDio()
-        .get("https://ente.io/release-info/independent.json");
+        .get("https://ente.com/release-info/independent.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 

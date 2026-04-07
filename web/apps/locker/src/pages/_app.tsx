@@ -1,10 +1,11 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
-import { accountLogout } from "ente-accounts-rs/services/logout";
-import { staticAppTitle } from "ente-base/app";
-import { CustomHead } from "ente-base/components/Head";
+import { LockerHead } from "components/LockerHead";
+import {
+    isSavedUserTokenMismatch,
+    savedLocalUser,
+} from "ente-accounts-rs/services/accounts-db";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
@@ -18,10 +19,11 @@ import {
 } from "ente-base/components/utils/hooks-app";
 import { lockerTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
-import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
+import { lockerLogout } from "services/logout";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -35,19 +37,35 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, []);
 
     const logout = useCallback(() => {
-        void accountLogout().then(() => window.location.replace("/login"));
+        void lockerLogout().then(() => window.location.replace("/login"));
     }, []);
+
+    useEffect(() => {
+        void isSavedUserTokenMismatch()
+            .then((mismatch) => {
+                if (!mismatch) {
+                    return;
+                }
+
+                log.error("Logging out (saved user token mismatch)");
+                logout();
+            })
+            .catch((error: unknown) => {
+                log.error(
+                    "Failed to validate saved user token mismatch",
+                    error,
+                );
+            });
+    }, [logout]);
 
     const baseContext = useMemo(
         () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
     );
 
-    const title = isI18nReady ? t("title_locker") : staticAppTitle;
-
     return (
         <ThemeProvider theme={lockerTheme}>
-            <CustomHead {...{ title }} />
+            <LockerHead />
             <CssBaseline enableColorScheme />
             <AttributedMiniDialog {...miniDialogProps} />
 

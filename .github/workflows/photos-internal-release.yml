@@ -42,6 +42,9 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
+      - name: Resolve dependencies with lockfile enforcement
+        run: flutter pub get --enforce-lockfile
+
       # Android Build 
       - name: Setup Android signing key
         uses: timheuer/base64-to-file@v1

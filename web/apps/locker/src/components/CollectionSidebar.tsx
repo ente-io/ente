@@ -19,7 +19,6 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useMemo } from "react";
-import { effectiveLockerFileLimit } from "services/locker-limits";
 import type { LockerCollection } from "types";
 import { isImportantCollection, visibleLockerCollections } from "types";
 
@@ -35,7 +34,6 @@ interface CollectionSidebarProps {
     onSelectCollections: () => void;
     onSelectTrash: () => void;
     trashItemCount: number;
-    isProductionEndpoint: boolean;
     userDetails?: {
         email: string;
         usage: number;
@@ -54,7 +52,6 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
     onSelectCollections,
     onSelectTrash,
     trashItemCount,
-    isProductionEndpoint,
     userDetails,
 }) => {
     const { logout } = useBaseContext();
@@ -67,10 +64,7 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
     const isHomeSelected =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
     const usageLimit = userDetails
-        ? effectiveLockerFileLimit(
-              userDetails.lockerFileLimit,
-              isProductionEndpoint,
-          )
+        ? Math.max(userDetails.lockerFileLimit, 1)
         : 100;
     const usageProgress = userDetails
         ? Math.min((userDetails.fileCount / usageLimit) * 100, 100)
@@ -311,10 +305,17 @@ const SidebarRow: React.FC<{
             ...(selected && {
                 color: color ?? "primary.main",
                 borderColor: theme.vars.palette.primary.main,
-                backgroundColor: "transparent",
+                backgroundColor: "rgba(16, 113, 255, 0.10)",
             }),
-            "&.Mui-selected": { backgroundColor: "transparent" },
-            "&.Mui-selected:hover": { backgroundColor: "transparent" },
+            "&.Mui-selected": { backgroundColor: "rgba(16, 113, 255, 0.10)" },
+            "&.Mui-selected:hover": {
+                backgroundColor: "rgba(16, 113, 255, 0.14)",
+            },
+            "&:hover": {
+                backgroundColor: selected
+                    ? "rgba(16, 113, 255, 0.14)"
+                    : theme.vars.palette.fill.faint,
+            },
         })}
     >
         <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>

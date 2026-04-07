@@ -13,7 +13,7 @@ echo "🟩 Flutter Precache"
 time flutter precache --ios
 
 echo "🟩 Install Flutter Dependencies"
-time flutter pub get
+time flutter pub get --enforce-lockfile
 
 echo "🟩 Install CocoaPods via Homebrew"
 time HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods

@@ -24,7 +24,7 @@ import (
 const (
 	backupOptionsRolloutPercentage  = 100
 	backupOptionsRolloutNonce       = "backup-options-v1"
-	videoStreamingRolloutPercentage = 50
+	videoStreamingRolloutPercentage = 75
 	videoStreamingRolloutNonce      = "video-streaming-v1"
 )
 
