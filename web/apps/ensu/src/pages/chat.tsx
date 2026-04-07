@@ -2881,7 +2881,7 @@ const Page: React.FC = () => {
                         type: "text/plain;charset=utf-8",
                     });
                     const url = URL.createObjectURL(blob);
-                    window.open(url, "_blank", "noopener,noreferrer");
+                    window.open(url, "_blank", "noopener");
                     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
                     return;
                 }
@@ -2889,7 +2889,7 @@ const Page: React.FC = () => {
                 const mime = inferImageMime(baseName);
                 const blob = new Blob([toSafeBlobPart(bytes)], { type: mime });
                 const url = URL.createObjectURL(blob);
-                window.open(url, "_blank", "noopener,noreferrer");
+                window.open(url, "_blank", "noopener");
                 window.setTimeout(() => URL.revokeObjectURL(url), 1000);
             } catch (error) {
                 log.error("Failed to open attachment", error);
