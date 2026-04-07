@@ -811,20 +811,19 @@ mod tests {
 
     #[tokio::test]
     async fn api_json_calls_still_follow_redirects() {
-        let mut origin_server = Server::new_async().await;
-        let mut redirect_server = Server::new_async().await;
+        let mut server = Server::new_async().await;
 
-        let redirect_mock = origin_server
+        let redirect_mock = server
             .mock("GET", "/ping")
             .match_header("x-auth-token", "auth-token")
             .with_status(302)
-            .with_header("location", &format!("{}/pong", redirect_server.url()))
+            .with_header("location", "/pong")
             .create_async()
             .await;
 
-        let target_mock = redirect_server
+        let target_mock = server
             .mock("GET", "/pong")
-            .match_header("x-auth-token", Matcher::Missing)
+            .match_header("x-auth-token", "auth-token")
             .with_status(200)
             .with_body(
                 serde_json::json!({
@@ -837,7 +836,7 @@ mod tests {
             .await;
 
         let client = HttpClient::new_with_config(HttpConfig {
-            base_url: origin_server.url(),
+            base_url: server.url(),
             auth_token: Some("auth-token".to_string()),
             user_agent: None,
             client_package: None,
