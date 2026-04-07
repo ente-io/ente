@@ -5,6 +5,8 @@ use std::sync::RwLock;
 use std::time::Duration;
 
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
+#[cfg(not(target_arch = "wasm32"))]
+use reqwest::redirect::Policy;
 use reqwest::{Response, Url};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
@@ -122,7 +124,7 @@ impl HttpClient {
         });
 
         #[cfg(not(target_arch = "wasm32"))]
-        let mut builder = reqwest::Client::builder();
+        let mut builder = reqwest::Client::builder().redirect(Policy::none());
         #[cfg(target_arch = "wasm32")]
         let builder = reqwest::Client::builder();
         #[cfg(not(target_arch = "wasm32"))]
@@ -793,6 +795,53 @@ mod tests {
 
         get_mock.assert_async().await;
         put_mock.assert_async().await;
+        assert_eq!(bytes, b"ok");
+    }
+
+    #[tokio::test]
+    async fn api_download_drops_auth_header_on_cross_origin_redirect() {
+        let mut origin_server = Server::new_async().await;
+        let mut redirect_server = Server::new_async().await;
+
+        let redirect_mock = origin_server
+            .mock("GET", "/download")
+            .match_header("x-auth-token", "auth-token")
+            .match_header("x-client-package", "io.ente.photos")
+            .match_header("x-client-version", "1.0.0")
+            .match_header("user-agent", "ente-core-test")
+            .with_status(302)
+            .with_header("location", &format!("{}/redirected", redirect_server.url()))
+            .create_async()
+            .await;
+
+        let target_mock = redirect_server
+            .mock("GET", "/redirected")
+            .match_header("x-auth-token", Matcher::Missing)
+            .match_header("x-client-package", "io.ente.photos")
+            .match_header("x-client-version", "1.0.0")
+            .match_header("user-agent", "ente-core-test")
+            .with_status(200)
+            .with_body("ok")
+            .create_async()
+            .await;
+
+        let client = HttpClient::new_with_config(HttpConfig {
+            base_url: origin_server.url(),
+            auth_token: Some("auth-token".to_string()),
+            user_agent: Some("ente-core-test".to_string()),
+            client_package: Some("io.ente.photos".to_string()),
+            client_version: Some("1.0.0".to_string()),
+            timeout_secs: None,
+        })
+        .unwrap();
+
+        let bytes = client
+            .get_bytes(&format!("{}/download", origin_server.url()))
+            .await
+            .unwrap();
+
+        redirect_mock.assert_async().await;
+        target_mock.assert_async().await;
         assert_eq!(bytes, b"ok");
     }
 }

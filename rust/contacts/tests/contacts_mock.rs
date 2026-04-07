@@ -88,6 +88,81 @@ async fn open_fetches_existing_root_key_from_server() {
 }
 
 #[tokio::test]
+async fn open_applies_server_root_key_when_create_loses_race() {
+    let mut server = Server::new_async().await;
+    let master_key = keys::generate_key();
+    let server_root_key = keys::generate_key();
+    let server_wrapped_root = wrap_root(&server_root_key, &master_key);
+    let contact = sample_contact();
+
+    let initial_fetch_mock = server
+        .mock("GET", "/user-entity/key")
+        .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
+        .with_status(404)
+        .expect(1)
+        .create_async()
+        .await;
+
+    let create_race_mock = server
+        .mock("POST", "/user-entity/key")
+        .match_body(Matcher::PartialJson(serde_json::json!({
+            "type": "contact"
+        })))
+        .with_status(409)
+        .expect(1)
+        .create_async()
+        .await;
+
+    let winner_fetch_mock = server
+        .mock("GET", "/user-entity/key")
+        .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
+        .with_status(200)
+        .with_body(
+            serde_json::json!({
+                "userID": 7,
+                "type": "contact",
+                "encryptedKey": server_wrapped_root.encrypted_key,
+                "header": server_wrapped_root.header,
+                "createdAt": 1
+            })
+            .to_string(),
+        )
+        .expect(1)
+        .create_async()
+        .await;
+
+    let get_contact_mock = server
+        .mock("GET", "/contacts/ct_contact1")
+        .with_status(200)
+        .with_body(
+            live_entity_json(
+                "ct_contact1",
+                &contact,
+                Some("b@test.test"),
+                &server_root_key,
+                None,
+            )
+            .to_string(),
+        )
+        .expect(1)
+        .create_async()
+        .await;
+
+    let opened = ContactsCtx::open(open_input(server.url(), master_key))
+        .await
+        .unwrap();
+    let fetched = opened.ctx.get_contact("ct_contact1").await.unwrap();
+
+    initial_fetch_mock.assert_async().await;
+    create_race_mock.assert_async().await;
+    winner_fetch_mock.assert_async().await;
+    get_contact_mock.assert_async().await;
+    assert_eq!(opened.root_key_source, RootKeySource::Server);
+    assert_eq!(opened.wrapped_root_key, server_wrapped_root);
+    assert_eq!(fetched.name.as_deref(), Some(contact.name.as_str()));
+}
+
+#[tokio::test]
 async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
