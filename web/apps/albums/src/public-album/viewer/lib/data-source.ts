@@ -207,7 +207,12 @@ class FileViewerDataSourceState {
  */
 let _state = new FileViewerDataSourceState();
 
+const forgetAllItemData = () =>
+    [..._state.itemDataByFileID.keys()].forEach(forgetItemDataForFileID);
+
 const resetState = () => {
+    forgetAllItemData();
+    forgetExif();
     _state = new FileViewerDataSourceState();
 };
 
@@ -254,6 +259,10 @@ export const fileViewerDidClose = () => {
     if (_state.needsReset && _state.viewerCount == 0) {
         // Reset everything.
         resetState();
+    } else if (_state.viewerCount == 0) {
+        // Release previews once the viewer is fully closed.
+        forgetAllItemData();
+        forgetExif();
     } else {
         // Selectively clear.
         forgetFailedOrTransientItems();
@@ -357,8 +366,23 @@ export const itemDataForFile = (
  * and so would like to clear any previously cached data.
  */
 export const forgetItemDataForFileID = (fileID: number) => {
+    downloadManager.reclaimFile(fileID);
     _state.itemDataByFileID.delete(fileID);
     _state.itemDataValidTillByFileID.delete(fileID);
+    _state.needsRefreshByFileID.delete(fileID);
+};
+
+/**
+ * Forget item data iff the provided {@link itemData} is still the current
+ * cache entry for its file.
+ *
+ * This allows PhotoSwipe to reclaim previews for slides that leave its preload
+ * window without accidentally deleting a newer cache entry created meanwhile
+ * for the same file.
+ */
+export const forgetItemDataIfCurrent = (itemData: ItemData) => {
+    if (_state.itemDataByFileID.get(itemData.fileID) !== itemData) return;
+    forgetItemDataForFileID(itemData.fileID);
 };
 
 /**

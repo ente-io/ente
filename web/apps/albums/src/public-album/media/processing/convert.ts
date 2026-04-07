@@ -181,6 +181,7 @@ export const playableVideoURL = async (
         try {
             log.info(`Converting ${videoFileName} to mp4`);
             const convertedBlob = await convertToMP4(videoBlob);
+            URL.revokeObjectURL(videoObjectURL);
             return URL.createObjectURL(
                 new Blob([convertedBlob], { type: "video/mp4" }),
             );

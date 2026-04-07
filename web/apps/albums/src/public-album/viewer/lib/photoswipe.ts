@@ -22,6 +22,7 @@ import {
     forgetExifForItemData,
     forgetItemDataForFileID,
     forgetItemDataForFileIDIfNeeded,
+    forgetItemDataIfCurrent,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
@@ -359,6 +360,23 @@ export class FileViewerPhotoSwipe {
             slideData! as ItemData;
 
         const currSlideData = () => asItemData(pswp.currSlide?.data);
+
+        /**
+         * Retry the active slide if its preload fetch had failed.
+         *
+         * Without this, a transient failure while the slide is still in
+         * PhotoSwipe's preload window can leave it stuck showing the warning
+         * icon until the user moves far enough away for the slide to be
+         * recreated.
+         */
+        const retryFailedCurrentSlideIfNeeded = () => {
+            const itemData = pswp.currSlide?.data as ItemData | undefined;
+            if (!itemData?.fetchFailed || itemData.isContentLoading) return;
+
+            forgetItemDataForFileID(itemData.fileID);
+            _currentAnnotatedFile = undefined;
+            pswp.refreshSlideContent(pswp.currIndex);
+        };
 
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
@@ -1093,9 +1111,11 @@ export class FileViewerPhotoSwipe {
             () => void updateFileInfoExifIfNeeded(currSlideData()),
         );
 
-        pswp.on("contentDestroy", (e) =>
-            forgetExifForItemData(asItemData(e.content.data)),
-        );
+        pswp.on("contentDestroy", (e) => {
+            const itemData = asItemData(e.content.data);
+            forgetItemDataIfCurrent(itemData);
+            forgetExifForItemData(itemData);
+        });
 
         /**
          * If the current slide is showing a video, then the DOM video element
@@ -1112,6 +1132,8 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("change", () => {
             const itemData = currSlideData();
+
+            retryFailedCurrentSlideIfNeeded();
 
             // For each slide ("item holder"), mirror the "aria-hidden" state
             // into the "inert" property so that keyboard navigation via tabs

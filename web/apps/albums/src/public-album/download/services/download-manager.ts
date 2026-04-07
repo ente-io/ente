@@ -190,8 +190,7 @@ class DownloadManager {
     logout() {
         setPublicAlbumsCredentials(undefined);
         this.thumbnailURLPromises.clear();
-        this.fileURLPromises.clear();
-        this.renderableSourceURLPromises.clear();
+        this.reclaimAllFiles();
         this.fileDownloadProgress.clear();
         this.fileDownloadProgressListeners = [];
     }
@@ -204,6 +203,43 @@ class DownloadManager {
         credentials: PublicAlbumsCredentials | undefined,
     ) {
         setPublicAlbumsCredentials(credentials);
+    }
+
+    /**
+     * Reclaim any full-resolution object URLs cached for the given file.
+     *
+     * The file viewer calls this when slides are destroyed so that a long swipe
+     * session does not retain every previously visited blob in memory.
+     */
+    reclaimFile(fileID: number) {
+        const fileURL = this.fileURLPromises.get(fileID);
+        if (fileURL) {
+            this.fileURLPromises.delete(fileID);
+            void fileURL.then(revokeObjectURLIfNeeded).catch(() => undefined);
+        }
+
+        const renderableSourceURLs =
+            this.renderableSourceURLPromises.get(fileID);
+        if (renderableSourceURLs) {
+            this.renderableSourceURLPromises.delete(fileID);
+            void renderableSourceURLs
+                .then(reclaimRenderableSourceURLs)
+                .catch(() => undefined);
+        }
+
+        if (this.fileDownloadProgress.has(fileID)) {
+            const progress = new Map(this.fileDownloadProgress);
+            progress.delete(fileID);
+            this.setFileDownloadProgress(progress);
+        }
+    }
+
+    reclaimAllFiles() {
+        const fileIDs = new Set([
+            ...this.fileURLPromises.keys(),
+            ...this.renderableSourceURLPromises.keys(),
+        ]);
+        fileIDs.forEach((fileID) => this.reclaimFile(fileID));
     }
 
     /**
@@ -626,6 +662,23 @@ const wrapErrors = <T>(op: () => Promise<T>) =>
     op().catch((e: unknown) => {
         throw new NetworkDownloadError(e);
     });
+
+const revokeObjectURLIfNeeded = (url: string | undefined) => {
+    if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
+};
+
+const reclaimRenderableSourceURLs = (sourceURLs: RenderableSourceURLs) => {
+    switch (sourceURLs.type) {
+        case "image":
+            revokeObjectURLIfNeeded(sourceURLs.imageURL);
+            break;
+        case "video":
+            revokeObjectURLIfNeeded(sourceURLs.videoURL);
+            break;
+        case "livePhoto":
+            break;
+    }
+};
 
 /**
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},
