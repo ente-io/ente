@@ -162,9 +162,8 @@ pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Encryp
 
 /// Encrypt a JSON value and return a combined `header || ciphertext` payload.
 pub fn encrypt_json_combined<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Vec<u8>> {
-    let json = serde_json::to_vec(value).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON serialization failed: {}", e))
-    })?;
+    let json = serde_json::to_vec(value)
+        .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
     encrypt_combined(&json, key)
 }
 
@@ -188,9 +187,8 @@ pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
     key: &[u8],
 ) -> Result<T> {
     let plaintext = decrypt_combined(combined, key)?;
-    serde_json::from_slice(&plaintext).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON deserialization failed: {}", e))
-    })
+    serde_json::from_slice(&plaintext)
+        .map_err(|e| CryptoError::Json(format!("JSON deserialization failed: {}", e)))
 }
 
 #[cfg(test)]

@@ -483,7 +483,7 @@ async fn get_attachment_uses_generic_signed_download_url() {
         .ctx;
 
     let downloaded = ctx
-        .get_attachment(AttachmentType::ProfilePicture, "ua_generic1")
+        .get_attachment_encrypted(AttachmentType::ProfilePicture, "ua_generic1")
         .await
         .unwrap();
 

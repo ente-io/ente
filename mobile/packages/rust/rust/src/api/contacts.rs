@@ -357,14 +357,14 @@ impl ContactsCtx {
             .map_err(Into::into)
     }
 
-    /// Download an attachment by type and attachment id.
-    pub async fn get_attachment(
+    /// Download an encrypted attachment by type and attachment id.
+    pub async fn get_attachment_encrypted(
         &self,
         attachment_type: AttachmentType,
         attachment_id: String,
     ) -> Result<Vec<u8>, ContactsError> {
         self.inner
-            .get_attachment(attachment_type.into(), &attachment_id)
+            .get_attachment_encrypted(attachment_type.into(), &attachment_id)
             .await
             .map_err(Into::into)
     }

@@ -331,7 +331,7 @@ impl ContactsCtx {
         self.decode_contact(response)
     }
 
-    pub async fn get_attachment(
+    pub async fn get_attachment_encrypted(
         &self,
         attachment_type: AttachmentType,
         attachment_id: &str,
@@ -370,7 +370,7 @@ impl ContactsCtx {
             contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
         };
         let encrypted_picture = self
-            .get_attachment(
+            .get_attachment_encrypted(
                 AttachmentType::ProfilePicture,
                 current.profile_picture_attachment_id.as_deref().unwrap(),
             )
@@ -491,17 +491,14 @@ async fn create_root_key(
 
     match http.post_empty("/user-entity/key", &request).await {
         Ok(()) => Ok(None),
-        Err(HttpError::Http { .. }) => {
+        Err(HttpError::Http { status, message }) if status == 409 => {
             if let Some(remote_root_key) = fetch_root_key(http).await? {
                 Ok(Some(remote_root_key))
             } else {
-                Err(HttpError::Http {
-                    status: 500,
-                    message: "failed to create root contact key".to_string(),
-                }
-                .into())
+                Err(HttpError::Http { status, message }.into())
             }
         }
+        Err(HttpError::Http { status, message }) => Err(HttpError::Http { status, message }.into()),
         Err(err) => Err(err.into()),
     }
 }
