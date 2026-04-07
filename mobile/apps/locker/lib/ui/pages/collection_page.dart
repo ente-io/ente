@@ -178,7 +178,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       }
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 
@@ -256,12 +256,11 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     if (isFavorite) {
       return SizedBox.fromSize();
     }
-    final canManageCollection =
-        collectionViewType == CollectionViewType.ownedCollection ||
+    final canManageCollection = collectionViewType ==
+            CollectionViewType.ownedCollection ||
         collectionViewType == CollectionViewType.hiddenOwnedCollection ||
         collectionViewType == CollectionViewType.sharedCollectionViewer ||
-        collectionViewType ==
-            CollectionViewType.sharedCollectionCollaborator ||
+        collectionViewType == CollectionViewType.sharedCollectionCollaborator ||
         collectionViewType == CollectionViewType.quickLink;
     if (!canManageCollection) {
       return SizedBox.fromSize();

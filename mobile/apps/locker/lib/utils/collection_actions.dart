@@ -57,7 +57,7 @@ class CollectionActions {
 
     if (result is Exception) {
       if (context.mounted) {
-        await showGenericErrorDialog(
+        await showGenericErrorBottomSheet(
           context: context,
           error: result,
         );
@@ -202,7 +202,7 @@ class CollectionActions {
       await progressDialog.hide();
 
       if (errors.isNotEmpty) {
-        await showGenericErrorDialog(
+        await showGenericErrorBottomSheet(
           context: context,
           error: errors.first,
         );
@@ -429,7 +429,7 @@ class CollectionActions {
         await showSubscriptionRequiredSheet(context);
       } else {
         _logger.severe("Failed to update shareUrl collection", e);
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
       return false;
     }
@@ -464,7 +464,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (context.mounted) {
-        await showGenericErrorDialog(
+        await showGenericErrorBottomSheet(
           context: context,
           error: e,
         );
@@ -493,7 +493,7 @@ class CollectionActions {
     } catch (e) {
       await dialog?.hide();
       _logger.severe("Failed to get public key", e);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
     // getPublicKey can return null when no user is associated with given
@@ -550,7 +550,7 @@ class CollectionActions {
     } catch (e) {
       await dialog?.hide();
       _logger.severe("Failed to get public key", e);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
     // getPublicKey can return null when no user is associated with given
@@ -572,7 +572,7 @@ class CollectionActions {
           await showSubscriptionRequiredSheet(context);
         } else {
           _logger.severe("failed to share collection", e);
-          await showGenericErrorDialog(context: context, error: e);
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
         return false;
       }
@@ -592,7 +592,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       _logger.severe("Failed to remove participant", e);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
   }
