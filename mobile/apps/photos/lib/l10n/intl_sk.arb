@@ -28,7 +28,6 @@
   "deleteReason4": "Môj dôvod nie je uvedený",
   "sendEmail": "Poslať email",
   "deleteRequestSLAText": "Vaša požiadavka bude spracovaná do 72 hodín.",
-  "deleteEmailRequest": "Prosíme zašlite email na <warning>account-deletion@ente.com</warning> z vašej zaregistrovanej emailovej adresy.",
   "entePhotosPerm": "Ente <i>potrebuje povolenie</i> na uchovávanie vašich fotiek",
   "ok": "Ok",
   "createAccount": "Vytvoriť účet",

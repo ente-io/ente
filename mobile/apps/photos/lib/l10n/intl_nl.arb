@@ -26,7 +26,6 @@
   "deleteReason4": "Mijn reden wordt niet vermeld",
   "sendEmail": "E-mail versturen",
   "deleteRequestSLAText": "Je verzoek wordt binnen 72 uur verwerkt.",
-  "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.com</warning> vanaf het door jou geregistreerde e-mailadres.",
   "entePhotosPerm": "Ente <i>heeft toestemming nodig om</i> je foto's te bewaren",
   "ok": "Oké",
   "createAccount": "Maak account",
@@ -282,11 +281,8 @@
   "verificationId": "Verificatie ID",
   "verifyEmailID": "Verifieer {email}",
   "emailNoEnteAccount": "{email} heeft geen Ente account.\n\nStuur ze een uitnodiging om foto's te delen.",
-  "shareMyVerificationID": "Hier is mijn verificatie-ID: {verificationID} voor ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hey, kunt u bevestigen dat dit uw ente.com verificatie-ID is: {verificationID}",
   "somethingWentWrong": "Er ging iets mis",
   "sendInvite": "Stuur een uitnodiging",
-  "shareTextRecommendUsingEnte": "Download Ente zodat we gemakkelijk foto's en video's in originele kwaliteit kunnen delen\n\nhttps://ente.com",
   "done": "Voltooid",
   "applyCodeTitle": "Code toepassen",
   "enterCodeDescription": "Voer de code van de vriend in om gratis opslag voor jullie beiden te claimen",
@@ -621,7 +617,6 @@
   "subscription": "Abonnement",
   "paymentDetails": "Betaalgegevens",
   "manageFamily": "Familie abonnement beheren",
-  "contactToManageSubscription": "Neem contact met ons op via support@ente.com om uw {provider} abonnement te beheren.",
   "renewSubscription": "Abonnement verlengen",
   "cancelSubscription": "Abonnement opzeggen",
   "areYouSureYouWantToRenew": "Weet u zeker dat u wilt verlengen?",
@@ -670,7 +665,6 @@
   "subAlreadyLinkedErrMessage": "Jouw {id} is al aan een ander Ente account gekoppeld.\nAls je jouw {id} wilt gebruiken met dit account, neem dan contact op met onze klantenservice",
   "visitWebToManage": "Bezoek alstublieft web.ente.io om uw abonnement te beheren",
   "couldNotUpdateSubscription": "Kon abonnement niet wijzigen",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Neem alstublieft contact op met support@ente.com en we helpen u graag!",
   "paymentFailed": "Betaling mislukt",
   "paymentFailedTalkToProvider": "Praat met {providerName} klantenservice als u in rekening bent gebracht",
   "@paymentFailedTalkToProvider": {
@@ -1097,8 +1091,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radius instellen",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Voeg 5 gezinsleden toe aan je bestaande abonnement zonder extra te betalen.\n\nElk lid krijgt zijn eigen privé ruimte en kan elkaars bestanden niet zien tenzij ze zijn gedeeld.\n\nFamilieplannen zijn beschikbaar voor klanten die een betaald Ente abonnement hebben.\n\nAbonneer nu om aan de slag te gaan!",
   "androidBiometricHint": "Identiteit verifiëren",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

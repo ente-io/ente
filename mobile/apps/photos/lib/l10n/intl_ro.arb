@@ -25,7 +25,6 @@
   "deleteReason4": "Motivul meu nu apare",
   "sendEmail": "Trimiteți e-mail",
   "deleteRequestSLAText": "Solicitarea dvs. va fi procesată în 72 de ore.",
-  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.com</warning> de pe adresa dvs. de e-mail înregistrată.",
   "entePhotosPerm": "Ente <i>are nevoie de permisiune</i> pentru a vă păstra fotografiile",
   "ok": "Ok",
   "createAccount": "Creare cont",
@@ -263,11 +262,8 @@
   "verificationId": "ID de verificare",
   "verifyEmailID": "Verificare {email}",
   "emailNoEnteAccount": "{email} nu are un cont Ente.\n\nTrimiteți-le o invitație pentru a distribui fotografii.",
-  "shareMyVerificationID": "Acesta este ID-ul meu de verificare: {verificationID} pentru ente.com.",
-  "shareTextConfirmOthersVerificationID": "Poți confirma că acesta este ID-ul tău de verificare ente.com: {verificationID}",
   "somethingWentWrong": "Ceva nu a funcţionat corect",
   "sendInvite": "Trimiteți invitația",
-  "shareTextRecommendUsingEnte": "Descarcă Ente pentru a putea distribui cu ușurință fotografii și videoclipuri în calitate originală\n\nhttps://ente.com",
   "done": "Finalizat",
   "applyCodeTitle": "Aplicați codul",
   "enterCodeDescription": "Introduceți codul oferit de prietenul dvs. pentru a beneficia de spațiu gratuit pentru amândoi",
@@ -586,7 +582,6 @@
   "subscription": "Abonament",
   "paymentDetails": "Detalii de plată",
   "manageFamily": "Administrați familia",
-  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.com pentru a vă gestiona abonamentul {provider}.",
   "renewSubscription": "Reînnoire abonament",
   "cancelSubscription": "Anulare abonament",
   "areYouSureYouWantToRenew": "Sunteți sigur că doriți să reînnoiți?",
@@ -635,7 +630,6 @@
   "subAlreadyLinkedErrMessage": "{id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți {id} cu acest cont, vă rugăm să contactați asistența noastră",
   "visitWebToManage": "Vă rugăm să vizitați web.ente.io pentru a vă gestiona abonamentul",
   "couldNotUpdateSubscription": "Nu s-a putut actualiza abonamentul",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.com și vom fi bucuroși să vă ajutăm!",
   "paymentFailed": "Plata nu a reușit",
   "paymentFailedTalkToProvider": "Vă rugăm să vorbiți cu asistența {providerName} dacă ați fost taxat",
   "@paymentFailedTalkToProvider": {
@@ -1040,8 +1034,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Setare rază",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Adăugați 5 membri ai familiei la planul dvs. existent fără a plăti suplimentar.\n\nFiecare membru primește propriul spațiu privat și nu poate vedea fișierele celuilalt decât dacă acestea sunt partajate.\n\nPlanurile de familie sunt disponibile pentru clienții care au un abonament Ente plătit.\n\nAbonați-vă acum pentru a începe!",
   "androidBiometricHint": "Verificați-vă identitatea",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

@@ -1,6 +1,6 @@
 import "@fontsource-variable/inter";
 import "@fontsource/itim";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, GlobalStyles } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
@@ -24,6 +24,17 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             >
                 <CustomHead title={staticAppTitle} />
                 <CssBaseline enableColorScheme />
+                <GlobalStyles
+                    styles={{
+                        html: { height: "100%" },
+                        body: {
+                            height: "100%",
+                            overflow: "hidden",
+                            overscrollBehavior: "none",
+                        },
+                        "#__next": { height: "100%", overflow: "hidden" },
+                    }}
+                />
                 <Component {...pageProps} />
             </ThemeProvider>
         </div>

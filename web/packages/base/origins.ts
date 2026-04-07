@@ -99,10 +99,10 @@ export const albumsAppOrigin = () =>
     process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.io";
 
 /**
- * Return true if this build is meant to only serve public albums.
+ * Return true if this build is Ente's official public albums deployment.
  */
-export const shouldOnlyServeAlbumsApp =
-    !!process.env.NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP;
+export const isOfficialAlbumsApp =
+    !!process.env.NEXT_PUBLIC_ENTE_OFFICIAL_ALBUMS_APP;
 
 /**
  * A static build time constant that is `true` if {@link shareAppOrigin} has
@@ -124,13 +124,12 @@ export const shareAppOrigin = (): string =>
 /**
  * Return the origin/path that serves the memories app landing experience.
  *
- * Defaults to our production memories landing page, "https://ente.io/memories",
+ * Defaults to our production memories app, "https://ente.com",
  * but can be overridden by setting the `NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT`
  * environment variable.
  */
 export const memoriesAppOrigin = (): string =>
-    process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ??
-    "https://ente.io/memories";
+    process.env.NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT ?? "https://ente.com";
 
 /**
  * Return the origin that serves the photos app.

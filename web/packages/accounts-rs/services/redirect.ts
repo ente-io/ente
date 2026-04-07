@@ -7,6 +7,7 @@ import { appName } from "ente-base/app";
  */
 export const appHomeRoute: string = {
     accounts: "/passkeys",
+    albums: "/",
     auth: "/auth",
     cast: "/" /* The cast app doesn't use this, this is an arbitrary value. */,
     embed: "/" /* The embed app doesn't use this either. */,

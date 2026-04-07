@@ -225,7 +225,7 @@
   "addedAs": "Ajouté comme",
   "changePermissions": "Modifier les permissions ?",
   "yesConvertToViewer": "Oui, convertir en observateur",
-  "cannotAddMorePhotosAfterBecomingViewer": "{user} ne pourra pas ajouter plus de photos à cet album\n\nIl pourra toujours supprimer les photos existantes ajoutées par eux",
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} Ne (pourra) pas ajouter de photos supplémentaires à cet album.\nIl sera toujours possible de supprimer les photos existantes",
   "allowAddingPhotos": "Autoriser l'ajout de photos",
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
@@ -321,9 +321,9 @@
   },
   "verificationId": "ID de vérification",
   "verifyEmailID": "Vérifier {email}",
-  "emailNoEnteAccount": "{email} n'a pas de compte Ente.\n\nEnvoyez une invitation pour partager des photos.",
+  "emailNoEnteAccount": "{email} N'a pas de compte Ente.\n\nEnvoyez une invitation pour partager des photos.",
   "shareMyVerificationID": "Voici mon ID de vérification : {verificationID} pour ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hé, pouvez-vous confirmer qu'il s'agit de votre ID de vérification ente.com : {verificationID}",
+  "shareTextConfirmOthersVerificationID": "Hé ! Pouvez-vous confirmer qu'il s'agit de votre ID de vérification ente.com : {verificationID}",
   "somethingWentWrong": "Un problème est survenu",
   "sendInvite": "Envoyer Invitations",
   "shareTextRecommendUsingEnte": "Téléchargez Ente pour pouvoir facilement partager des photos et vidéos en qualité originale\n\nhttps://ente.com",
@@ -355,7 +355,7 @@
   "theyAlsoGetXGb": "Ils obtiennent aussi {storageAmountInGB} Go",
   "referralStorageForBoth": "{storageAmountInGB} GB pour eux + {storageAmountInGB} GB pour vous lorsqu'ils mettront à niveau leur compte.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} Go chaque fois que quelqu'un s'inscrit à un abonnement payant et applique votre code",
-  "shareTextReferralCode": "Ente Photos est un endroit privé et sécurisé pour vos photos\n* Téléchargez des photos Ente à partir de https://ente. o/app\n* Créez un compte\n* Appliquez le code de parrainage {referralCode} dans Paramètres->Parrainage\n* Obtennez {referralStorageInGB}Go gratuitement lorsque vous passez à un abonnement payant",
+  "shareTextReferralCode": "Ente Photos est un endroit privé et sécurisé pour vos photos\n* Téléchargez des photos Ente à partir de https://ente.com/app\n* Créez un compte\n* Appliquez le code de parrainage {referralCode} dans Paramètres->Parrainage\n* Obtennez {referralStorageInGB}Go gratuitement lorsque vous passez à un abonnement payant",
   "claimFreeStorage": "Obtenez du stockage gratuit",
   "inviteYourFriends": "Parrainez vos ami·e·s",
   "earnFreeStorage": "Obtenez du stockage gratuit",
@@ -674,6 +674,7 @@
   "shareYourSubscription": "Partagez votre abonnement avec vos proches",
   "shareStorageWith5Members": "Partager votre espace de stockage avec 5 membres",
   "privateSpaceForEveryMember": "Espace privé pour chaque membre",
+  "feedToEngageWithFamily": "Un fil pour échanger avec la famille",
   "plansStartAt": "Les abonnements commencent à {price}/mois",
   "@plansStartAt": {
     "placeholders": {
@@ -809,6 +810,17 @@
   "storageLimitExplanation": "Définissez le stockage maximum que ce membre peut utiliser. Il ne sera pas en mesure de télécharger une fois la limite atteinte.",
   "limit": "Limite",
   "noLimit": "Aucune limite",
+  "currentUsageNote": "Utilisation actuelle : {amount}. Définissez à 0 pour pas de limite.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Quitter l'abonnement famille?",
+  "leaveFamilyConfirmBody": "Vous perdrez l'accès au stockage partagé.",
   "referrals": "Parrainages",
   "notifications": "Notifications",
   "sharedPhotoNotifications": "Nouvelles photos et albums partagés",
@@ -975,7 +987,7 @@
   "visitWebToManage": "Vous pouvez gérer votre abonnement sur web.ente.io",
   "managePaymentMethod": "Gérer le mode de paiement",
   "couldNotUpdateSubscription": "Impossible de mettre à jour l’abonnement",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Veuillez contacter support@ente.com et nous serons heureux de vous aider!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Veuillez contacter support@ente.com et nous serons heureux de vous aider !",
   "paymentFailed": "Échec du paiement",
   "paymentFailedTalkToProvider": "Veuillez contacter le support {providerName} si vous avez été facturé",
   "@paymentFailedTalkToProvider": {
@@ -1107,7 +1119,17 @@
   "unarchive": "Désarchiver",
   "favorite": "Favori",
   "removeFromFavorite": "Retirer des favoris",
+  "shareMemories": "Partagez des souvenirs",
+  "shareTheseMemories": "Partagez ces souvenirs",
+  "shareThisPhoto": "Partager cette photo",
+  "shareThisVideo": "Partager cette vidéo",
   "shareLink": "Partager le lien",
+  "memoryShareLinkDescription": "Ce lien expirera automatiquement dans 7 jours.",
+  "deleteLink": "Supprimer le lien",
+  "deleteLinkQuestion": "Supprimer le lien ?",
+  "deleteMemoryLinkMessage": "Les personnes avec qui vous avez partagé ce lien perdront l'accès une fois qu'il sera supprimé.",
+  "linkDeletedSuccessfully": "Lien supprimé avec succès",
+  "memoryLinks": "Liens du souvenir",
   "openLink": "Ouvrir le lien",
   "pay": "Payer",
   "noPaymentAppFound": "Aucune application de paiement n'a été trouvée",
@@ -1463,6 +1485,14 @@
   "searchCaptionEmptySection": "Ajoutez des descriptions comme \"#trip\" dans les infos photo pour les retrouver ici plus rapidement",
   "language": "Langue",
   "selectLanguage": "Sélectionnez une langue",
+  "noLocation": "Aucune localisation",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Aucun tag de localisation",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Nom du lieu",
   "addLocation": "Ajouter la localisation",
   "groupNearbyPhotos": "Grouper les photos à proximité",
@@ -1519,8 +1549,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Définir le rayon",
-  "familyPlanPortalTitle": "Famille",
-  "familyPlanOverview": "Ajoutez 5 membres de votre famille à votre abonnement existant sans payer de supplément.\n\nChaque membre dispose de son propre espace privé et ne peut pas voir les fichiers des autres membres, sauf s'ils sont partagés.\n\nLes abonnement familiaux sont disponibles pour les clients qui ont un abonnement Ente payant.\n\nAbonnez-vous maintenant pour commencer !",
   "androidBiometricHint": "Vérifier l’identité",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2605,7 +2633,7 @@
   "artisticPortraits": "Portraits joyeux",
   "streetFood": "Bouchés de la bouffe",
   "riverCruises": "Vue sur le fleuve",
-  "facesTimelineBannerTitle": "Souvenirs",
+  "facesTimelineBannerTitle": "Fil de souvenir",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
@@ -2675,6 +2703,9 @@
   "coastalCliffs": "Falaises au bord de mer",
   "candidLaughter": "Éclat de rire",
   "groupSelfies": "Nous tous",
+  "birthdayJoy": "Joyeux anniversaire",
+  "weddingMoments": "Éclat du jour du mariage",
+  "goldenHourPortraits": "Visages de l'heure dorée -coucher de soleil",
   "concertNights": "Nuits en concert",
   "poolDays": "Jours au bord de la piscine",
   "picnicDays": "Souvenirs de pique-niques",

@@ -1002,6 +1002,13 @@
       "title": "INWX"
     },
     {
+      "title": "IPQualityScore",
+      "slug": "ipqualityscore",
+      "altNames": [
+        "IPQS"
+      ]
+    },
+    {
       "title": "IRCTC",
       "slug": "irctc",
       "altNames": [
@@ -1753,6 +1760,10 @@
       "title": "reMarkable"
     },
     {
+      "title": "Reolink",
+      "slug": "reolink"
+    },
+    {
       "title": "Restorecord"
     },
     {
@@ -1797,7 +1808,10 @@
       "hex": "000000"
     },
     {
-      "title": "Samsung"
+      "title": "Samsung",
+      "altNames": [
+        "Samsung Account"
+      ]
     },
     {
       "title": "SBI",
@@ -2339,6 +2353,10 @@
     },
     {
       "title": "Zoom"
+    },
+    {
+      "title": "DLsite",
+      "slug": "dlsite"
     }
   ]
 }

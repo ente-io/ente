@@ -1,5 +1,4 @@
 import "package:ente_qr/ente_qr.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/models/file/file.dart";
@@ -8,43 +7,39 @@ import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
 class QrCodeHighlightOverlay extends StatelessWidget {
   final List<QrDetection> detections;
   final EnteFile file;
-  final ValueListenable<bool> enableFullScreenNotifier;
 
   const QrCodeHighlightOverlay({
     required this.detections,
     required this.file,
-    required this.enableFullScreenNotifier,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (detections.isEmpty || !file.hasDimensions) {
+    if (detections.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: enableFullScreenNotifier,
-      builder: (context, isFullScreen, _) {
-        if (isFullScreen) {
-          return const SizedBox.shrink();
-        }
-
-        return LayoutBuilder(
+    return LayoutBuilder(
           builder: (context, constraints) {
             final screenWidth = constraints.maxWidth;
             final screenHeight = constraints.maxHeight;
-            final imageAspect = file.width / file.height;
-            final screenAspect = screenWidth / screenHeight;
 
             double displayWidth;
             double displayHeight;
-            if (imageAspect > screenAspect) {
-              displayWidth = screenWidth;
-              displayHeight = screenWidth / imageAspect;
+            if (file.hasDimensions) {
+              final imageAspect = file.width / file.height;
+              final screenAspect = screenWidth / screenHeight;
+              if (imageAspect > screenAspect) {
+                displayWidth = screenWidth;
+                displayHeight = screenWidth / imageAspect;
+              } else {
+                displayHeight = screenHeight;
+                displayWidth = screenHeight * imageAspect;
+              }
             } else {
+              displayWidth = screenWidth;
               displayHeight = screenHeight;
-              displayWidth = screenHeight * imageAspect;
             }
 
             final offsetX = (screenWidth - displayWidth) / 2;
@@ -66,8 +61,6 @@ class QrCodeHighlightOverlay extends StatelessWidget {
             );
           },
         );
-      },
-    );
   }
 }
 

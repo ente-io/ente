@@ -25,6 +25,7 @@ import {
     getAndClearIsFirstLogin,
     getAndClearJustSignedUp,
 } from "ente-accounts/services/accounts-db";
+import { processPendingAlbumJoin } from "ente-accounts/services/join-album";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
 import { ensureLocalUser } from "ente-accounts/services/user";
@@ -41,6 +42,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { subscribeMainWindowFocus } from "ente-base/electron";
+import { hasPendingAlbumToJoin } from "ente-base/join-album";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -56,10 +58,6 @@ import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/Fi
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
-import {
-    hasPendingAlbumToJoin,
-    processPendingAlbumJoin,
-} from "ente-new/albums/services/join-album";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
     CollectionSelector,

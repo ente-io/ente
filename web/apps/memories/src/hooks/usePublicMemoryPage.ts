@@ -5,7 +5,7 @@ import type { EnteFile } from "ente-media/file";
 import type {
     PublicMemoryShareFrame,
     PublicMemoryShareMetadata,
-} from "ente-new/albums/services/public-memory";
+} from "../services/public-memory";
 import {
     loadPublicMemoryPage,
     type PublicMemoryViewerVariant,

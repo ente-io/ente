@@ -42,13 +42,16 @@ you wish to change endpoints, bucket configuration or server configuration.
 
 :::
 
-## Try the web app
+## Try the web apps
 
 Open Ente Photos web app at `http://<machine-ip>:3000` (or
 `http://localhost:3000` if using on same local machine). Select **Don't have an
 account?** to create a new user.
 
 Follow the prompts to sign up.
+
+Public album links are served by the separate Albums app at
+`http://<machine-ip>:3002` (or `http://localhost:3002` on the same machine).
 
 <div style="display: flex; gap: 10px;">
   <img alt="Onboarding screen" src="/onboarding.png" style="width: 50%; height: auto;">

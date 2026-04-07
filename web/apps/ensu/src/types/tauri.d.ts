@@ -28,6 +28,26 @@ declare module "@tauri-apps/api/dialog" {
     ): Promise<string | null>;
 }
 
+declare module "@tauri-apps/api/process" {
+    export function relaunch(): Promise<void>;
+}
+
 declare module "@tauri-apps/api/shell" {
     export function open(path: string): Promise<void>;
+}
+
+declare module "@tauri-apps/api/updater" {
+    export interface UpdateManifest {
+        version: string;
+        date: string;
+        body: string;
+    }
+
+    export interface UpdateResult {
+        manifest?: UpdateManifest;
+        shouldUpdate: boolean;
+    }
+
+    export function checkUpdate(): Promise<UpdateResult>;
+    export function installUpdate(): Promise<void>;
 }

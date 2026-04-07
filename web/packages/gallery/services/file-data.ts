@@ -8,11 +8,11 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import type { EnteFile } from "ente-media/file";
 import {
     authenticatedPublicMemoryRequestHeaders,
     type PublicMemoryCredentials,
-} from "ente-new/albums/services/public-memory";
+} from "ente-base/public-memory";
+import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 

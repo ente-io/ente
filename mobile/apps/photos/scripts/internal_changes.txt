@@ -1,4 +1,5 @@
 Latest changes:
+- Ashil, Laurens: Fix file download not working for files with stale localID references
 - Ashil: Bug fixes and improvements on Gallery
 - Laurens: Make asset downloads (ML models) resumable (internal + offline)
 - Neeraj: Fix startup auto-logout cleanup
@@ -6,10 +7,11 @@ Latest changes:
 - Neeraj: Guard shared favorites removal resolution
 - Neeraj: Handle incomplete signup login errors with localized error copy
 - Neeraj: Improve motion photo video detection in rust layer
+- Amrithesh: OCR inline text detection
+- Ashil, Setal: Native family management screens
 - Prateek: 16 KB page size fix
 
 Still behind internal flag:
-- Ashil, Setal (I): Native family management screens
 - Amrithesh: (I) ML/Pet recognition [Indexing]
 - Amrithesh: (I) QR code detection
 - Laurens: (I) Clip text encoding in rust

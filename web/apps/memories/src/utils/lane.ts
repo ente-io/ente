@@ -6,7 +6,7 @@ import type {
     PublicMemoryShareFrame,
     PublicMemoryShareFrameCrop,
     PublicMemoryShareMetadata,
-} from "ente-new/albums/services/public-memory";
+} from "../services/public-memory";
 
 const LANE_CROP_REGULAR_PADDING = 0.4;
 const LANE_CROP_MINIMUM_PADDING = 0.1;
@@ -56,8 +56,81 @@ export const alignLaneFilesWithMetadata = (
     return { files: orderedFiles, frames: orderedFrames };
 };
 
-const yearsBetween = (start: Date, end: Date) =>
-    (end.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+const normalizeCalendarDate = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const parseCalendarDate = (value: string): Date | undefined => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+    if (dateOnlyMatch) {
+        const [, year, month, day] = dateOnlyMatch;
+        const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+        if (
+            Number.isNaN(parsed.getTime()) ||
+            parsed.getFullYear() !== Number(year) ||
+            parsed.getMonth() !== Number(month) - 1 ||
+            parsed.getDate() !== Number(day)
+        ) {
+            return undefined;
+        }
+
+        return parsed;
+    }
+
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) {
+        return undefined;
+    }
+
+    return normalizeCalendarDate(parsed);
+};
+
+const safeDateInYear = (date: Date, year: number) => {
+    const daysInTargetMonth = new Date(year, date.getMonth() + 1, 0).getDate();
+    const targetDay = Math.min(date.getDate(), daysInTargetMonth);
+    return new Date(year, date.getMonth(), targetDay);
+};
+
+const completedYearsBetween = (start: Date, end: Date) => {
+    const startDate = normalizeCalendarDate(start);
+    const endDate = normalizeCalendarDate(end);
+    if (endDate.getTime() < startDate.getTime()) {
+        return 0;
+    }
+
+    let years = endDate.getFullYear() - startDate.getFullYear();
+    if (
+        endDate.getTime() <
+        safeDateInYear(startDate, endDate.getFullYear()).getTime()
+    ) {
+        years -= 1;
+    }
+
+    return Math.max(0, years);
+};
+
+const laneCaptionValue = ({
+    captionType,
+    creationDate,
+    birthDate,
+}: {
+    captionType: "age" | "yearsAgo";
+    creationDate: Date;
+    birthDate?: string;
+}) => {
+    if (captionType === "age" && birthDate) {
+        const parsedBirthDate = parseCalendarDate(birthDate);
+        if (parsedBirthDate) {
+            return completedYearsBetween(parsedBirthDate, creationDate);
+        }
+    }
+
+    return completedYearsBetween(creationDate, new Date());
+};
 
 export const getFileAspectRatio = (file: EnteFile): number | undefined => {
     const width = file.pubMagicMetadata?.data.w;
@@ -195,24 +268,15 @@ export const formatLaneCaption = ({
     const personName = metadata?.personName?.trim() ?? "";
     const captionType =
         metadata?.captionType ?? (metadata?.birthDate ? "age" : "yearsAgo");
-    const roundedValue = (() => {
-        if (captionType === "age" && metadata?.birthDate) {
-            const birthDate = new Date(metadata.birthDate);
-            if (!Number.isNaN(birthDate.getTime())) {
-                return Math.max(
-                    0,
-                    Math.round(yearsBetween(birthDate, creationDate)),
-                );
-            }
-        }
-        return Math.max(0, Math.round(yearsBetween(creationDate, new Date())));
-    })();
+    const roundedValue = laneCaptionValue({
+        captionType,
+        creationDate,
+        birthDate: metadata?.birthDate,
+    });
     const yearsLabel = `${roundedValue} year${roundedValue === 1 ? "" : "s"}`;
 
     if (captionType === "age") {
-        return personName
-            ? `${personName} ${yearsLabel} old`
-            : `${yearsLabel} old`;
+        return `${yearsLabel} old`;
     }
 
     return personName ? `${personName} ${yearsLabel} ago` : `${yearsLabel} ago`;
@@ -235,19 +299,13 @@ export const buildLaneCaptionModel = ({
     const personName = metadata?.personName?.trim() ?? "";
     const captionType =
         metadata?.captionType ?? (metadata?.birthDate ? "age" : "yearsAgo");
-    const roundedValue = (() => {
-        if (captionType === "age" && metadata?.birthDate) {
-            const birthDate = new Date(metadata.birthDate);
-            if (!Number.isNaN(birthDate.getTime())) {
-                return Math.max(
-                    0,
-                    Math.round(yearsBetween(birthDate, creationDate)),
-                );
-            }
-        }
-        return Math.max(0, Math.round(yearsBetween(creationDate, new Date())));
-    })();
-    const prefix = personName ? `${personName} ` : "";
+    const roundedValue = laneCaptionValue({
+        captionType,
+        creationDate,
+        birthDate: metadata?.birthDate,
+    });
+    const prefix =
+        captionType === "age" ? "" : personName ? `${personName} ` : "";
     const suffix =
         captionType === "age"
             ? ` year${roundedValue === 1 ? "" : "s"} old`
@@ -329,17 +387,6 @@ export const calculateLaneScale = (distance: number) => {
     return Math.min(Math.max(1.0 - Math.abs(distance) * 0.02, 0.82), 1.02);
 };
 
-export const calculateLaneYOffset = (distance: number, cardHeight: number) => {
-    if (distance >= 0) {
-        const compression = Math.pow(0.72, distance);
-        return -cardHeight * 0.14 * distance * compression;
-    }
-    const downward = Math.abs(distance);
-    const easedComponent = Math.pow(downward, 1.45);
-    const travel = downward * (2.8 + 1.8 * downward);
-    return cardHeight * (travel + easedComponent * 0.65);
-};
-
 export const calculateLaneBlur = (distance: number) => {
     if (distance <= 0) {
         return 0;
@@ -362,11 +409,7 @@ export const calculateLaneOpacity = (distance: number) => {
         return Math.max(0.35, 1 - distance * 0.22);
     }
     const drop = Math.abs(distance);
-    if (drop <= 0.9) {
-        return 1;
-    }
-    const t = Math.min(Math.max((drop - 0.9) / 0.55, 0), 1);
-    return Math.max(0, 1 - t);
+    return Math.max(0, 1 - drop * 0.85);
 };
 
 export const calculateLaneOverlayOpacity = (distance: number) => {

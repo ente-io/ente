@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Ensu",
-    "version": "0.1.12"
+    "version": "0.1.15"
   },
   "tauri": {
     "windows": [
@@ -52,10 +52,19 @@
       },
       "path": {
         "all": true
+      },
+      "process": {
+        "all": false,
+        "relaunch": true
       }
     },
     "security": {
       "csp": null
+    },
+    "updater": {
+      "active": false,
+      "dialog": false,
+      "endpoints": ["https://ente.com/release-info/ensu-desktop.json"]
     }
   }
 }

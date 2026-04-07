@@ -14,15 +14,15 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
+import {
+    authenticatedPublicMemoryRequestHeaders,
+    type PublicMemoryCredentials,
+} from "ente-base/public-memory";
 import { ensureAuthToken } from "ente-base/token";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import {
-    authenticatedPublicMemoryRequestHeaders,
-    type PublicMemoryCredentials,
-} from "ente-new/albums/services/public-memory";
 import { detectFileTypeInfoFromChunk } from "../utils/detect-type";
 import { playableVideoURL, renderableImageBlob } from "./convert";
 import { hlsPlaylistDataForFile, type HLSPlaylistDataForFile } from "./video";

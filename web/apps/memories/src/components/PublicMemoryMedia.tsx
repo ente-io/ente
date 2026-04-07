@@ -1,5 +1,9 @@
-import { Box, Typography } from "@mui/material";
-import { LoadingIndicator } from "ente-base/components/loaders";
+/**
+ * Shared media primitives for the public memories viewers.
+ * This file contains the image and video renderers, loading overlay, and media
+ * sizing/crop helpers used by both `MemoryViewer` and `LaneMemoryViewer`.
+ */
+import { Box, CircularProgress, Typography } from "@mui/material";
 import log from "ente-base/log";
 import {
     downloadManager,
@@ -7,20 +11,22 @@ import {
 } from "ente-gallery/services/download";
 import type { HLSPlaylistData } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
-import type { PublicMemoryShareFrameCrop } from "ente-new/albums/services/public-memory";
 import "hls-video-element";
 import {
     type CSSProperties,
     type RefObject,
+    type SyntheticEvent,
     useCallback,
     useEffect,
     useRef,
     useState,
 } from "react";
+import type { PublicMemoryShareFrameCrop } from "../services/public-memory";
 import { computeMediaCropStyle } from "../utils/lane";
 
-const DEFAULT_MEDIA_MAX_WIDTH_CSS = "min(1264px, calc(100vw - 48px))";
-const DEFAULT_MEDIA_MAX_HEIGHT_CSS = "calc(min(100vh, 100dvh) - 220px)";
+const DEFAULT_MEDIA_MAX_WIDTH_CSS = "min(1360px, calc(100vw - 32px))";
+const DEFAULT_MEDIA_MAX_HEIGHT_CSS = "calc(100dvh - 184px)";
+const ASPECT_RATIO_CHANGE_EPSILON = 0.00001;
 
 const buildMediaStyle = ({
     cropRect,
@@ -55,6 +61,10 @@ const buildMediaStyle = ({
     };
 };
 
+/**
+ * Shared loading mask for public memory media while the image or video source is resolving.
+ * Used internally by `PhotoImage` and `VideoPlayer` in this file.
+ */
 function MediaLoadingOverlay() {
     return (
         <Box
@@ -68,7 +78,7 @@ function MediaLoadingOverlay() {
                 zIndex: 2,
             }}
         >
-            <LoadingIndicator />
+            <CircularProgress sx={{ color: "#08c225" }} size={32} />
         </Box>
     );
 }
@@ -86,6 +96,10 @@ export interface PhotoImageProps {
     showLoadingOverlay?: boolean;
 }
 
+/**
+ * Public-memory image renderer that handles thumbnail-to-full-image loading and lane crops.
+ * Used by `MemoryViewer` for share items and by `LaneMemoryViewer` for lane cards.
+ */
 export function PhotoImage({
     file,
     onFullLoad,
@@ -110,6 +124,8 @@ export function PhotoImage({
     const onAspectRatioRef = useRef(onAspectRatio);
     const mediaReadyRef = useRef(false);
     const hasNotifiedDisplayReadyRef = useRef(false);
+    const lastReportedAspectRatioRef = useRef<number | undefined>(undefined);
+    const loadGenerationRef = useRef(0);
 
     onFullLoadRef.current = onFullLoad;
     onAspectRatioRef.current = onAspectRatio;
@@ -123,26 +139,48 @@ export function PhotoImage({
         onFullLoadRef.current();
     }, []);
 
+    const reportAspectRatio = useCallback((width: number, height: number) => {
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        const nextAspectRatio = width / height;
+        const previousAspectRatio = lastReportedAspectRatioRef.current;
+        if (
+            typeof previousAspectRatio === "number" &&
+            Math.abs(previousAspectRatio - nextAspectRatio) <
+                ASPECT_RATIO_CHANGE_EPSILON
+        ) {
+            return;
+        }
+
+        lastReportedAspectRatioRef.current = nextAspectRatio;
+        onAspectRatioRef.current?.(width, height);
+    }, []);
+
     useEffect(() => {
-        let cancelled = false;
+        const loadGeneration = loadGenerationRef.current + 1;
+        loadGenerationRef.current = loadGeneration;
+        const loadState = { cancelled: false };
         setIsLoading(true);
         setThumbnailURL(undefined);
         setFullImageURL(undefined);
         mediaReadyRef.current = false;
         hasNotifiedDisplayReadyRef.current = false;
+        lastReportedAspectRatioRef.current = undefined;
 
         const loadThumbnail = async () => {
             try {
                 const nextThumbnailURL =
                     await downloadManager.renderableThumbnailURL(file);
-                if (!cancelled && nextThumbnailURL) {
+                if (!loadState.cancelled && nextThumbnailURL) {
                     setThumbnailURL(nextThumbnailURL);
-                } else if (!cancelled) {
+                } else if (!loadState.cancelled) {
                     setIsLoading(false);
                 }
             } catch (error) {
                 log.error("Failed to load thumbnail", error);
-                if (!cancelled) {
+                if (!loadState.cancelled) {
                     setIsLoading(false);
                 }
             }
@@ -155,17 +193,26 @@ export function PhotoImage({
             try {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                if (cancelled) {
+                if (loadState.cancelled) {
                     return;
                 }
-                if (sourceURLs.type === "image") {
-                    setFullImageURL(sourceURLs.imageURL);
-                } else {
+                if (sourceURLs.type === "video") {
                     signalReady();
+                    return;
                 }
+
+                const nextFullImageURL =
+                    sourceURLs.type === "livePhoto"
+                        ? await sourceURLs.imageURL()
+                        : sourceURLs.imageURL;
+                if (loadGeneration !== loadGenerationRef.current) {
+                    return;
+                }
+
+                setFullImageURL(nextFullImageURL);
             } catch (error) {
                 log.error("Failed to load full image", error);
-                if (!cancelled) {
+                if (!loadState.cancelled) {
                     signalReady();
                 }
             }
@@ -175,7 +222,10 @@ export function PhotoImage({
         void loadFullImage();
 
         return () => {
-            cancelled = true;
+            loadState.cancelled = true;
+            if (loadGenerationRef.current === loadGeneration) {
+                loadGenerationRef.current += 1;
+            }
         };
     }, [file, signalReady, thumbnailOnly]);
 
@@ -199,9 +249,43 @@ export function PhotoImage({
             return;
         }
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-            onAspectRatioRef.current?.(image.naturalWidth, image.naturalHeight);
+            reportAspectRatio(image.naturalWidth, image.naturalHeight);
         }
-    }, [fullImageURL, thumbnailOnly]);
+    }, [fullImageURL, reportAspectRatio, thumbnailOnly]);
+
+    const handleImageLoad = useCallback(
+        (event: SyntheticEvent<HTMLImageElement>) => {
+            const image = event.currentTarget;
+            reportAspectRatio(image.naturalWidth, image.naturalHeight);
+            const isFullImageLoad =
+                !thumbnailOnly &&
+                !!fullImageURL &&
+                (image.currentSrc || image.src) === fullImageURL;
+            setIsLoading(false);
+            if (thumbnailOnly || isFullImageLoad) {
+                signalReady();
+            }
+        },
+        [fullImageURL, reportAspectRatio, signalReady, thumbnailOnly],
+    );
+
+    const handleImageError = useCallback(
+        (event: SyntheticEvent<HTMLImageElement>) => {
+            const failedURL =
+                event.currentTarget.currentSrc || event.currentTarget.src;
+            log.error("Failed to render public memory image", failedURL);
+            setIsLoading(false);
+
+            if (!thumbnailOnly && fullImageURL && failedURL === fullImageURL) {
+                setFullImageURL(undefined);
+            } else if (thumbnailURL && failedURL === thumbnailURL) {
+                setThumbnailURL(undefined);
+            }
+
+            signalReady();
+        },
+        [fullImageURL, signalReady, thumbnailOnly, thumbnailURL],
+    );
 
     const displayURL = fullImageURL ?? thumbnailURL;
     const mediaStyle = buildMediaStyle({
@@ -230,22 +314,8 @@ export function PhotoImage({
                     src={displayURL}
                     alt=""
                     draggable={false}
-                    onLoad={(event) => {
-                        const isFullImageLoad =
-                            !thumbnailOnly &&
-                            !!fullImageURL &&
-                            event.currentTarget.src === fullImageURL;
-                        if (isFullImageLoad) {
-                            onAspectRatioRef.current?.(
-                                event.currentTarget.naturalWidth,
-                                event.currentTarget.naturalHeight,
-                            );
-                        }
-                        setIsLoading(false);
-                        if (thumbnailOnly || isFullImageLoad) {
-                            signalReady();
-                        }
-                    }}
+                    onLoad={handleImageLoad}
+                    onError={handleImageError}
                     style={mediaStyle}
                 />
             )}
@@ -258,6 +328,8 @@ export interface VideoPlayerProps {
     onReady?: () => void;
     onDuration?: (durationSeconds: number) => void;
     onEnded?: () => void;
+    onPlaybackBlocked?: () => void;
+    muted?: boolean;
     paused?: boolean;
     mediaRef?: RefObject<HTMLVideoElement | null>;
     fillFrame?: boolean;
@@ -269,11 +341,17 @@ export interface VideoPlayerProps {
     showLoadingOverlay?: boolean;
 }
 
+/**
+ * Public-memory video renderer that supports HLS playback, local video fallbacks, and lane crops.
+ * Used by `MemoryViewer` for share playback and by `LaneMemoryViewer` for the active lane card.
+ */
 export function VideoPlayer({
     file,
     onReady,
     onDuration,
     onEnded,
+    onPlaybackBlocked,
+    muted = false,
     paused,
     mediaRef,
     fillFrame,
@@ -293,18 +371,57 @@ export function VideoPlayer({
     );
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
+        null,
+    );
     const videoRef = useRef<HTMLVideoElement>(null);
     const onReadyRef = useRef(onReady);
     const onDurationRef = useRef(onDuration);
     const onEndedRef = useRef(onEnded);
+    const onPlaybackBlockedRef = useRef(onPlaybackBlocked);
+    const pausedRef = useRef(paused);
+    const playbackRequestIDRef = useRef(0);
+    const hasSignalledReadyRef = useRef(false);
 
     onReadyRef.current = onReady;
     onDurationRef.current = onDuration;
     onEndedRef.current = onEnded;
+    onPlaybackBlockedRef.current = onPlaybackBlocked;
+    pausedRef.current = paused;
+
+    const invalidatePlaybackRequest = useCallback(() => {
+        playbackRequestIDRef.current += 1;
+    }, []);
+
+    const requestPlayback = useCallback(() => {
+        const video = videoRef.current;
+        if (!video || pausedRef.current) {
+            return;
+        }
+
+        const requestID = playbackRequestIDRef.current + 1;
+        playbackRequestIDRef.current = requestID;
+        const playPromise = video.play();
+        void playPromise.catch((error: unknown) => {
+            if (
+                requestID !== playbackRequestIDRef.current ||
+                pausedRef.current ||
+                video !== videoRef.current
+            ) {
+                return;
+            }
+
+            log.warn("Failed to start public memory video playback", error);
+            video.pause();
+            setIsLoading(false);
+            onPlaybackBlockedRef.current?.();
+        });
+    }, []);
 
     const setVideoElementRef = useCallback(
         (node: HTMLVideoElement | null) => {
             videoRef.current = node;
+            setVideoElement(node);
             if (mediaRef) {
                 mediaRef.current = node;
             }
@@ -314,11 +431,13 @@ export function VideoPlayer({
 
     useEffect(() => {
         let cancelled = false;
+        invalidatePlaybackRequest();
         setIsLoading(true);
         setError(false);
         setVideoURL(undefined);
         setHlsData(undefined);
         setThumbnailURL(undefined);
+        hasSignalledReadyRef.current = false;
 
         const load = async () => {
             try {
@@ -360,7 +479,7 @@ export function VideoPlayer({
         return () => {
             cancelled = true;
         };
-    }, [file]);
+    }, [file, invalidatePlaybackRequest]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -369,13 +488,21 @@ export function VideoPlayer({
         }
 
         if (paused) {
+            invalidatePlaybackRequest();
             video.pause();
         } else {
-            video.play().catch(() => {
-                // Autoplay may be blocked; ignore.
-            });
+            requestPlayback();
         }
-    }, [hlsData, paused, videoURL]);
+    }, [hlsData, invalidatePlaybackRequest, paused, requestPlayback, videoURL]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) {
+            return;
+        }
+
+        video.muted = muted;
+    }, [muted, videoElement]);
 
     const handleLoadedMetadata = useCallback(() => {
         const video = videoRef.current;
@@ -385,20 +512,54 @@ export function VideoPlayer({
         }
     }, [onAspectRatio]);
 
-    const handleCanPlay = useCallback(() => {
+    const handleMediaReady = useCallback(() => {
         setIsLoading(false);
-        onReadyRef.current?.();
-        const video = videoRef.current;
-        if (video && !paused) {
-            video.play().catch(() => {
-                // Autoplay may be blocked.
-            });
+        if (!hasSignalledReadyRef.current) {
+            hasSignalledReadyRef.current = true;
+            onReadyRef.current?.();
         }
-    }, [paused]);
+        if (!pausedRef.current) {
+            requestPlayback();
+        }
+    }, [requestPlayback]);
 
     const handleEnded = useCallback(() => {
         onEndedRef.current?.();
     }, []);
+
+    useEffect(() => {
+        const video = videoElement;
+        if (!video) {
+            return;
+        }
+
+        const handleError = () => {
+            const mediaError = video.error;
+            log.error("Public memory video element error", mediaError);
+            setError(true);
+            setIsLoading(false);
+        };
+
+        video.addEventListener("loadedmetadata", handleLoadedMetadata);
+        video.addEventListener("loadeddata", handleMediaReady);
+        video.addEventListener("canplay", handleMediaReady);
+        video.addEventListener("playing", handleMediaReady);
+        video.addEventListener("ended", handleEnded);
+        video.addEventListener("error", handleError);
+
+        if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            handleMediaReady();
+        }
+
+        return () => {
+            video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+            video.removeEventListener("loadeddata", handleMediaReady);
+            video.removeEventListener("canplay", handleMediaReady);
+            video.removeEventListener("playing", handleMediaReady);
+            video.removeEventListener("ended", handleEnded);
+            video.removeEventListener("error", handleError);
+        };
+    }, [handleEnded, handleLoadedMetadata, handleMediaReady, videoElement]);
 
     const mediaStyle = buildMediaStyle({
         cropRect,
@@ -444,9 +605,6 @@ export function VideoPlayer({
                     src={hlsData.playlistURL}
                     poster={thumbnailURL}
                     playsInline
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onCanPlay={handleCanPlay}
-                    onEnded={handleEnded}
                     style={mediaStyle}
                 />
             )}
@@ -457,10 +615,6 @@ export function VideoPlayer({
                     src={videoURL}
                     poster={thumbnailURL}
                     playsInline
-                    muted={false}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onCanPlay={handleCanPlay}
-                    onEnded={handleEnded}
                     style={mediaStyle}
                 />
             )}
