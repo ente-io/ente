@@ -126,7 +126,7 @@ dependencies:
   freezed_annotation: 3.1.0
   home_widget: 0.8.0
   html_unescape: 2.0.0
-  http: 1.4.0
+  http: 1.6.0
   hugeicons: 1.1.2
   image: 4.5.4
   in_app_purchase: 3.2.1
