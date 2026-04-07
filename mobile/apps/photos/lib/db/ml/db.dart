@@ -116,7 +116,26 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     petFacesSpeciesIndex,
   ];
   static const List<String> _offlineMigrationScripts = [
-    ..._defaultMigrationScripts,
+    createFacesTable,
+    createFaceClustersTable,
+    createClusterPersonTable,
+    createClusterSummaryTable,
+    createNotPersonFeedbackTable,
+    fcClusterIDIndex,
+    createClipEmbeddingsTable,
+    createFileDataTable,
+    createFaceCacheTable,
+    createTextEmbeddingsCacheTable,
+    createClusterCentroidVectorIdMappingTable,
+    createPetFacesTable,
+    createPetBodiesTable,
+    createPetFaceVectorIdMappingTable,
+    createPetBodyVectorIdMappingTable,
+    createPetFaceClustersTable,
+    petFcClusterIDIndex,
+    createPetClusterSummaryTable,
+    createPetClusterCentroidVectorIdMappingTable,
+    createPetClusterPetTable,
   ];
 
   // only have a single app-wide reference to the database
@@ -458,7 +477,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deletePetFaceClustersTable);
     await db.execute(deletePetClusterSummaryTable);
     await db.execute(deletePetClusterPetTable);
-    await db.execute(deleteNotPetFeedbackTable);
+    if (!_isOffline) {
+      await db.execute(deleteNotPetFeedbackTable);
+    }
     await db.execute(deletePetClusterCentroidVectorIdMappingTable);
     final petVdbs =
         _isOffline ? PetVectorDB.allOfflineInstances : PetVectorDB.allInstances;
@@ -1603,7 +1624,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await db.execute(deletePetClusterSummaryTable);
       await db.execute(deletePetClusterCentroidVectorIdMappingTable);
       await db.execute(deletePetClusterPetTable);
-      await db.execute(deleteNotPetFeedbackTable);
+      if (!_isOffline) {
+        await db.execute(deleteNotPetFeedbackTable);
+      }
 
       // Recreate the tables
       await db.execute(createPetFaceClustersTable);
@@ -1611,7 +1634,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await db.execute(createPetClusterSummaryTable);
       await db.execute(createPetClusterCentroidVectorIdMappingTable);
       await db.execute(createPetClusterPetTable);
-      await db.execute(createNotPetFeedbackTable);
+      if (!_isOffline) {
+        await db.execute(createNotPetFeedbackTable);
+      }
     } catch (e, s) {
       _logger.severe('Error dropping pet clustering data', e, s);
     }

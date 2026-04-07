@@ -148,6 +148,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
     final colorScheme = getEnteColorScheme(context);
 
     final bool showBanner = !_isBannerDismissed &&
+        !isOfflineMode &&
         _files.isNotEmpty &&
         (widget.clusterLabel.isEmpty ||
             widget.clusterLabel.startsWith("Dog") ||
@@ -198,7 +199,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
         child: Scaffold(
           appBar: AppBar(
             title: GestureDetector(
-              onTap: _editName,
+              onTap: isOfflineMode ? null : _editName,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -216,17 +217,24 @@ class _PetClusterPageState extends State<PetClusterPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.edit, size: 16, color: colorScheme.strokeMuted),
+                  if (!isOfflineMode) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.edit,
+                      size: 16,
+                      color: colorScheme.strokeMuted,
+                    ),
+                  ],
                 ],
               ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.account_tree_outlined, size: 20),
-                tooltip: "View clusters",
-                onPressed: _viewClusters,
-              ),
+              if (!isOfflineMode)
+                IconButton(
+                  icon: const Icon(Icons.account_tree_outlined, size: 20),
+                  tooltip: "View clusters",
+                  onPressed: _viewClusters,
+                ),
               Text(
                 "${_files.length}",
                 style: textTheme.body.copyWith(color: colorScheme.textMuted),
@@ -240,22 +248,23 @@ class _PetClusterPageState extends State<PetClusterPage> {
               alignment: Alignment.bottomCenter,
               children: [
                 gallery,
-                _PetSelectionBar(
-                  selectedFiles: _selectedFiles,
-                  clusterId: widget.clusterId,
-                  species: widget.species,
-                  allFiles: _files,
-                  onFilesRemoved: (removed) {
-                    for (final f in removed) {
-                      _files.remove(f);
-                    }
-                    if (_files.isEmpty) {
-                      Navigator.pop(context);
-                    } else {
-                      setState(() {});
-                    }
-                  },
-                ),
+                if (!isOfflineMode)
+                  _PetSelectionBar(
+                    selectedFiles: _selectedFiles,
+                    clusterId: widget.clusterId,
+                    species: widget.species,
+                    allFiles: _files,
+                    onFilesRemoved: (removed) {
+                      for (final f in removed) {
+                        _files.remove(f);
+                      }
+                      if (_files.isEmpty) {
+                        Navigator.pop(context);
+                      } else {
+                        setState(() {});
+                      }
+                    },
+                  ),
               ],
             ),
           ),
@@ -265,6 +274,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
   }
 
   Future<void> _editName() async {
+    if (isOfflineMode) return;
     final result = await routeToPage(
       context,
       SaveOrEditPet(
@@ -282,6 +292,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
   }
 
   Future<void> _viewClusters() async {
+    if (isOfflineMode) return;
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
     final clusterToPetId = await mlDataDB.getClusterToPetId();
@@ -295,6 +306,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
   }
 
   Future<void> _handleMergePet() async {
+    if (isOfflineMode) return;
     final selection = await showMergePetPage(
       context,
       currentClusterId: widget.clusterId,

@@ -260,16 +260,19 @@ class PetClusteringService {
       faceToCluster[assignment.petFaceId] = assignment.clusterId;
     }
 
-    // Check not-pet feedback and override violating assignments
+    // Online mode preserves user corrections by honoring rejected assignments.
+    // Offline mode is view-only raw clustering output.
     if (faceToCluster.isNotEmpty) {
-      final allRejected = await mlDataDB.getBulkRejectedPetFaceIds(
-        faceToCluster.values.toSet(),
-      );
-      if (allRejected.isNotEmpty) {
-        for (final entry in faceToCluster.entries.toList()) {
-          final rejected = allRejected[entry.value];
-          if (rejected != null && rejected.contains(entry.key)) {
-            faceToCluster[entry.key] = const Uuid().v4();
+      if (!isOffline) {
+        final allRejected = await mlDataDB.getBulkRejectedPetFaceIds(
+          faceToCluster.values.toSet(),
+        );
+        if (allRejected.isNotEmpty) {
+          for (final entry in faceToCluster.entries.toList()) {
+            final rejected = allRejected[entry.value];
+            if (rejected != null && rejected.contains(entry.key)) {
+              faceToCluster[entry.key] = const Uuid().v4();
+            }
           }
         }
       }

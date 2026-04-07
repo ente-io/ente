@@ -91,7 +91,8 @@ class _PetClustersPageState extends State<PetClustersPage> {
                   itemBuilder: (context, index) {
                     final (clusterId, fileCount, _) = _clusters![index];
                     // Only the primary (first/largest) cluster can't be removed
-                    final canRemove = _clusters!.length > 1 && index != 0;
+                    final canRemove =
+                        !isOfflineMode && _clusters!.length > 1 && index != 0;
                     return ListTile(
                       leading: SizedBox(
                         width: 56,
