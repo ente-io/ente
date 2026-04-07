@@ -225,7 +225,7 @@ class _FrbContactsRustContext implements ContactsRustContext {
     ContactAttachmentType attachmentType,
     String attachmentId,
   ) {
-    return _inner.getAttachment(
+    return _inner.getAttachmentEncrypted(
       attachmentType: _toRustAttachmentType(attachmentType),
       attachmentId: attachmentId,
     );
