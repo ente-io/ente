@@ -620,7 +620,7 @@ export const createOfflineRecoveryHtml = async () => {
   <main>
     <div class="topbar">
       <div class="brand">2of3</div>
-      <div class="byline">by <a href="https://ente.com" target="_blank" rel="noreferrer">Ente</a></div>
+      <div class="byline">by <a href="https://ente.com" target="_blank" rel="noopener">Ente</a></div>
     </div>
     <div class="shell">
       <div class="panel">

@@ -156,7 +156,7 @@ const HELP_FAQS = [
                     component="a"
                     href="https://github.com/ente-io/ente"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener"
                     sx={{
                         color: "inherit",
                         textDecorationColor: "currentColor",
@@ -195,7 +195,7 @@ const HELP_FAQS = [
                     component="a"
                     href="https://github.com/ente-io/ente"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener"
                     sx={{
                         color: "inherit",
                         textDecorationColor: "currentColor",
@@ -1112,7 +1112,7 @@ const Page = () => {
                                     component="a"
                                     href="https://ente.com"
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener"
                                     sx={{
                                         color: "var(--ink)",
                                         fontWeight: 700,
@@ -2216,7 +2216,7 @@ const Page = () => {
                                     component="a"
                                     href="https://ente.com"
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener"
                                     sx={{
                                         color: "var(--ink)",
                                         fontWeight: 500,
@@ -2285,7 +2285,7 @@ const Page = () => {
                                     component="a"
                                     href="https://github.com/ente-io/ente"
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener"
                                     aria-label="View source on GitHub"
                                     sx={{
                                         color: "var(--ink)",
