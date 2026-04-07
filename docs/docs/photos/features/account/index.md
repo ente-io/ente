@@ -277,6 +277,7 @@ Learn more in the [Legacy guide](/photos/features/account/legacy/).
 ## Related topics
 
 - [Passkeys](/photos/features/account/passkeys) - Use passkeys for two-factor authentication
+- [App lock](/photos/features/account/app-lock) - Add a lock screen for the Ente Photos app
 - [Family Plans](/photos/features/account/family-plans) - Share storage with family members
 - [Referral Program](/photos/features/account/referral-program/) - Earn free storage by inviting friends
 - [Legacy](/photos/features/account/legacy/) - Designate trusted contacts for account recovery
