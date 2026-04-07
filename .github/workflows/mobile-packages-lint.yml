@@ -5,8 +5,10 @@ on:
     pull_request:
         paths:
             - "mobile/packages/**"
+            - "mobile/apps/*/pubspec.yaml"
             - "rust/photos/**"
             - ".github/workflows/mobile-packages-lint.yml"
+            - ".github/scripts/check_mobile_pubspec_constraints.py"
             - "mobile/analysis_options.yaml"
     # Allow manual trigger for testing
     workflow_dispatch:
@@ -87,6 +89,31 @@ jobs:
                   echo "Lint locker: $LINT_LOCKER"
                   echo "Lint all: $LINT_ALL"
                   echo "Rust changed: ${{ steps.changes.outputs.rust }}"
+
+    pubspec-constraints:
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Check changed mobile pubspec constraints
+              run: |
+                  FILES=$(git diff --name-only \
+                    "${{ github.event.pull_request.base.sha }}" \
+                    "${{ github.event.pull_request.head.sha }}" \
+                    -- 'mobile/apps/*/pubspec.yaml' 'mobile/packages/*/pubspec.yaml')
+
+                  if [ -z "$FILES" ]; then
+                    echo "No mobile pubspec changes to validate."
+                    exit 0
+                  fi
+
+                  python3 .github/scripts/check_mobile_pubspec_constraints.py \
+                    "${{ github.event.pull_request.base.sha }}" \
+                    $FILES
 
     packages-lint:
         needs: detect-changes
