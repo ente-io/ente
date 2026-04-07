@@ -258,12 +258,7 @@ class _FrbContactsRustContext implements ContactsRustContext {
 
   @override
   Future<Uint8List> getProfilePicture(String contactId) async {
-    final contact = await getContact(contactId);
-    final attachmentId = contact.profilePictureAttachmentId;
-    if (attachmentId == null) {
-      throw StateError('Contact $contactId does not have a profile picture');
-    }
-    return getAttachment(ContactAttachmentType.profilePicture, attachmentId);
+    return _inner.getProfilePicture(contactId: contactId);
   }
 
   @override

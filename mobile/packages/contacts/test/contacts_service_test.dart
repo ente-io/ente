@@ -171,7 +171,8 @@ void main() {
       ],
       const [],
     ];
-    rustApi.ctx.attachments['att_1'] = Uint8List.fromList([7, 8, 9]);
+    rustApi.ctx.attachments['att_1'] = Uint8List.fromList([99, 88, 77]);
+    rustApi.ctx.profilePictures['ct_1'] = Uint8List.fromList([7, 8, 9]);
 
     await service.open(
       ContactsSession(
@@ -187,12 +188,13 @@ void main() {
       await service.getProfilePicture('ct_1'),
       Uint8List.fromList([7, 8, 9]),
     );
-    expect(rustApi.ctx.getAttachmentCalls, 1);
+    expect(rustApi.ctx.getAttachmentCalls, 0);
+    expect(rustApi.ctx.getProfilePictureCalls, 1);
     expect(
       await service.getProfilePicture('ct_1'),
       Uint8List.fromList([7, 8, 9]),
     );
-    expect(rustApi.ctx.getAttachmentCalls, 1);
+    expect(rustApi.ctx.getProfilePictureCalls, 1);
   });
 
   test('replacing profile picture removes stale cached bytes', () async {
@@ -280,6 +282,68 @@ void main() {
       expect(await database.getCachedAttachment('att_drop'), isNull);
     },
   );
+
+  test('sync increases overlap page size to avoid skipping equal timestamps',
+      () async {
+    final firstPage = <ContactRecord>[
+      for (var i = 0; i < 5000; i++)
+        ContactRecord(
+          id: 'ct_$i',
+          contactUserId: i + 2,
+          email: 'user$i@test.test',
+          data: ContactData(contactUserId: i + 2, name: 'User $i'),
+          profilePictureAttachmentId: null,
+          isDeleted: false,
+          createdAt: 10,
+          updatedAt: 20,
+        ),
+    ];
+    const overflow = ContactRecord(
+      id: 'ct_overflow',
+      contactUserId: 6002,
+      email: 'overflow@test.test',
+      data: ContactData(contactUserId: 6002, name: 'Overflow'),
+      profilePictureAttachmentId: null,
+      isDeleted: false,
+      createdAt: 10,
+      updatedAt: 20,
+    );
+    rustApi.ctx.diffHandler = (sinceTime, limit) async {
+      if (sinceTime == 0) {
+        return firstPage;
+      }
+      if (sinceTime == 19 && limit == 5000) {
+        return firstPage;
+      }
+      if (sinceTime == 19 && limit == 10000) {
+        return [...firstPage, overflow];
+      }
+      return const [];
+    };
+
+    await service.open(
+      ContactsSession(
+        baseUrl: 'http://localhost:8080',
+        authToken: 'token',
+        userId: 1,
+        accountKey: Uint8List.fromList([1, 2, 3]),
+      ),
+    );
+
+    final synced = await service.sync();
+
+    expect(
+      synced.any((contact) => contact.id == 'ct_overflow'),
+      isTrue,
+    );
+    expect(rustApi.ctx.diffSinceTimes.first, 0);
+    expect(rustApi.ctx.diffSinceTimes.skip(1), everyElement(19));
+    expect(rustApi.ctx.diffLimits.first, 5000);
+    expect(rustApi.ctx.diffLimits.where((limit) => limit == 5000), isNotEmpty);
+    expect(rustApi.ctx.diffLimits, contains(10000));
+    expect((await service.getContact('ct_overflow'))?.data?.name, 'Overflow');
+    expect(synced.where((contact) => contact.id == 'ct_0'), hasLength(1));
+  });
 }
 
 class FakeContactsRustApi implements ContactsRustApi {
@@ -307,8 +371,13 @@ class FakeContactsRustContext implements ContactsRustContext {
   int userIdValue = 0;
   final Map<String, ContactRecord> records = {};
   final Map<String, Uint8List> attachments = {};
+  final Map<String, Uint8List> profilePictures = {};
   List<List<ContactRecord>> diffPages = [];
+  Future<List<ContactRecord>> Function(int sinceTime, int limit)? diffHandler;
+  final List<int> diffSinceTimes = [];
+  final List<int> diffLimits = [];
   int getAttachmentCalls = 0;
+  int getProfilePictureCalls = 0;
   String nextAttachmentId = 'att_profile';
 
   @override
@@ -385,6 +454,16 @@ class FakeContactsRustContext implements ContactsRustContext {
 
   @override
   Future<List<ContactRecord>> getDiff(int sinceTime, int limit) async {
+    diffSinceTimes.add(sinceTime);
+    diffLimits.add(limit);
+    final handler = diffHandler;
+    if (handler != null) {
+      final page = await handler(sinceTime, limit);
+      for (final record in page) {
+        records[record.id] = record;
+      }
+      return page;
+    }
     if (diffPages.isEmpty) {
       return const [];
     }
@@ -407,8 +486,13 @@ class FakeContactsRustContext implements ContactsRustContext {
 
   @override
   Future<Uint8List> getProfilePicture(String contactId) {
+    getProfilePictureCalls += 1;
+    final picture = profilePictures[contactId];
+    if (picture != null) {
+      return Future.value(picture);
+    }
     final attachmentId = records[contactId]!.profilePictureAttachmentId!;
-    return getAttachment(ContactAttachmentType.profilePicture, attachmentId);
+    return Future.value(attachments[attachmentId]!);
   }
 
   @override
@@ -430,6 +514,7 @@ class FakeContactsRustContext implements ContactsRustContext {
     );
     records[contactId] = updated;
     attachments[nextAttachmentId] = attachmentBytes;
+    profilePictures[contactId] = attachmentBytes;
     return updated;
   }
 

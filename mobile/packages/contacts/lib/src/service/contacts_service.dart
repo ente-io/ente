@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ContactsService {
   static const _syncLimit = 5000;
+  static const _maxSyncLimit = 50000;
 
   ContactsService({
     required SharedPreferences preferences,
@@ -69,18 +70,40 @@ class ContactsService {
   Future<List<ContactRecord>> sync() async {
     final ctx = _requireCtx();
     var sinceTime = await _database.getLastSyncedUpdatedAt();
+    var limit = _syncLimit;
     final synced = <ContactRecord>[];
+    final syncedIds = <String>{};
+    var previousSinceTime = -1;
+    List<String>? previousPageIds;
     while (true) {
-      final diff = await ctx.getDiff(sinceTime, _syncLimit);
+      final diff = await ctx.getDiff(sinceTime, limit);
       if (diff.isEmpty) {
         break;
       }
+      final pageIds = diff.map((contact) => contact.id).toList(growable: false);
+      if (sinceTime == previousSinceTime &&
+          previousPageIds != null &&
+          _sameIds(previousPageIds, pageIds)) {
+        if (limit >= _maxSyncLimit) {
+          throw StateError(
+            'Contacts sync pagination stalled at updatedAt ${diff.last.updatedAt}',
+          );
+        }
+        limit = min(limit * 2, _maxSyncLimit);
+        continue;
+      }
       await _database.upsertContacts(diff);
       final maxUpdatedAt = diff.map((e) => e.updatedAt).reduce(max);
-      await _database.setLastSyncedUpdatedAt(maxUpdatedAt);
-      sinceTime = maxUpdatedAt;
-      synced.addAll(diff);
-      if (diff.length < _syncLimit) {
+      previousSinceTime = sinceTime;
+      previousPageIds = pageIds;
+      sinceTime = _nextSyncCursor(diff, maxUpdatedAt, limit);
+      await _database.setLastSyncedUpdatedAt(sinceTime);
+      for (final contact in diff) {
+        if (syncedIds.add(contact.id)) {
+          synced.add(contact);
+        }
+      }
+      if (diff.length < limit) {
         break;
       }
     }
@@ -194,8 +217,12 @@ class ContactsService {
     if (cached != null) {
       return cached;
     }
-    final bytes =
-        await _requireCtx().getAttachment(attachmentType, attachmentId);
+    final ctx = _requireCtx();
+    final bytes = switch (attachmentType) {
+      ContactAttachmentType.profilePicture => await ctx.getProfilePicture(
+          contactId,
+        ),
+    };
     await _database.upsertCachedAttachment(attachmentId, bytes);
     return bytes;
   }
@@ -219,6 +246,27 @@ class ContactsService {
 
   Future<void> resetLocalState() async {
     await _database.resetState();
+  }
+
+  int _nextSyncCursor(List<ContactRecord> diff, int maxUpdatedAt, int limit) {
+    if (diff.length < limit || maxUpdatedAt <= 0) {
+      return maxUpdatedAt;
+    }
+    // Overlap the boundary timestamp by one tick so the next page can pick up
+    // additional rows that share the current page's max updatedAt.
+    return maxUpdatedAt - 1;
+  }
+
+  bool _sameIds(List<String> a, List<String> b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   ContactsRustContext _requireCtx() {
