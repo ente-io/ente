@@ -11,6 +11,7 @@ use reqwest::{Response, Url};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use zeroize::Zeroizing;
 
 const TOKEN_HEADER: &str = "X-Auth-Token";
 const CLIENT_PKG_HEADER: &str = "X-Client-Package";
@@ -92,7 +93,7 @@ pub struct HttpClient {
     no_redirect_client: reqwest::Client,
     base_url: String,
     base_origin: Option<Url>,
-    auth_token: RwLock<Option<String>>,
+    auth_token: RwLock<Option<Zeroizing<String>>>,
     user_agent: Option<String>,
     client_package: Option<String>,
     client_version: Option<String>,
@@ -149,7 +150,7 @@ impl HttpClient {
             no_redirect_client,
             base_url,
             base_origin,
-            auth_token: RwLock::new(config.auth_token),
+            auth_token: RwLock::new(config.auth_token.map(Zeroizing::new)),
             user_agent: config.user_agent,
             client_package: config.client_package,
             client_version: config.client_version,
@@ -158,7 +159,8 @@ impl HttpClient {
 
     /// Replace the auth token used for authenticated requests.
     pub fn set_auth_token(&self, auth_token: Option<String>) {
-        *self.auth_token.write().expect("auth token lock poisoned") = auth_token;
+        *self.auth_token.write().expect("auth token lock poisoned") =
+            auth_token.map(Zeroizing::new);
     }
 
     /// Create a bare client for presigned object-store requests.
@@ -452,10 +454,10 @@ impl HttpClient {
             .auth_token
             .read()
             .expect("auth token lock poisoned")
-            .clone()
+            .as_ref()
         {
             let token =
-                HeaderValue::from_str(&auth_token).map_err(|e| Error::Parse(e.to_string()))?;
+                HeaderValue::from_str(auth_token).map_err(|e| Error::Parse(e.to_string()))?;
             headers.insert(TOKEN_HEADER, token);
         }
         Ok(headers)
@@ -716,11 +718,24 @@ mod tests {
         let client = test_client("https://api.ente.io");
         client.set_auth_token(Some("token-1".to_string()));
         assert_eq!(
-            client.auth_token.read().unwrap().clone(),
-            Some("token-1".to_string())
+            client
+                .auth_token
+                .read()
+                .unwrap()
+                .as_ref()
+                .map(|token| token.as_str()),
+            Some("token-1")
         );
         client.set_auth_token(None);
-        assert_eq!(client.auth_token.read().unwrap().clone(), None);
+        assert_eq!(
+            client
+                .auth_token
+                .read()
+                .unwrap()
+                .as_ref()
+                .map(|token| token.as_str()),
+            None
+        );
     }
 
     #[tokio::test]
