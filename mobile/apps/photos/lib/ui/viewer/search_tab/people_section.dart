@@ -226,9 +226,7 @@ class PersonSearchExample extends StatelessWidget {
   Widget _buildPetItem(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final clusterId = searchResult.params[kPetClusterParamId] as String?;
-    final hasCustomName =
-        searchResult.params[kPetHasCustomName] as bool? ?? false;
-    final species = searchResult.params[kPetSpecies] as int? ?? -1;
+    final hasCustomName = searchResult.name().isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -278,7 +276,6 @@ class PersonSearchExample extends StatelessWidget {
                         context,
                         SaveOrEditPet(
                           clusterId: clusterId,
-                          species: species,
                         ),
                       );
                     }

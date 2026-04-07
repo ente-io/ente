@@ -22,14 +22,14 @@ import "package:photos/ui/viewer/people/pet_face_widget.dart";
 /// save/edit screen layout (minus email/suggestions).
 class SaveOrEditPet extends StatefulWidget {
   final String clusterId;
-  final int species;
+  final int? species;
   final String? currentName;
   final String? petId;
   final bool isEditing;
 
   const SaveOrEditPet({
     required this.clusterId,
-    required this.species,
+    this.species,
     this.currentName,
     this.petId,
     this.isEditing = false,
@@ -45,12 +45,14 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
   String _inputName = "";
   String? _selectedDate;
   PetData? _existingData;
+  int? _species;
   Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _inputName = widget.currentName ?? "";
+    _species = widget.species;
     _loadExistingData();
   }
 
@@ -75,6 +77,17 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
         });
       }
     }
+    _species ??= await _resolveSpecies(mlDataDB);
+  }
+
+  Future<int?> _resolveSpecies(MLDataDB mlDataDB) async {
+    final clusters = await mlDataDB.getAllPetClustersWithInfo();
+    for (final cluster in clusters) {
+      if (cluster.$1 == widget.clusterId) {
+        return cluster.$2;
+      }
+    }
+    return null;
   }
 
   bool get _hasChanges {
@@ -235,15 +248,16 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
             ? existingPet.data.copyWith(name: name, birthDate: _selectedDate)
             : PetData(
                 name: name,
-                species: widget.species,
+                species: _species ?? -1,
                 birthDate: _selectedDate,
               );
         await petService.updatePet(petId, updatedData);
       } else {
+        _species ??= await _resolveSpecies(mlDataDB);
         final pet = await petService.addPet(
           PetData(
             name: name,
-            species: widget.species,
+            species: _species ?? -1,
             birthDate: _selectedDate,
           ),
         );

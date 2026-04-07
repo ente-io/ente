@@ -2038,8 +2038,6 @@ class SearchService {
             params: {
               kPetClusterParamId: primaryClusterId,
               kFileID: files.first.uploadedFileID,
-              kPetSpecies: species,
-              kPetHasCustomName: customName != null && customName.isNotEmpty,
               if (clusterToPetId.containsKey(primaryClusterId))
                 kPetId: clusterToPetId[primaryClusterId],
             },
