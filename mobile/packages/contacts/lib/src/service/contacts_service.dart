@@ -10,8 +10,8 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ContactsService {
-  static const _syncLimit = 5000;
-  static const _maxSyncLimit = 50000;
+  static const _serverMaxSyncLimit = 5000;
+  static const _syncLimit = _serverMaxSyncLimit;
 
   ContactsService({
     required SharedPreferences preferences,
@@ -84,12 +84,13 @@ class ContactsService {
       if (sinceTime == previousSinceTime &&
           previousPageIds != null &&
           _sameIds(previousPageIds, pageIds)) {
-        if (limit >= _maxSyncLimit) {
+        if (limit >= _serverMaxSyncLimit) {
           throw StateError(
-            'Contacts sync pagination stalled at updatedAt ${diff.last.updatedAt}',
+            'Contacts sync pagination stalled at updatedAt '
+            '${diff.last.updatedAt} within server limit $_serverMaxSyncLimit',
           );
         }
-        limit = min(limit * 2, _maxSyncLimit);
+        limit = min(limit * 2, _serverMaxSyncLimit);
         continue;
       }
       await _database.upsertContacts(diff);

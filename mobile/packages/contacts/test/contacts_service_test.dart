@@ -283,8 +283,7 @@ void main() {
     },
   );
 
-  test('sync increases overlap page size to avoid skipping equal timestamps',
-      () async {
+  test('sync clamps overlap retries to the server page cap', () async {
     final firstPage = <ContactRecord>[
       for (var i = 0; i < 5000; i++)
         ContactRecord(
@@ -298,25 +297,12 @@ void main() {
           updatedAt: 20,
         ),
     ];
-    const overflow = ContactRecord(
-      id: 'ct_overflow',
-      contactUserId: 6002,
-      email: 'overflow@test.test',
-      data: ContactData(contactUserId: 6002, name: 'Overflow'),
-      profilePictureAttachmentId: null,
-      isDeleted: false,
-      createdAt: 10,
-      updatedAt: 20,
-    );
     rustApi.ctx.diffHandler = (sinceTime, limit) async {
       if (sinceTime == 0) {
         return firstPage;
       }
       if (sinceTime == 19 && limit == 5000) {
         return firstPage;
-      }
-      if (sinceTime == 19 && limit == 10000) {
-        return [...firstPage, overflow];
       }
       return const [];
     };
@@ -330,19 +316,14 @@ void main() {
       ),
     );
 
-    final synced = await service.sync();
+    await expectLater(service.sync(), throwsStateError);
 
-    expect(
-      synced.any((contact) => contact.id == 'ct_overflow'),
-      isTrue,
-    );
     expect(rustApi.ctx.diffSinceTimes.first, 0);
     expect(rustApi.ctx.diffSinceTimes.skip(1), everyElement(19));
     expect(rustApi.ctx.diffLimits.first, 5000);
     expect(rustApi.ctx.diffLimits.where((limit) => limit == 5000), isNotEmpty);
-    expect(rustApi.ctx.diffLimits, contains(10000));
-    expect((await service.getContact('ct_overflow'))?.data?.name, 'Overflow');
-    expect(synced.where((contact) => contact.id == 'ct_0'), hasLength(1));
+    expect(rustApi.ctx.diffLimits.every((limit) => limit <= 5000), isTrue);
+    expect((await service.getContact('ct_overflow'))?.data?.name, isNull);
   });
 }
 
