@@ -1,5 +1,5 @@
 {
-  "onBoardingBody": "Bezpecne zalohujte sve dokumenty",
+  "onBoardingBody": "Bezpečně zálohujte své dokumenty",
   "newUser": "Nový uživatel Ente",
   "existingUser": "Stávající uživatel",
   "developerSettings": "Nastavení pro vývojáře",
@@ -30,9 +30,9 @@
     }
   },
   "downloadFailed": "Stahování selhalo",
-  "failedToDownloadOrDecrypt": "Položku se nepodarilo stahnout",
-  "errorOpeningFile": "Chyba pri otevirani položky",
-  "errorOpeningFileMessage": "Chyba pri otevirani položky: {error}",
+  "failedToDownloadOrDecrypt": "Položku se nepodařilo stáhnout",
+  "errorOpeningFile": "Chyba při otevírání položky",
+  "errorOpeningFileMessage": "Chyba při otevírání položky: {error}",
   "@errorOpeningFileMessage": {
     "description": "Error message when opening an item fails",
     "placeholders": {
@@ -42,7 +42,7 @@
       }
     }
   },
-  "couldNotOpenFile": "Položku nelze otevrit: {error}",
+  "couldNotOpenFile": "Položku nelze otevřít: {error}",
   "@couldNotOpenFile": {
     "description": "Error message when item cannot be opened",
     "placeholders": {
@@ -52,7 +52,7 @@
       }
     }
   },
-  "minutesAgo": "pred {minutes} min",
+  "minutesAgo": "před {minutes} min",
   "@minutesAgo": {
     "description": "Time format for minutes ago",
     "placeholders": {
@@ -62,7 +62,7 @@
       }
     }
   },
-  "hoursAgo": "pred {hours} hod",
+  "hoursAgo": "před {hours} hod",
   "@hoursAgo": {
     "description": "Time format for hours ago",
     "placeholders": {
@@ -73,7 +73,7 @@
     }
   },
   "yesterday": "Včera",
-  "daysAgo": "pred {days} dny",
+  "daysAgo": "před {days} dny",
   "@daysAgo": {
     "description": "Time format for days ago",
     "placeholders": {
@@ -83,7 +83,7 @@
       }
     }
   },
-  "collectionRenamedSuccessfully": "Kolekce byla uspesne prejmenovana",
+  "collectionRenamedSuccessfully": "Kolekce byla úspěšně přejmenována",
   "failedToRenameCollection": "Prejmenovani kolekce se nezdarilo: {error}",
   "@failedToRenameCollection": {
     "description": "Error message when collection rename fails",
@@ -523,7 +523,6 @@
   "youCannotShareWithYourself": "Nemůžete sdílet se sebou",
   "inviteToEnte": "Pozvat do Ente",
   "sendInvite": "Odeslat pozvánku",
-  "shareTextRecommendUsingEnte": "Stáhněte si Ente\n\nhttps://ente.io",
   "thisIsYourVerificationId": "Toto je Vaše ověřovací ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Osoba, která s Vámi sdílí alba, by měla na svém zařízení vidět stejné ID.",
   "howToViewShareeVerificationID": "Požádejte je, aby dlouze stiskli svou e-mailovou adresu na obrazovce nastavení a ověřili, zda se ID na obou zařízeních shodují.",
@@ -532,15 +531,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ověřovací ID",
   "verifyEmailID": "Ověřit {email}",
   "emailNoEnteAccount": "{email} nema ucet Ente.\n\nPošlete mu pozvanku pro sdileni položek.",
-  "shareMyVerificationID": "Zde je moje ověřovací ID: {verificationID} pro ente.io.",
-  "shareTextConfirmOthersVerificationID": "Ahoj, můžeš potvrdit, že toto je tvé ověřovací ID ente.io: {verificationID}",
   "passwordLock": "Zámek heslem",
   "manage": "Spravovat",
   "addedAs": "Přidán jako",

@@ -1042,7 +1042,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendInvite => 'Send invite';
 
   @override
-  String get shareTextRecommendUsingEnte => 'Download Ente\n\nhttps://ente.io';
+  String get shareTextRecommendUsingEnte => 'Download Ente\n\nhttps://ente.com';
 
   @override
   String get thisIsYourVerificationId => 'This is your Verification ID';
@@ -1075,12 +1075,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String shareMyVerificationID(Object verificationID) {
-    return 'Here\'s my verification ID: $verificationID for ente.io.';
+    return 'Here\'s my verification ID: $verificationID for ente.com.';
   }
 
   @override
   String shareTextConfirmOthersVerificationID(Object verificationID) {
-    return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
+    return 'Hey, can you confirm that this is your ente.com verification ID: $verificationID';
   }
 
   @override
@@ -1804,4 +1804,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authToViewYourActiveSessions =>
       'Please authenticate to view your active sessions';
+
+  @override
+  String deleteAccountFeedbackPrompt(String email) {
+    return 'Something not working? Reach out at $email, we\'d love to help.';
+  }
+
+  @override
+  String get sendFeedback => 'Send feedback';
+
+  @override
+  String get deleteAccountPermanentWarning =>
+      'This will permanently delete your Ente Auth, Photos, and Locker data';
 }

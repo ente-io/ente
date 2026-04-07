@@ -6,6 +6,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -58,17 +61,19 @@ fun MarkdownView(
                     val appendCursor = trailingCursor && index == blocks.lastIndex
                     when (block) {
                         is MarkdownBlock.Heading -> {
-                            Text(
-                                text = markdownAnnotatedText(block.text, appendCursor),
+                            InlineMarkdownText(
+                                text = block.text,
                                 style = headingStyle(block.level),
-                                color = EnsuColor.textPrimary()
+                                color = EnsuColor.textPrimary(),
+                                appendCursor = appendCursor
                             )
                         }
                         is MarkdownBlock.Paragraph -> {
-                            Text(
-                                text = markdownAnnotatedText(block.text, appendCursor),
+                            InlineMarkdownText(
+                                text = block.text,
                                 style = EnsuTypography.message,
-                                color = EnsuColor.textPrimary()
+                                color = EnsuColor.textPrimary(),
+                                appendCursor = appendCursor
                             )
                         }
                         is MarkdownBlock.BlockQuote -> {
@@ -100,10 +105,11 @@ fun MarkdownView(
                                                 style = EnsuTypography.message,
                                                 color = EnsuColor.textPrimary()
                                             )
-                                            Text(
-                                                text = markdownAnnotatedText(item, itemCursor),
+                                            InlineMarkdownText(
+                                                text = item,
                                                 style = EnsuTypography.message,
-                                                color = EnsuColor.textPrimary()
+                                                color = EnsuColor.textPrimary(),
+                                                appendCursor = itemCursor
                                             )
                                         }
                                     }
@@ -147,10 +153,11 @@ private fun BlockQuoteView(text: String, appendCursor: Boolean = false) {
                 .background(EnsuColor.border())
         )
         Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
-        Text(
-            text = markdownAnnotatedText(text, appendCursor),
+        InlineMarkdownText(
+            text = text,
             style = EnsuTypography.message,
-            color = EnsuColor.textPrimary()
+            color = EnsuColor.textPrimary(),
+            appendCursor = appendCursor
         )
     }
 }
@@ -231,8 +238,17 @@ private fun headingStyle(level: Int): TextStyle {
     return EnsuTypography.message.copy(fontSize = size, fontWeight = FontWeight.SemiBold, lineHeight = (size.value + 6).sp)
 }
 
-private fun markdownAnnotatedText(text: String, appendCursor: Boolean = false): AnnotatedString {
-    val pattern = Regex("(\\*\\*[^*]+\\*\\*|`[^`]+`|\\*[^*]+\\*)")
+private data class InlineLinkMatch(
+    val label: String,
+    val endIndexExclusive: Int
+)
+
+private fun markdownAnnotatedText(
+    text: String,
+    linkColor: androidx.compose.ui.graphics.Color,
+    appendCursor: Boolean = false
+): AnnotatedString {
+    val pattern = Regex("""(\[[^\]\n]+\]\([^)]+\)|~~[^~\n]+~~|\*\*[^*\n]+\*\*|`[^`\n]+`|\*[^*\n]+\*)""")
     val codeFamily = EnsuTypography.code.fontFamily
     return buildAnnotatedString {
         var currentIndex = 0
@@ -244,6 +260,26 @@ private fun markdownAnnotatedText(text: String, appendCursor: Boolean = false): 
             }
             val token = match.value
             when {
+                token.startsWith("[") -> {
+                    val labelEnd = token.indexOf(']')
+                    if (labelEnd > 1) {
+                        withStyle(
+                            SpanStyle(
+                                color = linkColor,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        ) {
+                            append(token.substring(1, labelEnd))
+                        }
+                    } else {
+                        append(token)
+                    }
+                }
+                token.startsWith("~~") -> {
+                    withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                        append(token.removePrefix("~~").removeSuffix("~~"))
+                    }
+                }
                 token.startsWith("**") -> {
                     withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
                         append(token.removePrefix("**").removeSuffix("**"))
@@ -269,6 +305,387 @@ private fun markdownAnnotatedText(text: String, appendCursor: Boolean = false): 
             append("▍")
         }
     }
+}
+
+private enum class InlineMarkdownStyle {
+    Normal,
+    Bold,
+    Italic,
+    Code,
+    Strikethrough,
+    Link
+}
+
+private sealed class InlineMarkdownSegment {
+    data class Text(val text: String, val style: InlineMarkdownStyle) : InlineMarkdownSegment()
+    data class Math(val latex: String) : InlineMarkdownSegment()
+}
+
+private data class InlineMathMatch(
+    val latex: String,
+    val endIndexExclusive: Int
+)
+
+private val mathTokenPattern = Regex(
+    """(?<!\\)\$(?!\$)(?:[^$\n\\]|\\.)+?(?<!\\)\$(?!\$)|\\\((?:[^\n\\]|\\.)+?\\\)"""
+)
+
+private fun parseInlineMarkdownSegments(text: String): List<InlineMarkdownSegment> {
+    val segments = mutableListOf<InlineMarkdownSegment>()
+    val buffer = StringBuilder()
+    var currentStyle = InlineMarkdownStyle.Normal
+    var index = 0
+
+    fun flushBuffer() {
+        if (buffer.isNotEmpty()) {
+            segments.add(
+                InlineMarkdownSegment.Text(
+                    text = buffer.toString(),
+                    style = currentStyle
+                )
+            )
+            buffer.clear()
+        }
+    }
+
+    while (index < text.length) {
+        val mathMatch = findInlineMathMatch(text, index)
+        if (mathMatch != null) {
+            flushBuffer()
+            segments.add(InlineMarkdownSegment.Math(latex = mathMatch.latex))
+            index = mathMatch.endIndexExclusive
+            continue
+        }
+
+        when (currentStyle) {
+            InlineMarkdownStyle.Link -> {
+                buffer.append(text[index])
+                index += 1
+            }
+            InlineMarkdownStyle.Code -> {
+                if (text[index] == '`') {
+                    flushBuffer()
+                    currentStyle = InlineMarkdownStyle.Normal
+                    index += 1
+                } else {
+                    buffer.append(text[index])
+                    index += 1
+                }
+            }
+            InlineMarkdownStyle.Bold -> {
+                if (text.startsWith("**", index)) {
+                    flushBuffer()
+                    currentStyle = InlineMarkdownStyle.Normal
+                    index += 2
+                } else {
+                    buffer.append(text[index])
+                    index += 1
+                }
+            }
+            InlineMarkdownStyle.Italic -> {
+                if (text[index] == '*' && !text.startsWith("**", index)) {
+                    flushBuffer()
+                    currentStyle = InlineMarkdownStyle.Normal
+                    index += 1
+                } else {
+                    buffer.append(text[index])
+                    index += 1
+                }
+            }
+            InlineMarkdownStyle.Strikethrough -> {
+                if (text.startsWith("~~", index)) {
+                    flushBuffer()
+                    currentStyle = InlineMarkdownStyle.Normal
+                    index += 2
+                } else {
+                    buffer.append(text[index])
+                    index += 1
+                }
+            }
+            InlineMarkdownStyle.Normal -> {
+                val linkMatch = findInlineLinkMatch(text, index)
+                when {
+                    linkMatch != null -> {
+                        flushBuffer()
+                        segments.add(
+                            InlineMarkdownSegment.Text(
+                                text = linkMatch.label,
+                                style = InlineMarkdownStyle.Link
+                            )
+                        )
+                        index = linkMatch.endIndexExclusive
+                    }
+                    text.startsWith("~~", index) && hasClosingDelimiter(text, index + 2, "~~") -> {
+                        flushBuffer()
+                        currentStyle = InlineMarkdownStyle.Strikethrough
+                        index += 2
+                    }
+                    text.startsWith("**", index) && hasClosingDelimiter(text, index + 2, "**") -> {
+                        flushBuffer()
+                        currentStyle = InlineMarkdownStyle.Bold
+                        index += 2
+                    }
+                    text[index] == '*' &&
+                        !text.startsWith("**", index) &&
+                        hasClosingSingleAsterisk(text, index + 1) -> {
+                        flushBuffer()
+                        currentStyle = InlineMarkdownStyle.Italic
+                        index += 1
+                    }
+                    text[index] == '`' && hasClosingDelimiter(text, index + 1, "`") -> {
+                        flushBuffer()
+                        currentStyle = InlineMarkdownStyle.Code
+                        index += 1
+                    }
+                    else -> {
+                        buffer.append(text[index])
+                        index += 1
+                    }
+                }
+            }
+        }
+    }
+
+    flushBuffer()
+
+    return segments.filterNot { segment ->
+        segment is InlineMarkdownSegment.Text && segment.text.isEmpty()
+    }
+}
+
+private fun findInlineMathMatch(text: String, startIndex: Int): InlineMathMatch? {
+    if (startIndex >= text.length) {
+        return null
+    }
+
+    if (text.startsWith("\\(", startIndex)) {
+        var index = startIndex + 2
+        while (index < text.length) {
+            if (text[index] == '\n') {
+                return null
+            }
+            if (text[index] == '\\') {
+                if (index + 1 >= text.length) {
+                    return null
+                }
+                if (text[index + 1] == ')') {
+                    return InlineMathMatch(
+                        latex = text.substring(startIndex + 2, index),
+                        endIndexExclusive = index + 2
+                    )
+                }
+                index += 2
+                continue
+            }
+            index += 1
+        }
+        return null
+    }
+
+    if (text[startIndex] != '$' || (startIndex > 0 && text[startIndex - 1] == '\\')) {
+        return null
+    }
+    if (startIndex + 1 < text.length && text[startIndex + 1] == '$') {
+        return null
+    }
+
+    var index = startIndex + 1
+    while (index < text.length) {
+        if (text[index] == '\n') {
+            return null
+        }
+        if (
+            text[index] == '$' &&
+            text[index - 1] != '\\' &&
+            (index + 1 >= text.length || text[index + 1] != '$')
+        ) {
+            if (index == startIndex + 1) {
+                return null
+            }
+            return InlineMathMatch(
+                latex = text.substring(startIndex + 1, index),
+                endIndexExclusive = index + 1
+            )
+        }
+        index += 1
+    }
+
+    return null
+}
+
+private fun findInlineLinkMatch(text: String, startIndex: Int): InlineLinkMatch? {
+    if (startIndex >= text.length || text[startIndex] != '[') {
+        return null
+    }
+
+    var labelEnd = -1
+    var index = startIndex + 1
+    while (index < text.length) {
+        val char = text[index]
+        if (char == '\n') {
+            return null
+        }
+        if (char == ']' && text.getOrNull(index + 1) == '(') {
+            labelEnd = index
+            break
+        }
+        index += 1
+    }
+
+    if (labelEnd <= startIndex + 1) {
+        return null
+    }
+
+    val label = text.substring(startIndex + 1, labelEnd)
+    if (mathTokenPattern.containsMatchIn(label)) {
+        return null
+    }
+
+    val urlStart = labelEnd + 2
+    index = urlStart
+    while (index < text.length) {
+        val char = text[index]
+        if (char == '\n') {
+            return null
+        }
+        if (char == ')') {
+            return InlineLinkMatch(
+                label = label,
+                endIndexExclusive = index + 1
+            )
+        }
+        index += 1
+    }
+
+    return null
+}
+
+private fun hasClosingDelimiter(text: String, startIndex: Int, delimiter: String): Boolean {
+    var index = startIndex
+    while (index < text.length) {
+        if (text[index] == '\n') {
+            return false
+        }
+        if (text.startsWith(delimiter, index)) {
+            return true
+        }
+        index += 1
+    }
+    return false
+}
+
+private fun hasClosingSingleAsterisk(text: String, startIndex: Int): Boolean {
+    var index = startIndex
+    while (index < text.length) {
+        if (text[index] == '\n') {
+            return false
+        }
+        if (text[index] == '*' && !text.startsWith("**", index)) {
+            return true
+        }
+        index += 1
+    }
+    return false
+}
+
+private fun hasInlineMath(text: String): Boolean =
+    mathTokenPattern.containsMatchIn(text)
+
+private fun splitTextChunks(text: String): List<String> =
+    Regex("""\s+|\S+\s*""").findAll(text).map { it.value }.toList()
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun InlineMarkdownText(
+    text: String,
+    style: TextStyle,
+    color: androidx.compose.ui.graphics.Color,
+    appendCursor: Boolean = false
+) {
+    if (!hasInlineMath(text)) {
+        Text(
+            text = markdownAnnotatedText(
+                text = text,
+                linkColor = EnsuColor.accent(),
+                appendCursor = appendCursor
+            ),
+            style = style,
+            color = color
+        )
+        return
+    }
+
+    val lines = text.split("\n")
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        lines.forEachIndexed { lineIndex, line ->
+            val isLastLine = lineIndex == lines.lastIndex
+            val segments = parseInlineMarkdownSegments(line)
+            val cursorInline = appendCursor &&
+                isLastLine &&
+                segments.lastOrNull() is InlineMarkdownSegment.Text
+            val cursorStandalone = appendCursor &&
+                isLastLine &&
+                segments.lastOrNull() !is InlineMarkdownSegment.Text
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                segments.forEachIndexed { segmentIndex, segment ->
+                    when (segment) {
+                        is InlineMarkdownSegment.Math -> {
+                            InlineLaTeXView(
+                                latex = segment.latex,
+                                modifier = Modifier.padding(top = 2.dp),
+                                fontSizeSp = style.fontSize.value
+                            )
+                        }
+                        is InlineMarkdownSegment.Text -> {
+                            val chunks = splitTextChunks(segment.text)
+                            chunks.forEachIndexed { chunkIndex, chunk ->
+                                val isLastChunk =
+                                    segmentIndex == segments.lastIndex && chunkIndex == chunks.lastIndex
+                                Text(
+                                    text = if (cursorInline && isLastChunk) "$chunk▍" else chunk,
+                                    style = styleForInlineSegment(style, segment.style),
+                                    color = colorForInlineSegment(color, segment.style)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (cursorStandalone) {
+                    Text(
+                        text = "▍",
+                        style = style,
+                        color = color
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun styleForInlineSegment(
+    baseStyle: TextStyle,
+    inlineStyle: InlineMarkdownStyle
+): TextStyle = when (inlineStyle) {
+    InlineMarkdownStyle.Normal -> baseStyle
+    InlineMarkdownStyle.Bold -> baseStyle.copy(fontWeight = FontWeight.SemiBold)
+    InlineMarkdownStyle.Italic -> baseStyle.copy(fontStyle = FontStyle.Italic)
+    InlineMarkdownStyle.Code -> baseStyle.copy(fontFamily = EnsuTypography.code.fontFamily)
+    InlineMarkdownStyle.Strikethrough -> baseStyle.copy(textDecoration = TextDecoration.LineThrough)
+    InlineMarkdownStyle.Link -> baseStyle.copy(textDecoration = TextDecoration.Underline)
+}
+
+@Composable
+private fun colorForInlineSegment(
+    baseColor: androidx.compose.ui.graphics.Color,
+    inlineStyle: InlineMarkdownStyle
+): androidx.compose.ui.graphics.Color = when (inlineStyle) {
+    InlineMarkdownStyle.Link -> EnsuColor.accent()
+    else -> baseColor
 }
 
 private sealed class MarkdownBlock {

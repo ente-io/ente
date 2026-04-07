@@ -9,261 +9,453 @@ class ChangeLogStrings {
   final String desc2;
   final String title3;
   final String desc3;
+  final String title4;
+  final String desc4;
 
   const ChangeLogStrings({
     required this.title1,
     required this.desc1,
-    required this.desc1Item1,
-    required this.desc1Item2,
-    required this.title2,
-    required this.desc2,
-    required this.title3,
-    required this.desc3,
+    this.desc1Item1 = '',
+    this.desc1Item2 = '',
+    this.title2 = '',
+    this.desc2 = '',
+    this.title3 = '',
+    this.desc3 = '',
+    this.title4 = '',
+    this.desc4 = '',
   });
 
-  static ChangeLogStrings forLocale(Locale locale) {
+  bool get hasVisibleEntries =>
+      title1.trim().isNotEmpty ||
+      desc1.trim().isNotEmpty ||
+      desc1Item1.trim().isNotEmpty ||
+      desc1Item2.trim().isNotEmpty ||
+      title2.trim().isNotEmpty ||
+      desc2.trim().isNotEmpty ||
+      title3.trim().isNotEmpty ||
+      desc3.trim().isNotEmpty ||
+      title4.trim().isNotEmpty ||
+      desc4.trim().isNotEmpty;
+
+  static ChangeLogStrings? maybeForLocale(
+    Locale locale, {
+    bool isOffline = false,
+  }) {
     final key = locale.countryCode != null && locale.countryCode!.isNotEmpty
         ? '${locale.languageCode}_${locale.countryCode}'
         : locale.languageCode;
+    final translations = isOffline ? _offlineTranslations : _translations;
+    final strings = translations[key] ??
+        translations[locale.languageCode] ??
+        translations['en'];
 
-    return _translations[key] ??
-        _translations[locale.languageCode] ??
-        _translations['en']!;
+    if (strings == null || !strings.hasVisibleEntries) {
+      return null;
+    }
+    return strings;
+  }
+
+  static bool hasContentForLocale(
+    Locale locale, {
+    bool isOffline = false,
+  }) {
+    return maybeForLocale(
+          locale,
+          isOffline: isOffline,
+        ) !=
+        null;
   }
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Better People Suggestions',
+      title1: 'Memory Lane',
       desc1:
-          'We have improved how people suggestions work with big under-the-hood changes. This will lead to higher quality suggestions for you to review and tag your entire library quickly.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'A Richer Feed',
+          'See how you and your loved ones have changed over the years with Memory Lane. Open someone\'s page from the Search tab, then find Memory Lane in the overflow menu. Share the experience by sending a Memory Lane link.',
+      title2: 'Share Your Memories',
       desc2:
-          'You will now see new shared albums and new photos added to shared albums in the feed. Share notifications also redirect to feed so you can quickly check out, like and comment on the photos shared with you.',
-      title3: 'Redesigned Help & Support',
+          'Share any memory as a link with friends and family - they\'ll get the full experience right in their browser. Memory and memory lane links self-destruct after 7 days.',
+      title3: 'QR Code Detection',
       desc3:
-          'We have made the help and support pages friendlier to use - report bugs, ask a question or raise a feature request. There is also a new section that takes you to our FAQ pages so you can quickly get answers.',
+          'Long-press any photo containing a QR code to instantly reveal and share the content behind it.',
+      title4: 'New Text Selection',
+      desc4:
+          'That same long-press gesture works for text too - use it to detect and select text in any photo.',
     ),
     'cs': ChangeLogStrings(
-      title1: 'Lepší návrhy osob',
+      title1: 'Cesta vzpomínek',
       desc1:
-          'Vylepšili jsme fungování návrhů osob pomocí velkých změn na pozadí. Díky tomu získáte kvalitnější návrhy, které můžete rychleji zkontrolovat a označit v celé své knihovně.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Bohatší kanál',
+          'Podívejte se, jak se vy a vaši blízcí měnili v průběhu let s Cestou vzpomínek. Otevřete stránku osoby z karty Hledat a poté najděte Cestu vzpomínek v nabídce. Sdílejte zážitek odesláním odkazu na Cestu vzpomínek.',
+      title2: 'Sdílejte své vzpomínky',
       desc2:
-          'Ve svém kanálu nyní uvidíte nová sdílená alba i nové fotky přidané do sdílených alb. Oznámení o sdílení vás také přesměrují do kanálu, abyste si mohli sdílené fotky rychle prohlédnout, označit jako oblíbené a komentovat.',
-      title3: 'Přepracovaná nápověda a podpora',
+          'Sdílejte jakoukoli vzpomínku jako odkaz s přáteli a rodinou – dostanou plný zážitek přímo ve svém prohlížeči. Odkazy na vzpomínky a cesty vzpomínek se automaticky zničí po 7 dnech.',
+      title3: 'Detekce QR kódů',
       desc3:
-          'Stránky nápovědy a podpory jsme zpříjemnili a zjednodušili. Můžete nahlásit chybu, položit otázku nebo požádat o novou funkci. Přibyla také nová sekce s našimi FAQ, kde rychle najdete odpovědi.',
+          'Dlouhým stisknutím na jakékoli fotce s QR kódem okamžitě zobrazíte a sdílíte obsah za ním.',
+      title4: 'Nový výběr textu',
+      desc4:
+          'Stejné gesto dlouhého stisknutí funguje i pro text – použijte ho k detekci a výběru textu na jakékoli fotce.',
     ),
     'de': ChangeLogStrings(
-      title1: 'Bessere Personenvorschläge',
+      title1: 'Memory Lane',
       desc1:
-          'Wir haben die Funktionsweise der Personenvorschläge mit umfassenden Änderungen im Hintergrund verbessert. Dadurch erhalten Sie hochwertigere Vorschläge, um Ihre gesamte Mediathek schneller zu prüfen und zu taggen.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Ein vielseitigerer Feed',
+          'Sehen Sie, wie sich Sie und Ihre Liebsten im Laufe der Jahre verändert haben – mit Memory Lane. Öffnen Sie die Seite einer Person über den Suchen-Tab und finden Sie Memory Lane im Overflow-Menü. Teilen Sie das Erlebnis, indem Sie einen Memory-Lane-Link senden.',
+      title2: 'Teilen Sie Ihre Erinnerungen',
       desc2:
-          'Im Feed sehen Sie jetzt neue geteilte Alben und neue Fotos, die zu geteilten Alben hinzugefügt wurden. Benachrichtigungen zum Teilen führen jetzt ebenfalls direkt zum Feed, damit Sie die mit Ihnen geteilten Fotos schnell ansehen, liken und kommentieren können.',
-      title3: 'Neu gestaltete Hilfe & Support',
+          'Teilen Sie jede Erinnerung als Link mit Freunden und Familie – sie erhalten das vollständige Erlebnis direkt im Browser. Links zu Erinnerungen und Memory Lane werden nach 7 Tagen automatisch gelöscht.',
+      title3: 'QR-Code-Erkennung',
       desc3:
-          'Wir haben die Hilfe- und Supportseiten benutzerfreundlicher gestaltet. Melden Sie Fehler, stellen Sie Fragen oder senden Sie einen Funktionswunsch. Außerdem gibt es einen neuen Bereich mit unseren FAQ-Seiten, damit Sie schnell Antworten finden.',
+          'Drücken Sie lange auf ein Foto mit einem QR-Code, um den Inhalt dahinter sofort anzuzeigen und zu teilen.',
+      title4: 'Neue Textauswahl',
+      desc4:
+          'Die gleiche Geste des langen Drückens funktioniert auch für Text – erkennen und markieren Sie Text in jedem Foto.',
     ),
     'es': ChangeLogStrings(
-      title1: 'Mejores sugerencias de personas',
+      title1: 'Memory Lane',
       desc1:
-          'Hemos mejorado el funcionamiento de las sugerencias de personas con grandes cambios internos. Esto dará lugar a sugerencias de mayor calidad para que puedas revisar y etiquetar rápidamente toda tu biblioteca.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Un feed más completo',
+          'Descubre cómo tú y tus seres queridos han cambiado a lo largo de los años con Memory Lane. Abre la página de alguien desde la pestaña Buscar y luego encuentra Memory Lane en el menú de opciones. Comparte la experiencia enviando un enlace de Memory Lane.',
+      title2: 'Comparte tus recuerdos',
       desc2:
-          'Ahora verás en el feed nuevos álbumes compartidos y nuevas fotos añadidas a álbumes compartidos. Las notificaciones de compartición también te redirigen al feed para que puedas ver, dar me gusta y comentar rápidamente las fotos compartidas contigo.',
-      title3: 'Ayuda y soporte rediseñados',
+          'Comparte cualquier recuerdo como un enlace con amigos y familia: obtendrán la experiencia completa directamente en su navegador. Los enlaces de recuerdos y Memory Lane se autodestruyen después de 7 días.',
+      title3: 'Detección de códigos QR',
       desc3:
-          'Hemos hecho que las páginas de ayuda y soporte sean más fáciles de usar: informa de errores, haz una pregunta o solicita una función. También hay una nueva sección que te lleva a nuestras páginas de preguntas frecuentes para que puedas obtener respuestas rápidamente.',
+          'Mantén pulsada cualquier foto que contenga un código QR para revelar y compartir instantáneamente el contenido detrás de él.',
+      title4: 'Nueva selección de texto',
+      desc4:
+          'El mismo gesto de pulsación larga también funciona para texto: úsalo para detectar y seleccionar texto en cualquier foto.',
     ),
     'fr': ChangeLogStrings(
-      title1: 'De meilleures suggestions de personnes',
+      title1: 'Memory Lane',
       desc1:
-          'Nous avons amélioré le fonctionnement des suggestions de personnes grâce à d\'importants changements internes. Cela vous offrira des suggestions de meilleure qualité pour examiner et identifier rapidement toute votre photothèque.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Un fil plus riche',
+          'Découvrez comment vous et vos proches avez changé au fil des années avec Memory Lane. Ouvrez la page d\'une personne depuis l\'onglet Rechercher, puis trouvez Memory Lane dans le menu. Partagez l\'expérience en envoyant un lien Memory Lane.',
+      title2: 'Partagez vos souvenirs',
       desc2:
-          'Vous verrez désormais dans le fil les nouveaux albums partagés ainsi que les nouvelles photos ajoutées aux albums partagés. Les notifications de partage redirigent aussi vers le fil pour que vous puissiez rapidement consulter, aimer et commenter les photos partagées avec vous.',
-      title3: 'Aide et support repensés',
+          'Partagez n\'importe quel souvenir sous forme de lien avec vos amis et votre famille – ils profiteront de l\'expérience complète directement dans leur navigateur. Les liens de souvenirs et de Memory Lane s\'autodétruisent après 7 jours.',
+      title3: 'Détection de codes QR',
       desc3:
-          'Nous avons rendu les pages d\'aide et de support plus agréables à utiliser : signalez un bug, posez une question ou demandez une fonctionnalité. Une nouvelle section vous amène aussi vers nos FAQ pour obtenir rapidement des réponses.',
+          'Appuyez longuement sur n\'importe quelle photo contenant un code QR pour révéler et partager instantanément le contenu qu\'il renferme.',
+      title4: 'Nouvelle sélection de texte',
+      desc4:
+          'Le même geste d\'appui long fonctionne aussi pour le texte – utilisez-le pour détecter et sélectionner du texte dans n\'importe quelle photo.',
     ),
     'it': ChangeLogStrings(
-      title1: 'Suggerimenti sulle persone migliorati',
+      title1: 'Memory Lane',
       desc1:
-          'Abbiamo migliorato il funzionamento dei suggerimenti sulle persone con grandi cambiamenti interni. Questo porterà suggerimenti di qualità superiore, così potrai rivedere e taggare rapidamente tutta la tua libreria.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Un feed più ricco',
+          'Scopri come tu e i tuoi cari siete cambiati nel corso degli anni con Memory Lane. Apri la pagina di una persona dalla scheda Cerca, poi trova Memory Lane nel menu. Condividi l\'esperienza inviando un link Memory Lane.',
+      title2: 'Condividi i tuoi ricordi',
       desc2:
-          'Ora nel feed vedrai nuovi album condivisi e nuove foto aggiunte agli album condivisi. Anche le notifiche di condivisione ora reindirizzano al feed, così puoi vedere rapidamente, mettere mi piace e commentare le foto condivise con te.',
-      title3: 'Aiuto e supporto riprogettati',
+          'Condividi qualsiasi ricordo come link con amici e familiari: vivranno l\'esperienza completa direttamente nel loro browser. I link dei ricordi e di Memory Lane si autodistruggono dopo 7 giorni.',
+      title3: 'Rilevamento codici QR',
       desc3:
-          'Abbiamo reso le pagine di aiuto e supporto più semplici da usare: segnala bug, fai una domanda o invia una richiesta di funzionalità. C\'è anche una nuova sezione che ti porta alle nostre pagine FAQ per trovare rapidamente le risposte.',
+          'Tieni premuto su qualsiasi foto contenente un codice QR per rivelare e condividere istantaneamente il contenuto dietro di esso.',
+      title4: 'Nuova selezione del testo',
+      desc4:
+          'Lo stesso gesto di pressione prolungata funziona anche per il testo: usalo per rilevare e selezionare testo in qualsiasi foto.',
     ),
     'ja': ChangeLogStrings(
-      title1: '人物候補がさらに向上',
+      title1: 'メモリーレーン',
       desc1:
-          '人物候補の仕組みを大幅な内部改善で強化しました。これにより候補の品質が向上し、ライブラリ全体をすばやく確認してタグ付けしやすくなります。',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'さらに充実したフィード',
+          'メモリーレーンで、あなたや大切な人たちが年月とともにどう変わったかを振り返りましょう。検索タブから人物のページを開き、オーバーフローメニューからメモリーレーンを見つけてください。メモリーレーンのリンクを送って体験を共有できます。',
+      title2: '思い出を共有',
       desc2:
-          'フィードに新しい共有アルバムや、共有アルバムに追加された新しい写真が表示されるようになりました。共有通知からもフィードに移動できるため、共有された写真をすぐに確認し、いいねやコメントがしやすくなります。',
-      title3: 'ヘルプとサポートを刷新',
-      desc3:
-          'ヘルプとサポートのページをより使いやすくしました。不具合の報告、質問、機能リクエストがしやすくなっています。FAQページへ移動できる新しいセクションも追加され、すばやく答えを見つけられます。',
+          'どんな思い出でもリンクとして友人や家族と共有できます。受け取った人はブラウザで完全な体験を楽しめます。思い出やメモリーレーンのリンクは7日後に自動的に削除されます。',
+      title3: 'QRコード検出',
+      desc3: 'QRコードが含まれる写真を長押しすると、その内容を即座に表示・共有できます。',
+      title4: '新しいテキスト選択',
+      desc4: '同じ長押しジェスチャーはテキストにも対応しています。写真内のテキストを検出・選択できます。',
     ),
     'nl': ChangeLogStrings(
-      title1: 'Betere suggesties voor personen',
+      title1: 'Memory Lane',
       desc1:
-          'We hebben de manier waarop suggesties voor personen werken verbeterd met grote wijzigingen achter de schermen. Daardoor krijg je betere suggesties om je hele bibliotheek snel te controleren en te taggen.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Een rijkere feed',
+          'Bekijk hoe jij en je dierbaren door de jaren heen zijn veranderd met Memory Lane. Open iemands pagina vanuit het tabblad Zoeken en vind Memory Lane in het overflowmenu. Deel de ervaring door een Memory Lane-link te sturen.',
+      title2: 'Deel je herinneringen',
       desc2:
-          'Je ziet nu nieuwe gedeelde albums en nieuwe foto\'s die aan gedeelde albums zijn toegevoegd in je feed. Meldingen over delen sturen je nu ook door naar de feed, zodat je gedeelde foto\'s snel kunt bekijken, liken en erop kunt reageren.',
-      title3: 'Opnieuw ontworpen hulp en ondersteuning',
+          'Deel elke herinnering als link met vrienden en familie – ze krijgen de volledige ervaring direct in hun browser. Links naar herinneringen en Memory Lane worden na 7 dagen automatisch verwijderd.',
+      title3: 'QR-codedetectie',
       desc3:
-          'We hebben de hulp- en ondersteuningspagina\'s gebruiksvriendelijker gemaakt: meld bugs, stel een vraag of dien een functieverzoek in. Er is ook een nieuwe sectie die je naar onze FAQ-pagina\'s brengt, zodat je snel antwoorden kunt vinden.',
+          'Houd een foto met een QR-code lang ingedrukt om de inhoud erachter direct te onthullen en te delen.',
+      title4: 'Nieuwe tekstselectie',
+      desc4:
+          'Hetzelfde gebaar van lang indrukken werkt ook voor tekst – gebruik het om tekst in elke foto te detecteren en te selecteren.',
     ),
     'no': ChangeLogStrings(
-      title1: 'Bedre personforslag',
+      title1: 'Memory Lane',
       desc1:
-          'Vi har forbedret hvordan personforslag fungerer med store endringer under panseret. Dette vil gi deg forslag av høyere kvalitet, slik at du raskt kan gå gjennom og tagge hele biblioteket ditt.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'En rikere feed',
+          'Se hvordan du og dine kjære har forandret seg gjennom årene med Memory Lane. Åpne noens side fra Søk-fanen, og finn Memory Lane i menyen. Del opplevelsen ved å sende en Memory Lane-lenke.',
+      title2: 'Del minnene dine',
       desc2:
-          'Du vil nå se nye delte album og nye bilder lagt til i delte album i feeden. Delingsvarsler tar deg også til feeden, slik at du raskt kan se, like og kommentere bildene som er delt med deg.',
-      title3: 'Nydesignet hjelp og støtte',
+          'Del et hvilket som helst minne som en lenke med venner og familie – de får den fulle opplevelsen rett i nettleseren. Lenker til minner og Memory Lane slettes automatisk etter 7 dager.',
+      title3: 'QR-kodegjenkjenning',
       desc3:
-          'Vi har gjort hjelpe- og støttesidene enklere å bruke. Rapporter feil, still et spørsmål eller send inn et funksjonsønske. Det finnes også en ny seksjon som tar deg til FAQ-sidene våre, slik at du raskt kan finne svar.',
+          'Trykk og hold på et bilde som inneholder en QR-kode for å umiddelbart vise og dele innholdet bak den.',
+      title4: 'Ny tekstvelging',
+      desc4:
+          'Den samme langtrykk-bevegelsen fungerer også for tekst – bruk den til å oppdage og velge tekst i et hvilket som helst bilde.',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Lepsze sugestie osób',
+      title1: 'Memory Lane',
       desc1:
-          'Ulepszyliśmy działanie sugestii osób dzięki dużym zmianom pod maską. Dzięki temu otrzymasz trafniejsze sugestie, aby szybciej przejrzeć i oznaczyć całą swoją bibliotekę.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Bogatszy kanał',
+          'Zobacz, jak Ty i Twoi bliscy zmieniali się na przestrzeni lat dzięki Memory Lane. Otwórz stronę osoby z zakładki Szukaj, a następnie znajdź Memory Lane w menu. Podziel się doświadczeniem, wysyłając link do Memory Lane.',
+      title2: 'Udostępnij swoje wspomnienia',
       desc2:
-          'W kanale zobaczysz teraz nowe udostępnione albumy oraz nowe zdjęcia dodane do udostępnionych albumów. Powiadomienia o udostępnieniu również przekierują Cię do kanału, aby szybko obejrzeć, polubić i skomentować udostępnione Ci zdjęcia.',
-      title3: 'Przeprojektowana pomoc i wsparcie',
+          'Udostępnij dowolne wspomnienie jako link znajomym i rodzinie – zobaczą pełne doświadczenie bezpośrednio w przeglądarce. Linki do wspomnień i Memory Lane ulegają samozniszczeniu po 7 dniach.',
+      title3: 'Wykrywanie kodów QR',
       desc3:
-          'Ułatwiliśmy korzystanie ze stron pomocy i wsparcia: zgłoś błąd, zadaj pytanie lub poproś o nową funkcję. Jest też nowa sekcja prowadząca do naszych stron FAQ, dzięki czemu szybko znajdziesz odpowiedzi.',
+          'Przytrzymaj dowolne zdjęcie zawierające kod QR, aby natychmiast wyświetlić i udostępnić ukrytą treść.',
+      title4: 'Nowe zaznaczanie tekstu',
+      desc4:
+          'Ten sam gest przytrzymania działa również dla tekstu – użyj go do wykrywania i zaznaczania tekstu na dowolnym zdjęciu.',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Melhores sugestões de pessoas',
+      title1: 'Memory Lane',
       desc1:
-          'Melhoramos como as sugestões de pessoas funcionam com grandes mudanças internas. Isso resultará em sugestões de maior qualidade para você revisar e marcar toda a sua biblioteca rapidamente.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Um feed mais rico',
+          'Veja como você e seus entes queridos mudaram ao longo dos anos com o Memory Lane. Abra a página de alguém na aba Pesquisar e encontre o Memory Lane no menu. Compartilhe a experiência enviando um link do Memory Lane.',
+      title2: 'Compartilhe suas memórias',
       desc2:
-          'Agora você verá no feed novos álbuns compartilhados e novas fotos adicionadas a álbuns compartilhados. As notificações de compartilhamento também redirecionam para o feed para que você possa ver, curtir e comentar rapidamente as fotos compartilhadas com você.',
-      title3: 'Ajuda e suporte redesenhados',
+          'Compartilhe qualquer memória como um link com amigos e familiares – eles terão a experiência completa direto no navegador. Links de memórias e Memory Lane se autodestroem após 7 dias.',
+      title3: 'Detecção de código QR',
       desc3:
-          'Deixamos as páginas de ajuda e suporte mais fáceis de usar: relate bugs, faça uma pergunta ou envie uma solicitação de recurso. Há também uma nova seção que leva você às nossas páginas de FAQ para encontrar respostas rapidamente.',
+          'Pressione e segure qualquer foto contendo um código QR para revelar e compartilhar instantaneamente o conteúdo por trás dele.',
+      title4: 'Nova seleção de texto',
+      desc4:
+          'O mesmo gesto de pressionar e segurar também funciona para texto – use-o para detectar e selecionar texto em qualquer foto.',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Melhores sugestões de pessoas',
+      title1: 'Memory Lane',
       desc1:
-          'Melhorámos a forma como as sugestões de pessoas funcionam com grandes alterações internas. Isto vai resultar em sugestões de melhor qualidade para rever e etiquetar rapidamente toda a sua biblioteca.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Um feed mais rico',
+          'Veja como você e os seus entes queridos mudaram ao longo dos anos com o Memory Lane. Abra a página de alguém no separador Pesquisar e encontre o Memory Lane no menu. Partilhe a experiência enviando uma ligação do Memory Lane.',
+      title2: 'Partilhe as suas memórias',
       desc2:
-          'Passará agora a ver no feed novos álbuns partilhados e novas fotografias adicionadas a álbuns partilhados. As notificações de partilha também redirecionam para o feed para que possa ver, gostar e comentar rapidamente as fotografias partilhadas consigo.',
-      title3: 'Ajuda e suporte redesenhados',
+          'Partilhe qualquer memória como uma ligação com amigos e família – terão a experiência completa diretamente no navegador. As ligações de memórias e Memory Lane autodestroem-se após 7 dias.',
+      title3: 'Deteção de código QR',
       desc3:
-          'Tornámos as páginas de ajuda e suporte mais fáceis de usar: reporte erros, faça uma pergunta ou peça uma funcionalidade. Existe também uma nova secção que o leva às nossas páginas de FAQ para encontrar respostas rapidamente.',
+          'Prima longamente qualquer fotografia que contenha um código QR para revelar e partilhar instantaneamente o conteúdo por detrás dele.',
+      title4: 'Nova seleção de texto',
+      desc4:
+          'O mesmo gesto de pressão longa também funciona para texto – utilize-o para detetar e selecionar texto em qualquer fotografia.',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Sugestii mai bune pentru persoane',
+      title1: 'Memory Lane',
       desc1:
-          'Am îmbunătățit modul în care funcționează sugestiile pentru persoane prin schimbări majore în culise. Astfel vei primi sugestii de calitate mai bună pentru a revizui și eticheta rapid întreaga bibliotecă.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Un flux mai bogat',
+          'Vezi cum tu și cei dragi v-ați schimbat de-a lungul anilor cu Memory Lane. Deschide pagina unei persoane din fila Căutare, apoi găsește Memory Lane în meniul suplimentar. Împărtășește experiența trimițând un link Memory Lane.',
+      title2: 'Împărtășește-ți amintirile',
       desc2:
-          'Acum vei vedea în flux albume partajate noi și fotografii noi adăugate în albume partajate. Notificările de partajare te redirecționează și ele către flux, ca să poți vedea rapid, aprecia și comenta fotografiile partajate cu tine.',
-      title3: 'Ajutor și suport reproiectate',
+          'Împărtășește orice amintire sub formă de link cu prietenii și familia – vor primi experiența completă direct în browser. Linkurile de amintiri și Memory Lane se autodistrug după 7 zile.',
+      title3: 'Detectare coduri QR',
       desc3:
-          'Am făcut paginile de ajutor și suport mai prietenoase și mai ușor de folosit: raportează erori, pune o întrebare sau trimite o cerere de funcționalitate. Există și o secțiune nouă care te duce la paginile noastre FAQ ca să găsești rapid răspunsuri.',
+          'Apasă lung pe orice fotografie care conține un cod QR pentru a dezvălui și partaja instantaneu conținutul din spatele acestuia.',
+      title4: 'Nouă selecție de text',
+      desc4:
+          'Același gest de apăsare lungă funcționează și pentru text – folosește-l pentru a detecta și selecta text din orice fotografie.',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Улучшенные подсказки по людям',
+      title1: 'Дорога воспоминаний',
       desc1:
-          'Мы улучшили работу подсказок по людям с помощью крупных внутренних изменений. Благодаря этому вы будете получать более качественные подсказки, чтобы быстрее просматривать и отмечать тегами всю свою медиатеку.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Более насыщенная лента',
+          'Посмотрите, как вы и ваши близкие менялись с годами с помощью Дороги воспоминаний. Откройте страницу человека на вкладке Поиск, затем найдите Дорогу воспоминаний в меню. Поделитесь впечатлениями, отправив ссылку на Дорогу воспоминаний.',
+      title2: 'Делитесь воспоминаниями',
       desc2:
-          'Теперь в ленте будут отображаться новые общие альбомы и новые фотографии, добавленные в общие альбомы. Уведомления о совместном доступе также будут перенаправлять в ленту, чтобы вы могли быстро просматривать, лайкать и комментировать фотографии, которыми с вами поделились.',
-      title3: 'Обновленные помощь и поддержка',
+          'Поделитесь любым воспоминанием в виде ссылки с друзьями и близкими — они получат полный опыт прямо в браузере. Ссылки на воспоминания и Дорогу воспоминаний автоматически удаляются через 7 дней.',
+      title3: 'Распознавание QR-кодов',
       desc3:
-          'Мы сделали страницы помощи и поддержки более удобными: сообщайте об ошибках, задавайте вопросы или отправляйте запросы на новые функции. Также появился новый раздел, который ведет на страницы FAQ, чтобы вы могли быстро находить ответы.',
+          'Нажмите и удерживайте любое фото с QR-кодом, чтобы мгновенно просмотреть и поделиться содержимым за ним.',
+      title4: 'Новое выделение текста',
+      desc4:
+          'Тот же жест долгого нажатия работает и для текста — используйте его для распознавания и выделения текста на любом фото.',
     ),
     'tr': ChangeLogStrings(
-      title1: 'Daha iyi kişi önerileri',
+      title1: 'Anı Yolu',
       desc1:
-          'Kişi önerilerinin çalışma şeklini, arka planda yaptığımız büyük değişikliklerle iyileştirdik. Bu sayede tüm arşivinizi hızla gözden geçirip etiketleyebilmeniz için daha kaliteli öneriler göreceksiniz.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Daha zengin bir akış',
+          'Anı Yolu ile siz ve sevdiklerinizin yıllar içinde nasıl değiştiğini görün. Arama sekmesinden birinin sayfasını açın ve taşma menüsünde Anı Yolu\'nu bulun. Bir Anı Yolu bağlantısı göndererek deneyimi paylaşın.',
+      title2: 'Anılarınızı paylaşın',
       desc2:
-          'Artık akışta yeni paylaşılan albümleri ve paylaşılan albümlere eklenen yeni fotoğrafları göreceksiniz. Paylaşım bildirimleri de sizi akışa yönlendirecek, böylece sizinle paylaşılan fotoğrafları hızlıca inceleyebilir, beğenebilir ve yorumlayabilirsiniz.',
-      title3: 'Yeniden tasarlanan Yardım ve Destek',
+          'Herhangi bir anıyı arkadaşlarınız ve ailenizle bağlantı olarak paylaşın – tam deneyimi doğrudan tarayıcılarında yaşayacaklar. Anı ve Anı Yolu bağlantıları 7 gün sonra otomatik olarak silinir.',
+      title3: 'QR Kod Algılama',
       desc3:
-          'Yardım ve destek sayfalarını kullanmayı daha kolay hale getirdik: hata bildirin, soru sorun veya özellik isteğinde bulunun. Ayrıca SSS sayfalarımıza götüren yeni bir bölüm de var, böylece hızlıca yanıt bulabilirsiniz.',
+          'QR kod içeren herhangi bir fotoğrafa uzun basarak arkasındaki içeriği anında görüntüleyin ve paylaşın.',
+      title4: 'Yeni Metin Seçimi',
+      desc4:
+          'Aynı uzun basma hareketi metin için de çalışır – herhangi bir fotoğraftaki metni algılamak ve seçmek için kullanın.',
     ),
     'uk': ChangeLogStrings(
-      title1: 'Кращі підказки щодо людей',
+      title1: 'Стежка спогадів',
       desc1:
-          'Ми покращили роботу підказок щодо людей завдяки великим внутрішнім змінам. Це дасть вам якісніші підказки, щоб ви могли швидко переглядати й позначати тегами всю свою бібліотеку.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Багатша стрічка',
+          'Подивіться, як ви та ваші рідні змінювалися протягом років завдяки Стежці спогадів. Відкрийте сторінку людини з вкладки Пошук, потім знайдіть Стежку спогадів у меню. Поділіться враженнями, надіславши посилання на Стежку спогадів.',
+      title2: 'Діліться спогадами',
       desc2:
-          'Тепер у стрічці ви бачитимете нові спільні альбоми та нові фото, додані до спільних альбомів. Сповіщення про поширення також перенаправлятимуть до стрічки, щоб ви могли швидко переглядати, вподобати й коментувати фото, якими з вами поділилися.',
-      title3: 'Оновлені довідка та підтримка',
+          'Поділіться будь-яким спогадом як посиланням з друзями та родиною – вони отримають повний досвід просто у браузері. Посилання на спогади та Стежку спогадів автоматично видаляються через 7 днів.',
+      title3: 'Розпізнавання QR-кодів',
       desc3:
-          'Ми зробили сторінки довідки та підтримки зручнішими: повідомляйте про помилки, ставте запитання або надсилайте запити на нові функції. Також з\'явився новий розділ, який веде до наших сторінок FAQ, щоб ви могли швидко знаходити відповіді.',
+          'Натисніть і утримуйте будь-яке фото з QR-кодом, щоб миттєво переглянути та поділитися вмістом за ним.',
+      title4: 'Нове виділення тексту',
+      desc4:
+          'Той самий жест довгого натискання працює і для тексту – використовуйте його для розпізнавання та виділення тексту на будь-якому фото.',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Gợi ý nhận diện người tốt hơn',
+      title1: 'Dải ký ức',
       desc1:
-          'Chúng tôi đã cải thiện cách hoạt động của gợi ý người bằng những thay đổi lớn ở phía sau. Điều này sẽ mang lại các gợi ý chất lượng cao hơn để bạn nhanh chóng xem lại và gắn thẻ toàn bộ thư viện của mình.',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: 'Bảng tin phong phú hơn',
+          'Xem bạn và những người thân yêu đã thay đổi như thế nào qua năm tháng với Dải ký ức. Mở trang của ai đó từ tab Tìm kiếm, sau đó tìm Dải ký ức trong menu. Chia sẻ trải nghiệm bằng cách gửi liên kết Dải ký ức.',
+      title2: 'Chia sẻ kỷ niệm của bạn',
       desc2:
-          'Giờ đây bạn sẽ thấy các album chia sẻ mới và các ảnh mới được thêm vào album chia sẻ trong bảng tin. Thông báo chia sẻ cũng sẽ chuyển hướng đến bảng tin để bạn có thể nhanh chóng xem, thích và bình luận về những ảnh được chia sẻ với mình.',
-      title3: 'Trợ giúp và hỗ trợ được thiết kế lại',
+          'Chia sẻ bất kỳ kỷ niệm nào dưới dạng liên kết với bạn bè và gia đình – họ sẽ có trải nghiệm đầy đủ ngay trong trình duyệt. Các liên kết kỷ niệm và Dải ký ức tự hủy sau 7 ngày.',
+      title3: 'Nhận diện mã QR',
       desc3:
-          'Chúng tôi đã làm cho các trang trợ giúp và hỗ trợ thân thiện hơn khi sử dụng: báo lỗi, đặt câu hỏi hoặc gửi yêu cầu tính năng. Ngoài ra còn có một mục mới đưa bạn tới các trang FAQ để nhanh chóng tìm câu trả lời.',
+          'Nhấn giữ bất kỳ ảnh nào chứa mã QR để hiển thị và chia sẻ ngay nội dung đằng sau nó.',
+      title4: 'Chọn văn bản mới',
+      desc4:
+          'Cử chỉ nhấn giữ tương tự cũng hoạt động với văn bản – sử dụng nó để phát hiện và chọn văn bản trong bất kỳ ảnh nào.',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '更好的人物建议',
-      desc1: '我们通过大量底层改进优化了人物建议的工作方式。这将带来更高质量的建议，帮助你快速查看并标记整个资料库。',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: '更丰富的动态',
+      title1: '记忆长廊',
+      desc1:
+          '通过记忆长廊，查看你和挚爱的人这些年来的变化。从搜索标签页打开某人的页面，然后在菜单中找到记忆长廊。发送记忆长廊链接来分享这段体验。',
+      title2: '分享你的回忆',
+      desc2: '将任何回忆以链接形式分享给朋友和家人——他们可以直接在浏览器中获得完整体验。回忆和记忆长廊链接会在7天后自动销毁。',
+      title3: '二维码检测',
+      desc3: '长按任何包含二维码的照片，即可立即查看和分享其背后的内容。',
+      title4: '全新文字选择',
+      desc4: '同样的长按手势也适用于文字——用它来检测和选择任何照片中的文字。',
+    ),
+  };
+
+  static const Map<String, ChangeLogStrings> _offlineTranslations = {
+    'en': ChangeLogStrings(
+      title1: 'QR Code Detection',
+      desc1:
+          'Long-press any photo containing a QR code to instantly reveal and share the content behind it.',
+      title2: 'New Text Selection',
       desc2:
-          '现在你会在动态中看到新的共享相册，以及添加到共享相册中的新照片。共享通知也会跳转到动态，方便你快速查看、点赞和评论分享给你的照片。',
-      title3: '重新设计的帮助与支持',
-      desc3:
-          '我们让帮助与支持页面变得更易用，你可以在那里报告问题、提出疑问或提交功能请求。我们还新增了一个版块，带你前往常见问题页面，方便你快速找到答案。',
+          'That same long-press gesture works for text too - use it to detect and select text in any photo.',
+    ),
+    'cs': ChangeLogStrings(
+      title1: 'Detekce QR kódů',
+      desc1:
+          'Dlouhým stisknutím na jakékoli fotce s QR kódem okamžitě zobrazíte a sdílíte obsah za ním.',
+      title2: 'Nový výběr textu',
+      desc2:
+          'Stejné gesto dlouhého stisknutí funguje i pro text – použijte ho k detekci a výběru textu na jakékoli fotce.',
+    ),
+    'de': ChangeLogStrings(
+      title1: 'QR-Code-Erkennung',
+      desc1:
+          'Drücken Sie lange auf ein Foto mit einem QR-Code, um den Inhalt dahinter sofort anzuzeigen und zu teilen.',
+      title2: 'Neue Textauswahl',
+      desc2:
+          'Die gleiche Geste des langen Drückens funktioniert auch für Text – erkennen und markieren Sie Text in jedem Foto.',
+    ),
+    'es': ChangeLogStrings(
+      title1: 'Detección de códigos QR',
+      desc1:
+          'Mantén pulsada cualquier foto que contenga un código QR para revelar y compartir instantáneamente el contenido detrás de él.',
+      title2: 'Nueva selección de texto',
+      desc2:
+          'El mismo gesto de pulsación larga también funciona para texto: úsalo para detectar y seleccionar texto en cualquier foto.',
+    ),
+    'fr': ChangeLogStrings(
+      title1: 'Détection de codes QR',
+      desc1:
+          'Appuyez longuement sur n\'importe quelle photo contenant un code QR pour révéler et partager instantanément le contenu qu\'il renferme.',
+      title2: 'Nouvelle sélection de texte',
+      desc2:
+          'Le même geste d\'appui long fonctionne aussi pour le texte – utilisez-le pour détecter et sélectionner du texte dans n\'importe quelle photo.',
+    ),
+    'it': ChangeLogStrings(
+      title1: 'Rilevamento codici QR',
+      desc1:
+          'Tieni premuto su qualsiasi foto contenente un codice QR per rivelare e condividere istantaneamente il contenuto dietro di esso.',
+      title2: 'Nuova selezione del testo',
+      desc2:
+          'Lo stesso gesto di pressione prolungata funziona anche per il testo: usalo per rilevare e selezionare testo in qualsiasi foto.',
+    ),
+    'ja': ChangeLogStrings(
+      title1: 'QRコード検出',
+      desc1: 'QRコードが含まれる写真を長押しすると、その内容を即座に表示・共有できます。',
+      title2: '新しいテキスト選択',
+      desc2: '同じ長押しジェスチャーはテキストにも対応しています。写真内のテキストを検出・選択できます。',
+    ),
+    'nl': ChangeLogStrings(
+      title1: 'QR-codedetectie',
+      desc1:
+          'Houd een foto met een QR-code lang ingedrukt om de inhoud erachter direct te onthullen en te delen.',
+      title2: 'Nieuwe tekstselectie',
+      desc2:
+          'Hetzelfde gebaar van lang indrukken werkt ook voor tekst – gebruik het om tekst in elke foto te detecteren en te selecteren.',
+    ),
+    'no': ChangeLogStrings(
+      title1: 'QR-kodegjenkjenning',
+      desc1:
+          'Trykk og hold på et bilde som inneholder en QR-kode for å umiddelbart vise og dele innholdet bak den.',
+      title2: 'Ny tekstvelging',
+      desc2:
+          'Den samme langtrykk-bevegelsen fungerer også for tekst – bruk den til å oppdage og velge tekst i et hvilket som helst bilde.',
+    ),
+    'pl': ChangeLogStrings(
+      title1: 'Wykrywanie kodów QR',
+      desc1:
+          'Przytrzymaj dowolne zdjęcie zawierające kod QR, aby natychmiast wyświetlić i udostępnić ukrytą treść.',
+      title2: 'Nowe zaznaczanie tekstu',
+      desc2:
+          'Ten sam gest przytrzymania działa również dla tekstu – użyj go do wykrywania i zaznaczania tekstu na dowolnym zdjęciu.',
+    ),
+    'pt_BR': ChangeLogStrings(
+      title1: 'Detecção de código QR',
+      desc1:
+          'Pressione e segure qualquer foto contendo um código QR para revelar e compartilhar instantaneamente o conteúdo por trás dele.',
+      title2: 'Nova seleção de texto',
+      desc2:
+          'O mesmo gesto de pressionar e segurar também funciona para texto – use-o para detectar e selecionar texto em qualquer foto.',
+    ),
+    'pt_PT': ChangeLogStrings(
+      title1: 'Deteção de código QR',
+      desc1:
+          'Prima longamente qualquer fotografia que contenha um código QR para revelar e partilhar instantaneamente o conteúdo por detrás dele.',
+      title2: 'Nova seleção de texto',
+      desc2:
+          'O mesmo gesto de pressão longa também funciona para texto – utilize-o para detetar e selecionar texto em qualquer fotografia.',
+    ),
+    'ro': ChangeLogStrings(
+      title1: 'Detectare coduri QR',
+      desc1:
+          'Apasă lung pe orice fotografie care conține un cod QR pentru a dezvălui și partaja instantaneu conținutul din spatele acestuia.',
+      title2: 'Nouă selecție de text',
+      desc2:
+          'Același gest de apăsare lungă funcționează și pentru text – folosește-l pentru a detecta și selecta text din orice fotografie.',
+    ),
+    'ru': ChangeLogStrings(
+      title1: 'Распознавание QR-кодов',
+      desc1:
+          'Нажмите и удерживайте любое фото с QR-кодом, чтобы мгновенно просмотреть и поделиться содержимым за ним.',
+      title2: 'Новое выделение текста',
+      desc2:
+          'Тот же жест долгого нажатия работает и для текста — используйте его для распознавания и выделения текста на любом фото.',
+    ),
+    'tr': ChangeLogStrings(
+      title1: 'QR Kod Algılama',
+      desc1:
+          'QR kod içeren herhangi bir fotoğrafa uzun basarak arkasındaki içeriği anında görüntüleyin ve paylaşın.',
+      title2: 'Yeni Metin Seçimi',
+      desc2:
+          'Aynı uzun basma hareketi metin için de çalışır – herhangi bir fotoğraftaki metni algılamak ve seçmek için kullanın.',
+    ),
+    'uk': ChangeLogStrings(
+      title1: 'Розпізнавання QR-кодів',
+      desc1:
+          'Натисніть і утримуйте будь-яке фото з QR-кодом, щоб миттєво переглянути та поділитися вмістом за ним.',
+      title2: 'Нове виділення тексту',
+      desc2:
+          'Той самий жест довгого натискання працює і для тексту – використовуйте його для розпізнавання та виділення тексту на будь-якому фото.',
+    ),
+    'vi': ChangeLogStrings(
+      title1: 'Nhận diện mã QR',
+      desc1:
+          'Nhấn giữ bất kỳ ảnh nào chứa mã QR để hiển thị và chia sẻ ngay nội dung đằng sau nó.',
+      title2: 'Chọn văn bản mới',
+      desc2:
+          'Cử chỉ nhấn giữ tương tự cũng hoạt động với văn bản – sử dụng nó để phát hiện và chọn văn bản trong bất kỳ ảnh nào.',
+    ),
+    'zh_CN': ChangeLogStrings(
+      title1: '二维码检测',
+      desc1: '长按任何包含二维码的照片，即可立即查看和分享其背后的内容。',
+      title2: '全新文字选择',
+      desc2: '同样的长按手势也适用于文字——用它来检测和选择任何照片中的文字。',
     ),
   };
 }

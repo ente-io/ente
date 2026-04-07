@@ -13,6 +13,7 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
+  static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
 
@@ -87,7 +88,7 @@ class FlagService {
   bool get enableOnlyBackupFuturePhotos =>
       internalUser || _isServerFlagEnabled(_backupOptionsFlag);
 
-  bool get facesTimeline => internalUser;
+  bool get facesTimeline => true;
   bool get ritualsFlag => true;
 
   bool get stopStreamProcess => true;
@@ -98,13 +99,24 @@ class FlagService {
 
   bool get enableShareePin => true;
 
+  bool get isSocialEnabled =>
+      internalUser || _isServerFlagEnabled(_commentsFlag);
+
+  bool get enableMemoryShareLink => true;
+
   bool get useRustForML => internalUser;
+
+  bool get enableMLInBackground => internalUser;
 
   bool get useRustForFaceThumbnails => internalUser;
 
   bool get petEnabled => internalUser;
 
-  bool get qrFeatureEnabled => internalUser;
+  bool get qrFeatureEnabled => true;
+
+  bool get ocrOverlayEnabled => true;
+
+  bool get enableBgLocalUploadPriority => internalUser;
 
   bool get syncRecoveryDiagnostics => internalUser;
 

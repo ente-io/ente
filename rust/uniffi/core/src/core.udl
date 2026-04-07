@@ -50,7 +50,7 @@ namespace core {
   void srp_clear();
 
   [Throws=EnsuError]
-  AuthSecrets srp_decrypt_secrets(KeyAttributes key_attrs, string? encrypted_token, string? plain_token);
+  AuthSecrets srp_decrypt_secrets(string srp_m2, KeyAttributes key_attrs, string? encrypted_token, string? plain_token);
 
   [Throws=EnsuError]
   sequence<u8> derive_kek_for_login(string password, string kek_salt, u32 mem_limit, u32 ops_limit);

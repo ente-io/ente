@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_qr/ente_qr.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
@@ -14,6 +15,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
+import "package:photos/states/detail_page_state.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
@@ -25,6 +27,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
   final Decoration? backgroundDecoration;
   final bool isFromMemories;
   final Function({required int memoryDuration})? onFinalFileLoad;
+  final ValueNotifier<List<QrDetection>>? qrDetectionsNotifier;
 
   const ZoomableLiveImageNew(
     this.enteFile, {
@@ -34,6 +37,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
     this.backgroundDecoration,
     this.isFromMemories = false,
     this.onFinalFileLoad,
+    this.qrDetectionsNotifier,
   });
 
   @override
@@ -70,7 +74,61 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     });
   }
 
-  void _onLongPressEvent(bool isPressed) {
+  /// Check if a local position (relative to this widget) falls within any
+  /// detected QR code bounding box.
+  bool _isPositionInQrRegion(Offset localPosition) {
+    final detections = widget.qrDetectionsNotifier?.value;
+    if (detections == null || detections.isEmpty) return false;
+    final file = widget.enteFile;
+    if (!file.hasDimensions) return false;
+
+    final size = context.size;
+    if (size == null) return false;
+
+    final imageAspect = file.width / file.height;
+    final widgetAspect = size.width / size.height;
+
+    double displayW, displayH;
+    if (imageAspect > widgetAspect) {
+      displayW = size.width;
+      displayH = size.width / imageAspect;
+    } else {
+      displayH = size.height;
+      displayW = size.height * imageAspect;
+    }
+
+    final offsetX = (size.width - displayW) / 2;
+    final offsetY = (size.height - displayH) / 2;
+
+    // Normalize the tap position to image coordinates (0-1)
+    final normX = (localPosition.dx - offsetX) / displayW;
+    final normY = (localPosition.dy - offsetY) / displayH;
+
+    for (final d in detections) {
+      if (normX >= d.x &&
+          normX <= d.x + d.width &&
+          normY >= d.y &&
+          normY <= d.y + d.height) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _onLongPressEvent(bool isPressed, [Offset? localPosition]) {
+    // If pressing within a QR code region, let the QR overlay handle it,
+    // but only when the overlay is actually visible (not in fullscreen mode).
+    final isQrOverlayVisible = !(InheritedDetailPageState.maybeOf(context)
+            ?.enableFullScreenNotifier
+            .value ??
+        true);
+    if (isPressed &&
+        isQrOverlayVisible &&
+        localPosition != null &&
+        _isPositionInQrRegion(localPosition)) {
+      return;
+    }
+
     if (isPressed) {
       if (_videoController == null) {
         unawaited(_loadLiveVideo());
@@ -122,7 +180,8 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
     if (!widget.isFromMemories) {
       return GestureDetector(
-        onLongPressStart: (_) => _onLongPressEvent(true),
+        onLongPressStart: (details) =>
+            _onLongPressEvent(true, details.localPosition),
         onLongPressEnd: (_) => _onLongPressEvent(false),
         child: content,
       );

@@ -520,15 +520,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Bekræftelses-ID",
   "verifyEmailID": "Bekræft {email}",
   "emailNoEnteAccount": "{email} har ikke en Ente-konto.\n\nSend dem en invitation for at dele elementer.",
-  "shareMyVerificationID": "Her er mit bekræftelses-ID: {verificationID} for ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: {verificationID}",
   "passwordLock": "Adgangskodelås",
   "manage": "Administrér",
   "addedAs": "Tilføjet som",

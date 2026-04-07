@@ -5,25 +5,67 @@ const configPath =
     "rust/apps/ensu/src-tauri/tauri.conf.json";
 
 const pubkey = process.env.ENSU_TAURI_UPDATER_PUBKEY?.trim();
+const requirePubkey =
+    process.env.ENSU_TAURI_REQUIRE_UPDATER_PUBKEY === "1" ||
+    process.env.ENSU_TAURI_REQUIRE_UPDATER_PUBKEY === "true";
 const endpoint = (
     process.env.ENSU_TAURI_UPDATER_ENDPOINT ||
-    "https://ente.io/release-info/ensu-desktop.json"
+    "https://ente.com/release-info/ensu-desktop.json"
 ).trim();
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-config.bundle = config.bundle || {};
-config.bundle.createUpdaterArtifacts = true;
+if (config.tauri && typeof config.tauri === "object") {
+    if (config.bundle && typeof config.bundle === "object") {
+        config.tauri.bundle = {
+            ...(config.tauri.bundle || {}),
+            ...config.bundle,
+        };
+        delete config.bundle;
+    }
+
+    if (config.plugins?.updater && typeof config.plugins.updater === "object") {
+        config.tauri.updater = {
+            ...(config.tauri.updater || {}),
+            ...config.plugins.updater,
+        };
+        delete config.plugins.updater;
+        if (Object.keys(config.plugins).length === 0) {
+            delete config.plugins;
+        }
+    }
+}
+
+if (!config.tauri && config.bundle && typeof config.bundle === "object") {
+    config.bundle.createUpdaterArtifacts = true;
+}
 
 if (pubkey) {
-    config.plugins = config.plugins || {};
-    config.plugins.updater = {
-        pubkey,
-        endpoints: [endpoint],
-    };
-    console.log(`Enabled updater artifacts + updater plugin config in ${configPath}`);
+    if (config.tauri && typeof config.tauri === "object") {
+        config.tauri.updater = {
+            ...(config.tauri.updater || {}),
+            active: true,
+            dialog: false,
+            pubkey,
+            endpoints: [endpoint],
+        };
+    } else {
+        config.plugins = config.plugins || {};
+        config.plugins.updater = {
+            ...(config.plugins.updater || {}),
+            pubkey,
+            endpoints: [endpoint],
+        };
+    }
+    console.log(`Enabled updater config in ${configPath}`);
 } else {
+    if (requirePubkey) {
+        console.error(
+            `Missing ENSU_TAURI_UPDATER_PUBKEY for ${configPath}; refusing to continue`,
+        );
+        process.exit(1);
+    }
     console.log(
-        `Enabled updater artifacts in ${configPath} (ENSU_TAURI_UPDATER_PUBKEY not set, leaving updater plugin config unchanged)`,
+        `No updater key configured for ${configPath}; leaving updater config unchanged`,
     );
 }
 

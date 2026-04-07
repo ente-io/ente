@@ -122,6 +122,41 @@ int? _magicFileId(EnteFile file) {
   return file.uploadedFileID ?? file.generatedID;
 }
 
+int _compareOfflineMagicFilesByRelevantPosition(
+  EnteFile a,
+  EnteFile b,
+  Map<int, int> fileIdToPositionMap,
+  Map<String, int> localIdToIntId,
+) {
+  final idA = localIdToIntId[a.localID];
+  final idB = localIdToIntId[b.localID];
+  final posA = idA != null ? fileIdToPositionMap[idA] : null;
+  final posB = idB != null ? fileIdToPositionMap[idB] : null;
+  if (posA == null && posB == null) return 0;
+  if (posA == null) return 1;
+  if (posB == null) return -1;
+  return posA.compareTo(posB);
+}
+
+void sortOfflineMagicFilesByCreationTime(
+  List<EnteFile> files,
+  Map<int, int> fileIdToPositionMap,
+  Map<String, int> localIdToIntId,
+) {
+  files.sort((a, b) {
+    final timeCompare = (b.creationTime ?? 0).compareTo(a.creationTime ?? 0);
+    if (timeCompare != 0) {
+      return timeCompare;
+    }
+    return _compareOfflineMagicFilesByRelevantPosition(
+      a,
+      b,
+      fileIdToPositionMap,
+      localIdToIntId,
+    );
+  });
+}
+
 GenericSearchResult? toGenericSearchResult(
   BuildContext context,
   Prompt prompt,
@@ -230,6 +265,10 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateKey) ?? 0;
   }
 
+  int get lastMagicCacheUpdateTimeInMicroseconds {
+    return lastMagicCacheUpdateTime * 1000;
+  }
+
   bool get enableDiscover => hasGrantedMLConsent;
 
   void queueUpdate(String reason) {
@@ -297,6 +336,21 @@ class MagicCacheService {
     } finally {
       _isUpdateInProgress = false;
       Bus.instance.fire(MagicCacheUpdatedEvent());
+    }
+  }
+
+  Future<void> refreshCache() async {
+    if (!enableDiscover) {
+      return;
+    }
+    try {
+      final prompts = await _readPromptFromDiskOrNetwork();
+      final magicCaches = await _readResultFromDisk();
+      _promptFuture = Future.value(prompts);
+      _magicCacheFuture = Future.value(magicCaches);
+      Bus.instance.fire(MagicCacheUpdatedEvent());
+    } catch (e, s) {
+      _logger.info("Error refreshing magic cache", e, s);
     }
   }
 
@@ -444,6 +498,13 @@ class MagicCacheService {
               if (fileId != null) {
                 fileIdToPosMap[fileId] = i;
               }
+            }
+            if (p.recentFirst && filesForPrompt.length > 1) {
+              sortOfflineMagicFilesByCreationTime(
+                filesForPrompt,
+                fileIdToPosMap,
+                localIdToIntId,
+              );
             }
             final genericSearchResult = toGenericSearchResult(
               context,

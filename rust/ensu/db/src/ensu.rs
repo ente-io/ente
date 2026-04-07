@@ -31,6 +31,10 @@ impl<B: crate::Backend> EnsuDb<B> {
         self.chat.list_sessions()
     }
 
+    pub fn list_all_sessions(&self) -> Result<Vec<Session>> {
+        self.chat.list_all_sessions()
+    }
+
     pub fn list_sessions_with_preview(&self) -> Result<Vec<SessionWithPreview>> {
         self.chat.list_sessions_with_preview()
     }

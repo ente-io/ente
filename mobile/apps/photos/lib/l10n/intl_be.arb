@@ -27,7 +27,6 @@
   "deleteReason4": "Прычына адсутнічае ў спісе",
   "sendEmail": "Адправіць ліст",
   "deleteRequestSLAText": "Ваш запыт будзе апрацаваны цягам 72 гадзін.",
-  "deleteEmailRequest": "Адпраўце ліст на <warning>account-deletion@ente.io</warning> з вашага зарэгістраванага адраса электроннай пошты.",
   "entePhotosPerm": "Праграме <i>неабходны доступ</i> для захавання вашых фатаграфій",
   "ok": "OK",
   "createAccount": "Стварыць уліковы запіс",
@@ -73,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +139,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -281,18 +280,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ідэнтыфікатар спраўджання",
   "verifyEmailID": "Спраўджанне {email}",
   "emailNoEnteAccount": "У {email} адсутнічае ўліковы запіс Ente.\n\nАдпраўце запрашэнне карыстальніку, каб абагуліць фатаграфіі.",
-  "shareMyVerificationID": "Вось мой ідэнтыфікатар спраўджання: {verificationID} для ente.io.",
-  "shareTextConfirmOthersVerificationID": "Здароў! Можаш пацвердзіць, што гэта твой ідэнтыфікатар спраўджання ente.io: {verificationID}",
   "somethingWentWrong": "Нешта пайшло не так",
   "sendInvite": "Адправіць запрашэнне",
-  "shareTextRecommendUsingEnte": "Спампуйце Ente для таго, каб мы маглі лёгка змаглі абагуляць фатаграфіі ў зыходнай якасці і відэа\n\nhttps://ente.io",
   "done": "Гатова",
   "applyCodeTitle": "Ужыць код",
   "enterCodeDescription": "Увядзіце код, атрыманы ад вашага сябра, каб вы абодва змаглі атрымаць бясплатнае сховішча",
@@ -463,7 +459,6 @@
   "discover_sunset": "Захад сонца",
   "discover_hills": "Узгоркі",
   "discover_greenery": "Зеляніна",
-  "mlIndexingDescription": "Звярніце ўвагу, што гэта камп'ютарнае навучанне павялічыць спажыванне трафіку і акумулятара, пакуль усе элементы не будуць праіндэксаваны. Разгледзьце магчымасць зрабіць гэту задачу на камп'ютары. Усе вынікі будуць сінхранізаваны аўтаматычна.",
   "loadingModel": "Спампоўванне мадэляў...",
   "waitingForWifi": "Чаканне Wi-Fi...",
   "status": "Стан",
@@ -577,8 +572,6 @@
   "familyPlans": "Сямейныя тарыфныя планы",
   "referrals": "Рэфералы",
   "notifications": "Апавяшчэнні",
-  "sharedPhotoNotifications": "Новыя абагульненыя фатаграфіі",
-  "sharedPhotoNotificationsExplanation": "Атрымлівайце апавяшчэнні, калі нехта дадае фатаграфію ў абагульнены альбом, да якога вы належыце",
   "advanced": "Дадаткова",
   "general": "Асноўныя",
   "security": "Бяспека",
@@ -612,7 +605,6 @@
   "darkTheme": "Цёмная",
   "systemTheme": "Сістэма",
   "freeTrial": "Бясплатная пробны перыяд",
-  "selectYourPlan": "Выберыце тарыфны план",
   "enteSubscriptionPitch": "Ente захоўвае вашы ўспаміны, таму яны заўсёды даступны вам, нават калі вы згубіце прыладу.",
   "enteSubscriptionShareWithFamily": "Ваша сям'я можа быць уключана ў ваш тарыфны план.",
   "currentUsageIs": "Выкарыстана сховішча: ",
@@ -633,7 +625,6 @@
   "subscription": "Падпіска",
   "paymentDetails": "Падрабязнасці плацяжу",
   "manageFamily": "Кіраванне сям'ёй",
-  "contactToManageSubscription": "Адпраўце ліст на паштовы адрас support@ente.io, каб кіраваць сваёй падпіскай {provider}.",
   "renewSubscription": "Падоўжыць падпіску",
   "cancelSubscription": "Скасаваць падпіску",
   "areYouSureYouWantToRenew": "Вы сапраўды хочаце падоўжыць?",
@@ -682,7 +673,6 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} ужо звязаны з іншым уліковым запісам Ente.\nКалі вы хочаце выкарыстоўваць ваш {id} з гэтым уліковым запісам, звярніцеся ў нашу службу падтрымкі",
   "visitWebToManage": "Наведайце web.ente.io, каб кіраваць сваёй падпіскай",
   "couldNotUpdateSubscription": "Не ўдалося абнавіць падпіску",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Адпраўце ліст на паштовы адрас support@ente.io і мы будзем рады дапамагчы!",
   "paymentFailed": "Збой плацяжу",
   "paymentFailedTalkToProvider": "Звярніцеся ў падтрымку {providerName}, калі з вас спагналі грашовыя сродкі",
   "@paymentFailedTalkToProvider": {
@@ -713,7 +703,6 @@
   "grantFullAccessPrompt": "Дазвольце доступ да ўсіх фатаграфій у наладах праграмы",
   "allowPermTitle": "Дазволіць доступ да фатаграфій",
   "allowPermBody": "Дазвольце доступ да сваіх фатаграфій з налад, каб Ente мог адлюстраваць і зарэзерваваць вашу бібліятэку.",
-  "openSettings": "Акдкрыць налады",
   "selectMorePhotos": "Выберыце больш фатаграфій",
   "existingUser": "Бягучы карыстальнік",
   "newToEnte": "Упершыню ў Ente",
@@ -1047,7 +1036,6 @@
   "fileTypesAndNames": "Тыпы файлаў і назвы",
   "location": "Месцазнаходжанне",
   "moments": "Моманты",
-  "searchFaceEmptySection": "Людзі будуць паказаны тут пасля завяршэння індэксацыі",
   "searchDatesEmptySection": "Пошук па даце, месяцу або году",
   "searchLocationEmptySection": "Групуйце фатаграфіі, якія зроблены ў пэўным радыусе ад фатаграфіі",
   "searchPeopleEmptySection": "Запрашайце людзей, і вы ўбачыце ўсе фатаграфіі, якія яны абагулілі",
@@ -1404,7 +1392,6 @@
   },
   "extraPhotosFound": "Знойдзены дадатковыя фатаграфіі",
   "configuration": "Канфігурацыя",
-  "localIndexing": "Лакальная індэксацыя",
   "processed": "Апрацавана",
   "resetPerson": "Выдаліць",
   "areYouSureYouWantToResetThisPerson": "Вы сапраўды хочаце скінуць даныя гэтай асобы?",
@@ -1742,9 +1729,6 @@
   "curatedMemories": "Абраныя ўспаміны",
   "widgets": "Віджэты",
   "memories": "Успаміны",
-  "peopleWidgetDesc": "Выберыце людзей, якіх вы хочаце бачыць на галоўным экране.",
-  "albumsWidgetDesc": "Выберыце альбомы, якія вы хочаце бачыць на галоўным экране.",
-  "memoriesWidgetDesc": "Выберыце, якія ўспаміны вы хочаце бачыць на галоўным экране.",
   "smartMemories": "Інтэлектуальныя ўспаміны",
   "pastYearsMemories": "Успаміны мінулых гадоў",
   "deleteMultipleAlbumDialog": "Таксама выдаліць фатаграфіі (разам з відэа), якія знаходзяцца ў гэтых {count} альбомах, з <bold>усіх</bold> іншых альбомаў, часткай якіх яны з'яўляюцца?",
@@ -1758,9 +1742,6 @@
   "sorryWeHadToPauseYourBackups": "Прабачце, але давялося прыпыніць ваша рэзервовае капіяванне",
   "clickToInstallOurBestVersionYet": "Націсніце, каб усталяваць нашу лепшую версію",
   "onThisDayNotificationExplanation": "Атрымлівайце напаміны аб успамінах з гэтага дня ў мінулыя гады.",
-  "addMemoriesWidgetPrompt": "Дадайце віджэт успамін на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
-  "addAlbumWidgetPrompt": "Дадайце віджэт альбома на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
-  "addPeopleWidgetPrompt": "Дадайце віджэт людзей на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
   "birthdayNotifications": "Апавяшчэнні аб днях нараджэння",
   "receiveRemindersOnBirthdays": "Атрымлівайце напаміны, калі ў некага дзень нараджэння. Націск на апавяшчэнне перанясе вас да фатаграфій імянінніка.",
   "happyBirthday": "З днём нараджэння! 🥳",
@@ -1785,7 +1766,6 @@
   "same": "Пакінуць папярэдні",
   "different": "Розныя",
   "sameperson": "Тая ж асоба?",
-  "indexingPausedStatusDescription": "Індэксаванне прыпынена. Яно аўтаматычна будзе ўзноўлена, калі прылада будзе гатова. Прылада лічыцца гатовай, калі ўзровень зараду акумулятара, стан акумулятара і цеплавы статус знаходзяцца ў межах нармальнага дыяпазону.",
   "thisWeek": "На гэтым тыдні",
   "lastWeek": "На мінулым тыдні",
   "thisMonth": "У гэтым месяцы",
@@ -2055,16 +2035,6 @@
   },
   "playfulKids": "Гарэзлівыя дзеці",
   "coastalCliffs": "Скалы ля мора",
-  "candidLaughter": "Шчыры смех",
-  "groupSelfies": "Мы ўсе",
-  "birthdayJoy": "Радасць дня нараджэння",
-  "weddingMoments": "Ззянне вясельнага дня",
-  "goldenHourPortraits": "Твары ў залатую гадзіну",
-  "concertNights": "Канцэртныя ночы",
-  "poolDays": "Дні каля басейна",
-  "picnicDays": "Успаміны пра пікнік",
-  "campingMoments": "Кемпінгавыя моманты",
-  "babySmiles": "Усмешкі немаўляці",
   "ritualsTitle": "Рытуалы",
   "ritualAddTooltip": "Дадаць рытуал",
   "ritualActivityHeading": "Актыўнасць",

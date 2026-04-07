@@ -216,7 +216,7 @@ class _LoginPasswordVerificationPageState
     if (result == true) {
       await sendLogs(
         context,
-        "support@ente.io",
+        "support@ente.com",
         postShare: () {},
       );
     }

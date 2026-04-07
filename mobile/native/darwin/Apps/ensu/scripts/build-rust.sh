@@ -56,7 +56,65 @@ enum BuildEndpointConfig {
 EOF
 }
 
-write_endpoint_config
+bindings_missing() {
+  for binding in \
+    "${GENERATED_DIR}/core.swift" \
+    "${GENERATED_DIR}/coreFFI.h" \
+    "${GENERATED_DIR}/coreFFI.modulemap" \
+    "${GENERATED_DIR}/db.swift" \
+    "${GENERATED_DIR}/dbFFI.h" \
+    "${GENERATED_DIR}/dbFFI.modulemap" \
+    "${GENERATED_DIR}/sync.swift" \
+    "${GENERATED_DIR}/syncFFI.h" \
+    "${GENERATED_DIR}/syncFFI.modulemap"; do
+    if [ ! -f "${binding}" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+generate_swift_binding() {
+  crate_dir="$1"
+  dylib_name="$2"
+
+  (
+    cd "${crate_dir}"
+    cargo build --locked --release
+    uniffi-bindgen generate "target/release/${dylib_name}" --language swift --out-dir "${GENERATED_DIR}"
+  )
+}
+
+sanitize_generated_swift_bindings() {
+  swift_file="$1"
+
+  if [ ! -f "${swift_file}" ]; then
+    return
+  fi
+
+  perl -0pi -e 's@try! rustCall \{ (uniffi_(?:db|sync)_fn_free_[^(]+\([^)]*\)) \}@// Avoid aborting the host app if Rust-side teardown fails during process shutdown.\n        try? rustCall { $1 }@g' "${swift_file}"
+}
+
+ensure_generated_bindings() {
+  if ! bindings_missing; then
+    return
+  fi
+
+  if ! command -v uniffi-bindgen >/dev/null 2>&1; then
+    echo "Missing generated UniFFI Swift bindings in ${GENERATED_DIR}." >&2
+    echo "Install uniffi-bindgen and retry the build." >&2
+    exit 1
+  fi
+
+  echo "Generating missing UniFFI Swift bindings..."
+  mkdir -p "${GENERATED_DIR}"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/core" "libcore.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
+  sanitize_generated_swift_bindings "${GENERATED_DIR}/db.swift"
+  sanitize_generated_swift_bindings "${GENERATED_DIR}/sync.swift"
+}
 
 if [ "$(uname -s)" = "Darwin" ]; then
   HOST_LIB_EXT="dylib"
@@ -97,6 +155,7 @@ generate_swift_bindings() {
   fi
 
   (cd "${crate_dir}" && uniffi-bindgen generate "${host_lib_path}" --language swift --out-dir "${GENERATED_DIR}" --crate "${crate_name}")
+  sanitize_generated_swift_bindings "${GENERATED_DIR}/${crate_name}.swift"
 }
 
 # Map Xcode platform+arch to Rust target triple.
@@ -169,6 +228,8 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 export SDKROOT="${HOST_SDKROOT}"
 
 ensure_uniffi_bindgen
+ensure_generated_bindings
+write_endpoint_config
 generate_swift_bindings "core" "${REPO_ROOT}/rust/uniffi/core" "core"
 generate_swift_bindings "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "db"
 generate_swift_bindings "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "sync"

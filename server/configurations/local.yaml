@@ -93,7 +93,7 @@ apps:
     # Default is https://share.ente.io
     #
     # If you're running a self-hosted instance and wish to serve public links for locker,
-    # set this to the URL where your albums web app is running.
+    # set this to the URL where your share web app is running.
     public-locker:
     # Default is https://paste.ente.io
     #
@@ -108,6 +108,11 @@ apps:
     accounts:
     # Default is https://family.ente.io
     family:
+    # Default is https://memories.ente.io
+    #
+    # If you're running a self-hosted instance and wish to serve public memory shares,
+    # set this to the URL where your memories web app is running.
+    public-memories:
     custom-domain:
         # Default is my.ente.io
         cname:

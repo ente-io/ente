@@ -514,7 +514,6 @@
   "youCannotShareWithYourself": "莫开玩笑，您不能与自己分享",
   "inviteToEnte": "邀请到 Ente",
   "sendInvite": "发送邀请",
-  "shareTextRecommendUsingEnte": "下载 Ente\n\nhttps://ente.io",
   "thisIsYourVerificationId": "这是您的验证 ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "与您共享相册的人应该会在他们的设备上看到相同的 ID。",
   "howToViewShareeVerificationID": "请让他们在设置屏幕上长按他们的电子邮件地址，并验证两台设备上的 ID 是否匹配。",
@@ -523,15 +522,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "验证 ID",
   "verifyEmailID": "验证 {email}",
   "emailNoEnteAccount": "{email} 没有 Ente 账户。\n\n发送邀请以共享项目。",
-  "shareMyVerificationID": "这是我的ente.io 的验证 ID： {verificationID}。",
-  "shareTextConfirmOthersVerificationID": "嘿，你能确认这是你的 ente.io 验证 ID吗：{verificationID}",
   "passwordLock": "密码锁",
   "manage": "管理",
   "addedAs": "已添加为",

@@ -5,6 +5,7 @@
   "accountWelcomeBack": "Witaj ponownie!",
   "emailAlreadyRegistered": "Adres e-mail jest już zarejestrowany.",
   "emailNotRegistered": "Adres e-mail nie jest zarejestrowany.",
+  "accountSetupIncompleteCreateAccount": "Konfiguracja konta nieukończona. Utwórz konto, aby ukończyć konfigurację.",
   "email": "Adres e-mail",
   "cancel": "Anuluj",
   "verify": "Zweryfikuj",
@@ -28,10 +29,10 @@
   "deleteReason4": "Moja przyczyna nie jest wymieniona",
   "sendEmail": "Wyślij e-mail",
   "deleteRequestSLAText": "Twoje żądanie zostanie przetworzone w ciągu 72 godzin.",
-  "deleteEmailRequest": "Wyślij wiadomość e-mail na <warning>account-deletion@ente.io</warning> z zarejestrowanego adresu e-mail.",
   "entePhotosPerm": "Ente <i>potrzebuje uprawnień</i> aby przechowywać twoje zdjęcia",
   "ok": "Ok",
   "createAccount": "Stwórz konto",
+  "createAccountTitle": "Utwórz konto",
   "createNewAccount": "Stwórz nowe konto",
   "password": "Hasło",
   "confirmPassword": "Powtórz hasło",
@@ -76,7 +77,18 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Wysłaliśmy kod na adres {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.com"
       }
     }
   },
@@ -110,6 +122,7 @@
   "generatingEncryptionKeys": "Generowanie kluczy szyfrujących...",
   "pleaseWait": "Prosimy czekać...",
   "continueLabel": "Kontynuuj",
+  "continueInMailApp": "Kontynuuj w aplikacji pocztowej",
   "insecureDevice": "Niezabezpieczone urządzenie",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Przepraszamy, nie mogliśmy wygenerować bezpiecznych kluczy na tym urządzeniu.\n\nZarejestruj się z innego urządzenia.",
   "howItWorks": "Jak to działa",
@@ -123,6 +136,7 @@
   "changeEmail": "Zmień adres e-mail",
   "enterYourPassword": "Wprowadź hasło",
   "welcomeBack": "Witaj ponownie!",
+  "readyToBackupTitle": "Gotowy do tworzenia kopii zapasowej",
   "readyToBackupSubtitle": "Twoje zdjęcia zostaną zsynchronizowane w tle. Pierwsza kopia zapasowa może zająć trochę czasu.",
   "contactSupport": "Skontaktuj się z pomocą techniczną",
   "locationPickerTip": "Możesz również dodać lokalizację wyśrodkowaną na zdjęciu z ekranu informacji o zdjęciu",
@@ -150,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -278,6 +292,7 @@
   "copyLink": "Skopiuj link",
   "copyEmbedHtml": "Kopiuj osadzony HTML",
   "linkHasExpired": "Link wygasł",
+  "linkRequestLimitExceeded": "Ten album został wyświetlony na zbyt wielu urządzeniach",
   "publicLinkEnabled": "Publiczny link włączony",
   "shareALink": "Udostępnij link",
   "sharedAlbumSectionDescription": "Twórz wspólne albumy i współpracuj z innymi użytkownikami Ente, w tym z użytkownikami korzystającymi z bezpłatnych planów.",
@@ -298,18 +313,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Identyfikator weryfikacyjny",
   "verifyEmailID": "Zweryfikuj {email}",
   "emailNoEnteAccount": "{email} nie posiada konta Ente.\n\nWyślij im zaproszenie do udostępniania zdjęć.",
-  "shareMyVerificationID": "Oto mój identyfikator weryfikacyjny: {verificationID} dla ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hej, czy możesz potwierdzić, że to jest Twój identyfikator weryfikacyjny ente.io: {verificationID}",
   "somethingWentWrong": "Coś poszło nie tak",
   "sendInvite": "Wyślij zaproszenie",
-  "shareTextRecommendUsingEnte": "Pobierz Ente, abyśmy mogli łatwo udostępniać zdjęcia i wideo w oryginalnej jakości\n\nhttps://ente.io",
   "done": "Gotowe",
   "applyCodeTitle": "Użyj kodu",
   "enterCodeDescription": "Wprowadź kod dostarczony przez znajomego, aby uzyskać bezpłatne miejsce dla was obojga",
@@ -335,12 +347,14 @@
   "claimMore": "Zdobądź więcej!",
   "earnMoreSpace": "Zdobądź więcej miejsca!",
   "theyAlsoGetXGb": "Oni również otrzymują {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB dla nich + {storageAmountInGB} GB dla ciebie, gdy ulepszą swoje konto.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB za każdym razem, gdy ktoś zarejestruje się w płatnym planie i użyje twojego kodu",
   "claimFreeStorage": "Odbierz bezpłatną przestrzeń dyskową",
   "inviteYourFriends": "Zaproś znajomych",
   "earnFreeStorage": "Zdobywaj bezpłatną przestrzeń dyskową",
   "shareCodeEarnStorage": "Udostępnij swój kod, zdobądź bezpłatną przestrzeń dyskową.",
   "youBothGet": "Oboje otrzymacie",
+  "free": "darmowy",
   "failedToFetchReferralDetails": "Nie można pobrać szczegółów polecenia. Spróbuj ponownie później.",
   "referralStep1": "1. Dostosuj i udostępniaj swój kod.",
   "referralStep2": "2. Oni rejestrują się do Ente, używając Twojego kodu.",
@@ -375,6 +389,7 @@
   "claimedByYou": "odebrane przez Ciebie",
   "earned": "zdobyte",
   "usable": "dostępne",
+  "referralStorageInfo": "Polecenia od płatnych subskrybentów zapewniają dodatkową przestrzeń.\n\nMożesz korzystać ze swojego miejsca do limitu planu. Ulepsz plan, by wykorzystać pozostałą otrzymaną przestrzeń.",
   "removeFromAlbumTitle": "Usunąć z albumu?",
   "removeFromAlbum": "Usuń z albumu",
   "itemsWillBeRemovedFromAlbum": "Wybrane elementy zostaną usunięte z tego albumu",
@@ -388,6 +403,7 @@
   "subscribe": "Subskrybuj",
   "canOnlyRemoveFilesOwnedByYou": "Można usuwać tylko pliki należące do Ciebie",
   "cannotMoveToSharedAlbums": "Nie można przenieść do udostępnionych albumów",
+  "cannotMoveToSharedAlbumsMessage": "Elementy mogą być dodane tylko do udostępnionych albumów, a nie przeniesione. Czy chcesz je dodać?",
   "deleteSharedAlbum": "Usunąć udostępniony album?",
   "deleteAlbum": "Usuń album",
   "deleteAlbumDialog": "Usunąć również zdjęcia (i wideo) znajdujące się w tym albumie ze <bold>wszystkich</bold> innych albumów, których są częścią?",
@@ -480,6 +496,10 @@
   "mlConsentPrivacy": "Kliknij tutaj, aby uzyskać więcej informacji na temat tej funkcji w naszej polityce prywatności",
   "mlConsentConfirmation": "Rozumiem i chcę włączyć nauczanie maszynowe",
   "magicSearch": "Magiczne wyszukiwanie",
+  "magic": "Magia",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Odkryj",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -499,7 +519,7 @@
   "discover_sunset": "Zachód słońca",
   "discover_hills": "Wzgórza",
   "discover_greenery": "Zieleń",
-  "mlIndexingDescription": "Pamiętaj, że nauczanie maszynowe spowoduje większą przepustowość i zużycie baterii do czasu zindeksowania wszystkich elementów. Rozważ użycie aplikacji komputerowej do szybszego indeksowania, wszystkie wyniki zostaną automatycznie zsynchronizowane.",
+  "mlIndexingDescription": "Pamiętaj, że nauczanie maszynowe spowoduje większą przepustowość i zużycie baterii do momentu przetworzenia wszystkich elementów. Rozważ użycie wersji aplikacji na komputer dla szybszego procesowania, wszystkie wyniki zostaną automatycznie zsynchronizowane.",
   "loadingModel": "Pobieranie modeli...",
   "waitingForWifi": "Czekanie na WiFi...",
   "status": "Stan",
@@ -508,6 +528,8 @@
   "clearIndexes": "Wyczyść indeksy",
   "selectFoldersForBackup": "Wybierz foldery do stworzenia kopii zapasowej",
   "selectFolders": "Wybierz foldery",
+  "backupToEnte": "Kopia zapasowa do Ente",
+  "selectAlbumsToBackUpToEnte": "Wybierz albumy do utworzenia kopii zapasowej do Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Wybrane foldery zostaną zaszyforwane i zostanie utworzona ich kopia zapasowa",
   "unselectAll": "Odznacz wszystko",
   "selectAll": "Zaznacz wszystko",
@@ -529,6 +551,7 @@
       }
     }
   },
+  "updateSettings": "Zapisz zmiany",
   "updatingFolderSelection": "Aktualizowanie wyboru folderu...",
   "itemCount": "{count, plural, one{{count} element} few {{count} elementy} many {{count} elementów} other{{count} elementu}}",
   "deleteItemCount": "{count, plural, =1 {Usuń {count} element} few {Usuń {count} elementy} many {Usuń {count} elementów} other{Usuń {count} elementu}}",
@@ -589,12 +612,22 @@
   "backedUpFolders": "Foldery kopii zapasowej",
   "backup": "Kopia zapasowa",
   "freeUpDeviceSpace": "Zwolnij miejsce na urządzeniu",
+  "freeUpDeviceSpaceDesc": "Oszczędzaj miejsce na swoim urządzeniu przez usunięcie plików już z kopią zapasową.",
+  "freeUpDeviceSpaceDescICloud": "Pliki w udostępnionych albumach iCloud nie mogą być usunięte.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Wszystko wyczyszczone",
   "noDeviceThatCanBeDeleted": "Nie masz żadnych plików na tym urządzeniu, które można usunąć",
   "removeDuplicates": "Usuń duplikaty",
   "removeDuplicatesDesc": "Przejrzyj i usuń pliki, które są dokładnymi duplikatami.",
   "viewLargeFiles": "Duże pliki",
   "viewLargeFilesDesc": "Wyświetl pliki zużywające największą ilość pamięci.",
+  "deleteSuggestions": "Usuń podpowiedzi",
+  "deleteSuggestionsDesc": "Przejrzyj pliki zaproponowane do usunięcia.",
+  "rejectSuggestions": "Usuń podpowiedzi",
+  "noDeleteSuggestion": "Brak sugestii usunięcia",
+  "youHaveNoFileSuggestedForDeletion": "Nie masz żadnych plików zasugerowanych do usunięcia",
   "noDuplicates": "✨ Brak duplikatów",
   "youveNoDuplicateFilesThatCanBeCleared": "Nie masz zduplikowanych plików, które można wyczyścić",
   "success": "Sukces",
@@ -629,10 +662,46 @@
     }
   },
   "familyPlans": "Plany rodzinne",
+  "family": "Rodzina",
+  "designedForFamilies": "Zaprojektowane dla rodzin",
+  "shareYourSubscription": "Podziel się swoją subskrypcją z bliskimi",
+  "shareStorageWith5Members": "Udostępnij przestrzeń 5 użytkownikom",
+  "privateSpaceForEveryMember": "Prywatna przestrzeń dla każdego użytkownika",
+  "feedToEngageWithFamily": "Kanał do kontaktu z rodziną",
+  "plansStartAt": "Plany zaczynają się od {price}/miesiąc",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Zobacz plany",
+  "yourPlanSupportsFamily": "Twój plan już obsługuje rodzinę",
+  "addUpTo5MembersFree": "Dodaj do 5 użytkowników za darmo",
+  "addFamilyMember": "Dodaj członka rodziny",
+  "addMember": "Dodaj użytkownika",
+  "inviteMembers": "Zaproś użytkowników",
+  "enterEmailAddresses": "Wprowadź ich adresy e-mail. Muszą posiadać oni konto Ente.",
+  "inviteLimitReached": "Już dodałeś 5 zaproszeń. Usuń jedno, aby dodać kolejne",
+  "emailAddress": "Adres e-mail",
+  "sendInvites": "Wyślij zaproszenia",
+  "enterAnEmailAddress": "Podaj adres e-mail",
+  "enterAValidEmailAddress": "Podaj poprawny adres e-mail",
+  "alreadyAdded": "Już dodany",
+  "thisUserIsNotOnEnte": "Ten użytkownik nie jest w Ente",
+  "emailNeedsEnteAccountForFamily": "{email} nie posiada konta Ente.\n\nWyślij im zaproszenia i dodaj je do twojej rodziny, gdy założą konto w Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
   "referrals": "Polecenia",
   "notifications": "Powiadomienia",
-  "sharedPhotoNotifications": "Nowe udostępnione zdjęcia",
-  "sharedPhotoNotificationsExplanation": "Otrzymuj powiadomienia, gdy ktoś doda zdjęcie do udostępnionego albumu, którego jesteś częścią",
   "advanced": "Zaawansowane",
   "general": "Ogólne",
   "security": "Bezpieczeństwo",
@@ -661,13 +730,53 @@
   "reportBug": "Zgłoś błąd",
   "suggestFeatures": "Zaproponuj funkcje",
   "support": "Wsparcie techniczne",
+  "askAQuestion": "Zadaj pytanie",
+  "requestAFeature": "Zaproponuj nową funkcjonalność",
+  "subject": "Temat",
+  "description": "Opis",
+  "oneLineAboutTheIssue": "Problem w jednej linijce",
+  "detailsAboutTheIssue": "Szczegóły problemu",
+  "yourQuestion": "Twoje pytanie",
+  "anyAdditionalInformation": "Dodatkowe informacje",
+  "attachLogs": "Załącz logi",
+  "attachLogsHelper": "Pomaga nam zdiagnozować problem szybciej",
+  "pleaseEnterASubject": "Proszę podać temat",
+  "pleaseEnterADescription": "Proszę wprowadzić opis",
+  "noEmailAppFound": "Nie znaleziono aplikacji poczty e-mail",
+  "noEmailAppBody": "Skopiuj swoją wiadomość i wyślij ją na adres {email} z dowolnej usługi mailowej.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.com"
+      }
+    }
+  },
+  "message": "Wiadomość",
+  "deviceInfo": "Informacje o urządzeniu",
+  "logs": "Dziennik logów",
+  "export": "Eksportuj",
+  "logsNotCopiedDownloadNote": "Dziennik logów nie jest skopiowany. Wyeksportuj logi i dołącz je do twojego maila.",
+  "attachedSize": "Załączono ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Skopiuj całość do schowka",
+  "copied": "Skopiowano",
   "appearance": "Wygląd",
   "theme": "Motyw",
   "lightTheme": "Jasny",
   "darkTheme": "Ciemny",
   "systemTheme": "Systemowy",
   "freeTrial": "Darmowy okres próbny",
-  "selectYourPlan": "Wybierz swój plan",
+  "chooseYourPlan": "Wybierz swój plan",
   "enteSubscriptionPitch": "Ente zachowuje Twoje wspomnienia, więc są zawsze dostępne dla Ciebie, nawet jeśli zgubisz urządzenie.",
   "enteSubscriptionShareWithFamily": "Twoja rodzina może być również dodana do Twojego planu.",
   "currentUsageIs": "Aktualne użycie to ",
@@ -688,7 +797,6 @@
   "subscription": "Subskrypcja",
   "paymentDetails": "Szczegóły płatności",
   "manageFamily": "Zarządzaj Rodziną",
-  "contactToManageSubscription": "Skontaktuj się z nami pod adresem support@ente.io, aby zarządzać subskrypcją {provider}.",
   "renewSubscription": "Odnów subskrypcję",
   "cancelSubscription": "Anuluj subskrypcję",
   "areYouSureYouWantToRenew": "Czy na pewno chcesz odnowić?",
@@ -736,8 +844,8 @@
   "appstoreSubscription": "Subskrypcja AppStore",
   "subAlreadyLinkedErrMessage": "Twoje {id} jest już połączony z innym kontem Ente.\nJeśli chcesz użyć swojego {id} za pomocą tego konta, skontaktuj się z naszym wsparciem technicznym",
   "visitWebToManage": "Odwiedź stronę web.ente.io, aby zarządzać subskrypcją",
+  "managePaymentMethod": "Zarządzaj formami płatności",
   "couldNotUpdateSubscription": "Nie można było zaktualizować subskrybcji",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Skontaktuj się z support@ente.io i z przyjemnością pomożemy!",
   "paymentFailed": "Płatność się nie powiodła",
   "paymentFailedTalkToProvider": "Porozmawiaj ze wsparciem {providerName} jeśli zostałeś obciążony",
   "@paymentFailedTalkToProvider": {
@@ -764,6 +872,21 @@
     "description": "Subtitle shown on family member subscription screen",
     "type": "text"
   },
+  "familyAdminManagesPlanSuffix": "zarządza tym planem.\nSkontaktuj się z nim, aby wprowadzić zmiany.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Opuść plan rodzinny",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Potrzebujesz pomocy? Skontaktuj się ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Czy jesteś pewien/pewna, że chcesz opuścić plan rodzinny?",
   "leave": "Wyjdź",
   "rateTheApp": "Oceń aplikację",
@@ -773,10 +896,15 @@
   "grantFullAccessPrompt": "Zezwól na dostęp do wszystkich zdjęć w aplikacji Ustawienia",
   "allowPermTitle": "Zezwól na dostęp do zdjęć",
   "allowPermBody": "Prosimy zezwolić na dostęp do swoich zdjęć w Ustawieniach, aby Ente mogło wyświetlać i tworzyć kopię zapasową Twojej biblioteki.",
-  "openSettings": "Otwórz Ustawienia",
+  "openSettings": "Otwórz ustawienia",
   "selectMorePhotos": "Wybierz więcej zdjęć",
   "existingUser": "Istniejący użytkownik",
   "newToEnte": "Nowy/a do Ente",
+  "createAnEnteAccount": "Utwórz konto Ente",
+  "continueWithoutAccount": "Kontynuuj bez konta",
+  "loginToExistingAccount": "Zaloguj się do istniejącego konta",
+  "shareTheMoment": "Podziel się momentem",
+  "letFriendsAndFamilyReact": "Pozwól rodzinie i przyjaciołom na reagowanie i komentowanie pod Twoimi zdjęciami.",
   "pleaseLoginAgain": "Zaloguj się ponownie",
   "autoLogoutMessage": "Z powodu technicznego błędu, zostałeś wylogowany. Przepraszamy za niedogodności.",
   "yourSubscriptionHasExpired": "Twoja subskrypcja wygasła",
@@ -792,6 +920,7 @@
   "couldNotBackUpTryLater": "Nie można utworzyć kopii zapasowej Twoich danych.\nSpróbujemy ponownie później.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente może zaszyfrować i zachować pliki tylko wtedy, gdy udzielisz do nich dostępu",
   "pleaseGrantPermissions": "Prosimy przyznać uprawnienia",
+  "grantPermissionDesc": "Zezwól proszę Ente na dostęp do twojej biblioteki, w celu uporządkowania jej z rozpoznawaniem twarzy. Cały proces odbywa się na twoim urządzeniu.",
   "privateSharing": "Udostępnianie prywatne",
   "shareOnlyWithThePeopleYouWant": "Udostępnij tylko ludziom, którym chcesz",
   "usePublicLinksForPeopleNotOnEnte": "Użyj publicznych linków dla osób spoza Ente",
@@ -813,6 +942,7 @@
   "name": "Nazwa",
   "newest": "Najnowsze",
   "lastUpdated": "Ostatnio zaktualizowano",
+  "updated": "Zaktualizowano",
   "deleteEmptyAlbums": "Usuń puste albumy",
   "deleteEmptyAlbumsWithQuestionMark": "Usunąć puste albumy?",
   "deleteAlbumsDialogBody": "Spowoduje to usunięcie wszystkich pustych albumów. Jest to przydatne, gdy chcesz zmniejszyć ilość śmieci na liście albumów.",
@@ -848,6 +978,9 @@
   "favorite": "Dodaj do ulubionych",
   "removeFromFavorite": "Usuń z ulubionych",
   "shareLink": "Udostępnij link",
+  "openLink": "Otwórz link",
+  "pay": "Zapłać",
+  "noPaymentAppFound": "Nie znaleziono aplikacji płatniczej",
   "createCollage": "Utwórz kolaż",
   "saveCollage": "Zapisz kolaż",
   "collageSaved": "Kolaż zapisano w galerii",
@@ -911,6 +1044,8 @@
   "sortAlbumsBy": "Sortuj według",
   "sortNewestFirst": "Od najnowszych",
   "sortOldestFirst": "Od najstarszych",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Zmień nazwę",
   "leaveSharedAlbum": "Opuścić udostępniony album?",
   "leaveAlbum": "Opuść album",
@@ -927,6 +1062,7 @@
   "clickOnTheOverflowMenu": "• Kliknij na menu przepełnienia",
   "click": "• Kliknij",
   "nothingToSeeHere": "Nie ma tutaj nic do zobaczenia! 👀",
+  "selectFoldersToBackup": "<action>Zaznacz foldery</action> by wyświetlić i\nutworzyć kopię zapasową w Ente.",
   "unarchiveAlbum": "Przywróć album z archiwum",
   "archiveAlbum": "Archiwizuj album",
   "calculating": "Obliczanie...",
@@ -1107,7 +1243,6 @@
   "fileTypesAndNames": "Typy plików i nazwy",
   "location": "Lokalizacja",
   "moments": "Momenty",
-  "searchFaceEmptySection": "Po zakończeniu indeksowania ludzie będą tu wyświetlani",
   "searchDatesEmptySection": "Szukaj według daty, miesiąca lub roku",
   "searchLocationEmptySection": "Grupuj zdjęcia zrobione w promieniu zdjęcia",
   "searchPeopleEmptySection": "Zaproś ludzi, a zobaczysz tutaj wszystkie udostępnione przez nich zdjęcia",
@@ -1478,7 +1613,6 @@
   },
   "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
   "configuration": "Konfiguracja",
-  "localIndexing": "Indeksowanie lokalne",
   "processed": "Przetworzone",
   "resetPerson": "Usuń",
   "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
@@ -1816,9 +1950,6 @@
   "curatedMemories": "Wyselekcjonowane wspomnienia",
   "widgets": "Widżety",
   "memories": "Wspomnienia",
-  "peopleWidgetDesc": "Wybierz osoby, które chcesz zobaczyć na ekranie głównym.",
-  "albumsWidgetDesc": "Wybierz albumy, które chcesz zobaczyć na ekranie głównym.",
-  "memoriesWidgetDesc": "Wybierz rodzaj wspomnień, które chcesz zobaczyć na ekranie głównym.",
   "smartMemories": "Inteligentne wspomnienia",
   "pastYearsMemories": "Wspomnienia z ubiegłych lat",
   "deleteMultipleAlbumDialog": "Usunąć również zdjęcia (i filmy) obecne w tych albumach {count} z <bold>wszystkich</bold> innych albumów, których są częścią?",
@@ -1832,9 +1963,6 @@
   "sorryWeHadToPauseYourBackups": "Przepraszamy, musieliśmy wstrzymać tworzenie kopii zapasowych",
   "clickToInstallOurBestVersionYet": "Kliknij, aby zainstalować naszą najlepszą wersję",
   "onThisDayNotificationExplanation": "Otrzymuj przypomnienia o wspomnieniach z tego dnia w poprzednich latach.",
-  "addMemoriesWidgetPrompt": "Dodaj widżet wspomnień do ekranu głównego i wróć tutaj, aby dostosować.",
-  "addAlbumWidgetPrompt": "Dodaj widżet albumu do ekranu głównego i wróć tutaj, aby dostosować.",
-  "addPeopleWidgetPrompt": "Dodaj widżet ludzi do ekranu głównego i wróć tutaj, aby dostosować.",
   "birthdayNotifications": "Powiadomienia o urodzinach",
   "receiveRemindersOnBirthdays": "Otrzymuj przypomnienia, kiedy są czyjeś urodziny. Naciskając na powiadomienie zabierze Cię do zdjęć osoby, która ma urodziny.",
   "happyBirthday": "Wszystkiego najlepszego! 🥳",
@@ -1859,7 +1987,6 @@
   "same": "Identyczne",
   "different": "Inne",
   "sameperson": "Ta sama osoba?",
-  "indexingPausedStatusDescription": "Indeksowanie zostało wstrzymane. Zostanie automatycznie wznowione, gdy urządzenie będzie gotowe. Urządzenie uznaje się za gotowe, gdy poziom baterii, stan jej zdrowia oraz status termiczny znajdują się w bezpiecznym zakresie.",
   "thisWeek": "Ten tydzień",
   "lastWeek": "Zeszły tydzień",
   "thisMonth": "Ten miesiąc",
@@ -1939,7 +2066,6 @@
   "offlineSettingsBannerTitle": "Nie możemy zobaczyć Twoich zdjęć. Nigdy.",
   "alreadyHaveAnAccount": "Posiadasz już konto?",
   "loginToEnte": "Zaloguj się do Ente",
-  "privateAndSecureBackups": "Prywatne i bezpieczne kopie zapasowe",
   "mlProgressBannerDescription": "Twoje zdjęcia są przetwarzane na urządzeniu w celu wykrycia twarzy, obiektów i innych.",
   "mlProgressBannerStatus": "{indexed} z {total} przetworzonych zdjęć",
   "@mlProgressBannerStatus": {

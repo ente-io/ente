@@ -1,5 +1,6 @@
 export const appNames = [
     "accounts",
+    "albums",
     "auth",
     "cast",
     "embed",
@@ -63,6 +64,7 @@ export const desktopAppVersion = process.env.desktopAppVersion;
  */
 export const staticAppTitle = {
     accounts: "Ente Accounts",
+    albums: "Ente Photos",
     auth: "Ente Auth",
     cast: "Ente Photos",
     embed: "Ente Photos",
@@ -89,6 +91,7 @@ export const clientPackageName = (() => {
     }
     return {
         accounts: "io.ente.accounts.web",
+        albums: "io.ente.albums.web",
         auth: "io.ente.auth.web",
         cast: "io.ente.cast.web",
         embed: "io.ente.photos.web", // Use photos package name for embed app

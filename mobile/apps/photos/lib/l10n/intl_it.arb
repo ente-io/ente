@@ -27,7 +27,6 @@
   "deleteReason4": "Il motivo non è elencato",
   "sendEmail": "Invia email",
   "deleteRequestSLAText": "La tua richiesta verrà elaborata entro 72 ore.",
-  "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.io</warning> dal tuo indirizzo email registrato.",
   "entePhotosPerm": "Ente <i>necessita del permesso per</i> preservare le tue foto",
   "ok": "Ok",
   "createAccount": "Crea account",
@@ -69,7 +68,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -132,7 +131,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -273,18 +272,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID di verifica",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} non ha un account Ente.\n\nInvia un invito per condividere foto.",
-  "shareMyVerificationID": "Ecco il mio ID di verifica: {verificationID} per ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.io",
   "somethingWentWrong": "Qualcosa è andato storto",
   "sendInvite": "Invita",
-  "shareTextRecommendUsingEnte": "Scarica Ente in modo da poter facilmente condividere foto e video in qualità originale\n\nhttps://ente.io",
   "done": "Completato",
   "applyCodeTitle": "Applica codice",
   "enterCodeDescription": "Inserisci il codice fornito dal tuo amico per richiedere spazio gratuito per entrambi",
@@ -457,7 +453,6 @@
   "discover_sunset": "Tramonto",
   "discover_hills": "Colline",
   "discover_greenery": "Vegetazione",
-  "mlIndexingDescription": "Si prega di notare che l'attivazione dell'apprendimento automatico si tradurrà in un maggior utilizzo della connessione e della batteria fino a quando tutti gli elementi non saranno indicizzati. Valuta di utilizzare l'applicazione desktop per un'indicizzazione più veloce, tutti i risultati verranno sincronizzati automaticamente.",
   "loadingModel": "Scaricamento modelli...",
   "waitingForWifi": "In attesa del WiFi...",
   "status": "Stato",
@@ -579,8 +574,6 @@
   "familyPlans": "Piano famiglia",
   "referrals": "Invita un Amico",
   "notifications": "Notifiche",
-  "sharedPhotoNotifications": "Nuove foto condivise",
-  "sharedPhotoNotificationsExplanation": "Ricevi notifiche quando qualcuno aggiunge una foto a un album condiviso, di cui fai parte",
   "advanced": "Avanzate",
   "general": "Generali",
   "security": "Sicurezza",
@@ -614,7 +607,6 @@
   "darkTheme": "Scuro",
   "systemTheme": "Sistema",
   "freeTrial": "Prova gratuita",
-  "selectYourPlan": "Seleziona un piano",
   "enteSubscriptionPitch": "Ente conserva i tuoi ricordi in modo che siano sempre a disposizione, anche se perdi il tuo dispositivo.",
   "enteSubscriptionShareWithFamily": "Aggiungi la tua famiglia al tuo piano.",
   "currentUsageIs": "Spazio attualmente utilizzato ",
@@ -635,7 +627,6 @@
   "subscription": "Abbonamento",
   "paymentDetails": "Dettagli di Pagamento",
   "manageFamily": "Gestisci Piano famiglia",
-  "contactToManageSubscription": "Scrivi all'indirizzo support@ente.io per gestire il tuo abbonamento {provider}.",
   "renewSubscription": "Rinnova abbonamento",
   "cancelSubscription": "Annulla abbonamento",
   "areYouSureYouWantToRenew": "Vuoi davvero rinnovare?",
@@ -684,7 +675,6 @@
   "subAlreadyLinkedErrMessage": "Il tuo {id} è già collegato a un altro account Ente.\nSe desideri utilizzare il tuo {id} con questo account, per favore contatta il nostro supporto''",
   "visitWebToManage": "Visita web.ente.io per gestire il tuo abbonamento",
   "couldNotUpdateSubscription": "Impossibile aggiornare l'abbonamento",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Contatta support@ente.io e saremo felici di aiutarti!",
   "paymentFailed": "Pagamento non riuscito",
   "paymentFailedTalkToProvider": "Si prega di parlare con il supporto di {providerName} se ti è stato addebitato qualcosa",
   "@paymentFailedTalkToProvider": {
@@ -715,7 +705,6 @@
   "grantFullAccessPrompt": "Consenti l'accesso a tutte le foto nelle Impostazioni",
   "allowPermTitle": "Consenti l'accesso alle foto",
   "allowPermBody": "Permetti l'accesso alle tue foto da Impostazioni in modo che Ente possa visualizzare e fare il backup della tua libreria.",
-  "openSettings": "Apri Impostazioni",
   "selectMorePhotos": "Seleziona più foto",
   "existingUser": "Accedi",
   "newToEnte": "Prima volta con Ente",
@@ -1040,7 +1029,6 @@
   "fileTypesAndNames": "Tipi e nomi di file",
   "location": "Luogo",
   "moments": "Momenti",
-  "searchFaceEmptySection": "Le persone saranno mostrate qui una volta completata l'indicizzazione",
   "searchDatesEmptySection": "Ricerca per data, mese o anno",
   "searchLocationEmptySection": "Raggruppa foto scattate entro un certo raggio da una foto",
   "searchPeopleEmptySection": "Invita persone e vedrai qui tutte le foto condivise da loro",
@@ -1389,7 +1377,6 @@
   },
   "extraPhotosFound": "Trovate foto aggiuntive",
   "configuration": "Configurazione",
-  "localIndexing": "Indicizzazione locale",
   "processed": "Processato",
   "resetPerson": "Rimuovi",
   "areYouSureYouWantToResetThisPerson": "Vuoi davvero resettare questa persona?",
@@ -1727,9 +1714,6 @@
   "curatedMemories": "Ricordi importanti",
   "widgets": "Widget",
   "memories": "Ricordi",
-  "peopleWidgetDesc": "Seleziona le persone che desideri vedere nella schermata principale.",
-  "albumsWidgetDesc": "Seleziona gli album che desideri vedere nella schermata principale.",
-  "memoriesWidgetDesc": "Seleziona il tipo di ricordi che desideri vedere nella schermata principale.",
   "smartMemories": "Ricordi intelligenti",
   "pastYearsMemories": "Ricordi degli ultimi anni",
   "deleteMultipleAlbumDialog": "Eliminare anche le foto (e i video) presenti su {count} album da <bold>tutti</bold> gli altri album di cui fanno parte?",
@@ -1743,9 +1727,6 @@
   "sorryWeHadToPauseYourBackups": "Spiacenti, abbiamo dovuto mettere in pausa i backup",
   "clickToInstallOurBestVersionYet": "Clicca per installare l'ultima versione dell'app",
   "onThisDayNotificationExplanation": "Ricevi promemoria sui ricordi da questo giorno negli anni precedenti.",
-  "addMemoriesWidgetPrompt": "Aggiungi un widget dei ricordi nella schermata iniziale e torna qui per personalizzarlo.",
-  "addAlbumWidgetPrompt": "Aggiungi un widget per gli album nella schermata iniziale e torna qui per personalizzarlo.",
-  "addPeopleWidgetPrompt": "Aggiungi un widget delle persone nella schermata iniziale e torna qui per personalizzarlo.",
   "birthdayNotifications": "Notifiche dei compleanni",
   "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
   "happyBirthday": "Buon compleanno! 🥳",
@@ -1770,7 +1751,6 @@
   "same": "Uguale",
   "different": "Diverso",
   "sameperson": "Stessa persona?",
-  "indexingPausedStatusDescription": "L'indicizzazione è in pausa. Riprenderà automaticamente quando il dispositivo è pronto. Il dispositivo è considerato pronto quando il suo livello di batteria, la salute della batteria e lo stato termico rientrano in una gamma sana.",
   "thisWeek": "Questa settimana",
   "lastWeek": "Settimana scorsa",
   "thisMonth": "Questo mese",

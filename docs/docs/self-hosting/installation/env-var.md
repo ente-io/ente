@@ -23,7 +23,7 @@ Here's the list of environment variables that is used by the cluster:
 | Service    | Environment Variable  | Description                                                                                     | Default Value                   |
 | ---------- | --------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- |
 | `web`      | `ENTE_API_ORIGIN`     | Alias for `NEXT_PUBLIC_ENTE_ENDPOINT`. API Endpoint for Ente's API (Museum).                    | http://localhost:8080           |
-| `web`      | `ENTE_ALBUMS_ORIGIN`  | Alias for `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`. Base URL for Ente Album, used for public sharing. | http://localhost:3002           |
+| `web`      | `ENTE_ALBUMS_ORIGIN`  | Alias for `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`. Base URL for the Ente Albums app, used for public sharing. | http://localhost:3002           |
 | `web`      | `ENTE_PHOTOS_ORIGIN`  | Alias for `NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT`. Base URL for Ente Photos web app.                 | http://localhost:3000           |
 | `postgres` | `POSTGRES_USER`       | Username for PostgreSQL database                                                                | `pguser`                        |
 | `postgres` | `POSTGRES_DB`         | Name of database for use with Ente                                                              | `ente_db`                       |
@@ -38,9 +38,12 @@ which is documented below to understand its behavior:
 
 ### Ports
 
-The below format is according to how ports are mapped in Docker when using the
-quickstart script. The mapping is of the format `<host-port>:<container-port>`
-in `ports` in compose file.
+The table below lists the default host/container ports used by Ente's web
+container and related services. The mapping is of the format
+`<host-port>:<container-port>` in the compose file.
+
+If you are using `quickstart.sh`, note that only `3000` (Photos) and `3002`
+(Albums) are exposed by default.
 
 | Service                                                 | Type     | Host Port | Container Port |
 | ------------------------------------------------------- | -------- | --------- | -------------- |
@@ -48,8 +51,8 @@ in `ports` in compose file.
 | Ente Photos                                             | Web      | 3000      | 3000           |
 | Ente Accounts                                           | Web      | 3001      | 3001           |
 | Ente Albums                                             | Web      | 3002      | 3002           |
-| [Ente Auth](https://ente.io/auth/)                      | Web      | 3003      | 3003           |
-| [Ente Cast](https://ente.io/help/photos/features/cast/) | Web      | 3004      | 3004           |
+| [Ente Auth](https://ente.com/auth/)                      | Web      | 3003      | 3003           |
+| [Ente Cast](https://ente.com/help/photos/features/cast/) | Web      | 3004      | 3004           |
 | Ente Public Locker                                      | Web      | 3005      | 3005           |
 | Ente Embed                                              | Web      | 3006      | 3006           |
 | Ente Paste (if deployed separately)                     | Web      | 3008      | 3008           |

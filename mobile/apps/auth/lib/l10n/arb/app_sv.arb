@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Tyvärr",
-  "importFailureDesc": "Det gick inte att tolka den valda filen.\nSkriv till support@ente.io om du behöver hjälp!",
   "pendingSyncs": "Varning",
   "pendingSyncsWarningBody": "En del av dina koder har inte säkerhetskopierats.\n\nSe till att du har en säkerhetskopia för dessa koder innan du loggar ut.",
   "checkInboxAndSpamFolder": "Vänligen kontrollera din inkorg (och skräppost) för att slutföra verifieringen",
@@ -343,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

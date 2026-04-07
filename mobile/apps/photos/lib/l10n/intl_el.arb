@@ -27,7 +27,6 @@
   "deleteReason4": "Ο λόγος δεν συμπεριλαμβάνεται στη λίστα",
   "sendEmail": "Αποστολή email",
   "deleteRequestSLAText": "Το αίτημά σας θα εξεταστεί εντός 72 ωρών.",
-  "deleteEmailRequest": "Παρακαλούμε στείλτε ένα μήνυμα ηλ. ταχυδρομείου στο <warning>account-deletion@ente.io</warning> από την καταχωρημένη διεύθυνσή σας.",
   "entePhotosPerm": "Το Ente <i>χρειάζεται άδεια</i> για να διατηρεί τις φωτογραφίες σας",
   "ok": "OK",
   "createAccount": "Δημιουργία λογαριασμού",
@@ -73,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +139,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -212,18 +211,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Κωδικός επαλήθευσης",
   "verifyEmailID": "Επαλήθευση {email}",
   "emailNoEnteAccount": "Η διεύθυνση {email} δεν αντιστοιχεί σε λογαριασμό Ente.\n\nΣτείλτε μια πρόσκληση για να μοιραστείτε φωτογραφίες.",
-  "shareMyVerificationID": "Αυτός είναι ο κωδικός επαλήθευσής μου: {verificationID} για το ente.io.",
-  "shareTextConfirmOthersVerificationID": "Γεια σας, θα μπορούσατε να επιβεβαιώσετε ότι αυτό είναι το αναγνωριστικό επαλήθευσής σας για το ente.io: {verificationID}",
   "somethingWentWrong": "Κάτι πήγε στραβά",
   "sendInvite": "Αποστολή πρόσκλησης",
-  "shareTextRecommendUsingEnte": "Κατεβάστε το Ente ώστε να μπορούμε εύκολα να μοιραστούμε φωτογραφίες και βίντεο στην αυθεντική τους ποιότητα\n\nhttps://ente.io",
   "done": "Ολοκληρώθηκε",
   "applyCodeTitle": "Εφαρμογή κωδικού",
   "enterCodeDescription": "Εισάγετε τον κωδικό που παρέχεται από το φίλο σας για να κερδίσετε δωρεάν αποθήκευση και για τους δύο σας",
@@ -392,7 +388,6 @@
   "discover_sunset": "Ηλιοβασιλέματα",
   "discover_hills": "Λόφοι",
   "discover_greenery": "Πράσινο",
-  "mlIndexingDescription": "Έχετε υπόψιν ότι η μηχανική μάθηση θα έχει ως αποτέλεσμα υψηλότερη χρήση δικτύου και μπαταρίας μέχρι όλα τα αντικείμενα να εισαχθούν στο ευρετήριο. Εξετάστε το ενδεχόμενο να χρησιμοποιήσετε την εφαρμογή για υπολογιστές ώστε η ευρετηρίαση να ολοκληρωθεί ταχύτερα, όλα τα αποτελέσματα θα συγχρονιστούν αυτόματα.",
   "loadingModel": "Γίνεται λήψη μοντέλων...",
   "waitingForWifi": "Αναμονή για WiFi...",
   "status": "Κατάσταση",
@@ -497,8 +492,6 @@
   "familyPlans": "Οικογενειακό πρόγραμμα",
   "referrals": "Συστάσεις",
   "notifications": "Ειδοποιήσεις",
-  "sharedPhotoNotifications": "Νέες κοινόχρηστες φωτογραφίες",
-  "sharedPhotoNotificationsExplanation": "Λάβετε ειδοποιήσεις όταν κάποιος προσθέτει μια φωτογραφία σε ένα κοινόχρηστο άλμπουμ που είστε μέρος του",
   "advanced": "Για προχωρημένους",
   "general": "Γενικά",
   "security": "Ασφάλεια",
@@ -532,7 +525,6 @@
   "darkTheme": "Σκοτεινό",
   "systemTheme": "Προεπιλογή συστήματος",
   "freeTrial": "Δωρεάν δοκιμή",
-  "selectYourPlan": "Επιλέξτε το πλάνο σας",
   "enteSubscriptionPitch": "Το Ente διατηρεί τις αναμνήσεις σας για να είναι πάντα στη διάθεσή σας, ακόμα και αν χάσετε τη συσκευή σας.",
   "enteSubscriptionShareWithFamily": "Μπορείτε να προσθέσετε και την οικογένειά σας στο πλάνο σας.",
   "currentUsageIs": "Η τρέχουσα χρήση σας είναι ",
@@ -544,7 +536,6 @@
     "type": "text"
   },
   "couldNotUpdateSubscription": "Αδυναμία ενημέρωσης συνδρομής",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Παρακαλούμε επικοινωνήστε με το support@ente.io και θα χαρούμε να βοηθήσουμε!",
   "paymentFailed": "Η πληρωμή απέτυχε",
   "paymentFailedTalkToProvider": "Παρακαλούμε επικοινωνήστε με την υποστήριξη του {providerName} εάν έχετε χρεωθεί",
   "@paymentFailedTalkToProvider": {
@@ -575,7 +566,6 @@
   "grantFullAccessPrompt": "Παρακαλούμε επιτρέψτε την πρόσβαση σε όλες τις φωτογραφίες από τις Ρυθμίσεις της συσκευής σας",
   "allowPermTitle": "Να επιτρέπεται η πρόσβαση στις φωτογραφίες",
   "allowPermBody": "Παρακαλούμε επιτρέψτε την πρόσβαση στις φωτογραφίες σας από τις Ρυθμίσεις, ώστε το Ente να μπορεί να εμφανίζει και να δημιουργεί αντίγραφα ασφαλείας της βιβλιοθήκης σας.",
-  "openSettings": "Άνοιγμα Ρυθμίσεων",
   "selectMorePhotos": "Επιλογή περισσότερων φωτογραφιών",
   "existingUser": "Υπάρχων χρήστης",
   "newToEnte": "Νέος/α στο Ente",
@@ -788,7 +778,6 @@
   "fileTypesAndNames": "Τύποι και ονόματα αρχείων",
   "location": "Τοποθεσία",
   "moments": "Στιγμές",
-  "searchFaceEmptySection": "Τα άτομα θα εμφανιστούν εδώ μόλις ολοκληρωθεί η δημιουργία ευρετηρίου",
   "searchDatesEmptySection": "Αναζήτηση με ημερομηνία, μήνα ή έτος",
   "searchLocationEmptySection": "Ομαδοποίηση φωτογραφιών που τραβήχθηκαν σε συγκεκριμένη ακτίνα από μία φωτογραφία",
   "searchPeopleEmptySection": "Προσκαλέστε ανθρώπους και δείτε όλες τις φωτογραφίες που θα μοιραστούν εδώ",
@@ -1022,7 +1011,6 @@
   },
   "extraPhotosFound": "Βρέθηκαν επιπλέον φωτογραφίες",
   "configuration": "Παραμετροποίηση",
-  "localIndexing": "Τοπική δημιουργία ευρετηρίων",
   "processed": "Έγινε επεξεργασία",
   "resetPerson": "Αφαίρεση",
   "areYouSureYouWantToResetThisPerson": "Θέλετε σίγουρα να επαναφέρετε αυτό το άτομο;",

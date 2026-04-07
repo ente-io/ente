@@ -333,7 +333,7 @@
     }
   },
   "sorry": "Przepraszamy",
-  "importFailureDesc": "Nie można przetworzyć wybranego pliku.\nJeśli potrzebujesz pomocy, napisz do support@ente.io!",
+  "importFailureDesc": "Nie można przeanalizować wybranego pliku.\nJeśli potrzebujesz pomocy, napisz do support@ente.com!",
   "pendingSyncs": "Uwaga",
   "pendingSyncsWarningBody": "Niektóre z Twoich kodów nie zostały skopiowane.\n\nUpewnij się, że masz kopię zapasową tych kodów przed wylogowaniem.",
   "checkInboxAndSpamFolder": "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację",
@@ -346,7 +346,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

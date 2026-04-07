@@ -102,6 +102,15 @@ impl<B: Backend> ChatDb<B> {
         rows.iter().map(|row| self.session_from_row(row)).collect()
     }
 
+    pub fn list_all_sessions(&self) -> Result<Vec<Session>> {
+        let rows = self.backend.query(
+            "SELECT session_uuid, title, created_at, updated_at, server_updated_at, remote_id, needs_sync, deleted_at \
+             FROM sessions ORDER BY updated_at DESC",
+            &[],
+        )?;
+        rows.iter().map(|row| self.session_from_row(row)).collect()
+    }
+
     pub fn list_sessions_with_preview(&self) -> Result<Vec<SessionWithPreview>> {
         let sessions = self.list_sessions()?;
         let mut with_preview = Vec::with_capacity(sessions.len());

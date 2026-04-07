@@ -1,6 +1,11 @@
 import { defineConfig } from "vitepress";
 import { sidebar } from "./sidebar";
 
+const docsBaseUrl = "https://ente.com/help";
+
+// Pages with noindex in frontmatter, collected during build to exclude from sitemap
+const noindexPages = new Set<string>();
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     base: "/help/", // Serve under /help path
@@ -12,7 +17,7 @@ export default defineConfig({
     cleanUrls: true,
     ignoreDeadLinks: "localhostLinks",
     sitemap: {
-        hostname: "https://ente.io/help/",
+        hostname: `${docsBaseUrl}/`,
         transformItems: (items) => {
             // Remove trailing slashes for consistency (cleanUrls is enabled)
             // and deduplicate URLs
@@ -23,6 +28,10 @@ export default defineConfig({
                     url: item.url.replace(/\/$/, ""),
                 }))
                 .filter((item) => {
+                    const path = item.url.replace(/\/$/, "");
+                    if (noindexPages.has(path)) {
+                        return false;
+                    }
                     if (seen.has(item.url)) {
                         return false;
                     }
@@ -32,8 +41,27 @@ export default defineConfig({
         },
     },
     transformPageData(pageData) {
+        // Track noindex pages for sitemap exclusion
+        const head = pageData.frontmatter.head;
+        if (Array.isArray(head)) {
+            for (const tag of head) {
+                if (
+                    Array.isArray(tag) &&
+                    tag[0] === "meta" &&
+                    tag[1]?.name === "robots" &&
+                    tag[1]?.content?.includes("noindex")
+                ) {
+                    const path = pageData.relativePath
+                        .replace(/index\.md$/, "")
+                        .replace(/\.md$/, "");
+                    noindexPages.add(path);
+                    break;
+                }
+            }
+        }
+
         // Add canonical URL to all pages
-        const canonicalUrl = `https://ente.io/help/${pageData.relativePath}`
+        const canonicalUrl = `${docsBaseUrl}/${pageData.relativePath}`
             .replace(/index\.md$/, "")
             .replace(/\.md$/, "");
         pageData.frontmatter.canonicalUrl = canonicalUrl;
@@ -41,13 +69,13 @@ export default defineConfig({
     async transformHead({ pageData }) {
         const head: any[] = [];
         const canonicalUrl =
-            pageData.frontmatter.canonicalUrl || `https://ente.io/help/`;
+            pageData.frontmatter.canonicalUrl || `${docsBaseUrl}/`;
         const title =
             pageData.frontmatter.title || pageData.title || "Ente Help";
         const description =
             pageData.frontmatter.description ||
             "Documentation and help for Ente's products";
-        const ogImage = "https://ente.io/help/og-image.png"; // You can customize this per page if needed
+        const ogImage = `${docsBaseUrl}/og-image.png`; // You can customize this per page if needed
 
         // Canonical URL
         head.push(["link", { rel: "canonical", href: canonicalUrl }]);
@@ -218,11 +246,11 @@ function generateBreadcrumbSchema(pageData: any) {
             "@type": "ListItem",
             position: 1,
             name: "Home",
-            item: "https://ente.io/help/",
+            item: `${docsBaseUrl}/`,
         },
     ];
 
-    let currentPath = "https://ente.io/help";
+    let currentPath = docsBaseUrl;
     parts.forEach((part, index) => {
         currentPath += `/${part}`;
         items.push({

@@ -516,7 +516,6 @@
   "youCannotShareWithYourself": "لا يمكنك المشاركة مع نفسك.",
   "inviteToEnte": "دعوة إلى Ente",
   "sendInvite": "إرسال دعوة",
-  "shareTextRecommendUsingEnte": "حمّل Ente\n\nhttps://ente.io",
   "thisIsYourVerificationId": "هذا هو معرّف التحقق الخاص بك",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "يجب أن يرى أي شخص يشارك ألبومات معك نفس معرّف التحقق على جهازه.",
   "howToViewShareeVerificationID": "يرجى الطلب منهم الضغط مطولًا على عنوان بريدهم الإلكتروني في شاشة الإعدادات، والتأكد من تطابق المعرّفات على كلا الجهازين.",
@@ -525,15 +524,13 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "معرّف التحقق",
   "verifyEmailID": "التحقق من {email}",
   "emailNoEnteAccount": "لا يملك {email} حساب Ente.\n\nأرسل له دعوة لمشاركة العناصر.",
-  "shareMyVerificationID": "إليك معرّف التحقق الخاص بي لـ ente.io: {verificationID}",
-  "shareTextConfirmOthersVerificationID": "مرحبًا، هل يمكنك تأكيد أن هذا هو معرّف التحقق الخاص بك على ente.io: {verificationID}",
   "passwordLock": "قفل بكلمة مرور",
   "manage": "إدارة",
   "addedAs": "تمت الإضافة كـ",

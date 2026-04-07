@@ -330,7 +330,6 @@
     }
   },
   "sorry": "معذرت",
-  "importFailureDesc": "منتخب فائل کو پارس (parse) نہیں کیا جا سکا۔\nاگر آپ کو مدد کی ضرورت ہو تو براہ کرم support@ente.io پر لکھیں!",
   "pendingSyncs": "انتباہ",
   "pendingSyncsWarningBody": "آپ کے کچھ کوڈز کا بیک اپ نہیں لیا گیا ہے۔\n\nبراہ کرم لاگ آؤٹ کرنے سے پہلے یقینی بنائیں کہ آپ کے پاس ان کوڈز کا بیک اپ موجود ہے۔",
   "checkInboxAndSpamFolder": "تصدیق مکمل کرنے کے لیے براہ کرم اپنا ان باکس (اور اسپام) چیک کریں",
@@ -343,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },

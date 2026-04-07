@@ -65,16 +65,16 @@ jobs:
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/photos web/apps/photos/out
 
             - name: Build custom-albums
-              run: yarn build:photos
+              run: yarn build:albums
               env:
-                  NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP: 1
+                  NEXT_PUBLIC_ENTE_OFFICIAL_ALBUMS_APP: 1
 
             - name: Publish custom-albums
               uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/custom-albums web/apps/photos/out
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/custom-albums web/apps/albums/out
 
             - name: Build accounts
               run: yarn build:accounts
@@ -125,6 +125,16 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/share web/apps/share/out
+
+            - name: Build memories
+              run: yarn build:memories
+
+            - name: Publish memories
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/memories web/apps/memories/out
 
             - name: Build paste
               run: yarn build:paste

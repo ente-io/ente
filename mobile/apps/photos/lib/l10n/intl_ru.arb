@@ -5,6 +5,7 @@
   "accountWelcomeBack": "С возвращением!",
   "emailAlreadyRegistered": "Электронная почта уже зарегистрирована.",
   "emailNotRegistered": "Электронная почта не зарегистрирована.",
+  "accountSetupIncompleteCreateAccount": "Настройка учетной записи не завершена. Создайте учетную запись, чтобы завершить настройку.",
   "email": "Электронная почта",
   "cancel": "Отменить",
   "verify": "Подтвердить",
@@ -28,10 +29,10 @@
   "deleteReason4": "Моя причина не указана",
   "sendEmail": "Отправить электронное письмо",
   "deleteRequestSLAText": "Ваш запрос будет обработан в течение 72 часов.",
-  "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.io</warning> с вашего зарегистрированного адреса электронной почты.",
   "entePhotosPerm": "Ente <i>требуется разрешение для</i> сохранения ваших фото",
   "ok": "Хорошо",
   "createAccount": "Создать аккаунт",
+  "createAccountTitle": "Создать аккаунт",
   "createNewAccount": "Создать новый аккаунт",
   "password": "Пароль",
   "confirmPassword": "Подтвердите пароль",
@@ -76,7 +77,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -87,7 +88,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -121,6 +122,7 @@
   "generatingEncryptionKeys": "Генерация ключей шифрования...",
   "pleaseWait": "Пожалуйста, подождите...",
   "continueLabel": "Продолжить",
+  "continueInMailApp": "Продолжить в приложении почты",
   "insecureDevice": "Небезопасное устройство",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "К сожалению, мы не смогли сгенерировать безопасные ключи на этом устройстве.\n\nПожалуйста, зарегистрируйтесь с другого устройства.",
   "howItWorks": "Как это работает",
@@ -134,6 +136,8 @@
   "changeEmail": "Изменить адрес электронной почты",
   "enterYourPassword": "Введите ваш пароль",
   "welcomeBack": "С возвращением!",
+  "readyToBackupTitle": "Готово к копированию",
+  "readyToBackupSubtitle": "Ваши фотографии будут синхронизироваться в фоновом режиме. Первая резервная копия может занять некоторое время.",
   "contactSupport": "Связаться с поддержкой",
   "locationPickerTip": "Вы также можете добавить местоположение по центру фотографии из экрана информации о фотографии",
   "@locationPickerTip": {
@@ -160,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -308,18 +312,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Идентификатор подтверждения",
   "verifyEmailID": "Подтвердить {email}",
   "emailNoEnteAccount": "У {email} нет аккаунта Ente.\n\nОтправьте ему приглашение для обмена фото.",
-  "shareMyVerificationID": "Вот мой идентификатор подтверждения: {verificationID} для ente.io.",
-  "shareTextConfirmOthersVerificationID": "Привет, можешь подтвердить, что это твой идентификатор подтверждения ente.io: {verificationID}",
   "somethingWentWrong": "Что-то пошло не так",
   "sendInvite": "Отправить приглашение",
-  "shareTextRecommendUsingEnte": "Скачай Ente, чтобы мы могли легко делиться фото и видео в оригинальном качестве\n\nhttps://ente.io",
   "done": "Готово",
   "applyCodeTitle": "Применить код",
   "enterCodeDescription": "Введите код, предоставленный вашим другом, чтобы вы оба могли получить бесплатное хранилище",
@@ -347,7 +348,6 @@
   "theyAlsoGetXGb": "Они тоже получат {storageAmountInGB} ГБ",
   "referralStorageForBoth": "{storageAmountInGB} ГБ для них + {storageAmountInGB} ГБ для вас при переходе на платный тариф.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ каждый раз, когда кто-то подписывается на платный тариф и применяет ваш код",
-  "shareTextReferralCode": "Ente Photos — это безопасное и защищённое хранилище для ваших фотографий\n* Скачайте Ente Photos — https://ente.io/app\n* Создайте аккаунт\n* Примените реферальный код {referralCode} в Настройки -> Рефералы -> Применить код\n* Получите {referralStorageInGB} ГБ бесплатно при переходе на платный тариф",
   "claimFreeStorage": "Получить бесплатное хранилище",
   "inviteYourFriends": "Пригласите своих друзей",
   "earnFreeStorage": "Заработайте бесплатное место в хранилище",
@@ -518,7 +518,6 @@
   "discover_sunset": "Закат",
   "discover_hills": "Холмы",
   "discover_greenery": "Зелень",
-  "mlIndexingDescription": "Обратите внимание, что машинное обучение увеличит использование трафика и батареи, пока все элементы не будут проиндексированы. Рассмотрите использование приложения для компьютера для более быстрой индексации. Результаты будут автоматически синхронизированы.",
   "loadingModel": "Загрузка моделей...",
   "waitingForWifi": "Ожидание Wi-Fi...",
   "status": "Статус",
@@ -661,8 +660,6 @@
   "familyPlans": "Семейные тарифы",
   "referrals": "Рефералы",
   "notifications": "Уведомления",
-  "sharedPhotoNotifications": "Новые общие фото",
-  "sharedPhotoNotificationsExplanation": "Получать уведомления, когда кто-то добавляет фото в общий альбом, в котором вы состоите",
   "socialNotifications": "Отметки \"Нравится\" и комментарии",
   "socialNotificationsExplanation": "Получать уведомления об отметке \"Нравится\" на ваших фотографиях и комментариях в альбомах, в которых вы участвуете",
   "advanced": "Расширенные",
@@ -699,7 +696,6 @@
   "darkTheme": "Тёмная",
   "systemTheme": "Системная",
   "freeTrial": "Бесплатный пробный период",
-  "selectYourPlan": "Выберите тариф",
   "enteSubscriptionPitch": "Ente сохраняет ваши воспоминания, чтобы они всегда были доступны вам, даже если вы потеряете устройство.",
   "enteSubscriptionShareWithFamily": "Ваша семья также может быть включена в ваш тариф.",
   "currentUsageIs": "Текущее использование составляет ",
@@ -720,7 +716,6 @@
   "subscription": "Подписка",
   "paymentDetails": "Платёжные данные",
   "manageFamily": "Управление семьёй",
-  "contactToManageSubscription": "Пожалуйста, свяжитесь с нами по адресу support@ente.io для управления вашей подпиской {provider}.",
   "renewSubscription": "Продлить подписку",
   "cancelSubscription": "Отменить подписку",
   "areYouSureYouWantToRenew": "Вы уверены, что хотите продлить?",
@@ -769,7 +764,6 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} уже связан с другим аккаунтом Ente.\nЕсли вы хотите использовать {id} с этим аккаунтом, пожалуйста, свяжитесь с нашей службой поддержки",
   "visitWebToManage": "Пожалуйста, посетите web.ente.io для управления вашей подпиской",
   "couldNotUpdateSubscription": "Не удалось обновить подписку",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.io, и мы будем рады помочь!",
   "paymentFailed": "Платёж не удался",
   "paymentFailedTalkToProvider": "Пожалуйста, обратитесь в поддержку {providerName}, если с вас сняли деньги",
   "@paymentFailedTalkToProvider": {
@@ -800,7 +794,6 @@
   "grantFullAccessPrompt": "Пожалуйста, разрешите доступ ко всем фото в настройках устройства",
   "allowPermTitle": "Разрешить доступ к фото",
   "allowPermBody": "Пожалуйста, разрешите доступ к вашим фото через настройки устройства, чтобы Ente мог отображать и сохранять вашу библиотеку.",
-  "openSettings": "Открыть настройки",
   "selectMorePhotos": "Выбрать больше фото",
   "existingUser": "Существующий пользователь",
   "newToEnte": "Впервые в Ente",
@@ -1183,7 +1176,6 @@
   "fileTypesAndNames": "Типы и названия файлов",
   "location": "Местоположение",
   "moments": "Моменты",
-  "searchFaceEmptySection": "Люди появятся здесь после завершения индексации",
   "searchDatesEmptySection": "Ищите по дате, месяцу или году",
   "searchLocationEmptySection": "Группируйте фото, снятые в определённом радиусе от фото",
   "searchPeopleEmptySection": "Приглашайте людей, и здесь появятся все фото, которыми они поделились",
@@ -1613,7 +1605,6 @@
   },
   "extraPhotosFound": "Найдены дополнительные фото",
   "configuration": "Настройки",
-  "localIndexing": "Локальная индексация",
   "processed": "Обработано",
   "resetPerson": "Удалить",
   "areYouSureYouWantToResetThisPerson": "Вы уверены, что хотите сбросить данные этого человека?",
@@ -1975,9 +1966,6 @@
   "curatedMemories": "Отобранные воспоминания",
   "widgets": "Виджеты",
   "memories": "Воспоминания",
-  "peopleWidgetDesc": "Выберите людей, которых вы хотите видеть на главном экране.",
-  "albumsWidgetDesc": "Выберите альбомы, которые вы хотите видеть на главном экране.",
-  "memoriesWidgetDesc": "Выберите, какие воспоминания вы хотите видеть на главном экране.",
   "smartMemories": "Умные воспоминания",
   "pastYearsMemories": "Воспоминания прошлых лет",
   "deleteMultipleAlbumDialog": "Также удалить фото (и видео), находящиеся в этих {count} альбомах, из <bold>всех</bold> других альбомов, частью которых они являются?",
@@ -1991,9 +1979,6 @@
   "sorryWeHadToPauseYourBackups": "Извините, нам пришлось приостановить резервное копирование",
   "clickToInstallOurBestVersionYet": "Нажмите, чтобы установить нашу лучшую версию",
   "onThisDayNotificationExplanation": "Получайте напоминания о воспоминаниях, связанных с этим днем в прошлые годы.",
-  "addMemoriesWidgetPrompt": "Добавьте виджет воспоминаний на главный экран и вернитесь сюда, чтобы настроить его.",
-  "addAlbumWidgetPrompt": "Добавьте виджет альбома на главный экран и вернитесь сюда, чтобы настроить его.",
-  "addPeopleWidgetPrompt": "Добавьте виджет людей на главный экран и вернитесь сюда, чтобы настроить его.",
   "birthdayNotifications": "Уведомления о днях рождения",
   "receiveRemindersOnBirthdays": "Получайте напоминания, когда у кого-то день рождения. Нажатие на уведомление перенесет вас к фотографиям именинника.",
   "happyBirthday": "С днём рождения! 🥳",
@@ -2023,7 +2008,6 @@
   "same": "Такой же",
   "different": "Разные",
   "sameperson": "Тот же человек?",
-  "indexingPausedStatusDescription": "Индексирование приостановлено. Оно автоматически возобновится, когда устройство будет готово. Устройство считается готовым, когда уровень заряда батареи, её состояние и температура находятся в пределах нормы.",
   "thisWeek": "На этой неделе",
   "lastWeek": "На прошлой неделе",
   "thisMonth": "В этом месяце",
@@ -2298,16 +2282,6 @@
   },
   "playfulKids": "Игра детей",
   "coastalCliffs": "Скалы у моря",
-  "candidLaughter": "Искренний смех",
-  "groupSelfies": "Мы все",
-  "birthdayJoy": "Радость дня рождения",
-  "weddingMoments": "Сияние свадебного дня",
-  "goldenHourPortraits": "Лица в золотой час",
-  "concertNights": "Концертные ночи",
-  "poolDays": "Дни у бассейна",
-  "picnicDays": "Пикниковые воспоминания",
-  "campingMoments": "Моменты кемпинга",
-  "babySmiles": "Улыбки малыша",
   "ritualsTitle": "Ритуалы",
   "ritualAddTooltip": "Добавить ритуал",
   "ritualActivityHeading": "Активность",
@@ -2407,38 +2381,6 @@
   "newLikeNotificationTitle": "Вы получили \"Нравится\"",
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
-  },
-  "likedYourPhoto": "Понравилось ваше фото",
-  "likedAPhoto": "Понравилось фото",
-  "likedYourVideo": "Понравилось ваше видео",
-  "commentedOnYourPhoto": "Прокомментировал(а) ваше фото",
-  "commentedOnAPhoto": "Прокомментировал(а) фото",
-  "commentedOnYourVideo": "Прокомментировал(а) ваше видео",
-  "commentedOnAVideo": "Прокомментировал(а) видео",
-  "repliedToYourComment": "Ответил(а) на ваш комментарий",
-  "repliedToAComment": "Ответил(а) на комментарий",
-  "likedYourComment": "Понравился ваш комментарий",
-  "likedAComment": "Понравился комментарий",
-  "likedYourReply": "Понравился ваш ответ",
-  "likedAReply": "Понравился ответ",
-  "addedAMemoryTo": "Добавлено воспоминание в {albumName}",
-  "@addedAMemoryTo": {
-    "placeholders": {
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
-  "addedNMemoriesTo": "Добавлено {count} воспоминание в {albumName}",
-  "@addedNMemoriesTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "albumName": {
-        "type": "String"
-      }
-    }
   },
   "and1Other": "и еще один",
   "andXOthers": "и {count} других",
@@ -2576,7 +2518,6 @@
   "deleteOnDeviceFiles": "Удалить на устройстве",
   "noHiddenFilesOnDevice": "Нет скрытых файлов на устройстве",
   "welcome": "Добро пожаловать",
-  "grantGalleryPermissionDesc": "Предоставьте разрешение для доступа к фотографиям и организации их с использованием распознавания лиц.\n\nВся обработка происходит на вашем устройстве.",
   "grantPermission": "Предоставить разрешение",
   "privateAI": "Частный ИИ",
   "privateAIDescription": "Ente использует ИИ на устройстве для анализа ваших фотографий на наличие лиц, объектов, мест и текста. Эти данные используются для таких функций, как распознавание лиц и умный поиск. Все обрабатывается и хранится локально на вашем устройстве — ничего не загружается на наши серверы.",
@@ -2588,7 +2529,6 @@
   "enableOnDeviceMLDescription": "Включите машинное обучение на устройстве для поиска по лицам, местам и другим критериям. Ваши фотографии никогда не покидают ваше устройство.",
   "offlineEnableSharingTitle": "Обмен начинается здесь",
   "offlineEnableSharingDesc": "Зарегистрируйтесь, чтобы делиться фотографиями со всеми — даже с теми, кто не использует Ente",
-  "offlineEnableBackupTitle": "Альбомы, которые будут загружены, появятся здесь",
   "offlineEnableBackupDesc": "Зарегистрируйтесь, чтобы сохранить свои воспоминания с Ente.",
   "offlineEnableBackupAction": "Начните с 10 ГБ БЕСПЛАТНО",
   "offlineSettingsBannerTitle": "Мы никогда не сможем видеть ваши фотографии. Никогда.",
@@ -2596,11 +2536,7 @@
   "alreadyHaveAnAccount": "Уже есть аккаунт?",
   "loginToEnte": "Войти в Ente",
   "searchAndDiscover": "Искать и открывать",
-  "searchAndDiscoverDesc": "Ищите фотографии по тексту или заново открывайте старые воспоминания с помощью машинного обучения на устройстве",
   "shareYourMemories": "Делитесь своими воспоминаниями",
-  "shareYourMemoriesDesc": "Делитесь своими альбомами, создавайте ссылки, собирайте фотографии и оставляйте комментарии",
-  "privateAndSecureBackups": "Частные и безопасные резервные копии",
-  "privateAndSecureBackupsDesc": "Сквозное шифрование, тройная репликация, открытый исходный код и независимый аудит",
   "mlProgressBannerTitle": "Подождите немного!",
   "mlProgressBannerDescription": "Ваши фотографии обрабатываются на устройстве для обнаружения лиц, объектов и другого.",
   "mlProgressBannerStatus": "{indexed} из {total} фотографий обработано",

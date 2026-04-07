@@ -22,22 +22,26 @@ RUN yarn config set network-timeout 900000 -g
 
 RUN yarn install
 RUN yarn build:photos
+RUN yarn build:albums
 RUN yarn build:accounts
 RUN yarn build:auth
 RUN yarn build:cast
 RUN yarn build:share
 RUN yarn build:embed
+RUN yarn build:paste
 
 FROM nginx
 
 WORKDIR /out
 
 COPY --from=builder /build/web/apps/photos/out /out/photos
+COPY --from=builder /build/web/apps/albums/out /out/albums
 COPY --from=builder /build/web/apps/accounts/out /out/accounts
 COPY --from=builder /build/web/apps/auth/out /out/auth
 COPY --from=builder /build/web/apps/cast/out /out/cast
 COPY --from=builder /build/web/apps/share/out /out/share
 COPY --from=builder /build/web/apps/embed/out /out/embed
+COPY --from=builder /build/web/apps/paste/out /out/paste
 
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
@@ -49,7 +53,7 @@ server {
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3002; root /out/photos;
+    listen 3002; root /out/albums;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
@@ -68,6 +72,10 @@ server {
     listen 3006; root /out/embed;
     location / { try_files \$uri \$uri.html /index.html; }
 }
+server {
+    listen 3008; root /out/paste;
+    location / { try_files \$uri \$uri.html /index.html; }
+}
 EOF
 
 EXPOSE 3000
@@ -77,17 +85,22 @@ EXPOSE 3003
 EXPOSE 3004
 EXPOSE 3005
 EXPOSE 3006
+EXPOSE 3008
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
-ENV ENTE_ALBUMS_ORIGIN=https://localhost:3002
-ENV ENTE_PHOTOS_ORIGIN=https://localhost:3000
+ENV ENTE_ALBUMS_ORIGIN=http://localhost:3002
+ENV ENTE_PHOTOS_ORIGIN=http://localhost:3000
 
 COPY <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
 find /out -name '*.js' |
     xargs sed -i'' "s#ENTE_API_ORIGIN_PLACEHOLDER#\$ENTE_API_ORIGIN#g"
 find /out/photos -name '*.js' |
     xargs sed -i'' "s#ENTE_ALBUMS_ORIGIN_PLACEHOLDER#\$ENTE_ALBUMS_ORIGIN#g"
+find /out/albums -name '*.js' |
+    xargs sed -i'' "s#ENTE_ALBUMS_ORIGIN_PLACEHOLDER#\$ENTE_ALBUMS_ORIGIN#g"
 find /out/photos -name '*.js' |
+    xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
+find /out/albums -name '*.js' |
     xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
 EOF
 
