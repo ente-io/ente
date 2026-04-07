@@ -216,7 +216,11 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
     // During the wait period (hasText passed but 1s timer hasn't fired),
     // show a transparent gesture layer to capture long press.
-    if (!_overlayActive || _localFilePath == null) {
+    // Only show when we know text exists to avoid blocking motion photo gestures.
+    if (_localFilePath == null) {
+      return const SizedBox.shrink();
+    }
+    if (!_overlayActive) {
       return Positioned.fill(
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,

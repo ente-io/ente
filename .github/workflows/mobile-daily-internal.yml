@@ -55,6 +55,9 @@ jobs:
               with:
                   toolchain: ${{ env.RUST_VERSION }}
 
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 

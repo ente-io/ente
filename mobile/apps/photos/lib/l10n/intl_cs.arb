@@ -1301,8 +1301,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Nastavit poloměr",
-  "familyPlanPortalTitle": "Rodina",
-  "familyPlanOverview": "Přidejte 5 členů rodiny do svého stávajícího plánu bez dalších poplatků.\n\nKaždý člen dostane svůj vlastní soukromý prostor a nemůže vidět soubory ostatních členů, pokud nejsou sdílené.\n\nRodinné plány jsou k dispozici zákazníkům, kteří mají placené předplatné Ente.\n\nPřihlaste se a začněte hned teď!",
   "androidBiometricHint": "Ověřte svou identitu",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2377,10 +2375,6 @@
   "artisticPortraits": "Umělecké portréty",
   "streetFood": "Kousky pouličního jídla",
   "riverCruises": "Výhledy z plavby po řece",
-  "facesTimelineBannerTitle": "Vzpomínání",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "Zobrazit fotografie {name} během let",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

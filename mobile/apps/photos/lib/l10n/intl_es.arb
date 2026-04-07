@@ -1429,8 +1429,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Establecer radio",
-  "familyPlanPortalTitle": "Familia",
-  "familyPlanOverview": "Añade 5 familiares a tu plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de Ente pagada.\n\n¡Suscríbete ahora para empezar!",
   "androidBiometricHint": "Verificar identidad",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2511,10 +2509,6 @@
   "artisticPortraits": "Retratos artísticos",
   "streetFood": "Antojos callejeros",
   "riverCruises": "Vistas de crusero fluvial",
-  "facesTimelineBannerTitle": "Jardín de recuerdos",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "Ver fotos de {name} a lo largo de los años",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

@@ -1207,8 +1207,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Estableix radi",
-  "familyPlanPortalTitle": "Família",
-  "familyPlanOverview": "Afegeix 5 membres de la família al teu pla existent sense pagar extra.\n\nCada membre obté el seu propi espai privat, i no pot veure els fitxers dels altres a menys que es comparteixin.\n\nEls plans familiars estan disponibles per als clients que tenen una subscripció de pagament d'Ente.\n\nSubscriu-te ara per començar!",
   "androidBiometricHint": "Verifica identitat",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2176,10 +2174,6 @@
   "artisticPortraits": "Retrats artístics",
   "streetFood": "Mossegades de menjar de carrer",
   "riverCruises": "Vistes de creuer fluvial",
-  "facesTimelineBannerTitle": "Camí dels records",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "Veure les fotos de {name} a través dels anys",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

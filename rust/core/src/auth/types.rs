@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::crypto::{SecretString, SecretVec};
 
 /// Attributes stored on server for key derivation and encrypted keys.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyAttributes {
     /// Salt for deriving key-encryption-key from password (base64)
@@ -40,6 +40,49 @@ pub struct KeyAttributes {
     /// Nonce for recovery key decryption (base64)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recovery_key_decryption_nonce: Option<String>,
+}
+
+impl fmt::Debug for KeyAttributes {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("KeyAttributes")
+            .field("kek_salt", &"[REDACTED]")
+            .field("encrypted_key", &"[REDACTED]")
+            .field("key_decryption_nonce", &"[REDACTED]")
+            .field("public_key", &"[REDACTED]")
+            .field("encrypted_secret_key", &"[REDACTED]")
+            .field("secret_key_decryption_nonce", &"[REDACTED]")
+            .field("mem_limit", &self.mem_limit)
+            .field("ops_limit", &self.ops_limit)
+            .field(
+                "master_key_encrypted_with_recovery_key",
+                &self
+                    .master_key_encrypted_with_recovery_key
+                    .as_ref()
+                    .map(|_| "[REDACTED]"),
+            )
+            .field(
+                "master_key_decryption_nonce",
+                &self
+                    .master_key_decryption_nonce
+                    .as_ref()
+                    .map(|_| "[REDACTED]"),
+            )
+            .field(
+                "recovery_key_encrypted_with_master_key",
+                &self
+                    .recovery_key_encrypted_with_master_key
+                    .as_ref()
+                    .map(|_| "[REDACTED]"),
+            )
+            .field(
+                "recovery_key_decryption_nonce",
+                &self
+                    .recovery_key_decryption_nonce
+                    .as_ref()
+                    .map(|_| "[REDACTED]"),
+            )
+            .finish()
+    }
 }
 
 /// Private key material (never sent to server).
@@ -197,6 +240,22 @@ mod tests {
     }
 
     #[test]
+    fn test_key_attributes_debug_redacts_server_material() {
+        let attrs = sample_key_attributes();
+
+        let debug = format!("{attrs:?}");
+        assert!(debug.contains("[REDACTED]"));
+        assert!(!debug.contains("server-kek-salt"));
+        assert!(!debug.contains("server-encrypted-key"));
+        assert!(!debug.contains("server-key-nonce"));
+        assert!(!debug.contains("server-public-key"));
+        assert!(!debug.contains("server-encrypted-secret-key"));
+        assert!(!debug.contains("server-secret-key-nonce"));
+        assert!(debug.contains("Some(1)"));
+        assert!(debug.contains("Some(2)"));
+    }
+
+    #[test]
     fn test_key_gen_result_debug_redacts_secret_material() {
         let result = KeyGenResult {
             key_attributes: sample_key_attributes(),
@@ -216,6 +275,12 @@ mod tests {
         assert!(!debug.contains("private-secret-key"));
         assert!(!debug.contains("[1, 2, 3]"));
         assert!(!debug.contains("[4, 5, 6]"));
+        assert!(!debug.contains("server-kek-salt"));
+        assert!(!debug.contains("server-encrypted-key"));
+        assert!(!debug.contains("server-key-nonce"));
+        assert!(!debug.contains("server-public-key"));
+        assert!(!debug.contains("server-encrypted-secret-key"));
+        assert!(!debug.contains("server-secret-key-nonce"));
         assert!(debug.contains("key_attributes"));
     }
 

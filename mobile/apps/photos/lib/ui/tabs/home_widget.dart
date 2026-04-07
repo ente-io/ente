@@ -1124,11 +1124,11 @@ class _HomeWidgetState extends State<HomeWidget> {
           );
         },
       );
+      // Do not show change dialog again
+      await updateService.hideChangeLog();
     } finally {
       _isShowingChangeLog = false;
     }
-    // Do not show change dialog again
-    updateService.hideChangeLog().ignore();
   }
 
   void _onDidReceiveNotificationResponse(

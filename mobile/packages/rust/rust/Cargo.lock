@@ -438,6 +438,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-contacts"
+version = "0.0.1"
+dependencies = [
+ "ente-core",
+ "md-5",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "ente-core"
 version = "0.0.1"
 dependencies = [
@@ -465,6 +476,7 @@ dependencies = [
 name = "ente_rust"
 version = "0.0.1"
 dependencies = [
+ "ente-contacts",
  "ente-core",
  "flutter_rust_bridge",
 ]

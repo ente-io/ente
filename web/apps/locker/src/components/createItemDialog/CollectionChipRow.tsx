@@ -84,14 +84,16 @@ export const CollectionChipRow: React.FC<{
                     {t("collections")}
                 </Typography>
             </Stack>
-            <Stack direction="row" sx={{ alignItems: "stretch", gap: 0 }}>
+            <Box sx={{ position: "relative", minWidth: 0 }}>
                 <Box
                     sx={{
-                        width: 28,
-                        flexShrink: 0,
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        zIndex: 1,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
                     }}
                 >
                     {canScrollLeft && (
@@ -100,9 +102,11 @@ export const CollectionChipRow: React.FC<{
                             disabled={disabled}
                             sx={(theme) => ({
                                 width: 28,
-                                height: "100%",
+                                height: 28,
                                 color: "#4A4A4A",
                                 borderRadius: "999px",
+                                backgroundColor:
+                                    theme.vars.palette.background.paper,
                                 ...theme.applyStyles("dark", {
                                     color: "#FFFFFF",
                                 }),
@@ -112,7 +116,7 @@ export const CollectionChipRow: React.FC<{
                         </ButtonBase>
                     )}
                 </Box>
-                <Box sx={{ position: "relative", flex: 1, minWidth: 0 }}>
+                <Box sx={{ position: "relative", minWidth: 0 }}>
                     <Stack
                         ref={scrollContainerRef}
                         direction="row"
@@ -193,11 +197,13 @@ export const CollectionChipRow: React.FC<{
                 </Box>
                 <Box
                     sx={{
-                        width: 28,
-                        flexShrink: 0,
+                        position: "absolute",
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        zIndex: 1,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
                     }}
                 >
                     {canScrollRight && (
@@ -206,9 +212,11 @@ export const CollectionChipRow: React.FC<{
                             disabled={disabled}
                             sx={(theme) => ({
                                 width: 28,
-                                height: "100%",
+                                height: 28,
                                 color: "#4A4A4A",
                                 borderRadius: "999px",
+                                backgroundColor:
+                                    theme.vars.palette.background.paper,
                                 ...theme.applyStyles("dark", {
                                     color: "#FFFFFF",
                                 }),
@@ -218,7 +226,7 @@ export const CollectionChipRow: React.FC<{
                         </ButtonBase>
                     )}
                 </Box>
-            </Stack>
+            </Box>
         </Box>
     );
 };

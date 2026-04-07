@@ -48,6 +48,9 @@ type S3Config struct {
 	// existing objectType (file, thumbnail) and will be used for new objectTypes. In the future,
 	// we can migrate existing objectTypes to this config.
 	fileDataConfig FileDataConfig
+	// attachmentConfig is the configuration for contact and future user attachments.
+	// If no explicit config is present, attachments default to hot storage with no replicas.
+	attachmentConfig AttachmentConfig
 }
 
 // # Datacenters
@@ -136,10 +139,10 @@ func (config *S3Config) initialize() {
 			Endpoint: aws.String(viper.GetString("s3." + dc + ".endpoint")),
 			Region:   aws.String(viper.GetString("s3." + dc + ".region")),
 		}
-		if usePathStyleURLs || viper.GetBool("s3." + dc + ".use_path_style_urls") || areLocalBuckets {
+		if usePathStyleURLs || viper.GetBool("s3."+dc+".use_path_style_urls") || areLocalBuckets {
 			s3Config.S3ForcePathStyle = aws.Bool(true)
 		}
-		if areLocalBuckets || viper.GetBool("s3." + dc + ".disable_ssl") {
+		if areLocalBuckets || viper.GetBool("s3."+dc+".disable_ssl") {
 			s3Config.DisableSSL = aws.Bool(true)
 		}
 		s3Session, err := session.NewSession(&s3Config)
@@ -155,6 +158,10 @@ func (config *S3Config) initialize() {
 	}
 
 	if err := viper.Sub("s3").Unmarshal(&config.fileDataConfig); err != nil {
+		log.Fatalf("Unable to decode into struct: %v\n", err)
+		return
+	}
+	if err := viper.Sub("s3").Unmarshal(&config.attachmentConfig); err != nil {
 		log.Fatalf("Unable to decode into struct: %v\n", err)
 		return
 	}
@@ -184,6 +191,20 @@ func (config *S3Config) GetReplicatedBuckets(oType ente.ObjectType) []string {
 		return []string{}
 	}
 	panic(fmt.Sprintf("ops not supported for object type: %s", oType))
+}
+
+func (config *S3Config) GetAttachmentBucketID(attachmentType string) string {
+	if config.attachmentConfig.HasConfig(attachmentType) {
+		return config.attachmentConfig.GetPrimaryBucketID(attachmentType)
+	}
+	return config.hotDC
+}
+
+func (config *S3Config) GetReplicatedAttachmentBuckets(attachmentType string) []string {
+	if config.attachmentConfig.HasConfig(attachmentType) {
+		return config.attachmentConfig.GetReplicaBuckets(attachmentType)
+	}
+	return []string{}
 }
 
 func (config *S3Config) IsBucketActive(bucketID string) bool {

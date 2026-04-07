@@ -1119,7 +1119,7 @@
   "unarchive": "Désarchiver",
   "favorite": "Favori",
   "removeFromFavorite": "Retirer des favoris",
-  "shareMemory": "Partager le souvenir",
+  "shareMemories": "Partagez des souvenirs",
   "shareTheseMemories": "Partagez ces souvenirs",
   "shareThisPhoto": "Partager cette photo",
   "shareThisVideo": "Partager cette vidéo",
@@ -1549,8 +1549,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Définir le rayon",
-  "familyPlanPortalTitle": "Famille",
-  "familyPlanOverview": "Ajoutez 5 membres de votre famille à votre abonnement existant sans payer de supplément.\n\nChaque membre dispose de son propre espace privé et ne peut pas voir les fichiers des autres membres, sauf s'ils sont partagés.\n\nLes abonnement familiaux sont disponibles pour les clients qui ont un abonnement Ente payant.\n\nAbonnez-vous maintenant pour commencer !",
   "androidBiometricHint": "Vérifier l’identité",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2635,7 +2633,7 @@
   "artisticPortraits": "Portraits joyeux",
   "streetFood": "Bouchés de la bouffe",
   "riverCruises": "Vue sur le fleuve",
-  "facesTimelineBannerTitle": "Souvenirs",
+  "facesTimelineBannerTitle": "Fil de souvenir",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
@@ -2705,7 +2703,7 @@
   "coastalCliffs": "Falaises au bord de mer",
   "candidLaughter": "Éclat de rire",
   "groupSelfies": "Nous tous",
-  "birthdayJoy": "",
+  "birthdayJoy": "Joyeux anniversaire",
   "weddingMoments": "Éclat du jour du mariage",
   "goldenHourPortraits": "Visages de l'heure dorée -coucher de soleil",
   "concertNights": "Nuits en concert",

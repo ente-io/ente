@@ -1092,8 +1092,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Imposta raggio",
-  "familyPlanPortalTitle": "Famiglia",
-  "familyPlanOverview": "Aggiungi 5 membri della famiglia al tuo piano esistente senza pagare extra.\n\nOgni membro ottiene il proprio spazio privato e non può vedere i file dell'altro a meno che non siano condivisi.\n\nI piani familiari sono disponibili per i clienti che hanno un abbonamento Ente a pagamento.\n\nIscriviti ora per iniziare!",
   "androidBiometricHint": "Verifica l'identità",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

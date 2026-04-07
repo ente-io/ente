@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
@@ -38,7 +39,7 @@ func NewCollectionLinkRepository(db *sql.DB, albumHost string) *CollectionLinkRe
 
 func (pcr *CollectionLinkRepo) GetAlbumUrl(app ente.App, token string) string {
 	if app == ente.Locker {
-		return fmt.Sprintf("%s/?t=%s", pcr.lockerHost, token)
+		return fmt.Sprintf("%s/c/%s", pcr.lockerHost, token)
 	}
 	return fmt.Sprintf("%s/?t=%s", pcr.albumHost, token)
 }

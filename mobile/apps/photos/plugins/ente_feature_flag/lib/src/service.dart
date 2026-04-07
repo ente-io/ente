@@ -102,7 +102,7 @@ class FlagService {
   bool get isSocialEnabled =>
       internalUser || _isServerFlagEnabled(_commentsFlag);
 
-  bool get enableMemoryShareLink => internalUser;
+  bool get enableMemoryShareLink => true;
 
   bool get useRustForML =>
       internalUser || (_prefs.getBool("ls.pet_recognition_enabled") ?? false);
