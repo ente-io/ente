@@ -126,7 +126,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.error_outline,
                       leadingIconColor: getEnteColorScheme(context).warning500,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      isBottomBorderRadiusRemoved: true,
                     ),
                   if (!url.isExpired)
                     MenuItemWidgetV2(
