@@ -63,10 +63,6 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
   bool get _showsDashboard => _showsAdminDashboard || _showsMemberDashboard;
 
-  String? get _familyAdminEmail => _userDetails.familyData?.members
-      ?.firstWhereOrNull((member) => member.isAdmin)
-      ?.email;
-
   int get _remainingSlots {
     final memberCount = _userDetails.familyData?.members
             ?.where(
@@ -363,25 +359,6 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
             },
           ),
         ] else ...[
-          if (_familyAdminEmail case final familyAdminEmail?) ...[
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: familyAdminEmail,
-                    style: getEnteTextTheme(context).small.copyWith(
-                          color: getEnteColorScheme(context).greenBase,
-                        ),
-                  ),
-                  TextSpan(
-                    text: l10n.familyAdminManagesPlanSuffix,
-                    style: getEnteTextTheme(context).smallMuted,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
           ButtonWidgetV2(
             buttonType: ButtonTypeV2.tertiaryCritical,
             labelText: l10n.leaveFamilyPlan,
