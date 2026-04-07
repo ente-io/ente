@@ -229,7 +229,7 @@ const decryptRemoteFileToCollectionItem = async (
 const fetchPublicCollectionDiff = async (
     credentials: PublicAlbumsCredentials,
 ) => {
-    const files: RemoteEnteFile[] = [];
+    const filesByID = new Map<number, RemoteEnteFile>();
     let sinceTime = 0;
     let hasMore = true;
 
@@ -246,14 +246,16 @@ const fetchPublicCollectionDiff = async (
         const parsed = FileDiffResponse.parse(await res.json());
         for (const file of parsed.diff) {
             sinceTime = Math.max(sinceTime, file.updationTime);
-            if (!file.isDeleted) {
-                files.push(file);
+            if (file.isDeleted) {
+                filesByID.delete(file.id);
+            } else {
+                filesByID.set(file.id, file);
             }
         }
         hasMore = parsed.hasMore;
     }
 
-    return files;
+    return [...filesByID.values()];
 };
 
 export const verifyPublicCollectionPassword = async (
