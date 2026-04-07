@@ -54,14 +54,12 @@ FaceBox computePaddedFaceCropBox(FaceBox faceBox) {
 
   final xCrop = faceBox.x - faceBox.width * _regularPadding;
   final xOvershoot = min(0.0, xCrop).abs() / faceBox.width;
-  final widthCrop =
-      faceBox.width * (1 + 2 * _regularPadding) -
+  final widthCrop = faceBox.width * (1 + 2 * _regularPadding) -
       2 * min(xOvershoot, _regularPadding - _minimumPadding) * faceBox.width;
 
   final yCrop = faceBox.y - faceBox.height * _regularPadding;
   final yOvershoot = min(0.0, yCrop).abs() / faceBox.height;
-  final heightCrop =
-      faceBox.height * (1 + 2 * _regularPadding) -
+  final heightCrop = faceBox.height * (1 + 2 * _regularPadding) -
       2 * min(yOvershoot, _regularPadding - _minimumPadding) * faceBox.height;
 
   final xCropSafe = xCrop.clamp(0.0, 1.0);

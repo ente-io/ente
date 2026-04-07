@@ -2027,9 +2027,8 @@ class SearchService {
 
       final List<GenericSearchResult> results = [];
       for (final (primaryClusterId, files, species, customName) in groups) {
-        final label = (customName != null && customName.isNotEmpty)
-            ? customName
-            : "";
+        final label =
+            (customName != null && customName.isNotEmpty) ? customName : "";
 
         results.add(
           GenericSearchResult(

@@ -1111,9 +1111,8 @@ class RemoteSyncService {
       return await _photoManagerPlugin.isLocallyAvailable(
         file.localID!,
         isOrigin: true,
-        subtype: file.fileType == FileType.livePhoto
-            ? (file.fileSubType ?? 0)
-            : 0,
+        subtype:
+            file.fileType == FileType.livePhoto ? (file.fileSubType ?? 0) : 0,
       );
     } catch (e, s) {
       _logger.warning(
