@@ -395,14 +395,6 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
                     label: Text(l10n.notThisPet, style: textTheme.small),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _moveToCluster,
-                    icon: const Icon(Icons.drive_file_move_outline, size: 18),
-                    label: Text(l10n.moveTo, style: textTheme.small),
-                  ),
-                ),
               ],
             ),
           ),
@@ -425,41 +417,6 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
     widget.onFilesRemoved(selected);
   }
 
-  Future<void> _moveToCluster() async {
-    final selected = widget.selectedFiles.files.toList();
-    if (selected.isEmpty) return;
-
-    final mlDataDB =
-        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-    final clusters = await mlDataDB.getAllPetClustersWithInfo();
-    // Filter out current cluster and restrict to same species
-    final otherClusters = clusters
-        .where((c) => c.$1 != widget.clusterId && c.$2 == widget.species)
-        .toList();
-
-    if (!mounted) return;
-
-    final targetClusterId = await showModalBottomSheet<String>(
-      context: context,
-      builder: (ctx) => _PetClusterPicker(
-        clusters: otherClusters,
-        currentClusterId: widget.clusterId,
-      ),
-    );
-
-    if (targetClusterId == null || !mounted) return;
-
-    final fileIds = await _resolveFileIds(selected);
-
-    await PetClusterFeedbackService.instance.movePetFacesToCluster(
-      fileIds,
-      widget.clusterId,
-      targetClusterId,
-    );
-    widget.selectedFiles.clearAll();
-    widget.onFilesRemoved(selected);
-  }
-
   /// Resolve file IDs for the pet ML DB. In offline mode, the ML tables
   /// are keyed by OfflineFilesDB integer IDs, not uploadedFileID.
   Future<List<int>> _resolveFileIds(List<EnteFile> files) async {
@@ -476,62 +433,5 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
       return mapping.values.toList();
     }
     return files.map((f) => f.uploadedFileID).whereType<int>().toList();
-  }
-}
-
-/// Bottom sheet picker for selecting a target pet cluster.
-class _PetClusterPicker extends StatelessWidget {
-  final List<(String, int, int, String?)> clusters;
-  final String currentClusterId;
-
-  const _PetClusterPicker({
-    required this.clusters,
-    required this.currentClusterId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(l10n.moveTo, style: textTheme.largeBold),
-          ),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: clusters.length,
-              itemBuilder: (context, index) {
-                final (clusterId, species, count, name) = clusters[index];
-                final speciesLabel = species == 0
-                    ? l10n.dog
-                    : species == 1
-                        ? l10n.cat
-                        : l10n.pet;
-                final label =
-                    (name != null && name.isNotEmpty) ? name : speciesLabel;
-                return ListTile(
-                  leading: SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: FaceThumbnailSquircleClip(
-                      child: PetFaceWidget(petClusterId: clusterId),
-                    ),
-                  ),
-                  title: Text(label),
-                  subtitle: Text(l10n.photosCount(count: count)),
-                  onTap: () => Navigator.pop(context, clusterId),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

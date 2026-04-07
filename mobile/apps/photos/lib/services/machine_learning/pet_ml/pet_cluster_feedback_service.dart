@@ -57,41 +57,6 @@ class PetClusterFeedbackService {
     Bus.instance.fire(PetsChangedEvent(source: "removePetFaces"));
   }
 
-  /// Move photos from one pet cluster to another.
-  Future<void> movePetFacesToCluster(
-    List<int> fileIds,
-    String sourceClusterId,
-    String targetClusterId,
-  ) async {
-    final petFaceIds =
-        await _db.getPetFaceIdsForFilesInCluster(fileIds, sourceClusterId);
-    if (petFaceIds.isEmpty) return;
-
-    // Reassign all found faces to the target cluster
-    final updates = <String, String>{};
-    final feedback = <(String, String)>[];
-    for (final faceId in petFaceIds) {
-      updates[faceId] = targetClusterId;
-      feedback.add((sourceClusterId, faceId));
-    }
-
-    // Record feedback first so that if the app crashes between the two writes,
-    // re-clustering still respects the user's correction.
-    await _db.bulkInsertNotPetFeedback(feedback);
-    // Clear any prior "not this pet" rejection for the target cluster,
-    // otherwise re-clustering would eject the face again.
-    await _db.clearNotPetFeedback(targetClusterId, petFaceIds);
-    await _db.forceUpdatePetFaceClusterIds(updates);
-
-    // Recompute summaries for both clusters so centroids/counts stay current.
-    await _recomputeClusterSummaries([sourceClusterId, targetClusterId]);
-
-    _logger.info(
-      "Moved ${petFaceIds.length} faces from $sourceClusterId to $targetClusterId",
-    );
-    Bus.instance.fire(PetsChangedEvent(source: "movePetFaces"));
-  }
-
   /// Merge two pet clusters by mapping them to the same [PetEntity].
   ///
   /// At least one cluster must already have a named pet. If neither does,
