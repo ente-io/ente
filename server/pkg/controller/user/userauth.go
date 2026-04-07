@@ -323,6 +323,7 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	c.touchContactsAfterEmailUpdate(ctx, userID)
 	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.com",
 		ente.EmailChangedSubject, ente.EmailChangedTemplate, map[string]interface{}{
 			"NewEmail": email,
@@ -359,6 +360,20 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	}()
 
 	return nil
+}
+
+func (c *UserController) touchContactsAfterEmailUpdate(ctx *gin.Context, userID int64) {
+	if c.ContactRepo == nil {
+		return
+	}
+	if touchErr := c.ContactRepo.TouchContactsForContactUser(ctx, userID); touchErr != nil {
+		log.WithError(touchErr).
+			WithFields(log.Fields{
+				"req_id":  requestid.Get(ctx),
+				"user_id": userID,
+			}).
+			Error("failed to touch contacts after email update")
+	}
 }
 
 // Logout removes the token from the cache and database.

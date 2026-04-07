@@ -7,10 +7,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"golang.org/x/net/idna"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"golang.org/x/net/idna"
 
 	"github.com/ente-io/museum/pkg/repo/remotestore"
 	"github.com/gin-contrib/requestid"
@@ -232,6 +233,7 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 	if origin == "" ||
 		origin == viper.GetString("apps.public-albums") ||
 		origin == viper.GetString("apps.embed-albums") ||
+		origin == viper.GetString("apps.public-locker") ||
 		strings.HasPrefix(strings.ToLower(origin), "http://localhost:") {
 		return nil
 	}

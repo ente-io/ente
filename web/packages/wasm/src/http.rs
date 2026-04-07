@@ -71,7 +71,7 @@ impl HttpClient {
     #[wasm_bindgen(constructor)]
     pub fn new(base_url: &str) -> Self {
         Self {
-            inner: CoreHttpClient::new(base_url),
+            inner: CoreHttpClient::new(base_url).expect("failed to build HTTP client"),
         }
     }
 
