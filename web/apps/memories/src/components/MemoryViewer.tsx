@@ -68,7 +68,7 @@ interface SharedMemoryHeaderProps {
     duration: number;
     onComplete: () => void;
     isVideo: boolean;
-    titleBelowProgress?: boolean;
+    showTitle?: boolean;
 }
 
 /**
@@ -83,7 +83,7 @@ function SharedMemoryHeader({
     duration,
     onComplete,
     isVideo,
-    titleBelowProgress = false,
+    showTitle = true,
 }: SharedMemoryHeaderProps) {
     const progressIndicator = (
         <ProgressIndicator
@@ -99,17 +99,54 @@ function SharedMemoryHeader({
 
     return (
         <HeaderSection>
-            {titleBelowProgress ? (
-                <>
-                    {progressIndicator}
-                    <MemoryTitle variant="h6">{title}</MemoryTitle>
-                </>
-            ) : (
-                <>
-                    <MemoryTitle variant="h6">{title}</MemoryTitle>
-                    {progressIndicator}
-                </>
-            )}
+            {showTitle && <MemoryTitle variant="h6">{title}</MemoryTitle>}
+            {progressIndicator}
+        </HeaderSection>
+    );
+}
+
+interface MobileProgressHeaderProps {
+    title: string;
+    date?: string;
+    total: number;
+    current: number;
+    paused: boolean;
+    duration: number;
+    onComplete: () => void;
+    isVideo: boolean;
+}
+
+function MobileProgressHeader({
+    title,
+    date,
+    total,
+    current,
+    paused,
+    duration,
+    onComplete,
+    isVideo,
+}: MobileProgressHeaderProps) {
+    return (
+        <HeaderSection>
+            <MobileFooterMeta>
+                <MobileFooterPrimaryLine variant="h6">
+                    {title}
+                </MobileFooterPrimaryLine>
+                {!!date && (
+                    <MobileFooterSecondaryLine variant="body">
+                        {date}
+                    </MobileFooterSecondaryLine>
+                )}
+            </MobileFooterMeta>
+            <ProgressIndicator
+                total={total}
+                current={current}
+                paused={paused}
+                duration={duration}
+                onComplete={onComplete}
+                isVideo={isVideo}
+                minimal
+            />
         </HeaderSection>
     );
 }
@@ -129,6 +166,12 @@ export function MemoryViewer({
     const currentFile = files[currentIndex]!;
     const [paused, setPaused] = useState(false);
     const [fileLoaded, setFileLoaded] = useState(false);
+    const [thumbnailResolvedSession, setThumbnailResolvedSession] = useState<
+        number | null
+    >(null);
+    const [fullLoadUnlockedSession, setFullLoadUnlockedSession] = useState<
+        number | null
+    >(null);
     const [videoDurationKnown, setVideoDurationKnown] = useState(false);
     const [progressDuration, setProgressDuration] = useState(
         IMAGE_AUTO_PROGRESS_DURATION_MS,
@@ -143,14 +186,29 @@ export function MemoryViewer({
     const [outgoingIndex, setOutgoingIndex] = useState<number | null>(null);
     const previousFileRef = useRef(currentFile);
     const previousIndexRef = useRef(currentIndex);
+    const lastPrefetchIndexRef = useRef(currentIndex);
+    const prefetchSessionRef = useRef(0);
     const outgoingClearTimeoutRef = useRef<number | null>(null);
     const activeVideoElementRef = useRef<HTMLVideoElement | null>(null);
+
+    // Each navigation gets a fresh prefetch session so revisiting an index
+    // cannot reuse an old unlock signal.
+    if (lastPrefetchIndexRef.current !== currentIndex) {
+        lastPrefetchIndexRef.current = currentIndex;
+        prefetchSessionRef.current += 1;
+    }
+
+    const activePrefetchSession = prefetchSessionRef.current;
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
     const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
     const isTabletShareLayout =
         viewport.width > MOBILE_LAYOUT_BREAKPOINT_PX &&
         viewport.width < SHARE_COMPACT_LAYOUT_BREAKPOINT_PX;
+    const isCurrentThumbnailResolved =
+        thumbnailResolvedSession === activePrefetchSession;
+    const isCurrentFullLoadUnlocked =
+        fullLoadUnlockedSession === activePrefetchSession;
 
     useEffect(() => {
         setPaused(false);
@@ -197,6 +255,13 @@ export function MemoryViewer({
     const handleFullLoad = useCallback(() => {
         setFileLoaded(true);
     }, []);
+
+    const handleCurrentThumbnailResolved = useCallback(() => {
+        setThumbnailResolvedSession(activePrefetchSession);
+        if (!isVideo) {
+            setFileLoaded(true);
+        }
+    }, [activePrefetchSession, isVideo]);
 
     const handleVideoDuration = useCallback((durationSeconds: number) => {
         setProgressDuration(durationSeconds * 1000);
@@ -251,34 +316,73 @@ export function MemoryViewer({
     }, [currentIndex, files.length, onNext]);
 
     useEffect(() => {
-        if (!fileLoaded || currentIndex >= files.length - 1) {
+        if (!isCurrentThumbnailResolved) {
             return;
         }
 
-        const nextFile = files[currentIndex + 1]!;
+        const prefetchIndex = currentIndex;
+        const thumbnailWindow = files.slice(
+            prefetchIndex + 1,
+            prefetchIndex + 3,
+        );
+        const videoWindow = thumbnailWindow.filter(
+            (file) => file.metadata.fileType === FileType.video,
+        );
+        const prefetchSession = activePrefetchSession;
+
+        if (thumbnailWindow.length === 0) {
+            setFullLoadUnlockedSession(prefetchSession);
+            return;
+        }
+
+        const loadState = { cancelled: false };
+
+        if (videoWindow.length > 0) {
+            void Promise.allSettled(
+                videoWindow.map((file) =>
+                    downloadManager.hlsPlaylistDataForPublicMemory(file),
+                ),
+            ).then((results) => {
+                results.forEach((result) => {
+                    if (result.status === "rejected") {
+                        log.warn(
+                            "Failed to prefetch staged memory video playlist",
+                            result.reason,
+                        );
+                    }
+                });
+            });
+        }
 
         void (async () => {
-            const prefetchTasks: Promise<unknown>[] = [
-                downloadManager.renderableThumbnailURL(nextFile),
-            ];
-
-            if (nextFile.metadata.fileType === FileType.video) {
-                prefetchTasks.unshift(
-                    downloadManager.hlsPlaylistDataForPublicMemory(nextFile),
-                );
-            }
-
-            const results = await Promise.allSettled(prefetchTasks);
+            const results = await Promise.allSettled(
+                thumbnailWindow.map((file) =>
+                    downloadManager.renderableThumbnailURL(file),
+                ),
+            );
             results.forEach((result) => {
                 if (result.status === "rejected") {
                     log.warn(
-                        "Failed to prefetch next memory media",
+                        "Failed to prefetch staged memory thumbnail",
                         result.reason,
                     );
                 }
             });
+
+            if (!loadState.cancelled) {
+                setFullLoadUnlockedSession(prefetchSession);
+            }
         })();
-    }, [currentIndex, fileLoaded, files]);
+
+        return () => {
+            loadState.cancelled = true;
+        };
+    }, [
+        activePrefetchSession,
+        currentIndex,
+        files,
+        isCurrentThumbnailResolved,
+    ]);
 
     useEffect(() => {
         const updateViewport = () => setViewport(readViewport());
@@ -309,6 +413,15 @@ export function MemoryViewer({
         }
         return memoryName || currentFileDate || "Memory";
     }, [currentFileDate, memoryName]);
+
+    const mobileFooterTitle = useMemo(
+        () => memoryName || currentFileDate || "Memory",
+        [currentFileDate, memoryName],
+    );
+    const mobileFooterDate = useMemo(
+        () => (memoryName && currentFileDate ? currentFileDate : undefined),
+        [currentFileDate, memoryName],
+    );
 
     const handleRestartPlayback = useCallback(() => {
         if (currentIndex > 0) {
@@ -486,7 +599,19 @@ export function MemoryViewer({
             duration={progressDuration}
             onComplete={handleAdvanceOrFinish}
             isVideo={isVideo}
-            titleBelowProgress={isMobileLayout}
+        />
+    );
+
+    const mobileProgressHeader = (
+        <MobileProgressHeader
+            title={mobileFooterTitle}
+            date={mobileFooterDate}
+            total={files.length}
+            current={currentIndex}
+            paused={isProgressPaused}
+            duration={progressDuration}
+            onComplete={handleAdvanceOrFinish}
+            isVideo={isVideo}
         />
     );
 
@@ -497,11 +622,13 @@ export function MemoryViewer({
                     <VideoPlayer
                         file={currentFile}
                         onReady={handleFullLoad}
+                        onThumbnailResolved={handleCurrentThumbnailResolved}
                         onDuration={handleVideoDuration}
                         onEnded={handleAdvanceOrFinish}
                         onPlaybackBlocked={handleVideoPlaybackBlocked}
                         mediaRef={activeVideoElementRef}
                         paused={paused}
+                        enableFullLoad={isCurrentFullLoadUnlocked}
                         fillFrame
                         objectFit="contain"
                         mediaAspectRatio={resolvedMediaAspectRatio}
@@ -511,6 +638,8 @@ export function MemoryViewer({
                     <PhotoImage
                         file={currentFile}
                         onFullLoad={handleFullLoad}
+                        onThumbnailResolved={handleCurrentThumbnailResolved}
+                        enableFullLoad={isCurrentFullLoadUnlocked}
                         fillFrame
                         objectFit="contain"
                         mediaAspectRatio={resolvedMediaAspectRatio}
@@ -572,6 +701,7 @@ export function MemoryViewer({
                                 alt="Ente Photos"
                             />
                         </BrandLink>
+                        <MobileHeaderSpacer aria-hidden="true" />
                         <MobileJoinNowButton
                             variant="contained"
                             color="accent"
@@ -649,7 +779,7 @@ export function MemoryViewer({
                     </MediaFrame>
                 </PhotoContainer>
 
-                {isMobileLayout && sharedHeader}
+                {isMobileLayout && mobileProgressHeader}
             </ContentContainer>
         </ViewerRoot>
     );
@@ -761,12 +891,49 @@ const MemoryTitle = styled(Typography)({
 
 const MobileTopActions = styled("div")({
     width: "100%",
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "auto minmax(0, 1fr) auto",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: "16px",
+    gap: "12px",
     padding: "0 24px",
     boxSizing: "border-box",
+});
+
+const MobileHeaderSpacer = styled("div")({ minWidth: 0 });
+
+const MobileFooterMeta = styled("div")({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "5px",
+    width: "100%",
+    transform: "translateY(-8px)",
+});
+
+const MobileFooterPrimaryLine = styled(Typography)({
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: 600,
+    fontSize: "19px",
+    lineHeight: 1.08,
+    letterSpacing: "-0.01em",
+    textAlign: "center",
+    whiteSpace: "nowrap",
+    maxWidth: "100%",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+});
+
+const MobileFooterSecondaryLine = styled(Typography)({
+    color: "rgba(255, 255, 255, 0.72)",
+    fontWeight: 500,
+    fontSize: "14px",
+    lineHeight: 1.18,
+    letterSpacing: "0.01em",
+    textAlign: "center",
+    whiteSpace: "nowrap",
+    maxWidth: "100%",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
 });
 
 const TopLeftBrandLink = styled(BrandLink)({

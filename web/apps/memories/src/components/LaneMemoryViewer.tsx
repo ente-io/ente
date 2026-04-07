@@ -4,7 +4,7 @@
  * playback timing, scrubbing, captions, and decorative backgrounds. It is
  * rendered by `pages/index.tsx` for the `"lane"` variant.
  */
-import { styled, Typography } from "@mui/material";
+import { styled } from "@mui/material";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { FileType } from "ente-media/file-type";
@@ -33,8 +33,8 @@ import {
 } from "../utils/lane";
 import {
     LaneCaptionText,
-    LanePlaybackGlyph,
     LaneProgressSlider,
+    PlaybackGlyph,
 } from "./PublicMemoryControls";
 import { PhotoImage, VideoPlayer } from "./PublicMemoryMedia";
 import {
@@ -51,7 +51,8 @@ import {
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
-const LANE_FRAME_INTERVAL_MS = 1500;
+const LANE_PLAYBACK_SPEED_MULTIPLIER = 1.25;
+const LANE_FRAME_INTERVAL_MS = 1200;
 const LANE_CARD_TRANSITION_DURATION_MS = 440;
 const LANE_COMPACT_LAYOUT_BREAKPOINT_PX = 900;
 const LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 340;
@@ -354,6 +355,16 @@ export function LaneMemoryViewer({
         videoDurationKnown,
     ]);
 
+    useEffect(() => {
+        const activeVideo = activeVideoElementRef.current;
+        if (!activeVideo || !isVideo) {
+            return;
+        }
+
+        activeVideo.defaultPlaybackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
+        activeVideo.playbackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
+    }, [displayIndex, isVideo]);
+
     const handleFullLoad = useCallback(() => {
         setFileLoaded(true);
     }, []);
@@ -434,6 +445,8 @@ export function LaneMemoryViewer({
             return;
         }
 
+        activeVideo.defaultPlaybackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
+        activeVideo.playbackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
         activeVideo.muted = false;
         void activeVideo.play().catch((error: unknown) => {
             log.warn(
@@ -575,6 +588,17 @@ export function LaneMemoryViewer({
         [memoryMetadata?.personName, memoryName],
     );
 
+    const laneTitleLines = useMemo(() => {
+        const memoryLaneMatch = /^(.*?)(?:\s+)?memory lane$/i.exec(laneTitle);
+        const primaryLine = memoryLaneMatch?.[1]?.trim();
+
+        if (primaryLine) {
+            return { primary: primaryLine, secondary: "memory lane" };
+        }
+
+        return { primary: laneTitle, secondary: undefined };
+    }, [laneTitle]);
+
     const laneSlices = useMemo(
         () => getLaneStackSlices(files.length, stackProgress),
         [files.length, stackProgress],
@@ -674,8 +698,19 @@ export function LaneMemoryViewer({
 
                 <LaneCenterSection>
                     <LaneMediaSection>
-                        <LaneSliderTitle variant="h6">
-                            {laneTitle}
+                        <LaneSliderTitle
+                            role="heading"
+                            aria-level={2}
+                            aria-label={laneTitle}
+                        >
+                            <LaneSliderTitlePrimary>
+                                {laneTitleLines.primary}
+                            </LaneSliderTitlePrimary>
+                            {laneTitleLines.secondary && (
+                                <LaneSliderTitleSecondary>
+                                    {laneTitleLines.secondary}
+                                </LaneSliderTitleSecondary>
+                            )}
                         </LaneSliderTitle>
                         <PhotoContainer
                             style={{ flex: "0 0 auto", minHeight: "auto" }}
@@ -833,20 +868,20 @@ export function LaneMemoryViewer({
                                     );
                                 })}
                                 {showPlaybackOverlay && (
-                                    <LaneCornerPlaybackOverlay>
-                                        <LaneCornerPlaybackControl
+                                    <LaneCenteredPlaybackOverlay>
+                                        <LaneCenteredPlaybackControl
                                             type="button"
                                             onClick={handlePlaybackToggle}
                                             aria-label={playbackOverlayLabel}
                                             data-memory-control="true"
                                         >
-                                            <LaneCornerPlaybackGlyph>
-                                                <LanePlaybackGlyph
+                                            <LaneCenteredPlaybackGlyph>
+                                                <PlaybackGlyph
                                                     paused={paused}
                                                 />
-                                            </LaneCornerPlaybackGlyph>
-                                        </LaneCornerPlaybackControl>
-                                    </LaneCornerPlaybackOverlay>
+                                            </LaneCenteredPlaybackGlyph>
+                                        </LaneCenteredPlaybackControl>
+                                    </LaneCenteredPlaybackOverlay>
                                 )}
                             </LaneCardStack>
                         </PhotoContainer>
@@ -1157,27 +1192,53 @@ const laneHeaderJoinNowButtonSx = {
     },
 } as const;
 
-const LaneSliderTitle = styled(Typography)({
-    color: "rgba(255, 255, 255, 0.42)",
-    fontWeight: 600,
-    fontSize: "24px",
-    lineHeight: 1.15,
-    letterSpacing: "-0.01em",
+const LaneSliderTitle = styled("div")({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "4px",
     textAlign: "center",
-    paddingBottom: "10px",
+    paddingBottom: "12px",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
-    maxWidth: "min(42vw, 420px)",
+    maxWidth: "min(52vw, 520px)",
+    textShadow: "0 12px 28px rgba(0, 0, 0, 0.32)",
     "@media (max-width: 900px)": {
-        fontSize: "21px",
-        paddingBottom: "8px",
-        maxWidth: "min(56vw, 360px)",
+        gap: "3px",
+        paddingBottom: "10px",
+        maxWidth: "min(64vw, 420px)",
     },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        fontSize: "18px",
-        lineHeight: 1.2,
-        paddingBottom: "6px",
-        maxWidth: "min(100%, 280px)",
+        gap: "2px",
+        paddingBottom: "8px",
+        maxWidth: "min(100%, 320px)",
+    },
+});
+
+const LaneSliderTitlePrimary = styled("span")({
+    color: "rgba(255, 255, 255, 0.82)",
+    fontWeight: 600,
+    fontSize: "44px",
+    lineHeight: 0.98,
+    letterSpacing: "-0.04em",
+    "@media (max-width: 900px)": { fontSize: "37px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: "31px",
+        lineHeight: 1,
+    },
+});
+
+const LaneSliderTitleSecondary = styled("span")({
+    color: "rgba(255, 255, 255, 0.5)",
+    fontWeight: 500,
+    fontSize: "29px",
+    lineHeight: 1.02,
+    letterSpacing: "-0.02em",
+    textTransform: "lowercase",
+    "@media (max-width: 900px)": { fontSize: "25px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: "21px",
+        lineHeight: 1.08,
     },
 });
 
@@ -1285,24 +1346,18 @@ const LaneCaption = styled("div")({
     },
 });
 
-const LaneCornerPlaybackOverlay = styled("div")({
+const LaneCenteredPlaybackOverlay = styled("div")({
     position: "absolute",
     inset: 0,
     zIndex: 4,
     display: "flex",
-    alignItems: "flex-end",
-    justifyContent: "flex-end",
-    padding: "20px",
-    pointerEvents: "none",
-    "@media (max-width: 900px)": { padding: "18px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        padding: "14px",
-    },
+    alignItems: "center",
+    justifyContent: "center",
 });
 
-const LaneCornerPlaybackControl = styled("button")({
-    width: "58px",
-    height: "58px",
+const LaneCenteredPlaybackControl = styled("button")({
+    width: "88px",
+    height: "88px",
     borderRadius: "999px",
     border: 0,
     cursor: "pointer",
@@ -1317,26 +1372,21 @@ const LaneCornerPlaybackControl = styled("button")({
     WebkitBackdropFilter: "blur(10px)",
     transition:
         "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
-    pointerEvents: "auto",
     "&:hover": {
         backgroundColor: "rgba(18, 18, 18, 0.72)",
         transform: "scale(1.03)",
     },
     "&:active": { transform: "scale(0.98)" },
-    "@media (max-width: 900px)": { width: "54px", height: "54px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        width: "48px",
-        height: "48px",
-    },
+    "@media (max-width: 900px)": { width: "80px", height: "80px" },
 });
 
-const LaneCornerPlaybackGlyph = styled("span")({
+const LaneCenteredPlaybackGlyph = styled("span")({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    transform: "scale(1.55)",
+    transform: "scale(1.65)",
     transformOrigin: "center",
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        transform: "scale(1.35)",
+        transform: "scale(1.5)",
     },
 });
