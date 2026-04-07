@@ -1,20 +1,26 @@
 import "dart:async";
+import "dart:convert";
 
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
+import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
@@ -103,6 +109,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     menuItemColor: enteColorScheme.fillFaint,
                     alignCaptionedTextToLeft: true,
+                    isBottomBorderRadiusRemoved: true,
                     onTap: () async {
                       // ignore: unawaited_futures
                       routeToPage(
@@ -113,6 +120,51 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       });
                     },
                     surfaceExecutionStates: false,
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menu,
+                    bgColor: enteColorScheme.fillFaint,
+                  ),
+                  MenuItemWidgetV2(
+                    key: ValueKey("Password lock ${url.passwordEnabled}"),
+                    captionedTextWidget: CaptionedTextWidgetV2(
+                      title: context.l10n.passwordLock,
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => url.passwordEnabled,
+                      onChanged: () async {
+                        if (!url.passwordEnabled) {
+                          await showInputSheet(
+                            context,
+                            title: context.l10n.setAPassword,
+                            submitButtonLabel: context.l10n.lockButtonLabel,
+                            hintText: context.l10n.enterPassword,
+                            onSubmit: (String password) async {
+                              if (password.trim().isEmpty) {
+                                return;
+                              }
+                              final propToUpdate =
+                                  await _getEncryptedPassword(password);
+                              await _updateUrlSettings(
+                                context,
+                                propToUpdate,
+                                showProgressDialog: false,
+                              );
+                            },
+                            isPasswordInput: true,
+                            textCapitalization: TextCapitalization.none,
+                            maxLength: 256,
+                          );
+                        } else {
+                          await _updateUrlSettings(context, {
+                            'disablePassword': true,
+                          });
+                        }
+                      },
+                    ),
                   ),
                   const SizedBox(
                     height: 24,
@@ -206,5 +258,45 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         ),
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
+    final kekSalt = CryptoUtil.getSaltToDeriveKey();
+    final result = await CryptoUtil.deriveInteractiveKey(
+      utf8.encode(pass),
+      kekSalt,
+    );
+    return {
+      'passHash': CryptoUtil.bin2base64(result.key),
+      'nonce': CryptoUtil.bin2base64(kekSalt),
+      'memLimit': result.memLimit,
+      'opsLimit': result.opsLimit,
+    };
+  }
+
+  Future<void> _updateUrlSettings(
+    BuildContext context,
+    Map<String, dynamic> prop, {
+    bool showProgressDialog = true,
+  }) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(context, context.l10n.pleaseWait)
+        : null;
+    await dialog?.show();
+    try {
+      await CollectionApiClient.instance.updateShareUrl(
+        widget.collection!,
+        prop,
+      );
+      await dialog?.hide();
+      showShortToast(context, context.l10n.collectionUpdated);
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      await dialog?.hide();
+      await showGenericErrorDialog(context: context, error: e);
+      rethrow;
+    }
   }
 }
