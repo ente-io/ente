@@ -5,18 +5,6 @@ const FontWeight _regularWeight = FontWeight.w500;
 const FontWeight _boldWeight = FontWeight.w600;
 const String _fontFamily = 'Inter';
 
-const TextStyle brandStyleSmall = TextStyle(
-  fontWeight: FontWeight.bold,
-  fontFamily: 'Montserrat',
-  fontSize: 21,
-);
-
-const TextStyle brandStyleMedium = TextStyle(
-  fontWeight: FontWeight.bold,
-  fontFamily: 'Montserrat',
-  fontSize: 24,
-);
-
 const TextStyle h1 = TextStyle(
   fontSize: 48,
   height: 48 / 28,
@@ -91,9 +79,6 @@ class EnteTextTheme {
   final TextStyle miniBold;
   final TextStyle tiny;
   final TextStyle tinyBold;
-  final TextStyle brandSmall;
-  final TextStyle brandMedium;
-
   // textMuted variants
   final TextStyle h1Muted;
   final TextStyle h2Muted;
@@ -136,8 +121,6 @@ class EnteTextTheme {
     required this.miniBold,
     required this.tiny,
     required this.tinyBold,
-    required this.brandSmall,
-    required this.brandMedium,
     required this.h1Muted,
     required this.h2Muted,
     required this.h3Muted,
@@ -196,8 +179,6 @@ EnteTextTheme _buildEnteTextStyle(
     miniBold: mini.copyWith(color: color, fontWeight: _boldWeight),
     tiny: tiny.copyWith(color: color),
     tinyBold: tiny.copyWith(color: color, fontWeight: _boldWeight),
-    brandSmall: brandStyleSmall.copyWith(color: color),
-    brandMedium: brandStyleMedium.copyWith(color: color),
     h1Muted: h1.copyWith(color: textMuted),
     h2Muted: h2.copyWith(color: textMuted),
     h3Muted: h3.copyWith(color: textMuted),
