@@ -12,17 +12,13 @@ import "package:photos/events/pets_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
-import "package:photos/services/machine_learning/pet_ml/pet_cluster_feedback_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
-import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
-import "package:photos/ui/viewer/people/merge_pet_sheet.dart";
 import "package:photos/ui/viewer/people/pet_clusters_page.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_pet.dart";
@@ -48,7 +44,6 @@ class PetClusterPage extends StatefulWidget {
 }
 
 class _PetClusterPageState extends State<PetClusterPage> {
-  final _selectedFiles = SelectedFiles();
   late List<EnteFile> _files;
   late String _label;
   bool _isBannerDismissed = false;
@@ -176,7 +171,6 @@ class _PetClusterPageState extends State<PetClusterPage> {
         EventType.hide,
       },
       tagPrefix: "pet_cluster_${widget.clusterId}",
-      selectedFiles: _selectedFiles,
       enableFileGrouping: true,
       initialFiles: _files,
       header: showBanner
@@ -185,9 +179,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
               text: l10n.savePet,
               subText: l10n.findThemQuickly,
               primaryActionLabel: l10n.save,
-              secondaryActionLabel: l10n.merge,
               onPrimaryTap: () => _editName(),
-              onSecondaryTap: _handleMergePet,
               onDismissed: () => setState(() => _isBannerDismissed = true),
               dismissibleKey: ValueKey("pet_banner_${widget.clusterId}"),
             )
@@ -242,32 +234,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
               const SizedBox(width: 16),
             ],
           ),
-          body: SelectionState(
-            selectedFiles: _selectedFiles,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                gallery,
-                if (!isOfflineMode)
-                  _PetSelectionBar(
-                    selectedFiles: _selectedFiles,
-                    clusterId: widget.clusterId,
-                    species: widget.species,
-                    allFiles: _files,
-                    onFilesRemoved: (removed) {
-                      for (final f in removed) {
-                        _files.remove(f);
-                      }
-                      if (_files.isEmpty) {
-                        Navigator.pop(context);
-                      } else {
-                        setState(() {});
-                      }
-                    },
-                  ),
-              ],
-            ),
-          ),
+          body: gallery,
         ),
       ),
     );
@@ -303,135 +270,5 @@ class _PetClusterPageState extends State<PetClusterPage> {
       PetClustersPage(petId: petId, petName: _label),
     );
     await _reloadClusterFiles();
-  }
-
-  Future<void> _handleMergePet() async {
-    if (isOfflineMode) return;
-    final selection = await showMergePetPage(
-      context,
-      currentClusterId: widget.clusterId,
-    );
-
-    if (selection == null || !mounted) return;
-
-    final mlDataDB =
-        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-    await mlDataDB.setClusterPetId(widget.clusterId, selection.petId);
-    Bus.instance.fire(PetsChangedEvent(source: "mergeIntoPet"));
-    if (mounted) Navigator.pop(context);
-  }
-}
-
-/// Selection action bar for pet cluster: "Not this pet" and "Move to".
-class _PetSelectionBar extends StatefulWidget {
-  final SelectedFiles selectedFiles;
-  final String clusterId;
-  final int species;
-  final List<EnteFile> allFiles;
-  final void Function(List<EnteFile> removed) onFilesRemoved;
-
-  const _PetSelectionBar({
-    required this.selectedFiles,
-    required this.clusterId,
-    required this.species,
-    required this.allFiles,
-    required this.onFilesRemoved,
-  });
-
-  @override
-  State<_PetSelectionBar> createState() => _PetSelectionBarState();
-}
-
-class _PetSelectionBarState extends State<_PetSelectionBar> {
-  final ValueNotifier<bool> _hasSelection = ValueNotifier(false);
-
-  @override
-  void initState() {
-    super.initState();
-    widget.selectedFiles.addListener(_listener);
-  }
-
-  @override
-  void dispose() {
-    widget.selectedFiles.removeListener(_listener);
-    _hasSelection.dispose();
-    super.dispose();
-  }
-
-  void _listener() {
-    _hasSelection.value = widget.selectedFiles.files.isNotEmpty;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return ValueListenableBuilder<bool>(
-      valueListenable: _hasSelection,
-      builder: (context, hasSelection, _) {
-        if (!hasSelection) return const SizedBox.shrink();
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: colorScheme.backgroundElevated2,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            top: false,
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _removeFromCluster,
-                    icon: const Icon(Icons.remove_circle_outline, size: 18),
-                    label: Text(l10n.notThisPet, style: textTheme.small),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _removeFromCluster() async {
-    final selected = widget.selectedFiles.files.toList();
-    if (selected.isEmpty) return;
-
-    final fileIds = await _resolveFileIds(selected);
-
-    await PetClusterFeedbackService.instance.removePetFacesFromCluster(
-      fileIds,
-      widget.clusterId,
-    );
-    widget.selectedFiles.clearAll();
-    widget.onFilesRemoved(selected);
-  }
-
-  /// Resolve file IDs for the pet ML DB. In offline mode, the ML tables
-  /// are keyed by OfflineFilesDB integer IDs, not uploadedFileID.
-  Future<List<int>> _resolveFileIds(List<EnteFile> files) async {
-    if (isOfflineMode) {
-      final localIds = files
-          .map((f) => f.localID)
-          .whereType<String>()
-          .where((id) => id.isNotEmpty)
-          .toList();
-      if (localIds.isEmpty) return [];
-      final mapping = await OfflineFilesDB.instance.getLocalIntIdsForLocalIds(
-        localIds,
-      );
-      return mapping.values.toList();
-    }
-    return files.map((f) => f.uploadedFileID).whereType<int>().toList();
   }
 }

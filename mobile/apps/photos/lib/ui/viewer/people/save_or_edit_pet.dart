@@ -2,9 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/events/pets_changed_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
@@ -15,7 +13,6 @@ import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
-import "package:photos/ui/viewer/people/merge_pet_sheet.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
 
 /// Full-page screen for saving or editing a pet, mirroring the person
@@ -194,29 +191,6 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
                         isDisabled: !_hasChanges || _inputName.trim().isEmpty,
                         onTap: () async => _save(),
                       ),
-                      if (!widget.isEditing) ...[
-                        const SizedBox(height: 24),
-                        Align(
-                          alignment: Alignment.center,
-                          child: TextButton(
-                            onPressed: _onMergeWithExisting,
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              context.l10n.mergeWithExisting,
-                              style: textTheme.small.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: colorScheme.primary500,
-                                decoration: TextDecoration.underline,
-                                decorationColor: colorScheme.primary500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -271,30 +245,6 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
       }
     } catch (e) {
       _logger.severe("Error saving pet", e);
-    }
-  }
-
-  Future<void> _onMergeWithExisting() async {
-    final selection = await showMergePetPage(
-      context,
-      currentClusterId: widget.clusterId,
-    );
-
-    if (selection == null || !mounted) return;
-
-    _logger.info(
-      "Merge: merging cluster ${widget.clusterId} into pet ${selection.petId}",
-    );
-    try {
-      final mlDataDB =
-          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-      // Map this cluster to the selected pet
-      await mlDataDB.setClusterPetId(widget.clusterId, selection.petId);
-      Bus.instance.fire(PetsChangedEvent(source: "mergeIntoPet"));
-      _logger.info("Merge: completed successfully");
-      if (mounted) Navigator.pop(context);
-    } catch (e, s) {
-      _logger.severe("Merge failed", e, s);
     }
   }
 }

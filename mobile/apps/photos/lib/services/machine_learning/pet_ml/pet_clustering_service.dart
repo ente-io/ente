@@ -1,5 +1,4 @@
 import "dart:convert" show jsonDecode, jsonEncode;
-import "dart:io" show File;
 import "dart:math" show min;
 import "dart:typed_data" show Float32List, Float64List;
 
@@ -25,84 +24,6 @@ class PetClusteringService {
   static final instance = PetClusteringService._();
 
   final Lock _clusterLock = Lock();
-
-  /// Export all pet face/body embeddings with cluster assignments to a JSON
-  /// file for offline threshold tuning. Call from a debug menu or test.
-  ///
-  /// Output format: `{ "species": 0, "inputs": [...], "clusters": {...} }`
-  /// where each input has petFaceId, faceEmbedding, bodyEmbedding, fileId,
-  /// and clusters maps petFaceId -> clusterId.
-  Future<String> dumpEmbeddingsJson({
-    required MLDataDB mlDataDB,
-    required String outputPath,
-    bool isOffline = false,
-  }) async {
-    final results = <Map<String, dynamic>>[];
-
-    for (final species in [0, 1]) {
-      final speciesName = species == 0 ? "dog" : "cat";
-      final faces = await mlDataDB.getPetFacesForClustering(
-        species,
-        isOffline: isOffline,
-      );
-      if (faces.isEmpty) continue;
-
-      final faceVdb = PetVectorDB.forModel(
-        species: species,
-        isFace: true,
-        offline: isOffline,
-      );
-
-      final inputs = <Map<String, dynamic>>[];
-      for (final face in faces) {
-        if (face.faceVectorId == null) continue;
-        List<double> faceEmb;
-        try {
-          final embs = await faceVdb.getEmbeddings([face.faceVectorId!]);
-          if (embs.isEmpty) continue;
-          faceEmb = embs.first.toList();
-        } catch (e) {
-          _logger.warning("Failed to get embedding for ${face.petFaceId}: $e");
-          continue;
-        }
-
-        inputs.add({
-          "petFaceId": face.petFaceId,
-          "faceEmbedding": faceEmb,
-          "bodyEmbedding": <double>[],
-          "fileId": face.fileId,
-        });
-      }
-
-      // Read existing cluster assignments for this species only
-      final clusters = <String, String>{};
-      final sqlDb = await mlDataDB.asyncDB;
-      final rows = await sqlDb.getAll(
-        'SELECT fc.$petFaceIDColumn, fc.$clusterIDColumn '
-        'FROM $petFaceClustersTable fc '
-        'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
-        'WHERE f.$speciesColumn = ?',
-        [species],
-      );
-      for (final row in rows) {
-        clusters[row[petFaceIDColumn] as String] =
-            row[clusterIDColumn] as String;
-      }
-
-      results.add({
-        "species": species,
-        "speciesName": speciesName,
-        "count": inputs.length,
-        "inputs": inputs,
-        "clusters": clusters,
-      });
-    }
-
-    final json = jsonEncode(results);
-    await File(outputPath).writeAsString(json);
-    _logger.info("Exported ${results.length} species groups to $outputPath");
-    return outputPath;
-  }
 
   /// Run pet clustering on all unclustered pet faces.
   ///

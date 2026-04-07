@@ -967,19 +967,12 @@ class SearchService {
     final pets = flagService.petEnabled
         ? await getAllPets(null)
         : <GenericSearchResult>[];
-    if (limit != null && people.length + pets.length > limit) {
-      // Reserve up to 1/3 of slots for pets, but no more than available.
-      final petReserved = (limit ~/ 3).clamp(0, pets.length);
-      // People get the rest, but no more than available.
-      final actualPeople = (limit - petReserved).clamp(0, people.length);
-      // Pets fill their reserved slots plus any people didn't use.
-      final actualPets = (limit - actualPeople).clamp(0, pets.length);
-      return [
-        ...people.sublist(0, actualPeople),
-        ...pets.sublist(0, actualPets),
-      ];
+    final combined = [...people, ...pets]
+      ..sort((a, b) => b.fileCount().compareTo(a.fileCount()));
+    if (limit != null && combined.length > limit) {
+      return combined.sublist(0, limit);
     }
-    return [...people, ...pets];
+    return combined;
   }
 
   Future<List<GenericSearchResult>> getAllFace(

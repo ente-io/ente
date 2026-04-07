@@ -1,18 +1,13 @@
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/events/pets_changed_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
-import "package:photos/services/machine_learning/pet_ml/pet_cluster_feedback_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
 
-/// Shows all clusters belonging to a pet, with the ability to unmerge
-/// (remove a cluster from the pet). Mirrors [PersonClustersPage].
+/// Shows all clusters belonging to a pet. Mirrors [PersonClustersPage].
 class PetClustersPage extends StatefulWidget {
   final String petId;
   final String petName;
@@ -28,7 +23,6 @@ class PetClustersPage extends StatefulWidget {
 }
 
 class _PetClustersPageState extends State<PetClustersPage> {
-  final _logger = Logger("PetClustersPage");
   List<(String clusterId, int fileCount, int species)>? _clusters;
   bool _loading = true;
 
@@ -90,9 +84,6 @@ class _PetClustersPageState extends State<PetClustersPage> {
                   itemCount: _clusters!.length,
                   itemBuilder: (context, index) {
                     final (clusterId, fileCount, _) = _clusters![index];
-                    // Only the primary (first/largest) cluster can't be removed
-                    final canRemove =
-                        !isOfflineMode && _clusters!.length > 1 && index != 0;
                     return ListTile(
                       leading: SizedBox(
                         width: 56,
@@ -105,31 +96,9 @@ class _PetClustersPageState extends State<PetClustersPage> {
                         context.l10n.photosCount(count: fileCount),
                         style: textTheme.body,
                       ),
-                      trailing: canRemove
-                          ? GestureDetector(
-                              onTap: () => _removeCluster(clusterId),
-                              child: Text(
-                                context.l10n.remove,
-                                style: textTheme.small.copyWith(
-                                  color: colorScheme.warning700,
-                                ),
-                              ),
-                            )
-                          : null,
                     );
                   },
                 ),
     );
-  }
-
-  Future<void> _removeCluster(String clusterId) async {
-    try {
-      await PetClusterFeedbackService.instance.unmergePetCluster(clusterId);
-      _logger.info("Unmerged cluster $clusterId from pet ${widget.petId}");
-      Bus.instance.fire(PetsChangedEvent(source: "unmergePetCluster"));
-      await _loadClusters();
-    } catch (e) {
-      _logger.severe("Failed to unmerge cluster", e);
-    }
   }
 }
