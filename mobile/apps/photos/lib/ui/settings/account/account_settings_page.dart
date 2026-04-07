@@ -64,6 +64,8 @@ class AccountSettingsPage extends StatelessWidget {
                         ),
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
+                        showOnlyLoadingState: true,
+                        surfaceExecutionStates: true,
                         onTap: () async => _onManageSubscriptionTapped(context),
                       ),
                       const SizedBox(height: 8),
