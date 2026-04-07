@@ -476,9 +476,30 @@ export const fileFileName = (file: EnteFile) =>
  *
  * While sometimes the epoch timestamp is the correct value to use, it is also
  * possible that {@link fileCreationPhotoDate} might be more appropriate.
+ *
+ * When the file has a {@link dateTime} string in its public magic metadata, we
+ * derive the epoch from it instead of using the baked {@link creationTime}.
+ * This ensures consistent sort ordering across images (whose EXIF dates are
+ * local time without offset) and videos (whose FFmpeg dates are often UTC with
+ * a "Z" suffix). The {@link dateTime} field always represents the local
+ * date/time regardless of how the original metadata encoded the timezone.
+ *
+ * See: https://github.com/ente-io/ente/issues/8321
+ *
+ * [Note: Photos are always in local date/time].
  */
-export const fileCreationTime = (file: EnteFile) =>
-    file.pubMagicMetadata?.data.editedTime ?? file.metadata.creationTime;
+export const fileCreationTime = (file: EnteFile) => {
+    const editedTime = file.pubMagicMetadata?.data.editedTime;
+    if (editedTime != undefined) return editedTime;
+
+    const dateTime = file.pubMagicMetadata?.data.dateTime;
+    if (dateTime) {
+        const t = new Date(dateTime).getTime();
+        if (!isNaN(t)) return t * 1000;
+    }
+
+    return file.metadata.creationTime;
+};
 
 /**
  * Return the file's creation date as a Date in the hypothetical "timezone of
