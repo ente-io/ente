@@ -33,8 +33,8 @@ import {
 } from "../utils/lane";
 import {
     LaneCaptionText,
-    LanePlaybackGlyph,
     LaneProgressSlider,
+    PlaybackGlyph,
 } from "./PublicMemoryControls";
 import { PhotoImage, VideoPlayer } from "./PublicMemoryMedia";
 import {
@@ -51,7 +51,8 @@ import {
     ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
-const LANE_FRAME_INTERVAL_MS = 1500;
+const LANE_PLAYBACK_SPEED_MULTIPLIER = 1.25;
+const LANE_FRAME_INTERVAL_MS = 1200;
 const LANE_CARD_TRANSITION_DURATION_MS = 440;
 const LANE_COMPACT_LAYOUT_BREAKPOINT_PX = 900;
 const LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 340;
@@ -354,6 +355,16 @@ export function LaneMemoryViewer({
         videoDurationKnown,
     ]);
 
+    useEffect(() => {
+        const activeVideo = activeVideoElementRef.current;
+        if (!activeVideo || !isVideo) {
+            return;
+        }
+
+        activeVideo.defaultPlaybackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
+        activeVideo.playbackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
+    }, [displayIndex, isVideo]);
+
     const handleFullLoad = useCallback(() => {
         setFileLoaded(true);
     }, []);
@@ -434,6 +445,8 @@ export function LaneMemoryViewer({
             return;
         }
 
+        activeVideo.defaultPlaybackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
+        activeVideo.playbackRate = LANE_PLAYBACK_SPEED_MULTIPLIER;
         activeVideo.muted = false;
         void activeVideo.play().catch((error: unknown) => {
             log.warn(
@@ -833,20 +846,20 @@ export function LaneMemoryViewer({
                                     );
                                 })}
                                 {showPlaybackOverlay && (
-                                    <LaneCornerPlaybackOverlay>
-                                        <LaneCornerPlaybackControl
+                                    <LaneCenteredPlaybackOverlay>
+                                        <LaneCenteredPlaybackControl
                                             type="button"
                                             onClick={handlePlaybackToggle}
                                             aria-label={playbackOverlayLabel}
                                             data-memory-control="true"
                                         >
-                                            <LaneCornerPlaybackGlyph>
-                                                <LanePlaybackGlyph
+                                            <LaneCenteredPlaybackGlyph>
+                                                <PlaybackGlyph
                                                     paused={paused}
                                                 />
-                                            </LaneCornerPlaybackGlyph>
-                                        </LaneCornerPlaybackControl>
-                                    </LaneCornerPlaybackOverlay>
+                                            </LaneCenteredPlaybackGlyph>
+                                        </LaneCenteredPlaybackControl>
+                                    </LaneCenteredPlaybackOverlay>
                                 )}
                             </LaneCardStack>
                         </PhotoContainer>
@@ -1285,24 +1298,18 @@ const LaneCaption = styled("div")({
     },
 });
 
-const LaneCornerPlaybackOverlay = styled("div")({
+const LaneCenteredPlaybackOverlay = styled("div")({
     position: "absolute",
     inset: 0,
     zIndex: 4,
     display: "flex",
-    alignItems: "flex-end",
-    justifyContent: "flex-end",
-    padding: "20px",
-    pointerEvents: "none",
-    "@media (max-width: 900px)": { padding: "18px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        padding: "14px",
-    },
+    alignItems: "center",
+    justifyContent: "center",
 });
 
-const LaneCornerPlaybackControl = styled("button")({
-    width: "58px",
-    height: "58px",
+const LaneCenteredPlaybackControl = styled("button")({
+    width: "88px",
+    height: "88px",
     borderRadius: "999px",
     border: 0,
     cursor: "pointer",
@@ -1317,26 +1324,21 @@ const LaneCornerPlaybackControl = styled("button")({
     WebkitBackdropFilter: "blur(10px)",
     transition:
         "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
-    pointerEvents: "auto",
     "&:hover": {
         backgroundColor: "rgba(18, 18, 18, 0.72)",
         transform: "scale(1.03)",
     },
     "&:active": { transform: "scale(0.98)" },
-    "@media (max-width: 900px)": { width: "54px", height: "54px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        width: "48px",
-        height: "48px",
-    },
+    "@media (max-width: 900px)": { width: "80px", height: "80px" },
 });
 
-const LaneCornerPlaybackGlyph = styled("span")({
+const LaneCenteredPlaybackGlyph = styled("span")({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    transform: "scale(1.55)",
+    transform: "scale(1.65)",
     transformOrigin: "center",
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        transform: "scale(1.35)",
+        transform: "scale(1.5)",
     },
 });

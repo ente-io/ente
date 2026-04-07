@@ -86,29 +86,29 @@ export const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
                 sx={{
                     width: 0,
                     height: 0,
-                    borderTop: "10px solid transparent",
-                    borderBottom: "10px solid transparent",
-                    borderLeft: "14px solid white",
-                    ml: "3px",
+                    borderTop: "12px solid transparent",
+                    borderBottom: "12px solid transparent",
+                    borderLeft: "17px solid white",
+                    ml: "4px",
                 }}
             />
         );
     }
 
     return (
-        <Box sx={{ display: "flex", gap: "6px" }}>
+        <Box sx={{ display: "flex", gap: "7px" }}>
             <Box
                 sx={{
-                    width: "6px",
-                    height: "18px",
+                    width: "7px",
+                    height: "20px",
                     borderRadius: "2px",
                     backgroundColor: "white",
                 }}
             />
             <Box
                 sx={{
-                    width: "6px",
-                    height: "18px",
+                    width: "7px",
+                    height: "20px",
                     borderRadius: "2px",
                     backgroundColor: "white",
                 }}
@@ -130,9 +130,9 @@ export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
                 sx={{
                     width: 0,
                     height: 0,
-                    borderTop: "5px solid transparent",
-                    borderBottom: "5px solid transparent",
-                    borderLeft: "8px solid white",
+                    borderTop: "6px solid transparent",
+                    borderBottom: "6px solid transparent",
+                    borderLeft: "10px solid white",
                     ml: "2px",
                 }}
             />
@@ -140,19 +140,19 @@ export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
     }
 
     return (
-        <Box sx={{ display: "flex", gap: "3px" }}>
+        <Box sx={{ display: "flex", gap: "4px" }}>
             <Box
                 sx={{
-                    width: "3px",
-                    height: "10px",
+                    width: "4px",
+                    height: "12px",
                     borderRadius: "1px",
                     backgroundColor: "white",
                 }}
             />
             <Box
                 sx={{
-                    width: "3px",
-                    height: "10px",
+                    width: "4px",
+                    height: "12px",
                     borderRadius: "1px",
                     backgroundColor: "white",
                 }}
