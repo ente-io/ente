@@ -1,12 +1,33 @@
 import { CustomHeadShare } from "ente-base/components/Head";
 import React, { useEffect, useState } from "react";
+import { CollectionShareView } from "../components/file-share/CollectionShareView";
 import { FileShareView } from "../components/file-share/FileShareView";
 
+const detectShareView = (): "file" | "collection" | null => {
+    if (typeof window === "undefined") {
+        return null;
+    }
+
+    const pathname = window.location.pathname;
+
+    if (/^\/c\/[^/]+\/?$/.test(pathname)) {
+        return "collection";
+    }
+
+    if (pathname === "/" || pathname === "") {
+        return null;
+    }
+
+    return "file";
+};
+
 /**
- * Index page that handles both root redirect and share links
+ * Index page that handles root redirect, single-file share links, and
+ * locker collection share links.
  *
  * - Root domain (/) redirects to ente.com/locker
- * - Share links (/token#key) render the FileShareView
+ * - Single-file share links (/{token}#{key}) render FileShareView
+ * - Collection share links (/c/{token}#{collectionKey}) render CollectionShareView
  *
  * This page is served for all routes via:
  * - _redirects file for Cloudflare Pages
@@ -15,25 +36,31 @@ import { FileShareView } from "../components/file-share/FileShareView";
  */
 const Page: React.FC = () => {
     const [hideContent, setHideContent] = useState(false);
+    const [shareView, setShareView] = useState<"file" | "collection" | null>(
+        null,
+    );
 
     useEffect(() => {
-        // Check if we're at the root path (client-side only)
         const pathname = window.location.pathname;
+        setShareView(detectShareView());
 
         if (pathname === "/" || pathname === "") {
-            // Hide content before redirect to avoid error flash
             setHideContent(true);
-            // Redirect to ente.com/locker for root path
             window.location.href = "https://ente.com/locker";
+            return;
         }
     }, []);
 
-    // Always render CustomHeadShare for SSR (ensures meta tags are in static HTML)
     return (
         <>
             <CustomHeadShare title="Ente Locker" />
-            {/* Hide FileShareView only when we detect root path on client */}
-            {!hideContent && <FileShareView />}
+            {!hideContent &&
+                shareView &&
+                (shareView === "collection" ? (
+                    <CollectionShareView />
+                ) : (
+                    <FileShareView />
+                ))}
         </>
     );
 };

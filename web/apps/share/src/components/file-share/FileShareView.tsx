@@ -146,6 +146,16 @@ export const FileShareView: React.FC = () => {
                         {/* File Info Display */}
                         {fileInfo && !loading && (
                             <>
+                                {(() => {
+                                    const iconInfo = getLockerFileIcon(
+                                        fileInfo.fileName,
+                                        {
+                                            lockerType: fileInfo.lockerType,
+                                        },
+                                    );
+
+                                    return (
+                                        <>
                                 {/* File Info - Centered */}
                                 <Box
                                     sx={{
@@ -161,10 +171,8 @@ export const FileShareView: React.FC = () => {
                                     {/* Large File Icon */}
                                     <Box
                                         sx={{
-                                            backgroundColor: getLockerFileIcon(
-                                                fileInfo.fileName,
-                                                fileInfo.lockerType,
-                                            ).backgroundColor,
+                                            backgroundColor:
+                                                iconInfo.backgroundColor,
                                             borderRadius: "20px",
                                             padding: 1.8,
                                             display: "flex",
@@ -172,12 +180,7 @@ export const FileShareView: React.FC = () => {
                                             justifyContent: "center",
                                         }}
                                     >
-                                        {
-                                            getLockerFileIcon(
-                                                fileInfo.fileName,
-                                                fileInfo.lockerType,
-                                            ).icon
-                                        }
+                                        {iconInfo.icon}
                                     </Box>
 
                                     {/* File Name */}
@@ -224,6 +227,9 @@ export const FileShareView: React.FC = () => {
                                             />
                                         )}
                                 </Box>
+                                        </>
+                                    );
+                                })()}
 
                                 {/* Download Button - Only show if not a LockerInfoType */}
                                 {!fileInfo.lockerType && (
