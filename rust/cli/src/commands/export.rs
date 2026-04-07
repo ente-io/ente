@@ -191,7 +191,10 @@ async fn sync_account_before_export(storage: &Storage, account: &Account) -> Res
         .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
 
     // Create API client with account's endpoint
-    let api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    let api_client = ApiClient::new_with_client_package(
+        Some(account.endpoint.clone()),
+        account.app.client_package(),
+    )?;
 
     // Store token for this account
     let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
@@ -252,7 +255,10 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
 
     // Create API client with account's endpoint
-    let api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    let api_client = ApiClient::new_with_client_package(
+        Some(account.endpoint.clone()),
+        account.app.client_package(),
+    )?;
 
     // Store token for this account
     // Token is stored as raw bytes from sealed_box_open

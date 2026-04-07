@@ -23,12 +23,16 @@ jobs:
                 platform:
                     - os: ubuntu-22.04
                       rust-target: x86_64-unknown-linux-gnu
+                      bundle-targets: appimage,deb,rpm,updater
                     - os: macos-latest
                       rust-target: x86_64-apple-darwin
+                      bundle-targets: app,dmg,updater
                     - os: macos-latest
                       rust-target: aarch64-apple-darwin
+                      bundle-targets: app,dmg,updater
                     - os: windows-latest
                       rust-target: x86_64-pc-windows-msvc
+                      bundle-targets: nsis,updater
 
         runs-on: ${{ matrix.platform.os }}
         env:
@@ -54,6 +58,11 @@ jobs:
                   node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
 
             # Pin to 1.93.0: Rust 1.94.0 has a trait glob-import regression
             # that breaks wry 0.24.x (SettingsExt not found via traits::*).
@@ -173,6 +182,7 @@ jobs:
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
                   ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
+                  ENSU_TAURI_REQUIRE_UPDATER_PUBKEY: "1"
               run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
 
             - name: Ensure ENSU Tauri signing key is configured
@@ -217,7 +227,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+                  args: ${{ format('--target {0} --bundles {1} --features updater', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
 
     build-android:
         runs-on: ubuntu-22.04

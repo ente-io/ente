@@ -9,18 +9,18 @@ Future<T?> showBaseBottomSheet<T>(
   TextStyle? titleStyle,
   bool showCloseButton = true,
   VoidCallback? onClose,
-  double headerSpacing = 20,
+  double headerSpacing = 16,
   Color? backgroundColor,
   Color? modalBackgroundColor,
   CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-  EdgeInsets padding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+  EdgeInsets padding = const EdgeInsets.all(20),
   bool isDismissible = true,
   bool enableDrag = true,
   bool isKeyboardAware = true,
   double topCornerRadius = 20,
   Color? closeButtonBackgroundColor,
-  double closeButtonSize = 40,
-  double closeIconSize = 24,
+  double closeButtonSize = 36,
+  double closeIconSize = 20,
 }) {
   return showModalBottomSheet<T>(
     context: context,
@@ -76,14 +76,14 @@ class BaseBottomSheet extends StatelessWidget {
     this.showCloseButton = true,
     this.onClose,
     this.crossAxisAlignment = CrossAxisAlignment.start,
-    this.padding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    this.padding = const EdgeInsets.all(20),
     this.backgroundColor,
-    this.headerSpacing = 20,
+    this.headerSpacing = 16,
     this.isKeyboardAware = true,
     this.topCornerRadius = 20,
     this.closeButtonBackgroundColor,
-    this.closeButtonSize = 40,
-    this.closeIconSize = 24,
+    this.closeButtonSize = 36,
+    this.closeIconSize = 20,
     super.key,
   });
 
@@ -148,8 +148,8 @@ class BottomSheetCloseButton extends StatelessWidget {
     super.key,
     this.onTap,
     this.backgroundColor,
-    this.buttonSize = 40,
-    this.iconSize = 24,
+    this.buttonSize = 36,
+    this.iconSize = 20,
   });
 
   @override

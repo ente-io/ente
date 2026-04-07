@@ -29,7 +29,7 @@
   "deleteReason4": "Моя причина не указана",
   "sendEmail": "Отправить электронное письмо",
   "deleteRequestSLAText": "Ваш запрос будет обработан в течение 72 часов.",
-  "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.com</warning> с вашего зарегистрированного адреса электронной почты.",
+  "deleteEmailRequest": "Пожалуйста, отправьте письмо на <warning>account-deletion@ente.com</warning> с вашей зарегистрированной электронной почты.",
   "entePhotosPerm": "Ente <i>требуется разрешение для</i> сохранения ваших фото",
   "ok": "Хорошо",
   "createAccount": "Создать аккаунт",
@@ -245,6 +245,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Макет альбома",
+  "layoutMasonry": "Плитка",
   "layoutGrouped": "Сгруппированные",
   "layoutContinuous": "Непрерывный",
   "layoutTrip": "Путешествие",
@@ -293,6 +294,7 @@
   "copyLink": "Скопировать ссылку",
   "copyEmbedHtml": "Скопируйте HTML-код для вставки",
   "linkHasExpired": "Срок действия ссылки истёк",
+  "linkRequestLimitExceeded": "Извините, этот альбом был просмотрен на слишком большом количестве устройств",
   "publicLinkEnabled": "Публичная ссылка включена",
   "shareALink": "Поделиться ссылкой",
   "sharedAlbumSectionDescription": "Создавайте общие и совместные альбомы с другими пользователями Ente, включая пользователей на бесплатных тарифах.",
@@ -325,6 +327,7 @@
   "somethingWentWrong": "Что-то пошло не так",
   "sendInvite": "Отправить приглашение",
   "shareTextRecommendUsingEnte": "Скачай Ente, чтобы мы могли легко делиться фото и видео в оригинальном качестве\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Скачай Ente, чтобы я мог добавить тебя в свой семейный тариф\n\nhttps://ente.com",
   "done": "Готово",
   "applyCodeTitle": "Применить код",
   "enterCodeDescription": "Введите код, предоставленный вашим другом, чтобы вы оба могли получить бесплатное хранилище",
@@ -523,6 +526,7 @@
   "discover_sunset": "Закат",
   "discover_hills": "Холмы",
   "discover_greenery": "Зелень",
+  "mlIndexingDescription": "Обратите внимание, что машинное обучение увеличит использование трафика и батареи, пока все элементы не будут обработаны. Рассмотрите использование приложения для компьютера для более быстрой обработки. Результаты будут автоматически синхронизированы.",
   "loadingModel": "Загрузка моделей...",
   "waitingForWifi": "Ожидание Wi-Fi...",
   "status": "Статус",
@@ -531,6 +535,8 @@
   "clearIndexes": "Удалить индексы",
   "selectFoldersForBackup": "Выберите папки для резервного копирования",
   "selectFolders": "Выберите папки",
+  "backupToEnte": "Резервное копирование в Ente",
+  "selectAlbumsToBackUpToEnte": "Выберите альбомы для резервного копирования в Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Выбранные папки будут зашифрованы и сохранены в резервной копии",
   "unselectAll": "Отменить выбор",
   "selectAll": "Выбрать все",
@@ -663,8 +669,116 @@
     }
   },
   "familyPlans": "Семейные тарифы",
+  "family": "Семья",
+  "designedForFamilies": "Создано для семей",
+  "shareYourSubscription": "Поделитесь своей подпиской с близкими",
+  "shareStorageWith5Members": "Поделиться хранилищем с 5 участниками",
+  "privateSpaceForEveryMember": "Приватное пространство для каждого участника",
+  "plansStartAt": "Тарифы начинаются от {price}/месяц",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Посмотреть тарифы",
+  "addFamilyMember": "Добавить члена семьи",
+  "addMember": "Добавить участника",
+  "inviteMembers": "Пригласить участников",
+  "enterEmailAddresses": "Введите их адреса электронной почты. У них должен быть аккаунт Ente.",
+  "inviteLimitReached": "Вы добавили 5 приглашений. Удалите одно, чтобы добавить другое",
+  "emailAddress": "Адрес электронной почты",
+  "sendInvites": "Отправить приглашения",
+  "enterAnEmailAddress": "Введите адрес электронной почты",
+  "enterAValidEmailAddress": "Введите действительный адрес электронной почты",
+  "thisUserIsNotOnEnte": "Этого пользователя нет в Ente",
+  "failedToInvite": "Не удалось пригласить {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{used} из {total} использовано",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Участники",
+  "pending": "Ожидание",
+  "closeFamilyPlan": "Закрыть семейный план",
+  "closeFamilyConfirmTitle": "Закрыть семейный план?",
+  "closeFamilyConfirmBody": "Все участники потеряют доступ к общему хранилищу. Это действие нельзя отменить.",
+  "editStorageLimit": "Изменить лимит хранилища",
+  "removeFromFamily": "Удалить из семьи",
+  "removeMemberConfirmTitle": "Удалить участника?",
+  "removeMemberConfirmBody": "{email} потеряет доступ к общему хранилищу.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Отправить приглашение повторно",
+  "revokeInviteConfirmTitle": "Отозвать приглашение?",
+  "revokeInviteConfirmBody": "Приглашение для {email} будет отменено.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "memberStorageUsed": "Использовано {amount}",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Лимит хранилища",
+  "usingStorage": "Используется {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "limit": "Лимит",
+  "noLimit": "Без лимитов",
+  "currentUsageNote": "Использовано: {amount}. Укажите 0, чтобы убрать лимит.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Покинуть семейный план?",
+  "leaveFamilyConfirmBody": "Вы потеряете доступ к общему хранилищу.",
   "referrals": "Рефералы",
   "notifications": "Уведомления",
+  "sharedPhotoNotifications": "Новые общие фото и альбомы",
   "socialNotifications": "Отметки \"Нравится\" и комментарии",
   "socialNotificationsExplanation": "Получать уведомления об отметке \"Нравится\" на ваших фотографиях и комментариях в альбомах, в которых вы участвуете",
   "advanced": "Расширенные",
@@ -695,12 +809,56 @@
   "reportBug": "Сообщить об ошибке",
   "suggestFeatures": "Предложить идею",
   "support": "Поддержка",
+  "helpAndSupport": "Помощь и поддержка",
+  "browseHelpPages": "Просмотреть справку",
+  "backupAndSync": "Резервное копирование и синхронизация",
+  "storageAndPlans": "Хранилище и тарифы",
+  "troubleshooting": "Устранение неполадок",
+  "reportAnIssue": "Сообщить о проблеме",
+  "askAQuestion": "Задать вопрос",
+  "requestAFeature": "Предложить идею",
+  "subject": "Тема",
+  "description": "Описание",
+  "yourQuestion": "Ваш вопрос",
+  "anyAdditionalInformation": "Любая дополнительная информация",
+  "attachLogs": "Прикрепить логи",
+  "pleaseEnterASubject": "Пожалуйста, введите тему",
+  "pleaseEnterADescription": "Пожалуйста, введите описание",
+  "noEmailAppFound": "Не найдено приложение электронной почты",
+  "noEmailAppBody": "Скопируйте своё сообщение и отправьте его на {email} через любой почтовый сервис.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.com"
+      }
+    }
+  },
+  "message": "Сообщение",
+  "deviceInfo": "Информация об устройстве",
+  "logs": "Логи",
+  "export": "Экспорт",
+  "logsNotCopiedDownloadNote": "Логи не скопированы. Экспортируйте логи и прикрепите их к письму.",
+  "attachedSize": "Прикреплено ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Скопировать всё в буфер обмена",
+  "copied": "Скопировано",
   "appearance": "Оформление",
   "theme": "Тема",
   "lightTheme": "Светлая",
   "darkTheme": "Тёмная",
   "systemTheme": "Системная",
   "freeTrial": "Бесплатный пробный период",
+  "chooseYourPlan": "Выбери свой тариф",
   "enteSubscriptionPitch": "Ente сохраняет ваши воспоминания, чтобы они всегда были доступны вам, даже если вы потеряете устройство.",
   "enteSubscriptionShareWithFamily": "Ваша семья также может быть включена в ваш тариф.",
   "currentUsageIs": "Текущее использование составляет ",
@@ -769,6 +927,7 @@
   "appstoreSubscription": "Подписка AppStore",
   "subAlreadyLinkedErrMessage": "Ваш {id} уже связан с другим аккаунтом Ente.\nЕсли вы хотите использовать {id} с этим аккаунтом, пожалуйста, свяжитесь с нашей службой поддержки",
   "visitWebToManage": "Пожалуйста, посетите web.ente.io для управления вашей подпиской",
+  "managePaymentMethod": "Управлять методом оплаты",
   "couldNotUpdateSubscription": "Не удалось обновить подписку",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Пожалуйста, свяжитесь с support@ente.com, и мы будем рады помочь!",
   "paymentFailed": "Платёж не удался",
@@ -792,6 +951,21 @@
   "youAreOnAFamilyPlan": "Вы на семейном тарифе!",
   "contactFamilyAdmin": "Пожалуйста, свяжитесь с <green>{familyAdminEmail}</green> для управления подпиской",
   "leaveFamily": "Покинуть семью",
+  "youAreOnAFamilyPlanSubtitle": "Вы на семейном тарифе.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Покинуть семейный тариф",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Нужна помощь? Свяжитесь с ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Вы уверены, что хотите покинуть семейный тариф?",
   "leave": "Покинуть",
   "rateTheApp": "Оценить приложение",
@@ -801,6 +975,7 @@
   "grantFullAccessPrompt": "Пожалуйста, разрешите доступ ко всем фото в настройках устройства",
   "allowPermTitle": "Разрешить доступ к фото",
   "allowPermBody": "Пожалуйста, разрешите доступ к вашим фото через настройки устройства, чтобы Ente мог отображать и сохранять вашу библиотеку.",
+  "openSettings": "Открыть настройки",
   "selectMorePhotos": "Выбрать больше фото",
   "existingUser": "Существующий пользователь",
   "newToEnte": "Впервые в Ente",
@@ -880,7 +1055,18 @@
   "unarchive": "Извлечь из архива",
   "favorite": "В избранное",
   "removeFromFavorite": "Убрать из избранного",
+  "shareMemories": "Поделиться воспоминаниями",
+  "shareTheseMemories": "Поделиться этими воспоминаниями",
+  "shareThisPhoto": "Поделиться этим фото",
+  "shareThisVideo": "Поделиться этим видео",
   "shareLink": "Поделиться ссылкой",
+  "memoryShareLinkDescription": "Срок действия этой ссылки автоматически истечёт через 7 дней.",
+  "deleteLink": "Удалить ссылку",
+  "deleteLinkQuestion": "Удалить ссылку?",
+  "linkDeletedSuccessfully": "Ссылка успешно удалена",
+  "openLink": "Открыть ссылку",
+  "pay": "Оплатить",
+  "noPaymentAppFound": "Не найдено приложение для оплаты",
   "createCollage": "Создать коллаж",
   "saveCollage": "Сохранить коллаж",
   "collageSaved": "Коллаж сохранён в галерее",
@@ -1191,6 +1377,10 @@
   "searchCaptionEmptySection": "Добавляйте описания вроде «#поездка» в информацию о фото, чтобы быстро находить их здесь",
   "language": "Язык",
   "selectLanguage": "Выберите язык",
+  "noLocation": "Местоположение не указано",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
   "locationName": "Название местоположения",
   "addLocation": "Добавить местоположение",
   "groupNearbyPhotos": "Группировать ближайшие фото",
@@ -1247,8 +1437,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Установить радиус",
-  "familyPlanPortalTitle": "Семья",
-  "familyPlanOverview": "Добавьте 5 членов семьи к существующему тарифу без дополнительной оплаты.\n\nКаждый участник получает своё личное пространство и не может видеть файлы других, если они не общедоступны.\n\nСемейные тарифы доступны клиентам с платной подпиской на Ente.\n\nПодпишитесь сейчас, чтобы начать!",
   "androidBiometricHint": "Подтвердите личность",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1612,6 +1800,7 @@
   },
   "extraPhotosFound": "Найдены дополнительные фото",
   "configuration": "Настройки",
+  "localIndexing": "Локальная обработка",
   "processed": "Обработано",
   "resetPerson": "Удалить",
   "areYouSureYouWantToResetThisPerson": "Вы уверены, что хотите сбросить данные этого человека?",
@@ -1780,9 +1969,18 @@
   "legacyPageDesc2": "Доверенные контакты могут начать восстановление аккаунта. Если не отменить это в течение 30 дней, то они смогут сбросить пароль и получить доступ.",
   "legacyAccounts": "Наследуемые аккаунты",
   "trustedContacts": "Доверенные контакты",
+  "addTrustedContact": "Добавить доверенный контакт",
+  "addContact": "Добавить контакт",
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашему аккаунту",
   "rejectRecovery": "Отклонить восстановление",
+  "updateTime": "Время обновления",
+  "revokeInvite": "Отозвать приглашение",
+  "cancelInvite": "Отменить приглашение",
+  "removeContact": "Удалить контакт",
+  "letsTryThatAgain": "Давай попробуем ещё раз",
+  "cancelRecovery": "Отменить восстановление",
+  "startRecovery": "Начать восстановление",
   "recoveryInitiated": "Восстановление начато",
   "recoveryInitiatedDesc": "Вы сможете получить доступ к аккаунту через {days} дней. Уведомление будет отправлено на {email}.",
   "@recoveryInitiatedDesc": {
@@ -1958,6 +2156,7 @@
   "personIsAge": "{name} исполнилось {age}!",
   "personTurningAge": "{name} скоро исполнится {age}",
   "lastTimeWithThem": "В последний раз с {name}",
+  "unnamedPeopleSpotlight": "Знакомое лицо",
   "tripToLocation": "Поездка в {location}",
   "tripInYear": "Поездка в {year}",
   "lastYearsTrip": "Прошлогодняя поездка",
@@ -2221,10 +2420,6 @@
   "artisticPortraits": "Художественный портрет",
   "streetFood": "Уличная еда",
   "riverCruises": "Вид на реку",
-  "facesTimelineBannerTitle": "Линия воспоминаний",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "Смотрите фотографии {name} на протяжении многих лет",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",
@@ -2389,6 +2584,88 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
+  "likedYourPhoto": "понравилось ваше фото",
+  "@likedYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAPhoto": "понравилось фото",
+  "@likedAPhoto": {
+    "description": "Social action text shown after a person's name, for example 'John liked a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourVideo": "понравилось ваше видео",
+  "@likedYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourPhoto": "прокомментировал(а) ваше фото",
+  "@commentedOnYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAPhoto": "прокомментировал(а) фото",
+  "@commentedOnAPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourVideo": "прокомментировал(а) ваше видео",
+  "@commentedOnYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAVideo": "прокомментировал(а) видео",
+  "@commentedOnAVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToYourComment": "ответил(а) на ваш комментарий",
+  "@repliedToYourComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToAComment": "ответил(а) на комментарий",
+  "@repliedToAComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourComment": "понравился ваш комментарий",
+  "@likedYourComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAComment": "понравился комментарий",
+  "@likedAComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourReply": "понравился ваш ответ",
+  "@likedYourReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked your reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAReply": "понравился ответ",
+  "@likedAReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked a reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "addedAMemoryTo": "добавил(а) воспоминание в {albumName}",
+  "@addedAMemoryTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added a memory to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "добавил(а) {count} шт. воспоминаний в {albumName}",
+  "@addedNMemoriesTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added 4 memories to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedAlbumWithYou": "поделился с вами {albumName}",
+  "@sharedAlbumWithYou": {
+    "description": "Social notification action text shown after a person's name, for example 'John shared Recents with you'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "и еще один",
   "andXOthers": "и {count} других",
   "@andXOthers": {
@@ -2537,13 +2814,17 @@
   "offlineEnableSharingTitle": "Обмен начинается здесь",
   "offlineEnableSharingDesc": "Зарегистрируйтесь, чтобы делиться фотографиями со всеми — даже с теми, кто не использует Ente",
   "offlineEnableBackupDesc": "Зарегистрируйтесь, чтобы сохранить свои воспоминания с Ente.",
+  "offlineEnableBackupTagLabel": "10 ГБ БЕСПЛАТНО!",
   "offlineEnableBackupAction": "Начните с 10 ГБ БЕСПЛАТНО",
   "offlineSettingsBannerTitle": "Мы никогда не сможем видеть ваши фотографии. Никогда.",
   "offlineSettingsBannerDesc": "Шифрование с нулевым разглашением означает, что ваши воспоминания остаются только вашими.",
   "alreadyHaveAnAccount": "Уже есть аккаунт?",
+  "dontHaveAnAccount": "Нет аккаунта?",
   "loginToEnte": "Войти в Ente",
   "searchAndDiscover": "Искать и открывать",
   "shareYourMemories": "Делитесь своими воспоминаниями",
+  "privateAndSecureBackups": "Резервное копирование с защитой конфиденциальности",
+  "privateAndSecureBackupsDesc": "Сквозное шифрование, независимый аудит и полностью открытый исходный код",
   "mlProgressBannerTitle": "Подождите немного!",
   "mlProgressBannerDescription": "Ваши фотографии обрабатываются на устройстве для обнаружения лиц, объектов и другого.",
   "mlProgressBannerStatus": "{indexed} из {total} фотографий обработано",
@@ -2561,5 +2842,7 @@
   "offlineFacesBannerSubtitle": "Зарегистрируйтесь, чтобы помечать людей и легко находить их позже.",
   "offlineNameFaceBannerTitle": "Назовите это лицо",
   "offlineNameFaceBannerSubtitle": "Зарегистрируйтесь, чтобы пометить их и легко находить их фотографии позже.",
-  "signUp": "Зарегистрироваться"
+  "signUp": "Зарегистрироваться",
+  "dog": "Собака",
+  "cat": "Кот"
 }

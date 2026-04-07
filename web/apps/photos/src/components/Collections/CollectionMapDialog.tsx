@@ -55,8 +55,6 @@ import Supercluster from "supercluster";
 import type { SelectedState } from "utils/file";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
-import { calculateOptimalZoom } from "../TripLayout/mapHelpers";
-import type { JourneyPoint } from "../TripLayout/types";
 
 interface CollectionMapDialogProps
     extends ModalVisibilityProps,
@@ -145,6 +143,16 @@ interface MapIndexPoint {
     lat: number;
     lng: number;
     timestamp: number;
+}
+
+interface MapPhotoPoint {
+    lat: number;
+    lng: number;
+    name: string;
+    country: string;
+    timestamp: string;
+    image: string;
+    fileId: number;
 }
 
 /**
@@ -245,6 +253,7 @@ type SuperclusterConstructor = new (options?: MapClusterOptions) => MapIndex;
 
 //OpenStreetMap only supports clustering till this zoom level and this tell the supercluster what the max limit is for the zoom.
 const MAX_MAP_ZOOM = 19;
+const DEFAULT_MAP_ZOOM = 10;
 //Instead of loading just the tiles which are in view, we're actually loading the 15% of the surrounding zone as well for smoother experience.
 //Leaflet LatLngBounds.pad expects a ratio (0.15 = 15%).
 const PREFETCH_BOUNDS_PADDING = 0.15;
@@ -932,7 +941,7 @@ function useFavorites(
  * @returns An object containing the visible photos array and setter.
  */
 function useVisiblePhotos() {
-    const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
+    const [visiblePhotos, setVisiblePhotos] = useState<MapPhotoPoint[]>([]);
     const [isVisiblePhotosUpdating, setIsVisiblePhotosUpdating] =
         useState(false);
 
@@ -957,12 +966,11 @@ function createMarkerIcon(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const leaflet = require("leaflet") as typeof import("leaflet");
 
-    const pinSize = size + 16; // Add padding for consistent sizing with TripLayout
+    const pinSize = size + 16;
     const triangleHeight = 10;
     const pinHeight = pinSize + triangleHeight + 2;
     const hasImage = imageSrc && imageSrc.trim() !== "";
 
-    // Border radius matching TripLayout style
     const outerBorderRadius = 16;
     const innerBorderRadius = 12;
 
@@ -1033,13 +1041,12 @@ function createClusterIcon(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const leaflet = require("leaflet") as typeof import("leaflet");
 
-    const pinSize = size + 16; // Add padding for consistent sizing with TripLayout
+    const pinSize = size + 16;
     const triangleHeight = 10;
     const pinHeight = pinSize + triangleHeight + 2;
     const hasImage = imageSrc && imageSrc.trim() !== "";
     const badgeOverflow = 6;
 
-    // Border radius matching TripLayout style
     const outerBorderRadius = 16;
     const innerBorderRadius = 12;
 
@@ -1223,7 +1230,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
-    const optimalZoom = calculateOptimalZoom();
+    const optimalZoom = DEFAULT_MAP_ZOOM;
 
     const {
         mapCenter,
@@ -1272,7 +1279,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             [isFileViewerOpen],
         );
 
-    // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
+    // Convert visible map photo points to EnteFiles for FileListWithViewer
     const visibleFiles = useMemo(() => {
         return visiblePhotos
             .map((p) => filesByID.get(p.fileId))
@@ -1498,7 +1505,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
  */
 interface MapLayoutProps {
     collectionSummary: CollectionSummary;
-    visiblePhotos: JourneyPoint[];
+    visiblePhotos: MapPhotoPoint[];
     visibleFiles: EnteFile[];
     visiblePhotosUpdating: boolean;
     mapIndex: MapIndex | null;
@@ -1508,7 +1515,7 @@ interface MapLayoutProps {
     mapCenter: [number, number];
     optimalZoom: number;
     onClose: () => void;
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosChange: (photosInView: MapPhotoPoint[]) => void;
     onVisiblePhotosLoadingChange: (loading: boolean) => void;
     onPrefetchThumbnails: (fileIDs: number[]) => void;
     user: ReturnType<typeof useCurrentUser>;
@@ -1885,7 +1892,7 @@ interface MapCanvasProps {
     mapIndex: MapIndex | null;
     optimalZoom: number;
     thumbByFileID: Map<number, string>;
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosChange: (photosInView: MapPhotoPoint[]) => void;
     onVisiblePhotosLoadingChange: (loading: boolean) => void;
     onPrefetchThumbnails: (fileIDs: number[]) => void;
 }
@@ -2025,7 +2032,7 @@ interface MapClustersProps {
     useMap: typeof import("react-leaflet").useMap;
     mapIndex: MapIndex;
     thumbByFileID: Map<number, string>;
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosChange: (photosInView: MapPhotoPoint[]) => void;
     onVisiblePhotosLoadingChange: (loading: boolean) => void;
     onPrefetchThumbnails: (fileIDs: number[]) => void;
     Marker: typeof import("react-leaflet").Marker;

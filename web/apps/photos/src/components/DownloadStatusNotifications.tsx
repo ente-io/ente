@@ -56,10 +56,9 @@ interface DownloadStatusNotificationsProps {
      *
      * and hidden attribute should be shown.
      *
-     * This is only relevant in the context of the photos app, and can be
-     * omitted by the public albums app. See the documentation of
-     * {@link SaveGroup}'s {@link collectionSummaryID} property for why we don't
-     * store the collection summary itself.
+     * See the documentation of {@link SaveGroup}'s
+     * {@link collectionSummaryID} property for why we don't store the
+     * collection summary itself.
      */
     onShowCollectionSummary?: (
         collectionSummaryID: number | undefined,

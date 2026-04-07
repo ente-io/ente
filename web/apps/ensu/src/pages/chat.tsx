@@ -33,6 +33,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { handleManualAppUpdateCheck } from "services/app-update";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
@@ -245,6 +246,13 @@ const parseDocumentBlocks = (text: string) => {
 
     return { text: stripped, documents };
 };
+
+const stripHiddenPartsText = (text: string) =>
+    text
+        .replace(/\u0000/g, "")
+        .replace(/<think>[\s\S]*?<\/think>/g, "")
+        .replace(/<todo_list>[\s\S]*?<\/todo_list>/g, "")
+        .trim();
 
 const buildDocumentBlocks = (documents: DocumentAttachment[]) => {
     if (!documents.length) return "";
@@ -1526,7 +1534,6 @@ const Page: React.FC = () => {
     }, [
         chatKey,
         currentSessionId,
-        isDraftSession,
         sessionFromQuery,
         updateRouteSession,
         showMiniDialog,
@@ -1849,13 +1856,7 @@ const Page: React.FC = () => {
                 delete attachmentPreviewInFlightRef.current[attachment.id];
             }
         },
-        [
-            chatKey,
-            downloadAttachment,
-            firstPaintDone,
-            inferImageMime,
-            readDecryptedAttachmentBytes,
-        ],
+        [chatKey, firstPaintDone, inferImageMime],
     );
 
     useEffect(() => {
@@ -1887,13 +1888,15 @@ const Page: React.FC = () => {
         [sessions, currentSessionId],
     );
 
+    const currentRootSessionUuid = currentSession?.rootSessionUuid;
+
     useEffect(() => {
-        if (!currentSession) {
+        if (!currentRootSessionUuid) {
             setBranchSelections({});
             return;
         }
         let cancelled = false;
-        void getBranchSelections(currentSession.rootSessionUuid)
+        void getBranchSelections(currentRootSessionUuid)
             .then((selections) => {
                 if (!cancelled) {
                     setBranchSelections(selections);
@@ -1909,7 +1912,7 @@ const Page: React.FC = () => {
         return () => {
             cancelled = true;
         };
-    }, [currentSession?.rootSessionUuid]);
+    }, [currentRootSessionUuid]);
 
     useEffect(() => {
         if (isTauriRuntime) return;
@@ -2336,7 +2339,7 @@ const Page: React.FC = () => {
                 if (!firstUser) return;
 
                 const userText = parseDocumentBlocks(firstUser.text).text;
-                const assistantText = stripHiddenParts(firstAssistant.text);
+                const assistantText = stripHiddenPartsText(firstAssistant.text);
 
                 const fallbackSeed = trimToWords(userText, 7) || "New chat";
                 const fallbackTitle = sessionTitleFromText(
@@ -2483,11 +2486,7 @@ const Page: React.FC = () => {
     );
 
     const stripHiddenParts = useCallback((text: string) => {
-        return text
-            .replace(/\u0000/g, "")
-            .replace(/<think>[\s\S]*?<\/think>/g, "")
-            .replace(/<todo_list>[\s\S]*?<\/todo_list>/g, "")
-            .trim();
+        return stripHiddenPartsText(text);
     }, []);
 
     const getMessagePreview = useCallback(
@@ -2506,7 +2505,7 @@ const Page: React.FC = () => {
             if (imageCount > 0) return "Attached images";
             return "";
         },
-        [stripHiddenParts, parseDocumentBlocks],
+        [stripHiddenParts],
     );
 
     const appendMessageToState = useCallback((message: ChatMessage) => {
@@ -2549,7 +2548,7 @@ const Page: React.FC = () => {
                 return next;
             });
         },
-        [getMessagePreview, sessionTitleFromText],
+        [getMessagePreview],
     );
 
     const approxTokens = useCallback((text: string) => {
@@ -2718,7 +2717,7 @@ const Page: React.FC = () => {
             removeSessionFromState(sessionId);
             void syncChat(chatKey);
         },
-        [chatKey, removeSessionFromState, syncChat],
+        [chatKey, removeSessionFromState],
     );
 
     const requestDeleteSession = useCallback((sessionId: string) => {
@@ -2795,13 +2794,7 @@ const Page: React.FC = () => {
                 setPendingImages([]);
             }
         },
-        [
-            chatKey,
-            downloadAttachment,
-            readDecryptedAttachmentBytes,
-            showMiniDialog,
-            inferImageMime,
-        ],
+        [chatKey, showMiniDialog, inferImageMime],
     );
 
     const handleCancelEdit = useCallback(() => {
@@ -2866,13 +2859,19 @@ const Page: React.FC = () => {
                         import("@tauri-apps/api/shell"),
                     ]);
                     const root = await appDataDir();
-                    const dir = await join(root, "ensu_llmchat_attachments");
+                    const dir = await join(root, "ensu_llmchat_attachments_v2");
                     await createDir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
                     await writeBinaryFile({ path: filePath, contents: bytes });
 
-                    await open(filePath);
+                    const normalizedPath = filePath.replace(/\\/g, "/");
+                    const fileUrl = new URL("file:///");
+                    fileUrl.pathname = normalizedPath.startsWith("/")
+                        ? normalizedPath
+                        : `/${normalizedPath}`;
+                    const openTarget = fileUrl.toString();
+                    await open(openTarget);
                     return;
                 }
 
@@ -2901,14 +2900,7 @@ const Page: React.FC = () => {
                 });
             }
         },
-        [
-            chatKey,
-            downloadAttachment,
-            readDecryptedAttachmentBytes,
-            inferImageMime,
-            isTauriRuntime,
-            showMiniDialog,
-        ],
+        [chatKey, inferImageMime, isTauriRuntime, showMiniDialog],
     );
 
     const flushStreamingText = useCallback(() => {
@@ -3025,7 +3017,6 @@ const Page: React.FC = () => {
         flushStreamingText,
         maybeGenerateSessionTitle,
         streamingParentId,
-        syncChat,
         updateBranchSelectionState,
         updateSessionAfterMessage,
     ]);
@@ -3302,7 +3293,8 @@ const Page: React.FC = () => {
             appendMessageToState,
             updateSessionAfterMessage,
             showMiniDialog,
-            syncChat,
+            approxTokens,
+            formatErrorMessage,
             scheduleStreamingFlush,
             flushStreamingText,
             maybeGenerateSessionTitle,
@@ -3523,6 +3515,10 @@ const Page: React.FC = () => {
 
         saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     }, [isTauriRuntime, showMiniDialog]);
+
+    const handleCheckForUpdates = useCallback(async () => {
+        await handleManualAppUpdateCheck(showMiniDialog);
+    }, [showMiniDialog]);
 
     const openModelSettings = useCallback(() => {
         if (!advancedUnlocked) return;
@@ -4133,13 +4129,11 @@ const Page: React.FC = () => {
         startGeneration,
         writeInferenceImages,
         cleanupInferenceImages,
-        storeEncryptedAttachmentBytes,
-        syncChat,
         updateBranchSelectionState,
         updateRouteSession,
-        formatErrorMessage,
         appendMessageToState,
         updateSessionAfterMessage,
+        refreshSessions,
     ]);
 
     useEffect(() => {
@@ -4421,6 +4415,7 @@ const Page: React.FC = () => {
                 isLoggedIn={isLoggedIn}
                 signedInEmail={savedLocalUser()?.email ?? ""}
                 saveLogs={saveLogs}
+                handleCheckForUpdates={handleCheckForUpdates}
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}

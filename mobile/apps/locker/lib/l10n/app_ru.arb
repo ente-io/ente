@@ -198,6 +198,7 @@
   "create": "Создать",
   "renameCollection": "Переименовать коллекцию",
   "save": "Сохранить",
+  "download": "Скачать",
   "deleteFile": "Удалить элемент",
   "deleteFileConfirmation": "Вы уверены, что хотите удалить \"{fileName}\"?",
   "@deleteFileConfirmation": {
@@ -288,6 +289,7 @@
     }
   },
   "uncategorized": "Без категории",
+  "syncing": "Синхронизация...",
   "syncingTrash": "Синхронизация корзины...",
   "restoring": "Восстановление...",
   "restoredFileToCollection": "\"{fileName}\" восстановлен в \"{collectionName}\"",
@@ -347,16 +349,27 @@
   "authToChangeLockscreenSetting": "Пожалуйста, авторизуйтесь для изменения настроек экрана блокировки",
   "authToViewPasskey": "Пожалуйста, авторизуйтесь, чтобы просмотреть пароль",
   "theme": "Тема",
+  "appearance": "Оформление",
   "lightTheme": "Светлая",
   "darkTheme": "Тёмная",
   "systemTheme": "Системная",
   "settings": "Настройки",
   "about": "О программе",
+  "aboutUs": "О нас",
   "weAreOpenSource": "У нас открытый исходный код!",
   "privacy": "Конфиденциальность",
   "terms": "Условия использования",
   "termsOfServicesTitle": "Условия использования",
+  "checkForUpdates": "Проверить наличие обновлений",
+  "checkingForUpdates": "Проверка наличия\nобновлений...",
+  "unableToCheckForUpdatesRightNow": "Не удалось проверить наличие обновлений прямо сейчас",
+  "youAreOnTheLatestVersion": "Вы используете последнюю версию",
+  "aNewVersionOfEnteLockerIsAvailable": "Доступна новая версия Ente Locker.",
+  "criticalUpdateAvailable": "Доступно критическое обновление",
+  "updateAvailable": "Доступно обновление",
+  "downloadUpdate": "Скачать обновление",
   "support": "Поддержка",
+  "helpAndSupport": "Помощь и поддержка",
   "contactSupport": "Связаться с поддержкой",
   "help": "Помощь",
   "suggestFeatures": "Предложить идею",
@@ -371,6 +384,10 @@
   "blog": "Блог",
   "merchandise": "Мерч",
   "twitter": "X (Ранее Twitter)",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
   "information": "Информация",
   "saveInformation": "Сохранить информацию",
   "saveToLocker": "Сохранить в Locker",
@@ -605,6 +622,14 @@
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
+  "uploadSubscriptionExpiredErrorTitle": "Подписка закончилась",
+  "@uploadSubscriptionExpiredErrorTitle": {
+    "description": "Title shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadSubscriptionExpiredErrorBody": "Ваша подписка на Ente Photos истекла. Продлите подписку, чтобы продолжить загрузку.",
+  "@uploadSubscriptionExpiredErrorBody": {
+    "description": "Body shown when uploads fail because the Photos subscription is expired"
+  },
   "uploadFileCountLimitErrorTitle": "Достигнут лимит файлов",
   "@uploadFileCountLimitErrorTitle": {
     "description": "Title shown when uploads fail because the locker already has the maximum file count"
@@ -639,6 +664,7 @@
   "deselectAll": "Отменить выделение",
   "selectAll": "Выбрать все",
   "unnamedCollection": "Коллекция без названия",
+  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "Загружено {completed}/{total} элементов...",
   "@uploadedFilesProgress": {
     "description": "Progress message showing uploaded items",
@@ -746,6 +772,7 @@
       }
     }
   },
+  "locker": "Locker",
   "loginToEnteAccount": "Войдите в свой аккаунт Ente",
   "unlockLockerNewUserTitle": "Присоединяйтесь к Ente, чтобы использовать Locker",
   "unlockLockerNewUserBody": "Locker в настоящее время доступен только для существующих пользователей Ente. Вы можете создать аккаунт в Ente Photos, чтобы использовать Locker.",
@@ -834,6 +861,20 @@
     }
   },
   "usage": "Использование",
+  "fileCount": "{used} / {max}",
+  "@fileCount": {
+    "description": "Display item count usage in the format 'used / max'",
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "8"
+      },
+      "max": {
+        "type": "String",
+        "example": "1,000"
+      }
+    }
+  },
   "important": "Важное",
   "unimportant": "Неважное",
   "removingFromImportant": "Удаление из важного...",
@@ -890,5 +931,125 @@
   "clearAllFilters": "Очистить все фильтры",
   "selectLanguage": "Выберите язык",
   "general": "Общие",
-  "language": "Язык"
+  "language": "Язык",
+  "selectedCount": "{count, plural, =1{1 выбран} other{{count} выбрано}}",
+  "@selectedCount": {
+    "description": "Number of items selected",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "actionNotSupportedForSharedFiles": "{count, plural, =1{Действие не поддерживается для 1 общего файла} other{Действие не поддерживается для {count} общих файлов}}",
+  "@actionNotSupportedForSharedFiles": {
+    "description": "Message when action is not supported for shared files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addTo": "Добавить в",
+  "shareNotSupportedForSharedFiles": "Нельзя делиться общими файлами",
+  "editNotSupportedForSharedFiles": "Нельзя редактировать общие файлы",
+  "deleteNotSupportedForSharedFiles": "Нельзя удалять общие файлы",
+  "importantNotSupportedForSharedFiles": "Общие файлы нельзя пометить как важные",
+  "sharingSection": "Поделиться",
+  "sharingEnabledToggle": "Возможность поделиться включена",
+  "publicLinkSection": "Публичная ссылка",
+  "linkEnabledToggle": "Ссылка включена",
+  "allowUploads": "Разрешить загрузку",
+  "collectionUpdated": "Коллекция обновлена",
+  "actionNotSupportedOnFavouritesAlbum": "Это действие недоступно для альбома «Избранное»",
+  "leaveCollectionSuccessfully": "Вы успешно покинули коллекцию",
+  "leftCollectionsSuccessfully": "{count, plural, =1 {Вы успешно покинули 1 коллекцию} few {Вы успешно покинули {count} коллекции} many {Вы успешно покинули {count} коллекций} other {Вы успешно покинули {count} коллекции}}",
+  "@leftCollectionsSuccessfully": {
+    "description": "Success message when leaving collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "removePublicLink": "Удалить публичную ссылку",
+  "removePublicLinkConfirmation": "Это удалит публичную ссылку для доступа к «{collectionName}».",
+  "@removePublicLinkConfirmation": {
+    "description": "Confirmation message when removing public link",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
+  "collectionsDeletedSuccessfully": "{count, plural, =1{1 коллекция успешно удалена} few {{count} коллекции успешно удалены} many {{count} коллекций успешно удалено} other {{count} коллекции успешно удалены}\n}",
+  "@collectionsDeletedSuccessfully": {
+    "description": "Success message when collections are deleted",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "restoreToCollection": "Восстановить в коллекцию",
+  "restoringFiles": "Восстановление...",
+  "filesRestoredSuccessfully": "{count, plural, =1{1 элемент успешно восстановлен} few {{count} элемента успешно восстановлено} many {{count} элементов успешно восстановлено} other {{count} элемента успешно восстановлено}}",
+  "@filesRestoredSuccessfully": {
+    "description": "Success message when items are restored from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToRestoreFiles": "Не удалось восстановить элементы",
+  "permanentlyDelete": "Удалить безвозвратно",
+  "permanentlyDeleteFilesBody": "{count, plural, =1{Этот элемент} few {Эти {count} элемента} many {Эти {count} элементов} other {Эти {count} элемента}} будут удалены навсегда без возможности восстановления.",
+  "@permanentlyDeleteFilesBody": {
+    "description": "Confirmation body for permanent deletion from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDelete": "Да, удалить",
+  "deletingFiles": "Удаление...",
+  "filesDeletedPermanently": "{count, plural, =1{1 элемент удалён навсегда} few {{count} элемента удалены навсегда} many {{count} элементов удалено навсегда} other {{count} элемента удалены навсегда}}",
+  "@filesDeletedPermanently": {
+    "description": "Success message when items are permanently deleted from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToDeleteFiles": "Не удалось удалить элементы",
+  "itemsStored": "Сохранено элементов",
+  "of_": "от",
+  "usageYou": "Вы",
+  "usageFamily": "Семья",
+  "searchSettings": "Настройки поиска",
+  "suggestions": "Предложения",
+  "noResultsFound": "Ничего не найдено",
+  "viewActiveSessions": "Просмотр активных сессий",
+  "authToViewYourActiveSessions": "Пожалуйста, авторизуйтесь для просмотра активных сессий",
+  "deleteAccountFeedbackPrompt": "Что-то не работает? Напишите нам на {email}, мы будем рады помочь.",
+  "@deleteAccountFeedbackPrompt": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "sendFeedback": "Отправить отзыв",
+  "deleteAccountPermanentWarning": "Это навсегда удалит ваши данные Ente Auth, Photos и Locker"
 }

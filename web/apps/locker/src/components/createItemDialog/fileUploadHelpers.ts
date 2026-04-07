@@ -36,8 +36,18 @@ export const toggleCollectionName = (names: string[], name: string) => {
         : addCollectionName(names, name);
 };
 
+const uploadItemKeySuffixByFile = new WeakMap<File, string>();
+let uploadItemKeyCounter = 0;
+
 export const uploadQueueItemKey = (item: LockerUploadCandidate) =>
-    `${item.relativePath ?? item.file.name}:${item.file.size}:${item.file.lastModified}`;
+    `${item.relativePath ?? item.file.name}:${item.file.size}:${item.file.lastModified}:${
+        uploadItemKeySuffixByFile.get(item.file) ??
+        (() => {
+            const suffix = String(++uploadItemKeyCounter);
+            uploadItemKeySuffixByFile.set(item.file, suffix);
+            return suffix;
+        })()
+    }`;
 
 export const uploadItemParentPath = (item: LockerUploadCandidate) => {
     const segments = (item.relativePath ?? item.file.name)
@@ -61,11 +71,12 @@ export const collectionNamesByUploadItem = (
         ]),
     );
 
+export const filterNonEmptyUploadItems = (items: LockerUploadCandidate[]) =>
+    items.filter((item) => item.file.size > 0);
+
 export const uploadProgressValue = (
     progress: LockerUploadProgress | null | undefined,
     uploadCap: number,
-    finalizingStartedAt?: number,
-    now = Date.now(),
 ) => {
     if (!progress) {
         return 0;
@@ -79,14 +90,7 @@ export const uploadProgressValue = (
     }
 
     if (progress.phase === "finalizing") {
-        const start = finalizingStartedAt ?? now;
-        const elapsed = Math.max(0, now - start);
-        const finalTarget = 99;
-        const easedFraction = 1 - Math.exp(-elapsed / 2200);
-        return Math.min(
-            finalTarget,
-            uploadCap + (finalTarget - uploadCap) * easedFraction,
-        );
+        return 99;
     }
 
     return 0;

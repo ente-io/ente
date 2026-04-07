@@ -482,7 +482,7 @@
   "add": "Ajouter",
   "collaboratorsCanAddFilesToTheSharedCollection": "Les collaborateurs peuvent ajouter des elements a la collection partagee.",
   "enterEmail": "Entrer un email",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -502,8 +502,8 @@
     },
     "description": "Number of collaborators that were successfully added to a collection."
   },
-  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
+  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "sharing": "Partage...",
   "invalidEmailAddress": "Adresse e-mail invalide",
@@ -514,7 +514,6 @@
   "youCannotShareWithYourself": "Vous ne pouvez pas partager avec vous-même",
   "inviteToEnte": "Inviter à rejoindre Ente",
   "sendInvite": "Envoyer Invitations",
-  "shareTextRecommendUsingEnte": "Telecharge Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Ceci est votre ID de vérification",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Quelqu'un qui partage des albums avec vous devrait voir le même ID sur son appareil.",
   "howToViewShareeVerificationID": "Demandez-leur d'appuyer longuement sur leur adresse email dans l'écran des paramètres pour vérifier que les identifiants des deux appareils correspondent.",
@@ -530,8 +529,6 @@
   "verificationId": "ID de vérification",
   "verifyEmailID": "Vérifier {email}",
   "emailNoEnteAccount": "{email} n'a pas de compte Ente.\n\nEnvoie-lui une invitation pour partager des elements.",
-  "shareMyVerificationID": "Voici mon ID de vérification : {verificationID} pour ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hé, pouvez-vous confirmer qu'il s'agit de votre ID de vérification ente.com : {verificationID}",
   "passwordLock": "Verrouillage par mot de passe",
   "manage": "Gérer",
   "addedAs": "Ajouté comme",

@@ -31,11 +31,11 @@ class MemoryLaneService {
 
   static final MemoryLaneService instance = MemoryLaneService._internal();
 
-  static const _minimumYears = 5;
+  static const _minimumYears = 2;
   static const _minimumFacesPerYear = 4;
   static const _minimumEligibleAgeYears = 5;
   static const _recomputeCooldown = Duration(hours: 2);
-  static const _timelineLogicVersion = 2;
+  static const _timelineLogicVersion = 3;
   static const _startupBackfillDelay = Duration(seconds: 15);
   static const _startupBackfillBatchSize = 200;
 
@@ -780,6 +780,19 @@ class MemoryLaneService {
     readyPersonIds.value = current;
   }
 
+  static int completedYearsBetween(DateTime start, DateTime end) {
+    final startDate = DateTime(start.year, start.month, start.day);
+    final endDate = DateTime(end.year, end.month, end.day);
+    if (endDate.isBefore(startDate)) {
+      return 0;
+    }
+    int years = endDate.year - startDate.year;
+    if (endDate.isBefore(_safeDateInYear(startDate, endDate.year))) {
+      years -= 1;
+    }
+    return years < 0 ? 0 : years;
+  }
+
   @visibleForTesting
   static int? minimumEligibleCreationTimeMicros(String? birthDateString) {
     if (birthDateString == null || birthDateString.isEmpty) {
@@ -789,17 +802,18 @@ class MemoryLaneService {
     if (birthDate == null) {
       return null;
     }
-    final targetYear = birthDate.year + _minimumEligibleAgeYears;
-    final targetMonth = birthDate.month;
-    final daysInTargetMonth = DateTime(targetYear, targetMonth + 1, 0).day;
-    final targetDay =
-        birthDate.day > daysInTargetMonth ? daysInTargetMonth : birthDate.day;
-    final cutoff = DateTime(
-      targetYear,
-      targetMonth,
-      targetDay,
+    final cutoff = _safeDateInYear(
+      birthDate,
+      birthDate.year + _minimumEligibleAgeYears,
     );
     return cutoff.microsecondsSinceEpoch;
+  }
+
+  static DateTime _safeDateInYear(DateTime date, int year) {
+    final daysInTargetMonth = DateTime(year, date.month + 1, 0).day;
+    final targetDay =
+        date.day > daysInTargetMonth ? daysInTargetMonth : date.day;
+    return DateTime(year, date.month, targetDay);
   }
 }
 

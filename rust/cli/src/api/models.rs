@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -55,7 +57,7 @@ pub struct VerifySrpSessionRequest {
     pub srp_m1: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyAttributes {
     pub kek_salt: String,
@@ -67,9 +69,13 @@ pub struct KeyAttributes {
     pub secret_key_decryption_nonce: String,
     pub mem_limit: i32,
     pub ops_limit: i32,
+    pub master_key_encrypted_with_recovery_key: Option<String>,
+    pub master_key_decryption_nonce: Option<String>,
+    pub recovery_key_encrypted_with_master_key: Option<String>,
+    pub recovery_key_decryption_nonce: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthResponse {
     pub id: i64,
@@ -84,6 +90,34 @@ pub struct AuthResponse {
     pub passkey_session_id: Option<String>,
     pub srp_m2: Option<String>,
     pub accounts_url: Option<String>,
+}
+
+impl fmt::Debug for AuthResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AuthResponse")
+            .field("id", &self.id)
+            .field("has_key_attributes", &self.key_attributes.is_some())
+            .field(
+                "encrypted_token",
+                &self.encrypted_token.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("token", &self.token.as_ref().map(|_| "[REDACTED]"))
+            .field(
+                "two_factor_session_id",
+                &self.two_factor_session_id.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field(
+                "two_factor_session_id_v2",
+                &self.two_factor_session_id_v2.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field(
+                "passkey_session_id",
+                &self.passkey_session_id.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("srp_m2", &self.srp_m2.as_ref().map(|_| "[REDACTED]"))
+            .field("accounts_url", &self.accounts_url)
+            .finish()
+    }
 }
 
 impl AuthResponse {
@@ -115,17 +149,121 @@ pub struct SendOtpRequest {
     pub purpose: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct VerifyEmailRequest {
     pub email: String,
     pub ott: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+impl fmt::Debug for VerifyEmailRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VerifyEmailRequest")
+            .field("email", &self.email)
+            .field("ott", &"[REDACTED]")
+            .field("source", &self.source)
+            .finish()
+    }
+}
+
+#[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VerifyTotpRequest {
     pub session_id: String,
     pub code: String,
+}
+
+impl fmt::Debug for VerifyTotpRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VerifyTotpRequest")
+            .field("session_id", &"[REDACTED]")
+            .field("code", &"[REDACTED]")
+            .finish()
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SetUserAttributesRequest {
+    pub key_attributes: KeyAttributes,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetupSrpRequest {
+    #[serde(rename = "srpUserID")]
+    pub srp_user_id: String,
+    #[serde(rename = "srpSalt")]
+    pub srp_salt: String,
+    #[serde(rename = "srpVerifier")]
+    pub srp_verifier: String,
+    #[serde(rename = "srpA")]
+    pub srp_a: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SetupSrpResponse {
+    #[serde(rename = "setupID")]
+    pub setup_id: Uuid,
+    #[serde(rename = "srpB")]
+    pub srp_b: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CompleteSrpSetupRequest {
+    #[serde(rename = "setupID")]
+    pub setup_id: String,
+    #[serde(rename = "srpM1")]
+    pub srp_m1: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CompleteSrpSetupResponse {
+    #[serde(rename = "setupID")]
+    pub setup_id: Uuid,
+    #[serde(rename = "srpM2")]
+    pub srp_m2: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionValidityResponse {
+    pub has_set_keys: bool,
+    pub key_attributes: Option<KeyAttributes>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TwoFactorSecret {
+    pub secret_code: String,
+    pub qr_code: String,
+}
+
+impl fmt::Debug for TwoFactorSecret {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TwoFactorSecret")
+            .field("secret_code", &"[REDACTED]")
+            .field("qr_code", &"[REDACTED]")
+            .finish()
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnableTwoFactorRequest {
+    pub code: String,
+    pub encrypted_two_factor_secret: String,
+    pub two_factor_secret_decryption_nonce: String,
+}
+
+impl fmt::Debug for EnableTwoFactorRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EnableTwoFactorRequest")
+            .field("code", &"[REDACTED]")
+            .field("encrypted_two_factor_secret", &"[REDACTED]")
+            .field("two_factor_secret_decryption_nonce", &"[REDACTED]")
+            .finish()
+    }
 }
 
 // ========== User Models ==========

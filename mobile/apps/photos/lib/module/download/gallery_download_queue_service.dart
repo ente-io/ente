@@ -183,8 +183,9 @@ class GalleryDownloadQueueService {
       if (uploadID == null || fileSize == null || fileSize <= 0) {
         continue;
       }
-      final queuedFile =
-          file.isRemoteFile ? file.copyWith() : file.copyWith(localID: null);
+      final queuedFile = file.isRemoteFile
+          ? file.copyWith()
+          : (file.copyWith()..localID = null);
       _queuedFilesByID[uploadID] = queuedFile;
       final sourceFileJson = _serializeQueuedFile(queuedFile);
       if (_tasks.containsKey(uploadID)) {
@@ -473,7 +474,7 @@ class GalleryDownloadQueueService {
     }
     file.fileSize ??= _tasks[fileID]?.totalBytes;
     final fileToDownload =
-        file.isRemoteFile ? file.copyWith() : file.copyWith(localID: null);
+        file.isRemoteFile ? file.copyWith() : (file.copyWith()..localID = null);
     await downloadToGallery(
       fileToDownload,
       forceResumableDownload: true,

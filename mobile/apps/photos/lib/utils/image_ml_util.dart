@@ -64,7 +64,7 @@ Future<DecodedImage> decodeImageFromPath(
   if (skipExifRead) {
     _logger.info('Skipping EXIF read for JXL on iOS');
   } else {
-    exifData = await readExifFromBytes(imageData);
+    exifData = _normalizeExifResult(await readExifFromBytes(imageData));
   }
   final int orientation =
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
@@ -135,6 +135,17 @@ Future<DecodedImage> decodeImageFromPath(
     image: includeDartUiImage ? image : null,
     rawRgbaBytes: rawRgbaBytes,
   );
+}
+
+Map<String, IfdTag> _normalizeExifResult(dynamic result) {
+  if (result is Map<String, IfdTag>) {
+    return result;
+  }
+  final dynamic tags = result.tags;
+  if (tags is Map<String, IfdTag>) {
+    return tags;
+  }
+  throw ArgumentError("Unsupported EXIF result type: ${result.runtimeType}");
 }
 
 Future<Uint8List?> createSafeJpegDecodeFallbackBytes({

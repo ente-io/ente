@@ -80,6 +80,7 @@ internal data class AuthorizationResponse(
     @SerialName("keyAttributes") val keyAttributes: KeyAttributesDto? = null,
     @SerialName("encryptedToken") val encryptedToken: String? = null,
     @SerialName("token") val token: String? = null,
+    @SerialName("srpM2") val srpM2: String? = null,
     @SerialName("twoFactorSessionID") val twoFactorSessionId: String? = null,
     @SerialName("twoFactorSessionIDV2") val twoFactorSessionIdV2: String? = null,
     @SerialName("passkeySessionID") val passkeySessionId: String? = null,

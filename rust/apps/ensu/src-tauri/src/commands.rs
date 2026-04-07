@@ -1,21 +1,24 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::path::{Path, PathBuf};
 #[cfg(target_os = "macos")]
 use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use ensu_db::backend::sqlite::SqliteBackend;
-use ensu_db::{EnsuDb, Error as DbError};
+use ensu_db::{EnsuDb, Error as DbError, SyncStateDb};
 use ensu_sync as chat_sync;
 use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
-use tauri::{AppHandle, State, Window};
+use tauri::{AppHandle, Manager, State, Window};
 use uuid::Uuid;
+
+use crate::logging;
 
 #[derive(Default)]
 pub struct SrpState {
@@ -39,6 +42,16 @@ struct ChatDbHolder {
 }
 
 const SECURE_STORAGE_SERVICE: &str = "io.ente.ensu";
+const CHAT_DB_FILE_NAME_V2: &str = "ensu_llmchat_v2.db";
+const LEGACY_CHAT_DB_FILE_NAME: &str = "ensu_llmchat.db";
+const SYNC_DB_FILE_NAME_V2: &str = "llmchat_sync_v2.db";
+const LEGACY_SYNC_DB_FILE_NAME: &str = "llmchat_sync.db";
+const ATTACHMENTS_DIR_NAME_V2: &str = "ensu_llmchat_attachments_v2";
+const LEGACY_ATTACHMENTS_DIR_NAME: &str = "ensu_llmchat_attachments";
+const SYNC_CURSOR_META_KEY: &str = "llmchat.sync.cursor";
+const SYNC_CHAT_KEY_META_KEY: &str = "llmchat.chat.key";
+const SYNC_OFFLINE_SEED_META_KEY: &str = "llmchat.offline.seeded.v1";
+const LLM_PANIC_JOB_ID: i64 = 0;
 
 #[derive(Debug, Serialize)]
 pub struct ApiError {
@@ -130,6 +143,39 @@ fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
 }
 
+fn replace_llm_state(
+    llm_state: &LlmState,
+    model: Option<llm::ModelHandleRef>,
+    context: Option<llm::ContextHandleRef>,
+) -> Result<(), ApiError> {
+    let mut model_guard = llm_state
+        .model
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
+    let mut context_guard = llm_state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+
+    *model_guard = model;
+    *context_guard = context;
+    Ok(())
+}
+
+fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
+    match payload.downcast::<String>() {
+        Ok(message) => *message,
+        Err(payload) => match payload.downcast::<&'static str>() {
+            Ok(message) => (*message).to_string(),
+            Err(_) => "non-string panic payload".to_string(),
+        },
+    }
+}
+
+fn log_command_panic(command: &str, message: &str) {
+    logging::log("Panic", format!("command={command} panic={message}"));
+}
+
 fn secure_storage_entry(key: &str) -> Result<keyring::Entry, ApiError> {
     keyring::Entry::new(SECURE_STORAGE_SERVICE, key)
         .map_err(|err| ApiError::new("secure_storage", err.to_string()))
@@ -211,9 +257,11 @@ impl From<core_crypto::CryptoError> for ApiError {
             E::StreamPushFailed => "stream_push_failed",
             E::StreamPullFailed => "stream_pull_failed",
             E::StreamTruncated => "stream_truncated",
+            E::StreamTrailingData => "stream_trailing_data",
             E::SealedBoxOpenFailed => "sealed_box_open_failed",
             E::InvalidPublicKey => "invalid_public_key",
             E::HashFailed => "hash_failed",
+            E::Json(_) => "json",
             E::Argon2(_) => "argon2",
             E::Aead => "aead",
             E::ArrayConversion => "array_conversion",
@@ -646,6 +694,13 @@ pub struct ChatSyncInput {
     client_version: Option<String>,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatDbMigrateLegacyInput {
+    key_b64: String,
+    legacy_key_b64: String,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChatSyncStatsDto {
@@ -680,6 +735,15 @@ impl From<chat_sync::SyncResult> for ChatSyncResultDto {
             downloaded_attachments: result.downloaded_attachments,
         }
     }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatDbMigrateLegacyResult {
+    did_migrate: bool,
+    migrated_sessions: i64,
+    migrated_messages: i64,
+    migrated_attachments: i64,
 }
 
 impl TryFrom<ChatAttachmentInput> for ensu_db::Attachment {
@@ -1267,43 +1331,105 @@ pub async fn chat_db_reset(state: State<'_, ChatDbState>, app: AppHandle) -> Res
 }
 
 #[tauri::command]
+pub async fn chat_db_migrate_legacy(
+    app: AppHandle,
+    input: ChatDbMigrateLegacyInput,
+) -> Result<ChatDbMigrateLegacyResult, ApiError> {
+    async_runtime::spawn_blocking(move || migrate_legacy_chat_db(&app, &input))
+        .await
+        .map_err(|_| chat_db_thread_error())?
+}
+
+#[tauri::command]
 pub async fn chat_sync(
     app: AppHandle,
     input: ChatSyncInput,
 ) -> Result<ChatSyncResultDto, ApiError> {
     async_runtime::spawn_blocking(move || {
-        let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
-        let master_key = core_crypto::decode_b64(&input.master_key_b64).map_err(ApiError::from)?;
+        match catch_unwind(AssertUnwindSafe(|| {
+            logging::log(
+                "Sync",
+                format!(
+                    "chat_sync start base_url={} has_user_agent={} has_client_package={} has_client_version={}",
+                    input.base_url,
+                    input.user_agent.is_some(),
+                    input.client_package.is_some(),
+                    input.client_version.is_some()
+                ),
+            );
+            let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+            let master_key =
+                core_crypto::decode_b64(&input.master_key_b64).map_err(ApiError::from)?;
 
-        let db_path = chat_db_path(&app)?;
-        let sync_path = sync_db_path(&app)?;
-        let attachments_dir = attachments_dir_path(&app)?;
-        let meta_dir = sync_meta_dir_path(&app)?;
+            let db_path = chat_db_path(&app)?;
+            let sync_path = sync_db_path(&app)?;
+            let attachments_dir = attachments_dir_path(&app)?;
+            let meta_dir = sync_meta_dir_path(&app)?;
 
-        let engine = chat_sync::SyncEngine::new(
-            db_path.to_string_lossy().to_string(),
-            sync_path.to_string_lossy().to_string(),
-            key,
-            attachments_dir.to_string_lossy().to_string(),
-            meta_dir.to_string_lossy().to_string(),
-            None,
-        )
-        .map_err(|err| ApiError::new("sync", err.to_string()))?;
+            logging::log(
+                "Sync",
+                format!(
+                    "chat_sync paths db={} sync={} attachments_dir={} meta_dir={}",
+                    db_path.display(),
+                    sync_path.display(),
+                    attachments_dir.display(),
+                    meta_dir.display()
+                ),
+            );
 
-        let auth = chat_sync::SyncAuth {
-            base_url: input.base_url,
-            auth_token: input.auth_token,
-            master_key: master_key.into(),
-            user_agent: input.user_agent,
-            client_package: input.client_package,
-            client_version: input.client_version,
-        };
+            let engine = chat_sync::SyncEngine::new(
+                db_path.to_string_lossy().to_string(),
+                sync_path.to_string_lossy().to_string(),
+                key,
+                attachments_dir.to_string_lossy().to_string(),
+                meta_dir.to_string_lossy().to_string(),
+                None,
+            )
+            .map_err(|err| {
+                logging::log("Sync", format!("failed to create sync engine error={err}"));
+                ApiError::new("sync", err.to_string())
+            })?;
 
-        let result = engine.sync(auth).map_err(map_sync_error)?;
-        Ok(ChatSyncResultDto::from(result))
+            let auth = chat_sync::SyncAuth {
+                base_url: input.base_url,
+                auth_token: input.auth_token,
+                master_key: master_key.into(),
+                user_agent: input.user_agent,
+                client_package: input.client_package,
+                client_version: input.client_version,
+            };
+
+            let result = engine.sync(auth).map_err(|err| {
+                logging::log("Sync", format!("sync failed error={err}"));
+                map_sync_error(err)
+            })?;
+            logging::log(
+                "Sync",
+                format!(
+                    "chat_sync success pulled_sessions={} pulled_messages={} pushed_sessions={} pushed_messages={} uploaded_attachments={} downloaded_attachments={}",
+                    result.pulled.sessions,
+                    result.pulled.messages,
+                    result.pushed.sessions,
+                    result.pushed.messages,
+                    result.uploaded_attachments,
+                    result.downloaded_attachments
+                ),
+            );
+            Ok(ChatSyncResultDto::from(result))
+        })) {
+            Ok(result) => result,
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("chat_sync", &message);
+                Err(ApiError::new("sync_panic", format!("chat_sync panicked: {message}")))
+            }
+        }
     })
     .await
-    .map_err(|_| ApiError::new("sync", "Sync task failed"))?
+    .map_err(|err| {
+        logging::log("Sync", format!("sync task join failed error={err}"));
+        ApiError::new("sync", "Sync task failed")
+    })?
 }
 
 #[derive(Serialize, Clone)]
@@ -1445,9 +1571,24 @@ pub fn get_ensu_defaults() -> TauriEnsuDefaults {
 
 #[tauri::command]
 pub async fn llm_init_backend() -> Result<(), ApiError> {
-    async_runtime::spawn_blocking(|| llm::init_backend().map_err(llm_error))
-        .await
-        .map_err(|_| llm_thread_error())??;
+    logging::log("LLM", "init backend requested");
+    async_runtime::spawn_blocking(|| match catch_unwind(AssertUnwindSafe(llm::init_backend)) {
+        Ok(result) => result.map_err(llm_error),
+        Err(payload) => {
+            let message = panic_message(payload);
+            log_command_panic("llm_init_backend", &message);
+            Err(ApiError::new(
+                "llm_panic",
+                format!("llm_init_backend panicked: {message}"),
+            ))
+        }
+    })
+    .await
+    .map_err(|err| {
+        logging::log("LLM", format!("init backend join failed error={err}"));
+        llm_thread_error()
+    })??;
+    logging::log("LLM", "init backend succeeded");
     Ok(())
 }
 
@@ -1456,21 +1597,31 @@ pub async fn llm_load_model(
     state: State<'_, LlmState>,
     params: llm::ModelLoadParams,
 ) -> Result<(), ApiError> {
-    let model = async_runtime::spawn_blocking(move || llm::load_model(params).map_err(llm_error))
-        .await
-        .map_err(|_| llm_thread_error())??;
-    let mut model_guard = state
-        .model
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
-    let mut context_guard = state
-        .context
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+    logging::log(
+        "LLM",
+        format!("load model requested model_path={}", params.model_path),
+    );
+    let model = async_runtime::spawn_blocking(move || {
+        match catch_unwind(AssertUnwindSafe(|| llm::load_model(params))) {
+            Ok(result) => result.map_err(llm_error),
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_load_model", &message);
+                Err(ApiError::new(
+                    "llm_panic",
+                    format!("llm_load_model panicked: {message}"),
+                ))
+            }
+        }
+    })
+    .await
+    .map_err(|err| {
+        logging::log("LLM", format!("load model join failed error={err}"));
+        llm_thread_error()
+    })??;
+    replace_llm_state(&state, Some(model), None)?;
 
-    *model_guard = Some(model);
-    *context_guard = None;
-
+    logging::log("LLM", "load model succeeded");
     Ok(())
 }
 
@@ -1490,12 +1641,32 @@ pub async fn llm_create_context(
     if params.n_threads.is_none() {
         params.n_threads = Some(default_llm_threads());
     }
+    logging::log(
+        "LLM",
+        format!(
+            "create context requested context_size={:?} n_threads={:?} n_batch={:?}",
+            params.context_size, params.n_threads, params.n_batch
+        ),
+    );
 
     let context = async_runtime::spawn_blocking(move || {
-        llm::create_context(model, params).map_err(llm_error)
+        match catch_unwind(AssertUnwindSafe(|| llm::create_context(model, params))) {
+            Ok(result) => result.map_err(llm_error),
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_create_context", &message);
+                Err(ApiError::new(
+                    "llm_panic",
+                    format!("llm_create_context panicked: {message}"),
+                ))
+            }
+        }
     })
     .await
-    .map_err(|_| llm_thread_error())??;
+    .map_err(|err| {
+        logging::log("LLM", format!("create context join failed error={err}"));
+        llm_thread_error()
+    })??;
 
     let mut context_guard = state
         .context
@@ -1503,6 +1674,7 @@ pub async fn llm_create_context(
         .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
     *context_guard = Some(context);
 
+    logging::log("LLM", "create context succeeded");
     Ok(())
 }
 
@@ -1518,18 +1690,7 @@ pub fn llm_free_context(state: State<LlmState>) -> Result<(), ApiError> {
 
 #[tauri::command]
 pub fn llm_free_model(state: State<LlmState>) -> Result<(), ApiError> {
-    let mut context_guard = state
-        .context
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
-    let mut model_guard = state
-        .model
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
-
-    *context_guard = None;
-    *model_guard = None;
-    Ok(())
+    replace_llm_state(&state, None, None)
 }
 
 #[tauri::command]
@@ -1546,8 +1707,23 @@ pub fn llm_generate_chat_stream(
         .ok_or_else(|| ApiError::new("llm_not_ready", "Model context not loaded"))?;
 
     async_runtime::spawn_blocking(move || {
-        let mut sink = LlmEventSink::new(window);
-        let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
+        match catch_unwind(AssertUnwindSafe(|| {
+            let mut sink = LlmEventSink::new(window.clone());
+            let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
+        })) {
+            Ok(()) => {}
+            Err(payload) => {
+                let message = panic_message(payload);
+                log_command_panic("llm_generate_chat_stream", &message);
+                let _ = window.emit(
+                    "llm-event",
+                    LlmEvent::Error {
+                        job_id: LLM_PANIC_JOB_ID,
+                        message: format!("Generation panicked: {message}"),
+                    },
+                );
+            }
+        }
     });
 
     Ok(())
@@ -1659,43 +1835,389 @@ pub fn secure_storage_delete(key: String) -> Result<(), ApiError> {
     }
 }
 
-fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+fn app_data_dir(app: &AppHandle) -> Result<PathBuf, ApiError> {
     let resolver = app.path_resolver();
     let dir = resolver
         .app_data_dir()
         .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
     std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
-    Ok(dir.join("ensu_llmchat.db"))
+    Ok(dir)
+}
+
+pub fn cleanup_for_exit(app: &AppHandle) {
+    logging::log("App", "cleanup_for_exit start");
+
+    if let Some(llm_state) = app.try_state::<LlmState>() {
+        match replace_llm_state(&llm_state, None, None) {
+            Ok(()) => {
+                logging::log("App", "cleared LLM model");
+                logging::log("App", "cleared LLM context");
+            }
+            Err(error) => {
+                logging::log(
+                    "App",
+                    format!(
+                        "failed to clear LLM state during exit error={}",
+                        error.message
+                    ),
+                );
+            }
+        }
+    } else {
+        logging::log("App", "LLM state unavailable during exit");
+    }
+
+    if let Some(chat_db_state) = app.try_state::<ChatDbState>() {
+        match chat_db_state.inner.lock() {
+            Ok(mut guard) => {
+                *guard = None;
+                logging::log("App", "cleared chat DB state");
+            }
+            Err(_) => logging::log("App", "failed to lock chat DB state during exit"),
+        }
+    } else {
+        logging::log("App", "chat DB state unavailable during exit");
+    }
+
+    logging::log("App", "cleanup_for_exit complete");
+}
+
+fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    Ok(app_data_dir(app)?.join(CHAT_DB_FILE_NAME_V2))
 }
 
 fn sync_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let resolver = app.path_resolver();
-    let dir = resolver
-        .app_data_dir()
-        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
-    std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
-    Ok(dir.join("llmchat_sync.db"))
+    Ok(app_data_dir(app)?.join(SYNC_DB_FILE_NAME_V2))
 }
 
 fn attachments_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let resolver = app.path_resolver();
-    let dir = resolver
-        .app_data_dir()
-        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
-    let attachments_dir = dir.join("ensu_llmchat_attachments");
+    let dir = app_data_dir(app)?;
+    let attachments_dir = dir.join(ATTACHMENTS_DIR_NAME_V2);
     std::fs::create_dir_all(&attachments_dir)
         .map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(attachments_dir)
 }
 
 fn sync_meta_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
-    let resolver = app.path_resolver();
-    let dir = resolver
-        .app_data_dir()
-        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
+    let dir = app_data_dir(app)?;
     let meta_dir = dir.join("sync_meta");
     std::fs::create_dir_all(&meta_dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(meta_dir)
+}
+
+fn legacy_chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    Ok(app_data_dir(app)?.join(LEGACY_CHAT_DB_FILE_NAME))
+}
+
+fn legacy_sync_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    Ok(app_data_dir(app)?.join(LEGACY_SYNC_DB_FILE_NAME))
+}
+
+fn legacy_attachments_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    Ok(app_data_dir(app)?.join(LEGACY_ATTACHMENTS_DIR_NAME))
+}
+
+fn cleanup_legacy_chat_artifacts(app: &AppHandle) -> Result<(), ApiError> {
+    let legacy_db_path = legacy_chat_db_path(app)?;
+    let legacy_sync_path = legacy_sync_db_path(app)?;
+    let legacy_attachments_dir = legacy_attachments_dir_path(app)?;
+
+    for candidate in [
+        legacy_db_path.clone(),
+        PathBuf::from(format!("{}-wal", legacy_db_path.display())),
+        PathBuf::from(format!("{}-shm", legacy_db_path.display())),
+        legacy_sync_path.clone(),
+        PathBuf::from(format!("{}-wal", legacy_sync_path.display())),
+        PathBuf::from(format!("{}-shm", legacy_sync_path.display())),
+    ] {
+        if candidate.exists() {
+            fs::remove_file(&candidate).map_err(|err| ApiError::new("io", err.to_string()))?;
+        }
+    }
+
+    if legacy_attachments_dir.exists() {
+        fs::remove_dir_all(&legacy_attachments_dir)
+            .map_err(|err| ApiError::new("io", err.to_string()))?;
+    }
+
+    Ok(())
+}
+
+fn verify_migrated_chat_db(
+    target_db: &EnsuDb<SqliteBackend>,
+    source_session_ids: &[Uuid],
+    source_message_ids_by_session: &HashMap<Uuid, Vec<Uuid>>,
+    migrated_meta_keys: &[&str],
+    target_sync_state: &SyncStateDb<SqliteBackend>,
+    target_attachments_dir: &Path,
+    expected_attachment_ids: &[String],
+) -> Result<(), ApiError> {
+    let target_session_ids = target_db
+        .list_all_sessions()
+        .map_err(ApiError::from)?
+        .into_iter()
+        .map(|session| session.uuid)
+        .collect::<std::collections::HashSet<_>>();
+
+    for session_uuid in source_session_ids {
+        if !target_session_ids.contains(session_uuid) {
+            return Err(ApiError::new(
+                "db_migration_verification",
+                format!("Missing migrated session {session_uuid}"),
+            ));
+        }
+    }
+
+    for (session_uuid, message_ids) in source_message_ids_by_session {
+        let target_message_ids = target_db
+            .get_messages_for_sync(*session_uuid, true)
+            .map_err(ApiError::from)?
+            .into_iter()
+            .map(|message| message.uuid)
+            .collect::<std::collections::HashSet<_>>();
+
+        for message_uuid in message_ids {
+            if !target_message_ids.contains(message_uuid) {
+                return Err(ApiError::new(
+                    "db_migration_verification",
+                    format!("Missing migrated message {message_uuid}"),
+                ));
+            }
+        }
+    }
+
+    for meta_key in migrated_meta_keys {
+        if target_sync_state
+            .get_meta(meta_key)
+            .map_err(ApiError::from)?
+            .is_none()
+        {
+            return Err(ApiError::new(
+                "db_migration_verification",
+                format!("Missing migrated sync meta key {meta_key}"),
+            ));
+        }
+    }
+
+    for attachment_id in expected_attachment_ids {
+        let target_path = target_attachments_dir.join(attachment_id);
+        if !target_path.exists() {
+            return Err(ApiError::new(
+                "db_migration_verification",
+                format!("Missing migrated attachment {attachment_id}"),
+            ));
+        }
+    }
+
+    Ok(())
+}
+
+fn migrate_legacy_chat_db(
+    app: &AppHandle,
+    input: &ChatDbMigrateLegacyInput,
+) -> Result<ChatDbMigrateLegacyResult, ApiError> {
+    let legacy_db_path = legacy_chat_db_path(app)?;
+    if !legacy_db_path.exists() {
+        return Ok(ChatDbMigrateLegacyResult {
+            did_migrate: false,
+            migrated_sessions: 0,
+            migrated_messages: 0,
+            migrated_attachments: 0,
+        });
+    }
+
+    let legacy_sync_path = legacy_sync_db_path(app)?;
+    let legacy_attachments_dir = legacy_attachments_dir_path(app)?;
+    let target_db_path = chat_db_path(app)?;
+    let target_sync_path = sync_db_path(app)?;
+    let target_attachments_dir = attachments_dir_path(app)?;
+
+    let legacy_key = core_crypto::decode_b64(&input.legacy_key_b64).map_err(ApiError::from)?;
+    let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+
+    let legacy_db =
+        EnsuDb::open_sqlite_with_defaults(&legacy_db_path, &legacy_sync_path, legacy_key)
+            .map_err(ApiError::from)?;
+    let target_db = EnsuDb::open_sqlite_with_defaults(&target_db_path, &target_sync_path, key)
+        .map_err(ApiError::from)?;
+    let legacy_sync_state =
+        SyncStateDb::open_sqlite_with_defaults(&legacy_sync_path).map_err(ApiError::from)?;
+    let target_sync_state =
+        SyncStateDb::open_sqlite_with_defaults(&target_sync_path).map_err(ApiError::from)?;
+
+    let mut migrated_sessions = 0_i64;
+    let mut migrated_messages = 0_i64;
+    let mut migrated_attachments = 0_i64;
+    let mut migrated_meta_keys = Vec::new();
+    let mut source_session_ids = Vec::new();
+    let mut source_message_ids_by_session = HashMap::new();
+    let mut expected_attachment_ids = Vec::new();
+    let legacy_sessions = legacy_db.list_all_sessions().map_err(ApiError::from)?;
+
+    for meta_key in [
+        SYNC_CURSOR_META_KEY,
+        SYNC_CHAT_KEY_META_KEY,
+        SYNC_OFFLINE_SEED_META_KEY,
+    ] {
+        if let Some(value) = legacy_sync_state
+            .get_meta(meta_key)
+            .map_err(ApiError::from)?
+        {
+            target_sync_state
+                .set_meta(meta_key, &value)
+                .map_err(ApiError::from)?;
+            migrated_meta_keys.push(meta_key);
+        }
+    }
+
+    for session in legacy_sessions {
+        source_session_ids.push(session.uuid);
+        target_db
+            .upsert_session(
+                session.uuid,
+                &session.title,
+                session.created_at,
+                session.updated_at,
+                session.remote_id.clone(),
+                session.needs_sync,
+                session.deleted_at,
+            )
+            .map_err(ApiError::from)?;
+        if let Some(state) = legacy_sync_state
+            .get_session_state(session.uuid)
+            .map_err(ApiError::from)?
+        {
+            target_sync_state
+                .set_session_state(
+                    session.uuid,
+                    state.remote_id.as_deref(),
+                    state.server_updated_at,
+                )
+                .map_err(ApiError::from)?;
+        }
+        migrated_sessions += 1;
+
+        for message in legacy_db
+            .get_messages_for_sync(session.uuid, true)
+            .map_err(ApiError::from)?
+        {
+            source_message_ids_by_session
+                .entry(session.uuid)
+                .or_insert_with(Vec::new)
+                .push(message.uuid);
+            let uploads = legacy_db
+                .get_uploads_for_message(message.uuid)
+                .map_err(ApiError::from)?;
+            let uploaded_at_by_id = uploads
+                .into_iter()
+                .map(|upload| (upload.attachment_id, upload.uploaded_at))
+                .collect::<HashMap<_, _>>();
+            let attachments = message
+                .attachments
+                .iter()
+                .cloned()
+                .map(|attachment| {
+                    let uploaded_at = uploaded_at_by_id
+                        .get(&attachment.id)
+                        .and_then(|value| *value);
+                    ensu_db::Attachment {
+                        id: attachment.id,
+                        kind: attachment.kind,
+                        size: attachment.size,
+                        name: attachment.name,
+                        uploaded_at,
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            target_db
+                .insert_message_with_uuid_and_state(
+                    message.uuid,
+                    message.session_uuid,
+                    message.sender.as_str(),
+                    &message.text,
+                    message.parent_message_uuid,
+                    attachments.clone(),
+                    message.created_at,
+                    message.deleted_at,
+                    message.needs_sync,
+                )
+                .map_err(ApiError::from)?;
+
+            if let Some(remote_id) = message.remote_id.as_deref() {
+                target_db
+                    .set_message_remote_id(message.uuid, remote_id)
+                    .map_err(ApiError::from)?;
+            }
+            if let Some(state) = legacy_sync_state
+                .get_message_state(message.uuid)
+                .map_err(ApiError::from)?
+            {
+                target_sync_state
+                    .set_message_state(
+                        message.uuid,
+                        state.remote_id.as_deref(),
+                        state.server_updated_at,
+                    )
+                    .map_err(ApiError::from)?;
+            }
+
+            for attachment in attachments {
+                if let Some(remote_id) = legacy_db
+                    .get_attachment_remote_id(&attachment.id)
+                    .map_err(ApiError::from)?
+                {
+                    target_db
+                        .set_attachment_remote_id(&attachment.id, Some(&remote_id))
+                        .map_err(ApiError::from)?;
+                }
+
+                if let Some(state) = legacy_db
+                    .get_attachment_upload_state(&attachment.id)
+                    .map_err(ApiError::from)?
+                {
+                    target_db
+                        .set_attachment_upload_state(&attachment.id, state)
+                        .map_err(ApiError::from)?;
+                }
+
+                let source_path = legacy_attachments_dir.join(&attachment.id);
+                let target_path = target_attachments_dir.join(&attachment.id);
+                if source_path.exists() && !target_path.exists() {
+                    fs::copy(&source_path, &target_path)
+                        .map_err(|err| ApiError::new("io", err.to_string()))?;
+                    migrated_attachments += 1;
+                }
+                if source_path.exists() {
+                    expected_attachment_ids.push(attachment.id.clone());
+                }
+            }
+
+            migrated_messages += 1;
+        }
+    }
+
+    verify_migrated_chat_db(
+        &target_db,
+        &source_session_ids,
+        &source_message_ids_by_session,
+        &migrated_meta_keys,
+        &target_sync_state,
+        &target_attachments_dir,
+        &expected_attachment_ids,
+    )?;
+
+    drop(legacy_sync_state);
+    drop(legacy_db);
+
+    cleanup_legacy_chat_artifacts(app)?;
+
+    Ok(ChatDbMigrateLegacyResult {
+        did_migrate: true,
+        migrated_sessions,
+        migrated_messages,
+        migrated_attachments,
+    })
 }
 
 fn with_chat_db<T, F>(
@@ -1721,12 +2243,23 @@ where
             let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
             let path = chat_db_path(app)?;
             let sync_path = sync_db_path(app)?;
-            let db =
-                EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(ApiError::from)?;
+            logging::log(
+                "ChatDb",
+                format!(
+                    "opening chat DB db={} sync={}",
+                    path.display(),
+                    sync_path.display()
+                ),
+            );
+            let db = EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(|err| {
+                logging::log("ChatDb", format!("failed to open chat DB error={err}"));
+                ApiError::from(err)
+            })?;
             *guard = Some(ChatDbHolder {
                 key_b64: key_b64.to_string(),
                 db: Arc::new(db),
             });
+            logging::log("ChatDb", "chat DB opened");
         }
 
         guard

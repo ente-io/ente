@@ -1,9 +1,13 @@
+import "dart:async";
+
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:media_extension/media_extension.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
@@ -44,6 +48,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   late bool _isFileSelected;
   int? _currentPointerId;
   bool _isPointerInside = false;
+  late final StreamSubscription<FileUploadedEvent> _fileUploadedSubscription;
 
   @override
   void initState() {
@@ -51,10 +56,19 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     _isFileSelected =
         widget.selectedFiles?.isFileSelected(widget.file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
+    _fileUploadedSubscription =
+        Bus.instance.on<FileUploadedEvent>().listen((event) {
+      if (event.file.generatedID != null &&
+          event.file.generatedID == widget.file.generatedID &&
+          mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
+    _fileUploadedSubscription.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
   }

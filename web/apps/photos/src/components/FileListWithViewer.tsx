@@ -43,8 +43,6 @@ export type FileListWithViewerProps = {
      *
      * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
      * reducer's documentation.
-     *
-     * Not set in the context of the shared albums app.
      */
     onMarkTempDeleted?: (files: EnteFile[]) => void;
     /**
@@ -132,11 +130,6 @@ export type FileListWithViewerProps = {
         | "onSendLink"
         | "onSelectCollection"
         | "onSelectPerson"
-        | "publicAlbumsCredentials"
-        | "collectionKey"
-        | "onJoinAlbum"
-        | "enableComment"
-        | "enableJoin"
     >;
 
 /**
@@ -195,11 +188,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     pendingFileSidebar,
     pendingHighlightCommentID,
     onPendingNavigationConsumed,
-    publicAlbumsCredentials,
-    collectionKey,
-    onJoinAlbum,
-    enableComment,
-    enableJoin,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -404,11 +392,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     onSendLink,
                     onSelectCollection,
                     onSelectPerson,
-                    publicAlbumsCredentials,
-                    collectionKey,
-                    onJoinAlbum,
-                    enableComment,
-                    enableJoin,
                 }}
                 isCommentsFeatureEnabled
                 onTriggerRemotePull={handleTriggerRemotePull}

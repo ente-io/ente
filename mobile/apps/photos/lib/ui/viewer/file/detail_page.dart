@@ -27,10 +27,10 @@ import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
+import "package:photos/ui/viewer/file/inline_text_detection.dart";
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
 import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
-import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -90,12 +90,14 @@ class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
   final _isInSharedCollectionNotifier = ValueNotifier(false);
   final _showingThumbnailFallbackNotifier = ValueNotifier<String?>(null);
+  final _isZoomedNotifier = ValueNotifier(false);
 
   @override
   void dispose() {
     _enableFullScreenNotifier.dispose();
     _isInSharedCollectionNotifier.dispose();
     _showingThumbnailFallbackNotifier.dispose();
+    _isZoomedNotifier.dispose();
     super.dispose();
   }
 
@@ -108,6 +110,7 @@ class _DetailPageState extends State<DetailPage> {
       enableFullScreenNotifier: _enableFullScreenNotifier,
       isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
       showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
+      isZoomedNotifier: _isZoomedNotifier,
       child: _Body(widget.config),
     );
   }
@@ -148,7 +151,8 @@ class _BodyState extends State<_Body> {
         swipeLocked = event.swipeLocked;
       });
     });
-    if (flagService.qrFeatureEnabled) {
+    if (flagService.qrFeatureEnabled &&
+        widget.config.mode != DetailPageMode.minimalistic) {
       _qrHelper = QrCodeDetectionHelper();
     }
 
@@ -156,7 +160,7 @@ class _BodyState extends State<_Body> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
-      _qrHelper?.evaluateFile(_files![_selectedIndexNotifier.value]);
+      _evaluateQrIfEligible(_files![_selectedIndexNotifier.value]);
       widget.config.onPageReady?.call(context);
     });
   }
@@ -253,15 +257,19 @@ class _BodyState extends State<_Body> {
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return widget.config.mode == DetailPageMode.minimalistic
-                      ? const SizedBox.shrink()
-                      : TextDetectionOverlayButton(
-                          file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
-                          isGuestView: isGuestView,
-                        );
+                  if (widget.config.mode == DetailPageMode.minimalistic) {
+                    return const SizedBox.shrink();
+                  }
+                  if (flagService.ocrOverlayEnabled) {
+                    return InlineTextDetection(
+                      file: _files![selectedIndex],
+                      enableFullScreenNotifier:
+                          InheritedDetailPageState.of(context)
+                              .enableFullScreenNotifier,
+                      isGuestView: isGuestView,
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
               if (_qrHelper != null)
@@ -279,9 +287,6 @@ class _BodyState extends State<_Body> {
                         return QrCodeHighlightOverlay(
                           detections: detections,
                           file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
                         );
                       },
                     );
@@ -382,6 +387,7 @@ class _BodyState extends State<_Body> {
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
+          qrDetectionsNotifier: _qrHelper?.qrDetectionsNotifier,
         );
         return GestureDetector(
           onTap: () {
@@ -406,7 +412,7 @@ class _BodyState extends State<_Body> {
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _updateSharedCollectionState(_files![index]);
-        _qrHelper?.evaluateFile(_files![index]);
+        _evaluateQrIfEligible(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -414,6 +420,11 @@ class _BodyState extends State<_Body> {
       controller: _pageController,
       itemCount: _files!.length,
     );
+  }
+
+  void _evaluateQrIfEligible(EnteFile file) {
+    if (_qrHelper == null || isGuestView || file is TrashFile) return;
+    _qrHelper!.evaluateFile(file);
   }
 
   bool shouldAutoPlay() {

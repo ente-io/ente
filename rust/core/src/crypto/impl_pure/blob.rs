@@ -132,9 +132,8 @@ pub fn decrypt_blob(blob: &EncryptedBlob, key: &[u8]) -> Result<Vec<u8>> {
 /// # Returns
 /// An [`EncryptedBlob`] containing the encrypted JSON.
 pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<EncryptedBlob> {
-    let json = serde_json::to_vec(value).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON serialization failed: {}", e))
-    })?;
+    let json = serde_json::to_vec(value)
+        .map_err(|e| CryptoError::Json(format!("JSON serialization failed: {}", e)))?;
     encrypt(&json, key)
 }
 
@@ -148,9 +147,8 @@ pub fn encrypt_json<T: serde::Serialize>(value: &T, key: &[u8]) -> Result<Encryp
 /// The deserialized JSON value.
 pub fn decrypt_json<T: serde::de::DeserializeOwned>(blob: &EncryptedBlob, key: &[u8]) -> Result<T> {
     let plaintext = decrypt_blob(blob, key)?;
-    serde_json::from_slice(&plaintext).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!("JSON deserialization failed: {}", e))
-    })
+    serde_json::from_slice(&plaintext)
+        .map_err(|e| CryptoError::Json(format!("JSON deserialization failed: {}", e)))
 }
 
 #[cfg(test)]
@@ -251,6 +249,38 @@ mod tests {
         let encrypted = encrypt_json(&data, &key).unwrap();
         let decrypted: TestData = decrypt_json(&encrypted, &key).unwrap();
         assert_eq!(decrypted, data);
+    }
+
+    #[test]
+    fn test_decrypt_json_wrong_type_returns_json_error() {
+        let key = keys::generate_stream_key();
+
+        #[derive(serde::Serialize)]
+        struct Original {
+            name: String,
+        }
+
+        #[derive(serde::Deserialize, Debug)]
+        #[allow(dead_code)]
+        struct Different {
+            count: u64,
+        }
+
+        let encrypted = encrypt_json(
+            &Original {
+                name: "test".to_string(),
+            },
+            &key,
+        )
+        .unwrap();
+
+        // Decrypt into a mismatched type — should be CryptoError::Json
+        let result: std::result::Result<Different, _> = decrypt_json(&encrypted, &key);
+        assert!(
+            matches!(result, Err(CryptoError::Json(_))),
+            "Expected CryptoError::Json, got: {:?}",
+            result
+        );
     }
 
     #[test]

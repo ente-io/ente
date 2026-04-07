@@ -51,9 +51,14 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
     onSubmit,
 }) => {
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleToggleShowHidePassword = useCallback(
         () => setShowPassword((show) => !show),
+        [],
+    );
+    const handleToggleShowHideConfirmPassword = useCallback(
+        () => setShowConfirmPassword((show) => !show),
         [],
     );
 
@@ -119,7 +124,7 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
             <TextField
                 name="confirmPassword"
                 autoComplete="new-password"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 label={t("confirm_password")}
                 value={formik.values.confirmPassword}
                 onChange={formik.handleChange}
@@ -128,6 +133,16 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
                 helperText={formik.errors.confirmPassword ?? " "}
                 disabled={formik.isSubmitting}
                 fullWidth
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <ShowHidePasswordInputAdornment
+                                showPassword={showConfirmPassword}
+                                onToggle={handleToggleShowHideConfirmPassword}
+                            />
+                        ),
+                    },
+                }}
             />
             <PasswordStrengthHint password={formik.values.password} />
 

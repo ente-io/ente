@@ -408,10 +408,20 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).numerator /
               (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).denominator;
     }
-    final imageWidth = exif["EXIF ExifImageWidth"] ?? exif["Image ImageWidth"];
-    final imageLength = exif["EXIF ExifImageLength"] ??
-        exif["Image "
-            "ImageLength"];
+    final imageWidth = _firstPositiveDimensionTag(
+      exif,
+      const [
+        "EXIF ExifImageWidth",
+        "Image ImageWidth",
+      ],
+    );
+    final imageLength = _firstPositiveDimensionTag(
+      exif,
+      const [
+        "EXIF ExifImageLength",
+        "Image ImageLength",
+      ],
+    );
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
       final double megaPixels =
@@ -472,6 +482,19 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       final reciprocal = (1 / seconds).round();
       return "1/$reciprocal";
     }
+  }
+
+  IfdTag? _firstPositiveDimensionTag(
+    Map<String, IfdTag> exif,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final tag = exif[key];
+      if (tag != null && tag.values.firstAsInt() > 0) {
+        return tag;
+      }
+    }
+    return null;
   }
 }
 

@@ -300,7 +300,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Future<void> _navigateWithoutAccount() async {
-    updateService.hideChangeLog().ignore();
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => const HomeWidget(startWithoutAccount: true),

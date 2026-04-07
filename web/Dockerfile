@@ -20,8 +20,10 @@ ENV NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=ENTE_PHOTOS_ORIGIN_PLACEHOLDER
 # `yarn install` is flaky on the GitHub arm64 runners otherwise.
 RUN yarn config set network-timeout 900000 -g
 
-RUN yarn install
+RUN corepack enable && corepack prepare yarn@1.22.22 --activate
+RUN yarn install --frozen-lockfile
 RUN yarn build:photos
+RUN yarn build:albums
 RUN yarn build:accounts
 RUN yarn build:auth
 RUN yarn build:cast
@@ -34,6 +36,7 @@ FROM nginx
 WORKDIR /out
 
 COPY --from=builder /build/web/apps/photos/out /out/photos
+COPY --from=builder /build/web/apps/albums/out /out/albums
 COPY --from=builder /build/web/apps/accounts/out /out/accounts
 COPY --from=builder /build/web/apps/auth/out /out/auth
 COPY --from=builder /build/web/apps/cast/out /out/cast
@@ -51,7 +54,7 @@ server {
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3002; root /out/photos;
+    listen 3002; root /out/albums;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
@@ -86,15 +89,19 @@ EXPOSE 3006
 EXPOSE 3008
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
-ENV ENTE_ALBUMS_ORIGIN=https://localhost:3002
-ENV ENTE_PHOTOS_ORIGIN=https://localhost:3000
+ENV ENTE_ALBUMS_ORIGIN=http://localhost:3002
+ENV ENTE_PHOTOS_ORIGIN=http://localhost:3000
 
 COPY <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
 find /out -name '*.js' |
     xargs sed -i'' "s#ENTE_API_ORIGIN_PLACEHOLDER#\$ENTE_API_ORIGIN#g"
 find /out/photos -name '*.js' |
     xargs sed -i'' "s#ENTE_ALBUMS_ORIGIN_PLACEHOLDER#\$ENTE_ALBUMS_ORIGIN#g"
+find /out/albums -name '*.js' |
+    xargs sed -i'' "s#ENTE_ALBUMS_ORIGIN_PLACEHOLDER#\$ENTE_ALBUMS_ORIGIN#g"
 find /out/photos -name '*.js' |
+    xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
+find /out/albums -name '*.js' |
     xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
 EOF
 

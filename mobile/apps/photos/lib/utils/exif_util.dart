@@ -12,6 +12,7 @@ import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/utils/file_util.dart';
+import 'package:random_access_source/random_access_source.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
 const kImageDateTime = "Image DateTime";
@@ -174,7 +175,14 @@ Location? locationFromExif(Map<String, IfdTag> exif) {
 }
 
 Future<Map<String, IfdTag>> _readExifArgs(Map<String, dynamic> args) {
-  return readExifFromFile(args["file"]);
+  final file = args["file"] as File;
+  return FileRASource.loadFile(file).then((src) async {
+    try {
+      return _normalizeExifResult(await readExifFromSource(src));
+    } finally {
+      await src.close();
+    }
+  });
 }
 
 Future<Map<String, IfdTag>> readExifAsync(File file) async {
@@ -183,6 +191,17 @@ Future<Map<String, IfdTag>> readExifAsync(File file) async {
     param: {"file": file},
     taskName: "readExifAsync",
   );
+}
+
+Map<String, IfdTag> _normalizeExifResult(dynamic result) {
+  if (result is Map<String, IfdTag>) {
+    return result;
+  }
+  final dynamic tags = result.tags;
+  if (tags is Map<String, IfdTag>) {
+    return tags;
+  }
+  throw ArgumentError("Unsupported EXIF result type: ${result.runtimeType}");
 }
 
 GPSData gpsDataFromExif(Map<String, IfdTag> exif) {

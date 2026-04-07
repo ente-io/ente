@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Sécurisez vos codes A2F",
+  "onBoardingBody": "Sécurisez vos codes 2FA-Double authentification",
   "featureBackupCodes": "Synchronisation et sauvegarde cryptés de bout-en-bout",
   "featureSearchEtc": "Recherche, Tags, Partage,\nCode suivant et bien plus encore",
   "featureOpenSource": "Open source et\naudité par des experts en sécurité",
@@ -625,7 +625,7 @@
   "selectAnOption": "Choisir une option",
   "todaysLogs": "Journaux du jour",
   "appIcon": "Icône de l'application",
-  "importAndOTPGuide": "Exportez votre sauvegarde depuis andOTP en utilisant les options de \"sauvegarde\" dans les paramètres.",
+  "importAndOTPGuide": "Exportez votre sauvegarde depuis and OTP en utilisant les options de \"sauvegarde\" dans les paramètres.\nSi votre sauvegarde est chiffrée, vous devrez retaper votre mot de passe pour la déchiffrer.",
   "enterPasswordToDecryptAndOTP": "Entrez le mot de passe pour déchiffrer la sauvegarde andOTP",
   "failedToDecryptAndOTPBackup": "Impossible de déchiffrer la sauvegarde andOTP",
   "notSupportedForHOTP": "Non pris en charge pour HOTP"

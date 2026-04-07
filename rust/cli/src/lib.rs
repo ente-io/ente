@@ -1,4 +1,5 @@
 pub mod api;
+pub mod auth_flow;
 pub mod cli;
 pub mod commands;
 pub mod models;

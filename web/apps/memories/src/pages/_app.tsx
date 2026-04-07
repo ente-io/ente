@@ -1,0 +1,44 @@
+import "@fontsource-variable/inter";
+import "@fontsource/itim";
+import { CssBaseline, GlobalStyles } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import { staticAppTitle } from "ente-base/app";
+import { CustomHead } from "ente-base/components/Head";
+import { useSetupLogs } from "ente-base/components/utils/hooks-app";
+import { shareTheme } from "ente-base/components/utils/theme";
+import type { AppProps } from "next/app";
+import React from "react";
+
+const memoriesAppStyle = { "--font-itim": "'Itim'" } as React.CSSProperties;
+
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+    useSetupLogs({ disableDiskLogs: true });
+
+    return (
+        <div style={memoriesAppStyle}>
+            <ThemeProvider
+                theme={shareTheme}
+                defaultMode="system"
+                // Avoid persisting a manual override; always follow the system theme.
+                storageManager={null}
+            >
+                <CustomHead title={staticAppTitle} />
+                <CssBaseline enableColorScheme />
+                <GlobalStyles
+                    styles={{
+                        html: { height: "100%" },
+                        body: {
+                            height: "100%",
+                            overflow: "hidden",
+                            overscrollBehavior: "none",
+                        },
+                        "#__next": { height: "100%", overflow: "hidden" },
+                    }}
+                />
+                <Component {...pageProps} />
+            </ThemeProvider>
+        </div>
+    );
+};
+
+export default App;

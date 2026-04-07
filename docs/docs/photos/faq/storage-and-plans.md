@@ -62,6 +62,14 @@ Ente provides several tools to help you optimize both your device storage and cl
 
 Learn more in the [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization).
 
+### Why is "Free up device space" taking so long? {#free-up-space-slow}
+
+Freeing up a very large number of files at once can take longer than expected.
+
+When you have a large library, free up space album by album instead. Open **On device**, open an album, tap the three-dot menu, and select **Free up device space**.
+
+Smaller batches usually work more reliably.
+
 ### Do items in trash count against my storage? {#trash-storage-count}
 
 Yes, items in trash are included in your storage quota calculation. To free up storage space, you can:
@@ -625,7 +633,8 @@ Use our [referral program](/photos/features/account/referral-program/). When fri
 ### Why did I receive this email? {#inactive-account-email-received}
 
 We recently sent an email to accounts that have not shown activity for 12
-months as part of our inactive-account policy.
+months as part of our inactive-account policy. Free accounts with no active
+paid subscription are deleted after 12 consecutive months of inactivity.
 
 ### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
 
@@ -634,8 +643,8 @@ The email includes the email address associated with the inactive account.
 If you are using Ente regularly, check the registered email address shown inside
 the app to confirm which account you are currently using.
 
-Open `Settings > Account`. The registered email address will appear in a green
-box.
+Open Settings in the Ente app. The registered email address will appear at the
+very top.
 
 ### What should I do if I received this email? {#inactive-account-action}
 
@@ -645,5 +654,5 @@ This will mark the account as active.
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
 Contact support at [support@ente.com](mailto:support@ente.com) and share a
-screenshot of the `Settings > Account` page showing the registered email address
-(green box), so we can verify the account.
+screenshot of the Settings showing the registered email address at the top so we
+can verify the account.
