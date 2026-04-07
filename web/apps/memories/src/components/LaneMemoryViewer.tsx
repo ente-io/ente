@@ -4,7 +4,7 @@
  * playback timing, scrubbing, captions, and decorative backgrounds. It is
  * rendered by `pages/index.tsx` for the `"lane"` variant.
  */
-import { styled, Typography } from "@mui/material";
+import { styled } from "@mui/material";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { FileType } from "ente-media/file-type";
@@ -588,6 +588,17 @@ export function LaneMemoryViewer({
         [memoryMetadata?.personName, memoryName],
     );
 
+    const laneTitleLines = useMemo(() => {
+        const memoryLaneMatch = /^(.*?)(?:\s+)?memory lane$/i.exec(laneTitle);
+        const primaryLine = memoryLaneMatch?.[1]?.trim();
+
+        if (primaryLine) {
+            return { primary: primaryLine, secondary: "memory lane" };
+        }
+
+        return { primary: laneTitle, secondary: undefined };
+    }, [laneTitle]);
+
     const laneSlices = useMemo(
         () => getLaneStackSlices(files.length, stackProgress),
         [files.length, stackProgress],
@@ -687,8 +698,19 @@ export function LaneMemoryViewer({
 
                 <LaneCenterSection>
                     <LaneMediaSection>
-                        <LaneSliderTitle variant="h6">
-                            {laneTitle}
+                        <LaneSliderTitle
+                            role="heading"
+                            aria-level={2}
+                            aria-label={laneTitle}
+                        >
+                            <LaneSliderTitlePrimary>
+                                {laneTitleLines.primary}
+                            </LaneSliderTitlePrimary>
+                            {laneTitleLines.secondary && (
+                                <LaneSliderTitleSecondary>
+                                    {laneTitleLines.secondary}
+                                </LaneSliderTitleSecondary>
+                            )}
                         </LaneSliderTitle>
                         <PhotoContainer
                             style={{ flex: "0 0 auto", minHeight: "auto" }}
@@ -1170,27 +1192,53 @@ const laneHeaderJoinNowButtonSx = {
     },
 } as const;
 
-const LaneSliderTitle = styled(Typography)({
-    color: "rgba(255, 255, 255, 0.42)",
-    fontWeight: 600,
-    fontSize: "24px",
-    lineHeight: 1.15,
-    letterSpacing: "-0.01em",
+const LaneSliderTitle = styled("div")({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "4px",
     textAlign: "center",
-    paddingBottom: "10px",
+    paddingBottom: "12px",
     whiteSpace: "normal",
     overflowWrap: "anywhere",
-    maxWidth: "min(42vw, 420px)",
+    maxWidth: "min(52vw, 520px)",
+    textShadow: "0 12px 28px rgba(0, 0, 0, 0.32)",
     "@media (max-width: 900px)": {
-        fontSize: "21px",
-        paddingBottom: "8px",
-        maxWidth: "min(56vw, 360px)",
+        gap: "3px",
+        paddingBottom: "10px",
+        maxWidth: "min(64vw, 420px)",
     },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        fontSize: "18px",
-        lineHeight: 1.2,
-        paddingBottom: "6px",
-        maxWidth: "min(100%, 280px)",
+        gap: "2px",
+        paddingBottom: "8px",
+        maxWidth: "min(100%, 320px)",
+    },
+});
+
+const LaneSliderTitlePrimary = styled("span")({
+    color: "rgba(255, 255, 255, 0.82)",
+    fontWeight: 600,
+    fontSize: "44px",
+    lineHeight: 0.98,
+    letterSpacing: "-0.04em",
+    "@media (max-width: 900px)": { fontSize: "37px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: "31px",
+        lineHeight: 1,
+    },
+});
+
+const LaneSliderTitleSecondary = styled("span")({
+    color: "rgba(255, 255, 255, 0.5)",
+    fontWeight: 500,
+    fontSize: "29px",
+    lineHeight: 1.02,
+    letterSpacing: "-0.02em",
+    textTransform: "lowercase",
+    "@media (max-width: 900px)": { fontSize: "25px" },
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: "21px",
+        lineHeight: 1.08,
     },
 });
 

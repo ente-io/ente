@@ -49,6 +49,8 @@ const LaneProgressTrack = styled("div")({
     borderRadius: "999px",
     backgroundColor: "rgba(193, 246, 235, 0.32)",
     cursor: "pointer",
+    touchAction: "none",
+    WebkitTapHighlightColor: "transparent",
     "@media (max-width: 900px)": { maxWidth: "320px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         maxWidth: "min(calc(100vw - 48px), 304px)",
@@ -263,6 +265,9 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;
             }
+            if (event.pointerType !== "mouse") {
+                event.preventDefault();
+            }
             const value = getScrubValue(event);
             draggingPointerIdRef.current = event.pointerId;
             event.currentTarget.setPointerCapture(event.pointerId);
@@ -284,6 +289,9 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             }
 
             event.stopPropagation();
+            if (event.pointerType !== "mouse") {
+                event.preventDefault();
+            }
             lastScrubValueRef.current = value;
             draggingPointerIdRef.current = null;
 
@@ -315,6 +323,9 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             }
 
             event.stopPropagation();
+            if (event.pointerType !== "mouse") {
+                event.preventDefault();
+            }
             lastScrubValueRef.current = value;
             onScrub?.(value);
         },

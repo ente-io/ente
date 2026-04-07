@@ -251,13 +251,13 @@ export function PhotoImage({
             return;
         }
 
-        const loadState = { cancelled: false };
+        let cancelled = false;
 
         const loadFullImage = async () => {
             try {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                if (loadState.cancelled) {
+                if (cancelled) {
                     return;
                 }
                 if (sourceURLs.type === "video") {
@@ -265,18 +265,20 @@ export function PhotoImage({
                     return;
                 }
 
-                const nextFullImageURL =
-                    sourceURLs.type === "livePhoto"
-                        ? await sourceURLs.imageURL()
-                        : sourceURLs.imageURL;
-                if (loadState.cancelled) {
-                    return;
+                let nextFullImageURL: string;
+                if (sourceURLs.type === "livePhoto") {
+                    nextFullImageURL = await sourceURLs.imageURL();
+                    if (cancelled) {
+                        return;
+                    }
+                } else {
+                    nextFullImageURL = sourceURLs.imageURL;
                 }
 
                 setFullImageURL(nextFullImageURL);
             } catch (error) {
                 log.error("Failed to load full image", error);
-                if (!loadState.cancelled) {
+                if (!cancelled) {
                     signalReady();
                 }
             }
@@ -285,7 +287,7 @@ export function PhotoImage({
         void loadFullImage();
 
         return () => {
-            loadState.cancelled = true;
+            cancelled = true;
         };
     }, [enableFullLoad, file, signalReady, thumbnailOnly]);
 
