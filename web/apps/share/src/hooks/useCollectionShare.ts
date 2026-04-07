@@ -1,10 +1,14 @@
 import type { SingleInputFormProps } from "ente-base/components/SingleInputForm";
-import { HTTPError, isHTTP401Error, isHTTPErrorWithStatus } from "ente-base/http";
+import {
+    HTTPError,
+    isHTTP401Error,
+    isHTTPErrorWithStatus,
+} from "ente-base/http";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import type { PublicURL } from "ente-media/collection";
 import type { NotificationAttributes } from "ente-new/photos/components/Notification";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     downloadPublicCollectionFile,
     fetchPublicCollectionShare,
@@ -49,6 +53,38 @@ interface CollectionShareLoadError {
     isExpired: boolean;
 }
 
+const accessTokenJWTStorageKey = (accessToken: string) =>
+    `share-collection-access-token-jwt:${accessToken}`;
+
+const savedAccessTokenJWT = (accessToken: string): string | null => {
+    try {
+        return window.localStorage.getItem(
+            accessTokenJWTStorageKey(accessToken),
+        );
+    } catch {
+        return null;
+    }
+};
+
+const saveAccessTokenJWT = (accessToken: string, accessTokenJWT: string) => {
+    try {
+        window.localStorage.setItem(
+            accessTokenJWTStorageKey(accessToken),
+            accessTokenJWT,
+        );
+    } catch {
+        // Ignore storage failures and continue with in-memory state.
+    }
+};
+
+const removeAccessTokenJWT = (accessToken: string) => {
+    try {
+        window.localStorage.removeItem(accessTokenJWTStorageKey(accessToken));
+    } catch {
+        // Ignore storage failures and continue with in-memory state.
+    }
+};
+
 const collectionShareLoadError = async (
     err: unknown,
 ): Promise<CollectionShareLoadError> => {
@@ -60,7 +96,8 @@ const collectionShareLoadError = async (
             if (payload.error === "expired token") {
                 return {
                     title: "Link expired",
-                    message: "This link has either expired or has been disabled.",
+                    message:
+                        "This link has either expired or has been disabled.",
                     isExpired: true,
                 };
             }
@@ -90,13 +127,15 @@ const collectionShareLoadError = async (
 
     return {
         title: "Unable to open this collection",
-        message: "Unable to load this collection right now. Please try again later.",
+        message:
+            "Unable to load this collection right now. Please try again later.",
         isExpired: false,
     };
 };
 
 export const useCollectionShare = (): UseCollectionShareResult => {
     const router = useRouter();
+    const isRevalidatingRef = useRef(false);
     const [loading, setLoading] = useState(true);
     const [downloadingItemID, setDownloadingItemID] = useState<number | null>(
         null,
@@ -133,11 +172,14 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 setError(null);
                 setErrorTitle(null);
                 setErrorIsExpired(false);
+                setPasswordProtectedPublicURL(null);
 
                 const url = new URL(window.location.href);
                 const token =
                     opts?.accessToken ?? extractCollectionTokenFromURL(url);
                 if (!token) {
+                    setCollectionInfo(null);
+                    setSelectedItem(null);
                     setErrorTitle("Invalid collection link");
                     setError("This collection link is invalid.");
                     return;
@@ -147,36 +189,69 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                     opts?.collectionKey ??
                     (await extractCollectionKeyFromShareURL(url));
                 if (!resolvedCollectionKey) {
+                    setCollectionInfo(null);
+                    setSelectedItem(null);
                     setErrorTitle("Invalid collection link");
                     setError("This collection link is invalid.");
                     return;
                 }
 
-                const resolvedAccessTokenJWT = opts?.accessTokenJWT;
+                const storedAccessTokenJWT = savedAccessTokenJWT(token);
+                const resolvedAccessTokenJWT =
+                    opts?.accessTokenJWT ?? storedAccessTokenJWT ?? undefined;
 
                 setAccessToken(token);
                 setCollectionKey(resolvedCollectionKey);
+                setAccessTokenJWT(resolvedAccessTokenJWT ?? null);
 
                 const metadata = await fetchPublicCollectionShareMetadata(
                     token,
                     resolvedCollectionKey,
                 );
-                if (metadata.passwordEnabled && !resolvedAccessTokenJWT) {
+                if (!metadata.passwordEnabled && resolvedAccessTokenJWT) {
+                    removeAccessTokenJWT(token);
+                    setAccessTokenJWT(null);
+                }
+
+                const activeAccessTokenJWT = metadata.passwordEnabled
+                    ? resolvedAccessTokenJWT
+                    : undefined;
+
+                if (metadata.passwordEnabled && !activeAccessTokenJWT) {
                     setPasswordProtectedPublicURL(metadata.publicURL ?? null);
                     setCollectionInfo(null);
+                    setSelectedItem(null);
                     return;
                 }
 
-                const info = await fetchPublicCollectionShare(
-                    {
-                        accessToken: token,
-                        accessTokenJWT: resolvedAccessTokenJWT,
-                    },
-                    resolvedCollectionKey,
-                );
+                let info: PublicCollectionShareInfo;
+                try {
+                    info = await fetchPublicCollectionShare(
+                        {
+                            accessToken: token,
+                            accessTokenJWT: activeAccessTokenJWT,
+                        },
+                        resolvedCollectionKey,
+                    );
+                } catch (err) {
+                    if (activeAccessTokenJWT && isHTTP401Error(err)) {
+                        removeAccessTokenJWT(token);
+                        setAccessTokenJWT(null);
+                        setPasswordProtectedPublicURL(
+                            metadata.publicURL ?? null,
+                        );
+                        setCollectionInfo(null);
+                        return;
+                    }
+                    throw err;
+                }
+
                 setPasswordProtectedPublicURL(null);
                 setCollectionInfo(info);
             } catch (err) {
+                setCollectionInfo(null);
+                setSelectedItem(null);
+                setPasswordProtectedPublicURL(null);
                 const loadError = await collectionShareLoadError(err);
                 setErrorTitle(loadError.title);
                 setError(loadError.message);
@@ -192,6 +267,39 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         if (router.isReady) {
             void loadCollection();
         }
+    }, [router.isReady, loadCollection]);
+
+    useEffect(() => {
+        if (!router.isReady) {
+            return;
+        }
+
+        const revalidate = () => {
+            if (document.visibilityState === "hidden" || isRevalidatingRef.current) {
+                return;
+            }
+
+            isRevalidatingRef.current = true;
+            void loadCollection().finally(() => {
+                isRevalidatingRef.current = false;
+            });
+        };
+
+        const onVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                revalidate();
+            }
+        };
+
+        window.addEventListener("focus", revalidate);
+        window.addEventListener("pageshow", revalidate);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+
+        return () => {
+            window.removeEventListener("focus", revalidate);
+            window.removeEventListener("pageshow", revalidate);
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+        };
     }, [router.isReady, loadCollection]);
 
     const handleCloseItem = () => {
@@ -214,7 +322,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         setDownloadProgress(null);
         try {
             await downloadPublicCollectionFile(
-                accessToken,
+                { accessToken, accessTokenJWT: accessTokenJWT ?? undefined },
                 item.id,
                 fileKey,
                 item.fileName,
@@ -228,6 +336,13 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 },
             );
         } catch (err) {
+            if (accessTokenJWT && collectionKey && isHTTP401Error(err)) {
+                removeAccessTokenJWT(accessToken);
+                setAccessTokenJWT(null);
+                setSelectedItem(null);
+                await loadCollection({ accessToken, collectionKey });
+                return;
+            }
             setNotificationAttributes({
                 color: "critical",
                 title:
@@ -282,6 +397,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 accessToken,
             );
             setAccessTokenJWT(jwtToken);
+            saveAccessTokenJWT(accessToken, jwtToken);
             await loadCollection({
                 accessToken,
                 collectionKey,

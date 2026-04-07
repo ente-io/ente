@@ -236,7 +236,10 @@ const fetchPublicCollectionDiff = async (
     while (hasMore) {
         const res = await fetch(
             await apiURL("/public-collection/diff", { sinceTime }),
-            { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+            {
+                headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+                cache: "no-store",
+            },
         );
         ensureOk(res);
 
@@ -283,6 +286,7 @@ export const fetchPublicCollectionShareMetadata = async (
 ): Promise<PublicCollectionShareMetadata> => {
     const res = await fetch(await apiURL("/public-collection/info"), {
         headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        cache: "no-store",
     });
     ensureOk(res);
 
@@ -330,7 +334,7 @@ export const fetchPublicCollectionShare = async (
 };
 
 export const downloadPublicCollectionFile = async (
-    accessToken: string,
+    credentials: PublicAlbumsCredentials,
     fileID: number,
     fileKey: string,
     fileName: string,
@@ -339,12 +343,9 @@ export const downloadPublicCollectionFile = async (
 ): Promise<void> => {
     const url = `${await apiOrigin()}/public-collection/files/download/${fileID}`;
     const response = await fetch(url, {
-        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
     });
-
-    if (!response.ok) {
-        throw new Error(`Failed to download file: ${response.statusText}`);
-    }
+    ensureOk(response);
 
     const totalHeader = response.headers.get("content-length");
     const total = totalHeader ? Number.parseInt(totalHeader, 10) : null;

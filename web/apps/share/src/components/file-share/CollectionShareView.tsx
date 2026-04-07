@@ -2,11 +2,13 @@ import {
     Box,
     ButtonBase,
     CircularProgress,
+    Paper,
     Stack,
     Typography,
 } from "@mui/material";
 import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import { Notification } from "ente-new/photos/components/Notification";
+import { t } from "i18next";
 import React from "react";
 import { useCollectionShare } from "../../hooks/useCollectionShare";
 import { type SharedCollectionItemInfo } from "../../services/collection-share";
@@ -42,6 +44,13 @@ const itemSubtitle = (item: SharedCollectionItemInfo) => {
     return "File";
 };
 
+const translatedOrFallback = (key: string, fallback: string) => {
+    const translated = t(key);
+    return typeof translated === "string" && translated.trim()
+        ? translated
+        : fallback;
+};
+
 const contentMaxWidth = 560;
 
 export const CollectionShareView: React.FC = () => {
@@ -62,6 +71,12 @@ export const CollectionShareView: React.FC = () => {
         handleCopyContent,
         setNotificationAttributes,
     } = useCollectionShare();
+    const passwordTitle = translatedOrFallback("password", "Password");
+    const passwordDescription = translatedOrFallback(
+        "link_password_description",
+        "Enter the password to unlock this collection.",
+    );
+    const unlockLabel = translatedOrFallback("unlock", "Unlock");
 
     return (
         <PublicShareScaffold>
@@ -119,36 +134,76 @@ export const CollectionShareView: React.FC = () => {
                         p: 3,
                     }}
                 >
-                    <Box sx={{ width: "100%", maxWidth: 420 }}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            width: "100%",
+                            maxWidth: 420,
+                            px: { xs: 3, sm: 4 },
+                            py: { xs: 3.5, sm: 4 },
+                            borderRadius: "20px",
+                            backgroundColor: "rgba(19, 21, 24, 0.96)",
+                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            boxShadow:
+                                "0 24px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+                            color: "#FFFFFF",
+                            "& .MuiTypography-root": { color: "inherit" },
+                            "& .MuiFormLabel-root": {
+                                color: "rgba(255, 255, 255, 0.64)",
+                            },
+                            "& .MuiFormLabel-root.Mui-focused": {
+                                color: "accent.light",
+                            },
+                            "& .MuiInputBase-root": {
+                                backgroundColor: "rgba(255, 255, 255, 0.08)",
+                                color: "#FFFFFF",
+                            },
+                            "& .MuiInputBase-input": { color: "#FFFFFF" },
+                            "& .MuiInputAdornment-root": {
+                                color: "rgba(255, 255, 255, 0.52)",
+                            },
+                            "& .MuiFormHelperText-root": {
+                                color: "rgba(255, 255, 255, 0.6)",
+                            },
+                            "& .MuiButton-root": {
+                                backgroundColor: "accent.main",
+                                color: "accent.contrastText",
+                            },
+                            "& .MuiButton-root:hover": {
+                                backgroundColor: "accent.dark",
+                            },
+                            "& .MuiButton-root.Mui-disabled": {
+                                backgroundColor: "accent.main",
+                                color: "accent.contrastText",
+                                opacity: 0.7,
+                            },
+                        }}
+                    >
                         <Typography
                             variant="h4"
-                            sx={{
-                                fontWeight: 700,
-                                color: "text.base",
-                                mb: 1.5,
-                            }}
+                            sx={{ fontWeight: 700, color: "#FFFFFF", mb: 1.5 }}
                         >
-                            Password
+                            {passwordTitle}
                         </Typography>
                         <Typography
                             variant="body"
-                            sx={{ color: "text.muted", mb: 2 }}
+                            sx={{ color: "rgba(255, 255, 255, 0.72)", mb: 2 }}
                         >
-                            This collection link is password protected.
+                            {passwordDescription}
                         </Typography>
                         <SingleInputForm
                             inputType="password"
-                            label="Password"
+                            label={passwordTitle}
                             submitButtonColor="primary"
-                            submitButtonTitle="Unlock"
+                            submitButtonTitle={unlockLabel}
                             onSubmit={handleSubmitPassword}
                         />
-                    </Box>
+                    </Paper>
                 </Box>
             )}
 
             {/* Item detail view - uses same component as single-file share */}
-            {selectedItem && !loading && !requiresPassword && (
+            {selectedItem && !loading && !requiresPassword && !error && (
                 <SharedItemDetails
                     itemInfo={selectedItem}
                     downloading={downloadingItemID === selectedItem.id}
@@ -168,7 +223,8 @@ export const CollectionShareView: React.FC = () => {
             {collectionInfo &&
                 !loading &&
                 !selectedItem &&
-                !requiresPassword && (
+                !requiresPassword &&
+                !error && (
                     <Box
                         sx={{
                             width: "100%",

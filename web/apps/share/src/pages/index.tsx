@@ -1,15 +1,10 @@
+import { Box, CircularProgress } from "@mui/material";
 import { CustomHeadShare } from "ente-base/components/Head";
 import React, { useEffect, useState } from "react";
 import { CollectionShareView } from "../components/file-share/CollectionShareView";
 import { FileShareView } from "../components/file-share/FileShareView";
 
-const detectShareView = (): "file" | "collection" | null => {
-    if (typeof window === "undefined") {
-        return null;
-    }
-
-    const pathname = window.location.pathname;
-
+const detectShareView = (pathname: string): "file" | "collection" | null => {
     if (/^\/c\/[^/]+\/?$/.test(pathname)) {
         return "collection";
     }
@@ -42,25 +37,36 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const pathname = window.location.pathname;
-        setShareView(detectShareView());
+        const nextShareView = detectShareView(pathname);
+        setShareView(nextShareView);
 
-        if (pathname === "/" || pathname === "") {
+        if (nextShareView === null) {
             setHideContent(true);
             window.location.href = "https://ente.com/locker";
-            return;
         }
     }, []);
 
     return (
         <>
             <CustomHeadShare title="Ente Locker" />
-            {!hideContent &&
-                shareView &&
-                (shareView === "collection" ? (
-                    <CollectionShareView />
-                ) : (
-                    <FileShareView />
-                ))}
+            {!hideContent && shareView === null && (
+                <Box
+                    sx={{
+                        minHeight: "100dvh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: "#08090A",
+                    }}
+                >
+                    <CircularProgress sx={{ color: "accent.main" }} size={32} />
+                </Box>
+            )}
+            {!hideContent && shareView === "collection" ? (
+                <CollectionShareView />
+            ) : !hideContent && shareView === "file" ? (
+                <FileShareView />
+            ) : null}
         </>
     );
 };
