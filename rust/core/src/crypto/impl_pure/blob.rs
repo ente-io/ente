@@ -189,10 +189,7 @@ pub fn decrypt_json_combined<T: serde::de::DeserializeOwned>(
 ) -> Result<T> {
     let plaintext = decrypt_combined(combined, key)?;
     serde_json::from_slice(&plaintext).map_err(|e| {
-        CryptoError::InvalidKeyDerivationParams(format!(
-            "JSON deserialization failed: {}",
-            e
-        ))
+        CryptoError::InvalidKeyDerivationParams(format!("JSON deserialization failed: {}", e))
     })
 }
 
