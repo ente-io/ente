@@ -423,6 +423,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     {...mapDialogVisibilityProps}
                     collectionSummary={activeCollectionSummary}
                     activeCollection={activeCollection}
+                    files={files}
                     onRemotePull={onRemotePull}
                     {...{
                         onAddSaveGroup,

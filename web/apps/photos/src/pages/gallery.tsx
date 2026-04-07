@@ -1895,6 +1895,9 @@ const Page: React.FC = () => {
                     // component need to be updated.
                     activeCollection: activeCollection!,
                     activeCollectionID: activeCollectionID!,
+                    files: activeCollection
+                        ? activeCollectionFiles
+                        : filteredFiles,
                     activePerson,
                     setFileListHeader,
                     saveGroups,
