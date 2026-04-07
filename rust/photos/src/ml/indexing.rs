@@ -73,29 +73,8 @@ pub fn analyze_image(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
         let decoded = decode_image_from_path(&image_path)?;
         let dims = decoded.dimensions.clone();
 
-        // Toggle to enable/disable cross-model filtering that suppresses
-        // human faces misdetected as pets.  Set to false to bypass.
-        let suppress_human_faces_as_pets = false;
-
-        // Run face detection when explicitly requested, OR when pet detection
-        // needs it to filter human faces that the pet model misdetects.
         let face_detections = if run_faces {
             run_face_detection(runtime, &decoded)?
-        } else if run_pets && suppress_human_faces_as_pets {
-            // Best-effort: run face detection for cross-model filtering.
-            // If the model is unavailable, proceed without filtering.
-            run_face_detection(runtime, &decoded).unwrap_or_else(|e| {
-                eprintln!("[ml] face detection for pet filtering unavailable: {e}");
-                Vec::new()
-            })
-        } else {
-            Vec::new()
-        };
-
-        // Collect human face boxes for the pet detector to filter against
-        // inline during its post-processing loop. Empty when filtering is off.
-        let human_face_boxes: Vec<[f32; 4]> = if suppress_human_faces_as_pets {
-            face_detections.iter().map(|d| d.box_xyxy).collect()
         } else {
             Vec::new()
         };
@@ -120,11 +99,7 @@ pub fn analyze_image(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
         };
 
         let pet_faces = if run_pets {
-            // Human face boxes are passed into the detection loop so false
-            // positives (human faces detected as pets) are rejected inline,
-            // before allocating PetFaceDetection structs — single pass, zero
-            // extra allocations for discarded detections.
-            let pet_face_detections = run_pet_face_detection(runtime, &decoded, &human_face_boxes)?;
+            let pet_face_detections = run_pet_face_detection(runtime, &decoded)?;
 
             if !pet_face_detections.is_empty() {
                 let (aligned, mut pet_results) =

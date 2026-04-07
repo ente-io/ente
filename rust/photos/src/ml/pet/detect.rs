@@ -12,11 +12,6 @@ const INPUT_HEIGHT: f32 = 640.0;
 const PET_FACE_IOU_THRESHOLD: f32 = 0.5;
 const PET_FACE_MIN_SCORE: f32 = 0.5;
 
-/// IoU threshold for suppressing pet face detections that overlap with
-/// human face detections. A pet face box overlapping a human face box by
-/// this much or more is assumed to be a misdetected human face.
-const HUMAN_PET_OVERLAP_IOU: f32 = 0.3;
-
 // Body detection thresholds
 const BODY_IOU_THRESHOLD: f32 = 0.5;
 const BODY_MIN_SCORE: f32 = 0.3;
@@ -35,26 +30,19 @@ const COCO_DOG: u8 = 16;
 /// Output format per row: [x, y, w, h, obj_conf, lx, ly, rx, ry, nx, ny, ...]
 /// 3 keypoints: left_eye, right_eye, nose (6 values for coords).
 ///
-/// `human_face_boxes` contains bounding boxes from the human face detector.
-/// Any pet detection whose box overlaps a human face by IoU >=
-/// [`HUMAN_PET_OVERLAP_IOU`] is discarded inline, before allocating a
-/// [`PetFaceDetection`] struct.  Pass `&[]` to skip this filter.
-///
 /// This mirrors `pet_pipeline/detection.py` `FaceDetector.detect()`.
 pub fn run_pet_face_detection(
     runtime: &MlRuntimeView<'_>,
     decoded: &DecodedImage,
-    human_face_boxes: &[[f32; 4]],
 ) -> MlResult<Vec<PetFaceDetection>> {
     let session = runtime.pet_face_detection_session()?;
-    run_pet_face_detection_with_session(&session, decoded, human_face_boxes)
+    run_pet_face_detection_with_session(&session, decoded)
 }
 
 /// Same as [run_pet_face_detection] but accepts a pre-built session directly.
 pub fn run_pet_face_detection_with_session(
     session: &ort::Session,
     decoded: &DecodedImage,
-    human_face_boxes: &[[f32; 4]],
 ) -> MlResult<Vec<PetFaceDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
@@ -191,20 +179,6 @@ pub fn run_pet_face_detection_with_session(
             );
             0
         };
-
-        // Suppress pet detections that overlap a confirmed human face.
-        if human_face_boxes
-            .iter()
-            .any(|hb| calculate_iou_4(&box_xyxy, hb) >= HUMAN_PET_OVERLAP_IOU)
-        {
-            eprintln!(
-                "[ml][pet] face #{}: SUPPRESSED (overlaps human face), score={:.3}, class={}",
-                i,
-                score,
-                if class_id == 0 { "dog" } else { "cat" }
-            );
-            continue;
-        }
 
         eprintln!(
             "[ml][pet]   -> class_id={} ({})",
@@ -482,18 +456,4 @@ mod tests {
         assert!((iou - 0.04 / 0.28).abs() < 1e-5);
     }
 
-    #[test]
-    fn human_overlap_threshold_rejects_near_identical() {
-        // Two nearly identical boxes should exceed the 0.3 IoU threshold
-        let a = [0.1, 0.1, 0.5, 0.5];
-        let b = [0.12, 0.12, 0.48, 0.48];
-        assert!(calculate_iou_4(&a, &b) >= HUMAN_PET_OVERLAP_IOU);
-    }
-
-    #[test]
-    fn human_overlap_threshold_allows_distant_boxes() {
-        let a = [0.1, 0.1, 0.3, 0.3];
-        let b = [0.6, 0.6, 0.9, 0.9];
-        assert!(calculate_iou_4(&a, &b) < HUMAN_PET_OVERLAP_IOU);
-    }
 }
