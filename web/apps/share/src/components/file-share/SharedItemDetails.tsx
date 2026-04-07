@@ -116,11 +116,7 @@ export const SharedItemDetails: React.FC<SharedItemDetailsProps> = ({
                 {!itemInfo.lockerType && (
                     <Typography
                         variant="body"
-                        sx={{
-                            color: "text.muted",
-                            mt: -2,
-                            fontSize: "1rem",
-                        }}
+                        sx={{ color: "text.muted", mt: -2, fontSize: "1rem" }}
                     >
                         {itemInfo.fileSize > 0
                             ? formatFileSize(itemInfo.fileSize)
@@ -153,9 +149,7 @@ export const SharedItemDetails: React.FC<SharedItemDetailsProps> = ({
                             fontWeight: 600,
                             bgcolor: "accent.main",
                             color: "accent.contrastText",
-                            "&:hover": {
-                                bgcolor: "accent.dark",
-                            },
+                            "&:hover": { bgcolor: "accent.dark" },
                             "&:disabled": {
                                 bgcolor: "accent.main",
                                 color: "accent.contrastText",
@@ -169,10 +163,7 @@ export const SharedItemDetails: React.FC<SharedItemDetailsProps> = ({
                             <>
                                 <CircularProgress
                                     size={20}
-                                    sx={{
-                                        mr: 1,
-                                        color: "accent.contrastText",
-                                    }}
+                                    sx={{ mr: 1, color: "accent.contrastText" }}
                                 />
                                 Downloading...
                             </>
