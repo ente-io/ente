@@ -71,7 +71,7 @@ pub struct PingResponse {
 }
 
 /// Authenticated HTTP client configuration.
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct HttpConfig {
     /// Base API URL.
     pub base_url: String,
@@ -85,6 +85,22 @@ pub struct HttpConfig {
     pub client_version: Option<String>,
     /// Optional request timeout.
     pub timeout_secs: Option<u64>,
+}
+
+impl std::fmt::Debug for HttpConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HttpConfig")
+            .field("base_url", &self.base_url)
+            .field(
+                "auth_token",
+                &self.auth_token.as_ref().map(|_| "<redacted>"),
+            )
+            .field("user_agent", &self.user_agent)
+            .field("client_package", &self.client_package)
+            .field("client_version", &self.client_version)
+            .field("timeout_secs", &self.timeout_secs)
+            .finish()
+    }
 }
 
 /// HTTP client for making requests to the Ente API.
