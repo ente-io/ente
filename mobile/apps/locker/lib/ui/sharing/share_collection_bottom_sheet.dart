@@ -14,7 +14,6 @@ import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/collections/models/public_url.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
@@ -96,12 +95,6 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
   }
 
   bool get _hasPublicLink => widget.collection.publicURLs.isNotEmpty;
-
-  bool get _hasActivePublicLink =>
-      _hasPublicLink && !(_publicUrl?.isExpired ?? false);
-
-  PublicURL? get _publicUrl =>
-      _hasPublicLink ? widget.collection.publicURLs.first : null;
 
   Widget _buildShareesList(colorScheme, textTheme) {
     final currentUserId = Configuration.instance.getUserID() ?? -1;
@@ -198,18 +191,21 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
             await showAddEmailSheet(
               context,
               collection: widget.collection,
-              onShareAdded: () {},
+              onShareAdded: () {
+                if (mounted) {
+                  setState(() {});
+                }
+              },
             );
           },
         ),
         const SizedBox(width: 16),
         _ShareActionOption(
           icon: HugeIcons.strokeRoundedLink02,
-          label: _hasActivePublicLink
-              ? context.l10n.manageLink
-              : context.l10n.linkLabel,
+          label:
+              _hasPublicLink ? context.l10n.manageLink : context.l10n.linkLabel,
           onTap: () async {
-            if (!_hasActivePublicLink) {
+            if (!_hasPublicLink) {
               await _createAndSharePublicLink();
               return;
             }
@@ -218,6 +214,9 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
               context,
               ManageSharedLinkWidget(collection: widget.collection),
             );
+            if (mounted) {
+              setState(() {});
+            }
           },
         ),
       ],
@@ -231,7 +230,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
     );
     if (result && mounted) {
       setState(() {});
-      if (_hasActivePublicLink) {
+      if (_hasPublicLink) {
         final url = CollectionService.instance.getPublicUrl(widget.collection);
         await shareText(url, context: context);
       }
