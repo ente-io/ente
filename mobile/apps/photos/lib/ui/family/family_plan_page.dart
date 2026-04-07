@@ -618,11 +618,11 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     }
 
     try {
-      final updatedUserDetails = await FamilyService.instance.leaveFamily();
+      await FamilyService.instance.leaveFamily();
       if (!mounted) {
         return;
       }
-      setState(() => _userDetails = updatedUserDetails);
+      Navigator.of(context).pop();
     } catch (error) {
       if (mounted) {
         await showGenericErrorDialog(context: context, error: error);
