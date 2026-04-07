@@ -312,12 +312,19 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     final activeMembers = members.where((member) => member.isActive).toList();
     final colorMap = _memberColorMap(activeMembers);
 
+    final currentEmail = _userDetails.email.trim().toLowerCase();
+    final currentMember = members.firstWhereOrNull(
+      (m) => m.email.trim().toLowerCase() == currentEmail,
+    );
+    final storageLimit = !isAdminView ? currentMember?.storageLimit : null;
+
     return ListView(
       children: [
         _FamilyStorageOverviewCard(
           userDetails: _userDetails,
           members: activeMembers,
           colorMap: colorMap,
+          storageLimit: storageLimit,
         ),
         const SizedBox(height: 16),
         Padding(
@@ -761,11 +768,13 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
     required this.userDetails,
     required this.members,
     required this.colorMap,
+    this.storageLimit,
   });
 
   final UserDetails userDetails;
   final List<FamilyMember> members;
   final Map<String, Color> colorMap;
+  final int? storageLimit;
 
   @override
   Widget build(BuildContext context) {
@@ -841,6 +850,13 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
               },
             ),
           ),
+          if (storageLimit != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              "Your storage is limited to ${convertBytesToReadableFormat(storageLimit!)}",
+              style: textTheme.miniMuted,
+            ),
+          ],
         ],
       ),
     );
@@ -1101,8 +1117,6 @@ class _FamilyMemberRow extends StatelessWidget {
     final isCurrentUser =
         member.email.trim().toLowerCase() == currentEmail.trim().toLowerCase();
     final canTap = isAdminView && !isCurrentUser;
-    final shouldShowStorageLimit =
-        !isAdminView && isCurrentUser && member.storageLimit != null;
     final backgroundColor = member.isPending
         ? colorScheme.fillMuted
         : avatarColor ?? colorScheme.greenBase;
@@ -1144,13 +1158,6 @@ class _FamilyMemberRow extends StatelessWidget {
                           ),
                     style: textTheme.smallMuted,
                   ),
-                  if (shouldShowStorageLimit) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      "${l10n.storageLimit}: ${convertBytesToReadableFormat(member.storageLimit!)}",
-                      style: textTheme.smallMuted,
-                    ),
-                  ],
                 ],
               ),
             ),
