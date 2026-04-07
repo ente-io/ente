@@ -807,6 +807,15 @@
       }
     }
   },
+  "yourStorageIsLimitedTo": "Your storage is limited to {limit}",
+  "@yourStorageIsLimitedTo": {
+    "placeholders": {
+      "limit": {
+        "type": "String",
+        "example": "50 GB"
+      }
+    }
+  },
   "storageLimitExplanation": "Set the maximum storage this member can use. They will not be able to upload once the limit is reached.",
   "limit": "Limit",
   "noLimit": "No limit",

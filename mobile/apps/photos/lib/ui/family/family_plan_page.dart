@@ -853,7 +853,9 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
           if (storageLimit != null) ...[
             const SizedBox(height: 10),
             Text(
-              "Your storage is limited to ${convertBytesToReadableFormat(storageLimit!)}",
+              AppLocalizations.of(context).yourStorageIsLimitedTo(
+                limit: convertBytesToReadableFormat(storageLimit!),
+              ),
               style: textTheme.miniMuted,
             ),
           ],
