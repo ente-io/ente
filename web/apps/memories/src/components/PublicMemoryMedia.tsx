@@ -129,6 +129,7 @@ export function PhotoImage({
     const onAspectRatioRef = useRef(onAspectRatio);
     const mediaReadyRef = useRef(false);
     const thumbnailResolvedRef = useRef(false);
+    const fullImageLoadTokenRef = useRef<symbol | null>(null);
     const hasNotifiedDisplayReadyRef = useRef(false);
     const hasNotifiedThumbnailResolvedRef = useRef(false);
     const lastReportedAspectRatioRef = useRef<number | undefined>(undefined);
@@ -251,13 +252,16 @@ export function PhotoImage({
             return;
         }
 
-        let cancelled = false;
+        const loadToken = Symbol("full-image-load");
+        fullImageLoadTokenRef.current = loadToken;
+
+        const isStaleLoad = () => fullImageLoadTokenRef.current !== loadToken;
 
         const loadFullImage = async () => {
             try {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                if (cancelled) {
+                if (isStaleLoad()) {
                     return;
                 }
                 if (sourceURLs.type === "video") {
@@ -268,7 +272,7 @@ export function PhotoImage({
                 let nextFullImageURL: string;
                 if (sourceURLs.type === "livePhoto") {
                     nextFullImageURL = await sourceURLs.imageURL();
-                    if (cancelled) {
+                    if (isStaleLoad()) {
                         return;
                     }
                 } else {
@@ -278,7 +282,7 @@ export function PhotoImage({
                 setFullImageURL(nextFullImageURL);
             } catch (error) {
                 log.error("Failed to load full image", error);
-                if (!cancelled) {
+                if (!isStaleLoad()) {
                     signalReady();
                 }
             }
@@ -287,7 +291,9 @@ export function PhotoImage({
         void loadFullImage();
 
         return () => {
-            cancelled = true;
+            if (fullImageLoadTokenRef.current === loadToken) {
+                fullImageLoadTokenRef.current = null;
+            }
         };
     }, [enableFullLoad, file, signalReady, thumbnailOnly]);
 
