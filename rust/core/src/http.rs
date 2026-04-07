@@ -89,6 +89,7 @@ pub struct HttpConfig {
 /// HTTP client for making requests to the Ente API.
 pub struct HttpClient {
     client: reqwest::Client,
+    no_redirect_client: reqwest::Client,
     base_url: String,
     base_origin: Option<Url>,
     auth_token: RwLock<Option<String>>,
@@ -124,7 +125,7 @@ impl HttpClient {
         });
 
         #[cfg(not(target_arch = "wasm32"))]
-        let mut builder = reqwest::Client::builder().redirect(Policy::none());
+        let mut builder = reqwest::Client::builder();
         #[cfg(target_arch = "wasm32")]
         let builder = reqwest::Client::builder();
         #[cfg(not(target_arch = "wasm32"))]
@@ -133,9 +134,19 @@ impl HttpClient {
         }
 
         let client = builder.build().map_err(Error::from)?;
+        #[cfg(not(target_arch = "wasm32"))]
+        let mut no_redirect_builder = reqwest::Client::builder().redirect(Policy::none());
+        #[cfg(target_arch = "wasm32")]
+        let no_redirect_builder = reqwest::Client::builder();
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(timeout) = config.timeout_secs {
+            no_redirect_builder = no_redirect_builder.timeout(Duration::from_secs(timeout));
+        }
+        let no_redirect_client = no_redirect_builder.build().map_err(Error::from)?;
 
         Ok(Self {
             client,
+            no_redirect_client,
             base_url,
             base_origin,
             auth_token: RwLock::new(config.auth_token),
@@ -153,7 +164,7 @@ impl HttpClient {
     /// Create a bare client for presigned object-store requests.
     pub fn object_store(&self) -> ObjectStoreHttpClient {
         ObjectStoreHttpClient {
-            client: self.client.clone(),
+            client: self.no_redirect_client.clone(),
         }
     }
 
@@ -326,7 +337,7 @@ impl HttpClient {
         for _ in 0..5 {
             let headers = headers_for_url(&current_url)?;
             let response = self
-                .client
+                .no_redirect_client
                 .get(current_url.clone())
                 .headers(headers)
                 .send()
@@ -362,7 +373,7 @@ impl HttpClient {
         let mut current_url = self.parse_url(url)?;
         for _ in 0..5 {
             let response = self
-                .client
+                .no_redirect_client
                 .put(current_url.clone())
                 .headers(header_map.clone())
                 .body(body.to_vec())
@@ -796,6 +807,51 @@ mod tests {
         get_mock.assert_async().await;
         put_mock.assert_async().await;
         assert_eq!(bytes, b"ok");
+    }
+
+    #[tokio::test]
+    async fn api_json_calls_still_follow_redirects() {
+        let mut origin_server = Server::new_async().await;
+        let mut redirect_server = Server::new_async().await;
+
+        let redirect_mock = origin_server
+            .mock("GET", "/ping")
+            .match_header("x-auth-token", "auth-token")
+            .with_status(302)
+            .with_header("location", &format!("{}/pong", redirect_server.url()))
+            .create_async()
+            .await;
+
+        let target_mock = redirect_server
+            .mock("GET", "/pong")
+            .match_header("x-auth-token", Matcher::Missing)
+            .with_status(200)
+            .with_body(
+                serde_json::json!({
+                    "message": "pong",
+                    "id": "redirected"
+                })
+                .to_string(),
+            )
+            .create_async()
+            .await;
+
+        let client = HttpClient::new_with_config(HttpConfig {
+            base_url: origin_server.url(),
+            auth_token: Some("auth-token".to_string()),
+            user_agent: None,
+            client_package: None,
+            client_version: None,
+            timeout_secs: None,
+        })
+        .unwrap();
+
+        let response: PingResponse = client.get_json("/ping", &[]).await.unwrap();
+
+        redirect_mock.assert_async().await;
+        target_mock.assert_async().await;
+        assert_eq!(response.message, "pong");
+        assert_eq!(response.id, "redirected");
     }
 
     #[tokio::test]
