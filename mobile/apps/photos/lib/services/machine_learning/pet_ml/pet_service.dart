@@ -256,7 +256,7 @@ class PetService {
           )
           .toList();
 
-      _addOrUpdateEntity(petData.toJson(), id: petID).ignore();
+      await _addOrUpdateEntity(petData.toJson(), id: petID);
       petData.logStats();
     }
 
@@ -268,7 +268,7 @@ class PetService {
       if (pet.data.assigned.isEmpty) continue;
 
       pet.data.assigned = [];
-      _addOrUpdateEntity(pet.data.toJson(), id: pet.remoteID).ignore();
+      await _addOrUpdateEntity(pet.data.toJson(), id: pet.remoteID);
       _logger.info(
         "Cleared remote assignments for pet ${pet.remoteID} (no local clusters)",
       );

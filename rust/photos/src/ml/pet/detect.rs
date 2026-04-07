@@ -455,5 +455,4 @@ mod tests {
         let iou = calculate_iou_4(&a, &b);
         assert!((iou - 0.04 / 0.28).abs() < 1e-5);
     }
-
 }
