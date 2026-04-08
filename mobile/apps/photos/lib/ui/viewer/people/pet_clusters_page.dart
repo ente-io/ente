@@ -3,6 +3,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
@@ -61,6 +62,14 @@ class _PetClustersPageState extends State<PetClustersPage> {
     }
   }
 
+  Future<void> _removeCluster(String clusterId) async {
+    await PetService.instance.removeClusterFromPet(
+      petID: widget.petId,
+      clusterID: clusterId,
+    );
+    await _loadClusters();
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
@@ -84,6 +93,8 @@ class _PetClustersPageState extends State<PetClustersPage> {
                   itemCount: _clusters!.length,
                   itemBuilder: (context, index) {
                     final (clusterId, fileCount, _) = _clusters![index];
+                    final canRemove =
+                        !isOfflineMode && _clusters!.length > 1 && index != 0;
                     return ListTile(
                       leading: SizedBox(
                         width: 56,
@@ -96,6 +107,15 @@ class _PetClustersPageState extends State<PetClustersPage> {
                         context.l10n.photosCount(count: fileCount),
                         style: textTheme.body,
                       ),
+                      trailing: canRemove
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.remove_circle_outline,
+                                color: colorScheme.warning500,
+                              ),
+                              onPressed: () => _removeCluster(clusterId),
+                            )
+                          : null,
                     );
                   },
                 ),

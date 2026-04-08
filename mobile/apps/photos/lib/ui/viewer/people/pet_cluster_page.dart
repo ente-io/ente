@@ -12,17 +12,27 @@ import "package:photos/events/pets_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/gallery_type.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/popup_item.dart";
+import "package:photos/ui/components/buttons/button_widget.dart"
+    show ButtonAction;
+import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
+import "package:photos/ui/viewer/people/merge_pet_sheet.dart";
 import "package:photos/ui/viewer/people/pet_clusters_page.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_pet.dart";
 import "package:photos/ui/viewer/people/save_person_banner.dart";
+import "package:photos/utils/dialog_util.dart";
 
 /// Detail page for a pet cluster with gallery, name editing, and reassignment.
 class PetClusterPage extends StatefulWidget {
@@ -44,6 +54,7 @@ class PetClusterPage extends StatefulWidget {
 }
 
 class _PetClusterPageState extends State<PetClusterPage> {
+  final _selectedFiles = SelectedFiles();
   late List<EnteFile> _files;
   late String _label;
   bool _isBannerDismissed = false;
@@ -170,6 +181,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
+      selectedFiles: _selectedFiles,
       tagPrefix: "pet_cluster_${widget.clusterId}",
       enableFileGrouping: true,
       initialFiles: _files,
@@ -179,10 +191,9 @@ class _PetClusterPageState extends State<PetClusterPage> {
               text: l10n.savePet,
               subText: l10n.findThemQuickly,
               primaryActionLabel: l10n.save,
-              secondaryActionLabel: l10n.skip,
+              secondaryActionLabel: l10n.merge,
               onPrimaryTap: () => _editName(),
-              onSecondaryTap: () =>
-                  setState(() => _isBannerDismissed = true),
+              onSecondaryTap: () => _handleMergePet(),
               onDismissed: () => setState(() => _isBannerDismissed = true),
               dismissibleKey: ValueKey("pet_banner_${widget.clusterId}"),
             )
@@ -225,10 +236,28 @@ class _PetClusterPageState extends State<PetClusterPage> {
             ),
             actions: [
               if (!isOfflineMode)
-                IconButton(
-                  icon: const Icon(Icons.account_tree_outlined, size: 20),
-                  tooltip: "View clusters",
-                  onPressed: _viewClusters,
+                PopupMenuButton<_PetClusterAction>(
+                  icon: const Icon(Icons.more_horiz),
+                  onSelected: (action) {
+                    switch (action) {
+                      case _PetClusterAction.viewClusters:
+                        _viewClusters();
+                      case _PetClusterAction.ignore:
+                        _ignorePet();
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    EntePopupMenuItem(
+                      l10n.viewClusters,
+                      value: _PetClusterAction.viewClusters,
+                      icon: Icons.account_tree_outlined,
+                    ),
+                    EntePopupMenuItem(
+                      l10n.ignorePet,
+                      value: _PetClusterAction.ignore,
+                      icon: Icons.hide_image_outlined,
+                    ),
+                  ],
                 ),
               Text(
                 "${_files.length}",
@@ -237,7 +266,20 @@ class _PetClusterPageState extends State<PetClusterPage> {
               const SizedBox(width: 16),
             ],
           ),
-          body: gallery,
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  GalleryType.petCluster,
+                  _selectedFiles,
+                  clusterID: widget.clusterId,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -261,6 +303,37 @@ class _PetClusterPageState extends State<PetClusterPage> {
     }
   }
 
+  Future<void> _handleMergePet() async {
+    if (isOfflineMode) return;
+    final selection = await showMergePetPage(
+      context,
+      currentClusterId: widget.clusterId,
+    );
+    if (selection == null || !mounted) return;
+    await PetService.instance.addClusterToExistingPet(
+      petId: selection.petId,
+      clusterID: widget.clusterId,
+    );
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _ignorePet() async {
+    if (isOfflineMode) return;
+    final l10n = AppLocalizations.of(context);
+    final result = await showChoiceDialog(
+      context,
+      title: l10n.areYouSureYouWantToIgnoreThisPet,
+      body: l10n.thePetGroupsWillNotBeDisplayed,
+      firstButtonLabel: l10n.confirm,
+      firstButtonOnTap: () async {
+        await PetService.instance
+            .ignorePetCluster(widget.clusterId, widget.species);
+      },
+    );
+    if (!mounted || result?.action != ButtonAction.first) return;
+    Navigator.of(context).pop();
+  }
+
   Future<void> _viewClusters() async {
     if (isOfflineMode) return;
     final mlDataDB =
@@ -275,3 +348,5 @@ class _PetClusterPageState extends State<PetClusterPage> {
     await _reloadClusterFiles();
   }
 }
+
+enum _PetClusterAction { viewClusters, ignore }

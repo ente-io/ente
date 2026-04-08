@@ -21,6 +21,7 @@ enum GalleryType {
   quickLink,
   peopleTag,
   cluster,
+  petCluster,
   sharedPublicCollection,
   magic,
   cleanupHiddenFromDevice,
@@ -47,6 +48,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.trash:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.sharedPublicCollection:
       case GalleryType.deleteSuggestions:
       case GalleryType.cleanupHiddenFromDevice:
@@ -73,6 +75,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.locationTag:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
       case GalleryType.deleteSuggestions:
@@ -95,6 +98,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
       case GalleryType.peopleTag:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.magic:
         return true;
       case GalleryType.trash:
@@ -125,6 +129,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
       case GalleryType.peopleTag:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.magic:
         return true;
       case GalleryType.trash:
@@ -146,6 +151,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.peopleTag:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.magic:
         return true;
       case GalleryType.hiddenSection:
@@ -177,6 +183,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.trash:
       case GalleryType.locationTag:
       case GalleryType.sharedPublicCollection:
@@ -207,6 +214,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.sharedCollection:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.sharedPublicCollection:
       case GalleryType.deleteSuggestions:
       case GalleryType.cleanupHiddenFromDevice:
@@ -230,6 +238,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.magic:
       case GalleryType.peopleTag:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
         return true;
 
       case GalleryType.hiddenSection:
@@ -266,6 +275,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
       case GalleryType.favorite:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.trash:
@@ -292,6 +302,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.peopleTag:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.magic:
         return true;
 
@@ -333,12 +344,14 @@ extension GalleyTypeExtension on GalleryType {
   bool showEditLocation() {
     return this != GalleryType.sharedCollection &&
         this != GalleryType.cluster &&
+        this != GalleryType.petCluster &&
         this != GalleryType.cleanupHiddenFromDevice;
   }
 
   bool showBulkEditTime() {
     return this != GalleryType.sharedCollection &&
         this != GalleryType.cluster &&
+        this != GalleryType.petCluster &&
         this != GalleryType.cleanupHiddenFromDevice;
   }
 }
@@ -442,6 +455,7 @@ extension GalleryAppBarExtn on GalleryType {
         return false;
       case GalleryType.uncategorized:
       case GalleryType.cluster:
+      case GalleryType.petCluster:
       case GalleryType.peopleTag:
       case GalleryType.ownedCollection:
       case GalleryType.sharedCollection:

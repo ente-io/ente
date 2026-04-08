@@ -13,6 +13,7 @@ import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:uuid/uuid.dart";
 
 /// Manages pet entities synced via the entity sync service.
 class PetService {
@@ -306,6 +307,67 @@ class PetService {
   void _invalidateCache() {
     _lastCacheRefreshTime = 0;
     _cachedPetsFuture = null;
+  }
+
+  /// Hide a pet cluster so it no longer appears in the pets section.
+  Future<void> ignorePetCluster(String clusterId, int species) async {
+    final clusterToPetId = await mlDataDB.getClusterToPetId();
+    final existingPetId = clusterToPetId[clusterId];
+
+    if (existingPetId != null) {
+      final pet = await getPet(existingPetId);
+      if (pet != null) {
+        await updatePet(existingPetId, pet.data.copyWith(isHidden: true));
+      }
+    } else {
+      final pet = await addPet(
+        PetData(name: "", species: species, isHidden: true),
+      );
+      await mlDataDB.setClusterPetId(clusterId, pet.remoteID);
+    }
+    Bus.instance.fire(PetsChangedEvent(source: "ignorePetCluster"));
+  }
+
+  /// Remove a secondary cluster from a pet.
+  Future<void> removeClusterFromPet({
+    required String petID,
+    required String clusterID,
+  }) async {
+    await mlDataDB.removeClusterPetId(clusterID);
+    final pet = await getPet(petID);
+    if (pet != null) {
+      pet.data.assigned.removeWhere((e) => e.id == clusterID);
+      await updatePet(petID, pet.data);
+    }
+    Bus.instance.fire(PetsChangedEvent(source: "removeClusterFromPet"));
+  }
+
+  /// Map a cluster to an existing pet entity.
+  Future<void> addClusterToExistingPet({
+    required String petId,
+    required String clusterID,
+  }) async {
+    await mlDataDB.setClusterPetId(clusterID, petId);
+    Bus.instance.fire(PetsChangedEvent(source: "addClusterToExistingPet"));
+  }
+
+  /// Remove selected files' pet faces from a cluster ("Not this pet").
+  Future<void> removeFilesFromPetCluster(
+    List<int> fileIds,
+    String clusterId,
+  ) async {
+    final faceIds =
+        await mlDataDB.getPetFaceIdsForFilesInCluster(fileIds, clusterId);
+    if (faceIds.isEmpty) return;
+    await mlDataDB.bulkInsertNotPetFeedback(
+      faceIds.map((faceId) => (clusterId, faceId)).toList(),
+    );
+    final newAssignments = <String, String>{};
+    for (final faceId in faceIds) {
+      newAssignments[faceId] = const Uuid().v4();
+    }
+    await mlDataDB.forceUpdatePetFaceClusterIds(newAssignments);
+    Bus.instance.fire(PetsChangedEvent(source: "removeFilesFromPetCluster"));
   }
 
   Future<void> _removeLocalClusterMappingsForPet(String petID) async {
