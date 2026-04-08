@@ -241,24 +241,31 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
   final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
     localIDs.add(entity.id);
-    final createMs = _safeGetMilliseconds(
-      entity.createDateTime,
-      entity.id,
-      entity.title,
-      'createDateTime',
-    );
-    final modifiedMs = _safeGetMilliseconds(
-      entity.modifiedDateTime,
-      entity.id,
-      entity.title,
-      'modifiedDateTime',
-    );
-    final bool assetCreatedOrUpdatedAfterGivenTime =
-        max(createMs, modifiedMs) >= (fromTime ~/ 1000);
-    if (!alreadySeenLocalIDs.contains(entity.id) &&
-        assetCreatedOrUpdatedAfterGivenTime) {
-      final file = await EnteFile.fromAsset(pathEntity.name, entity);
-      files.add(file);
+    try {
+      final createMs = _safeGetMilliseconds(
+        entity.createDateTime,
+        entity.id,
+        entity.title,
+        'createDateTime',
+      );
+      final modifiedMs = _safeGetMilliseconds(
+        entity.modifiedDateTime,
+        entity.id,
+        entity.title,
+        'modifiedDateTime',
+      );
+      final bool assetCreatedOrUpdatedAfterGivenTime =
+          max(createMs, modifiedMs) >= (fromTime ~/ 1000);
+      if (!alreadySeenLocalIDs.contains(entity.id) &&
+          assetCreatedOrUpdatedAfterGivenTime) {
+        final file = await EnteFile.fromAsset(pathEntity.name, entity);
+        files.add(file);
+      }
+    } on InvalidDateTimeError catch (e) {
+      _logger.warning(
+        "Skipping asset with invalid timestamp: id=${entity.id} title=${entity.title}",
+        e,
+      );
     }
   }
   return Tuple2(localIDs, files);
