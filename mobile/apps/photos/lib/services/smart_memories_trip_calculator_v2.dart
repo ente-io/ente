@@ -74,6 +74,8 @@ class TripMemoriesCalculatorV2 {
   static const _minBaseActiveWeeks = 6;
   static const _minBaseActiveMonths = 2;
   static const _minBaseSpanDays = 45;
+  static const _baseDensityWindowDays = 120;
+  static const _minBaseActiveDaysInWindow = 12;
 
   // Trip duration bounds (in days).
   static const _minTripDays = 3;
@@ -444,11 +446,31 @@ class TripMemoriesCalculatorV2 {
       creationTimes.last,
     );
     final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
+    final sortedUniqueDays = uniqueDays.toList()..sort();
 
     return uniqueDays.length >= _minBaseActiveDays &&
         uniqueWeeks.length >= _minBaseActiveWeeks &&
         uniqueMonths.length >= _minBaseActiveMonths &&
+        _hasDenseResidenceWindow(sortedUniqueDays) &&
         daysRange >= _minBaseSpanDays;
+  }
+
+  static bool _hasDenseResidenceWindow(List<int> sortedUniqueDays) {
+    if (sortedUniqueDays.length < _minBaseActiveDaysInWindow) {
+      return false;
+    }
+
+    var windowStart = 0;
+    for (int windowEnd = 0; windowEnd < sortedUniqueDays.length; windowEnd++) {
+      while (sortedUniqueDays[windowEnd] - sortedUniqueDays[windowStart] >
+          _baseDensityWindowDays * microSecondsInDay) {
+        windowStart++;
+      }
+      if (windowEnd - windowStart + 1 >= _minBaseActiveDaysInWindow) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // ── Merge trips across temporal blocks ──
