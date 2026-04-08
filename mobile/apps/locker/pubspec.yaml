@@ -22,6 +22,8 @@ dependencies:
     path: ../../packages/base
   ente_configuration:
     path: ../../packages/configuration
+  ente_contacts:
+    path: ../../packages/contacts
   ente_crypto_api:
     path: ../../packages/ente_crypto_api
   ente_crypto_dart_adapter:
@@ -40,6 +42,8 @@ dependencies:
     path: ../../packages/network
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
+  ente_rust:
+    path: ../../packages/rust
   ente_sharing:
     path: ../../packages/sharing
   ente_strings:

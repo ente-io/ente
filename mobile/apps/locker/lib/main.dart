@@ -12,6 +12,7 @@ import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:ente_rust/ente_rust.dart';
 import "package:ente_strings/l10n/strings_localizations.dart";
 import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:ente_ui/theme/theme_config.dart";
@@ -25,6 +26,7 @@ import 'package:locker/l10n/app_localizations.dart';
 import 'package:locker/services/collections/collections_api_client.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import 'package:locker/services/contacts_display_service.dart';
 import "package:locker/services/db/locker_db.dart";
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
@@ -40,6 +42,8 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
+bool _isRustInitialized = false;
+Future<void>? _rustInitFuture;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,6 +109,7 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     try {
+      await _ensureRustInitialized();
       await _init(false, via: 'mainMethod');
     } catch (e, s) {
       _logger.severe("Failed to init", e, s);
@@ -130,6 +135,25 @@ Future<void> _runInForeground() async {
       ),
     );
   });
+}
+
+Future<void> _ensureRustInitialized() async {
+  if (_isRustInitialized) {
+    return;
+  }
+  final inFlightInit = _rustInitFuture;
+  if (inFlightInit != null) {
+    await inFlightInit;
+    return;
+  }
+  final initFuture = EnteRust.init();
+  _rustInitFuture = initFuture;
+  try {
+    await initFuture;
+    _isRustInitialized = true;
+  } finally {
+    _rustInitFuture = null;
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -192,6 +216,10 @@ Future<void> _init(bool bool, {String? via}) async {
     await EmergencyContactService.instance.init(
       UserService.instance,
       Configuration.instance,
+    );
+    await LockerContactsDisplayService.init(
+      preferences: preferences,
+      packageInfo: packageInfo,
     );
   } catch (e) {
     _logger.severe("Error during initialization", e);

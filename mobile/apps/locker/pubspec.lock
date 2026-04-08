@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: e563c2e01de8974566a1998410d3f6f03521788160a02503b0b1f1a46c7b3d95
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   characters:
     dependency: transitive
     description:
@@ -262,6 +270,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_contacts:
+    dependency: "direct main"
+    description:
+      path: "../../packages/contacts"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_crypto_api:
     dependency: "direct main"
     description:
@@ -334,6 +349,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_rust:
+    dependency: "direct main"
+    description:
+      path: "../../packages/rust"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_sharing:
     dependency: "direct main"
     description:
@@ -573,6 +595,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.31"
+  flutter_rust_bridge:
+    dependency: transitive
+    description:
+      name: flutter_rust_bridge
+      sha256: e87d6b9ee934dcd24a128ccb2bd91905d2d5fe5c06245d6a8f5477d4907a437a
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.12.0"
   flutter_secure_storage:
     dependency: transitive
     description:
@@ -1332,6 +1362,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.6"
+  sqflite_common_ffi:
+    dependency: transitive
+    description:
+      name: sqflite_common_ffi
+      sha256: "9faa2fedc5385ef238ce772589f7718c24cdddd27419b609bb9c6f703ea27988"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
   sqflite_darwin:
     dependency: transitive
     description:
@@ -1348,6 +1386,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: "3145bd74dcdb4fd6f5c6dda4d4e4490a8087d7f286a14dee5d37087290f0f8a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.4"
   stack_trace:
     dependency: transitive
     description:
