@@ -47,6 +47,9 @@ class CommentBubbleWidget extends StatefulWidget {
   /// Callback invoked when the user taps on the parent quote preview.
   final VoidCallback? onParentQuoteTap;
 
+  /// Callback invoked when the user taps the visible author header.
+  final VoidCallback? onAuthorTap;
+
   const CommentBubbleWidget({
     required this.comment,
     required this.user,
@@ -62,6 +65,7 @@ class CommentBubbleWidget extends StatefulWidget {
     this.isHighlighted = false,
     this.onAutoHighlightDismissed,
     this.onParentQuoteTap,
+    this.onAuthorTap,
     super.key,
   });
 
@@ -513,6 +517,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                 user: widget.user,
                 createdAt: widget.comment.createdAt,
                 currentUserID: widget.currentUserID,
+                onAuthorTap: widget.onAuthorTap,
               ),
             ),
           ),
@@ -807,12 +812,14 @@ class _Header extends StatelessWidget {
   final User user;
   final int createdAt;
   final int currentUserID;
+  final VoidCallback? onAuthorTap;
 
   const _Header({
     required this.isOwnComment,
     required this.user,
     required this.createdAt,
     required this.currentUserID,
+    this.onAuthorTap,
   });
 
   @override
@@ -881,7 +888,7 @@ class _Header extends StatelessWidget {
       ),
     );
 
-    return Row(
+    final row = Row(
       mainAxisAlignment:
           isOwnComment ? MainAxisAlignment.end : MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
@@ -908,6 +915,16 @@ class _Header extends StatelessWidget {
           ),
         ],
       ],
+    );
+
+    if (isOwnComment || onAuthorTap == null) {
+      return row;
+    }
+
+    return GestureDetector(
+      onTap: onAuthorTap,
+      behavior: HitTestBehavior.opaque,
+      child: row,
     );
   }
 }

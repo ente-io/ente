@@ -3,12 +3,14 @@ import "dart:typed_data";
 
 import "package:ente_contacts/contacts.dart" as contacts;
 import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -20,7 +22,10 @@ import "package:photos/services/photos_contacts_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
@@ -35,14 +40,14 @@ import "package:photos/utils/thumbnail_util.dart";
 class EditContactPage extends StatefulWidget {
   final int contactUserId;
   final String email;
-  final List<EnteFile> files;
   final contacts.ContactRecord? existingContact;
+  final List<EnteFile>? photoPickerFiles;
 
   const EditContactPage({
     required this.contactUserId,
     required this.email,
-    required this.files,
     required this.existingContact,
+    this.photoPickerFiles,
     super.key,
   });
 
@@ -55,6 +60,7 @@ class _EditContactPageState extends State<EditContactPage> {
   static const _avatarSize = 108.0;
   static const _editBadgeSize = 32.0;
   static const _avatarRadius = 20.0;
+  static const _avatarCornerSmoothing = 0.6;
 
   final _logger = Logger("EditContactPage");
   late final TextEditingController _nameController;
@@ -90,135 +96,170 @@ class _EditContactPageState extends State<EditContactPage> {
   }
 
   bool get _canSave => !_isSaving && _nameController.text.trim().isNotEmpty;
+  String get _initialName => (widget.existingContact?.data?.name ?? "").trim();
+  String? get _initialBirthDate => widget.existingContact?.data?.birthDate;
+  bool get _hasUnsavedChanges =>
+      _nameController.text.trim() != _initialName ||
+      _selectedBirthDate != _initialBirthDate ||
+      _photoDirty;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Scaffold(
-      backgroundColor: colorScheme.backgroundColour,
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
+    return PopScope(
+      canPop: !_isSaving && !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || _isSaving || !_hasUnsavedChanges) {
+          return;
+        }
+
+        final action = await _showExitConfirmationDialog(context);
+        if (!mounted || action == null || action == ButtonAction.cancel) {
+          return;
+        }
+
+        if (_canSave && action == ButtonAction.first) {
+          await _saveContact();
+          return;
+        }
+
+        final shouldPop = _canSave
+            ? action == ButtonAction.second
+            : action == ButtonAction.first;
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
         backgroundColor: colorScheme.backgroundColour,
-        surfaceTintColor: Colors.transparent,
-        title: Text(
-          "Edit contact",
-          style: textTheme.h3Bold.copyWith(
-            fontSize: 20,
-            height: 28 / 20,
+        appBar: AppBar(
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          backgroundColor: colorScheme.backgroundColour,
+          surfaceTintColor: Colors.transparent,
+          title: Text(
+            "Edit contact",
+            style: textTheme.h3Bold.copyWith(
+              fontSize: 20,
+              height: 28 / 20,
+            ),
           ),
+          centerTitle: false,
         ),
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-              children: [
-                Center(
-                  child: GestureDetector(
-                    onTap: _pickContactPhoto,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        _buildAvatar(context, size: _avatarSize),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: _AvatarEditButton(
-                            size: _editBadgeSize,
-                            onTap: _pickContactPhoto,
-                          ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: _avatarSize,
+                      height: _avatarSize,
+                      child: GestureDetector(
+                        onTap: _pickContactPhoto,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _buildAvatar(context, size: _avatarSize),
+                            Positioned(
+                              right: -4,
+                              bottom: -4,
+                              child: _AvatarEditButton(
+                                size: _editBadgeSize,
+                                onTap: _pickContactPhoto,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                if (_showAutofillRow) ...[
-                  MenuItemWidgetNew(
-                    title: "Auto-fetch from people",
-                    subText: "Use their name and photo",
-                    titleToSubTextSpacing: 4,
-                    subTextStyle: textTheme.mini.copyWith(
-                      color: colorScheme.textMuted,
-                      height: 16 / 12,
-                    ),
-                    leadingIconSize: 44,
-                    leadingIconWidget: _AutofillLeadingWidget(
-                      person: _autofillPerson,
-                      previewPeople: _autofillPreviewPeople,
-                    ),
-                    trailingIcon: Icons.chevron_right_rounded,
-                    onTap: _autoFillFromPeople,
-                  ),
-                  const SizedBox(height: 28),
-                ],
-                const _FieldLabel(text: "Email", isRequired: true),
-                const SizedBox(height: 8),
-                _InputShell(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    child: Text(
-                      widget.email,
-                      style: textTheme.body,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const _FieldLabel(text: "Name"),
-                const SizedBox(height: 8),
-                _InputShell(
-                  child: TextField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    style: textTheme.body,
-                    decoration: InputDecoration(
-                      hintText: "Enter a name",
-                      hintStyle: textTheme.bodyFaint,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                const _FieldLabel(text: "Birthday"),
-                const SizedBox(height: 8),
-                _BirthDateField(
-                  value: _selectedBirthDate,
-                  onTap: _pickBirthDate,
-                  onClear: _selectedBirthDate == null
-                      ? null
-                      : () {
-                          setState(() {
-                            _selectedBirthDate = null;
-                          });
-                        },
-                  hintText: "Enter date of birth",
-                ),
-              ],
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              child: _SaveContactButton(
-                isDisabled: !_canSave,
-                onTap: _canSave ? _saveContact : null,
+                  const SizedBox(height: 32),
+                  if (_showAutofillRow) ...[
+                    MenuItemWidgetNew(
+                      title: "Auto-fetch from people",
+                      subText: "Use their name and photo",
+                      titleToSubTextSpacing: 4,
+                      subTextStyle: textTheme.mini.copyWith(
+                        color: colorScheme.textMuted,
+                        height: 16 / 12,
+                      ),
+                      leadingIconSize: 44,
+                      leadingIconWidget: _AutofillLeadingWidget(
+                        person: _autofillPerson,
+                        previewPeople: _autofillPreviewPeople,
+                      ),
+                      trailingIcon: Icons.chevron_right_rounded,
+                      onTap: _autoFillFromPeople,
+                    ),
+                    const SizedBox(height: 28),
+                  ],
+                  const _FieldLabel(text: "Email", isRequired: true),
+                  const SizedBox(height: 8),
+                  _InputShell(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      child: Text(
+                        widget.email,
+                        style: textTheme.body,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const _FieldLabel(text: "Name"),
+                  const SizedBox(height: 8),
+                  _InputShell(
+                    child: TextField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      style: textTheme.body,
+                      decoration: InputDecoration(
+                        hintText: "Enter a name",
+                        hintStyle: textTheme.bodyFaint,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const _FieldLabel(text: "Birthday"),
+                  const SizedBox(height: 8),
+                  _BirthDateField(
+                    value: _selectedBirthDate,
+                    onTap: _pickBirthDate,
+                    onClear: _selectedBirthDate == null
+                        ? null
+                        : () {
+                            setState(() {
+                              _selectedBirthDate = null;
+                            });
+                          },
+                    hintText: "Enter date of birth",
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: _SaveContactButton(
+                  isDisabled: !_canSave,
+                  onTap: _canSave ? _saveContact : null,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -235,36 +276,26 @@ class _EditContactPageState extends State<EditContactPage> {
         avatarSeed.length.remainder(colorScheme.avatarColors.length)];
 
     if (_isLoadingPhoto) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(_avatarRadius),
-        ),
+      return _ContactThumbnailShell(
+        size: size,
+        backgroundColor: colorScheme.fillFaint,
         child: const Center(child: EnteLoadingWidget()),
       );
     }
 
     if (_draftPhotoBytes != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(_avatarRadius),
+      return _ContactThumbnailShell(
+        size: size,
         child: Image.memory(
           _draftPhotoBytes!,
-          width: size,
-          height: size,
           fit: BoxFit.cover,
         ),
       );
     }
 
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: avatarColor,
-        borderRadius: BorderRadius.circular(_avatarRadius),
-      ),
+    return _ContactThumbnailShell(
+      size: size,
+      backgroundColor: avatarColor,
       child: Center(
         child: Text(
           initial,
@@ -308,16 +339,9 @@ class _EditContactPageState extends State<EditContactPage> {
   }
 
   Future<void> _pickContactPhoto() async {
-    final pickerFiles = widget.files.isNotEmpty
-        ? widget.files
-        : await SearchService.instance.getAllFilesForGenericGallery();
-    if (pickerFiles.isEmpty) {
-      showShortToast(context, "No photos available to use");
-      return;
-    }
     final selectedFile = await showContactPhotoPickerSheet(
       context,
-      files: pickerFiles,
+      initialFiles: widget.photoPickerFiles,
     );
     if (selectedFile == null) {
       return;
@@ -425,6 +449,65 @@ class _EditContactPageState extends State<EditContactPage> {
         _isSaving = false;
       });
     }
+  }
+
+  Future<ButtonAction?> _showExitConfirmationDialog(
+    BuildContext context,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    if (_canSave) {
+      final actionResult = await showActionSheet(
+        context: context,
+        body: l10n.saveChangesBeforeLeavingQuestion,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            labelText: l10n.save,
+            isInAlert: true,
+            buttonAction: ButtonAction.first,
+            shouldStickToDarkTheme: true,
+          ),
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: l10n.dontSave,
+            isInAlert: true,
+            buttonAction: ButtonAction.second,
+            shouldStickToDarkTheme: true,
+          ),
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: l10n.cancel,
+            isInAlert: true,
+            buttonAction: ButtonAction.cancel,
+            shouldStickToDarkTheme: true,
+          ),
+        ],
+      );
+      return actionResult?.action;
+    }
+
+    final actionResult = await showActionSheet(
+      context: context,
+      body: l10n.doYouWantToDiscardTheEditsYouHaveMade,
+      buttons: [
+        ButtonWidget(
+          labelText: l10n.yesDiscardChanges,
+          buttonType: ButtonType.critical,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: l10n.cancel,
+          buttonType: ButtonType.secondary,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+        ),
+      ],
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    return actionResult?.action;
   }
 
   Future<Uint8List?> _loadEditablePhotoBytesFromFile(EnteFile file) async {
@@ -712,20 +795,51 @@ class _AvatarEditButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: getEnteColorScheme(context).primary500,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: const Icon(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: getEnteColorScheme(context).greenBase,
+          shape: BoxShape.circle,
+        ),
+        child: const Center(
+          child: Icon(
             Icons.edit_outlined,
             color: Colors.white,
-            size: 16,
+            size: 12,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContactThumbnailShell extends StatelessWidget {
+  const _ContactThumbnailShell({
+    required this.size,
+    required this.child,
+    this.backgroundColor,
+  });
+
+  final double size;
+  final Widget child;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipSmoothRect(
+        radius: SmoothBorderRadius(
+          cornerRadius: _EditContactPageState._avatarRadius,
+          cornerSmoothing: _EditContactPageState._avatarCornerSmoothing,
+        ),
+        child: ColoredBox(
+          color: backgroundColor ?? Colors.transparent,
+          child: SizedBox.expand(child: child),
         ),
       ),
     );

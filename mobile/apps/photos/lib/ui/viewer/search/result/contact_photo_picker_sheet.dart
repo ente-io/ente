@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
@@ -14,11 +16,11 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 
 Future<EnteFile?> showContactPhotoPickerSheet(
   BuildContext context, {
-  required List<EnteFile> files,
+  List<EnteFile>? initialFiles,
 }) {
   return showBarModalBottomSheet<EnteFile>(
     context: context,
-    builder: (context) => _ContactPhotoPickerSheet(files: files),
+    builder: (context) => _ContactPhotoPickerSheet(initialFiles: initialFiles),
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
       borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
@@ -31,9 +33,9 @@ Future<EnteFile?> showContactPhotoPickerSheet(
 }
 
 class _ContactPhotoPickerSheet extends StatelessWidget {
-  final List<EnteFile> files;
+  final List<EnteFile>? initialFiles;
 
-  const _ContactPhotoPickerSheet({required this.files});
+  const _ContactPhotoPickerSheet({this.initialFiles});
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +67,13 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
                           creationEndTime, {
                           limit,
                           asc,
-                        }) async =>
-                            FileLoadResult(files, false),
+                        }) async {
+                          final files =
+                              initialFiles ??
+                              await SearchService.instance
+                                  .getAllFilesForGenericGallery();
+                          return FileLoadResult(files, false);
+                        },
                         tagPrefix: "pick_contact_photo_gallery",
                         selectedFiles: selectedFiles,
                         limitSelectionToOne: true,
@@ -100,7 +107,8 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
                             key: ValueKey(value),
                             isDisabled: !value,
                             buttonType: ButtonType.neutral,
-                            labelText: "Set selected photo",
+                            labelText:
+                                AppLocalizations.of(context).useSelectedPhoto,
                             onTap: () async {
                               Navigator.pop(context, selectedFiles.files.first);
                             },

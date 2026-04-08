@@ -1,6 +1,5 @@
-import "dart:typed_data";
-
 import "package:ente_contacts/contacts.dart" as contacts;
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -12,6 +11,11 @@ class PhotosContactsService {
       : _contacts = contacts.ContactsService(
           preferences: ServiceLocator.instance.prefs,
         );
+
+  @visibleForTesting
+  PhotosContactsService.forTesting({
+    required contacts.ContactsService contactsService,
+  }) : _contacts = contactsService;
 
   static final PhotosContactsService instance =
       PhotosContactsService._privateConstructor();
@@ -31,22 +35,21 @@ class PhotosContactsService {
   bool get hasHydratedCache => _hasHydratedCache;
 
   Future<void> ensureReady() async {
-    final config = Configuration.instance;
-    final authToken = config.getToken();
-    if (!flagService.internalUser) {
+    if (!flagService.enableContact) {
       _resetSessionState(notify: true);
       return;
     }
-    final sessionKey = _buildSessionKey();
-    if (sessionKey == null) {
+    final session = _buildSession();
+    if (session == null) {
       _resetSessionState(notify: true);
       return;
     }
+    final sessionKey = _buildSessionKey(session);
     if (_readyFuture != null && _sessionKey == sessionKey) {
       await _readyFuture;
-      if (authToken != null && _sessionAuthToken != authToken) {
-        await _contacts.updateAuthToken(authToken);
-        _sessionAuthToken = authToken;
+      if (_sessionAuthToken != session.authToken) {
+        await _contacts.updateAuthToken(session.authToken);
+        _sessionAuthToken = session.authToken;
       }
       return;
     }
@@ -54,10 +57,10 @@ class PhotosContactsService {
       _resetSessionState(notify: true);
     }
     _sessionKey = sessionKey;
-    _sessionAuthToken = authToken;
+    _sessionAuthToken = session.authToken;
     late final Future<void> readyFuture;
     readyFuture =
-        _openAndSync().catchError((Object error, StackTrace stackTrace) {
+        _openAndSync(session).catchError((Object error, StackTrace stackTrace) {
       if (identical(_readyFuture, readyFuture)) {
         _readyFuture = null;
       }
@@ -209,52 +212,87 @@ class PhotosContactsService {
     return contact;
   }
 
-  String? _buildSessionKey() {
-    final config = Configuration.instance;
-    final userId = config.getUserID();
-    final accountKey = config.getKey();
-    if (config.getToken() == null || userId == null || accountKey == null) {
-      return null;
-    }
-    return "${config.getHttpEndpoint()}|$userId";
+  @visibleForTesting
+  Future<void> debugOpenAndSync(contacts.ContactsSession session) async {
+    _sessionKey = _buildSessionKey(session);
+    _sessionAuthToken = session.authToken;
+    await _openAndSync(session);
   }
 
-  Future<void> _openAndSync() async {
-    final config = Configuration.instance;
-    final token = config.getToken();
-    final userId = config.getUserID();
-    final accountKey = config.getKey();
-    if (token == null || userId == null || accountKey == null) {
-      return;
-    }
-    final packageInfo = ServiceLocator.instance.packageInfo;
-    await _contacts.open(
-      contacts.ContactsSession(
-        baseUrl: config.getHttpEndpoint(),
-        authToken: token,
-        userId: userId,
-        accountKey: accountKey,
-        clientPackage: packageInfo.packageName,
-        clientVersion: packageInfo.version,
-      ),
-    );
-    final contactsDiff = await _contacts.sync();
-    for (final contact in contactsDiff) {
-      _invalidateProfilePictureCache(contact.contactUserId);
+  @visibleForTesting
+  void debugHydrateContacts(
+    List<contacts.ContactRecord> contacts, {
+    bool markHydrated = false,
+  }) {
+    for (final contact in contacts) {
       _cacheContact(contact);
     }
+    if (markHydrated) {
+      _hasHydratedCache = true;
+    }
+  }
+
+  @visibleForTesting
+  void debugReset({bool notify = false}) {
+    _resetSessionState(notify: notify);
+  }
+
+  contacts.ContactsSession? _buildSession() {
+    final config = Configuration.instance;
+    final userId = config.getUserID();
+    final accountKey = config.getKey();
+    final token = config.getToken();
+    if (token == null || userId == null || accountKey == null) {
+      return null;
+    }
+    final packageInfo = ServiceLocator.instance.packageInfo;
+    return contacts.ContactsSession(
+      baseUrl: config.getHttpEndpoint(),
+      authToken: token,
+      userId: userId,
+      accountKey: accountKey,
+      clientPackage: packageInfo.packageName,
+      clientVersion: packageInfo.version,
+    );
+  }
+
+  String _buildSessionKey(contacts.ContactsSession session) {
+    return "${session.baseUrl}|${session.userId}";
+  }
+
+  Future<void> _openAndSync(contacts.ContactsSession session) async {
+    await _contacts.open(session);
     final cachedUserIdsBeforeHydration = _contactsByUserId.keys.toSet();
-    final diffUserIds =
-        contactsDiff.map((contact) => contact.contactUserId).toSet();
     final localContacts = await _hydrateCacheFromLocalDb();
     _hasHydratedCache = true;
     final newlyHydratedLocalUserIds = localContacts
         .map((contact) => contact.contactUserId)
         .where((userId) => !cachedUserIdsBeforeHydration.contains(userId))
         .toSet();
-    final changedUserIds = {...diffUserIds, ...newlyHydratedLocalUserIds};
+    final changedUserIds = <int>{...newlyHydratedLocalUserIds};
+    var shouldRetrySync = false;
+    try {
+      final contactsDiff = await _contacts.sync();
+      for (final contact in contactsDiff) {
+        _invalidateProfilePictureCache(contact.contactUserId);
+        _cacheContact(contact);
+      }
+      changedUserIds.addAll(
+        contactsDiff.map((contact) => contact.contactUserId),
+      );
+    } catch (e, s) {
+      shouldRetrySync = true;
+      _logger.warning(
+        "Failed to sync contacts after hydrating local cache",
+        e,
+        s,
+      );
+    }
     if (changedUserIds.isNotEmpty) {
       _notifyContactsChanged(changedUserIds);
+    }
+    if (shouldRetrySync && _sessionKey == _buildSessionKey(session)) {
+      _readyFuture = null;
     }
   }
 

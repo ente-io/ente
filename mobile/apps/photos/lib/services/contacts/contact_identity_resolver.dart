@@ -18,7 +18,7 @@ String resolveDisplayName(User user) {
 }
 
 String? resolveKnownEmail(User user) {
-  if (flagService.internalUser && user.id != null && user.id! > 0) {
+  if (flagService.enableContact && user.id != null && user.id! > 0) {
     final savedEmail = _knownEmailOrNull(
       PhotosContactsService.instance.getCachedResolvedEmailByUserId(user.id),
     );
@@ -30,8 +30,19 @@ String? resolveKnownEmail(User user) {
   return _knownEmailOrNull(user.email);
 }
 
+bool matchesResolvedContactQuery(User user, String lowerCaseQuery) {
+  if (lowerCaseQuery.isEmpty) {
+    return true;
+  }
+
+  final resolvedName = resolveDisplayName(user).toLowerCase();
+  final resolvedEmail = (resolveKnownEmail(user) ?? user.email).toLowerCase();
+  return resolvedName.contains(lowerCaseQuery) ||
+      resolvedEmail.contains(lowerCaseQuery);
+}
+
 String? _savedContactName(User user) {
-  if (!flagService.internalUser || user.id == null || user.id! <= 0) {
+  if (!flagService.enableContact || user.id == null || user.id! <= 0) {
     return null;
   }
 

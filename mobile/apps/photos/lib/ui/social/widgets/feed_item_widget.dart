@@ -30,6 +30,9 @@ class FeedItemWidget extends StatelessWidget {
   /// Called when the user taps shared-feed header text/avatar area.
   final VoidCallback? onSharedHeaderTap;
 
+  /// Called when the user taps the primary actor avatar or name.
+  final ValueChanged<User>? onPrimaryActorTap;
+
   /// Called when the user taps the +N extra-count badge in the shared grid.
   final VoidCallback? onSharedExtraCountTap;
 
@@ -47,6 +50,7 @@ class FeedItemWidget extends StatelessWidget {
     this.onTap,
     this.onSharedPhotoTap,
     this.onSharedHeaderTap,
+    this.onPrimaryActorTap,
     this.onSharedExtraCountTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
@@ -96,6 +100,7 @@ class FeedItemWidget extends StatelessWidget {
                         feedItem: feedItem,
                         currentUserID: currentUserID,
                         anonDisplayNames: anonDisplayNames,
+                        onPrimaryActorTap: onPrimaryActorTap,
                       ),
                     ],
                   ),
@@ -107,6 +112,7 @@ class FeedItemWidget extends StatelessWidget {
                       feedItem: feedItem,
                       currentUserID: currentUserID,
                       anonDisplayNames: anonDisplayNames,
+                      onPrimaryActorTap: onPrimaryActorTap,
                     ),
                   ),
                 ],
@@ -172,6 +178,7 @@ class FeedItemWidget extends StatelessWidget {
                       feedItem: feedItem,
                       currentUserID: currentUserID,
                       anonDisplayNames: anonDisplayNames,
+                      onPrimaryActorTap: onPrimaryActorTap,
                     ),
                     const SizedBox(height: 4),
                     // Text content
@@ -184,6 +191,7 @@ class FeedItemWidget extends StatelessWidget {
                           feedItem: feedItem,
                           currentUserID: currentUserID,
                           anonDisplayNames: anonDisplayNames,
+                          onPrimaryActorTap: onPrimaryActorTap,
                         ),
                       ),
                     ),
@@ -355,11 +363,13 @@ class _StackedAvatars extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
   final Map<String, String> anonDisplayNames;
+  final ValueChanged<User>? onPrimaryActorTap;
 
   const _StackedAvatars({
     required this.feedItem,
     required this.currentUserID,
     required this.anonDisplayNames,
+    this.onPrimaryActorTap,
   });
 
   @override
@@ -369,11 +379,15 @@ class _StackedAvatars extends StatelessWidget {
     final displayCount = actors.length.clamp(1, 2);
 
     if (displayCount == 1) {
-      return _buildSingleAvatar(actors.first, colorScheme);
+      return _wrapActorTap(
+        _buildSingleAvatar(actors.first, colorScheme),
+        actors.first,
+      );
     }
 
     // Stacked avatars with overlap
-    return SizedBox(
+    return _wrapActorTap(
+      SizedBox(
       width: 28 + 21, // First avatar + second avatar offset
       height: 28,
       child: Stack(
@@ -419,6 +433,8 @@ class _StackedAvatars extends StatelessWidget {
           ),
         ],
       ),
+      ),
+      actors.first,
     );
   }
 
@@ -437,6 +453,18 @@ class _StackedAvatars extends StatelessWidget {
         currentUserID: currentUserID,
         addStroke: false,
       ),
+    );
+  }
+
+  Widget _wrapActorTap(Widget child, User primaryActor) {
+    final onTap = onPrimaryActorTap;
+    if (onTap == null) {
+      return child;
+    }
+    return GestureDetector(
+      onTap: () => onTap(primaryActor),
+      behavior: HitTestBehavior.opaque,
+      child: child,
     );
   }
 
@@ -475,11 +503,13 @@ class _FeedTextContent extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
   final Map<String, String> anonDisplayNames;
+  final ValueChanged<User>? onPrimaryActorTap;
 
   const _FeedTextContent({
     required this.feedItem,
     required this.currentUserID,
     required this.anonDisplayNames,
+    this.onPrimaryActorTap,
   });
 
   @override
@@ -495,12 +525,22 @@ class _FeedTextContent extends StatelessWidget {
       children: [
         ResolvedSocialUserName(
           user: primaryUser,
-          builder: (context, primaryName) => _buildUsernameRow(
-            context,
-            primaryName,
-            textTheme,
-            colorScheme,
-          ),
+          builder: (context, primaryName) {
+            final row = _buildUsernameRow(
+              context,
+              primaryName,
+              textTheme,
+              colorScheme,
+            );
+            if (onPrimaryActorTap == null) {
+              return row;
+            }
+            return GestureDetector(
+              onTap: () => onPrimaryActorTap!(primaryUser),
+              behavior: HitTestBehavior.opaque,
+              child: row,
+            );
+          },
         ),
         const SizedBox(height: 2),
         // Action description

@@ -38,7 +38,7 @@ class _ResolvedSocialUserNameState extends State<ResolvedSocialUserName> {
         Bus.instance.on<ContactsChangedEvent>().listen((event) {
       if (mounted &&
           event.matchesContactUserId(widget.user.id) &&
-          flagService.internalUser) {
+          flagService.enableContact) {
         setState(() {});
       }
     });

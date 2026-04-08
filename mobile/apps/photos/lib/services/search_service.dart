@@ -117,7 +117,7 @@ class SearchService {
   }
 
   Future<void> _warmContactsCacheIfNeeded() async {
-    if (!flagService.internalUser ||
+    if (!flagService.enableContact ||
         PhotosContactsService.instance.hasHydratedCache) {
       return;
     }
@@ -130,6 +130,51 @@ class SearchService {
         s,
       );
     }
+  }
+
+  Future<GenericSearchResult?> buildContactSearchResultForUser(User user) async {
+    final userId = user.id;
+    if (userId == null || userId <= 0) {
+      return null;
+    }
+
+    await _warmContactsCacheIfNeeded();
+
+    final allFiles = await getAllFilesForSearch();
+    final files = allFiles.where((file) => file.ownerID == userId).toList();
+    final collections = _collectionService
+        .getCollectionsForUI(includedShared: true, includeCollab: true)
+        .where((collection) => _isVisibleSharedCollectionForContact(collection))
+        .where((collection) => _isSameContactUser(collection.owner, user))
+        .toList();
+
+    return GenericSearchResult(
+      ResultType.shared,
+      resolveDisplayName(user),
+      files,
+      hierarchicalSearchFilter: ContactsFilter(
+        user: user,
+        occurrence: kMostRelevantFilter,
+        matchedUploadedIDs: filesToUploadedFileIDs(files),
+      ),
+      params: _contactSearchParams(user, collections),
+    );
+  }
+
+  bool _isVisibleSharedCollectionForContact(Collection collection) {
+    final ownerID = Configuration.instance.getUserID();
+    return !collection.isHidden() &&
+        ownerID != null &&
+        !collection.isOwner(ownerID);
+  }
+
+  bool _isSameContactUser(User source, User target) {
+    final sourceId = source.id;
+    final targetId = target.id;
+    if (sourceId != null && targetId != null && sourceId > 0 && targetId > 0) {
+      return sourceId == targetId;
+    }
+    return source.email == target.email;
   }
 
   Future<List<EnteFile>> getAllFilesForSearch() async {
@@ -1684,9 +1729,7 @@ class SearchService {
       final fileOwner = CollectionsService.instance
           .getFileOwner(file.ownerID!, file.collectionID);
 
-      if (fileOwner.email.toLowerCase().contains(lowerCaseQuery) ||
-          ((fileOwner.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
-              false)) {
+      if (matchesResolvedContactQuery(fileOwner, lowerCaseQuery)) {
         if (peopleToSharedFiles.containsKey(fileOwner)) {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {
@@ -1702,9 +1745,7 @@ class SearchService {
       if (existingEmails.contains(user.email)) {
         continue;
       }
-      if (user.email.toLowerCase().contains(lowerCaseQuery) ||
-          ((user.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
-              false)) {
+      if (matchesResolvedContactQuery(user, lowerCaseQuery)) {
         peopleToSharedFiles[user] = [];
       }
     }
