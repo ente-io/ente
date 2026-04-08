@@ -4,13 +4,16 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/contacts_changed_event.dart";
+import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/service_locator.dart";
 
 class PhotosContactsService {
   PhotosContactsService._privateConstructor()
       : _contactsServiceFactory = (() => contacts.ContactsService(
               preferences: ServiceLocator.instance.prefs,
-            ));
+            )) {
+    _attachSessionResetListeners();
+  }
 
   @visibleForTesting
   PhotosContactsService.forTesting({
@@ -18,7 +21,9 @@ class PhotosContactsService {
     contacts.ContactsService Function()? contactsServiceFactory,
   })  : _contacts = contactsService,
         _contactsServiceFactory = contactsServiceFactory ??
-            (contactsService != null ? () => contactsService : null);
+            (contactsService != null ? () => contactsService : null) {
+    _attachSessionResetListeners();
+  }
 
   static final PhotosContactsService instance =
       PhotosContactsService._privateConstructor();
@@ -115,7 +120,7 @@ class PhotosContactsService {
   }
 
   contacts.ContactRecord? getCachedContactByUserId(int? contactUserId) {
-    if (contactUserId == null) {
+    if (contactUserId == null || _sessionKey == null) {
       return null;
     }
     final contact = _contactsByUserId[contactUserId];
@@ -135,6 +140,7 @@ class PhotosContactsService {
 
   Uint8List? getCachedProfilePictureBytesByUserId(int? contactUserId) {
     if (contactUserId == null ||
+        _sessionKey == null ||
         !_resolvedProfilePictureUserIds.contains(contactUserId)) {
       return null;
     }
@@ -143,6 +149,7 @@ class PhotosContactsService {
 
   bool hasResolvedProfilePictureByUserId(int? contactUserId) {
     return contactUserId != null &&
+        _sessionKey != null &&
         _resolvedProfilePictureUserIds.contains(contactUserId);
   }
 
@@ -150,10 +157,10 @@ class PhotosContactsService {
     if (contactUserId == null) {
       return null;
     }
-    if (!flagService.enableContact) {
+    if (!flagService.enableContact || _sessionKey == null) {
       return null;
     }
-    if (_resolvedProfilePictureUserIds.contains(contactUserId)) {
+    if (hasResolvedProfilePictureByUserId(contactUserId)) {
       return _profilePictureBytesByUserId[contactUserId];
     }
     final inflightLoad = _profilePictureLoadsByUserId[contactUserId];
@@ -171,10 +178,6 @@ class PhotosContactsService {
     final contact = await getContactByUserId(contactUserId);
     final attachmentId = contact?.profilePictureAttachmentId;
     if (contact == null) {
-      if (_hasHydratedCache && _sessionKey != null) {
-        _profilePictureBytesByUserId.remove(contactUserId);
-        _resolvedProfilePictureUserIds.add(contactUserId);
-      }
       return null;
     }
     if (attachmentId == null) {
@@ -450,6 +453,13 @@ class PhotosContactsService {
     _profilePictureBytesByUserId.remove(contactUserId);
     _resolvedProfilePictureUserIds.remove(contactUserId);
     _profilePictureLoadsByUserId.remove(contactUserId);
+  }
+
+  void _attachSessionResetListeners() {
+    Bus.instance.on<UserLoggedOutEvent>().listen((_) {
+      _sessionGeneration += 1;
+      _resetSessionState(notify: true);
+    });
   }
 
   contacts.ContactsService _newContactsService() {

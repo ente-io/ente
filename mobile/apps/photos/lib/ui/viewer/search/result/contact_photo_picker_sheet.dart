@@ -70,9 +70,10 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
                           asc,
                         }) async {
                           final files =
-                              initialFiles ??
-                              await SearchService.instance
-                                  .getAllFilesForGenericGallery();
+                              initialFiles == null || initialFiles!.isEmpty
+                                  ? await SearchService.instance
+                                      .getAllFilesForGenericGallery()
+                                  : initialFiles!;
                           return FileLoadResult(files, false);
                         },
                         tagPrefix: "pick_contact_photo_gallery",

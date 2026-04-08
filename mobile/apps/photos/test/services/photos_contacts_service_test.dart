@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:ente_contacts/contacts.dart' as contacts;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/photos_contacts_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -227,6 +229,20 @@ void main() {
       expect(contactsService.getProfilePictureCalls, 1);
     },
   );
+
+  test('logout event clears hydrated contact cache immediately', () async {
+    await service.debugOpenAndSync(session);
+
+    expect(service.getCachedSavedNameByUserId(7), 'Alice');
+
+    Bus.instance.fire(UserLoggedOutEvent());
+    await Future<void>.delayed(Duration.zero);
+
+    expect(service.getCachedSavedNameByUserId(7), isNull);
+    expect(service.getCachedResolvedEmailByUserId(7), isNull);
+    expect(service.getCachedProfilePictureBytesByUserId(7), isNull);
+    expect(service.hasHydratedCache, isFalse);
+  });
 }
 
 class FakeContactsService extends Fake implements contacts.ContactsService {
