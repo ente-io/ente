@@ -179,7 +179,10 @@ class _PetClusterPageState extends State<PetClusterPage> {
               text: l10n.savePet,
               subText: l10n.findThemQuickly,
               primaryActionLabel: l10n.save,
+              secondaryActionLabel: l10n.skip,
               onPrimaryTap: () => _editName(),
+              onSecondaryTap: () =>
+                  setState(() => _isBannerDismissed = true),
               onDismissed: () => setState(() => _isBannerDismissed = true),
               dismissibleKey: ValueKey("pet_banner_${widget.clusterId}"),
             )

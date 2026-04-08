@@ -115,6 +115,7 @@ class PetService {
 
   Future<void> deletePet(String petID) async {
     await entityService.deleteEntry(petID);
+    await _removeLocalClusterMappingsForPet(petID);
     _invalidateCache();
     Bus.instance.fire(PetsChangedEvent(source: "PetService.deletePet"));
   }
@@ -124,6 +125,7 @@ class PetService {
     final pets = await getPets();
     for (final pet in pets) {
       await entityService.deleteEntry(pet.remoteID);
+      await _removeLocalClusterMappingsForPet(pet.remoteID);
     }
     _invalidateCache();
   }
@@ -304,5 +306,14 @@ class PetService {
   void _invalidateCache() {
     _lastCacheRefreshTime = 0;
     _cachedPetsFuture = null;
+  }
+
+  Future<void> _removeLocalClusterMappingsForPet(String petID) async {
+    final clusterToPetId = await mlDataDB.getClusterToPetId();
+    for (final entry in clusterToPetId.entries) {
+      if (entry.value == petID) {
+        await mlDataDB.removeClusterPetId(entry.key);
+      }
+    }
   }
 }

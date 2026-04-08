@@ -74,15 +74,8 @@ pub fn run_pet_face_detection_with_session(
                 total, output_shape
             )));
         };
-        // Warn if the total is ambiguously divisible by multiple candidates.
         let candidates = [11usize, 12, 13];
-        let valid_count = candidates.iter().filter(|&&c| total % c == 0).count();
-        if valid_count > 1 {
-            eprintln!(
-                "[ml][pet] WARNING: flat output len={total} is divisible by {valid_count} row-length candidates; using {inferred}. \
-                 Prefer a model with 2D output shape for reliability."
-            );
-        }
+        let _valid_count = candidates.iter().filter(|&&c| total % c == 0).count();
         inferred
     } else {
         return Err(MlError::Postprocess(
@@ -98,13 +91,6 @@ pub fn run_pet_face_detection_with_session(
     }
 
     let detection_rows = output_data.len() / row_len;
-    eprintln!(
-        "[ml][pet] face detect: output_shape={:?}, row_len={}, detection_rows={}, is_2class={}",
-        output_shape,
-        row_len,
-        detection_rows,
-        row_len >= 13
-    );
     let mut detections = Vec::with_capacity(detection_rows);
 
     for i in 0..detection_rows {
@@ -154,37 +140,14 @@ pub fn run_pet_face_detection_with_session(
             let dog_score = row[12];
             let max_score = cat_score.max(dog_score);
             let min_score = cat_score.min(dog_score);
-            eprintln!(
-                "[ml][pet] face #{}: score={:.3}, cat_score={:.4}, dog_score={:.4}, ratio={:.3}",
-                i,
-                score,
-                cat_score,
-                dog_score,
-                if max_score > 0.0 {
-                    min_score / max_score
-                } else {
-                    0.0
-                }
-            );
             // Skip if species scores are too close (ambiguous)
             if max_score > 0.0 && min_score / max_score > 0.7 {
-                eprintln!("[ml][pet]   -> SKIPPED (ambiguous)");
                 continue;
             }
             if dog_score > cat_score { 0 } else { 1 }
         } else {
-            eprintln!(
-                "[ml][pet] face #{}: score={:.3}, 1-class model -> dog",
-                i, score
-            );
             0
         };
-
-        eprintln!(
-            "[ml][pet]   -> class_id={} ({})",
-            class_id,
-            if class_id == 0 { "dog" } else { "cat" }
-        );
         detections.push(PetFaceDetection {
             score,
             box_xyxy,
