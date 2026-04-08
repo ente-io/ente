@@ -161,7 +161,6 @@ lib/
 1. Install Flutter v3.32.8 and Rust
 2. Install Flutter Rust Bridge: `cargo install flutter_rust_bridge_codegen`
 3. Generate Rust bindings: `flutter_rust_bridge_codegen generate`
-4. Update submodules: `git submodule update --init --recursive`
 
 ## Critical Coding Requirements
 

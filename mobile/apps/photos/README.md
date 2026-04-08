@@ -48,13 +48,11 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 1. Install [Flutter v3.32.8](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
-2. Pull in all submodules with `git submodule update --init --recursive`
-
-3. Install dependencies using one of these methods:
+2. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos run codegen:rust`. This will install dependencies and generate Rust bindings.
    - **Using Flutter directly:** Run `flutter pub get`, then install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` in both this folder and in `mobile/packages/rust`.
 
-4. On Android:
+3. On Android:
 
    - For development, run `flutter run -t lib/main.dart --flavor independent`
 
@@ -62,7 +60,7 @@ You can alternatively install the build from PlayStore or F-Droid.
      keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
      and run `flutter build apk --release --flavor independent`
 
-5. For iOS, run `flutter build ios`
+4. For iOS, run `flutter build ios`
 
 Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
 

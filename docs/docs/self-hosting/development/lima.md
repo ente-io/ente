@@ -34,8 +34,7 @@ Using a VM-local clone avoids host-mount permission differences.
 limactl shell docker /bin/bash -lc '
   cd ~ &&
   git clone https://github.com/ente-io/ente.git &&
-  cd ente &&
-  git submodule update --init --recursive
+  cd ente
 '
 ```
 

@@ -23,10 +23,8 @@ jobs:
                 working-directory: mobile/apps/locker
 
         steps:
-            - name: Checkout code and submodules
+            - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Free up disk space
               run: |
