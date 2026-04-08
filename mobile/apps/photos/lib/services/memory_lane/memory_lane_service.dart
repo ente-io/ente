@@ -155,9 +155,34 @@ class MemoryLaneService {
     });
   }
 
-  Future<MemoryLanePersonTimeline?> getTimeline(String personId) {
-    if (!isFeatureEnabled) return Future.value(null);
-    return _cacheService.getTimeline(personId);
+  Future<MemoryLanePersonTimeline?> getTimeline(String personId) async {
+    if (!isFeatureEnabled) return null;
+    final timeline = await _cacheService.getTimeline(personId);
+    if (timeline == null || timeline.entries.isEmpty) {
+      return timeline;
+    }
+
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
+    final containsHiddenEntry = timeline.entries.any(
+      (entry) => hiddenFileIds.contains(entry.fileId),
+    );
+    if (!containsHiddenEntry) {
+      return timeline;
+    }
+
+    _logger.info(
+      "Memory Lane: evicting stale cached timeline for $personId due to hidden entries",
+    );
+    await _cacheService.removeTimeline(personId);
+    await _refreshReadyPersonIds();
+    schedulePersonRecompute(
+      personId,
+      force: true,
+      trigger: "hidden_entry_validation",
+    );
+    return null;
   }
 
   bool hasReadyTimelineSync(String personId) {
