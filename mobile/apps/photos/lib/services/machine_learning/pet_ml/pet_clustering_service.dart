@@ -1,5 +1,4 @@
-import "dart:convert" show jsonDecode, jsonEncode;
-import "dart:math" show min;
+import "dart:math" show Random, min;
 import "dart:typed_data" show Float32List, Float64List;
 
 import "package:logging/logging.dart";
@@ -15,6 +14,7 @@ import "package:synchronized/synchronized.dart";
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("PetClusteringService");
+const _incrementalClusterSampleSize = 5;
 
 /// Orchestrates pet clustering by reading indexed pet data from the DB,
 /// fetching embeddings from the vector DB, calling the Rust 3-phase
@@ -125,41 +125,24 @@ class PetClusteringService {
         species: species,
       );
     } else {
-      // Incremental mode — use exemplar matching (F1=0.96)
+      // Incremental mode — use random cluster samples built on demand.
       if (unclusteredMetas.isEmpty) {
         _logger.info("No unclustered $speciesName faces, skipping");
         return false;
       }
       _logger.info(
-        "Exemplar-incremental clustering ${unclusteredMetas.length} new "
+        "Sample-incremental clustering ${unclusteredMetas.length} new "
         "$speciesName faces (${existingSummaries.length} existing clusters)",
       );
 
-      // Load stored exemplars
-      final exemplarsJsonMap =
-          await mlDataDB.getClusterExemplarsJson(species: species);
-
-      final clusterExemplars = <RustClusterExemplars>[];
-      for (final entry in exemplarsJsonMap.entries) {
-        final List<dynamic> parsed = jsonDecode(entry.value) as List<dynamic>;
-        final exemplars = parsed
-            .map(
-              (e) => Float64List.fromList(
-                (e as List<dynamic>).map((v) => (v as num).toDouble()).toList(),
-              ),
-            )
-            .toList();
-        clusterExemplars.add(
-          RustClusterExemplars(
-            clusterId: entry.key,
-            exemplars: exemplars,
-          ),
-        );
-      }
+      final clusterExemplars = await _buildRandomClusterSamples(
+        existingClusterIds: existingSummaries.keys,
+        faces: faces,
+        faceVdb: faceVdb,
+      );
 
       if (clusterExemplars.isEmpty) {
-        // No exemplars stored yet — fall back to batch
-        _logger.info("No exemplars found, falling back to batch");
+        _logger.info("No cluster samples found, falling back to batch");
         result = await runPetClusteringFromIndex(
           faces: allMetas,
           faceIndexPath: faceIndexPath,
@@ -211,11 +194,9 @@ class PetClusteringService {
     }
 
     final dbClusterToFaces = await mlDataDB.getPetClusterToFaceIds(species);
-    final clusterSummaries = <String, (int, int)>{};
     final clusterCentroids = <String, Float32List>{};
 
     for (final entry in dbClusterToFaces.entries) {
-      clusterSummaries[entry.key] = (entry.value.length, species);
       // Use Rust's centroid if available, otherwise recompute from VDB
       final rustCentroid = rustCentroids[entry.key];
       if (rustCentroid != null) {
@@ -230,33 +211,6 @@ class PetClusteringService {
           clusterCentroids[entry.key] = centroid;
         }
       }
-    }
-
-    // Delete existing summaries for clusters that no longer have any face
-    // assignments in the DB.
-    final activeClusterIds = await mlDataDB.getActivePetClusterIds(species);
-    final staleIds = existingSummaries.keys
-        .where((id) => !activeClusterIds.contains(id))
-        .toList();
-    if (staleIds.isNotEmpty) {
-      await mlDataDB.deletePetClusterSummaries(staleIds);
-    }
-
-    if (clusterSummaries.isNotEmpty) {
-      // Build exemplars JSON from Rust result
-      final exemplarsJson = <String, String>{};
-      for (final es in result.exemplarSummaries) {
-        if (es.exemplars.isNotEmpty) {
-          exemplarsJson[es.clusterId] = jsonEncode(
-            es.exemplars.map((e) => e.toList()).toList(),
-          );
-        }
-      }
-
-      await mlDataDB.petClusterSummaryUpdate(
-        clusterSummaries,
-        exemplarsJson: exemplarsJson.isNotEmpty ? exemplarsJson : null,
-      );
     }
 
     // Write centroids to vector DB
@@ -293,7 +247,7 @@ class PetClusteringService {
       "${result.nUnclustered} unclustered, "
       "${result.summaries.length} clusters",
     );
-    return faceToCluster.isNotEmpty || clusterSummaries.isNotEmpty;
+    return faceToCluster.isNotEmpty;
   }
 
   /// Compute L2-normalized mean centroid for a cluster by reading embeddings
@@ -324,6 +278,71 @@ class PetClusteringService {
       floats[i] = values[i];
     }
     return floats;
+  }
+
+  static Future<List<RustClusterExemplars>> _buildRandomClusterSamples({
+    required Iterable<String> existingClusterIds,
+    required List<PetFaceClusterInfo> faces,
+    required PetVectorDB faceVdb,
+  }) async {
+    final clusterToVectorIds = <String, List<int>>{};
+    for (final face in faces) {
+      final clusterId = face.clusterId;
+      final vectorId = face.faceVectorId;
+      if (clusterId == null || clusterId.isEmpty || vectorId == null) {
+        continue;
+      }
+      clusterToVectorIds.putIfAbsent(clusterId, () => []).add(vectorId);
+    }
+
+    final random = Random();
+    final clusterSamples = <RustClusterExemplars>[];
+    for (final clusterId in existingClusterIds) {
+      final vectorIds = clusterToVectorIds[clusterId];
+      if (vectorIds == null || vectorIds.isEmpty) {
+        continue;
+      }
+      final sampledVectorIds = _sampleRandomVectorIds(
+        vectorIds,
+        _incrementalClusterSampleSize,
+        random,
+      );
+      final embeddings = await faceVdb.getEmbeddings(sampledVectorIds);
+      if (embeddings.isEmpty) {
+        continue;
+      }
+      clusterSamples.add(
+        RustClusterExemplars(
+          clusterId: clusterId,
+          exemplars: embeddings
+              .map(
+                (embedding) => Float64List.fromList(
+                  embedding.map((value) => value.toDouble()).toList(),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    }
+    return clusterSamples;
+  }
+
+  static List<int> _sampleRandomVectorIds(
+    List<int> vectorIds,
+    int maxSamples,
+    Random random,
+  ) {
+    if (vectorIds.length <= maxSamples) {
+      return List<int>.from(vectorIds);
+    }
+    final shuffled = List<int>.from(vectorIds);
+    for (int i = shuffled.length - 1; i > 0; i--) {
+      final j = random.nextInt(i + 1);
+      final tmp = shuffled[i];
+      shuffled[i] = shuffled[j];
+      shuffled[j] = tmp;
+    }
+    return shuffled.sublist(0, maxSamples);
   }
 }
 
@@ -411,43 +430,20 @@ extension PetClusteringDB on MLDataDB {
     }
   }
 
-  /// Update pet cluster summaries (count + species + exemplars) in SQLite.
-  Future<void> petClusterSummaryUpdate(
-    Map<String, (int count, int species)> summaries, {
-    Map<String, String>? exemplarsJson,
-  }) async {
-    if (summaries.isEmpty) return;
-    final db = await asyncDB;
-    const String sql = '''
-      INSERT INTO $petClusterSummaryTable ($clusterIDColumn, $countColumn, $speciesColumn, $exemplarsColumn)
-      VALUES (?, ?, ?, ?)
-      ON CONFLICT($clusterIDColumn) DO UPDATE SET
-        $countColumn = excluded.$countColumn,
-        $speciesColumn = excluded.$speciesColumn,
-        $exemplarsColumn = excluded.$exemplarsColumn
-    ''';
-    const batchSize = 400;
-    final entries = summaries.entries.toList();
-    for (int i = 0; i < entries.length; i += batchSize) {
-      final batch = entries.sublist(i, min(i + batchSize, entries.length));
-      final params = batch
-          .map(
-            (e) => [e.key, e.value.$1, e.value.$2, exemplarsJson?[e.key]],
-          )
-          .toList();
-      await db.executeBatch(sql, params);
-    }
-  }
-
   /// Get all existing pet cluster summaries, optionally filtered by species.
   Future<Map<String, (int count, int species)>> getAllPetClusterSummary({
     int? species,
   }) async {
     final db = await asyncDB;
-    final where = species != null ? ' WHERE $speciesColumn = ?' : '';
+    final where = species != null ? ' AND f.$speciesColumn = ?' : '';
     final params = species != null ? [species] : <Object>[];
     final rows = await db.getAll(
-      'SELECT * FROM $petClusterSummaryTable$where',
+      'SELECT fc.$clusterIDColumn, COUNT(*) as $countColumn, '
+      'MIN(f.$speciesColumn) as $speciesColumn '
+      'FROM $petFaceClustersTable fc '
+      'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
+      'WHERE f.$speciesColumn >= 0$where '
+      'GROUP BY fc.$clusterIDColumn',
       params,
     );
     final result = <String, (int, int)>{};
@@ -456,23 +452,6 @@ extension PetClusteringDB on MLDataDB {
         r[countColumn] as int,
         r[speciesColumn] as int,
       );
-    }
-    return result;
-  }
-
-  /// Get stored exemplar embeddings for all clusters of a species.
-  Future<Map<String, String>> getClusterExemplarsJson({
-    required int species,
-  }) async {
-    final db = await asyncDB;
-    final rows = await db.getAll(
-      'SELECT $clusterIDColumn, $exemplarsColumn FROM $petClusterSummaryTable '
-      'WHERE $speciesColumn = ? AND $exemplarsColumn IS NOT NULL',
-      [species],
-    );
-    final result = <String, String>{};
-    for (final r in rows) {
-      result[r[clusterIDColumn] as String] = r[exemplarsColumn] as String;
     }
     return result;
   }
@@ -730,27 +709,6 @@ extension PetClusteringDB on MLDataDB {
       }
     }
     return result;
-  }
-
-  /// Delete a pet cluster summary row.
-  Future<void> deletePetClusterSummary(String clusterId) async {
-    final db = await asyncDB;
-    await db.execute(
-      'DELETE FROM $petClusterSummaryTable WHERE $clusterIDColumn = ?',
-      [clusterId],
-    );
-  }
-
-  /// Delete multiple pet cluster summary rows in one batch.
-  Future<void> deletePetClusterSummaries(List<String> clusterIds) async {
-    if (clusterIds.isEmpty) return;
-    final db = await asyncDB;
-    final placeholders = List.filled(clusterIds.length, '?').join(',');
-    await db.execute(
-      'DELETE FROM $petClusterSummaryTable '
-      'WHERE $clusterIDColumn IN ($placeholders)',
-      clusterIds,
-    );
   }
 
   /// Reassign all pet faces in one cluster to another.

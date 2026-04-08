@@ -136,6 +136,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetClusterSummaryTable,
     createPetClusterCentroidVectorIdMappingTable,
     createPetClusterPetTable,
+    "SELECT 1", // placeholder: no notPetFeedback in offline mode
+    petFacesSpeciesIndex,
   ];
 
   // only have a single app-wide reference to the database
@@ -475,7 +477,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deletePetFaceVectorIdMappingTable);
     await db.execute(deletePetBodyVectorIdMappingTable);
     await db.execute(deletePetFaceClustersTable);
-    await db.execute(deletePetClusterSummaryTable);
     await db.execute(deletePetClusterPetTable);
     if (!_isOffline) {
       await db.execute(deleteNotPetFeedbackTable);
@@ -1631,7 +1632,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       // Recreate the tables
       await db.execute(createPetFaceClustersTable);
       await db.execute(petFcClusterIDIndex);
-      await db.execute(createPetClusterSummaryTable);
       await db.execute(createPetClusterCentroidVectorIdMappingTable);
       await db.execute(createPetClusterPetTable);
       if (!_isOffline) {
@@ -2417,8 +2417,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     }
 
-    // Delete mapping table entries, cluster assignments, and detection rows
-    // atomically. Also clean up cluster summaries that become empty.
+      // Delete mapping table entries, cluster assignments, and detection rows
+      // atomically.
     await db.writeTransaction((tx) async {
       if (faceIdsToRemove.isNotEmpty) {
         final fpH = List.filled(faceIdsToRemove.length, '?').join(',');
@@ -2442,12 +2442,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'DELETE FROM $petBodiesTable WHERE $fileIDColumn IN ($placeholders)',
         fileIDs,
       );
-      // Clean up cluster summaries that no longer have any face assignments
-      await tx.execute(
-        'DELETE FROM $petClusterSummaryTable '
-        'WHERE $clusterIDColumn NOT IN '
-        '(SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable)',
-      );
     });
 
     // Find clusters that were emptied and clean up their centroid data.
@@ -2465,20 +2459,19 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await _deletePetClusterCentroids(db, emptiedIds, speciesByCluster);
     }
 
-    // Recompute summaries and centroids for clusters that lost members but
-    // still have remaining faces (empty ones were already deleted above).
+    // Recompute centroids for clusters that lost members but still have
+    // remaining faces (empty ones were already deleted above).
     if (affectedClusterIds.isNotEmpty) {
       await _recomputeSurvivingPetClusterCentroids(db, affectedClusterIds);
     }
   }
 
-  /// Recompute pet_cluster_summary counts and centroid vectors for clusters
-  /// that lost members but were not emptied by a file deletion.
+  /// Recompute centroid vectors for clusters that lost members but were not
+  /// emptied by a file deletion.
   Future<void> _recomputeSurvivingPetClusterCentroids(
     SqliteDatabase db,
     Set<String> clusterIds,
   ) async {
-    final summaries = <String, (int, int)>{};
     final centroidsBySpecies = <int, Map<String, Float32List>>{};
 
     for (final clusterId in clusterIds) {
@@ -2513,7 +2506,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
         final centroid = computeL2MeanCentroid(embs);
 
-        summaries[clusterId] = (faceRows.length, species);
         centroidsBySpecies
             .putIfAbsent(species, () => {})
             .putIfAbsent(clusterId, () => centroid);
@@ -2522,17 +2514,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
           "Failed to recompute centroid for cluster $clusterId",
           e,
           s,
-        );
-      }
-    }
-
-    // Update summary counts
-    if (summaries.isNotEmpty) {
-      for (final entry in summaries.entries) {
-        await db.execute(
-          'INSERT OR REPLACE INTO $petClusterSummaryTable '
-          '($clusterIDColumn, $countColumn, $speciesColumn) VALUES (?, ?, ?)',
-          [entry.key, entry.value.$1, entry.value.$2],
         );
       }
     }
