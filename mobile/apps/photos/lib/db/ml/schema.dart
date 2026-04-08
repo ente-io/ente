@@ -310,14 +310,6 @@ CREATE TABLE IF NOT EXISTS $petClusterPetTable (
 
 const deletePetFaceClustersTable = 'DELETE FROM $petFaceClustersTable';
 const petClusterSummaryTable = 'pet_cluster_summary';
-const createPetClusterSummaryTable = '''
-CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
-  $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
-  $countColumn INTEGER NOT NULL DEFAULT 0,
-  $speciesColumn INTEGER NOT NULL DEFAULT -1,
-  exemplars TEXT
-);
-''';
 const deletePetClusterSummaryTable = 'DROP TABLE IF EXISTS $petClusterSummaryTable';
 const deletePetClusterCentroidVectorIdMappingTable =
     'DELETE FROM $petClusterCentroidVectorIdMappingTable';

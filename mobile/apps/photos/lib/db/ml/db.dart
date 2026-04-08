@@ -106,10 +106,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetFacesTable,
     createPetBodiesTable,
     createPetFaceVectorIdMappingTable,
-    createPetBodyVectorIdMappingTable,
     createPetFaceClustersTable,
     petFcClusterIDIndex,
-    createPetClusterSummaryTable,
     createPetClusterCentroidVectorIdMappingTable,
     createPetClusterPetTable,
     createNotPetFeedbackTable,
@@ -130,14 +128,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetFacesTable,
     createPetBodiesTable,
     createPetFaceVectorIdMappingTable,
-    createPetBodyVectorIdMappingTable,
     createPetFaceClustersTable,
     petFcClusterIDIndex,
-    createPetClusterSummaryTable,
     createPetClusterCentroidVectorIdMappingTable,
     createPetClusterPetTable,
-    "SELECT 1", // placeholder: no notPetFeedback in offline mode
-    petFacesSpeciesIndex,
   ];
 
   // only have a single app-wide reference to the database
