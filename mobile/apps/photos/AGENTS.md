@@ -32,7 +32,6 @@ Regenerate Dart bindings when Rust APIs change and keep generated code in `lib/s
 2. Install Rust along with `flutter_rust_bridge_codegen` via `cargo install flutter_rust_bridge_codegen`.
 3. Regenerate Rust bindings whenever native APIs shift using `flutter_rust_bridge_codegen generate`.
 4. Initialize and refresh git submodules with `git submodule update --init --recursive`.
-5. Point git hooks at the repository hooks directory: `git config core.hooksPath hooks`.
 
 ## Critical Practices
 - `dart format .` must run before you commit so the tree stays uniformly formatted.
