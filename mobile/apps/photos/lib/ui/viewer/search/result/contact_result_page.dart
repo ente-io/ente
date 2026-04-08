@@ -480,6 +480,7 @@ class _UnsavedContactHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Column(
@@ -494,8 +495,8 @@ class _UnsavedContactHeader extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           MenuItemWidgetNew(
-            title: "Add a name and photo",
-            subText: AppLocalizations.of(context).itemCount(count: itemCount),
+            title: l10n.addANameAndPhoto,
+            subText: l10n.itemCount(count: itemCount),
             titleColor: colorScheme.textBase,
             subTextStyle: textTheme.mini.copyWith(
               color: colorScheme.textMuted,
@@ -546,6 +547,7 @@ class _UnsavedContactEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36),
@@ -561,7 +563,7 @@ class _UnsavedContactEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              "Nothing to see here",
+              l10n.nothingToSeeHere,
               style: textTheme.largeBold.copyWith(
                 fontSize: 18,
                 height: 24 / 18,
@@ -569,7 +571,7 @@ class _UnsavedContactEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              "Photos shared with or by $email will appear here.",
+              l10n.photosSharedByWillAppearHere(email: email),
               textAlign: TextAlign.center,
               style: textTheme.mini.copyWith(
                 color: colorScheme.textMuted,

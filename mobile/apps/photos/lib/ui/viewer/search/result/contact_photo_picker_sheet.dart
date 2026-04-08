@@ -39,6 +39,7 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isFileSelected = ValueNotifier(false);
     final selectedFiles = SelectedFiles();
     selectedFiles.addListener(() {
@@ -55,8 +56,8 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  const BottomOfTitleBarWidget(
-                    title: TitleBarTitleWidget(title: "Set a contact photo"),
+                  BottomOfTitleBarWidget(
+                    title: TitleBarTitleWidget(title: l10n.setAContactPhoto),
                     showCloseButton: true,
                   ),
                   Expanded(

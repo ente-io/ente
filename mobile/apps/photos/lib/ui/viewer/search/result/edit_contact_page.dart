@@ -107,6 +107,7 @@ class _EditContactPageState extends State<EditContactPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
 
     return PopScope(
       canPop: !_isSaving && !_hasUnsavedChanges,
@@ -140,7 +141,7 @@ class _EditContactPageState extends State<EditContactPage> {
           backgroundColor: colorScheme.backgroundColour,
           surfaceTintColor: Colors.transparent,
           title: Text(
-            "Edit contact",
+            l10n.editContact,
             style: textTheme.h3Bold.copyWith(
               fontSize: 20,
               height: 28 / 20,
@@ -180,8 +181,8 @@ class _EditContactPageState extends State<EditContactPage> {
                   const SizedBox(height: 32),
                   if (_showAutofillRow) ...[
                     MenuItemWidgetNew(
-                      title: "Auto-fetch from people",
-                      subText: "Use their name and photo",
+                      title: l10n.autoFetchFromPeople,
+                      subText: l10n.useTheirNameAndPhoto,
                       titleToSubTextSpacing: 4,
                       subTextStyle: textTheme.mini.copyWith(
                         color: colorScheme.textMuted,
@@ -197,7 +198,7 @@ class _EditContactPageState extends State<EditContactPage> {
                     ),
                     const SizedBox(height: 28),
                   ],
-                  const _FieldLabel(text: "Email", isRequired: true),
+                  _FieldLabel(text: l10n.email, isRequired: true),
                   const SizedBox(height: 8),
                   _InputShell(
                     child: Padding(
@@ -212,7 +213,7 @@ class _EditContactPageState extends State<EditContactPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const _FieldLabel(text: "Name"),
+                  _FieldLabel(text: l10n.name),
                   const SizedBox(height: 8),
                   _InputShell(
                     child: TextField(
@@ -220,7 +221,7 @@ class _EditContactPageState extends State<EditContactPage> {
                       textCapitalization: TextCapitalization.words,
                       style: textTheme.body,
                       decoration: InputDecoration(
-                        hintText: "Enter a name",
+                        hintText: l10n.enterName,
                         hintStyle: textTheme.bodyFaint,
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
@@ -231,7 +232,7 @@ class _EditContactPageState extends State<EditContactPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const _FieldLabel(text: "Birthday"),
+                  _FieldLabel(text: l10n.birthday),
                   const SizedBox(height: 8),
                   _BirthDateField(
                     value: _selectedBirthDate,
@@ -243,7 +244,7 @@ class _EditContactPageState extends State<EditContactPage> {
                               _selectedBirthDate = null;
                             });
                           },
-                    hintText: "Enter date of birth",
+                    hintText: l10n.enterDateOfBirthHint,
                   ),
                 ],
               ),
@@ -962,6 +963,7 @@ class _SaveContactButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
     final backgroundColor =
         isDisabled ? colorScheme.fillFaint : colorScheme.primary500;
     final textColor =
@@ -981,7 +983,7 @@ class _SaveContactButton extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              "Save contact",
+              l10n.saveContact,
               style: textTheme.small.copyWith(
                 color: textColor,
                 fontWeight: FontWeight.w500,

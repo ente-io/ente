@@ -31,16 +31,19 @@ class PhotosContactsService {
   String? _sessionKey;
   String? _sessionAuthToken;
   bool _hasHydratedCache = false;
+  int _sessionGeneration = 0;
 
   bool get hasHydratedCache => _hasHydratedCache;
 
   Future<void> ensureReady() async {
     if (!flagService.enableContact) {
+      _sessionGeneration += 1;
       _resetSessionState(notify: true);
       return;
     }
     final session = _buildSession();
     if (session == null) {
+      _sessionGeneration += 1;
       _resetSessionState(notify: true);
       return;
     }
@@ -54,13 +57,17 @@ class PhotosContactsService {
       return;
     }
     if (_sessionKey != sessionKey) {
+      _sessionGeneration += 1;
       _resetSessionState(notify: true);
     }
     _sessionKey = sessionKey;
     _sessionAuthToken = session.authToken;
     late final Future<void> readyFuture;
-    readyFuture =
-        _openAndSync(session).catchError((Object error, StackTrace stackTrace) {
+    final generation = _sessionGeneration;
+    readyFuture = _openAndSync(
+      session,
+      generation,
+    ).catchError((Object error, StackTrace stackTrace) {
       if (identical(_readyFuture, readyFuture)) {
         _readyFuture = null;
       }
@@ -71,6 +78,9 @@ class PhotosContactsService {
   }
 
   Future<contacts.ContactRecord?> getContactByUserId(int contactUserId) async {
+    if (!flagService.enableContact) {
+      return null;
+    }
     final cached = getCachedContactByUserId(contactUserId);
     if (cached != null) {
       return cached;
@@ -78,6 +88,9 @@ class PhotosContactsService {
     return _runReadSafely(
       () async {
         await ensureReady();
+        if (_sessionKey == null) {
+          return null;
+        }
         final contact = await _contacts.getContactByUserId(contactUserId);
         if (contact == null || contact.isDeleted) {
           return null;
@@ -123,6 +136,9 @@ class PhotosContactsService {
 
   Future<Uint8List?> getProfilePictureBytesByUserId(int? contactUserId) async {
     if (contactUserId == null) {
+      return null;
+    }
+    if (!flagService.enableContact) {
       return null;
     }
     if (_resolvedProfilePictureUserIds.contains(contactUserId)) {
@@ -214,9 +230,14 @@ class PhotosContactsService {
 
   @visibleForTesting
   Future<void> debugOpenAndSync(contacts.ContactsSession session) async {
+    final sessionKey = _buildSessionKey(session);
+    if (_sessionKey != sessionKey) {
+      _sessionGeneration += 1;
+      _resetSessionState(notify: false);
+    }
     _sessionKey = _buildSessionKey(session);
     _sessionAuthToken = session.authToken;
-    await _openAndSync(session);
+    await _openAndSync(session, _sessionGeneration);
   }
 
   @visibleForTesting
@@ -260,10 +281,23 @@ class PhotosContactsService {
     return "${session.baseUrl}|${session.userId}";
   }
 
-  Future<void> _openAndSync(contacts.ContactsSession session) async {
+  Future<void> _openAndSync(
+    contacts.ContactsSession session,
+    int generation,
+  ) async {
     await _contacts.open(session);
+    if (!_isSessionGenerationCurrent(generation, session)) {
+      return;
+    }
+
     final cachedUserIdsBeforeHydration = _contactsByUserId.keys.toSet();
-    final localContacts = await _hydrateCacheFromLocalDb();
+    final localContacts = await _contacts.getContacts();
+    if (!_isSessionGenerationCurrent(generation, session)) {
+      return;
+    }
+    for (final contact in localContacts) {
+      _cacheContact(contact);
+    }
     _hasHydratedCache = true;
     final newlyHydratedLocalUserIds = localContacts
         .map((contact) => contact.contactUserId)
@@ -273,6 +307,9 @@ class PhotosContactsService {
     var shouldRetrySync = false;
     try {
       final contactsDiff = await _contacts.sync();
+      if (!_isSessionGenerationCurrent(generation, session)) {
+        return;
+      }
       for (final contact in contactsDiff) {
         _invalidateProfilePictureCache(contact.contactUserId);
         _cacheContact(contact);
@@ -281,6 +318,9 @@ class PhotosContactsService {
         contactsDiff.map((contact) => contact.contactUserId),
       );
     } catch (e, s) {
+      if (!_isSessionGenerationCurrent(generation, session)) {
+        return;
+      }
       shouldRetrySync = true;
       _logger.warning(
         "Failed to sync contacts after hydrating local cache",
@@ -294,6 +334,14 @@ class PhotosContactsService {
     if (shouldRetrySync && _sessionKey == _buildSessionKey(session)) {
       _readyFuture = null;
     }
+  }
+
+  bool _isSessionGenerationCurrent(
+    int generation,
+    contacts.ContactsSession session,
+  ) {
+    return _sessionGeneration == generation &&
+        _sessionKey == _buildSessionKey(session);
   }
 
   void _notifyChanged(contacts.ContactRecord contact) {
@@ -319,6 +367,14 @@ class PhotosContactsService {
         );
         return null;
       }
+      if (_isContactsDatabaseNotConfiguredError(e)) {
+        _logger.warning(
+          "Contacts integration unavailable while contacts are disabled or not initialized during $description",
+          e,
+          s,
+        );
+        return null;
+      }
       rethrow;
     } catch (e, s) {
       _logger.warning("Failed to $description", e, s);
@@ -331,6 +387,12 @@ class PhotosContactsService {
         .contains("flutter_rust_bridge has not been initialized");
   }
 
+  bool _isContactsDatabaseNotConfiguredError(StateError error) {
+    return error.message.contains(
+      "ContactsDatabase.configure(userId: ...) must be called first",
+    );
+  }
+
   void _cacheContact(contacts.ContactRecord contact) {
     final userId = contact.contactUserId;
     if (contact.isDeleted) {
@@ -339,14 +401,6 @@ class PhotosContactsService {
       return;
     }
     _contactsByUserId[userId] = contact;
-  }
-
-  Future<List<contacts.ContactRecord>> _hydrateCacheFromLocalDb() async {
-    final localContacts = await _contacts.getContacts();
-    for (final contact in localContacts) {
-      _cacheContact(contact);
-    }
-    return localContacts;
   }
 
   void _resetSessionState({required bool notify}) {

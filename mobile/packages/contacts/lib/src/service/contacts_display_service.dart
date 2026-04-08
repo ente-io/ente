@@ -276,7 +276,7 @@ class ContactsDisplayService {
     final contacts = _requireContacts();
     await contacts.open(session);
     if (!_isSessionGenerationCurrent(generation, session)) {
-      return;
+        return;
     }
 
     final localContacts = await contacts.getContacts();
@@ -289,13 +289,25 @@ class ContactsDisplayService {
       _notifyChanged();
     }
 
-    final diff = await contacts.sync();
-    if (!_isSessionGenerationCurrent(generation, session)) {
-      return;
-    }
-    final diffChanged = _cacheContacts(diff, invalidateProfilePictures: true);
-    if (diffChanged.isNotEmpty) {
-      _notifyChanged();
+    try {
+      final diff = await contacts.sync();
+      if (!_isSessionGenerationCurrent(generation, session)) {
+        return;
+      }
+      final diffChanged = _cacheContacts(diff, invalidateProfilePictures: true);
+      if (diffChanged.isNotEmpty) {
+        _notifyChanged();
+      }
+    } catch (error, stackTrace) {
+      if (!_isSessionGenerationCurrent(generation, session)) {
+        return;
+      }
+      _logger.warning(
+        'Failed to sync shared contacts display cache after hydrating local cache',
+        error,
+        stackTrace,
+      );
+      _readyFuture = null;
     }
   }
 

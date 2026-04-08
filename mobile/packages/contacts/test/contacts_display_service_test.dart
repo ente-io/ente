@@ -253,6 +253,27 @@ void main() {
       isNull,
     );
   });
+
+  test(
+      'ensureReady keeps hydrated cache and retries later when sync fails',
+      () async {
+    await contactsService.open(session);
+    await contactsService.createContact(
+      const ContactData(contactUserId: 7, name: 'Alice'),
+    );
+    rustApi.ctx.diffError = StateError('boom');
+
+    await expectLater(displayService.ensureReady(session), completes);
+
+    expect(displayService.getCachedSavedName(contactUserId: 7), 'Alice');
+    expect(rustApi.ctx.getDiffCalls, 1);
+
+    rustApi.ctx.diffError = null;
+    rustApi.diffPages = [const []];
+
+    await expectLater(displayService.ensureReady(session), completes);
+    expect(rustApi.ctx.getDiffCalls, 2);
+  });
 }
 
 class FakeContactsRustApi implements ContactsRustApi {
@@ -290,6 +311,8 @@ class FakeContactsRustContext implements ContactsRustContext {
   Completer<void>? diffBarrier;
   Completer<void>? diffStarted;
   Object? profilePictureError;
+  Object? diffError;
+  int getDiffCalls = 0;
 
   @override
   Future<ContactRecord> createContact(ContactData data) async {
@@ -365,11 +388,16 @@ class FakeContactsRustContext implements ContactsRustContext {
 
   @override
   Future<List<ContactRecord>> getDiff(int sinceTime, int limit) async {
+    getDiffCalls += 1;
     final barrier = diffBarrier;
     if (barrier != null) {
       diffStarted?.complete();
       diffBarrier = null;
       await barrier.future;
+    }
+    final error = diffError;
+    if (error != null) {
+      throw error;
     }
     if (diffPages.isEmpty) {
       return const [];
