@@ -79,10 +79,7 @@ melos clean:photos
 
 ### Direct Flutter Commands
 ```bash
-# Development run with environment variables
-./run.sh                                    # Uses .env file with --flavor dev
-
-# Development run without env file
+# Development run
 flutter run -t lib/main.dart --flavor independent
 
 # Build release APK

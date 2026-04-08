@@ -10,10 +10,10 @@
 - Shared Flutter packages sit under `mobile/packages/`; Photos-specific Flutter plugins live in `mobile/apps/photos/plugins/`.
 
 ## Project Structure & Module Organization
-`lib/` houses the Flutter client (`core/`, `services/`, `ui/`, `db/`). Tests live in `test/` (unit & widget) and `integration_test/`. Platform shells are `android/` and `ios/`; Rust crates and bridge helpers sit in `rust/` and `rust_builder/`. Assets, fonts, and localization configs are in `assets/`, `fonts/`, `l10n.yaml`, with generated code in `lib/generated/`. Automation scripts include `scripts/`, `run.sh`, `build-apk.sh`, and release tooling under `fastlane/`.
+`lib/` houses the Flutter client (`core/`, `services/`, `ui/`, `db/`). Tests live in `test/` (unit & widget) and `integration_test/`. Platform shells are `android/` and `ios/`; Rust crates and bridge helpers sit in `rust/` and `rust_builder/`. Assets, fonts, and localization configs are in `assets/`, `fonts/`, `l10n.yaml`, with generated code in `lib/generated/`. Automation scripts include `scripts/` and release tooling under `fastlane/`.
 
 ## Build, Test & Development Commands
-Run `flutter pub get` after dependency edits. Launch the dev flavor via `./run.sh` (reads `.env`) or use `flutter run -t lib/main.dart --flavor independent`. Regenerate Rust bindings with `flutter_rust_bridge_codegen generate` before builds. Android releases rely on `flutter build apk --release --flavor independent`; for iOS run `cd ios && pod install` then `flutter build ios`. Use `./build-apk.sh` when Gradle artifacts from `thirdparty/transistor-background-fetch` need refreshing.
+Run `flutter pub get` after dependency edits. Launch the app with `flutter run -t lib/main.dart --flavor independent`. Regenerate Rust bindings with `flutter_rust_bridge_codegen generate` before builds. Android releases rely on `flutter build apk --release --flavor independent`; for iOS run `cd ios && pod install` then `flutter build ios`.
 
 ## Coding Style & Naming Conventions
 Use 2-space indentation and format with `dart format .` (trailing commas preserved). `analysis_options.yaml` enforces rules such as `prefer_const_constructors`, `require_trailing_commas`, and `always_use_package_imports`. Keep files `snake_case.dart`, classes `PascalCase`, private members `_camelCase`. Avoid `print`; rely on the log utilities under `lib/core/`.
