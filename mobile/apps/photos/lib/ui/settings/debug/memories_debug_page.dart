@@ -1,15 +1,21 @@
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:photos/models/file/file.dart";
+import "package:photos/models/file_load_result.dart";
 import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/filler_memory.dart";
+import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/time_memory.dart";
 import "package:photos/models/memories/trip_memory.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/memories/all_memories_page.dart";
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
 class MemoriesDebugPage extends StatefulWidget {
   const MemoriesDebugPage({super.key});
@@ -186,7 +192,7 @@ class _MemoriesDebugPageState extends State<MemoriesDebugPage> {
                           ),
                           child: _MemoryDebugTile(
                             memory: memory,
-                            onTap: () => _openMemory(data.memories, memory),
+                            onTap: () => _openMemory(memory),
                             icon: _memoryTypeIcon(memory.type),
                             subtitle: _buildSubtitle(memory),
                           ),
@@ -272,23 +278,12 @@ class _MemoriesDebugPageState extends State<MemoriesDebugPage> {
     return grouped;
   }
 
-  Future<void> _openMemory(
-    List<SmartMemory> allMemories,
-    SmartMemory selectedMemory,
-  ) async {
-    final index = allMemories.indexOf(selectedMemory);
-    if (index == -1) return;
+  Future<void> _openMemory(SmartMemory memory) async {
+    final files = Memory.filesFromMemories(memory.memories);
+    if (files.isEmpty) return;
     await routeToPage(
       context,
-      AllMemoriesPage(
-        allMemories: allMemories
-            .map((memory) => memory.memories)
-            .toList(growable: false),
-        allTitles: allMemories.map((memory) => memory.title).toList(
-              growable: false,
-            ),
-        initialPageIndex: index,
-      ),
+      _MemoryGalleryPage(title: memory.title, files: files),
       forceCustomPageRoute: true,
     );
   }
@@ -567,6 +562,8 @@ class _MemoryDebugTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final firstFile =
+        memory.memories.isNotEmpty ? memory.memories.first.file : null;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -585,17 +582,21 @@ class _MemoryDebugTile extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: colorScheme.fillFaint,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: colorScheme.strokeBase,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: firstFile != null
+                        ? ThumbnailWidget(firstFile, rawThumbnail: true)
+                        : Container(
+                            color: colorScheme.fillFaint,
+                            child: Icon(
+                              icon,
+                              size: 20,
+                              color: colorScheme.strokeBase,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -648,6 +649,60 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MemoryGalleryPage extends StatefulWidget {
+  final String title;
+  final List<EnteFile> files;
+
+  const _MemoryGalleryPage({required this.title, required this.files});
+
+  @override
+  State<_MemoryGalleryPage> createState() => _MemoryGalleryPageState();
+}
+
+class _MemoryGalleryPageState extends State<_MemoryGalleryPage> {
+  late final SelectedFiles _selectedFiles;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFiles = SelectedFiles();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return GalleryFilesState(
+      child: Scaffold(
+        backgroundColor: colorScheme.backgroundBase,
+        appBar: AppBar(
+          backgroundColor: colorScheme.backgroundBase,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          title: Text(widget.title, style: textTheme.largeBold),
+        ),
+        body: Gallery(
+          asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+            final result = widget.files
+                .where(
+                  (file) =>
+                      file.creationTime! >= creationStartTime &&
+                      file.creationTime! <= creationEndTime,
+                )
+                .toList();
+            return Future.value(
+              FileLoadResult(result, result.length < widget.files.length),
+            );
+          },
+          tagPrefix: "memory_debug_gallery",
+          selectedFiles: _selectedFiles,
+          initialFiles: widget.files,
+        ),
       ),
     );
   }
