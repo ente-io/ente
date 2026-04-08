@@ -46,7 +46,7 @@ import "package:photos/services/search_service.dart";
 part "smart_memories_clip_calculator.dart";
 part "smart_memories_people_calculator.dart";
 part "smart_memories_time_calculator.dart";
-part "smart_memories_trip_calculator.dart";
+part "smart_memories_trip_calculator_V2.dart";
 
 class MemoriesResult {
   final List<SmartMemory> memories;
@@ -945,7 +945,7 @@ class SmartMemoriesService {
     required Vector clipPositiveTextVector,
     required List<City> cities,
   }) async {
-    return TripMemoriesCalculator.compute(
+    return TripMemoriesCalculatorV2.compute(
       allFiles,
       allFileIdsToFile,
       currentTime,

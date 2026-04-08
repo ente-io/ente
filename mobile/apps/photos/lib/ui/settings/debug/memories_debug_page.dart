@@ -159,7 +159,18 @@ class _MemoriesDebugPageState extends State<MemoriesDebugPage> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: _MemoryDebugSectionHeader(
                         title: _memoryTypeLabel(entry.key),
-                        count: entry.value.length,
+                        count: entry.key == MemoryType.trips
+                            ? entry.value
+                                .whereType<TripMemory>()
+                                .where(
+                                  (m) =>
+                                      m.locationName == null ||
+                                      !m.locationName!
+                                          .toLowerCase()
+                                          .contains("base"),
+                                )
+                                .length
+                            : entry.value.length,
                         icon: _memoryTypeIcon(entry.key),
                         isExpanded: isExpanded,
                         onTap: () => _toggleSection(entry.key),
@@ -452,7 +463,7 @@ class _SummaryCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       child: Text(
-                        "${typeLabelBuilder(entry.key)} ${entry.value.length}",
+                        "${typeLabelBuilder(entry.key)} ${entry.key == MemoryType.trips ? entry.value.whereType<TripMemory>().where((m) => m.locationName == null || !m.locationName!.toLowerCase().contains("base")).length : entry.value.length}",
                         style: textTheme.mini,
                       ),
                     ),
