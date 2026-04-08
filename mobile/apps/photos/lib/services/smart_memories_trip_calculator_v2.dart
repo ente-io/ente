@@ -84,6 +84,12 @@ class TripMemoriesCalculatorV2 {
   // Minimum photos for a valid trip.
   static const _minTripPhotos = 20;
 
+  // Minimum photos for a cluster to participate in chain merging.
+  // Smaller clusters are kept as standalone candidates (and typically
+  // filtered out by _isValidTrip), preventing stray photos from being
+  // absorbed into legitimate trips.
+  static const _minChainClusterPhotos = 5;
+
   // Max temporal gap (in days) for merging trips across temporal blocks.
   static const _mergeWindowDays = 2;
 
@@ -376,11 +382,25 @@ class TripMemoriesCalculatorV2 {
     final sortedClusters = List<_LocationCluster>.from(clusters)
       ..sort((a, b) => a.firstCreationTime.compareTo(b.firstCreationTime));
 
-    final merged = <_LocationCluster>[];
-    var currentCluster = _LocationCluster.fromFiles(sortedClusters.first.files);
+    // Separate clusters large enough to chain from tiny ones that should
+    // stay standalone (they'll be filtered out later by _isValidTrip).
+    final chainable = <_LocationCluster>[];
+    final tooSmall = <_LocationCluster>[];
+    for (final cluster in sortedClusters) {
+      if (cluster.files.length >= _minChainClusterPhotos) {
+        chainable.add(cluster);
+      } else {
+        tooSmall.add(cluster);
+      }
+    }
 
-    for (int i = 1; i < sortedClusters.length; i++) {
-      final next = sortedClusters[i];
+    if (chainable.isEmpty) return clusters;
+
+    final merged = <_LocationCluster>[];
+    var currentCluster = _LocationCluster.fromFiles(chainable.first.files);
+
+    for (int i = 1; i < chainable.length; i++) {
+      final next = chainable[i];
       final distance = calculateDistance(currentCluster.center, next.center);
       final allFiles = [...currentCluster.files, ...next.files];
       final times = allFiles.map((f) => f.creationTime!);
@@ -395,7 +415,9 @@ class TripMemoriesCalculatorV2 {
       }
     }
     merged.add(currentCluster);
-    return merged;
+
+    // Return both chained results and the too-small standalone clusters
+    return [...merged, ...tooSmall];
   }
 
   // ── Trip validation ──
