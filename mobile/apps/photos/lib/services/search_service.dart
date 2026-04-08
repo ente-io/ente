@@ -50,12 +50,14 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import "package:photos/services/date_parse_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/memories_cache_service.dart";
+import "package:photos/services/photos_contacts_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -99,6 +101,35 @@ class SearchService {
 
   Set<int> ignoreCollections() {
     return CollectionsService.instance.getHiddenCollectionIds();
+  }
+
+  Map<String, dynamic> _contactSearchParams(
+    User user,
+    List<Collection> collections,
+  ) {
+    final params = <String, dynamic>{
+      kPersonParamID: user.linkedPersonID,
+      kContactUserId: user.id,
+      kContactEmail: resolveKnownEmail(user) ?? user.email,
+      kContactCollections: collections,
+    };
+    return params;
+  }
+
+  Future<void> _warmContactsCacheIfNeeded() async {
+    if (!flagService.internalUser ||
+        PhotosContactsService.instance.hasHydratedCache) {
+      return;
+    }
+    try {
+      await PhotosContactsService.instance.ensureReady();
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to preload contacts cache; falling back to person/email results",
+        e,
+        s,
+      );
+    }
   }
 
   Future<List<EnteFile>> getAllFilesForSearch() async {
@@ -1634,6 +1665,7 @@ class SearchService {
     if (isOfflineMode) {
       return <GenericSearchResult>[];
     }
+    await _warmContactsCacheIfNeeded();
     final int ownerID = Configuration.instance.getUserID()!;
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];
@@ -1664,11 +1696,12 @@ class SearchService {
       }
     }
 
-    final relevantContactEmails =
-        UserService.instance.getEmailIDsOfRelevantContacts();
+    final relevantContacts = UserService.instance.getRelevantContacts();
 
-    for (final email in relevantContactEmails.difference(existingEmails)) {
-      final user = User(email: email);
+    for (final user in relevantContacts) {
+      if (existingEmails.contains(user.email)) {
+        continue;
+      }
       if (user.email.toLowerCase().contains(lowerCaseQuery) ||
           ((user.displayName?.toLowerCase().contains(lowerCaseQuery)) ??
               false)) {
@@ -1688,30 +1721,27 @@ class SearchService {
       }
     }
 
-    peopleToSharedFiles.forEach((key, value) {
-      final user = key;
+    for (final entry in peopleToSharedFiles.entries) {
+      final user = entry.key;
+      final files = entry.value;
       final collections = peopleToSharedAlbums[user.email] ?? [];
+      final name = resolveDisplayName(user);
+      final params = _contactSearchParams(user, collections);
 
       searchResults.add(
         GenericSearchResult(
           ResultType.shared,
-          key.displayName != null && key.displayName!.isNotEmpty
-              ? key.displayName!
-              : key.email,
-          value,
+          name,
+          files,
           hierarchicalSearchFilter: ContactsFilter(
-            user: key,
+            user: user,
             occurrence: kMostRelevantFilter,
-            matchedUploadedIDs: filesToUploadedFileIDs(value),
+            matchedUploadedIDs: filesToUploadedFileIDs(files),
           ),
-          params: {
-            kPersonParamID: key.linkedPersonID,
-            kContactEmail: key.email,
-            kContactCollections: collections,
-          },
+          params: params,
         ),
       );
-    });
+    }
 
     return searchResults;
   }
@@ -1720,6 +1750,7 @@ class SearchService {
     int? limit,
   ) async {
     try {
+      await _warmContactsCacheIfNeeded();
       final int ownerID = Configuration.instance.getUserID()!;
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFilesForSearch();
@@ -1756,14 +1787,12 @@ class SearchService {
         }
       }
 
-      final allRelevantEmails =
-          UserService.instance.getEmailIDsOfRelevantContacts();
+      final allRelevantContacts = UserService.instance.getRelevantContacts();
 
-      final emailsWithNoSharedFiles =
-          allRelevantEmails.difference(existingEmails);
-
-      for (final email in emailsWithNoSharedFiles) {
-        final user = User(email: email);
+      for (final user in allRelevantContacts) {
+        if (existingEmails.contains(user.email)) {
+          continue;
+        }
         peopleToSharedFiles[user] = [];
       }
 
@@ -1781,16 +1810,16 @@ class SearchService {
         return aName.compareTo(bName);
       });
 
-      final limitedEntries =
-          limit != null ? sortedEntries.take(limit).toList() : sortedEntries;
+      final limitedEntries = limit != null
+          ? _preserveEmailOnlyContactsWithinLimit(sortedEntries, limit)
+          : sortedEntries;
 
       for (var entry in limitedEntries) {
         final user = entry.key;
         final files = entry.value;
-        final name = user.displayName != null && user.displayName!.isNotEmpty
-            ? user.displayName!
-            : user.email;
+        final name = resolveDisplayName(user);
         final collections = peopleToSharedAlbums[user.email] ?? [];
+        final params = _contactSearchParams(user, collections);
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
@@ -1801,11 +1830,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               matchedUploadedIDs: filesToUploadedFileIDs(files),
             ),
-            params: {
-              kPersonParamID: user.linkedPersonID,
-              kContactEmail: user.email,
-              kContactCollections: collections,
-            },
+            params: params,
           ),
         );
       }
@@ -1824,6 +1849,36 @@ class SearchService {
               monthData.name.toLowerCase().startsWith(query.toLowerCase()),
         )
         .toList();
+  }
+
+  List<MapEntry<User, List<EnteFile>>> _preserveEmailOnlyContactsWithinLimit(
+    List<MapEntry<User, List<EnteFile>>> sortedEntries,
+    int limit,
+  ) {
+    if (limit <= 0) {
+      return const [];
+    }
+    final limitedEntries = sortedEntries.take(limit).toList();
+    if (limitedEntries.length < limit ||
+        limitedEntries.any((entry) => entry.key.id == null)) {
+      return limitedEntries;
+    }
+
+    final includedEmails =
+        limitedEntries.map((entry) => entry.key.email).toSet();
+    MapEntry<User, List<EnteFile>>? overflowEmailOnly;
+    for (final entry in sortedEntries.skip(limit)) {
+      if (entry.key.id == null && !includedEmails.contains(entry.key.email)) {
+        overflowEmailOnly = entry;
+        break;
+      }
+    }
+    if (overflowEmailOnly == null) {
+      return limitedEntries;
+    }
+
+    limitedEntries[limitedEntries.length - 1] = overflowEmailOnly;
+    return limitedEntries;
   }
 
   Future<List<EnteFile>> _getFilesInYear(List<int> durationOfYear) async {

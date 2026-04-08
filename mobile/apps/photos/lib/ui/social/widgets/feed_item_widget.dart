@@ -1,7 +1,6 @@
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
@@ -11,6 +10,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/widgets/resolved_social_user_name.dart";
 import "package:photos/ui/social/widgets/shared_photos_grid.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
@@ -488,14 +488,20 @@ class _FeedTextContent extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     final primaryUser = _getPrimaryUser();
-    final primaryName = primaryUser.displayName ?? primaryUser.email;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Username row
-        _buildUsernameRow(context, primaryName, textTheme, colorScheme),
+        ResolvedSocialUserName(
+          user: primaryUser,
+          builder: (context, primaryName) => _buildUsernameRow(
+            context,
+            primaryName,
+            textTheme,
+            colorScheme,
+          ),
+        ),
         const SizedBox(height: 2),
         // Action description
         Text.rich(

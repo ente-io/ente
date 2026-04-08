@@ -6,7 +6,6 @@ import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/comment_deleted_event.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
@@ -21,6 +20,7 @@ import "package:photos/ui/social/comment_likes_bottom_sheet.dart";
 import "package:photos/ui/social/widgets/comment_actions_popup.dart";
 import "package:photos/ui/social/widgets/comment_like_count_capsule.dart";
 import "package:photos/ui/social/widgets/delete_comment_confirmation_dialog.dart";
+import "package:photos/ui/social/widgets/resolved_social_user_name.dart";
 import "package:photos/utils/social/relative_time_formatter.dart";
 
 final _logger = Logger("CommentBubbleWidget");
@@ -635,11 +635,6 @@ class _InlineParentQuote extends StatelessWidget {
         isParentDeleted ? l10n.deletedComment : parentComment!.data;
     final parentUser =
         parentComment != null ? userResolver(parentComment!) : null;
-    final parentAuthor = parentComment != null
-        ? (parentUser!.id == currentUserID
-            ? l10n.you
-            : (parentUser.displayName ?? parentUser.email))
-        : null;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final lineColor = isOwnComment
@@ -678,17 +673,31 @@ class _InlineParentQuote extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (parentAuthor != null)
-                    Text(
-                      parentAuthor,
-                      style: textTheme.mini.copyWith(
-                        color: parentAuthorTextColor,
-                        height: 20 / 12,
-                        letterSpacing: -0.24,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  if (parentUser != null)
+                    parentUser.id == currentUserID
+                        ? Text(
+                            l10n.you,
+                            style: textTheme.mini.copyWith(
+                              color: parentAuthorTextColor,
+                              height: 20 / 12,
+                              letterSpacing: -0.24,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        : ResolvedSocialUserName(
+                            user: parentUser,
+                            builder: (context, resolvedName) => Text(
+                              resolvedName,
+                              style: textTheme.mini.copyWith(
+                                color: parentAuthorTextColor,
+                                height: 20 / 12,
+                                letterSpacing: -0.24,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                   Text(
                     parentText,
                     style: textTheme.tiny.copyWith(
@@ -810,7 +819,6 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final name = user.displayName ?? user.email;
     final timestamp = formatRelativeTime(createdAt);
 
     if (isOwnComment) {
@@ -833,40 +841,43 @@ class _Header extends StatelessWidget {
       fontWeight: FontWeight.w500,
     );
 
-    final headerText = Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: name, style: baseNameStyle),
-          WidgetSpan(
-            alignment: PlaceholderAlignment.baseline,
-            baseline: TextBaseline.alphabetic,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                '•',
-                style: baseNameStyle.copyWith(
-                  fontSize: (baseNameStyle.fontSize ?? 14) * 0.65,
-                  height: 1,
-                  fontWeight: FontWeight.w600,
+    final headerText = ResolvedSocialUserName(
+      user: user,
+      builder: (context, resolvedName) => Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: resolvedName, style: baseNameStyle),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.baseline,
+              baseline: TextBaseline.alphabetic,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  '•',
+                  style: baseNameStyle.copyWith(
+                    fontSize: (baseNameStyle.fontSize ?? 14) * 0.65,
+                    height: 1,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
-          TextSpan(
-            text: timestamp,
-            style: textTheme.tiny.copyWith(
-              color: colorScheme.textMuted,
-              height: 14 / 10,
-              fontWeight: FontWeight.w500,
+            TextSpan(
+              text: timestamp,
+              style: textTheme.tiny.copyWith(
+                color: colorScheme.textMuted,
+                height: 14 / 10,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      textHeightBehavior: const TextHeightBehavior(
-        applyHeightToFirstAscent: false,
-        applyHeightToLastDescent: false,
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textHeightBehavior: const TextHeightBehavior(
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        ),
       ),
     );
 

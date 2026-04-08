@@ -1,6 +1,5 @@
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/reaction.dart";
@@ -10,6 +9,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/widgets/resolved_social_user_name.dart";
 
 const _shrinkWrapThreshold = 30;
 
@@ -202,19 +202,32 @@ class _CommentLikeListItem extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              user.id == currentUserID
-                  ? youLabel
-                  : (user.displayName ?? user.email),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                height: 20 / 14,
-                letterSpacing: 14 * -0.02,
-                color: colorScheme.textMuted,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: user.id == currentUserID
+                ? Text(
+                    youLabel,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 20 / 14,
+                      letterSpacing: 14 * -0.02,
+                      color: colorScheme.textMuted,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : ResolvedSocialUserName(
+                    user: user,
+                    builder: (context, resolvedName) => Text(
+                      resolvedName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        height: 20 / 14,
+                        letterSpacing: 14 * -0.02,
+                        color: colorScheme.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
           ),
           const Icon(
             EnteIcons.likeFilled,
