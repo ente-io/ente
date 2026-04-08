@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -254,8 +255,46 @@ void main() {
     );
   });
 
-  test(
-      'ensureReady keeps hydrated cache and retries later when sync fails',
+  test('session switch creates a fresh contacts service instance', () async {
+    final rustApiForFirstSession = FakeContactsRustApi();
+    final rustApiForSecondSession = FakeContactsRustApi();
+    final services = Queue<ContactsService>.of([
+      ContactsService(
+        preferences: preferences,
+        database: ContactsDatabase(directoryResolver: () async => tempDir),
+        rustApi: rustApiForFirstSession,
+      ),
+      ContactsService(
+        preferences: preferences,
+        database: ContactsDatabase(directoryResolver: () async => tempDir),
+        rustApi: rustApiForSecondSession,
+      ),
+    ]);
+
+    await displayService.debugReset(clearLocalState: false);
+    displayService.init(
+      preferences: preferences,
+      contactsServiceFactory: () => services.removeFirst(),
+    );
+
+    rustApiForFirstSession.diffPages = [const []];
+    await displayService.ensureReady(session);
+
+    final nextSession = ContactsSession(
+      baseUrl: session.baseUrl,
+      authToken: 'token-2',
+      userId: 2,
+      accountKey: Uint8List.fromList([9, 9, 9]),
+    );
+    rustApiForSecondSession.diffPages = [const []];
+    await displayService.ensureReady(nextSession);
+
+    expect(rustApiForFirstSession.openCalls, 1);
+    expect(rustApiForSecondSession.openCalls, 1);
+    expect(services, isEmpty);
+  });
+
+  test('ensureReady keeps hydrated cache and retries later when sync fails',
       () async {
     await contactsService.open(session);
     await contactsService.createContact(
@@ -280,9 +319,11 @@ class FakeContactsRustApi implements ContactsRustApi {
   FakeContactsRustContext ctx = FakeContactsRustContext();
   FakeContactsRustContext? nextOpenContext;
   List<List<ContactRecord>> diffPages = const [];
+  int openCalls = 0;
 
   @override
   Future<OpenContactsContextResult> open(OpenContactsContextInput input) async {
+    openCalls += 1;
     final context = nextOpenContext ?? ctx;
     nextOpenContext = null;
     context.userIdValue = input.userId;

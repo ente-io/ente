@@ -385,7 +385,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     PersonService.init(entityService, MLDataDB.instance, preferences);
     await PersonService.instance.refreshPersonCache();
-    if (!isBackground && flagService.internalUser) {
+    if (!isBackground && flagService.enableContact) {
       unawaited(_warmContactsCacheInBackground());
     }
     EnteWakeLockService.instance.init(preferences);

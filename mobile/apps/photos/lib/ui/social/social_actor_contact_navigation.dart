@@ -46,7 +46,8 @@ Future<void> openSocialActorContactDestination(
     return;
   }
 
-  final destination = await _buildDestination(user, userId: userId, email: email);
+  final destination =
+      await _buildDestination(user, userId: userId, email: email);
   if (destination == null) {
     return;
   }
@@ -72,7 +73,7 @@ Future<Widget?> _buildDestination(
     return _contactResultPageForUser(user);
   }
 
-  if (!contactsService.hasHydratedCache) {
+  if (contactsService.needsWarmup) {
     try {
       await contactsService.ensureReady();
     } catch (e, s) {

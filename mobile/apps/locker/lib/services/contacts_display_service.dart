@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LockerContactsDisplayService {
   static final Logger _logger = Logger('LockerContactsDisplayService');
   static PackageInfo? _packageInfo;
+  static Future<void> _pendingOperation = Future.value();
 
   static Future<void> init({
     required SharedPreferences preferences,
@@ -16,7 +17,7 @@ class LockerContactsDisplayService {
   }) async {
     contacts.ContactsDisplayService.instance.init(preferences: preferences);
     _packageInfo = packageInfo;
-    unawaited(_warmup());
+    scheduleEnsureReady();
   }
 
   static Future<void> ensureReady() async {
@@ -31,6 +32,22 @@ class LockerContactsDisplayService {
     return contacts.ContactsDisplayService.instance.resetLocalState();
   }
 
+  static void scheduleEnsureReady() {
+    unawaited(
+      _enqueueOperation(() async {
+        await _warmup();
+      }),
+    );
+  }
+
+  static void scheduleResetLocalState() {
+    unawaited(
+      _enqueueOperation(() async {
+        await resetLocalState();
+      }),
+    );
+  }
+
   static Future<void> _warmup() async {
     try {
       await ensureReady();
@@ -41,6 +58,14 @@ class LockerContactsDisplayService {
         stackTrace,
       );
     }
+  }
+
+  static Future<void> _enqueueOperation(Future<void> Function() operation) {
+    final previous = _pendingOperation;
+    late final Future<void> current;
+    current = previous.catchError((_) {}).then((_) => operation());
+    _pendingOperation = current.catchError((_) {});
+    return current;
   }
 
   static contacts.ContactsSession? _buildSession() {

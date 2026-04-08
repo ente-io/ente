@@ -27,7 +27,8 @@ void main() {
       ],
       syncError: StateError('boom'),
     );
-    service = PhotosContactsService.forTesting(contactsService: contactsService);
+    service =
+        PhotosContactsService.forTesting(contactsService: contactsService);
     session = contacts.ContactsSession(
       baseUrl: 'http://localhost:8080',
       authToken: 'token',
@@ -52,7 +53,8 @@ void main() {
     () async {
       contactsService.getContactsBarrier = Completer<void>();
       contactsService.getContactsStarted = Completer<void>();
-      contactsService.localContactsPages = Queue<List<contacts.ContactRecord>>.of([
+      contactsService.localContactsPages =
+          Queue<List<contacts.ContactRecord>>.of([
         const [
           contacts.ContactRecord(
             id: 'ct_old',
@@ -137,9 +139,8 @@ class FakeContactsService extends Fake implements contacts.ContactsService {
   }) async {
     getContactsCalls += 1;
     final pages = localContactsPages;
-    final response = pages != null && pages.isNotEmpty
-        ? pages.removeFirst()
-        : localContacts;
+    final response =
+        pages != null && pages.isNotEmpty ? pages.removeFirst() : localContacts;
     final started = getContactsStarted;
     if (started != null && !started.isCompleted) {
       started.complete();

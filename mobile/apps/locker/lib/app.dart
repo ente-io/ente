@@ -70,18 +70,18 @@ class _AppState extends State<App>
     WidgetsBinding.instance.addObserver(this);
 
     if (Configuration.instance.hasConfiguredAccount()) {
-      unawaited(LockerContactsDisplayService.ensureReady());
+      LockerContactsDisplayService.scheduleEnsureReady();
     }
 
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
-      unawaited(LockerContactsDisplayService.resetLocalState());
+      LockerContactsDisplayService.scheduleResetLocalState();
       if (mounted) {
         setState(() {});
       }
     });
     _signedInEvent = Bus.instance.on<SignedInEvent>().listen((event) {
       UserService.instance.getUserDetailsV2().ignore();
-      unawaited(LockerContactsDisplayService.ensureReady());
+      LockerContactsDisplayService.scheduleEnsureReady();
       if (mounted) {
         setState(() {});
       }

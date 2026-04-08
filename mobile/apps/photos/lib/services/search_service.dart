@@ -117,8 +117,7 @@ class SearchService {
   }
 
   Future<void> _warmContactsCacheIfNeeded() async {
-    if (!flagService.enableContact ||
-        PhotosContactsService.instance.hasHydratedCache) {
+    if (!PhotosContactsService.instance.needsWarmup) {
       return;
     }
     try {
@@ -132,7 +131,9 @@ class SearchService {
     }
   }
 
-  Future<GenericSearchResult?> buildContactSearchResultForUser(User user) async {
+  Future<GenericSearchResult?> buildContactSearchResultForUser(
+    User user,
+  ) async {
     final userId = user.id;
     if (userId == null || userId <= 0) {
       return null;

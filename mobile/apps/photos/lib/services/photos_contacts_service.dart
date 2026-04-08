@@ -35,6 +35,9 @@ class PhotosContactsService {
 
   bool get hasHydratedCache => _hasHydratedCache;
 
+  bool get needsWarmup =>
+      flagService.enableContact && (!_hasHydratedCache || _readyFuture == null);
+
   Future<void> ensureReady() async {
     if (!flagService.enableContact) {
       _sessionGeneration += 1;

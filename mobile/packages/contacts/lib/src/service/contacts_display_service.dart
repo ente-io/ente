@@ -25,6 +25,8 @@ class ContactsDisplayService {
   final Map<int, Future<Uint8List?>> _profilePictureLoadsByUserId = {};
   final Map<int, DateTime> _profilePictureFailureUntilByUserId = {};
 
+  SharedPreferences? _preferences;
+  ContactsService Function()? _contactsServiceFactory;
   ContactsService? _contacts;
   ContactsSession? _session;
   String? _sessionKey;
@@ -40,14 +42,18 @@ class ContactsDisplayService {
   void init({
     required SharedPreferences preferences,
     ContactsService? contactsService,
+    ContactsService Function()? contactsServiceFactory,
   }) {
-    _contacts ??= contactsService ?? ContactsService(preferences: preferences);
+    _preferences = preferences;
+    _contactsServiceFactory = contactsServiceFactory ??
+        (contactsService != null ? () => contactsService : null);
+    _contacts ??= contactsService;
   }
 
   Future<void> ensureReady(ContactsSession session) async {
-    final contacts = _requireContacts();
     final sessionKey = _buildSessionKey(session);
     if (_readyFuture != null && _sessionKey == sessionKey) {
+      final contacts = _requireContacts();
       await _readyFuture;
       if (_sessionAuthToken != session.authToken) {
         await contacts.updateAuthToken(session.authToken);
@@ -61,6 +67,8 @@ class ContactsDisplayService {
       _sessionGeneration += 1;
       _clearCachedState(notify: true);
     }
+    _contacts ??= _newContactsService();
+    final currentContacts = _requireContacts();
 
     _session = session;
     _sessionKey = sessionKey;
@@ -68,7 +76,8 @@ class ContactsDisplayService {
 
     late final Future<void> readyFuture;
     final generation = _sessionGeneration;
-    readyFuture = _openAndSync(session, generation).catchError((
+    readyFuture =
+        _openAndSync(currentContacts, session, generation).catchError((
       Object error,
       StackTrace stackTrace,
     ) {
@@ -110,9 +119,10 @@ class ContactsDisplayService {
   }
 
   Future<void> resetLocalState() async {
-    await _contacts?.resetLocalState();
+    final contacts = _contacts;
     _sessionGeneration += 1;
     _clearCachedState(notify: true);
+    await contacts?.resetLocalState();
   }
 
   ContactRecord? getCachedContact({
@@ -228,14 +238,11 @@ class ContactsDisplayService {
 
   @visibleForTesting
   Future<void> debugReset({bool clearLocalState = true}) async {
+    final contacts = _contacts;
     if (clearLocalState) {
-      await _contacts?.resetLocalState();
+      await contacts?.resetLocalState();
     }
     _clearCachedState(notify: false);
-    _contacts = null;
-    _session = null;
-    _sessionKey = null;
-    _sessionAuthToken = null;
     if (_changes.value != 0) {
       _changes.value = 0;
     }
@@ -272,11 +279,14 @@ class ContactsDisplayService {
     }
   }
 
-  Future<void> _openAndSync(ContactsSession session, int generation) async {
-    final contacts = _requireContacts();
+  Future<void> _openAndSync(
+    ContactsService contacts,
+    ContactsSession session,
+    int generation,
+  ) async {
     await contacts.open(session);
     if (!_isSessionGenerationCurrent(generation, session)) {
-        return;
+      return;
     }
 
     final localContacts = await contacts.getContacts();
@@ -446,6 +456,20 @@ class ContactsDisplayService {
     return contacts;
   }
 
+  ContactsService _newContactsService() {
+    final factory = _contactsServiceFactory;
+    if (factory != null) {
+      return factory();
+    }
+    final preferences = _preferences;
+    if (preferences == null) {
+      throw StateError(
+        'ContactsDisplayService.init(preferences: ...) must be called before use',
+      );
+    }
+    return ContactsService(preferences: preferences);
+  }
+
   bool _isSessionGenerationCurrent(int generation, ContactsSession session) {
     return _sessionGeneration == generation &&
         _sessionKey == _buildSessionKey(session);
@@ -464,6 +488,7 @@ class ContactsDisplayService {
     _profilePictureLoadsByUserId.clear();
     _profilePictureFailureUntilByUserId.clear();
     _readyFuture = null;
+    _contacts = null;
     _session = null;
     _sessionKey = null;
     _sessionAuthToken = null;
