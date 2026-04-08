@@ -82,7 +82,7 @@ class TripMemoriesCalculatorV2 {
   static const _minBaseActiveDaysInWindow = 12;
 
   // Trip duration bounds (in days).
-  static const _minTripDays = 3;
+  static const _minTripDays = 2;
   static const _maxTripDays = 30;
 
   // Minimum photos for a valid trip.
