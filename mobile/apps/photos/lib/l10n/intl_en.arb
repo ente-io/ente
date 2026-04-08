@@ -2989,6 +2989,10 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
+  "couldNotLoadSelectedPhoto": "Could not load selected photo",
+  "@couldNotLoadSelectedPhoto": {
+    "description": "Toast when the selected contact photo cannot be loaded"
+  },
   "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",

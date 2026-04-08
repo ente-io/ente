@@ -2,11 +2,31 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:ente_contacts/contacts.dart' as contacts;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/photos_contacts_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    ServiceLocator.instance.init(
+      prefs,
+      Dio(),
+      Dio(),
+      PackageInfo(
+        appName: 'Photos',
+        packageName: 'photos',
+        version: '1.0.0',
+        buildNumber: '1',
+      ),
+    );
+  });
+
   late FakeContactsService contactsService;
   late PhotosContactsService service;
   late contacts.ContactsSession session;
@@ -108,6 +128,105 @@ void main() {
       expect(service.getCachedResolvedEmailByUserId(7), isNull);
     },
   );
+
+  test(
+    'session switch creates a fresh contacts service instance',
+    () async {
+      final firstService = FakeContactsService(
+        localContacts: const [
+          contacts.ContactRecord(
+            id: 'ct_old',
+            contactUserId: 7,
+            email: 'alice@test.test',
+            data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
+            profilePictureAttachmentId: null,
+            isDeleted: false,
+            createdAt: 1,
+            updatedAt: 2,
+          ),
+        ],
+      );
+      final secondService = FakeContactsService(
+        localContacts: const [
+          contacts.ContactRecord(
+            id: 'ct_new',
+            contactUserId: 9,
+            email: 'bob@test.test',
+            data: contacts.ContactData(contactUserId: 9, name: 'Bob'),
+            profilePictureAttachmentId: null,
+            isDeleted: false,
+            createdAt: 3,
+            updatedAt: 4,
+          ),
+        ],
+      );
+      final services = Queue<FakeContactsService>.of([
+        firstService,
+        secondService,
+      ]);
+      service = PhotosContactsService.forTesting(
+        contactsServiceFactory: () => services.removeFirst(),
+      );
+
+      firstService.openBarrier = Completer<void>();
+      final oldOpenAndSync = service.debugOpenAndSync(session);
+      await firstService.openStarted!.future;
+
+      final nextSession = contacts.ContactsSession(
+        baseUrl: session.baseUrl,
+        authToken: 'token-2',
+        userId: 2,
+        accountKey: Uint8List.fromList([9, 9, 9]),
+      );
+      await service.debugOpenAndSync(nextSession);
+
+      expect(service.getCachedSavedNameByUserId(9), 'Bob');
+      expect(service.getCachedSavedNameByUserId(7), isNull);
+
+      firstService.openBarrier!.complete();
+      await oldOpenAndSync;
+
+      expect(firstService.openCalls, 1);
+      expect(secondService.openCalls, 1);
+      expect(service.getCachedSavedNameByUserId(9), 'Bob');
+      expect(service.getCachedSavedNameByUserId(7), isNull);
+    },
+  );
+
+  test(
+    'profile picture retry is restored when local hydration later adds an attachment',
+    () async {
+      contactsService = FakeContactsService(localContacts: const []);
+      service =
+          PhotosContactsService.forTesting(contactsService: contactsService);
+
+      await service.debugOpenAndSync(session);
+      expect(await service.getProfilePictureBytesByUserId(7), isNull);
+
+      contactsService.profilePictureBytesByContactId['ct_1'] =
+          Uint8List.fromList([1, 2, 3]);
+      service.debugHydrateContacts(
+        const [
+          contacts.ContactRecord(
+            id: 'ct_1',
+            contactUserId: 7,
+            email: 'alice@test.test',
+            data: contacts.ContactData(contactUserId: 7, name: 'Alice'),
+            profilePictureAttachmentId: 'att_1',
+            isDeleted: false,
+            createdAt: 1,
+            updatedAt: 2,
+          ),
+        ],
+      );
+
+      expect(
+        await service.getProfilePictureBytesByUserId(7),
+        Uint8List.fromList([1, 2, 3]),
+      );
+      expect(contactsService.getProfilePictureCalls, 1);
+    },
+  );
 }
 
 class FakeContactsService extends Fake implements contacts.ContactsService {
@@ -122,15 +241,27 @@ class FakeContactsService extends Fake implements contacts.ContactsService {
   final Object? syncError;
   Queue<List<contacts.ContactRecord>>? localContactsPages;
   Queue<List<contacts.ContactRecord>>? syncPages;
+  final Map<String, Uint8List> profilePictureBytesByContactId = {};
+  Completer<void>? openBarrier;
+  Completer<void>? openStarted;
   Completer<void>? getContactsBarrier;
   Completer<void>? getContactsStarted;
   int openCalls = 0;
   int syncCalls = 0;
   int getContactsCalls = 0;
+  int getProfilePictureCalls = 0;
 
   @override
   Future<void> open(contacts.ContactsSession session) async {
     openCalls += 1;
+    final started = openStarted ??= Completer<void>();
+    if (!started.isCompleted) {
+      started.complete();
+    }
+    final barrier = openBarrier;
+    if (barrier != null && !barrier.isCompleted) {
+      await barrier.future;
+    }
   }
 
   @override
@@ -164,5 +295,15 @@ class FakeContactsService extends Fake implements contacts.ContactsService {
       throw error;
     }
     return syncDiff;
+  }
+
+  @override
+  Future<Uint8List> getProfilePicture(String contactId) async {
+    getProfilePictureCalls += 1;
+    final bytes = profilePictureBytesByContactId[contactId];
+    if (bytes == null) {
+      throw StateError('missing profile picture');
+    }
+    return bytes;
   }
 }

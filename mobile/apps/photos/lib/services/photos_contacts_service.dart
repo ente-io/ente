@@ -8,25 +8,29 @@ import "package:photos/service_locator.dart";
 
 class PhotosContactsService {
   PhotosContactsService._privateConstructor()
-      : _contacts = contacts.ContactsService(
-          preferences: ServiceLocator.instance.prefs,
-        );
+      : _contactsServiceFactory = (() => contacts.ContactsService(
+              preferences: ServiceLocator.instance.prefs,
+            ));
 
   @visibleForTesting
   PhotosContactsService.forTesting({
-    required contacts.ContactsService contactsService,
-  }) : _contacts = contactsService;
+    contacts.ContactsService? contactsService,
+    contacts.ContactsService Function()? contactsServiceFactory,
+  })  : _contacts = contactsService,
+        _contactsServiceFactory = contactsServiceFactory ??
+            (contactsService != null ? () => contactsService : null);
 
   static final PhotosContactsService instance =
       PhotosContactsService._privateConstructor();
 
-  final contacts.ContactsService _contacts;
+  final contacts.ContactsService Function()? _contactsServiceFactory;
   final _logger = Logger("PhotosContactsService");
   final Map<int, contacts.ContactRecord> _contactsByUserId = {};
   final Map<int, Uint8List?> _profilePictureBytesByUserId = {};
   final Set<int> _resolvedProfilePictureUserIds = {};
   final Map<int, Future<Uint8List?>> _profilePictureLoadsByUserId = {};
 
+  contacts.ContactsService? _contacts;
   Future<void>? _readyFuture;
   String? _sessionKey;
   String? _sessionAuthToken;
@@ -52,9 +56,10 @@ class PhotosContactsService {
     }
     final sessionKey = _buildSessionKey(session);
     if (_readyFuture != null && _sessionKey == sessionKey) {
+      final contacts = _requireContacts();
       await _readyFuture;
       if (_sessionAuthToken != session.authToken) {
-        await _contacts.updateAuthToken(session.authToken);
+        await contacts.updateAuthToken(session.authToken);
         _sessionAuthToken = session.authToken;
       }
       return;
@@ -63,11 +68,14 @@ class PhotosContactsService {
       _sessionGeneration += 1;
       _resetSessionState(notify: true);
     }
+    _contacts ??= _newContactsService();
+    final currentContacts = _requireContacts();
     _sessionKey = sessionKey;
     _sessionAuthToken = session.authToken;
     late final Future<void> readyFuture;
     final generation = _sessionGeneration;
     readyFuture = _openAndSync(
+      currentContacts,
       session,
       generation,
     ).catchError((Object error, StackTrace stackTrace) {
@@ -91,10 +99,11 @@ class PhotosContactsService {
     return _runReadSafely(
       () async {
         await ensureReady();
-        if (_sessionKey == null) {
+        final contacts = _activeContactsOrNull();
+        if (contacts == null) {
           return null;
         }
-        final contact = await _contacts.getContactByUserId(contactUserId);
+        final contact = await contacts.getContactByUserId(contactUserId);
         if (contact == null || contact.isDeleted) {
           return null;
         }
@@ -161,14 +170,21 @@ class PhotosContactsService {
   Future<Uint8List?> _loadProfilePictureBytesByUserId(int contactUserId) async {
     final contact = await getContactByUserId(contactUserId);
     final attachmentId = contact?.profilePictureAttachmentId;
-    if (contact == null || attachmentId == null) {
+    if (contact == null) {
+      if (_hasHydratedCache && _sessionKey != null) {
+        _profilePictureBytesByUserId.remove(contactUserId);
+        _resolvedProfilePictureUserIds.add(contactUserId);
+      }
+      return null;
+    }
+    if (attachmentId == null) {
       _profilePictureBytesByUserId.remove(contactUserId);
       _resolvedProfilePictureUserIds.add(contactUserId);
       return null;
     }
     final contactId = contact.id;
     try {
-      final bytes = await _contacts.getProfilePicture(contactId);
+      final bytes = await _requireContacts().getProfilePicture(contactId);
       final latestContact = _contactsByUserId[contactUserId];
       if (latestContact == null ||
           latestContact.isDeleted ||
@@ -194,14 +210,14 @@ class PhotosContactsService {
     required String name,
     String? birthDate,
   }) async {
-    await ensureReady();
+    final contactsService = await _ensureReadyForWrite();
     final trimmedName = name.trim();
     final trimmedBirthDate = birthDate?.trim();
     final normalizedBirthDate =
         trimmedBirthDate == null || trimmedBirthDate.isEmpty
             ? null
             : trimmedBirthDate;
-    final existing = await _contacts.getContactByUserId(
+    final existing = await contactsService.getContactByUserId(
       contactUserId,
       includeDeleted: true,
     );
@@ -211,8 +227,8 @@ class PhotosContactsService {
       birthDate: normalizedBirthDate,
     );
     final contact = existing == null
-        ? await _contacts.createContact(data)
-        : await _contacts.updateContact(existing.id, data);
+        ? await contactsService.createContact(data)
+        : await contactsService.updateContact(existing.id, data);
     _cacheContact(contact);
     _notifyChanged(contact);
     return contact;
@@ -222,8 +238,8 @@ class PhotosContactsService {
     required String contactId,
     required Uint8List bytes,
   }) async {
-    await ensureReady();
-    final contact = await _contacts.setProfilePicture(contactId, bytes);
+    final contactsService = await _ensureReadyForWrite();
+    final contact = await contactsService.setProfilePicture(contactId, bytes);
     _cacheContact(contact);
     _profilePictureBytesByUserId[contact.contactUserId] = bytes;
     _resolvedProfilePictureUserIds.add(contact.contactUserId);
@@ -238,9 +254,11 @@ class PhotosContactsService {
       _sessionGeneration += 1;
       _resetSessionState(notify: false);
     }
+    _contacts ??= _newContactsService();
+    final currentContacts = _requireContacts();
     _sessionKey = _buildSessionKey(session);
     _sessionAuthToken = session.authToken;
-    await _openAndSync(session, _sessionGeneration);
+    await _openAndSync(currentContacts, session, _sessionGeneration);
   }
 
   @visibleForTesting
@@ -285,16 +303,17 @@ class PhotosContactsService {
   }
 
   Future<void> _openAndSync(
+    contacts.ContactsService contactsService,
     contacts.ContactsSession session,
     int generation,
   ) async {
-    await _contacts.open(session);
+    await contactsService.open(session);
     if (!_isSessionGenerationCurrent(generation, session)) {
       return;
     }
 
     final cachedUserIdsBeforeHydration = _contactsByUserId.keys.toSet();
-    final localContacts = await _contacts.getContacts();
+    final localContacts = await contactsService.getContacts();
     if (!_isSessionGenerationCurrent(generation, session)) {
       return;
     }
@@ -309,7 +328,7 @@ class PhotosContactsService {
     final changedUserIds = <int>{...newlyHydratedLocalUserIds};
     var shouldRetrySync = false;
     try {
-      final contactsDiff = await _contacts.sync();
+      final contactsDiff = await contactsService.sync();
       if (!_isSessionGenerationCurrent(generation, session)) {
         return;
       }
@@ -398,12 +417,17 @@ class PhotosContactsService {
 
   void _cacheContact(contacts.ContactRecord contact) {
     final userId = contact.contactUserId;
+    final existing = _contactsByUserId[userId];
     if (contact.isDeleted) {
       _contactsByUserId.remove(userId);
       _invalidateProfilePictureCache(userId);
       return;
     }
     _contactsByUserId[userId] = contact;
+    if (existing?.profilePictureAttachmentId !=
+        contact.profilePictureAttachmentId) {
+      _invalidateProfilePictureCache(userId);
+    }
   }
 
   void _resetSessionState({required bool notify}) {
@@ -413,6 +437,7 @@ class PhotosContactsService {
     _resolvedProfilePictureUserIds.clear();
     _profilePictureLoadsByUserId.clear();
     _readyFuture = null;
+    _contacts = null;
     _sessionKey = null;
     _sessionAuthToken = null;
     _hasHydratedCache = false;
@@ -425,5 +450,43 @@ class PhotosContactsService {
     _profilePictureBytesByUserId.remove(contactUserId);
     _resolvedProfilePictureUserIds.remove(contactUserId);
     _profilePictureLoadsByUserId.remove(contactUserId);
+  }
+
+  contacts.ContactsService _newContactsService() {
+    final factory = _contactsServiceFactory;
+    if (factory != null) {
+      return factory();
+    }
+    throw StateError(
+      "PhotosContactsService was not initialized with a contacts service factory",
+    );
+  }
+
+  contacts.ContactsService _requireContacts() {
+    final contacts = _contacts;
+    if (contacts == null) {
+      throw StateError(
+        "PhotosContactsService.ensureReady() must be called before use",
+      );
+    }
+    return contacts;
+  }
+
+  contacts.ContactsService? _activeContactsOrNull() {
+    if (_sessionKey == null) {
+      return null;
+    }
+    return _contacts;
+  }
+
+  Future<contacts.ContactsService> _ensureReadyForWrite() async {
+    await ensureReady();
+    final contacts = _activeContactsOrNull();
+    if (contacts == null) {
+      throw StateError(
+        "Contacts are unavailable without an active session",
+      );
+    }
+    return contacts;
   }
 }

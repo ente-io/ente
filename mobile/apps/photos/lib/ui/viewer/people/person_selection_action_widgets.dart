@@ -239,9 +239,7 @@ class _LinkContactToPersonSelectionPageState
           final slivers = <Widget>[
             SearchableAppBar(
               title: Text(
-                widget.mode == PersonSelectionMode.autofillContact
-                    ? "Select a person"
-                    : context.l10n.selectPersonToLink,
+                context.l10n.selectPersonToLink,
               ),
               onSearch: _updateSearchQuery,
               onSearchClosed: _clearSearchQuery,

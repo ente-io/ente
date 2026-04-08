@@ -358,7 +358,10 @@ class _EditContactPageState extends State<EditContactPage> {
       _isLoadingPhoto = false;
     });
     if (sourceBytes == null) {
-      showShortToast(context, "Could not load selected photo");
+      showShortToast(
+        context,
+        AppLocalizations.of(context).couldNotLoadSelectedPhoto,
+      );
       return;
     }
     final croppedBytes = await routeToPage(
