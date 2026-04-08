@@ -14,7 +14,6 @@ import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
 import "package:photos/db/ml/db_pet_model_mappers.dart";
-import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
@@ -108,7 +107,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetFaceVectorIdMappingTable,
     createPetFaceClustersTable,
     petFcClusterIDIndex,
-    createPetClusterCentroidVectorIdMappingTable,
     createPetClusterPetTable,
     createNotPetFeedbackTable,
     petFacesSpeciesIndex,
@@ -130,7 +128,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetFaceVectorIdMappingTable,
     createPetFaceClustersTable,
     petFcClusterIDIndex,
-    createPetClusterCentroidVectorIdMappingTable,
     createPetClusterPetTable,
   ];
 
@@ -479,15 +476,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final petVdbs =
         _isOffline ? PetVectorDB.allOfflineInstances : PetVectorDB.allInstances;
     for (final vdb in petVdbs) {
-      await vdb.deleteIndexFile();
-    }
-    final petCentroidVdbs = _isOffline
-        ? [
-            PetClusterCentroidVectorDB.offlineDog,
-            PetClusterCentroidVectorDB.offlineCat,
-          ]
-        : [PetClusterCentroidVectorDB.dog, PetClusterCentroidVectorDB.cat];
-    for (final vdb in petCentroidVdbs) {
       await vdb.deleteIndexFile();
     }
     _markClusterSummaryMutated();
@@ -1626,7 +1614,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       // Recreate the tables
       await db.execute(createPetFaceClustersTable);
       await db.execute(petFcClusterIDIndex);
-      await db.execute(createPetClusterCentroidVectorIdMappingTable);
       await db.execute(createPetClusterPetTable);
       if (!_isOffline) {
         await db.execute(createNotPetFeedbackTable);
@@ -2391,25 +2378,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         _logger.warning("Failed to delete pet face vectors", e, s);
       }
     }
-    // Collect which clusters may become empty so we can delete their centroid
-    // vectors after the deletion.
-    final affectedClusterIds = <String>{};
-    final speciesByCluster = <String, int>{};
-    if (faceIdsToRemove.isNotEmpty) {
-      final fpH = List.filled(faceIdsToRemove.length, '?').join(',');
-      final clusterRows = await db.getAll(
-        'SELECT DISTINCT fc.$clusterIDColumn, f.$speciesColumn '
-        'FROM $petFaceClustersTable fc '
-        'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
-        'WHERE fc.$petFaceIDColumn IN ($fpH)',
-        faceIdsToRemove,
-      );
-      for (final row in clusterRows) {
-        final cid = row[clusterIDColumn] as String;
-        affectedClusterIds.add(cid);
-        speciesByCluster[cid] = row[speciesColumn] as int;
-      }
-    }
     // Delete mapping table entries, cluster assignments, and detection rows
     // atomically.
     await db.writeTransaction((tx) async {
@@ -2436,65 +2404,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         fileIDs,
       );
     });
-
-    // Find clusters that were emptied and clean up their centroid data.
-    if (affectedClusterIds.isNotEmpty) {
-      final survivingRows = await db.getAll(
-        'SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable '
-        'WHERE $clusterIDColumn IN '
-        '(${List.filled(affectedClusterIds.length, '?').join(',')})',
-        affectedClusterIds.toList(),
-      );
-      final survivingIds =
-          survivingRows.map((r) => r[clusterIDColumn] as String).toSet();
-      final emptiedIds =
-          affectedClusterIds.where((id) => !survivingIds.contains(id));
-      await _deletePetClusterCentroids(db, emptiedIds, speciesByCluster);
-    }
-
-  }
-
-  /// Delete centroid vector IDs and usearch vectors for emptied pet clusters.
-  Future<void> _deletePetClusterCentroids(
-    SqliteDatabase db,
-    Iterable<String> clusterIds,
-    Map<String, int> speciesByCluster,
-  ) async {
-    if (clusterIds.isEmpty) return;
-
-    // Group by species so we target the correct centroid vector DB.
-    final idsBySpecies = <int, List<String>>{};
-    for (final cid in clusterIds) {
-      final species = speciesByCluster[cid];
-      if (species == null) continue;
-      idsBySpecies.putIfAbsent(species, () => []).add(cid);
-    }
-
-    for (final entry in idsBySpecies.entries) {
-      try {
-        final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
-          species: entry.key,
-          offline: _isOffline,
-        );
-        final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
-          entry.value,
-          db: db,
-        );
-        if (idMap.isNotEmpty) {
-          await centroidVdb.deleteCentroids(idMap.values.toList());
-          // Remove mapping rows
-          for (final cid in idMap.keys) {
-            await centroidVdb.deleteClusterCentroidMapping(cid, db: db);
-          }
-        }
-      } catch (e, s) {
-        _logger.warning(
-          "Failed to delete pet centroids for species ${entry.key}",
-          e,
-          s,
-        );
-      }
-    }
   }
 
   @override

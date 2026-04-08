@@ -1,15 +1,13 @@
 import "dart:math" show Random, min;
-import "dart:typed_data" show Float32List, Float64List;
+import "dart:typed_data" show Float64List;
 
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/db_pet_model_mappers.dart";
-import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/ml/schema.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/src/rust/api/ml_indexing_api.dart";
-import "package:photos/utils/ml_util.dart" show computeL2MeanCentroid;
 import "package:synchronized/synchronized.dart";
 import "package:uuid/uuid.dart";
 
@@ -183,101 +181,12 @@ class PetClusteringService {
       await mlDataDB.updatePetFaceIdToClusterId(faceToCluster);
     }
 
-    // 6. Use Rust-returned centroids for clusters it created/modified.
-    // For clusters Rust didn't touch (e.g. incremental mode existing clusters),
-    // recompute from the VDB.
-    final rustCentroids = <String, Float32List>{};
-    for (final s in result.summaries) {
-      if (s.centroid.isNotEmpty) {
-        rustCentroids[s.clusterId] = _doublesToFloat32(s.centroid);
-      }
-    }
-
-    final dbClusterToFaces = await mlDataDB.getPetClusterToFaceIds(species);
-    final clusterCentroids = <String, Float32List>{};
-
-    for (final entry in dbClusterToFaces.entries) {
-      // Use Rust's centroid if available, otherwise recompute from VDB
-      final rustCentroid = rustCentroids[entry.key];
-      if (rustCentroid != null) {
-        clusterCentroids[entry.key] = rustCentroid;
-      } else {
-        final centroid = await _computeCentroidFromVdb(
-          entry.value,
-          mlDataDB,
-          faceVdb,
-        );
-        if (centroid != null) {
-          clusterCentroids[entry.key] = centroid;
-        }
-      }
-    }
-
-    // Write centroids to vector DB
-    if (clusterCentroids.isNotEmpty) {
-      final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
-        species: species,
-        offline: isOffline,
-      );
-      final sqlDb = await mlDataDB.asyncDB;
-      final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
-        clusterCentroids.keys,
-        db: sqlDb,
-        createIfMissing: true,
-      );
-      final vectorIds = <int>[];
-      final centroids = <Float32List>[];
-      for (final entry in clusterCentroids.entries) {
-        final vectorId = idMap[entry.key];
-        if (vectorId != null) {
-          vectorIds.add(vectorId);
-          centroids.add(entry.value);
-        }
-      }
-      if (vectorIds.isNotEmpty) {
-        await centroidVdb.bulkInsertCentroids(
-          vectorIds: vectorIds,
-          centroids: centroids,
-        );
-      }
-    }
-
     _logger.info(
       "$speciesName clustering done: ${faceToCluster.length} assigned, "
       "${result.nUnclustered} unclustered, "
       "${result.summaries.length} clusters",
     );
     return faceToCluster.isNotEmpty;
-  }
-
-  /// Compute L2-normalized mean centroid for a cluster by reading embeddings
-  /// from the vector DB. Used for clusters Rust didn't return centroids for.
-  static Future<Float32List?> _computeCentroidFromVdb(
-    List<String> faceIds,
-    MLDataDB mlDataDB,
-    PetVectorDB faceVdb,
-  ) async {
-    final details = await mlDataDB.getPetFaceDetails(faceIds);
-    final vectorIds = <int>[];
-    for (final d in details.values) {
-      if (d.$2 != null) vectorIds.add(d.$2!);
-    }
-    if (vectorIds.isEmpty) return null;
-    try {
-      final embs = await faceVdb.getEmbeddings(vectorIds);
-      if (embs.isEmpty) return null;
-      return computeL2MeanCentroid(embs);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  static Float32List _doublesToFloat32(List<double> values) {
-    final floats = Float32List(values.length);
-    for (int i = 0; i < values.length; i++) {
-      floats[i] = values[i];
-    }
-    return floats;
   }
 
   static Future<List<RustClusterExemplars>> _buildRandomClusterSamples({
