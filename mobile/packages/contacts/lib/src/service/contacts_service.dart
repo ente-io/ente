@@ -170,7 +170,7 @@ class ContactsService {
   }
 
   Future<Uint8List> getProfilePicture(String contactId) {
-    return _getAttachment(contactId, ContactAttachmentType.profilePicture);
+    return _getProfilePicture(contactId);
   }
 
   Future<ContactRecord> deleteProfilePicture(String contactId) {
@@ -203,27 +203,17 @@ class ContactsService {
     return updated;
   }
 
-  Future<Uint8List> _getAttachment(
-    String contactId,
-    ContactAttachmentType attachmentType,
-  ) async {
+  Future<Uint8List> _getProfilePicture(String contactId) async {
     final contact = await _database.getContact(contactId);
     final attachmentId = contact?.profilePictureAttachmentId;
     if (attachmentId == null) {
-      throw StateError(
-        'Contact $contactId does not have attachment $attachmentType',
-      );
+      throw StateError('Contact $contactId does not have a profile picture');
     }
     final cached = await _database.getCachedAttachment(attachmentId);
     if (cached != null) {
       return cached;
     }
-    final ctx = _requireCtx();
-    final bytes = switch (attachmentType) {
-      ContactAttachmentType.profilePicture => await ctx.getProfilePicture(
-          contactId,
-        ),
-    };
+    final bytes = await _requireCtx().getProfilePicture(contactId);
     await _database.upsertCachedAttachment(attachmentId, bytes);
     return bytes;
   }

@@ -343,7 +343,7 @@ impl ContactsCtx {
             .map_err(Into::into)
     }
 
-    /// Encrypt and upload a new contact profile picture.
+    /// Encrypt and upload a new attachment for the contact.
     pub async fn set_attachment(
         &self,
         contact_id: String,
