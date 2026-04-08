@@ -304,6 +304,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-contacts"
+version = "0.0.1"
+dependencies = [
+ "ente-core",
+ "md-5",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "ente-core"
 version = "0.0.1"
 dependencies = [
@@ -333,8 +344,10 @@ dependencies = [
 name = "ente-wasm"
 version = "0.0.1"
 dependencies = [
+ "ente-contacts",
  "ente-core",
  "md-5",
+ "serde",
  "serde-wasm-bindgen",
  "wasm-bindgen",
  "wasm-bindgen-futures",

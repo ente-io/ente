@@ -9,6 +9,7 @@ import {
     styled,
     Typography,
 } from "@mui/material";
+import { useResolvedContactAvatar } from "ente-contacts-web";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
@@ -95,7 +96,47 @@ interface Liker {
     avatarInitial: string;
     /** True if this is a registered user with masked email (show person icon). */
     isMaskedEmail: boolean;
+    isCurrentUser: boolean;
 }
+
+const LikerRowItem: React.FC<{ liker: Liker }> = ({ liker }) => {
+    const shouldResolveContact =
+        !liker.anonUserID &&
+        liker.userID > 0 &&
+        !liker.isMaskedEmail &&
+        !liker.isCurrentUser;
+    const resolved = useResolvedContactAvatar({
+        userID: shouldResolveContact ? liker.userID : undefined,
+        email: shouldResolveContact ? liker.email : undefined,
+    });
+
+    return (
+        <LikerRow>
+            <Avatar
+                sx={{
+                    width: 32,
+                    height: 32,
+                    fontSize: 14,
+                    bgcolor: getAvatarColor(liker.email),
+                    color: "#fff",
+                }}
+                src={resolved.avatarURL}
+            >
+                {liker.isMaskedEmail ? (
+                    <PersonIcon />
+                ) : (
+                    (shouldResolveContact
+                        ? resolved.initial
+                        : liker.avatarInitial)
+                )}
+            </Avatar>
+            <LikerName>
+                {shouldResolveContact ? resolved.primaryLabel : liker.userName}
+            </LikerName>
+            <HeartFilledIcon />
+        </LikerRow>
+    );
+};
 
 /** Collection info for the dropdown. */
 interface CollectionInfo {
@@ -289,6 +330,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                     email,
                     avatarInitial: actualName[0]?.toUpperCase() ?? "?",
                     isMaskedEmail,
+                    isCurrentUser,
                 };
             });
     }, [
@@ -576,25 +618,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                         <EmptyMessage>{t("no_likes_yet")}</EmptyMessage>
                     ) : (
                         likers.map((liker) => (
-                            <LikerRow key={liker.id}>
-                                <Avatar
-                                    sx={{
-                                        width: 32,
-                                        height: 32,
-                                        fontSize: 14,
-                                        bgcolor: getAvatarColor(liker.email),
-                                        color: "#fff",
-                                    }}
-                                >
-                                    {liker.isMaskedEmail ? (
-                                        <PersonIcon />
-                                    ) : (
-                                        liker.avatarInitial
-                                    )}
-                                </Avatar>
-                                <LikerName>{liker.userName}</LikerName>
-                                <HeartFilledIcon />
-                            </LikerRow>
+                            <LikerRowItem key={liker.id} liker={liker} />
                         ))
                     )}
                 </LikersContainer>

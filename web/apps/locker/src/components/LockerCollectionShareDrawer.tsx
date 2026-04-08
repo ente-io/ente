@@ -21,6 +21,7 @@ import {
 } from "ente-base/components/OverflowMenu";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
+import { useResolvedContactAvatar } from "ente-contacts-web";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { t } from "i18next";
@@ -517,7 +518,15 @@ const ParticipantRow: React.FC<{
     action?: React.ReactNode;
 }> = ({ participant, subtitle, action }) => {
     const email = participant.email ?? t("unknownEmail");
-    const avatarLetter = email.charAt(0).toUpperCase() || "?";
+    const resolved = useResolvedContactAvatar({
+        userID: participant.id,
+        email: participant.email,
+    });
+    const label = resolved.source === "contact" ? resolved.primaryLabel : email;
+    const initial =
+        resolved.source === "contact"
+            ? resolved.initial
+            : (email.charAt(0).toUpperCase() || "?");
 
     return (
         <Stack
@@ -538,12 +547,13 @@ const ParticipantRow: React.FC<{
                     bgcolor: theme.vars.palette.fill.faintHover,
                     color: "text.base",
                 })}
+                src={resolved.avatarURL}
             >
-                {avatarLetter}
+                {initial}
             </Avatar>
             <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="body" sx={{ fontWeight: "medium" }} noWrap>
-                    {email}
+                    {label}
                 </Typography>
                 {subtitle && (
                     <Typography
