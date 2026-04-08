@@ -703,15 +703,18 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: ValueListenableBuilder<double>(
-                                          valueListenable:
-                                              _stackProgressNotifier,
-                                          builder: (context, stackProgress, _) {
-                                            return _buildFrameView(
-                                              context,
-                                              stackProgress,
-                                            );
-                                          },
+                                        child: RepaintBoundary(
+                                          child: ValueListenableBuilder<double>(
+                                            valueListenable:
+                                                _stackProgressNotifier,
+                                            builder:
+                                                (context, stackProgress, _) {
+                                              return _buildFrameView(
+                                                context,
+                                                stackProgress,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
                                     ],
