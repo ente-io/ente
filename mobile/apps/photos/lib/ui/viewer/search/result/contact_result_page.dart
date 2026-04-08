@@ -644,7 +644,7 @@ class _ContactResultAppBar extends StatelessWidget
                   preferredSize: Size.fromHeight(0),
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Flexible(child: RecommendedFiltersForAppbar()),
+                    child: RecommendedFiltersForAppbar(),
                   ),
                 ),
         );

@@ -184,18 +184,21 @@ void main() {
 
     final pending = displayService.getProfilePictureBytes(contactUserId: 7);
 
-    displayService.debugHydrateContacts([
-      const ContactRecord(
-        id: 'ct_1',
-        contactUserId: 7,
-        email: 'alice@test.test',
-        data: ContactData(contactUserId: 7, name: 'Alice'),
-        profilePictureAttachmentId: 'att_new',
-        isDeleted: false,
-        createdAt: 1,
-        updatedAt: 3,
-      ),
-    ], notify: false,);
+    displayService.debugHydrateContacts(
+      [
+        const ContactRecord(
+          id: 'ct_1',
+          contactUserId: 7,
+          email: 'alice@test.test',
+          data: ContactData(contactUserId: 7, name: 'Alice'),
+          profilePictureAttachmentId: 'att_new',
+          isDeleted: false,
+          createdAt: 1,
+          updatedAt: 3,
+        ),
+      ],
+      notify: false,
+    );
 
     rustApi.ctx.profilePictureBarrier!.complete();
 
@@ -205,18 +208,66 @@ void main() {
       isNull,
     );
   });
+
+  test(
+      'stale in-flight ensureReady does not repopulate cache after session switch',
+      () async {
+    final diffBarrier = Completer<void>();
+    rustApi.ctx.diffBarrier = diffBarrier;
+    rustApi.ctx.diffStarted = Completer<void>();
+    rustApi.diffPages = [
+      [
+        const ContactRecord(
+          id: 'ct_old',
+          contactUserId: 7,
+          email: 'alice@test.test',
+          data: ContactData(contactUserId: 7, name: 'Alice'),
+          profilePictureAttachmentId: null,
+          isDeleted: false,
+          createdAt: 1,
+          updatedAt: 2,
+        ),
+      ],
+      const [],
+    ];
+
+    final oldEnsureReady = displayService.ensureReady(session);
+    await rustApi.ctx.diffStarted!.future;
+
+    rustApi.nextOpenContext = FakeContactsRustContext();
+    rustApi.diffPages = [const []];
+    final nextSession = ContactsSession(
+      baseUrl: session.baseUrl,
+      authToken: 'token-2',
+      userId: 2,
+      accountKey: Uint8List.fromList([9, 9, 9]),
+    );
+    await displayService.ensureReady(nextSession);
+
+    diffBarrier.complete();
+    await oldEnsureReady;
+
+    expect(displayService.getCachedSavedName(contactUserId: 7), isNull);
+    expect(
+      displayService.getCachedResolvedEmail(email: 'alice@test.test'),
+      isNull,
+    );
+  });
 }
 
 class FakeContactsRustApi implements ContactsRustApi {
   FakeContactsRustContext ctx = FakeContactsRustContext();
+  FakeContactsRustContext? nextOpenContext;
   List<List<ContactRecord>> diffPages = const [];
 
   @override
   Future<OpenContactsContextResult> open(OpenContactsContextInput input) async {
-    ctx.userIdValue = input.userId;
-    ctx.diffPages = List<List<ContactRecord>>.from(diffPages);
+    final context = nextOpenContext ?? ctx;
+    nextOpenContext = null;
+    context.userIdValue = input.userId;
+    context.diffPages = List<List<ContactRecord>>.from(diffPages);
     return OpenContactsContextResult(
-      ctx: ctx,
+      ctx: context,
       wrappedRootKey: const WrappedRootContactKey(
         encryptedKey: 'enc-key',
         header: 'enc-header',
@@ -236,6 +287,8 @@ class FakeContactsRustContext implements ContactsRustContext {
   int getProfilePictureCalls = 0;
   String nextAttachmentId = 'att_profile';
   Completer<void>? profilePictureBarrier;
+  Completer<void>? diffBarrier;
+  Completer<void>? diffStarted;
   Object? profilePictureError;
 
   @override
@@ -312,6 +365,12 @@ class FakeContactsRustContext implements ContactsRustContext {
 
   @override
   Future<List<ContactRecord>> getDiff(int sinceTime, int limit) async {
+    final barrier = diffBarrier;
+    if (barrier != null) {
+      diffStarted?.complete();
+      diffBarrier = null;
+      await barrier.future;
+    }
     if (diffPages.isEmpty) {
       return const [];
     }

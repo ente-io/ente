@@ -31,6 +31,7 @@ class ContactsDisplayService {
   String? _sessionAuthToken;
   Future<void>? _readyFuture;
   bool _hasHydratedCache = false;
+  int _sessionGeneration = 0;
 
   ValueListenable<int> get changes => _changes;
 
@@ -57,6 +58,7 @@ class ContactsDisplayService {
     }
 
     if (_sessionKey != sessionKey) {
+      _sessionGeneration += 1;
       _clearCachedState(notify: true);
     }
 
@@ -65,7 +67,8 @@ class ContactsDisplayService {
     _sessionAuthToken = session.authToken;
 
     late final Future<void> readyFuture;
-    readyFuture = _openAndSync(session).catchError((
+    final generation = _sessionGeneration;
+    readyFuture = _openAndSync(session, generation).catchError((
       Object error,
       StackTrace stackTrace,
     ) {
@@ -108,6 +111,7 @@ class ContactsDisplayService {
 
   Future<void> resetLocalState() async {
     await _contacts?.resetLocalState();
+    _sessionGeneration += 1;
     _clearCachedState(notify: true);
   }
 
@@ -268,11 +272,17 @@ class ContactsDisplayService {
     }
   }
 
-  Future<void> _openAndSync(ContactsSession session) async {
+  Future<void> _openAndSync(ContactsSession session, int generation) async {
     final contacts = _requireContacts();
     await contacts.open(session);
+    if (!_isSessionGenerationCurrent(generation, session)) {
+      return;
+    }
 
     final localContacts = await contacts.getContacts();
+    if (!_isSessionGenerationCurrent(generation, session)) {
+      return;
+    }
     final localChanged = _cacheContacts(localContacts);
     _hasHydratedCache = true;
     if (localChanged.isNotEmpty) {
@@ -280,6 +290,9 @@ class ContactsDisplayService {
     }
 
     final diff = await contacts.sync();
+    if (!_isSessionGenerationCurrent(generation, session)) {
+      return;
+    }
     final diffChanged = _cacheContacts(diff, invalidateProfilePictures: true);
     if (diffChanged.isNotEmpty) {
       _notifyChanged();
@@ -419,6 +432,11 @@ class ContactsDisplayService {
       );
     }
     return contacts;
+  }
+
+  bool _isSessionGenerationCurrent(int generation, ContactsSession session) {
+    return _sessionGeneration == generation &&
+        _sessionKey == _buildSessionKey(session);
   }
 
   void _clearCachedState({required bool notify}) {
