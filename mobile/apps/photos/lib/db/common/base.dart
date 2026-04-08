@@ -40,10 +40,9 @@ mixin SqlDbBase {
         await tx.execute('PRAGMA user_version = $toVersion');
       });
     } else if (currentVersion > toVersion) {
-      debugPrint(
-        "$runtimeType downgrading user_version from $currentVersion to $toVersion",
+      throw AssertionError(
+        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
       );
-      await database.execute('PRAGMA user_version = $toVersion');
     }
   }
 }
