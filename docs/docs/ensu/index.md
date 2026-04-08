@@ -41,6 +41,9 @@ You can download Ensu from [ente.com/ensu](https://ente.com/ensu).
 | macOS / Windows / Linux | [GitHub releases](https://github.com/ente-io/ente/releases?q=ensu) |
 | Web | [ensu.ente.io](https://ensu.ente.io) (experimental) |
 
+If you install the Android APK directly from GitHub releases, see
+[Verify the Ensu Android APK](/ensu/android-apk-signature).
+
 ## Current status
 
 Ensu is currently an **Ente Labs** project. This means we are actively iterating

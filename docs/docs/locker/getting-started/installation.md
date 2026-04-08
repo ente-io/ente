@@ -21,6 +21,9 @@ Ente Locker for Android can be downloaded through multiple channels:
 - [F-Droid](https://f-droid.org/en/packages/io.ente.locker.fdroid/)
 - [GitHub](https://github.com/ente-io/ente/releases?q=locker)
 
+If you install the APK directly from GitHub, see
+[Verify the Ente Locker Android APK](/locker/getting-started/android-apk-signature).
+
 ## Next steps
 
 Now that you've installed Ente Locker, proceed to

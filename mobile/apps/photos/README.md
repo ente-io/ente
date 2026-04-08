@@ -48,15 +48,11 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 1. Install [Flutter v3.32.8](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
-2. Pull in all submodules with `git submodule update --init --recursive`
-
-3. Enable repo git hooks `git config core.hooksPath hooks`
-
-4. Install dependencies using one of these methods:
+2. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos run codegen:rust`. This will install dependencies and generate Rust bindings.
    - **Using Flutter directly:** Run `flutter pub get`, then install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` in both this folder and in `mobile/packages/rust`.
 
-5. On Android:
+3. On Android:
 
    - For development, run `flutter run -t lib/main.dart --flavor independent`
 
@@ -64,7 +60,7 @@ You can alternatively install the build from PlayStore or F-Droid.
      keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
      and run `flutter build apk --release --flavor independent`
 
-6. For iOS, run `flutter build ios`
+4. For iOS, run `flutter build ios`
 
 Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
 
@@ -97,17 +93,6 @@ for your support.
 If your language is not listed for translation, please [create a GitHub
 issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
 to have it added.
-
-## Certificate Fingerprints
-
-- **SHA1**: E1:60:10:18:B6:B0:2E:A3:74:6F:90:67:50:30:29:75:0E:EF:6D:39
-- **SHA256**: 35:ED:56:81:B7:0B:B3:BD:35:D9:0D:85:6A:F5:69:4C:50:4D:EF:46:AA:D8:3F:77:7B:1C:67:5C:F4:51:35:0B
-
-To verify these fingerprints, use the following command:
-
-```bash
-apksigner verify --print-certs <path_to_apk>
-```
 
 ## 💚 Contribute
 

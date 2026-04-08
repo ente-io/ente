@@ -18,10 +18,8 @@ jobs:
                 working-directory: mobile/apps/locker
 
         steps:
-            - name: Checkout code and submodules
+            - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Setup JDK 17
               uses: actions/setup-java@v1

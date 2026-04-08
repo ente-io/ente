@@ -121,10 +121,8 @@ jobs:
         # Skip if no packages need linting
         if: needs.detect-changes.outputs.lint_all == 'true' || needs.detect-changes.outputs.packages != ''
         steps:
-            - name: Checkout code and submodules
+            - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -265,10 +263,8 @@ jobs:
         runs-on: ubuntu-latest
         if: needs.detect-changes.outputs.rust_changed == 'true'
         steps:
-            - name: Checkout code and submodules
+            - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -341,9 +337,14 @@ jobs:
         if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_auth == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
         steps:
             - name: Checkout code and submodules
+              if: needs.detect-changes.outputs.lint_auth == 'true'
               uses: actions/checkout@v4
               with:
                   submodules: recursive
+
+            - name: Checkout code
+              if: needs.detect-changes.outputs.lint_auth != 'true'
+              uses: actions/checkout@v4
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2

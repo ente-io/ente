@@ -79,10 +79,7 @@ melos clean:photos
 
 ### Direct Flutter Commands
 ```bash
-# Development run with environment variables
-./run.sh                                    # Uses .env file with --flavor dev
-
-# Development run without env file
+# Development run
 flutter run -t lib/main.dart --flavor independent
 
 # Build release APK
@@ -161,8 +158,6 @@ lib/
 1. Install Flutter v3.32.8 and Rust
 2. Install Flutter Rust Bridge: `cargo install flutter_rust_bridge_codegen`
 3. Generate Rust bindings: `flutter_rust_bridge_codegen generate`
-4. Update submodules: `git submodule update --init --recursive`
-5. Enable git hooks: `git config core.hooksPath hooks`
 
 ## Critical Coding Requirements
 
