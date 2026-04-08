@@ -199,6 +199,16 @@ class MemoryShareService {
     try {
       final response = await _enteDio.get('/memory-share');
       final List<dynamic> shares = response.data['memoryShares'] ?? [];
+      final localSharesByID = {
+        for (final share in await _db.getAll()) share.id: share,
+      };
+      if (shares.isEmpty) {
+        _memoryShareByHashCache.clear();
+        for (final localShare in localSharesByID.values) {
+          await _db.delete(localShare.id);
+        }
+        return [];
+      }
       Uint8List? memoryEntityKey;
       try {
         memoryEntityKey = await entityService.getOrCreateEntityKey(
@@ -226,10 +236,6 @@ class MemoryShareService {
         }
         return share;
       }).toList();
-
-      final localSharesByID = {
-        for (final share in await _db.getAll()) share.id: share,
-      };
       _memoryShareByHashCache.clear();
       final activeRemoteShareIDs = <int>{};
       final activeShares = <MemoryShare>[];
