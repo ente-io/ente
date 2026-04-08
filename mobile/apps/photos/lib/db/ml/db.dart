@@ -113,24 +113,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     petFacesSpeciesIndex,
   ];
   static const List<String> _offlineMigrationScripts = [
-    createFacesTable,
-    createFaceClustersTable,
-    createClusterPersonTable,
-    createClusterSummaryTable,
-    createNotPersonFeedbackTable,
-    fcClusterIDIndex,
-    createClipEmbeddingsTable,
-    createFileDataTable,
-    createFaceCacheTable,
-    createTextEmbeddingsCacheTable,
-    createClusterCentroidVectorIdMappingTable,
-    createPetFacesTable,
-    createPetBodiesTable,
-    createPetFaceVectorIdMappingTable,
-    createPetBodyVectorIdMappingTable,
-    createPetFaceClustersTable,
-    petFcClusterIDIndex,
-    createPetClusterPetTable,
+    ..._defaultMigrationScripts,
   ];
 
   // only have a single app-wide reference to the database
