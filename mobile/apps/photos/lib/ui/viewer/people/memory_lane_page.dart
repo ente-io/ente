@@ -703,15 +703,18 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: ValueListenableBuilder<double>(
-                                          valueListenable:
-                                              _stackProgressNotifier,
-                                          builder: (context, stackProgress, _) {
-                                            return _buildFrameView(
-                                              context,
-                                              stackProgress,
-                                            );
-                                          },
+                                        child: RepaintBoundary(
+                                          child: ValueListenableBuilder<double>(
+                                            valueListenable:
+                                                _stackProgressNotifier,
+                                            builder:
+                                                (context, stackProgress, _) {
+                                              return _buildFrameView(
+                                                context,
+                                                stackProgress,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1236,7 +1239,10 @@ class _MemoryLaneCard extends StatelessWidget {
     final scale = _calculateScale(distance);
     final yOffset = _calculateYOffset(distance);
     final opacity = _calculateOpacity(distance);
-    final blurSigma = blurEnabled ? _calculateBlur(distance) : 0.0;
+    // Skip the expensive ImageFiltered blur for distant cards where the
+    // combination of low opacity and dark overlay already obscures detail.
+    final blurSigma =
+        blurEnabled && distance < 3.0 ? _calculateBlur(distance) : 0.0;
     final rotation = _calculateRotation(distance);
     final overlayOpacity = _calculateOverlayOpacity(distance);
 
@@ -1323,25 +1329,24 @@ class _MemoryLaneCard extends StatelessWidget {
       ),
     );
 
+    final transform = Matrix4.identity()
+      ..translate(0.0, yOffset)
+      ..rotateZ(rotation)
+      ..scale(scale, scale);
+
     return Positioned.fill(
       child: IgnorePointer(
         child: Opacity(
           opacity: opacity,
-          child: Transform.translate(
-            offset: Offset(0, yOffset),
-            child: Transform.rotate(
-              angle: rotation,
-              child: Transform.scale(
-                scale: scale,
-                alignment: Alignment.center,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(_cardRadius),
-                    boxShadow: cardShadow,
-                  ),
-                  child: cardContent,
-                ),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: transform,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_cardRadius),
+                boxShadow: cardShadow,
               ),
+              child: cardContent,
             ),
           ),
         ),

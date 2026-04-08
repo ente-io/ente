@@ -18,6 +18,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 typedef _TimelineComputationResult = ({
@@ -154,9 +155,34 @@ class MemoryLaneService {
     });
   }
 
-  Future<MemoryLanePersonTimeline?> getTimeline(String personId) {
-    if (!isFeatureEnabled) return Future.value(null);
-    return _cacheService.getTimeline(personId);
+  Future<MemoryLanePersonTimeline?> getTimeline(String personId) async {
+    if (!isFeatureEnabled) return null;
+    final timeline = await _cacheService.getTimeline(personId);
+    if (timeline == null || timeline.entries.isEmpty) {
+      return timeline;
+    }
+
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
+    final containsHiddenEntry = timeline.entries.any(
+      (entry) => hiddenFileIds.contains(entry.fileId),
+    );
+    if (!containsHiddenEntry) {
+      return timeline;
+    }
+
+    _logger.info(
+      "Memory Lane: evicting stale cached timeline for $personId due to hidden entries",
+    );
+    await _cacheService.removeTimeline(personId);
+    await _refreshReadyPersonIds();
+    schedulePersonRecompute(
+      personId,
+      force: true,
+      trigger: "hidden_entry_validation",
+    );
+    return null;
   }
 
   bool hasReadyTimelineSync(String personId) {
@@ -353,12 +379,16 @@ class MemoryLaneService {
     final uniqueFileIds =
         faceIds.map(getFileIdFromFaceId<int>).toSet().toList();
     final fileMap = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
     final minCreationTime = minimumEligibleCreationTimeMicros(
       person.data.birthDate,
     );
     final counts = <int, int>{};
     for (final faceId in faceIds) {
       final fileId = getFileIdFromFaceId<int>(faceId);
+      if (hiddenFileIds.contains(fileId)) continue;
       final file = fileMap[fileId];
       final creationTime = file?.creationTime;
       if (creationTime == null || creationTime <= 0) {
@@ -536,11 +566,15 @@ class MemoryLaneService {
     final List<int> uniqueFileIds =
         faceIds.map(getFileIdFromFaceId<int>).toSet().toList();
     final fileMap = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
 
     final faces = <_TimelineFaceData>[];
     final facesByFileId = <int, Map<String, Face>>{};
     for (final faceId in faceIds) {
       final fileId = getFileIdFromFaceId<int>(faceId);
+      if (hiddenFileIds.contains(fileId)) continue;
       final file = fileMap[fileId];
       if (file == null) {
         continue;
