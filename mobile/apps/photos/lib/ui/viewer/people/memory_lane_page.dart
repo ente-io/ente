@@ -1323,25 +1323,24 @@ class _MemoryLaneCard extends StatelessWidget {
       ),
     );
 
+    final transform = Matrix4.identity()
+      ..translate(0.0, yOffset)
+      ..rotateZ(rotation)
+      ..scale(scale, scale);
+
     return Positioned.fill(
       child: IgnorePointer(
         child: Opacity(
           opacity: opacity,
-          child: Transform.translate(
-            offset: Offset(0, yOffset),
-            child: Transform.rotate(
-              angle: rotation,
-              child: Transform.scale(
-                scale: scale,
-                alignment: Alignment.center,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(_cardRadius),
-                    boxShadow: cardShadow,
-                  ),
-                  child: cardContent,
-                ),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: transform,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_cardRadius),
+                boxShadow: cardShadow,
               ),
+              child: cardContent,
             ),
           ),
         ),
