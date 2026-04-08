@@ -1,4 +1,5 @@
 Latest changes:
+- Ashil: Fix app going blank on iOS on deleting all empty albums
 - Ashil: Show family dashboard for family non-admin members too
 - Ashil: Updated 'ente' branding
 - Ashil, Laurens: Fix file download not working for files with stale localID references
