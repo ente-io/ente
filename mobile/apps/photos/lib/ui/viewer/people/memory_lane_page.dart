@@ -1239,7 +1239,10 @@ class _MemoryLaneCard extends StatelessWidget {
     final scale = _calculateScale(distance);
     final yOffset = _calculateYOffset(distance);
     final opacity = _calculateOpacity(distance);
-    final blurSigma = blurEnabled ? _calculateBlur(distance) : 0.0;
+    // Skip the expensive ImageFiltered blur for distant cards where the
+    // combination of low opacity and dark overlay already obscures detail.
+    final blurSigma =
+        blurEnabled && distance < 3.0 ? _calculateBlur(distance) : 0.0;
     final rotation = _calculateRotation(distance);
     final overlayOpacity = _calculateOverlayOpacity(distance);
 
