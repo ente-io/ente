@@ -2391,8 +2391,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         _logger.warning("Failed to delete pet face vectors", e, s);
       }
     }
-    // Collect which clusters will lose members so we can recompute their
-    // summaries and centroids after the deletion.
+    // Collect which clusters may become empty so we can delete their centroid
+    // vectors after the deletion.
     final affectedClusterIds = <String>{};
     final speciesByCluster = <String, int>{};
     if (faceIdsToRemove.isNotEmpty) {
@@ -2410,9 +2410,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         speciesByCluster[cid] = row[speciesColumn] as int;
       }
     }
-
-      // Delete mapping table entries, cluster assignments, and detection rows
-      // atomically.
+    // Delete mapping table entries, cluster assignments, and detection rows
+    // atomically.
     await db.writeTransaction((tx) async {
       if (faceIdsToRemove.isNotEmpty) {
         final fpH = List.filled(faceIdsToRemove.length, '?').join(',');
@@ -2453,100 +2452,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await _deletePetClusterCentroids(db, emptiedIds, speciesByCluster);
     }
 
-    // Recompute centroids for clusters that lost members but still have
-    // remaining faces (empty ones were already deleted above).
-    if (affectedClusterIds.isNotEmpty) {
-      await _recomputeSurvivingPetClusterCentroids(db, affectedClusterIds);
-    }
-  }
-
-  /// Recompute centroid vectors for clusters that lost members but were not
-  /// emptied by a file deletion.
-  Future<void> _recomputeSurvivingPetClusterCentroids(
-    SqliteDatabase db,
-    Set<String> clusterIds,
-  ) async {
-    final centroidsBySpecies = <int, Map<String, Float32List>>{};
-
-    for (final clusterId in clusterIds) {
-      // Get remaining faces for this cluster
-      final faceRows = await db.getAll(
-        'SELECT fc.$petFaceIDColumn, f.$speciesColumn, f.$faceVectorIdColumn '
-        'FROM $petFaceClustersTable fc '
-        'INNER JOIN $petFacesTable f '
-        'ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
-        'WHERE fc.$clusterIDColumn = ?',
-        [clusterId],
-      );
-      if (faceRows.isEmpty) continue; // already deleted by transaction
-
-      final vectorIds = <int>[];
-      int? species;
-      for (final row in faceRows) {
-        species ??= row[speciesColumn] as int;
-        final vid = row[faceVectorIdColumn] as int?;
-        if (vid != null) vectorIds.add(vid);
-      }
-      if (vectorIds.isEmpty || species == null) continue;
-
-      try {
-        final vdb = PetVectorDB.forModel(
-          species: species,
-          isFace: true,
-          offline: _isOffline,
-        );
-        final embs = await vdb.getEmbeddings(vectorIds);
-        if (embs.isEmpty) continue;
-
-        final centroid = computeL2MeanCentroid(embs);
-
-        centroidsBySpecies
-            .putIfAbsent(species, () => {})
-            .putIfAbsent(clusterId, () => centroid);
-      } catch (e, s) {
-        _logger.warning(
-          "Failed to recompute centroid for cluster $clusterId",
-          e,
-          s,
-        );
-      }
-    }
-
-    // Write updated centroids to vector DB
-    for (final entry in centroidsBySpecies.entries) {
-      try {
-        final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
-          species: entry.key,
-          offline: _isOffline,
-        );
-        final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
-          entry.value.keys,
-          db: db,
-          createIfMissing: true,
-        );
-        final vectorIds = <int>[];
-        final centroids = <Float32List>[];
-        for (final ce in entry.value.entries) {
-          final vectorId = idMap[ce.key];
-          if (vectorId != null) {
-            vectorIds.add(vectorId);
-            centroids.add(ce.value);
-          }
-        }
-        if (vectorIds.isNotEmpty) {
-          await centroidVdb.bulkInsertCentroids(
-            vectorIds: vectorIds,
-            centroids: centroids,
-          );
-        }
-      } catch (e, s) {
-        _logger.warning(
-          "Failed to write centroid for species ${entry.key}",
-          e,
-          s,
-        );
-      }
-    }
   }
 
   /// Delete centroid vector IDs and usearch vectors for emptied pet clusters.
