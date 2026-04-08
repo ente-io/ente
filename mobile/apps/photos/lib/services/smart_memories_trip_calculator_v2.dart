@@ -30,6 +30,10 @@ class _LocationCluster {
       .map((file) => file.creationTime!)
       .reduce((value, element) => min(value, element));
 
+  int get lastCreationTime => files
+      .map((file) => file.creationTime!)
+      .reduce((value, element) => max(value, element));
+
   void addFile(EnteFile file) {
     files.add(file);
     _latitudeSum += file.location!.latitude!;
@@ -90,7 +94,7 @@ class TripMemoriesCalculatorV2 {
   // absorbed into legitimate trips.
   static const _minChainClusterPhotos = 5;
 
-  // Max temporal gap (in days) for merging trips across temporal blocks.
+  // Max temporal gap (in days) for merging clusters or trips.
   static const _mergeWindowDays = 2;
 
   // Max spatial distance (in km) for merging trips across temporal blocks.
@@ -402,12 +406,21 @@ class TripMemoriesCalculatorV2 {
     for (int i = 1; i < chainable.length; i++) {
       final next = chainable[i];
       final distance = calculateDistance(currentCluster.center, next.center);
+      final gapDays =
+          DateTime.fromMicrosecondsSinceEpoch(next.firstCreationTime)
+              .difference(
+                DateTime.fromMicrosecondsSinceEpoch(
+                    currentCluster.lastCreationTime),
+              )
+              .inDays;
       final allFiles = [...currentCluster.files, ...next.files];
       final times = allFiles.map((f) => f.creationTime!);
       final spanDays = DateTime.fromMicrosecondsSinceEpoch(times.reduce(max))
           .difference(DateTime.fromMicrosecondsSinceEpoch(times.reduce(min)))
           .inDays;
-      if (distance <= _chainHopDistance && spanDays <= _maxTripDays) {
+      if (distance <= _chainHopDistance &&
+          gapDays <= _mergeWindowDays &&
+          spanDays <= _maxTripDays) {
         currentCluster.addCluster(next);
       } else {
         merged.add(currentCluster);
