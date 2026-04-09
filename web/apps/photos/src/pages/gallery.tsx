@@ -51,6 +51,7 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import type { Location } from "ente-base/types";
+import { ensureContactsReady } from "ente-contacts-web";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
@@ -535,6 +536,18 @@ const Page: React.FC = () => {
 
             // Initialize the reducer.
             const user = ensureLocalUser();
+            const masterKey = await masterKeyFromSession();
+            if (masterKey) {
+                void ensureContactsReady({
+                    userID: user.id,
+                    masterKeyB64: masterKey,
+                }).catch((error: unknown) => {
+                    log.warn(
+                        "[gallery] Failed to warm contacts display cache",
+                        error,
+                    );
+                });
+            }
             const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
                 type: "mount",
