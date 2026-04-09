@@ -347,7 +347,6 @@ class _ContactResultPageState extends State<ContactResultPage> {
         contactUserId: contactUserId,
         email: _contactEmail,
         existingContact: _savedContact,
-        photoPickerFiles: files,
       ),
     );
     if (updated is contacts.ContactRecord && mounted) {

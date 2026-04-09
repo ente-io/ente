@@ -15,12 +15,11 @@ import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
 Future<EnteFile?> showContactPhotoPickerSheet(
-  BuildContext context, {
-  List<EnteFile>? initialFiles,
-}) {
+  BuildContext context,
+) {
   return showBarModalBottomSheet<EnteFile>(
     context: context,
-    builder: (context) => _ContactPhotoPickerSheet(initialFiles: initialFiles),
+    builder: (context) => const _ContactPhotoPickerSheet(),
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
       borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
@@ -33,9 +32,7 @@ Future<EnteFile?> showContactPhotoPickerSheet(
 }
 
 class _ContactPhotoPickerSheet extends StatelessWidget {
-  final List<EnteFile>? initialFiles;
-
-  const _ContactPhotoPickerSheet({this.initialFiles});
+  const _ContactPhotoPickerSheet();
 
   @override
   Widget build(BuildContext context) {
@@ -69,11 +66,8 @@ class _ContactPhotoPickerSheet extends StatelessWidget {
                           limit,
                           asc,
                         }) async {
-                          final files =
-                              initialFiles == null || initialFiles!.isEmpty
-                                  ? await SearchService.instance
-                                      .getAllFilesForGenericGallery()
-                                  : initialFiles!;
+                          final files = await SearchService.instance
+                              .getAllFilesForContactPhotoPicker();
                           return FileLoadResult(files, false);
                         },
                         tagPrefix: "pick_contact_photo_gallery",

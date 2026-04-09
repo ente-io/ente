@@ -269,6 +269,20 @@ class SearchService {
     }
   }
 
+  Future<List<EnteFile>> getAllFilesForContactPhotoPicker() async {
+    final files = await getAllFilesForSearch();
+    final archivedCollectionIds =
+        (await _collectionService.getArchivedCollection())
+            .map((collection) => collection.id)
+            .toSet();
+    if (archivedCollectionIds.isEmpty) {
+      return files;
+    }
+    return files
+        .where((file) => !archivedCollectionIds.contains(file.collectionID))
+        .toList();
+  }
+
   Future<List<EnteFile>> getHiddenFiles() async {
     if (_cachedHiddenFilesFuture != null) {
       return _cachedHiddenFilesFuture!;

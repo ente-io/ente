@@ -41,13 +41,11 @@ class EditContactPage extends StatefulWidget {
   final int contactUserId;
   final String email;
   final contacts.ContactRecord? existingContact;
-  final List<EnteFile>? photoPickerFiles;
 
   const EditContactPage({
     required this.contactUserId,
     required this.email,
     required this.existingContact,
-    this.photoPickerFiles,
     super.key,
   });
 
@@ -340,10 +338,7 @@ class _EditContactPageState extends State<EditContactPage> {
   }
 
   Future<void> _pickContactPhoto() async {
-    final selectedFile = await showContactPhotoPickerSheet(
-      context,
-      initialFiles: widget.photoPickerFiles,
-    );
+    final selectedFile = await showContactPhotoPickerSheet(context);
     if (selectedFile == null) {
       return;
     }
