@@ -52,6 +52,7 @@ jobs:
               uses: dtolnay/rust-toolchain@stable
               with:
                   toolchain: ${{ env.RUST_VERSION }}
+                  targets: armv7-linux-androideabi,aarch64-linux-android
 
             - name: Resolve dependencies with lockfile enforcement
               run: flutter pub get --enforce-lockfile
