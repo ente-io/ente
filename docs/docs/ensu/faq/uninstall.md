@@ -15,39 +15,22 @@ This page explains how to remove the downloaded models and local data.
 1. Quit Ensu if it is running.
 2. Move **Ensu.app** from your Applications folder (or wherever you placed it)
    to the Trash.
-3. Delete the application data folder:
-
-    ```sh
-    rm -rf ~/Library/Application\ Support/io.ente.ensu
-    ```
-
-    This folder contains the downloaded model files (in a `models` subfolder),
-    the local chat database, attachments, and logs.
+3. Delete "~/Library/Application Support/io.ente.ensu". It contains the
+   downloaded models, local chat database, attachments, and logs.
 
 ## Windows
 
 1. Uninstall Ensu using **Settings > Apps** (or **Add or Remove Programs**).
-2. Delete the application data folder:
-
-    ```
-    %APPDATA%\io.ente.ensu
-    ```
-
-    You can paste this path into the File Explorer address bar. It contains the
-    downloaded models, chat database, and logs.
+2. Delete "%APPDATA%\io.ente.ensu". You can paste this path into the File
+   Explorer address bar. It contains the downloaded models, chat database,
+   and logs.
 
 ## Linux
 
 1. Remove the Ensu application (e.g. delete the AppImage or uninstall the
    package).
-2. Delete the application data folder:
-
-    ```sh
-    rm -rf ~/.local/share/io.ente.ensu
-    ```
-
-    On some distributions this may instead be at the path given by
-    `$XDG_DATA_HOME/io.ente.ensu`.
+2. Delete "~/.local/share/io.ente.ensu" (or "$XDG_DATA_HOME/io.ente.ensu"
+   if set). It contains the downloaded models, chat database, and logs.
 
 ## iOS
 
