@@ -1588,7 +1588,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
       // Clear pet clustering tables
       await db.execute(deletePetFaceClustersTable);
-      await db.execute(deletePetClusterSummaryTable);
       await db.execute(deletePetClusterPetTable);
       if (!_isOffline) {
         await db.execute(deleteNotPetFeedbackTable);

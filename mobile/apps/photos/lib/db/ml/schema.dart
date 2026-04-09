@@ -296,10 +296,6 @@ CREATE TABLE IF NOT EXISTS $petClusterPetTable (
 ''';
 
 const deletePetFaceClustersTable = 'DELETE FROM $petFaceClustersTable';
-// Legacy cleanup for older installs that still have the removed table.
-const petClusterSummaryTable = 'pet_cluster_summary';
-const deletePetClusterSummaryTable =
-    'DROP TABLE IF EXISTS $petClusterSummaryTable';
 const deletePetClusterPetTable = 'DELETE FROM $petClusterPetTable';
 
 // ── Not-Pet Feedback Table ──
