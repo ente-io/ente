@@ -242,7 +242,7 @@
     "leave": "Verlaten",
     "leave_family_plan_confirm": "Weet je zeker dat je het familie-plan wilt verlaten?",
     "choose_plan": "Kies uw abonnement",
-    "manage_plan": "Beheer uw abonnement",
+    "manage_plan": "",
     "current_usage": "Huidig gebruik is <strong>{{usage}}</strong>",
     "two_months_free": "Krijg 2 maanden gratis bij jaarlijkse abonnementen",
     "free_plan_option": "Doorgaan met gratis account",
