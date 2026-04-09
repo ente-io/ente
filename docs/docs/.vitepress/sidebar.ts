@@ -533,6 +533,17 @@ export const sidebar = [
             {
                 text: "FAQ",
                 link: "/ensu/faq/",
+                collapsed: true,
+                items: [
+                    {
+                        text: "General",
+                        link: "/ensu/faq/",
+                    },
+                    {
+                        text: "Uninstall",
+                        link: "/ensu/faq/uninstall",
+                    },
+                ],
             },
         ],
     },
