@@ -14,21 +14,21 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import {
     OverflowMenu,
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
+import { isHTTPErrorWithStatus } from "ente-base/http";
+import log from "ente-base/log";
 import {
     ensureContactsReady,
     useResolvedContactAvatar,
     useResolvedContactDisplay,
 } from "ente-contacts-web";
-import { isHTTPErrorWithStatus } from "ente-base/http";
-import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -138,11 +138,10 @@ export const LockerCollectionShareDrawer: React.FC<
             return;
         }
 
-        let cancelled = false;
         void (async () => {
             try {
                 const masterKeyB64 = await masterKeyFromSession();
-                if (!masterKeyB64 || cancelled) {
+                if (!masterKeyB64) {
                     return;
                 }
                 await ensureContactsReady({
@@ -150,18 +149,12 @@ export const LockerCollectionShareDrawer: React.FC<
                     masterKeyB64,
                 });
             } catch (error) {
-                if (!cancelled) {
-                    log.warn(
-                        "[LockerCollectionShareDrawer] Failed to warm contacts display cache",
-                        error,
-                    );
-                }
+                log.warn(
+                    "[LockerCollectionShareDrawer] Failed to warm contacts display cache",
+                    error,
+                );
             }
         })();
-
-        return () => {
-            cancelled = true;
-        };
     }, [currentUser.id, open]);
 
     const sortedSharees = useMemo(
@@ -566,7 +559,7 @@ const ParticipantRow: React.FC<{
     const initial =
         resolved.source === "contact"
             ? resolved.initial
-            : (email.charAt(0).toUpperCase() || "?");
+            : email.charAt(0).toUpperCase() || "?";
 
     return (
         <Stack

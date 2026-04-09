@@ -12,12 +12,12 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
 import {
     useResolvedContactAvatar,
     useResolvedContactDisplay,
 } from "ente-contacts-web";
-import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
-import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
@@ -252,8 +252,9 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
         userID: useContactDisplay ? userID : undefined,
         email: useContactDisplay ? email : undefined,
     });
-    const displayName =
-        useContactDisplay ? (resolved.primaryLabel || userName) : userName;
+    const displayName = useContactDisplay
+        ? resolved.primaryLabel || userName
+        : userName;
 
     return (
         <CommentHeaderContainer>
@@ -262,17 +263,19 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
                     width: avatarSize,
                     height: avatarSize,
                     fontSize: 14,
-                    bgcolor: getAvatarColor(avatarColorKey ?? email ?? userName),
+                    bgcolor: getAvatarColor(
+                        avatarColorKey ?? email ?? userName,
+                    ),
                     color: "#fff",
                 }}
                 src={useContactDisplay ? resolved.avatarURL : undefined}
             >
                 {isMaskedEmail ? (
                     <PersonIcon />
+                ) : useContactDisplay ? (
+                    resolved.initial
                 ) : (
-                    (useContactDisplay
-                        ? resolved.initial
-                        : userName[0]?.toUpperCase())
+                    userName[0]?.toUpperCase()
                 )}
             </Avatar>
             <UserName>{displayName}</UserName>
@@ -337,7 +340,7 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
 
         // For registered users, look up email
         return shouldResolveParent
-            ? (resolvedParent.primaryLabel || parentEmail || t("user"))
+            ? resolvedParent.primaryLabel || parentEmail || t("user")
             : (parentEmail ?? t("user"));
     };
 

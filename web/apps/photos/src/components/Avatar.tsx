@@ -1,5 +1,4 @@
 // TODO: Audit this file
-/* eslint-disable react-hooks/exhaustive-deps */
 import { styled } from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
 import { useResolvedContactAvatar } from "ente-contacts-web";
@@ -49,8 +48,13 @@ const AvatarImage = styled("img")<{
         opacity === undefined ? 1 : Math.max(0, Math.min(opacity, 100)) / 100};
 `;
 
-const colorSeedFromEmail = (email: string) =>
-    [...email].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+const colorSeedFromEmail = (email: string) => {
+    let seed = 0;
+    for (const char of email) {
+        seed += char.codePointAt(0) ?? 0;
+    }
+    return seed;
+};
 
 const Avatar: React.FC<AvatarProps> = ({
     user,
@@ -65,13 +69,8 @@ const Avatar: React.FC<AvatarProps> = ({
 
     const resolvedContact = useResolvedContactAvatar(
         file && file.ownerID !== user?.id
-            ? {
-                  userID: file.ownerID,
-                  email: emailByUserID?.get(file.ownerID),
-              }
-            : {
-                  email,
-              },
+            ? { userID: file.ownerID, email: emailByUserID?.get(file.ownerID) }
+            : { email },
     );
 
     const fallbackEmail = resolvedContact.actualEmail ?? email;
@@ -114,7 +113,13 @@ const Avatar: React.FC<AvatarProps> = ({
     ]);
 
     if (resolvedContact.avatarURL && !isPublicCollectedAvatar) {
-        return <AvatarImage size={18} opacity={opacity} src={resolvedContact.avatarURL} />;
+        return (
+            <AvatarImage
+                size={18}
+                opacity={opacity}
+                src={resolvedContact.avatarURL}
+            />
+        );
     }
 
     if (!colorCode || !userLetter) {

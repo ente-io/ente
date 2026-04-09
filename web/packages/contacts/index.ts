@@ -1,16 +1,9 @@
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
-import {
-    clientPackageName,
-    desktopAppVersion,
-    isDesktop,
-} from "ente-base/app";
+import { clientPackageName, desktopAppVersion, isDesktop } from "ente-base/app";
 import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
-import {
-    contacts_open_ctx,
-    type ContactsCtxHandle,
-} from "ente-wasm";
+import { contacts_open_ctx, type ContactsCtxHandle } from "ente-wasm";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
     saveContactDisplayRecords,
     saveContactsSinceTime,
@@ -49,10 +42,7 @@ type RemoteContactRecord = {
     updatedAt: number | bigint;
 };
 
-type ContactsReadyInput = {
-    userID: number;
-    masterKeyB64: string;
-};
+type ContactsReadyInput = { userID: number; masterKeyB64: string };
 
 type ContactsState = {
     snapshot: ContactsDisplaySnapshot;
@@ -229,11 +219,9 @@ const contactDisplayRecordFromRemote = (
     contactUserId: Number(record.contactUserId),
     resolvedEmail: knownEmailOrUndefined(record.email),
     displayName: knownEmailOrUndefined(record.name),
-    profilePictureAttachmentID:
-        knownEmailOrUndefined(
-            record.profilePictureAttachmentID ??
-                record.profilePictureAttachmentId,
-        ),
+    profilePictureAttachmentID: knownEmailOrUndefined(
+        record.profilePictureAttachmentID ?? record.profilePictureAttachmentId,
+    ),
     updatedAt: Number(record.updatedAt),
 });
 
@@ -254,7 +242,8 @@ export const contactsDisplaySubscribe = (onChange: () => void) => {
 
 const subscribeAvatarURL = (contactID: string, onChange: () => void) => {
     const listeners =
-        state.avatarListenersByContactID.get(contactID) ?? new Set<() => void>();
+        state.avatarListenersByContactID.get(contactID) ??
+        new Set<() => void>();
     listeners.add(onChange);
     state.avatarListenersByContactID.set(contactID, listeners);
     return () => {
@@ -374,10 +363,9 @@ const syncContacts = async ({
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
-        await saveContactDisplayRecords(
-            sessionKey,
-            [...state.contactsByID.values()],
-        );
+        await saveContactDisplayRecords(sessionKey, [
+            ...state.contactsByID.values(),
+        ]);
         await saveContactsSinceTime(sessionKey, sinceTime);
         emitSnapshot(true);
     }
@@ -468,7 +456,12 @@ const inferImageMimeType = (bytes: Uint8Array) => {
     ) {
         return "image/png";
     }
-    if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    if (
+        bytes.length >= 3 &&
+        bytes[0] === 0xff &&
+        bytes[1] === 0xd8 &&
+        bytes[2] === 0xff
+    ) {
         return "image/jpeg";
     }
     if (
@@ -510,12 +503,13 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
     const load = ctx
         .get_profile_picture(contactID)
         .then((bytes: Uint8Array) => {
-            if (!isCurrentSession(sessionKey, generation) || state.ctx !== ctx) {
+            if (
+                !isCurrentSession(sessionKey, generation) ||
+                state.ctx !== ctx
+            ) {
                 return;
             }
-            const blob = new Blob([bytes], {
-                type: inferImageMimeType(bytes),
-            });
+            const blob = new Blob([bytes], { type: inferImageMimeType(bytes) });
             const url = URL.createObjectURL(blob);
             cleanupAvatarURL(contactID);
             state.avatarURLByContactID.set(contactID, url);
@@ -523,7 +517,10 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
             emitAvatarURL(contactID);
         })
         .catch((error: unknown) => {
-            if (!isCurrentSession(sessionKey, generation) || state.ctx !== ctx) {
+            if (
+                !isCurrentSession(sessionKey, generation) ||
+                state.ctx !== ctx
+            ) {
                 return;
             }
             state.avatarFailureUntilByContactID.set(
@@ -590,8 +587,5 @@ export const useResolvedContactAvatar = (
         void ensureProfilePictureLoaded(display.contactId);
     }, [display.contactId, display.profilePictureAttachmentID]);
 
-    return {
-        ...display,
-        avatarURL,
-    };
+    return { ...display, avatarURL };
 };

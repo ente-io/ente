@@ -21,7 +21,6 @@ import TextField from "@mui/material/TextField";
 import Avatar from "components/Avatar";
 import { type LocalUser } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import { useResolvedContactDisplay } from "ente-contacts-web";
 import {
     SidebarDrawer,
     SidebarDrawerTitlebar,
@@ -51,6 +50,7 @@ import { deriveInteractiveKey } from "ente-base/crypto";
 import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
+import { useResolvedContactDisplay } from "ente-contacts-web";
 import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
@@ -301,10 +301,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
 type ResolvedEmailRowCommonProps = Pick<
     CollectionShareProps,
     "user" | "emailByUserID"
-> & {
-    email?: string;
-    fallbackLabel?: string;
-};
+> & { email?: string; fallbackLabel?: string };
 
 const ResolvedEmailRowLabel: React.FC<ResolvedEmailRowCommonProps> = ({
     email,
@@ -428,18 +425,18 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                         {t("admins", { defaultValue: "Admins" })}
                     </RowButtonGroupTitle>
-                        <RowButtonGroup>
-                            {admins.map((email, index) => (
-                                <React.Fragment key={email}>
-                                    <ResolvedEmailRowLabel
-                                        email={email}
-                                        fallbackLabel={
-                                            email == user.email
-                                                ? t("you")
-                                                : undefined
-                                        }
-                                        {...{ user, emailByUserID }}
-                                    />
+                    <RowButtonGroup>
+                        {admins.map((email, index) => (
+                            <React.Fragment key={email}>
+                                <ResolvedEmailRowLabel
+                                    email={email}
+                                    fallbackLabel={
+                                        email == user.email
+                                            ? t("you")
+                                            : undefined
+                                    }
+                                    {...{ user, emailByUserID }}
+                                />
                                 {index != admins.length - 1 && (
                                     <RowButtonDivider />
                                 )}
@@ -479,21 +476,21 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     <RowButtonGroupTitle icon={<Photo />}>
                         {t("viewers")}
                     </RowButtonGroupTitle>
-                        <RowButtonGroup>
-                            {viewers.map((email, index) => (
-                                <React.Fragment key={email}>
-                                    <ResolvedEmailRowLabel
-                                        email={email}
-                                        fallbackLabel={
-                                            email == user.email
-                                                ? t("you")
-                                                : undefined
-                                        }
-                                        {...{ user, emailByUserID }}
-                                    />
-                                    {index != viewers.length - 1 && (
-                                        <RowButtonDivider />
-                                    )}
+                    <RowButtonGroup>
+                        {viewers.map((email, index) => (
+                            <React.Fragment key={email}>
+                                <ResolvedEmailRowLabel
+                                    email={email}
+                                    fallbackLabel={
+                                        email == user.email
+                                            ? t("you")
+                                            : undefined
+                                    }
+                                    {...{ user, emailByUserID }}
+                                />
+                                {index != viewers.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
                             </React.Fragment>
                         ))}
                     </RowButtonGroup>
@@ -575,16 +572,11 @@ const EmailShare: React.FC<EmailShareProps> = ({
                                     />
                                 }
                                 label={
-                                    collection.sharees.length === 1
-                                        ? (
-                                              <ResolvedEmailText
-                                                  email={
-                                                      collection.sharees[0]
-                                                          ?.email
-                                                  }
-                                              />
-                                          )
-                                        : null
+                                    collection.sharees.length === 1 ? (
+                                        <ResolvedEmailText
+                                            email={collection.sharees[0]?.email}
+                                        />
+                                    ) : null
                                 }
                                 endIcon={<ChevronRightIcon />}
                                 onClick={showManageEmail}
@@ -1081,14 +1073,14 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                             {t("owner")}
                         </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                <ResolvedEmailRowLabel
-                                    email={ownerEmail}
-                                    fallbackLabel={isOwner ? t("you") : undefined}
-                                    {...{ user, emailByUserID }}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
+                        <RowButtonGroup>
+                            <ResolvedEmailRowLabel
+                                email={ownerEmail}
+                                fallbackLabel={isOwner ? t("you") : undefined}
+                                {...{ user, emailByUserID }}
+                            />
+                        </RowButtonGroup>
+                    </Stack>
                     {(admins.length > 0 || canManageParticipants) && (
                         <Stack>
                             <RowButtonGroupTitle

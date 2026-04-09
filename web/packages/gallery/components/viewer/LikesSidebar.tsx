@@ -9,9 +9,9 @@ import {
     styled,
     Typography,
 } from "@mui/material";
-import { useResolvedContactAvatar } from "ente-contacts-web";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
+import { useResolvedContactAvatar } from "ente-contacts-web";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
@@ -126,15 +126,15 @@ const LikerRowItem: React.FC<{ liker: Liker }> = ({ liker }) => {
             >
                 {liker.isMaskedEmail ? (
                     <PersonIcon />
+                ) : shouldResolveContact ? (
+                    resolved.initial
                 ) : (
-                    (shouldResolveContact
-                        ? resolved.initial
-                        : liker.avatarInitial)
+                    liker.avatarInitial
                 )}
             </Avatar>
             <LikerName>
                 {shouldResolveContact
-                    ? (resolved.primaryLabel || liker.userName)
+                    ? resolved.primaryLabel || liker.userName
                     : liker.userName}
             </LikerName>
             <HeartFilledIcon />

@@ -98,19 +98,17 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
         header: "wrapped-header",
     }));
 
-    const diff =
-        options.diff ??
-        [
-            {
-                id: "ct_1",
-                contactUserId: 101,
-                email: "set@test.test",
-                name: "Set",
-                profilePictureAttachmentID: "ua_1",
-                isDeleted: false,
-                updatedAt: 1,
-            },
-        ];
+    const diff = options.diff ?? [
+        {
+            id: "ct_1",
+            contactUserId: 101,
+            email: "set@test.test",
+            name: "Set",
+            profilePictureAttachmentID: "ua_1",
+            isDeleted: false,
+            updatedAt: 1,
+        },
+    ];
 
     const get_diff = vi
         .fn()
@@ -123,20 +121,10 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
         throw options.getProfilePictureError ?? new Error("boom");
     });
 
-    vi.doMock("ente-base/kv", () => ({
-        getKV,
-        getKVN,
-        setKV,
-    }));
-    vi.doMock("ente-base/token", () => ({
-        savedAuthToken,
-    }));
-    vi.doMock("ente-base/origins", () => ({
-        apiOrigin,
-    }));
-    vi.doMock("ente-base/log", () => ({
-        default: { info, warn, error },
-    }));
+    vi.doMock("ente-base/kv", () => ({ getKV, getKVN, setKV }));
+    vi.doMock("ente-base/token", () => ({ savedAuthToken }));
+    vi.doMock("ente-base/origins", () => ({ apiOrigin }));
+    vi.doMock("ente-base/log", () => ({ default: { info, warn, error } }));
     vi.doMock("ente-base/app", () => ({
         clientPackageName: "io.ente.photos.web",
         desktopAppVersion: undefined,
@@ -153,13 +141,7 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
 
     const contacts = await import("./index");
 
-    return {
-        contacts,
-        setKV,
-        get_diff,
-        get_profile_picture,
-        info,
-    };
+    return { contacts, setKV, get_diff, get_profile_picture, info };
 };
 
 describe("ensureContactsReady", () => {
@@ -216,13 +198,10 @@ describe("profile picture loading", () => {
 
     test("uses the inferred image mime type for avatar blobs", async () => {
         const createObjectURL = vi.fn((_blob: Blob) => "blob:contact");
-        vi.stubGlobal("URL", {
-            createObjectURL,
-            revokeObjectURL: vi.fn(),
-        });
+        vi.stubGlobal("URL", { createObjectURL, revokeObjectURL: vi.fn() });
         const pngBytes = Uint8Array.from([
-            0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-            0x00, 0x00, 0x00, 0x0d,
+            0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00,
+            0x0d,
         ]);
         const { contacts } = await setupContactsModule({
             getProfilePictureBytes: pngBytes,
@@ -232,9 +211,7 @@ describe("profile picture loading", () => {
             userID: 101,
             masterKeyB64: "ignored",
         });
-        await contacts.__testing.preloadResolvedContactAvatar({
-            userID: 101,
-        });
+        await contacts.__testing.preloadResolvedContactAvatar({ userID: 101 });
 
         const blobArg = createObjectURL.mock.calls[0]?.[0] as Blob | undefined;
         expect(blobArg?.type).toBe("image/png");

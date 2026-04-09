@@ -49,9 +49,9 @@ import {
     haveMasterKeyInSession,
     masterKeyFromSession,
 } from "ente-base/session";
-import { ensureContactsReady } from "ente-contacts-web";
 import { savedAuthToken } from "ente-base/token";
 import type { Location } from "ente-base/types";
+import { ensureContactsReady } from "ente-contacts-web";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";

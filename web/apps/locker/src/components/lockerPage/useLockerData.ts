@@ -12,10 +12,10 @@ import {
     ensureOk,
     isHTTP401Error,
 } from "ente-base/http";
-import { ensureContactsReady } from "ente-contacts-web";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
+import { ensureContactsReady } from "ente-contacts-web";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";

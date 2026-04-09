@@ -4,7 +4,8 @@ import type {
     ResolvedContactDisplay,
 } from "./types";
 
-export const normalizeEmail = (email?: string | null) => email?.trim().toLowerCase();
+export const normalizeEmail = (email?: string | null) =>
+    email?.trim().toLowerCase();
 
 export const knownEmailOrUndefined = (email?: string | null) => {
     const trimmed = email?.trim();

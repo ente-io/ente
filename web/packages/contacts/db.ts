@@ -5,7 +5,8 @@ import type { ContactDisplayRecord, WrappedRootContactKey } from "./types";
 const contactsKey = (sessionKey: string) => `contacts/${sessionKey}/records`;
 const wrappedRootKeyKey = (sessionKey: string) =>
     `contacts/${sessionKey}/root-key`;
-const sinceTimeKey = (sessionKey: string) => `contacts/${sessionKey}/since-time`;
+const sinceTimeKey = (sessionKey: string) =>
+    `contacts/${sessionKey}/since-time`;
 
 const ContactDisplayRecordZ = z.object({
     contactId: z.string(),
