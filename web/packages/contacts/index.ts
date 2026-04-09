@@ -31,7 +31,7 @@ const AVATAR_FAILURE_TTL_MS = 60_000;
 const READY_RETRY_COOLDOWN_MS = 5_000;
 const CONTACTS_CACHE_SCHEMA_VERSION = 2;
 
-type RemoteContactRecord = {
+interface RemoteContactRecord {
     id: string;
     contactUserId: number | bigint;
     email?: string | null;
@@ -40,11 +40,14 @@ type RemoteContactRecord = {
     profilePictureAttachmentId?: string | null;
     isDeleted: boolean;
     updatedAt: number | bigint;
-};
+}
 
-type ContactsReadyInput = { userID: number; masterKeyB64: string };
+interface ContactsReadyInput {
+    userID: number;
+    masterKeyB64: string;
+}
 
-type ContactsState = {
+interface ContactsState {
     snapshot: ContactsDisplaySnapshot;
     listeners: Set<() => void>;
     currentSessionKey: string | undefined;
@@ -61,7 +64,7 @@ type ContactsState = {
     avatarListenersByContactID: Map<string, Set<() => void>>;
     lastReadyInput: ContactsReadyInput | undefined;
     retryTimer: ReturnType<typeof setTimeout> | undefined;
-};
+}
 
 const emptySnapshot = (): ContactsDisplaySnapshot => ({
     isHydrated: false,
@@ -308,7 +311,10 @@ const syncContacts = async ({
             userId: userID,
             masterKeyB64,
             cachedRootKey,
-            userAgent: globalThis.navigator?.userAgent,
+            userAgent:
+                typeof navigator === "undefined"
+                    ? undefined
+                    : navigator.userAgent,
             clientPackage: clientPackageName,
             clientVersion: isDesktop ? desktopAppVersion : undefined,
         });
@@ -327,7 +333,7 @@ const syncContacts = async ({
         ctx.update_auth_token(authToken);
     }
 
-    if (!ctx || !isCurrentSession(sessionKey, generation)) {
+    if (!isCurrentSession(sessionKey, generation)) {
         return;
     }
 
@@ -409,7 +415,7 @@ export const ensureContactsReady = async ({
                 state.retryTimer = undefined;
             }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
             if (state.retryTimer) {
                 clearTimeout(state.retryTimer);
             }

@@ -70,25 +70,25 @@ beforeEach(() => {
     vi.useRealTimers();
 });
 
-type SetupOptions = {
+interface SetupOptions {
     diff?: object[];
     getProfilePictureError?: Error;
     getProfilePictureBytes?: Uint8Array;
-};
+}
 
 const setupContactsModule = async (options: SetupOptions = {}) => {
     const kv = new Map<string, unknown>();
-    const setKV = vi.fn(async (key: string, value: unknown) => {
+    const setKV = vi.fn((key: string, value: unknown) => {
         kv.set(key, JSON.parse(JSON.stringify(value)));
     });
-    const getKV = vi.fn(async (key: string) => kv.get(key));
-    const getKVN = vi.fn(async (key: string) => {
+    const getKV = vi.fn((key: string) => kv.get(key));
+    const getKVN = vi.fn((key: string) => {
         const value = kv.get(key);
         return typeof value === "number" ? value : undefined;
     });
 
-    const savedAuthToken = vi.fn(async () => "auth-token-secret");
-    const apiOrigin = vi.fn(async () => "https://api.example");
+    const savedAuthToken = vi.fn(() => "auth-token-secret");
+    const apiOrigin = vi.fn(() => "https://api.example");
     const info = vi.fn();
     const warn = vi.fn();
     const error = vi.fn();
@@ -114,7 +114,7 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
         .fn()
         .mockResolvedValueOnce(diff)
         .mockResolvedValueOnce([]);
-    const get_profile_picture = vi.fn(async () => {
+    const get_profile_picture = vi.fn(() => {
         if (options.getProfilePictureBytes) {
             return options.getProfilePictureBytes;
         }
@@ -131,7 +131,7 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
         isDesktop: false,
     }));
     vi.doMock("ente-wasm", () => ({
-        contacts_open_ctx: vi.fn(async () => ({
+        contacts_open_ctx: vi.fn(() => ({
             update_auth_token,
             current_wrapped_root_key,
             get_diff,
@@ -197,7 +197,10 @@ describe("profile picture loading", () => {
     });
 
     test("uses the inferred image mime type for avatar blobs", async () => {
-        const createObjectURL = vi.fn((_blob: Blob) => "blob:contact");
+        const createObjectURL = vi.fn((blob: Blob) => {
+            void blob;
+            return "blob:contact";
+        });
         vi.stubGlobal("URL", { createObjectURL, revokeObjectURL: vi.fn() });
         const pngBytes = Uint8Array.from([
             0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00,
@@ -213,7 +216,7 @@ describe("profile picture loading", () => {
         });
         await contacts.__testing.preloadResolvedContactAvatar({ userID: 101 });
 
-        const blobArg = createObjectURL.mock.calls[0]?.[0] as Blob | undefined;
+        const blobArg = createObjectURL.mock.calls[0]?.[0];
         expect(blobArg?.type).toBe("image/png");
     });
 });
