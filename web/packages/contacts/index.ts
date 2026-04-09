@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import {
+    clientPackageName,
+    desktopAppVersion,
+    isDesktop,
+} from "ente-base/app";
 import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
@@ -296,6 +301,9 @@ const syncContacts = async ({
             userId: userID,
             masterKeyB64,
             cachedRootKey: await savedWrappedRootContactKey(sessionKey),
+            userAgent: globalThis.navigator?.userAgent,
+            clientPackage: clientPackageName,
+            clientVersion: isDesktop ? desktopAppVersion : undefined,
         });
         const wrappedRootKey =
             state.ctx.current_wrapped_root_key() as WrappedRootContactKey;
