@@ -712,7 +712,8 @@ class MemoriesCacheService {
     final activeTrips = memories
         .where(
           (memory) =>
-              memory.type == MemoryType.trips && memory.isRelevantAt(timestamp),
+              _shouldCarryForwardTripEntry(memory) &&
+              memory.isRelevantAt(timestamp),
         )
         .toList();
     final dedupedActiveTrips = _dedupeTripCacheEntriesInOrder(
@@ -729,6 +730,16 @@ class MemoriesCacheService {
     return dedupedActiveTrips
         .take(_tripMemoryCarryForwardLimit)
         .toList(growable: false);
+  }
+
+  static bool _shouldCarryForwardTripEntry(ToShowMemory memory) {
+    if (memory.type != MemoryType.trips) {
+      return false;
+    }
+    // Drop legacy keyless trips during migration so they cannot coexist with
+    // newly recomputed keyed trips for the same trip.
+    final tripKey = memory.tripKey;
+    return tripKey != null && tripKey.isNotEmpty;
   }
 
   Future<String> _getCachePath() async {
