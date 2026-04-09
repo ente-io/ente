@@ -121,6 +121,7 @@ import {
     pullUserDetails,
     redirectToCustomerPortal,
     userDetailsAddOnBonuses,
+    userDetailsSnapshot,
     type UserDetails,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -1020,15 +1021,22 @@ const Account: React.FC<AccountProps> = ({
         void router.push("/change-email");
     }, [router]);
 
-    const handleManageSubscription = useCallback(
-        () =>
+    const handleManageSubscription = useCallback(() => {
+        void (async () => {
+            if (!userDetails) {
+                await pullUserDetails();
+            }
+
+            const resolvedUserDetails = userDetails ?? userDetailsSnapshot();
+            if (!resolvedUserDetails) return;
+
             openManageSubscription({
-                userDetails,
+                userDetails: resolvedUserDetails,
                 showManageMemberSubscription,
                 onShowPlanSelector,
-            }),
-        [onShowPlanSelector, showManageMemberSubscription, userDetails],
-    );
+            });
+        })();
+    }, [onShowPlanSelector, showManageMemberSubscription, userDetails]);
 
     const handleRecoveryKey = useCallback(async () => {
         if (isDesktop) {
