@@ -1336,11 +1336,7 @@ export class FileViewerPhotoSwipe {
                     title: "Ente",
                     html: publicAlbumEnteLogoHTML(),
                     onClick: () => {
-                        window.open(
-                            "https://ente.io",
-                            "_blank",
-                            "noopener,noreferrer",
-                        );
+                        window.open("https://ente.com", "_blank", "noopener");
                     },
                 });
             }

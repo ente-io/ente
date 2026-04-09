@@ -691,9 +691,9 @@ export function MemoryViewer({
                 {isMobileLayout ? (
                     <MobileTopActions>
                         <BrandLink
-                            href="https://ente.io"
+                            href="https://ente.com"
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener"
                             data-memory-control="true"
                         >
                             <EnteBrandTagImage
@@ -706,9 +706,9 @@ export function MemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.io/get"
+                            href="https://ente.com/get"
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener"
                         >
                             Try Ente
                         </MobileJoinNowButton>
@@ -716,9 +716,9 @@ export function MemoryViewer({
                 ) : (
                     <TopControls>
                         <TopLeftBrandLink
-                            href="https://ente.io"
+                            href="https://ente.com"
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener"
                             data-memory-control="true"
                         >
                             <EnteBrandTagImage
@@ -734,9 +734,9 @@ export function MemoryViewer({
                                 variant="contained"
                                 color="accent"
                                 disableElevation
-                                href="https://ente.io/get"
+                                href="https://ente.com/get"
                                 target="_blank"
-                                rel="noreferrer"
+                                rel="noopener"
                                 sx={
                                     isTabletShareLayout
                                         ? compactShareHeaderJoinNowButtonSx

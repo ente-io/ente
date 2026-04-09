@@ -37,7 +37,7 @@ export const CanvasReadbackBlockedDialog: React.FC<
                         <HelpLink
                             href="https://ente.com/help/photos/faq/troubleshooting#thumbnails"
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="noopener"
                         >
                             {t("learn_how")}
                         </HelpLink>
