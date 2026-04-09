@@ -46,4 +46,3 @@ mobile/native/darwin/Packages/Rust/Sources/InferenceRS/inference_rs_uniffi*
 
 # Local ensu endpoint overrides (compile-time)
 mobile/native/darwin/Apps/ensu/ensu/Generated/EndpointConfig.swift
-.gitnexus
