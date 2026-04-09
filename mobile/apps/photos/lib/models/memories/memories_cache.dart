@@ -95,12 +95,19 @@ class ToShowMemory {
     return now > lastTimeToShow;
   }
 
+  bool isRelevantAt(int timestamp) {
+    return timestamp >= firstTimeToShow && timestamp < lastTimeToShow;
+  }
+
   bool shouldShowNow() {
     final now = DateTime.now().microsecondsSinceEpoch;
-    final relevantForNow = now >= firstTimeToShow && now < lastTimeToShow;
+    final relevantForNow = isRelevantAt(now);
     final calculatedForNow = (now >= calculationTime) &&
         (now < calculationTime + kMemoriesUpdateFrequency.inMicroseconds);
-    return relevantForNow && (calculatedForNow || type == MemoryType.onThisDay);
+    return relevantForNow &&
+        (calculatedForNow ||
+            type == MemoryType.onThisDay ||
+            type == MemoryType.trips);
   }
 
   ToShowMemory(
@@ -254,6 +261,28 @@ class ToShowMemory {
 
   bool get hasTypedSpec => spec != null;
 
+  String? get tripKey {
+    final currentSpec = spec;
+    if (currentSpec is TripMemorySpec) {
+      return currentSpec.tripKey;
+    }
+    return null;
+  }
+
+  String get tripIdentityKey {
+    final key = tripKey;
+    if (key != null && key.isNotEmpty) {
+      return "trip:$key";
+    }
+    final loc = location;
+    if (loc == null) {
+      return "legacy:$id";
+    }
+    final latitude = (loc.latitude ?? 0).toStringAsFixed(2);
+    final longitude = (loc.longitude ?? 0).toStringAsFixed(2);
+    return "legacy:$latitude:$longitude";
+  }
+
   SmartMemory toSmartMemory(List<Memory> memories) {
     if (spec != null) {
       return spec!.toSmartMemory(
@@ -388,10 +417,12 @@ class ClipShownLog {
 class TripsShownLog {
   final Location location;
   final int lastTimeShown;
+  final String? tripKey;
 
   TripsShownLog(
     this.location,
     this.lastTimeShown,
+    this.tripKey,
   );
 
   factory TripsShownLog.fromOldCacheMemory(ToShowMemory memory) {
@@ -399,6 +430,7 @@ class TripsShownLog {
     return TripsShownLog(
       memory.location!,
       memory.lastTimeToShow,
+      memory.tripKey,
     );
   }
 
@@ -409,6 +441,7 @@ class TripsShownLog {
         longitude: json['location']['longitude'],
       ),
       json['lastTimeShown'],
+      json['tripKey'] as String?,
     );
   }
 
@@ -419,6 +452,7 @@ class TripsShownLog {
         'longitude': location.longitude!,
       },
       'lastTimeShown': lastTimeShown,
+      'tripKey': tripKey,
     };
   }
 

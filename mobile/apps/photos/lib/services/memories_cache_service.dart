@@ -21,6 +21,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
+import "package:photos/models/memories/trip_memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/language_service.dart";
@@ -39,6 +40,7 @@ class MemoriesCacheService {
   static const _lastMemoriesCacheUpdateTimeKey = "lastMemoriesCacheUpdateTime";
   static const _showAnyMemoryKey = "memories.enabled";
   static const _shouldUpdateCacheKey = "memories.shouldUpdateCache";
+  static const _tripMemoryCarryForwardLimit = kTripSurfaceSlots;
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
@@ -522,16 +524,20 @@ class MemoriesCacheService {
         final next = now.add(kMemoriesUpdateFrequency);
         final nowResult =
             await smartMemoriesService.calcSmartMemories(now, newCache);
-        if (nowResult.isEmpty) {
-          _cachedMemories = [];
-          _logger.warning(
-            "No memories found for now, not updating cache and returning early",
-          );
-          return;
-        }
+        final carriedForwardTripEntries = List<ToShowMemory>.from(
+          newCache.toShowMemories,
+        );
+        newCache.toShowMemories.addAll(
+          nowResult.memories
+              .whereType<TripMemory>()
+              .map((memory) => ToShowMemory.fromSmartMemory(memory, now)),
+        );
         final nextResult =
             await smartMemoriesService.calcSmartMemories(next, newCache);
         w?.log("calculated new memories");
+        newCache.toShowMemories
+          ..clear()
+          ..addAll(carriedForwardTripEntries);
         final localIdToIntId = isOfflineMode
             ? await _buildLocalIntIdMapForMemories(
                 [...nowResult.memories, ...nextResult.memories],
@@ -545,15 +551,21 @@ class MemoriesCacheService {
           newCache.toShowMemories
               .add(_toCacheMemory(nextMemory, next, localIdToIntId));
         }
+        final nowMicros = now.microsecondsSinceEpoch;
+        final dedupedMemories = _dedupeTripCacheEntriesInOrder(
+          List<ToShowMemory>.from(newCache.toShowMemories),
+          nowMicros: nowMicros,
+        );
+        newCache.toShowMemories
+          ..clear()
+          ..addAll(dedupedMemories);
         newCache.baseLocations.addAll(nowResult.baseLocations);
         w?.log("added memories to cache");
-        _cachedMemories = nowResult.memories
-            .where((memory) => memory.shouldShowNow())
-            .toList();
+        _cachedMemories = await fromCacheToMemories(newCache);
         await _scheduleMemoryNotifications(
           [...nowResult.memories, ...nextResult.memories],
         );
-        locationService.baseLocations = nowResult.baseLocations;
+        locationService.baseLocations = newCache.baseLocations;
         await writeToJsonFile<MemoriesCache>(
           await _getCachePath(),
           newCache,
@@ -636,6 +648,89 @@ class MemoriesCacheService {
     );
   }
 
+  static bool _shouldPreferTripCacheEntry(
+    ToShowMemory candidate,
+    ToShowMemory existing, {
+    required int nowMicros,
+  }) {
+    final candidateActive = candidate.isRelevantAt(nowMicros);
+    final existingActive = existing.isRelevantAt(nowMicros);
+    if (candidateActive != existingActive) {
+      return candidateActive;
+    }
+    if (candidate.firstTimeToShow != existing.firstTimeToShow) {
+      return candidate.firstTimeToShow < existing.firstTimeToShow;
+    }
+    if (candidate.lastTimeToShow != existing.lastTimeToShow) {
+      return candidate.lastTimeToShow > existing.lastTimeToShow;
+    }
+    return candidate.calculationTime > existing.calculationTime;
+  }
+
+  static List<ToShowMemory> _dedupeTripCacheEntriesInOrder(
+    List<ToShowMemory> memories, {
+    required int nowMicros,
+  }) {
+    final preferredEntries = <String, ToShowMemory>{};
+    for (final memory in memories) {
+      if (memory.type != MemoryType.trips) continue;
+      final identityKey = memory.tripIdentityKey;
+      final existing = preferredEntries[identityKey];
+      if (existing == null ||
+          _shouldPreferTripCacheEntry(
+            memory,
+            existing,
+            nowMicros: nowMicros,
+          )) {
+        preferredEntries[identityKey] = memory;
+      }
+    }
+
+    final emittedKeys = <String>{};
+    final result = <ToShowMemory>[];
+    for (final memory in memories) {
+      if (memory.type != MemoryType.trips) {
+        result.add(memory);
+        continue;
+      }
+      final identityKey = memory.tripIdentityKey;
+      if (emittedKeys.contains(identityKey)) {
+        continue;
+      }
+      if (preferredEntries[identityKey] == memory) {
+        result.add(memory);
+        emittedKeys.add(identityKey);
+      }
+    }
+    return result;
+  }
+
+  static List<ToShowMemory> _activeTripEntriesForTime(
+    Iterable<ToShowMemory> memories, {
+    required int timestamp,
+  }) {
+    final activeTrips = memories
+        .where(
+          (memory) =>
+              memory.type == MemoryType.trips && memory.isRelevantAt(timestamp),
+        )
+        .toList();
+    final dedupedActiveTrips = _dedupeTripCacheEntriesInOrder(
+      activeTrips,
+      nowMicros: timestamp,
+    );
+    dedupedActiveTrips.sort((a, b) {
+      final firstCompare = a.firstTimeToShow.compareTo(b.firstTimeToShow);
+      if (firstCompare != 0) {
+        return firstCompare;
+      }
+      return a.lastTimeToShow.compareTo(b.lastTimeToShow);
+    });
+    return dedupedActiveTrips
+        .take(_tripMemoryCarryForwardLimit)
+        .toList(growable: false);
+  }
+
   Future<String> _getCachePath() async {
     final suffix = isOfflineMode ? "_offline" : "";
     return (await getApplicationSupportDirectory()).path +
@@ -687,8 +782,10 @@ class MemoriesCacheService {
     final List<PeopleShownLog> peopleShownLogs = [];
     final List<ClipShownLog> clipShownLogs = [];
     final List<TripsShownLog> tripsShownLogs = [];
+    final List<ToShowMemory> toShowMemories = [];
     if (oldCache != null) {
       final now = DateTime.now();
+      final nowMicros = now.microsecondsSinceEpoch;
       for (final peopleLog in oldCache.peopleShownLogs) {
         if (now.difference(
               DateTime.fromMicrosecondsSinceEpoch(peopleLog.lastTimeShown),
@@ -713,6 +810,12 @@ class MemoriesCacheService {
           clipShownLogs.add(clipLog);
         }
       }
+      toShowMemories.addAll(
+        _activeTripEntriesForTime(
+          oldCache.toShowMemories,
+          timestamp: nowMicros,
+        ),
+      );
       for (final oldMemory in oldCache.toShowMemories) {
         if (oldMemory.isOld) {
           if (oldMemory.type == MemoryType.people) {
@@ -726,7 +829,7 @@ class MemoriesCacheService {
       }
     }
     return MemoriesCache(
-      toShowMemories: [],
+      toShowMemories: toShowMemories,
       peopleShownLogs: peopleShownLogs,
       clipShownLogs: clipShownLogs,
       tripsShownLogs: tripsShownLogs,

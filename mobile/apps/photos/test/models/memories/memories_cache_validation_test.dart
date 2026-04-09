@@ -108,6 +108,7 @@ void main() {
         id: "trip-typed",
         locationName: "Paris",
         tripYear: 2021,
+        tripKey: "trip-paris-2021",
       )..title = "Stored trip title";
 
       final timeMemory = TimeMemory(
@@ -179,6 +180,7 @@ void main() {
           id: "trip-cache",
           locationName: "New York",
           tripYear: 2020,
+          tripKey: "trip-nyc-2020",
         )..title = "Stored typed trip title",
         calcTime,
       );
@@ -214,6 +216,7 @@ void main() {
       expect(decoded.toShowMemories.last.hasTypedSpec, isFalse);
       expect(decoded.toShowMemories.first.id, "trip-cache");
       expect(decoded.toShowMemories.last.id, "trip-legacy-cache");
+      expect(decoded.toShowMemories.first.tripKey, "trip-nyc-2020");
     });
   });
 }

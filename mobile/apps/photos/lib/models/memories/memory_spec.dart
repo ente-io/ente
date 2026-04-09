@@ -42,6 +42,7 @@ abstract class MemorySpec {
         location: memory.location,
         locationName: memory.locationName,
         tripYear: memory.tripYear,
+        tripKey: memory.tripKey,
       );
     }
     if (memory is ClipMemory) {
@@ -173,11 +174,13 @@ class TripMemorySpec extends MemorySpec {
   final Location location;
   final String? locationName;
   final int? tripYear;
+  final String? tripKey;
 
   const TripMemorySpec({
     required this.location,
     required this.locationName,
     required this.tripYear,
+    required this.tripKey,
   });
 
   factory TripMemorySpec.fromJson(Map<String, dynamic> json) {
@@ -189,6 +192,7 @@ class TripMemorySpec extends MemorySpec {
       ),
       locationName: json["locationName"] as String?,
       tripYear: json["tripYear"] as int?,
+      tripKey: json["tripKey"] as String?,
     );
   }
 
@@ -214,6 +218,7 @@ class TripMemorySpec extends MemorySpec {
       id: id,
       locationName: locationName,
       tripYear: tripYear,
+      tripKey: tripKey,
     );
     tripMemory.title = title;
     return tripMemory;
@@ -229,6 +234,7 @@ class TripMemorySpec extends MemorySpec {
       },
       "locationName": locationName,
       "tripYear": tripYear,
+      "tripKey": tripKey,
     };
   }
 }

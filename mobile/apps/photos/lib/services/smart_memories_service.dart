@@ -749,6 +749,7 @@ class SmartMemoriesService {
         now,
         oldCache.tripsShownLogs,
         surfaceAll: debugSurfaceAll,
+        cachedTripMemories: oldCache.toShowMemories,
         isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
@@ -937,6 +938,7 @@ class SmartMemoriesService {
     DateTime currentTime,
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
+    required Iterable<ToShowMemory> cachedTripMemories,
     required bool isOfflineMode,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -951,6 +953,7 @@ class SmartMemoriesService {
       currentTime,
       shownTrips,
       surfaceAll: surfaceAll,
+      cachedTripMemories: cachedTripMemories,
       isOfflineMode: isOfflineMode,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
