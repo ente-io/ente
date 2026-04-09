@@ -257,7 +257,7 @@ class _FrbContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  Future<Uint8List> getProfilePicture(String contactId) async {
+  Future<Uint8List> getProfilePicture(String contactId) {
     return _inner.getProfilePicture(contactId: contactId);
   }
 

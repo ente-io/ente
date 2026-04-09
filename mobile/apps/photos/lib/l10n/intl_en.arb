@@ -1223,6 +1223,16 @@
   "clickOnTheOverflowMenu": "• Click on the overflow menu",
   "click": "• Click",
   "nothingToSeeHere": "Nothing to see here! 👀",
+  "addANameAndPhoto": "Add a name and photo",
+  "photosSharedByWillAppearHere": "Photos shared by {email} will appear here.",
+  "@photosSharedByWillAppearHere": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "a@test.test"
+      }
+    }
+  },
   "selectFoldersToBackup": "<action>Select folders</action> to view and\nbackup on ente.",
   "unarchiveAlbum": "Unarchive album",
   "archiveAlbum": "Archive album",
@@ -1742,8 +1752,14 @@
   "editEmailAlreadyLinked": "This email is already linked to {name}.",
   "viewPersonToUnlink": "View {name} to unlink",
   "enterName": "Enter name",
+  "editContact": "Edit contact",
+  "autoFetchFromPeople": "Auto-fetch from people",
+  "useTheirNameAndPhoto": "Use their name and photo",
   "savePerson": "Save person",
+  "saveContact": "Save contact",
   "editPerson": "Edit person",
+  "enterDateOfBirthHint": "Enter date of birth",
+  "setAContactPhoto": "Set a contact photo",
   "mergedPhotos": "Merged photos",
   "orMergeWithExistingPerson": "Or merge with existing",
   "enterDateOfBirth": "Birthday (optional)",
@@ -2972,6 +2988,10 @@
   "couldNotLoadAlbums": "Could not load albums",
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
+  },
+  "couldNotLoadSelectedPhoto": "Could not load selected photo",
+  "@couldNotLoadSelectedPhoto": {
+    "description": "Toast when the selected contact photo cannot be loaded"
   },
   "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
   "@albumsCount": {

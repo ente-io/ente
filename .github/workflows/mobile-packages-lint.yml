@@ -354,7 +354,7 @@ jobs:
                   cache: true
 
             - name: Install Rust ${{ env.RUST_VERSION }}
-              if: needs.detect-changes.outputs.lint_photos == 'true'
+              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               uses: dtolnay/rust-toolchain@stable
               with:
                   toolchain: ${{ env.RUST_VERSION }}
@@ -370,11 +370,11 @@ jobs:
                   key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
 
             - name: Install Flutter Rust Bridge
-              if: needs.detect-changes.outputs.lint_photos == 'true'
+              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               run: cargo install flutter_rust_bridge_codegen
 
             - name: Generate Rust bindings (Core package)
-              if: needs.detect-changes.outputs.lint_photos == 'true'
+              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               run: flutter_rust_bridge_codegen generate
               working-directory: mobile/packages/rust
 
