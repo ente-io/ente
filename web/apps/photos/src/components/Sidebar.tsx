@@ -6,7 +6,6 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
@@ -205,6 +204,7 @@ type SidebarProps = ModalVisibilityProps & {
 
 type AccountAction = Extract<
     SidebarActionID,
+    | "account.subscription"
     | "account.recoveryKey"
     | "account.twoFactor"
     | "account.twoFactor.reconfigure"
@@ -409,6 +409,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {...{
                         onShowExport: handleShowExport,
                         onAuthenticateUser,
+                        onShowPlanSelector,
                         showAccount,
                         accountVisibilityProps,
                         showPreferences,
@@ -445,6 +446,35 @@ const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
 interface SectionProps {
     onCloseSidebar: SidebarProps["onClose"];
 }
+
+const openManageSubscription = ({
+    userDetails,
+    showManageMemberSubscription,
+    onShowPlanSelector,
+}: {
+    userDetails: UserDetails | undefined;
+    showManageMemberSubscription: () => void;
+    onShowPlanSelector: () => void;
+}) => {
+    if (
+        userDetails &&
+        isPartOfFamily(userDetails) &&
+        !isFamilyAdmin(userDetails)
+    ) {
+        showManageMemberSubscription();
+    } else if (
+        userDetails &&
+        isSubscriptionStripe(userDetails.subscription) &&
+        isSubscriptionPastDue(userDetails.subscription)
+    ) {
+        // TODO: This makes an API request, so the UI should indicate the await.
+        //
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        redirectToCustomerPortal();
+    } else {
+        onShowPlanSelector();
+    }
+};
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
     <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
@@ -487,25 +517,12 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         [userDetails],
     );
 
-    const handleSubscriptionCardClick = () => {
-        if (isNonAdminFamilyMember) {
-            showManageMemberSubscription();
-        } else {
-            if (
-                userDetails &&
-                isSubscriptionStripe(userDetails.subscription) &&
-                isSubscriptionPastDue(userDetails.subscription)
-            ) {
-                // TODO: This makes an API request, so the UI should indicate
-                // the await.
-                //
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                redirectToCustomerPortal();
-            } else {
-                onShowPlanSelector();
-            }
-        }
-    };
+    const handleSubscriptionCardClick = () =>
+        openManageSubscription({
+            userDetails,
+            showManageMemberSubscription,
+            onShowPlanSelector,
+        });
 
     return (
         <>
@@ -788,7 +805,10 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 };
 
 type UtilitySectionProps = SectionProps &
-    Pick<SidebarProps, "onShowExport" | "onAuthenticateUser"> & {
+    Pick<
+        SidebarProps,
+        "onShowExport" | "onAuthenticateUser" | "onShowPlanSelector"
+    > & {
         showAccount: () => void;
         accountVisibilityProps: ModalVisibilityProps;
         showPreferences: () => void;
@@ -814,6 +834,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     onCloseSidebar,
     onShowExport,
     onAuthenticateUser,
+    onShowPlanSelector,
     showAccount,
     accountVisibilityProps,
     showPreferences,
@@ -890,7 +911,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 onRootClose={onCloseSidebar}
                 pendingAction={pendingAccountAction}
                 onActionHandled={onAccountActionHandled}
-                {...{ onAuthenticateUser }}
+                {...{ onAuthenticateUser, onShowPlanSelector }}
             />
             <Preferences
                 {...preferencesVisibilityProps}
@@ -947,7 +968,7 @@ const InfoSection: React.FC = () => {
 };
 
 type AccountProps = NestedSidebarDrawerVisibilityProps &
-    Pick<SidebarProps, "onAuthenticateUser"> & {
+    Pick<SidebarProps, "onAuthenticateUser" | "onShowPlanSelector"> & {
         pendingAction?: AccountAction;
         onActionHandled?: (action?: AccountAction) => void;
     };
@@ -957,13 +978,19 @@ const Account: React.FC<AccountProps> = ({
     onClose,
     onRootClose,
     onAuthenticateUser,
+    onShowPlanSelector,
     pendingAction,
     onActionHandled,
 }) => {
     const { showMiniDialog } = useBaseContext();
+    const userDetails = useUserDetailsSnapshot();
 
     const router = useRouter();
 
+    const {
+        show: showManageMemberSubscription,
+        props: manageMemberSubscriptionVisibilityProps,
+    } = useModalVisibility();
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
     const { show: showTwoFactor, props: twoFactorVisibilityProps } =
@@ -972,6 +999,14 @@ const Account: React.FC<AccountProps> = ({
         useModalVisibility();
     const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
         useModalVisibility();
+
+    const isNonAdminFamilyMember = useMemo(
+        () =>
+            userDetails &&
+            isPartOfFamily(userDetails) &&
+            !isFamilyAdmin(userDetails),
+        [userDetails],
+    );
 
     const handleRootClose = () => {
         onClose();
@@ -984,6 +1019,16 @@ const Account: React.FC<AccountProps> = ({
     const handleChangeEmail = useCallback(() => {
         void router.push("/change-email");
     }, [router]);
+
+    const handleManageSubscription = useCallback(
+        () =>
+            openManageSubscription({
+                userDetails,
+                showManageMemberSubscription,
+                onShowPlanSelector,
+            }),
+        [onShowPlanSelector, showManageMemberSubscription, userDetails],
+    );
 
     const handleRecoveryKey = useCallback(async () => {
         if (isDesktop) {
@@ -1018,6 +1063,9 @@ const Account: React.FC<AccountProps> = ({
     useEffect(() => {
         if (!open || !pendingAction) return;
         switch (pendingAction) {
+            case "account.subscription":
+                handleManageSubscription();
+                break;
             case "account.recoveryKey":
                 void handleRecoveryKey();
                 break;
@@ -1043,6 +1091,7 @@ const Account: React.FC<AccountProps> = ({
         }
         onActionHandled?.();
     }, [
+        handleManageSubscription,
         handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
@@ -1064,11 +1113,12 @@ const Account: React.FC<AccountProps> = ({
             <Stack sx={{ px: 2, py: 1, gap: 3 }}>
                 <RowButtonGroup>
                     <RowButton
-                        endIcon={
-                            <HealthAndSafetyIcon
-                                sx={{ color: "accent.main" }}
-                            />
-                        }
+                        label={t("manage_plan")}
+                        onClick={handleManageSubscription}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
                         label={t("recovery_key")}
                         onClick={() => void handleRecoveryKey()}
                     />
@@ -1115,6 +1165,12 @@ const Account: React.FC<AccountProps> = ({
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
             />
+            {isNonAdminFamilyMember && userDetails && (
+                <ManageMemberSubscription
+                    {...manageMemberSubscriptionVisibilityProps}
+                    {...{ userDetails }}
+                />
+            )}
             <TwoFactorSettings
                 {...twoFactorVisibilityProps}
                 onRootClose={onRootClose}
