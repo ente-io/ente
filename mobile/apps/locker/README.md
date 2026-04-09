@@ -11,18 +11,8 @@ important documents in the cloud with secure sharing capabilities.
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
    - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
-3. For Android, [setup your
-   keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-   and run `flutter build apk --release --flavor independent`
+3. Run the app:
+   - Android: `flutter run -t lib/main.dart --flavor independent`
+   - iOS: `flutter run`
 
-4. For iOS, run `flutter build ios`
-
-## ⚙️ Develop
-
-For Android, use
-
-```sh
-flutter run -t lib/main.dart --flavor independent
-```
-
-For iOS, use `flutter run`
+To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
