@@ -477,6 +477,7 @@ async fn fetch_root_key(http: &HttpClient) -> Result<Option<RootKeyResponse>> {
     http.get_json_optional("/user-entity/key", &[("type", CONTACT_TYPE.to_string())])
         .await
         .map_err(Into::into)
+        .map_err(|error| with_http_context("contacts root key fetch failed", error))
 }
 
 async fn create_root_key(
@@ -495,10 +496,40 @@ async fn create_root_key(
             if let Some(remote_root_key) = fetch_root_key(http).await? {
                 Ok(Some(remote_root_key))
             } else {
-                Err(HttpError::Http { status, message }.into())
+                Err(with_http_context(
+                    "contacts root key create failed",
+                    HttpError::Http { status, message }.into(),
+                ))
             }
         }
-        Err(HttpError::Http { status, message }) => Err(HttpError::Http { status, message }.into()),
-        Err(err) => Err(err.into()),
+        Err(HttpError::Http { status, message }) => Err(with_http_context(
+            "contacts root key create failed",
+            HttpError::Http { status, message }.into(),
+        )),
+        Err(err) => Err(with_http_context(
+            "contacts root key create failed",
+            err.into(),
+        )),
+    }
+}
+
+fn with_http_context(context: &'static str, error: ContactsError) -> ContactsError {
+    match error {
+        ContactsError::Http(HttpError::Network(message)) => {
+            ContactsError::Http(HttpError::Network(format!("{context}: {message}")))
+        }
+        ContactsError::Http(HttpError::Http { status, message }) => {
+            ContactsError::Http(HttpError::Http {
+                status,
+                message: format!("{context}: {message}"),
+            })
+        }
+        ContactsError::Http(HttpError::Parse(message)) => {
+            ContactsError::Http(HttpError::Parse(format!("{context}: {message}")))
+        }
+        ContactsError::Http(HttpError::InvalidUrl(message)) => {
+            ContactsError::Http(HttpError::InvalidUrl(format!("{context}: {message}")))
+        }
+        other => other,
     }
 }
