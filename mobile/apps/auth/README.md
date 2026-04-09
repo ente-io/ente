@@ -52,21 +52,11 @@ or managing your secrets, please use our mobile or desktop app.
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
    - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
-4. For Android, [setup your
-   keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-   and run `flutter build apk --release --flavor independent`
+4. Run the app:
+   - Android: `flutter run -t lib/main.dart --flavor independent`
+   - iOS: `flutter run`
 
-5. For iOS, run `flutter build ios`
-
-## ⚙️ Develop
-
-For Android, use
-
-```sh
-flutter run -t lib/main.dart --flavor independent
-```
-
-For iOS, use `flutter run`
+To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
 
 If the code you're working needs to modify user facing strings, see
 [docs/localization](docs/localization.md).
