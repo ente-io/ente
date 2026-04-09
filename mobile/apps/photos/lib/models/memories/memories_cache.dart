@@ -13,7 +13,7 @@ import "package:photos/models/memories/trip_memory.dart";
 
 const kPersonShowTimeout = Duration(days: 16 * kMemoriesUpdateFrequencyDays);
 const kClipShowTimeout = Duration(days: 10 * kMemoriesUpdateFrequencyDays);
-const kTripShowTimeout = Duration(days: 50 * kMemoriesUpdateFrequencyDays);
+const kTripShowTimeout = Duration(days: 40 * kMemoriesUpdateFrequencyDays);
 
 final maxShowTimeout = [
       kPersonShowTimeout,
