@@ -242,7 +242,7 @@
     "leave": "Rời",
     "leave_family_plan_confirm": "Bạn có chắc muốn rời khỏi gói gia đình không?",
     "choose_plan": "Chọn gói của bạn",
-    "manage_plan": "Quản lý gói đăng ký",
+    "manage_plan": "",
     "current_usage": "Hiện dùng <strong>{{usage}}</strong>",
     "two_months_free": "Nhận 2 tháng miễn phí với các gói theo năm",
     "free_plan_option": "Tiếp tục dùng gói miễn phí",

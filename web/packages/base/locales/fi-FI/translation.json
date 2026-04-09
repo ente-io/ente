@@ -242,7 +242,7 @@
     "leave": "Poistu",
     "leave_family_plan_confirm": "Oletko varma että haluat poistua perhetilauksesta?",
     "choose_plan": "Valitse tilauksesi",
-    "manage_plan": "Hallinnoi tilaustasi",
+    "manage_plan": "",
     "current_usage": "Nykyinen käyttö <strong>{{usage}}</strong>",
     "two_months_free": "Saat 2 kuukautta ilmaiseksi vuositilauksista",
     "free_plan_option": "Jatka ilmaisella tilauksella",

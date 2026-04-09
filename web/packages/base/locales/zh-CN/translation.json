@@ -242,7 +242,7 @@
     "leave": "离开",
     "leave_family_plan_confirm": "您确定要离开家庭计划吗？",
     "choose_plan": "选择您的计划",
-    "manage_plan": "管理您的订阅",
+    "manage_plan": "",
     "current_usage": "当前使用量是 <strong>{{usage}}</strong>",
     "two_months_free": "在年度计划上免费获得 2 个月",
     "free_plan_option": "继续使用免费计划",
