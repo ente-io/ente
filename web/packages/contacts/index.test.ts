@@ -116,9 +116,11 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
         .mockResolvedValueOnce([]);
     const get_profile_picture = vi.fn(() => {
         if (options.getProfilePictureBytes) {
-            return options.getProfilePictureBytes;
+            return Promise.resolve(options.getProfilePictureBytes);
         }
-        throw options.getProfilePictureError ?? new Error("boom");
+        return Promise.reject(
+            options.getProfilePictureError ?? new Error("boom"),
+        );
     });
 
     vi.doMock("ente-base/kv", () => ({ getKV, getKVN, setKV }));
