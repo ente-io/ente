@@ -252,7 +252,8 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
         userID: useContactDisplay ? userID : undefined,
         email: useContactDisplay ? email : undefined,
     });
-    const displayName = useContactDisplay ? resolved.primaryLabel : userName;
+    const displayName =
+        useContactDisplay ? (resolved.primaryLabel || userName) : userName;
 
     return (
         <CommentHeaderContainer>
@@ -336,7 +337,7 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
 
         // For registered users, look up email
         return shouldResolveParent
-            ? resolvedParent.primaryLabel
+            ? (resolvedParent.primaryLabel || parentEmail || t("user"))
             : (parentEmail ?? t("user"));
     };
 

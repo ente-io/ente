@@ -58,6 +58,7 @@ type ContactsState = {
     snapshot: ContactsDisplaySnapshot;
     listeners: Set<() => void>;
     currentSessionKey: string | undefined;
+    sessionGeneration: number;
     currentAuthToken: string | undefined;
     ctx: ContactsCtxHandle | undefined;
     readyPromise: Promise<void> | undefined;
@@ -83,6 +84,7 @@ const state: ContactsState = {
     snapshot: emptySnapshot(),
     listeners: new Set(),
     currentSessionKey: undefined,
+    sessionGeneration: 0,
     currentAuthToken: undefined,
     ctx: undefined,
     readyPromise: undefined,
@@ -122,6 +124,10 @@ const cleanupAvatarURL = (contactID: string, shouldEmit = false) => {
     state.avatarLoadsByContactID.delete(contactID);
     state.avatarFailureUntilByContactID.delete(contactID);
 };
+
+const isCurrentSession = (sessionKey: string, generation: number) =>
+    state.currentSessionKey === sessionKey &&
+    state.sessionGeneration === generation;
 
 const clearInMemoryState = () => {
     for (const avatarURL of state.avatarURLByContactID.values()) {
@@ -272,10 +278,16 @@ const useContactsSnapshot = () =>
     );
 
 const loadLocalSessionState = async (sessionKey: string) => {
-    clearInMemoryState();
+    state.sessionGeneration += 1;
+    const generation = state.sessionGeneration;
     state.currentSessionKey = sessionKey;
+    clearInMemoryState();
+    emitSnapshot(false);
 
     const savedRecords = await savedContactDisplayRecords(sessionKey);
+    if (!isCurrentSession(sessionKey, generation)) {
+        return;
+    }
     for (const record of savedRecords) {
         upsertContact(record);
     }
@@ -294,29 +306,42 @@ const syncContacts = async ({
     baseURL: string;
     authToken: string;
 }) => {
-    if (!state.ctx) {
-        state.ctx = await contacts_open_ctx({
+    let ctx = state.ctx;
+    const generation = state.sessionGeneration;
+    if (!ctx) {
+        const cachedRootKey = await savedWrappedRootContactKey(sessionKey);
+        if (!isCurrentSession(sessionKey, generation)) {
+            return;
+        }
+        const openedCtx = await contacts_open_ctx({
             baseUrl: baseURL,
             authToken,
             userId: userID,
             masterKeyB64,
-            cachedRootKey: await savedWrappedRootContactKey(sessionKey),
+            cachedRootKey,
             userAgent: globalThis.navigator?.userAgent,
             clientPackage: clientPackageName,
             clientVersion: isDesktop ? desktopAppVersion : undefined,
         });
+        if (!isCurrentSession(sessionKey, generation)) {
+            return;
+        }
+        state.ctx = openedCtx;
+        ctx = openedCtx;
         const wrappedRootKey =
-            state.ctx.current_wrapped_root_key() as WrappedRootContactKey;
+            openedCtx.current_wrapped_root_key() as WrappedRootContactKey;
         await saveWrappedRootContactKey(sessionKey, wrappedRootKey);
+        if (!isCurrentSession(sessionKey, generation)) {
+            return;
+        }
     } else if (state.currentAuthToken !== authToken) {
-        state.ctx.update_auth_token(authToken);
+        ctx.update_auth_token(authToken);
     }
 
-    if (!state.ctx || state.currentSessionKey !== sessionKey) {
+    if (!ctx || !isCurrentSession(sessionKey, generation)) {
         return;
     }
 
-    const ctx = state.ctx;
     state.currentAuthToken = authToken;
 
     let sinceTime = (await savedContactsSinceTime(sessionKey)) ?? 0;
@@ -327,7 +352,7 @@ const syncContacts = async ({
             BigInt(sinceTime),
             CONTACT_DIFF_LIMIT,
         )) as RemoteContactRecord[];
-        if (state.currentSessionKey !== sessionKey) {
+        if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
         if (diff.length === 0) {
@@ -346,7 +371,7 @@ const syncContacts = async ({
     }
 
     if (didChange) {
-        if (state.currentSessionKey !== sessionKey) {
+        if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
         await saveContactDisplayRecords(
@@ -365,6 +390,10 @@ export const ensureContactsReady = async ({
     state.lastReadyInput = { userID, masterKeyB64 };
     const authToken = await savedAuthToken();
     if (!authToken) {
+        state.sessionGeneration += 1;
+        state.currentSessionKey = undefined;
+        clearInMemoryState();
+        emitSnapshot(false);
         return;
     }
 
@@ -456,7 +485,10 @@ const inferImageMimeType = (bytes: Uint8Array) => {
 
 const ensureProfilePictureLoaded = async (contactID: string) => {
     const contact = state.contactsByID.get(contactID);
-    if (!contact?.profilePictureAttachmentID || !state.ctx) {
+    const ctx = state.ctx;
+    const sessionKey = state.currentSessionKey;
+    const generation = state.sessionGeneration;
+    if (!contact?.profilePictureAttachmentID || !ctx || !sessionKey) {
         return;
     }
 
@@ -475,9 +507,12 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
         return;
     }
 
-    const load = state.ctx
+    const load = ctx
         .get_profile_picture(contactID)
         .then((bytes: Uint8Array) => {
+            if (!isCurrentSession(sessionKey, generation) || state.ctx !== ctx) {
+                return;
+            }
             const blob = new Blob([bytes], {
                 type: inferImageMimeType(bytes),
             });
@@ -488,6 +523,9 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
             emitAvatarURL(contactID);
         })
         .catch((error: unknown) => {
+            if (!isCurrentSession(sessionKey, generation) || state.ctx !== ctx) {
+                return;
+            }
             state.avatarFailureUntilByContactID.set(
                 contactID,
                 Date.now() + AVATAR_FAILURE_TTL_MS,
@@ -498,7 +536,9 @@ const ensureProfilePictureLoaded = async (contactID: string) => {
             );
         })
         .finally(() => {
-            state.avatarLoadsByContactID.delete(contactID);
+            if (state.avatarLoadsByContactID.get(contactID) === load) {
+                state.avatarLoadsByContactID.delete(contactID);
+            }
         });
 
     state.avatarLoadsByContactID.set(contactID, load);

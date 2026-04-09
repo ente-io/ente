@@ -562,7 +562,7 @@ const ParticipantRow: React.FC<{
         userID: participant.id,
         email: participant.email,
     });
-    const label = resolvedDisplay.primaryLabel;
+    const label = resolvedDisplay.primaryLabel || email;
     const initial =
         resolved.source === "contact"
             ? resolved.initial

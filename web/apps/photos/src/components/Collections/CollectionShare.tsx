@@ -317,7 +317,7 @@ const ResolvedEmailRowLabel: React.FC<ResolvedEmailRowCommonProps> = ({
     return (
         <RowLabel
             startIcon={<Avatar email={email} {...{ user, emailByUserID }} />}
-            label={fallbackLabel ?? resolved.primaryLabel}
+            label={(fallbackLabel ?? resolved.primaryLabel) || email || ""}
         />
     );
 };
@@ -344,7 +344,7 @@ const ResolvedEmailRowButton: React.FC<ResolvedEmailRowButtonProps> = ({
             fontWeight="regular"
             disabled={disabled}
             onClick={onClick ?? (() => undefined)}
-            label={fallbackLabel ?? resolved.primaryLabel}
+            label={(fallbackLabel ?? resolved.primaryLabel) || email || ""}
             startIcon={<Avatar email={email} {...{ user, emailByUserID }} />}
             endIcon={endIcon}
         />
@@ -356,7 +356,7 @@ const ResolvedEmailText: React.FC<{
     fallbackLabel?: string;
 }> = ({ email, fallbackLabel }) => {
     const resolved = useResolvedContactDisplay({ email });
-    return <>{fallbackLabel ?? resolved.primaryLabel}</>;
+    return <>{(fallbackLabel ?? resolved.primaryLabel) || email || ""}</>;
 };
 
 type SharingDetailsProps = Pick<
@@ -1396,7 +1396,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             {...{ open, onClose }}
             onRootClose={handleRootClose}
             title={t("manage")}
-            caption={participantDisplay.primaryLabel}
+            caption={participantDisplay.primaryLabel || participant.email || ""}
         >
             <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                 <Stack>

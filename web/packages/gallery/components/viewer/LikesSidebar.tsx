@@ -90,8 +90,10 @@ interface Liker {
     userID: number;
     anonUserID?: string;
     userName: string;
-    /** The actual email for avatar color, even when userName is "You". */
-    email: string;
+    /** The actual email when known. */
+    email?: string;
+    /** Stable fallback key for avatar color when email is missing. */
+    avatarColorKey: string;
     /** The first letter of the actual name (not "You") for the avatar. */
     avatarInitial: string;
     /** True if this is a registered user with masked email (show person icon). */
@@ -117,7 +119,7 @@ const LikerRowItem: React.FC<{ liker: Liker }> = ({ liker }) => {
                     width: 32,
                     height: 32,
                     fontSize: 14,
-                    bgcolor: getAvatarColor(liker.email),
+                    bgcolor: getAvatarColor(liker.avatarColorKey),
                     color: "#fff",
                 }}
                 src={resolved.avatarURL}
@@ -131,7 +133,9 @@ const LikerRowItem: React.FC<{ liker: Liker }> = ({ liker }) => {
                 )}
             </Avatar>
             <LikerName>
-                {shouldResolveContact ? resolved.primaryLabel : liker.userName}
+                {shouldResolveContact
+                    ? (resolved.primaryLabel || liker.userName)
+                    : liker.userName}
             </LikerName>
             <HeartFilledIcon />
         </LikerRow>
@@ -295,7 +299,8 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                 // Check if this is the current logged-in user.
                 const isCurrentUser = r.userID === currentUserID;
 
-                let email: string;
+                let email: string | undefined;
+                let avatarColorKey: string;
                 let userName: string;
                 let actualName: string;
 
@@ -309,12 +314,13 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                         `${t("anonymous")} ${r.anonUserID?.slice(-4) ?? ""}`;
                     // Use actualName for avatar color (varying length like mobile emails)
                     email = actualName;
+                    avatarColorKey = actualName;
                     userName = actualName;
                 } else {
                     const emailFromMap = prefetchedUserIDToEmail?.get(r.userID);
-                    // Use userID as string for unique avatar color
-                    email = emailFromMap ?? String(r.userID);
-                    actualName = emailFromMap ?? t("anonymous");
+                    email = emailFromMap;
+                    avatarColorKey = emailFromMap ?? String(r.userID);
+                    actualName = emailFromMap ?? t("user");
                     userName = isCurrentUser ? t("you") : actualName;
                 }
 
@@ -328,6 +334,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                     anonUserID: r.anonUserID,
                     userName,
                     email,
+                    avatarColorKey,
                     avatarInitial: actualName[0]?.toUpperCase() ?? "?",
                     isMaskedEmail,
                     isCurrentUser,

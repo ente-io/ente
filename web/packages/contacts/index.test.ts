@@ -55,11 +55,11 @@ describe("resolveContactDisplayFromSnapshot", () => {
         expect(resolved.source).toBe("fallback");
     });
 
-    test("falls back to Someone when no user or email exists", () => {
+    test("returns an empty label when no user or email exists", () => {
         const resolved = resolveContactDisplayFromSnapshot(makeSnapshot(), {});
 
-        expect(resolved.primaryLabel).toBe("Someone");
-        expect(resolved.initial).toBe("S");
+        expect(resolved.primaryLabel).toBe("");
+        expect(resolved.initial).toBe("?");
         expect(resolved.source).toBe("fallback");
     });
 });
@@ -136,6 +136,11 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
     }));
     vi.doMock("ente-base/log", () => ({
         default: { info, warn, error },
+    }));
+    vi.doMock("ente-base/app", () => ({
+        clientPackageName: "io.ente.photos.web",
+        desktopAppVersion: undefined,
+        isDesktop: false,
     }));
     vi.doMock("ente-wasm", () => ({
         contacts_open_ctx: vi.fn(async () => ({
