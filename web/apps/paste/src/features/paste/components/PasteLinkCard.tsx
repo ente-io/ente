@@ -207,7 +207,7 @@ export const PasteLinkCard = ({
 
     const handleConfirmOpenLink = () => {
         handleCloseViewConfirm();
-        window.open(link, "_blank", "noopener,noreferrer");
+        window.open(link, "_blank", "noopener");
     };
     const arrowStrokeColor = resolvedMode === "dark" ? "#ffffff" : null;
 
@@ -270,7 +270,7 @@ export const PasteLinkCard = ({
                         component="a"
                         href={link}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener"
                         title={link}
                         onClick={(event) => {
                             event.preventDefault();

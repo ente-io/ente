@@ -548,9 +548,9 @@ export const PublicAlbumSingleFileViewer: React.FC<
                             >
                                 <Box
                                     component="a"
-                                    href="https://ente.io"
+                                    href="https://ente.com"
                                     target="_blank"
-                                    rel="noopener noreferrer"
+                                    rel="noopener"
                                     sx={{
                                         color: "white",
                                         opacity: 0.85,
