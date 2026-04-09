@@ -32,18 +32,28 @@ class ContactsService {
   Future<void> open(ContactsSession session) async {
     final accountKey = await session.resolveAccountKey();
     final cachedRootKey = _cachedRootKey(session.userId);
-    final opened = await _rustApi.open(
-      OpenContactsContextInput(
-        baseUrl: session.baseUrl,
-        authToken: session.authToken,
-        userId: session.userId,
-        accountKey: accountKey,
-        cachedRootKey: cachedRootKey,
-        userAgent: session.userAgent,
-        clientPackage: session.clientPackage,
-        clientVersion: session.clientVersion,
-      ),
-    );
+    final opened = await _rustApi
+        .open(
+          OpenContactsContextInput(
+            baseUrl: session.baseUrl,
+            authToken: session.authToken,
+            userId: session.userId,
+            accountKey: accountKey,
+            cachedRootKey: cachedRootKey,
+            userAgent: session.userAgent,
+            clientPackage: session.clientPackage,
+            clientVersion: session.clientVersion,
+          ),
+        )
+        .catchError((Object error, StackTrace stackTrace) {
+          _logger.warning(
+            "Failed to open contacts context for account user ${session.userId} "
+            "at ${session.baseUrl} (hasCachedRootKey: ${cachedRootKey != null})",
+            error,
+            stackTrace,
+          );
+          throw error;
+        });
 
     _ctx = opened.ctx;
     _session = session;
