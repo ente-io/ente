@@ -402,7 +402,7 @@ export const ensureContactsReady = async ({
         return state.readyPromise;
     }
 
-    state.readyPromise = syncContacts({
+    const readyPromise = syncContacts({
         sessionKey,
         baseURL,
         authToken,
@@ -429,10 +429,14 @@ export const ensureContactsReady = async ({
             throw error;
         })
         .finally(() => {
-            state.readyPromise = undefined;
+            if (state.readyPromise === readyPromise) {
+                state.readyPromise = undefined;
+            }
         });
 
-    return state.readyPromise;
+    state.readyPromise = readyPromise;
+
+    return readyPromise;
 };
 
 const inferImageMimeType = (bytes: Uint8Array) => {

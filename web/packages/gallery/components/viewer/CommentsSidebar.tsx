@@ -272,7 +272,7 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
             >
                 {isMaskedEmail ? (
                     <PersonIcon />
-                ) : useContactDisplay ? (
+                ) : useContactDisplay && resolved.source === "contact" ? (
                     resolved.initial
                 ) : (
                     userName[0]?.toUpperCase()

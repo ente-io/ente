@@ -126,7 +126,7 @@ const LikerRowItem: React.FC<{ liker: Liker }> = ({ liker }) => {
             >
                 {liker.isMaskedEmail ? (
                     <PersonIcon />
-                ) : shouldResolveContact ? (
+                ) : shouldResolveContact && resolved.source === "contact" ? (
                     resolved.initial
                 ) : (
                     liker.avatarInitial
