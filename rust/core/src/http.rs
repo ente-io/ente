@@ -95,6 +95,7 @@ fn format_reqwest_error(error: &reqwest::Error) -> String {
     if error.is_timeout() {
         kinds.push("timeout");
     }
+    #[cfg(not(target_arch = "wasm32"))]
     if error.is_connect() {
         kinds.push("connect");
     }
