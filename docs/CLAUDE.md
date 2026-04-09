@@ -7,17 +7,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 When making commits, follow these rules:
 
 - Keep messages CONCISE (no walls of text)
-- Subject line under 72 chars as a single sentence (no body text, no bullets, no lists - only Co-Authored-By line)
+- Subject line under 72 chars as a single sentence (no body text, no bullets, no lists)
 - NO emojis
-- NO promotional text or links (except Co-Authored-By line)
-- Use ONLY "Co-Authored-By: Claude <noreply@anthropic.com>" for attribution
+- NO promotional text or links
+- NO Co-Authored-By lines
 
 Example:
 
 ```
 Format markdown files with Prettier for consistent styling
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ## Repository Overview
