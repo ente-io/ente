@@ -453,11 +453,9 @@ Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
         (args["petFaceEmbeddingDogModelPath"] as String?) ?? "",
     petFaceEmbeddingCat:
         (args["petFaceEmbeddingCatModelPath"] as String?) ?? "",
-    petBodyDetection: (args["petBodyDetectionModelPath"] as String?) ?? "",
-    petBodyEmbeddingDog:
-        (args["petBodyEmbeddingDogModelPath"] as String?) ?? "",
-    petBodyEmbeddingCat:
-        (args["petBodyEmbeddingCatModelPath"] as String?) ?? "",
+    petBodyDetection: "",
+    petBodyEmbeddingDog: "",
+    petBodyEmbeddingCat: "",
   );
   final providerPolicy = rust_ml.RustExecutionProviderPolicy(
     preferCoreml: args["preferCoreml"] as bool? ?? true,
@@ -522,9 +520,6 @@ String _runtimeConfigCacheKey(
     modelPaths.petFaceDetection,
     modelPaths.petFaceEmbeddingDog,
     modelPaths.petFaceEmbeddingCat,
-    modelPaths.petBodyDetection,
-    modelPaths.petBodyEmbeddingDog,
-    modelPaths.petBodyEmbeddingCat,
     providerPolicy.preferCoreml,
     providerPolicy.preferNnapi,
     providerPolicy.preferXnnpack,

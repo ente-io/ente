@@ -105,6 +105,8 @@ class EntityService {
     try {
       await _remoteToLocalSync(EntityType.location);
       await _remoteToLocalSync(EntityType.cgroup);
+      await _remoteToLocalSync(EntityType.person);
+      await _remoteToLocalSync(EntityType.pet);
       await _remoteToLocalSync(EntityType.smartAlbum);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);

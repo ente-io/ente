@@ -8,12 +8,11 @@ use crate::{
         error::{MlError, MlResult},
         face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
         pet::{
-            align::run_pet_face_alignment,
-            detect::{run_pet_body_detection, run_pet_face_detection},
-            embed::{run_pet_body_embedding, run_pet_face_embedding},
+            align::run_pet_face_alignment, detect::run_pet_face_detection,
+            embed::run_pet_face_embedding,
         },
         runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
-        types::{self, ClipResult, Dimensions, FaceResult, PetBodyResult, PetFaceResult},
+        types::{ClipResult, Dimensions, FaceResult, PetBodyResult, PetFaceResult},
     },
 };
 
@@ -74,13 +73,18 @@ pub fn analyze_image(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
         let decoded = decode_image_from_path(&image_path)?;
         let dims = decoded.dimensions.clone();
 
+        let face_detections = if run_faces {
+            run_face_detection(runtime, &decoded)?
+        } else {
+            Vec::new()
+        };
+
         let faces = if run_faces {
-            let detections = run_face_detection(runtime, &decoded)?;
-            if detections.is_empty() {
+            if face_detections.is_empty() {
                 Some(Vec::new())
             } else {
                 let (aligned, mut face_results) =
-                    run_face_alignment(file_id, &decoded, detections)?;
+                    run_face_alignment(file_id, &decoded, face_detections)?;
                 run_face_embedding(runtime, &aligned, &mut face_results)?;
                 Some(face_results)
             }
@@ -94,39 +98,19 @@ pub fn analyze_image(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
             None
         };
 
-        let (pet_faces, pet_bodies) = if run_pets {
+        let pet_faces = if run_pets {
             let pet_face_detections = run_pet_face_detection(runtime, &decoded)?;
-            let body_detections = run_pet_body_detection(runtime, &decoded)?;
 
-            let pet_face_results = if !pet_face_detections.is_empty() {
+            if !pet_face_detections.is_empty() {
                 let (aligned, mut pet_results) =
                     run_pet_face_alignment(file_id, &decoded, &pet_face_detections)?;
                 run_pet_face_embedding(runtime, &aligned, &mut pet_results)?;
-                pet_results
+                Some(pet_results)
             } else {
-                Vec::new()
-            };
-
-            let mut body_results: Vec<PetBodyResult> = body_detections
-                .into_iter()
-                .map(|det| {
-                    let base_id = types::to_face_id(file_id, det.box_xyxy);
-                    let pet_body_id = format!("{base_id}_c{}", det.coco_class);
-                    PetBodyResult {
-                        pet_body_id,
-                        detection: det,
-                        body_embedding: Vec::new(),
-                    }
-                })
-                .collect();
-
-            if !body_results.is_empty() {
-                run_pet_body_embedding(runtime, &decoded, &mut body_results)?;
+                Some(Vec::new())
             }
-
-            (Some(pet_face_results), Some(body_results))
         } else {
-            (None, None)
+            None
         };
 
         Ok(AnalyzeImageResult {
@@ -135,7 +119,7 @@ pub fn analyze_image(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
             faces,
             clip,
             pet_faces,
-            pet_bodies,
+            pet_bodies: None,
         })
     })
 }
@@ -211,20 +195,11 @@ fn validate_request_model_paths(req: &AnalyzeImageRequest) -> MlResult<()> {
         if model_paths.pet_face_detection.trim().is_empty() {
             missing.push("petFaceDetectionModelPath");
         }
-        if model_paths.pet_body_detection.trim().is_empty() {
-            missing.push("petBodyDetectionModelPath");
-        }
         if model_paths.pet_face_embedding_dog.trim().is_empty() {
             missing.push("petFaceEmbeddingDogModelPath");
         }
         if model_paths.pet_face_embedding_cat.trim().is_empty() {
             missing.push("petFaceEmbeddingCatModelPath");
-        }
-        if model_paths.pet_body_embedding_dog.trim().is_empty() {
-            missing.push("petBodyEmbeddingDogModelPath");
-        }
-        if model_paths.pet_body_embedding_cat.trim().is_empty() {
-            missing.push("petBodyEmbeddingCatModelPath");
         }
     }
     if missing.is_empty() {

@@ -13,21 +13,19 @@ class MLResult {
   List<FaceResult>? faces = <FaceResult>[];
   ClipResult? clip;
   List<PetFaceResult>? petFaces;
-  List<PetBodyResult>? petBodies;
 
   Dimensions decodedImageSize;
 
   bool get ranML => facesRan || clipRan || petsRan;
   bool get facesRan => faces != null;
   bool get clipRan => clip != null;
-  bool get petsRan => petFaces != null || petBodies != null;
+  bool get petsRan => petFaces != null;
 
   MLResult({
     this.fileId = -1,
     this.faces,
     this.clip,
     this.petFaces,
-    this.petBodies,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
@@ -41,7 +39,6 @@ class MLResult {
         'faces': faces?.map((face) => face.toJson()).toList(),
         'clip': clip?.toJson(),
         'petFaces': petFaces?.map((pf) => pf.toJson()).toList(),
-        'petBodies': petBodies?.map((obj) => obj.toJson()).toList(),
         'decodedImageSize': {
           'width': decodedImageSize.width,
           'height': decodedImageSize.height,
@@ -65,13 +62,6 @@ class MLResult {
           ? (json['petFaces'] as List)
               .map(
                 (item) => PetFaceResult.fromJson(item as Map<String, dynamic>),
-              )
-              .toList()
-          : null,
-      petBodies: json['petBodies'] != null
-          ? (json['petBodies'] as List)
-              .map(
-                (item) => PetBodyResult.fromJson(item as Map<String, dynamic>),
               )
               .toList()
           : null,
@@ -232,41 +222,6 @@ class PetFaceResult {
       embedding: Embedding.from(json['embedding']),
       fileId: json['fileId'],
       petFaceId: json['petFaceId'],
-    );
-  }
-}
-
-class PetBodyResult {
-  final List<double> boxXyxy;
-  final double score;
-  final int cocoClass;
-  final String petBodyId;
-  final Embedding embedding;
-
-  PetBodyResult({
-    required this.boxXyxy,
-    required this.score,
-    required this.cocoClass,
-    required this.petBodyId,
-    required this.embedding,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'boxXyxy': boxXyxy,
-        'score': score,
-        'cocoClass': cocoClass,
-        'petBodyId': petBodyId,
-        'embedding': embedding,
-      };
-
-  static PetBodyResult fromJson(Map<String, dynamic> json) {
-    return PetBodyResult(
-      boxXyxy:
-          (json['boxXyxy'] as List).map((e) => (e as num).toDouble()).toList(),
-      score: (json['score'] as num).toDouble(),
-      cocoClass: json['cocoClass'],
-      petBodyId: json['petBodyId'],
-      embedding: Embedding.from(json['embedding']),
     );
   }
 }

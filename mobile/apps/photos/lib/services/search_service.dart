@@ -53,7 +53,10 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/date_parse_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -61,6 +64,7 @@ import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/people/pet_cluster_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -947,6 +951,28 @@ class SearchService {
       );
     }
     return files;
+  }
+
+  /// Returns combined people + pets results for the unified section.
+  Future<List<GenericSearchResult>> getAllPeopleAndPets(
+    int? limit, {
+    BuildContext? context,
+  }) async {
+    final people = await getAllFace(
+      null,
+      minClusterSize: limit == null
+          ? kMinimumClusterSizeAllFaces
+          : kMinimumClusterSizeSearchResult,
+    );
+    final pets = flagService.petEnabled
+        ? await getAllPets(null)
+        : <GenericSearchResult>[];
+    final combined = [...people, ...pets]
+      ..sort((a, b) => b.fileCount().compareTo(a.fileCount()));
+    if (limit != null && combined.length > limit) {
+      return combined.sublist(0, limit);
+    }
+    return combined;
   }
 
   Future<List<GenericSearchResult>> getAllFace(
@@ -1873,5 +1899,169 @@ class SearchService {
           ? DateTime(year + 1, 1, 1).microsecondsSinceEpoch
           : DateTime(year, month + 1, 1).microsecondsSinceEpoch,
     ];
+  }
+
+  Future<Map<int, EnteFile>> _getFileIdToFileMap(Set<int> fileIds) async {
+    final allFiles = await getAllFilesForSearch();
+    final map = <int, EnteFile>{};
+    for (final file in allFiles) {
+      final id = file.uploadedFileID;
+      if (id != null && fileIds.contains(id)) {
+        map[id] = file;
+      }
+    }
+    return map;
+  }
+
+  Future<List<GenericSearchResult>> getAllPets(
+    int? limit,
+  ) async {
+    try {
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+
+      // Get all pet cluster assignments: cluster_id -> list of file_ids
+      final clusterToFileIds = await mlDataDB.getPetClusterFileIds();
+      if (clusterToFileIds.isEmpty) return [];
+
+      // Get cluster summaries for species info
+      final clusterSummaries = await mlDataDB.getAllPetClusterSummary();
+
+      // Get pet names via cluster → pet mapping + PetService
+      final clusterToPetId = await mlDataDB.getClusterToPetId();
+      final petEntities = await PetService.instance.getPetsMap();
+      final petNames = <String, String>{};
+      for (final entry in clusterToPetId.entries) {
+        final pet = petEntities[entry.value];
+        if (pet != null && pet.data.name.isNotEmpty) {
+          petNames[entry.key] = pet.data.name;
+        }
+      }
+
+      // Get file ID -> EnteFile mapping. In offline mode the ML DB stores
+      // local integer IDs, so we must convert via OfflineFilesDB first.
+      final allFileIds = clusterToFileIds.values.expand((ids) => ids).toSet();
+      final Map<int, EnteFile> fileIdToFile;
+      if (isOfflineMode) {
+        final localIdMap =
+            await OfflineFilesDB.instance.getLocalIdsForIntIds(allFileIds);
+        final allFiles = await getAllFilesForSearch();
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
+          }
+        }
+        final map = <int, EnteFile>{};
+        for (final entry in localIdMap.entries) {
+          final file = localIdToFile[entry.value];
+          if (file != null) {
+            map[entry.key] = file;
+          }
+        }
+        fileIdToFile = map;
+      } else {
+        fileIdToFile = await _getFileIdToFileMap(allFileIds);
+      }
+
+      // Group clusters by petId. Clusters sharing the same petId (merged)
+      // are combined into a single search result, mirroring how persons
+      // aggregate multiple clusters.
+      final petIdToClusters = <String, List<String>>{};
+      final standaloneClusters = <String>[];
+      for (final clusterId in clusterToFileIds.keys) {
+        final petId = clusterToPetId[clusterId];
+        if (petId != null) {
+          petIdToClusters.putIfAbsent(petId, () => []).add(clusterId);
+        } else {
+          standaloneClusters.add(clusterId);
+        }
+      }
+
+      // Build groups: each group is (primaryClusterId, allFiles, species, name)
+      final groups = <(String, List<EnteFile>, int, String?)>[];
+
+      for (final entry in petIdToClusters.entries) {
+        final clusterIds = entry.value;
+        final seenFids = <int>{};
+        final allFiles = <EnteFile>[];
+        int? species;
+        for (final cid in clusterIds) {
+          final fids = clusterToFileIds[cid] ?? [];
+          for (final fid in fids) {
+            if (!seenFids.add(fid)) continue;
+            final file = fileIdToFile[fid];
+            if (file != null) allFiles.add(file);
+          }
+          species ??= clusterSummaries[cid]?.$2;
+        }
+        if (allFiles.isEmpty) continue;
+        final pet = petEntities[entry.key];
+        final name =
+            pet != null && pet.data.name.isNotEmpty ? pet.data.name : null;
+        groups.add((clusterIds.first, allFiles, species ?? -1, name));
+      }
+
+      for (final clusterId in standaloneClusters) {
+        final fids = clusterToFileIds[clusterId] ?? [];
+        final files = <EnteFile>[];
+        for (final fid in fids) {
+          final file = fileIdToFile[fid];
+          if (file != null) files.add(file);
+        }
+        if (files.isEmpty) continue;
+        final species = clusterSummaries[clusterId]?.$2 ?? -1;
+        groups.add((clusterId, files, species, null));
+      }
+
+      // Sort by file count descending
+      groups.sort((a, b) => b.$2.length.compareTo(a.$2.length));
+
+      final List<GenericSearchResult> results = [];
+      for (final (primaryClusterId, files, species, customName) in groups) {
+        final label =
+            (customName != null && customName.isNotEmpty) ? customName : "";
+
+        results.add(
+          GenericSearchResult(
+            ResultType.faces,
+            label,
+            files,
+            params: {
+              kPetClusterParamId: primaryClusterId,
+              kFileID: files.first.uploadedFileID,
+              if (clusterToPetId.containsKey(primaryClusterId))
+                kPetId: clusterToPetId[primaryClusterId],
+            },
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                PetClusterPage(
+                  clusterId: primaryClusterId,
+                  clusterLabel: label,
+                  files: files,
+                  species: species,
+                ),
+              );
+            },
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: label,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.faces,
+              matchedUploadedIDs: filesToUploadedFileIDs(files),
+            ),
+          ),
+        );
+      }
+
+      if (limit != null && results.length > limit) {
+        return results.sublist(0, limit);
+      }
+      return results;
+    } catch (e, s) {
+      _logger.severe("Error in getAllPets", e, s);
+      return [];
+    }
   }
 }

@@ -1686,6 +1686,7 @@
   },
   "faces": "Faces",
   "people": "People",
+  "peopleAndPets": "People & Pets",
   "contents": "Contents",
   "addNew": "Add new",
   "@addNew": {
@@ -1743,6 +1744,7 @@
   "viewPersonToUnlink": "View {name} to unlink",
   "enterName": "Enter name",
   "savePerson": "Save person",
+  "savePet": "Save pet",
   "editPerson": "Edit person",
   "mergedPhotos": "Merged photos",
   "orMergeWithExistingPerson": "Or merge with existing",
@@ -3084,5 +3086,14 @@
   "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
   "signUp": "Sign up",
   "dog": "Dog",
-  "cat": "Cat"
+  "cat": "Cat",
+  "pet": "Pet",
+  "moveTo": "Move to",
+  "notThisPet": "Not this pet",
+  "noClusters": "No clusters",
+  "noNamedPetsToMerge": "No named pets to merge with.\nName a pet first, then merge.",
+  "viewClusters": "View clusters",
+  "ignorePet": "Ignore pet",
+  "areYouSureYouWantToIgnoreThisPet": "Are you sure you want to ignore this pet?",
+  "thePetGroupsWillNotBeDisplayed": "The pet groups will not be displayed in the pets section anymore. Photos will remain untouched."
 }

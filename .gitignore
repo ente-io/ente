@@ -29,6 +29,7 @@ mobile/native/android/apps/ensu/crypto-auth-core/src/main/jniLibs/
 mobile/native/android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core_uniffi.kt
 mobile/native/android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core.kt
 mobile/native/android/packages/rust/.gradle/
+mobile/packages/**/android/.gradle/
 mobile/native/android/packages/rust/src/main/jniLibs/
 mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference_rs_uniffi.kt
 mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference.kt

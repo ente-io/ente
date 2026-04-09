@@ -13,6 +13,7 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/main.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
@@ -21,10 +22,11 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
-import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
@@ -393,6 +395,14 @@ class MLService {
       if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
+      if (_hasModeChanged(mode)) {
+        _logger.info("App mode changed during ML run, stopping");
+        return;
+      }
+      // Pet clustering (internal users only)
+      if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+        await _clusterPets(mlDataDB, mode);
+      }
       if (_mlControllerStatus == true) {
         if (_hasModeChanged(mode)) {
           _logger.info("App mode changed during ML run, stopping");
@@ -678,7 +688,6 @@ class MLService {
         }
       } else {
         final clusterStartTime = DateTime.now();
-        // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
         final clusteringResult =
             await FaceClusteringService.instance.predictLinearIsolate(
           allFaceInfoForClustering.toSet(),
@@ -714,6 +723,25 @@ class MLService {
       _clusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
+    }
+  }
+
+  Future<void> _clusterPets(MLDataDB mlDataDB, MLMode mode) async {
+    if (_shouldPauseIndexingAndClustering) return;
+    try {
+      final changed = await PetClusteringService.instance.clusterPets(
+        mlDataDB: mlDataDB,
+        isOffline: mode == MLMode.offline,
+      );
+      if (changed) {
+        Bus.instance.fire(PetsChangedEvent(source: "clustering"));
+      }
+      // Reconcile local cluster mappings with synced PetEntity data
+      if (PetService.isInitialized) {
+        await PetService.instance.reconcileClusters();
+      }
+    } catch (e, s) {
+      _logger.severe("Pet clustering failed", e, s);
     }
   }
 
@@ -817,7 +845,7 @@ class MLService {
 
       // Pet results locally — delete stale rows before writing so
       // re-indexing with fewer detections doesn't leave old data behind.
-      final rustPets = result.petFaces != null || result.petBodies != null;
+      final rustPets = result.petFaces != null;
       if (rustPets) {
         await mlDataDB.deletePetDataForFiles([result.fileId]);
         if (result.petFaces != null && result.petFaces!.isNotEmpty) {
@@ -843,37 +871,6 @@ class MLService {
           // No pet faces detected; insert empty marker so the file is
           // considered pet-indexed (mirrors Face.empty for human faces).
           await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
-        }
-
-        if (result.petBodies != null && result.petBodies!.isNotEmpty) {
-          final dbPetBodies = result.petBodies!.map((obj) {
-            final detectionObj = FaceDetectionRelative(
-              score: obj.score,
-              box: [
-                obj.boxXyxy[0],
-                obj.boxXyxy[1],
-                obj.boxXyxy[2],
-                obj.boxXyxy[3],
-              ],
-              allKeypoints: const [],
-            );
-            return DBPetBody(
-              fileId: result.fileId,
-              petBodyId: obj.petBodyId,
-              detection: jsonEncode(detectionObj.toJson()),
-              bodyVectorId: null,
-              species: obj.cocoClass == 15 ? 1 : 0,
-              score: obj.score,
-              imageHeight: result.decodedImageSize.height,
-              imageWidth: result.decodedImageSize.width,
-              mlVersion: petMlVersion,
-            );
-          }).toList();
-          await mlDataDB.bulkInsertPetBodies(dbPetBodies);
-          await mlDataDB.storePetBodyEmbeddings(
-            dbPetBodies,
-            result.petBodies!,
-          );
         }
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");

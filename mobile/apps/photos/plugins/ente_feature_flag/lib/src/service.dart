@@ -104,19 +104,21 @@ class FlagService {
 
   bool get enableMemoryShareLink => true;
 
-  bool get useRustForML => internalUser;
+  bool get useRustForML =>
+      internalUser || (_prefs.getBool("ls.pet_recognition_enabled") ?? false);
 
   bool get enableMLInBackground => internalUser;
 
   bool get useRustForFaceThumbnails => internalUser;
 
-  bool get petEnabled => internalUser;
+  bool get petEnabled =>
+      internalUser || (_prefs.getBool("ls.pet_recognition_enabled") ?? false);
 
   bool get qrFeatureEnabled => true;
 
-  bool get ocrOverlayEnabled => true;
-
   bool get enableBgLocalUploadPriority => internalUser;
+
+  bool get ocrOverlayEnabled => true;
 
   bool get syncRecoveryDiagnostics => internalUser;
 

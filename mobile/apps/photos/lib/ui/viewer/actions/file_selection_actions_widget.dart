@@ -27,6 +27,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -252,6 +253,16 @@ class _FileSelectionActionsWidgetState
             labelText: AppLocalizations.of(context).notThisPerson,
             icon: Icons.remove_circle_outline,
             onTap: _onRemoveFromClusterClicked,
+          ),
+        );
+      }
+
+      if (widget.type == GalleryType.petCluster && widget.clusterID != null) {
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).notThisPet,
+            icon: Icons.remove_circle_outline,
+            onTap: _onRemoveFromPetClusterClicked,
           ),
         );
       }
@@ -1012,6 +1023,47 @@ class _FileSelectionActionsWidgetState
           widget.clusterID!,
         );
       }
+    }
+    widget.selectedFiles.clearAll();
+    if (mounted) {
+      setState(() => {});
+    }
+  }
+
+  Future<void> _onRemoveFromPetClusterClicked() async {
+    if (widget.clusterID == null) return;
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: AppLocalizations.of(context).yesRemove,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: AppLocalizations.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      body: AppLocalizations.of(context).notThisPet,
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult?.action == ButtonAction.first) {
+      final fileIds = widget.selectedFiles.files
+          .map((f) => f.uploadedFileID ?? 0)
+          .where((id) => id > 0)
+          .toList();
+      await PetService.instance.removeFilesFromPetCluster(
+        fileIds,
+        widget.clusterID!,
+      );
     }
     widget.selectedFiles.clearAll();
     if (mounted) {

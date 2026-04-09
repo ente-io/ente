@@ -13,9 +13,6 @@ enum MLModels {
   petFaceDetection,
   petFaceEmbeddingDog,
   petFaceEmbeddingCat,
-  petBodyDetection,
-  petBodyEmbeddingDog,
-  petBodyEmbeddingCat,
 }
 
 extension MLModelsExtension on MLModels {
@@ -35,12 +32,6 @@ extension MLModelsExtension on MLModels {
         return PetFaceEmbeddingDogService.instance;
       case MLModels.petFaceEmbeddingCat:
         return PetFaceEmbeddingCatService.instance;
-      case MLModels.petBodyDetection:
-        return PetBodyDetectionService.instance;
-      case MLModels.petBodyEmbeddingDog:
-        return PetBodyEmbeddingDogService.instance;
-      case MLModels.petBodyEmbeddingCat:
-        return PetBodyEmbeddingCatService.instance;
     }
   }
 
@@ -52,9 +43,6 @@ extension MLModelsExtension on MLModels {
       case MLModels.petFaceDetection:
       case MLModels.petFaceEmbeddingDog:
       case MLModels.petFaceEmbeddingCat:
-      case MLModels.petBodyDetection:
-      case MLModels.petBodyEmbeddingDog:
-      case MLModels.petBodyEmbeddingCat:
         return true;
       case MLModels.clipTextEncoder:
         return false;

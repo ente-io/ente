@@ -1,10 +1,9 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
-import "package:photos/ui/viewer/people/person_face_widget.dart";
 
 class SavePersonBanner extends StatelessWidget {
-  final PersonFaceWidget? faceWidget;
+  final Widget? faceWidget;
   final String text;
   final String? subText;
   final String? primaryActionLabel;

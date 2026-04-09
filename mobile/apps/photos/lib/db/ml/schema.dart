@@ -213,6 +213,9 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
 
 const deletePetFacesTable = 'DELETE FROM $petFacesTable';
 
+const petFacesSpeciesIndex =
+    'CREATE INDEX IF NOT EXISTS idx_pet_faces_species ON $petFacesTable ($speciesColumn)';
+
 // ── Pet Bodies Table ──
 
 const petBodiesTable = 'pet_bodies';
@@ -265,3 +268,46 @@ CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
 
 const deletePetBodyVectorIdMappingTable =
     'DELETE FROM $petBodyVectorIdMappingTable';
+
+// ── Pet Face Clusters Table ──
+
+const petFaceClustersTable = 'pet_face_clusters';
+
+const createPetFaceClustersTable = '''
+CREATE TABLE IF NOT EXISTS $petFaceClustersTable (
+  $petFaceIDColumn TEXT NOT NULL PRIMARY KEY,
+  $clusterIDColumn TEXT NOT NULL
+);
+''';
+
+const petFcClusterIDIndex =
+    'CREATE INDEX IF NOT EXISTS idx_pet_fc_cluster ON $petFaceClustersTable ($clusterIDColumn)';
+
+// ── Pet Cluster → Pet Mapping Table ──
+
+const petClusterPetTable = 'pet_cluster_pet';
+const petIdColumn = 'pet_id';
+
+const createPetClusterPetTable = '''
+CREATE TABLE IF NOT EXISTS $petClusterPetTable (
+  $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
+  $petIdColumn TEXT NOT NULL
+);
+''';
+
+const deletePetFaceClustersTable = 'DELETE FROM $petFaceClustersTable';
+const deletePetClusterPetTable = 'DELETE FROM $petClusterPetTable';
+
+// ── Not-Pet Feedback Table ──
+
+const notPetFeedbackTable = 'not_pet_feedback';
+
+const createNotPetFeedbackTable = '''
+CREATE TABLE IF NOT EXISTS $notPetFeedbackTable (
+  $clusterIDColumn TEXT NOT NULL,
+  $petFaceIDColumn TEXT NOT NULL,
+  PRIMARY KEY($clusterIDColumn, $petFaceIDColumn)
+);
+''';
+
+const deleteNotPetFeedbackTable = 'DELETE FROM $notPetFeedbackTable';

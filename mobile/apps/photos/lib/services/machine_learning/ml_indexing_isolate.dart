@@ -207,9 +207,6 @@ class MLIndexingIsolate extends SuperIsolate {
           PetFaceDetectionService.instance.downloadModel(forceRefresh),
           PetFaceEmbeddingDogService.instance.downloadModel(forceRefresh),
           PetFaceEmbeddingCatService.instance.downloadModel(forceRefresh),
-          PetBodyDetectionService.instance.downloadModel(forceRefresh),
-          PetBodyEmbeddingDogService.instance.downloadModel(forceRefresh),
-          PetBodyEmbeddingCatService.instance.downloadModel(forceRefresh),
         ]);
       }
 
@@ -386,9 +383,6 @@ class MLIndexingIsolate extends SuperIsolate {
     String petFaceDetectionPath = "";
     String petFaceEmbeddingDogPath = "";
     String petFaceEmbeddingCatPath = "";
-    String petBodyDetectionPath = "";
-    String petBodyEmbeddingDogPath = "";
-    String petBodyEmbeddingCatPath = "";
 
     if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
       petFaceDetectionPath =
@@ -397,12 +391,6 @@ class MLIndexingIsolate extends SuperIsolate {
           (await PetFaceEmbeddingDogService.instance.getModelNameAndPath()).$2;
       petFaceEmbeddingCatPath =
           (await PetFaceEmbeddingCatService.instance.getModelNameAndPath()).$2;
-      petBodyDetectionPath =
-          (await PetBodyDetectionService.instance.getModelNameAndPath()).$2;
-      petBodyEmbeddingDogPath =
-          (await PetBodyEmbeddingDogService.instance.getModelNameAndPath()).$2;
-      petBodyEmbeddingCatPath =
-          (await PetBodyEmbeddingCatService.instance.getModelNameAndPath()).$2;
     }
 
     return {
@@ -412,9 +400,9 @@ class MLIndexingIsolate extends SuperIsolate {
       "petFaceDetectionModelPath": petFaceDetectionPath,
       "petFaceEmbeddingDogModelPath": petFaceEmbeddingDogPath,
       "petFaceEmbeddingCatModelPath": petFaceEmbeddingCatPath,
-      "petBodyDetectionModelPath": petBodyDetectionPath,
-      "petBodyEmbeddingDogModelPath": petBodyEmbeddingDogPath,
-      "petBodyEmbeddingCatModelPath": petBodyEmbeddingCatPath,
+      "petBodyDetectionModelPath": "",
+      "petBodyEmbeddingDogModelPath": "",
+      "petBodyEmbeddingCatModelPath": "",
       "preferCoreml": Platform.isIOS,
       "preferNnapi": Platform.isAndroid,
       "preferXnnpack": Platform.isAndroid,

@@ -8,12 +8,14 @@ import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
@@ -602,6 +604,26 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           onTap: () async => _onResetFacesAndClustering(context),
         ),
         MenuItemWidgetNew(
+          title: "Re-index pet faces",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiImage,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onReindexPetFaces(context),
+        ),
+        MenuItemWidgetNew(
+          title: "Reset pet clustering",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiImage,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onResetPetClustering(context),
+        ),
+        MenuItemWidgetNew(
           title: "Reset all local faces",
           leadingIconWidget: _buildIconWidget(
             context,
@@ -910,6 +932,56 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('peopleToPersonMapping remove failed ', e, s);
+          await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
+  }
+
+  Future<void> _onReindexPetFaces(BuildContext context) async {
+    await showChoiceDialog(
+      context,
+      title: "Are you sure?",
+      body: "This will delete ALL pet data (indexed faces, bodies, embeddings, "
+          "clusters, and PetEntity data) and re-run detection, embedding, "
+          "and clustering from scratch.",
+      firstButtonLabel: "Yes, confirm",
+      firstButtonOnTap: () async {
+        try {
+          // Drop clustering data first
+          await mlDataDB.dropPetClusteringData();
+          await PetService.instance.deleteAllPets();
+          // Drop indexed faces/bodies and vector DBs
+          final allFileIds = (await mlDataDB.petIndexedFileIds()).keys.toList();
+          if (allFileIds.isNotEmpty) {
+            await mlDataDB.deletePetDataForFiles(allFileIds);
+          }
+          Bus.instance.fire(PetsChangedEvent(source: "reindexPetFaces"));
+          showShortToast(context, "Done — pet re-indexing will start shortly");
+        } catch (e, s) {
+          logger.warning('re-index pet faces failed', e, s);
+          await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
+  }
+
+  Future<void> _onResetPetClustering(BuildContext context) async {
+    await showChoiceDialog(
+      context,
+      title: "Are you sure?",
+      body: "This will delete all pet clusters, PetEntity data, and feedback. "
+          "Indexed pet faces/bodies are preserved. "
+          "Pet clustering will re-run automatically.",
+      firstButtonLabel: "Yes, confirm",
+      firstButtonOnTap: () async {
+        try {
+          await mlDataDB.dropPetClusteringData();
+          await PetService.instance.deleteAllPets();
+          Bus.instance.fire(PetsChangedEvent(source: "resetPetClusters"));
+          showShortToast(context, "Done");
+        } catch (e, s) {
+          logger.warning('reset pet clustering failed ', e, s);
           await showGenericErrorDialog(context: context, error: e);
         }
       },

@@ -1,5 +1,6 @@
 import "dart:io" show Directory, File, Platform;
 import "dart:math" as math show sqrt, min, max;
+import "dart:typed_data" show Float32List;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
@@ -762,12 +763,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
         args["petFaceEmbeddingDogModelPath"] as String?;
     final String? petFaceEmbeddingCatModelPath =
         args["petFaceEmbeddingCatModelPath"] as String?;
-    final String? petBodyDetectionModelPath =
-        args["petBodyDetectionModelPath"] as String?;
-    final String? petBodyEmbeddingDogModelPath =
-        args["petBodyEmbeddingDogModelPath"] as String?;
-    final String? petBodyEmbeddingCatModelPath =
-        args["petBodyEmbeddingCatModelPath"] as String?;
     final bool preferCoreml = args["preferCoreml"] as bool? ?? true;
     final bool preferNnapi = args["preferNnapi"] as bool? ?? true;
     final bool preferXnnpack = args["preferXnnpack"] as bool? ?? false;
@@ -797,15 +792,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
       if (isMissingModelPath(petFaceEmbeddingCatModelPath)) {
         missingModelPaths.add("petFaceEmbeddingCatModelPath");
       }
-      if (isMissingModelPath(petBodyDetectionModelPath)) {
-        missingModelPaths.add("petBodyDetectionModelPath");
-      }
-      if (isMissingModelPath(petBodyEmbeddingDogModelPath)) {
-        missingModelPaths.add("petBodyEmbeddingDogModelPath");
-      }
-      if (isMissingModelPath(petBodyEmbeddingCatModelPath)) {
-        missingModelPaths.add("petBodyEmbeddingCatModelPath");
-      }
     }
     if (missingModelPaths.isNotEmpty) {
       throw Exception(
@@ -821,9 +807,9 @@ Future<MLResult> analyzeImageRust(Map args) async {
       petFaceDetection: petFaceDetectionModelPath ?? "",
       petFaceEmbeddingDog: petFaceEmbeddingDogModelPath ?? "",
       petFaceEmbeddingCat: petFaceEmbeddingCatModelPath ?? "",
-      petBodyDetection: petBodyDetectionModelPath ?? "",
-      petBodyEmbeddingDog: petBodyEmbeddingDogModelPath ?? "",
-      petBodyEmbeddingCat: petBodyEmbeddingCatModelPath ?? "",
+      petBodyDetection: "",
+      petBodyEmbeddingDog: "",
+      petBodyEmbeddingCat: "",
     );
     final providerPolicy = rust_ml.RustExecutionProviderPolicy(
       preferCoreml: preferCoreml,
@@ -1023,18 +1009,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
           );
         }).toList(growable: false);
       }
-
-      if (rustResult.petBodies != null) {
-        result.petBodies = rustResult.petBodies!.map((body) {
-          return PetBodyResult(
-            boxXyxy: body.boxXyxy.toList(growable: false),
-            score: body.score,
-            cocoClass: body.cocoClass,
-            petBodyId: body.petBodyId,
-            embedding: Embedding.from(body.bodyEmbedding),
-          );
-        }).toList(growable: false);
-      }
     }
 
     return result;
@@ -1218,4 +1192,28 @@ Future<void> _cleanupDecodeFallback(_DecodeFallbackFile fallback) async {
   } catch (e, s) {
     _logger.warning("Could not cleanup decode fallback file", e, s);
   }
+}
+
+/// Compute L2-normalized mean centroid from a list of Float32 embeddings.
+Float32List computeL2MeanCentroid(List<Float32List> embeddings) {
+  final dim = embeddings.first.length;
+  final centroid = Float32List(dim);
+  for (final emb in embeddings) {
+    for (int i = 0; i < dim; i++) {
+      centroid[i] += emb[i];
+    }
+  }
+  final n = embeddings.length.toDouble();
+  double norm = 0;
+  for (int i = 0; i < dim; i++) {
+    centroid[i] /= n;
+    norm += centroid[i] * centroid[i];
+  }
+  norm = math.sqrt(norm);
+  if (norm > 0) {
+    for (int i = 0; i < dim; i++) {
+      centroid[i] /= norm;
+    }
+  }
+  return centroid;
 }

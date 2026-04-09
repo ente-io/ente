@@ -31,6 +31,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
+import "package:photos/ui/viewer/people/pet_face_widget.dart";
 import "package:photos/ui/viewer/people/pinned_person_badge.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
@@ -301,6 +302,13 @@ class FaceSearchResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
+    final petClusterId = params[kPetClusterParamId] as String?;
+    if (petClusterId != null) {
+      return PetFaceWidget(
+        petClusterId: petClusterId,
+        key: ValueKey(petClusterId),
+      );
+    }
     final int cachedPixelWidth =
         (displaySize * MediaQuery.devicePixelRatioOf(context)).toInt();
     return PersonFaceWidget(
@@ -375,7 +383,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     }
     return faces.where((face) {
       final personId = face.params[kPersonParamID] as String?;
-      if (personId == null || personId.isEmpty) {
+      final petClusterId = face.params[kPetClusterParamId] as String?;
+      if ((personId == null || personId.isEmpty) && petClusterId == null) {
         return false;
       }
       return face.name().toLowerCase().contains(query);
@@ -467,6 +476,11 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       minClusterSize: kMinimumClusterSizeAllFaces,
       showIgnoredOnly: _showingIgnoredPeople,
     );
+    if (!_showingIgnoredPeople && flagService.petEnabled) {
+      allFaces.addAll(
+        await SearchService.instance.getAllPets(null),
+      );
+    }
     normalFaces.clear();
     extraFaces.clear();
     if (_showingIgnoredPeople) {
@@ -629,7 +643,11 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         final slivers = <Widget>[
           if (widget.showSearchBar)
             SearchableAppBar(
-              title: Text(SectionType.face.sectionTitle(context)),
+              title: Text(
+                flagService.petEnabled
+                    ? AppLocalizations.of(context).peopleAndPets
+                    : SectionType.face.sectionTitle(context),
+              ),
               autoActivateSearch: widget.startInSearchMode,
               onSearch: _updateSearchQuery,
               onSearchClosed: _clearSearchQuery,

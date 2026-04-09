@@ -10,7 +10,7 @@ const INPUT_HEIGHT: f32 = 640.0;
 
 // Pet face detection thresholds (from Python config)
 const PET_FACE_IOU_THRESHOLD: f32 = 0.5;
-const PET_FACE_MIN_SCORE: f32 = 0.3;
+const PET_FACE_MIN_SCORE: f32 = 0.5;
 
 // Body detection thresholds
 const BODY_IOU_THRESHOLD: f32 = 0.5;
@@ -35,12 +35,20 @@ pub fn run_pet_face_detection(
     runtime: &MlRuntimeView<'_>,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<PetFaceDetection>> {
+    let session = runtime.pet_face_detection_session()?;
+    run_pet_face_detection_with_session(&session, decoded)
+}
+
+/// Same as [run_pet_face_detection] but accepts a pre-built session directly.
+pub fn run_pet_face_detection_with_session(
+    session: &ort::Session,
+    decoded: &DecodedImage,
+) -> MlResult<Vec<PetFaceDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
 
-    let pet_face_detection = runtime.pet_face_detection_session()?;
     let (output_shape, output_data) = onnx::run_f32(
-        &pet_face_detection,
+        session,
         input,
         [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
@@ -66,15 +74,8 @@ pub fn run_pet_face_detection(
                 total, output_shape
             )));
         };
-        // Warn if the total is ambiguously divisible by multiple candidates.
         let candidates = [11usize, 12, 13];
-        let valid_count = candidates.iter().filter(|&&c| total % c == 0).count();
-        if valid_count > 1 {
-            eprintln!(
-                "[ml][pet] WARNING: flat output len={total} is divisible by {valid_count} row-length candidates; using {inferred}. \
-                 Prefer a model with 2D output shape for reliability."
-            );
-        }
+        let _valid_count = candidates.iter().filter(|&&c| total % c == 0).count();
         inferred
     } else {
         return Err(MlError::Postprocess(
@@ -130,14 +131,23 @@ pub fn run_pet_face_detection(
 
         // For a 2-class model (row_len >= 13): row[11] = cat score,
         // row[12] = dog score.  Pick argmax and map to 0=dog, 1=cat.
+        // Skip detections where species confidence is too low (< 60% of
+        // the winning class) to avoid misclassifying cats as dogs or vice versa.
         // For a 1-class model (row_len == 12): row[11] is the single class
         // score; class is always 0 (dog).
         let class_id: u8 = if row_len >= 13 {
-            if row[12] > row[11] { 0 } else { 1 }
+            let cat_score = row[11];
+            let dog_score = row[12];
+            let max_score = cat_score.max(dog_score);
+            let min_score = cat_score.min(dog_score);
+            // Skip if species scores are too close (ambiguous)
+            if max_score > 0.0 && min_score / max_score > 0.7 {
+                continue;
+            }
+            if dog_score > cat_score { 0 } else { 1 }
         } else {
             0
         };
-
         detections.push(PetFaceDetection {
             score,
             box_xyxy,
@@ -187,7 +197,7 @@ pub fn run_pet_body_detection(
         // Find the winning class across all 80 COCO classes and only
         // keep detections whose predicted class is cat (15) or dog (16).
         let class_logits = &row[5..85];
-        let (best_cls, best_logit) = class_logits
+        let (best_cls, _) = class_logits
             .iter()
             .enumerate()
             .max_by(|a, b| a.1.total_cmp(b.1))
@@ -196,11 +206,11 @@ pub fn run_pet_body_detection(
         if best_cls != COCO_CAT && best_cls != COCO_DOG {
             continue;
         }
-        let class_score = best_logit * obj_conf;
+        let class_score = row[5 + best_cls as usize] * obj_conf;
+        let class_id = best_cls;
         if class_score < BODY_MIN_SCORE {
             continue;
         }
-        let class_id = best_cls;
 
         let x_min_abs = row[0] - row[2] / 2.0;
         let y_min_abs = row[1] - row[3] / 2.0;
@@ -239,28 +249,30 @@ fn correct_box_for_aspect_ratio(
     pad_left: usize,
     pad_top: usize,
 ) {
-    if scaled_width == INPUT_WIDTH as usize
-        && scaled_height == INPUT_HEIGHT as usize
-        && pad_left == 0
-        && pad_top == 0
+    if scaled_width != INPUT_WIDTH as usize
+        || scaled_height != INPUT_HEIGHT as usize
+        || pad_left != 0
+        || pad_top != 0
     {
-        return;
+        let scaled_width = scaled_width as f32;
+        let scaled_height = scaled_height as f32;
+        let pad_left = pad_left as f32;
+        let pad_top = pad_top as f32;
+
+        let transform_x = |x: f32| -> f32 { (x * INPUT_WIDTH - pad_left) / scaled_width };
+        let transform_y = |y: f32| -> f32 { (y * INPUT_HEIGHT - pad_top) / scaled_height };
+
+        box_xyxy[0] = transform_x(box_xyxy[0]);
+        box_xyxy[1] = transform_y(box_xyxy[1]);
+        box_xyxy[2] = transform_x(box_xyxy[2]);
+        box_xyxy[3] = transform_y(box_xyxy[3]);
     }
 
-    let scaled_width = scaled_width as f32;
-    let scaled_height = scaled_height as f32;
-    let pad_left = pad_left as f32;
-    let pad_top = pad_top as f32;
-
-    let transform_x =
-        |x: f32| -> f32 { ((x * INPUT_WIDTH - pad_left) / scaled_width).clamp(0.0, 1.0) };
-    let transform_y =
-        |y: f32| -> f32 { ((y * INPUT_HEIGHT - pad_top) / scaled_height).clamp(0.0, 1.0) };
-
-    box_xyxy[0] = transform_x(box_xyxy[0]);
-    box_xyxy[1] = transform_y(box_xyxy[1]);
-    box_xyxy[2] = transform_x(box_xyxy[2]);
-    box_xyxy[3] = transform_y(box_xyxy[3]);
+    // Always clamp to [0, 1] -- YOLO can predict boxes that extend beyond
+    // the image boundary, matching the Python pipeline's post-detection clamp.
+    for v in box_xyxy.iter_mut() {
+        *v = v.clamp(0.0, 1.0);
+    }
 }
 
 fn correct_for_maintained_aspect_ratio_3kp(
@@ -273,24 +285,26 @@ fn correct_for_maintained_aspect_ratio_3kp(
 ) {
     correct_box_for_aspect_ratio(box_xyxy, scaled_width, scaled_height, pad_left, pad_top);
 
-    if scaled_width == INPUT_WIDTH as usize
-        && scaled_height == INPUT_HEIGHT as usize
-        && pad_left == 0
-        && pad_top == 0
+    if scaled_width != INPUT_WIDTH as usize
+        || scaled_height != INPUT_HEIGHT as usize
+        || pad_left != 0
+        || pad_top != 0
     {
-        return;
+        let transform_x =
+            |x: f32| -> f32 { (x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32 };
+        let transform_y =
+            |y: f32| -> f32 { (y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32 };
+
+        for point in keypoints.iter_mut() {
+            point[0] = transform_x(point[0]);
+            point[1] = transform_y(point[1]);
+        }
     }
 
-    let transform_x = |x: f32| -> f32 {
-        ((x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32).clamp(0.0, 1.0)
-    };
-    let transform_y = |y: f32| -> f32 {
-        ((y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32).clamp(0.0, 1.0)
-    };
-
+    // Always clamp keypoints to [0, 1], matching box clamping above.
     for point in keypoints.iter_mut() {
-        point[0] = transform_x(point[0]);
-        point[1] = transform_y(point[1]);
+        point[0] = point[0].clamp(0.0, 1.0);
+        point[1] = point[1].clamp(0.0, 1.0);
     }
 }
 
@@ -376,4 +390,32 @@ fn naive_nms_pet_body(
         .zip(suppressed)
         .filter_map(|(d, s)| if s { None } else { Some(d) })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn iou_identical_boxes() {
+        let b = [0.1, 0.1, 0.5, 0.5];
+        assert!((calculate_iou_4(&b, &b) - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn iou_disjoint_boxes() {
+        let a = [0.0, 0.0, 0.1, 0.1];
+        let b = [0.5, 0.5, 0.6, 0.6];
+        assert_eq!(calculate_iou_4(&a, &b), 0.0);
+    }
+
+    #[test]
+    fn iou_partial_overlap() {
+        let a = [0.0, 0.0, 0.4, 0.4];
+        let b = [0.2, 0.2, 0.6, 0.6];
+        // Intersection: [0.2,0.2]->[0.4,0.4] = 0.2*0.2 = 0.04
+        // Union: 0.16 + 0.16 - 0.04 = 0.28
+        let iou = calculate_iou_4(&a, &b);
+        assert!((iou - 0.04 / 0.28).abs() < 1e-5);
+    }
 }

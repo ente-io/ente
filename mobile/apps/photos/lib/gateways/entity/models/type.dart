@@ -4,12 +4,14 @@ enum EntityType {
   cgroup,
   unknown,
   smartAlbum,
-  memory;
+  memory,
+  pet;
 
   bool get isZipped {
     switch (this) {
       case EntityType.location:
       case EntityType.person:
+      case EntityType.pet:
         return false;
       default:
         return true;
@@ -28,6 +30,8 @@ enum EntityType {
         return "smart_album";
       case EntityType.memory:
         return "memory";
+      case EntityType.pet:
+        return "pet";
       case EntityType.unknown:
         return "unknown";
     }
