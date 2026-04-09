@@ -14,6 +14,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { savedLocalUser } from "ente-accounts-rs/services/accounts-db";
 import {
     OverflowMenu,
@@ -21,7 +22,11 @@ import {
 } from "ente-base/components/OverflowMenu";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
-import { useResolvedContactAvatar } from "ente-contacts-web";
+import {
+    ensureContactsReady,
+    useResolvedContactAvatar,
+    useResolvedContactDisplay,
+} from "ente-contacts-web";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { t } from "i18next";
@@ -127,6 +132,37 @@ export const LockerCollectionShareDrawer: React.FC<
             cancelled = true;
         };
     }, [collection, onRefreshSharees, open]);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        let cancelled = false;
+        void (async () => {
+            try {
+                const masterKeyB64 = await masterKeyFromSession();
+                if (!masterKeyB64 || cancelled) {
+                    return;
+                }
+                await ensureContactsReady({
+                    userID: currentUser.id,
+                    masterKeyB64,
+                });
+            } catch (error) {
+                if (!cancelled) {
+                    log.warn(
+                        "[LockerCollectionShareDrawer] Failed to warm contacts display cache",
+                        error,
+                    );
+                }
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [currentUser.id, open]);
 
     const sortedSharees = useMemo(
         () =>
@@ -518,11 +554,15 @@ const ParticipantRow: React.FC<{
     action?: React.ReactNode;
 }> = ({ participant, subtitle, action }) => {
     const email = participant.email ?? t("unknownEmail");
+    const resolvedDisplay = useResolvedContactDisplay({
+        userID: participant.id,
+        email: participant.email,
+    });
     const resolved = useResolvedContactAvatar({
         userID: participant.id,
         email: participant.email,
     });
-    const label = resolved.source === "contact" ? resolved.primaryLabel : email;
+    const label = resolvedDisplay.primaryLabel;
     const initial =
         resolved.source === "contact"
             ? resolved.initial
