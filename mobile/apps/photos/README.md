@@ -13,11 +13,11 @@ commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5
 To know more about Ente, see [our main README](../../../README.md) or visit
 [ente.com](https://ente.com).
 
-To use Ente Photos on the web, see [../../../web](../../../web/README.md). To use Ente
-Photos on the desktop, see [../../../desktop](../../../desktop/README.md). There is a also a
+To use Ente Photos on the web, see [web](../../../web/README.md). To use Ente
+Photos on the desktop, see [desktop](../../../desktop/README.md). There is a also a
 [CLI tool](../../../cli/README.md) for easy / automated exports.
 
-If you're looking for Ente Auth instead, see [../auth](../auth/README.md).
+If you're looking for Ente Auth instead, see [auth](../auth/README.md).
 
 ## 📲 Installation
 
@@ -52,20 +52,19 @@ You can alternatively install the build from PlayStore or F-Droid.
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos run codegen:rust`. This will install dependencies and generate Rust bindings.
    - **Using Flutter directly:** Run `flutter pub get`, then install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` in both this folder and in `mobile/packages/rust`.
 
-3. On Android:
-
-   - For development, run `flutter run -t lib/main.dart --flavor independent`
-
-   - For building APK, [setup your
-     keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-     and run `flutter build apk --release --flavor independent`
+3. On Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
 
 4. For iOS, run `flutter build ios`
 
-Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
+## ⚙️ Develop
 
-VSCode users might find it useful to copy [docs/vscode](docs/vscode) into a top
-level `.vscode`.
+For Android, use
+
+```sh
+flutter run -t lib/main.dart --flavor independent
+```
+
+For iOS, use `flutter run`
 
 ## 📝 Localization
 
@@ -96,4 +95,4 @@ to have it added.
 
 ## 💚 Contribute
 
-For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).
+For more ways to contribute, see [CONTRIBUTING.md](../../../CONTRIBUTING.md).

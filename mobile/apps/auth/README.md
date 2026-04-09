@@ -5,7 +5,7 @@ storing your 2FA codes with cloud backups. Works offline. You can even use it
 without signing up for an account if you don't want the cloud backups or
 multi-device sync.
 
-![App Screenshots](./screenshots/screenshots.png)
+![App Screenshots](./docs/assets/screenshots.png)
 
 ## 📲 Download
 
@@ -46,7 +46,7 @@ or managing your secrets, please use our mobile or desktop app.
 
 1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
 
-2. Pull in all submodules with `git submodule update --init --recursive`
+2. Pull in submodules with `git submodule update --init --recursive`
 
 3. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
@@ -67,9 +67,6 @@ flutter run -t lib/main.dart --flavor independent
 ```
 
 For iOS, use `flutter run`
-
-VSCode users might find it useful to copy [docs/vscode](docs/vscode) into a top
-level `.vscode`.
 
 If the code you're working needs to modify user facing strings, see
 [docs/localization](docs/localization.md).
@@ -102,7 +99,7 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 The best way to support this project is by checking out [Ente
 Photos](../mobile/README.md) or spreading the word.
 
-For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).
+For more ways to contribute, see [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## ⭐️ About
 
