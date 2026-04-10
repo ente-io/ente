@@ -1,4 +1,4 @@
-import { ensureWasmCryptoInit, loadEnteWasm } from "ente-wasm/load";
+import { ensureWasmCryptoInit } from "ente-wasm/load";
 
 export const deriveKeyInsufficientMemoryErrorMessage =
     "Failed to derive key (insufficient memory)";
@@ -84,8 +84,7 @@ export const deriveKey = async (
     opsLimit: number,
     memLimit: number,
 ) => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return wasm.auth_derive_kek(password, saltB64, memLimit, opsLimit);
 };
 
@@ -99,9 +98,8 @@ const normalizeDerivedKey = (result: WasmDerivedKey): DerivedKey => ({
 export const deriveSensitiveKey = async (
     password: string,
 ): Promise<DerivedKey> => {
-    await ensureWasmCryptoInit();
+    const wasm = await ensureWasmCryptoInit();
     try {
-        const wasm = await loadEnteWasm();
         return normalizeDerivedKey(
             wasm.auth_generate_sensitive_kek(password) as WasmDerivedKey,
         );
@@ -113,9 +111,8 @@ export const deriveSensitiveKey = async (
 export const deriveInteractiveKey = async (
     password: string,
 ): Promise<DerivedKey> => {
-    await ensureWasmCryptoInit();
+    const wasm = await ensureWasmCryptoInit();
     try {
-        const wasm = await loadEnteWasm();
         return normalizeDerivedKey(
             wasm.auth_generate_interactive_kek(password) as WasmDerivedKey,
         );
@@ -125,14 +122,12 @@ export const deriveInteractiveKey = async (
 };
 
 export const generateKey = async (): Promise<string> => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return wasm.crypto_generate_key();
 };
 
 export const generateKeyPair = async (): Promise<KeyPair> => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     const keyPair = wasm.crypto_generate_keypair();
     return { publicKey: keyPair.public_key, privateKey: keyPair.secret_key };
 };
@@ -141,8 +136,7 @@ export const encryptBox = async (
     dataB64: string,
     keyB64: string,
 ): Promise<EncryptedBox> => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     const box = wasm.crypto_encrypt_box(dataB64, keyB64);
     return { encryptedData: box.encrypted_data, nonce: box.nonce };
 };
@@ -151,8 +145,7 @@ export const decryptBox = async (
     box: EncryptedBox,
     keyB64: string,
 ): Promise<string> => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return wasm.crypto_decrypt_box(box.encryptedData, box.nonce, keyB64);
 };
 
@@ -160,8 +153,7 @@ export const boxSealOpenBytes = async (
     encryptedData: string,
     keyPair: KeyPair,
 ): Promise<Uint8Array> => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return fromB64(
         wasm.crypto_box_seal_open(
             encryptedData,
@@ -177,8 +169,7 @@ export const deriveSubKeyBytes = async (
     subKeyID: number,
     context: string,
 ) => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return fromB64(
         wasm.crypto_derive_subkey(
             keyB64,
@@ -193,8 +184,7 @@ export const generateSRPSetupAttributesRust = async (
     kekB64: string,
     srpUserID: string,
 ) => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     const setup = wasm.auth_generate_srp_setup(
         kekB64,
         srpUserID,
@@ -207,13 +197,11 @@ export const generateSRPSetupAttributesRust = async (
 };
 
 export const recoveryKeyFromMnemonicOrHex = async (value: string) => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return wasm.auth_recovery_key_from_mnemonic_or_hex(value);
 };
 
 export const recoveryKeyToMnemonicRust = async (recoveryKey: string) => {
-    await ensureWasmCryptoInit();
-    const wasm = await loadEnteWasm();
+    const wasm = await ensureWasmCryptoInit();
     return wasm.auth_recovery_key_to_mnemonic(recoveryKey);
 };

@@ -1,7 +1,7 @@
 type EnteWasmModule = typeof import("ente-wasm");
 
 let wasmPromise: Promise<EnteWasmModule> | undefined;
-let cryptoInitDone = false;
+let cryptoReadyPromise: Promise<EnteWasmModule> | undefined;
 
 /**
  * Load `ente-wasm` once and return the shared module instance.
@@ -9,18 +9,24 @@ let cryptoInitDone = false;
  * The first call performs the dynamic import. Later calls reuse the same
  * promise, so all consumers share one loader path.
  */
-export const loadEnteWasm = async (): Promise<EnteWasmModule> => {
-    wasmPromise ??= import("ente-wasm");
-    return wasmPromise;
-};
+export const loadEnteWasm = (): Promise<EnteWasmModule> =>
+    (wasmPromise ??= import("ente-wasm").catch((error: unknown) => {
+        wasmPromise = undefined;
+        throw error;
+    }));
 
 /**
- * Ensure the WASM crypto backend has been initialised exactly once for the
- * current page runtime.
+ * Ensure the WASM crypto backend is initialised, then return the ready module.
+ *
+ * The first call runs `crypto_init()`. Later calls reuse the same promise.
  */
-export const ensureWasmCryptoInit = async () => {
-    if (cryptoInitDone) return;
-    const wasm = await loadEnteWasm();
-    wasm.crypto_init();
-    cryptoInitDone = true;
-};
+export const ensureWasmCryptoInit = (): Promise<EnteWasmModule> =>
+    (cryptoReadyPromise ??= loadEnteWasm()
+        .then((wasm) => {
+            wasm.crypto_init();
+            return wasm;
+        })
+        .catch((error: unknown) => {
+            cryptoReadyPromise = undefined;
+            throw error;
+        }));
