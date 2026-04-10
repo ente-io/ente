@@ -137,11 +137,11 @@ class SmartMemoriesService {
         'calcMemories called with time: $now at ${DateTime.now()} $t',
       );
 
-      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories(
+      final allFileIdsToFile = await _getFilesAndMapForMemories(
         useLocalIntIds: isOfflineMode,
         requireLocalId: isOfflineMode,
       );
-      _logger.info("All files length: ${allFiles.length} $t");
+      _logger.info("All files length: ${allFileIdsToFile.length} $t");
 
       final collectionIDsToExclude = await getCollectionIDsToExclude();
       _logger.info(
@@ -231,7 +231,6 @@ class SmartMemoriesService {
 
       _logger.info('all data fetched $t at ${DateTime.now()}, to computer');
       final computationContext = MemoriesComputationContext(
-        allFiles: allFiles,
         allFileIdsToFile: allFileIdsToFile,
         collectionIDsToExclude: collectionIDsToExclude,
         isOfflineMode: isOfflineMode,
@@ -564,14 +563,13 @@ class SmartMemoriesService {
     return false;
   }
 
-  Future<(Set<EnteFile>, Map<int, EnteFile>)> _getFilesAndMapForMemories({
+  Future<Map<int, EnteFile>> _getFilesAndMapForMemories({
     bool useGeneratedIds = false,
     bool requireLocalId = false,
     bool useLocalIntIds = false,
   }) async {
-    final allFilesFromSearchService = Set<EnteFile>.from(
-      await SearchService.instance.getAllFilesForSearch(),
-    );
+    final allFilesFromSearchService =
+        await SearchService.instance.getAllFilesForSearch();
     final archivedOrHiddenCollectionIDs =
         CollectionsService.instance.archivedOrHiddenCollectionIds();
     final excludedUploadFileIDs = <int>{};
@@ -587,7 +585,7 @@ class SmartMemoriesService {
         }
       }
     }
-    final Set<EnteFile> candidateFiles = {};
+    final candidateFiles = <EnteFile>[];
     for (final file in allFilesFromSearchService) {
       final localId = file.localID;
       final hasLocalId = localId != null && localId.isNotEmpty;
@@ -624,7 +622,6 @@ class SmartMemoriesService {
                 .where((id) => id.isNotEmpty),
           )
         : <String, int>{};
-    final Set<EnteFile> allFiles = {};
     final allFileIdsToFile = <int, EnteFile>{};
     for (final file in candidateFiles) {
       final localIntId = useLocalIntIds ? localIdToIntId[file.localID] : null;
@@ -639,11 +636,10 @@ class SmartMemoriesService {
               ? mappedFile.generatedID
               : mappedFile.uploadedFileID;
       if (key != null) {
-        allFiles.add(mappedFile);
         allFileIdsToFile[key] = mappedFile;
       }
     }
-    return (allFiles, allFileIdsToFile);
+    return allFileIdsToFile;
   }
 
   static Future<MemoriesResult> _allMemoriesCalculations(
@@ -654,7 +650,6 @@ class SmartMemoriesService {
       final computationContext = MemoriesComputationContext.fromIsolateArgs(
         args,
       );
-      final Set<EnteFile> allFiles = computationContext.allFiles;
       final Map<int, EnteFile> allFileIdsToFile =
           computationContext.allFileIdsToFile;
       final Set<int> collectionIDsToExclude =
@@ -703,25 +698,38 @@ class SmartMemoriesService {
       }
       dev.log('arguments from indirect data calculated $t');
       dev.log('starting actual memory calculations ${DateTime.now()}');
-      dev.log("All files length at start: ${allFiles.length} $t");
-      final allFilesForNonDedupedMemories = Set<EnteFile>.from(allFiles);
+      dev.log("All files length at start: ${allFileIdsToFile.length} $t");
+      // Keep one canonical file store and track cross-category deduction by
+      // file ID so full-source memories do not require a second file set.
+      final fullSourceFiles = allFileIdsToFile.values;
+      final usedMemoryFileIds = <int>{};
 
       final List<SmartMemory> memories = [];
 
       // On this day memories
+      final onThisDayFiles = _collectAvailableFiles(
+        allFileIdsToFile,
+        usedMemoryFileIds,
+      );
       final onThisDayMemories = await _getOnThisDayResults(
-        allFiles,
+        onThisDayFiles,
         now,
         seenTimes: seenTimes,
         collectionIDsToExclude: collectionIDsToExclude,
       );
-      _deductUsedMemories(allFiles, onThisDayMemories);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        onThisDayMemories,
+        isOfflineMode: isOfflineMode,
+      );
       memories.addAll(onThisDayMemories);
-      dev.log("All files length after on this day: ${allFiles.length} $t");
+      dev.log(
+        "All files length after on this day: "
+        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+      );
 
       // People memories
       final peopleMemories = await _getPeopleResults(
-        allFiles,
         allFileIdsToFile,
         now,
         oldCache.peopleShownLogs,
@@ -739,13 +747,20 @@ class SmartMemoriesService {
         clipPositiveTextVector: clipPositiveTextVector,
         clipPeopleActivityVectors: clipPeopleActivityVectors,
       );
-      _deductUsedMemories(allFiles, peopleMemories);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        peopleMemories,
+        isOfflineMode: isOfflineMode,
+      );
       memories.addAll(peopleMemories);
-      dev.log("All files length after people: ${allFiles.length} $t");
+      dev.log(
+        "All files length after people: "
+        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+      );
 
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
-        tripSourceFiles: allFilesForNonDedupedMemories,
+        tripSourceFiles: fullSourceFiles,
         allFileIdsToFile: allFileIdsToFile,
         currentTime: now,
         shownTrips: oldCache.tripsShownLogs,
@@ -759,13 +774,24 @@ class SmartMemoriesService {
         clipPositiveTextVector: clipPositiveTextVector,
         cities: cities,
       );
-      _deductUsedMemories(allFiles, tripMemories);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        tripMemories,
+        isOfflineMode: isOfflineMode,
+      );
       memories.addAll(tripMemories);
-      dev.log("All files length after trips: ${allFiles.length} $t");
+      dev.log(
+        "All files length after trips: "
+        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+      );
 
       // Clip memories
+      final clipFiles = _collectAvailableFiles(
+        allFileIdsToFile,
+        usedMemoryFileIds,
+      );
       final clipMemories = await _getClipResults(
-        allFiles,
+        clipFiles,
         now,
         oldCache.clipShownLogs,
         surfaceAll: debugSurfaceAll,
@@ -774,15 +800,26 @@ class SmartMemoriesService {
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipMemoryTypeVectors: clipMemoryTypeVectors,
       );
-      _deductUsedMemories(allFiles, clipMemories);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        clipMemories,
+        isOfflineMode: isOfflineMode,
+      );
       memories.addAll(clipMemories);
-      dev.log("All files length after clip memories: ${allFiles.length} $t");
+      dev.log(
+        "All files length after clip memories: "
+        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+      );
 
       // Time memories
+      final timeFiles = _collectAvailableFiles(
+        allFileIdsToFile,
+        usedMemoryFileIds,
+      );
       final timeMemories = await _onThisDayOrWeekResults(
-        allFiles,
+        timeFiles,
         now,
-        recentSourceFiles: allFilesForNonDedupedMemories,
+        recentSourceFiles: fullSourceFiles,
         isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
@@ -790,16 +827,34 @@ class SmartMemoriesService {
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
-      _deductUsedMemories(allFiles, timeMemories);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        timeMemories,
+        isOfflineMode: isOfflineMode,
+      );
       memories.addAll(timeMemories);
-      dev.log("All files length after time: ${allFiles.length} $t");
+      dev.log(
+        "All files length after time: "
+        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+      );
 
       // Filler memories
+      final fillerFiles = _collectAvailableFiles(
+        allFileIdsToFile,
+        usedMemoryFileIds,
+      );
       final fillerMemories =
-          await _getFillerResults(allFiles, now, seenTimes: seenTimes);
-      _deductUsedMemories(allFiles, fillerMemories);
+          await _getFillerResults(fillerFiles, now, seenTimes: seenTimes);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        fillerMemories,
+        isOfflineMode: isOfflineMode,
+      );
       memories.addAll(fillerMemories);
-      dev.log("All files length after filler: ${allFiles.length} $t");
+      dev.log(
+        "All files length after filler: "
+        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+      );
       dev.log('finished actual memory calculations ${DateTime.now()}');
       return MemoriesResult(memories, bases);
     } catch (e, s) {
@@ -810,15 +865,16 @@ class SmartMemoriesService {
 
   Future<List<SmartMemory>> calcSimpleMemories() async {
     final now = DateTime.now();
-    final (allFiles, _) = await _getFilesAndMapForMemories(
+    final allFileIdsToFile = await _getFilesAndMapForMemories(
       useLocalIntIds: isOfflineMode,
       requireLocalId: isOfflineMode,
     );
+    final usedMemoryFileIds = <int>{};
     final seenTimes = await _memoriesDB.getSeenTimes();
     final collectionIDsToExclude = await getCollectionIDsToExclude();
     final localIdToIntId = isOfflineMode
         ? await OfflineFilesDB.instance.ensureLocalIntIds(
-            allFiles
+            allFileIdsToFile.values
                 .map((file) => file.localID)
                 .whereType<String>()
                 .where((id) => id.isNotEmpty),
@@ -828,8 +884,12 @@ class SmartMemoriesService {
     final List<SmartMemory> memories = [];
 
     // On this day memories
+    final onThisDayFiles = _collectAvailableFiles(
+      allFileIdsToFile,
+      usedMemoryFileIds,
+    );
     final onThisDayMemories = await _getOnThisDayResults(
-      allFiles,
+      onThisDayFiles,
       now,
       seenTimes: seenTimes,
       collectionIDsToExclude: collectionIDsToExclude,
@@ -838,12 +898,20 @@ class SmartMemoriesService {
     if (onThisDayMemories.isNotEmpty &&
         onThisDayMemories.first.shouldShowNow()) {
       memories.add(onThisDayMemories.first);
-      _deductUsedMemories(allFiles, [onThisDayMemories.first]);
+      _markUsedMemories(
+        usedMemoryFileIds,
+        [onThisDayMemories.first],
+        isOfflineMode: isOfflineMode,
+      );
     }
 
     // Filler memories
+    final fillerFiles = _collectAvailableFiles(
+      allFileIdsToFile,
+      usedMemoryFileIds,
+    );
     final fillerMemories = await _getFillerResults(
-      allFiles,
+      fillerFiles,
       now,
       seenTimes: seenTimes,
       localIdToIntId: localIdToIntId,
@@ -861,19 +929,46 @@ class SmartMemoriesService {
     return memories;
   }
 
-  static void _deductUsedMemories(
-    Set<EnteFile> files,
-    List<SmartMemory> memories,
+  static List<EnteFile> _collectAvailableFiles(
+    Map<int, EnteFile> allFileIdsToFile,
+    Set<int> usedMemoryFileIds,
   ) {
-    final usedFiles = <EnteFile>{};
-    for (final memory in memories) {
-      usedFiles.addAll(memory.memories.map((m) => m.file));
+    final availableFiles = <EnteFile>[];
+    for (final entry in allFileIdsToFile.entries) {
+      if (usedMemoryFileIds.contains(entry.key)) {
+        continue;
+      }
+      availableFiles.add(entry.value);
     }
-    files.removeAll(usedFiles);
+    return availableFiles;
+  }
+
+  static int _remainingFilesCount(
+    Map<int, EnteFile> allFileIdsToFile,
+    Set<int> usedMemoryFileIds,
+  ) {
+    return allFileIdsToFile.length - usedMemoryFileIds.length;
+  }
+
+  static void _markUsedMemories(
+    Set<int> usedMemoryFileIds,
+    Iterable<SmartMemory> memories, {
+    required bool isOfflineMode,
+  }) {
+    for (final memory in memories) {
+      for (final fileMemory in memory.memories) {
+        final fileId = _memoryFileIdFromMemory(
+          fileMemory,
+          isOfflineMode: isOfflineMode,
+        );
+        if (fileId != null) {
+          usedMemoryFileIds.add(fileId);
+        }
+      }
+    }
   }
 
   static Future<List<PeopleMemory>> _getPeopleResults(
-    Iterable<EnteFile> allFiles,
     Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<PeopleShownLog> shownPeople, {
@@ -892,7 +987,6 @@ class SmartMemoriesService {
     required Map<PeopleActivity, Vector> clipPeopleActivityVectors,
   }) async {
     return PeopleMemoriesCalculator.compute(
-      allFiles,
       allFileIdsToFile,
       currentTime,
       shownPeople,
@@ -967,7 +1061,7 @@ class SmartMemoriesService {
   }
 
   static Future<List<TimeMemory>> _onThisDayOrWeekResults(
-    Set<EnteFile> allFiles,
+    Iterable<EnteFile> allFiles,
     DateTime currentTime, {
     required Iterable<EnteFile> recentSourceFiles,
     required bool isOfflineMode,

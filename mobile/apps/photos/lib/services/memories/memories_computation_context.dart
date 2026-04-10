@@ -9,7 +9,6 @@ import "package:photos/models/ml/vector.dart";
 import "package:photos/services/location_service.dart";
 
 class MemoriesComputationContext {
-  final Set<EnteFile> allFiles;
   final Map<int, EnteFile> allFileIdsToFile;
   final Set<int> collectionIDsToExclude;
   final bool isOfflineMode;
@@ -31,7 +30,6 @@ class MemoriesComputationContext {
   final Map<ClipMemoryType, Vector> clipMemoryTypeVectors;
 
   const MemoriesComputationContext({
-    required this.allFiles,
     required this.allFileIdsToFile,
     required this.collectionIDsToExclude,
     required this.isOfflineMode,
@@ -57,7 +55,6 @@ class MemoriesComputationContext {
     Map<String, dynamic> args,
   ) {
     return MemoriesComputationContext(
-      allFiles: (args["allFiles"] as Set).cast<EnteFile>(),
       allFileIdsToFile: Map<int, EnteFile>.from(
         args["allFileIdsToFile"] as Map,
       ),
@@ -96,7 +93,6 @@ class MemoriesComputationContext {
 
   Map<String, dynamic> toIsolateArgs() {
     return <String, dynamic>{
-      "allFiles": allFiles,
       "allFileIdsToFile": allFileIdsToFile,
       "collectionIDsToExclude": collectionIDsToExclude,
       "isOfflineMode": isOfflineMode,

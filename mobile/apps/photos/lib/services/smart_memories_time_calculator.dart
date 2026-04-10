@@ -4,7 +4,7 @@ class TimeMemoriesCalculator {
   static const _recentTimeMemorySelectionSize = 10;
 
   static Future<List<TimeMemory>> computeTimeMemories(
-    Set<EnteFile> allFiles,
+    Iterable<EnteFile> allFiles,
     DateTime currentTime, {
     Iterable<EnteFile>? recentSourceFiles,
     required bool isOfflineMode,
@@ -16,8 +16,10 @@ class TimeMemoriesCalculator {
   }) async {
     final List<TimeMemory> recentMemoryResult = [];
     final List<TimeMemory> historicalMemoryResult = [];
-    if (allFiles.isEmpty) return [];
-    final recentCandidates = recentSourceFiles ?? allFiles;
+    final availableFiles =
+        allFiles is List<EnteFile> ? allFiles : allFiles.toList();
+    if (availableFiles.isEmpty) return [];
+    final recentCandidates = recentSourceFiles ?? availableFiles;
 
     final startOfCurrentWeek = _startOfWeek(currentTime);
     final startOfPreviousWeek =
@@ -67,13 +69,13 @@ class TimeMemoriesCalculator {
     final currentMonth = currentTime.month;
     final currentYear = currentTime.year;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
-    final averageDailyPhotos = allFiles.length / 365;
+    final averageDailyPhotos = availableFiles.length / 365;
     final significantDayThreshold = averageDailyPhotos * 0.25;
     final significantWeekThreshold = averageDailyPhotos * 0.40;
 
     final dayMonthYearGroups = <int, Map<int, List<Memory>>>{};
 
-    for (final file in allFiles) {
+    for (final file in availableFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
       final creationTime =
@@ -147,7 +149,7 @@ class TimeMemoriesCalculator {
 
     if (historicalMemoryResult.isEmpty) {
       final currentWeekYearGroups = <int, List<Memory>>{};
-      for (final file in allFiles) {
+      for (final file in availableFiles) {
         if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
         final creationTime =
@@ -215,8 +217,20 @@ class TimeMemoriesCalculator {
 
     const monthSelectionSize = 20;
     final currentMonthYearGroups = <int, List<Memory>>{};
-    SmartMemoriesService._deductUsedMemories(allFiles, historicalMemoryResult);
-    for (final file in allFiles) {
+    final historicalMemoryFileIds = <int>{};
+    SmartMemoriesService._markUsedMemories(
+      historicalMemoryFileIds,
+      historicalMemoryResult,
+      isOfflineMode: isOfflineMode,
+    );
+    for (final file in availableFiles) {
+      final fileId = SmartMemoriesService._memoryFileId(
+        file,
+        isOfflineMode: isOfflineMode,
+      );
+      if (fileId != null && historicalMemoryFileIds.contains(fileId)) {
+        continue;
+      }
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
       final creationTime =

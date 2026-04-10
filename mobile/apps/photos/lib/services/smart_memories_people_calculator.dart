@@ -2,7 +2,6 @@ part of "smart_memories_service.dart";
 
 class PeopleMemoriesCalculator {
   static Future<List<PeopleMemory>> compute(
-    Iterable<EnteFile> allFiles,
     Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<PeopleShownLog> shownPeople, {
@@ -22,7 +21,7 @@ class PeopleMemoriesCalculator {
   }) async {
     final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
     final List<PeopleMemory> memoryResults = [];
-    if (allFiles.isEmpty) return [];
+    if (allFileIdsToFile.isEmpty) return [];
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
