@@ -15,7 +15,7 @@ import type {
     EncryptedFile,
     KeyPair,
 } from "ente-base/crypto/types";
-import { ensureWasmCryptoInit } from "ente-wasm/load";
+import { loadCryptoReadyEnteWasm } from "ente-wasm/load";
 
 const shouldFallbackToLegacyBlobDecrypt = (error: unknown): boolean => {
     if (!error || typeof error !== "object") {
@@ -70,7 +70,7 @@ export const decryptBox = async (
     box: EncryptedBox,
     key: Uint8Array | string,
 ): Promise<string> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     return wasm.crypto_decrypt_box(
         toB64String(box.encryptedData),
         toB64String(box.nonce),
@@ -97,7 +97,7 @@ export const decryptMetadataJSON = async (
     blob: EncryptedBlob,
     key: Uint8Array | string,
 ): Promise<unknown> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const encryptedData = toB64String(blob.encryptedData);
     const decryptionHeader = toB64String(blob.decryptionHeader);
     const keyB64 = toB64String(key);
@@ -129,7 +129,7 @@ export const boxSealOpen = async (
     encryptedData: string,
     keyPair: KeyPair,
 ): Promise<string> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     return wasm.crypto_box_seal_open(
         encryptedData,
         keyPair.publicKey,
@@ -141,7 +141,7 @@ export const boxSeal = async (
     dataB64: string,
     publicKeyB64: string,
 ): Promise<string> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     return wasm.crypto_box_seal(dataB64, publicKeyB64);
 };
 
@@ -159,12 +159,12 @@ export const boxSeal = async (
  * Generate a random 32-byte key (base64).
  */
 export const generateKey = async (): Promise<string> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     return wasm.crypto_generate_key();
 };
 
 export const md5Base64 = async (data: Uint8Array): Promise<string> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     return wasm.crypto_md5_base64(data);
 };
 
@@ -176,7 +176,7 @@ export const encryptBox = async (
     dataB64: string,
     keyB64: string,
 ): Promise<{ encryptedData: string; nonce: string }> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const result = wasm.crypto_encrypt_box(dataB64, keyB64);
     return { encryptedData: result.encrypted_data, nonce: result.nonce };
 };
@@ -189,7 +189,7 @@ export const encryptBlob = async (
     dataB64: string,
     keyB64: string,
 ): Promise<{ encryptedData: string; decryptionHeader: string }> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const result = wasm.crypto_encrypt_blob(dataB64, keyB64);
     return {
         encryptedData: result.encrypted_data,
@@ -228,7 +228,7 @@ export interface StreamDecryptorHandle {
 
 export const createStreamEncryptor =
     async (): Promise<StreamEncryptorHandle> => {
-        const wasm = await ensureWasmCryptoInit();
+        const wasm = await loadCryptoReadyEnteWasm();
         const encryptor = new wasm.CryptoStreamEncryptor();
 
         return {
@@ -244,7 +244,7 @@ export const createStreamDecryptor = async (
     decryptionHeader: string,
     keyB64: string,
 ): Promise<StreamDecryptorHandle> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const decryptor = new wasm.CryptoStreamDecryptor(decryptionHeader, keyB64);
 
     return {
@@ -280,7 +280,7 @@ export interface EncryptedFileResult {
 export const encryptFileStream = async (
     dataB64: string,
 ): Promise<EncryptedFileResult> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const result = wasm.crypto_encrypt_stream(dataB64);
     return {
         encryptedData: result.encrypted_data,
@@ -300,7 +300,7 @@ export const encryptFileStreamWithKey = async (
     dataB64: string,
     keyB64: string,
 ): Promise<EncryptedFileResult> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const result = wasm.crypto_encrypt_stream_with_key(dataB64, keyB64);
     return {
         encryptedData: result.encrypted_data,
@@ -324,7 +324,7 @@ export const decryptStreamBytes = async (
     file: EncryptedFile,
     key: Uint8Array | string,
 ): Promise<Uint8Array> => {
-    const wasm = await ensureWasmCryptoInit();
+    const wasm = await loadCryptoReadyEnteWasm();
     const plaintextB64 = wasm.crypto_decrypt_stream(
         toB64String(file.encryptedData),
         toB64String(file.decryptionHeader),

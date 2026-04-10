@@ -14,10 +14,6 @@
     },
     "module": "./pkg/ente_wasm.js",
     "types": "./pkg/ente_wasm.d.ts",
-    "files": [
-        "pkg",
-        "load.ts"
-    ],
     "scripts": {
         "build": "wasm-pack build --target bundler",
         "test": "vitest"

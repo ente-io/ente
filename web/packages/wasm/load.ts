@@ -16,11 +16,12 @@ export const loadEnteWasm = (): Promise<EnteWasmModule> =>
     }));
 
 /**
- * Ensure the WASM crypto backend is initialised, then return the ready module.
+ * Load `ente-wasm`, initialize the crypto backend, and return the ready
+ * module.
  *
  * The first call runs `crypto_init()`. Later calls reuse the same promise.
  */
-export const ensureWasmCryptoInit = (): Promise<EnteWasmModule> =>
+export const loadCryptoReadyEnteWasm = (): Promise<EnteWasmModule> =>
     (cryptoReadyPromise ??= loadEnteWasm()
         .then((wasm) => {
             wasm.crypto_init();
