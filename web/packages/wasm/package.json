@@ -16,7 +16,7 @@
     "types": "./pkg/ente_wasm.d.ts",
     "scripts": {
         "build": "wasm-pack build --target bundler",
-        "test": "vitest"
+        "test": "vitest --run"
     },
     "devDependencies": {
         "ente-build-config": "*",
