@@ -50,6 +50,7 @@ abstract class MemorySpec {
     }
     if (memory is TimeMemory) {
       return TimeMemorySpec(
+        timeKind: memory.kind,
         day: memory.day,
         month: memory.month,
         yearsAgo: memory.yearsAgo,
@@ -288,24 +289,31 @@ class ClipMemorySpec extends MemorySpec {
 class TimeMemorySpec extends MemorySpec {
   static const kindValue = "time";
 
+  final TimeMemoryKind timeKind;
   final DateTime? day;
   final DateTime? month;
   final int? yearsAgo;
 
   const TimeMemorySpec({
+    required this.timeKind,
     required this.day,
     required this.month,
     required this.yearsAgo,
   });
 
   factory TimeMemorySpec.fromJson(Map<String, dynamic> json) {
+    final day = json["day"] != null
+        ? DateTime.fromMicrosecondsSinceEpoch(json["day"] as int)
+        : null;
+    final month = json["month"] != null
+        ? DateTime.fromMicrosecondsSinceEpoch(json["month"] as int)
+        : null;
     return TimeMemorySpec(
-      day: json["day"] != null
-          ? DateTime.fromMicrosecondsSinceEpoch(json["day"] as int)
-          : null,
-      month: json["month"] != null
-          ? DateTime.fromMicrosecondsSinceEpoch(json["month"] as int)
-          : null,
+      timeKind: json["timeKind"] != null
+          ? TimeMemoryKind.values.byName(json["timeKind"] as String)
+          : TimeMemory.inferKind(day: day, month: month),
+      day: day,
+      month: month,
       yearsAgo: json["yearsAgo"] as int?,
     );
   }
@@ -329,6 +337,7 @@ class TimeMemorySpec extends MemorySpec {
       firstDateToShow,
       lastDateToShow,
       id: id,
+      kind: timeKind,
       day: day,
       month: month,
       yearsAgo: yearsAgo,
@@ -341,6 +350,7 @@ class TimeMemorySpec extends MemorySpec {
   Map<String, dynamic> toJson() {
     return {
       "kind": kind,
+      "timeKind": timeKind.name,
       "day": day?.microsecondsSinceEpoch,
       "month": month?.microsecondsSinceEpoch,
       "yearsAgo": yearsAgo,

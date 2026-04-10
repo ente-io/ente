@@ -186,17 +186,25 @@ class PhotoSelector {
 
     if (sorted.length < config.targetSize) return sorted;
 
-    // Divide into N equal buckets.
-    final int total = sorted.length;
+    final minCreationTime = sorted.first.file.creationTime!;
+    final maxCreationTime = sorted.last.file.creationTime!;
+    if (minCreationTime == maxCreationTime) {
+      return _selectFlat(sorted, config);
+    }
+
+    // Divide the full chronological range into equal time buckets so dense
+    // periods do not dominate multiple buckets just because they have more
+    // photos.
     final int numBuckets = config.targetSize;
-    final int quotient = total ~/ numBuckets;
-    final int remainder = total % numBuckets;
-    final List<List<Memory>> buckets = [];
-    int offset = 0;
-    for (int i = 0; i < numBuckets; i++) {
-      final int bucketSize = quotient + (i < remainder ? 1 : 0);
-      buckets.add(sorted.sublist(offset, offset + bucketSize));
-      offset += bucketSize;
+    final int totalRange = maxCreationTime - minCreationTime + 1;
+    final List<List<Memory>> buckets =
+        List.generate(numBuckets, (_) => <Memory>[]);
+    for (final mem in sorted) {
+      final creationTime = mem.file.creationTime!;
+      final bucketIndex =
+          ((creationTime - minCreationTime) * numBuckets ~/ totalRange)
+              .clamp(0, numBuckets - 1);
+      buckets[bucketIndex].add(mem);
     }
 
     final finalSelection = <Memory>[];
@@ -255,6 +263,47 @@ class PhotoSelector {
       // Pick the winner.
       final winner = _pickCandidate(candidates, finalSelection, config.pick);
       finalSelection.add(winner);
+    }
+
+    if (finalSelection.length >= config.targetSize) {
+      return finalSelection;
+    }
+
+    final selectedFileIDs = finalSelection
+        .map(
+          (mem) =>
+              memoryFileIdFromMemory(mem, isOfflineMode: config.isOfflineMode),
+        )
+        .whereType<int>()
+        .toSet();
+    final remaining = sorted.where((mem) {
+      final fileID =
+          memoryFileIdFromMemory(mem, isOfflineMode: config.isOfflineMode);
+      return fileID == null || !selectedFileIDs.contains(fileID);
+    }).toList()
+      ..sort((a, b) {
+        final aID =
+            memoryFileIdFromMemory(a, isOfflineMode: config.isOfflineMode);
+        final bID =
+            memoryFileIdFromMemory(b, isOfflineMode: config.isOfflineMode);
+        return (config.scores[bID] ?? 0.0).compareTo(config.scores[aID] ?? 0.0);
+      });
+
+    for (final candidate in remaining) {
+      if (finalSelection.length >= config.targetSize) break;
+      final filteredCandidates = excludeNearDuplicates(
+        [candidate],
+        finalSelection,
+        config.fileIDToImageEmbedding,
+        isOfflineMode: config.isOfflineMode,
+      );
+      if (filteredCandidates.isEmpty) continue;
+      final timeFiltered = excludeTooCloseInTime(
+        filteredCandidates,
+        finalSelection,
+      );
+      if (timeFiltered.isEmpty) continue;
+      finalSelection.add(timeFiltered.first);
     }
 
     return finalSelection;
@@ -508,6 +557,7 @@ class PhotoSelector {
   static Future<List<Memory>> bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
+    SelectionDistribution? distributionOverride,
     required bool isOfflineMode,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -546,6 +596,21 @@ class PhotoSelector {
       }
 
       scores[fileID] = faceCount * 1000.0 + clipScore;
+    }
+
+    if (distributionOverride != null) {
+      return select(
+        memories,
+        SelectionConfig(
+          targetSize: targetSize,
+          isOfflineMode: isOfflineMode,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+          scores: scores,
+          distribution: distributionOverride,
+          pick: SelectionPick.ranked,
+          sort: SelectionSort.chronological,
+        ),
+      );
     }
 
     final allYears = memories.map((e) {

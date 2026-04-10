@@ -1,9 +1,12 @@
 part of "smart_memories_service.dart";
 
 class TimeMemoriesCalculator {
+  static const _recentTimeMemorySelectionSize = 10;
+
   static Future<List<TimeMemory>> computeTimeMemories(
     Set<EnteFile> allFiles,
     DateTime currentTime, {
+    Iterable<EnteFile>? recentSourceFiles,
     required bool isOfflineMode,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -11,8 +14,53 @@ class TimeMemoriesCalculator {
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
   }) async {
-    final List<TimeMemory> memoryResult = [];
+    final List<TimeMemory> recentMemoryResult = [];
+    final List<TimeMemory> historicalMemoryResult = [];
     if (allFiles.isEmpty) return [];
+    final recentCandidates = recentSourceFiles ?? allFiles;
+
+    final startOfCurrentWeek = _startOfWeek(currentTime);
+    final startOfPreviousWeek =
+        startOfCurrentWeek.subtract(const Duration(days: 7));
+    await _maybeAddRecentTimeMemory(
+      recentMemoryResult,
+      recentCandidates,
+      sourceStart: startOfPreviousWeek,
+      sourceEnd: startOfCurrentWeek,
+      showStart: startOfCurrentWeek,
+      showEnd: startOfCurrentWeek.add(const Duration(days: 7)),
+      kind: TimeMemoryKind.lastWeek,
+      isOfflineMode: isOfflineMode,
+      seenTimes: seenTimes,
+      fileIdToFaces: fileIdToFaces,
+      faceIDsToPersonID: faceIDsToPersonID,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+      clipPositiveTextVector: clipPositiveTextVector,
+    );
+
+    final startOfCurrentMonth = _startOfMonth(currentTime);
+    final startOfPreviousMonth = DateTime(
+      startOfCurrentMonth.year,
+      startOfCurrentMonth.month - 1,
+    );
+    await _maybeAddRecentTimeMemory(
+      recentMemoryResult,
+      recentCandidates,
+      sourceStart: startOfPreviousMonth,
+      sourceEnd: startOfCurrentMonth,
+      showStart: startOfCurrentMonth,
+      showEnd: DateTime(
+        startOfCurrentMonth.year,
+        startOfCurrentMonth.month + 1,
+      ),
+      kind: TimeMemoryKind.lastMonth,
+      isOfflineMode: isOfflineMode,
+      seenTimes: seenTimes,
+      fileIdToFaces: fileIdToFaces,
+      faceIDsToPersonID: faceIDsToPersonID,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+      clipPositiveTextVector: clipPositiveTextVector,
+    );
 
     final currentDayMonth = currentTime.month * 100 + currentTime.day;
     final currentWeek = getWeekNumber(currentTime);
@@ -62,7 +110,7 @@ class TimeMemoriesCalculator {
           clipPositiveTextVector: clipPositiveTextVector,
         );
 
-        memoryResult.add(
+        historicalMemoryResult.add(
           TimeMemory(
             photoSelection,
             day: date,
@@ -84,7 +132,7 @@ class TimeMemoriesCalculator {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
-          memoryResult.add(
+          historicalMemoryResult.add(
             TimeMemory(
               photoSelection,
               day: date,
@@ -97,7 +145,7 @@ class TimeMemoriesCalculator {
       }
     }
 
-    if (memoryResult.isEmpty) {
+    if (historicalMemoryResult.isEmpty) {
       final currentWeekYearGroups = <int, List<Memory>>{};
       for (final file in allFiles) {
         if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
@@ -129,7 +177,7 @@ class TimeMemoriesCalculator {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
-          memoryResult.add(
+          historicalMemoryResult.add(
             TimeMemory(
               photoSelection,
               currentTime.subtract(kMemoriesMargin).microsecondsSinceEpoch,
@@ -150,7 +198,7 @@ class TimeMemoriesCalculator {
               fileIDToImageEmbedding: fileIDToImageEmbedding,
               clipPositiveTextVector: clipPositiveTextVector,
             );
-            memoryResult.add(
+            historicalMemoryResult.add(
               TimeMemory(
                 photoSelection,
                 yearsAgo: currentTime.year - date.year,
@@ -167,7 +215,7 @@ class TimeMemoriesCalculator {
 
     const monthSelectionSize = 20;
     final currentMonthYearGroups = <int, List<Memory>>{};
-    SmartMemoriesService._deductUsedMemories(allFiles, memoryResult);
+    SmartMemoriesService._deductUsedMemories(allFiles, historicalMemoryResult);
     for (final file in allFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
@@ -203,7 +251,7 @@ class TimeMemoriesCalculator {
       );
       final daysLeftInMonth =
           DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-      memoryResult.add(
+      historicalMemoryResult.add(
         TimeMemory(
           photoSelection,
           month: DateTime(year, currentMonth),
@@ -215,7 +263,9 @@ class TimeMemoriesCalculator {
         ),
       );
     }
-    if (sortedYearsForCurrentMonth.length <= 3) return memoryResult;
+    if (sortedYearsForCurrentMonth.length <= 3) {
+      return [...recentMemoryResult, ...historicalMemoryResult];
+    }
     final allPhotos = sortedYearsForCurrentMonth
         .expand((year) => currentMonthYearGroups[year]!)
         .toList();
@@ -230,7 +280,7 @@ class TimeMemoriesCalculator {
     );
     final daysLeftInMonth =
         DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-    memoryResult.add(
+    historicalMemoryResult.add(
       TimeMemory(
         photoSelection,
         month: DateTime(currentYear, currentMonth),
@@ -239,7 +289,59 @@ class TimeMemoriesCalculator {
       ),
     );
 
-    return memoryResult;
+    return [...recentMemoryResult, ...historicalMemoryResult];
+  }
+
+  static Future<void> _maybeAddRecentTimeMemory(
+    List<TimeMemory> memories,
+    Iterable<EnteFile> allFiles, {
+    required DateTime sourceStart,
+    required DateTime sourceEnd,
+    required DateTime showStart,
+    required DateTime showEnd,
+    required TimeMemoryKind kind,
+    required bool isOfflineMode,
+    required Map<int, int> seenTimes,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<String, String> faceIDsToPersonID,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
+    required Vector clipPositiveTextVector,
+  }) async {
+    final sourceStartMicros = sourceStart.microsecondsSinceEpoch;
+    final sourceEndMicros = sourceEnd.microsecondsSinceEpoch;
+    final candidates = <Memory>[];
+    for (final file in allFiles) {
+      final creationTime = file.creationTime;
+      if (creationTime == null ||
+          creationTime < sourceStartMicros ||
+          creationTime >= sourceEndMicros) {
+        continue;
+      }
+      candidates.add(Memory.fromFile(file, seenTimes));
+    }
+
+    if (candidates.length < SmartMemoriesService.minimumMemoryLength) {
+      return;
+    }
+
+    final photoSelection = await SmartMemoriesService._bestSelection(
+      candidates,
+      prefferedSize: _recentTimeMemorySelectionSize,
+      distributionOverride: SelectionDistribution.timeBuckets,
+      isOfflineMode: isOfflineMode,
+      fileIdToFaces: fileIdToFaces,
+      faceIDsToPersonID: faceIDsToPersonID,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+      clipPositiveTextVector: clipPositiveTextVector,
+    );
+    memories.add(
+      TimeMemory(
+        photoSelection,
+        showStart.microsecondsSinceEpoch,
+        showEnd.microsecondsSinceEpoch,
+        kind: kind,
+      ),
+    );
   }
 
   static Future<List<FillerMemory>> computeFillerMemories(
@@ -448,5 +550,18 @@ class TimeMemoriesCalculator {
   static int getWeekNumber(DateTime date) {
     final int dayOfYear = int.parse(DateFormat('D').format(date));
     return ((dayOfYear - 1) ~/ 7) + 1;
+  }
+
+  static DateTime _startOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  static DateTime _startOfWeek(DateTime date) {
+    final startOfDay = _startOfDay(date);
+    return startOfDay.subtract(Duration(days: startOfDay.weekday - 1));
+  }
+
+  static DateTime _startOfMonth(DateTime date) {
+    return DateTime(date.year, date.month);
   }
 }

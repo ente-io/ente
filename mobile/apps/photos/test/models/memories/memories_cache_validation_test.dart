@@ -8,6 +8,7 @@ import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/filler_memory.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/memory_spec.dart";
 import "package:photos/models/memories/on_this_day_memory.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
@@ -116,9 +117,26 @@ void main() {
         30,
         40,
         id: "time-typed",
+        kind: TimeMemoryKind.day,
         day: DateTime.utc(2022, 3, 14),
         yearsAgo: 4,
       )..title = "Stored time title";
+
+      final lastWeekMemory = TimeMemory(
+        buildMemories([411, 412]),
+        41,
+        42,
+        id: "time-last-week",
+        kind: TimeMemoryKind.lastWeek,
+      )..title = "Stored last week title";
+
+      final lastMonthMemory = TimeMemory(
+        buildMemories([421, 422]),
+        43,
+        44,
+        id: "time-last-month",
+        kind: TimeMemoryKind.lastMonth,
+      )..title = "Stored last month title";
 
       final fillerMemory = FillerMemory(
         buildMemories([501]),
@@ -149,6 +167,8 @@ void main() {
       final originals = <SmartMemory>[
         tripMemory,
         timeMemory,
+        lastWeekMemory,
+        lastMonthMemory,
         fillerMemory,
         onThisDayMemory,
         peopleMemory,
@@ -217,6 +237,44 @@ void main() {
       expect(decoded.toShowMemories.first.id, "trip-cache");
       expect(decoded.toShowMemories.last.id, "trip-legacy-cache");
       expect(decoded.toShowMemories.first.tripKey, "trip-nyc-2020");
+    });
+
+    test("legacy time specs infer the correct subtype", () {
+      final legacyWeekSpec = TimeMemorySpec.fromJson({
+        "kind": "time",
+        "yearsAgo": 2,
+      });
+      final legacyMonthSpec = TimeMemorySpec.fromJson({
+        "kind": "time",
+        "month": DateTime.utc(2021, 3, 1).microsecondsSinceEpoch,
+      });
+
+      expect(legacyWeekSpec.timeKind, TimeMemoryKind.week);
+      expect(legacyMonthSpec.timeKind, TimeMemoryKind.month);
+
+      final legacyWeekMemory = legacyWeekSpec.toSmartMemory(
+        buildMemories([1001]),
+        firstDateToShow: 10,
+        lastDateToShow: 20,
+        title: "legacy-week",
+        id: "legacy-week",
+      );
+      final legacyMonthMemory = legacyMonthSpec.toSmartMemory(
+        buildMemories([1002]),
+        firstDateToShow: 10,
+        lastDateToShow: 20,
+        title: "legacy-month",
+        id: "legacy-month",
+      );
+
+      expect(
+        legacyWeekMemory.createTitle(l10n, "en"),
+        l10n.thisWeekXYearsAgo(count: 2),
+      );
+      expect(
+        legacyMonthMemory.createTitle(l10n, "en"),
+        l10n.throughTheYears(dateFormat: "March"),
+      );
     });
   });
 }

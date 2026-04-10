@@ -704,6 +704,7 @@ class SmartMemoriesService {
       dev.log('arguments from indirect data calculated $t');
       dev.log('starting actual memory calculations ${DateTime.now()}');
       dev.log("All files length at start: ${allFiles.length} $t");
+      final allFilesForRecentTimeMemories = Set<EnteFile>.from(allFiles);
 
       final List<SmartMemory> memories = [];
 
@@ -781,6 +782,7 @@ class SmartMemoriesService {
       final timeMemories = await _onThisDayOrWeekResults(
         allFiles,
         now,
+        recentSourceFiles: allFilesForRecentTimeMemories,
         isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
@@ -967,6 +969,7 @@ class SmartMemoriesService {
   static Future<List<TimeMemory>> _onThisDayOrWeekResults(
     Set<EnteFile> allFiles,
     DateTime currentTime, {
+    required Iterable<EnteFile> recentSourceFiles,
     required bool isOfflineMode,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -977,6 +980,7 @@ class SmartMemoriesService {
     return TimeMemoriesCalculator.computeTimeMemories(
       allFiles,
       currentTime,
+      recentSourceFiles: recentSourceFiles,
       isOfflineMode: isOfflineMode,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
@@ -1140,6 +1144,7 @@ class SmartMemoriesService {
   static Future<List<Memory>> _bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
+    SelectionDistribution? distributionOverride,
     required bool isOfflineMode,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -1149,6 +1154,7 @@ class SmartMemoriesService {
       PhotoSelector.bestSelection(
         memories,
         prefferedSize: prefferedSize,
+        distributionOverride: distributionOverride,
         isOfflineMode: isOfflineMode,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
