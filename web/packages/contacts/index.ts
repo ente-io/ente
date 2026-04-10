@@ -1,8 +1,12 @@
+import { savedKeyAttributes } from "ente-accounts-rs/services/accounts-db";
+import { getUserRecoveryKey } from "ente-accounts-rs/services/recovery-key";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { clientPackageName, desktopAppVersion, isDesktop } from "ente-base/app";
 import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
-import { contacts_open_ctx, type ContactsCtxHandle } from "ente-wasm";
+import type { ContactsCtxHandle } from "ente-wasm";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
     saveContactDisplayRecords,
@@ -21,6 +25,24 @@ import type {
     ContactDisplayRecord,
     ContactLookup,
     ContactsDisplaySnapshot,
+    LegacyContactState,
+    LegacyInfo,
+    LegacyRecoveryBundle,
+    ResolvedContactAvatar,
+    ResolvedContactDisplay,
+    WrappedRootContactKey,
+} from "./types";
+export type {
+    ContactDisplayRecord,
+    ContactLookup,
+    ContactsDisplaySnapshot,
+    LegacyContactRecord,
+    LegacyContactState,
+    LegacyInfo,
+    LegacyRecoveryBundle,
+    LegacyRecoverySession,
+    LegacyRecoveryStatus,
+    LegacyUser,
     ResolvedContactAvatar,
     ResolvedContactDisplay,
     WrappedRootContactKey,
@@ -30,6 +52,15 @@ const CONTACT_DIFF_LIMIT = 500;
 const AVATAR_FAILURE_TTL_MS = 60_000;
 const READY_RETRY_COOLDOWN_MS = 5_000;
 const CONTACTS_CACHE_SCHEMA_VERSION = 2;
+
+type EnteWasmModule = typeof import("ente-wasm");
+
+let _wasmPromise: Promise<EnteWasmModule> | undefined;
+
+const enteWasm = async () => {
+    _wasmPromise ??= import("ente-wasm");
+    return _wasmPromise;
+};
 
 interface RemoteContactRecord {
     id: string;
@@ -287,7 +318,7 @@ const loadLocalSessionState = async (sessionKey: string) => {
     emitSnapshot(true);
 };
 
-const syncContacts = async ({
+const ensureContactsCtxOpen = async ({
     sessionKey,
     baseURL,
     authToken,
@@ -300,21 +331,19 @@ const syncContacts = async ({
 }) => {
     let ctx = state.ctx;
     const generation = state.sessionGeneration;
+
     if (!ctx) {
         const cachedRootKey = await savedWrappedRootContactKey(sessionKey);
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
+        const { contacts_open_ctx } = await enteWasm();
         const openedCtx = await contacts_open_ctx({
             baseUrl: baseURL,
             authToken,
             userId: userID,
             masterKeyB64,
             cachedRootKey,
-            userAgent:
-                typeof navigator === "undefined"
-                    ? undefined
-                    : navigator.userAgent,
             clientPackage: clientPackageName,
             clientVersion: isDesktop ? desktopAppVersion : undefined,
         });
@@ -338,6 +367,31 @@ const syncContacts = async ({
     }
 
     state.currentAuthToken = authToken;
+    return ctx;
+};
+
+const syncContacts = async ({
+    sessionKey,
+    baseURL,
+    authToken,
+    userID,
+    masterKeyB64,
+}: ContactsReadyInput & {
+    sessionKey: string;
+    baseURL: string;
+    authToken: string;
+}) => {
+    const ctx = await ensureContactsCtxOpen({
+        sessionKey,
+        baseURL,
+        authToken,
+        userID,
+        masterKeyB64,
+    });
+    if (!ctx) {
+        return;
+    }
+    const generation = state.sessionGeneration;
 
     let sinceTime = (await savedContactsSinceTime(sessionKey)) ?? 0;
     let didChange = false;
@@ -437,6 +491,174 @@ export const ensureContactsReady = async ({
     state.readyPromise = readyPromise;
 
     return readyPromise;
+};
+
+const ensureCurrentLegacyCtx = async () => {
+    const masterKeyB64 = await masterKeyFromSession();
+    if (!masterKeyB64) {
+        throw new Error("Missing current master key");
+    }
+    const authToken = await savedAuthToken();
+    if (!authToken) {
+        throw new Error("Missing auth token");
+    }
+    const user = ensureLocalUser();
+    const baseURL = await apiOrigin();
+    const sessionKey = buildSessionKey(baseURL, user.id);
+    if (state.currentSessionKey !== sessionKey) {
+        await loadLocalSessionState(sessionKey);
+    }
+    const ctx = await ensureContactsCtxOpen({
+        sessionKey,
+        baseURL,
+        authToken,
+        userID: user.id,
+        masterKeyB64,
+    });
+    if (!ctx) {
+        throw new Error("Contacts context not available");
+    }
+    return ctx;
+};
+
+const ensureCurrentLegacyKeyAttributes = () => {
+    const keyAttributes = savedKeyAttributes();
+    if (!keyAttributes) {
+        throw new Error("Missing current key attributes");
+    }
+    return keyAttributes as unknown as Record<string, unknown>;
+};
+
+export const legacyGetInfo = async (): Promise<LegacyInfo> => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return (await ctx.legacy_get_info()) as LegacyInfo;
+};
+
+export const legacyPublicKey = async (email: string) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    const publicKey = (await ctx.legacy_public_key(email)) as
+        | string
+        | null
+        | undefined;
+    return publicKey ?? undefined;
+};
+
+export const legacyVerificationID = async (email: string) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    const publicKey = (await ctx.legacy_public_key(email)) as
+        | string
+        | null
+        | undefined;
+    return publicKey ? ctx.legacy_verification_id(publicKey) : undefined;
+};
+
+export const legacyAddContact = async (
+    email: string,
+    recoveryNoticeInDays?: number,
+) => {
+    await getUserRecoveryKey();
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_add_contact(
+        email,
+        ensureCurrentLegacyKeyAttributes(),
+        recoveryNoticeInDays,
+    );
+};
+
+export const legacyUpdateContact = async (
+    userID: number,
+    emergencyContactID: number,
+    state: LegacyContactState,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_update_contact(
+        BigInt(userID),
+        BigInt(emergencyContactID),
+        state,
+    );
+};
+
+export const legacyUpdateRecoveryNotice = async (
+    emergencyContactID: number,
+    recoveryNoticeInDays: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_update_recovery_notice(
+        BigInt(emergencyContactID),
+        recoveryNoticeInDays,
+    );
+};
+
+export const legacyStartRecovery = async (
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_start_recovery(
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyStopRecovery = async (
+    recoveryID: string,
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_stop_recovery(
+        recoveryID,
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyRejectRecovery = async (
+    recoveryID: string,
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_reject_recovery(
+        recoveryID,
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyApproveRecovery = async (
+    recoveryID: string,
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_approve_recovery(
+        recoveryID,
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyRecoveryBundle = async (
+    recoveryID: string,
+): Promise<LegacyRecoveryBundle> => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return (await ctx.legacy_recovery_bundle(
+        recoveryID,
+        ensureCurrentLegacyKeyAttributes(),
+    )) as LegacyRecoveryBundle;
+};
+
+export const legacyChangePassword = async (
+    recoveryID: string,
+    newPassword: string,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_change_password(
+        recoveryID,
+        ensureCurrentLegacyKeyAttributes(),
+        newPassword,
+    );
 };
 
 const inferImageMimeType = (bytes: Uint8Array) => {

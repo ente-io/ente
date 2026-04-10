@@ -1,11 +1,22 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
 
-use ente_core::crypto::{SecretVec, keys};
+use ente_core::auth::{self, KeyAttributes, SrpSession};
+use ente_core::crypto::{self, SecretVec, keys, sealed, secretbox};
 use ente_core::http::{Error as HttpError, HttpClient, HttpConfig};
+use sha2::{Digest, Sha256};
+use uuid::Uuid;
 
 use crate::crypto as contacts_crypto;
 use crate::error::{ContactsError, Result};
+use crate::legacy_models::{LegacyContactState, LegacyInfo, LegacyRecoveryBundle};
+use crate::legacy_transport::{
+    LegacyAddContactRequest, LegacyChangePasswordRequest, LegacyChangePasswordResponse,
+    LegacyContactIdentifier, LegacyInfoResponse, LegacyInitChangePasswordRequest,
+    LegacyPublicKeyResponse, LegacyRecoveryIdentifier, LegacyRecoveryInfoResponse,
+    LegacySetupSrpRequest, LegacySetupSrpResponse, LegacyUpdateContactRequest,
+    LegacyUpdateRecoveryNoticeRequest, LegacyUpdateSrpAndKeysRequest, LegacyUpdatedKeyAttr,
+};
 use crate::models::{AttachmentType, ContactData, ContactRecord, WrappedRootContactKey};
 use crate::transport::{
     AttachmentUploadUrlRequest, AttachmentUploadUrlResponse, CommitAttachmentRequest,
@@ -95,28 +106,12 @@ impl ContactsCtx {
                     &generated_root_contact_key,
                     &input.master_key,
                 )?;
-                if let Some(remote_root_key) =
-                    create_root_key(&http, &generated_wrapped_root_key).await?
-                {
-                    let wrapped_root_key = wrapped_root_key_from_response(remote_root_key);
-                    let root_contact_key = contacts_crypto::decrypt_root_contact_key(
-                        &wrapped_root_key,
-                        &input.master_key,
-                    )?;
-                    (
-                        root_contact_key,
-                        wrapped_root_key,
-                        RootKeySource::Server,
-                        true,
-                    )
-                } else {
-                    (
-                        generated_root_contact_key,
-                        generated_wrapped_root_key,
-                        RootKeySource::Created,
-                        true,
-                    )
-                }
+                (
+                    generated_root_contact_key,
+                    generated_wrapped_root_key,
+                    RootKeySource::Created,
+                    false,
+                )
             };
 
         let ctx = Self {
@@ -411,6 +406,245 @@ impl ContactsCtx {
             .await
     }
 
+    pub async fn legacy_info(&self) -> Result<LegacyInfo> {
+        self.http
+            .get_json::<LegacyInfoResponse>("/emergency-contacts/info", &[])
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy info fetch failed", error))
+    }
+
+    pub async fn legacy_public_key(&self, email: &str) -> Result<Option<String>> {
+        self.http
+            .get_json_optional::<LegacyPublicKeyResponse>(
+                "/users/public-key",
+                &[("email", email.trim().to_string())],
+            )
+            .await
+            .map(|response| response.map(|result| result.public_key))
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy public key fetch failed", error))
+    }
+
+    pub fn legacy_verification_id(&self, public_key_b64: &str) -> Result<String> {
+        let public_key = crypto::decode_b64(public_key_b64)?;
+        let digest = Sha256::digest(&public_key);
+        auth::recovery_key_to_mnemonic(&crypto::encode_b64(digest.as_slice())).map_err(Into::into)
+    }
+
+    pub async fn legacy_add_contact(
+        &self,
+        email: &str,
+        current_user_key_attrs: &KeyAttributes,
+        recovery_notice_in_days: Option<i32>,
+    ) -> Result<()> {
+        let public_key = self
+            .legacy_public_key(email)
+            .await?
+            .ok_or_else(|| ContactsError::InvalidInput("legacy contact is not on Ente".into()))?;
+        let recovery_key = self.current_recovery_key(current_user_key_attrs)?;
+        let recipient_public_key = crypto::decode_b64(&public_key)?;
+        let encrypted_key = sealed::seal(&recovery_key, &recipient_public_key)?;
+
+        self.http
+            .post_empty(
+                "/emergency-contacts/add",
+                &LegacyAddContactRequest {
+                    email: email.trim().to_string(),
+                    encrypted_key: crypto::encode_b64(&encrypted_key),
+                    recovery_notice_in_days,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy contact add failed", error))
+    }
+
+    pub async fn legacy_update_contact(
+        &self,
+        user_id: i64,
+        emergency_contact_id: i64,
+        state: LegacyContactState,
+    ) -> Result<()> {
+        self.http
+            .post_empty(
+                "/emergency-contacts/update",
+                &LegacyUpdateContactRequest {
+                    user_id,
+                    emergency_contact_id,
+                    state,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy contact update failed", error))
+    }
+
+    pub async fn legacy_update_recovery_notice(
+        &self,
+        emergency_contact_id: i64,
+        recovery_notice_in_days: i32,
+    ) -> Result<()> {
+        self.http
+            .post_empty(
+                "/emergency-contacts/update-recovery-notice",
+                &LegacyUpdateRecoveryNoticeRequest {
+                    emergency_contact_id,
+                    recovery_notice_in_days,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy recovery notice update failed", error))
+    }
+
+    pub async fn legacy_start_recovery(
+        &self,
+        user_id: i64,
+        emergency_contact_id: i64,
+    ) -> Result<()> {
+        self.legacy_contact_action(
+            "/emergency-contacts/start-recovery",
+            user_id,
+            emergency_contact_id,
+            "legacy recovery start failed",
+        )
+        .await
+    }
+
+    pub async fn legacy_stop_recovery(
+        &self,
+        recovery_id: &str,
+        user_id: i64,
+        emergency_contact_id: i64,
+    ) -> Result<()> {
+        self.legacy_recovery_action(
+            "/emergency-contacts/stop-recovery",
+            recovery_id,
+            user_id,
+            emergency_contact_id,
+            "legacy recovery stop failed",
+        )
+        .await
+    }
+
+    pub async fn legacy_reject_recovery(
+        &self,
+        recovery_id: &str,
+        user_id: i64,
+        emergency_contact_id: i64,
+    ) -> Result<()> {
+        self.legacy_recovery_action(
+            "/emergency-contacts/reject-recovery",
+            recovery_id,
+            user_id,
+            emergency_contact_id,
+            "legacy recovery reject failed",
+        )
+        .await
+    }
+
+    pub async fn legacy_approve_recovery(
+        &self,
+        recovery_id: &str,
+        user_id: i64,
+        emergency_contact_id: i64,
+    ) -> Result<()> {
+        self.legacy_recovery_action(
+            "/emergency-contacts/approve-recovery",
+            recovery_id,
+            user_id,
+            emergency_contact_id,
+            "legacy recovery approve failed",
+        )
+        .await
+    }
+
+    pub async fn legacy_recovery_bundle(
+        &self,
+        recovery_id: &str,
+        current_user_key_attrs: &KeyAttributes,
+    ) -> Result<LegacyRecoveryBundle> {
+        let response = self
+            .legacy_recovery_info(recovery_id)
+            .await
+            .map_err(|error| with_http_context("legacy recovery info fetch failed", error))?;
+        let recovery_key =
+            self.decrypt_legacy_recovery_key(&response.encrypted_key, current_user_key_attrs)?;
+
+        Ok(LegacyRecoveryBundle {
+            recovery_key: crypto::encode_hex(&recovery_key),
+            user_key_attributes: response.user_key_attr,
+        })
+    }
+
+    pub async fn legacy_change_password(
+        &self,
+        recovery_id: &str,
+        current_user_key_attrs: &KeyAttributes,
+        new_password: &str,
+    ) -> Result<()> {
+        let bundle = self
+            .legacy_recovery_bundle(recovery_id, current_user_key_attrs)
+            .await?;
+        let recovery_key = auth::recovery_key_from_mnemonic_or_hex(&bundle.recovery_key)?;
+        let target_master_key =
+            decrypt_master_key_with_recovery_key(&bundle.user_key_attributes, &recovery_key)?;
+        let (updated_key_attrs, _) = auth::generate_key_attributes_for_new_password(
+            &target_master_key,
+            &bundle.user_key_attributes,
+            new_password,
+        )?;
+        let srp_user_id = Uuid::new_v4().to_string();
+        let (mut srp_session, setup_request) =
+            password_reset_setup_request(&srp_user_id, new_password, &updated_key_attrs)?;
+        let init_response = self
+            .http
+            .post_json::<LegacySetupSrpResponse, _>(
+                "/emergency-contacts/init-change-password",
+                &LegacyInitChangePasswordRequest {
+                    recovery_id: recovery_id.to_string(),
+                    setup_srp_request: setup_request,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy password reset init failed", error))?;
+        let srp_m1 = srp_session_m1(&mut srp_session, &init_response)?;
+        let updated_key_attr = LegacyUpdatedKeyAttr {
+            kek_salt: updated_key_attrs.kek_salt.clone(),
+            encrypted_key: updated_key_attrs.encrypted_key.clone(),
+            key_decryption_nonce: updated_key_attrs.key_decryption_nonce.clone(),
+            mem_limit: updated_key_attrs.mem_limit.ok_or_else(|| {
+                ContactsError::InvalidInput("updated key attributes missing memLimit".into())
+            })?,
+            ops_limit: updated_key_attrs.ops_limit.ok_or_else(|| {
+                ContactsError::InvalidInput("updated key attributes missing opsLimit".into())
+            })?,
+        };
+
+        let change_response = self
+            .http
+            .post_json::<LegacyChangePasswordResponse, _>(
+                "/emergency-contacts/change-password",
+                &LegacyChangePasswordRequest {
+                    recovery_id: recovery_id.to_string(),
+                    update_srp_and_keys_request: LegacyUpdateSrpAndKeysRequest {
+                        setup_id: init_response.setup_id,
+                        srp_m1,
+                        updated_key_attr,
+                    },
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy password reset failed", error))?;
+
+        let server_m2 = crypto::decode_b64(&change_response.srp_m2)?;
+        srp_session.verify_m2(&server_m2)?;
+        Ok(())
+    }
+
     fn decode_contact(&self, entity: ContactEntityResponse) -> Result<ContactRecord> {
         if entity.is_deleted {
             return Ok(ContactRecord {
@@ -470,6 +704,86 @@ impl ContactsCtx {
 
         self.root_key_confirmed.store(true, Ordering::Release);
         Ok(())
+    }
+
+    async fn legacy_contact_action(
+        &self,
+        path: &str,
+        user_id: i64,
+        emergency_contact_id: i64,
+        error_context: &'static str,
+    ) -> Result<()> {
+        self.http
+            .post_empty(
+                path,
+                &LegacyContactIdentifier {
+                    user_id,
+                    emergency_contact_id,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context(error_context, error))
+    }
+
+    async fn legacy_recovery_action(
+        &self,
+        path: &str,
+        recovery_id: &str,
+        user_id: i64,
+        emergency_contact_id: i64,
+        error_context: &'static str,
+    ) -> Result<()> {
+        self.http
+            .post_empty(
+                path,
+                &LegacyRecoveryIdentifier {
+                    id: recovery_id.to_string(),
+                    user_id,
+                    emergency_contact_id,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context(error_context, error))
+    }
+
+    async fn legacy_recovery_info(&self, recovery_id: &str) -> Result<LegacyRecoveryInfoResponse> {
+        self.http
+            .get_json::<LegacyRecoveryInfoResponse>(
+                &format!("/emergency-contacts/recovery-info/{recovery_id}"),
+                &[],
+            )
+            .await
+            .map_err(Into::into)
+    }
+
+    fn current_recovery_key(&self, current_user_key_attrs: &KeyAttributes) -> Result<SecretVec> {
+        let master_key = self.master_key.read().expect("master key lock poisoned");
+        let recovery_key_hex = auth::get_recovery_key(&master_key, current_user_key_attrs)?;
+        Ok(SecretVec::new(crypto::decode_hex(&recovery_key_hex)?))
+    }
+
+    fn decrypt_legacy_recovery_key(
+        &self,
+        encrypted_key_b64: &str,
+        current_user_key_attrs: &KeyAttributes,
+    ) -> Result<SecretVec> {
+        let public_key = crypto::decode_b64(&current_user_key_attrs.public_key)?;
+        let encrypted_key = crypto::decode_b64(encrypted_key_b64)?;
+        let secret_key = self.current_secret_key(current_user_key_attrs)?;
+        let decrypted = sealed::open(&encrypted_key, &public_key, &secret_key)?;
+        Ok(SecretVec::new(decrypted))
+    }
+
+    fn current_secret_key(&self, current_user_key_attrs: &KeyAttributes) -> Result<SecretVec> {
+        let encrypted_secret_key = crypto::decode_b64(&current_user_key_attrs.encrypted_secret_key)?;
+        let secret_key_nonce =
+            crypto::decode_b64(&current_user_key_attrs.secret_key_decryption_nonce)?;
+        let master_key = self.master_key.read().expect("master key lock poisoned");
+        let secret_key =
+            secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)?;
+        Ok(SecretVec::new(secret_key))
     }
 }
 
@@ -532,4 +846,71 @@ fn with_http_context(context: &'static str, error: ContactsError) -> ContactsErr
         }
         other => other,
     }
+}
+
+fn decrypt_master_key_with_recovery_key(
+    key_attributes: &KeyAttributes,
+    recovery_key: &[u8],
+) -> Result<SecretVec> {
+    let encrypted_master_key = key_attributes
+        .master_key_encrypted_with_recovery_key
+        .as_ref()
+        .ok_or_else(|| {
+            ContactsError::InvalidInput(
+                "target key attributes missing masterKeyEncryptedWithRecoveryKey".into(),
+            )
+        })?;
+    let master_key_nonce = key_attributes
+        .master_key_decryption_nonce
+        .as_ref()
+        .ok_or_else(|| {
+            ContactsError::InvalidInput(
+                "target key attributes missing masterKeyDecryptionNonce".into(),
+            )
+        })?;
+    let encrypted_master_key = crypto::decode_b64(encrypted_master_key)?;
+    let master_key_nonce = crypto::decode_b64(master_key_nonce)?;
+    secretbox::decrypt(&encrypted_master_key, &master_key_nonce, recovery_key)
+        .map(SecretVec::new)
+        .map_err(Into::into)
+}
+
+fn password_reset_setup_request(
+    srp_user_id: &str,
+    new_password: &str,
+    updated_key_attrs: &KeyAttributes,
+) -> Result<(SrpSession, LegacySetupSrpRequest)> {
+    let mem_limit = updated_key_attrs
+        .mem_limit
+        .ok_or_else(|| ContactsError::InvalidInput("updated key attributes missing memLimit".into()))?;
+    let ops_limit = updated_key_attrs
+        .ops_limit
+        .ok_or_else(|| ContactsError::InvalidInput("updated key attributes missing opsLimit".into()))?;
+    let kek = auth::derive_kek(new_password, &updated_key_attrs.kek_salt, mem_limit, ops_limit)?;
+    let generated_srp = auth::generate_srp_setup(&kek, srp_user_id)?;
+    let srp_session = SrpSession::new(
+        srp_user_id,
+        &generated_srp.srp_salt,
+        &generated_srp.login_sub_key,
+    )?;
+    let srp_a = crypto::encode_b64(&srp_session.public_a());
+
+    Ok((
+        srp_session,
+        LegacySetupSrpRequest {
+            srp_user_id: srp_user_id.to_string(),
+            srp_salt: crypto::encode_b64(&generated_srp.srp_salt),
+            srp_verifier: crypto::encode_b64(&generated_srp.srp_verifier),
+            srp_a,
+        },
+    ))
+}
+
+fn srp_session_m1(
+    srp_session: &mut SrpSession,
+    init_response: &LegacySetupSrpResponse,
+) -> Result<String> {
+    let server_b = crypto::decode_b64(&init_response.srp_b)?;
+    let client_m1 = srp_session.compute_m1(&server_b)?;
+    Ok(crypto::encode_b64(&client_m1))
 }

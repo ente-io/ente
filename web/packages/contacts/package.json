@@ -8,6 +8,9 @@
         "test": "vitest"
     },
     "dependencies": {
+        "@mui/icons-material": "^7.3.4",
+        "@mui/material": "^7.3.4",
+        "ente-accounts-rs": "*",
         "ente-base": "*",
         "ente-wasm": "*",
         "react": "^19.2.0",

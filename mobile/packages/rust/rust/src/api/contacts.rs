@@ -40,6 +40,11 @@ pub enum ContactsError {
         /// Cryptographic error description.
         message: String,
     },
+    /// Authentication or recovery crypto operation failed.
+    Auth {
+        /// Authentication error description.
+        message: String,
+    },
     /// Input validation failed.
     InvalidInput {
         /// Validation failure description.
@@ -69,6 +74,9 @@ impl From<CoreContactsError> for ContactsError {
                 ContactsError::InvalidUrl { message }
             }
             CoreContactsError::Crypto(message) => ContactsError::Crypto {
+                message: message.to_string(),
+            },
+            CoreContactsError::Auth(message) => ContactsError::Auth {
                 message: message.to_string(),
             },
             CoreContactsError::InvalidInput(message) => ContactsError::InvalidInput { message },
@@ -177,7 +185,7 @@ pub enum RootKeySource {
     Cache,
     /// Fetched the wrapped root key from the server.
     Server,
-    /// Created a new wrapped root key on the server.
+    /// Created a new wrapped root key locally; it is confirmed on first write.
     Created,
 }
 
