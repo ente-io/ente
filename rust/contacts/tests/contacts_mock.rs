@@ -88,7 +88,7 @@ async fn open_fetches_existing_root_key_from_server() {
 }
 
 #[tokio::test]
-async fn open_applies_server_root_key_when_create_loses_race() {
+async fn get_contact_refreshes_generated_root_key_when_server_key_appears_later() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
     let server_root_key = keys::generate_key();
@@ -103,17 +103,7 @@ async fn open_applies_server_root_key_when_create_loses_race() {
         .create_async()
         .await;
 
-    let create_race_mock = server
-        .mock("POST", "/user-entity/key")
-        .match_body(Matcher::PartialJson(serde_json::json!({
-            "type": "contact"
-        })))
-        .with_status(409)
-        .expect(1)
-        .create_async()
-        .await;
-
-    let winner_fetch_mock = server
+    let refresh_root_mock = server
         .mock("GET", "/user-entity/key")
         .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
         .with_status(200)
@@ -154,11 +144,10 @@ async fn open_applies_server_root_key_when_create_loses_race() {
     let fetched = opened.ctx.get_contact("ct_contact1").await.unwrap();
 
     initial_fetch_mock.assert_async().await;
-    create_race_mock.assert_async().await;
-    winner_fetch_mock.assert_async().await;
+    refresh_root_mock.assert_async().await;
     get_contact_mock.assert_async().await;
-    assert_eq!(opened.root_key_source, RootKeySource::Server);
-    assert_eq!(opened.wrapped_root_key, server_wrapped_root);
+    assert_eq!(opened.root_key_source, RootKeySource::Created);
+    assert_eq!(opened.ctx.current_wrapped_root_key(), server_wrapped_root);
     assert_eq!(fetched.name.as_deref(), Some(contact.name.as_str()));
 }
 
@@ -556,6 +545,73 @@ async fn deleted_contacts_surface_as_tombstones() {
     assert_eq!(diff[0].id, "ct_deleted1");
     assert_eq!(diff[0].contact_user_id, 42);
     assert_eq!(diff[0].email, None);
+}
+
+#[tokio::test]
+async fn get_diff_refreshes_unconfirmed_cached_root_key_before_decrypting() {
+    let mut server = Server::new_async().await;
+    let master_key = keys::generate_key();
+    let stale_root_key = keys::generate_key();
+    let stale_wrapped_root = wrap_root(&stale_root_key, &master_key);
+    let server_root_key = keys::generate_key();
+    let server_wrapped_root = wrap_root(&server_root_key, &master_key);
+    let contact = sample_contact();
+
+    let refresh_root_mock = server
+        .mock("GET", "/user-entity/key")
+        .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
+        .with_status(200)
+        .with_body(
+            serde_json::json!({
+                "userID": 7,
+                "type": "contact",
+                "encryptedKey": server_wrapped_root.encrypted_key,
+                "header": server_wrapped_root.header,
+                "createdAt": 1
+            })
+            .to_string(),
+        )
+        .expect(1)
+        .create_async()
+        .await;
+
+    let diff_mock = server
+        .mock("GET", "/contacts/diff")
+        .match_query(Matcher::AllOf(vec![
+            Matcher::UrlEncoded("sinceTime".into(), "0".into()),
+            Matcher::UrlEncoded("limit".into(), "10".into()),
+        ]))
+        .with_status(200)
+        .with_body(
+            serde_json::json!({
+                "diff": [live_entity_json(
+                    "ct_contact1",
+                    &contact,
+                    Some("b@test.test"),
+                    &server_root_key,
+                    None,
+                )]
+            })
+            .to_string(),
+        )
+        .expect(1)
+        .create_async()
+        .await;
+
+    let ctx = ContactsCtx::open(OpenContactsCtxInput {
+        cached_root_key: Some(stale_wrapped_root),
+        ..open_input(server.url(), master_key)
+    })
+    .await
+    .unwrap()
+    .ctx;
+
+    let diff = ctx.get_diff(0, 10).await.unwrap();
+
+    refresh_root_mock.assert_async().await;
+    diff_mock.assert_async().await;
+    assert_eq!(diff.len(), 1);
+    assert_eq!(diff[0].name.as_deref(), Some(contact.name.as_str()));
 }
 
 #[test]

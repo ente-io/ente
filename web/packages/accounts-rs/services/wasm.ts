@@ -4,7 +4,15 @@ let wasmPromise: Promise<EnteWasmModule> | undefined;
 let initDone = false;
 
 export const enteWasm = async (): Promise<EnteWasmModule> => {
-    wasmPromise ??= import("ente-wasm");
+    if (!wasmPromise) {
+        const load = import("ente-wasm");
+        wasmPromise = load.catch((error: unknown) => {
+            if (wasmPromise === load) {
+                wasmPromise = undefined;
+            }
+            throw error;
+        });
+    }
     return wasmPromise;
 };
 

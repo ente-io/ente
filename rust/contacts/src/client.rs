@@ -190,6 +190,7 @@ impl ContactsCtx {
     }
 
     pub async fn get_contact(&self, contact_id: &str) -> Result<ContactRecord> {
+        self.ensure_remote_root_key_for_read().await?;
         let response = self
             .http
             .get_json::<ContactEntityResponse>(&format!("/contacts/{contact_id}"), &[])
@@ -198,6 +199,7 @@ impl ContactsCtx {
     }
 
     pub async fn get_diff(&self, since_time: i64, limit: u16) -> Result<Vec<ContactRecord>> {
+        self.ensure_remote_root_key_for_read().await?;
         let response = self
             .http
             .get_json::<ContactDiffResponse>(
@@ -345,6 +347,7 @@ impl ContactsCtx {
     }
 
     pub async fn get_profile_picture(&self, contact_id: &str) -> Result<Vec<u8>> {
+        self.ensure_remote_root_key_for_read().await?;
         let current = self
             .http
             .get_json::<ContactEntityResponse>(&format!("/contacts/{contact_id}"), &[])
@@ -703,6 +706,19 @@ impl ContactsCtx {
         }
 
         self.root_key_confirmed.store(true, Ordering::Release);
+        Ok(())
+    }
+
+    async fn ensure_remote_root_key_for_read(&self) -> Result<()> {
+        if self.root_key_confirmed.load(Ordering::Acquire) {
+            return Ok(());
+        }
+
+        if let Some(remote_root_key) = fetch_root_key(&self.http).await? {
+            self.apply_wrapped_root_key(wrapped_root_key_from_response(remote_root_key))?;
+            self.root_key_confirmed.store(true, Ordering::Release);
+        }
+
         Ok(())
     }
 

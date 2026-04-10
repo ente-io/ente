@@ -58,7 +58,15 @@ type EnteWasmModule = typeof import("ente-wasm");
 let _wasmPromise: Promise<EnteWasmModule> | undefined;
 
 const enteWasm = async () => {
-    _wasmPromise ??= import("ente-wasm");
+    if (!_wasmPromise) {
+        const load = import("ente-wasm");
+        _wasmPromise = load.catch((error: unknown) => {
+            if (_wasmPromise === load) {
+                _wasmPromise = undefined;
+            }
+            throw error;
+        });
+    }
     return _wasmPromise;
 };
 

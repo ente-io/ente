@@ -128,6 +128,7 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
     vi.doMock("ente-base/origins", () => ({ apiOrigin }));
     vi.doMock("ente-base/log", () => ({ default: { info, warn, error } }));
     vi.doMock("ente-base/app", () => ({
+        appName: "photos",
         clientPackageName: "io.ente.photos.web",
         desktopAppVersion: undefined,
         isDesktop: false,

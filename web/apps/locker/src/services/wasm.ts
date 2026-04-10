@@ -20,7 +20,15 @@ let _cryptoInitDone = false;
  * subsequent calls.
  */
 export const enteWasm = async (): Promise<EnteWasmModule> => {
-    _wasmPromise ??= import("ente-wasm");
+    if (!_wasmPromise) {
+        const load = import("ente-wasm");
+        _wasmPromise = load.catch((error: unknown) => {
+            if (_wasmPromise === load) {
+                _wasmPromise = undefined;
+            }
+            throw error;
+        });
+    }
     return _wasmPromise;
 };
 

@@ -299,13 +299,21 @@ let _wasmPromise: Promise<EnteCryptoAdapter> | undefined;
 let _cryptoInitDone = false;
 
 export const enteWasm = async (): Promise<EnteCryptoAdapter> => {
-    _wasmPromise ??= (async () => {
-        if (isTauriRuntime()) {
-            return createTauriAdapter();
-        }
-        const wasm = await import("ente-wasm");
-        return createWasmAdapter(wasm);
-    })();
+    if (!_wasmPromise) {
+        const load = (async () => {
+            if (isTauriRuntime()) {
+                return createTauriAdapter();
+            }
+            const wasm = await import("ente-wasm");
+            return createWasmAdapter(wasm);
+        })();
+        _wasmPromise = load.catch((error: unknown) => {
+            if (_wasmPromise === load) {
+                _wasmPromise = undefined;
+            }
+            throw error;
+        });
+    }
 
     return _wasmPromise;
 };
