@@ -232,6 +232,7 @@ class FileUtil {
     final decryptedFile = await file_downloader.openFile(
       file,
       fileKey,
+      useTemporaryDecryptedFile: true,
       progressCallback: (downloaded, total) {
         if (total > 0 && downloaded >= 0) {
           final percentage = ((downloaded / total) * 100).clamp(0, 100).round();

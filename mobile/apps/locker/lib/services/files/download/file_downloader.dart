@@ -16,6 +16,12 @@ import 'package:path/path.dart' as p;
 
 final _logger = Logger("FileDownloader");
 
+String _getTemporaryDecryptedFilePath(EnteFile file) {
+  final String tempDir = Configuration.instance.getTempDirectory();
+  final String safeDisplayName = p.basename(file.displayName);
+  return "$tempDir${file.uploadedFileID}_$safeDisplayName";
+}
+
 /// Returns the encrypted offline blob for this device, downloading it only when
 /// a usable local copy does not already exist.
 Future<File> ensureEncryptedOfflineCopy(
@@ -117,13 +123,14 @@ Future<File?> openFile(
   EnteFile file,
   Uint8List fileKey, {
   ProgressCallback? progressCallback,
+  bool useTemporaryDecryptedFile = false,
 }) async {
   if (!LockerDB.instance.isFileMarkedOffline(file)) {
     return downloadAndDecrypt(
       file,
       fileKey,
       progressCallback: progressCallback,
-      shouldUseCache: true,
+      shouldUseCache: !useTemporaryDecryptedFile,
     );
   }
 
@@ -134,7 +141,9 @@ Future<File?> openFile(
     );
     final String logPrefix = 'File-${file.uploadedFileID}:';
     final int startTime = DateTime.now().millisecondsSinceEpoch;
-    final String decryptedFilePath = getCachedDecryptedFilePath(file);
+    final String decryptedFilePath = useTemporaryDecryptedFile
+        ? _getTemporaryDecryptedFilePath(file)
+        : getCachedDecryptedFilePath(file);
     final File decryptedFile = File(decryptedFilePath);
     final int sizeInBytes = file.fileSize ?? await offlineEncryptedFile.length();
 
@@ -196,7 +205,7 @@ Future<File?> openFile(
     file,
     fileKey,
     progressCallback: progressCallback,
-    shouldUseCache: true,
+    shouldUseCache: !useTemporaryDecryptedFile,
   );
 }
 
@@ -221,10 +230,9 @@ Future<File?> downloadAndDecrypt(
   bool usingCachedEncryptedFile = false;
   bool downloadedFreshEncryptedFile = false;
 
-  final String safeDisplayName = p.basename(file.displayName);
   final String decryptedFilePath = shouldUseCache
       ? cachedDecryptedFilePath
-      : "$tempDir${file.uploadedFileID}_$safeDisplayName";
+      : _getTemporaryDecryptedFilePath(file);
   final File decryptedFile = File(decryptedFilePath);
 
   final startTime = DateTime.now().millisecondsSinceEpoch;
