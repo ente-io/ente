@@ -686,7 +686,7 @@ export function LaneMemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.io/get"
+                            href="https://ente.com/get"
                             target="_blank"
                             rel="noreferrer"
                             sx={laneHeaderJoinNowButtonSx}
