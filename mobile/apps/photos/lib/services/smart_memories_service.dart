@@ -704,7 +704,7 @@ class SmartMemoriesService {
       dev.log('arguments from indirect data calculated $t');
       dev.log('starting actual memory calculations ${DateTime.now()}');
       dev.log("All files length at start: ${allFiles.length} $t");
-      final allFilesForRecentTimeMemories = Set<EnteFile>.from(allFiles);
+      final allFilesForNonDedupedMemories = Set<EnteFile>.from(allFiles);
 
       final List<SmartMemory> memories = [];
 
@@ -745,10 +745,10 @@ class SmartMemoriesService {
 
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
-        allFiles,
-        allFileIdsToFile,
-        now,
-        oldCache.tripsShownLogs,
+        tripSourceFiles: allFilesForNonDedupedMemories,
+        allFileIdsToFile: allFileIdsToFile,
+        currentTime: now,
+        shownTrips: oldCache.tripsShownLogs,
         surfaceAll: debugSurfaceAll,
         cachedTripMemories: oldCache.toShowMemories,
         isOfflineMode: isOfflineMode,
@@ -782,7 +782,7 @@ class SmartMemoriesService {
       final timeMemories = await _onThisDayOrWeekResults(
         allFiles,
         now,
-        recentSourceFiles: allFilesForRecentTimeMemories,
+        recentSourceFiles: allFilesForNonDedupedMemories,
         isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
@@ -934,11 +934,11 @@ class SmartMemoriesService {
     );
   }
 
-  static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
-    Iterable<EnteFile> allFiles,
-    Map<int, EnteFile> allFileIdsToFile,
-    DateTime currentTime,
-    List<TripsShownLog> shownTrips, {
+  static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults({
+    required Iterable<EnteFile> tripSourceFiles,
+    required Map<int, EnteFile> allFileIdsToFile,
+    required DateTime currentTime,
+    required List<TripsShownLog> shownTrips,
     bool surfaceAll = false,
     required Iterable<ToShowMemory> cachedTripMemories,
     required bool isOfflineMode,
@@ -950,7 +950,7 @@ class SmartMemoriesService {
     required List<City> cities,
   }) async {
     return TripMemoriesCalculatorV2.compute(
-      allFiles,
+      tripSourceFiles,
       allFileIdsToFile,
       currentTime,
       shownTrips,
