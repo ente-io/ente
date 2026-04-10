@@ -6,12 +6,17 @@
         ".": {
             "types": "./pkg/ente_wasm.d.ts",
             "import": "./pkg/ente_wasm.js"
+        },
+        "./load": {
+            "types": "./load.ts",
+            "import": "./load.ts"
         }
     },
     "module": "./pkg/ente_wasm.js",
     "types": "./pkg/ente_wasm.d.ts",
     "files": [
-        "pkg"
+        "pkg",
+        "load.ts"
     ],
     "scripts": {
         "build": "wasm-pack build --target bundler",
