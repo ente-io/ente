@@ -348,8 +348,10 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                     textCapitalization: widget.textCapitalization!,
                     autofocus: widget.autoFocus ?? false,
                     autocorrect: widget.autoCorrect,
-                    maxLines: widget.maxLines ?? (_isMultiline ? null : 1),
-                    minLines: widget.minLines,
+                    maxLines: widget.isPasswordInput
+                        ? 1
+                        : widget.maxLines ?? (_isMultiline ? null : 1),
+                    minLines: widget.isPasswordInput ? null : widget.minLines,
                     autofillHints: widget.autofillHints ??
                         (widget.isPasswordInput
                             ? const [AutofillHints.password]
