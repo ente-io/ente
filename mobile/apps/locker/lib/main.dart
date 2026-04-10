@@ -26,7 +26,7 @@ import 'package:locker/l10n/app_localizations.dart';
 import 'package:locker/services/collections/collections_api_client.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
-import 'package:locker/services/contacts_display_service.dart';
+import "package:locker/services/contacts_display_service.dart";
 import 'package:locker/services/db/locker_db.dart';
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
