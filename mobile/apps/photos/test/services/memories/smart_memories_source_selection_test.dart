@@ -3,6 +3,7 @@ import "package:ml_linalg/vector.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/time_memory.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
@@ -27,6 +28,12 @@ EnteFile _file({
 }
 
 Vector get _positiveTextVector => Vector.fromList([1.0]);
+
+Vector _normalizedVector(List<double> values) {
+  final vector = Vector.fromList(values);
+  final norm = vector.norm();
+  return Vector.fromList(values.map((value) => value / norm).toList());
+}
 
 void main() {
   group("smart memories source selection", () {
@@ -135,6 +142,65 @@ void main() {
 
         expect(lastWeekMemory.memories, hasLength(10));
         expect(distinctDays.length, greaterThanOrEqualTo(4));
+      },
+    );
+
+    test(
+      "ClipMemoriesCalculator surfaces a memory from the full source set",
+      () async {
+        final currentTime = DateTime.utc(2026, 4, 10);
+        final fullSourceFiles = <EnteFile>[
+          for (int i = 0; i < 12; i++)
+            _file(
+              id: i + 1,
+              createdAt: DateTime.utc(2024, 6, 1 + (i ~/ 4), 9 + i),
+            ),
+        ];
+        final depletedRemainingFiles = fullSourceFiles.take(6).toList();
+        final selectedClipType = ClipMemoryType.values.first;
+        final queryVector = _normalizedVector(
+          List<double>.filled(fullSourceFiles.length, 1.0),
+        );
+        final fileIDToImageEmbedding = <int, EmbeddingVector>{
+          for (int i = 0; i < fullSourceFiles.length; i++)
+            fullSourceFiles[i].uploadedFileID!: EmbeddingVector(
+              fileID: fullSourceFiles[i].uploadedFileID!,
+              embedding: List<double>.generate(
+                fullSourceFiles.length,
+                (index) => index == i ? 1.0 : 0.0,
+              ),
+            ),
+        };
+
+        final fullClipMemories = await ClipMemoriesCalculator.compute(
+          fullSourceFiles,
+          currentTime,
+          <ClipShownLog>[],
+          surfaceAll: true,
+          isOfflineMode: false,
+          seenTimes: const <int, int>{},
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+          clipMemoryTypeVectors: <ClipMemoryType, Vector>{
+            selectedClipType: queryVector,
+          },
+        );
+
+        final depletedClipMemories = await ClipMemoriesCalculator.compute(
+          depletedRemainingFiles,
+          currentTime,
+          <ClipShownLog>[],
+          surfaceAll: true,
+          isOfflineMode: false,
+          seenTimes: const <int, int>{},
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+          clipMemoryTypeVectors: <ClipMemoryType, Vector>{
+            selectedClipType: queryVector,
+          },
+        );
+
+        expect(fullClipMemories, hasLength(1));
+        expect(fullClipMemories.first.memories, hasLength(10));
+        expect(depletedClipMemories, isEmpty);
       },
     );
   });

@@ -786,12 +786,8 @@ class SmartMemoriesService {
       );
 
       // Clip memories
-      final clipFiles = _collectAvailableFiles(
-        allFileIdsToFile,
-        usedMemoryFileIds,
-      );
       final clipMemories = await _getClipResults(
-        clipFiles,
+        fullSourceFiles,
         now,
         oldCache.clipShownLogs,
         surfaceAll: debugSurfaceAll,
