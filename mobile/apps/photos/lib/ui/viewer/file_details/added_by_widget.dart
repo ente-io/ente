@@ -20,6 +20,9 @@ class AddedByWidget extends StatelessWidget {
     if (file.isOwner && file.isCollect) {
       addedBy = file.uploaderName;
     } else {
+      if (file.ownerID == null) {
+        return const SizedBox.shrink();
+      }
       final fileOwner = CollectionsService.instance
           .getFileOwner(file.ownerID!, file.collectionID);
       addedBy = resolveDisplayName(fileOwner);
