@@ -301,21 +301,13 @@ let _wasmPromise: Promise<EnteCryptoAdapter> | undefined;
 let _cryptoInitDone = false;
 
 export const enteWasm = async (): Promise<EnteCryptoAdapter> => {
-    if (!_wasmPromise) {
-        const load = (async () => {
-            if (isTauriRuntime()) {
-                return createTauriAdapter();
-            }
-            const wasm = await loadEnteWasm();
-            return createWasmAdapter(wasm);
-        })();
-        _wasmPromise = load.catch((error: unknown) => {
-            if (_wasmPromise === load) {
-                _wasmPromise = undefined;
-            }
-            throw error;
-        });
-    }
+    _wasmPromise ??= (async () => {
+        if (isTauriRuntime()) {
+            return createTauriAdapter();
+        }
+        const wasm = await loadEnteWasm();
+        return createWasmAdapter(wasm);
+    })();
 
     return _wasmPromise;
 };
