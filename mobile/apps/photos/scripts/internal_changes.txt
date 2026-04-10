@@ -1,4 +1,5 @@
 Latest changes:
+- Neeraj: Fix Added by visibility in file details
 - Neeraj: Contacts
 - Neeraj: Fix grey screen when collections search result is empty 
 - Ashil: Fix app going blank on iOS on deleting all empty albums

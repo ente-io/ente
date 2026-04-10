@@ -13,12 +13,16 @@ class AddedByWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!file.isUploaded || (!file.isOwner && file.isCollect)) {
+    if (!file.isUploaded) {
       return const SizedBox.shrink();
     }
-    String? addedBy;
-    if (file.isOwner && file.isCollect) {
-      addedBy = file.uploaderName;
+    late final String addedBy;
+    if (file.isOwner) {
+      final uploaderName = file.uploaderName?.trim();
+      if (uploaderName == null || uploaderName.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      addedBy = uploaderName;
     } else {
       if (file.ownerID == null) {
         return const SizedBox.shrink();
@@ -27,7 +31,7 @@ class AddedByWidget extends StatelessWidget {
           .getFileOwner(file.ownerID!, file.collectionID);
       addedBy = resolveDisplayName(fileOwner);
     }
-    if (addedBy == null || addedBy.isEmpty) {
+    if (addedBy.isEmpty) {
       return const SizedBox.shrink();
     }
     return Padding(
