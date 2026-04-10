@@ -216,6 +216,9 @@ class _CollectionsFlexiGridViewWidgetState
         widget.shouldShowCreateAlbum && !isAnyAlbumSelected;
     final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
     final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
+    if (displayItemCount == 0) {
+      return SliverToBoxAdapter(key: key, child: const SizedBox.shrink());
+    }
 
     return SliverPadding(
       key: key,
