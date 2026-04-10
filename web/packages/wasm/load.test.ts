@@ -10,7 +10,7 @@ test("loadEnteWasm shares the same import promise", async () => {
     const importFactory = vi.fn(() => Promise.resolve(wasmModule));
     vi.doMock("ente-wasm", importFactory);
 
-    const { loadEnteWasm } = await import("../load");
+    const { loadEnteWasm } = await import("./load");
 
     const first = loadEnteWasm();
     const second = loadEnteWasm();
@@ -31,7 +31,7 @@ test("loadCryptoReadyEnteWasm initializes crypto once", async () => {
     const importFactory = vi.fn(() => Promise.resolve(wasmModule));
     vi.doMock("ente-wasm", importFactory);
 
-    const { loadCryptoReadyEnteWasm } = await import("../load");
+    const { loadCryptoReadyEnteWasm } = await import("./load");
 
     const first = loadCryptoReadyEnteWasm();
     const second = loadCryptoReadyEnteWasm();
@@ -56,7 +56,7 @@ test("loadCryptoReadyEnteWasm retries after crypto init failure", async () => {
     const wasmModule = { crypto_init };
     vi.doMock("ente-wasm", () => wasmModule);
 
-    const { loadCryptoReadyEnteWasm } = await import("../load");
+    const { loadCryptoReadyEnteWasm } = await import("./load");
 
     await expect(loadCryptoReadyEnteWasm()).rejects.toThrow("init failed");
     await expect(loadCryptoReadyEnteWasm()).resolves.toMatchObject({
@@ -76,7 +76,7 @@ test("loadEnteWasm retries after a failed load attempt", async () => {
         return Promise.resolve(wasmModule);
     });
 
-    const { loadEnteWasm } = await import("../load");
+    const { loadEnteWasm } = await import("./load");
 
     await expect(loadEnteWasm()).rejects.toBeTruthy();
     await expect(loadEnteWasm()).resolves.toMatchObject({
