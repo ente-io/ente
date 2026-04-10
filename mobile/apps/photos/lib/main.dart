@@ -5,6 +5,7 @@ import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_rust/ente_rust.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -37,7 +38,9 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
+import 'package:photos/services/memory_share_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/photos_contacts_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/social_notification_coordinator.dart';
@@ -207,6 +210,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     // Initialize early so thermal/battery listeners can warm up while the
     // rest of background services are being initialized.
     final controller = computeController;
+    await MemoryShareService.instance.init();
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -240,7 +244,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    if (flagService.enableMLInBackground && hasGrantedMLConsent) {
+    if ((isOfflineMode || flagService.enableMLInBackground) &&
+        hasGrantedMLConsent) {
       await controller.init();
       final canRunML = controller.requestCompute(ml: true);
       if (!canRunML) {
@@ -325,6 +330,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    await MemoryShareService.instance.init();
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
@@ -379,6 +385,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     PersonService.init(entityService, MLDataDB.instance, preferences);
     await PersonService.instance.refreshPersonCache();
+    if (!isBackground && flagService.enableContact) {
+      unawaited(_warmContactsCacheInBackground());
+    }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();
@@ -388,6 +397,14 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
+  }
+}
+
+Future<void> _warmContactsCacheInBackground() async {
+  try {
+    await PhotosContactsService.instance.ensureReady();
+  } catch (e, s) {
+    _logger.warning("Deferred contacts warm-up failed", e, s);
   }
 }
 
@@ -401,8 +418,10 @@ Future<void> _ensureRustInitialized({required String via}) async {
     return;
   }
 
-  _logger.info("Initializing Rust bridge via $via");
-  final initFuture = EntePhotosRust.init();
+  final initFuture = Future.wait([
+    EntePhotosRust.init(),
+    EnteRust.init(),
+  ]);
   _rustInitFuture = initFuture;
   try {
     await initFuture;

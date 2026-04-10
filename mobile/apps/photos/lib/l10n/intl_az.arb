@@ -28,7 +28,6 @@
   "deleteReason4": "Səbəbim siyahıda yoxdur",
   "sendEmail": "E-poçtu göndər",
   "deleteRequestSLAText": "Sorğunuz 72 saat ərzində icra olunacaq.",
-  "deleteEmailRequest": "Zəhmət olmasa, qeydiyyatdan keçdiyiniz e-poçt ünvanından <warning>account-deletion@ente.com</warning> ünvanına e-poçt göndərin.",
   "entePhotosPerm": "Ente şəkillərinizi qorumaq üçün <i>icazə tələb edir</i>",
   "ok": "Bəli",
   "createAccount": "Hesab yarat",
@@ -317,11 +316,8 @@
   "verificationId": "Doğrulama ID-si",
   "verifyEmailID": "{email} ünvanını doğrula",
   "emailNoEnteAccount": "{email} ünvanının Ente hesabı yoxdur. Fotoları paylaşmaq üçün onlara dəvət göndərin.",
-  "shareMyVerificationID": "Budur mənim ente.com üçün doğrulama ID-m: {verificationID}.",
-  "shareTextConfirmOthersVerificationID": "Salam, bunun sizin ente.com doğrulama ID-niz olduğunu təsdiqləyə bilərsinizmi: {verificationID}",
   "somethingWentWrong": "Xəta baş verdi",
   "sendInvite": "Dəvət göndər",
-  "shareTextRecommendUsingEnte": "Orijinal keyfiyyətdə foto və videoları asanlıqla paylaşa bilməyimiz üçün Ente-ni yükləyin\n\nhttps://ente.com",
   "done": "Hazırdır",
   "applyCodeTitle": "Kodu tətbiq et",
   "enterCodeDescription": "Hər ikiniz üçün pulsuz yaddaş əldə etmək üçün dostunuz tərəfindən verilən kodu daxil edin",
@@ -349,7 +345,6 @@
   "theyAlsoGetXGb": "Onlar da {storageAmountInGB} GB əldə edirlər",
   "referralStorageForBoth": "Onlar üçün {storageAmountInGB} GB + onlar abunəliklərini yüksəltdikdə sizin üçün {storageAmountInGB} GB.",
   "freeStorageOnReferralSuccess": "Hər dəfə kimsə ödənişli plana keçid etdikdə və sizin kodunuzu tətbiq etdikdə {storageAmountInGB} GB",
-  "shareTextReferralCode": "Ente Photos fotolarınız üçün şəxsi və təhlükəsiz məkandır\n* Ente Photos-u https://ente.com/app ünvanından yükləyin\n* Hesab yaradın\n* Tənzimləmələr->Referal bölməsində {referralCode} referal kodunu tətbiq edin\n* Ödənişli plana keçid etdikdə pulsuz {referralStorageInGB} GB əldə edin",
   "claimFreeStorage": "Pulsuz yaddaş əldə et",
   "inviteYourFriends": "Dostlarını dəvət et",
   "earnFreeStorage": "Pulsuz yaddaş qazanın",
@@ -720,7 +715,6 @@
   "subscription": "Abunəlik",
   "paymentDetails": "Ödəniş məlumatları",
   "manageFamily": "Ailəni idarə et",
-  "contactToManageSubscription": "{provider} abunəliyinizi idarə etmək üçün lütfən support@ente.com ünvanı vasitəsilə bizimlə əlaqə saxlayın.",
   "renewSubscription": "Abunəliyi yenilə",
   "cancelSubscription": "Abunəliyi ləğv et",
   "areYouSureYouWantToRenew": "Yeniləmək istədiyinizdən əminsiniz?",
@@ -769,7 +763,6 @@
   "subAlreadyLinkedErrMessage": "Sizin {id} artıq başqa bir Ente hesabına bağlanıb.\nƏgər {id} kimliyinizi bu hesab ilə istifadə etmək istəyirsinizsə, lütfən dəstək xidmətimizlə əlaqə saxlayın",
   "visitWebToManage": "Abunəliyinizi idarə etmək üçün lütfən web.ente.io saytına daxil olun",
   "couldNotUpdateSubscription": "Abunəliyi yeniləmək mümkün olmadı",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Lütfən support@ente.com ilə əlaqə saxlayın, kömək etməkdən məmnun olarıq!",
   "paymentFailed": "Ödəniş uğursuz oldu",
   "paymentFailedTalkToProvider": "Əgər ödəniş balansımdan çıxılıbsa, lütfən {providerName} dəstək xidməti ilə danışın",
   "@paymentFailedTalkToProvider": {
@@ -1299,8 +1292,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radiusu təyin et",
-  "familyPlanPortalTitle": "Ailə",
-  "familyPlanOverview": "Əlavə ödəniş etmədən mövcud planınıza 5 ailə üzvü əlavə edin.\n\nHər bir üzv öz şəxsi sahəsini əldə edir və paylanmadıqca bir-birinin fayllarını görə bilmirlər.\n\nAilə planları ödənişli Ente abunəliyi olan müştərilər üçün əlçatandır.\n\nBaşlamaq üçün indi abunə olun!",
   "androidBiometricHint": "Kimliyi təsdiqlə",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2375,10 +2366,6 @@
   "artisticPortraits": "Bədii portretlər",
   "streetFood": "Küçə yeməkləri",
   "riverCruises": "Çay kruizi mənzərələri",
-  "facesTimelineBannerTitle": "Yaddaş Zolağı",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "{name} adlı şəxsin illər ərzindəki şəkillərinə baxın",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

@@ -9,8 +9,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/utils/file_util.dart";
 
 class QrCodeDetectionHelper {
-  static const _debounceDuration = Duration(milliseconds: 1500);
-
+  static const _debounceDuration = Duration(milliseconds: 500);
   final Logger _logger = Logger("QrCodeDetectionHelper");
   final EnteQr _enteQr = EnteQr();
 
@@ -28,11 +27,11 @@ class QrCodeDetectionHelper {
     final int requestId = ++_requestId;
 
     if (!isEligible) {
-      qrDetectionsNotifier.value = const [];
+      _clearDetections();
       return;
     }
 
-    qrDetectionsNotifier.value = const [];
+    _clearDetections();
 
     _debounceTimer = Timer(_debounceDuration, () {
       _scanFile(file, requestId);
@@ -46,12 +45,14 @@ class QrCodeDetectionHelper {
     if (_disposed || requestId != _requestId) return;
 
     try {
+      final stopwatch = Stopwatch()..start();
       final File? localFile = await getFile(file);
       if (_disposed || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        qrDetectionsNotifier.value = const [];
+        _clearDetections();
         return;
       }
+      final getFileMs = stopwatch.elapsedMilliseconds;
 
       List<QrDetection> detections = const [];
       try {
@@ -63,12 +64,27 @@ class QrCodeDetectionHelper {
         _logger.severe("Failed to scan QR codes", error, stackTrace);
       }
 
+      final totalMs = stopwatch.elapsedMilliseconds;
+      _logger.info(
+        "QR scan: getFile=${getFileMs}ms, "
+        "detect=${totalMs - getFileMs}ms, "
+        "total=${totalMs}ms, "
+        "found=${detections.length}",
+      );
+
       if (_disposed || requestId != _requestId) return;
 
       qrDetectionsNotifier.value = detections;
     } catch (error, stackTrace) {
       _logger.severe("QR code detection failed", error, stackTrace);
       if (_disposed || requestId != _requestId) return;
+      _clearDetections();
+    }
+  }
+
+  /// Only notify listeners when the value actually changes.
+  void _clearDetections() {
+    if (qrDetectionsNotifier.value.isNotEmpty) {
       qrDetectionsNotifier.value = const [];
     }
   }

@@ -27,6 +27,11 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: "desktop/yarn.lock"
 
-            - run: yarn install
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
+
+            - run: yarn install --frozen-lockfile
 
             - run: yarn lint

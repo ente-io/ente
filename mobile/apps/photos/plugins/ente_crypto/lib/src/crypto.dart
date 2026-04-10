@@ -939,9 +939,12 @@ class CryptoUtil {
       );
     }
 
+    // Keep the adaptive floor aligned with the server-side minimum accepted
+    // account KDF memory limit (128 MiB), not libsodium's absolute minimum.
+    const int minMemLimit = 128 * 1024 * 1024;
     Uint8List key;
-    while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
-        opsLimit <= Sodium.cryptoPwhashOpslimitMax) {
+    while (
+        memLimit >= minMemLimit && opsLimit <= Sodium.cryptoPwhashOpslimitMax) {
       try {
         key = await deriveKey(password, salt, memLimit, opsLimit);
         return DerivedKeyResult(key, memLimit, opsLimit);

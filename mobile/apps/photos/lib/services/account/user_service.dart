@@ -1158,18 +1158,6 @@ class UserService {
     }
   }
 
-  Future<String> getFamilyPortalUrl(bool familyExist) async {
-    try {
-      final responseData = await _gateway.getFamiliesToken();
-      final String url = responseData["familyUrl"] ?? kFamilyUrl;
-      final String jwtToken = responseData["familiesToken"];
-      return '$url?token=$jwtToken&isFamilyCreated=$familyExist';
-    } catch (e, s) {
-      _logger.severe("failed to fetch families token", e, s);
-      rethrow;
-    }
-  }
-
   Future<void> _saveConfiguration(dynamic response) async {
     final responseData = response is Map ? response : response.data as Map?;
     if (responseData == null) {

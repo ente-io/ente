@@ -2,7 +2,7 @@ import Head from "next/head";
 import React from "react";
 
 const url = "https://locker.ente.io";
-const title = "Ente Locker - Safe space for your most important documents";
+const title = "Ente Locker";
 const description =
     "Store your important documents and credentials. Share them with trusted contacts or pass them on in emergencies.";
 const image =
@@ -12,6 +12,7 @@ export const LockerHead: React.FC = () => (
     <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
+        <link rel="icon" type="image/png" href="/images/favicon.png" />
         <meta name="twitter:site" content="@enteio" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={url} />

@@ -30,6 +30,9 @@ Latest releases are built straight from the source and made available over
 These builds will notify you whenever a new release is available and will help
 you stay updated.
 
+If you install the APK directly from GitHub, see
+[Verify the Ente Auth Android APK](/auth/faq/android-apk-signature).
+
 ### Obtainium
 
 You can setup [Obtainium](https://github.com/ImranR98/Obtainium) to track our

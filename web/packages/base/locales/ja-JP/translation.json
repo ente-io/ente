@@ -242,7 +242,7 @@
     "leave": "離脱",
     "leave_family_plan_confirm": "本当にファミリープランを退会しますか？",
     "choose_plan": "プランを選択",
-    "manage_plan": "サブスクリプションの管理",
+    "manage_plan": "",
     "current_usage": "現在の使用量は <strong>{{usage}}</strong>",
     "two_months_free": "年次プランでは2ヶ月分無料",
     "free_plan_option": "無料プランを継続する",

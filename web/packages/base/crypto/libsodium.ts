@@ -828,8 +828,10 @@ export const deriveSensitiveKey = async (
         throw new Error(`Invalid mem and ops limits: ${memLimit}, ${opsLimit}`);
     }
 
-    const minMemLimit = sodium.crypto_pwhash_MEMLIMIT_MIN;
-    while (memLimit > minMemLimit) {
+    // Keep the adaptive floor aligned with the server-side minimum accepted
+    // account KDF memory limit (128 MiB), not libsodium's absolute minimum.
+    const minMemLimit = 128 * 1024 * 1024;
+    while (memLimit >= minMemLimit) {
         try {
             const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
             return { key, salt, opsLimit, memLimit };

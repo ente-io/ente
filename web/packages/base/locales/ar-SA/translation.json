@@ -242,7 +242,7 @@
     "leave": "مغادرة",
     "leave_family_plan_confirm": "هل أنت متأكد من أنك تريد مغادرة الخطة العائلية؟",
     "choose_plan": "اختر خطتك",
-    "manage_plan": "إدارة اشتراكك",
+    "manage_plan": "",
     "current_usage": "الاستخدام الحالي هو <strong>{{usage}}</strong>",
     "two_months_free": "احصل على شهرين مجانًا في الخطط السنوية",
     "free_plan_option": "المتابعة مع الخطة المجانية",

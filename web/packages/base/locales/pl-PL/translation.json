@@ -242,7 +242,7 @@
     "leave": "Wyjdź",
     "leave_family_plan_confirm": "Czy na pewno chcesz opuścić plan rodzinny?",
     "choose_plan": "Wybierz swój plan",
-    "manage_plan": "Zarządzaj swoją subskrypcją",
+    "manage_plan": "",
     "current_usage": "Bieżące użycie to <strong>{{usage}}</strong>",
     "two_months_free": "Otrzymaj 2 miesiące za darmo na rocznych planach",
     "free_plan_option": "Kontynuuj z darmowym planem",

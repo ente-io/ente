@@ -14,17 +14,22 @@ also find it useful to install the _vscode-styled-components_ extension.
 
 Make sure you're on yarn 1.x series (aka yarn "classic").
 
-### yarn install
+### yarn install --frozen-lockfile
 
-Installs dependencies. This needs to be done once, and thereafter wherever there
-is a change in `yarn.lock` (e.g. when pulling the latest upstream).
+Installs dependencies using the committed lockfile. This should be the default
+for local setup, and whenever there is a change in `yarn.lock` (e.g. when
+pulling the latest upstream).
+
+Use plain `yarn install` only when intentionally updating dependencies and
+reviewing the resulting `package.json` and `yarn.lock` changes.
 
 ### yarn dev:\*
 
 Launch the app in development mode. There is one `yarn dev:foo` for each app,
 e.g. `yarn dev:auth`. `yarn dev` is a shortcut for `yarn dev:photos`.
 
-The ports are different for the main apps (3000), various sidecars (3001, 3002).
+Common ports are `3000` for photos, `3002` for albums, `3003` for auth,
+`3005` for share, and `3006` for embed. See `package.json` for the full list.
 
 ### yarn build:\*
 
@@ -62,9 +67,10 @@ production build.
 Note that yarn does not automatically update `node_modules` if you switch to a
 branch that has added or modified dependencies. So if you encounter unexpected
 errors on switching branches, make sure that your `node_modules` is up to date
-by running `yarn install` first.
+by running `yarn install --frozen-lockfile` first.
 
-> `yarn` is a shortcut for `yarn install`
+> `yarn` is a shortcut for `yarn install`, but normal development should prefer
+> `yarn install --frozen-lockfile`.
 
 To add a local package as a dependency, use `<package-name>@*`. The "\*" here
 denotes any version.

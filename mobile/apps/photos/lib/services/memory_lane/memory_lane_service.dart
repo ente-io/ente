@@ -18,6 +18,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 typedef _TimelineComputationResult = ({
@@ -31,11 +32,11 @@ class MemoryLaneService {
 
   static final MemoryLaneService instance = MemoryLaneService._internal();
 
-  static const _minimumYears = 5;
+  static const _minimumYears = 2;
   static const _minimumFacesPerYear = 4;
   static const _minimumEligibleAgeYears = 5;
   static const _recomputeCooldown = Duration(hours: 2);
-  static const _timelineLogicVersion = 2;
+  static const _timelineLogicVersion = 3;
   static const _startupBackfillDelay = Duration(seconds: 15);
   static const _startupBackfillBatchSize = 200;
 
@@ -154,9 +155,34 @@ class MemoryLaneService {
     });
   }
 
-  Future<MemoryLanePersonTimeline?> getTimeline(String personId) {
-    if (!isFeatureEnabled) return Future.value(null);
-    return _cacheService.getTimeline(personId);
+  Future<MemoryLanePersonTimeline?> getTimeline(String personId) async {
+    if (!isFeatureEnabled) return null;
+    final timeline = await _cacheService.getTimeline(personId);
+    if (timeline == null || timeline.entries.isEmpty) {
+      return timeline;
+    }
+
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
+    final containsHiddenEntry = timeline.entries.any(
+      (entry) => hiddenFileIds.contains(entry.fileId),
+    );
+    if (!containsHiddenEntry) {
+      return timeline;
+    }
+
+    _logger.info(
+      "Memory Lane: evicting stale cached timeline for $personId due to hidden entries",
+    );
+    await _cacheService.removeTimeline(personId);
+    await _refreshReadyPersonIds();
+    schedulePersonRecompute(
+      personId,
+      force: true,
+      trigger: "hidden_entry_validation",
+    );
+    return null;
   }
 
   bool hasReadyTimelineSync(String personId) {
@@ -353,12 +379,16 @@ class MemoryLaneService {
     final uniqueFileIds =
         faceIds.map(getFileIdFromFaceId<int>).toSet().toList();
     final fileMap = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
     final minCreationTime = minimumEligibleCreationTimeMicros(
       person.data.birthDate,
     );
     final counts = <int, int>{};
     for (final faceId in faceIds) {
       final fileId = getFileIdFromFaceId<int>(faceId);
+      if (hiddenFileIds.contains(fileId)) continue;
       final file = fileMap[fileId];
       final creationTime = file?.creationTime;
       if (creationTime == null || creationTime <= 0) {
@@ -536,11 +566,15 @@ class MemoryLaneService {
     final List<int> uniqueFileIds =
         faceIds.map(getFileIdFromFaceId<int>).toSet().toList();
     final fileMap = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenFileIds =
+        hiddenFiles.map((e) => e.uploadedFileID).whereType<int>().toSet();
 
     final faces = <_TimelineFaceData>[];
     final facesByFileId = <int, Map<String, Face>>{};
     for (final faceId in faceIds) {
       final fileId = getFileIdFromFaceId<int>(faceId);
+      if (hiddenFileIds.contains(fileId)) continue;
       final file = fileMap[fileId];
       if (file == null) {
         continue;
@@ -780,6 +814,19 @@ class MemoryLaneService {
     readyPersonIds.value = current;
   }
 
+  static int completedYearsBetween(DateTime start, DateTime end) {
+    final startDate = DateTime(start.year, start.month, start.day);
+    final endDate = DateTime(end.year, end.month, end.day);
+    if (endDate.isBefore(startDate)) {
+      return 0;
+    }
+    int years = endDate.year - startDate.year;
+    if (endDate.isBefore(_safeDateInYear(startDate, endDate.year))) {
+      years -= 1;
+    }
+    return years < 0 ? 0 : years;
+  }
+
   @visibleForTesting
   static int? minimumEligibleCreationTimeMicros(String? birthDateString) {
     if (birthDateString == null || birthDateString.isEmpty) {
@@ -789,17 +836,18 @@ class MemoryLaneService {
     if (birthDate == null) {
       return null;
     }
-    final targetYear = birthDate.year + _minimumEligibleAgeYears;
-    final targetMonth = birthDate.month;
-    final daysInTargetMonth = DateTime(targetYear, targetMonth + 1, 0).day;
-    final targetDay =
-        birthDate.day > daysInTargetMonth ? daysInTargetMonth : birthDate.day;
-    final cutoff = DateTime(
-      targetYear,
-      targetMonth,
-      targetDay,
+    final cutoff = _safeDateInYear(
+      birthDate,
+      birthDate.year + _minimumEligibleAgeYears,
     );
     return cutoff.microsecondsSinceEpoch;
+  }
+
+  static DateTime _safeDateInYear(DateTime date, int year) {
+    final daysInTargetMonth = DateTime(year, date.month + 1, 0).day;
+    final targetDay =
+        date.day > daysInTargetMonth ? daysInTargetMonth : date.day;
+    return DateTime(year, date.month, targetDay);
   }
 }
 

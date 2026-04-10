@@ -253,8 +253,9 @@ type ErrorCode string
 
 const (
 	// Standard, generic error codes
-	BadRequest ErrorCode = "BAD_REQUEST"
-	CONFLICT   ErrorCode = "CONFLICT"
+	BadRequest    ErrorCode = "BAD_REQUEST"
+	CONFLICT      ErrorCode = "CONFLICT"
+	AlreadyExists ErrorCode = "ALREADY_EXISTS"
 
 	InternalError ErrorCode = "INTERNAL_ERROR"
 
@@ -376,6 +377,14 @@ func NewPermissionDeniedError(message string) *ApiError {
 func NewConflictError(message string) *ApiError {
 	return &ApiError{
 		Code:           CONFLICT,
+		HttpStatusCode: http.StatusConflict,
+		Message:        message,
+	}
+}
+
+func NewAlreadyExistsError(message string) *ApiError {
+	return &ApiError{
+		Code:           AlreadyExists,
 		HttpStatusCode: http.StatusConflict,
 		Message:        message,
 	}

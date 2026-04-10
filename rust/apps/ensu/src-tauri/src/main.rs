@@ -1,19 +1,31 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::Manager;
+use tauri::RunEvent;
 
 mod commands;
+mod logging;
 
 fn main() {
-    tauri::Builder::default()
+    logging::install_panic_hook();
+    logging::log("App", "starting Tauri backend");
+
+    let app = tauri::Builder::default()
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
+            logging::init_logging(&app.handle());
+            logging::log("App", "setup started");
+
             // Show the main window after setup is complete
             if let Some(window) = app.get_window("main") {
-                window.show().unwrap();
+                if let Err(err) = window.show() {
+                    logging::log("App", format!("failed to show main window error={err}"));
+                    return Err(Box::new(err));
+                }
             }
+            logging::log("App", "setup complete");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -69,6 +81,15 @@ fn main() {
             commands::fs_read_head,
             commands::fs_append_bytes,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .unwrap_or_else(|err| {
+            logging::log("App", format!("tauri build failed error={err}"));
+            panic!("error while building tauri application: {err}");
+        });
+
+    app.run(|app_handle, event| {
+        if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
+            commands::cleanup_for_exit(app_handle);
+        }
+    });
 }

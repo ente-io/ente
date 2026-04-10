@@ -234,10 +234,6 @@ export interface FileListProps {
     footer?: FileListHeaderOrFooter;
     /**
      * The logged in user, if any.
-     *
-     * This is only expected to be present when the listing is shown within the
-     * photos app, where we have a logged in user. The public albums app can
-     * omit this prop.
      */
     user?: LocalUser;
     /**
@@ -262,15 +258,10 @@ export interface FileListProps {
     activePersonID?: string | undefined;
     /**
      * File IDs of all the files that the user has marked as a favorite.
-     *
-     * Not set in the context of the shared albums app.
      */
     favoriteFileIDs?: Set<number>;
     /**
      * A map from known Ente user IDs to their emails.
-     *
-     * This is only expected in the context of the photos app, and will be
-     * omitted when running in the public albums app.
      */
     emailByUserID?: Map<number, string>;
     /**
@@ -954,7 +945,6 @@ export const FileList: React.FC<FileListProps> = ({
             contextMenu,
             emailByUserID,
             favoriteFileIDs,
-            haveSelection,
             handleContextMenu,
             handleRangeSelect,
             handleSelect,

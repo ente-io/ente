@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:math" as math;
-import "dart:typed_data";
 import "dart:ui" as ui;
 
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
@@ -17,10 +17,14 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memory_lane/memory_lane_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/share_util.dart";
 
 class MemoryLanePage extends StatefulWidget {
   final PersonEntity person;
@@ -57,7 +61,6 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   // Wait for this many frames (or the available total) before auto-starting playback.
   static const int _initialFrameTarget = 120;
   static const int _frameBuildConcurrency = 6;
-  static const double _appBarSideWidth = kToolbarHeight;
 
   final Logger _logger = Logger("MemoryLanePage");
   late final AnimationController _cardTransitionController;
@@ -84,11 +87,13 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   final GlobalKey _controlsKey = GlobalKey();
   bool _isScrubbing = false;
   double _sliderValue = 0;
-  double _previousCaptionValue = 0;
-  double _currentCaptionValue = 0;
+  int _previousCaptionValue = 0;
+  int _currentCaptionValue = 0;
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
   int _maxCaptionDigits = 1;
   bool get _featureEnabled => flagService.facesTimeline;
+  bool get _showShareAction =>
+      _featureEnabled && flagService.enableMemoryShareLink && !isOfflineMode;
 
   @override
   void initState() {
@@ -282,9 +287,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     }
   }
 
-  int _captionDigitCount(double value) {
-    final int rounded = value.round().abs();
-    return math.max(1, rounded.toString().length);
+  int _captionDigitCount(int value) {
+    return math.max(1, value.abs().toString().length);
   }
 
   Future<void> _buildFramesInParallel({
@@ -396,19 +400,27 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     final captionType = widget.person.data.birthDate != null
         ? _CaptionType.age
         : _CaptionType.yearsAgo;
-    double captionValue;
+    int captionValue;
     if (captionType == _CaptionType.age) {
       final birthDateString = widget.person.data.birthDate!;
       final birthDate = DateTime.tryParse(birthDateString);
       if (birthDate == null) {
-        captionValue = _yearsBetween(creationDate, DateTime.now());
+        captionValue = MemoryLaneService.completedYearsBetween(
+          creationDate,
+          DateTime.now(),
+        );
       } else {
-        captionValue = _yearsBetween(birthDate, creationDate);
+        captionValue = MemoryLaneService.completedYearsBetween(
+          birthDate,
+          creationDate,
+        );
       }
     } else {
-      captionValue = _yearsBetween(creationDate, DateTime.now());
+      captionValue = MemoryLaneService.completedYearsBetween(
+        creationDate,
+        DateTime.now(),
+      );
     }
-    captionValue = captionValue.clamp(0, double.infinity);
     final timelineFrame = _TimelineFrame(
       entry: entry,
       image: image,
@@ -580,7 +592,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
           final title = l10n.facesTimelineAppBarTitle;
           final colorScheme = getEnteColorScheme(context);
           final textTheme = getEnteTextTheme(context);
-          final titleStyle = textTheme.h2Bold.copyWith(
+          final titleStyle = textTheme.h3Bold.copyWith(
             letterSpacing: -2,
           );
           return DecoratedBox(
@@ -594,29 +606,55 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
+                centerTitle: false,
                 foregroundColor: colorScheme.textBase,
                 automaticallyImplyLeading: false,
-                title: Row(
-                  children: [
-                    const SizedBox(
-                      width: _appBarSideWidth,
-                      height: kToolbarHeight,
-                      child: BackButton(),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          title,
-                          style: titleStyle,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: _appBarSideWidth),
-                  ],
+                titleSpacing: 24,
+                title: Text(
+                  title,
+                  style: titleStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_showShareAction)
+                          _buildAppBarActionButton(
+                            context: context,
+                            icon: Icons.share,
+                            tooltip: l10n.shareLink,
+                            onTap: () async {
+                              _pausePlayback();
+                              final shareLinkData =
+                                  await _getOrCreateMemoryLaneLinkData(context);
+                              if (!context.mounted || shareLinkData == null) {
+                                return;
+                              }
+                              await shareText(
+                                shareLinkData.$1,
+                                context: context,
+                              );
+                            },
+                          ),
+                        if (_showShareAction) const SizedBox(width: 12),
+                        _buildAppBarActionButton(
+                          context: context,
+                          icon: Icons.close,
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).closeButtonTooltip,
+                          onTap: () async {
+                            await Navigator.of(context).maybePop();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               body: Stack(
                 children: [
@@ -665,15 +703,18 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: ValueListenableBuilder<double>(
-                                          valueListenable:
-                                              _stackProgressNotifier,
-                                          builder: (context, stackProgress, _) {
-                                            return _buildFrameView(
-                                              context,
-                                              stackProgress,
-                                            );
-                                          },
+                                        child: RepaintBoundary(
+                                          child: ValueListenableBuilder<double>(
+                                            valueListenable:
+                                                _stackProgressNotifier,
+                                            builder:
+                                                (context, stackProgress, _) {
+                                              return _buildFrameView(
+                                                context,
+                                                stackProgress,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -824,10 +865,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final localeName = l10n.localeName;
     final numberFormat = NumberFormat.decimalPattern(localeName);
-    final int currentRounded =
-        _currentCaptionValue.round().clamp(0, 1000).toInt();
-    final int previousRounded =
-        _previousCaptionValue.round().clamp(0, 1000).toInt();
+    final int currentRounded = _currentCaptionValue.clamp(0, 1000);
+    final int previousRounded = _previousCaptionValue.clamp(0, 1000);
     final TextStyle baseStyle = textTheme.bodyMuted.copyWith(
       color: isDark
           ? colorScheme.textMuted
@@ -961,6 +1000,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
             trackHeight: 4,
             activeTrackColor: activeTrackColor,
             inactiveTrackColor: inactiveTrackColor,
+            tickMarkShape: SliderTickMarkShape.noTickMark,
             thumbColor: Colors.white,
             overlayColor: Colors.transparent,
             trackShape: const RoundedRectSliderTrackShape(),
@@ -1015,6 +1055,71 @@ class _MemoryLanePageState extends State<MemoryLanePage>
         ),
       ],
     );
+  }
+
+  Widget _buildAppBarActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String tooltip,
+    required Future<void> Function() onTap,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: () async {
+          await onTap();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.fillFaint,
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 20,
+            color: colorScheme.textBase,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<(String, int)?> _getOrCreateMemoryLaneLinkData(
+    BuildContext context,
+  ) async {
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.creatingLink);
+    await dialog.show();
+    try {
+      final timeline = await MemoryLaneService.instance.getTimeline(
+        widget.person.remoteID,
+      );
+      if (timeline == null || !timeline.isReady || timeline.entries.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          showShortToast(context, l10n.somethingWentWrong);
+        }
+        return null;
+      }
+      final shareLinkData =
+          await MemoryShareService.instance.getOrCreateMemoryLaneLink(
+        entries: timeline.entries,
+        title: l10n.facesTimelineAppBarTitle,
+        personId: widget.person.remoteID,
+        personName: widget.person.data.name,
+        birthDate: widget.person.data.birthDate,
+      );
+      await dialog.hide();
+      return shareLinkData;
+    } catch (e) {
+      await dialog.hide();
+      if (context.mounted) {
+        await showGenericErrorBottomSheet(context: context, error: e);
+      }
+      return null;
+    }
   }
 
   void _togglePlayback() {
@@ -1088,7 +1193,7 @@ class _TimelineFrame {
   final MemoryImage? image;
   final DateTime creationDate;
   final _CaptionType captionType;
-  final double captionValue;
+  final int captionValue;
 
   _TimelineFrame({
     required this.entry,
@@ -1134,7 +1239,10 @@ class _MemoryLaneCard extends StatelessWidget {
     final scale = _calculateScale(distance);
     final yOffset = _calculateYOffset(distance);
     final opacity = _calculateOpacity(distance);
-    final blurSigma = blurEnabled ? _calculateBlur(distance) : 0.0;
+    // Skip the expensive ImageFiltered blur for distant cards where the
+    // combination of low opacity and dark overlay already obscures detail.
+    final blurSigma =
+        blurEnabled && distance < 3.0 ? _calculateBlur(distance) : 0.0;
     final rotation = _calculateRotation(distance);
     final overlayOpacity = _calculateOverlayOpacity(distance);
 
@@ -1221,25 +1329,24 @@ class _MemoryLaneCard extends StatelessWidget {
       ),
     );
 
+    final transform = Matrix4.identity()
+      ..translate(0.0, yOffset)
+      ..rotateZ(rotation)
+      ..scale(scale, scale);
+
     return Positioned.fill(
       child: IgnorePointer(
         child: Opacity(
           opacity: opacity,
-          child: Transform.translate(
-            offset: Offset(0, yOffset),
-            child: Transform.rotate(
-              angle: rotation,
-              child: Transform.scale(
-                scale: scale,
-                alignment: Alignment.center,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(_cardRadius),
-                    boxShadow: cardShadow,
-                  ),
-                  child: cardContent,
-                ),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: transform,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_cardRadius),
+                boxShadow: cardShadow,
               ),
+              child: cardContent,
             ),
           ),
         ),
@@ -1367,11 +1474,6 @@ class _MemoryLaneCard extends StatelessWidget {
 }
 
 enum _CaptionType { age, yearsAgo }
-
-double _yearsBetween(DateTime start, DateTime end) {
-  final days = end.difference(start).inDays;
-  return days / 365.25;
-}
 
 class _MemoryLaneSliderThumbShape extends SliderComponentShape {
   const _MemoryLaneSliderThumbShape();

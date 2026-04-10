@@ -39,6 +39,7 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
+import 'package:photos/services/memory_share_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/dialog_util.dart";
@@ -607,6 +608,18 @@ class CollectionsService {
     );
 
     return SharedCollections(outgoing, incoming, quickLinks);
+  }
+
+  Future<SharedCollectionsAndMemoryLinks>
+      getSharedCollectionsAndMemoryLinks() async {
+    final collections = await getSharedCollections();
+    try {
+      final memoryLinks = await MemoryShareService.instance.listMemoryShares();
+      return SharedCollectionsAndMemoryLinks(collections, memoryLinks);
+    } catch (e, s) {
+      _logger.severe("failed to load memory links", e, s);
+      return SharedCollectionsAndMemoryLinks(collections, []);
+    }
   }
 
   Future<List<Collection>> getCollectionForOnEnteSection() async {

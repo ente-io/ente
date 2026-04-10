@@ -29,7 +29,6 @@
   "deleteReason4": "Meu motivo não está listado",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "Sua solicitação será revisada em até 72 horas.",
-  "deleteEmailRequest": "Por favor, envie um e-mail a <warning>account-deletion@ente.com</warning> do seu e-mail registrado.",
   "entePhotosPerm": "Ente <i>precisa de permissão para</i> preservar suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
@@ -320,11 +319,8 @@
   "verificationId": "ID de verificação",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} não tem uma conta Ente.\n\nEnvie-os um convite para compartilhar fotos.",
-  "shareMyVerificationID": "Aqui está meu ID de verificação para o ente.com: {verificationID}",
-  "shareTextConfirmOthersVerificationID": "Ei, você pode confirmar se este ID de verificação do ente.com é seu?: {verificationID}",
   "somethingWentWrong": "Algo deu errado",
   "sendInvite": "Enviar convite",
-  "shareTextRecommendUsingEnte": "Baixe o Ente para que nós possamos compartilhar com facilidade fotos e vídeos de qualidade original\n\nhttps://ente.com",
   "done": "Concluído",
   "applyCodeTitle": "Aplicar código",
   "enterCodeDescription": "Insira o código fornecido por um amigo para reivindicar armazenamento grátis para ambos",
@@ -352,7 +348,6 @@
   "theyAlsoGetXGb": "Eles também recebem {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB para eles + {storageAmountInGB} GB para você quando eles atualizarem.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB toda vez que alguém utilizar seu código num plano pago",
-  "shareTextReferralCode": "Ente Photos é uma casa privada e segura para suas fotos\n* Baixe Fotos Ente de https://ente. o/app\n* Crie uma conta\n* Aplique o código de indicação {referralCode} em Configurações->Indicação\n* Obtenha {referralStorageInGB}GB gratuitamente quando você fizer o upgrade para um plano pago",
   "claimFreeStorage": "Reivindique armaz. grátis",
   "inviteYourFriends": "Convide seus amigos",
   "earnFreeStorage": "Reivindique armaz. grátis",
@@ -685,7 +680,6 @@
   "subscription": "Assinatura",
   "paymentDetails": "Detalhes de pagamento",
   "manageFamily": "Gerenciar família",
-  "contactToManageSubscription": "Entre em contato conosco em support@ente.com para gerenciar sua assinatura {provider}.",
   "renewSubscription": "Renovar assinatura",
   "cancelSubscription": "Cancelar assinatura",
   "areYouSureYouWantToRenew": "Deseja renovar?",
@@ -734,7 +728,6 @@
   "subAlreadyLinkedErrMessage": "Seu {id} já está vinculado a outra conta Ente. Se você gostaria de usar seu {id} com esta conta, entre em contato conosco\"",
   "visitWebToManage": "Visite o web.ente.io para gerenciar sua assinatura",
   "couldNotUpdateSubscription": "Não foi possível atualizar a assinatura",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Entre em contato com support@ente.com e nós ficaremos felizes em ajudar!",
   "paymentFailed": "O pagamento falhou",
   "paymentFailedTalkToProvider": "Fale com o suporte {providerName} se você foi cobrado",
   "@paymentFailedTalkToProvider": {
@@ -1162,8 +1155,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Definir raio",
-  "familyPlanPortalTitle": "Família",
-  "familyPlanOverview": "Adicione 5 familiares para seu plano existente sem pagar nenhum custo adicional.\n\nCada membro ganha seu espaço privado, significando que eles não podem ver os arquivos dos outros a menos que eles sejam compartilhados.\n\nOs planos familiares estão disponíveis para clientes que já tem uma assinatura paga do Ente.\n\nAssine agora para iniciar!",
   "androidBiometricHint": "Verificar identidade",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

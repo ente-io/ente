@@ -1,0 +1,4 @@
+{
+    "extends": "ente-build-config/tsconfig-typecheck.json",
+    "include": [".", "../base/global-electron.d.ts"]
+}
