@@ -5,6 +5,8 @@
  * when needed (login/crypto flows), while Tauri uses native Rust bindings.
  */
 
+import { loadEnteWasm } from "ente-wasm/load";
+
 export type EnteWasmModule = typeof import("ente-wasm");
 
 export interface EncryptedBox {
@@ -304,7 +306,7 @@ export const enteWasm = async (): Promise<EnteCryptoAdapter> => {
             if (isTauriRuntime()) {
                 return createTauriAdapter();
             }
-            const wasm = await import("ente-wasm");
+            const wasm = await loadEnteWasm();
             return createWasmAdapter(wasm);
         })();
         _wasmPromise = load.catch((error: unknown) => {
@@ -321,7 +323,6 @@ export const enteWasm = async (): Promise<EnteCryptoAdapter> => {
 export const ensureCryptoInit = async () => {
     if (_cryptoInitDone) return;
     const wasm = await enteWasm();
-    // No-op for the pure Rust backend, but keeps the API symmetric.
     await wasm.crypto_init();
     _cryptoInitDone = true;
 };

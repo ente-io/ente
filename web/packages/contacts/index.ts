@@ -7,6 +7,7 @@ import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
 import type { ContactsCtxHandle } from "ente-wasm";
+import { loadEnteWasm } from "ente-wasm/load";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
     saveContactDisplayRecords,
@@ -52,23 +53,6 @@ const CONTACT_DIFF_LIMIT = 500;
 const AVATAR_FAILURE_TTL_MS = 60_000;
 const READY_RETRY_COOLDOWN_MS = 5_000;
 const CONTACTS_CACHE_SCHEMA_VERSION = 2;
-
-type EnteWasmModule = typeof import("ente-wasm");
-
-let _wasmPromise: Promise<EnteWasmModule> | undefined;
-
-const enteWasm = async () => {
-    if (!_wasmPromise) {
-        const load = import("ente-wasm");
-        _wasmPromise = load.catch((error: unknown) => {
-            if (_wasmPromise === load) {
-                _wasmPromise = undefined;
-            }
-            throw error;
-        });
-    }
-    return _wasmPromise;
-};
 
 interface RemoteContactRecord {
     id: string;
@@ -345,7 +329,7 @@ const ensureContactsCtxOpen = async ({
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
-        const { contacts_open_ctx } = await enteWasm();
+        const { contacts_open_ctx } = await loadEnteWasm();
         const openedCtx = await contacts_open_ctx({
             baseUrl: baseURL,
             authToken,
