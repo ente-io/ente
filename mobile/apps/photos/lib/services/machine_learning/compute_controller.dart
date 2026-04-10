@@ -275,8 +275,7 @@ class ComputeController {
       );
       return;
     }
-    final shouldRunCompute =
-        this.shouldRunCompute;
+    final shouldRunCompute = this.shouldRunCompute;
     if (shouldRunCompute != _canRunCompute) {
       _canRunCompute = shouldRunCompute;
       _logger.info(

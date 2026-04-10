@@ -30,8 +30,6 @@ import {
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
     addToFavoritesCollection,
-    isArchivedCollection,
-    isHiddenCollection,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -72,6 +70,7 @@ interface CollectionMapDialogProps
         > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
+    files: EnteFile[];
     onRemotePull?: (opts?: RemotePullOpts) => Promise<void>;
 }
 
@@ -449,7 +448,7 @@ const getLatestFileIdFromPoints = (points: MapIndexPoint[]) =>
 function useMapData(
     open: boolean,
     collectionSummary: CollectionSummary,
-    activeCollection: Collection | undefined,
+    files: EnteFile[],
     onGenericError: (e: unknown) => void,
 ): MapDataResult {
     const [state, setState] = useState<MapDataState>({
@@ -475,9 +474,9 @@ function useMapData(
     // Include fileCount to detect when collection content changes
     const loadedCollectionRef = useRef<{
         summaryId: number;
-        collectionId: number | undefined;
         fileCount: number;
         updationTime: number | null;
+        files: EnteFile[];
     } | null>(null);
 
     //Syncing the refs with the state for the stale closure prevention.
@@ -578,7 +577,6 @@ function useMapData(
 
         // Skip reload if we already have data for this collection with same file count
         const currentSummaryId = collectionSummary.id;
-        const currentCollectionId = activeCollection?.id;
         const currentFileCount = collectionSummary.fileCount;
         const currentUpdationTime = collectionSummary.updationTime ?? null;
         const loaded = loadedCollectionRef.current;
@@ -587,9 +585,9 @@ function useMapData(
         if (
             loaded &&
             loaded.summaryId === currentSummaryId &&
-            loaded.collectionId === currentCollectionId &&
             loaded.fileCount === currentFileCount &&
-            loaded.updationTime === currentUpdationTime
+            loaded.updationTime === currentUpdationTime &&
+            loaded.files === files
         ) {
             return;
         }
@@ -600,18 +598,17 @@ function useMapData(
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
             try {
-                const files = await getFilesForCollection(
-                    collectionSummary,
-                    activeCollection,
-                );
+                const uniqueFiles = uniqueFilesByID(files);
 
                 //Creating a id <- file mapping to drive renders and update the UI, changes to this will result in UI re-renders
-                const filesByID = new Map(files.map((file) => [file.id, file]));
+                const filesByID = new Map(
+                    uniqueFiles.map((file) => [file.id, file]),
+                );
                 //ref mirrow for using in the useCallbacks
                 filesByIDRef.current = filesByID;
 
                 const { points, latestFileId } =
-                    await buildMapIndexPoints(files);
+                    await buildMapIndexPoints(uniqueFiles);
 
                 //mapIndex has the SuperCluster Spatial Index
                 const mapIndex = buildMapIndex(points);
@@ -637,9 +634,9 @@ function useMapData(
                 // Mark this collection as loaded
                 loadedCollectionRef.current = {
                     summaryId: currentSummaryId,
-                    collectionId: currentCollectionId,
                     fileCount: currentFileCount,
                     updationTime: currentUpdationTime,
+                    files,
                 };
 
                 const coverId = collectionSummary.coverFile?.id ?? latestFileId;
@@ -664,13 +661,7 @@ function useMapData(
         };
 
         void loadMapData();
-    }, [
-        open,
-        collectionSummary,
-        activeCollection,
-        onGenericError,
-        queueThumbnailFetch,
-    ]);
+    }, [open, collectionSummary, files, onGenericError, queueThumbnailFetch]);
 
     /**
      * This function is used to update the map view, after a file has been
@@ -1138,70 +1129,6 @@ function createClusterIcon(
 // Helper Functions
 // ============================================================================
 
-/**
- * Returns true if the file is visible (not archived or hidden).
- */
-function isFileVisible(file: EnteFile): boolean {
-    const visibility = file.magicMetadata?.data.visibility;
-    // Files without visibility metadata are considered visible (default state)
-    return visibility === undefined || visibility === ItemVisibility.visible;
-}
-
-/**
- * Loads every locally stored file, filters those belonging to the
- * target collection, removes duplicates by ID, filters out hidden/archived
- * files, and returns the unique set of visible files. For "All", it also
- * excludes files that belong to hidden or archived collections.
- */
-async function getFilesForCollection(
-    collectionSummary: CollectionSummary,
-    activeCollection: Collection | undefined,
-): Promise<EnteFile[]> {
-    if (collectionSummary.type === "all") {
-        const [allFiles, collections] = await Promise.all([
-            savedCollectionFiles(),
-            savedCollections(),
-        ]);
-        // Filter out hidden and archived files to prevent leaking items users expect to remain hidden.
-        const visibleFiles = allFiles.filter(isFileVisible);
-        const hiddenCollectionIDs = new Set(
-            collections
-                .filter(isHiddenCollection)
-                .map((collection) => collection.id),
-        );
-        const archivedCollectionIDs = new Set(
-            collections
-                .filter(isArchivedCollection)
-                .map((collection) => collection.id),
-        );
-        const hiddenFileIDs = new Set(
-            allFiles
-                .filter((file) => hiddenCollectionIDs.has(file.collectionID))
-                .map((file) => file.id),
-        );
-        const archivedFileIDs = new Set(
-            allFiles
-                .filter((file) => archivedCollectionIDs.has(file.collectionID))
-                .map((file) => file.id),
-        );
-        const filtered = visibleFiles.filter(
-            (file) =>
-                !hiddenFileIDs.has(file.id) && !archivedFileIDs.has(file.id),
-        );
-        return uniqueFilesByID(filtered);
-    }
-    const allFiles = await savedCollectionFiles();
-    // Filter out hidden and archived files to prevent leaking items users expect to remain hidden.
-    const visibleFiles = allFiles.filter(isFileVisible);
-    if (!activeCollection) {
-        return [];
-    }
-    const filtered = visibleFiles.filter(
-        (file) => file.collectionID === activeCollection.id,
-    );
-    return uniqueFilesByID(filtered);
-}
-
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -1215,6 +1142,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     onClose,
     collectionSummary,
     activeCollection,
+    files,
     onRemotePull,
     onAddSaveGroup,
     onMarkTempDeleted,
@@ -1244,7 +1172,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         removeFiles: removeFilesFromMap,
         updateFileVisibility,
         queueThumbnailFetch,
-    } = useMapData(open, collectionSummary, activeCollection, onGenericError);
+    } = useMapData(open, collectionSummary, files, onGenericError);
 
     const {
         visiblePhotos,

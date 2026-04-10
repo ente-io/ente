@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -43,6 +43,7 @@ class _ManageIndividualParticipantState
     final isAdmin = widget.user.isAdmin;
     final isCollaborator = widget.user.isCollaborator;
     final isViewer = widget.user.isViewer;
+    final resolvedName = resolveDisplayName(widget.user);
     bool isConvertToViewSuccess = false;
     return Scaffold(
       appBar: AppBar(),
@@ -61,7 +62,7 @@ class _ManageIndividualParticipantState
                     title: AppLocalizations.of(context).manage,
                   ),
                   Text(
-                    widget.user.displayName ?? widget.user.email,
+                    resolvedName,
                     textAlign: TextAlign.left,
                     style: textTheme.small.copyWith(
                       color: colorScheme.textMuted,
@@ -152,7 +153,7 @@ class _ManageIndividualParticipantState
                         ).yesConvertToViewer,
                         body: AppLocalizations.of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                          user: widget.user.displayName ?? widget.user.email,
+                          user: resolvedName,
                         ),
                         isCritical: true,
                       );

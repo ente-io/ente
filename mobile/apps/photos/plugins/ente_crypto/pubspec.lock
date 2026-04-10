@@ -21,7 +21,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "82e365fed8a1a76f6eea0220de98389eed7b0445"
       resolved-ref: "82e365fed8a1a76f6eea0220de98389eed7b0445"
       url: "https://github.com/ente-io/computer.git"
     source: git

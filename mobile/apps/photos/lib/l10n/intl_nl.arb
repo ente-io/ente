@@ -1091,8 +1091,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radius instellen",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Voeg 5 gezinsleden toe aan je bestaande abonnement zonder extra te betalen.\n\nElk lid krijgt zijn eigen privé ruimte en kan elkaars bestanden niet zien tenzij ze zijn gedeeld.\n\nFamilieplannen zijn beschikbaar voor klanten die een betaald Ente abonnement hebben.\n\nAbonneer nu om aan de slag te gaan!",
   "androidBiometricHint": "Identiteit verifiëren",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1779,7 +1777,7 @@
   "font": "Lettertype",
   "background": "Achtergrond",
   "align": "Uitlijnen",
-  "addedToAlbums": "{count, plural, one {}=1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
+  "addedToAlbums": "{count, plural, =1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {

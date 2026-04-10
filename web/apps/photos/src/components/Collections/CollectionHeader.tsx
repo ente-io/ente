@@ -40,6 +40,7 @@ import {
     CollectionSubType,
     type Collection,
 } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
@@ -94,6 +95,7 @@ export interface CollectionHeaderProps
     > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
+    files: EnteFile[];
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
     /**
@@ -158,6 +160,7 @@ const shouldShowOptions = (type: CollectionSummaryType) =>
 const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
     collectionSummary,
+    files,
     setActiveCollectionID,
     onRemotePull,
     onCollectionShare,
@@ -789,6 +792,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 {...mapDialogVisibilityProps}
                 collectionSummary={collectionSummary}
                 activeCollection={activeCollection}
+                files={files}
                 onRemotePull={onRemotePull}
                 onAddSaveGroup={onAddSaveGroup}
                 onMarkTempDeleted={onMarkTempDeleted}

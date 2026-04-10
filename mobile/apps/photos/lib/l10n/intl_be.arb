@@ -1099,8 +1099,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Задаць радыус",
-  "familyPlanPortalTitle": "Сямейны",
-  "familyPlanOverview": "Дадайце 5 членаў сям'і да бягучага тарыфнага плана без дадатковай платы.\n\nКожны член атрымае сваю ўласную прыватную прастору і не зможа бачыць файлы іншых, пакуль яны не будуць абагулены.\n\nСямейныя тарыфныя планы даступны для кліентаў з платнай падпіскай Ente.\n\nПадпішыцеся, каб скарыстацца прапановай!",
   "androidBiometricHint": "Спраўдзіць ідэнтычнасць",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1967,10 +1965,6 @@
   "artisticPortraits": "Майстэрскі партрэт",
   "streetFood": "Вулічна ежа",
   "riverCruises": "Від на раку",
-  "facesTimelineBannerTitle": "Алея ўспамінаў",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "Глядзіце фатаграфіі карыстальніка {name} за розныя гады",
   "@facesTimelineBannerSubtitle": {
     "description": "Subtitle for Memory Lane banner describing the timeline for a person",

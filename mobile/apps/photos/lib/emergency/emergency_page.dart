@@ -11,6 +11,7 @@ import "package:photos/emergency/other_contact_page.dart";
 import "package:photos/emergency/select_contact_page.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/alert_bottom_sheet.dart";
@@ -116,15 +117,16 @@ class _EmergencyPageState extends State<EmergencyPage> {
                     final recoverSession = info!.recoverSessions[listIndex];
                     final isLastItem =
                         listIndex == info!.recoverSessions.length - 1;
+                    final emergencyUser = recoverSession.emergencyContact;
                     return _buildGroupedMenuItem(
                       listIndex: listIndex,
                       isLastItem: isLastItem,
                       child: MenuItemWidgetNew(
-                        title: recoverSession.emergencyContact.email,
+                        title: resolveDisplayName(emergencyUser),
                         titleColor: colorScheme.warning500,
                         leadingIconSize: 24,
                         leadingIconWidget: UserAvatarWidget(
-                          recoverSession.emergencyContact,
+                          emergencyUser,
                           type: AvatarType.md,
                           currentUserID: currentUserID,
                         ),
@@ -164,17 +166,18 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       final contact = trustedContacts[listIndex];
                       final isLastItem =
                           listIndex == trustedContacts.length - 1;
+                      final emergencyUser = contact.emergencyContact;
                       return _buildGroupedMenuItem(
                         listIndex: listIndex,
                         isLastItem: isLastItem,
                         child: MenuItemWidgetNew(
-                          title: contact.emergencyContact.email,
+                          title: resolveDisplayName(emergencyUser),
                           titleColor: contact.isPendingInvite()
                               ? colorScheme.warning500
                               : textTheme.small.color,
                           leadingIconSize: 24,
                           leadingIconWidget: UserAvatarWidget(
-                            contact.emergencyContact,
+                            emergencyUser,
                             type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
@@ -273,17 +276,18 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       final listIndex = index - 1;
                       final currentUser = othersTrustedContacts[listIndex];
                       final isLastItem = index == othersTrustedContacts.length;
+                      final emergencyUser = currentUser.user;
                       return _buildGroupedMenuItem(
                         listIndex: listIndex,
                         isLastItem: isLastItem,
                         child: MenuItemWidgetNew(
-                          title: currentUser.user.email,
+                          title: resolveDisplayName(emergencyUser),
                           titleColor: currentUser.isPendingInvite()
                               ? colorScheme.warning500
                               : textTheme.small.color,
                           leadingIconSize: 24,
                           leadingIconWidget: UserAvatarWidget(
-                            currentUser.user,
+                            emergencyUser,
                             type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),

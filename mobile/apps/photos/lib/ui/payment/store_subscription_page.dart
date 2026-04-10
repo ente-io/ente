@@ -21,8 +21,8 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import 'package:photos/ui/family/family_plan_page.dart';
 import 'package:photos/ui/notification/toast.dart';
-import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
@@ -159,9 +159,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     colorScheme = getEnteColorScheme(context);
-    final bool isFamilyChildUser = _hasLoadedData &&
-        _userDetails.isPartOfFamily() &&
-        !_userDetails.isFamilyAdmin();
     if (!_isLoading) {
       _isLoading = true;
       _fetchSubData();
@@ -183,15 +180,13 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: isFamilyChildUser
-            ? null
-            : Text(
-                widget.isOnboarding
-                    ? AppLocalizations.of(context).chooseYourPlan
-                    : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
-                style: textTheme.largeBold,
-              ),
-        centerTitle: !isFamilyChildUser,
+        title: Text(
+          widget.isOnboarding
+              ? AppLocalizations.of(context).chooseYourPlan
+              : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,9 +194,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Expanded(child: _getBody()),
         ],
       ),
-      bottomNavigationBar: widget.isOnboarding &&
-              _hasLoadedData &&
-              !(_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin())
+      bottomNavigationBar: widget.isOnboarding && _hasLoadedData
           ? Container(
               color: colorScheme.backgroundColour,
               child: SafeArea(
@@ -238,6 +231,19 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           await _userService.getUserDetailsV2(memoryCount: false);
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
+
+      if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
+        if (mounted) {
+          replacePage(
+            context,
+            FamilyPlanPage(
+              initialUserDetails: _userDetails,
+              refreshOnOpen: false,
+            ),
+          );
+        }
+        return;
+      }
 
       _hasActiveSubscription = _currentSubscription!.isValid();
       _hideCurrentPlanSelection =
@@ -277,41 +283,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     }
   }
 
-  Future<void> _onLeaveFamily(UserDetails userDetails) async {
-    _userDetails = userDetails;
-    _currentSubscription = userDetails.subscription;
-    _hasActiveSubscription = _currentSubscription!.isValid();
-    _hideCurrentPlanSelection =
-        _currentSubscription?.attributes?.isCancelled ?? false;
-    showYearlyPlan = _currentSubscription!.isYearlyPlan();
-    _isActiveStripeSubscriber =
-        _currentSubscription!.paymentProvider == stripe &&
-            _currentSubscription!.isValid();
-    if (mounted) {
-      setState(() {});
-    }
-
-    try {
-      await _filterStorePlansForUi();
-    } catch (error, stackTrace) {
-      _logger.warning(
-        "Failed to refresh billing plans after leaving family",
-        error,
-        stackTrace,
-      );
-    }
-  }
-
   Widget _getBody() {
     if (_hasLoadedData) {
-      if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(
-          userDetails: _userDetails,
-          onLeaveFamily: _onLeaveFamily,
-        );
-      } else {
-        return _buildPlans();
-      }
+      return _buildPlans();
     }
     return const EnteLoadingWidget();
   }

@@ -2,11 +2,11 @@ import 'package:collection/collection.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/contacts/contact_identity_resolver.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -438,10 +438,6 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   }
 
   String _nameIfAvailableElseEmail(User user) {
-    final name = user.displayName;
-    if (name != null && name.isNotEmpty) {
-      return name;
-    }
-    return user.email;
+    return resolveDisplayName(user);
   }
 }

@@ -1119,7 +1119,7 @@
   "unarchive": "Bỏ lưu trữ",
   "favorite": "Thích",
   "removeFromFavorite": "Xóa khỏi mục đã thích",
-  "shareMemory": "Chia sẻ kỷ niệm",
+  "shareMemories": "Chia sẻ kỷ niệm",
   "shareTheseMemories": "Chia sẻ những kỷ niệm này",
   "shareThisPhoto": "Chia sẻ ảnh này",
   "shareThisVideo": "Chia sẻ video này",
@@ -1549,8 +1549,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Đặt bán kính",
-  "familyPlanPortalTitle": "Gia đình",
-  "familyPlanOverview": "Thêm 5 thành viên gia đình vào gói hiện tại của bạn mà không phải trả thêm phí.\n\nMỗi thành viên có không gian riêng tư của mình và không thể xem tệp của nhau trừ khi được chia sẻ.\n\nGói gia đình có sẵn cho người dùng Ente gói trả phí.\n\nĐăng ký ngay để bắt đầu!",
   "androidBiometricHint": "Xác minh danh tính",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2635,7 +2633,7 @@
   "artisticPortraits": "Chân dung nghệ thuật",
   "streetFood": "Món ngon đường phố",
   "riverCruises": "Cảnh quan trên sông",
-  "facesTimelineBannerTitle": "Hồi Ức",
+  "facesTimelineBannerTitle": "Hồi ức",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },

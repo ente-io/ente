@@ -1,5 +1,6 @@
 # melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils
 dependency_overrides:
+  cronet_http: 1.6.0
   ente_cast:
     path: plugins/ente_cast
   ente_crypto:
@@ -12,27 +13,31 @@ dependency_overrides:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 16kb-fix
-  intl: ^0.20.2
-  js: ^0.6.7
+      ref: 1eb375e639dc86df69b544642b177a710ae43db0
+  intl: 0.20.2
+  js: 0.6.7
   media_kit:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   media_kit_libs_ios_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: libs/ios/media_kit_libs_ios_video
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   media_kit_libs_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: libs/universal/media_kit_libs_video
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
   media_kit_video:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
-  protobuf: ^3.1.0
-  watcher: ^1.1.0
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
+  protobuf: 3.1.0
+  watcher: 1.1.2
   win32: 5.10.1
   log_viewer:
     path: ../../packages/log_viewer

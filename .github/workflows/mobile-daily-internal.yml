@@ -22,10 +22,8 @@ jobs:
                 working-directory: mobile/apps/photos
 
         steps:
-            - name: Checkout code and submodules
+            - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Free Disk Space (Ubuntu)
               uses: jlumbroso/free-disk-space@main
@@ -54,6 +52,18 @@ jobs:
               uses: dtolnay/rust-toolchain@stable
               with:
                   toolchain: ${{ env.RUST_VERSION }}
+
+            # Cargokit resolves the toolchain as "stable" (not a pinned
+            # version like "1.90.0"). Two Cargokit instances run in
+            # parallel during Gradle build, and both race to
+            # `rustup target add` if the targets are missing — causing
+            # download conflicts. Pre-install them here to prevent that.
+            - name: Pre-install Android Rust targets
+              run: |
+                  rustup target add --toolchain stable armv7-linux-androideabi aarch64-linux-android
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen

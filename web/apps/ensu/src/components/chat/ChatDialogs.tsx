@@ -188,7 +188,7 @@ export const ChatDialogs = memo(
             }
 
             if (typeof window !== "undefined") {
-                const popup = window.open(url, "_blank", "noopener,noreferrer");
+                const popup = window.open(url, "_blank", "noopener");
                 if (!popup) {
                     window.location.href = url;
                 }

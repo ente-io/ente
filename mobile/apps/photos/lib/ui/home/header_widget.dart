@@ -66,11 +66,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         isOfflineMode && !Configuration.instance.hasConfiguredAccount();
     final List<Widget> children = <Widget>[
       const StatusBarWidget(),
-      if (showGetStartedBanner)
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2, vertical: 8),
-          child: GetStartedBanner(),
-        ),
+      if (showGetStartedBanner) const GetStartedBanner(),
       const MemoriesWidget(),
     ];
     if (showWrappedBanner) {

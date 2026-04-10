@@ -719,7 +719,7 @@ export default function PublicAlbumPage() {
                         ) : (
                             <SpacedRow sx={{ flex: 1 }}>
                                 <EnteLogoLink href="https://ente.com">
-                                    <EnteLogo height={15} />
+                                    <EnteLogo height={17} />
                                 </EnteLogoLink>
                                 <Stack direction="row" spacing={2}>
                                     <SecondaryActionButton

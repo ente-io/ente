@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import "package:photos/app.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
@@ -115,11 +116,12 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
           statusBarBrightness: Brightness.dark,
         ),
         leading: const SizedBox(),
-        title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-            color: Colors.white,
+        title: SvgPicture.asset(
+          "assets/ente-branding.svg",
+          height: 18,
+          colorFilter: const ColorFilter.mode(
+            Colors.white,
+            BlendMode.srcIn,
           ),
         ),
         centerTitle: true,
