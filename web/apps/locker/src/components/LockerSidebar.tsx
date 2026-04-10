@@ -24,6 +24,7 @@ import type { LockerCollection } from "types";
 import { visibleLockerCollections } from "types";
 import { LockerAboutDrawer } from "./LockerAboutDrawer";
 import { LockerAccountDrawer } from "./LockerAccountDrawer";
+import { LockerAuthenticateUser } from "./LockerAuthenticateUser";
 import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
 import { LockerSidebarDrawer } from "./LockerSidebarShell";
 import { LockerSocialFooter } from "./LockerSocialFooter";
@@ -86,6 +87,8 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
         0,
     );
     const [isAccountOpen, setIsAccountOpen] = useState(false);
+    const [isLegacyAuthenticateOpen, setIsLegacyAuthenticateOpen] =
+        useState(false);
     const [isLegacyOpen, setIsLegacyOpen] = useState(false);
     const [isSupportOpen, setIsSupportOpen] = useState(false);
     const [isAboutOpen, setIsAboutOpen] = useState(false);
@@ -128,6 +131,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     useEffect(() => {
         if (!open) {
             setIsAccountOpen(false);
+            setIsLegacyAuthenticateOpen(false);
             setIsLegacyOpen(false);
             setIsSupportOpen(false);
             setIsAboutOpen(false);
@@ -388,7 +392,9 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                                     icon={FavouriteIcon}
                                     label="Legacy"
                                     endIcon={<ChevronRightIcon />}
-                                    onClick={() => setIsLegacyOpen(true)}
+                                    onClick={() =>
+                                        setIsLegacyAuthenticateOpen(true)
+                                    }
                                 />
                                 <LockerSidebarCardButton
                                     icon={HelpCircleIcon}
@@ -445,6 +451,11 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                 onClose={() => setIsLegacyOpen(false)}
                 onRootClose={onClose}
                 suggestedUsers={legacySuggestedUsers}
+            />
+            <LockerAuthenticateUser
+                open={isLegacyAuthenticateOpen}
+                onClose={() => setIsLegacyAuthenticateOpen(false)}
+                onAuthenticate={() => setIsLegacyOpen(true)}
             />
             <LockerSupportDrawer
                 open={isSupportOpen}
