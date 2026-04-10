@@ -52,4 +52,24 @@ post_install do |installer|
     end
 
   end
+
+  # Temporary Flutter 3.32.8 arm64-simulator workaround.
+  # Remove once the app is on Flutter 3.38+ and these frameworks load normally.
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.native_targets.each do |target|
+      next unless target.name == 'Runner'
+
+      force_link_flags = [
+        '$(inherited)',
+        '-Wl,-needed_framework,cupertino_http',
+        '-Wl,-needed_framework,objective_c',
+      ]
+
+      target.build_configurations.each do |config|
+        config.build_settings['OTHER_LDFLAGS[sdk=iphonesimulator*]'] = force_link_flags
+      end
+    end
+
+    aggregate_target.user_project.save
+  end
 end
