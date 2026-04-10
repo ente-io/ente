@@ -242,7 +242,7 @@
     "leave": "Ayrıl",
     "leave_family_plan_confirm": "Aile planından ayrılmak istediğinize emin misiniz?",
     "choose_plan": "Planınızı seçin",
-    "manage_plan": "Aboneliği yönet",
+    "manage_plan": "",
     "current_usage": "Mevcut kullanım <strong>{{usage}}</strong>",
     "two_months_free": "Yıllık planlarda 2 ay ücretsiz",
     "free_plan_option": "Ücretsiz planla devam et",

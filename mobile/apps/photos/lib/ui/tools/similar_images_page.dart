@@ -38,8 +38,7 @@ enum SimilarImagesPageState {
 
 enum SortKey {
   size,
-  distanceAsc,
-  distanceDesc,
+  recent,
   count,
 }
 
@@ -712,27 +711,43 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     }
   }
 
-  void _sortSimilarFiles() {
+  int? _groupMostRecentCreationTime(SimilarFiles similarFiles) {
+    int? mostRecentCreationTime;
+    for (final file in similarFiles.files) {
+      final creationTime = file.creationTime;
+      if (creationTime == null || creationTime <= 0) {
+        continue;
+      }
+      if (mostRecentCreationTime == null ||
+          creationTime > mostRecentCreationTime) {
+        mostRecentCreationTime = creationTime;
+      }
+    }
+    return mostRecentCreationTime;
+  }
+
+  void _sortSimilarFiles({bool updateState = true}) {
     switch (_sortKey) {
       case SortKey.size:
         _similarFilesList.sort((a, b) => b.totalSize.compareTo(a.totalSize));
         break;
-      case SortKey.distanceAsc:
+      case SortKey.recent:
         _similarFilesList.sort((a, b) {
-          final distanceComparison =
-              a.furthestDistance.compareTo(b.furthestDistance);
-          if (distanceComparison != 0) {
-            return distanceComparison;
+          final aMostRecentCreationTime = _groupMostRecentCreationTime(a);
+          final bMostRecentCreationTime = _groupMostRecentCreationTime(b);
+          if (aMostRecentCreationTime == null) {
+            if (bMostRecentCreationTime == null) {
+              return b.totalSize.compareTo(a.totalSize);
+            }
+            return 1;
           }
-          return b.totalSize.compareTo(a.totalSize);
-        });
-        break;
-      case SortKey.distanceDesc:
-        _similarFilesList.sort((a, b) {
-          final distanceComparison =
-              b.furthestDistance.compareTo(a.furthestDistance);
-          if (distanceComparison != 0) {
-            return distanceComparison;
+          if (bMostRecentCreationTime == null) {
+            return -1;
+          }
+          final recentComparison =
+              bMostRecentCreationTime.compareTo(aMostRecentCreationTime);
+          if (recentComparison != 0) {
+            return recentComparison;
           }
           return b.totalSize.compareTo(a.totalSize);
         });
@@ -742,7 +757,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
             .sort((a, b) => b.files.length.compareTo(a.files.length));
         break;
     }
-    if (_isDisposed) return;
+    if (!updateState || _isDisposed) return;
     setState(() {});
   }
 
@@ -1110,6 +1125,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     for (final group in groupsToRemove) {
       _similarFilesList.remove(group);
     }
+    _sortSimilarFiles(updateState: false);
 
     final int collectionCnt = collectionToFilesToAddMap.keys.length;
     if (createSymlink) {
@@ -1235,11 +1251,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         case SortKey.size:
           text = AppLocalizations.of(context).totalSize;
           break;
-        case SortKey.distanceAsc:
-          text = AppLocalizations.of(context).similarity;
-          break;
-        case SortKey.distanceDesc:
-          text = "(I) Similarity ↑";
+        case SortKey.recent:
+          text = AppLocalizations.of(context).recent;
           break;
         case SortKey.count:
           text = AppLocalizations.of(context).count;
@@ -1274,11 +1287,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         _sortSimilarFiles();
       },
       itemBuilder: (context) {
-        final sortKeys = kDebugMode
-            ? SortKey.values
-            : SortKey.values
-                .where((key) => key != SortKey.distanceDesc)
-                .toList();
+        const sortKeys = SortKey.values;
         return List.generate(sortKeys.length, (index) {
           final sortKey = sortKeys[index];
           return PopupMenuItem(

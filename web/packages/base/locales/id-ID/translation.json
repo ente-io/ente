@@ -242,7 +242,7 @@
     "leave": "Tinggalkan",
     "leave_family_plan_confirm": "Apakah kamu yakin ingin meninggalkan paket keluarga?",
     "choose_plan": "Pilih paket kamu",
-    "manage_plan": "Atur langganan kamu",
+    "manage_plan": "",
     "current_usage": "Pemakaian saat ini sebesar <strong>{{usage}}</strong>",
     "two_months_free": "Dapatkan 2 bulan gratis dengan paket tahunan",
     "free_plan_option": "",

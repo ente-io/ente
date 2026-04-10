@@ -58,16 +58,18 @@ public struct AuthorizationResponse: Codable {
     public let keyAttributes: KeyAttributes?
     public let encryptedToken: String?
     public let token: String?
+    public let srpM2: String?
     public let twoFactorSessionID: String?
     public let twoFactorSessionIDV2: String?
     public let passkeySessionID: String?
     public let accountsUrl: String?
     public let id: UserID
     
-    public init(keyAttributes: KeyAttributes?, encryptedToken: String?, token: String?, twoFactorSessionID: String?, twoFactorSessionIDV2: String?, passkeySessionID: String?, accountsUrl: String?, id: UserID) {
+    public init(keyAttributes: KeyAttributes?, encryptedToken: String?, token: String?, srpM2: String?, twoFactorSessionID: String?, twoFactorSessionIDV2: String?, passkeySessionID: String?, accountsUrl: String?, id: UserID) {
         self.keyAttributes = keyAttributes
         self.encryptedToken = encryptedToken
         self.token = token
+        self.srpM2 = srpM2
         self.twoFactorSessionID = twoFactorSessionID
         self.twoFactorSessionIDV2 = twoFactorSessionIDV2
         self.passkeySessionID = passkeySessionID

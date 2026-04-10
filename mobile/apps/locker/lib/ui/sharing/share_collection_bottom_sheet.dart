@@ -1,3 +1,4 @@
+import 'package:ente_contacts/contacts.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
@@ -66,35 +67,40 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    return ValueListenableBuilder<int>(
+      valueListenable: ContactsDisplayService.instance.changes,
+      builder: (context, __, ___) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildShareesList(colorScheme, textTheme),
-        if (_isOwner) ...[
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: GradientButton(
-              text: context.l10n.addEmail,
-              onTap: () async {
-                await showAddEmailSheet(
-                  context,
-                  collection: widget.collection,
-                  onShareAdded: () {
-                    if (mounted) {
-                      setState(() {});
-                    }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildShareesList(colorScheme, textTheme),
+            if (_isOwner) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: GradientButton(
+                  text: context.l10n.addEmail,
+                  onTap: () async {
+                    await showAddEmailSheet(
+                      context,
+                      collection: widget.collection,
+                      onShareAdded: () {
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    );
                   },
-                );
-              },
-            ),
-          ),
-        ],
-      ],
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -150,7 +156,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
                         ),
                       MenuItemWidgetV2(
                         captionedTextWidget: CaptionedTextWidgetV2(
-                          title: user.email,
+                          title: user.resolvedDisplayName,
                         ),
                         leadingIconSize: 24,
                         leadingIconWidget: UserAvatarWidget(
@@ -353,7 +359,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         context,
         title: context.l10n.changePermissions,
         message: context.l10n.cannotAddMoreFilesAfterBecomingViewer(
-          user.displayName ?? user.email,
+          user.resolvedDisplayName,
         ),
         buttons: [
           SizedBox(
@@ -393,7 +399,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
       context,
       title: context.l10n.removeWithQuestionMark,
       message: context.l10n.removeParticipantBody(
-        user.displayName ?? user.email,
+        user.resolvedDisplayName,
       ),
       assetPath: "assets/warning-grey.png",
       buttons: [

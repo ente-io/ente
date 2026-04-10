@@ -29,7 +29,6 @@
   "deleteReason4": "Moja przyczyna nie jest wymieniona",
   "sendEmail": "Wyślij e-mail",
   "deleteRequestSLAText": "Twoje żądanie zostanie przetworzone w ciągu 72 godzin.",
-  "deleteEmailRequest": "Wyślij wiadomość e-mail na <warning>account-deletion@ente.com</warning> z zarejestrowanego adresu e-mail.",
   "entePhotosPerm": "Ente <i>potrzebuje uprawnień</i> aby przechowywać twoje zdjęcia",
   "ok": "Ok",
   "createAccount": "Stwórz konto",
@@ -321,12 +320,8 @@
   "verificationId": "Identyfikator weryfikacyjny",
   "verifyEmailID": "Zweryfikuj {email}",
   "emailNoEnteAccount": "{email} nie posiada konta Ente.\n\nWyślij im zaproszenie do udostępniania zdjęć.",
-  "shareMyVerificationID": "Oto mój identyfikator weryfikacyjny: {verificationID} dla ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hej, czy możesz potwierdzić, że to jest Twój identyfikator weryfikacyjny ente.com: {verificationID}",
   "somethingWentWrong": "Coś poszło nie tak",
   "sendInvite": "Wyślij zaproszenie",
-  "shareTextRecommendUsingEnte": "Pobierz Ente, abyśmy mogli łatwo udostępniać zdjęcia i wideo w oryginalnej jakości\n\nhttps://ente.com",
-  "shareTextRecommendUsingEnteForFamily": "Pobierz Entre, abym mógł dodać cię do mojego planu rodzinnego\n\nhttps://ente.com",
   "done": "Gotowe",
   "applyCodeTitle": "Użyj kodu",
   "enterCodeDescription": "Wprowadź kod dostarczony przez znajomego, aby uzyskać bezpłatne miejsce dla was obojga",
@@ -354,7 +349,6 @@
   "theyAlsoGetXGb": "Oni również otrzymują {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB dla nich + {storageAmountInGB} GB dla ciebie, gdy ulepszą swoje konto.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB za każdym razem, gdy ktoś zarejestruje się w płatnym planie i użyje twojego kodu",
-  "shareTextReferralCode": "Ente Photos to prywatny i bezpieczny dom dla twoich zdjęć\n* Pobierz Ente Photos z https://ente.com/app\n* Załóż konto\n* Wpisz kod polecający {referralCode} w Ustawienia->Polecanie\n* Otrzymaj {referralStorageInGB} GB za darmo po uaktualnieniu do płatnego planu",
   "claimFreeStorage": "Odbierz bezpłatną przestrzeń dyskową",
   "inviteYourFriends": "Zaproś znajomych",
   "earnFreeStorage": "Zdobywaj bezpłatną przestrzeń dyskową",
@@ -803,7 +797,6 @@
   "subscription": "Subskrypcja",
   "paymentDetails": "Szczegóły płatności",
   "manageFamily": "Zarządzaj Rodziną",
-  "contactToManageSubscription": "Skontaktuj się z nami pod adresem support@ente.com, aby zarządzać subskrypcją {provider}.",
   "renewSubscription": "Odnów subskrypcję",
   "cancelSubscription": "Anuluj subskrypcję",
   "areYouSureYouWantToRenew": "Czy na pewno chcesz odnowić?",
@@ -853,7 +846,6 @@
   "visitWebToManage": "Odwiedź stronę web.ente.io, aby zarządzać subskrypcją",
   "managePaymentMethod": "Zarządzaj formami płatności",
   "couldNotUpdateSubscription": "Nie można było zaktualizować subskrybcji",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Skontaktuj się z support@ente.com i z przyjemnością pomożemy!",
   "paymentFailed": "Płatność się nie powiodła",
   "paymentFailedTalkToProvider": "Porozmawiaj ze wsparciem {providerName} jeśli zostałeś obciążony",
   "@paymentFailedTalkToProvider": {
@@ -1314,8 +1306,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Ustaw promień",
-  "familyPlanPortalTitle": "Rodzina",
-  "familyPlanOverview": "Dodaj 5 członków rodziny do istniejącego planu bez dodatkowego płacenia.\n\nKażdy członek otrzymuje własną przestrzeń prywatną i nie widzi wzajemnie swoich plików, chyba że są one udostępnione.\n\nPlany rodzinne są dostępne dla klientów, którzy mają płatną subskrypcję Ente.\n\nSubskrybuj teraz, aby rozpocząć!",
   "androidBiometricHint": "Potwierdź swoją tożsamość",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

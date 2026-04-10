@@ -337,6 +337,22 @@ class EnteFile {
       ownerID: $ownerID, collectionID: $collectionID, updationTime: $updationTime)''';
   }
 
+  /// Mutates this file in place with upload-result fields from [uploadedFile].
+  /// Used by the gallery's soft refresh path so that all existing references
+  /// (GalleryGroups sub-lists, GalleryFileWidget.widget.file, etc.) see the
+  /// updated state without needing to rebuild GalleryGroups.
+  void applyUploadedData(EnteFile uploadedFile) {
+    uploadedFileID = uploadedFile.uploadedFileID;
+    collectionID = uploadedFile.collectionID;
+    updationTime = uploadedFile.updationTime;
+    ownerID = uploadedFile.ownerID;
+    encryptedKey = uploadedFile.encryptedKey;
+    keyDecryptionNonce = uploadedFile.keyDecryptionNonce;
+    fileDecryptionHeader = uploadedFile.fileDecryptionHeader;
+    thumbnailDecryptionHeader = uploadedFile.thumbnailDecryptionHeader;
+    metadataDecryptionHeader = uploadedFile.metadataDecryptionHeader;
+  }
+
   @override
   bool operator ==(Object o) {
     if (identical(this, o)) return true;

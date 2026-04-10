@@ -39,31 +39,66 @@ type activeOverageWarningResolution struct {
 	CycleStart int64
 }
 
+type activeOverageWarningSpec struct {
+	Stage        activeOverageWarningStage
+	Delay        int64
+	TemplateID   string
+	TemplateName string
+	Subject      string
+}
+
+var activeOverageWarningSpecs = []activeOverageWarningSpec{
+	{
+		Stage:        activeOverageWarningStage0,
+		TemplateID:   StorageWarningActiveOverageAnchorTemplateID,
+		TemplateName: storageWarningActiveOverageTemplate,
+		Subject:      storageWarningActiveOverage0Subject,
+	},
+	{
+		Stage:        activeOverageWarningStage30,
+		Delay:        storageWarningActiveOverageWarning30Delay,
+		TemplateID:   storageWarningActiveOverage30TemplateID,
+		TemplateName: storageWarningActiveOverageTemplate,
+		Subject:      storageWarningActiveOverage30Subject,
+	},
+	{
+		Stage:        activeOverageWarningStage60,
+		Delay:        storageWarningActiveOverageWarning60Delay,
+		TemplateID:   storageWarningActiveOverage60TemplateID,
+		TemplateName: storageWarningActiveOverageTemplate,
+		Subject:      storageWarningActiveOverage60Subject,
+	},
+	{
+		Stage:        activeOverageWarningStage89,
+		Delay:        storageWarningActiveOverageWarning89Delay,
+		TemplateID:   storageWarningActiveOverage89TemplateID,
+		TemplateName: storageWarningActiveOverageTemplate,
+		Subject:      storageWarningActiveOverage89Subject,
+	},
+	{
+		Stage:        activeOverageWarningStageScheduledDeletion,
+		Delay:        storageWarningActiveOverageDeletionDelay,
+		TemplateID:   repo.StorageWarningActiveOverageScheduledDeletionTemplateID,
+		TemplateName: storageWarningActiveOverageScheduledDeletionTemplate,
+		Subject:      storageWarningActiveOverageScheduledDeletionSubject,
+	},
+}
+
 func activeOverageWarningTemplateDetails(stage activeOverageWarningStage) (templateID string, templateName string, subject string, ok bool) {
-	switch stage {
-	case activeOverageWarningStage0:
-		return StorageWarningActiveOverageAnchorTemplateID, storageWarningActiveOverageTemplate, storageWarningActiveOverage0Subject, true
-	case activeOverageWarningStage30:
-		return storageWarningActiveOverage30TemplateID, storageWarningActiveOverageTemplate, storageWarningActiveOverage30Subject, true
-	case activeOverageWarningStage60:
-		return storageWarningActiveOverage60TemplateID, storageWarningActiveOverageTemplate, storageWarningActiveOverage60Subject, true
-	case activeOverageWarningStage89:
-		return storageWarningActiveOverage89TemplateID, storageWarningActiveOverageTemplate, storageWarningActiveOverage89Subject, true
-	case activeOverageWarningStageScheduledDeletion:
-		return repo.StorageWarningActiveOverageScheduledDeletionTemplateID, storageWarningActiveOverageScheduledDeletionTemplate, storageWarningActiveOverageScheduledDeletionSubject, true
-	default:
-		return "", "", "", false
+	for _, spec := range activeOverageWarningSpecs {
+		if spec.Stage == stage {
+			return spec.TemplateID, spec.TemplateName, spec.Subject, true
+		}
 	}
+	return "", "", "", false
 }
 
 func activeOverageWarningTemplateIDs() []string {
-	return []string{
-		StorageWarningActiveOverageAnchorTemplateID,
-		storageWarningActiveOverage30TemplateID,
-		storageWarningActiveOverage60TemplateID,
-		storageWarningActiveOverage89TemplateID,
-		repo.StorageWarningActiveOverageScheduledDeletionTemplateID,
+	templateIDs := make([]string, 0, len(activeOverageWarningSpecs))
+	for _, spec := range activeOverageWarningSpecs {
+		templateIDs = append(templateIDs, spec.TemplateID)
 	}
+	return templateIDs
 }
 
 func resolveActiveOverageWarningStage(now int64, history map[string]int64) activeOverageWarningStage {
@@ -88,7 +123,7 @@ func resolveActiveOverageWarning(now int64, history map[string]int64) activeOver
 			CycleStart: now,
 		}
 	}
-	if now-cycleStart >= storageWarningActiveOverageDeletionDelay {
+	if overdueForActiveOverageDeletion(now, cycleStart) {
 		finalReminderSentAt := history[storageWarningActiveOverage89TemplateID]
 		if storageWarningTemplateSentInCycle(history, storageWarningActiveOverage89TemplateID, cycleStart) &&
 			finalReminderSentAt >= now-storageWarningPreviousStageFreshnessWindow {
@@ -102,31 +137,23 @@ func resolveActiveOverageWarning(now int64, history map[string]int64) activeOver
 			CycleStart: now,
 		}
 	}
-	if now >= cycleStart+storageWarningActiveOverageWarning30Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage30TemplateID, cycleStart) {
-		return activeOverageWarningResolution{
-			Stage:      activeOverageWarningStage30,
-			CycleStart: cycleStart,
-		}
-	}
-	if now >= cycleStart+storageWarningActiveOverageWarning60Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage60TemplateID, cycleStart) {
-		return activeOverageWarningResolution{
-			Stage:      activeOverageWarningStage60,
-			CycleStart: cycleStart,
-		}
-	}
-	if now >= cycleStart+storageWarningActiveOverageWarning89Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage89TemplateID, cycleStart) {
-		return activeOverageWarningResolution{
-			Stage:      activeOverageWarningStage89,
-			CycleStart: cycleStart,
+	for _, spec := range activeOverageWarningSpecs[1:4] {
+		if now >= cycleStart+spec.Delay &&
+			!storageWarningTemplateSentInCycle(history, spec.TemplateID, cycleStart) {
+			return activeOverageWarningResolution{
+				Stage:      spec.Stage,
+				CycleStart: cycleStart,
+			}
 		}
 	}
 	return activeOverageWarningResolution{
 		Stage:      activeOverageWarningStageNone,
 		CycleStart: cycleStart,
 	}
+}
+
+func overdueForActiveOverageDeletion(now int64, cycleStart int64) bool {
+	return now-cycleStart >= storageWarningActiveOverageDeletionDelay
 }
 
 func activeOverageWarningAutoDeleteDate(cycleStart int64, stage activeOverageWarningStage, now int64) int64 {

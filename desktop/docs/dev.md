@@ -28,8 +28,8 @@ can be useful during development.
 When using native node modules (those written in C/C++), we need to ensure they
 are built against `electron`'s packaged `node` version. We use
 [electron-builder](https://www.electron.build/cli)'s `install-app-deps` command
-to rebuild those modules automatically after each `yarn install` by invoking it
-in as the `postinstall` step in our package.json.
+to rebuild those modules automatically after each dependency install by
+invoking it in as the `postinstall` step in our package.json.
 
 ### lint, lint-fix
 

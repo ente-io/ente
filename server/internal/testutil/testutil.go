@@ -123,6 +123,11 @@ func ResetTables(t *testing.T, db *sql.DB) {
 			usage,
 			families,
 			tokens,
+			temp_objects,
+			user_attachments,
+			contact_entity,
+			entity_data,
+			entity_key,
 			authenticator_entity,
 			collections,
 			users

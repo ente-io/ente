@@ -289,10 +289,14 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
     }
 
     final isLink = widget.buttonType == ButtonTypeV2.link;
-    final labelStyle = (isLink ? textTheme.body : textTheme.bodyBold).copyWith(
+    final isTertiaryCritical =
+        widget.buttonType == ButtonTypeV2.tertiaryCritical;
+    final hasUnderline = isLink || isTertiaryCritical;
+    final labelStyle =
+        (hasUnderline ? textTheme.body : textTheme.bodyBold).copyWith(
       color: colors.textColor,
-      decoration: isLink ? TextDecoration.underline : null,
-      decorationColor: isLink ? colors.textColor : null,
+      decoration: hasUnderline ? TextDecoration.underline : null,
+      decorationColor: hasUnderline ? colors.textColor : null,
     );
 
     final hasLeading = widget.leadingWidget != null;

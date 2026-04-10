@@ -242,7 +242,7 @@
     "leave": "Odejít",
     "leave_family_plan_confirm": "Opravdu chcete opustit rodinný plán?",
     "choose_plan": "Vyberte si svůj plán",
-    "manage_plan": "Spravovat své předplatné",
+    "manage_plan": "",
     "current_usage": "Aktuální využití je <strong>{{usage}}</strong>",
     "two_months_free": "Získejte 2 měsíce zdarma při ročních plánech",
     "free_plan_option": "Pokračovat s bezplatným plánem",

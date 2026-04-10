@@ -25,6 +25,7 @@ import {
     getAndClearIsFirstLogin,
     getAndClearJustSignedUp,
 } from "ente-accounts/services/accounts-db";
+import { processPendingAlbumJoin } from "ente-accounts/services/join-album";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
 import { ensureLocalUser } from "ente-accounts/services/user";
@@ -41,6 +42,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { subscribeMainWindowFocus } from "ente-base/electron";
+import { hasPendingAlbumToJoin } from "ente-base/join-album";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -49,6 +51,7 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import type { Location } from "ente-base/types";
+import { ensureContactsReady } from "ente-contacts-web";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
@@ -56,10 +59,6 @@ import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/Fi
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
-import {
-    hasPendingAlbumToJoin,
-    processPendingAlbumJoin,
-} from "ente-new/albums/services/join-album";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
     CollectionSelector,
@@ -537,6 +536,18 @@ const Page: React.FC = () => {
 
             // Initialize the reducer.
             const user = ensureLocalUser();
+            const masterKey = await masterKeyFromSession();
+            if (masterKey) {
+                void ensureContactsReady({
+                    userID: user.id,
+                    masterKeyB64: masterKey,
+                }).catch((error: unknown) => {
+                    log.warn(
+                        "[gallery] Failed to warm contacts display cache",
+                        error,
+                    );
+                });
+            }
             const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
                 type: "mount",
@@ -1895,6 +1906,9 @@ const Page: React.FC = () => {
                     // component need to be updated.
                     activeCollection: activeCollection!,
                     activeCollectionID: activeCollectionID!,
+                    files: activeCollection
+                        ? activeCollectionFiles
+                        : filteredFiles,
                     activePerson,
                     setFileListHeader,
                     saveGroups,

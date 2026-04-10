@@ -184,10 +184,10 @@ const MessageRow = memo(
         const switcher = branchSwitchers[message.messageUuid];
         const showSwitcher = !isSynthetic && !!switcher && switcher.total > 1;
         const timestamp = formatTime(message.createdAt);
-        const attachments = message.attachments ?? [];
         const assistantMessagePaddingX = "8px";
 
         const { displayText, copyText, imageAttachments } = useMemo(() => {
+            const attachments = message.attachments ?? [];
             const imageAttachments = attachments.filter(
                 (attachment) => attachment.kind === "image",
             );
@@ -205,8 +205,8 @@ const MessageRow = memo(
 
             return { displayText, copyText, imageAttachments };
         }, [
-            attachments,
             isSelf,
+            message.attachments,
             message.text,
             parseDocumentBlocks,
             stripHiddenParts,

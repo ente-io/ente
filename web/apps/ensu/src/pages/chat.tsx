@@ -33,6 +33,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { handleManualAppUpdateCheck } from "services/app-update";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
@@ -2880,7 +2881,7 @@ const Page: React.FC = () => {
                         type: "text/plain;charset=utf-8",
                     });
                     const url = URL.createObjectURL(blob);
-                    window.open(url, "_blank", "noopener,noreferrer");
+                    window.open(url, "_blank", "noopener");
                     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
                     return;
                 }
@@ -2888,7 +2889,7 @@ const Page: React.FC = () => {
                 const mime = inferImageMime(baseName);
                 const blob = new Blob([toSafeBlobPart(bytes)], { type: mime });
                 const url = URL.createObjectURL(blob);
-                window.open(url, "_blank", "noopener,noreferrer");
+                window.open(url, "_blank", "noopener");
                 window.setTimeout(() => URL.revokeObjectURL(url), 1000);
             } catch (error) {
                 log.error("Failed to open attachment", error);
@@ -3514,6 +3515,10 @@ const Page: React.FC = () => {
 
         saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     }, [isTauriRuntime, showMiniDialog]);
+
+    const handleCheckForUpdates = useCallback(async () => {
+        await handleManualAppUpdateCheck(showMiniDialog);
+    }, [showMiniDialog]);
 
     const openModelSettings = useCallback(() => {
         if (!advancedUnlocked) return;
@@ -4410,6 +4415,7 @@ const Page: React.FC = () => {
                 isLoggedIn={isLoggedIn}
                 signedInEmail={savedLocalUser()?.email ?? ""}
                 saveLogs={saveLogs}
+                handleCheckForUpdates={handleCheckForUpdates}
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}

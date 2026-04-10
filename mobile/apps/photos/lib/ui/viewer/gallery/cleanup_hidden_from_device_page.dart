@@ -1,3 +1,4 @@
+import "dart:math";
 import "dart:ui";
 
 import "package:flutter/material.dart";
@@ -60,6 +61,8 @@ class _CleanupHiddenFromDevicePageState
   @override
   Widget build(BuildContext context) {
     final filesAreSelected = _selectedFiles.files.isNotEmpty;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final deleteAllButtonHeight = 40.0 + max(bottomPadding, 6.0) + 12.0;
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
@@ -100,7 +103,7 @@ class _CleanupHiddenFromDevicePageState
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  height: filesAreSelected ? 0 : 80,
+                  height: filesAreSelected ? 0 : deleteAllButtonHeight,
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 100),
                     opacity: filesAreSelected ? 0.0 : 1.0,

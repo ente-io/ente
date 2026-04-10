@@ -242,7 +242,7 @@
     "leave": "Dejar",
     "leave_family_plan_confirm": "¿Está seguro de que desea abandonar el plan familiar?",
     "choose_plan": "Elije tu plan",
-    "manage_plan": "Administra tu suscripción",
+    "manage_plan": "",
     "current_usage": "El uso actual es <strong>{{usage}}</strong>",
     "two_months_free": "Obtén 2 meses gratis en planes anuales",
     "free_plan_option": "Continuar con el plan gratuito",

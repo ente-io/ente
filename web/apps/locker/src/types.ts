@@ -144,12 +144,19 @@ export const isUncategorizedCollection = (collection: LockerCollection) =>
 
 export const isCollectionOwner = (
     collection: LockerCollection,
-    currentUserID: number,
-) => collection.owner.id === currentUserID;
+    currentUserID: number | undefined,
+) => currentUserID !== undefined && collection.owner.id === currentUserID;
+
+export const canRestoreToCollection = (
+    collection: LockerCollection,
+    currentUserID: number | undefined,
+) =>
+    isCollectionOwner(collection, currentUserID) &&
+    !isUncategorizedCollection(collection);
 
 export const canEditCollection = (
     collection: LockerCollection,
-    currentUserID: number,
+    currentUserID: number | undefined,
 ) =>
     isCollectionOwner(collection, currentUserID) &&
     !isImportantCollection(collection) &&
@@ -159,14 +166,28 @@ export const canOpenCollectionSharing = (collection: LockerCollection) =>
     !isImportantCollection(collection) &&
     !isUncategorizedCollection(collection);
 
+export const canLeaveCollection = (
+    collection: LockerCollection,
+    currentUserID: number | undefined,
+) =>
+    canOpenCollectionSharing(collection) &&
+    !isCollectionOwner(collection, currentUserID);
+
+export const isLockerItemOwner = (
+    item: LockerItem,
+    currentUserID: number | undefined,
+) =>
+    currentUserID !== undefined &&
+    (item.ownerID ?? currentUserID) === currentUserID;
+
 export const canShareLockerFileLink = (
     item: LockerItem,
-    currentUserID: number,
-) => item.type === "file" && (item.ownerID ?? currentUserID) === currentUserID;
+    currentUserID: number | undefined,
+) => isLockerItemOwner(item, currentUserID);
 
 export const canManageCollectionSharing = (
     collection: LockerCollection,
-    currentUserID: number,
+    currentUserID: number | undefined,
 ) =>
     canOpenCollectionSharing(collection) &&
     isCollectionOwner(collection, currentUserID);
@@ -183,10 +204,14 @@ export const sortLockerCollections = (collections: LockerCollection[]) =>
     });
 
 export const visibleLockerCollections = (collections: LockerCollection[]) =>
-    sortLockerCollections(
-        collections.filter(
-            (collection) => !isUncategorizedCollection(collection),
-        ),
+    sortLockerCollections(collections);
+
+export const restoreTargetLockerCollections = (
+    collections: LockerCollection[],
+    currentUserID: number | undefined,
+) =>
+    visibleLockerCollections(collections).filter((collection) =>
+        canRestoreToCollection(collection, currentUserID),
     );
 
 /**

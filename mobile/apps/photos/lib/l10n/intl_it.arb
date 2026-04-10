@@ -27,7 +27,6 @@
   "deleteReason4": "Il motivo non è elencato",
   "sendEmail": "Invia email",
   "deleteRequestSLAText": "La tua richiesta verrà elaborata entro 72 ore.",
-  "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.com</warning> dal tuo indirizzo email registrato.",
   "entePhotosPerm": "Ente <i>necessita del permesso per</i> preservare le tue foto",
   "ok": "Ok",
   "createAccount": "Crea account",
@@ -280,11 +279,8 @@
   "verificationId": "ID di verifica",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} non ha un account Ente.\n\nInvia un invito per condividere foto.",
-  "shareMyVerificationID": "Ecco il mio ID di verifica: {verificationID} per ente.com.",
-  "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.com",
   "somethingWentWrong": "Qualcosa è andato storto",
   "sendInvite": "Invita",
-  "shareTextRecommendUsingEnte": "Scarica Ente in modo da poter facilmente condividere foto e video in qualità originale\n\nhttps://ente.com",
   "done": "Completato",
   "applyCodeTitle": "Applica codice",
   "enterCodeDescription": "Inserisci il codice fornito dal tuo amico per richiedere spazio gratuito per entrambi",
@@ -631,7 +627,6 @@
   "subscription": "Abbonamento",
   "paymentDetails": "Dettagli di Pagamento",
   "manageFamily": "Gestisci Piano famiglia",
-  "contactToManageSubscription": "Scrivi all'indirizzo support@ente.com per gestire il tuo abbonamento {provider}.",
   "renewSubscription": "Rinnova abbonamento",
   "cancelSubscription": "Annulla abbonamento",
   "areYouSureYouWantToRenew": "Vuoi davvero rinnovare?",
@@ -680,7 +675,6 @@
   "subAlreadyLinkedErrMessage": "Il tuo {id} è già collegato a un altro account Ente.\nSe desideri utilizzare il tuo {id} con questo account, per favore contatta il nostro supporto''",
   "visitWebToManage": "Visita web.ente.io per gestire il tuo abbonamento",
   "couldNotUpdateSubscription": "Impossibile aggiornare l'abbonamento",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Contatta support@ente.com e saremo felici di aiutarti!",
   "paymentFailed": "Pagamento non riuscito",
   "paymentFailedTalkToProvider": "Si prega di parlare con il supporto di {providerName} se ti è stato addebitato qualcosa",
   "@paymentFailedTalkToProvider": {
@@ -796,11 +790,11 @@
   "share": "Condividi",
   "unhideToAlbum": "Non nascondere l'album",
   "restoreToAlbum": "Ripristina l'album",
-  "moveItem": "{count, plural, one {}=1 {Sposta elemento} other {Sposta elementi}}",
+  "moveItem": "{count, plural, =1 {Sposta elemento} other {Sposta elementi}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {}=1 {Aggiungi elemento} other {Aggiungi elementi}}",
+  "addItem": "{count, plural, =1 {Aggiungi elemento} other {Aggiungi elementi}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -901,7 +895,7 @@
   "authToViewYourMemories": "Autenticati per visualizzare le tue foto",
   "unlock": "Sblocca",
   "freeUpSpace": "Libera spazio",
-  "freeUpSpaceSaving": "{count, plural, one {}=1 {Può essere cancellato per liberare {formattedSize}} other {Possono essere cancellati per liberare {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Può essere cancellato per liberare {formattedSize}} other {Possono essere cancellati per liberare {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 file} other {{formattedNumber} file}} di quest'album sono stati salvati in modo sicuro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1098,8 +1092,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Imposta raggio",
-  "familyPlanPortalTitle": "Famiglia",
-  "familyPlanOverview": "Aggiungi 5 membri della famiglia al tuo piano esistente senza pagare extra.\n\nOgni membro ottiene il proprio spazio privato e non può vedere i file dell'altro a meno che non siano condivisi.\n\nI piani familiari sono disponibili per i clienti che hanno un abbonamento Ente a pagamento.\n\nIscriviti ora per iniziare!",
   "androidBiometricHint": "Verifica l'identità",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1258,8 +1250,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trova rapidamente le persone per nome",
-  "addViewers": "{count, plural, one {}=0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
-  "addCollaborators": "{count, plural, one {}=0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
+  "addViewers": "{count, plural, =0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
+  "addCollaborators": "{count, plural, =0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Premi a lungo un'email per verificare la crittografia end to end.",
   "developerSettingsWarning": "Vuoi davvero modificare le Impostazioni sviluppatore?",
   "developerSettings": "Impostazioni sviluppatore",
@@ -1393,7 +1385,7 @@
   "enableMachineLearningBanner": "Abilita l'apprendimento automatico per la ricerca magica e il riconoscimento facciale",
   "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
   "searchPersonsEmptySection": "Le persone saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1478,7 +1470,7 @@
   },
   "currentlyRunning": "attualmente in esecuzione",
   "ignored": "ignorato",
-  "photosCount": "{count, plural, one {}=0 {0 foto} =1 {1 foto} other {{count} foto}}",
+  "photosCount": "{count, plural, =0 {0 foto} =1 {1 foto} other {{count} foto}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1674,7 +1666,7 @@
   "moveSelectedPhotosToOneDate": "Sposta foto selezionate in una data specifica",
   "shiftDatesAndTime": "Sposta date e orari",
   "photosKeepRelativeTimeDifference": "Le foto mantengono una differenza di tempo relativa",
-  "photocountPhotos": "{count, plural, one {}=0 {Nessuna foto} =1 {1 foto} other {{count} foto}}",
+  "photocountPhotos": "{count, plural, =0 {Nessuna foto} =1 {1 foto} other {{count} foto}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -1688,7 +1680,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Gli elementi selezionati verranno rimossi da questa persona, ma non eliminati dalla tua libreria.",
   "throughTheYears": "{dateFormat} negli anni",
   "thisWeekThroughTheYears": "Questa settimana negli anni",
-  "thisWeekXYearsAgo": "{count, plural, one {}=1 {Questa settimana, {count} anno fa} other {Questa settimana, {count} anni fa}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Questa settimana, {count} anno fa} other {Questa settimana, {count} anni fa}}",
   "youAndThem": "Tu e {name}",
   "admiringThem": "Ammirando {name}",
   "embracingThem": "Abbracciando {name}",
@@ -1794,7 +1786,7 @@
   "font": "Carattere",
   "background": "Sfondo",
   "align": "Allineamento",
-  "addedToAlbums": "{count, plural, one {}=1{Aggiunto con successo a 1 album} other{Aggiunto con successo a {count} album}}",
+  "addedToAlbums": "{count, plural, =1{Aggiunto con successo a 1 album} other{Aggiunto con successo a {count} album}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {

@@ -1,5 +1,7 @@
 import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
+import 'package:ente_contacts/contacts.dart';
+import "package:ente_sharing/extensions/user_extension.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
@@ -82,28 +84,32 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    return ValueListenableBuilder<int>(
+      valueListenable: ContactsDisplayService.instance.changes,
+      builder: (context, __, ___) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildEmailInputField(colorScheme, textTheme),
-          if (_suggestedUsers.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            _buildExistingContactsSection(colorScheme, textTheme),
-          ],
-          // _buildShareLaterCheckbox(colorScheme, textTheme),
-          if (_shareLater) ...[
-            const SizedBox(height: 12),
-            _buildScheduleDateTimeRow(colorScheme, textTheme),
-          ],
-          const SizedBox(height: 20),
-          _buildShareButton(),
-        ],
-      ),
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildEmailInputField(colorScheme, textTheme),
+              if (_suggestedUsers.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                _buildExistingContactsSection(colorScheme, textTheme),
+              ],
+              if (_shareLater) ...[
+                const SizedBox(height: 12),
+                _buildScheduleDateTimeRow(colorScheme, textTheme),
+              ],
+              const SizedBox(height: 20),
+              _buildShareButton(),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -156,11 +162,14 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
   Widget _buildExistingContactsSection(colorScheme, textTheme) {
     final filteredUsers = _suggestedUsers
         .where(
-          (user) => user.email
-              .toLowerCase()
-              .contains(_textController.text.trim().toLowerCase()),
+          (user) => user.matchesResolvedNameOrEmail(_textController.text),
         )
-        .toList();
+        .toList()
+      ..sort(
+        (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+              b.resolvedDisplayName.toLowerCase(),
+            ),
+      );
 
     if (filteredUsers.isEmpty) {
       return const SizedBox.shrink();
@@ -204,7 +213,7 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
                             ),
                           MenuItemWidgetV2(
                             captionedTextWidget: CaptionedTextWidgetV2(
-                              title: user.email,
+                              title: user.resolvedDisplayName,
                             ),
                             leadingIconSize: 24.0,
                             leadingIconWidget: UserAvatarWidget(
@@ -481,6 +490,11 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     }
 
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+    suggestedUsers.sort(
+      (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+            b.resolvedDisplayName.toLowerCase(),
+          ),
+    );
     return suggestedUsers;
   }
 

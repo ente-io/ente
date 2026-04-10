@@ -242,7 +242,7 @@
     "leave": "Покинути",
     "leave_family_plan_confirm": "Ви впевнені, що хочете залишити сімейний план?",
     "choose_plan": "Оберіть свій план",
-    "manage_plan": "Керувати вашою підпискою",
+    "manage_plan": "",
     "current_usage": "Поточне використання – <strong>{{usage}}</strong>",
     "two_months_free": "Отримуйте 2 місяці безплатно на щорічних планах",
     "free_plan_option": "Продовжити з безплатним планом",

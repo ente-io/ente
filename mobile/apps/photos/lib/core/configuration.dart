@@ -4,6 +4,7 @@ import "dart:io";
 
 import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:ente_contacts/contacts.dart';
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -20,6 +21,7 @@ import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/db/memories_db.dart";
+import "package:photos/db/memory_shares_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
@@ -37,6 +39,7 @@ import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -234,9 +237,11 @@ class Configuration {
     await GalleryDownloadsDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
+    await MemorySharesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
     await TrashDB.instance.clearTable();
+    await ContactsDatabase().clearTable();
 
     // Clear all in-memory caches
     ThumbnailInMemoryLruCache.clearAll();
@@ -253,6 +258,7 @@ class Configuration {
     await SimilarImagesService.instance.clearCache();
     await IgnoredFilesService.instance.reset();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+    MemoryShareService.instance.clearCache();
 
     // Clear additional caches (safe to call even if not initialized)
     try {

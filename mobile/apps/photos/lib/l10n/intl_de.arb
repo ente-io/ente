@@ -29,7 +29,6 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
-  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.com</warning> von Ihrer bei uns hinterlegten E-Mail-Adresse.",
   "entePhotosPerm": "Ente <i> benötigt Berechtigung, um </i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
@@ -810,6 +809,7 @@
   "storageLimitExplanation": "Lege die maximale Speicherkapazität fest, die dieses Mitglied verwenden kann. Sobald das Limit erreicht ist, wird ein Hochladen nicht mehr möglich sein.",
   "limit": "Limit",
   "noLimit": "Kein Limit",
+  "leaveFamilyConfirmTitle": "Familientarif verlassen?",
   "referrals": "Weiterempfehlungen",
   "notifications": "Benachrichtigungen",
   "sharedPhotoNotifications": "Neue geteilte Fotos und Alben",
@@ -926,7 +926,6 @@
   "subscription": "Abonnement",
   "paymentDetails": "Zahlungsdetails",
   "manageFamily": "Familiengruppe verwalten",
-  "contactToManageSubscription": "Bitte kontaktiere uns über support@ente.com, um dein {provider} Abo zu verwalten.",
   "renewSubscription": "Abonnement erneuern",
   "cancelSubscription": "Abonnement kündigen",
   "areYouSureYouWantToRenew": "Bist du sicher, dass du verlängern möchtest?",
@@ -976,7 +975,6 @@
   "visitWebToManage": "Bitte rufe \"web.ente.io\" auf, um dein Abo zu verwalten",
   "managePaymentMethod": "Zahlungsmethode verwalten",
   "couldNotUpdateSubscription": "Abo konnte nicht aktualisiert werden",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktieren Sie uns über support@ente.com wo wir Ihnen gerne weiterhelfen.",
   "paymentFailed": "Zahlung fehlgeschlagen",
   "paymentFailedTalkToProvider": "Bitte kontaktiere den Support von {providerName}, falls etwas abgebucht wurde",
   "@paymentFailedTalkToProvider": {
@@ -1108,7 +1106,17 @@
   "unarchive": "Dearchivieren",
   "favorite": "Favorit",
   "removeFromFavorite": "Aus Favoriten entfernen",
+  "shareMemories": "Erinnerungen teilen",
+  "shareTheseMemories": "Diese Erinnerungen teilen",
+  "shareThisPhoto": "Dieses Foto teilen",
+  "shareThisVideo": "Dieses Video teilen",
   "shareLink": "Link teilen",
+  "memoryShareLinkDescription": "Dieser Link läuft automatisch in 7 Tagen ab.",
+  "deleteLink": "Link löschen",
+  "deleteLinkQuestion": "Link löschen?",
+  "deleteMemoryLinkMessage": "Personen, mit denen du diesen Link geteilt hast, verlieren den Zugriff, sobald er gelöscht wurde.",
+  "linkDeletedSuccessfully": "Link erfolgreich gelöscht",
+  "memoryLinks": "Erinnerungs-Links",
   "openLink": "Link öffnen",
   "pay": "Bezahlen",
   "noPaymentAppFound": "Keine Zahlungs-App gefunden",
@@ -1464,6 +1472,14 @@
   "searchCaptionEmptySection": "Füge Beschreibungen wie \"#trip\" in der Fotoinfo hinzu um diese schnell hier wiederzufinden",
   "language": "Sprache",
   "selectLanguage": "Sprache auswählen",
+  "noLocation": "Kein Standort",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Keine Standort-Markierung",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Standortname",
   "addLocation": "Ort hinzufügen",
   "groupNearbyPhotos": "Fotos in der Nähe gruppieren",
@@ -1520,8 +1536,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radius festlegen",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Füge kostenlos 5 Familienmitglieder zu deinem bestehenden Abo hinzu.\n\nJedes Mitglied bekommt seinen eigenen privaten Bereich und kann die Dateien der anderen nur sehen, wenn sie geteilt werden.\n\nFamilien-Abos stehen Nutzern mit einem Bezahltarif zur Verfügung.\n\nMelde dich jetzt an, um loszulegen!",
   "androidBiometricHint": "Identität verifizieren",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2606,7 +2620,7 @@
   "artisticPortraits": "Kunstvolle Porträts",
   "streetFood": "Streetfood-Happen",
   "riverCruises": "Flusskreuzfahrt-Ausblicke",
-  "facesTimelineBannerTitle": "Erinnerungen",
+  "facesTimelineBannerTitle": "Reise in die Vergangenheit",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },

@@ -1,6 +1,5 @@
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/reaction.dart";
@@ -10,6 +9,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/social_actor_contact_navigation.dart";
+import "package:photos/ui/social/widgets/resolved_social_user_name.dart";
 
 const _shrinkWrapThreshold = 30;
 
@@ -25,6 +26,7 @@ Future<void> showCommentLikesBottomSheet(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => CommentLikesBottomSheet(
+      launchContext: context,
       reactions: reactions,
       collectionID: collectionID,
       currentUserID: currentUserID,
@@ -33,11 +35,13 @@ Future<void> showCommentLikesBottomSheet(
 }
 
 class CommentLikesBottomSheet extends StatefulWidget {
+  final BuildContext launchContext;
   final List<Reaction> reactions;
   final int collectionID;
   final int currentUserID;
 
   const CommentLikesBottomSheet({
+    required this.launchContext,
     required this.reactions,
     required this.collectionID,
     required this.currentUserID,
@@ -164,6 +168,13 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
                       user: user,
                       currentUserID: widget.currentUserID,
                       youLabel: l10n.you,
+                      onTap: () => openSocialActorContactDestination(
+                        context,
+                        user,
+                        currentUserID: widget.currentUserID,
+                        navigationContext: widget.launchContext,
+                        dismissCurrentRoute: true,
+                      ),
                     );
                   },
                 ),
@@ -179,18 +190,20 @@ class _CommentLikeListItem extends StatelessWidget {
   final User user;
   final int currentUserID;
   final String youLabel;
+  final VoidCallback? onTap;
 
   const _CommentLikeListItem({
     required this.user,
     required this.currentUserID,
     required this.youLabel,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
@@ -202,19 +215,32 @@ class _CommentLikeListItem extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              user.id == currentUserID
-                  ? youLabel
-                  : (user.displayName ?? user.email),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                height: 20 / 14,
-                letterSpacing: 14 * -0.02,
-                color: colorScheme.textMuted,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: user.id == currentUserID
+                ? Text(
+                    youLabel,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 20 / 14,
+                      letterSpacing: 14 * -0.02,
+                      color: colorScheme.textMuted,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : ResolvedSocialUserName(
+                    user: user,
+                    builder: (context, resolvedName) => Text(
+                      resolvedName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        height: 20 / 14,
+                        letterSpacing: 14 * -0.02,
+                        color: colorScheme.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
           ),
           const Icon(
             EnteIcons.likeFilled,
@@ -223,6 +249,16 @@ class _CommentLikeListItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null || user.id == currentUserID) {
+      return row;
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: row,
     );
   }
 }

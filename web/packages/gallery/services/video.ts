@@ -8,6 +8,7 @@ import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
 import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import type { PublicMemoryCredentials } from "ente-base/public-memory";
 import { ensureAuthToken } from "ente-base/token";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { fileLogID, type EnteFile } from "ente-media/file";
@@ -330,6 +331,7 @@ export type HLSPlaylistDataForFile = HLSPlaylistData | "skip" | undefined;
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
+    publicMemoryCredentials?: PublicMemoryCredentials,
 ): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
@@ -341,6 +343,7 @@ export const hlsPlaylistDataForFile = async (
         "vid_preview",
         file.id,
         publicAlbumsCredentials,
+        publicMemoryCredentials,
     );
     if (!playlistFileData) return undefined;
 
@@ -358,6 +361,7 @@ export const hlsPlaylistDataForFile = async (
         "vid_preview",
         file.id,
         publicAlbumsCredentials,
+        publicMemoryCredentials,
     );
     if (!videoURL) return undefined;
 

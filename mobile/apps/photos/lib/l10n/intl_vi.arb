@@ -1119,7 +1119,17 @@
   "unarchive": "Bỏ lưu trữ",
   "favorite": "Thích",
   "removeFromFavorite": "Xóa khỏi mục đã thích",
+  "shareMemories": "Chia sẻ kỷ niệm",
+  "shareTheseMemories": "Chia sẻ những kỷ niệm này",
+  "shareThisPhoto": "Chia sẻ ảnh này",
+  "shareThisVideo": "Chia sẻ video này",
   "shareLink": "Chia sẻ liên kết",
+  "memoryShareLinkDescription": "Liên kết này sẽ tự hết hạn sau 7 ngày.",
+  "deleteLink": "Xóa liên kết",
+  "deleteLinkQuestion": "Xóa liên kết?",
+  "deleteMemoryLinkMessage": "Những người mà bạn đã chia sẻ liên kết sẽ không thể truy cập.",
+  "linkDeletedSuccessfully": "Xóa liên kết thành công",
+  "memoryLinks": "Liên kết kỷ niệm",
   "openLink": "Mở liên kết",
   "pay": "Thanh toán",
   "noPaymentAppFound": "Không tìm thấy ứng dụng thanh toán",
@@ -1475,6 +1485,14 @@
   "searchCaptionEmptySection": "Thêm mô tả như \"#phượt\" trong thông tin ảnh để tìm nhanh thấy chúng ở đây",
   "language": "Ngôn ngữ",
   "selectLanguage": "Chọn ngôn ngữ",
+  "noLocation": "Không có địa điểm",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Không có thẻ địa điểm",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Tên vị trí",
   "addLocation": "Thêm vị trí",
   "groupNearbyPhotos": "Nhóm ảnh gần nhau",
@@ -1531,8 +1549,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Đặt bán kính",
-  "familyPlanPortalTitle": "Gia đình",
-  "familyPlanOverview": "Thêm 5 thành viên gia đình vào gói hiện tại của bạn mà không phải trả thêm phí.\n\nMỗi thành viên có không gian riêng tư của mình và không thể xem tệp của nhau trừ khi được chia sẻ.\n\nGói gia đình có sẵn cho người dùng Ente gói trả phí.\n\nĐăng ký ngay để bắt đầu!",
   "androidBiometricHint": "Xác minh danh tính",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2617,7 +2633,7 @@
   "artisticPortraits": "Chân dung nghệ thuật",
   "streetFood": "Món ngon đường phố",
   "riverCruises": "Cảnh quan trên sông",
-  "facesTimelineBannerTitle": "Hồi Ức",
+  "facesTimelineBannerTitle": "Hồi ức",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
