@@ -123,16 +123,13 @@ with examples that work for macOS (please adapt to your OS).
 ### Install [Go](https://golang.org/dl/)
 
 ```sh
-brew tap homebrew/core
-brew upgrade
 brew install go
 ```
 
-### Install other packages
+### Install Postgres
 
 ```sh
 brew install postgresql@15
-brew install pkg-config
 ```
 
 > [!NOTE]
@@ -141,43 +138,95 @@ brew install pkg-config
 > avoid surprises, but if you're using a newer Postgres that should work fine
 > too.
 
-On M1 macs, we additionally need to link the postgres keg.
-
-```
-brew link postgresql@15
-```
-
-### Init Postgres database
-
-Homebrew already creates a default database cluster for us, but if needed, it
-can also be done with the following commands:
+Run the service:
 
 ```sh
-sudo mkdir -p /usr/local/var/postgres
-sudo chmod 775 /usr/local/var/postgres
-sudo chown $(whoami)  /usr/local/var/postgres
-initdb /usr/local/var/postgres
+brew services run postgresql@15
 ```
 
-On M1 macs, the path to the database cluster is
-`/opt/homebrew/var/postgresql@15` (instead of `/usr/local/var/postgres`).
+> [!TIP]
+>
+> To stop, use
+>
+> ```sh
+> brew services stop postgresql@15
+> ```
+>
+> You can also tell brew to automatically start the service on login by using `start` instead of `run`
+>
+> ```sh
+> brew services start postgresql@15
+> ```
 
-### Start Postgres
+Create the database and user (one time)
 
 ```sh
-pg_ctl -D /usr/local/var/postgres -l logfile start
+psql postgres -c "CREATE USER pguser WITH PASSWORD 'pgpass';"
+psql postgres -c "CREATE DATABASE ente_db OWNER pguser;"
 ```
 
-### Create user
+> [!CAUTION]
+>
+> Since these are dev instructions, we're using the default username and password. For any non-trivial use, change the credentials.
+
+> [!TIP]
+>
+> To inspect the DB, you can
+>
+> ```sh
+> psql ente_db
+> ```
+>
+> Data is stored in `/opt/homebrew/var/postgresql@15`
+
+### Install Local S3
+
+If you don't have a test S3 bucket, you can run a S3 compatible API locally. This section outlines using minio. Garage is also a newer alternative.
 
 ```sh
-createuser -s postgres
+brew install minio minio-mc
+brew services run minio
+```
+
+One time bucket creation.
+
+```sh
+mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
+mc mb local/b2-eu-cen
+mc ls local
+```
+
+> [!CAUTION]
+>
+> Since these are dev instructions, we're using the default username and password. For any non-trivial use, change the credentials.
+
+### Create config
+
+Create `museum.yaml` in `ente/server`.
+
+```yaml
+db:
+    host: localhost
+    port: 5432
+    name: ente_db
+    user: pguser
+    password: pgpass
+
+s3:
+    are_local_buckets: true
+    b2-eu-cen:
+        key: minioadmin
+        secret: minioadmin
+        endpoint: localhost:9000
+        region: eu-central-2
+        bucket: b2-eu-cen
 ```
 
 ### Start museum
 
+From `ente/server`,
+
 ```sh
-export ENTE_DB_USER=postgres
 go run cmd/museum/main.go
 ```
 
@@ -186,7 +235,6 @@ Then you can just call `air` after declaring the required environment variables.
 For example,
 
 ```sh
-ENTE_DB_USER=ente_user
 air
 ```
 
