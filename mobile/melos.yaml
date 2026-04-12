@@ -76,15 +76,15 @@ scripts:
 
 
   run:photos:apk:
-    run: melos exec --scope="photos" -- "flutter run -t lib/main.dart --flavor independent"
+    run: melos exec --scope="photos" -- "flutter run --flavor independent"
     description: Run the 'photos' app in independent mode.
 
   run:auth:apk:
-    run: melos exec --scope="auth" -- "flutter run -t lib/main.dart --flavor independent"
+    run: melos exec --scope="auth" -- "flutter run --flavor independent"
     description: Run the 'auth' app in independent mode.
 
   run:locker:apk:
-    run: melos exec --scope="locker" -- "flutter run -t lib/main.dart --flavor independent"
+    run: melos exec --scope="locker" -- "flutter run --flavor independent"
     description: Run the 'locker' app in independent mode.
 
  # --- APP-SPECIFIC BUILD COMMANDS ---

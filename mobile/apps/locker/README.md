@@ -12,7 +12,7 @@ important documents in the cloud with secure sharing capabilities.
    - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
 3. Run the app:
-   - Android: `flutter run -t lib/main.dart --flavor independent`
+   - Android: `flutter run --flavor independent`
    - iOS: `flutter run`
 
 To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.

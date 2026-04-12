@@ -79,7 +79,7 @@ melos clean:photos
 ### Direct Flutter Commands
 ```bash
 # Development run
-flutter run -t lib/main.dart --flavor independent
+flutter run --flavor independent
 
 # Build release APK
 flutter build apk --release --flavor independent
