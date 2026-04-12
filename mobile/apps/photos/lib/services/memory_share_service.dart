@@ -7,7 +7,6 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
-import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -44,14 +43,6 @@ class MemoryShareService {
     _enteDio = NetworkClient.instance.enteDio;
     _db = MemorySharesDB.instance;
     await _loadMemoryShareHashCache();
-    if (!Configuration.instance.isLoggedIn()) {
-      return;
-    }
-    try {
-      await listMemoryShares();
-    } catch (e, s) {
-      _logger.warning("Failed to refresh memory shares during init", e, s);
-    }
   }
 
   void clearCache() {
@@ -246,6 +237,7 @@ class MemoryShareService {
       for (final share in result) {
         if (share.isDeleted) {
           await _db.delete(share.id);
+          _removeMemoryShareFromCache(share.id);
           continue;
         }
         activeRemoteShareIDs.add(share.id);

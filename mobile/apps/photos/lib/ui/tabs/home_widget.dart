@@ -48,6 +48,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
@@ -332,6 +333,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         setState(() {});
       }
     });
+    if (!isOfflineMode && Configuration.instance.hasConfiguredAccount()) {
+      MemoryShareService.instance.listMemoryShares().ignore();
+    }
   }
 
   Future<void> syncWidget() async {
