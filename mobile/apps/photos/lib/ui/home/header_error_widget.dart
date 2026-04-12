@@ -47,6 +47,24 @@ class HeaderErrorWidget extends StatelessWidget {
           },
         ),
       );
+    } else if (_error is LocalDeviceStorageFullError) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6),
+        child: NotificationWidget(
+          startIcon: Icons.sd_storage_rounded,
+          actionIcon: Icons.info_outline_rounded,
+          text: AppLocalizations.of(context).freeUpDeviceSpace,
+          subText: "Backup paused because device storage is full.",
+          onTap: () async => {
+            sendLogs(
+              context,
+              AppLocalizations.of(context).raiseTicket,
+              "support@ente.com",
+              subject: AppLocalizations.of(context).backupFailed,
+            ),
+          },
+        ),
+      );
     } else {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6),

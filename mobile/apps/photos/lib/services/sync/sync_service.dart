@@ -35,6 +35,8 @@ class SyncService {
 
   static const kLastStorageLimitExceededNotificationPushTime =
       "last_storage_limit_exceeded_notification_push_time";
+  static const kLastLocalStorageFullNotificationPushTime =
+      "last_local_storage_full_notification_push_time";
 
   SyncService._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -114,6 +116,14 @@ class SyncService {
         SyncStatusUpdate(
           SyncStatus.error,
           error: StorageLimitExceededError(),
+        ),
+      );
+    } on LocalDeviceStorageFullError {
+      _showLocalStorageFullNotification();
+      Bus.instance.fire(
+        SyncStatusUpdate(
+          SyncStatus.error,
+          error: LocalDeviceStorageFullError(),
         ),
       );
     } on UnauthorizedError {
@@ -248,6 +258,20 @@ class SyncService {
       NotificationService.instance.showNotification(
         s.storageLimitExceeded,
         s.sorryWeHadToPauseYourBackups,
+      );
+    }
+  }
+
+  void _showLocalStorageFullNotification() async {
+    final lastNotificationShownTime =
+        _prefs.getInt(kLastLocalStorageFullNotificationPushTime) ?? 0;
+    final now = DateTime.now().microsecondsSinceEpoch;
+    if ((now - lastNotificationShownTime) > microSecondsInDay) {
+      await _prefs.setInt(kLastLocalStorageFullNotificationPushTime, now);
+      final s = await LanguageService.locals;
+      NotificationService.instance.showNotification(
+        s.freeUpDeviceSpace,
+        "Backup paused because device storage is full.",
       );
     }
   }

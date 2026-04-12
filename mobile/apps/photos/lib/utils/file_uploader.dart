@@ -924,8 +924,18 @@ class FileUploader {
       Bus.instance.fire(FileUploadedEvent(remoteFile));
       return remoteFile;
     } catch (e, s) {
+      if (isLocalDeviceStorageFullException(e)) {
+        uploadHardFailure = true;
+        _logger.warning(
+          "Device storage is full; pausing backup until storage is freed",
+          e,
+          s,
+        );
+        throw LocalDeviceStorageFullError();
+      }
       if (!(e is NoActiveSubscriptionError ||
           e is StorageLimitExceededError ||
+          e is LocalDeviceStorageFullError ||
           e is WiFiUnavailableError ||
           e is SilentlyCancelUploadsError ||
           e is InvalidFileError ||

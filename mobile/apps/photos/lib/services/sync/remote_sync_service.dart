@@ -747,10 +747,15 @@ class RemoteSyncService {
       await Future.wait(futures);
     } on InvalidFileError {
       // Do nothing
-    } on FileSystemException {
+    } on FileSystemException catch (e) {
+      if (isLocalDeviceStorageFullException(e)) {
+        throw LocalDeviceStorageFullError();
+      }
       // Do nothing since it's caused mostly due to concurrency issues
       // when the foreground app deletes temporary files, interrupting a background
       // upload
+    } on LocalDeviceStorageFullError {
+      rethrow;
     } on LockAlreadyAcquiredError {
       // Do nothing
     } on SilentlyCancelUploadsError {

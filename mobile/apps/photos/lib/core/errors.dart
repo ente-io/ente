@@ -1,3 +1,5 @@
+import 'dart:io';
+
 enum InvalidReason {
   assetDeleted,
   assetDeletedEvent,
@@ -37,6 +39,8 @@ class SyncStopRequestedError extends Error {}
 class NoActiveSubscriptionError extends Error {}
 
 class StorageLimitExceededError extends Error {}
+
+class LocalDeviceStorageFullError extends Error {}
 
 // error when file size + current usage >= storage plan limit + buffer
 class FileTooLargeForPlanError extends Error {}
@@ -143,6 +147,27 @@ class InvalidDateTimeError implements Exception {
     return 'InvalidDateTimeError: $field is invalid for asset '
         '(id: $assetId, title: ${assetTitle ?? "unknown"}) - $originalError';
   }
+}
+
+bool isLocalDeviceStorageFullException(Object error) {
+  if (error is LocalDeviceStorageFullError) {
+    return true;
+  }
+  if (error is! FileSystemException) {
+    return false;
+  }
+
+  final osCode = error.osError?.errorCode;
+  if (osCode == 28) {
+    return true;
+  }
+
+  final text =
+      '${error.message} ${error.osError?.message ?? ''}'.toLowerCase();
+  return text.contains('no space left on device') ||
+      text.contains('enospc') ||
+      text.contains('disk full') ||
+      text.contains('not enough space');
 }
 
 class BadMD5DigestError implements Exception {
