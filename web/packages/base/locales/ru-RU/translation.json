@@ -242,7 +242,7 @@
     "leave": "Выйти",
     "leave_family_plan_confirm": "Вы уверены, что хотите покинуть семейный план?",
     "choose_plan": "Выбери свой план",
-    "manage_plan": "Управление подпиской",
+    "manage_plan": "",
     "current_usage": "Текущее использование составляет <strong>{{usage}}</strong>",
     "two_months_free": "Получите 2 месяца бесплатно по годовым планам",
     "free_plan_option": "Продолжить с бесплатным планом",

@@ -16,8 +16,6 @@ Ente Locker is a Flutter application for securely storing important documents. I
 
 ## Commit & PR Guidelines
 
-⚠️ **CRITICAL: From the default template, use ONLY: Co-Authored-By: Claude <noreply@anthropic.com>** ⚠️
-
 ### Pre-commit/PR Checklist (RUN BEFORE EVERY COMMIT OR PR!)
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
@@ -44,7 +42,8 @@ flutter analyze
 - Keep messages CONCISE (no walls of text)
 - Subject line under 72 chars (no body text unless critical)
 - NO emojis
-- NO promotional text or links (except Co-Authored-By line)
+- NO promotional text or links
+- NO Co-Authored-By lines
 
 ### Additional Guidelines
 

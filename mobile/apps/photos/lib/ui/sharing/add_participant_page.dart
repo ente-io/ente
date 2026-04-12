@@ -1,11 +1,11 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -74,10 +74,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     final filterSuggestedUsers = _suggestedUsers
         .where(
-          (element) =>
-              (element.displayName ?? element.email).toLowerCase().contains(
-                    _textController.text.trim().toLowerCase(),
-                  ),
+          (element) => _matchesUserQuery(
+            element,
+            _textController.text.trim().toLowerCase(),
+          ),
         )
         .toList();
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
@@ -158,15 +158,15 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           );
                         }
                         final currentUser = filterSuggestedUsers[index];
+                        final resolvedName = resolveDisplayName(currentUser);
                         return Column(
                           children: [
                             MenuItemWidget(
                               key: ValueKey(
-                                currentUser.displayName ?? currentUser.email,
+                                '${currentUser.email}-$resolvedName',
                               ),
                               captionedTextWidget: CaptionedTextWidget(
-                                title: currentUser.displayName ??
-                                    currentUser.email,
+                                title: resolvedName,
                               ),
                               leadingIconSize: 24.0,
                               leadingIconWidget: UserAvatarWidget(
@@ -509,9 +509,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(
-        (element) => !(element.displayName ?? element.email)
-            .toLowerCase()
-            .contains(_textController.text.trim().toLowerCase()),
+        (element) => !_matchesUserQuery(
+          element,
+          _textController.text.trim().toLowerCase(),
+        ),
       );
     }
     suggestedUsers.removeWhere(
@@ -534,5 +535,15 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       case ActionTypesToShow.addAdmin:
         return AppLocalizations.of(context).addAdmin;
     }
+  }
+
+  bool _matchesUserQuery(User user, String lowerCaseQuery) {
+    if (lowerCaseQuery.isEmpty) {
+      return true;
+    }
+    final resolvedName = resolveDisplayName(user).toLowerCase();
+    final resolvedEmail = (resolveKnownEmail(user) ?? user.email).toLowerCase();
+    return resolvedName.contains(lowerCaseQuery) ||
+        resolvedEmail.contains(lowerCaseQuery);
   }
 }

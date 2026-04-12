@@ -17,6 +17,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
+import "package:photos/ui/social/social_actor_contact_navigation.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -600,6 +601,12 @@ class _FeedScreenState extends State<FeedScreen> {
                             type: item.type,
                             sharedFileIDs: item.sharedFileIDs,
                           ),
+                        ),
+                        onPrimaryActorTap: (user) =>
+                            openSocialActorContactDestination(
+                          context,
+                          user,
+                          currentUserID: _currentUserID,
                         ),
                       );
                     },

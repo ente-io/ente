@@ -54,11 +54,14 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   bool get _isFamilyAdmin =>
       _userDetails.currentFamilyMember()?.isAdmin ?? false;
 
-  bool get _shouldRedirectMemberToSubscription =>
-      _userDetails.isPartOfFamily() && !_isFamilyAdmin;
+  bool get _isFamilyMember => _userDetails.isPartOfFamily() && !_isFamilyAdmin;
 
-  bool get _showsDashboard =>
+  bool get _showsAdminDashboard =>
       _isFamilyAdmin && _userDetails.hasConfiguredFamily();
+
+  bool get _showsMemberDashboard => _isFamilyMember;
+
+  bool get _showsDashboard => _showsAdminDashboard || _showsMemberDashboard;
 
   int get _remainingSlots {
     final memberCount = _userDetails.familyData?.members
@@ -73,36 +76,23 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   @override
   void initState() {
     super.initState();
-    if (_shouldRedirectMemberToSubscription) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        replacePage(context, getSubscriptionPage());
-      });
-      return;
-    }
     if (widget.refreshOnOpen) {
       unawaited(_refreshUserDetails());
     }
-    if (_isFreeUser) {
+    if (_isFreeUser && !_userDetails.isPartOfFamily()) {
       unawaited(_loadStartingPrice());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_shouldRedirectMemberToSubscription) {
-      return const FamilyPageScaffold(
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final content = _showsDashboard
-        ? _buildDashboard(context)
-        : _isFreeUser
-            ? _buildFreeAdvert(context)
-            : _buildPaidAdvert(context);
+    final content = _showsAdminDashboard
+        ? _buildDashboard(context, isAdminView: true)
+        : _showsMemberDashboard
+            ? _buildDashboard(context, isAdminView: false)
+            : _isFreeUser
+                ? _buildFreeAdvert(context)
+                : _buildPaidAdvert(context);
 
     return FamilyPageScaffold(
       title: _showsDashboard ? AppLocalizations.of(context).family : null,
@@ -313,11 +303,20 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     );
   }
 
-  Widget _buildDashboard(BuildContext context) {
+  Widget _buildDashboard(
+    BuildContext context, {
+    required bool isAdminView,
+  }) {
     final l10n = AppLocalizations.of(context);
-    final members = _sortedMembersForList();
+    final members = _sortedMembersForDashboard(isAdminView: isAdminView);
     final activeMembers = members.where((member) => member.isActive).toList();
     final colorMap = _memberColorMap(activeMembers);
+
+    final currentEmail = _userDetails.email.trim().toLowerCase();
+    final currentMember = members.firstWhereOrNull(
+      (m) => m.email.trim().toLowerCase() == currentEmail,
+    );
+    final storageLimit = !isAdminView ? currentMember?.storageLimit : null;
 
     return ListView(
       children: [
@@ -325,6 +324,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
           userDetails: _userDetails,
           members: activeMembers,
           colorMap: colorMap,
+          storageLimit: storageLimit,
         ),
         const SizedBox(height: 16),
         Padding(
@@ -338,32 +338,42 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
           members: members,
           userDetails: _userDetails,
           colorMap: colorMap,
-          isAdminView: true,
+          isAdminView: isAdminView,
           onMemberTap: _showMemberActions,
         ),
         const SizedBox(height: 24),
-        if (_remainingSlots > 0) ...[
-          ButtonWidgetV2(
-            buttonType: ButtonTypeV2.primary,
-            labelText: l10n.addMember,
-            leadingWidget: const Icon(
-              Icons.person_add_outlined,
-              color: Colors.white,
-              size: 20,
+        if (isAdminView) ...[
+          if (_remainingSlots > 0) ...[
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: l10n.addMember,
+              leadingWidget: const Icon(
+                Icons.person_add_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+              onTap: () async {
+                unawaited(_openInvitePage());
+              },
             ),
+            const SizedBox(height: 12),
+          ],
+          ButtonWidgetV2(
+            buttonType: ButtonTypeV2.tertiaryCritical,
+            labelText: l10n.closeFamilyPlan,
             onTap: () async {
-              unawaited(_openInvitePage());
+              unawaited(_confirmCloseFamily());
             },
           ),
-          const SizedBox(height: 12),
+        ] else ...[
+          ButtonWidgetV2(
+            buttonType: ButtonTypeV2.tertiaryCritical,
+            labelText: l10n.leaveFamilyPlan,
+            onTap: () async {
+              unawaited(_confirmLeaveFamily());
+            },
+          ),
         ],
-        ButtonWidgetV2(
-          buttonType: ButtonTypeV2.tertiaryCritical,
-          labelText: l10n.closeFamilyPlan,
-          onTap: () async {
-            unawaited(_confirmCloseFamily());
-          },
-        ),
         const SizedBox(height: 16),
       ],
     );
@@ -436,7 +446,11 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
     final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
-    final colorMap = _memberColorMap(_legendMembers());
+    final colorMap = _memberColorMap(
+      _sortedMembersForDashboard(isAdminView: true)
+          .where((member) => member.isActive)
+          .toList(),
+    );
     await showBaseBottomSheet<void>(
       context,
       title: member.email,
@@ -599,29 +613,48 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     }
   }
 
-  List<FamilyMember> _sortedMembersForList() {
+  Future<void> _confirmLeaveFamily() async {
+    final confirmed = await showFamilyConfirmationSheet(
+      context,
+      title: AppLocalizations.of(context).leaveFamily,
+      body: AppLocalizations.of(context).areYouSureThatYouWantToLeaveTheFamily,
+      actionLabel: AppLocalizations.of(context).leave,
+    );
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    try {
+      await FamilyService.instance.leaveFamily();
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+    } catch (error) {
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: error);
+      }
+    }
+  }
+
+  List<FamilyMember> _sortedMembersForDashboard({
+    required bool isAdminView,
+  }) {
     final members = List<FamilyMember>.from(
       _userDetails.familyData?.members ?? const <FamilyMember>[],
     );
     final currentEmail = _userDetails.email.trim().toLowerCase();
 
-    members.sort((a, b) {
-      if (a.email.trim().toLowerCase() == currentEmail) return -1;
-      if (b.email.trim().toLowerCase() == currentEmail) return 1;
-      if (a.isPending != b.isPending) return a.isPending ? 1 : -1;
-      return a.email.compareTo(b.email);
-    });
-    return members;
-  }
+    if (!isAdminView) {
+      members.removeWhere((member) => !member.isActive);
+    }
 
-  List<FamilyMember> _legendMembers() {
-    final currentEmail = _userDetails.email.trim().toLowerCase();
-    final members = (_userDetails.familyData?.members ?? [])
-        .where((member) => member.isActive)
-        .toList();
     members.sort((a, b) {
       if (a.email.trim().toLowerCase() == currentEmail) return -1;
       if (b.email.trim().toLowerCase() == currentEmail) return 1;
+      if (isAdminView && a.isPending != b.isPending) {
+        return a.isPending ? 1 : -1;
+      }
       if (a.isAdmin != b.isAdmin) return a.isAdmin ? -1 : 1;
       return a.email.compareTo(b.email);
     });
@@ -735,11 +768,13 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
     required this.userDetails,
     required this.members,
     required this.colorMap,
+    this.storageLimit,
   });
 
   final UserDetails userDetails;
   final List<FamilyMember> members;
   final Map<String, Color> colorMap;
+  final int? storageLimit;
 
   @override
   Widget build(BuildContext context) {
@@ -815,6 +850,15 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
               },
             ),
           ),
+          if (storageLimit != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              AppLocalizations.of(context).yourStorageIsLimitedTo(
+                limit: convertBytesToReadableFormat(storageLimit!),
+              ),
+              style: textTheme.miniMuted,
+            ),
+          ],
         ],
       ),
     );

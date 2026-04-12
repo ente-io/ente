@@ -33,10 +33,17 @@ import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/people_sort_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
 
+enum PersonSelectionMode {
+  linkContact,
+  autofillContact,
+}
+
 class LinkContactToPersonSelectionPage extends StatefulWidget {
   final String? emailToLink;
+  final PersonSelectionMode mode;
   const LinkContactToPersonSelectionPage({
     this.emailToLink,
+    this.mode = PersonSelectionMode.linkContact,
     super.key,
   });
 
@@ -85,8 +92,12 @@ class _LinkContactToPersonSelectionPageState
 
     final entries = <_PersonSelectionEntry>[];
     for (final person in persons) {
-      if ((person.data.email != null && person.data.email!.isNotEmpty) ||
-          person.data.isIgnored) {
+      final isAlreadyLinked =
+          person.data.email != null && person.data.email!.isNotEmpty;
+      if (person.data.isIgnored) {
+        continue;
+      }
+      if (widget.mode == PersonSelectionMode.linkContact && isAlreadyLinked) {
         continue;
       }
       final searchResult = resultsById[person.remoteID];
@@ -227,7 +238,9 @@ class _LinkContactToPersonSelectionPageState
         builder: (context, snapshot) {
           final slivers = <Widget>[
             SearchableAppBar(
-              title: Text(context.l10n.selectPersonToLink),
+              title: Text(
+                context.l10n.selectPersonToLink,
+              ),
               onSearch: _updateSearchQuery,
               onSearchClosed: _clearSearchQuery,
               centerTitle: false,
@@ -315,6 +328,13 @@ class _LinkContactToPersonSelectionPageState
                     return _RoundedPersonFaceWidget(
                       key: ValueKey(results[index].personEntity.remoteID),
                       onTap: () async {
+                        if (widget.mode ==
+                            PersonSelectionMode.autofillContact) {
+                          Navigator.of(
+                            context,
+                          ).pop(results[index].personEntity);
+                          return;
+                        }
                         try {
                           final updatedPerson = await linkPersonToContact(
                             context,

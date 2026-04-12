@@ -46,7 +46,7 @@ jobs:
 
             - run: yarn lint
 
-            - run: yarn test:run
+            - run: yarn test
 
             - name: Audit dependencies
               run: |

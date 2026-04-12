@@ -594,6 +594,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_contacts:
+    dependency: "direct main"
+    description:
+      path: "../../packages/contacts"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_crypto:
     dependency: "direct main"
     description:
@@ -1175,8 +1182,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "1eb375e639dc86df69b544642b177a710ae43db0"
-      resolved-ref: "1eb375e639dc86df69b544642b177a710ae43db0"
+      ref: "85a6ac0f36c4473ac1345727ca5dd8589e564b80"
+      resolved-ref: "85a6ac0f36c4473ac1345727ca5dd8589e564b80"
       url: "https://github.com/ente-io/flutter_sodium"
     source: git
     version: "0.2.0"
@@ -2577,6 +2584,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.5"
+  sqflite_common_ffi:
+    dependency: transitive
+    description:
+      name: sqflite_common_ffi
+      sha256: "9faa2fedc5385ef238ce772589f7718c24cdddd27419b609bb9c6f703ea27988"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
   sqflite_darwin:
     dependency: transitive
     description:

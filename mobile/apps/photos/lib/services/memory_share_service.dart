@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -43,6 +44,9 @@ class MemoryShareService {
     _enteDio = NetworkClient.instance.enteDio;
     _db = MemorySharesDB.instance;
     await _loadMemoryShareHashCache();
+    if (!Configuration.instance.isLoggedIn()) {
+      return;
+    }
     try {
       await listMemoryShares();
     } catch (e, s) {
@@ -199,6 +203,16 @@ class MemoryShareService {
     try {
       final response = await _enteDio.get('/memory-share');
       final List<dynamic> shares = response.data['memoryShares'] ?? [];
+      final localSharesByID = {
+        for (final share in await _db.getAll()) share.id: share,
+      };
+      if (shares.isEmpty) {
+        _memoryShareByHashCache.clear();
+        for (final localShare in localSharesByID.values) {
+          await _db.delete(localShare.id);
+        }
+        return [];
+      }
       Uint8List? memoryEntityKey;
       try {
         memoryEntityKey = await entityService.getOrCreateEntityKey(
@@ -226,10 +240,6 @@ class MemoryShareService {
         }
         return share;
       }).toList();
-
-      final localSharesByID = {
-        for (final share in await _db.getAll()) share.id: share,
-      };
       _memoryShareByHashCache.clear();
       final activeRemoteShareIDs = <int>{};
       final activeShares = <MemoryShare>[];
