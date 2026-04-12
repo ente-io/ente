@@ -1182,8 +1182,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "33fe482088f582cc4202b35cdd47a5bc84da45bc"
-      resolved-ref: "33fe482088f582cc4202b35cdd47a5bc84da45bc"
+      ref: "85a6ac0f36c4473ac1345727ca5dd8589e564b80"
+      resolved-ref: "85a6ac0f36c4473ac1345727ca5dd8589e564b80"
       url: "https://github.com/ente-io/flutter_sodium"
     source: git
     version: "0.2.0"
