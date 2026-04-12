@@ -1,6 +1,8 @@
 import { Link01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import {
     Box,
@@ -253,9 +255,12 @@ export const PasteLinkCard = ({
                         flex: 1,
                         minWidth: 0,
                         display: "flex",
+                        flexDirection: "row",
                         alignItems: "center",
                         boxSizing: "border-box",
-                        px: { xs: 1.9, sm: 2.2 },
+                        gap: { xs: 0.75, sm: 1 },
+                        pl: { xs: 1.9, sm: 2.2 },
+                        pr: { xs: 0.85, sm: 1 },
                         py: { xs: 1.05, sm: 1.2 },
                         borderRadius: "14px",
                         border: `1px solid ${tokens.surface.linkRowBorder}`,
@@ -279,12 +284,10 @@ export const PasteLinkCard = ({
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: { xs: "flex-start", md: "center" },
-                            height: "100%",
-                            width: "100%",
-                            maxWidth: "100%",
-                            gap: 0.9,
+                            justifyContent: "flex-start",
+                            flex: 1,
                             minWidth: 0,
+                            gap: 0.9,
                             color: tokens.text.primary,
                             textDecoration: "none",
                             fontSize: { xs: "0.9rem", sm: "0.93rem" },
@@ -316,9 +319,7 @@ export const PasteLinkCard = ({
                         <Box
                             component="span"
                             sx={{
-                                flex: { xs: 1, md: "0 1 auto" },
                                 minWidth: 0,
-                                maxWidth: { md: "calc(100% - 28px)" },
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -328,6 +329,39 @@ export const PasteLinkCard = ({
                             {link}
                         </Box>
                     </Typography>
+                    <IconButton
+                        type="button"
+                        aria-label={showCopied ? "Copied" : "Copy link"}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            handleCopyClick();
+                        }}
+                        sx={{
+                            flexShrink: 0,
+                            width: { xs: 36, sm: 38 },
+                            height: { xs: 36, sm: 38 },
+                            borderRadius: "10px",
+                            color: tokens.text.primary,
+                            bgcolor: "transparent",
+                            "&:hover": {
+                                bgcolor: tokens.frame.headerIconHoverBg,
+                            },
+                        }}
+                    >
+                        {showCopied ? (
+                            <CheckRoundedIcon
+                                sx={{
+                                    fontSize: { xs: 20, sm: 21 },
+                                    color: tokens.text.copied,
+                                }}
+                            />
+                        ) : (
+                            <ContentCopyRoundedIcon
+                                sx={{ fontSize: { xs: 20, sm: 21 } }}
+                            />
+                        )}
+                    </IconButton>
                 </Box>
                 {arrow && (
                     <Box
@@ -599,9 +633,64 @@ export const PasteLinkCard = ({
                                 backdropFilter: "blur(8px) saturate(106%)",
                                 WebkitBackdropFilter:
                                     "blur(8px) saturate(106%)",
+                                minWidth: 0,
+                                overflow: "visible",
                             }}
                         >
-                            <PasteQrCode value={link} tokens={tokens} />
+                            <Box
+                                sx={{
+                                    position: "relative",
+                                    width: "fit-content",
+                                    maxWidth: "100%",
+                                    mx: "auto",
+                                    overflow: "visible",
+                                }}
+                            >
+                                <PasteQrCode value={link} tokens={tokens} />
+                                <IconButton
+                                    type="button"
+                                    aria-label="Close QR code"
+                                    disableRipple
+                                    onClick={() => {
+                                        setShowQr(false);
+                                    }}
+                                    sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        right: 0,
+                                        zIndex: 1,
+                                        width: 28,
+                                        height: 28,
+                                        minWidth: 28,
+                                        padding: 0,
+                                        borderRadius: "50%",
+                                        border: `1px solid ${tokens.button.qrToggleBorder}`,
+                                        color: tokens.text.secondary,
+                                        bgcolor: tokens.surface.floatingCardBg,
+                                        opacity: 1,
+                                        boxShadow:
+                                            "0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05)",
+                                        transform: "translate(50%, -50%) scale(1)",
+                                        transformOrigin: "center",
+                                        transition:
+                                            "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+                                        "&:hover": {
+                                            opacity: 1,
+                                            transform:
+                                                "translate(50%, -50%) scale(1.12)",
+                                            bgcolor:
+                                                resolvedMode === "dark"
+                                                    ? "rgba(26, 36, 72, 1)"
+                                                    : "rgba(237, 244, 255, 1)",
+                                        },
+                                        "& .MuiSvgIcon-root": {
+                                            opacity: 1,
+                                        },
+                                    }}
+                                >
+                                    <CloseRoundedIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                            </Box>
                         </Box>
                     )}
                 </Stack>
@@ -762,18 +851,72 @@ export const PasteLinkCard = ({
                                     bgcolor: tokens.surface.floatingCardBg,
                                     boxShadow:
                                         tokens.surface.floatingCardShadow,
+                                    overflow: "visible",
                                 },
                             },
                         }}
                     >
-                        <Box sx={{ p: 1.15 }}>
-                            <PasteQrCode
-                                value={link}
-                                tokens={tokens}
-                                size={226}
-                                paperBg={tokens.qr.mobilePaperBg}
-                                borderRadius="12px"
-                            />
+                        <Box sx={{ p: 1.15, overflow: "visible" }}>
+                            <Box
+                                sx={{
+                                    position: "relative",
+                                    width: "fit-content",
+                                    maxWidth: "100%",
+                                    mx: "auto",
+                                    overflow: "visible",
+                                }}
+                            >
+                                <PasteQrCode
+                                    value={link}
+                                    tokens={tokens}
+                                    size={226}
+                                    paperBg={tokens.qr.mobilePaperBg}
+                                    borderRadius="12px"
+                                />
+                                <IconButton
+                                    type="button"
+                                    aria-label="Close QR code"
+                                    disableRipple
+                                    onClick={() => {
+                                        setShowQr(false);
+                                    }}
+                                    sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        right: 0,
+                                        zIndex: 1,
+                                        width: 28,
+                                        height: 28,
+                                        minWidth: 28,
+                                        padding: 0,
+                                        borderRadius: "50%",
+                                        border: `1px solid ${tokens.button.qrToggleBorder}`,
+                                        color: tokens.text.secondary,
+                                        bgcolor: tokens.surface.floatingCardBg,
+                                        opacity: 1,
+                                        boxShadow:
+                                            "0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05)",
+                                        transform: "translate(50%, -50%) scale(1)",
+                                        transformOrigin: "center",
+                                        transition:
+                                            "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+                                        "&:hover": {
+                                            opacity: 1,
+                                            transform:
+                                                "translate(50%, -50%) scale(1.12)",
+                                            bgcolor:
+                                                resolvedMode === "dark"
+                                                    ? "rgba(26, 36, 72, 1)"
+                                                    : "rgba(237, 244, 255, 1)",
+                                        },
+                                        "& .MuiSvgIcon-root": {
+                                            opacity: 1,
+                                        },
+                                    }}
+                                >
+                                    <CloseRoundedIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                            </Box>
                         </Box>
                     </Dialog>
                 )}

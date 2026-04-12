@@ -43,14 +43,27 @@ export const PasteCreatePanel = ({
     const isNearCharLimit = inputText.length >= nearLimitThreshold;
     const isCreateDisabled = isInputEmpty;
     const privacyPills = [
-        "Private",
-        isMobile ? "E2EE" : "End To End Encrypted",
-        "One-Time View",
-        "Deletes In 24 Hrs",
+        isMobile ? "E2EE" : "End-to-end encrypted",
+        "Auto-deletes after 24 hours",
     ];
 
     return (
         <Box sx={{ width: "100%", maxWidth: "100%", minWidth: 0 }}>
+            <Typography
+                component="h2"
+                sx={{
+                    color: tokens.text.primary,
+                    fontWeight: 600,
+                    fontSize: { xs: "1.08rem", sm: "1.18rem" },
+                    lineHeight: 1.35,
+                    letterSpacing: "0.01em",
+                    textAlign: "center",
+                    mb: { xs: 1.25, sm: 1.5 },
+                    maxWidth: "100%",
+                }}
+            >
+                Share private data with secure, one-time links
+            </Typography>
             <Box
                 sx={{
                     position: "relative",
@@ -165,14 +178,21 @@ export const PasteCreatePanel = ({
                         disabled={isCreateDisabled}
                         sx={{
                             pointerEvents: "auto",
+                            boxSizing: "border-box",
                             width: { xs: 34, sm: 38 },
                             height: { xs: 34, sm: 38 },
+                            minWidth: { xs: 34, sm: 38 },
+                            minHeight: { xs: 34, sm: 38 },
+                            padding: 0,
                             marginBottom: { xs: "3px", sm: "4px" },
                             marginRight: { xs: "-1px", sm: "-2px" },
                             borderRadius: { xs: "12px", sm: "14px" },
                             bgcolor: tokens.button.primaryBg,
                             color: tokens.button.primaryText,
                             boxShadow: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                             "&:hover": {
                                 bgcolor: tokens.button.primaryHoverBg,
                                 boxShadow: "none",
@@ -184,11 +204,29 @@ export const PasteCreatePanel = ({
                         }}
                     >
                         {creating ? (
-                            <CircularProgress
-                                size={17}
-                                thickness={5.2}
-                                sx={{ color: tokens.button.primaryText }}
-                            />
+                            <Box
+                                sx={{
+                                    width: 18,
+                                    height: 18,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    lineHeight: 0,
+                                }}
+                            >
+                                <CircularProgress
+                                    size={17}
+                                    thickness={5.2}
+                                    sx={{
+                                        color: tokens.button.primaryText,
+                                        display: "block",
+                                        "& .MuiCircularProgress-svg": {
+                                            display: "block",
+                                            transformOrigin: "50% 50%",
+                                        },
+                                    }}
+                                />
+                            </Box>
                         ) : (
                             <Box
                                 sx={{
