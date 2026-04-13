@@ -376,8 +376,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
-            showOnlyLoadingState: true,
-            surfaceExecutionStates: true,
             onTap: () async {
               late final UserDetails userDetails;
               try {

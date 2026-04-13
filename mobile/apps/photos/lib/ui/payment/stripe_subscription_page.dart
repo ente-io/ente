@@ -262,8 +262,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
-            showOnlyLoadingState: true,
-            surfaceExecutionStates: true,
             onTap: () async {
               late final UserDetails userDetails;
               try {
@@ -297,7 +295,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: MenuItemWidgetNew(
-            title: AppLocalizations.of(context).managePaymentMethod,
+            title: "Manage payment method",
             menuItemColor: colorScheme.fillFaint,
             pressedColor: colorScheme.fillFaintPressed,
             trailingWidget: Icon(
