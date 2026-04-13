@@ -61,9 +61,11 @@ class _InputSheetState extends State<InputSheet> {
   }
 
   Future<void> _onSubmit() async {
-    final text = _textController.text.trim();
+    final text = widget.isPasswordInput
+        ? _textController.text
+        : _textController.text.trim();
 
-    if (text.isEmpty || _isSubmitting) {
+    if (text.trim().isEmpty || _isSubmitting) {
       return;
     }
 
