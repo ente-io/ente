@@ -13,8 +13,8 @@ authentication when opened.
 **On mobile:**
 Open `Settings > Security > App lock`, then turn on **App lock**.
 
-**On desktop / web:**
-Open `Settings > Account > App lock`, then turn on **App lock**.
+**On desktop:**
+Open `Settings > Preferences > App lock`, then turn on **App lock**.
 
 ## Lock methods
 
