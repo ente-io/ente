@@ -253,7 +253,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: MenuItemWidgetNew(
             title: AppLocalizations.of(context).manageFamily,
             menuItemColor: colorScheme.fillFaint,
@@ -295,9 +295,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (_currentSubscription!.productID != freeProductID) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: MenuItemWidgetNew(
-            title: "Manage payment method",
+            title: AppLocalizations.of(context).managePaymentMethod,
             menuItemColor: colorScheme.fillFaint,
             pressedColor: colorScheme.fillFaintPressed,
             trailingWidget: Icon(
@@ -316,7 +316,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (_hasActiveSubscription && _isStripeSubscriber) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: _stripeRenewOrCancelButton(),
         ),
       );
