@@ -163,8 +163,9 @@ class GalleryDownloadQueueService {
   }
 
   Future<GalleryDownloadEnqueueResult> enqueueFiles(
-    List<EnteFile> files,
-  ) async {
+    List<EnteFile> files, {
+    bool persistToFilesDB = true,
+  }) async {
     await init();
     if (files.isEmpty) {
       return const GalleryDownloadEnqueueResult(
@@ -187,7 +188,10 @@ class GalleryDownloadQueueService {
           ? file.copyWith()
           : (file.copyWith()..localID = null);
       _queuedFilesByID[uploadID] = queuedFile;
-      final sourceFileJson = _serializeQueuedFile(queuedFile);
+      final sourceFileJson = _serializeQueuedFile(
+        queuedFile,
+        persistToFilesDB: persistToFilesDB,
+      );
       if (_tasks.containsKey(uploadID)) {
         final existingTask = _tasks[uploadID];
         if (existingTask != null && existingTask.sourceFileJson == null) {
@@ -456,9 +460,11 @@ class GalleryDownloadQueueService {
 
   Future<void> _downloadAndSaveToGallery(int fileID) async {
     EnteFile? file = _queuedFilesByID[fileID];
+    String? sourceFileJson;
     if (file == null) {
       final task = _tasks[fileID];
       if (task != null) {
+        sourceFileJson = task.sourceFileJson;
         file = _deserializeQueuedFile(task.sourceFileJson);
         if (file != null) {
           _queuedFilesByID[fileID] = file;
@@ -478,6 +484,9 @@ class GalleryDownloadQueueService {
     await downloadToGallery(
       fileToDownload,
       forceResumableDownload: true,
+      persistToFilesDB: _deserializePersistToFilesDB(
+        sourceFileJson ?? _tasks[fileID]?.sourceFileJson,
+      ),
     );
   }
 
@@ -594,7 +603,10 @@ class GalleryDownloadQueueService {
     Bus.instance.fire(GalleryDownloadsUpdatedEvent());
   }
 
-  String _serializeQueuedFile(EnteFile file) {
+  String _serializeQueuedFile(
+    EnteFile file, {
+    required bool persistToFilesDB,
+  }) {
     return jsonEncode({
       "uploadedFileID": file.uploadedFileID,
       "ownerID": file.ownerID,
@@ -609,7 +621,22 @@ class GalleryDownloadQueueService {
       "fileSize": file.fileSize,
       "pubMmdEncodedJson": file.pubMmdEncodedJson,
       "pubMmdVersion": file.pubMmdVersion,
+      "persistToFilesDB": persistToFilesDB,
     });
+  }
+
+  bool _deserializePersistToFilesDB(String? sourceFileJson) {
+    if (sourceFileJson == null || sourceFileJson.isEmpty) {
+      return true;
+    }
+    try {
+      final Map<String, dynamic> map =
+          jsonDecode(sourceFileJson) as Map<String, dynamic>;
+      return map["persistToFilesDB"] as bool? ?? true;
+    } catch (e, s) {
+      _logger.warning("Failed to deserialize gallery download metadata", e, s);
+      return true;
+    }
   }
 
   EnteFile? _deserializeQueuedFile(String? sourceFileJson) {

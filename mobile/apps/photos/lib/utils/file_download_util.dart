@@ -318,6 +318,7 @@ Future<String> _getFileMetadataForLogging(
 Future<void> downloadToGallery(
   EnteFile file, {
   bool forceResumableDownload = false,
+  bool persistToFilesDB = true,
 }) async {
   try {
     final FileType type = file.fileType;
@@ -365,14 +366,19 @@ Future<void> downloadToGallery(
       }
 
       if (savedAsset != null) {
-        file.localID = savedAsset!.id;
-        await FilesDB.instance.insert(file);
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            [file],
-            source: "download",
-          ),
-        );
+        // Public-link downloads should be discovered by local sync so they are
+        // materialized as true on-device files instead of remote/shared
+        // entries in FilesDB.
+        if (persistToFilesDB) {
+          file.localID = savedAsset!.id;
+          await FilesDB.instance.insert(file);
+          Bus.instance.fire(
+            LocalPhotosUpdatedEvent(
+              [file],
+              source: "download",
+            ),
+          );
+        }
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
         _logger.severe('Failed to save assert of type $type');
       }

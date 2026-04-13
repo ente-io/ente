@@ -36,6 +36,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
@@ -500,6 +501,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 sharedFiles,
                 0,
                 "sharedPublicCollection",
+                galleryType: GalleryType.sharedPublicCollection,
               ),
             ),
           );
