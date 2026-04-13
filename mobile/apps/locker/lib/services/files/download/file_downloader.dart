@@ -145,7 +145,8 @@ Future<File?> openFile(
         ? _getTemporaryDecryptedFilePath(file)
         : getCachedDecryptedFilePath(file);
     final File decryptedFile = File(decryptedFilePath);
-    final int sizeInBytes = file.fileSize ?? await offlineEncryptedFile.length();
+    final int sizeInBytes =
+        file.fileSize ?? await offlineEncryptedFile.length();
 
     try {
       if (await decryptedFile.exists()) {
@@ -187,20 +188,6 @@ Future<File?> openFile(
       s,
     );
   }
-
-  if (file.uploadedFileID != null) {
-    try {
-      await removeOfflineFileCopiesFromDisk(
-        [file.uploadedFileID!],
-        removeWorkingCopies: false,
-      );
-      await LockerDB.instance.setFilesMarkedOffline(
-        [file.uploadedFileID!],
-        false,
-      );
-    } catch (_) {}
-  }
-
   return downloadAndDecrypt(
     file,
     fileKey,

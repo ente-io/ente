@@ -102,7 +102,7 @@ class CollectionService {
       await _setFirstSyncCompleted();
     }
 
-    final List<Future> fileFutures = [];
+    final List<Future<bool>> fileFutures = [];
     for (final collection in updatedCollections) {
       if (collection.isDeleted) {
         continue;
@@ -126,15 +126,23 @@ class CollectionService {
             collection.id,
             diff.latestUpdatedAtTime,
           );
+          return true;
         }).catchError((e) {
           _logger.severe(
             "Failed to fetch files for collection ${collection.id}: $e",
           );
+          return false;
         }),
       );
     }
-    await Future.wait(fileFutures);
-    await OfflineFilesService.instance.cleanupInactiveOfflineFiles();
+    final fileSyncResults = await Future.wait(fileFutures);
+    if (fileSyncResults.every((didSync) => didSync)) {
+      await OfflineFilesService.instance.cleanupInactiveOfflineFiles();
+    } else {
+      _logger.warning(
+        "Skipping offline stale cleanup because one or more collection syncs failed",
+      );
+    }
     if (updatedCollections.isNotEmpty) {
       Bus.instance.fire(CollectionsUpdatedEvent('sync'));
     }
