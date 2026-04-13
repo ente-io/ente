@@ -220,10 +220,7 @@ impl ContactsCtxHandle {
         recovery_notice_in_days: i32,
     ) -> Result<(), ContactsError> {
         self.inner
-            .legacy_update_recovery_notice(
-                emergency_contact_id,
-                recovery_notice_in_days,
-            )
+            .legacy_update_recovery_notice(emergency_contact_id, recovery_notice_in_days)
             .await
             .map_err(Into::into)
     }
