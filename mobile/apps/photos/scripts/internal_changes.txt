@@ -1,5 +1,5 @@
 Latest changes:
-- Prateek: Fix dedupe cleanup progress percentage display
+- Neeraj: Fix dedupe cleanup progress percentage display
 - Neeraj: Fix Added by visibility in file details
 - Neeraj: Contacts
 - Neeraj: Fix grey screen when collections search result is empty 
