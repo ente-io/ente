@@ -96,7 +96,7 @@ class AccountSettingsPage extends StatelessWidget {
             CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
       } catch (e) {
         // ignore: unawaited_futures
-        showGenericErrorDialog(
+        showGenericErrorBottomSheet(
           context: context,
           error: e,
         );
