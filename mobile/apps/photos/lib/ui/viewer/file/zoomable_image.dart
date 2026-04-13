@@ -490,6 +490,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         initialPosition: currentPosition,
         initialScale: scale,
       );
+      _initialScale = null;
       _subscribeToZoomStream();
       // Fix for auto-zooming when final image is loaded after double tapping
       //twice.

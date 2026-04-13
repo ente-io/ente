@@ -249,7 +249,12 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
           valueListenable:
               zoomTransformNotifier ?? ValueNotifier(ZoomTransform.identity),
           builder: (context, transform, _) {
-            if (isZoomed && !_zoomGestureSettled) {
+            if (isZoomed) {
+              // Every new transform resets the debounce, including post-settle
+              // re-zooms (e.g. double-tap). Mutating directly here (no setState)
+              // is intentional: shouldIgnore reads _zoomGestureSettled later in
+              // this same builder, so the updated value is used immediately.
+              _zoomGestureSettled = false;
               _zoomSettleTimer?.cancel();
               _zoomSettleTimer = Timer(const Duration(milliseconds: 200), () {
                 if (mounted) {
