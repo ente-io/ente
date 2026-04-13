@@ -1847,7 +1847,7 @@ class CollectionsService {
         if (shouldCopyViaUncategorized) {
           await _addToCollection(
             dstCollectionID,
-            copiedFiles.map((file) => file.copyWith()).toList(),
+            copiedFiles,
           );
         }
       }
