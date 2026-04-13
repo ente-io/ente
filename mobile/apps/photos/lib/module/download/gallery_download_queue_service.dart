@@ -195,6 +195,7 @@ class GalleryDownloadQueueService {
       if (_tasks.containsKey(uploadID)) {
         final existingTask = _tasks[uploadID];
         if (existingTask != null &&
+            persistToFilesDB &&
             existingTask.sourceFileJson != sourceFileJson) {
           await _updateTask(
             existingTask.copyWith(sourceFileJson: sourceFileJson),
