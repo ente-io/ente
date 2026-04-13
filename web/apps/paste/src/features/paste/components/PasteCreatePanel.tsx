@@ -43,27 +43,14 @@ export const PasteCreatePanel = ({
     const isNearCharLimit = inputText.length >= nearLimitThreshold;
     const isCreateDisabled = isInputEmpty;
     const privacyPills = [
+        "Private",
         isMobile ? "E2EE" : "End-to-end encrypted",
+        "One-time view",
         "Auto-deletes after 24 hours",
     ];
 
     return (
         <Box sx={{ width: "100%", maxWidth: "100%", minWidth: 0 }}>
-            <Typography
-                component="h2"
-                sx={{
-                    color: tokens.text.primary,
-                    fontWeight: 600,
-                    fontSize: { xs: "1.08rem", sm: "1.18rem" },
-                    lineHeight: 1.35,
-                    letterSpacing: "0.01em",
-                    textAlign: "center",
-                    mb: { xs: 1.25, sm: 1.5 },
-                    maxWidth: "100%",
-                }}
-            >
-                Share private data with secure, one-time links
-            </Typography>
             <Box
                 sx={{
                     position: "relative",

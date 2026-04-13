@@ -1,8 +1,6 @@
 import { Link01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
 import {
     Box,
@@ -255,12 +253,9 @@ export const PasteLinkCard = ({
                         flex: 1,
                         minWidth: 0,
                         display: "flex",
-                        flexDirection: "row",
                         alignItems: "center",
                         boxSizing: "border-box",
-                        gap: { xs: 0.75, sm: 1 },
-                        pl: { xs: 1.9, sm: 2.2 },
-                        pr: { xs: 0.85, sm: 1 },
+                        px: { xs: 1.9, sm: 2.2 },
                         py: { xs: 1.05, sm: 1.2 },
                         borderRadius: "14px",
                         border: `1px solid ${tokens.surface.linkRowBorder}`,
@@ -284,9 +279,10 @@ export const PasteLinkCard = ({
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-start",
-                            flex: 1,
-                            minWidth: 0,
+                            justifyContent: { xs: "flex-start", md: "center" },
+                            height: "100%",
+                            width: "100%",
+                            maxWidth: "100%",
                             gap: 0.9,
                             color: tokens.text.primary,
                             textDecoration: "none",
@@ -319,7 +315,9 @@ export const PasteLinkCard = ({
                         <Box
                             component="span"
                             sx={{
+                                flex: { xs: 1, md: "0 1 auto" },
                                 minWidth: 0,
+                                maxWidth: { md: "calc(100% - 28px)" },
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -329,39 +327,6 @@ export const PasteLinkCard = ({
                             {link}
                         </Box>
                     </Typography>
-                    <IconButton
-                        type="button"
-                        aria-label={showCopied ? "Copied" : "Copy link"}
-                        onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            handleCopyClick();
-                        }}
-                        sx={{
-                            flexShrink: 0,
-                            width: { xs: 36, sm: 38 },
-                            height: { xs: 36, sm: 38 },
-                            borderRadius: "10px",
-                            color: tokens.text.primary,
-                            bgcolor: "transparent",
-                            "&:hover": {
-                                bgcolor: tokens.frame.headerIconHoverBg,
-                            },
-                        }}
-                    >
-                        {showCopied ? (
-                            <CheckRoundedIcon
-                                sx={{
-                                    fontSize: { xs: 20, sm: 21 },
-                                    color: tokens.text.copied,
-                                }}
-                            />
-                        ) : (
-                            <ContentCopyRoundedIcon
-                                sx={{ fontSize: { xs: 20, sm: 21 } }}
-                            />
-                        )}
-                    </IconButton>
                 </Box>
                 {arrow && (
                     <Box
