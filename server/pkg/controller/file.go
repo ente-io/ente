@@ -864,7 +864,13 @@ func (c *FileController) cleanupDeletedFile(qItem repo.QueueItem) {
 
 func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.ObjectType) (string, error) {
 	s3Client := c.S3Config.GetHotS3Client()
-	fullKey := c.S3Config.FullKey(c.S3Config.GetHotDataCenter(), objectKey)
+	// Resolve where the object actually lives: either under the configured
+	// bucket prefix (the default) or at the bucket root for legacy data
+	// uploaded before the prefix was configured.
+	fullKey, err := c.S3Config.ResolveKey(c.S3Config.GetHotDataCenter(), objectKey)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
 		Key:    &fullKey,
@@ -879,7 +885,10 @@ func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.Object
 
 func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objType ente.ObjectType) (string, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
-	fullKey := c.S3Config.FullKey(dc, objectKey)
+	fullKey, err := c.S3Config.ResolveKey(dc, objectKey)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &fullKey,
@@ -895,9 +904,14 @@ func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objTy
 func (c *FileController) sizeOf(objectKey string) (int64, error) {
 	s3Client := c.S3Config.GetHotS3Client()
 	bucket := c.S3Config.GetHotBucket()
-	fullKey := c.S3Config.FullKey(c.S3Config.GetHotDataCenter(), objectKey)
+	// Resolve transparently against both prefixed and legacy root locations,
+	// so that size lookups for pre-prefix data continue to work after an
+	// operator turns on the bucket prefix.
+	fullKey, err := c.S3Config.ResolveKey(c.S3Config.GetHotDataCenter(), objectKey)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
 	var head *s3.HeadObjectOutput
-	var err error
 	// Retry twice with a delay of 500ms and 1000ms
 	for i := 0; i < 3; i++ {
 		head, err = s3Client.HeadObject(&s3.HeadObjectInput{

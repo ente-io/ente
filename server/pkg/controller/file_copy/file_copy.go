@@ -10,6 +10,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/s3config"
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente-io/stacktrace"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -174,13 +175,26 @@ func (fc *FileCopyController) createCopy(c *gin.Context, fcInternal fileCopyInte
 	s3Client := fc.S3Config.GetHotS3Client()
 	hotDC := fc.S3Config.GetHotDataCenter()
 	hotBucket := fc.S3Config.GetHotBucket()
-	bucketPrefix := fc.S3Config.GetPrefix(hotDC)
+	// Resolve source keys with legacy fallback so that copies of files
+	// uploaded before the prefix was configured still succeed. Destination
+	// keys always land under the (potentially empty) prefix since they're
+	// being written for the first time.
+	fileSrcKey, err := fc.S3Config.ResolveKey(hotDC, fcInternal.FileCopyReq.SourceS3Object.ObjectKey)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	thumbSrcKey, err := fc.S3Config.ResolveKey(hotDC, fcInternal.ThumbCopyReq.SourceS3Object.ObjectKey)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	fileDstKey := fc.S3Config.FullKey(hotDC, fcInternal.FileCopyReq.DestObjectKey)
+	thumbDstKey := fc.S3Config.FullKey(hotDC, fcInternal.ThumbCopyReq.DestObjectKey)
 	g := new(errgroup.Group)
 	g.Go(func() error {
-		return copyS3Object(s3Client, hotBucket, bucketPrefix, fcInternal.FileCopyReq)
+		return copyS3Object(s3Client, hotBucket, fileSrcKey, fileDstKey, fcInternal.FileCopyReq)
 	})
 	g.Go(func() error {
-		return copyS3Object(s3Client, hotBucket, bucketPrefix, fcInternal.ThumbCopyReq)
+		return copyS3Object(s3Client, hotBucket, thumbSrcKey, thumbDstKey, fcInternal.ThumbCopyReq)
 	})
 	if err := g.Wait(); err != nil {
 		return nil, err
@@ -195,12 +209,10 @@ func (fc *FileCopyController) createCopy(c *gin.Context, fcInternal fileCopyInte
 
 // Helper function for S3 object copying.
 //
-// bucketPrefix is the configured prefix for the hot storage DC; it is
-// prepended to both the source and destination object keys before issuing the
-// CopyObject call. The database-level keys in req remain unprefixed.
-func copyS3Object(s3Client *s3.S3, bucket *string, bucketPrefix string, req *copyS3ObjectReq) error {
-	srcKey := bucketPrefix + req.SourceS3Object.ObjectKey
-	dstKey := bucketPrefix + req.DestObjectKey
+// srcKey and dstKey are the already-resolved S3 keys (with bucket prefix
+// applied, including any legacy-fallback resolution for the source). The
+// database-level keys in req remain unprefixed.
+func copyS3Object(s3Client *s3.S3, bucket *string, srcKey, dstKey string, req *copyS3ObjectReq) error {
 	copySource := fmt.Sprintf("%s/%s", *bucket, srcKey)
 	copyInput := &s3.CopyObjectInput{
 		Bucket:     bucket,

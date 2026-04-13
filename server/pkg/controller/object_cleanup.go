@@ -295,12 +295,19 @@ func (c *ObjectCleanupController) DeleteAllObjectsWithPrefix(prefix string, dc s
 // DeleteObjectFromDataCenter deletes an object from S3. The input objectKey is
 // the database-style key ({userID}/{uuid}); the DC's configured bucket prefix
 // is added before calling S3.
+//
+// When a bucket prefix is configured, the object is resolved with a
+// transparent fallback to the legacy root location, so that files uploaded
+// before the prefix was turned on can still be deleted cleanly.
 func (c *ObjectCleanupController) DeleteObjectFromDataCenter(objectKey string, dc string) error {
 	log.Info("Deleting " + objectKey + " from " + dc)
 	var s3Client = c.S3Config.GetS3Client(dc)
 	bucket := c.S3Config.GetBucket(dc)
-	fullKey := c.S3Config.FullKey(dc, objectKey)
-	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{
+	fullKey, err := c.S3Config.ResolveKey(dc, objectKey)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	_, err = s3Client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: bucket,
 		Key:    &fullKey,
 	})

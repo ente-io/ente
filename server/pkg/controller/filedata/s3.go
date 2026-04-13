@@ -90,7 +90,12 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 
 func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
-	fullKey := c.S3Config.FullKey(dc, objectKey)
+	// ResolveKey falls back to the legacy bucket-root path if the object
+	// does not exist under the configured prefix.
+	fullKey, err := c.S3Config.ResolveKey(dc, objectKey)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &fullKey,
@@ -108,9 +113,12 @@ func (c *Controller) downloadObject(ctx context.Context, objectKey string, dc st
 	var obj fileData.S3FileMetadata
 	buff := &aws.WriteAtBuffer{}
 	bucket := c.S3Config.GetBucket(dc)
-	fullKey := c.S3Config.FullKey(dc, objectKey)
+	fullKey, err := c.S3Config.ResolveKey(dc, objectKey)
+	if err != nil {
+		return obj, stacktrace.Propagate(err, "")
+	}
 	downloader := c.downloadManagerCache[dc]
-	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
+	_, err = downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
 		Bucket: bucket,
 		Key:    &fullKey,
 	})
@@ -194,7 +202,12 @@ func (c *Controller) replicateObject(ctx context.Context, req *ReplicateObjectRe
 	defer file.Close()
 	//s3Client := c.S3Config.GetS3Client(req.SrcBucketID)
 	bucket := c.S3Config.GetBucket(req.SrcBucketID)
-	srcKey := c.S3Config.FullKey(req.SrcBucketID, req.ObjectKey)
+	// Resolve with legacy fallback — the source may be a deployment whose
+	// existing data lives at the bucket root (pre-prefix).
+	srcKey, err := c.S3Config.ResolveKey(req.SrcBucketID, req.ObjectKey)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	downloader := c.downloadManagerCache[req.SrcBucketID]
 	_, err = downloader.DownloadWithContext(ctx, file, &s3.GetObjectInput{
 		Bucket: bucket,

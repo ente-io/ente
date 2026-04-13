@@ -135,6 +135,96 @@ func TestValidateDBKey(t *testing.T) {
 	}
 }
 
+func TestLocateKey_NoPrefix(t *testing.T) {
+	c := newTestConfig(map[string]string{"dc": ""})
+
+	calls := 0
+	exists := func(key string) (bool, error) {
+		calls++
+		return true, nil
+	}
+
+	got, err := c.LocateKey("dc", "42/uuid", exists)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "42/uuid" {
+		t.Errorf("expected '42/uuid', got %q", got)
+	}
+	if calls != 0 {
+		t.Errorf("expected no HEAD calls when no prefix configured, got %d", calls)
+	}
+}
+
+func TestLocateKey_FoundInPrefix(t *testing.T) {
+	c := newTestConfig(map[string]string{"dc": "ente/"})
+
+	calls := 0
+	exists := func(key string) (bool, error) {
+		calls++
+		if key == "ente/42/uuid" {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	got, err := c.LocateKey("dc", "42/uuid", exists)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "ente/42/uuid" {
+		t.Errorf("expected 'ente/42/uuid', got %q", got)
+	}
+	if calls != 1 {
+		t.Errorf("expected 1 HEAD call (prefix-only), got %d", calls)
+	}
+}
+
+func TestLocateKey_FallbackToLegacy(t *testing.T) {
+	c := newTestConfig(map[string]string{"dc": "ente/"})
+
+	calls := 0
+	exists := func(key string) (bool, error) {
+		calls++
+		if key == "ente/42/uuid" {
+			return false, nil
+		}
+		if key == "42/uuid" {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	got, err := c.LocateKey("dc", "42/uuid", exists)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "42/uuid" {
+		t.Errorf("expected legacy path '42/uuid', got %q", got)
+	}
+	if calls != 2 {
+		t.Errorf("expected 2 HEAD calls (prefix miss + legacy hit), got %d", calls)
+	}
+}
+
+func TestLocateKey_NotFound(t *testing.T) {
+	c := newTestConfig(map[string]string{"dc": "ente/"})
+
+	exists := func(key string) (bool, error) {
+		return false, nil
+	}
+
+	got, err := c.LocateKey("dc", "42/uuid", exists)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// When nothing exists, we return the prefixed path so downstream 404s
+	// report the "expected" new-location path.
+	if got != "ente/42/uuid" {
+		t.Errorf("expected 'ente/42/uuid' as the default, got %q", got)
+	}
+}
+
 func TestNewDBObjectKey(t *testing.T) {
 	c := newTestConfig(nil)
 

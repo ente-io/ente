@@ -114,6 +114,30 @@ The prefix is optional and can be set independently for each configured
 bucket. Leaving it unset preserves the previous behaviour of storing objects
 at the root of the bucket.
 
+#### Enabling a prefix on an existing deployment
+
+When you add `prefix` to a bucket that already holds data uploaded at the
+bucket root, Ente continues to serve those files: reads transparently fall
+back to the bucket-root path if an object isn't found under the prefix. New
+uploads always land under the prefix.
+
+This means you can turn on the prefix at any time without downtime. The
+fallback involves one extra HEAD request per read for pre-prefix objects;
+once everything has been migrated, the fallback becomes a no-op.
+
+When you are ready, you can move the legacy objects under the prefix so the
+fallback is never hit:
+
+```bash
+# Use rclone (recommended) for a fast, resumable move.
+rclone move remote:shared-bucket/ remote:shared-bucket/ente/ \
+    --include "*/*" --exclude "ente/**"
+```
+
+`orphan cleanup` only scans under the configured prefix and will never touch
+bucket-root objects, so there is no risk of accidental deletion during the
+transition.
+
 ## CORS (Cross-Origin Resource Sharing)
 
 If you cannot upload a photo due to CORS error, you need to fix the CORS

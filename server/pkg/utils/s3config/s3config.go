@@ -399,3 +399,59 @@ func (config *S3Config) UserPrefix(userID int64) string {
 func (config *S3Config) ValidateDBKey(dbKey string, userID int64) bool {
 	return strings.HasPrefix(dbKey, config.UserPrefix(userID))
 }
+
+// LocateKey finds where an object actually lives in S3 for the given DC:
+// either under the configured bucket prefix (the default, and the only
+// location for new uploads) or at the bucket root (for data uploaded before
+// the prefix was configured).
+//
+// Behavior:
+//   - If no prefix is configured for dc, this is a no-op: it returns dbKey.
+//   - If a prefix is configured, it first checks `prefix + dbKey`. If the
+//     object exists there, that path is returned.
+//   - Otherwise, it falls back to checking `dbKey` at the bucket root. If
+//     the object exists there, that (legacy) path is returned.
+//   - If neither exists, the prefixed path is returned (so reads fail in the
+//     expected "new" location, matching the behavior when no prefix is set).
+//
+// This lets operators turn on `prefix` on an existing deployment without
+// making previously-uploaded files unreachable: new uploads go under the
+// prefix, old uploads continue to be served from the root, and admins can
+// migrate at their own pace (e.g. via `rclone move`).
+//
+// Note that this incurs an extra HEAD request on reads whenever the object
+// is not found under the prefix. On fresh deployments (where no legacy data
+// exists) this cost is amortized by the fact that any real object will be
+// found on the first HEAD, and no fallback is attempted.
+func (config *S3Config) LocateKey(dc, dbKey string, exists func(key string) (bool, error)) (string, error) {
+	prefix := config.bucketPrefixes[dc]
+	if prefix == "" {
+		// No prefix configured — there is only one possible path.
+		return dbKey, nil
+	}
+
+	prefixed := prefix + dbKey
+	found, err := exists(prefixed)
+	if err != nil {
+		return "", err
+	}
+	if found {
+		return prefixed, nil
+	}
+
+	// Fall back to the legacy (pre-prefix) path at bucket root.
+	legacyFound, err := exists(dbKey)
+	if err != nil {
+		// Not a hard error — treat as "not there" and report the prefixed
+		// path so callers see a consistent "expected" location.
+		return prefixed, nil
+	}
+	if legacyFound {
+		return dbKey, nil
+	}
+
+	// Neither location has the object; return the prefixed path so that
+	// subsequent operations fail with the usual "not found" semantics in
+	// the location where new uploads would live.
+	return prefixed, nil
+}

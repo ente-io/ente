@@ -238,7 +238,10 @@ func (c *Controller) GetAttachmentURL(ctx *gin.Context, attachmentTypeRaw string
 	}
 	objectKey := contactmodel.AttachmentObjectKey(userID, attachment.AttachmentType, attachment.AttachmentID)
 	s3Client := c.S3Config.GetS3Client(attachment.LatestBucket)
-	fullKey := c.S3Config.FullKey(attachment.LatestBucket, objectKey)
+	fullKey, err := c.S3Config.ResolveKey(attachment.LatestBucket, objectKey)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 	input := &s3.GetObjectInput{
 		Bucket:                     c.S3Config.GetBucket(attachment.LatestBucket),
 		Key:                        aws.String(fullKey),
@@ -492,7 +495,10 @@ func (c *Controller) replicateAttachmentObject(ctx context.Context, row contactm
 		downloader = s3manager.NewDownloaderWithClient(&s3Client)
 		c.downloadManagerCache[row.LatestBucket] = downloader
 	}
-	srcKey := c.S3Config.FullKey(row.LatestBucket, row.ObjectKey())
+	srcKey, err := c.S3Config.ResolveKey(row.LatestBucket, row.ObjectKey())
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	_, err = downloader.DownloadWithContext(ctx, file, &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(row.LatestBucket),
 		Key:    aws.String(srcKey),
@@ -521,7 +527,10 @@ func (c *Controller) replicateAttachmentObject(ctx context.Context, row contactm
 
 func (c *Controller) verifyAttachmentSize(bucketID string, objectKey string, expectedSize int64) error {
 	s3Client := c.S3Config.GetS3Client(bucketID)
-	fullKey := c.S3Config.FullKey(bucketID, objectKey)
+	fullKey, err := c.S3Config.ResolveKey(bucketID, objectKey)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	res, err := s3Client.HeadObject(&s3.HeadObjectInput{
 		Bucket: c.S3Config.GetBucket(bucketID),
 		Key:    aws.String(fullKey),

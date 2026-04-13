@@ -406,10 +406,14 @@ func (c *ReplicationController3) downloadFromB2ViaWorker(objectKey string, file 
 }
 
 // Get a presigned URL to download the object with objectKey from the B2 bucket.
-// objectKey is the database-style key; the primary DC's configured bucket
-// prefix (if any) is applied before signing.
+// objectKey is the database-style key; the source DC's prefix (if any) is
+// applied when resolving the S3 location, transparently falling back to a
+// bucket-root key for objects that pre-date the prefix configuration.
 func (c *ReplicationController3) getPresignedB2URL(objectKey string) (string, error) {
-	fullKey := c.S3Config.FullKey(c.S3Config.GetHotBackblazeDC(), objectKey)
+	fullKey, err := c.S3Config.ResolveKey(c.S3Config.GetHotBackblazeDC(), objectKey)
+	if err != nil {
+		return "", err
+	}
 	r, _ := c.b2Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: c.b2Bucket,
 		Key:    &fullKey,
