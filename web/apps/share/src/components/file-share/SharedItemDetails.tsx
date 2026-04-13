@@ -31,15 +31,11 @@ export const SharedItemDetails: React.FC<SharedItemDetailsProps> = ({
         lockerType: itemInfo.lockerType,
     });
 
-    // When there is a back button (collection context), content starts at the
-    // top so the back button is immediately visible. Without a back button
-    // (single-file context), locker items get extra top spacing to push the
-    // content down from the logo, and regular file items are vertically centred.
-    const topMargin = itemInfo.lockerType
-        ? onBack
-            ? 0
-            : { xs: 16, md: "20dvh" }
-        : 0;
+    const topMargin = onBack
+        ? { xs: 3, md: 5 }
+        : itemInfo.lockerType
+          ? { xs: 16, md: "20dvh" }
+          : 0;
 
     return (
         <Box
