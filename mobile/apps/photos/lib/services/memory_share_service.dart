@@ -43,11 +43,6 @@ class MemoryShareService {
     _enteDio = NetworkClient.instance.enteDio;
     _db = MemorySharesDB.instance;
     await _loadMemoryShareHashCache();
-    try {
-      await listMemoryShares();
-    } catch (e, s) {
-      _logger.warning("Failed to refresh memory shares during init", e, s);
-    }
   }
 
   void clearCache() {
@@ -242,6 +237,7 @@ class MemoryShareService {
       for (final share in result) {
         if (share.isDeleted) {
           await _db.delete(share.id);
+          _removeMemoryShareFromCache(share.id);
           continue;
         }
         activeRemoteShareIDs.add(share.id);

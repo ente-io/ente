@@ -167,7 +167,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       backgroundColor: pageBackgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

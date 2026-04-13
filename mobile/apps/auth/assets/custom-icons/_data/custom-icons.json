@@ -385,7 +385,6 @@
     {
       "title": "Capcom",
       "slug": "capcom",
-      "hex": "0D4DA2",
       "altNames": [
         "Capcom Co., Ltd."
       ]
@@ -722,6 +721,13 @@
       "title": "Esketit"
     },
     {
+      "title": "ESL",
+      "slug": "esl",
+      "altNames": [
+        "ESL Gaming"
+      ]
+    },
+    {
       "title": "Estateguru"
     },
     {
@@ -796,7 +802,10 @@
     },
     {
       "title": "Firefox",
-      "slug": "mozilla"
+      "slug": "firefoxbrowser",
+      "altNames": [
+        "Firefox Browser"
+      ]
     },
     {
       "title": "fortrabbit"
@@ -1285,6 +1294,14 @@
       "title": "MEXC"
     },
     {
+      "title": "MyFigureCollection",
+      "slug": "mfc",
+      "altNames": [
+        "MyFigureCollection.net",
+        "MFC"
+      ]
+    },    
+    {
       "title": "microsoft"
     },
     {
@@ -1320,7 +1337,15 @@
       ]
     },
     {
-      "title": "Mozilla"
+      "title": "MozillaOld",
+      "slug": "mozilla_old"
+    },
+    {
+      "title": "Mozilla",
+      "slug": "mozilla",
+      "altNames": [
+        "Mozilla Account"
+      ]
     },
     {
       "title": "MyFRITZ!Net",
@@ -1419,6 +1444,7 @@
     },
     {
       "title": "nintendo",
+      "hex": "ffffff",
       "altNames": [
         "任天堂",
         "Nintendo Account"
@@ -1591,6 +1617,10 @@
     {
       "title": "Pionex",
       "slug": "pionex"
+    },
+    {
+      "title": "PSNProfiles",
+      "slug": "psnprofiles"
     },
     {
       "title": "Plus Crypto",
@@ -1888,6 +1918,10 @@
     },
     {
       "title": "SpaceHey"
+    },
+    {
+      "title": "Square Enix",
+      "slug": "square_enix"
     },
     {
       "title": "Standard Notes",

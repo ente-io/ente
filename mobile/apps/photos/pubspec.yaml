@@ -118,7 +118,7 @@ dependencies:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 1eb375e639dc86df69b544642b177a710ae43db0
+      ref: 85a6ac0f36c4473ac1345727ca5dd8589e564b80
   flutter_spinkit: 5.2.1
   flutter_staggered_grid_view: 0.7.0
   flutter_svg: 2.2.0
@@ -267,7 +267,7 @@ dependency_overrides:
   flutter_sodium: # update source if there is any update
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 1eb375e639dc86df69b544642b177a710ae43db0
+      ref: 85a6ac0f36c4473ac1345727ca5dd8589e564b80
   intl: 0.20.2
   js: 0.6.7
   media_kit: # update media_kit* if there is any update
