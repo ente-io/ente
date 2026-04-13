@@ -4,7 +4,6 @@ import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection.dart";
@@ -16,7 +15,9 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/social_actor_contact_navigation.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
+import "package:photos/ui/social/widgets/resolved_social_user_name.dart";
 
 const _shrinkWrapThreshold = 30;
 
@@ -31,6 +32,7 @@ Future<void> showLikesBottomSheet(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => LikesBottomSheet(
+      launchContext: context,
       fileID: fileID,
       initialCollectionID: initialCollectionID,
     ),
@@ -38,10 +40,12 @@ Future<void> showLikesBottomSheet(
 }
 
 class LikesBottomSheet extends StatefulWidget {
+  final BuildContext launchContext;
   final int fileID;
   final int initialCollectionID;
 
   const LikesBottomSheet({
+    required this.launchContext,
     required this.fileID,
     required this.initialCollectionID,
     super.key,
@@ -259,6 +263,13 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
                     currentUserID: _currentUserID,
                     selectedCollectionID: _selectedCollectionID,
                     anonDisplayNames: _anonDisplayNames,
+                    onUserTap: (user) => openSocialActorContactDestination(
+                      context,
+                      user,
+                      currentUserID: _currentUserID,
+                      navigationContext: widget.launchContext,
+                      dismissCurrentRoute: true,
+                    ),
                   ),
                 ),
             ],
@@ -360,12 +371,14 @@ class _LikesList extends StatelessWidget {
   final int currentUserID;
   final int selectedCollectionID;
   final Map<String, String> anonDisplayNames;
+  final ValueChanged<User> onUserTap;
 
   const _LikesList({
     required this.likes,
     required this.currentUserID,
     required this.selectedCollectionID,
     required this.anonDisplayNames,
+    required this.onUserTap,
   });
 
   User _getUserForReaction(Reaction reaction) {
@@ -399,6 +412,7 @@ class _LikesList extends StatelessWidget {
           user: user,
           currentUserID: currentUserID,
           youLabel: l10n.you,
+          onTap: () => onUserTap(user),
         );
       },
     );
@@ -409,18 +423,20 @@ class _LikeListItem extends StatelessWidget {
   final User user;
   final int currentUserID;
   final String youLabel;
+  final VoidCallback? onTap;
 
   const _LikeListItem({
     required this.user,
     required this.currentUserID,
     required this.youLabel,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
@@ -432,19 +448,32 @@ class _LikeListItem extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              user.id == currentUserID
-                  ? youLabel
-                  : (user.displayName ?? user.email),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                height: 20 / 14,
-                letterSpacing: 14 * -0.02,
-                color: colorScheme.textMuted,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: user.id == currentUserID
+                ? Text(
+                    youLabel,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 20 / 14,
+                      letterSpacing: 14 * -0.02,
+                      color: colorScheme.textMuted,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : ResolvedSocialUserName(
+                    user: user,
+                    builder: (context, resolvedName) => Text(
+                      resolvedName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        height: 20 / 14,
+                        letterSpacing: 14 * -0.02,
+                        color: colorScheme.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
           ),
           const Icon(
             EnteIcons.likeFilled,
@@ -453,6 +482,16 @@ class _LikeListItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null || user.id == currentUserID) {
+      return row;
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: row,
     );
   }
 }

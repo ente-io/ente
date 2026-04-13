@@ -2,6 +2,7 @@ import "dart:async";
 
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
@@ -60,7 +61,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildOnlinePermissionScreen(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
@@ -70,11 +70,12 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-            color: colorScheme.content,
+        title: SvgPicture.asset(
+          "assets/ente-branding.svg",
+          height: 15,
+          colorFilter: ColorFilter.mode(
+            colorScheme.content,
+            BlendMode.srcIn,
           ),
         ),
       ),
@@ -463,7 +464,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildOfflinePermissionHeader(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -478,10 +478,12 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                 size: 24,
                 color: colorScheme.strokeBase,
               ),
-              Text(
-                "ente",
-                style: textTheme.h3Bold.copyWith(
-                  fontFamily: "Montserrat",
+              SvgPicture.asset(
+                "assets/ente-branding.svg",
+                height: 15,
+                colorFilter: ColorFilter.mode(
+                  colorScheme.content,
+                  BlendMode.srcIn,
                 ),
               ),
               HugeIcon(

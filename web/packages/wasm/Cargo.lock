@@ -304,6 +304,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-contacts"
+version = "0.0.1"
+dependencies = [
+ "ente-core",
+ "md-5",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "ente-core"
 version = "0.0.1"
 dependencies = [
@@ -333,8 +344,10 @@ dependencies = [
 name = "ente-wasm"
 version = "0.0.1"
 dependencies = [
+ "ente-contacts",
  "ente-core",
  "md-5",
+ "serde",
  "serde-wasm-bindgen",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -566,6 +579,7 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "tower-service",
+ "webpki-roots",
 ]
 
 [[package]]
@@ -1071,6 +1085,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+ "webpki-roots",
 ]
 
 [[package]]
@@ -1704,6 +1719,15 @@ checksum = "5a6580f308b1fad9207618087a65c04e7a10bc77e02c8e84e9b00dd4b12fa0bb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22cfaf3c063993ff62e73cb4311efde4db1efb31ab78a3e5c457939ad5cc0bed"
+dependencies = [
+ "rustls-pki-types",
 ]
 
 [[package]]

@@ -242,7 +242,7 @@
     "leave": "Palikti",
     "leave_family_plan_confirm": "Ar tikrai norite palikti šeimos planą?",
     "choose_plan": "Pasirinkite planą",
-    "manage_plan": "Tvarkyti prenumeratą",
+    "manage_plan": "",
     "current_usage": "Dabartinis naudojimas – <strong>{{usage}}</strong>",
     "two_months_free": "Gaukite 2 mėnesius nemokamai metiniuose planuose",
     "free_plan_option": "Tęsti su nemokamu planu",

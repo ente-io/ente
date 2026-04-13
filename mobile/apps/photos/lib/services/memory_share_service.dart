@@ -43,11 +43,6 @@ class MemoryShareService {
     _enteDio = NetworkClient.instance.enteDio;
     _db = MemorySharesDB.instance;
     await _loadMemoryShareHashCache();
-    try {
-      await listMemoryShares();
-    } catch (e, s) {
-      _logger.warning("Failed to refresh memory shares during init", e, s);
-    }
   }
 
   void clearCache() {
@@ -199,6 +194,16 @@ class MemoryShareService {
     try {
       final response = await _enteDio.get('/memory-share');
       final List<dynamic> shares = response.data['memoryShares'] ?? [];
+      final localSharesByID = {
+        for (final share in await _db.getAll()) share.id: share,
+      };
+      if (shares.isEmpty) {
+        _memoryShareByHashCache.clear();
+        for (final localShare in localSharesByID.values) {
+          await _db.delete(localShare.id);
+        }
+        return [];
+      }
       Uint8List? memoryEntityKey;
       try {
         memoryEntityKey = await entityService.getOrCreateEntityKey(
@@ -226,16 +231,13 @@ class MemoryShareService {
         }
         return share;
       }).toList();
-
-      final localSharesByID = {
-        for (final share in await _db.getAll()) share.id: share,
-      };
       _memoryShareByHashCache.clear();
       final activeRemoteShareIDs = <int>{};
       final activeShares = <MemoryShare>[];
       for (final share in result) {
         if (share.isDeleted) {
           await _db.delete(share.id);
+          _removeMemoryShareFromCache(share.id);
           continue;
         }
         activeRemoteShareIDs.add(share.id);

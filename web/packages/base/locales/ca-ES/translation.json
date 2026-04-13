@@ -242,7 +242,7 @@
     "leave": "Surt",
     "leave_family_plan_confirm": "Estàs segur que vols deixar el pla familiar?",
     "choose_plan": "Tria el teu pla",
-    "manage_plan": "Gestiona la teva subscripció",
+    "manage_plan": "",
     "current_usage": "L'ús actual és <strong>{{usage}}</strong>",
     "two_months_free": "Aconsegueix 2 mesos gratis en plans anuals",
     "free_plan_option": "Continua amb el pla gratuït",

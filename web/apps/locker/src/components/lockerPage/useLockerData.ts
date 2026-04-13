@@ -5,6 +5,7 @@ import {
 } from "ente-accounts-rs/services/accounts-db";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import {
     authenticatedRequestHeaders,
@@ -14,6 +15,7 @@ import {
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
+import { ensureContactsReady } from "ente-contacts-web";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -309,6 +311,15 @@ export const useLockerData = ({
                 }
 
                 setMasterKey(mk);
+                void ensureContactsReady({
+                    userID: ensureLocalUser().id,
+                    masterKeyB64: mk,
+                }).catch((error: unknown) => {
+                    log.warn(
+                        "[locker] Failed to warm contacts display cache",
+                        error,
+                    );
+                });
 
                 const persisted = await loadPersistedLockerState(mk);
                 if (canApplyState() && persisted.hasPersistedState) {

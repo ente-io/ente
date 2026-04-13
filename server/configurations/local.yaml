@@ -228,6 +228,10 @@ s3:
     #     img_preview:
     #         primaryBucket:
     #         replicaBuckets: []
+    # attachment-config:
+    #     profile_picture:
+    #         primaryBucket:
+    #         replicaBuckets: []
 
 # Key used for encrypting customer emails before storing them in DB
 #

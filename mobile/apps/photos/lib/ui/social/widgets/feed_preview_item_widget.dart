@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/feed_item.dart";
@@ -9,6 +8,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/widgets/resolved_social_user_name.dart";
 
 class FeedPreviewItemWidget extends StatelessWidget {
   final FeedItem feedItem;
@@ -246,28 +246,27 @@ class _PreviewTextContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primaryUser = _getPrimaryUser();
-    final primaryName = primaryUser.displayName ?? primaryUser.email;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Username row with "and X other(s)"
-        _buildUsernameRow(context, primaryName),
-        const SizedBox(height: 2),
-        // Action description
-        Text.rich(
-          _getActionDescriptionSpan(
-            context,
-            textTheme.small.copyWith(
-              color: colorScheme.textMuted,
-              fontWeight: FontWeight.w500,
+    return ResolvedSocialUserName(
+      user: primaryUser,
+      builder: (context, primaryName) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildUsernameRow(context, primaryName),
+          const SizedBox(height: 2),
+          Text.rich(
+            _getActionDescriptionSpan(
+              context,
+              textTheme.small.copyWith(
+                color: colorScheme.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        ],
+      ),
     );
   }
 

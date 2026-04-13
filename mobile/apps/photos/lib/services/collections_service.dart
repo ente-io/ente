@@ -618,7 +618,9 @@ class CollectionsService {
       return SharedCollectionsAndMemoryLinks(collections, memoryLinks);
     } catch (e, s) {
       _logger.severe("failed to load memory links", e, s);
-      return SharedCollectionsAndMemoryLinks(collections, []);
+      final localMemoryLinks =
+          await MemoryShareService.instance.getLocalMemoryShares();
+      return SharedCollectionsAndMemoryLinks(collections, localMemoryLinks);
     }
   }
 

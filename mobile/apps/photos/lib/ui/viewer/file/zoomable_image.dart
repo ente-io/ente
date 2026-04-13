@@ -85,9 +85,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
-      InheritedDetailPageState.maybeOf(context)
-          ?.isZoomedNotifier
-          .value = _isZooming;
+      InheritedDetailPageState.maybeOf(context)?.isZoomedNotifier.value =
+          _isZooming;
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };

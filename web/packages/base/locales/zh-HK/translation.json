@@ -242,7 +242,7 @@
     "leave": "離開",
     "leave_family_plan_confirm": "你確定要離開家庭計劃嗎？",
     "choose_plan": "選擇你的計劃",
-    "manage_plan": "管理你的訂閲",
+    "manage_plan": "",
     "current_usage": "目前已使用 <strong>{{usage}}</strong>",
     "two_months_free": "",
     "free_plan_option": "以免費計劃繼續",

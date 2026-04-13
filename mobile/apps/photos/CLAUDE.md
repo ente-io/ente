@@ -24,8 +24,6 @@ The Photos app uses two types of packages:
 
 ## Commit & PR Guidelines
 
-⚠️ **CRITICAL: From the default template, use ONLY: Co-Authored-By: Claude <noreply@anthropic.com>** ⚠️
-
 ### Pre-commit/PR Checklist (RUN BEFORE EVERY COMMIT OR PR!)
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
@@ -52,7 +50,8 @@ flutter analyze
 - Keep messages CONCISE (no walls of text)
 - Subject line under 72 chars (no body text unless critical)
 - NO emojis
-- NO promotional text or links (except Co-Authored-By line)
+- NO promotional text or links
+- NO Co-Authored-By lines
 
 ### Additional Guidelines
 
@@ -79,11 +78,8 @@ melos clean:photos
 
 ### Direct Flutter Commands
 ```bash
-# Development run with environment variables
-./run.sh                                    # Uses .env file with --flavor dev
-
-# Development run without env file
-flutter run -t lib/main.dart --flavor independent
+# Development run
+flutter run --flavor independent
 
 # Build release APK
 flutter build apk --release --flavor independent
@@ -161,8 +157,6 @@ lib/
 1. Install Flutter v3.32.8 and Rust
 2. Install Flutter Rust Bridge: `cargo install flutter_rust_bridge_codegen`
 3. Generate Rust bindings: `flutter_rust_bridge_codegen generate`
-4. Update submodules: `git submodule update --init --recursive`
-5. Enable git hooks: `git config core.hooksPath hooks`
 
 ## Critical Coding Requirements
 

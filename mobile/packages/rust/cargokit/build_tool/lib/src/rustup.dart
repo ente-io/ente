@@ -36,14 +36,34 @@ class Rustup {
     required String toolchain,
   }) {
     log.info("Installing Rust target: $target");
-    runCommand("rustup", [
-      'target',
-      'add',
-      '--toolchain',
-      toolchain,
-      target,
-    ]);
-    _installedTargets(toolchain)?.add(target);
+    final lockFile = File(path.join(
+      Directory.systemTemp.path,
+      'cargokit_rustup_target_${toolchain}_$target.lock',
+    ));
+    lockFile.createSync(recursive: true);
+    final lock = lockFile.openSync(mode: FileMode.write);
+    var lockAcquired = false;
+    try {
+      lock.lockSync(FileLock.blockingExclusive);
+      lockAcquired = true;
+      if (_getInstalledTargets(toolchain).contains(target)) {
+        _installedTargets(toolchain)?.add(target);
+        return;
+      }
+      runCommand("rustup", [
+        'target',
+        'add',
+        '--toolchain',
+        toolchain,
+        target,
+      ]);
+      _installedTargets(toolchain)?.add(target);
+    } finally {
+      if (lockAcquired) {
+        lock.unlockSync();
+      }
+      lock.closeSync();
+    }
   }
 
   final List<_Toolchain> _installedToolchains;

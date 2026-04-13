@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/ui/common/loading_widget.dart";
@@ -67,6 +68,16 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
+          final isFamilyMember = (userDetails?.isPartOfFamily() ?? false) &&
+              !((userDetails?.currentFamilyMember()?.isAdmin) ?? false);
+          if (isFamilyMember) {
+            await billingService.launchFamilyPortal(
+              context,
+              userDetails!,
+              refreshOnOpen: false,
+            );
+            return;
+          }
           // ignore: unawaited_futures
           Navigator.of(context).push(
             MaterialPageRoute(

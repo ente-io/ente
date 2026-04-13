@@ -4,6 +4,7 @@ import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -63,6 +64,8 @@ class AccountSettingsPage extends StatelessWidget {
                         ),
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
+                        showOnlyLoadingState: true,
+                        surfaceExecutionStates: true,
                         onTap: () async => _onManageSubscriptionTapped(context),
                       ),
                       const SizedBox(height: 8),
@@ -155,8 +158,35 @@ class AccountSettingsPage extends StatelessWidget {
     );
   }
 
-  void _onManageSubscriptionTapped(BuildContext context) {
-    Navigator.of(context).push(
+  Future<void> _onManageSubscriptionTapped(BuildContext context) async {
+    try {
+      final userDetails =
+          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if (!context.mounted) {
+        return;
+      }
+      final isFamilyMember = userDetails.isPartOfFamily() &&
+          !(userDetails.currentFamilyMember()?.isAdmin ?? false);
+      if (isFamilyMember) {
+        await billingService.launchFamilyPortal(
+          context,
+          userDetails,
+          refreshOnOpen: false,
+        );
+        return;
+      }
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+      await showGenericErrorDialog(context: context, error: error);
+      return;
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return getSubscriptionPage();

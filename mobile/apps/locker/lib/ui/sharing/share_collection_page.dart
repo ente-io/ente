@@ -1,3 +1,4 @@
+import 'package:ente_contacts/contacts.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
@@ -338,8 +339,11 @@ class EmailItemWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: user?.displayName ?? user?.email ?? '',
+            captionedTextWidget: ValueListenableBuilder<int>(
+              valueListenable: ContactsDisplayService.instance.changes,
+              builder: (context, __, ___) => CaptionedTextWidget(
+                title: user?.resolvedDisplayName ?? '',
+              ),
             ),
             leadingIconWidget: UserAvatarWidget(
               collection.getSharees().first,

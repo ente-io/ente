@@ -1309,8 +1309,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Yarıçapı ayarla",
-  "familyPlanPortalTitle": "Aile",
-  "familyPlanOverview": "Ekstra ödeme yapmadan mevcut planınıza 5 aile üyesi ekleyin.\n\nHer üyenin kendine ait özel alanı vardır ve paylaşılmadıkça birbirlerinin dosyalarını göremezler.\n\nAile planları ücretli ente aboneliğine sahip müşteriler tarafından kullanılabilir.\n\nBaşlamak için şimdi abone olun!",
   "androidBiometricHint": "Kimliği doğrula",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

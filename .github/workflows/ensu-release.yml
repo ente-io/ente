@@ -59,6 +59,11 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
+
             # Pin to 1.93.0: Rust 1.94.0 has a trait glob-import regression
             # that breaks wry 0.24.x (SettingsExt not found via traits::*).
             - name: Install Rust 1.93.0
@@ -237,10 +242,8 @@ jobs:
                 working-directory: mobile/native/android/apps/ensu
 
         steps:
-            - name: Checkout code and submodules
+            - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Set release tag
               shell: bash
