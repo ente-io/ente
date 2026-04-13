@@ -68,7 +68,10 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 				return
 			}
 			if reached {
-				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "reached device limit"})
+				c.AbortWithStatusJSON(
+					ente.ErrLinkDeviceLimitExceeded.HttpStatusCode,
+					&ente.ErrLinkDeviceLimitExceeded,
+				)
 				return
 			}
 		} else {
