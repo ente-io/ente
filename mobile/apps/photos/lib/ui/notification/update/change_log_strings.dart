@@ -458,17 +458,4 @@ class ChangeLogStrings {
       desc2: '同样的长按手势也适用于文字——用它来检测和选择任何照片中的文字。',
     ),
   };
-
-  static const Map<String, ChangeLogStrings> _offlineTranslations = {
-    'en': ChangeLogStrings(
-      title1: '',
-      desc1: '',
-      desc1Item1: '',
-      desc1Item2: '',
-      title2: '',
-      desc2: '',
-      title3: '',
-      desc3: '',
-    ),
-  };
 }
