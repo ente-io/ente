@@ -1828,7 +1828,7 @@ class CollectionsService {
         final currentUserID = _config.getUserID()!;
         final shouldCopyViaUncategorized = dstCollection != null &&
             !dstCollection.isOwner(currentUserID) &&
-            dstCollection.canAutoAdd(currentUserID);
+            dstCollection.canAdd(currentUserID);
 
         final int copyDestinationCollectionID;
         if (shouldCopyViaUncategorized) {
