@@ -75,10 +75,15 @@ Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
   if (folderNames.isNotEmpty) {
     return folderNames.last;
   }
-  throw StateError(
-    "Expected non-empty device collection name for localID=${file.localID}, "
-    "but found none.",
+  // The asset exists on device but no device-collection mapping is recorded
+  // yet (e.g. LocalSyncService hasn't ingested it). Treat this as "not
+  // skippable" rather than crashing; a duplicate save is preferable to an
+  // unhandled StateError surfacing in the download flow.
+  _logger.severe(
+    "No device collection name found for localID=${file.localID} "
+    "despite asset existing on device.",
   );
+  return null;
 }
 
 Future<File?> downloadAndDecryptPublicFile(
@@ -315,6 +320,11 @@ Future<String> _getFileMetadataForLogging(
   return buffer.toString();
 }
 
+// Note: callers that tap Download repeatedly on a public-link file
+// (persistToFilesDB == false) may produce duplicate on-device copies, because
+// the in-memory EnteFile they hold is not updated with the saved localID and
+// LocalSyncService ingests the asset as a new local row rather than marking
+// the existing remote entry. Revisit if this surfaces as a user complaint.
 Future<void> downloadToGallery(
   EnteFile file, {
   bool forceResumableDownload = false,
