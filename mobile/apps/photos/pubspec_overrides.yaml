@@ -13,7 +13,7 @@ dependency_overrides:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 85a6ac0f36c4473ac1345727ca5dd8589e564b80
+      ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   intl: 0.20.2
   js: 0.6.7
   media_kit:
