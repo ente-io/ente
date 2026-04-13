@@ -340,7 +340,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       } else {
         widgets.add(
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: MenuItemWidgetNew(
               title: AppLocalizations.of(context).managePaymentMethod,
               menuItemColor: colorScheme.fillFaint,
@@ -365,7 +365,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: MenuItemWidgetNew(
             title: _isFreePlanUser()
                 ? AppLocalizations.of(context).familyPlans
@@ -376,8 +376,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
-            showOnlyLoadingState: true,
-            surfaceExecutionStates: true,
             onTap: () async {
               late final UserDetails userDetails;
               try {
