@@ -107,12 +107,13 @@ func (c *ObjectController) removeComplianceHold(qItem repo.QueueItem) {
 	for _, dc := range dcs {
 		if dc == complianceDC {
 			logger.Info("Removing compliance hold")
-			err = c.DisableObjectConditionalHold(&s3Client, bucket, objectKey)
+			fullKey := config.FullKey(dc, objectKey)
+			err = c.DisableObjectConditionalHold(&s3Client, bucket, fullKey)
 			if err != nil {
 				logger.WithError(err).Errorf("Failed to remove compliance hold (dc: %s, bucket: %s)", dc, bucket)
 				return
 			}
-			logger.Infof("Removed compliance hold for %s/%s", bucket, objectKey)
+			logger.Infof("Removed compliance hold for %s/%s", bucket, fullKey)
 			break
 		}
 	}

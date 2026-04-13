@@ -254,12 +254,17 @@ func (c *ObjectCleanupController) AddMultipartTempObjectKey(objectKey string, up
 	return stacktrace.Propagate(err, "")
 }
 
+// DeleteAllObjectsWithPrefix deletes all objects under a given database-style
+// key prefix (e.g. "{userID}/" or "{userID}/file-data/{fileID}/"). The DC's
+// bucket prefix, if configured, is applied when listing and deleting so the
+// caller can continue to think purely in database keys.
 func (c *ObjectCleanupController) DeleteAllObjectsWithPrefix(prefix string, dc string) error {
 	s3Client := c.S3Config.GetS3Client(dc)
 	bucket := c.S3Config.GetBucket(dc)
+	fullPrefix := c.S3Config.FullKey(dc, prefix)
 	output, err := s3Client.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: bucket,
-		Prefix: &prefix,
+		Prefix: &fullPrefix,
 	})
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -270,7 +275,9 @@ func (c *ObjectCleanupController) DeleteAllObjectsWithPrefix(prefix string, dc s
 	}
 	var keys []string
 	for _, obj := range output.Contents {
-		keys = append(keys, *obj.Key)
+		// Convert back to database-style key before invoking DeleteObjectFromDataCenter,
+		// which expects dbKey and applies the DC prefix itself.
+		keys = append(keys, c.S3Config.StripPrefix(dc, *obj.Key))
 	}
 	for _, key := range keys {
 		err = c.DeleteObjectFromDataCenter(key, dc)
@@ -285,20 +292,24 @@ func (c *ObjectCleanupController) DeleteAllObjectsWithPrefix(prefix string, dc s
 	return nil
 }
 
+// DeleteObjectFromDataCenter deletes an object from S3. The input objectKey is
+// the database-style key ({userID}/{uuid}); the DC's configured bucket prefix
+// is added before calling S3.
 func (c *ObjectCleanupController) DeleteObjectFromDataCenter(objectKey string, dc string) error {
 	log.Info("Deleting " + objectKey + " from " + dc)
 	var s3Client = c.S3Config.GetS3Client(dc)
 	bucket := c.S3Config.GetBucket(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 	err = s3Client.WaitUntilObjectNotExists(&s3.HeadObjectInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -309,9 +320,10 @@ func (c *ObjectCleanupController) DeleteObjectFromDataCenter(objectKey string, d
 func (c *ObjectCleanupController) abortMultipartUpload(objectKey string, uploadID string, dc string) error {
 	s3Client := c.S3Config.GetS3Client(dc)
 	bucket := c.S3Config.GetBucket(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	_, err := s3Client.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
 		Bucket:   bucket,
-		Key:      &objectKey,
+		Key:      &fullKey,
 		UploadId: &uploadID,
 	})
 	if err != nil {
@@ -323,7 +335,7 @@ func (c *ObjectCleanupController) abortMultipartUpload(objectKey string, uploadI
 	}
 	r, err := s3Client.ListParts(&s3.ListPartsInput{
 		Bucket:   bucket,
-		Key:      &objectKey,
+		Key:      &fullKey,
 		UploadId: &uploadID,
 	})
 	if err != nil {
@@ -481,9 +493,13 @@ func (c *ObjectCleanupController) ClearOrphanObjects(dc string, prefix string, f
 	// can span hours, and we don't want a different instance to start another
 	// run just because it was only considering the start time of the job.
 
+	// The caller-supplied prefix is in database-key form; combine it with the
+	// DC's configured bucket prefix (if any) so that we list only inside the
+	// Ente sub-folder and never touch unrelated data in the bucket.
+	fullPrefix := s3Config.FullKey(dc, prefix)
 	err := dest.Client.ListObjectVersionsPages(&s3.ListObjectVersionsInput{
 		Bucket: dest.Bucket,
-		Prefix: &prefix,
+		Prefix: &fullPrefix,
 	},
 		func(page *s3.ListObjectVersionsOutput, lastPage bool) bool {
 			c.clearOrphanObjectsPage(page, dest, logger)
@@ -610,7 +626,11 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 		return
 	}
 
-	objectKey := *od.GetKey()
+	// The key returned by S3 includes the DC's bucket prefix (if any). Strip
+	// it to get the database-style key we use when checking membership in the
+	// DB. Keep fullKey around for S3 operations (delete, compliance hold).
+	fullKey := *od.GetKey()
+	objectKey := c.S3Config.StripPrefix(dest.DC, fullKey)
 	lastModified := *od.GetLastModified()
 
 	logger = logger.WithFields(log.Fields{
@@ -640,8 +660,9 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 	logger.Infof("Found orphan object %v", od)
 
 	if dest.HasComplianceHold {
-		// Remove compliance hold.
-		err := c.ObjectController.DisableObjectConditionalHold(&dest.Client, *dest.Bucket, objectKey)
+		// Remove compliance hold. Wasabi's API takes the full key (as it
+		// appears in S3), not the database key.
+		err := c.ObjectController.DisableObjectConditionalHold(&dest.Client, *dest.Bucket, fullKey)
 		if err != nil {
 			logger.Error(stacktrace.Propagate(err, "Failed to disable conditional hold on object"))
 			return
@@ -658,7 +679,7 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 		// Delete it right away.
 		versionID := od.GetVersionId()
 		logger.Infof("Deleting version '%s'", enteString.EmptyIfNil(versionID))
-		err := c.DeleteObjectVersion(objectKey, versionID, dest)
+		err := c.DeleteObjectVersion(fullKey, versionID, dest)
 		if err != nil {
 			logger.Error(stacktrace.Propagate(err, "Failed to delete object"))
 		}
@@ -668,6 +689,7 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 }
 
 // DeleteObjectVersion can be used to delete objects from versioned buckets.
+// objectKey here is the full S3 key (with any bucket prefix already applied).
 //
 // If we delete an object in a versioning enabled bucket, deletion does not
 // actually remove the object and instead creates a delete marker:

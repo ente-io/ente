@@ -23,9 +23,10 @@ const PreSignedRequestValidityDuration = 7 * 24 * stime.Hour
 
 func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	r, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	url, err := r.Presign(PreSignedRequestValidityDuration)
 	if err != nil {
@@ -46,9 +47,10 @@ func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL,
 func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *int64) (*ente.MultipartUploadURLs, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
 	bucket := c.S3Config.GetBucket(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -62,7 +64,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 	for i := int64(1); i <= *count; i++ {
 		partReq, _ := s3Client.UploadPartRequest(&s3.UploadPartInput{
 			Bucket:     bucket,
-			Key:        &objectKey,
+			Key:        &fullKey,
 			UploadId:   r.UploadId,
 			PartNumber: &i,
 		})
@@ -75,7 +77,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 	multipartUploadURLs.PartURLs = urls
 	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
 		Bucket:   bucket,
-		Key:      &objectKey,
+		Key:      &fullKey,
 		UploadId: r.UploadId,
 	})
 	url, err := r2.Presign(PreSignedRequestValidityDuration)
@@ -88,9 +90,10 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 
 func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
-		Key:    &objectKey,
+		Key:    &fullKey,
 	}
 	input.ResponseContentDisposition = aws.String("attachment")
 	r, _ := s3Client.GetObjectRequest(input)
@@ -105,10 +108,11 @@ func (c *Controller) downloadObject(ctx context.Context, objectKey string, dc st
 	var obj fileData.S3FileMetadata
 	buff := &aws.WriteAtBuffer{}
 	bucket := c.S3Config.GetBucket(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	downloader := c.downloadManagerCache[dc]
 	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return obj, err
@@ -125,10 +129,11 @@ func (c *Controller) uploadObject(obj fileData.S3FileMetadata, objectKey string,
 	embeddingObj, _ := json.Marshal(obj)
 	s3Client := c.S3Config.GetS3Client(dc)
 	s3Bucket := c.S3Config.GetBucket(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	uploader := s3manager.NewUploaderWithClient(&s3Client)
 	up := s3manager.UploadInput{
 		Bucket: s3Bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 		Body:   bytes.NewReader(embeddingObj),
 	}
 	var err error
@@ -151,9 +156,10 @@ func (c *Controller) uploadObject(obj fileData.S3FileMetadata, objectKey string,
 func (c *Controller) verifySize(bucketID string, objectKey string, expectedSize int64) error {
 	s3Client := c.S3Config.GetS3Client(bucketID)
 	bucket := c.S3Config.GetBucket(bucketID)
+	fullKey := c.S3Config.FullKey(bucketID, objectKey)
 	res, err := s3Client.HeadObject(&s3.HeadObjectInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "Fetching object info from bucket %s failed", *bucket)
@@ -188,10 +194,11 @@ func (c *Controller) replicateObject(ctx context.Context, req *ReplicateObjectRe
 	defer file.Close()
 	//s3Client := c.S3Config.GetS3Client(req.SrcBucketID)
 	bucket := c.S3Config.GetBucket(req.SrcBucketID)
+	srcKey := c.S3Config.FullKey(req.SrcBucketID, req.ObjectKey)
 	downloader := c.downloadManagerCache[req.SrcBucketID]
 	_, err = downloader.DownloadWithContext(ctx, file, &s3.GetObjectInput{
 		Bucket: bucket,
-		Key:    &req.ObjectKey,
+		Key:    &srcKey,
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to download object from bucket %s", req.SrcBucketID)
@@ -202,9 +209,10 @@ func (c *Controller) replicateObject(ctx context.Context, req *ReplicateObjectRe
 	dstClient := c.S3Config.GetS3Client(req.DestBucketID)
 	uploader := s3manager.NewUploaderWithClient(&dstClient)
 	file.Seek(0, io.SeekStart)
+	dstKey := c.S3Config.FullKey(req.DestBucketID, req.ObjectKey)
 	up := s3manager.UploadInput{
 		Bucket: c.S3Config.GetBucket(req.DestBucketID),
-		Key:    aws.String(req.ObjectKey),
+		Key:    aws.String(dstKey),
 		Body:   file,
 	}
 	result, err := uploader.Upload(&up)

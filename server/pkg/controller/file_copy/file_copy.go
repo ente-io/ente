@@ -172,13 +172,15 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 func (fc *FileCopyController) createCopy(c *gin.Context, fcInternal fileCopyInternal, userID int64, app ente.App) (*ente.File, error) {
 	// using HotS3Client copy the File and Thumbnail
 	s3Client := fc.S3Config.GetHotS3Client()
+	hotDC := fc.S3Config.GetHotDataCenter()
 	hotBucket := fc.S3Config.GetHotBucket()
+	bucketPrefix := fc.S3Config.GetPrefix(hotDC)
 	g := new(errgroup.Group)
 	g.Go(func() error {
-		return copyS3Object(s3Client, hotBucket, fcInternal.FileCopyReq)
+		return copyS3Object(s3Client, hotBucket, bucketPrefix, fcInternal.FileCopyReq)
 	})
 	g.Go(func() error {
-		return copyS3Object(s3Client, hotBucket, fcInternal.ThumbCopyReq)
+		return copyS3Object(s3Client, hotBucket, bucketPrefix, fcInternal.ThumbCopyReq)
 	})
 	if err := g.Wait(); err != nil {
 		return nil, err
@@ -192,19 +194,25 @@ func (fc *FileCopyController) createCopy(c *gin.Context, fcInternal fileCopyInte
 }
 
 // Helper function for S3 object copying.
-func copyS3Object(s3Client *s3.S3, bucket *string, req *copyS3ObjectReq) error {
-	copySource := fmt.Sprintf("%s/%s", *bucket, req.SourceS3Object.ObjectKey)
+//
+// bucketPrefix is the configured prefix for the hot storage DC; it is
+// prepended to both the source and destination object keys before issuing the
+// CopyObject call. The database-level keys in req remain unprefixed.
+func copyS3Object(s3Client *s3.S3, bucket *string, bucketPrefix string, req *copyS3ObjectReq) error {
+	srcKey := bucketPrefix + req.SourceS3Object.ObjectKey
+	dstKey := bucketPrefix + req.DestObjectKey
+	copySource := fmt.Sprintf("%s/%s", *bucket, srcKey)
 	copyInput := &s3.CopyObjectInput{
 		Bucket:     bucket,
 		CopySource: &copySource,
-		Key:        &req.DestObjectKey,
+		Key:        &dstKey,
 	}
 	start := time.Now()
 	_, err := s3Client.CopyObject(copyInput)
 	elapsed := time.Since(start)
 	if err != nil {
-		return fmt.Errorf("failed to copy (%s) from %s to %s: %w", req.SourceS3Object.Type, copySource, req.DestObjectKey, err)
+		return fmt.Errorf("failed to copy (%s) from %s to %s: %w", req.SourceS3Object.Type, copySource, dstKey, err)
 	}
-	logrus.WithField("duration", elapsed).WithField("size", req.SourceS3Object.FileSize).Infof("copied (%s) from %s to %s", req.SourceS3Object.Type, copySource, req.DestObjectKey)
+	logrus.WithField("duration", elapsed).WithField("size", req.SourceS3Object.FileSize).Infof("copied (%s) from %s to %s", req.SourceS3Object.Type, copySource, dstKey)
 	return nil
 }

@@ -89,6 +89,31 @@ b2-eu-cen:
     bucket: b2-eu-cen
 ```
 
+### Sharing a bucket with other data
+
+By default, Ente stores all objects at the root of the bucket using keys of
+the form `{userID}/{uuid}`. If you want to keep Ente's data under a
+sub-folder so the bucket can be shared with unrelated data, set the optional
+`prefix` on the bucket:
+
+```yaml
+b2-eu-cen:
+    key: <key>
+    secret: <secret>
+    endpoint: <endpoint>
+    region: <region>
+    bucket: shared-bucket
+    prefix: ente/
+```
+
+With the above, objects will be written to `shared-bucket/ente/{userID}/{uuid}`.
+Ente only reads, writes, and lists objects under this prefix — anything else
+in the bucket is left untouched, including by the orphan object cleanup.
+
+The prefix is optional and can be set independently for each configured
+bucket. Leaving it unset preserves the previous behaviour of storing objects
+at the root of the bucket.
+
 ## CORS (Cross-Origin Resource Sharing)
 
 If you cannot upload a photo due to CORS error, you need to fix the CORS

@@ -2,11 +2,15 @@ package s3config
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/ente-io/museum/ente"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -26,6 +30,16 @@ import (
 type S3Config struct {
 	// A map from data centers to the name of the bucket used in that DC.
 	buckets map[string]string
+	// A map from data centers to the optional object key prefix used in that
+	// DC. If set, this prefix is prepended to object keys when interacting with
+	// S3. The prefix is NOT stored in the database — the database keeps the
+	// bare object key ({userID}/{uuid}) and the prefix is added/stripped at
+	// the S3 boundary. This allows Ente to coexist with other data in the same
+	// bucket by confining itself to a sub-folder.
+	//
+	// Empty string means no prefix (default behavior, unchanged from before).
+	// If set, always ends with "/" (normalized in initialize()).
+	bucketPrefixes map[string]string
 	// Primary (hot) data center
 	hotDC string
 	// Secondary (hot) data center
@@ -124,6 +138,7 @@ func (config *S3Config) initialize() {
 	}
 
 	config.buckets = make(map[string]string)
+	config.bucketPrefixes = make(map[string]string)
 	config.s3Configs = make(map[string]*aws.Config)
 	config.s3Clients = make(map[string]s3.S3)
 
@@ -133,6 +148,17 @@ func (config *S3Config) initialize() {
 
 	for _, dc := range dcs {
 		config.buckets[dc] = viper.GetString("s3." + dc + ".bucket")
+		prefix := viper.GetString("s3." + dc + ".prefix")
+		if prefix != "" {
+			// Normalize: strip leading '/' (prefix is relative to bucket root)
+			// and ensure trailing '/' so concatenation yields correct keys.
+			prefix = strings.TrimPrefix(prefix, "/")
+			if !strings.HasSuffix(prefix, "/") {
+				prefix += "/"
+			}
+			log.Infof("Bucket %s: using key prefix %q", dc, prefix)
+		}
+		config.bucketPrefixes[dc] = prefix
 		s3Config := aws.Config{
 			Credentials: credentials.NewStaticCredentials(viper.GetString("s3."+dc+".key"),
 				viper.GetString("s3."+dc+".secret"), ""),
@@ -293,4 +319,83 @@ func (config *S3Config) WasabiComplianceDC() string {
 // various workarounds for debugging locally; not meant for production use.
 func (config *S3Config) AreLocalBuckets() bool {
 	return config.areLocalBuckets
+}
+
+// GetPrefix returns the configured S3 key prefix for the given data center, or
+// an empty string if no prefix has been configured. When non-empty, the
+// returned value always ends with "/".
+//
+// The prefix is an optional configuration that lets self-hosted Ente
+// instances store all objects under a sub-folder inside a bucket shared with
+// other data. When a prefix is configured, Ente will only read/write/delete
+// objects under that prefix, leaving the rest of the bucket untouched.
+//
+// The prefix is NEVER stored in the database. It is added to object keys at
+// the S3 boundary (uploads, presigned URLs, listing, deletion) and stripped
+// when reading object keys back from S3 (e.g. during orphan cleanup).
+func (config *S3Config) GetPrefix(dc string) string {
+	return config.bucketPrefixes[dc]
+}
+
+// HasPrefix reports whether any configured data center uses a non-empty key
+// prefix. Useful for fast paths where prefix handling can be skipped
+// entirely.
+func (config *S3Config) HasPrefix() bool {
+	for _, p := range config.bucketPrefixes {
+		if p != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// FullKey returns the full S3 object key for a given database key in the
+// given data center. If the DC has no prefix configured, the database key is
+// returned unchanged.
+//
+// The database stores bare object keys of the form "{userID}/{uuid}" (or the
+// more structured "{userID}/file-data/..." form for derived data). This
+// method is the single place that prepends the per-DC prefix when talking to
+// S3.
+func (config *S3Config) FullKey(dc, dbKey string) string {
+	prefix := config.bucketPrefixes[dc]
+	if prefix == "" {
+		return dbKey
+	}
+	return prefix + dbKey
+}
+
+// StripPrefix removes the DC's prefix from a full S3 object key, returning
+// the bare database-style key. If the key does not start with the prefix (or
+// no prefix is configured), the key is returned unchanged.
+//
+// This is used when scanning S3 listings and comparing object keys against
+// entries in the database.
+func (config *S3Config) StripPrefix(dc, fullKey string) string {
+	prefix := config.bucketPrefixes[dc]
+	if prefix == "" {
+		return fullKey
+	}
+	return strings.TrimPrefix(fullKey, prefix)
+}
+
+// NewDBObjectKey generates a new database object key for a newly-uploaded
+// file. The key has the form "{userID}/{uuid}" and is independent of any
+// bucket prefix — the prefix is added later when building S3 requests.
+func (config *S3Config) NewDBObjectKey(userID int64) string {
+	return strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+}
+
+// UserPrefix returns the per-user prefix segment of a database object key,
+// i.e. "{userID}/". Note that this is the *user* prefix inside the bucket
+// (or inside the bucket's configured prefix), not the bucket prefix.
+func (config *S3Config) UserPrefix(userID int64) string {
+	return strconv.FormatInt(userID, 10) + "/"
+}
+
+// ValidateDBKey reports whether dbKey has the expected "{userID}/..." form
+// for the given user. This is a cheap structural check used when clients
+// report newly-uploaded object keys back to the server.
+func (config *S3Config) ValidateDBKey(dbKey string, userID int64) bool {
+	return strings.HasPrefix(dbKey, config.UserPrefix(userID))
 }

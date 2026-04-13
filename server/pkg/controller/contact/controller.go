@@ -162,9 +162,10 @@ func (c *Controller) GetAttachmentUploadURL(ctx *gin.Context, attachmentTypeRaw 
 	dc := c.S3Config.GetAttachmentBucketID(string(attachmentType))
 
 	s3Client := c.S3Config.GetS3Client(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	putReq, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
 		Bucket:        c.S3Config.GetBucket(dc),
-		Key:           aws.String(objectKey),
+		Key:           aws.String(fullKey),
 		ContentLength: aws.Int64(req.ContentLength),
 		ContentMD5:    aws.String(req.ContentMD5),
 	})
@@ -237,9 +238,10 @@ func (c *Controller) GetAttachmentURL(ctx *gin.Context, attachmentTypeRaw string
 	}
 	objectKey := contactmodel.AttachmentObjectKey(userID, attachment.AttachmentType, attachment.AttachmentID)
 	s3Client := c.S3Config.GetS3Client(attachment.LatestBucket)
+	fullKey := c.S3Config.FullKey(attachment.LatestBucket, objectKey)
 	input := &s3.GetObjectInput{
 		Bucket:                     c.S3Config.GetBucket(attachment.LatestBucket),
-		Key:                        aws.String(objectKey),
+		Key:                        aws.String(fullKey),
 		ResponseContentDisposition: aws.String("attachment"),
 	}
 	getReq, _ := s3Client.GetObjectRequest(input)
@@ -490,9 +492,10 @@ func (c *Controller) replicateAttachmentObject(ctx context.Context, row contactm
 		downloader = s3manager.NewDownloaderWithClient(&s3Client)
 		c.downloadManagerCache[row.LatestBucket] = downloader
 	}
+	srcKey := c.S3Config.FullKey(row.LatestBucket, row.ObjectKey())
 	_, err = downloader.DownloadWithContext(ctx, file, &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(row.LatestBucket),
-		Key:    aws.String(row.ObjectKey()),
+		Key:    aws.String(srcKey),
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to download attachment from bucket %s", row.LatestBucket)
@@ -505,9 +508,10 @@ func (c *Controller) replicateAttachmentObject(ctx context.Context, row contactm
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
 		return stacktrace.Propagate(err, "failed to seek temporary attachment file")
 	}
+	dstKey := c.S3Config.FullKey(dstBucketID, row.ObjectKey())
 	if _, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: c.S3Config.GetBucket(dstBucketID),
-		Key:    aws.String(row.ObjectKey()),
+		Key:    aws.String(dstKey),
 		Body:   file,
 	}); err != nil {
 		return stacktrace.Propagate(err, "failed to upload attachment to bucket %s", dstBucketID)
@@ -517,9 +521,10 @@ func (c *Controller) replicateAttachmentObject(ctx context.Context, row contactm
 
 func (c *Controller) verifyAttachmentSize(bucketID string, objectKey string, expectedSize int64) error {
 	s3Client := c.S3Config.GetS3Client(bucketID)
+	fullKey := c.S3Config.FullKey(bucketID, objectKey)
 	res, err := s3Client.HeadObject(&s3.HeadObjectInput{
 		Bucket: c.S3Config.GetBucket(bucketID),
-		Key:    aws.String(objectKey),
+		Key:    aws.String(fullKey),
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to fetch attachment info from bucket %s", bucketID)

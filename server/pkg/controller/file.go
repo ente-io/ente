@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"runtime/debug"
-	"strconv"
 	"strings"
 	"sync"
 	gTime "time"
@@ -26,7 +25,6 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -78,8 +76,7 @@ const (
 )
 
 func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.File, app ente.App) error {
-	objectPathPrefix := strconv.FormatInt(userID, 10) + "/"
-	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
+	if !c.S3Config.ValidateDBKey(file.File.ObjectKey, userID) || !c.S3Config.ValidateDBKey(file.Thumbnail.ObjectKey, userID) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
 	}
 	if file.File.ObjectKey == file.Thumbnail.ObjectKey {
@@ -335,7 +332,7 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 		count = MaxUploadURLsLimit
 	}
 	for i := 0; i < count; i++ {
-		objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+		objectKey := c.S3Config.NewDBObjectKey(userID)
 		objectKeys = append(objectKeys, objectKey)
 		url, err := c.getObjectURL(s3Client, dc, bucket, objectKey, nil, nil)
 		if err != nil {
@@ -365,7 +362,7 @@ func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID in
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
-	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+	objectKey := c.S3Config.NewDBObjectKey(userID)
 	length := req.ContentLength
 	checksumCopy := checksum
 	url, err := c.getObjectURL(s3Client, dc, bucket, objectKey, &length, &checksumCopy)
@@ -643,8 +640,7 @@ func (c *FileController) UpdateMagicMetadata(ctx *gin.Context, req ente.UpdateMu
 // UpdateThumbnail updates thumbnail of a file
 func (c *FileController) UpdateThumbnail(ctx *gin.Context, fileID int64, newThumbnail ente.FileAttributes, app ente.App) error {
 	userID := auth.GetUserID(ctx.Request.Header)
-	objectPathPrefix := strconv.FormatInt(userID, 10) + "/"
-	if !strings.HasPrefix(newThumbnail.ObjectKey, objectPathPrefix) {
+	if !c.S3Config.ValidateDBKey(newThumbnail.ObjectKey, userID) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
 	}
 	ownerID, err := c.FileRepo.GetOwnerID(fileID)
@@ -868,9 +864,10 @@ func (c *FileController) cleanupDeletedFile(qItem repo.QueueItem) {
 
 func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.ObjectType) (string, error) {
 	s3Client := c.S3Config.GetHotS3Client()
+	fullKey := c.S3Config.FullKey(c.S3Config.GetHotDataCenter(), objectKey)
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
-		Key:    &objectKey,
+		Key:    &fullKey,
 	}
 	input.ResponseContentDisposition = aws.String("attachment")
 	if objType == ente.FILE || objType == ente.THUMBNAIL {
@@ -882,9 +879,10 @@ func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.Object
 
 func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objType ente.ObjectType) (string, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
-		Key:    &objectKey,
+		Key:    &fullKey,
 	}
 	input.ResponseContentDisposition = aws.String("attachment")
 	if objType == ente.FILE || objType == ente.THUMBNAIL {
@@ -897,12 +895,13 @@ func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objTy
 func (c *FileController) sizeOf(objectKey string) (int64, error) {
 	s3Client := c.S3Config.GetHotS3Client()
 	bucket := c.S3Config.GetHotBucket()
+	fullKey := c.S3Config.FullKey(c.S3Config.GetHotDataCenter(), objectKey)
 	var head *s3.HeadObjectOutput
 	var err error
 	// Retry twice with a delay of 500ms and 1000ms
 	for i := 0; i < 3; i++ {
 		head, err = s3Client.HeadObject(&s3.HeadObjectInput{
-			Key:    &objectKey,
+			Key:    &fullKey,
 			Bucket: bucket,
 		})
 		if err == nil {
@@ -1006,8 +1005,9 @@ func (c *FileController) rollbackObject(objectKey string) error {
 
 func (c *FileController) getVersions(objectKey string) ([]*s3.ObjectVersion, error) {
 	s3Client := c.S3Config.GetHotS3Client()
+	fullKey := c.S3Config.FullKey(c.S3Config.GetHotDataCenter(), objectKey)
 	response, err := s3Client.ListObjectVersions(&s3.ListObjectVersionsInput{
-		Prefix: &objectKey,
+		Prefix: &fullKey,
 		Bucket: c.S3Config.GetHotBucket(),
 	})
 	if err != nil {
@@ -1018,9 +1018,10 @@ func (c *FileController) getVersions(objectKey string) ([]*s3.ObjectVersion, err
 
 func (c *FileController) deleteObjectVersionFromHotStorage(objectKey string, versionID string) error {
 	var s3Client = c.S3Config.GetHotS3Client()
+	fullKey := c.S3Config.FullKey(c.S3Config.GetHotDataCenter(), objectKey)
 	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket:    c.S3Config.GetHotBucket(),
-		Key:       &objectKey,
+		Key:       &fullKey,
 		VersionId: &versionID,
 	})
 	if err != nil {
@@ -1028,7 +1029,7 @@ func (c *FileController) deleteObjectVersionFromHotStorage(objectKey string, ver
 	}
 	err = s3Client.WaitUntilObjectNotExists(&s3.HeadObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -1036,10 +1037,16 @@ func (c *FileController) deleteObjectVersionFromHotStorage(objectKey string, ver
 	return nil
 }
 
+// getObjectURL returns a presigned PUT URL for the given database-style
+// object key. The bucket's configured prefix (if any) is applied when signing
+// the request, but the key returned to the caller (and stored in
+// temp_objects) is the bare dbKey without the prefix. This keeps the prefix
+// confined to the S3 boundary.
 func (c *FileController) getObjectURL(s3Client *s3.S3, dc string, bucket *string, objectKey string, contentLength *int64, contentMD5 *string) (ente.UploadURL, error) {
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	input := &s3.PutObjectInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	}
 	if contentLength != nil {
 		input.ContentLength = contentLength
@@ -1071,10 +1078,11 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
-	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+	objectKey := c.S3Config.NewDBObjectKey(userID)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
@@ -1086,7 +1094,7 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
 	urls := make([]string, 0)
 	for i := 0; i < count; i++ {
-		url, err := c.getPartURL(*s3Client, objectKey, int64(i+1), r.UploadId, nil, nil)
+		url, err := c.getPartURL(*s3Client, fullKey, int64(i+1), r.UploadId, nil, nil)
 		if err != nil {
 			return multipartUploadURLs, stacktrace.Propagate(err, "")
 		}
@@ -1095,7 +1103,7 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 	multipartUploadURLs.PartURLs = urls
 	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
 		Bucket:   c.S3Config.GetHotBucket(),
-		Key:      &objectKey,
+		Key:      &fullKey,
 		UploadId: r.UploadId,
 	})
 	url, err := r2.Presign(PreSignedRequestValidityDuration)
@@ -1143,10 +1151,11 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
-	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+	objectKey := c.S3Config.NewDBObjectKey(userID)
+	fullKey := c.S3Config.FullKey(dc, objectKey)
 	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
 		Bucket: bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	if err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
@@ -1161,7 +1170,7 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 		length := partLengths[i]
 		lengthCopy := length
 		checksumCopy := normalizedChecksums[i]
-		url, err := c.getPartURL(*s3Client, objectKey, partNumber, r.UploadId, &lengthCopy, &checksumCopy)
+		url, err := c.getPartURL(*s3Client, fullKey, partNumber, r.UploadId, &lengthCopy, &checksumCopy)
 		if err != nil {
 			return multipartUploadURLs, stacktrace.Propagate(err, "")
 		}
@@ -1170,7 +1179,7 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 	multipartUploadURLs.PartURLs = urls
 	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
 		Bucket:   c.S3Config.GetHotBucket(),
-		Key:      &objectKey,
+		Key:      &fullKey,
 		UploadId: r.UploadId,
 	})
 	url, err := r2.Presign(PreSignedRequestValidityDuration)
@@ -1181,6 +1190,10 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 	return multipartUploadURLs, nil
 }
 
+// getPartURL presigns a PUT URL for a single part of a multipart upload.
+// objectKey is the full S3 key (with any bucket prefix already applied by
+// the caller); the caller also owns the upload session identified by
+// uploadID.
 func (c *FileController) getPartURL(s3Client s3.S3, objectKey string, partNumber int64, uploadID *string, contentLength *int64, contentMD5 *string) (string, error) {
 	input := &s3.UploadPartInput{
 		Bucket:     c.S3Config.GetHotBucket(),

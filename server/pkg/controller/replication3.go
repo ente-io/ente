@@ -406,10 +406,13 @@ func (c *ReplicationController3) downloadFromB2ViaWorker(objectKey string, file 
 }
 
 // Get a presigned URL to download the object with objectKey from the B2 bucket.
+// objectKey is the database-style key; the primary DC's configured bucket
+// prefix (if any) is applied before signing.
 func (c *ReplicationController3) getPresignedB2URL(objectKey string) (string, error) {
+	fullKey := c.S3Config.FullKey(c.S3Config.GetHotBackblazeDC(), objectKey)
 	r, _ := c.b2Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: c.b2Bucket,
-		Key:    &objectKey,
+		Key:    &fullKey,
 	})
 	return r.Presign(PreSignedRequestValidityDuration)
 }
@@ -521,9 +524,13 @@ func (c *ReplicationController3) uploadFile(in *UploadInput, dest *UploadDestina
 	// Rewind the file pointer back to the start for the next upload.
 	in.File.Seek(0, io.SeekStart)
 
+	// The destination DC may have a configured bucket prefix. Apply it so
+	// replicated objects land under the same sub-folder on the destination
+	// as they would for direct uploads.
+	destKey := c.S3Config.FullKey(dest.DC, in.ObjectKey)
 	up := s3manager.UploadInput{
 		Bucket: dest.Bucket,
-		Key:    &in.ObjectKey,
+		Key:    &destKey,
 		Body:   in.File,
 	}
 	if dest.IsGlacier {
@@ -581,9 +588,10 @@ func (c *ReplicationController3) isRequestFailureAccessDenied(err error) bool {
 
 // Verify the uploaded file by doing a HEAD check and comparing sizes
 func (c *ReplicationController3) verifyUploadedFileSize(in *UploadInput, dest *UploadDestination) error {
+	destKey := c.S3Config.FullKey(dest.DC, in.ObjectKey)
 	res, err := dest.Client.HeadObject(&s3.HeadObjectInput{
 		Bucket: dest.Bucket,
-		Key:    &in.ObjectKey,
+		Key:    &destKey,
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "Fetching object info from bucket %s failed", *dest.Bucket)

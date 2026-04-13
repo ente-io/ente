@@ -121,6 +121,7 @@ and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 | `s3.wasabi-eu-central-2-v3`            | Secondary hot storage configuration          |         |
 | `s3.are_local_buckets`                 |                                              | `true`  |
 | `s3.use_path_style_urls`               | Enable path-style URLs for MinIO             | `false` |
+| `s3.<bucket>.prefix`                   | Optional key prefix within the bucket        |         |
 
 ### Encryption Keys
 
