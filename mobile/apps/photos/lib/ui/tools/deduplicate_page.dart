@@ -289,17 +289,16 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       if (!mounted) {
         return;
       }
-      if (collectionCnt > 0) {
-        progress++;
-        // calculate progress percentage upto 2 decimal places
-        final double percentage = (progress / collectionCnt) * 100;
-        _deleteProgress.value = '$percentage%';
-      }
       log("AddingNow ${collectionToFilesToAddMap[collectionID]!.length} files to $collectionID");
       await CollectionsService.instance.addSilentlyToCollection(
         collectionID,
         collectionToFilesToAddMap[collectionID]!,
       );
+      if (collectionCnt > 0) {
+        progress++;
+        final int percentage = ((progress * 100) / collectionCnt).round();
+        _deleteProgress.value = '$percentage%';
+      }
     }
     _deleteProgress.value = "";
     if (filesToDelele.isNotEmpty) {
