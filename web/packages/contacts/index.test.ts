@@ -72,6 +72,7 @@ beforeEach(() => {
 
 interface SetupOptions {
     diff?: object[];
+    legacyInfo?: object;
     getProfilePictureError?: Error;
     getProfilePictureBytes?: Uint8Array;
 }
@@ -122,11 +123,27 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
             options.getProfilePictureError ?? new Error("boom"),
         );
     });
+    const legacy_get_info = vi.fn(() =>
+        Promise.resolve(
+            options.legacyInfo ?? {
+                contacts: [],
+                recoverSessions: [],
+                othersEmergencyContact: [],
+                othersRecoverySession: [],
+            },
+        ),
+    );
 
     vi.doMock("ente-base/kv", () => ({ getKV, getKVN, setKV }));
     vi.doMock("ente-base/token", () => ({ savedAuthToken }));
     vi.doMock("ente-base/origins", () => ({ apiOrigin }));
     vi.doMock("ente-base/log", () => ({ default: { info, warn, error } }));
+    vi.doMock("ente-accounts-rs/services/session-storage", () => ({
+        masterKeyFromSession: vi.fn(() => "MASTER_KEY"),
+    }));
+    vi.doMock("ente-accounts-rs/services/user", () => ({
+        ensureLocalUser: vi.fn(() => ({ id: 101 })),
+    }));
     vi.doMock("ente-base/app", () => ({
         appName: "photos",
         clientPackageName: "io.ente.photos.web",
@@ -139,12 +156,20 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
             current_wrapped_root_key,
             get_diff,
             get_profile_picture,
+            legacy_get_info,
         })),
     }));
 
     const contacts = await import("./index");
 
-    return { contacts, setKV, get_diff, get_profile_picture, info };
+    return {
+        contacts,
+        setKV,
+        get_diff,
+        get_profile_picture,
+        legacy_get_info,
+        info,
+    };
 };
 
 describe("ensureContactsReady", () => {
@@ -253,5 +278,53 @@ describe("retry after warm-up failure", () => {
         await vi.advanceTimersByTimeAsync(5_001);
 
         expect(get_diff).toHaveBeenCalledTimes(3);
+    });
+});
+
+describe("legacyGetInfo", () => {
+    test("normalizes bigint legacy numeric fields at the API boundary", async () => {
+        const { contacts } = await setupContactsModule({
+            legacyInfo: {
+                contacts: [
+                    {
+                        user: { id: 101n, email: "owner@test.test" },
+                        emergencyContact: {
+                            id: 202n,
+                            email: "trusted@test.test",
+                        },
+                        state: "ACCEPTED",
+                        recoveryNoticeInDays: 14n,
+                    },
+                ],
+                recoverSessions: [
+                    {
+                        id: "session_1",
+                        user: { id: 101n, email: "owner@test.test" },
+                        emergencyContact: {
+                            id: 202n,
+                            email: "trusted@test.test",
+                        },
+                        status: "WAITING",
+                        waitTill: 3_600_000_000n,
+                        createdAt: 1_700_000_000_000_000n,
+                    },
+                ],
+                othersEmergencyContact: [],
+                othersRecoverySession: [],
+            },
+        });
+
+        const info = await contacts.legacyGetInfo();
+
+        expect(info.contacts[0]?.user.id).toBe(101);
+        expect(info.contacts[0]?.emergencyContact.id).toBe(202);
+        expect(info.contacts[0]?.recoveryNoticeInDays).toBe(14);
+        expect(typeof info.contacts[0]?.user.id).toBe("number");
+        expect(typeof info.contacts[0]?.emergencyContact.id).toBe("number");
+        expect(typeof info.contacts[0]?.recoveryNoticeInDays).toBe("number");
+        expect(info.recoverSessions[0]?.waitTill).toBe(3_600_000_000);
+        expect(info.recoverSessions[0]?.createdAt).toBe(1_700_000_000_000_000);
+        expect(typeof info.recoverSessions[0]?.waitTill).toBe("number");
+        expect(typeof info.recoverSessions[0]?.createdAt).toBe("number");
     });
 });

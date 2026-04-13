@@ -29,6 +29,7 @@ import type {
     LegacyContactState,
     LegacyInfo,
     LegacyRecoveryBundle,
+    LegacyRecoveryStatus,
     ResolvedContactAvatar,
     ResolvedContactDisplay,
     WrappedRootContactKey,
@@ -63,6 +64,34 @@ interface RemoteContactRecord {
     profilePictureAttachmentId?: string | null;
     isDeleted: boolean;
     updatedAt: number | bigint;
+}
+
+interface RemoteLegacyUser {
+    id: number | bigint;
+    email: string;
+}
+
+interface RemoteLegacyContactRecord {
+    user: RemoteLegacyUser;
+    emergencyContact: RemoteLegacyUser;
+    state: LegacyContactState;
+    recoveryNoticeInDays: number | bigint;
+}
+
+interface RemoteLegacyRecoverySession {
+    id: string;
+    user: RemoteLegacyUser;
+    emergencyContact: RemoteLegacyUser;
+    status: LegacyRecoveryStatus;
+    waitTill: number | bigint;
+    createdAt: number | bigint;
+}
+
+interface RemoteLegacyInfo {
+    contacts: RemoteLegacyContactRecord[];
+    recoverSessions: RemoteLegacyRecoverySession[];
+    othersEmergencyContact: RemoteLegacyContactRecord[];
+    othersRecoverySession: RemoteLegacyRecoverySession[];
 }
 
 interface ContactsReadyInput {
@@ -521,9 +550,45 @@ const ensureCurrentLegacyKeyAttributes = () => {
     return keyAttributes as unknown as Record<string, unknown>;
 };
 
+const normalizeLegacyUser = (user: RemoteLegacyUser) => ({
+    id: Number(user.id),
+    email: user.email,
+});
+
+const normalizeLegacyContactRecord = (record: RemoteLegacyContactRecord) => ({
+    user: normalizeLegacyUser(record.user),
+    emergencyContact: normalizeLegacyUser(record.emergencyContact),
+    state: record.state,
+    recoveryNoticeInDays: Number(record.recoveryNoticeInDays),
+});
+
+const normalizeLegacyRecoverySession = (
+    session: RemoteLegacyRecoverySession,
+) => ({
+    id: session.id,
+    user: normalizeLegacyUser(session.user),
+    emergencyContact: normalizeLegacyUser(session.emergencyContact),
+    status: session.status,
+    waitTill: Number(session.waitTill),
+    createdAt: Number(session.createdAt),
+});
+
+const normalizeLegacyInfo = (info: RemoteLegacyInfo): LegacyInfo => ({
+    contacts: info.contacts.map(normalizeLegacyContactRecord),
+    recoverSessions: info.recoverSessions.map(normalizeLegacyRecoverySession),
+    othersEmergencyContact: info.othersEmergencyContact.map(
+        normalizeLegacyContactRecord,
+    ),
+    othersRecoverySession: info.othersRecoverySession.map(
+        normalizeLegacyRecoverySession,
+    ),
+});
+
 export const legacyGetInfo = async (): Promise<LegacyInfo> => {
     const ctx = await ensureCurrentLegacyCtx();
-    return (await ctx.legacy_get_info()) as LegacyInfo;
+    return normalizeLegacyInfo(
+        (await ctx.legacy_get_info()) as RemoteLegacyInfo,
+    );
 };
 
 export const legacyPublicKey = async (email: string) => {
