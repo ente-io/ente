@@ -57,6 +57,7 @@ pub struct ContactsCtx {
     master_key: Arc<RwLock<SecretVec>>,
     root_contact_key: Arc<RwLock<SecretVec>>,
     wrapped_root_key: Arc<RwLock<WrappedRootContactKey>>,
+    opened_with_cached_root_key: bool,
     root_key_confirmed: AtomicBool,
 }
 
@@ -114,6 +115,7 @@ impl ContactsCtx {
                 )
             };
 
+        let opened_with_cached_root_key = root_key_source == RootKeySource::Cache;
         let ctx = Self {
             user_id: input.user_id,
             object_store_http: http.object_store(),
@@ -121,6 +123,7 @@ impl ContactsCtx {
             master_key: Arc::new(RwLock::new(SecretVec::new(input.master_key))),
             root_contact_key: Arc::new(RwLock::new(SecretVec::new(root_contact_key))),
             wrapped_root_key: Arc::new(RwLock::new(wrapped_root_key.clone())),
+            opened_with_cached_root_key,
             root_key_confirmed: AtomicBool::new(root_key_confirmed),
         };
 
@@ -711,6 +714,9 @@ impl ContactsCtx {
 
     async fn ensure_remote_root_key_for_read(&self) -> Result<()> {
         if self.root_key_confirmed.load(Ordering::Acquire) {
+            return Ok(());
+        }
+        if self.opened_with_cached_root_key {
             return Ok(());
         }
 

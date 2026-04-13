@@ -548,30 +548,18 @@ async fn deleted_contacts_surface_as_tombstones() {
 }
 
 #[tokio::test]
-async fn get_diff_refreshes_unconfirmed_cached_root_key_before_decrypting() {
+async fn get_diff_uses_cached_root_key_for_reads_without_fetching_remote_key() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
-    let stale_root_key = keys::generate_key();
-    let stale_wrapped_root = wrap_root(&stale_root_key, &master_key);
-    let server_root_key = keys::generate_key();
-    let server_wrapped_root = wrap_root(&server_root_key, &master_key);
+    let cached_root_key = keys::generate_key();
+    let cached_wrapped_root = wrap_root(&cached_root_key, &master_key);
     let contact = sample_contact();
 
-    let refresh_root_mock = server
+    let no_fetch_root_mock = server
         .mock("GET", "/user-entity/key")
         .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
-        .with_status(200)
-        .with_body(
-            serde_json::json!({
-                "userID": 7,
-                "type": "contact",
-                "encryptedKey": server_wrapped_root.encrypted_key,
-                "header": server_wrapped_root.header,
-                "createdAt": 1
-            })
-            .to_string(),
-        )
-        .expect(1)
+        .with_status(500)
+        .expect(0)
         .create_async()
         .await;
 
@@ -588,7 +576,7 @@ async fn get_diff_refreshes_unconfirmed_cached_root_key_before_decrypting() {
                     "ct_contact1",
                     &contact,
                     Some("b@test.test"),
-                    &server_root_key,
+                    &cached_root_key,
                     None,
                 )]
             })
@@ -599,7 +587,7 @@ async fn get_diff_refreshes_unconfirmed_cached_root_key_before_decrypting() {
         .await;
 
     let ctx = ContactsCtx::open(OpenContactsCtxInput {
-        cached_root_key: Some(stale_wrapped_root),
+        cached_root_key: Some(cached_wrapped_root),
         ..open_input(server.url(), master_key)
     })
     .await
@@ -608,7 +596,7 @@ async fn get_diff_refreshes_unconfirmed_cached_root_key_before_decrypting() {
 
     let diff = ctx.get_diff(0, 10).await.unwrap();
 
-    refresh_root_mock.assert_async().await;
+    no_fetch_root_mock.assert_async().await;
     diff_mock.assert_async().await;
     assert_eq!(diff.len(), 1);
     assert_eq!(diff[0].name.as_deref(), Some(contact.name.as_str()));
