@@ -66,6 +66,7 @@ import { useBaseContext } from "ente-base/context";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
+    isMuseumHTTPError,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
@@ -134,6 +135,10 @@ const loadJoinPublicAlbumRedirect = () =>
     import("@/public-album/access/services/join-public-album-redirect");
 
 const publicAlbumAllFilesCollectionID = 0;
+
+const isDeviceLimitExceededError = async (e: unknown) =>
+    isHTTPErrorWithStatus(e, 429) ||
+    (await isMuseumHTTPError(e, 403, "LINK_DEVICE_LIMIT_EXCEEDED"));
 
 export default function PublicAlbumPage() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -413,7 +418,8 @@ export default function PublicAlbumPage() {
                 }
             }
         } catch (e) {
-            // The 410 Gone or 429 Rate limited can arise from either the
+            const isDeviceLimitExceeded = await isDeviceLimitExceededError(e);
+            // The 410 Gone or device-limit failure can arise from either the
             // collection pull or the files pull since they're part of the
             // remote's access token check sequence.
             //
@@ -425,7 +431,7 @@ export default function PublicAlbumPage() {
             if (
                 isHTTPErrorWithStatus(e, 401) ||
                 isHTTPErrorWithStatus(e, 410) ||
-                isHTTPErrorWithStatus(e, 429)
+                isDeviceLimitExceeded
             ) {
                 const [
                     { removePublicCollectionFileData },
@@ -435,7 +441,7 @@ export default function PublicAlbumPage() {
                     loadPublicAlbumsFDB(),
                 ]);
                 setErrorMessage(
-                    isHTTPErrorWithStatus(e, 429)
+                    isDeviceLimitExceeded
                         ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
