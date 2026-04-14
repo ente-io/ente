@@ -178,6 +178,7 @@ export default function PublicAlbumPage() {
         fileIndex: number;
         sidebar?: FileViewerInitialSidebar;
         commentID?: string;
+        anonUserNames?: Map<string, string>;
     }>();
 
     /**
@@ -204,6 +205,9 @@ export default function PublicAlbumPage() {
             fileIndex,
             sidebar,
             commentID: info.commentID,
+            anonUserNames: info.anonUserNames
+                ? new Map(info.anonUserNames)
+                : undefined,
         });
     };
 
@@ -764,6 +768,9 @@ export default function PublicAlbumPage() {
                         pendingFileSidebar={pendingFileNavigation?.sidebar}
                         pendingHighlightCommentID={
                             pendingFileNavigation?.commentID
+                        }
+                        pendingAnonUserNames={
+                            pendingFileNavigation?.anonUserNames
                         }
                         onPendingNavigationConsumed={() =>
                             setPendingFileNavigation(undefined)

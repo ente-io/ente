@@ -41,6 +41,10 @@ export type FileListWithViewerProps = {
      */
     pendingHighlightCommentID?: string;
     /**
+     * Resolved anonymous display names from the feed for the target album.
+     */
+    pendingAnonUserNames?: Map<string, string>;
+    /**
      * Called after the pending navigation is consumed.
      */
     onPendingNavigationConsumed?: () => void;
@@ -87,6 +91,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     pendingFileIndex,
     pendingFileSidebar,
     pendingHighlightCommentID,
+    pendingAnonUserNames,
     onPendingNavigationConsumed,
     publicAlbumsCredentials,
     collectionKey,
@@ -102,6 +107,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const [highlightCommentID, setHighlightCommentID] = useState<
         string | undefined
     >(undefined);
+    const [initialAnonUserNames, setInitialAnonUserNames] = useState<
+        Map<string, string> | undefined
+    >(undefined);
 
     // Handle pending navigation from feed item clicks
     useEffect(() => {
@@ -109,6 +117,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             setCurrentIndex(pendingFileIndex);
             setInitialSidebar(pendingFileSidebar);
             setHighlightCommentID(pendingHighlightCommentID);
+            setInitialAnonUserNames(
+                pendingAnonUserNames
+                    ? new Map(pendingAnonUserNames)
+                    : undefined,
+            );
             setOpenFileViewer(true);
             onPendingNavigationConsumed?.();
         }
@@ -116,6 +129,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         pendingFileIndex,
         pendingFileSidebar,
         pendingHighlightCommentID,
+        pendingAnonUserNames,
         onPendingNavigationConsumed,
     ]);
 
@@ -123,6 +137,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleCloseFileViewerInternal = useCallback(() => {
         setInitialSidebar(undefined);
         setHighlightCommentID(undefined);
+        setInitialAnonUserNames(undefined);
         setOpenFileViewer(false);
     }, []);
 
@@ -188,6 +203,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     initialIndex={currentIndex}
                     initialSidebar={initialSidebar}
                     highlightCommentID={highlightCommentID}
+                    initialAnonUserNames={initialAnonUserNames}
                     disableDownload={!enableDownload}
                     {...{
                         files,
