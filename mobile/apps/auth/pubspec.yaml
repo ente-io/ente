@@ -28,6 +28,8 @@ dependencies:
   email_validator: 3.0.0
   ente_accounts:
     path: ../../packages/accounts
+  ente_auth_qr:
+    path: plugins/qr
   ente_base:
     path: ../../packages/base
   ente_configuration:
@@ -46,8 +48,6 @@ dependencies:
     path: ../../packages/network
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
-  ente_qr:
-    path: plugins/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
