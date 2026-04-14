@@ -34,7 +34,9 @@ enum PeopleSortKey {
 enum OfflineFlag {
   mlConsent,
   mapEnabled,
-  getStartedBannerDismissed,
+  // Reserved: previously getStartedBannerDismissed. Kept to preserve bit
+  // positions of subsequent flags in the stored bitmap.
+  reservedGetStartedBannerDismissed,
   facesBannerDismissed,
   nameFaceBannerDismissed,
   seenMLEnablingBanner,
@@ -95,6 +97,9 @@ class LocalSettings {
 
   static const _kOfflineFlags = "ls.offline_flags";
   static const _kOfflineMapEnabled = "ls.offline_map_enabled";
+  static const _kOfflineGetStartedBannerDismissedAt =
+      "ls.offline_get_started_banner_dismissed_at";
+  static const _kOfflineGetStartedBannerDismissDuration = Duration(days: 7);
 
   final SharedPreferences _prefs;
 
@@ -524,11 +529,24 @@ class LocalSettings {
     await _prefs.setBool(_kShowOfflineModeOption, value);
   }
 
-  bool get isOfflineGetStartedBannerDismissed =>
-      _getFlag(OfflineFlag.getStartedBannerDismissed);
+  bool get isOfflineGetStartedBannerDismissed {
+    final dismissedAtMs =
+        _prefs.getInt(_kOfflineGetStartedBannerDismissedAt) ?? 0;
+    if (dismissedAtMs == 0) return false;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - dismissedAtMs;
+    return elapsed >= 0 &&
+        elapsed < _kOfflineGetStartedBannerDismissDuration.inMilliseconds;
+  }
 
-  Future<void> setOfflineGetStartedBannerDismissed(bool value) =>
-      _setFlag(OfflineFlag.getStartedBannerDismissed, value);
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) {
+    if (value) {
+      return _prefs.setInt(
+        _kOfflineGetStartedBannerDismissedAt,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    }
+    return _prefs.remove(_kOfflineGetStartedBannerDismissedAt);
+  }
 
   bool get isMLProgressBannerDismissed =>
       _getFlag(OfflineFlag.mlProgressBannerDismissed);
