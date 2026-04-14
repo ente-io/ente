@@ -21,46 +21,46 @@ class QrCodeHighlightOverlay extends StatelessWidget {
     }
 
     return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final screenHeight = constraints.maxHeight;
+          builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
+            final screenHeight = constraints.maxHeight;
 
-        double displayWidth;
-        double displayHeight;
-        if (file.hasDimensions) {
-          final imageAspect = file.width / file.height;
-          final screenAspect = screenWidth / screenHeight;
-          if (imageAspect > screenAspect) {
-            displayWidth = screenWidth;
-            displayHeight = screenWidth / imageAspect;
-          } else {
-            displayHeight = screenHeight;
-            displayWidth = screenHeight * imageAspect;
-          }
-        } else {
-          displayWidth = screenWidth;
-          displayHeight = screenHeight;
-        }
+            double displayWidth;
+            double displayHeight;
+            if (file.hasDimensions) {
+              final imageAspect = file.width / file.height;
+              final screenAspect = screenWidth / screenHeight;
+              if (imageAspect > screenAspect) {
+                displayWidth = screenWidth;
+                displayHeight = screenWidth / imageAspect;
+              } else {
+                displayHeight = screenHeight;
+                displayWidth = screenHeight * imageAspect;
+              }
+            } else {
+              displayWidth = screenWidth;
+              displayHeight = screenHeight;
+            }
 
-        final offsetX = (screenWidth - displayWidth) / 2;
-        final offsetY = (screenHeight - displayHeight) / 2;
+            final offsetX = (screenWidth - displayWidth) / 2;
+            final offsetY = (screenHeight - displayHeight) / 2;
 
-        return SizedBox.expand(
-          child: Stack(
-            children: [
-              for (final detection in detections)
-                _QrTapRegion(
-                  detection: detection,
-                  offsetX: offsetX,
-                  offsetY: offsetY,
-                  displayWidth: displayWidth,
-                  displayHeight: displayHeight,
-                ),
-            ],
-          ),
+            return SizedBox.expand(
+              child: Stack(
+                children: [
+                  for (final detection in detections)
+                    _QrTapRegion(
+                      detection: detection,
+                      offsetX: offsetX,
+                      offsetY: offsetY,
+                      displayWidth: displayWidth,
+                      displayHeight: displayHeight,
+                    ),
+                ],
+              ),
+            );
+          },
         );
-      },
-    );
   }
 }
 

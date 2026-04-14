@@ -834,9 +834,6 @@
     "confirm_pin": "Confirm your PIN",
     "confirm": "Confirm",
     "incorrect_pin_or_password": "Incorrect PIN or password",
-    "too_many_attempts": "Too many attempts.",
-    "try_again_in": "Try again in {{time}}.",
-    "too_many_wrong_attempts": "Too many wrong attempts. Please log out and log in again.",
     "app_lock_disable_confirm": "Are you sure you want to disable app lock?",
     "lock_type": "Lock type",
     "auto_lock": "Auto-lock",
@@ -848,10 +845,9 @@
     "app_lock_confirm_password": "Confirm your app lock password",
     "app_lock_set_password": "Set app lock password",
     "app_lock_password_mismatch": "App lock passwords don't match",
-    "app_lock_incorrect": "Incorrect PIN or app lock password",
     "app_lock_enter_pin_to_unlock": "Enter your app lock pin to unlock.",
     "app_lock_pin_digit_label": "PIN digit {{index}}",
-    "app_lock_please_try_again_in": "Too many attempts, Please try again in",
+    "app_lock_please_try_again_in": "Too many attempts, please try again in {{time}}",
     "app_lock_set_pin": "Set PIN",
     "device_lock": "Device lock",
     "device_lock_not_supported": "Device lock is not supported on this device",
@@ -871,7 +867,5 @@
     "auto_lock_5_minutes": "5 minutes",
     "auto_lock_30_minutes": "30 minutes",
     "wrong_unlock_code_one": "You've entered the wrong unlock code {{count}} time.",
-    "wrong_unlock_code_other": "You've entered the wrong unlock code {{count}} times.",
-    "one_more_wrong_attempt_logout": "One more wrong attempt will log you out.",
-    "next_wrong_attempt_wait": "You'll need to wait {{time}} if this attempt is wrong."
+    "wrong_unlock_code_other": "You've entered the wrong unlock code {{count}} times."
 }

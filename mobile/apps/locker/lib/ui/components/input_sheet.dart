@@ -12,6 +12,7 @@ class InputSheet extends StatefulWidget {
   final String? initialValue;
   final TextCapitalization textCapitalization;
   final int? maxLength;
+  final bool isPasswordInput;
 
   const InputSheet({
     super.key,
@@ -22,6 +23,7 @@ class InputSheet extends StatefulWidget {
     this.initialValue,
     this.textCapitalization = TextCapitalization.words,
     this.maxLength = 200,
+    this.isPasswordInput = false,
   });
 
   @override
@@ -32,6 +34,7 @@ class _InputSheetState extends State<InputSheet> {
   late final TextEditingController _textController;
   bool _isSubmitting = false;
   bool _isInputValid = false;
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -58,9 +61,11 @@ class _InputSheetState extends State<InputSheet> {
   }
 
   Future<void> _onSubmit() async {
-    final text = _textController.text.trim();
+    final text = widget.isPasswordInput
+        ? _textController.text
+        : _textController.text.trim();
 
-    if (text.isEmpty || _isSubmitting) {
+    if (text.trim().isEmpty || _isSubmitting) {
       return;
     }
 
@@ -99,6 +104,9 @@ class _InputSheetState extends State<InputSheet> {
           autofocus: true,
           textCapitalization: widget.textCapitalization,
           maxLength: widget.maxLength,
+          obscureText: widget.isPasswordInput && !_isPasswordVisible,
+          enableSuggestions: !widget.isPasswordInput,
+          autocorrect: !widget.isPasswordInput,
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: textTheme.body.copyWith(
@@ -120,6 +128,21 @@ class _InputSheetState extends State<InputSheet> {
                 color: colorScheme.strokeFaint,
               ),
             ),
+            suffixIcon: widget.isPasswordInput
+                ? IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: colorScheme.textMuted,
+                    ),
+                  )
+                : null,
             counterText: "",
           ),
           style: textTheme.body.copyWith(
@@ -151,6 +174,7 @@ Future<dynamic> showInputSheet(
   String? initialValue,
   TextCapitalization textCapitalization = TextCapitalization.words,
   int? maxLength = 200,
+  bool isPasswordInput = false,
 }) async {
   return showBaseBottomSheet<dynamic>(
     context,
@@ -165,6 +189,7 @@ Future<dynamic> showInputSheet(
       initialValue: initialValue,
       textCapitalization: textCapitalization,
       maxLength: maxLength,
+      isPasswordInput: isPasswordInput,
     ),
   );
 }

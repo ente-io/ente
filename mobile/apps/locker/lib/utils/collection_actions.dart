@@ -4,11 +4,10 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
-import "package:ente_ui/components/action_sheet_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import "package:ente_ui/components/buttons/button_widget.dart" show ButtonAction;
-import "package:ente_ui/components/buttons/button_widget_v2.dart";
+import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
+import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
 import 'package:flutter/material.dart';
@@ -20,6 +19,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
@@ -341,12 +341,9 @@ class CollectionActions {
       assetPath: "assets/warning-grey.png",
       buttons: [
         SizedBox(
-          child: ButtonWidgetV2(
-            buttonType: ButtonTypeV2.primary,
-            labelText: context.l10n.leaveCollection,
-            onTap: () async {
-              Navigator.of(context).pop(true);
-            },
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
           ),
         ),
       ],
@@ -385,12 +382,9 @@ class CollectionActions {
       assetPath: "assets/warning-grey.png",
       buttons: [
         SizedBox(
-          child: ButtonWidgetV2(
-            buttonType: ButtonTypeV2.primary,
-            labelText: context.l10n.leaveCollection,
-            onTap: () async {
-              Navigator.of(context).pop(true);
-            },
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
           ),
         ),
       ],
@@ -445,41 +439,36 @@ class CollectionActions {
     BuildContext context,
     Collection collection,
   ) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final colorScheme = getEnteColorScheme(context);
+    final shouldRemove = await showAlertBottomSheet<bool>(
+      context,
+      title: context.l10n.removePublicLink,
+      message: context.l10n
+          .removePublicLinkConfirmation(collection.name ?? "this collection"),
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidgetV2(
-          buttonType: ButtonTypeV2.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.yesRemove,
-          onTap: () async {
-            await CollectionApiClient.instance.disableShareUrl(collection);
-          },
-        ),
-        ButtonWidgetV2(
-          buttonType: ButtonTypeV2.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        GradientButton(
+          text: context.l10n.yesRemove,
+          backgroundColor: colorScheme.warning400,
+          onTap: () => Navigator.of(context).pop(true),
         ),
       ],
-      title: context.l10n.removePublicLink,
-      body: context.l10n
-          .removePublicLinkConfirmation(collection.name ?? "this collection"),
     );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.error) {
+
+    if (shouldRemove != true) {
+      return false;
+    }
+
+    try {
+      await CollectionApiClient.instance.disableShareUrl(collection);
+      return true;
+    } catch (e) {
+      if (context.mounted) {
         await showGenericErrorBottomSheet(
           context: context,
-          error: actionResult.exception,
+          error: e,
         );
       }
-      return actionResult.action == ButtonAction.first;
-    } else {
       return false;
     }
   }

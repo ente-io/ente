@@ -35,7 +35,10 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         refreshHost();
-        if (savedPartialLocalUser()?.email) void router.replace("/verify");
+        if (savedPartialLocalUser()?.email) {
+            void router.replace("/verify");
+            return;
+        }
         setLoading(false);
     }, [router, refreshHost]);
 

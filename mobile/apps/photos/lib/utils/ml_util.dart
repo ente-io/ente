@@ -1,13 +1,17 @@
 import "dart:io" show Directory, File, Platform;
 import "dart:math" as math show sqrt, min, max;
 
+import "package:dio/dio.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/db/offline_files_db.dart";
+import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -17,7 +21,9 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_typedefs.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/filedata/model/response.dart";
 import "package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
@@ -33,6 +39,7 @@ import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("MlUtil");
+const _kMlStaleCleanupMaxIds = 5;
 
 enum FileDataForML { thumbnailData, fileData }
 
@@ -444,6 +451,73 @@ Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   );
 }
 
+bool _isRecoverableMlFetchForbidden(Object error) =>
+    error is DioException &&
+    error.type == DioExceptionType.badResponse &&
+    error.response?.statusCode == 403;
+
+Future<FileDataResponse> _fetchFilesDataForMlHydrationWithRecovery(
+  Map<int, FileMLInstruction> pendingIndex,
+) async {
+  final batchIds = pendingIndex.keys.toSet();
+  try {
+    return await fileDataService.getFilesData(batchIds);
+  } catch (e) {
+    if (!_isRecoverableMlFetchForbidden(e)) rethrow;
+
+    await CollectionsService.instance.sync();
+    final suspects = <int>{};
+    for (final id in batchIds) {
+      final collectionIds =
+          await FilesDB.instance.getAllCollectionIDsOfFile(id);
+      final hasAccess = collectionIds.any((cid) {
+        final c = CollectionsService.instance.getCollectionByID(cid);
+        return c != null && !c.isDeleted;
+      });
+      if (!hasAccess) suspects.add(id);
+    }
+    _logger.info(
+      "ML stale recovery: ${suspects.length}/${batchIds.length} suspects",
+    );
+    if (suspects.isEmpty) rethrow;
+    if (suspects.length > _kMlStaleCleanupMaxIds) {
+      _logger.severe(
+        "ML stale recovery aborted: ${suspects.length} suspects exceeds cap $_kMlStaleCleanupMaxIds",
+      );
+      rethrow;
+    }
+
+    final confirmed = <int>{};
+    for (final id in suspects) {
+      try {
+        await fileDataService.getFilesData({id});
+      } catch (e) {
+        if (!_isRecoverableMlFetchForbidden(e)) rethrow;
+        confirmed.add(id);
+      }
+    }
+    if (confirmed.isEmpty) rethrow;
+
+    final staleFiles = confirmed
+        .map((id) => pendingIndex.remove(id)?.file)
+        .whereType<EnteFile>()
+        .toList();
+    await FilesDB.instance.deleteMultipleUploadedFiles(confirmed.toList());
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        staleFiles,
+        type: EventType.deletedFromRemote,
+        source: "mlStaleFileCleanup",
+      ),
+    );
+    _logger.info(
+      "Pruned ${confirmed.length} stale ML IDs, retrying ${pendingIndex.length}",
+    );
+    if (pendingIndex.isEmpty) return FileDataResponse.empty();
+    return fileDataService.getFilesData(pendingIndex.keys.toSet());
+  }
+}
+
 Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
   List<FileMLInstruction> instructions, {
   required MLDataDB mlDataDB,
@@ -464,7 +538,9 @@ Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
     return instructions.where((instruction) => instruction.pendingML).toList();
   }
   _logger.info("fetching embeddings for ${ids.length} files");
-  final res = await fileDataService.getFilesData(ids);
+  final res = flagService.internalUser
+      ? await _fetchFilesDataForMlHydrationWithRecovery(pendingIndex)
+      : await fileDataService.getFilesData(ids);
   _logger.info("embeddingResponse ${res.debugLog()}");
   final List<Face> faces = [];
   final List<ClipEmbedding> clipEmbeddings = [];

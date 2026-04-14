@@ -1182,8 +1182,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "85a6ac0f36c4473ac1345727ca5dd8589e564b80"
-      resolved-ref: "85a6ac0f36c4473ac1345727ca5dd8589e564b80"
+      ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
+      resolved-ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
       url: "https://github.com/ente-io/flutter_sodium"
     source: git
     version: "0.2.0"
@@ -1807,8 +1807,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
-      resolved-ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
+      ref: bd1cce917e914690c00cc138b000b728742dde2b
+      resolved-ref: bd1cce917e914690c00cc138b000b728742dde2b
       url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"

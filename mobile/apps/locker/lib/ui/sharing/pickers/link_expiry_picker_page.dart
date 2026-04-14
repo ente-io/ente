@@ -1,6 +1,6 @@
-import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
+import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/components/separators.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
@@ -82,9 +82,15 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   @override
   Widget build(BuildContext context) {
     List<Widget> items = [];
-    for (Tuple2<String, int> expiryOpiton in _expiryOptions) {
+    for (int index = 0; index < _expiryOptions.length; index++) {
+      final expiryOpiton = _expiryOptions[index];
       items.add(
-        _menuItemForPicker(context, expiryOpiton),
+        _menuItemForPicker(
+          context,
+          expiryOpiton,
+          isFirst: index == 0,
+          isLast: index == _expiryOptions.length - 1,
+        ),
       );
     }
     items = addSeparators(
@@ -103,15 +109,19 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   Widget _menuItemForPicker(
     BuildContext context,
     Tuple2<String, int> expiryOpiton,
+    {
+      required bool isFirst,
+      required bool isLast,
+    }
   ) {
-    return MenuItemWidget(
+    return MenuItemWidgetV2(
       menuItemColor: getEnteColorScheme(context).fillFaint,
-      captionedTextWidget: CaptionedTextWidget(
+      captionedTextWidget: CaptionedTextWidgetV2(
         title: expiryOpiton.item1,
       ),
       alignCaptionedTextToLeft: true,
-      isTopBorderRadiusRemoved: true,
-      isBottomBorderRadiusRemoved: true,
+      isTopBorderRadiusRemoved: !isFirst,
+      isBottomBorderRadiusRemoved: !isLast,
       alwaysShowSuccessState: true,
       surfaceExecutionStates: expiryOpiton.item2 == -1 ? false : true,
       onTap: () async {

@@ -26,7 +26,13 @@ import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 // =============================================================================
 // Icons
@@ -139,6 +145,12 @@ export interface PublicFeedItemClickInfo {
      * For `liked_comment`, this is the target comment ID.
      */
     commentID?: string;
+    /**
+     * Snapshot of resolved anonymous display names from the feed.
+     * This lets the viewer open with stable names instead of briefly falling
+     * back to anonymous placeholders before its own profile fetch completes.
+     */
+    anonUserNames?: Map<string, string>;
 }
 
 export interface PublicFeedSidebarProps extends ModalVisibilityProps {
@@ -583,26 +595,32 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item, onClick }) => {
  */
 const getFeedItemClickInfo = (
     item: PublicFeedItem,
+    anonUserNames: Map<string, string>,
 ): PublicFeedItemClickInfo => {
+    const clickInfoBase = { anonUserNames: new Map(anonUserNames) };
+
     switch (item.type) {
         case "liked_photo":
         case "liked_video":
-            return { type: item.type, fileID: item.fileID };
+            return { ...clickInfoBase, type: item.type, fileID: item.fileID };
         case "commented_photo":
         case "commented_video":
             return {
+                ...clickInfoBase,
                 type: item.type,
                 fileID: item.fileID,
                 commentID: item.commentID,
             };
         case "replied_comment":
             return {
+                ...clickInfoBase,
                 type: item.type,
                 fileID: item.fileID!,
                 commentID: item.replyID,
             };
         case "liked_comment":
             return {
+                ...clickInfoBase,
                 type: item.type,
                 fileID: item.fileID!,
                 commentID: item.commentID,
@@ -636,6 +654,24 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
         new Map(),
     );
     const [isLoading, setIsLoading] = useState(false);
+    const thumbnailCacheRef = useRef(thumbnailCache);
+    const thumbnailLoadsInFlightRef = useRef<Set<number>>(new Set());
+    const canSetThumbnailCacheRef = useRef(open);
+
+    useEffect(() => {
+        thumbnailCacheRef.current = thumbnailCache;
+    }, [thumbnailCache]);
+
+    useEffect(() => {
+        canSetThumbnailCacheRef.current = open;
+    }, [open]);
+
+    useEffect(
+        () => () => {
+            canSetThumbnailCacheRef.current = false;
+        },
+        [],
+    );
 
     // Build file type cache from files
     useEffect(() => {
@@ -646,41 +682,60 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
         setFileTypeCache(cache);
     }, [files]);
 
-    // Load thumbnails for files that have reactions/comments
+    // Load thumbnails for active feed items in parallel and show each one as
+    // soon as it is ready instead of waiting for the entire batch to finish.
     useEffect(() => {
-        const loadThumbnails = async () => {
-            // Get unique file IDs from comments and reactions
-            const fileIDsWithActivity = new Set<number>();
-            for (const c of comments) {
-                if (c.fileID) fileIDsWithActivity.add(c.fileID);
-            }
-            for (const r of reactions) {
-                if (r.fileID) fileIDsWithActivity.add(r.fileID);
-            }
+        if (!open || (comments.length === 0 && reactions.length === 0)) return;
 
-            // Find matching files
-            const filesToLoad = files.filter((f) =>
-                fileIDsWithActivity.has(f.id),
-            );
+        const fileIDsWithActivity = new Set<number>();
 
-            const newCache = new Map<number, string>();
-            for (const file of filesToLoad) {
+        for (const c of comments) {
+            if (!c.fileID) continue;
+            fileIDsWithActivity.add(c.fileID);
+        }
+
+        for (const r of reactions) {
+            fileIDsWithActivity.add(r.fileID);
+        }
+
+        const filesToLoad = files.filter(
+            (file) =>
+                fileIDsWithActivity.has(file.id) &&
+                !thumbnailCacheRef.current.has(file.id) &&
+                !thumbnailLoadsInFlightRef.current.has(file.id),
+        );
+
+        if (filesToLoad.length === 0) return;
+
+        for (const file of filesToLoad) {
+            thumbnailLoadsInFlightRef.current.add(file.id);
+        }
+
+        void Promise.allSettled(
+            filesToLoad.map(async (file) => {
                 try {
                     const url =
                         await downloadManager.renderableThumbnailURL(file);
-                    if (url) {
-                        newCache.set(file.id, url);
-                    }
-                } catch {
-                    // Ignore thumbnail loading errors
-                }
-            }
-            setThumbnailCache(newCache);
-        };
+                    if (!url || !canSetThumbnailCacheRef.current) return;
 
-        if (open && (comments.length > 0 || reactions.length > 0)) {
-            void loadThumbnails();
-        }
+                    setThumbnailCache((prev) => {
+                        if (prev.get(file.id) === url) return prev;
+
+                        const next = new Map(prev);
+                        next.set(file.id, url);
+                        thumbnailCacheRef.current = next;
+                        return next;
+                    });
+                } catch (e) {
+                    log.warn(
+                        `Failed to fetch feed thumbnail for file ${file.id}`,
+                        e,
+                    );
+                } finally {
+                    thumbnailLoadsInFlightRef.current.delete(file.id);
+                }
+            }),
+        );
     }, [open, comments, reactions, files]);
 
     // Polling interval for refreshing feed data (5 seconds)
@@ -788,7 +843,10 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                                     onItemClick
                                         ? () => {
                                               onItemClick(
-                                                  getFeedItemClickInfo(item),
+                                                  getFeedItemClickInfo(
+                                                      item,
+                                                      anonUserNames,
+                                                  ),
                                               );
                                           }
                                         : undefined

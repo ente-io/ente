@@ -118,7 +118,7 @@ dependencies:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 85a6ac0f36c4473ac1345727ca5dd8589e564b80
+      ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   flutter_spinkit: 5.2.1
   flutter_staggered_grid_view: 0.7.0
   flutter_svg: 2.2.0
@@ -174,7 +174,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/ente-io/mobile_ocr
-      ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
+      ref: bd1cce917e914690c00cc138b000b728742dde2b
   modal_bottom_sheet: 3.0.0
   motionphoto:
     git:
@@ -267,7 +267,7 @@ dependency_overrides:
   flutter_sodium: # update source if there is any update
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 85a6ac0f36c4473ac1345727ca5dd8589e564b80
+      ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   intl: 0.20.2
   js: 0.6.7
   media_kit: # update media_kit* if there is any update

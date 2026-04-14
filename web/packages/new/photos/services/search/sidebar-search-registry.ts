@@ -201,6 +201,13 @@ const sidebarActions = (): SidebarAction[] => {
             keywords: ["appearance", "dark mode", "light mode"],
         },
         {
+            id: "preferences.appLock",
+            label: t("app_lock"),
+            path: [preferencesCategory, t("app_lock")],
+            keywords: ["lock", "pin", "password", "biometric", "privacy"],
+            available: () => isDesktop,
+        },
+        {
             id: "preferences.customDomains",
             label: t("custom_domains"),
             path: [preferencesCategory, t("custom_domains")],
@@ -389,6 +396,7 @@ export const performSidebarAction = async (
 
         case "preferences.language":
         case "preferences.theme":
+        case "preferences.appLock":
         case "preferences.customDomains":
         case "preferences.map":
         case "preferences.advanced":

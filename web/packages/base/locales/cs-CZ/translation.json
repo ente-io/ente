@@ -834,9 +834,6 @@
     "confirm_pin": "Potvrďte svůj PIN",
     "confirm": "Potvrdit",
     "incorrect_pin_or_password": "Nesprávný PIN nebo heslo",
-    "too_many_attempts": "Příliš mnoho pokusů.",
-    "try_again_in": "Zkuste to znovu za {{time}}.",
-    "too_many_wrong_attempts": "Příliš mnoho chybných pokusů. Odhlaste se prosím a znovu se přihlaste.",
     "app_lock_disable_confirm": "Jste si jisti, že chcete vypnout uzamčení aplikace?",
     "lock_type": "Typ uzamčení",
     "auto_lock": "Automatické uzamčení",
@@ -848,10 +845,9 @@
     "app_lock_confirm_password": "Potvrďte heslo zámku aplikace",
     "app_lock_set_password": "Nastavit heslo zámku aplikace",
     "app_lock_password_mismatch": "Hesla zámku aplikace se neshodují",
-    "app_lock_incorrect": "Nesprávný PIN nebo heslo zámku aplikace",
     "app_lock_enter_pin_to_unlock": "Zadejte PIN pro odemknutí aplikace.",
     "app_lock_pin_digit_label": "PIN číslice {{index}}",
-    "app_lock_please_try_again_in": "Příliš mnoho pokusů, zkuste to prosím znovu za",
+    "app_lock_please_try_again_in": "Příliš mnoho pokusů, zkuste to prosím znovu za {{time}}",
     "app_lock_set_pin": "Nastavit PIN",
     "device_lock": "Zámek zařízení",
     "device_lock_not_supported": "Zámek zařízení není na tomto zařízení podporován",
@@ -871,7 +867,5 @@
     "auto_lock_5_minutes": "5 minut",
     "auto_lock_30_minutes": "30 minut",
     "wrong_unlock_code_one": "Zadali jste nesprávný odemykací kód {{count}} krát.",
-    "wrong_unlock_code_other": "Zadali jste nesprávný odemykací kód {{count}} krát.",
-    "one_more_wrong_attempt_logout": "Jeden další chybný pokus Vás odhlásí.",
-    "next_wrong_attempt_wait": "Budete muset počkat {{time}}, pokud je tento pokus chybný."
+    "wrong_unlock_code_other": "Zadali jste nesprávný odemykací kód {{count}} krát."
 }
