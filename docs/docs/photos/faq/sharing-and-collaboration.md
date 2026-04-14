@@ -111,7 +111,7 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 
 You can do this by adding your partner as a viewer or collaborator to your camera folder, and asking them to do the same for you. On Android this is the **Camera** folder, and on iOS this is **Recents** (or equivalent).
 
-Any new photos backed up to these folders will automatically be shared and synced to the other person's device. This results in two separate albums — one for your photos and one for your partner's — where both of you can view and add photos.
+Any new photos backed up to these folders will automatically be shared and synced to the other person's device. This results in two separate albums - one for your photos and one for your partner's - where both of you can view and add photos.
 
 ### Does Ente have a shared library feature where all photos are shared with another account (similar to Google Photos Partner Sharing/iCloud Shared Photo Library)? {#shared-library}
 
@@ -428,7 +428,7 @@ Once you upgrade to a paid plan, all future public links will have no device lim
 
 On public links, contributor emails are masked by default to protect privacy.
 
-If you're an album member viewing comments or likes in the mobile app, you'll see names instead of masked emails — but only for people you've already added to your People list with their linked email address.
+If you're an album member viewing comments or likes in the mobile app, you'll see names instead of masked emails - but only for people you've already added to your People list with their linked email address.
 
 Anonymous viewers (people without an Ente account) can also show a name if they've entered one themselves when liking or commenting.
 

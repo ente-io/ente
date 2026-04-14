@@ -33,7 +33,7 @@ Once configured, new photos added to these albums will automatically sync in the
 Yes. You can enable this during signup/login on the permissions screen, or later via `Settings > Backup > Backup settings` by toggling on **Backup only new photos**.
 
 - **During onboarding**: Ente backs up from the **last 7 days** onward, so you have some recent photos available right away.
-- **Via the settings toggle**: Ente uses the current moment as the cutoff — only photos taken from that point forward are backed up.
+- **Via the settings toggle**: Ente uses the current moment as the cutoff - only photos taken from that point forward are backed up.
 
 In both cases, photos older than the cutoff will not be uploaded to Ente.
 
@@ -357,7 +357,7 @@ Learn more in the [Watch folders feature guide](/photos/features/backup-and-sync
 
 ### Does Ente keep my phone and PC folders in sync with each other? {#folder-sync-phone-pc}
 
-Ente backs up photos from your phone and computer to Ente's servers, making them available across all your Ente apps. However, Ente is not a two-way folder sync service — it won't automatically mirror a folder on your PC and your phone's local storage with each other.
+Ente backs up photos from your phone and computer to Ente's servers, making them available across all your Ente apps. However, Ente is not a two-way folder sync service - it won't automatically mirror a folder on your PC and your phone's local storage with each other.
 
 - **On mobile**: Your photos remain in your device photo library. Ente backs up the albums you select.
 - **On desktop**: Your photos remain in the folder you chose to watch. The desktop app uploads them to Ente using Watch folders.
