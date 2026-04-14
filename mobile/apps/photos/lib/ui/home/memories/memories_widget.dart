@@ -9,7 +9,6 @@ import "package:photos/events/memory_seen_event.dart";
 import 'package:photos/models/memories/memory.dart';
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -80,10 +79,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       future: memoriesCacheService.getMemories(),
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData) {
-          return SizedBox(
-            height: _memoryheight + 12 + 10,
-            child: const EnteLoadingWidget(),
-          );
+          return const SizedBox.shrink();
         } else {
           if (snapshot.data!.isEmpty) return const SizedBox.shrink();
           return Column(
