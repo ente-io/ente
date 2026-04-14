@@ -847,7 +847,7 @@
     "app_lock_password_mismatch": "App lock passwords don't match",
     "app_lock_enter_pin_to_unlock": "Enter your app lock pin to unlock.",
     "app_lock_pin_digit_label": "PIN digit {{index}}",
-    "app_lock_please_try_again_in": "Too many attempts, Please try again in {{time}}",
+    "app_lock_please_try_again_in": "Too many attempts, please try again in {{time}}",
     "app_lock_set_pin": "Set PIN",
     "device_lock": "Device lock",
     "device_lock_not_supported": "Device lock is not supported on this device",
