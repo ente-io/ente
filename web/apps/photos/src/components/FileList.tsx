@@ -1358,9 +1358,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     );
 };
 
-const FileThumbnail_ = styled("div")<{
-    disabled: boolean;
-}>`
+const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
     display: flex;
     width: fit-content;
     margin-bottom: ${thumbnailGap}px;
