@@ -6,8 +6,8 @@ import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
+import "package:ente_ui/components/buttons/button_widget.dart" show ButtonAction;
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/progress_dialog.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
@@ -20,7 +20,6 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
@@ -342,9 +341,12 @@ class CollectionActions {
       assetPath: "assets/warning-grey.png",
       buttons: [
         SizedBox(
-          child: GradientButton(
-            text: context.l10n.leaveCollection,
-            onTap: () => Navigator.of(context).pop(true),
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            labelText: context.l10n.leaveCollection,
+            onTap: () async {
+              Navigator.of(context).pop(true);
+            },
           ),
         ),
       ],
@@ -383,9 +385,12 @@ class CollectionActions {
       assetPath: "assets/warning-grey.png",
       buttons: [
         SizedBox(
-          child: GradientButton(
-            text: context.l10n.leaveCollection,
-            onTap: () => Navigator.of(context).pop(true),
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            labelText: context.l10n.leaveCollection,
+            onTap: () async {
+              Navigator.of(context).pop(true);
+            },
           ),
         ),
       ],
@@ -443,8 +448,8 @@ class CollectionActions {
     final actionResult = await showActionSheet(
       context: context,
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.critical,
           isInAlert: true,
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
@@ -454,8 +459,8 @@ class CollectionActions {
             await CollectionApiClient.instance.disableShareUrl(collection);
           },
         ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.secondary,
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,

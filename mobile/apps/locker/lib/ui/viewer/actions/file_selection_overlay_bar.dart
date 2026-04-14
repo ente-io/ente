@@ -1,6 +1,6 @@
 import "package:ente_events/event_bus.dart";
 import "package:ente_icons/ente_icons.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/buttons/button_widget.dart" show ButtonAction;
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";

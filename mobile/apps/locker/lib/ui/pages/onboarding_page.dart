@@ -6,6 +6,7 @@ import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/pages/developer_settings_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -133,8 +133,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 isDismissible: false,
                 showCloseButton: false,
                 buttons: [
-                  GradientButton(
-                    text: l10n.yes,
+                  ButtonWidgetV2(
+                    buttonType: ButtonTypeV2.primary,
+                    labelText: l10n.yes,
                     onTap: () async {
                       Navigator.of(context).pop();
                       await Navigator.of(context).push(
@@ -199,11 +200,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          GradientButton(
-                            text: l10n.loginToEnteAccount,
-                            backgroundColor: Colors.white,
-                            textColor: colorScheme.primary700,
-                            onTap: _navigateToSignInPage,
+                          ButtonWidgetV2(
+                            labelText: l10n.loginToEnteAccount,
+                            buttonType: ButtonTypeV2.secondary,
+                            shouldStickToLightTheme: true,
+                            onTap: () async {
+                              _navigateToSignInPage();
+                            },
                           ),
                           const SizedBox(height: 20),
                           Center(

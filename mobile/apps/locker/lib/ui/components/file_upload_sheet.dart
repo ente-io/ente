@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:ente_ui/components/base_bottom_sheet.dart';
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import 'package:ente_ui/components/text_input_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
@@ -152,8 +151,8 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
-          child: ButtonWidget(
-            buttonType: ButtonType.primary,
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
             labelText: context.l10n.upload,
             onTap: _onSave,
             isDisabled: _selectedCollectionIds.isEmpty,

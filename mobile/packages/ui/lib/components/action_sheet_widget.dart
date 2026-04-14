@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_result.dart';
 import 'package:ente_ui/components/components_constants.dart';
 import 'package:ente_ui/components/separators.dart';
@@ -18,7 +17,7 @@ enum ActionSheetType {
 ///Returns null if dismissed
 Future<ButtonResult?> showActionSheet({
   required BuildContext context,
-  required List<ButtonWidget> buttons,
+  required List<Widget> buttons,
   ActionSheetType actionSheetType = ActionSheetType.defaultActionSheet,
   bool enableDrag = true,
   bool isDismissible = true,
@@ -54,7 +53,7 @@ class ActionSheetWidget extends StatelessWidget {
   final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
-  final List<ButtonWidget> actionButtons;
+  final List<Widget> actionButtons;
   final ActionSheetType actionSheetType;
   final bool isCheckIconGreen;
 

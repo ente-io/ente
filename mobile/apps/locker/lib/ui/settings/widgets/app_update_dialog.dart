@@ -1,10 +1,10 @@
 import "dart:async";
 
 import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/update_service.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 Future<void> showAppUpdateBottomSheet(
@@ -27,9 +27,10 @@ Future<void> showAppUpdateBottomSheet(
     isDismissible: !shouldForceUpdate,
     showCloseButton: !shouldForceUpdate,
     buttons: [
-      GradientButton(
-        text: l10n.downloadUpdate,
-        onTap: () {
+      ButtonWidgetV2(
+        buttonType: ButtonTypeV2.primary,
+        labelText: l10n.downloadUpdate,
+        onTap: () async {
           unawaited(
             launchUrlString(
               latestVersionInfo.url,

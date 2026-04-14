@@ -5,13 +5,13 @@ import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
 import 'package:ente_strings/ente_strings.dart';
 import "package:ente_ui/components/base_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/services/configuration.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import "package:share_plus/share_plus.dart";
 
 class RecoveryKeySheet extends StatefulWidget {
@@ -124,9 +124,10 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
             onTap: () => _shareRecoveryKey(recoveryKeyMnemonic),
-            text: 'Share recovery key',
+            labelText: 'Share recovery key',
           ),
         ),
       ],

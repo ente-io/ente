@@ -6,6 +6,7 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
@@ -16,7 +17,6 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/viewer/date/date_time_picker.dart";
 import "package:locker/utils/collection_actions.dart";
 
@@ -429,8 +429,10 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
         _shareLater ? context.l10n.scheduleShare : context.l10n.share;
     return SizedBox(
       width: double.infinity,
-      child: GradientButton(
-        text: buttonText,
+      child: ButtonWidgetV2(
+        buttonType: ButtonTypeV2.primary,
+        isDisabled: !canShare,
+        labelText: buttonText,
         onTap: canShare ? _onShareTap : null,
       ),
     );

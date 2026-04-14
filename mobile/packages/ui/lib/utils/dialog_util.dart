@@ -6,7 +6,7 @@ import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/action_sheet_widget.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
+import 'package:ente_ui/components/buttons/button_widget_v2.dart';
 import 'package:ente_ui/components/buttons/models/button_result.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialog_widget.dart';
@@ -184,8 +184,11 @@ Future<void> showGenericErrorBottomSheet({
     message: errorBody,
     assetPath: 'assets/warning-grey.png',
     buttons: [
-      GradientButton(
-        text: context.strings.contactSupport,
+      ButtonWidgetV2(
+        buttonType: ButtonTypeV2.primary,
+        labelText: context.strings.contactSupport,
+        buttonAction: ButtonAction.first,
+        isInAlert: true,
         onTap: () async {
           await sendLogs(context, "support@ente.com", postShare: () {});
         },

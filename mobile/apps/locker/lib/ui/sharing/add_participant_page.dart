@@ -3,8 +3,7 @@ import 'package:ente_contacts/contacts.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
-import "package:ente_ui/components/buttons/models/button_type.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -248,9 +247,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final widgets = <Widget>[];
     if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
       widgets.add(
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          buttonSize: ButtonSizeV2.large,
           labelText: context.l10n.addViewers(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
@@ -287,12 +286,12 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       ActionTypesToShow.addCollaborator,
     )) {
       widgets.add(
-        ButtonWidget(
+        ButtonWidgetV2(
           buttonType:
               widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)
-                  ? ButtonType.neutral
-                  : ButtonType.primary,
-          buttonSize: ButtonSize.large,
+                  ? ButtonTypeV2.neutral
+                  : ButtonTypeV2.primary,
+          buttonSize: ButtonSizeV2.large,
           labelText: context.l10n.addCollaborators(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
@@ -397,9 +396,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           ),
         ),
         const SizedBox(width: 8),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.small,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.secondary,
+          buttonSize: ButtonSizeV2.small,
           labelText: context.l10n.add,
           isDisabled: !_emailIsValid,
           onTap: () async {

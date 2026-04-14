@@ -1,6 +1,7 @@
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/buttons/button_widget.dart" show ButtonAction;
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
@@ -12,7 +13,6 @@ import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 Future<void> showShareLinkSheet(
   BuildContext context,
@@ -116,7 +116,8 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
             onTap: () async {
               Navigator.of(context).pop();
               await shareText(
@@ -124,7 +125,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
                 context: widget.rootContext,
               );
             },
-            text: l10n.shareLink,
+            labelText: l10n.shareLink,
           ),
         ),
         const SizedBox(height: 16),
@@ -149,7 +150,6 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
   }
 
   Future<void> _deleteShareLink(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
     final l10n = context.l10n;
 
     final result = await showAlertBottomSheet<ButtonResult>(
@@ -158,12 +158,14 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
       message: l10n.deleteShareLinkConfirmation,
       assetPath: 'assets/file_delete_icon.png',
       buttons: [
-        GradientButton(
-          text: l10n.delete,
-          backgroundColor: colorScheme.warning400,
-          onTap: () => Navigator.of(context).pop(
-            ButtonResult(ButtonAction.first),
-          ),
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.critical,
+          labelText: l10n.delete,
+          onTap: () async {
+            Navigator.of(context).pop(
+              ButtonResult(ButtonAction.first),
+            );
+          },
         ),
       ],
     );

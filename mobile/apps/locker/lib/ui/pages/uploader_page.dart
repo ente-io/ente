@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_utils/email_util.dart";
@@ -15,7 +16,6 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
 import 'package:locker/ui/components/file_upload_sheet.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:logging/logging.dart';
 
@@ -222,8 +222,9 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       assetPath: "assets/warning-grey.png",
       isDismissible: true,
       buttons: [
-        GradientButton(
-          text: context.l10n.contactSupport,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: context.l10n.contactSupport,
           onTap: () async {
             await sendEmail(
               context,

@@ -1,8 +1,8 @@
 import "package:ente_base/typedefs.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 class InputSheet extends StatefulWidget {
   final String title;
@@ -130,9 +130,11 @@ class _InputSheetState extends State<InputSheet> {
         const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            isDisabled: !_isInputValid || _isSubmitting,
             onTap: !_isInputValid || _isSubmitting ? null : _onSubmit,
-            text: widget.submitButtonLabel,
+            labelText: widget.submitButtonLabel,
           ),
         ),
       ],

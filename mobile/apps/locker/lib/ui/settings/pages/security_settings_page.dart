@@ -10,6 +10,7 @@ import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -18,7 +19,6 @@ import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/settings/widgets/settings_widget.dart";
 import "package:logging/logging.dart";
 
@@ -172,8 +172,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         message: l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
         assetPath: "assets/warning-grey.png",
         buttons: [
-          GradientButton(
-            text: context.l10n.contactSupport,
+          ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            labelText: context.l10n.contactSupport,
             onTap: () async {
               await sendLogs(context, "support@ente.com", postShare: () {});
             },
