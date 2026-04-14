@@ -1,4 +1,4 @@
-package io.ente.auth.ente_qr
+package io.ente.auth.ente_auth_qr
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

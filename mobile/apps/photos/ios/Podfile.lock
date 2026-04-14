@@ -1,5 +1,5 @@
 PODS:
-  - app_links (0.0.2):
+  - app_links (6.4.1):
     - Flutter
   - audio_session (0.0.1):
     - Flutter
@@ -491,7 +491,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/workmanager_apple/ios"
 
 SPEC CHECKSUMS:
-  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
+  app_links: 3dbc685f76b1693c66a6d9dd1e9ab6f73d97dc0a
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
   backup_exclusion: a855876cbfac88c9d23f25b91263acd582ce4a05
   battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd

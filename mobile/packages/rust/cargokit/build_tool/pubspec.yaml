@@ -29,5 +29,5 @@ dependencies:
   toml: 0.14.0
 
 dev_dependencies:
-  lints: ^2.1.0
-  test: ^1.24.0
+  lints: 2.1.1
+  test: 1.24.6

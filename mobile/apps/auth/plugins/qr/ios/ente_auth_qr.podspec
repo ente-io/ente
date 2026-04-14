@@ -1,9 +1,9 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint ente_qr.podspec` to validate before publishing.
+# Run `pod lib lint ente_auth_qr.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'ente_qr'
+  s.name             = 'ente_auth_qr'
   s.version          = '0.0.1'
   s.summary          = 'A QR code reader plugin for Ente.'
   s.description      = <<-DESC
