@@ -17,7 +17,7 @@ scripts:
   # The very first command you should run. It links all your local packages
   # together and runs `flutter pub get --enforce-lockfile` everywhere.
   bootstrap:
-    run: melos bootstrap
+    run: dart run melos bootstrap
     description: Bootstrap the workspace, linking local packages.
 
   # --- RUST CODEGEN COMMANDS ---
@@ -54,11 +54,11 @@ scripts:
   # --- GLOBAL COMMANDS (run on all apps & packages) ---
 
   get:all:
-    run: melos exec -- "flutter pub get --enforce-lockfile"
+    run: dart run melos exec -- "flutter pub get --enforce-lockfile"
     description: Run "flutter pub get --enforce-lockfile" in all projects.
 
   clean:all:
-    run: melos exec -- "flutter clean"
+    run: dart run melos exec -- "flutter clean"
     description: Run "flutter clean" in all projects.
 
   # --- APP-SPECIFIC CLEAN COMMANDS ---
@@ -67,49 +67,49 @@ scripts:
   # field in that app's `pubspec.yaml` file.
 
   clean:photos:
-    run: melos exec --scope="photos" -- "flutter clean"
+    run: dart run melos exec --scope="photos" -- "flutter clean"
     description: Clean the 'photos' app.
 
   clean:auth:
-    run: melos exec --scope="auth" -- "flutter clean"
+    run: dart run melos exec --scope="auth" -- "flutter clean"
     description: Clean the 'auth' app.
 
   clean:locker:
-    run: melos exec --scope="locker" -- "flutter clean"
+    run: dart run melos exec --scope="locker" -- "flutter clean"
     description: Clean the 'locker' app.
 
 
   run:photos:apk:
-    run: melos exec --scope="photos" -- "flutter run --flavor independent"
+    run: dart run melos exec --scope="photos" -- "flutter run --flavor independent"
     description: Run the 'photos' app in independent mode.
 
   run:auth:apk:
-    run: melos exec --scope="auth" -- "flutter run --flavor independent"
+    run: dart run melos exec --scope="auth" -- "flutter run --flavor independent"
     description: Run the 'auth' app in independent mode.
 
   run:locker:apk:
-    run: melos exec --scope="locker" -- "flutter run --flavor independent"
+    run: dart run melos exec --scope="locker" -- "flutter run --flavor independent"
     description: Run the 'locker' app in independent mode.
 
  # --- APP-SPECIFIC BUILD COMMANDS ---
 
   build:photos:apk:
-    run: melos exec --scope="photos" -- "flutter build apk --release"
+    run: dart run melos exec --scope="photos" -- "flutter build apk --release"
     description: Build a release APK for the 'photos' app.
 
   build:auth:appbundle:
-    run: melos exec --scope="auth" -- "flutter build appbundle --release"
+    run: dart run melos exec --scope="auth" -- "flutter build appbundle --release"
     description: Build a release AppBundle for the 'auth' app.
 
   build:locker:ios:
-    run: melos exec --scope="locker" -- "flutter build ios --release"
+    run: dart run melos exec --scope="locker" -- "flutter build ios --release"
     description: Build a release iOS archive for the 'locker' app.
 
   # --- PLUGIN-SPECIFIC COMMANDS ---
   get:plugins:
-    run: melos exec --depends-on="flutter" --scope="ente_*" -- "flutter pub get --enforce-lockfile"
+    run: dart run melos exec --depends-on="flutter" --scope="ente_*" -- "flutter pub get --enforce-lockfile"
     description: Run "flutter pub get --enforce-lockfile" in all plugin packages.
 
   clean:plugins:
-    run: melos exec --depends-on="flutter" --scope="ente_*" -- "flutter clean"
+    run: dart run melos exec --depends-on="flutter" --scope="ente_*" -- "flutter clean"
     description: Clean all plugin packages.
