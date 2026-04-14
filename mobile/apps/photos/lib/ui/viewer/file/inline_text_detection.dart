@@ -50,6 +50,10 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   int _requestId = 0;
   bool _overlayActive = false;
   Offset? _pendingLongPressPosition;
+  bool _zoomGestureSettled = false;
+  Timer? _zoomSettleTimer;
+  int _activePointers = 0;
+  bool _isPinching = false;
 
   @override
   void initState() {
@@ -68,6 +72,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   @override
   void dispose() {
+    _zoomSettleTimer?.cancel();
     _detectorController.dispose();
     super.dispose();
   }
@@ -230,20 +235,85 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       );
     }
 
+    final detailState = InheritedDetailPageState.maybeOf(context);
+    final zoomTransformNotifier = detailState?.zoomTransformNotifier;
+
     return ValueListenableBuilder<bool>(
       valueListenable: isZoomedNotifier ?? _defaultZoomNotifier,
       builder: (context, isZoomed, _) {
-        final bool shouldHide = isZoomed;
+        if (!isZoomed) {
+          _zoomGestureSettled = false;
+          _zoomSettleTimer?.cancel();
+        }
+        return ValueListenableBuilder<ZoomTransform>(
+          valueListenable:
+              zoomTransformNotifier ?? ValueNotifier(ZoomTransform.identity),
+          builder: (context, transform, _) {
+            if (isZoomed) {
+              // Every new transform resets the debounce, including post-settle
+              // re-zooms (e.g. double-tap). Mutating directly here (no setState)
+              // is intentional: shouldIgnore reads _zoomGestureSettled later in
+              // this same builder, so the updated value is used immediately.
+              _zoomGestureSettled = false;
+              _zoomSettleTimer?.cancel();
+              _zoomSettleTimer = Timer(const Duration(milliseconds: 200), () {
+                if (mounted) {
+                  setState(() {
+                    _zoomGestureSettled = true;
+                  });
+                }
+              });
+            }
 
-        return Positioned.fill(
-          child: IgnorePointer(
-            ignoring: shouldHide,
-            child: AnimatedOpacity(
-              opacity: shouldHide ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: _buildInlineOverlay(context),
-            ),
-          ),
+            Widget overlay = _buildInlineOverlay(context);
+
+            if (isZoomed) {
+              overlay = Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..translate(transform.offset.dx, transform.offset.dy)
+                  ..scale(transform.scale),
+                child: overlay,
+              );
+            }
+
+            // Ignore pointer events when:
+            // - Actively pinching (2+ fingers down) — let PhotoView handle zoom
+            // - Zoomed but gesture not yet settled — transform is still changing
+            final shouldIgnore =
+                _isPinching || (isZoomed && !_zoomGestureSettled);
+
+            return Positioned.fill(
+              child: Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerDown: (_) {
+                  _activePointers++;
+                  if (_activePointers >= 2 && !_isPinching) {
+                    setState(() {
+                      _isPinching = true;
+                      _zoomGestureSettled = false;
+                    });
+                  }
+                },
+                onPointerUp: (_) {
+                  if (_activePointers > 0) _activePointers--;
+                  if (_activePointers < 2 && _isPinching) {
+                    setState(() => _isPinching = false);
+                  }
+                },
+                onPointerCancel: (_) {
+                  if (_activePointers > 0) _activePointers--;
+                  if (_activePointers < 2 && _isPinching) {
+                    setState(() => _isPinching = false);
+                  }
+                },
+                child: IgnorePointer(
+                  ignoring: shouldIgnore,
+                  child: overlay,
+                ),
+              ),
+            );
+          },
         );
       },
     );
