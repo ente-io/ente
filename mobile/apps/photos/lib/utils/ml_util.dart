@@ -1,13 +1,17 @@
 import "dart:io" show Directory, File, Platform;
 import "dart:math" as math show sqrt, min, max;
 
+import "package:dio/dio.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/db/offline_files_db.dart";
+import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -17,7 +21,9 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_typedefs.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/filedata/model/response.dart";
 import "package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
@@ -33,6 +39,7 @@ import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("MlUtil");
+const _kMlStaleCleanupMaxIds = 5;
 
 enum FileDataForML { thumbnailData, fileData }
 
@@ -90,6 +97,18 @@ class _OnlineMLIndexingCandidates {
   const _OnlineMLIndexingCandidates({
     required this.matched,
     required this.unmatched,
+  });
+}
+
+class _MlForbiddenFetchRecovery {
+  final Set<int> suspectedStaleIds;
+  final Set<int> confirmedStaleIds;
+  final bool abortedBySafetyCap;
+
+  const _MlForbiddenFetchRecovery({
+    this.suspectedStaleIds = const {},
+    this.confirmedStaleIds = const {},
+    this.abortedBySafetyCap = false,
   });
 }
 
@@ -444,6 +463,154 @@ Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   );
 }
 
+bool _isRecoverableMlFetchForbidden(Object error) {
+  return error is DioException &&
+      error.type == DioExceptionType.badResponse &&
+      error.response?.statusCode == 403;
+}
+
+Future<_MlForbiddenFetchRecovery> _resolveForbiddenMlFetchRecovery(
+  Set<int> batchIds,
+) async {
+  await CollectionsService.instance.sync();
+
+  final suspectedStaleIds = <int>{};
+  for (final uploadedFileId in batchIds) {
+    final collectionIds = await FilesDB.instance.getAllCollectionIDsOfFile(
+      uploadedFileId,
+    );
+    final hasAccessibleCollection = collectionIds.any((collectionId) {
+      final collection = CollectionsService.instance.getCollectionByID(
+        collectionId,
+      );
+      return collection != null && !collection.isDeleted;
+    });
+    if (!hasAccessibleCollection) {
+      suspectedStaleIds.add(uploadedFileId);
+    }
+  }
+
+  _logger.info(
+    "ML stale-file recovery inspected ${batchIds.length} IDs and found "
+    "${suspectedStaleIds.length} suspect IDs",
+  );
+  if (suspectedStaleIds.isEmpty) {
+    return const _MlForbiddenFetchRecovery();
+  }
+
+  if (suspectedStaleIds.length > _kMlStaleCleanupMaxIds) {
+    _logger.severe(
+      "Aborting ML stale-file cleanup: batchSize=${batchIds.length}, "
+      "suspectCount=${suspectedStaleIds.length}, absoluteLimit="
+      "$_kMlStaleCleanupMaxIds",
+    );
+    return _MlForbiddenFetchRecovery(
+      suspectedStaleIds: suspectedStaleIds,
+      abortedBySafetyCap: true,
+    );
+  }
+
+  if (suspectedStaleIds.length == 1) {
+    final uploadedFileId = suspectedStaleIds.first;
+    try {
+      await fileDataService.getFilesData({uploadedFileId});
+      _logger.info(
+        "Keeping uploadID=$uploadedFileId after single-ID ML re-probe",
+      );
+      return _MlForbiddenFetchRecovery(suspectedStaleIds: suspectedStaleIds);
+    } catch (e) {
+      if (!_isRecoverableMlFetchForbidden(e)) {
+        rethrow;
+      }
+      return _MlForbiddenFetchRecovery(
+        suspectedStaleIds: suspectedStaleIds,
+        confirmedStaleIds: {uploadedFileId},
+      );
+    }
+  }
+
+  try {
+    await fileDataService.getFilesData(suspectedStaleIds);
+    _logger.info(
+      "ML stale-file recovery kept all suspect IDs after subset re-probe",
+    );
+    return _MlForbiddenFetchRecovery(suspectedStaleIds: suspectedStaleIds);
+  } catch (e) {
+    if (!_isRecoverableMlFetchForbidden(e)) {
+      rethrow;
+    }
+  }
+
+  final confirmedStaleIds = <int>{};
+  for (final uploadedFileId in suspectedStaleIds) {
+    try {
+      await fileDataService.getFilesData({uploadedFileId});
+      _logger.info(
+        "Keeping uploadID=$uploadedFileId after single-ID ML re-probe",
+      );
+    } catch (e) {
+      if (!_isRecoverableMlFetchForbidden(e)) {
+        rethrow;
+      }
+      confirmedStaleIds.add(uploadedFileId);
+    }
+  }
+
+  _logger.info(
+    "ML stale-file recovery confirmed ${confirmedStaleIds.length} stale IDs",
+  );
+  return _MlForbiddenFetchRecovery(
+    suspectedStaleIds: suspectedStaleIds,
+    confirmedStaleIds: confirmedStaleIds,
+  );
+}
+
+Future<FileDataResponse> _fetchFilesDataForMlHydrationWithRecovery(
+  Map<int, FileMLInstruction> pendingIndex,
+) async {
+  final batchIds = pendingIndex.keys.toSet();
+  try {
+    return await fileDataService.getFilesData(batchIds);
+  } catch (e) {
+    if (!_isRecoverableMlFetchForbidden(e)) {
+      rethrow;
+    }
+    final recovery = await _resolveForbiddenMlFetchRecovery(batchIds);
+    if (recovery.abortedBySafetyCap || recovery.confirmedStaleIds.isEmpty) {
+      rethrow;
+    }
+
+    final staleFiles = <EnteFile>[];
+    for (final staleId in recovery.confirmedStaleIds) {
+      final staleInstruction = pendingIndex.remove(staleId);
+      if (staleInstruction != null) {
+        staleFiles.add(staleInstruction.file);
+      }
+    }
+    await FilesDB.instance.deleteMultipleUploadedFiles(
+      recovery.confirmedStaleIds.toList(),
+    );
+    if (staleFiles.isNotEmpty) {
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          staleFiles,
+          type: EventType.deletedFromRemote,
+          source: "mlStaleFileCleanup",
+        ),
+      );
+    }
+
+    _logger.info(
+      "Pruned ${recovery.confirmedStaleIds.length} stale ML IDs. "
+      "Retrying fetch for ${pendingIndex.length} IDs",
+    );
+    if (pendingIndex.isEmpty) {
+      return FileDataResponse.empty();
+    }
+    return fileDataService.getFilesData(pendingIndex.keys.toSet());
+  }
+}
+
 Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
   List<FileMLInstruction> instructions, {
   required MLDataDB mlDataDB,
@@ -464,7 +631,7 @@ Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
     return instructions.where((instruction) => instruction.pendingML).toList();
   }
   _logger.info("fetching embeddings for ${ids.length} files");
-  final res = await fileDataService.getFilesData(ids);
+  final res = await _fetchFilesDataForMlHydrationWithRecovery(pendingIndex);
   _logger.info("embeddingResponse ${res.debugLog()}");
   final List<Face> faces = [];
   final List<ClipEmbedding> clipEmbeddings = [];
