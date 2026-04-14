@@ -16,6 +16,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import "package:photos/events/memory_seen_event.dart";
+import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
@@ -31,6 +32,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/smart_memories_service.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
@@ -58,6 +60,8 @@ class MemoriesCacheService {
   List<SmartMemory>? _cachedMemories;
   List<SmartMemory>? get currentMemoriesSync => _cachedMemories;
   bool _shouldUpdate = false;
+  bool _pendingInitialOfflineCacheUpgrade = false;
+  bool _isRunningDeferredInitialOfflineCacheUpgrade = false;
 
   bool _isUpdatingMemories = false;
   bool get isUpdatingMemories => _isUpdatingMemories;
@@ -119,12 +123,34 @@ class MemoriesCacheService {
     });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      if (_pendingInitialOfflineCacheUpgrade &&
+          isOfflineMode &&
+          event.source == "offlineImportMetadata" &&
+          LocalSyncService.instance.hasCompletedFirstImport()) {
+        unawaited(
+          _runDeferredInitialOfflineCacheUpgrade(
+            trigger: "offlineImportMetadata",
+          ),
+        );
+      }
+
       final shouldQueueUpdate =
           _cachedMemories == null || _cachedMemories!.isEmpty;
       if (!shouldQueueUpdate) {
         return;
       }
       queueUpdateCache();
+    });
+
+    Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status != SyncStatus.completedFirstGalleryImport) {
+        return;
+      }
+      unawaited(
+        _runDeferredInitialOfflineCacheUpgrade(
+          trigger: "completedFirstGalleryImport",
+        ),
+      );
     });
   }
 
@@ -259,6 +285,43 @@ class MemoriesCacheService {
   void queueUpdateCache() {
     _shouldUpdate = true;
     unawaited(_prefs.setBool(_shouldUpdateKey, true));
+  }
+
+  bool _shouldDeferInitialOfflineCacheUpgrade() {
+    return isOfflineMode &&
+        !LocalSyncService.instance.hasCompletedFirstImport();
+  }
+
+  Future<void> _runDeferredInitialOfflineCacheUpgrade({
+    required String trigger,
+  }) async {
+    if (!_pendingInitialOfflineCacheUpgrade ||
+        _isRunningDeferredInitialOfflineCacheUpgrade ||
+        !isOfflineMode) {
+      return;
+    }
+
+    _isRunningDeferredInitialOfflineCacheUpgrade = true;
+    try {
+      _logger.info(
+        "Running deferred initial offline memories cache upgrade after $trigger",
+      );
+      await updateCache(forced: true);
+      final persistedMemories = await _getMemoriesFromCache();
+      if (persistedMemories != null && persistedMemories.isNotEmpty) {
+        _pendingInitialOfflineCacheUpgrade = false;
+        _logger.info(
+          "Deferred initial offline memories cache upgrade after $trigger completed",
+        );
+      } else {
+        _logger.warning(
+          "Deferred initial offline memories cache upgrade after $trigger still produced an empty disk cache; waiting for the next import signal",
+        );
+      }
+    } finally {
+      _isRunningDeferredInitialOfflineCacheUpgrade = false;
+      Bus.instance.fire(MemoriesChangedEvent());
+    }
   }
 
   Future<void> purgeMlOnlyMemoriesFromCache() async {
@@ -446,11 +509,18 @@ class MemoriesCacheService {
               "smart memories will upgrade in background",
             );
             _cachedMemories = await smartMemoriesService.calcSimpleMemories();
-            unawaited(
-              updateCache(forced: true).whenComplete(
-                () => Bus.instance.fire(MemoriesChangedEvent()),
-              ),
-            );
+            if (_shouldDeferInitialOfflineCacheUpgrade()) {
+              _pendingInitialOfflineCacheUpgrade = true;
+              _logger.info(
+                "Deferring initial offline memories cache upgrade until first import metadata is ready",
+              );
+            } else {
+              unawaited(
+                updateCache(forced: true).whenComplete(
+                  () => Bus.instance.fire(MemoriesChangedEvent()),
+                ),
+              );
+            }
             return _cachedMemories!;
           }
           _logger.warning(
