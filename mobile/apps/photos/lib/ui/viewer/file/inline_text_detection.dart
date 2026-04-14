@@ -45,7 +45,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   static const Duration _autoActivateDelay = Duration(seconds: 1);
   static const double _globalGestureSlop = 18.0;
   static final Map<String, _HasTextResult> _hasTextCache = {};
-  static final ValueNotifier<bool> _defaultZoomNotifier = ValueNotifier(false);
   final Logger _logger = Logger("InlineTextDetection");
   final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
@@ -378,8 +377,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       return const SizedBox.shrink();
     }
 
-    final isZoomedNotifier =
-        InheritedDetailPageState.maybeOf(context)?.isZoomedNotifier;
+    final detailState = InheritedDetailPageState.of(context);
+    final isZoomedNotifier = detailState.isZoomedNotifier;
 
     // During the wait period (hasText passed but 1s timer hasn't fired),
     // show a transparent gesture layer to capture long press.
@@ -397,11 +396,10 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       );
     }
 
-    final detailState = InheritedDetailPageState.maybeOf(context);
-    final zoomTransformNotifier = detailState?.zoomTransformNotifier;
+    final zoomTransformNotifier = detailState.zoomTransformNotifier;
 
     return ValueListenableBuilder<bool>(
-      valueListenable: isZoomedNotifier ?? _defaultZoomNotifier,
+      valueListenable: isZoomedNotifier,
       builder: (context, isZoomed, _) {
         _isCurrentlyZoomed = isZoomed;
         if (!isZoomed) {
@@ -410,8 +408,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
           _lastSeenTransform = null;
         }
         return ValueListenableBuilder<ZoomTransform>(
-          valueListenable:
-              zoomTransformNotifier ?? ValueNotifier(ZoomTransform.identity),
+          valueListenable: zoomTransformNotifier,
           builder: (context, transform, _) {
             // Only reset the debounce when the transform has genuinely changed.
             // Guarding on value change prevents the setState rebuild from the
