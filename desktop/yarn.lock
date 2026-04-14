@@ -1277,10 +1277,10 @@ electron-updater@6.6.5:
     semver "^7.6.3"
     tiny-typed-emitter "^2.1.0"
 
-electron@41.0.0:
-  version "41.0.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-41.0.0.tgz#5c5dcc8f38f7a53700ccd24c2abda962fa9a1d2b"
-  integrity sha512-U7QueSj1cFj9QM0Qamgh/MK08662FVK555iMfapqU7mcAmIm4A8bZuZptpjMXrT4JNAMGjgWu9sOeO1+RPCJNw==
+electron@41.2.0:
+  version "41.2.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-41.2.0.tgz#7598019461b3cde346a9d59cc6ba11229d7717f0"
+  integrity sha512-0OKLiymqfV0WK68RBXqAm3Myad2TpI5wwxLCBEUcH5Nugo3YfSk7p1Js/AL9266qTz5xZioUnxt9hG8FFwax0g==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^24.9.0"
