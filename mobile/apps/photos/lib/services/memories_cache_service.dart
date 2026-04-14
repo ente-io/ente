@@ -446,7 +446,11 @@ class MemoriesCacheService {
               "smart memories will upgrade in background",
             );
             _cachedMemories = await smartMemoriesService.calcSimpleMemories();
-            unawaited(updateCache(forced: true));
+            unawaited(
+              updateCache(forced: true).whenComplete(
+                () => Bus.instance.fire(MemoriesChangedEvent()),
+              ),
+            );
             return _cachedMemories!;
           }
           _logger.warning(
@@ -697,7 +701,7 @@ class MemoriesCacheService {
         await _cacheUpdated();
         w?.logAndReset('_cacheUpdated method done');
       } catch (e, s) {
-        _logger.info("Error updating memories cache", e, s);
+        _logger.severe("Error updating memories cache", e, s);
       } finally {
         _isUpdatingMemories = false;
       }
