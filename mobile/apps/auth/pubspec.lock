@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: adaptive_theme
-      sha256: caa49b4c73b681bf12a641dff77aa1383262a00cf38b9d1a25b180e275ba5ab9
+      sha256: "5caccff82e40ef6d3ebb28caaa091ab1865b0e35bd2ab2ddccf49cd336331012"
       url: "https://pub.dev"
     source: hosted
-    version: "3.7.0"
+    version: "3.7.2"
   analyzer:
     dependency: transitive
     description:
@@ -1819,10 +1819,10 @@ packages:
     dependency: "direct main"
     description:
       name: tray_manager
-      sha256: ad18c4cd73003097d182884bacb0578ad2865f3ab842a0ad00f6d043ed49eaf0
+      sha256: c5fd83b0ae4d80be6eaedfad87aaefab8787b333b8ebd064b0e442a81006035b
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
+    version: "0.5.2"
   tuple:
     dependency: "direct main"
     description:
