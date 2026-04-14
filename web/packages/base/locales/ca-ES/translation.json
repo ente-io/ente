@@ -847,7 +847,7 @@
     "app_lock_password_mismatch": "Les contrasenyes de bloqueig de l'aplicació no coincideixen",
     "app_lock_enter_pin_to_unlock": "Introdueix el PIN de bloqueig de l'aplicació per desbloquejar.",
     "app_lock_pin_digit_label": "Dígit del PIN {{index}}",
-    "app_lock_please_try_again_in": "Massa intents, si us plau, torna-ho a provar d'aquí a {{time}}",
+    "app_lock_please_try_again_in": "",
     "app_lock_set_pin": "Estableix el PIN",
     "device_lock": "Bloqueig del dispositiu",
     "device_lock_not_supported": "El bloqueig del dispositiu no és compatible amb aquest dispositiu",

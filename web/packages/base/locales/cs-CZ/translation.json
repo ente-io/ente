@@ -847,7 +847,7 @@
     "app_lock_password_mismatch": "Hesla zámku aplikace se neshodují",
     "app_lock_enter_pin_to_unlock": "Zadejte PIN pro odemknutí aplikace.",
     "app_lock_pin_digit_label": "PIN číslice {{index}}",
-    "app_lock_please_try_again_in": "Příliš mnoho pokusů, zkuste to prosím znovu za {{time}}",
+    "app_lock_please_try_again_in": "",
     "app_lock_set_pin": "Nastavit PIN",
     "device_lock": "Zámek zařízení",
     "device_lock_not_supported": "Zámek zařízení není na tomto zařízení podporován",

@@ -847,7 +847,7 @@
     "app_lock_password_mismatch": "Mật khẩu khóa ứng dụng không khớp",
     "app_lock_enter_pin_to_unlock": "Nhập mã pin để mở khóa.",
     "app_lock_pin_digit_label": "Mã PIN {{index}}",
-    "app_lock_please_try_again_in": "Thử quá nhiều lần. Hãy thử lại sau {{time}}",
+    "app_lock_please_try_again_in": "",
     "app_lock_set_pin": "Đặt mã PIN",
     "device_lock": "Khóa thiết bị",
     "device_lock_not_supported": "Không hỗ trợ khóa thiết bị trên thiết bị này",
