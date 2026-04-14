@@ -47,7 +47,7 @@ dependencies:
   cupertino_icons: 1.0.8
   dart_ui_isolate: 1.1.1
   defer_pointer: 0.0.2
-  device_info_plus: 11.5.0
+  device_info_plus: 11.3.0
   dio: 5.8.0+1
   dots_indicator: 4.0.1
   dotted_border: 2.1.0
