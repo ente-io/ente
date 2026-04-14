@@ -602,60 +602,14 @@ export const PasteLinkCard = ({
                                 overflow: "visible",
                             }}
                         >
-                            <Box
-                                sx={{
-                                    position: "relative",
-                                    width: "fit-content",
-                                    maxWidth: "100%",
-                                    mx: "auto",
-                                    overflow: "visible",
+                            <PasteQrCode
+                                value={link}
+                                tokens={tokens}
+                                onClose={() => {
+                                    setShowQr(false);
                                 }}
-                            >
-                                <PasteQrCode value={link} tokens={tokens} />
-                                <IconButton
-                                    type="button"
-                                    aria-label="Close QR code"
-                                    disableRipple
-                                    onClick={() => {
-                                        setShowQr(false);
-                                    }}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        right: 0,
-                                        zIndex: 1,
-                                        width: 28,
-                                        height: 28,
-                                        minWidth: 28,
-                                        padding: 0,
-                                        borderRadius: "50%",
-                                        border: `1px solid ${tokens.button.qrToggleBorder}`,
-                                        color: tokens.text.secondary,
-                                        bgcolor: tokens.surface.floatingCardBg,
-                                        opacity: 1,
-                                        boxShadow:
-                                            "0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05)",
-                                        transform: "translate(50%, -50%) scale(1)",
-                                        transformOrigin: "center",
-                                        transition:
-                                            "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 420ms cubic-bezier(0.22, 1, 0.36, 1)",
-                                        "&:hover": {
-                                            opacity: 1,
-                                            transform:
-                                                "translate(50%, -50%) scale(1.12)",
-                                            bgcolor:
-                                                resolvedMode === "dark"
-                                                    ? "rgba(26, 36, 72, 1)"
-                                                    : "rgba(237, 244, 255, 1)",
-                                        },
-                                        "& .MuiSvgIcon-root": {
-                                            opacity: 1,
-                                        },
-                                    }}
-                                >
-                                    <CloseRoundedIcon sx={{ fontSize: 16 }} />
-                                </IconButton>
-                            </Box>
+                                resolvedMode={resolvedMode}
+                            />
                         </Box>
                     )}
                 </Stack>
@@ -822,66 +776,17 @@ export const PasteLinkCard = ({
                         }}
                     >
                         <Box sx={{ p: 1.15, overflow: "visible" }}>
-                            <Box
-                                sx={{
-                                    position: "relative",
-                                    width: "fit-content",
-                                    maxWidth: "100%",
-                                    mx: "auto",
-                                    overflow: "visible",
+                            <PasteQrCode
+                                value={link}
+                                tokens={tokens}
+                                size={226}
+                                paperBg={tokens.qr.mobilePaperBg}
+                                borderRadius="12px"
+                                onClose={() => {
+                                    setShowQr(false);
                                 }}
-                            >
-                                <PasteQrCode
-                                    value={link}
-                                    tokens={tokens}
-                                    size={226}
-                                    paperBg={tokens.qr.mobilePaperBg}
-                                    borderRadius="12px"
-                                />
-                                <IconButton
-                                    type="button"
-                                    aria-label="Close QR code"
-                                    disableRipple
-                                    onClick={() => {
-                                        setShowQr(false);
-                                    }}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        right: 0,
-                                        zIndex: 1,
-                                        width: 28,
-                                        height: 28,
-                                        minWidth: 28,
-                                        padding: 0,
-                                        borderRadius: "50%",
-                                        border: `1px solid ${tokens.button.qrToggleBorder}`,
-                                        color: tokens.text.secondary,
-                                        bgcolor: tokens.surface.floatingCardBg,
-                                        opacity: 1,
-                                        boxShadow:
-                                            "0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05)",
-                                        transform: "translate(50%, -50%) scale(1)",
-                                        transformOrigin: "center",
-                                        transition:
-                                            "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 420ms cubic-bezier(0.22, 1, 0.36, 1)",
-                                        "&:hover": {
-                                            opacity: 1,
-                                            transform:
-                                                "translate(50%, -50%) scale(1.12)",
-                                            bgcolor:
-                                                resolvedMode === "dark"
-                                                    ? "rgba(26, 36, 72, 1)"
-                                                    : "rgba(237, 244, 255, 1)",
-                                        },
-                                        "& .MuiSvgIcon-root": {
-                                            opacity: 1,
-                                        },
-                                    }}
-                                >
-                                    <CloseRoundedIcon sx={{ fontSize: 16 }} />
-                                </IconButton>
-                            </Box>
+                                resolvedMode={resolvedMode}
+                            />
                         </Box>
                     </Dialog>
                 )}
