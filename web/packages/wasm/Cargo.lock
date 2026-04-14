@@ -354,6 +354,7 @@ version = "0.0.1"
 dependencies = [
  "ente-contacts",
  "ente-core",
+ "js-sys",
  "md-5",
  "serde",
  "serde-wasm-bindgen",

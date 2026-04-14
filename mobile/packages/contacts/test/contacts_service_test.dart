@@ -40,6 +40,7 @@ void main() {
   });
 
   test('open persists wrapped root key and sync caches contacts', () async {
+    rustApi.rootKeySource = RootKeySource.server;
     rustApi.diffPages = [
       [
         const ContactRecord(
@@ -82,7 +83,9 @@ void main() {
     expect(cached.single.profilePictureAttachmentId, 'att_1');
   });
 
-  test('create and profile-picture changes update local cache', () async {
+  test('open does not persist a newly created root key', () async {
+    rustApi.rootKeySource = RootKeySource.created;
+
     await service.open(
       ContactsSession(
         baseUrl: 'http://localhost:8080',
@@ -92,8 +95,30 @@ void main() {
       ),
     );
 
+    expect(preferences.getString('entity_key_contact_1'), isNull);
+    expect(preferences.getString('entity_key_header_contact_1'), isNull);
+  });
+
+  test('create and profile-picture changes update local cache', () async {
+    rustApi.rootKeySource = RootKeySource.created;
+    await service.open(
+      ContactsSession(
+        baseUrl: 'http://localhost:8080',
+        authToken: 'token',
+        userId: 1,
+        accountKey: Uint8List.fromList([1, 2, 3]),
+      ),
+    );
+    expect(preferences.getString('entity_key_contact_1'), isNull);
+    expect(preferences.getString('entity_key_header_contact_1'), isNull);
+
     final created = await service.createContact(
       const ContactData(contactUserId: 2, name: 'B'),
+    );
+    expect(preferences.getString('entity_key_contact_1'), 'enc-key');
+    expect(
+      preferences.getString('entity_key_header_contact_1'),
+      'enc-header',
     );
     expect((await service.getContact(created.id))!.data!.name, 'B');
     expect((await service.getContactByUserId(2))!.id, created.id);
@@ -331,6 +356,7 @@ class FakeContactsRustApi implements ContactsRustApi {
   FakeContactsRustContext ctx = FakeContactsRustContext();
   List<List<ContactRecord>> diffPages = const [];
   Uint8List? lastAccountKey;
+  RootKeySource rootKeySource = RootKeySource.server;
 
   @override
   Future<OpenContactsContextResult> open(OpenContactsContextInput input) async {
@@ -343,7 +369,7 @@ class FakeContactsRustApi implements ContactsRustApi {
         encryptedKey: 'enc-key',
         header: 'enc-header',
       ),
-      rootKeySource: RootKeySource.created,
+      rootKeySource: rootKeySource,
     );
   }
 }

@@ -75,6 +75,7 @@ interface SetupOptions {
     legacyInfo?: object;
     getProfilePictureError?: Error;
     getProfilePictureBytes?: Uint8Array;
+    rootKeySource?: "cache" | "server" | "created";
 }
 
 const setupContactsModule = async (options: SetupOptions = {}) => {
@@ -94,11 +95,6 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
     const warn = vi.fn();
     const error = vi.fn();
     const update_auth_token = vi.fn();
-    const current_wrapped_root_key = vi.fn(() => ({
-        encryptedKey: "wrapped-root-key",
-        header: "wrapped-header",
-    }));
-
     const diff = options.diff ?? [
         {
             id: "ct_1",
@@ -152,11 +148,17 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
     }));
     vi.doMock("ente-wasm", () => ({
         contacts_open_ctx: vi.fn(() => ({
-            update_auth_token,
-            current_wrapped_root_key,
-            get_diff,
-            get_profile_picture,
-            legacy_get_info,
+            ctx: {
+                update_auth_token,
+                get_diff,
+                get_profile_picture,
+                legacy_get_info,
+            },
+            wrappedRootKey: {
+                encryptedKey: "wrapped-root-key",
+                header: "wrapped-header",
+            },
+            rootKeySource: options.rootKeySource ?? "server",
         })),
     }));
 
@@ -193,6 +195,24 @@ describe("ensureContactsReady", () => {
 
         const resolved = contacts.resolveContactDisplay({ userID: 101 });
         expect(resolved.profilePictureAttachmentID).toBe("ua_1");
+    });
+
+    test("does not persist an unconfirmed locally created root key", async () => {
+        const { contacts, setKV } = await setupContactsModule({
+            rootKeySource: "created",
+        });
+
+        await contacts.ensureContactsReady({
+            userID: 101,
+            masterKeyB64: "MASTER_KEY_SHOULD_NOT_PERSIST",
+        });
+
+        const persisted = setKV.mock.calls
+            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .join("\n");
+
+        expect(persisted).toContain("contacts/");
+        expect(persisted).not.toContain("wrapped-root-key");
     });
 });
 

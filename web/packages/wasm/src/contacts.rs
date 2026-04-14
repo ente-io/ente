@@ -2,9 +2,10 @@
 
 use ente_contacts::{
     ContactsCtx, ContactsError as CoreContactsError, LegacyContactState, OpenContactsCtxInput,
-    WrappedRootContactKey,
+    RootKeySource, WrappedRootContactKey,
 };
 use ente_core::{auth::KeyAttributes, crypto};
+use js_sys::{Object, Reflect};
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen as swb;
 use wasm_bindgen::prelude::*;
@@ -106,7 +107,7 @@ impl From<ente_contacts::ContactRecord> for ContactRecordJs {
 
 /// Open contacts context for web.
 #[wasm_bindgen]
-pub async fn contacts_open_ctx(input: JsValue) -> Result<ContactsCtxHandle, ContactsError> {
+pub async fn contacts_open_ctx(input: JsValue) -> Result<JsValue, ContactsError> {
     let input: OpenContactsCtxJsInput = swb::from_value(input)?;
     let master_key = crypto::decode_b64(&input.master_key_b64).map_err(|e| ContactsError {
         code: "decode".to_string(),
@@ -125,7 +126,31 @@ pub async fn contacts_open_ctx(input: JsValue) -> Result<ContactsCtxHandle, Cont
     })
     .await?;
 
-    Ok(ContactsCtxHandle { inner: result.ctx })
+    let output = Object::new();
+    Reflect::set(
+        &output,
+        &JsValue::from_str("ctx"),
+        &JsValue::from(ContactsCtxHandle { inner: result.ctx }),
+    )
+    .expect("setting ctx should not fail");
+    Reflect::set(
+        &output,
+        &JsValue::from_str("wrappedRootKey"),
+        &swb::to_value(&result.wrapped_root_key).map_err(ContactsError::from)?,
+    )
+    .expect("setting wrappedRootKey should not fail");
+    Reflect::set(
+        &output,
+        &JsValue::from_str("rootKeySource"),
+        &JsValue::from_str(match result.root_key_source {
+            RootKeySource::Cache => "cache",
+            RootKeySource::Server => "server",
+            RootKeySource::Created => "created",
+        }),
+    )
+    .expect("setting rootKeySource should not fail");
+
+    Ok(output.into())
 }
 
 /// Handle to an open contacts context.
