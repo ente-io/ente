@@ -9,6 +9,7 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
@@ -28,6 +29,7 @@ import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
@@ -44,7 +46,7 @@ class MemoriesCacheService {
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
-  static const _kCacheUpdateDelay = Duration(seconds: 5);
+  static const _kCacheUpdateDelay = Duration(seconds: 20);
 
   final SharedPreferences _prefs;
   static final Logger _logger = Logger("MemoriesCacheService");
@@ -66,6 +68,12 @@ class MemoriesCacheService {
 
     Future.delayed(_kCacheUpdateDelay, () {
       _checkIfTimeToUpdateCache();
+      // Self-schedule cache updates independently of runAllML, so that users
+      // with ML disabled still get their memories cache refreshed on the
+      // configured cadence. Safe to call unconditionally: updateCache() is a
+      // no-op when neither _shouldUpdate nor forced is true, and the lock
+      // serialises against concurrent invocations from runAllML.
+      unawaited(updateCache());
       _memoriesDB.clearMemoriesSeenBeforeTime(
         DateTime.now()
             .subtract(kMemoriesUpdateFrequency)
@@ -137,15 +145,25 @@ class MemoriesCacheService {
     }
   }
 
-  bool get enableSmartMemories =>
-      hasGrantedMLConsent &&
-      localSettings.isMLLocalIndexingEnabled &&
-      localSettings.isSmartMemoriesEnabled;
+  bool get enableSmartMemories => localSettings.isSmartMemoriesEnabled;
 
-  bool get curatedMemoriesOption =>
-      showAnyMemories &&
-      hasGrantedMLConsent &&
-      localSettings.isMLLocalIndexingEnabled;
+  bool get curatedMemoriesOption => showAnyMemories;
+
+  bool get _mlEnabled =>
+      hasGrantedMLConsent && localSettings.isMLLocalIndexingEnabled;
+
+  Future<bool> _isMlReady() async {
+    if (!_mlEnabled) return false;
+    try {
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final clipIndexed = await mlDataDB.getClipIndexedFileCount();
+      return clipIndexed >= SmartMemoriesService.minimumMemoryLength;
+    } catch (e, s) {
+      _logger.warning("Failed to read CLIP indexed count", e, s);
+      return false;
+    }
+  }
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
@@ -522,8 +540,12 @@ class MemoriesCacheService {
         // calculate memories for this period and for the next period
         final now = DateTime.now();
         final next = now.add(kMemoriesUpdateFrequency);
-        final nowResult =
-            await smartMemoriesService.calcSmartMemories(now, newCache);
+        final mlReady = await _isMlReady();
+        final nowResult = await smartMemoriesService.calcSmartMemories(
+          now,
+          newCache,
+          mlEnabled: mlReady,
+        );
         final carriedForwardTripEntries = List<ToShowMemory>.from(
           newCache.toShowMemories,
         );
@@ -532,8 +554,11 @@ class MemoriesCacheService {
               .whereType<TripMemory>()
               .map((memory) => ToShowMemory.fromSmartMemory(memory, now)),
         );
-        final nextResult =
-            await smartMemoriesService.calcSmartMemories(next, newCache);
+        final nextResult = await smartMemoriesService.calcSmartMemories(
+          next,
+          newCache,
+          mlEnabled: mlReady,
+        );
         w?.log("calculated new memories");
         newCache.toShowMemories
           ..clear()
@@ -773,6 +798,7 @@ class MemoriesCacheService {
     DateTime? calcTime,
   }) async {
     return _memoriesUpdateLock.synchronized(() async {
+      final mlReady = await _isMlReady();
       final result = await smartMemoriesService.calcSmartMemories(
         calcTime ?? DateTime.now(),
         MemoriesCache(
@@ -783,6 +809,7 @@ class MemoriesCacheService {
           baseLocations: [],
         ),
         debugSurfaceAll: true,
+        mlEnabled: mlReady,
       );
       locationService.baseLocations = result.baseLocations;
       return result.memories;

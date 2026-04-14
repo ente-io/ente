@@ -1,5 +1,5 @@
 import "dart:developer" as dev show log;
-import "dart:math" show max;
+import "dart:math" show Random, max;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -554,11 +554,17 @@ class PhotoSelector {
   }
 
   /// Returns the best selection for time and trip memories.
+  ///
+  /// When [mlEnabled] is false, scoring and CLIP near-duplicate filtering are
+  /// skipped; candidates are shuffled randomly and distributed across years or
+  /// chronologically based solely on creation time, keeping only the
+  /// time-spacing filter.
   static Future<List<Memory>> bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
     SelectionDistribution? distributionOverride,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
@@ -567,6 +573,15 @@ class PhotoSelector {
     final fileCount = memories.length;
     int targetSize = prefferedSize ?? 10;
     if (fileCount <= targetSize) return memories;
+
+    if (!mlEnabled) {
+      return _bestSelectionNoMl(
+        memories,
+        targetSize: targetSize,
+        isOfflineMode: isOfflineMode,
+        distributionOverride: distributionOverride,
+      );
+    }
 
     // Pre-compute combined score: face count * 1000 + CLIP nostalgia.
     // This replicates the original two-level stable sort (faces primary,
@@ -651,6 +666,163 @@ class PhotoSelector {
         ),
       );
     }
+  }
+
+  // -----------------------------------------------------------------------
+  // ML-free selection path
+  // -----------------------------------------------------------------------
+
+  /// Produces a time-distributed selection without using any ML signals:
+  /// - No scoring (face counts / CLIP nostalgia).
+  /// - No CLIP near-duplicate filtering.
+  /// - Within each year / bucket, candidates are shuffled with fresh
+  ///   randomness and then filtered by the time-spacing rule.
+  static List<Memory> _bestSelectionNoMl(
+    List<Memory> memories, {
+    required int targetSize,
+    required bool isOfflineMode,
+    SelectionDistribution? distributionOverride,
+  }) {
+    final withCreationTime =
+        memories.where((m) => m.file.creationTime != null).toList();
+    if (withCreationTime.length <= targetSize) return withCreationTime;
+
+    final random = Random();
+    final allYears = withCreationTime
+        .map(
+          (e) => DateTime.fromMicrosecondsSinceEpoch(e.file.creationTime!).year,
+        )
+        .toSet();
+
+    int effectiveTargetSize = targetSize;
+    final List<Memory> sortedChronologically;
+
+    if (distributionOverride == SelectionDistribution.timeBuckets ||
+        (distributionOverride == null && allYears.length <= 1)) {
+      sortedChronologically = List<Memory>.from(withCreationTime)
+        ..sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
+      // Single year / time-buckets override: distribute evenly across the
+      // chronological range and shuffle within each bucket.
+      return _pickAcrossTimeBuckets(
+        sortedChronologically,
+        targetSize: effectiveTargetSize,
+        random: random,
+      );
+    }
+
+    if (distributionOverride == null && (allYears.length * 2) > 10) {
+      effectiveTargetSize = allYears.length * 3;
+      if (withCreationTime.length < effectiveTargetSize) {
+        return withCreationTime;
+      }
+    }
+
+    // Multiple years: round-robin through recent-years-first, shuffling each
+    // year's list with fresh randomness.
+    final yearToFiles = <int, List<Memory>>{};
+    for (final mem in withCreationTime) {
+      final year =
+          DateTime.fromMicrosecondsSinceEpoch(mem.file.creationTime!).year;
+      yearToFiles.putIfAbsent(year, () => []).add(mem);
+    }
+    for (final yearFiles in yearToFiles.values) {
+      yearFiles.shuffle(random);
+    }
+    final years = yearToFiles.keys.toList()..sort((a, b) => b.compareTo(a));
+
+    final selected = <Memory>[];
+    final selectedCreationTimes = <int>[];
+    final fileCount = withCreationTime.length;
+    int skipped = 0;
+
+    outerLoop:
+    while (selected.length + skipped < fileCount) {
+      for (final year in years) {
+        final yearFiles = yearToFiles[year]!;
+        if (yearFiles.isEmpty) continue;
+        final candidate = yearFiles.removeAt(0);
+        final creationTime = candidate.file.creationTime;
+        if (isTooCloseInTime(creationTime, selectedCreationTimes)) {
+          skipped++;
+          continue;
+        }
+        selected.add(candidate);
+        if (creationTime != null) selectedCreationTimes.add(creationTime);
+        if (selected.length >= effectiveTargetSize ||
+            selected.length + skipped >= fileCount) {
+          break outerLoop;
+        }
+      }
+    }
+
+    selected
+        .sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
+    return selected;
+  }
+
+  static List<Memory> _pickAcrossTimeBuckets(
+    List<Memory> sorted, {
+    required int targetSize,
+    required Random random,
+  }) {
+    if (sorted.length <= targetSize) return sorted;
+    final minCreationTime = sorted.first.file.creationTime!;
+    final maxCreationTime = sorted.last.file.creationTime!;
+    if (minCreationTime == maxCreationTime) {
+      final shuffled = List<Memory>.from(sorted)..shuffle(random);
+      return shuffled.take(targetSize).toList()
+        ..sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
+    }
+    final int numBuckets = targetSize;
+    final int totalRange = maxCreationTime - minCreationTime + 1;
+    final List<List<Memory>> buckets =
+        List.generate(numBuckets, (_) => <Memory>[]);
+    for (final mem in sorted) {
+      final creationTime = mem.file.creationTime!;
+      final bucketIndex =
+          ((creationTime - minCreationTime) * numBuckets ~/ totalRange)
+              .clamp(0, numBuckets - 1);
+      buckets[bucketIndex].add(mem);
+    }
+
+    final selected = <Memory>[];
+    final selectedCreationTimes = <int>[];
+    for (final bucket in buckets) {
+      if (bucket.isEmpty) continue;
+      bucket.shuffle(random);
+      Memory? chosen;
+      for (final candidate in bucket) {
+        if (!isTooCloseInTime(
+          candidate.file.creationTime,
+          selectedCreationTimes,
+        )) {
+          chosen = candidate;
+          break;
+        }
+      }
+      chosen ??= bucket.first;
+      selected.add(chosen);
+      final ct = chosen.file.creationTime;
+      if (ct != null) selectedCreationTimes.add(ct);
+    }
+
+    if (selected.length < targetSize) {
+      final selectedSet = selected.toSet();
+      for (final mem in sorted) {
+        if (selected.length >= targetSize) break;
+        if (selectedSet.contains(mem)) continue;
+        if (isTooCloseInTime(mem.file.creationTime, selectedCreationTimes)) {
+          continue;
+        }
+        selected.add(mem);
+        final ct = mem.file.creationTime;
+        if (ct != null) selectedCreationTimes.add(ct);
+      }
+    }
+
+    selected
+        .sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
+    return selected;
   }
 
   // -----------------------------------------------------------------------

@@ -227,6 +227,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -248,6 +249,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -267,6 +269,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -294,6 +297,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -338,6 +342,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -367,6 +372,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -410,6 +416,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -446,6 +453,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -495,6 +503,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -536,6 +545,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -573,6 +583,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -610,6 +621,7 @@ void main() {
       final result = await PhotoSelector.bestSelection(
         memories,
         isOfflineMode: false,
+        mlEnabled: true,
         fileIdToFaces: {},
         faceIDsToPersonID: {},
         fileIDToImageEmbedding: _embMap(embeddings),
@@ -898,6 +910,7 @@ void main() {
         final result = await PhotoSelector.bestSelection(
           copy,
           isOfflineMode: false,
+          mlEnabled: true,
           fileIdToFaces: {},
           faceIDsToPersonID: {},
           fileIDToImageEmbedding: embMap,
@@ -945,6 +958,7 @@ void main() {
         final result = await PhotoSelector.bestSelection(
           copy,
           isOfflineMode: false,
+          mlEnabled: true,
           fileIdToFaces: {},
           faceIDsToPersonID: {},
           fileIDToImageEmbedding: embMap,

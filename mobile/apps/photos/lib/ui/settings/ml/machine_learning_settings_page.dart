@@ -230,6 +230,11 @@ class _MachineLearningSettingsPageState
     final oldMlConsent = hasGrantedMLConsent;
     final mlConsent = !oldMlConsent;
     await setMLConsent(mlConsent);
+    // Queue a memories cache refresh so People/Clip memories appear or
+    // disappear on the next scheduled recompute. We intentionally only queue
+    // here — the actual recompute will be picked up by the next updateCache
+    // invocation (runAllML after indexing, or the startup self-schedule).
+    memoriesCacheService.queueUpdateCache();
     Bus.instance.fire(NotificationEvent());
     if (!mlConsent) {
       MLService.instance.pauseIndexingAndClustering();
@@ -358,6 +363,7 @@ class _MachineLearningSettingsPageState
             value: () => localSettings.isMLLocalIndexingEnabled,
             onChanged: () async {
               final localIndexing = await localSettings.toggleLocalMLIndexing();
+              memoriesCacheService.queueUpdateCache();
               Bus.instance.fire(NotificationEvent());
               if (localIndexing) {
                 unawaited(MLService.instance.runAllML(force: true));

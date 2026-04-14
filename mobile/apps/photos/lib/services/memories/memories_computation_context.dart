@@ -12,6 +12,7 @@ class MemoriesComputationContext {
   final Map<int, EnteFile> allFileIdsToFile;
   final Set<int> collectionIDsToExclude;
   final bool isOfflineMode;
+  final bool mlEnabled;
   final DateTime now;
   final MemoriesCache oldCache;
   final bool debugSurfaceAll;
@@ -33,6 +34,7 @@ class MemoriesComputationContext {
     required this.allFileIdsToFile,
     required this.collectionIDsToExclude,
     required this.isOfflineMode,
+    required this.mlEnabled,
     required this.now,
     required this.oldCache,
     required this.debugSurfaceAll,
@@ -61,6 +63,7 @@ class MemoriesComputationContext {
       collectionIDsToExclude:
           (args["collectionIDsToExclude"] as Set).cast<int>(),
       isOfflineMode: args["isOfflineMode"] ?? false,
+      mlEnabled: args["mlEnabled"] ?? false,
       now: args["now"] as DateTime,
       oldCache: args["oldCache"] as MemoriesCache,
       debugSurfaceAll: args["debugSurfaceAll"] ?? false,
@@ -96,6 +99,7 @@ class MemoriesComputationContext {
       "allFileIdsToFile": allFileIdsToFile,
       "collectionIDsToExclude": collectionIDsToExclude,
       "isOfflineMode": isOfflineMode,
+      "mlEnabled": mlEnabled,
       "now": now,
       "oldCache": oldCache,
       "debugSurfaceAll": debugSurfaceAll,

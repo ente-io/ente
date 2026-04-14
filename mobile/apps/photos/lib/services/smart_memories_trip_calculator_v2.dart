@@ -139,6 +139,7 @@ class TripMemoriesCalculatorV2 {
     bool surfaceAll = false,
     required Iterable<ToShowMemory> cachedTripMemories,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -238,6 +239,7 @@ class TripMemoriesCalculatorV2 {
         windowEnd,
         seenTimes: seenTimes,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -255,6 +257,7 @@ class TripMemoriesCalculatorV2 {
       shownTrips,
       cachedTripMemories: cachedTripMemories,
       isOfflineMode: isOfflineMode,
+      mlEnabled: mlEnabled,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
       faceIDsToPersonID: faceIDsToPersonID,
@@ -860,6 +863,7 @@ class TripMemoriesCalculatorV2 {
     int windowEnd, {
     required Map<int, int> seenTimes,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
@@ -901,6 +905,7 @@ class TripMemoriesCalculatorV2 {
       final photoSelection = await SmartMemoriesService._bestSelection(
         trip.memories,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -930,6 +935,7 @@ class TripMemoriesCalculatorV2 {
     List<TripsShownLog> shownTrips, {
     required Iterable<ToShowMemory> cachedTripMemories,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -1039,6 +1045,7 @@ class TripMemoriesCalculatorV2 {
       final photoSelection = await SmartMemoriesService._bestSelection(
         trip.memories,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: fileIDToImageEmbedding,

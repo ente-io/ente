@@ -130,11 +130,13 @@ class SmartMemoriesService {
     DateTime now,
     MemoriesCache oldCache, {
     bool debugSurfaceAll = false,
+    required bool mlEnabled,
   }) async {
     try {
       final TimeLogger t = TimeLogger(context: "calcMemories");
       _logger.info(
-        'calcMemories called with time: $now at ${DateTime.now()} $t',
+        'calcMemories called with time: $now at ${DateTime.now()} '
+        '(mlEnabled: $mlEnabled) $t',
       );
 
       final allFileIdsToFile = await _getFilesAndMapForMemories(
@@ -153,7 +155,7 @@ class SmartMemoriesService {
 
       final mlDataDB =
           isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-      final allPersons = isOfflineMode
+      final allPersons = (!mlEnabled || isOfflineMode)
           ? const <PersonEntity>[]
           : await PersonService.instance.getPersons();
       final persons =
@@ -162,7 +164,7 @@ class SmartMemoriesService {
         'gotten all ${persons.length} persons after filtering $t',
       );
       final bool unnamedPeopleFallbackEnabled =
-          localSettings.showOfflineModeOption;
+          mlEnabled && localSettings.showOfflineModeOption;
       final amountOfNonIgnoredPersons =
           persons.where((person) => !person.data.isIgnored).length;
       final canUseUnnamedFallback = unnamedPeopleFallbackEnabled &&
@@ -190,38 +192,51 @@ class SmartMemoriesService {
       final cities = await locationService.getCities();
       _logger.info('cities has ${cities.length} entries $t');
 
-      final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
-          await mlDataDB.getFileIDsToFacesWithoutEmbedding();
+      final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces = mlEnabled
+          ? await mlDataDB.getFileIDsToFacesWithoutEmbedding()
+          : <int, List<FaceWithoutEmbedding>>{};
       _logger.info('fileIdToFaces has ${fileIdToFaces.length} entries $t');
 
-      final allImageEmbeddings = await mlDataDB.getAllClipVectors();
+      final allImageEmbeddings = mlEnabled
+          ? await mlDataDB.getAllClipVectors()
+          : const <EmbeddingVector>[];
       _logger.info(
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
 
-      _logger.info('Loading text embeddings via cache service');
-      final clipPositiveTextVector = Vector.fromList(
-        await textEmbeddingsCacheService.getEmbedding(
-          "Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion",
-        ),
-      );
-
-      final clipPeopleActivityVectors = <PeopleActivity, Vector>{};
-      for (final activity in PeopleActivity.values) {
-        final query = activityQuery(activity);
-        clipPeopleActivityVectors[activity] = Vector.fromList(
-          await textEmbeddingsCacheService.getEmbedding(query),
+      final Vector clipPositiveTextVector;
+      final Map<PeopleActivity, Vector> clipPeopleActivityVectors;
+      final Map<ClipMemoryType, Vector> clipMemoryTypeVectors;
+      if (mlEnabled) {
+        _logger.info('Loading text embeddings via cache service');
+        clipPositiveTextVector = Vector.fromList(
+          await textEmbeddingsCacheService.getEmbedding(
+            "Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion",
+          ),
         );
-      }
 
-      final clipMemoryTypeVectors = <ClipMemoryType, Vector>{};
-      for (final memoryType in ClipMemoryType.values) {
-        final query = clipQuery(memoryType);
-        clipMemoryTypeVectors[memoryType] = Vector.fromList(
-          await textEmbeddingsCacheService.getEmbedding(query),
-        );
+        clipPeopleActivityVectors = <PeopleActivity, Vector>{};
+        for (final activity in PeopleActivity.values) {
+          final query = activityQuery(activity);
+          clipPeopleActivityVectors[activity] = Vector.fromList(
+            await textEmbeddingsCacheService.getEmbedding(query),
+          );
+        }
+
+        clipMemoryTypeVectors = <ClipMemoryType, Vector>{};
+        for (final memoryType in ClipMemoryType.values) {
+          final query = clipQuery(memoryType);
+          clipMemoryTypeVectors[memoryType] = Vector.fromList(
+            await textEmbeddingsCacheService.getEmbedding(query),
+          );
+        }
+        _logger.info('Text embeddings loaded via cache service');
+      } else {
+        _logger.info('ML disabled, skipping text embedding loads');
+        clipPositiveTextVector = Vector.fromList(const [0.0]);
+        clipPeopleActivityVectors = const <PeopleActivity, Vector>{};
+        clipMemoryTypeVectors = const <ClipMemoryType, Vector>{};
       }
-      _logger.info('Text embeddings loaded via cache service');
 
       final local = await getLocale();
       final languageCode = local?.languageCode ?? "en";
@@ -234,6 +249,7 @@ class SmartMemoriesService {
         allFileIdsToFile: allFileIdsToFile,
         collectionIDsToExclude: collectionIDsToExclude,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         now: now,
         oldCache: oldCache,
         debugSurfaceAll: debugSurfaceAll,
@@ -655,6 +671,7 @@ class SmartMemoriesService {
       final Set<int> collectionIDsToExclude =
           computationContext.collectionIDsToExclude;
       final bool isOfflineMode = computationContext.isOfflineMode;
+      final bool mlEnabled = computationContext.mlEnabled;
       final DateTime now = computationContext.now;
       final MemoriesCache oldCache = computationContext.oldCache;
       final bool debugSurfaceAll = computationContext.debugSurfaceAll;
@@ -728,35 +745,39 @@ class SmartMemoriesService {
         "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
       );
 
-      // People memories
-      final peopleMemories = await _getPeopleResults(
-        allFileIdsToFile,
-        now,
-        oldCache.peopleShownLogs,
-        surfaceAll: debugSurfaceAll,
-        seenTimes: seenTimes,
-        persons: persons,
-        isOfflineMode: isOfflineMode,
-        canUseUnnamedFallback: canUseUnnamedFallback,
-        currentUserEmail: currentUserEmail,
-        fileIdToFaces: fileIdToFaces,
-        clusterIdToFaceCount: clusterIdToFaceCount,
-        clusterIdToFaceIDs: clusterIdToFaceIDs,
-        assignedClusterIDs: assignedClusterIDs,
-        fileIDToImageEmbedding: fileIDToImageEmbedding,
-        clipPositiveTextVector: clipPositiveTextVector,
-        clipPeopleActivityVectors: clipPeopleActivityVectors,
-      );
-      _markUsedMemories(
-        usedMemoryFileIds,
-        peopleMemories,
-        isOfflineMode: isOfflineMode,
-      );
-      memories.addAll(peopleMemories);
-      dev.log(
-        "All files length after people: "
-        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
-      );
+      // People memories (ML only)
+      if (mlEnabled) {
+        final peopleMemories = await _getPeopleResults(
+          allFileIdsToFile,
+          now,
+          oldCache.peopleShownLogs,
+          surfaceAll: debugSurfaceAll,
+          seenTimes: seenTimes,
+          persons: persons,
+          isOfflineMode: isOfflineMode,
+          canUseUnnamedFallback: canUseUnnamedFallback,
+          currentUserEmail: currentUserEmail,
+          fileIdToFaces: fileIdToFaces,
+          clusterIdToFaceCount: clusterIdToFaceCount,
+          clusterIdToFaceIDs: clusterIdToFaceIDs,
+          assignedClusterIDs: assignedClusterIDs,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+          clipPositiveTextVector: clipPositiveTextVector,
+          clipPeopleActivityVectors: clipPeopleActivityVectors,
+        );
+        _markUsedMemories(
+          usedMemoryFileIds,
+          peopleMemories,
+          isOfflineMode: isOfflineMode,
+        );
+        memories.addAll(peopleMemories);
+        dev.log(
+          "All files length after people: "
+          "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+        );
+      } else {
+        dev.log('ML disabled, skipping people memories $t');
+      }
 
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
@@ -767,6 +788,7 @@ class SmartMemoriesService {
         surfaceAll: debugSurfaceAll,
         cachedTripMemories: oldCache.toShowMemories,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -785,27 +807,31 @@ class SmartMemoriesService {
         "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
       );
 
-      // Clip memories
-      final clipMemories = await _getClipResults(
-        fullSourceFiles,
-        now,
-        oldCache.clipShownLogs,
-        surfaceAll: debugSurfaceAll,
-        isOfflineMode: isOfflineMode,
-        seenTimes: seenTimes,
-        fileIDToImageEmbedding: fileIDToImageEmbedding,
-        clipMemoryTypeVectors: clipMemoryTypeVectors,
-      );
-      _markUsedMemories(
-        usedMemoryFileIds,
-        clipMemories,
-        isOfflineMode: isOfflineMode,
-      );
-      memories.addAll(clipMemories);
-      dev.log(
-        "All files length after clip memories: "
-        "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
-      );
+      // Clip memories (ML only)
+      if (mlEnabled) {
+        final clipMemories = await _getClipResults(
+          fullSourceFiles,
+          now,
+          oldCache.clipShownLogs,
+          surfaceAll: debugSurfaceAll,
+          isOfflineMode: isOfflineMode,
+          seenTimes: seenTimes,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+          clipMemoryTypeVectors: clipMemoryTypeVectors,
+        );
+        _markUsedMemories(
+          usedMemoryFileIds,
+          clipMemories,
+          isOfflineMode: isOfflineMode,
+        );
+        memories.addAll(clipMemories);
+        dev.log(
+          "All files length after clip memories: "
+          "${_remainingFilesCount(allFileIdsToFile, usedMemoryFileIds)} $t",
+        );
+      } else {
+        dev.log('ML disabled, skipping clip memories $t');
+      }
 
       // Time memories
       final timeFiles = _collectAvailableFiles(
@@ -817,6 +843,7 @@ class SmartMemoriesService {
         now,
         recentSourceFiles: fullSourceFiles,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -1032,6 +1059,7 @@ class SmartMemoriesService {
     bool surfaceAll = false,
     required Iterable<ToShowMemory> cachedTripMemories,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -1047,6 +1075,7 @@ class SmartMemoriesService {
       surfaceAll: surfaceAll,
       cachedTripMemories: cachedTripMemories,
       isOfflineMode: isOfflineMode,
+      mlEnabled: mlEnabled,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
       faceIDsToPersonID: faceIDsToPersonID,
@@ -1061,6 +1090,7 @@ class SmartMemoriesService {
     DateTime currentTime, {
     required Iterable<EnteFile> recentSourceFiles,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -1072,6 +1102,7 @@ class SmartMemoriesService {
       currentTime,
       recentSourceFiles: recentSourceFiles,
       isOfflineMode: isOfflineMode,
+      mlEnabled: mlEnabled,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
       faceIDsToPersonID: faceIDsToPersonID,
@@ -1236,6 +1267,7 @@ class SmartMemoriesService {
     int? prefferedSize,
     SelectionDistribution? distributionOverride,
     required bool isOfflineMode,
+    required bool mlEnabled,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
@@ -1246,6 +1278,7 @@ class SmartMemoriesService {
         prefferedSize: prefferedSize,
         distributionOverride: distributionOverride,
         isOfflineMode: isOfflineMode,
+        mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
