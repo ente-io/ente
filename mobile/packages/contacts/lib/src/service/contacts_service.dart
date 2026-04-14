@@ -31,7 +31,8 @@ class ContactsService {
 
   Future<void> open(ContactsSession session) async {
     final accountKey = await session.resolveAccountKey();
-    final cachedRootKey = _cachedRootKey(session.userId);
+    final cachedWrappedRootContactKey =
+        _cachedWrappedRootContactKey(session.userId);
     final opened = await _rustApi
         .open(
       OpenContactsContextInput(
@@ -39,7 +40,7 @@ class ContactsService {
         authToken: session.authToken,
         userId: session.userId,
         accountKey: accountKey,
-        cachedRootKey: cachedRootKey,
+        cachedWrappedRootContactKey: cachedWrappedRootContactKey,
         userAgent: session.userAgent,
         clientPackage: session.clientPackage,
         clientVersion: session.clientVersion,
@@ -48,7 +49,7 @@ class ContactsService {
         .catchError((Object error, StackTrace stackTrace) {
       _logger.warning(
         "Failed to open contacts context for account user ${session.userId} "
-        "at ${session.baseUrl} (hasCachedRootKey: ${cachedRootKey != null})",
+        "at ${session.baseUrl} (hasCachedRootKey: ${cachedWrappedRootContactKey != null})",
         error,
         stackTrace,
       );
@@ -58,8 +59,11 @@ class ContactsService {
     _ctx = opened.ctx;
     _session = session;
     await _database.configure(userId: session.userId);
-    if (opened.rootKeySource != RootKeySource.created) {
-      await _persistWrappedRootKey(session.userId, opened.wrappedRootKey);
+    if (opened.wrappedRootContactKey != null) {
+      await _persistWrappedRootContactKey(
+        session.userId,
+        opened.wrappedRootContactKey!,
+      );
     }
     _logger.info('Opened contacts context for user ${session.userId}');
   }
@@ -287,7 +291,7 @@ class ContactsService {
     return ctx;
   }
 
-  WrappedRootContactKey? _cachedRootKey(int userId) {
+  WrappedRootContactKey? _cachedWrappedRootContactKey(int userId) {
     final encryptedKey = _preferences.getString(_entityKeyPref(userId));
     final header = _preferences.getString(_entityHeaderPref(userId));
     if (encryptedKey == null || header == null) {
@@ -296,7 +300,7 @@ class ContactsService {
     return WrappedRootContactKey(encryptedKey: encryptedKey, header: header);
   }
 
-  Future<void> _persistWrappedRootKey(
+  Future<void> _persistWrappedRootContactKey(
     int userId,
     WrappedRootContactKey key,
   ) async {
@@ -310,7 +314,14 @@ class ContactsService {
     if (session == null || ctx == null) {
       return;
     }
-    await _persistWrappedRootKey(session.userId, ctx.currentWrappedRootKey());
+    final currentWrappedRootContactKey = ctx.currentWrappedRootContactKey();
+    if (currentWrappedRootContactKey == null) {
+      return;
+    }
+    await _persistWrappedRootContactKey(
+      session.userId,
+      currentWrappedRootContactKey,
+    );
   }
 
   String _entityKeyPref(int userId) => 'entity_key_contact_$userId';

@@ -1,4 +1,3 @@
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
 
 use ente_core::auth::{self, KeyAttributes, SrpSession};
@@ -29,8 +28,7 @@ const CONTACT_TYPE: &str = "contact";
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RootKeySource {
     Cache,
-    Server,
-    Created,
+    Unresolved,
 }
 
 pub struct OpenContactsCtxInput {
@@ -38,7 +36,7 @@ pub struct OpenContactsCtxInput {
     pub auth_token: String,
     pub user_id: i64,
     pub master_key: Vec<u8>,
-    pub cached_root_key: Option<WrappedRootContactKey>,
+    pub cached_wrapped_root_contact_key: Option<WrappedRootContactKey>,
     pub user_agent: Option<String>,
     pub client_package: Option<String>,
     pub client_version: Option<String>,
@@ -46,7 +44,7 @@ pub struct OpenContactsCtxInput {
 
 pub struct OpenContactsCtxResult {
     pub ctx: ContactsCtx,
-    pub wrapped_root_key: WrappedRootContactKey,
+    pub wrapped_root_contact_key: Option<WrappedRootContactKey>,
     pub root_key_source: RootKeySource,
 }
 
@@ -55,13 +53,13 @@ pub struct ContactsCtx {
     http: HttpClient,
     object_store_http: ente_core::http::ObjectStoreHttpClient,
     master_key: Arc<RwLock<SecretVec>>,
-    root_contact_key: Arc<RwLock<SecretVec>>,
-    wrapped_root_key: Arc<RwLock<WrappedRootContactKey>>,
-    opened_with_cached_root_key: bool,
-    root_key_confirmed: AtomicBool,
+    root_contact_key: Arc<RwLock<Option<SecretVec>>>,
+    wrapped_root_contact_key: Arc<RwLock<Option<WrappedRootContactKey>>>,
 }
 
-fn wrapped_root_key_from_response(remote_root_key: RootKeyResponse) -> WrappedRootContactKey {
+fn wrapped_root_contact_key_from_response(
+    remote_root_key: RootKeyResponse,
+) -> WrappedRootContactKey {
     WrappedRootContactKey {
         encrypted_key: remote_root_key.encrypted_key,
         header: remote_root_key.header,
@@ -79,57 +77,32 @@ impl ContactsCtx {
             timeout_secs: Some(30),
         })?;
 
-        let (root_contact_key, wrapped_root_key, root_key_source, root_key_confirmed) =
-            if let Some(cached_root_key) = input.cached_root_key {
-                let root_contact_key =
-                    contacts_crypto::decrypt_root_contact_key(&cached_root_key, &input.master_key)?;
-                (
-                    root_contact_key,
-                    cached_root_key,
-                    RootKeySource::Cache,
-                    false,
-                )
-            } else if let Some(remote_root_key) = fetch_root_key(&http).await? {
-                let wrapped_root_key = wrapped_root_key_from_response(remote_root_key);
+        let (root_contact_key, wrapped_root_contact_key, root_key_source) =
+            if let Some(cached_wrapped_root_contact_key) = input.cached_wrapped_root_contact_key {
                 let root_contact_key = contacts_crypto::decrypt_root_contact_key(
-                    &wrapped_root_key,
+                    &cached_wrapped_root_contact_key,
                     &input.master_key,
                 )?;
                 (
-                    root_contact_key,
-                    wrapped_root_key,
-                    RootKeySource::Server,
-                    true,
+                    Some(SecretVec::new(root_contact_key)),
+                    Some(cached_wrapped_root_contact_key),
+                    RootKeySource::Cache,
                 )
             } else {
-                let generated_root_contact_key = keys::generate_key();
-                let generated_wrapped_root_key = contacts_crypto::encrypt_root_contact_key(
-                    &generated_root_contact_key,
-                    &input.master_key,
-                )?;
-                (
-                    generated_root_contact_key,
-                    generated_wrapped_root_key,
-                    RootKeySource::Created,
-                    false,
-                )
+                (None, None, RootKeySource::Unresolved)
             };
-
-        let opened_with_cached_root_key = root_key_source == RootKeySource::Cache;
         let ctx = Self {
             user_id: input.user_id,
             object_store_http: http.object_store(),
             http,
             master_key: Arc::new(RwLock::new(SecretVec::new(input.master_key))),
-            root_contact_key: Arc::new(RwLock::new(SecretVec::new(root_contact_key))),
-            wrapped_root_key: Arc::new(RwLock::new(wrapped_root_key.clone())),
-            opened_with_cached_root_key,
-            root_key_confirmed: AtomicBool::new(root_key_confirmed),
+            root_contact_key: Arc::new(RwLock::new(root_contact_key)),
+            wrapped_root_contact_key: Arc::new(RwLock::new(wrapped_root_contact_key.clone())),
         };
 
         Ok(OpenContactsCtxResult {
             ctx,
-            wrapped_root_key,
+            wrapped_root_contact_key,
             root_key_source,
         })
     }
@@ -142,39 +115,45 @@ impl ContactsCtx {
         self.http.set_auth_token(Some(auth_token));
     }
 
-    pub fn current_wrapped_root_key(&self) -> WrappedRootContactKey {
-        self.wrapped_root_key
+    pub fn current_wrapped_root_contact_key(&self) -> Option<WrappedRootContactKey> {
+        self.wrapped_root_contact_key
             .read()
             .expect("wrapped root key lock poisoned")
             .clone()
     }
 
-    fn apply_wrapped_root_key(&self, wrapped_root_key: WrappedRootContactKey) -> Result<()> {
+    fn apply_wrapped_root_contact_key(
+        &self,
+        wrapped_root_contact_key: WrappedRootContactKey,
+    ) -> Result<()> {
         let master_key = self.master_key.read().expect("master key lock poisoned");
         let decrypted_root_key =
-            contacts_crypto::decrypt_root_contact_key(&wrapped_root_key, &master_key)?;
+            contacts_crypto::decrypt_root_contact_key(&wrapped_root_contact_key, &master_key)?;
         *self
             .root_contact_key
             .write()
-            .expect("root contact key lock poisoned") = SecretVec::new(decrypted_root_key);
+            .expect("root contact key lock poisoned") = Some(SecretVec::new(decrypted_root_key));
         *self
-            .wrapped_root_key
+            .wrapped_root_contact_key
             .write()
-            .expect("wrapped root key lock poisoned") = wrapped_root_key;
+            .expect("wrapped root key lock poisoned") = Some(wrapped_root_contact_key);
         Ok(())
     }
 
     pub async fn create_contact(&self, data: &ContactData) -> Result<ContactRecord> {
         contacts_crypto::validate_contact_data(data)?;
-        self.ensure_root_key_confirmed().await?;
+        self.ensure_root_key_available().await?;
 
         let contact_key = keys::generate_stream_key();
         let wrapped_contact_key = {
-            let root_contact_key = self
+            let root_contact_key_guard = self
                 .root_contact_key
                 .read()
                 .expect("root contact key lock poisoned");
-            contacts_crypto::wrap_contact_key(&contact_key, &root_contact_key)?
+            let root_contact_key = root_contact_key_guard.as_ref().ok_or_else(|| {
+                ContactsError::InvalidInput("contacts root key is unresolved".into())
+            })?;
+            contacts_crypto::wrap_contact_key(&contact_key, root_contact_key)?
         };
         let encrypted_data = contacts_crypto::encrypt_contact_data(data, &contact_key)?;
         let response = self
@@ -193,16 +172,17 @@ impl ContactsCtx {
     }
 
     pub async fn get_contact(&self, contact_id: &str) -> Result<ContactRecord> {
-        self.ensure_remote_root_key_for_read().await?;
         let response = self
             .http
             .get_json::<ContactEntityResponse>(&format!("/contacts/{contact_id}"), &[])
             .await?;
+        if !response.is_deleted {
+            self.ensure_root_key_available().await?;
+        }
         self.decode_contact(response)
     }
 
     pub async fn get_diff(&self, since_time: i64, limit: u16) -> Result<Vec<ContactRecord>> {
-        self.ensure_remote_root_key_for_read().await?;
         let response = self
             .http
             .get_json::<ContactDiffResponse>(
@@ -213,6 +193,9 @@ impl ContactsCtx {
                 ],
             )
             .await?;
+        if response.diff.iter().any(|entity| !entity.is_deleted) {
+            self.ensure_root_key_available().await?;
+        }
 
         response
             .diff
@@ -227,7 +210,7 @@ impl ContactsCtx {
         data: &ContactData,
     ) -> Result<ContactRecord> {
         contacts_crypto::validate_contact_data(data)?;
-        self.ensure_root_key_confirmed().await?;
+        self.ensure_root_key_available().await?;
 
         let current = self
             .http
@@ -238,11 +221,14 @@ impl ContactsCtx {
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedKey)?;
         let contact_key = {
-            let root_contact_key = self
+            let root_contact_key_guard = self
                 .root_contact_key
                 .read()
                 .expect("root contact key lock poisoned");
-            contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
+            let root_contact_key = root_contact_key_guard.as_ref().ok_or_else(|| {
+                ContactsError::InvalidInput("contacts root key is unresolved".into())
+            })?;
+            contacts_crypto::unwrap_contact_key(encrypted_key, root_contact_key)?
         };
         let encrypted_data = contacts_crypto::encrypt_contact_data(data, &contact_key)?;
 
@@ -261,7 +247,6 @@ impl ContactsCtx {
     }
 
     pub async fn delete_contact(&self, contact_id: &str) -> Result<()> {
-        self.ensure_root_key_confirmed().await?;
         self.http
             .delete_empty(&format!("/contacts/{contact_id}"), &[])
             .await?;
@@ -274,7 +259,7 @@ impl ContactsCtx {
         attachment_type: AttachmentType,
         attachment_bytes: &[u8],
     ) -> Result<ContactRecord> {
-        self.ensure_root_key_confirmed().await?;
+        self.ensure_root_key_available().await?;
 
         let current = self
             .http
@@ -285,11 +270,14 @@ impl ContactsCtx {
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedKey)?;
         let contact_key = {
-            let root_contact_key = self
+            let root_contact_key_guard = self
                 .root_contact_key
                 .read()
                 .expect("root contact key lock poisoned");
-            contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
+            let root_contact_key = root_contact_key_guard.as_ref().ok_or_else(|| {
+                ContactsError::InvalidInput("contacts root key is unresolved".into())
+            })?;
+            contacts_crypto::unwrap_contact_key(encrypted_key, root_contact_key)?
         };
         let encrypted_attachment =
             contacts_crypto::encrypt_profile_picture(attachment_bytes, &contact_key)?;
@@ -350,7 +338,6 @@ impl ContactsCtx {
     }
 
     pub async fn get_profile_picture(&self, contact_id: &str) -> Result<Vec<u8>> {
-        self.ensure_remote_root_key_for_read().await?;
         let current = self
             .http
             .get_json::<ContactEntityResponse>(&format!("/contacts/{contact_id}"), &[])
@@ -358,17 +345,21 @@ impl ContactsCtx {
         if current.is_deleted || current.profile_picture_attachment_id.is_none() {
             return Err(ContactsError::ProfilePictureNotFound);
         }
+        self.ensure_root_key_available().await?;
 
         let encrypted_key = current
             .encrypted_key
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedKey)?;
         let contact_key = {
-            let root_contact_key = self
+            let root_contact_key_guard = self
                 .root_contact_key
                 .read()
                 .expect("root contact key lock poisoned");
-            contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?
+            let root_contact_key = root_contact_key_guard.as_ref().ok_or_else(|| {
+                ContactsError::InvalidInput("contacts root key is unresolved".into())
+            })?;
+            contacts_crypto::unwrap_contact_key(encrypted_key, root_contact_key)?
         };
         let encrypted_picture = self
             .get_attachment_encrypted(
@@ -384,7 +375,6 @@ impl ContactsCtx {
         contact_id: &str,
         attachment_type: AttachmentType,
     ) -> Result<ContactRecord> {
-        self.ensure_root_key_confirmed().await?;
         let response = self
             .http
             .delete_json::<ContactEntityResponse>(
@@ -674,11 +664,14 @@ impl ContactsCtx {
             .encrypted_data
             .as_deref()
             .ok_or(ContactsError::MissingEncryptedData)?;
-        let root_contact_key = self
+        let root_contact_key_guard = self
             .root_contact_key
             .read()
             .expect("root contact key lock poisoned");
-        let contact_key = contacts_crypto::unwrap_contact_key(encrypted_key, &root_contact_key)?;
+        let root_contact_key = root_contact_key_guard
+            .as_ref()
+            .ok_or_else(|| ContactsError::InvalidInput("contacts root key is unresolved".into()))?;
+        let contact_key = contacts_crypto::unwrap_contact_key(encrypted_key, root_contact_key)?;
         let data = contacts_crypto::decrypt_contact_data(encrypted_data, &contact_key)?;
 
         Ok(ContactRecord {
@@ -694,35 +687,35 @@ impl ContactsCtx {
         })
     }
 
-    async fn ensure_root_key_confirmed(&self) -> Result<()> {
-        if self.root_key_confirmed.load(Ordering::Acquire) {
+    async fn ensure_root_key_available(&self) -> Result<()> {
+        if self
+            .root_contact_key
+            .read()
+            .expect("root contact key lock poisoned")
+            .is_some()
+        {
             return Ok(());
         }
 
         if let Some(remote_root_key) = fetch_root_key(&self.http).await? {
-            self.apply_wrapped_root_key(wrapped_root_key_from_response(remote_root_key))?;
+            self.apply_wrapped_root_contact_key(wrapped_root_contact_key_from_response(
+                remote_root_key,
+            ))?;
         } else {
-            let wrapped_root_key = self.current_wrapped_root_key();
-            if let Some(remote_root_key) = create_root_key(&self.http, &wrapped_root_key).await? {
-                self.apply_wrapped_root_key(wrapped_root_key_from_response(remote_root_key))?;
+            let generated_root_contact_key = keys::generate_key();
+            let generated_wrapped_root_contact_key = {
+                let master_key = self.master_key.read().expect("master key lock poisoned");
+                contacts_crypto::encrypt_root_contact_key(&generated_root_contact_key, &master_key)?
+            };
+            if let Some(remote_root_key) =
+                create_root_key(&self.http, &generated_wrapped_root_contact_key).await?
+            {
+                self.apply_wrapped_root_contact_key(wrapped_root_contact_key_from_response(
+                    remote_root_key,
+                ))?;
+            } else {
+                self.apply_wrapped_root_contact_key(generated_wrapped_root_contact_key)?;
             }
-        }
-
-        self.root_key_confirmed.store(true, Ordering::Release);
-        Ok(())
-    }
-
-    async fn ensure_remote_root_key_for_read(&self) -> Result<()> {
-        if self.root_key_confirmed.load(Ordering::Acquire) {
-            return Ok(());
-        }
-        if self.opened_with_cached_root_key {
-            return Ok(());
-        }
-
-        if let Some(remote_root_key) = fetch_root_key(&self.http).await? {
-            self.apply_wrapped_root_key(wrapped_root_key_from_response(remote_root_key))?;
-            self.root_key_confirmed.store(true, Ordering::Release);
         }
 
         Ok(())
@@ -799,12 +792,12 @@ impl ContactsCtx {
     }
 
     fn current_secret_key(&self, current_user_key_attrs: &KeyAttributes) -> Result<SecretVec> {
-        let encrypted_secret_key = crypto::decode_b64(&current_user_key_attrs.encrypted_secret_key)?;
+        let encrypted_secret_key =
+            crypto::decode_b64(&current_user_key_attrs.encrypted_secret_key)?;
         let secret_key_nonce =
             crypto::decode_b64(&current_user_key_attrs.secret_key_decryption_nonce)?;
         let master_key = self.master_key.read().expect("master key lock poisoned");
-        let secret_key =
-            secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)?;
+        let secret_key = secretbox::decrypt(&encrypted_secret_key, &secret_key_nonce, &master_key)?;
         Ok(SecretVec::new(secret_key))
     }
 }
@@ -818,12 +811,12 @@ async fn fetch_root_key(http: &HttpClient) -> Result<Option<RootKeyResponse>> {
 
 async fn create_root_key(
     http: &HttpClient,
-    wrapped_root_key: &WrappedRootContactKey,
+    wrapped_root_contact_key: &WrappedRootContactKey,
 ) -> Result<Option<RootKeyResponse>> {
     let request = CreateRootKeyRequest {
         r#type: CONTACT_TYPE,
-        encrypted_key: &wrapped_root_key.encrypted_key,
-        header: &wrapped_root_key.header,
+        encrypted_key: &wrapped_root_contact_key.encrypted_key,
+        header: &wrapped_root_contact_key.header,
     };
 
     match http.post_empty("/user-entity/key", &request).await {
@@ -902,13 +895,18 @@ fn password_reset_setup_request(
     new_password: &str,
     updated_key_attrs: &KeyAttributes,
 ) -> Result<(SrpSession, LegacySetupSrpRequest)> {
-    let mem_limit = updated_key_attrs
-        .mem_limit
-        .ok_or_else(|| ContactsError::InvalidInput("updated key attributes missing memLimit".into()))?;
-    let ops_limit = updated_key_attrs
-        .ops_limit
-        .ok_or_else(|| ContactsError::InvalidInput("updated key attributes missing opsLimit".into()))?;
-    let kek = auth::derive_kek(new_password, &updated_key_attrs.kek_salt, mem_limit, ops_limit)?;
+    let mem_limit = updated_key_attrs.mem_limit.ok_or_else(|| {
+        ContactsError::InvalidInput("updated key attributes missing memLimit".into())
+    })?;
+    let ops_limit = updated_key_attrs.ops_limit.ok_or_else(|| {
+        ContactsError::InvalidInput("updated key attributes missing opsLimit".into())
+    })?;
+    let kek = auth::derive_kek(
+        new_password,
+        &updated_key_attrs.kek_salt,
+        mem_limit,
+        ops_limit,
+    )?;
     let generated_srp = auth::generate_srp_setup(&kek, srp_user_id)?;
     let srp_session = SrpSession::new(
         srp_user_id,

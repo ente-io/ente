@@ -183,18 +183,15 @@ impl From<CoreContactRecord> for ContactRecord {
 pub enum RootKeySource {
     /// Reused the caller-provided cached wrapped root key.
     Cache,
-    /// Fetched the wrapped root key from the server.
-    Server,
-    /// Created a new wrapped root key locally; it is confirmed on first write.
-    Created,
+    /// Opened without a cached wrapped root key; Rust will resolve it lazily.
+    Unresolved,
 }
 
 impl From<CoreRootKeySource> for RootKeySource {
     fn from(value: CoreRootKeySource) -> Self {
         match value {
             CoreRootKeySource::Cache => RootKeySource::Cache,
-            CoreRootKeySource::Server => RootKeySource::Server,
-            CoreRootKeySource::Created => RootKeySource::Created,
+            CoreRootKeySource::Unresolved => RootKeySource::Unresolved,
         }
     }
 }
@@ -227,7 +224,7 @@ pub struct OpenContactsCtxInput {
     /// Logged-in account key used to unwrap or create the root contact key.
     pub master_key: Vec<u8>,
     /// Optional cached wrapped root key for the current user.
-    pub cached_root_key: Option<WrappedRootContactKey>,
+    pub cached_wrapped_root_contact_key: Option<WrappedRootContactKey>,
     /// Optional user agent to send to Ente API endpoints.
     pub user_agent: Option<String>,
     /// Optional client package header to send to Ente API endpoints.
@@ -241,9 +238,9 @@ pub struct OpenContactsCtxInput {
 pub struct OpenContactsCtxResult {
     /// Opaque contacts context bound to the current account/session.
     pub ctx: ContactsCtx,
-    /// Current wrapped root key that the caller may persist.
-    pub wrapped_root_key: WrappedRootContactKey,
-    /// Source used to obtain the root key during open.
+    /// Current wrapped root key that the caller may persist, if already resolved.
+    pub wrapped_root_contact_key: Option<WrappedRootContactKey>,
+    /// State of the root key during open.
     pub root_key_source: RootKeySource,
 }
 
@@ -264,7 +261,7 @@ pub async fn open_contacts_ctx(
         auth_token: input.auth_token,
         user_id: input.user_id,
         master_key: input.master_key,
-        cached_root_key: input.cached_root_key.map(Into::into),
+        cached_wrapped_root_contact_key: input.cached_wrapped_root_contact_key.map(Into::into),
         user_agent: input.user_agent,
         client_package: input.client_package,
         client_version: input.client_version,
@@ -276,7 +273,7 @@ pub async fn open_contacts_ctx(
         ctx: ContactsCtx {
             inner: Arc::new(opened.ctx),
         },
-        wrapped_root_key: opened.wrapped_root_key.into(),
+        wrapped_root_contact_key: opened.wrapped_root_contact_key.map(Into::into),
         root_key_source: opened.root_key_source.into(),
     })
 }
@@ -294,9 +291,11 @@ impl ContactsCtx {
     }
 
     #[frb(sync)]
-    /// Return the current wrapped root key for caller-managed persistence.
-    pub fn current_wrapped_root_key(&self) -> WrappedRootContactKey {
-        self.inner.current_wrapped_root_key().into()
+    /// Return the current wrapped root key for caller-managed persistence, if resolved.
+    pub fn current_wrapped_root_contact_key(&self) -> Option<WrappedRootContactKey> {
+        self.inner
+            .current_wrapped_root_contact_key()
+            .map(Into::into)
     }
 
     /// Create a contact for the referenced user.

@@ -19,7 +19,7 @@ fn open_input(base_url: String, master_key: Vec<u8>) -> OpenContactsCtxInput {
         auth_token: "auth-token".to_string(),
         user_id: 7,
         master_key,
-        cached_root_key: None,
+        cached_wrapped_root_contact_key: None,
         user_agent: Some("ente-contacts-test".to_string()),
         client_package: Some("io.ente.photos".to_string()),
         client_version: Some("1.0.0".to_string()),
@@ -55,7 +55,7 @@ fn live_entity_json(
 }
 
 #[tokio::test]
-async fn open_fetches_existing_root_key_from_server() {
+async fn open_without_cached_wrapped_root_contact_key_is_unresolved() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
     let root_key = keys::generate_key();
@@ -75,6 +75,7 @@ async fn open_fetches_existing_root_key_from_server() {
             })
             .to_string(),
         )
+        .expect(0)
         .create_async()
         .await;
 
@@ -83,27 +84,19 @@ async fn open_fetches_existing_root_key_from_server() {
         .unwrap();
 
     root_mock.assert_async().await;
-    assert_eq!(opened.root_key_source, RootKeySource::Server);
-    assert_eq!(opened.wrapped_root_key, wrapped_root);
+    assert_eq!(opened.root_key_source, RootKeySource::Unresolved);
+    assert_eq!(opened.wrapped_root_contact_key, None);
 }
 
 #[tokio::test]
-async fn get_contact_refreshes_generated_root_key_when_server_key_appears_later() {
+async fn get_contact_fetches_root_key_when_unresolved_context_reads_live_contact() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
     let server_root_key = keys::generate_key();
     let server_wrapped_root = wrap_root(&server_root_key, &master_key);
     let contact = sample_contact();
 
-    let initial_fetch_mock = server
-        .mock("GET", "/user-entity/key")
-        .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
-        .with_status(404)
-        .expect(1)
-        .create_async()
-        .await;
-
-    let refresh_root_mock = server
+    let root_fetch_mock = server
         .mock("GET", "/user-entity/key")
         .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
         .with_status(200)
@@ -143,16 +136,18 @@ async fn get_contact_refreshes_generated_root_key_when_server_key_appears_later(
         .unwrap();
     let fetched = opened.ctx.get_contact("ct_contact1").await.unwrap();
 
-    initial_fetch_mock.assert_async().await;
-    refresh_root_mock.assert_async().await;
+    root_fetch_mock.assert_async().await;
     get_contact_mock.assert_async().await;
-    assert_eq!(opened.root_key_source, RootKeySource::Created);
-    assert_eq!(opened.ctx.current_wrapped_root_key(), server_wrapped_root);
+    assert_eq!(opened.root_key_source, RootKeySource::Unresolved);
+    assert_eq!(
+        opened.ctx.current_wrapped_root_contact_key(),
+        Some(server_wrapped_root)
+    );
     assert_eq!(fetched.name.as_deref(), Some(contact.name.as_str()));
 }
 
 #[tokio::test]
-async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
+async fn create_contact_uses_cached_wrapped_root_contact_key_without_fetching_remote_key() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
     let root_key = keys::generate_key();
@@ -174,7 +169,7 @@ async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
             })
             .to_string(),
         )
-        .expect(1)
+        .expect(0)
         .create_async()
         .await;
 
@@ -200,7 +195,7 @@ async fn create_contact_uses_cached_root_key_but_confirms_before_write() {
         .await;
 
     let ctx = ContactsCtx::open(OpenContactsCtxInput {
-        cached_root_key: Some(wrapped_root),
+        cached_wrapped_root_contact_key: Some(wrapped_root),
         ..open_input(server.url(), master_key)
     })
     .await
@@ -437,6 +432,7 @@ async fn get_attachment_uses_generic_signed_download_url() {
             })
             .to_string(),
         )
+        .expect(0)
         .create_async()
         .await;
 
@@ -503,6 +499,7 @@ async fn deleted_contacts_surface_as_tombstones() {
             })
             .to_string(),
         )
+        .expect(0)
         .create_async()
         .await;
 
@@ -548,11 +545,11 @@ async fn deleted_contacts_surface_as_tombstones() {
 }
 
 #[tokio::test]
-async fn get_diff_uses_cached_root_key_for_reads_without_fetching_remote_key() {
+async fn get_diff_uses_cached_wrapped_root_contact_key_for_reads_without_fetching_remote_key() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
-    let cached_root_key = keys::generate_key();
-    let cached_wrapped_root = wrap_root(&cached_root_key, &master_key);
+    let cached_wrapped_root_contact_key = keys::generate_key();
+    let cached_wrapped_root = wrap_root(&cached_wrapped_root_contact_key, &master_key);
     let contact = sample_contact();
 
     let no_fetch_root_mock = server
@@ -576,7 +573,7 @@ async fn get_diff_uses_cached_root_key_for_reads_without_fetching_remote_key() {
                     "ct_contact1",
                     &contact,
                     Some("b@test.test"),
-                    &cached_root_key,
+                    &cached_wrapped_root_contact_key,
                     None,
                 )]
             })
@@ -587,7 +584,7 @@ async fn get_diff_uses_cached_root_key_for_reads_without_fetching_remote_key() {
         .await;
 
     let ctx = ContactsCtx::open(OpenContactsCtxInput {
-        cached_root_key: Some(cached_wrapped_root),
+        cached_wrapped_root_contact_key: Some(cached_wrapped_root),
         ..open_input(server.url(), master_key)
     })
     .await

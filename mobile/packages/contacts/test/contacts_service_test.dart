@@ -40,7 +40,7 @@ void main() {
   });
 
   test('open persists wrapped root key and sync caches contacts', () async {
-    rustApi.rootKeySource = RootKeySource.server;
+    rustApi.rootKeySource = RootKeySource.cache;
     rustApi.diffPages = [
       [
         const ContactRecord(
@@ -83,8 +83,10 @@ void main() {
     expect(cached.single.profilePictureAttachmentId, 'att_1');
   });
 
-  test('open does not persist a newly created root key', () async {
-    rustApi.rootKeySource = RootKeySource.created;
+  test('open does not persist an unresolved wrapped root contact key',
+      () async {
+    rustApi.rootKeySource = RootKeySource.unresolved;
+    rustApi.openWrappedRootContactKey = null;
 
     await service.open(
       ContactsSession(
@@ -100,7 +102,8 @@ void main() {
   });
 
   test('create and profile-picture changes update local cache', () async {
-    rustApi.rootKeySource = RootKeySource.created;
+    rustApi.rootKeySource = RootKeySource.unresolved;
+    rustApi.openWrappedRootContactKey = null;
     await service.open(
       ContactsSession(
         baseUrl: 'http://localhost:8080',
@@ -356,7 +359,12 @@ class FakeContactsRustApi implements ContactsRustApi {
   FakeContactsRustContext ctx = FakeContactsRustContext();
   List<List<ContactRecord>> diffPages = const [];
   Uint8List? lastAccountKey;
-  RootKeySource rootKeySource = RootKeySource.server;
+  RootKeySource rootKeySource = RootKeySource.cache;
+  WrappedRootContactKey? openWrappedRootContactKey =
+      const WrappedRootContactKey(
+    encryptedKey: 'enc-key',
+    header: 'enc-header',
+  );
 
   @override
   Future<OpenContactsContextResult> open(OpenContactsContextInput input) async {
@@ -365,10 +373,7 @@ class FakeContactsRustApi implements ContactsRustApi {
     lastAccountKey = input.accountKey;
     return OpenContactsContextResult(
       ctx: ctx,
-      wrappedRootKey: const WrappedRootContactKey(
-        encryptedKey: 'enc-key',
-        header: 'enc-header',
-      ),
+      wrappedRootContactKey: openWrappedRootContactKey,
       rootKeySource: rootKeySource,
     );
   }
@@ -404,7 +409,8 @@ class FakeContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  WrappedRootContactKey currentWrappedRootKey() => const WrappedRootContactKey(
+  WrappedRootContactKey currentWrappedRootContactKey() =>
+      const WrappedRootContactKey(
         encryptedKey: 'enc-key',
         header: 'enc-header',
       );

@@ -99,11 +99,11 @@ interface ContactsReadyInput {
     masterKeyB64: string;
 }
 
-type RootKeySource = "cache" | "server" | "created";
+type RootKeySource = "cache" | "unresolved";
 
 interface OpenedContactsCtx {
     ctx: ContactsCtxHandle;
-    wrappedRootKey: WrappedRootContactKey;
+    wrappedRootContactKey?: WrappedRootContactKey;
     rootKeySource: RootKeySource;
 }
 
@@ -362,7 +362,8 @@ const ensureContactsCtxOpen = async ({
     const generation = state.sessionGeneration;
 
     if (!ctx) {
-        const cachedRootKey = await savedWrappedRootContactKey(sessionKey);
+        const cachedWrappedRootContactKey =
+            await savedWrappedRootContactKey(sessionKey);
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
@@ -372,7 +373,7 @@ const ensureContactsCtxOpen = async ({
             authToken,
             userId: userID,
             masterKeyB64,
-            cachedRootKey,
+            cachedWrappedRootContactKey,
             clientPackage: clientPackageName,
             clientVersion: isDesktop ? desktopAppVersion : undefined,
         })) as OpenedContactsCtx;
@@ -381,10 +382,10 @@ const ensureContactsCtxOpen = async ({
         }
         state.ctx = openedCtx.ctx;
         ctx = openedCtx.ctx;
-        if (openedCtx.rootKeySource !== "created") {
+        if (openedCtx.wrappedRootContactKey) {
             await saveWrappedRootContactKey(
                 sessionKey,
-                openedCtx.wrappedRootKey,
+                openedCtx.wrappedRootContactKey,
             );
             if (!isCurrentSession(sessionKey, generation)) {
                 return;

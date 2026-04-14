@@ -68,7 +68,7 @@ struct OpenContactsCtxJsInput {
     auth_token: String,
     user_id: i64,
     master_key_b64: String,
-    cached_root_key: Option<WrappedRootContactKey>,
+    cached_wrapped_root_contact_key: Option<WrappedRootContactKey>,
     user_agent: Option<String>,
     client_package: Option<String>,
     client_version: Option<String>,
@@ -119,7 +119,7 @@ pub async fn contacts_open_ctx(input: JsValue) -> Result<JsValue, ContactsError>
         auth_token: input.auth_token,
         user_id: input.user_id,
         master_key,
-        cached_root_key: input.cached_root_key,
+        cached_wrapped_root_contact_key: input.cached_wrapped_root_contact_key,
         user_agent: input.user_agent,
         client_package: input.client_package,
         client_version: input.client_version,
@@ -135,17 +135,16 @@ pub async fn contacts_open_ctx(input: JsValue) -> Result<JsValue, ContactsError>
     .expect("setting ctx should not fail");
     Reflect::set(
         &output,
-        &JsValue::from_str("wrappedRootKey"),
-        &swb::to_value(&result.wrapped_root_key).map_err(ContactsError::from)?,
+        &JsValue::from_str("wrappedRootContactKey"),
+        &swb::to_value(&result.wrapped_root_contact_key).map_err(ContactsError::from)?,
     )
-    .expect("setting wrappedRootKey should not fail");
+    .expect("setting wrappedRootContactKey should not fail");
     Reflect::set(
         &output,
         &JsValue::from_str("rootKeySource"),
         &JsValue::from_str(match result.root_key_source {
             RootKeySource::Cache => "cache",
-            RootKeySource::Server => "server",
-            RootKeySource::Created => "created",
+            RootKeySource::Unresolved => "unresolved",
         }),
     )
     .expect("setting rootKeySource should not fail");
@@ -166,9 +165,9 @@ impl ContactsCtxHandle {
         self.inner.update_auth_token(auth_token);
     }
 
-    /// Return the wrapped root key currently held by this context.
-    pub fn current_wrapped_root_key(&self) -> Result<JsValue, ContactsError> {
-        swb::to_value(&self.inner.current_wrapped_root_key()).map_err(Into::into)
+    /// Return the wrapped root key currently held by this context, if resolved.
+    pub fn current_wrapped_root_contact_key(&self) -> Result<JsValue, ContactsError> {
+        swb::to_value(&self.inner.current_wrapped_root_contact_key()).map_err(Into::into)
     }
 
     /// Pull a diff page of contacts.

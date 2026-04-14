@@ -175,7 +175,7 @@ async fn open_ctx(endpoint: &str, account: &TestAccount) -> ContactsCtx {
         auth_token: account.auth_token.clone(),
         user_id: account.user_id,
         master_key: account.master_key.clone(),
-        cached_root_key: None,
+        cached_wrapped_root_contact_key: None,
         user_agent: Some("ente-contacts-live-test".to_string()),
         client_package: Some(App::Photos.client_package().to_string()),
         client_version: Some("0.0.1".to_string()),

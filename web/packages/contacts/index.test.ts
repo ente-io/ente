@@ -75,7 +75,8 @@ interface SetupOptions {
     legacyInfo?: object;
     getProfilePictureError?: Error;
     getProfilePictureBytes?: Uint8Array;
-    rootKeySource?: "cache" | "server" | "created";
+    rootKeySource?: "cache" | "unresolved";
+    wrappedRootContactKey?: { encryptedKey: string; header: string };
 }
 
 const setupContactsModule = async (options: SetupOptions = {}) => {
@@ -154,11 +155,15 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
                 get_profile_picture,
                 legacy_get_info,
             },
-            wrappedRootKey: {
-                encryptedKey: "wrapped-root-key",
-                header: "wrapped-header",
-            },
-            rootKeySource: options.rootKeySource ?? "server",
+            wrappedRootContactKey:
+                options.wrappedRootContactKey ??
+                (options.rootKeySource === "unresolved"
+                    ? undefined
+                    : {
+                          encryptedKey: "wrapped-root-key",
+                          header: "wrapped-header",
+                      }),
+            rootKeySource: options.rootKeySource ?? "cache",
         })),
     }));
 
@@ -197,9 +202,9 @@ describe("ensureContactsReady", () => {
         expect(resolved.profilePictureAttachmentID).toBe("ua_1");
     });
 
-    test("does not persist an unconfirmed locally created root key", async () => {
+    test("does not persist an unresolved wrapped root contact key", async () => {
         const { contacts, setKV } = await setupContactsModule({
-            rootKeySource: "created",
+            rootKeySource: "unresolved",
         });
 
         await contacts.ensureContactsReady({
