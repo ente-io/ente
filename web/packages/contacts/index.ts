@@ -367,7 +367,7 @@ const ensureContactsCtxOpen = async ({
             return;
         }
         const { contacts_open_ctx } = await loadEnteWasm();
-        const openedCtx = await contacts_open_ctx({
+        const openedCtx = (await contacts_open_ctx({
             baseUrl: baseURL,
             authToken,
             userId: userID,
@@ -375,7 +375,7 @@ const ensureContactsCtxOpen = async ({
             cachedRootKey,
             clientPackage: clientPackageName,
             clientVersion: isDesktop ? desktopAppVersion : undefined,
-        }) as OpenedContactsCtx;
+        })) as OpenedContactsCtx;
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
