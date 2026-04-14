@@ -424,6 +424,7 @@ class MemoriesCacheService {
           await _calculateRegularFillers();
           return _cachedMemories!;
         }
+        final cacheFileExists = await _cacheFileExists();
         _cachedMemories = await _getMemoriesFromCache();
         if (_cachedMemories == null || _cachedMemories!.isEmpty) {
           final shouldRefreshEmptyCache = _cachedMemories == null ||
@@ -437,6 +438,15 @@ class MemoriesCacheService {
           if (!shouldRefreshEmptyCache) {
             _logger.info("Found fresh empty memories cache");
             return [];
+          }
+          if (!cacheFileExists) {
+            _logger.info(
+              "No disk cache (fresh install): serving simple memories, "
+              "smart memories will upgrade in background",
+            );
+            _cachedMemories = await smartMemoriesService.calcSimpleMemories();
+            unawaited(updateCache(forced: true));
+            return _cachedMemories!;
           }
           _logger.warning(
             "No memories found in cache, force updating cache. Possible severe caching issue",
@@ -857,6 +867,10 @@ class MemoriesCacheService {
     final suffix = isOfflineMode ? "_offline" : "";
     return (await getApplicationSupportDirectory()).path +
         "/cache/memories_cache$suffix";
+  }
+
+  Future<bool> _cacheFileExists() async {
+    return File(await _getCachePath()).existsSync();
   }
 
   Future<void> _cacheUpdated() async {
