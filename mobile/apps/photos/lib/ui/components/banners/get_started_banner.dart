@@ -1,3 +1,5 @@
+import "dart:math" as math;
+
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -12,6 +14,18 @@ class GetStartedBanner extends StatefulWidget {
 }
 
 class _GetStartedBannerState extends State<GetStartedBanner> {
+  static const _contentHorizontalPadding = 16.0;
+  static const _subtitleArtworkGap = 8.0;
+  static const _duckRightInset = 8.0;
+  static const _duckMaxWidth = 188.0;
+  static const _duckWidthRatio = 188.0 / 359.0;
+  static const _subtitleMaxWidth = 240.0;
+  static const _subtitleMinWidth = 160.0;
+  // Sampled from the duck PNG's opaque left edge across the subtitle's
+  // first and second line bands. This lets the text wrap into the transparent
+  // shoulder area without colliding with the visible artwork.
+  static const _duckFirstLineOpaqueStartFraction = 0.374;
+  static const _duckSecondLineOpaqueStartFraction = 0.328;
   bool _dismissed = false;
 
   @override
@@ -69,10 +83,45 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
               final innerWidth = constraints.maxWidth - 32;
               final titleMaxWidth =
                   (innerWidth - 32).clamp(120.0, double.infinity);
-              // 12px Inter SemiBold needs ~240px to fit the English
-              // description on two lines; clamp so it doesn't overflow
-              // on very narrow devices.
-              final descMaxWidth = innerWidth < 240.0 ? innerWidth : 240.0;
+              final idealDuckWidth = math.min(
+                _duckMaxWidth,
+                constraints.maxWidth * _duckWidthRatio,
+              );
+              final maxDuckWidthForSubtitle = math.max(
+                0.0,
+                (constraints.maxWidth -
+                        _contentHorizontalPadding -
+                        _duckRightInset -
+                        _subtitleArtworkGap -
+                        _subtitleMinWidth) /
+                    (1 - _duckSecondLineOpaqueStartFraction),
+              );
+              final duckWidth = math.min(
+                idealDuckWidth,
+                maxDuckWidthForSubtitle,
+              );
+              final firstLineMaxWidth = math.min(
+                _subtitleMaxWidth,
+                _subtitleLineWidth(
+                  bannerWidth: constraints.maxWidth,
+                  duckWidth: duckWidth,
+                  duckOpaqueStartFraction: _duckFirstLineOpaqueStartFraction,
+                ),
+              );
+              final secondLineMaxWidth = math.min(
+                _subtitleMaxWidth,
+                _subtitleLineWidth(
+                  bannerWidth: constraints.maxWidth,
+                  duckWidth: duckWidth,
+                  duckOpaqueStartFraction: _duckSecondLineOpaqueStartFraction,
+                ),
+              );
+              final effectiveDescriptionStyle = secondLineMaxWidth < 180
+                  ? descriptionStyle.copyWith(
+                      fontSize: 11,
+                      height: 18 / 11,
+                    )
+                  : descriptionStyle;
 
               return Stack(
                 children: [
@@ -82,7 +131,7 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                     child: IgnorePointer(
                       child: Image.asset(
                         "assets/ducky_10gb_free.png",
-                        width: 188,
+                        width: duckWidth,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -107,14 +156,11 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                             ),
                           ),
                           const SizedBox(height: 13),
-                          SizedBox(
-                            width: descMaxWidth,
-                            child: Text(
-                              l10n.offlineHomeSignupBannerDescription,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: descriptionStyle,
-                            ),
+                          _BannerDescriptionText(
+                            text: l10n.offlineHomeSignupBannerDescription,
+                            style: effectiveDescriptionStyle,
+                            firstLineMaxWidth: firstLineMaxWidth,
+                            secondLineMaxWidth: secondLineMaxWidth,
                           ),
                           const Spacer(),
                           GestureDetector(
@@ -181,4 +227,135 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
       ),
     );
   }
+
+  double _subtitleLineWidth({
+    required double bannerWidth,
+    required double duckWidth,
+    required double duckOpaqueStartFraction,
+  }) {
+    final artworkGap = duckWidth > 0 ? _subtitleArtworkGap : 0.0;
+    return math.max(
+      0.0,
+      bannerWidth -
+          _contentHorizontalPadding -
+          _duckRightInset -
+          artworkGap -
+          (duckWidth * (1 - duckOpaqueStartFraction)),
+    );
+  }
+}
+
+class _BannerDescriptionText extends StatefulWidget {
+  static const _lineHeight = 20.0;
+
+  final String text;
+  final TextStyle style;
+  final double firstLineMaxWidth;
+  final double secondLineMaxWidth;
+
+  const _BannerDescriptionText({
+    required this.text,
+    required this.style,
+    required this.firstLineMaxWidth,
+    required this.secondLineMaxWidth,
+  });
+
+  @override
+  State<_BannerDescriptionText> createState() => _BannerDescriptionTextState();
+}
+
+class _BannerDescriptionTextState extends State<_BannerDescriptionText> {
+  _SplitBannerDescription? _cachedSplit;
+  String? _cachedText;
+  double? _cachedFirstLineMaxWidth;
+  TextStyle? _cachedStyle;
+  TextScaler? _cachedTextScaler;
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = _splitLines(context);
+    final strutStyle = StrutStyle(
+      fontFamily: widget.style.fontFamily,
+      fontSize: widget.style.fontSize,
+      fontWeight: widget.style.fontWeight,
+      height: widget.style.height,
+      forceStrutHeight: true,
+    );
+
+    return SizedBox(
+      height: _BannerDescriptionText._lineHeight * 2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: widget.firstLineMaxWidth,
+            child: Text(
+              lines.firstLine,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.clip,
+              style: widget.style,
+              strutStyle: strutStyle,
+            ),
+          ),
+          if (lines.secondLine.isNotEmpty)
+            SizedBox(
+              width: widget.secondLineMaxWidth,
+              child: Text(
+                lines.secondLine,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: widget.style,
+                strutStyle: strutStyle,
+              ),
+            )
+          else
+            const SizedBox(height: _BannerDescriptionText._lineHeight),
+        ],
+      ),
+    );
+  }
+
+  _SplitBannerDescription _splitLines(BuildContext context) {
+    if (widget.text.isEmpty || widget.firstLineMaxWidth <= 0) {
+      return const _SplitBannerDescription("", "");
+    }
+
+    final textScaler = MediaQuery.textScalerOf(context);
+    if (_cachedSplit != null &&
+        _cachedText == widget.text &&
+        _cachedFirstLineMaxWidth == widget.firstLineMaxWidth &&
+        _cachedStyle == widget.style &&
+        _cachedTextScaler == textScaler) {
+      return _cachedSplit!;
+    }
+
+    final painter = TextPainter(
+      text: TextSpan(text: widget.text, style: widget.style),
+      textDirection: Directionality.of(context),
+      textScaler: textScaler,
+    )..layout(maxWidth: widget.firstLineMaxWidth);
+    final firstLineRange =
+        painter.getLineBoundary(const TextPosition(offset: 0));
+    final splitIndex = firstLineRange.end.clamp(0, widget.text.length);
+    final firstLine = widget.text.substring(0, splitIndex).trimRight();
+    final secondLine = widget.text.substring(splitIndex).trimLeft();
+    painter.dispose();
+
+    final split = _SplitBannerDescription(firstLine, secondLine);
+    _cachedSplit = split;
+    _cachedText = widget.text;
+    _cachedFirstLineMaxWidth = widget.firstLineMaxWidth;
+    _cachedStyle = widget.style;
+    _cachedTextScaler = textScaler;
+    return split;
+  }
+}
+
+class _SplitBannerDescription {
+  final String firstLine;
+  final String secondLine;
+
+  const _SplitBannerDescription(this.firstLine, this.secondLine);
 }
