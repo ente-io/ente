@@ -1,4 +1,5 @@
 Latest changes:
+- Amrithesh: Improve zoomed OCR selection UX in the photo viewer
 - Neeraj: Fix dedupe cleanup progress percentage display
 - Neeraj: Fix Added by visibility in file details
 - Neeraj: Contacts
