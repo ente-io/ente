@@ -101,6 +101,11 @@ export type FileViewerProps = ModalVisibilityProps & {
     publicAlbumsCredentials?: PublicAlbumsCredentials;
     shouldCloseOnBrowserBack?: boolean;
     disableEscapeClose?: boolean;
+    /**
+     * Disable PhotoSwipe's gesture-driven dismissals, such as pinch-to-close
+     * and vertical drag close.
+     */
+    disableGestureClose?: boolean;
     collectionKey?: string;
     onJoinAlbum?: () => void;
     enableComment?: boolean;
@@ -125,6 +130,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     publicAlbumsCredentials,
     shouldCloseOnBrowserBack: shouldCloseOnBrowserBackOverride,
     disableEscapeClose = false,
+    disableGestureClose = false,
     collectionKey,
     onJoinAlbum,
     enableComment = true,
@@ -1173,6 +1179,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 enableComment,
                 showFullscreenButton,
                 disableEscapeClose,
+                disableGestureClose,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -1213,6 +1220,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         disableDownload,
         showFullscreenButton,
         disableEscapeClose,
+        disableGestureClose,
         handleClose,
         handleAnnotate,
         handleViewInfo,
