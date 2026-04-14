@@ -95,7 +95,6 @@ export type FileListWithViewerProps = {
     FileListProps,
     | "mode"
     | "modePlus"
-    | "layout"
     | "header"
     | "footer"
     | "disableGrouping"
@@ -140,7 +139,6 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
-    layout,
     header,
     footer,
     user,
@@ -338,7 +336,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
-                            layout,
                             header: headerWithMap,
                             footer,
                             user,
