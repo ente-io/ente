@@ -19,6 +19,11 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
   static const _duckRightInset = 8.0;
   static const _duckMaxWidth = 188.0;
   static const _duckWidthRatio = 188.0 / 359.0;
+  static const _minVisibleDuckWidth = 60.0;
+  static const _duckWidthSearchStep = 4.0;
+  static const _accessibilityDescriptionWidthFraction = 0.6;
+  static const _accessibilityDescriptionMaxLines = 4;
+  static const _accessibilityDuckWidthBoost = 1.2;
   static const _subtitleMaxWidth = 240.0;
   static const _subtitleMinWidth = 160.0;
   // Sampled from the duck PNG's opaque left edge across the subtitle's
@@ -66,76 +71,183 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
       color: Colors.black,
     );
 
+    final textScaler = MediaQuery.textScalerOf(context);
+    final titleScaleDown = textScaler.scale(1.0) <= 1.0;
+    final titleLines = titleScaleDown ? 1 : 2;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: GestureDetector(
-        onTap: _onGetStarted,
-        child: Container(
-          width: double.infinity,
-          height: 188,
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: colorScheme.greenBase,
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final innerWidth = constraints.maxWidth - 32;
-              final titleMaxWidth =
-                  (innerWidth - 32).clamp(120.0, double.infinity);
-              final idealDuckWidth = math.min(
-                _duckMaxWidth,
-                constraints.maxWidth * _duckWidthRatio,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final innerWidth = constraints.maxWidth - 32;
+          final titleMaxWidth = (innerWidth - 32).clamp(120.0, double.infinity);
+          final idealDuckWidth = math.min(
+            _duckMaxWidth,
+            constraints.maxWidth * _duckWidthRatio,
+          );
+          final maxDuckWidthForSubtitle = math.max(
+            0.0,
+            (constraints.maxWidth -
+                    _contentHorizontalPadding -
+                    _duckRightInset -
+                    _subtitleArtworkGap -
+                    _subtitleMinWidth) /
+                (1 - _duckSecondLineOpaqueStartFraction),
+          );
+          final sculptedDuckWidth = math.min(
+            idealDuckWidth,
+            maxDuckWidthForSubtitle,
+          );
+          final firstLineMaxWidth = math.min(
+            _subtitleMaxWidth,
+            _subtitleLineWidth(
+              bannerWidth: constraints.maxWidth,
+              duckWidth: sculptedDuckWidth,
+              duckOpaqueStartFraction: _duckFirstLineOpaqueStartFraction,
+            ),
+          );
+          final secondLineMaxWidth = math.min(
+            _subtitleMaxWidth,
+            _subtitleLineWidth(
+              bannerWidth: constraints.maxWidth,
+              duckWidth: sculptedDuckWidth,
+              duckOpaqueStartFraction: _duckSecondLineOpaqueStartFraction,
+            ),
+          );
+
+          TextStyle descriptionStyleForWidth(double maxWidth) {
+            if (maxWidth < 180) {
+              return descriptionStyle.copyWith(
+                fontSize: 11,
+                height: 18 / 11,
               );
-              final maxDuckWidthForSubtitle = math.max(
-                0.0,
-                (constraints.maxWidth -
-                        _contentHorizontalPadding -
-                        _duckRightInset -
-                        _subtitleArtworkGap -
-                        _subtitleMinWidth) /
-                    (1 - _duckSecondLineOpaqueStartFraction),
-              );
-              final duckWidth = math.min(
-                idealDuckWidth,
-                maxDuckWidthForSubtitle,
-              );
-              final firstLineMaxWidth = math.min(
+            }
+            return descriptionStyle;
+          }
+
+          var resolvedDuckWidth = sculptedDuckWidth;
+          var resolvedFirstLineMaxWidth = firstLineMaxWidth;
+          var resolvedSecondLineMaxWidth = secondLineMaxWidth;
+          var sculptedDescriptionStyle =
+              descriptionStyleForWidth(secondLineMaxWidth);
+          var useAccessibilityDescriptionLayout =
+              _descriptionNeedsAccessibilityFallback(
+            context: context,
+            text: l10n.offlineHomeSignupBannerDescription,
+            style: sculptedDescriptionStyle,
+            firstLineMaxWidth: firstLineMaxWidth,
+            secondLineMaxWidth: secondLineMaxWidth,
+            textScaler: textScaler,
+          );
+          if (useAccessibilityDescriptionLayout) {
+            for (double candidateDuckWidth =
+                    sculptedDuckWidth - _duckWidthSearchStep;
+                candidateDuckWidth >= 0;
+                candidateDuckWidth -= _duckWidthSearchStep) {
+              final candidateFirstLineMaxWidth = math.min(
                 _subtitleMaxWidth,
                 _subtitleLineWidth(
                   bannerWidth: constraints.maxWidth,
-                  duckWidth: duckWidth,
+                  duckWidth: candidateDuckWidth,
                   duckOpaqueStartFraction: _duckFirstLineOpaqueStartFraction,
                 ),
               );
-              final secondLineMaxWidth = math.min(
+              final candidateSecondLineMaxWidth = math.min(
                 _subtitleMaxWidth,
                 _subtitleLineWidth(
                   bannerWidth: constraints.maxWidth,
-                  duckWidth: duckWidth,
+                  duckWidth: candidateDuckWidth,
                   duckOpaqueStartFraction: _duckSecondLineOpaqueStartFraction,
                 ),
               );
-              final effectiveDescriptionStyle = secondLineMaxWidth < 180
-                  ? descriptionStyle.copyWith(
-                      fontSize: 11,
-                      height: 18 / 11,
-                    )
-                  : descriptionStyle;
+              final candidateDescriptionStyle =
+                  descriptionStyleForWidth(candidateSecondLineMaxWidth);
+              final fitsWithCandidateDuck =
+                  !_descriptionNeedsAccessibilityFallback(
+                context: context,
+                text: l10n.offlineHomeSignupBannerDescription,
+                style: candidateDescriptionStyle,
+                firstLineMaxWidth: candidateFirstLineMaxWidth,
+                secondLineMaxWidth: candidateSecondLineMaxWidth,
+                textScaler: textScaler,
+              );
+              if (!fitsWithCandidateDuck) {
+                continue;
+              }
 
-              return Stack(
+              if (candidateDuckWidth >= _minVisibleDuckWidth) {
+                resolvedDuckWidth = candidateDuckWidth;
+                resolvedFirstLineMaxWidth = candidateFirstLineMaxWidth;
+                resolvedSecondLineMaxWidth = candidateSecondLineMaxWidth;
+                sculptedDescriptionStyle = candidateDescriptionStyle;
+                useAccessibilityDescriptionLayout = false;
+              }
+              break;
+            }
+          }
+          final fallbackDescriptionMaxWidth =
+              innerWidth * _accessibilityDescriptionWidthFraction;
+          final fallbackDuckWidth = math.min(
+            idealDuckWidth,
+            math.max(0.0, innerWidth - fallbackDescriptionMaxWidth) *
+                _accessibilityDuckWidthBoost,
+          );
+          final duckWidth = useAccessibilityDescriptionLayout
+              ? fallbackDuckWidth
+              : resolvedDuckWidth;
+          final descriptionMaxWidth = useAccessibilityDescriptionLayout
+              ? fallbackDescriptionMaxWidth
+              : resolvedSecondLineMaxWidth;
+          final effectiveDescriptionStyle =
+              descriptionStyleForWidth(descriptionMaxWidth);
+          final descriptionLineHeight =
+              _scaledLineHeight(effectiveDescriptionStyle, textScaler);
+          final descriptionLines = useAccessibilityDescriptionLayout
+              ? _measureTextLineCount(
+                  context: context,
+                  text: l10n.offlineHomeSignupBannerDescription,
+                  style: effectiveDescriptionStyle,
+                  maxWidth: descriptionMaxWidth,
+                  textScaler: textScaler,
+                  maxLines: _accessibilityDescriptionMaxLines,
+                )
+              : 2;
+          final titleLineHeight = _scaledLineHeight(titleStyle, textScaler);
+          final buttonLineHeight = _scaledLineHeight(buttonStyle, textScaler);
+          final requiredHeight = 18.0 /*top padding*/ +
+              titleLineHeight * titleLines +
+              13.0 /*title-desc gap*/ +
+              descriptionLineHeight * descriptionLines +
+              16.0 /*min gap above button*/ +
+              buttonLineHeight +
+              24.0 /*button vertical padding*/ +
+              16.0 /*bottom padding*/;
+          final containerHeight = math.max(188.0, requiredHeight);
+
+          return GestureDetector(
+            onTap: _onGetStarted,
+            child: Container(
+              width: double.infinity,
+              height: containerHeight,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: colorScheme.greenBase,
+              ),
+              child: Stack(
                 children: [
-                  Positioned(
-                    right: 8,
-                    bottom: 0,
-                    child: IgnorePointer(
-                      child: Image.asset(
-                        "assets/ducky_10gb_free.png",
-                        width: duckWidth,
-                        fit: BoxFit.contain,
+                  if (duckWidth > 0)
+                    Positioned(
+                      right: 8,
+                      bottom: 0,
+                      child: IgnorePointer(
+                        child: Image.asset(
+                          "assets/ducky_10gb_free.png",
+                          width: duckWidth,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
-                  ),
                   Positioned.fill(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
@@ -144,24 +256,57 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                         children: [
                           SizedBox(
                             width: titleMaxWidth,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                l10n.offlineHomeSignupBannerTitle,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: titleStyle,
-                              ),
-                            ),
+                            child: titleScaleDown
+                                // Default text scale: preserve the original
+                                // single-line scale-down behaviour so narrow
+                                // devices still fit the title on one line.
+                                ? FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      l10n.offlineHomeSignupBannerTitle,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: titleStyle,
+                                    ),
+                                  )
+                                // Accessibility text scale: honour the user's
+                                // requested size by wrapping to two lines
+                                // instead of shrinking the title back down.
+                                : Text(
+                                    l10n.offlineHomeSignupBannerTitle,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: titleStyle,
+                                  ),
                           ),
                           const SizedBox(height: 13),
-                          _BannerDescriptionText(
-                            text: l10n.offlineHomeSignupBannerDescription,
-                            style: effectiveDescriptionStyle,
-                            firstLineMaxWidth: firstLineMaxWidth,
-                            secondLineMaxWidth: secondLineMaxWidth,
-                          ),
+                          if (useAccessibilityDescriptionLayout)
+                            SizedBox(
+                              width: descriptionMaxWidth,
+                              child: Text(
+                                l10n.offlineHomeSignupBannerDescription,
+                                maxLines: _accessibilityDescriptionMaxLines,
+                                overflow: TextOverflow.ellipsis,
+                                style: effectiveDescriptionStyle,
+                                strutStyle: StrutStyle(
+                                  fontFamily:
+                                      effectiveDescriptionStyle.fontFamily,
+                                  fontSize: effectiveDescriptionStyle.fontSize,
+                                  fontWeight:
+                                      effectiveDescriptionStyle.fontWeight,
+                                  height: effectiveDescriptionStyle.height,
+                                  forceStrutHeight: true,
+                                ),
+                              ),
+                            )
+                          else
+                            _BannerDescriptionText(
+                              text: l10n.offlineHomeSignupBannerDescription,
+                              style: effectiveDescriptionStyle,
+                              firstLineMaxWidth: resolvedFirstLineMaxWidth,
+                              secondLineMaxWidth: resolvedSecondLineMaxWidth,
+                            ),
                           const Spacer(),
                           GestureDetector(
                             onTap: _onGetStarted,
@@ -202,10 +347,10 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                     ),
                   ),
                 ],
-              );
-            },
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -242,6 +387,77 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
           artworkGap -
           (duckWidth * (1 - duckOpaqueStartFraction)),
     );
+  }
+
+  bool _descriptionNeedsAccessibilityFallback({
+    required BuildContext context,
+    required String text,
+    required TextStyle style,
+    required double firstLineMaxWidth,
+    required double secondLineMaxWidth,
+    required TextScaler textScaler,
+  }) {
+    if (text.isEmpty || firstLineMaxWidth <= 0 || secondLineMaxWidth <= 0) {
+      return true;
+    }
+
+    final firstLinePainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: textScaler,
+    )..layout(maxWidth: firstLineMaxWidth);
+    final firstLineRange =
+        firstLinePainter.getLineBoundary(const TextPosition(offset: 0));
+    final splitIndex = firstLineRange.end.clamp(0, text.length);
+    final secondLine = text.substring(splitIndex).trimLeft();
+    firstLinePainter.dispose();
+
+    if (secondLine.isEmpty) {
+      return false;
+    }
+
+    final secondLinePainter = TextPainter(
+      text: TextSpan(text: secondLine, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: textScaler,
+      maxLines: 1,
+      ellipsis: "\u2026",
+    )..layout(maxWidth: secondLineMaxWidth);
+    final needsFallback = secondLinePainter.didExceedMaxLines;
+    secondLinePainter.dispose();
+    return needsFallback;
+  }
+
+  int _measureTextLineCount({
+    required BuildContext context,
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required TextScaler textScaler,
+    int? maxLines,
+  }) {
+    if (text.isEmpty || maxWidth <= 0) {
+      return 0;
+    }
+
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: textScaler,
+      maxLines: maxLines,
+      ellipsis: maxLines == null ? null : "\u2026",
+    )..layout(maxWidth: maxWidth);
+    final lineCount = painter.computeLineMetrics().length;
+    painter.dispose();
+    if (maxLines == null) {
+      return lineCount;
+    }
+    return lineCount.clamp(1, maxLines);
+  }
+
+  double _scaledLineHeight(TextStyle style, TextScaler textScaler) {
+    final fontSize = style.fontSize ?? 14.0;
+    return textScaler.scale(fontSize) * (style.height ?? 1.0);
   }
 }
 
