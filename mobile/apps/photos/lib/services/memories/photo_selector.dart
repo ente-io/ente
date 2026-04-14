@@ -800,7 +800,7 @@ class PhotoSelector {
           break;
         }
       }
-      chosen ??= bucket.first;
+      if (chosen == null) continue;
       selected.add(chosen);
       final ct = chosen.file.creationTime;
       if (ct != null) selectedCreationTimes.add(ct);

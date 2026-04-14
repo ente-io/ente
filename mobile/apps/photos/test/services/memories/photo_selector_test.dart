@@ -319,6 +319,31 @@ void main() {
       }
     });
 
+    test('skips no-ML time buckets that cannot satisfy the min-gap filter',
+        () async {
+      const minute = 60 * 1000000;
+      final memories = [
+        _mem(_file(uploadedFileID: 0, creationTime: _baseTime)),
+        _mem(_file(uploadedFileID: 1, creationTime: _baseTime + 7 * minute)),
+        _mem(_file(uploadedFileID: 2, creationTime: _baseTime + 8 * minute)),
+        _mem(_file(uploadedFileID: 3, creationTime: _baseTime + 9 * minute)),
+        _mem(_file(uploadedFileID: 4, creationTime: _baseTime + 20 * minute)),
+      ];
+
+      final result = await PhotoSelector.bestSelection(
+        memories,
+        prefferedSize: 3,
+        isOfflineMode: false,
+        mlEnabled: false,
+        fileIdToFaces: const {},
+        faceIDsToPersonID: const {},
+        fileIDToImageEmbedding: const {},
+        clipPositiveTextVector: _positiveTextVector,
+      );
+
+      expect(result.map((m) => m.file.uploadedFileID), equals([0, 4]));
+    });
+
     test('prioritizes files with named faces', () async {
       // 20 photos, file 0 has a named face, others don't
       final memories = List.generate(20, (i) {
