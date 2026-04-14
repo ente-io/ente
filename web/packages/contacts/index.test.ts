@@ -77,6 +77,7 @@ interface SetupOptions {
     getProfilePictureBytes?: Uint8Array;
     rootKeySource?: "cache" | "unresolved";
     wrappedRootContactKey?: { encryptedKey: string; header: string };
+    currentWrappedRootContactKey?: { encryptedKey: string; header: string };
 }
 
 const setupContactsModule = async (options: SetupOptions = {}) => {
@@ -96,6 +97,17 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
     const warn = vi.fn();
     const error = vi.fn();
     const update_auth_token = vi.fn();
+    const current_wrapped_root_contact_key = vi.fn(
+        () =>
+            options.currentWrappedRootContactKey ??
+            options.wrappedRootContactKey ??
+            (options.rootKeySource === "unresolved"
+                ? { encryptedKey: "wrapped-root-key", header: "wrapped-header" }
+                : {
+                      encryptedKey: "wrapped-root-key",
+                      header: "wrapped-header",
+                  }),
+    );
     const diff = options.diff ?? [
         {
             id: "ct_1",
@@ -151,6 +163,7 @@ const setupContactsModule = async (options: SetupOptions = {}) => {
         contacts_open_ctx: vi.fn(() => ({
             ctx: {
                 update_auth_token,
+                current_wrapped_root_contact_key,
                 get_diff,
                 get_profile_picture,
                 legacy_get_info,
@@ -205,6 +218,7 @@ describe("ensureContactsReady", () => {
     test("does not persist an unresolved wrapped root contact key", async () => {
         const { contacts, setKV } = await setupContactsModule({
             rootKeySource: "unresolved",
+            diff: [],
         });
 
         await contacts.ensureContactsReady({
@@ -216,8 +230,24 @@ describe("ensureContactsReady", () => {
             .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
             .join("\n");
 
-        expect(persisted).toContain("contacts/");
         expect(persisted).not.toContain("wrapped-root-key");
+    });
+
+    test("persists a resolved wrapped root contact key after non-empty diff", async () => {
+        const { contacts, setKV } = await setupContactsModule({
+            rootKeySource: "unresolved",
+        });
+
+        await contacts.ensureContactsReady({
+            userID: 101,
+            masterKeyB64: "MASTER_KEY_SHOULD_NOT_PERSIST",
+        });
+
+        const persisted = setKV.mock.calls
+            .map(([key, value]) => `${String(key)}:${JSON.stringify(value)}`)
+            .join("\n");
+
+        expect(persisted).toContain("wrapped-root-key");
     });
 });
 

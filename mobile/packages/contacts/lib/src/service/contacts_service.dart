@@ -124,6 +124,7 @@ class ContactsService {
         break;
       }
     }
+    await _persistConfirmedWrappedRootKey();
     await _database.deleteUnreferencedCachedAttachments();
     return synced;
   }

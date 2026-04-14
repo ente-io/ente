@@ -101,6 +101,46 @@ void main() {
     expect(preferences.getString('entity_key_header_contact_1'), isNull);
   });
 
+  test(
+      'sync persists a resolved wrapped root contact key after unresolved open',
+      () async {
+    rustApi.rootKeySource = RootKeySource.unresolved;
+    rustApi.openWrappedRootContactKey = null;
+    rustApi.diffPages = [
+      [
+        const ContactRecord(
+          id: 'ct_1',
+          contactUserId: 2,
+          email: 'b@test.test',
+          data: ContactData(contactUserId: 2, name: 'B'),
+          profilePictureAttachmentId: null,
+          isDeleted: false,
+          createdAt: 10,
+          updatedAt: 20,
+        ),
+      ],
+      const [],
+    ];
+
+    await service.open(
+      ContactsSession(
+        baseUrl: 'http://localhost:8080',
+        authToken: 'token',
+        userId: 1,
+        accountKey: Uint8List.fromList([1, 2, 3]),
+      ),
+    );
+    expect(preferences.getString('entity_key_contact_1'), isNull);
+
+    await service.sync();
+
+    expect(preferences.getString('entity_key_contact_1'), 'enc-key');
+    expect(
+      preferences.getString('entity_key_header_contact_1'),
+      'enc-header',
+    );
+  });
+
   test('create and profile-picture changes update local cache', () async {
     rustApi.rootKeySource = RootKeySource.unresolved;
     rustApi.openWrappedRootContactKey = null;

@@ -456,6 +456,16 @@ const syncContacts = async ({
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
+        const wrappedRootContactKey =
+            (await ctx.current_wrapped_root_contact_key()) as
+                | WrappedRootContactKey
+                | undefined;
+        if (wrappedRootContactKey) {
+            await saveWrappedRootContactKey(sessionKey, wrappedRootContactKey);
+            if (!isCurrentSession(sessionKey, generation)) {
+                return;
+            }
+        }
         await saveContactDisplayRecords(sessionKey, [
             ...state.contactsByID.values(),
         ]);
