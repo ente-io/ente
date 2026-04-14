@@ -209,6 +209,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         () =>
             initialAnonUserNames ? new Map(initialAnonUserNames) : new Map(),
     );
+    const [publicSocialDataStatusByFileID, setPublicSocialDataStatusByFileID] =
+        useState<Map<number, "loading" | "ready">>(new Map());
 
     useEffect(() => {
         if (!initialAnonUserNames?.size) return;
@@ -904,6 +906,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [allReactions, files, open]);
 
     const activeFileID = activeAnnotatedFile?.file.id;
+    const shouldFetchPublicSocialData =
+        !!open &&
+        enableComment &&
+        !!activeFileID &&
+        !!publicAlbumsCredentials &&
+        !!collectionKey;
+    const isInitialPublicSocialDataLoading =
+        !!activeFileID &&
+        shouldFetchPublicSocialData &&
+        publicSocialDataStatusByFileID.get(activeFileID) !== "ready";
 
     // Fetch social data (comments + reactions) for public albums (when viewing as anonymous user).
     useEffect(() => {
@@ -918,6 +930,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         const file = files.find((f) => f.id === activeFileID);
         if (!file) return;
+
+        setPublicSocialDataStatusByFileID((prev) => {
+            if (prev.get(activeFileID) === "ready") return prev;
+
+            const next = new Map(prev);
+            next.set(activeFileID, "loading");
+            return next;
+        });
 
         void (async () => {
             try {
@@ -1011,6 +1031,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 }
             } catch (e) {
                 log.error("Failed to fetch public social data", e);
+            } finally {
+                setPublicSocialDataStatusByFileID((prev) => {
+                    if (prev.get(activeFileID) === "ready") return prev;
+
+                    const next = new Map(prev);
+                    next.set(activeFileID, "ready");
+                    return next;
+                });
             }
         })();
     }, [
@@ -1249,6 +1277,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleCommentsClose}
                 file={activeAnnotatedFile.file}
                 activeCollectionID={activeCollectionID}
+                isSocialDataLoading={isInitialPublicSocialDataLoading}
                 prefetchedComments={fileComments.get(
                     activeAnnotatedFile.file.id,
                 )}
@@ -1272,6 +1301,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleLikesClose}
                 file={activeAnnotatedFile.file}
                 activeCollectionID={activeCollectionID}
+                isSocialDataLoading={isInitialPublicSocialDataLoading}
                 prefetchedReactions={allReactions.get(
                     activeAnnotatedFile.file.id,
                 )}
