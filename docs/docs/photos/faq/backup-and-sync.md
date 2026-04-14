@@ -364,7 +364,7 @@ Ente backs up photos from your phone and computer to Ente's servers, making them
 
 Once uploaded, your library is accessible across all your devices through Ente.
 
-### Can Ente create albums automatically from my folder structure? {#albums-from-folder-structure}
+### Can Ente create albums automatically from my watch folder structure? {#albums-from-watch-folder-structure}
 
 Yes. When you add a parent folder in Watch folders and choose **Separate albums**, each subfolder is created as its own Ente album.
 
