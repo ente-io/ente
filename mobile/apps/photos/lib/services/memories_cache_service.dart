@@ -12,6 +12,7 @@ import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import "package:photos/events/memory_seen_event.dart";
@@ -114,6 +115,15 @@ class MemoriesCacheService {
               .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
         }
       }
+    });
+
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      final shouldQueueUpdate =
+          _cachedMemories == null || _cachedMemories!.isEmpty;
+      if (!shouldQueueUpdate) {
+        return;
+      }
+      queueUpdateCache();
     });
   }
 
@@ -416,8 +426,16 @@ class MemoriesCacheService {
         }
         _cachedMemories = await _getMemoriesFromCache();
         if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+          final shouldRefreshEmptyCache = _cachedMemories == null ||
+              _shouldUpdate ||
+              _timeToUpdateCache() ||
+              lastMemoriesCacheUpdateTime == 0;
           if (onlyUseCache) {
             _logger.info("Only using cache, no memories found");
+            return [];
+          }
+          if (!shouldRefreshEmptyCache) {
+            _logger.info("Found fresh empty memories cache");
             return [];
           }
           _logger.warning(
