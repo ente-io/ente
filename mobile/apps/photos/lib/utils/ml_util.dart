@@ -100,18 +100,6 @@ class _OnlineMLIndexingCandidates {
   });
 }
 
-class _MlForbiddenFetchRecovery {
-  final Set<int> suspectedStaleIds;
-  final Set<int> confirmedStaleIds;
-  final bool abortedBySafetyCap;
-
-  const _MlForbiddenFetchRecovery({
-    this.suspectedStaleIds = const {},
-    this.confirmedStaleIds = const {},
-    this.abortedBySafetyCap = false,
-  });
-}
-
 Future<IndexStatus> getIndexStatus() async {
   try {
     final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
@@ -463,107 +451,10 @@ Future<RemoteMLHydrationSummary> hydrateOwnedRemoteMLData({
   );
 }
 
-bool _isRecoverableMlFetchForbidden(Object error) {
-  return error is DioException &&
-      error.type == DioExceptionType.badResponse &&
-      error.response?.statusCode == 403;
-}
-
-Future<_MlForbiddenFetchRecovery> _resolveForbiddenMlFetchRecovery(
-  Set<int> batchIds,
-) async {
-  await CollectionsService.instance.sync();
-
-  final suspectedStaleIds = <int>{};
-  for (final uploadedFileId in batchIds) {
-    final collectionIds = await FilesDB.instance.getAllCollectionIDsOfFile(
-      uploadedFileId,
-    );
-    final hasAccessibleCollection = collectionIds.any((collectionId) {
-      final collection = CollectionsService.instance.getCollectionByID(
-        collectionId,
-      );
-      return collection != null && !collection.isDeleted;
-    });
-    if (!hasAccessibleCollection) {
-      suspectedStaleIds.add(uploadedFileId);
-    }
-  }
-
-  _logger.info(
-    "ML stale-file recovery inspected ${batchIds.length} IDs and found "
-    "${suspectedStaleIds.length} suspect IDs",
-  );
-  if (suspectedStaleIds.isEmpty) {
-    return const _MlForbiddenFetchRecovery();
-  }
-
-  if (suspectedStaleIds.length > _kMlStaleCleanupMaxIds) {
-    _logger.severe(
-      "Aborting ML stale-file cleanup: batchSize=${batchIds.length}, "
-      "suspectCount=${suspectedStaleIds.length}, absoluteLimit="
-      "$_kMlStaleCleanupMaxIds",
-    );
-    return _MlForbiddenFetchRecovery(
-      suspectedStaleIds: suspectedStaleIds,
-      abortedBySafetyCap: true,
-    );
-  }
-
-  if (suspectedStaleIds.length == 1) {
-    final uploadedFileId = suspectedStaleIds.first;
-    try {
-      await fileDataService.getFilesData({uploadedFileId});
-      _logger.info(
-        "Keeping uploadID=$uploadedFileId after single-ID ML re-probe",
-      );
-      return _MlForbiddenFetchRecovery(suspectedStaleIds: suspectedStaleIds);
-    } catch (e) {
-      if (!_isRecoverableMlFetchForbidden(e)) {
-        rethrow;
-      }
-      return _MlForbiddenFetchRecovery(
-        suspectedStaleIds: suspectedStaleIds,
-        confirmedStaleIds: {uploadedFileId},
-      );
-    }
-  }
-
-  try {
-    await fileDataService.getFilesData(suspectedStaleIds);
-    _logger.info(
-      "ML stale-file recovery kept all suspect IDs after subset re-probe",
-    );
-    return _MlForbiddenFetchRecovery(suspectedStaleIds: suspectedStaleIds);
-  } catch (e) {
-    if (!_isRecoverableMlFetchForbidden(e)) {
-      rethrow;
-    }
-  }
-
-  final confirmedStaleIds = <int>{};
-  for (final uploadedFileId in suspectedStaleIds) {
-    try {
-      await fileDataService.getFilesData({uploadedFileId});
-      _logger.info(
-        "Keeping uploadID=$uploadedFileId after single-ID ML re-probe",
-      );
-    } catch (e) {
-      if (!_isRecoverableMlFetchForbidden(e)) {
-        rethrow;
-      }
-      confirmedStaleIds.add(uploadedFileId);
-    }
-  }
-
-  _logger.info(
-    "ML stale-file recovery confirmed ${confirmedStaleIds.length} stale IDs",
-  );
-  return _MlForbiddenFetchRecovery(
-    suspectedStaleIds: suspectedStaleIds,
-    confirmedStaleIds: confirmedStaleIds,
-  );
-}
+bool _isRecoverableMlFetchForbidden(Object error) =>
+    error is DioException &&
+    error.type == DioExceptionType.badResponse &&
+    error.response?.statusCode == 403;
 
 Future<FileDataResponse> _fetchFilesDataForMlHydrationWithRecovery(
   Map<int, FileMLInstruction> pendingIndex,
@@ -572,41 +463,57 @@ Future<FileDataResponse> _fetchFilesDataForMlHydrationWithRecovery(
   try {
     return await fileDataService.getFilesData(batchIds);
   } catch (e) {
-    if (!_isRecoverableMlFetchForbidden(e)) {
-      rethrow;
+    if (!_isRecoverableMlFetchForbidden(e)) rethrow;
+
+    await CollectionsService.instance.sync();
+    final suspects = <int>{};
+    for (final id in batchIds) {
+      final collectionIds =
+          await FilesDB.instance.getAllCollectionIDsOfFile(id);
+      final hasAccess = collectionIds.any((cid) {
+        final c = CollectionsService.instance.getCollectionByID(cid);
+        return c != null && !c.isDeleted;
+      });
+      if (!hasAccess) suspects.add(id);
     }
-    final recovery = await _resolveForbiddenMlFetchRecovery(batchIds);
-    if (recovery.abortedBySafetyCap || recovery.confirmedStaleIds.isEmpty) {
+    _logger.info(
+      "ML stale recovery: ${suspects.length}/${batchIds.length} suspects",
+    );
+    if (suspects.isEmpty) rethrow;
+    if (suspects.length > _kMlStaleCleanupMaxIds) {
+      _logger.severe(
+        "ML stale recovery aborted: ${suspects.length} suspects exceeds cap $_kMlStaleCleanupMaxIds",
+      );
       rethrow;
     }
 
-    final staleFiles = <EnteFile>[];
-    for (final staleId in recovery.confirmedStaleIds) {
-      final staleInstruction = pendingIndex.remove(staleId);
-      if (staleInstruction != null) {
-        staleFiles.add(staleInstruction.file);
+    final confirmed = <int>{};
+    for (final id in suspects) {
+      try {
+        await fileDataService.getFilesData({id});
+      } catch (e) {
+        if (!_isRecoverableMlFetchForbidden(e)) rethrow;
+        confirmed.add(id);
       }
     }
-    await FilesDB.instance.deleteMultipleUploadedFiles(
-      recovery.confirmedStaleIds.toList(),
-    );
-    if (staleFiles.isNotEmpty) {
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          staleFiles,
-          type: EventType.deletedFromRemote,
-          source: "mlStaleFileCleanup",
-        ),
-      );
-    }
+    if (confirmed.isEmpty) rethrow;
 
-    _logger.info(
-      "Pruned ${recovery.confirmedStaleIds.length} stale ML IDs. "
-      "Retrying fetch for ${pendingIndex.length} IDs",
+    final staleFiles = confirmed
+        .map((id) => pendingIndex.remove(id)?.file)
+        .whereType<EnteFile>()
+        .toList();
+    await FilesDB.instance.deleteMultipleUploadedFiles(confirmed.toList());
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        staleFiles,
+        type: EventType.deletedFromRemote,
+        source: "mlStaleFileCleanup",
+      ),
     );
-    if (pendingIndex.isEmpty) {
-      return FileDataResponse.empty();
-    }
+    _logger.info(
+      "Pruned ${confirmed.length} stale ML IDs, retrying ${pendingIndex.length}",
+    );
+    if (pendingIndex.isEmpty) return FileDataResponse.empty();
     return fileDataService.getFilesData(pendingIndex.keys.toSet());
   }
 }
