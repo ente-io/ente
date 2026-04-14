@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_accounts,ente_base,ente_configuration,ente_events,ente_lock_screen,ente_logging,ente_network,ente_strings,ente_ui,ente_utils,ente_sharing,ente_legacy,ente_crypto_api,ente_crypto_dart_adapter,ente_pure_utils,ente_icons
+# melos_managed_dependency_overrides: ente_accounts,ente_base,ente_configuration,ente_events,ente_lock_screen,ente_logging,ente_network,ente_strings,ente_ui,ente_utils,ente_sharing,ente_legacy,ente_crypto_api,ente_crypto_dart_adapter,ente_pure_utils,ente_icons,ente_contacts,ente_rust
 dependency_overrides:
   ente_accounts:
     path: ../../packages/accounts
@@ -6,6 +6,8 @@ dependency_overrides:
     path: ../../packages/base
   ente_configuration:
     path: ../../packages/configuration
+  ente_contacts:
+    path: ../../packages/contacts
   ente_crypto_api:
     path: ../../packages/ente_crypto_api
   ente_crypto_dart_adapter:
@@ -24,6 +26,8 @@ dependency_overrides:
     path: ../../packages/network
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
+  ente_rust:
+    path: ../../packages/rust
   ente_sharing:
     path: ../../packages/sharing
   ente_strings:

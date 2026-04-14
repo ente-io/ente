@@ -43,7 +43,7 @@ dependencies:
       ref: 82e365fed8a1a76f6eea0220de98389eed7b0445
   connectivity_plus: 6.1.4
   convert: 3.1.2
-  crypto: 3.0.6
+  crypto: 3.0.7
   cupertino_icons: 1.0.8
   dart_ui_isolate: 1.1.1
   defer_pointer: 0.0.2
@@ -121,7 +121,7 @@ dependencies:
       ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   flutter_spinkit: 5.2.1
   flutter_staggered_grid_view: 0.7.0
-  flutter_svg: 2.2.0
+  flutter_svg: 2.2.3
   flutter_timezone: 4.1.1
   fluttertoast: 8.2.12
   fraction: 5.0.5
@@ -228,7 +228,7 @@ dependencies:
   scrollable_positioned_list: 0.3.8
   sentry: 8.14.2
   sentry_flutter: 8.14.2
-  share_plus: 11.0.0
+  share_plus: 11.1.0
   shared_preferences: 2.5.3
   sqflite: 2.4.2
   sqflite_migration: 0.3.0

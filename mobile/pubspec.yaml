@@ -7,6 +7,6 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dev_dependencies:
-  melos: ^6.0.0
+  melos: 6.3.3
 dependencies:
-  flutter_lints: ^6.0.0
+  flutter_lints: 6.0.0
