@@ -5,10 +5,12 @@ on:
     pull_request:
         paths:
             - "mobile/packages/**"
-            - "mobile/apps/*/pubspec.yaml"
+            - "mobile/**/pubspec*.yaml"
+            - "mobile/**/pubspec.lock"
             - "rust/photos/**"
             - ".github/workflows/mobile-packages-lint.yml"
             - "mobile/scripts/check_frozen_pubspecs.rb"
+            - ".github/scripts/get-affected-packages.sh"
             - "mobile/analysis_options.yaml"
     # Allow manual trigger for testing
     workflow_dispatch:
