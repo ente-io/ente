@@ -228,8 +228,10 @@ class _MachineLearningSettingsPageState
 
   Future<void> toggleMlConsent() async {
     final oldMlConsent = hasGrantedMLConsent;
+    final oldMlEnabled = oldMlConsent && localSettings.isMLLocalIndexingEnabled;
     final mlConsent = !oldMlConsent;
     await setMLConsent(mlConsent);
+    final newMlEnabled = mlConsent && localSettings.isMLLocalIndexingEnabled;
     // Queue a memories cache refresh so People/Clip memories appear or
     // disappear on the next scheduled recompute. We intentionally only queue
     // here — the actual recompute will be picked up by the next updateCache
@@ -241,6 +243,9 @@ class _MachineLearningSettingsPageState
       unawaited(
         MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
       );
+      if (oldMlEnabled && !newMlEnabled) {
+        await memoriesCacheService.purgeMlOnlyMemoriesFromCache();
+      }
     } else {
       await MLService.instance.init();
       await SemanticSearchService.instance.init();
@@ -362,7 +367,10 @@ class _MachineLearningSettingsPageState
           trailingWidget: ToggleSwitchWidget(
             value: () => localSettings.isMLLocalIndexingEnabled,
             onChanged: () async {
+              final oldMlEnabled =
+                  hasGrantedMLConsent && localSettings.isMLLocalIndexingEnabled;
               final localIndexing = await localSettings.toggleLocalMLIndexing();
+              final newMlEnabled = hasGrantedMLConsent && localIndexing;
               memoriesCacheService.queueUpdateCache();
               Bus.instance.fire(NotificationEvent());
               if (localIndexing) {
@@ -372,6 +380,9 @@ class _MachineLearningSettingsPageState
                 unawaited(
                   MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
                 );
+                if (oldMlEnabled && !newMlEnabled) {
+                  await memoriesCacheService.purgeMlOnlyMemoriesFromCache();
+                }
               }
 
               if (mounted) {

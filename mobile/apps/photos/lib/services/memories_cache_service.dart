@@ -250,6 +250,82 @@ class MemoriesCacheService {
     unawaited(_prefs.setBool(_shouldUpdateKey, true));
   }
 
+  Future<void> purgeMlOnlyMemoriesFromCache() async {
+    await _memoriesUpdateLock.synchronized(() async {
+      bool cacheChanged = false;
+      final removedPersonIDs = <String>{};
+
+      if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
+        final filtered = <SmartMemory>[];
+        for (final memory in _cachedMemories!) {
+          if (memory.type == MemoryType.people ||
+              memory.type == MemoryType.clip) {
+            if (memory is PeopleMemory) {
+              removedPersonIDs.add(memory.personID);
+            }
+            continue;
+          }
+          filtered.add(memory);
+        }
+        if (filtered.length != _cachedMemories!.length) {
+          _cachedMemories = filtered;
+          cacheChanged = true;
+        }
+      }
+
+      final cache = await _readCacheFromDisk();
+      if (cache != null) {
+        final originalToShowLength = cache.toShowMemories.length;
+        final activeRemovedPeopleLogs = <PeopleShownLog>[];
+        final activeRemovedClipLogs = <ClipShownLog>[];
+
+        for (final memory in cache.toShowMemories) {
+          if (memory.type == MemoryType.people) {
+            if (memory.personID != null) {
+              removedPersonIDs.add(memory.personID!);
+            }
+            if (memory.shouldShowNow()) {
+              activeRemovedPeopleLogs.add(
+                PeopleShownLog.fromOldCacheMemory(memory),
+              );
+            }
+          } else if (memory.type == MemoryType.clip && memory.shouldShowNow()) {
+            activeRemovedClipLogs.add(
+              ClipShownLog.fromOldCacheMemory(memory),
+            );
+          }
+        }
+
+        cache.toShowMemories.removeWhere(
+          (memory) =>
+              memory.type == MemoryType.people ||
+              memory.type == MemoryType.clip,
+        );
+        if (cache.toShowMemories.length != originalToShowLength) {
+          cache.peopleShownLogs.addAll(activeRemovedPeopleLogs);
+          cache.clipShownLogs.addAll(activeRemovedClipLogs);
+          await writeToJsonFile<MemoriesCache>(
+            await _getCachePath(),
+            cache,
+            MemoriesCache.encodeToJsonString,
+          );
+          cacheChanged = true;
+        }
+      }
+
+      for (final personID in removedPersonIDs) {
+        await NotificationService.instance.clearAllScheduledNotifications(
+          containingPayload: personID,
+          logLines: false,
+        );
+      }
+
+      if (cacheChanged) {
+        Bus.instance.fire(MemoriesChangedEvent());
+      }
+    });
+  }
+
   Future<void> purgePersonFromMemoriesCache(String personID) async {
     await _memoriesUpdateLock.synchronized(() async {
       final removedMemoryIDs = <String>{};
