@@ -656,10 +656,22 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const thumbnailCacheRef = useRef(thumbnailCache);
     const thumbnailLoadsInFlightRef = useRef<Set<number>>(new Set());
+    const canSetThumbnailCacheRef = useRef(open);
 
     useEffect(() => {
         thumbnailCacheRef.current = thumbnailCache;
     }, [thumbnailCache]);
+
+    useEffect(() => {
+        canSetThumbnailCacheRef.current = open;
+    }, [open]);
+
+    useEffect(
+        () => () => {
+            canSetThumbnailCacheRef.current = false;
+        },
+        [],
+    );
 
     // Build file type cache from files
     useEffect(() => {
@@ -674,8 +686,6 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     // soon as it is ready instead of waiting for the entire batch to finish.
     useEffect(() => {
         if (!open || (comments.length === 0 && reactions.length === 0)) return;
-
-        let didCancel = false;
 
         const fileIDsWithActivity = new Set<number>();
 
@@ -706,7 +716,7 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                 try {
                     const url =
                         await downloadManager.renderableThumbnailURL(file);
-                    if (didCancel || !url) return;
+                    if (!url || !canSetThumbnailCacheRef.current) return;
 
                     setThumbnailCache((prev) => {
                         if (prev.get(file.id) === url) return prev;
@@ -726,10 +736,6 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                 }
             }),
         );
-
-        return () => {
-            didCancel = true;
-        };
     }, [open, comments, reactions, files]);
 
     // Polling interval for refreshing feed data (5 seconds)
