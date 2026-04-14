@@ -246,8 +246,6 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
 }
 
 class _BannerDescriptionText extends StatefulWidget {
-  static const _lineHeight = 20.0;
-
   final String text;
   final TextStyle style;
   final double firstLineMaxWidth;
@@ -274,6 +272,10 @@ class _BannerDescriptionTextState extends State<_BannerDescriptionText> {
   @override
   Widget build(BuildContext context) {
     final lines = _splitLines(context);
+    final textScaler = MediaQuery.textScalerOf(context);
+    final fontSize = widget.style.fontSize ?? 12.0;
+    final lineHeight =
+        textScaler.scale(fontSize) * (widget.style.height ?? 1.0);
     final strutStyle = StrutStyle(
       fontFamily: widget.style.fontFamily,
       fontSize: widget.style.fontSize,
@@ -283,7 +285,7 @@ class _BannerDescriptionTextState extends State<_BannerDescriptionText> {
     );
 
     return SizedBox(
-      height: _BannerDescriptionText._lineHeight * 2,
+      height: lineHeight * 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -311,7 +313,7 @@ class _BannerDescriptionTextState extends State<_BannerDescriptionText> {
               ),
             )
           else
-            const SizedBox(height: _BannerDescriptionText._lineHeight),
+            SizedBox(height: lineHeight),
         ],
       ),
     );
