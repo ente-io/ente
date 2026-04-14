@@ -91,6 +91,7 @@ class _DetailPageState extends State<DetailPage> {
   final _isInSharedCollectionNotifier = ValueNotifier(false);
   final _showingThumbnailFallbackNotifier = ValueNotifier<String?>(null);
   final _isZoomedNotifier = ValueNotifier(false);
+  final _zoomTransformNotifier = ValueNotifier(ZoomTransform.identity);
 
   @override
   void dispose() {
@@ -98,6 +99,7 @@ class _DetailPageState extends State<DetailPage> {
     _isInSharedCollectionNotifier.dispose();
     _showingThumbnailFallbackNotifier.dispose();
     _isZoomedNotifier.dispose();
+    _zoomTransformNotifier.dispose();
     super.dispose();
   }
 
@@ -111,6 +113,7 @@ class _DetailPageState extends State<DetailPage> {
       isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
       showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
       isZoomedNotifier: _isZoomedNotifier,
+      zoomTransformNotifier: _zoomTransformNotifier,
       child: _Body(widget.config),
     );
   }

@@ -1800,9 +1800,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
-      resolved-ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
-      url: "https://github.com/ente-io/mobile_ocr"
+      ref: "197f7d6dc5696f7a6c663c15e255c664fb77ac01"
+      resolved-ref: "197f7d6dc5696f7a6c663c15e255c664fb77ac01"
+      url: "https://github.com/Amrithesh-Kakkoth/mobile_ocr"
     source: git
     version: "1.0.0"
   mockito:
