@@ -93,6 +93,7 @@ export type FileViewerProps = ModalVisibilityProps & {
     initialIndex: number;
     initialSidebar?: FileViewerInitialSidebar;
     highlightCommentID?: string;
+    initialAnonUserNames?: Map<string, string>;
     disableDownload?: boolean;
     showFullscreenButton?: boolean;
     onDownload?: (file: EnteFile) => void;
@@ -116,6 +117,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     initialIndex,
     initialSidebar,
     highlightCommentID,
+    initialAnonUserNames,
     disableDownload,
     showFullscreenButton,
     onDownload,
@@ -204,8 +206,26 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     // Map of anon user ID to decrypted user name for anonymous users.
     const [anonUserNames, setAnonUserNames] = useState<Map<string, string>>(
-        new Map(),
+        () =>
+            initialAnonUserNames ? new Map(initialAnonUserNames) : new Map(),
     );
+
+    useEffect(() => {
+        if (!initialAnonUserNames?.size) return;
+
+        setAnonUserNames((prev) => {
+            let didChange = false;
+            const next = new Map(prev);
+
+            for (const [anonUserID, userName] of initialAnonUserNames) {
+                if (next.get(anonUserID) === userName) continue;
+                next.set(anonUserID, userName);
+                didChange = true;
+            }
+
+            return didChange ? next : prev;
+        });
+    }, [initialAnonUserNames]);
 
     // Ref for allReactions to use in callbacks
     const allReactionsRef = useRef(allReactions);

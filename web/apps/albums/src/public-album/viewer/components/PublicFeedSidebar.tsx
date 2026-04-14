@@ -145,6 +145,12 @@ export interface PublicFeedItemClickInfo {
      * For `liked_comment`, this is the target comment ID.
      */
     commentID?: string;
+    /**
+     * Snapshot of resolved anonymous display names from the feed.
+     * This lets the viewer open with stable names instead of briefly falling
+     * back to anonymous placeholders before its own profile fetch completes.
+     */
+    anonUserNames?: Map<string, string>;
 }
 
 export interface PublicFeedSidebarProps extends ModalVisibilityProps {
@@ -589,26 +595,32 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item, onClick }) => {
  */
 const getFeedItemClickInfo = (
     item: PublicFeedItem,
+    anonUserNames: Map<string, string>,
 ): PublicFeedItemClickInfo => {
+    const clickInfoBase = { anonUserNames: new Map(anonUserNames) };
+
     switch (item.type) {
         case "liked_photo":
         case "liked_video":
-            return { type: item.type, fileID: item.fileID };
+            return { ...clickInfoBase, type: item.type, fileID: item.fileID };
         case "commented_photo":
         case "commented_video":
             return {
+                ...clickInfoBase,
                 type: item.type,
                 fileID: item.fileID,
                 commentID: item.commentID,
             };
         case "replied_comment":
             return {
+                ...clickInfoBase,
                 type: item.type,
                 fileID: item.fileID!,
                 commentID: item.replyID,
             };
         case "liked_comment":
             return {
+                ...clickInfoBase,
                 type: item.type,
                 fileID: item.fileID!,
                 commentID: item.commentID,
@@ -825,7 +837,10 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                                     onItemClick
                                         ? () => {
                                               onItemClick(
-                                                  getFeedItemClickInfo(item),
+                                                  getFeedItemClickInfo(
+                                                      item,
+                                                      anonUserNames,
+                                                  ),
                                               );
                                           }
                                         : undefined
