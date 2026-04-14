@@ -318,7 +318,7 @@ class _AdvancedSharingBottomSheetState
       }
     } catch (e) {
       if (mounted) {
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }
@@ -344,7 +344,7 @@ class _AdvancedSharingBottomSheetState
     } catch (e) {
       if (mounted) {
         await dialog?.hide();
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
         rethrow;
       }
     }

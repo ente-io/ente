@@ -223,7 +223,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       }
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 

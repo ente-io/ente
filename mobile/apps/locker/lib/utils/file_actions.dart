@@ -408,7 +408,7 @@ class FileActions {
       if (!context.mounted) {
         return;
       }
-      await showGenericErrorDialog(
+      await showGenericErrorBottomSheet(
         context: context,
         error: e,
       );

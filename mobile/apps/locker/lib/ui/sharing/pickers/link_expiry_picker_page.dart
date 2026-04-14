@@ -161,7 +161,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       await CollectionApiClient.instance
           .updateShareUrl(widget.collection, prop);
     } catch (e) {
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       rethrow;
     }
   }

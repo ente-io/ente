@@ -761,7 +761,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (!context.mounted) {
         return;
       }
-      await showGenericErrorDialog(
+      await showGenericErrorBottomSheet(
         context: context,
         error: e,
       );
