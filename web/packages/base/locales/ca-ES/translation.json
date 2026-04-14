@@ -834,9 +834,6 @@
     "confirm_pin": "Confirma el teu PIN",
     "confirm": "Confirma",
     "incorrect_pin_or_password": "PIN o contrasenya incorrectes",
-    "too_many_attempts": "Massa intents.",
-    "try_again_in": "Torna-ho a provar d'aquí a {{time}}.",
-    "too_many_wrong_attempts": "Massa intents erronis. Si us plau, tanca la sessió i torna-la a iniciar.",
     "app_lock_disable_confirm": "Estàs segur que vols desactivar el bloqueig de l'aplicació?",
     "lock_type": "Tipus de bloqueig",
     "auto_lock": "Bloqueig automàtic",
@@ -848,7 +845,6 @@
     "app_lock_confirm_password": "Confirma la contrasenya de bloqueig de l'aplicació",
     "app_lock_set_password": "Estableix la contrasenya de bloqueig de l'aplicació",
     "app_lock_password_mismatch": "Les contrasenyes de bloqueig de l'aplicació no coincideixen",
-    "app_lock_incorrect": "PIN o contrasenya de bloqueig de l'aplicació incorrectes",
     "app_lock_enter_pin_to_unlock": "Introdueix el PIN de bloqueig de l'aplicació per desbloquejar.",
     "app_lock_pin_digit_label": "Dígit del PIN {{index}}",
     "app_lock_please_try_again_in": "Massa intents, si us plau, torna-ho a provar d'aquí a",
@@ -871,7 +867,5 @@
     "auto_lock_5_minutes": "5 minuts",
     "auto_lock_30_minutes": "30 minuts",
     "wrong_unlock_code_one": "Has introduït un codi de desbloqueig incorrecte {{count}} vegada.",
-    "wrong_unlock_code_other": "Has introduït un codi de desbloqueig incorrecte {{count}} vegades.",
-    "one_more_wrong_attempt_logout": "Un intent incorrecte més tancarà la teva sessió.",
-    "next_wrong_attempt_wait": "Hauràs d'esperar {{time}} si aquest intent és incorrecte."
+    "wrong_unlock_code_other": "Has introduït un codi de desbloqueig incorrecte {{count}} vegades."
 }
