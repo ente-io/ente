@@ -100,6 +100,16 @@ Photos automatically move to Uncategorized in these situations:
 
 **Note**: Photos uploaded by others (from shared albums) do not go to Uncategorized when removed.
 
+### How do I bring my local album structure into Ente? {#import-local-album-structure}
+
+If your photos ended up in Uncategorized instead of their original albums (for example, because they were detected as duplicates during backup), you can reorganize them manually:
+
+1. Open **On device**, go to an album, select all photos, and add them to the corresponding album in Ente.
+2. Repeat for each album.
+3. Open Uncategorized, tap the three dots menu, and select **Clean up Uncategorized**. This removes any photos from Uncategorized that now exist in another album.
+
+Alternatively, if you have the original photos on your computer, you can delete them from Uncategorized and re-upload them using the desktop app's [Watch folders](/photos/features/backup-and-sync/watch-folders) feature with **Separate albums** mode. This creates one Ente album per subfolder automatically.
+
 ### How do I clean up Uncategorized items? {#clean-uncategorized}
 
 **On mobile:**

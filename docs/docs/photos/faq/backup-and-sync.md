@@ -355,6 +355,25 @@ Watch folders allow the Ente desktop app to automatically monitor specific direc
 
 Learn more in the [Watch folders feature guide](/photos/features/backup-and-sync/watch-folders).
 
+### Does Ente keep my phone and PC folders in sync with each other? {#folder-sync-phone-pc}
+
+Ente backs up photos from your phone and computer to Ente's servers, making them available across all your Ente apps. However, Ente is not a two-way folder sync service — it won't automatically mirror a folder on your PC and your phone's local storage with each other.
+
+- **On mobile**: Your photos remain in your device photo library. Ente backs up the albums you select.
+- **On desktop**: Your photos remain in the folder you chose to watch. The desktop app uploads them to Ente using Watch folders.
+
+Once uploaded, your library is accessible across all your devices through Ente.
+
+### Can Ente create albums automatically from my folder structure? {#albums-from-folder-structure}
+
+Yes. When you add a parent folder in Watch folders and choose **Separate albums**, each subfolder is created as its own Ente album.
+
+For example, if you have a `Photos` folder containing `Trip A` and `Trip B` subfolders, watching `Photos` in Separate albums mode creates two albums called "Trip A" and "Trip B".
+
+> **Note**: Ente albums are flat, not nested. All albums appear as top-level albums regardless of how your folders are structured on disk.
+
+Learn more in the [Watch folders guide](/photos/features/backup-and-sync/watch-folders).
+
 ### What are watch folders? {#what-are-watch-folders}
 
 Watch folders is a desktop app feature that automatically syncs specific folders on your computer to Ente. Once you add a folder to watch, the app will:

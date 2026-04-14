@@ -484,6 +484,10 @@ When you add a shared photo to your own album, Ente creates a hard copy that you
 
 We understand this uses extra storage in some use cases (like family photo sharing). We're exploring reference-based solutions in the future where storage would only count if the original is deleted. See [this discussion](https://github.com/ente-io/ente/discussions/790) for more details.
 
+### Why don't photos added via a shared link appear in my feed? {#shared-link-photos-not-in-feed}
+
+Only photos added by Ente users who joined the album directly will appear in your feed. Photos added through a public link by someone without an Ente account are not shown in the feed.
+
 ### Can I remove myself from a shared album? {#leave-shared-album}
 
 Yes, if someone has shared an album with you, you can leave it at any time:
