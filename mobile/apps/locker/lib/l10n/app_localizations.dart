@@ -270,6 +270,48 @@ abstract class AppLocalizations {
   /// **'Downloading... {percentage}%'**
   String downloadingProgress(int percentage);
 
+  /// No description provided for @saveOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Save offline'**
+  String get saveOffline;
+
+  /// No description provided for @unsave.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsave'**
+  String get unsave;
+
+  /// No description provided for @savingOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving offline...'**
+  String get savingOffline;
+
+  /// Success message when files are saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file saved offline} other{{count} files saved offline}}'**
+  String filesAvailableOffline(int count);
+
+  /// Partial success message for offline save
+  ///
+  /// In en, this message translates to:
+  /// **'{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}'**
+  String filesAvailableOfflinePartial(int successCount, int failureCount);
+
+  /// Failure message when files could not be saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}'**
+  String failedToSaveFilesOffline(int count);
+
+  /// Success message when offline copies are removed
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}'**
+  String filesRemovedFromOffline(int count);
+
   /// No description provided for @downloadFailed.
   ///
   /// In en, this message translates to:
