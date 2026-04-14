@@ -7,6 +7,7 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
+import type { ExternalParsedMetadata } from "./upload-service";
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -268,6 +269,7 @@ export interface ClusteredUploadItem {
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;
+    externalParsedMetadata?: ExternalParsedMetadata;
     // TODO: Tie this to the isLivePhoto flag using a discriminated union.
     livePhotoAssets?: LivePhotoAssets;
 }
