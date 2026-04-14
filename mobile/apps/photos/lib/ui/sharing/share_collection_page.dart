@@ -2,11 +2,11 @@ import 'package:collection/collection.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/extensions/user_extension.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/api/collection/user.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/contacts/contact_identity_resolver.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -353,12 +353,13 @@ class EmailItemWidget extends StatelessWidget {
       return const SizedBox.shrink();
     } else if (collection.getSharees().length == 1) {
       final User? user = collection.getSharees().firstOrNull;
+      final resolvedName = user == null ? '' : resolveDisplayName(user);
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: user?.displayName ?? user?.email ?? '',
+              title: resolvedName,
             ),
             leadingIconWidget: UserAvatarWidget(
               collection.getSharees().first,

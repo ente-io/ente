@@ -313,7 +313,6 @@
   "verifyIDLabel": "تایید",
   "fileInfoAddDescHint": "افزودن توضیحات...",
   "editLocationTagTitle": "ویرایش مکان",
-  "familyPlanPortalTitle": "خانوادگی",
   "androidBiometricHint": "تایید هویت",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

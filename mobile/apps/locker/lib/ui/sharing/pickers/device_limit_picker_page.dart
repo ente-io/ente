@@ -1,6 +1,6 @@
-import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
+import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/components/separators.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
@@ -85,12 +85,21 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     items.clear();
     if (isCustomLimit) {
       items.add(
-        _menuItemForPicker(initialDeviceLimit),
+        _menuItemForPicker(
+          initialDeviceLimit,
+          isFirst: true,
+          isLast: publicLinkDeviceLimits.isEmpty,
+        ),
       );
     }
-    for (int deviceLimit in publicLinkDeviceLimits) {
+    for (int index = 0; index < publicLinkDeviceLimits.length; index++) {
+      final deviceLimit = publicLinkDeviceLimits[index];
       items.add(
-        _menuItemForPicker(deviceLimit),
+        _menuItemForPicker(
+          deviceLimit,
+          isFirst: !isCustomLimit && index == 0,
+          isLast: index == publicLinkDeviceLimits.length - 1,
+        ),
       );
     }
     items = addSeparators(
@@ -106,17 +115,21 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     );
   }
 
-  Widget _menuItemForPicker(int deviceLimit) {
-    return MenuItemWidget(
+  Widget _menuItemForPicker(
+    int deviceLimit, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    return MenuItemWidgetV2(
       key: ValueKey(deviceLimit),
       menuItemColor: getEnteColorScheme(context).fillFaint,
-      captionedTextWidget: CaptionedTextWidget(
+      captionedTextWidget: CaptionedTextWidgetV2(
         title: deviceLimit == 0 ? context.l10n.noDeviceLimit : "$deviceLimit",
       ),
       trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
       alignCaptionedTextToLeft: true,
-      isTopBorderRadiusRemoved: true,
-      isBottomBorderRadiusRemoved: true,
+      isTopBorderRadiusRemoved: !isFirst,
+      isBottomBorderRadiusRemoved: !isLast,
       showOnlyLoadingState: true,
       onTap: () async {
         await _updateUrlSettings(context, {
@@ -138,7 +151,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       await CollectionApiClient.instance
           .updateShareUrl(widget.collection, prop);
     } catch (e) {
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       rethrow;
     }
   }

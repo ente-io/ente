@@ -214,19 +214,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-top: 21.5px;
+        margin-top: 20.5px;
         margin-inline-start: 4px;
         margin-inline-end: 0;
         width: auto;
         min-width: 0;
         padding-inline: 0;
-        height: 20px;
+        height: 22px;
         color: rgb(255 255 255 / 0.85);
     }
 
     .pswp-ente-public-album .pswp__button--ente-logo .pswp__ente-logo-svg {
         display: block;
-        height: 15px;
+        height: 17px;
         width: auto;
     }
 }

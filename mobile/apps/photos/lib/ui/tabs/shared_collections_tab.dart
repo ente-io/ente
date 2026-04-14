@@ -21,6 +21,7 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/memory_share_service.dart";
+import "package:photos/services/photos_contacts_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
@@ -133,6 +134,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
       if (_isOnSharedTab) {
         _enableDeferredWidgetsAfterDwell();
         _enableFeedPreviewImmediately();
+        _warmContactsForSharedTab();
       } else {
         if (!_canLoadDeferredWidgets.value) {
           _debouncerForDeferringLoad.cancelDebounceTimer();
@@ -169,6 +171,27 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   void _enableFeedPreviewImmediately() {
     _enableFeedPreview("shared-tab-selected");
+  }
+
+  void _warmContactsForSharedTab() {
+    if (!flagService.enableContact ||
+        !Configuration.instance.hasConfiguredAccount() ||
+        !PhotosContactsService.instance.needsWarmup) {
+      return;
+    }
+    unawaited(_retryContactsWarmup());
+  }
+
+  Future<void> _retryContactsWarmup() async {
+    try {
+      await PhotosContactsService.instance.ensureReady();
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to warm contacts while entering shared tab",
+        e,
+        s,
+      );
+    }
   }
 
   void _enableFeedPreview(String reason) {

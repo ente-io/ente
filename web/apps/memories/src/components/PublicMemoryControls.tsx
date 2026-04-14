@@ -1,11 +1,20 @@
+/**
+ * Shared playback and progress controls for the public memories viewers.
+ * This file contains the share viewer progress bar plus the lane-specific
+ * caption, glyph, and scrubber controls used by `MemoryViewer` and
+ * `LaneMemoryViewer`.
+ */
 import { keyframes } from "@emotion/react";
 import { Box, styled } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type { LaneCaptionModel } from "../utils/lane";
 
 const MOBILE_LAYOUT_BREAKPOINT_PX = 600;
 const DESKTOP_PROGRESS_MAX_WIDTH_PX = 448;
 const MOBILE_PROGRESS_MAX_WIDTH_PX = 326;
+const MINIMAL_DESKTOP_PROGRESS_MAX_WIDTH_PX = 392;
+const MINIMAL_PROGRESS_COMPACT_BREAKPOINT_PX = 700;
+const MINIMAL_PROGRESS_COMPACT_MAX_WIDTH_PX = 352;
 
 const progressFillAnimation = keyframes`
     from { width: 0%; }
@@ -23,10 +32,9 @@ const LaneCaptionInline = styled("span")({
 
 const LaneCaptionNumber = styled("span")({
     color: "rgba(255, 255, 255, 0.9)",
-    fontFamily: "var(--font-itim), cursive",
     fontSize: "24px",
-    fontStyle: "normal",
-    fontWeight: 400,
+    fontWeight: 600,
+    letterSpacing: "-0.01em",
     lineHeight: 1.1,
     display: "inline-flex",
     minWidth: "2ch",
@@ -41,9 +49,11 @@ const LaneProgressTrack = styled("div")({
     borderRadius: "999px",
     backgroundColor: "rgba(193, 246, 235, 0.32)",
     cursor: "pointer",
+    touchAction: "none",
+    WebkitTapHighlightColor: "transparent",
     "@media (max-width: 900px)": { maxWidth: "320px" },
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        maxWidth: "248px",
+        maxWidth: "min(calc(100vw - 48px), 304px)",
     },
 });
 
@@ -67,6 +77,10 @@ const LaneProgressThumb = styled("div")({
     transform: "translate(-50%, -50%)",
 });
 
+/**
+ * Play/pause glyph used by the share viewer's playback button.
+ * Used by `MemoryViewer`.
+ */
 export const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
     if (paused) {
         return (
@@ -74,29 +88,29 @@ export const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
                 sx={{
                     width: 0,
                     height: 0,
-                    borderTop: "10px solid transparent",
-                    borderBottom: "10px solid transparent",
-                    borderLeft: "14px solid white",
-                    ml: "3px",
+                    borderTop: "12px solid transparent",
+                    borderBottom: "12px solid transparent",
+                    borderLeft: "17px solid white",
+                    ml: "4px",
                 }}
             />
         );
     }
 
     return (
-        <Box sx={{ display: "flex", gap: "6px" }}>
+        <Box sx={{ display: "flex", gap: "7px" }}>
             <Box
                 sx={{
-                    width: "6px",
-                    height: "18px",
+                    width: "7px",
+                    height: "20px",
                     borderRadius: "2px",
                     backgroundColor: "white",
                 }}
             />
             <Box
                 sx={{
-                    width: "6px",
-                    height: "18px",
+                    width: "7px",
+                    height: "20px",
                     borderRadius: "2px",
                     backgroundColor: "white",
                 }}
@@ -105,6 +119,10 @@ export const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
     );
 };
 
+/**
+ * Smaller play/pause glyph sized for the lane viewer footer controls.
+ * Used by `LaneMemoryViewer`.
+ */
 export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
     paused,
 }) => {
@@ -114,9 +132,9 @@ export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
                 sx={{
                     width: 0,
                     height: 0,
-                    borderTop: "5px solid transparent",
-                    borderBottom: "5px solid transparent",
-                    borderLeft: "8px solid white",
+                    borderTop: "6px solid transparent",
+                    borderBottom: "6px solid transparent",
+                    borderLeft: "10px solid white",
                     ml: "2px",
                 }}
             />
@@ -124,19 +142,19 @@ export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
     }
 
     return (
-        <Box sx={{ display: "flex", gap: "3px" }}>
+        <Box sx={{ display: "flex", gap: "4px" }}>
             <Box
                 sx={{
-                    width: "3px",
-                    height: "10px",
+                    width: "4px",
+                    height: "12px",
                     borderRadius: "1px",
                     backgroundColor: "white",
                 }}
             />
             <Box
                 sx={{
-                    width: "3px",
-                    height: "10px",
+                    width: "4px",
+                    height: "12px",
                     borderRadius: "1px",
                     backgroundColor: "white",
                 }}
@@ -145,6 +163,10 @@ export const LanePlaybackGlyph: React.FC<{ paused: boolean }> = ({
     );
 };
 
+/**
+ * Formats and renders the lane caption text, including the animated numeric counter state.
+ * Used by `LaneMemoryViewer`.
+ */
 export const LaneCaptionText: React.FC<{
     model: LaneCaptionModel;
     previousValue?: number;
@@ -184,16 +206,22 @@ interface LaneProgressSliderProps {
     total: number;
     current?: number;
     currentProgress?: number;
+    width?: number;
     onSeek: (index: number) => void;
     onScrubStart?: () => void;
     onScrub?: (value: number) => void;
     onScrubEnd?: (value: number) => void;
 }
 
+/**
+ * Scrubbable progress control for lane shares.
+ * Used by `LaneMemoryViewer`.
+ */
 export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
     total,
     current,
     currentProgress,
+    width,
     onSeek,
     onScrubStart,
     onScrub,
@@ -207,8 +235,13 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
         return (value / (total - 1)) * 100;
     }, [current, currentProgress, total]);
 
-    const [draggingPointerId, setDraggingPointerId] = useState<number | null>(
-        null,
+    const draggingPointerIdRef = useRef<number | null>(null);
+    const lastScrubValueRef = useRef(currentProgress ?? current ?? 0);
+
+    const isPointerDragActive = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) =>
+            event.pointerType !== "mouse" || (event.buttons & 1) === 1,
+        [],
     );
 
     const getScrubValue = useCallback(
@@ -229,47 +262,98 @@ export const LaneProgressSlider: React.FC<LaneProgressSliderProps> = ({
             if (total <= 1) {
                 return;
             }
-            setDraggingPointerId(event.pointerId);
-            event.currentTarget.setPointerCapture(event.pointerId);
+            if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+            }
+            if (event.pointerType !== "mouse") {
+                event.preventDefault();
+            }
             const value = getScrubValue(event);
+            draggingPointerIdRef.current = event.pointerId;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            lastScrubValueRef.current = value;
             onScrubStart?.();
             onScrub?.(value);
         },
         [getScrubValue, onScrub, onScrubStart, total],
     );
 
-    const handlePointerMove = useCallback(
-        (event: React.PointerEvent<HTMLDivElement>) => {
-            if (draggingPointerId !== event.pointerId) {
+    const commitScrub = useCallback(
+        (
+            event: React.PointerEvent<HTMLDivElement>,
+            value: number,
+            releasePointerCapture: boolean,
+        ) => {
+            if (draggingPointerIdRef.current !== event.pointerId) {
                 return;
             }
-            event.stopPropagation();
-            onScrub?.(getScrubValue(event));
-        },
-        [draggingPointerId, getScrubValue, onScrub],
-    );
 
-    const endScrub = useCallback(
-        (event: React.PointerEvent<HTMLDivElement>) => {
-            if (draggingPointerId !== event.pointerId) {
-                return;
-            }
             event.stopPropagation();
-            const value = getScrubValue(event);
-            event.currentTarget.releasePointerCapture(event.pointerId);
-            setDraggingPointerId(null);
+            if (event.pointerType !== "mouse") {
+                event.preventDefault();
+            }
+            lastScrubValueRef.current = value;
+            draggingPointerIdRef.current = null;
+
+            if (
+                releasePointerCapture &&
+                event.currentTarget.hasPointerCapture(event.pointerId)
+            ) {
+                event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+
             onScrubEnd?.(value);
             if (!onScrubEnd) {
                 onSeek(Math.round(value));
             }
         },
-        [draggingPointerId, getScrubValue, onScrubEnd, onSeek],
+        [onScrubEnd, onSeek],
+    );
+
+    const handlePointerMove = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            if (draggingPointerIdRef.current !== event.pointerId) {
+                return;
+            }
+
+            const value = getScrubValue(event);
+            if (!isPointerDragActive(event)) {
+                commitScrub(event, value, true);
+                return;
+            }
+
+            event.stopPropagation();
+            if (event.pointerType !== "mouse") {
+                event.preventDefault();
+            }
+            lastScrubValueRef.current = value;
+            onScrub?.(value);
+        },
+        [commitScrub, getScrubValue, isPointerDragActive, onScrub],
+    );
+
+    const endScrub = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            commitScrub(event, getScrubValue(event), true);
+        },
+        [commitScrub, getScrubValue],
+    );
+
+    const handleLostPointerCapture = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            commitScrub(event, lastScrubValueRef.current, false);
+        },
+        [commitScrub],
     );
 
     return (
         <LaneProgressTrack
             data-memory-control="true"
+            style={{
+                maxWidth: typeof width === "number" ? `${width}px` : undefined,
+            }}
             onPointerDown={handlePointerDown}
+            onLostPointerCapture={handleLostPointerCapture}
             onPointerMove={handlePointerMove}
             onPointerUp={endScrub}
             onPointerCancel={endScrub}
@@ -288,8 +372,13 @@ interface ProgressIndicatorProps {
     onComplete: () => void;
     isVideo?: boolean;
     compact?: boolean;
+    minimal?: boolean;
 }
 
+/**
+ * Segmented autoplay progress bar for the share viewer header.
+ * Used by `MemoryViewer`.
+ */
 export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     total,
     current,
@@ -298,12 +387,17 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     onComplete,
     isVideo,
     compact,
+    minimal,
 }) => {
     const segments = useMemo(
         () => Array.from({ length: total }, (_, i) => i),
         [total],
     );
-    const progressGap = total > 15 ? "4px" : "12px";
+    const progressGap = total > 15 ? "4px" : minimal ? "8px" : "12px";
+    const progressHeight = minimal ? "2px" : "4px";
+    const compactMinimalProgressGap = total > 15 ? "3px" : "6px";
+    const progressTrackOpacity = minimal ? 0.24 : 0.45;
+    const progressFillColor = minimal ? "rgba(255, 255, 255, 0.78)" : "white";
 
     return (
         <Box
@@ -314,9 +408,19 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                 width: "100%",
                 maxWidth: compact
                     ? `${MOBILE_PROGRESS_MAX_WIDTH_PX}px`
-                    : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
+                    : minimal
+                      ? `${MINIMAL_DESKTOP_PROGRESS_MAX_WIDTH_PX}px`
+                      : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
                 minWidth: 0,
-                height: "4px",
+                height: progressHeight,
+                ...(minimal && {
+                    [`@media (max-width: ${MINIMAL_PROGRESS_COMPACT_BREAKPOINT_PX}px)`]:
+                        {
+                            gap: compactMinimalProgressGap,
+                            maxWidth: `${MINIMAL_PROGRESS_COMPACT_MAX_WIDTH_PX}px`,
+                            height: "1.5px",
+                        },
+                }),
             }}
         >
             {segments.map((i) => (
@@ -335,6 +439,10 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                     }
                     paused={paused}
                     duration={duration}
+                    height={progressHeight}
+                    minimal={minimal}
+                    trackOpacity={progressTrackOpacity}
+                    fillColor={progressFillColor}
                     onComplete={
                         i === current && !isVideo ? onComplete : undefined
                     }
@@ -348,13 +456,25 @@ interface ProgressBarProps {
     state: "past" | "active" | "future";
     paused: boolean;
     duration: number;
+    height: string;
+    minimal?: boolean;
+    trackOpacity: number;
+    fillColor: string;
     onComplete?: () => void;
 }
 
+/**
+ * Single progress segment used to build `ProgressIndicator`.
+ * Used only within `PublicMemoryControls.tsx`.
+ */
 const ProgressBar: React.FC<ProgressBarProps> = ({
     state,
     paused,
     duration,
+    height,
+    minimal,
+    trackOpacity,
+    fillColor,
     onComplete,
 }) => {
     return (
@@ -363,10 +483,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 position: "relative",
                 flex: 1,
                 minWidth: 0,
-                height: "4px",
-                borderRadius: "14px",
-                backgroundColor: "rgba(255, 255, 255, 0.45)",
+                height,
+                borderRadius: "999px",
+                backgroundColor: `rgba(255, 255, 255, ${trackOpacity})`,
                 overflow: "hidden",
+                ...(minimal && {
+                    [`@media (max-width: ${MINIMAL_PROGRESS_COMPACT_BREAKPOINT_PX}px)`]:
+                        { height: "1.5px" },
+                }),
             }}
         >
             <Box
@@ -381,8 +505,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                     top: 0,
                     left: 0,
                     height: "100%",
-                    borderRadius: "14px",
-                    backgroundColor: "white",
+                    borderRadius: "999px",
+                    backgroundColor: fillColor,
                     width:
                         state === "past"
                             ? "100%"

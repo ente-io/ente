@@ -1135,12 +1135,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         if (!mounted) {
           return;
         }
-        if (collectionCnt > 2 && showUIFeedback) {
-          progress++;
-          // calculate progress percentage upto 2 decimal places
-          final double percentage = (progress / collectionCnt) * 100;
-          _deleteProgress.value = '${percentage.toStringAsFixed(1)}%';
-        }
         // Check permission before attempting to add symlinks
         final collection =
             CollectionsService.instance.getCollectionByID(collectionID);
@@ -1153,6 +1147,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           _logger.warning(
             "Skipping adding symlinks to collection $collectionID due to missing permissions (${collection?.canAutoAdd(userID!) ?? false}) or collection not found. (${collection == null})",
           );
+        }
+        if (collectionCnt > 2 && showUIFeedback) {
+          progress++;
+          final int percentage = ((progress * 100) / collectionCnt).round();
+          _deleteProgress.value = '$percentage%';
         }
       }
     }

@@ -361,7 +361,8 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      if (flagService.syncRecoveryDiagnostics && allFiles.length != files.length) {
+      if (flagService.syncRecoveryDiagnostics &&
+          allFiles.length != files.length) {
         final sampleLocalIDs =
             allFiles.take(3).map((file) => file.localID).toList();
         _logger.info(

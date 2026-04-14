@@ -4,7 +4,7 @@ version = "0.0.1"
 edition = "2024"
 
 [dependencies]
-reqwest = { version = "0.12", default-features = false, features = ["http2", "charset", "system-proxy", "json", "rustls-tls-native-roots"] }
+reqwest = { version = "0.12", default-features = false, features = ["http2", "charset", "system-proxy", "json", "rustls-tls-native-roots", "rustls-tls-webpki-roots"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
@@ -40,6 +40,7 @@ zeroize = { version = "1.8", features = ["derive"] }
 [dev-dependencies]
 chacha20 = "0.9.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+mockito = "1.6"
 
 # Keep SRP deps available for unit tests (the SRP module is compiled under cfg(test))
 srp = "0.6"

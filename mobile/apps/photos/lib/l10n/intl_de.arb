@@ -321,8 +321,12 @@
   "verificationId": "Verifizierungs-ID",
   "verifyEmailID": "Verifiziere {email}",
   "emailNoEnteAccount": "{email} hat kein Ente-Konto.\n\nSende eine Einladung, um Fotos zu teilen.",
+  "shareMyVerificationID": "Hier ist meine Verifizierungs-ID: {verificationID} für ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, kannst du bestätigen, dass dies deine ente.com Verifizierungs-ID ist: {verificationID}",
   "somethingWentWrong": "Irgendetwas ging schief",
   "sendInvite": "Einladung senden",
+  "shareTextRecommendUsingEnte": "Hol dir Ente, damit wir ganz einfach Fotos und Videos in Originalqualität teilen können\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Lade Ente herunter, damit ich dich zu meinem Familientarif hinzufügen kann\n\nhttps://ente.com",
   "done": "Fertig",
   "applyCodeTitle": "Code nutzen",
   "enterCodeDescription": "Gib den Code deines Freundes ein, damit sie beide kostenlosen Speicherplatz erhalten",
@@ -350,6 +354,7 @@
   "theyAlsoGetXGb": "Diese erhalten auch {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB für sie oder ihn + {storageAmountInGB} GB für dich, wenn ein Upgrade durchgeführt wird.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB jedes Mal, wenn sich jemand mit deinem Code für einen bezahlten Tarif anmeldet",
+  "shareTextReferralCode": "Ente Fotos ist ein privates und sicheres Zuhause für deine Fotos\n* Lade Ente Fotos von https://ente.com/app herunter\n* Erstelle ein Konto\n* Wende den Empfehlungscode {referralCode} an unter Einstellungen->Weiterempfehlungen\n* Erhalte {referralStorageInGB} GB kostenlos, wenn, du auf einen kostenpflichtigen Tarif upgradest",
   "claimFreeStorage": "Freien Speicher einlösen",
   "inviteYourFriends": "Lade deine Freunde ein",
   "earnFreeStorage": "Kostenlosen Speicherplatz verdienen",
@@ -1101,7 +1106,7 @@
   "unarchive": "Dearchivieren",
   "favorite": "Favorit",
   "removeFromFavorite": "Aus Favoriten entfernen",
-  "shareMemory": "Erinnerung teilen",
+  "shareMemories": "Erinnerungen teilen",
   "shareTheseMemories": "Diese Erinnerungen teilen",
   "shareThisPhoto": "Dieses Foto teilen",
   "shareThisVideo": "Dieses Video teilen",
@@ -1531,8 +1536,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radius festlegen",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Füge kostenlos 5 Familienmitglieder zu deinem bestehenden Abo hinzu.\n\nJedes Mitglied bekommt seinen eigenen privaten Bereich und kann die Dateien der anderen nur sehen, wenn sie geteilt werden.\n\nFamilien-Abos stehen Nutzern mit einem Bezahltarif zur Verfügung.\n\nMelde dich jetzt an, um loszulegen!",
   "androidBiometricHint": "Identität verifizieren",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -2617,7 +2620,7 @@
   "artisticPortraits": "Kunstvolle Porträts",
   "streetFood": "Streetfood-Happen",
   "riverCruises": "Flusskreuzfahrt-Ausblicke",
-  "facesTimelineBannerTitle": "Erinnerungen",
+  "facesTimelineBannerTitle": "Reise in die Vergangenheit",
   "@facesTimelineBannerTitle": {
     "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },

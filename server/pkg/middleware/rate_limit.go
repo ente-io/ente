@@ -25,7 +25,7 @@ type RateLimitMiddleware struct {
 	reset             time.Duration
 	ticker            *time.Ticker
 	limit10ReqPerMin  *limiter.Limiter
-	limit150ReqPerMin *limiter.Limiter
+	limit250ReqPerMin *limiter.Limiter
 	limit300ReqPerMin *limiter.Limiter
 	limit200ReqPerMin *limiter.Limiter
 	limit200ReqPerSec *limiter.Limiter
@@ -35,7 +35,7 @@ type RateLimitMiddleware struct {
 func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
 	rl := &RateLimitMiddleware{
 		limit10ReqPerMin:  util.NewRateLimiter("10-M"),
-		limit150ReqPerMin: util.NewRateLimiter("150-M"),
+		limit250ReqPerMin: util.NewRateLimiter("250-M"),
 		limit300ReqPerMin: util.NewRateLimiter("300-M"),
 		limit200ReqPerMin: util.NewRateLimiter("200-M"),
 		limit200ReqPerSec: util.NewRateLimiter("200-S"),
@@ -227,7 +227,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		return r.limit200ReqPerMin
 	}
 	if isPublicCollectionUploadURLPath(reqPath) {
-		return r.limit150ReqPerMin
+		return r.limit250ReqPerMin
 	}
 	return nil
 }

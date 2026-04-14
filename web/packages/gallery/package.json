@@ -8,6 +8,7 @@
         "@hugeicons/react": "^1.1.4",
         "bs58": "^6.0.0",
         "ente-base": "*",
+        "ente-contacts-web": "*",
         "ente-utils": "*",
         "exifreader": "^4.32.0",
         "hls-video-element": "^1.5.8",

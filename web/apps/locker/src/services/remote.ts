@@ -136,11 +136,21 @@ const decodeUTF8B64 = (b64: string) => utf8Decoder.decode(b64ToBytes(b64));
 const generateBase62Secret = (length: number) => {
     const charset =
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    const randomValues = crypto.getRandomValues(new Uint8Array(length));
-    return Array.from(
-        randomValues,
-        (value) => charset[value % charset.length]!,
-    ).join("");
+    const charsetLength = charset.length;
+    const maxUnbiasedValue = 256 - (256 % charsetLength);
+    let secret = "";
+
+    while (secret.length < length) {
+        const randomValues = crypto.getRandomValues(
+            new Uint8Array(length - secret.length),
+        );
+        for (const value of randomValues) {
+            if (value >= maxUnbiasedValue) continue;
+            secret += charset[value % charsetLength]!;
+        }
+    }
+
+    return secret;
 };
 
 const prepareFileLinkSecretPayload = async (fileKey: string) => {

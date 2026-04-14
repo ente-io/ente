@@ -36,6 +36,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
@@ -48,6 +49,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
@@ -332,6 +334,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         setState(() {});
       }
     });
+    if (!isOfflineMode && Configuration.instance.hasConfiguredAccount()) {
+      MemoryShareService.instance.listMemoryShares().ignore();
+    }
   }
 
   Future<void> syncWidget() async {
@@ -500,6 +505,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 sharedFiles,
                 0,
                 "sharedPublicCollection",
+                galleryType: GalleryType.sharedPublicCollection,
               ),
             ),
           );
@@ -1124,11 +1130,11 @@ class _HomeWidgetState extends State<HomeWidget> {
           );
         },
       );
+      // Do not show change dialog again
+      await updateService.hideChangeLog();
     } finally {
       _isShowingChangeLog = false;
     }
-    // Do not show change dialog again
-    updateService.hideChangeLog().ignore();
   }
 
   void _onDidReceiveNotificationResponse(

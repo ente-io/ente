@@ -82,7 +82,7 @@ export const EmbedFileListWithViewer: React.FC<
                             component="a"
                             href="https://ente.com"
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="noopener"
                             sx={{
                                 transition: "color 0.2s ease",
                                 color: "inherit",

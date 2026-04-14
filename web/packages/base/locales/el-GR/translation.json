@@ -242,7 +242,7 @@
     "leave": "Αποχώρηση",
     "leave_family_plan_confirm": "Θέλετε σίγουρα να αποχωρήσετε από το οικογενειακό πρόγραμμα;",
     "choose_plan": "Επιλέξτε το πρόγραμμά σας",
-    "manage_plan": "Διαχειριστείτε τη συνδρομή σας",
+    "manage_plan": "",
     "current_usage": "Η τρέχουσα χρήση είναι <strong>{{usage}}</strong>",
     "two_months_free": "Αποκτήστε 2 μήνες δωρεάν στα ετήσια προγράμματα",
     "free_plan_option": "Συνέχεια με το δωρεάν πρόγραμμα",
@@ -834,9 +834,6 @@
     "confirm_pin": "",
     "confirm": "",
     "incorrect_pin_or_password": "",
-    "too_many_attempts": "",
-    "try_again_in": "",
-    "too_many_wrong_attempts": "",
     "app_lock_disable_confirm": "",
     "lock_type": "",
     "auto_lock": "",
@@ -848,7 +845,6 @@
     "app_lock_confirm_password": "",
     "app_lock_set_password": "",
     "app_lock_password_mismatch": "",
-    "app_lock_incorrect": "",
     "app_lock_enter_pin_to_unlock": "",
     "app_lock_pin_digit_label": "",
     "app_lock_please_try_again_in": "",
@@ -871,7 +867,5 @@
     "auto_lock_5_minutes": "",
     "auto_lock_30_minutes": "",
     "wrong_unlock_code_one": "",
-    "wrong_unlock_code_other": "",
-    "one_more_wrong_attempt_logout": "",
-    "next_wrong_attempt_wait": ""
+    "wrong_unlock_code_other": ""
 }

@@ -282,7 +282,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                             <Link
                                                 href="https://web.ente.io"
                                                 target="_blank"
-                                                rel="noreferrer"
+                                                rel="noopener"
                                                 underline="always"
                                                 sx={{
                                                     color: "critical.main",

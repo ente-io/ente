@@ -43,3 +43,7 @@ disable screenshots on Android).
 
 - [Account overview](/photos/features/account/)
 - [Passkeys](/photos/features/account/passkeys)
+
+## Related FAQs
+
+- [Can I use app lock to protect Ente Photos?](/photos/faq/security-and-privacy#app-lock)

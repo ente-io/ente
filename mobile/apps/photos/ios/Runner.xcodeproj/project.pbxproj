@@ -1043,6 +1043,11 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 0.0.11;
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"-Wl,-needed_framework,cupertino_http",
+					"-Wl,-needed_framework,objective_c",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1345,6 +1350,11 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 0.0.11;
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"-Wl,-needed_framework,cupertino_http",
+					"-Wl,-needed_framework,objective_c",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1388,6 +1398,11 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 0.0.11;
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"-Wl,-needed_framework,cupertino_http",
+					"-Wl,-needed_framework,objective_c",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

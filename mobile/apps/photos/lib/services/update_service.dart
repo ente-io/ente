@@ -22,7 +22,7 @@ enum ChangeLogAction {
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 47;
+  static const currentChangeLogVersion = 48;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -37,7 +37,13 @@ class UpdateService {
 
   Future<bool> shouldShowChangeLog() async {
     // fetch the change log version which was last shown to user.
-    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
+    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey);
+    if (lastShownAtVersion == null) {
+      // Fresh install: the key was never set, so the user has no previous
+      // version to show a "What's New" for. Silently mark as seen.
+      await hideChangeLog();
+      return false;
+    }
     return lastShownAtVersion < currentChangeLogVersion;
   }
 
