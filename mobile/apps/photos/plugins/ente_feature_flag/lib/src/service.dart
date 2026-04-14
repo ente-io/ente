@@ -122,6 +122,8 @@ class FlagService {
 
   bool get syncRecoveryDiagnostics => internalUser;
 
+  bool get mLHydrationStaleFileRecovery => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
