@@ -142,7 +142,7 @@ impl ContactsCtx {
 
     pub async fn create_contact(&self, data: &ContactData) -> Result<ContactRecord> {
         contacts_crypto::validate_contact_data(data)?;
-        self.ensure_root_key_available().await?;
+        self.ensure_confirmed_root_contact_key().await?;
 
         let contact_key = keys::generate_stream_key();
         let wrapped_contact_key = {
@@ -177,7 +177,7 @@ impl ContactsCtx {
             .get_json::<ContactEntityResponse>(&format!("/contacts/{contact_id}"), &[])
             .await?;
         if !response.is_deleted {
-            self.ensure_root_key_available().await?;
+            self.ensure_confirmed_root_contact_key().await?;
         }
         self.decode_contact(response)
     }
@@ -194,7 +194,7 @@ impl ContactsCtx {
             )
             .await?;
         if response.diff.iter().any(|entity| !entity.is_deleted) {
-            self.ensure_root_key_available().await?;
+            self.ensure_confirmed_root_contact_key().await?;
         }
 
         response
@@ -210,7 +210,7 @@ impl ContactsCtx {
         data: &ContactData,
     ) -> Result<ContactRecord> {
         contacts_crypto::validate_contact_data(data)?;
-        self.ensure_root_key_available().await?;
+        self.ensure_confirmed_root_contact_key().await?;
 
         let current = self
             .http
@@ -259,7 +259,7 @@ impl ContactsCtx {
         attachment_type: AttachmentType,
         attachment_bytes: &[u8],
     ) -> Result<ContactRecord> {
-        self.ensure_root_key_available().await?;
+        self.ensure_confirmed_root_contact_key().await?;
 
         let current = self
             .http
@@ -345,7 +345,7 @@ impl ContactsCtx {
         if current.is_deleted || current.profile_picture_attachment_id.is_none() {
             return Err(ContactsError::ProfilePictureNotFound);
         }
-        self.ensure_root_key_available().await?;
+        self.ensure_confirmed_root_contact_key().await?;
 
         let encrypted_key = current
             .encrypted_key
@@ -375,6 +375,7 @@ impl ContactsCtx {
         contact_id: &str,
         attachment_type: AttachmentType,
     ) -> Result<ContactRecord> {
+        self.ensure_confirmed_root_contact_key().await?;
         let response = self
             .http
             .delete_json::<ContactEntityResponse>(
@@ -687,7 +688,7 @@ impl ContactsCtx {
         })
     }
 
-    async fn ensure_root_key_available(&self) -> Result<()> {
+    async fn ensure_confirmed_root_contact_key(&self) -> Result<()> {
         if self
             .root_contact_key
             .read()

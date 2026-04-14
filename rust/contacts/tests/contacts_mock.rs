@@ -411,6 +411,64 @@ async fn get_profile_picture_uses_signed_download_url() {
 }
 
 #[tokio::test]
+async fn delete_profile_picture_fetches_root_key_when_unresolved_context_decodes_live_response() {
+    let mut server = Server::new_async().await;
+    let master_key = keys::generate_key();
+    let root_key = keys::generate_key();
+    let wrapped_root = wrap_root(&root_key, &master_key);
+    let contact = sample_contact();
+
+    let root_mock = server
+        .mock("GET", "/user-entity/key")
+        .match_query(Matcher::UrlEncoded("type".into(), "contact".into()))
+        .with_status(200)
+        .with_body(
+            serde_json::json!({
+                "userID": 7,
+                "type": "contact",
+                "encryptedKey": wrapped_root.encrypted_key,
+                "header": wrapped_root.header,
+                "createdAt": 1
+            })
+            .to_string(),
+        )
+        .expect(1)
+        .create_async()
+        .await;
+
+    let deleted_attachment_entity = live_entity_json(
+        "ct_picture1",
+        &contact,
+        Some("b@test.test"),
+        &root_key,
+        None,
+    );
+
+    let delete_mock = server
+        .mock(
+            "DELETE",
+            "/contacts/ct_picture1/attachments/profile_picture",
+        )
+        .with_status(200)
+        .with_body(deleted_attachment_entity.to_string())
+        .expect(1)
+        .create_async()
+        .await;
+
+    let ctx = ContactsCtx::open(open_input(server.url(), master_key))
+        .await
+        .unwrap()
+        .ctx;
+
+    let updated = ctx.delete_profile_picture("ct_picture1").await.unwrap();
+
+    root_mock.assert_async().await;
+    delete_mock.assert_async().await;
+    assert_eq!(updated.id, "ct_picture1");
+    assert_eq!(updated.profile_picture_attachment_id, None);
+}
+
+#[tokio::test]
 async fn get_attachment_uses_generic_signed_download_url() {
     let mut server = Server::new_async().await;
     let master_key = keys::generate_key();
