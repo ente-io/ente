@@ -207,21 +207,24 @@ class RemoteSyncService {
       _existingSync = null;
       _logger.warning("Error executing remote sync", e, s);
 
-      if (flagService.internalUser ||
-          // rethrow whitelisted error so that UI status can be updated correctly.
-          {
-            UnauthorizedError,
-            NoActiveSubscriptionError,
-            WiFiUnavailableError,
-            StorageLimitExceededError,
-            SyncStopRequestedError,
-            NoMediaLocationAccessError,
-          }.contains(e.runtimeType)) {
+      if (flagService.internalUser || _shouldRethrowSyncError(e)) {
         rethrow;
       }
     } finally {
       _isExistingSyncSilent = false;
     }
+  }
+
+  bool _shouldRethrowSyncError(Object error) {
+    // Rethrow whitelisted errors so that SyncService can emit the
+    // corresponding user-visible status updates.
+    return error is UnauthorizedError ||
+        error is NoActiveSubscriptionError ||
+        error is WiFiUnavailableError ||
+        error is StorageLimitExceededError ||
+        error is SyncStopRequestedError ||
+        error is NoMediaLocationAccessError ||
+        error is LocalDeviceStorageFullError;
   }
 
   bool isFirstRemoteSyncDone() {

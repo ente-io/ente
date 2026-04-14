@@ -269,7 +269,7 @@ class SyncService {
     if ((now - lastNotificationShownTime) > microSecondsInDay) {
       await _prefs.setInt(kLastLocalStorageFullNotificationPushTime, now);
       final s = await LanguageService.locals;
-      NotificationService.instance.showNotification(
+      await NotificationService.instance.showNotification(
         s.freeUpDeviceSpace,
         "Backup paused because device storage is full.",
       );
