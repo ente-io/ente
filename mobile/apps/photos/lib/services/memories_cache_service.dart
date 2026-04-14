@@ -56,6 +56,7 @@ class MemoriesCacheService {
       isOfflineMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
 
   List<SmartMemory>? _cachedMemories;
+  List<SmartMemory>? get currentMemoriesSync => _cachedMemories;
   bool _shouldUpdate = false;
 
   bool _isUpdatingMemories = false;

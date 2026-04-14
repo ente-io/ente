@@ -76,6 +76,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   Widget _memories() {
     return FutureBuilder<List<SmartMemory>>(
+      initialData: memoriesCacheService.currentMemoriesSync,
       future: memoriesCacheService.getMemories(),
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData) {
@@ -83,6 +84,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         } else {
           if (snapshot.data!.isEmpty) return const SizedBox.shrink();
           return Column(
+            key: ValueKey(identityHashCode(snapshot.data)),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(
