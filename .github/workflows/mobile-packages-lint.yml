@@ -8,7 +8,7 @@ on:
             - "mobile/apps/*/pubspec.yaml"
             - "rust/photos/**"
             - ".github/workflows/mobile-packages-lint.yml"
-            - ".github/scripts/check_mobile_pubspec_constraints.py"
+            - "mobile/scripts/check_frozen_pubspecs.rb"
             - "mobile/analysis_options.yaml"
     # Allow manual trigger for testing
     workflow_dispatch:
@@ -96,24 +96,9 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
 
-            - name: Check changed mobile pubspec constraints
-              run: |
-                  FILES=$(git diff --name-only \
-                    "${{ github.event.pull_request.base.sha }}" \
-                    "${{ github.event.pull_request.head.sha }}" \
-                    -- 'mobile/apps/*/pubspec.yaml' 'mobile/packages/*/pubspec.yaml')
-
-                  if [ -z "$FILES" ]; then
-                    echo "No mobile pubspec changes to validate."
-                    exit 0
-                  fi
-
-                  python3 .github/scripts/check_mobile_pubspec_constraints.py \
-                    "${{ github.event.pull_request.base.sha }}" \
-                    $FILES
+            - name: Verify frozen mobile pubspecs
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile
 
     packages-lint:
         needs: detect-changes
