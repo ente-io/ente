@@ -10,6 +10,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 WORKDIR /build
 COPY web/ ./web
 COPY rust/core ./rust/core
+COPY rust/contacts ./rust/contacts
 
 WORKDIR /build/web
 
