@@ -5,19 +5,11 @@ import 'package:flutter/material.dart';
 /// including background, text, fill, stroke, and accent colors for both light
 /// and dark themes.
 ///
-/// Apps can easily customize the primary colors using the factory constructors:
+/// Start from [lightScheme] or [darkScheme] and use [copyWith] to customize
+/// primary colors per app:
 ///
 /// ```dart
-/// // Create a light theme with custom primary colors
-/// final customLightScheme = EnteColorScheme.light(
-///   primary700: Color(0xFF1976D2),
-///   primary500: Color(0xFF2196F3),
-///   primary400: Color(0xFF42A5F5),
-///   primary300: Color(0xFF64B5F6),
-/// );
-///
-/// // Create a dark theme with custom primary colors
-/// final customDarkScheme = EnteColorScheme.dark(
+/// final customLightScheme = lightScheme.copyWith(
 ///   primary700: Color(0xFF1976D2),
 ///   primary500: Color(0xFF2196F3),
 ///   primary400: Color(0xFF42A5F5),
@@ -54,23 +46,16 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
         ),
     };
 
-    return brightness == Brightness.light
-        ? EnteColorScheme.light(
-            primary700: appColors.primary700,
-            primary500: appColors.primary500,
-            primary400: appColors.primary400,
-            primary300: appColors.primary300,
-            gradientButtonBgColor: appColors.gradientButtonBgColor,
-            gradientButtonBgColors: appColors.gradientButtonBgColors,
-          )
-        : EnteColorScheme.dark(
-            primary700: appColors.primary700,
-            primary500: appColors.primary500,
-            primary400: appColors.primary400,
-            primary300: appColors.primary300,
-            gradientButtonBgColor: appColors.gradientButtonBgColor,
-            gradientButtonBgColors: appColors.gradientButtonBgColors,
-          );
+    final base = brightness == Brightness.light ? lightScheme : darkScheme;
+    return base.copyWith(
+      primary700: appColors.primary700,
+      primary500: appColors.primary500,
+      primary400: appColors.primary400,
+      primary300: appColors.primary300,
+      alternativeColor: appColors.primary400,
+      gradientButtonBgColor: appColors.gradientButtonBgColor,
+      gradientButtonBgColors: appColors.gradientButtonBgColors,
+    );
   }
 
   // Background Colors
@@ -165,6 +150,35 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   final Color golden700;
   final Color golden500;
 
+  final Color fill;
+  final Color fillDark;
+  final Color fillDarker;
+  final Color fillDarkest;
+  final Color fillReverse;
+
+  final Color content;
+  final Color contentDark;
+  final Color contentDarker;
+  final Color contentLight;
+  final Color contentLighter;
+  final Color contentLightest;
+  final Color contentReverse;
+
+  final Color strokeSolid;
+  final Color strokeSolidDark;
+
+  final Color backgroundColour;
+
+  final Color greenBase;
+  final Color greenDark;
+  final Color greenDarker;
+  final Color greenLight;
+
+  final Color redBase;
+  final Color redDark;
+  final Color redDarker;
+  final Color redLight;
+
   bool get isLightTheme => backgroundBase == backgroundBaseLight;
 
   const EnteColorScheme(
@@ -196,11 +210,34 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     this.primary500,
     this.primary400,
     this.primary300,
-    this.avatarColors, {
+    this.avatarColors,
+    this.fill,
+    this.fillDark,
+    this.fillDarker,
+    this.fillDarkest,
+    this.fillReverse,
+    this.content,
+    this.contentDark,
+    this.contentDarker,
+    this.contentLight,
+    this.contentLighter,
+    this.contentLightest,
+    this.contentReverse,
+    this.strokeSolid,
+    this.strokeSolidDark,
+    this.backgroundColour,
+    this.greenBase,
+    this.greenDark,
+    this.greenDarker,
+    this.greenLight,
+    this.redBase,
+    this.redDark,
+    this.redDarker,
+    this.redLight, {
     this.warning700 = _warning700,
     this.warning800 = _warning800,
     this.warning500 = _warning500,
-    this.warning400 = _warning700,
+    this.warning400 = _warning400,
     this.caution500 = _caution500,
     this.fabForegroundColor = _defaultFabForegroundColor,
     this.fabBackgroundColor = _defaultFabBackgroundColor,
@@ -240,113 +277,6 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   });
 
   /// Factory constructor for light theme with customizable primary colors
-  factory EnteColorScheme.light({
-    Color? primary700,
-    Color? primary500,
-    Color? primary400,
-    Color? primary300,
-    Color? iconButtonColor,
-    Color? gradientButtonBgColor,
-    List<Color>? gradientButtonBgColors,
-    Color? warning700,
-    Color? warning500,
-    Color? warning400,
-    Color? warning800,
-    Color? caution500,
-  }) {
-    return EnteColorScheme(
-      backgroundBaseLight,
-      backgroundElevatedLight,
-      backgroundElevated2Light,
-      backdropBaseLight,
-      backdropMutedLight,
-      backdropFaintLight,
-      textBaseLight,
-      textMutedLight,
-      textFaintLight,
-      fillBaseLight,
-      fillBasePressedLight,
-      fillMutedLight,
-      fillFaintLight,
-      fillFaintPressedLight,
-      strokeBaseLight,
-      strokeMutedLight,
-      strokeFaintLight,
-      strokeFainterLight,
-      blurStrokeBaseLight,
-      blurStrokeFaintLight,
-      blurStrokePressedLight,
-      iconButtonColor ?? _defaultIconButtonColor,
-      gradientButtonBgColor ?? _defaultGradientButtonBgColor,
-      gradientButtonBgColors ?? _defaultGradientButtonBgColors,
-      primary700 ?? _defaultPrimary700,
-      primary500 ?? _defaultPrimary500,
-      primary400 ?? _defaultPrimary400,
-      primary300 ?? _defaultPrimary300,
-      avatarLight,
-      alternativeColor: primary400 ?? _defaultAlternativeColor,
-      warning700: warning700 ?? _warning700,
-      warning800: warning800 ?? _warning800,
-      warning500: warning500 ?? _warning500,
-      warning400: warning400 ?? _warning700,
-      caution500: caution500 ?? _caution500,
-    );
-  }
-
-  /// Factory constructor for dark theme with customizable primary colors
-  factory EnteColorScheme.dark({
-    Color? primary700,
-    Color? primary500,
-    Color? primary400,
-    Color? primary300,
-    Color? iconButtonColor,
-    Color? gradientButtonBgColor,
-    List<Color>? gradientButtonBgColors,
-    Color? warning700,
-    Color? warning500,
-    Color? warning400,
-    Color? warning800,
-    Color? caution500,
-  }) {
-    return EnteColorScheme(
-      backgroundBaseDark,
-      backgroundElevatedDark,
-      backgroundElevated2Dark,
-      backdropBaseDark,
-      backdropMutedDark,
-      backdropFaintDark,
-      textBaseDark,
-      textMutedDark,
-      textFaintDark,
-      fillBaseDark,
-      fillBasePressedDark,
-      fillMutedDark,
-      fillFaintDark,
-      fillFaintPressedDark,
-      strokeBaseDark,
-      strokeMutedDark,
-      strokeFaintDark,
-      strokeFainterDark,
-      blurStrokeBaseDark,
-      blurStrokeFaintDark,
-      blurStrokePressedDark,
-      iconButtonColor ?? _defaultIconButtonColor,
-      gradientButtonBgColor ?? _defaultGradientButtonBgColor,
-      gradientButtonBgColors ?? _defaultGradientButtonBgColors,
-      primary700 ?? _defaultPrimary700,
-      primary500 ?? _defaultPrimary500,
-      primary400 ?? _defaultPrimary400,
-      primary300 ?? _defaultPrimary300,
-      avatarDark,
-      alternativeColor: primary400 ?? _defaultAlternativeColor,
-      warning700: warning700 ?? _warning700,
-      warning800: warning800 ?? _warning800,
-      warning500: warning500 ?? _warning500,
-      warning400: warning400 ?? _warning700,
-      caution500: caution500 ?? _caution500,
-    );
-  }
-
   get inverseEnteTheme => null;
 
   @override
@@ -417,6 +347,29 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     Color? codeCardBackgroundColor,
     Color? primaryColor,
     List<Color>? avatarColors,
+    Color? fill,
+    Color? fillDark,
+    Color? fillDarker,
+    Color? fillDarkest,
+    Color? fillReverse,
+    Color? content,
+    Color? contentDark,
+    Color? contentDarker,
+    Color? contentLight,
+    Color? contentLighter,
+    Color? contentLightest,
+    Color? contentReverse,
+    Color? strokeSolid,
+    Color? strokeSolidDark,
+    Color? backgroundColour,
+    Color? greenBase,
+    Color? greenDark,
+    Color? greenDarker,
+    Color? greenLight,
+    Color? redBase,
+    Color? redDark,
+    Color? redDarker,
+    Color? redLight,
   }) {
     return EnteColorScheme(
       backgroundBase ?? this.backgroundBase,
@@ -448,6 +401,29 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
       primary400 ?? this.primary400,
       primary300 ?? this.primary300,
       avatarColors ?? this.avatarColors,
+      fill ?? this.fill,
+      fillDark ?? this.fillDark,
+      fillDarker ?? this.fillDarker,
+      fillDarkest ?? this.fillDarkest,
+      fillReverse ?? this.fillReverse,
+      content ?? this.content,
+      contentDark ?? this.contentDark,
+      contentDarker ?? this.contentDarker,
+      contentLight ?? this.contentLight,
+      contentLighter ?? this.contentLighter,
+      contentLightest ?? this.contentLightest,
+      contentReverse ?? this.contentReverse,
+      strokeSolid ?? this.strokeSolid,
+      strokeSolidDark ?? this.strokeSolidDark,
+      backgroundColour ?? this.backgroundColour,
+      greenBase ?? this.greenBase,
+      greenDark ?? this.greenDark,
+      greenDarker ?? this.greenDarker,
+      greenLight ?? this.greenLight,
+      redBase ?? this.redBase,
+      redDark ?? this.redDark,
+      redDarker ?? this.redDarker,
+      redLight ?? this.redLight,
       warning700: warning700 ?? this.warning700,
       warning800: warning800 ?? this.warning800,
       warning500: warning500 ?? this.warning500,
@@ -535,6 +511,29 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
       Color.lerp(primary400, other.primary400, t)!,
       Color.lerp(primary300, other.primary300, t)!,
       _lerpColorList(avatarColors, other.avatarColors, t),
+      Color.lerp(fill, other.fill, t)!,
+      Color.lerp(fillDark, other.fillDark, t)!,
+      Color.lerp(fillDarker, other.fillDarker, t)!,
+      Color.lerp(fillDarkest, other.fillDarkest, t)!,
+      Color.lerp(fillReverse, other.fillReverse, t)!,
+      Color.lerp(content, other.content, t)!,
+      Color.lerp(contentDark, other.contentDark, t)!,
+      Color.lerp(contentDarker, other.contentDarker, t)!,
+      Color.lerp(contentLight, other.contentLight, t)!,
+      Color.lerp(contentLighter, other.contentLighter, t)!,
+      Color.lerp(contentLightest, other.contentLightest, t)!,
+      Color.lerp(contentReverse, other.contentReverse, t)!,
+      Color.lerp(strokeSolid, other.strokeSolid, t)!,
+      Color.lerp(strokeSolidDark, other.strokeSolidDark, t)!,
+      Color.lerp(backgroundColour, other.backgroundColour, t)!,
+      Color.lerp(greenBase, other.greenBase, t)!,
+      Color.lerp(greenDark, other.greenDark, t)!,
+      Color.lerp(greenDarker, other.greenDarker, t)!,
+      Color.lerp(greenLight, other.greenLight, t)!,
+      Color.lerp(redBase, other.redBase, t)!,
+      Color.lerp(redDark, other.redDark, t)!,
+      Color.lerp(redDarker, other.redDarker, t)!,
+      Color.lerp(redLight, other.redLight, t)!,
       warning700: Color.lerp(warning700, other.warning700, t)!,
       warning800: Color.lerp(warning800, other.warning800, t)!,
       warning500: Color.lerp(warning500, other.warning500, t)!,
@@ -585,6 +584,29 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   _defaultPrimary400,
   _defaultPrimary300,
   avatarLight,
+  fillLight,
+  fillDarkLight,
+  fillDarkerLight,
+  fillDarkestLight,
+  fillReverseLight,
+  contentLight,
+  contentDarkLight,
+  contentDarkerLight,
+  contentLightLight,
+  contentLighterLight,
+  contentLightestLight,
+  contentReverseLight,
+  strokeLight,
+  strokeDarkLight,
+  backgroundColourLight,
+  green,
+  greenDark,
+  greenDarker,
+  greenLightLight,
+  red,
+  redDark,
+  redDarker,
+  redLightLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -617,6 +639,29 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   _defaultPrimary400,
   _defaultPrimary300,
   avatarDark,
+  fillDark,
+  fillDarkDark,
+  fillDarkerDark,
+  fillDarkestDark,
+  fillReverseDark,
+  contentDark,
+  contentDarkDark,
+  contentDarkerDark,
+  contentLightDark,
+  contentLighterDark,
+  contentLightestDark,
+  contentReverseDark,
+  strokeDark,
+  strokeDarkDark,
+  backgroundColourDark,
+  green,
+  greenDark,
+  greenDarker,
+  greenLightDark,
+  red,
+  redDark,
+  redDarker,
+  redLightDark,
 );
 
 // Background Colors
@@ -676,6 +721,69 @@ const Color blurStrokeBaseDark = Color.fromRGBO(255, 255, 255, 0.90);
 const Color blurStrokeFaintDark = Color.fromRGBO(255, 255, 255, 0.06);
 const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
+// Green Colors
+const Color green = Color.fromRGBO(8, 194, 37, 1);
+const Color greenLightLight = Color.fromRGBO(231, 246, 233, 1);
+const Color greenLightDark = Color.fromRGBO(33, 33, 33, 1);
+const Color greenDark = Color.fromRGBO(6, 157, 30, 1);
+const Color greenDarker = Color.fromRGBO(5, 124, 24, 1);
+
+// Red Colors
+const Color red = Color.fromRGBO(246, 58, 58, 1);
+const Color redLightLight = Color.fromRGBO(250, 235, 235, 1);
+const Color redLightDark = Color.fromRGBO(33, 33, 33, 1);
+const Color redDark = Color.fromRGBO(221, 52, 52, 1);
+const Color redDarker = Color.fromRGBO(197, 46, 46, 1);
+
+// Fill Colors
+const Color fillLight = Color.fromRGBO(255, 255, 255, 1);
+const Color fillDark = Color.fromRGBO(33, 33, 33, 1);
+
+const Color fillDarkLight = Color.fromRGBO(245, 245, 245, 1);
+const Color fillDarkDark = Color.fromRGBO(10, 10, 10, 1);
+
+const Color fillDarkerLight = Color.fromRGBO(233, 233, 233, 1);
+const Color fillDarkerDark = Color.fromRGBO(20, 20, 20, 1);
+
+const Color fillDarkestLight = Color.fromRGBO(210, 210, 210, 1);
+const Color fillDarkestDark = Color.fromRGBO(41, 41, 41, 1);
+
+const Color fillReverseLight = Color.fromRGBO(0, 0, 0, 1);
+const Color fillReverseDark = Color.fromRGBO(255, 255, 255, 1);
+
+// Content Colors
+const Color contentLight = Color.fromRGBO(0, 0, 0, 1);
+const Color contentDark = Color.fromRGBO(255, 255, 255, 1);
+
+const Color contentDarkLight = Color.fromRGBO(26, 26, 26, 1);
+const Color contentDarkDark = Color.fromRGBO(229, 229, 229, 1);
+
+const Color contentDarkerLight = Color.fromRGBO(21, 21, 21, 1);
+const Color contentDarkerDark = Color.fromRGBO(204, 204, 204, 1);
+
+const Color contentLightLight = Color.fromRGBO(102, 102, 102, 1);
+const Color contentLightDark = Color.fromRGBO(153, 153, 153, 1);
+
+const Color contentLighterLight = Color.fromRGBO(150, 150, 150, 1);
+const Color contentLighterDark = Color.fromRGBO(150, 150, 150, 1);
+
+const Color contentLightestLight = Color.fromRGBO(222, 222, 222, 1);
+const Color contentLightestDark = Color.fromRGBO(10, 10, 10, 1);
+
+const Color contentReverseLight = Color.fromRGBO(255, 255, 255, 1);
+const Color contentReverseDark = Color.fromRGBO(0, 0, 0, 1);
+
+// Stroke Colors
+const Color strokeLight = Color.fromRGBO(235, 235, 235, 1);
+const Color strokeDark = Color.fromRGBO(20, 20, 20, 1);
+
+const Color strokeDarkLight = Color.fromRGBO(224, 224, 224, 1);
+const Color strokeDarkDark = Color.fromRGBO(62, 62, 62, 1);
+
+// Background
+const Color backgroundColourLight = Color.fromRGBO(250, 250, 250, 1);
+const Color backgroundColourDark = Color.fromRGBO(22, 22, 22, 1);
+
 // Default Primary Colors
 const Color _defaultPrimary700 = Color.fromRGBO(0, 122, 255, 1);
 const Color _defaultPrimary500 = Color.fromRGBO(52, 152, 255, 1);
@@ -693,7 +801,7 @@ const List<Color> _defaultGradientButtonBgColors = [
 const Color _defaultIconButtonColor = Color.fromRGBO(0, 122, 255, 1);
 
 // Warning Colors
-const Color _warning700 = Color.fromRGBO(245, 52, 52, 1);
+const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning800 = Color(0xFFF53434);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
@@ -824,7 +932,7 @@ class ColorSchemeBuilder {
     // Create gradient colors from the primary color
     final gradientColors = [primary700, primary500];
 
-    final lightScheme = EnteColorScheme.light(
+    final light = lightScheme.copyWith(
       primary700: primary700,
       primary500: primary500,
       primary400: primary400,
@@ -834,7 +942,7 @@ class ColorSchemeBuilder {
       gradientButtonBgColors: gradientColors,
     );
 
-    final darkScheme = EnteColorScheme.dark(
+    final dark = darkScheme.copyWith(
       primary700: primary700,
       primary500: primary500,
       primary400: primary400,
@@ -844,7 +952,7 @@ class ColorSchemeBuilder {
       gradientButtonBgColors: gradientColors,
     );
 
-    return (light: lightScheme, dark: darkScheme);
+    return (light: light, dark: dark);
   }
 
   /// Creates light and dark color schemes with fully custom primary colors.
@@ -874,7 +982,7 @@ class ColorSchemeBuilder {
     final effectiveGradientColors =
         gradientButtonBgColors ?? [primary700, primary500];
 
-    final lightScheme = EnteColorScheme.light(
+    final light = lightScheme.copyWith(
       primary700: primary700,
       primary500: primary500,
       primary400: primary400,
@@ -884,7 +992,7 @@ class ColorSchemeBuilder {
       gradientButtonBgColors: effectiveGradientColors,
     );
 
-    final darkScheme = EnteColorScheme.dark(
+    final dark = darkScheme.copyWith(
       primary700: primary700,
       primary500: primary500,
       primary400: primary400,
@@ -894,7 +1002,7 @@ class ColorSchemeBuilder {
       gradientButtonBgColors: effectiveGradientColors,
     );
 
-    return (light: lightScheme, dark: darkScheme);
+    return (light: light, dark: dark);
   }
 }
 
