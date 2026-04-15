@@ -7,6 +7,8 @@ Current server-backed coverage in this crate:
 - a single ignored full e2e suite that reuses one owner/trusted pair and covers
   auth, contacts CRUD, and the legacy recovery lifecycle
 
+Detailed scenario coverage lives in [`COVERAGE.md`](COVERAGE.md).
+
 Preferred local runner:
 
 ```sh
