@@ -1,7 +1,7 @@
 import "package:ente_base/typedefs.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/button_widget_v2.dart";
-import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/components/text_input_widget_v2.dart";
 import "package:flutter/material.dart";
 
 class InputSheet extends StatefulWidget {
@@ -34,7 +34,6 @@ class _InputSheetState extends State<InputSheet> {
   late final TextEditingController _textController;
   bool _isSubmitting = false;
   bool _isInputValid = false;
-  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -92,63 +91,20 @@ class _InputSheetState extends State<InputSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _textController,
-          autofocus: true,
+        TextInputWidgetV2(
+          textEditingController: _textController,
+          autoFocus: true,
           textCapitalization: widget.textCapitalization,
           maxLength: widget.maxLength,
-          obscureText: widget.isPasswordInput && !_isPasswordVisible,
-          enableSuggestions: !widget.isPasswordInput,
-          autocorrect: !widget.isPasswordInput,
-          decoration: InputDecoration(
-            hintText: widget.hintText,
-            hintStyle: textTheme.body.copyWith(
-              color: colorScheme.textMuted,
-            ),
-            filled: true,
-            fillColor: colorScheme.fillFaint,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: colorScheme.strokeFaint,
-              ),
-            ),
-            suffixIcon: widget.isPasswordInput
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: colorScheme.textMuted,
-                    ),
-                  )
-                : null,
-            counterText: "",
-          ),
-          style: textTheme.body.copyWith(
-            color: colorScheme.textBase,
-          ),
-          onSubmitted: (_) => _onSubmit(),
+          hintText: widget.hintText,
+          isPasswordInput: widget.isPasswordInput,
+          autoCorrect: !widget.isPasswordInput,
+          shouldSurfaceExecutionStates: false,
+          onSubmit: (_) async => _onSubmit(),
         ),
         const SizedBox(height: 28),
         SizedBox(

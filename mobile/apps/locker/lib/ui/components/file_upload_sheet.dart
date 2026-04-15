@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:ente_ui/components/base_bottom_sheet.dart';
 import "package:ente_ui/components/buttons/button_widget_v2.dart";
-import 'package:ente_ui/components/text_input_widget.dart';
+import 'package:ente_ui/components/text_input_widget_v2.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +101,6 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
     return Column(
@@ -134,17 +133,10 @@ class _FileUploadSheetState extends State<FileUploadSheet> {
           title: context.l10n.collections,
         ),
         const SizedBox(height: 16),
-        Text(
-          context.l10n.note,
-          style: textTheme.small.copyWith(
-            color: colorScheme.textBase,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextInputWidget(
+        TextInputWidgetV2(
+          label: context.l10n.note,
           hintText: context.l10n.optionalNote,
-          initialValue: _noteController.text,
-          onChange: (value) => _noteController.text = value,
+          textEditingController: _noteController,
           maxLength: 500,
           textCapitalization: TextCapitalization.sentences,
         ),

@@ -1,7 +1,7 @@
+import 'package:ente_ui/components/text_input_widget_v2.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
-import 'package:locker/ui/components/form_text_input_widget.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class EmergencyContactPage extends BaseInfoPage<EmergencyContactData> {
@@ -26,6 +26,8 @@ class _EmergencyContactPageState
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _contactDetailsController.addListener(_onFieldChanged);
     _loadExistingData();
   }
 
@@ -46,10 +48,18 @@ class _EmergencyContactPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _contactDetailsController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _contactDetailsController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -68,6 +78,9 @@ class _EmergencyContactPageState
   }
 
   @override
+  bool get isSaveEnabled => super.isSaveEnabled && validateForm();
+
+  @override
   EmergencyContactData createInfoData() {
     return EmergencyContactData(
       name: _nameController.text.trim(),
@@ -81,38 +94,29 @@ class _EmergencyContactPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      FormTextInputWidget(
-        labelText: context.l10n.contactName,
+      TextInputWidgetV2(
+        label: context.l10n.contactName,
         hintText: context.l10n.contactNameHint,
-        controller: _nameController,
-        shouldUseTextInputWidget: false,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterContactName;
-          }
-          return null;
-        },
+        textEditingController: _nameController,
+        autoFocus: true,
+        textCapitalization: TextCapitalization.words,
       ),
       const SizedBox(height: 24),
-      FormTextInputWidget(
-        labelText: context.l10n.contactDetails,
+      TextInputWidgetV2(
+        label: context.l10n.contactDetails,
         hintText: context.l10n.contactDetailsHint,
-        controller: _contactDetailsController,
-        shouldUseTextInputWidget: false,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterContactDetails;
-          }
-          return null;
-        },
+        textEditingController: _contactDetailsController,
+        textCapitalization: TextCapitalization.sentences,
       ),
       const SizedBox(height: 24),
-      FormTextInputWidget(
-        labelText: context.l10n.contactNotes,
+      TextInputWidgetV2(
+        label: context.l10n.contactNotes,
         hintText: context.l10n.contactNotesHint,
-        controller: _notesController,
-        shouldUseTextInputWidget: false,
+        textEditingController: _notesController,
         maxLines: 3,
+        minLines: 3,
+        keyboardType: TextInputType.multiline,
+        textCapitalization: TextCapitalization.sentences,
       ),
       const SizedBox(height: 24),
     ];

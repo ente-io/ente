@@ -238,7 +238,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   }
 
   Future<void> _saveRecord() async {
-    if (!_formKey.currentState!.validate() || !validateForm()) {
+    if (!validateForm()) {
       return;
     }
 
@@ -558,7 +558,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           Text(
             label,
             style: textTheme.body,
-          ), // Use default style to match FormTextInputWidget
+          ),
           const SizedBox(height: 12),
         ],
         ClipRRect(
