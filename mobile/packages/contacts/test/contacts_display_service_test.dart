@@ -330,11 +330,11 @@ class FakeContactsRustApi implements ContactsRustApi {
     context.diffPages = List<List<ContactRecord>>.from(diffPages);
     return OpenContactsContextResult(
       ctx: context,
-      wrappedRootKey: const WrappedRootContactKey(
+      wrappedRootContactKey: const WrappedRootContactKey(
         encryptedKey: 'enc-key',
         header: 'enc-header',
       ),
-      rootKeySource: RootKeySource.created,
+      rootKeySource: RootKeySource.cache,
     );
   }
 }
@@ -372,7 +372,8 @@ class FakeContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  WrappedRootContactKey currentWrappedRootKey() => const WrappedRootContactKey(
+  WrappedRootContactKey currentWrappedRootContactKey() =>
+      const WrappedRootContactKey(
         encryptedKey: 'enc-key',
         header: 'enc-header',
       );

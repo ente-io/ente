@@ -1,4 +1,4 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -112,7 +112,7 @@ const LockerSidebarTitlebar: React.FC<LockerSidebarTitlebarProps> = ({
     <Stack sx={{ gap: "4px" }}>
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <IconButton onClick={onClose} color="primary">
-                <ArrowBackIcon />
+                <ArrowBackOutlinedIcon />
             </IconButton>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 {actionButton && actionButton}

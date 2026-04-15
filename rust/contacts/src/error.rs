@@ -1,4 +1,4 @@
-use ente_core::{crypto::CryptoError, http::Error as HttpError};
+use ente_core::{auth::AuthError, crypto::CryptoError, http::Error as HttpError};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -8,6 +8,9 @@ pub enum ContactsError {
 
     #[error(transparent)]
     Crypto(#[from] CryptoError),
+
+    #[error(transparent)]
+    Auth(#[from] AuthError),
 
     #[error("invalid input: {0}")]
     InvalidInput(String),
