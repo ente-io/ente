@@ -28,7 +28,7 @@ jobs:
                 working-directory: rust/apps/ensu/src-tauri
         steps:
             - name: Checkout code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Cache
               uses: actions/cache@v4
