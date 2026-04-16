@@ -114,7 +114,7 @@ class FlagService {
   bool get enableMLInBackground =>
       internalUser || _isInUserRollout(_rustMlRolloutPercent);
 
-  bool get useRustForFaceThumbnails => true;
+  bool get useRustForFaceThumbnails => internalUser;
 
   bool get petEnabled => internalUser;
 
