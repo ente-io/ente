@@ -74,6 +74,7 @@ export const fetchFileInfo = async (
 
     const response = await fetch(url, {
         headers: { "X-Auth-Access-Token": accessToken },
+        cache: "no-store",
     });
 
     if (!response.ok) {
