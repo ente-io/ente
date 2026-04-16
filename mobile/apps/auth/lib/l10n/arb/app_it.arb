@@ -580,7 +580,7 @@
   "addNew": "Aggiungi nuovo",
   "selected": "selezionato",
   "moveMultipleToTrashMessage": "Sei sicuro di voler spostare {count} elementi nel cestino?",
-  "nSelected": "{count, plural, =1{1 selezionato} other{{count} selezionati}}",
+  "nSelected": "{count, plural, one {{count} selezionato} other{{count} selezionati}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -591,7 +591,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1 elemento fissato} other{{count} elementi fissati}}",
+  "pinnedCount": "{count, plural, one {{count} elemento fissato} other{{count} elementi fissati}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -602,7 +602,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 elemento sganciato} other{{count} elementi sganciati}}",
+  "unpinnedCount": "{count, plural, one{{count} elemento sganciato} other{{count} elementi sganciati}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

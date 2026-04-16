@@ -577,7 +577,7 @@
   "addNew": "새로 추가",
   "selected": "선택됨",
   "moveMultipleToTrashMessage": "항목 {count}개를 휴지통으로 이동하시겠습니까?",
-  "nSelected": "{count, plural, =1{1개 선택함} other{{count}개 선택함}}",
+  "nSelected": "{count, plural, one {{count}개 선택함} other{{count}개 선택함}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -588,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1개 고정함} other{{count}개 고정함}}",
+  "pinnedCount": "{count, plural, one{{count}개 고정함} other{{count}개 고정함}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -599,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1개 고정 해제함} other{{count}개 고정 해제함}}",
+  "unpinnedCount": "{count, plural, one{{count}개 고정 해제함} other{{count}개 고정 해제함}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {
