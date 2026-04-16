@@ -14,10 +14,9 @@ import {
     type ThumbnailGridLayoutParams,
 } from "@/shared/utils/thumbnail-grid-layout";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Typography, styled } from "@mui/material";
 import { Overlay } from "ente-base/components/containers";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
@@ -238,9 +237,6 @@ export const FileList: React.FC<FileListProps> = ({
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set<string>());
-    // Show back-to-top button when scrolled past threshold
-    const [showBackToTop, setShowBackToTop] = useState(false);
-
     const listRef = useRef<VariableSizeList | null>(null);
     const outerRef = useRef<HTMLDivElement | null>(null);
 
@@ -626,13 +622,6 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, []);
 
-    const handleScroll = useCallback(
-        ({ scrollOffset }: { scrollOffset: number }) => {
-            setShowBackToTop(scrollOffset > 500);
-        },
-        [],
-    );
-
     const masonryTargetRowHeight = useMemo(
         () => preferredMasonryRowHeight(layoutParams.containerWidth),
         [layoutParams.containerWidth],
@@ -802,7 +791,6 @@ export const FileList: React.FC<FileListProps> = ({
     const handleMasonryScroll: React.UIEventHandler<HTMLDivElement> =
         useCallback((event) => {
             const scrollOffset = event.currentTarget.scrollTop;
-            setShowBackToTop(scrollOffset > 500);
             setMasonryScrollTop(scrollOffset);
             setMasonryIsScrolling(true);
             if (masonryScrollIdleTimeoutRef.current) {
@@ -894,10 +882,6 @@ export const FileList: React.FC<FileListProps> = ({
         ],
     );
 
-    const handleScrollToTop = useCallback(() => {
-        outerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }, []);
-
     if (shouldUseMasonry) {
         return (
             <Box sx={{ position: "relative", width, height }}>
@@ -948,15 +932,6 @@ export const FileList: React.FC<FileListProps> = ({
                         </Box>
                     )}
                 </Box>
-                {showBackToTop && (
-                    <BackToTopButton
-                        size="small"
-                        aria-label="scroll to top"
-                        onClick={handleScrollToTop}
-                    >
-                        <KeyboardArrowUpIcon />
-                    </BackToTopButton>
-                )}
             </Box>
         );
     }
@@ -975,19 +950,9 @@ export const FileList: React.FC<FileListProps> = ({
                 itemCount={items.length}
                 overscanCount={3}
                 useIsScrolling
-                onScroll={handleScroll}
             >
                 {FileListRow}
             </VariableSizeList>
-            {showBackToTop && (
-                <BackToTopButton
-                    size="small"
-                    aria-label="scroll to top"
-                    onClick={handleScrollToTop}
-                >
-                    <KeyboardArrowUpIcon />
-                </BackToTopButton>
-            )}
         </Box>
     );
 };
@@ -1132,20 +1097,6 @@ const NoFilesListItem = styled(FullSpanListItem)`
     min-height: 100%;
     justify-content: center;
 `;
-
-/**
- * Floating button to scroll back to the top of the file list.
- */
-const BackToTopButton = styled(Fab)(({ theme }) => ({
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    backgroundColor: theme.vars.palette.fill.faint,
-    color: theme.vars.palette.text.base,
-    boxShadow: "none",
-    "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
-    [theme.breakpoints.down("sm")]: { display: "none" },
-}));
 
 /**
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
