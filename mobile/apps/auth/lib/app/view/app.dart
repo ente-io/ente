@@ -248,7 +248,7 @@ class _AppState extends State<App>
         TerminateProcess(hProcess, 0);
       } else {
         windowManager.setPreventClose(false);
-        windowManager.destroy();
+        windowManager.destroy().then((_) => exit(0));
       }
     }
   }
