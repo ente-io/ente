@@ -166,7 +166,7 @@ class PeopleMemory extends SmartMemory {
         case PeopleMemoryType.spotlight:
           return locals.unnamedPeopleSpotlight;
         case PeopleMemoryType.lastTimeYouSawThem:
-          return locals.unnamedPeopleLastTimeYouSawThem;
+          return locals.unnamedPeopleThrowbackTogether;
       }
     }
     switch (peopleMemoryType) {
@@ -190,7 +190,7 @@ class PeopleMemory extends SmartMemory {
           }
         }
       case PeopleMemoryType.lastTimeYouSawThem:
-        return locals.lastTimeWithThem(name: personName!);
+        return locals.throwbackWithThem(name: personName!);
     }
   }
 }
