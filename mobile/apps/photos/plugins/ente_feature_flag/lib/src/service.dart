@@ -212,6 +212,6 @@ class FlagService {
     if (percent >= 100) {
       return true;
     }
-    return userId % 100 < percent;
+    return (userId % 100) < percent;
   }
 }
