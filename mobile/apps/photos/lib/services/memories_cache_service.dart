@@ -717,12 +717,6 @@ class MemoriesCacheService {
           newCache,
           mlEnabled: mlReady,
         );
-        if (nowResult.memories.isEmpty) {
-          _logger.warning(
-            "calcSmartMemories returned empty for `now`; preserving existing disk cache and deferring to next trigger",
-          );
-          return;
-        }
         final carriedForwardTripEntries = List<ToShowMemory>.from(
           newCache.toShowMemories,
         );
