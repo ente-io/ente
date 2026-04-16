@@ -270,17 +270,17 @@ abstract class AppLocalizations {
   /// **'Downloading... {percentage}%'**
   String downloadingProgress(int percentage);
 
-  /// No description provided for @saveOffline.
+  /// No description provided for @keepOffline.
   ///
   /// In en, this message translates to:
-  /// **'Save offline'**
-  String get saveOffline;
+  /// **'Keep offline'**
+  String get keepOffline;
 
-  /// No description provided for @unsave.
+  /// No description provided for @cloudOnly.
   ///
   /// In en, this message translates to:
-  /// **'Unsave'**
-  String get unsave;
+  /// **'Cloud only'**
+  String get cloudOnly;
 
   /// No description provided for @savingOffline.
   ///

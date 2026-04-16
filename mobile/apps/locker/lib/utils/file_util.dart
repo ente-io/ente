@@ -44,7 +44,7 @@ class FileUtil {
 
     final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
     if (await cachedDecryptedFile.exists()) {
-      await _launchFile(context, cachedDecryptedFile);
+      await _launchFile(context, cachedDecryptedFile, displayName: file.displayName);
       return;
     }
 
@@ -77,7 +77,7 @@ class FileUtil {
       await dialog.hide();
 
       if (decryptedFile != null) {
-        await _launchFile(context, decryptedFile);
+        await _launchFile(context, decryptedFile, displayName: file.displayName);
       } else {
         await showAlertBottomSheet(
           context,
@@ -399,10 +399,24 @@ class FileUtil {
 
   static Future<void> _launchFile(
     BuildContext context,
-    File file,
-  ) async {
+    File file, {
+    String? displayName,
+  }) async {
+    File fileToOpen = file;
+
     try {
-      final result = await OpenFile.open(file.path);
+      if (displayName != null && displayName.isNotEmpty) {
+        try {
+          final sanitizedName = _sanitizeFileName(p.basename(displayName));
+          final launchPath = p.join(file.parent.path, sanitizedName);
+          await file.copy(launchPath);
+          fileToOpen = File(launchPath);
+        } catch (e) {
+          _logger.warning("Failed to create display-name copy: $e");
+        }
+      }
+
+      final result = await OpenFile.open(fileToOpen.path);
       if (result.type != ResultType.done) {
         throw Exception(result.message);
       }

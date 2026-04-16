@@ -345,19 +345,33 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final showImportant = viewType?.showMarkImportantOption ?? true;
     final showDelete = viewType?.showDeleteOption ?? true;
 
+    final eligibleOfflineFiles =
+        OfflineFilesService.instance.getEligibleFiles(files);
+    final showOffline = viewType?.showOfflineOption ?? true;
     final actions = <Widget>[];
 
-    actions.add(
-      SelectionActionButton(
-        hugeIcon: const HugeIcon(
-          icon: HugeIcons.strokeRoundedDownload01,
+    if (showOffline && eligibleOfflineFiles.isNotEmpty) {
+      final shouldRemoveOffline = isSingleSelection &&
+          eligibleOfflineFiles.length == 1 &&
+          LockerDB.instance.isFileMarkedOffline(eligibleOfflineFiles.first);
+
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedBookmark02,
+            color: colorScheme.textBase,
+          ),
+          label: shouldRemoveOffline
+              ? context.l10n.cloudOnly
+              : context.l10n.keepOffline,
+          onTap: () => _toggleOfflineAvailability(
+            context,
+            files,
+            shouldRemoveOffline: shouldRemoveOffline,
+          ),
         ),
-        label: context.l10n.download,
-        onTap: () => isSingleSelection
-            ? _downloadFile(context, file!)
-            : _downloadMultipleFiles(context, files),
-      ),
-    );
+      );
+    }
 
     if (showImportant) {
       actions.add(
@@ -467,15 +481,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final file = isSingleSelection ? selectedFiles.first : null;
     final files = selectedFiles.toList();
     final viewType = widget.collectionViewType;
-    final colorScheme = getEnteColorScheme(context);
     final actions = <Widget>[];
-    final eligibleOfflineFiles =
-        OfflineFilesService.instance.getEligibleFiles(files);
 
     final showEdit = viewType?.showEditOption ?? true;
     final showShare = viewType?.showShareOption ?? true;
     final showAddTo = viewType?.showAddToCollectionOption ?? true;
-    final showOffline = viewType?.showOfflineOption ?? true;
 
     if (isSingleSelection && showEdit) {
       actions.add(
@@ -513,32 +523,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    if (showOffline) {
-      if (eligibleOfflineFiles.isEmpty) {
-        return actions;
-      }
-
-      final shouldRemoveOffline = isSingleSelection &&
-          eligibleOfflineFiles.length == 1 &&
-          LockerDB.instance.isFileMarkedOffline(eligibleOfflineFiles.first);
-
-      actions.add(
-        SelectionActionButton(
-          hugeIcon: HugeIcon(
-            icon: HugeIcons.strokeRoundedBookmark02,
-            color: colorScheme.textBase,
-          ),
-          label: shouldRemoveOffline
-              ? context.l10n.unsave
-              : context.l10n.saveOffline,
-          onTap: () => _toggleOfflineAvailability(
-            context,
-            files,
-            shouldRemoveOffline: shouldRemoveOffline,
-          ),
+    actions.add(
+      SelectionActionButton(
+        hugeIcon: const HugeIcon(
+          icon: HugeIcons.strokeRoundedDownload01,
         ),
-      );
-    }
+        label: context.l10n.download,
+        onTap: () => isSingleSelection
+            ? _downloadFile(context, file!)
+            : _downloadMultipleFiles(context, files),
+      ),
+    );
 
     return actions;
   }

@@ -76,10 +76,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get saveOffline => 'Save offline';
+  String get keepOffline => 'Keep offline';
 
   @override
-  String get unsave => 'Unsave';
+  String get cloudOnly => 'Cloud only';
 
   @override
   String get savingOffline => 'Saving offline...';
