@@ -159,7 +159,11 @@ export const CollectionShareView: React.FC = () => {
                     <Paper elevation={0} sx={passwordCardSx}>
                         <Typography
                             variant="h4"
-                            sx={{ fontWeight: 700, color: "text.base", mb: 1.5 }}
+                            sx={{
+                                fontWeight: 700,
+                                color: "text.base",
+                                mb: 1.5,
+                            }}
                         >
                             {passwordTitle}
                         </Typography>
