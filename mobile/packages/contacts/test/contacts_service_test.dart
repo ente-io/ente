@@ -40,6 +40,7 @@ void main() {
   });
 
   test('open persists wrapped root key and sync caches contacts', () async {
+    rustApi.rootKeySource = RootKeySource.cache;
     rustApi.diffPages = [
       [
         const ContactRecord(
@@ -82,7 +83,11 @@ void main() {
     expect(cached.single.profilePictureAttachmentId, 'att_1');
   });
 
-  test('create and profile-picture changes update local cache', () async {
+  test('open does not persist an unresolved wrapped root contact key',
+      () async {
+    rustApi.rootKeySource = RootKeySource.unresolved;
+    rustApi.openWrappedRootContactKey = null;
+
     await service.open(
       ContactsSession(
         baseUrl: 'http://localhost:8080',
@@ -92,8 +97,71 @@ void main() {
       ),
     );
 
+    expect(preferences.getString('entity_key_contact_1'), isNull);
+    expect(preferences.getString('entity_key_header_contact_1'), isNull);
+  });
+
+  test(
+      'sync persists a resolved wrapped root contact key after unresolved open',
+      () async {
+    rustApi.rootKeySource = RootKeySource.unresolved;
+    rustApi.openWrappedRootContactKey = null;
+    rustApi.diffPages = [
+      [
+        const ContactRecord(
+          id: 'ct_1',
+          contactUserId: 2,
+          email: 'b@test.test',
+          data: ContactData(contactUserId: 2, name: 'B'),
+          profilePictureAttachmentId: null,
+          isDeleted: false,
+          createdAt: 10,
+          updatedAt: 20,
+        ),
+      ],
+      const [],
+    ];
+
+    await service.open(
+      ContactsSession(
+        baseUrl: 'http://localhost:8080',
+        authToken: 'token',
+        userId: 1,
+        accountKey: Uint8List.fromList([1, 2, 3]),
+      ),
+    );
+    expect(preferences.getString('entity_key_contact_1'), isNull);
+
+    await service.sync();
+
+    expect(preferences.getString('entity_key_contact_1'), 'enc-key');
+    expect(
+      preferences.getString('entity_key_header_contact_1'),
+      'enc-header',
+    );
+  });
+
+  test('create and profile-picture changes update local cache', () async {
+    rustApi.rootKeySource = RootKeySource.unresolved;
+    rustApi.openWrappedRootContactKey = null;
+    await service.open(
+      ContactsSession(
+        baseUrl: 'http://localhost:8080',
+        authToken: 'token',
+        userId: 1,
+        accountKey: Uint8List.fromList([1, 2, 3]),
+      ),
+    );
+    expect(preferences.getString('entity_key_contact_1'), isNull);
+    expect(preferences.getString('entity_key_header_contact_1'), isNull);
+
     final created = await service.createContact(
       const ContactData(contactUserId: 2, name: 'B'),
+    );
+    expect(preferences.getString('entity_key_contact_1'), 'enc-key');
+    expect(
+      preferences.getString('entity_key_header_contact_1'),
+      'enc-header',
     );
     expect((await service.getContact(created.id))!.data!.name, 'B');
     expect((await service.getContactByUserId(2))!.id, created.id);
@@ -331,6 +399,12 @@ class FakeContactsRustApi implements ContactsRustApi {
   FakeContactsRustContext ctx = FakeContactsRustContext();
   List<List<ContactRecord>> diffPages = const [];
   Uint8List? lastAccountKey;
+  RootKeySource rootKeySource = RootKeySource.cache;
+  WrappedRootContactKey? openWrappedRootContactKey =
+      const WrappedRootContactKey(
+    encryptedKey: 'enc-key',
+    header: 'enc-header',
+  );
 
   @override
   Future<OpenContactsContextResult> open(OpenContactsContextInput input) async {
@@ -339,11 +413,8 @@ class FakeContactsRustApi implements ContactsRustApi {
     lastAccountKey = input.accountKey;
     return OpenContactsContextResult(
       ctx: ctx,
-      wrappedRootKey: const WrappedRootContactKey(
-        encryptedKey: 'enc-key',
-        header: 'enc-header',
-      ),
-      rootKeySource: RootKeySource.created,
+      wrappedRootContactKey: openWrappedRootContactKey,
+      rootKeySource: rootKeySource,
     );
   }
 }
@@ -378,7 +449,8 @@ class FakeContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  WrappedRootContactKey currentWrappedRootKey() => const WrappedRootContactKey(
+  WrappedRootContactKey currentWrappedRootContactKey() =>
+      const WrappedRootContactKey(
         encryptedKey: 'enc-key',
         header: 'enc-header',
       );

@@ -631,6 +631,7 @@ impl HttpClient {
 
     fn build_public_headers(&self) -> Result<HeaderMap, Error> {
         let mut headers = HeaderMap::new();
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(user_agent) = &self.user_agent {
             let value =
                 HeaderValue::from_str(user_agent).map_err(|e| Error::Parse(e.to_string()))?;

@@ -12,7 +12,7 @@ dependencies:
       url: https://github.com/ente-io/computer.git
       ref: 82e365fed8a1a76f6eea0220de98389eed7b0445
   convert: 3.1.2
-  crypto: 3.0.6
+  crypto: 3.0.7
   flutter:
     sdk: flutter
   flutter_sodium: 0.2.0

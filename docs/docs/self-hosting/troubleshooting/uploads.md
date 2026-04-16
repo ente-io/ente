@@ -45,3 +45,15 @@ The "Mismatch in file size" error mostly occurs in a situation where the client
 is re-uploading a file which is already in the bucket with a different file
 size. The reason for re-upload could be anything including network issue, sudden
 killing of app before the upload is complete and etc.
+
+## Uploads from mobile or another device time out
+
+If uploads from the web app on the same machine work, but uploads from the
+mobile app or another device on your LAN silently fail, and museum logs
+`OBJECT_SIZE_FETCH_FAILED: dial tcp …: i/o timeout`, your bucket `endpoint` is
+set to an address only the server can reach (typically `localhost:3200` from
+the quickstart).
+
+Change `endpoint` in `museum.yaml` to an address reachable from both museum and
+the clients — usually the server's LAN IP or a hostname. Learn more in
+[Configuring Object Storage](/self-hosting/administration/object-storage#using-the-mobile-app-or-another-device).
