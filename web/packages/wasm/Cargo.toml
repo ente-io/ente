@@ -7,8 +7,11 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
+ente-contacts = { path = "../../../rust/contacts" }
 ente-core = { path = "../../../rust/core", features = ["srp"] }
 md-5 = "0.10"
+js-sys = "0.3"
+serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"

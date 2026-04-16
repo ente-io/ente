@@ -995,46 +995,78 @@ export const downloadLockerFile = async (
 ): Promise<void> => {
     const fileRecord = getEncryptedFileRecord(fileID);
     if (!fileRecord) {
+        log.error(`Locker download missing file record ${fileID}`);
         throw new Error(`File ${fileID} not found in cache`);
     }
+
+    log.info(
+        `Locker download start ${fileID}: hasObject=${fileRecord.hasObject} size=${fileRecord.fileSize ?? "unknown"}`,
+    );
 
     const cacheSnapshot = getLockerCacheSnapshot();
     const collectionRecord = cacheSnapshot.collections.get(
         fileRecord.collectionID,
     );
     if (!collectionRecord) {
+        log.error(
+            `Locker download missing collection record ${fileID}: collectionID=${fileRecord.collectionID}`,
+        );
         throw new Error(
             `Collection ${fileRecord.collectionID} not found in cache`,
         );
     }
 
-    const collectionKey = await decryptCollectionKey(
-        collectionRecord,
-        masterKey,
-    );
-    const fileKey = await decryptBox(
-        {
-            encryptedData: fileRecord.encryptedKey,
-            nonce: fileRecord.keyDecryptionNonce,
-        },
-        collectionKey,
-    );
+    let fileKey: string;
+    try {
+        const collectionKey = await decryptCollectionKey(
+            collectionRecord,
+            masterKey,
+        );
+        fileKey = await decryptBox(
+            {
+                encryptedData: fileRecord.encryptedKey,
+                nonce: fileRecord.keyDecryptionNonce,
+            },
+            collectionKey,
+        );
+    } catch (error) {
+        log.error(
+            `Locker download key preparation failed ${fileID}: collectionID=${fileRecord.collectionID}`,
+            error,
+        );
+        throw error;
+    }
 
     const customOrigin = await customAPIOrigin();
+    const downloadSource = customOrigin ? "api" : "proxy";
     let response: Response;
-    if (customOrigin) {
-        const token = await ensureAuthToken();
-        const url = await apiURL(`/files/download/${fileID}`, { token });
-        response = await fetch(url);
-    } else {
-        response = await fetch(`https://files.ente.io/?fileID=${fileID}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
+    try {
+        if (customOrigin) {
+            const token = await ensureAuthToken();
+            const url = await apiURL(`/files/download/${fileID}`, { token });
+            response = await fetch(url);
+        } else {
+            response = await fetch(`https://files.ente.io/?fileID=${fileID}`, {
+                headers: await authenticatedRequestHeaders(),
+            });
+        }
+    } catch (error) {
+        log.error(
+            `Locker download request failed ${fileID}: source=${downloadSource}`,
+            error,
+        );
+        throw error;
     }
     ensureOk(response);
+    log.info(
+        `Locker download response ${fileID}: source=${downloadSource} status=${response.status} redirected=${response.redirected} contentType=${response.headers.get("Content-Type") ?? "unknown"} contentLength=${response.headers.get("Content-Length") ?? "unknown"}`,
+    );
 
     const body = response.body;
     if (!body) {
+        log.error(
+            `Locker download empty response body ${fileID}: source=${downloadSource} status=${response.status}`,
+        );
         throw new Error("Download response body is empty");
     }
 
@@ -1117,17 +1149,36 @@ export const downloadLockerFile = async (
                     }
                 } while (!didEnqueue);
             } catch (error) {
+                log.error(
+                    `Locker download stream failed ${fileID}: source=${downloadSource} downloaded=${downloadedBytes} total=${contentLength > 0 ? contentLength : "unknown"} leftover=${leftoverBytes.length}`,
+                    error,
+                );
                 streamDecryptor.free();
                 controller.error(error);
             }
         },
         cancel: () => {
+            log.warn(
+                `Locker download stream cancelled ${fileID}: source=${downloadSource} downloaded=${downloadedBytes} total=${contentLength > 0 ? contentLength : "unknown"}`,
+            );
             streamDecryptor.free();
             void reader.cancel();
         },
     });
 
-    const decryptedData = await new Response(decryptedStream).blob();
+    let decryptedData: Blob;
+    try {
+        decryptedData = await new Response(decryptedStream).blob();
+    } catch (error) {
+        log.error(
+            `Locker download blob assembly failed ${fileID}: source=${downloadSource} downloaded=${downloadedBytes} total=${contentLength > 0 ? contentLength : "unknown"}`,
+            error,
+        );
+        throw error;
+    }
+    log.info(
+        `Locker download decrypted ${fileID}: source=${downloadSource} downloaded=${downloadedBytes} blobSize=${decryptedData.size}`,
+    );
     const url = URL.createObjectURL(decryptedData);
     const anchor = document.createElement("a");
     anchor.style.display = "none";
@@ -1135,6 +1186,9 @@ export const downloadLockerFile = async (
     anchor.download = fileName;
     document.body.appendChild(anchor);
     anchor.click();
+    log.info(
+        `Locker download triggered save ${fileID}: source=${downloadSource}`,
+    );
     setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
     anchor.remove();
 };

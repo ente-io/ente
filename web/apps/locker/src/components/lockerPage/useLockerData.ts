@@ -2,9 +2,11 @@ import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/util
 import {
     isSavedUserTokenMismatch,
     savedLocalUser,
+    savedPartialLocalUser,
 } from "ente-accounts-rs/services/accounts-db";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import {
     authenticatedRequestHeaders,
@@ -14,6 +16,7 @@ import {
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
+import { ensureContactsReady } from "ente-contacts-web";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -301,14 +304,25 @@ export const useLockerData = ({
                 }
                 if (!mk) {
                     stashRedirect(router.asPath || "/");
-                    void router.push("/login");
+                    void router.push(
+                        savedPartialLocalUser()?.email ? "/verify" : "/login",
+                    );
                     return;
                 }
-                if (cancelled || !mountedRef.current) {
+                if (!canApplyState()) {
                     return;
                 }
 
                 setMasterKey(mk);
+                void ensureContactsReady({
+                    userID: ensureLocalUser().id,
+                    masterKeyB64: mk,
+                }).catch((error: unknown) => {
+                    log.warn(
+                        "[locker] Failed to warm contacts display cache",
+                        error,
+                    );
+                });
 
                 const persisted = await loadPersistedLockerState(mk);
                 if (canApplyState() && persisted.hasPersistedState) {
@@ -321,6 +335,9 @@ export const useLockerData = ({
                 }
 
                 await fetchAndStoreLockerData(mk);
+                if (canApplyState()) {
+                    setHasFetched(true);
+                }
             } catch (error) {
                 log.error("Failed to fetch locker data", error);
                 if (isHTTP401Error(error)) {
@@ -334,9 +351,6 @@ export const useLockerData = ({
                               })
                             : t("generic_error_retry"),
                     );
-                }
-            } finally {
-                if (canApplyState()) {
                     setHasFetched(true);
                 }
             }

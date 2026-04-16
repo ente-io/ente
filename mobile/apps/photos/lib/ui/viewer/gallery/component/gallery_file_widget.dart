@@ -278,6 +278,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         galleryFiles.indexOf(file),
         widget.tag,
         isLocalOnlyContext: isLocalOnlyContext,
+        galleryType: galleryType,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);

@@ -2,10 +2,13 @@ import "dart:async";
 import "dart:io";
 
 import "package:flutter/foundation.dart";
+import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:mobile_ocr/mobile_ocr.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -16,7 +19,7 @@ import "package:photos/utils/file_util.dart";
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
 /// 1. Quick `hasText()` check runs silently when the image loads.
-/// 2. If text is found and user stays on the image for 1 second, full
+/// 2. If text is found and the user stays on the image for 1 second, full
 ///    detection runs automatically and text boundaries appear as a
 ///    transparent overlay.
 /// 3. Long press on detected text lets users select and copy.
@@ -39,8 +42,9 @@ class InlineTextDetection extends StatefulWidget {
 
 class _InlineTextDetectionState extends State<InlineTextDetection> {
   static const int _maxCacheSize = 200;
+  static const Duration _autoActivateDelay = Duration(seconds: 1);
+  static const double _globalGestureSlop = 18.0;
   static final Map<String, _HasTextResult> _hasTextCache = {};
-  static final ValueNotifier<bool> _defaultZoomNotifier = ValueNotifier(false);
   final Logger _logger = Logger("InlineTextDetection");
   final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
@@ -50,10 +54,26 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   int _requestId = 0;
   bool _overlayActive = false;
   Offset? _pendingLongPressPosition;
+  Timer? _autoActivateTimer;
+  bool _zoomGestureSettled = false;
+  Timer? _zoomSettleTimer;
+  ZoomTransform? _lastSeenTransform;
+  int _activePointers = 0;
+  bool _isPinching = false;
+  bool _isCurrentlyZoomed = false;
+  int _globalActivePointers = 0;
+  int? _trackedGlobalPointer;
+  Offset? _trackedGlobalPointerDownPosition;
+  bool _trackedGlobalPointerMoved = false;
+  bool _trackedGlobalLongPressTriggered = false;
+  Timer? _globalLongPressTimer;
 
   @override
   void initState() {
     super.initState();
+    GestureBinding.instance.pointerRouter.addGlobalRoute(
+      _handleGlobalPointerEvent,
+    );
     _evaluateFile();
   }
 
@@ -68,11 +88,19 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   @override
   void dispose() {
+    _autoActivateTimer?.cancel();
+    _zoomSettleTimer?.cancel();
+    _globalLongPressTimer?.cancel();
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(
+      _handleGlobalPointerEvent,
+    );
     _detectorController.dispose();
     super.dispose();
   }
 
   void _resetState() {
+    _autoActivateTimer?.cancel();
+    _cancelTrackedGlobalPointer();
     setState(() {
       _localFilePath = null;
       _overlayActive = false;
@@ -133,7 +161,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       setState(() {
         _localFilePath = cached.localPath;
       });
-      if (cached.hasText) _activateOverlay();
+      if (cached.hasText) _scheduleAutoActivate(requestId);
       return;
     }
 
@@ -177,7 +205,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _localFilePath = result.localPath;
       });
 
-      if (hasText) _activateOverlay();
+      if (hasText) _scheduleAutoActivate(requestId);
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
@@ -186,13 +214,25 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   }
 
   void _activateOverlay() {
+    _autoActivateTimer?.cancel();
+    if (_overlayActive) return;
     setState(() {
       _overlayActive = true;
     });
   }
 
+  void _scheduleAutoActivate(int requestId) {
+    _autoActivateTimer?.cancel();
+    _autoActivateTimer = Timer(_autoActivateDelay, () {
+      if (!mounted || requestId != _requestId) return;
+      if (_localFilePath == null || _overlayActive) return;
+      _activateOverlay();
+    });
+  }
+
   void _handleLongPress(LongPressStartDetails details) {
     if (_overlayActive) return; // Already active, let overlay handle it
+    _autoActivateTimer?.cancel();
     setState(() {
       _pendingLongPressPosition = details.globalPosition;
     });
@@ -205,14 +245,140 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     // Otherwise _evaluateFile will activate when hasText completes
   }
 
+  bool get _canTrackTapToClearSelection =>
+      _overlayActive && _detectorController.hasActiveSelection;
+
+  bool get _canTrackZoomedPanFirstLongPress =>
+      _overlayActive &&
+      _isCurrentlyZoomed &&
+      _zoomGestureSettled &&
+      !_isPinching;
+
+  bool _isPrimaryGlobalPointer(PointerDownEvent event) {
+    if (event.kind == PointerDeviceKind.mouse) {
+      return event.buttons == kPrimaryMouseButton;
+    }
+    return true;
+  }
+
+  void _cancelTrackedGlobalPointer() {
+    _globalLongPressTimer?.cancel();
+    _globalLongPressTimer = null;
+    _trackedGlobalPointer = null;
+    _trackedGlobalPointerDownPosition = null;
+    _trackedGlobalPointerMoved = false;
+    _trackedGlobalLongPressTriggered = false;
+  }
+
+  void _handleGlobalPointerDown(PointerDownEvent event) {
+    _globalActivePointers++;
+    if (!_isPrimaryGlobalPointer(event)) {
+      return;
+    }
+    if (_globalActivePointers != 1) {
+      _cancelTrackedGlobalPointer();
+      return;
+    }
+
+    final bool tapCanClearSelection = _canTrackTapToClearSelection;
+    final bool pointOnInteractiveUi =
+        _detectorController.isPointOnInteractiveSelectionUi(event.position);
+    final bool longPressCanSelect = _canTrackZoomedPanFirstLongPress &&
+        !pointOnInteractiveUi &&
+        _detectorController.isPointOnSelectableText(event.position);
+
+    if (!tapCanClearSelection && !longPressCanSelect) {
+      return;
+    }
+
+    if (pointOnInteractiveUi) {
+      _cancelTrackedGlobalPointer();
+      return;
+    }
+
+    _trackedGlobalPointer = event.pointer;
+    _trackedGlobalPointerDownPosition = event.position;
+    _trackedGlobalPointerMoved = false;
+    _trackedGlobalLongPressTriggered = false;
+
+    if (longPressCanSelect) {
+      final Offset position = event.position;
+      final int pointer = event.pointer;
+      _globalLongPressTimer = Timer(kLongPressTimeout, () {
+        if (!mounted ||
+            _trackedGlobalPointer != pointer ||
+            _trackedGlobalPointerMoved ||
+            _globalActivePointers != 1 ||
+            !_canTrackZoomedPanFirstLongPress) {
+          return;
+        }
+        _trackedGlobalLongPressTriggered =
+            _detectorController.selectTextAtPosition(position);
+      });
+    }
+  }
+
+  void _handleGlobalPointerMove(PointerMoveEvent event) {
+    if (event.pointer != _trackedGlobalPointer) {
+      return;
+    }
+    final Offset? initialPosition = _trackedGlobalPointerDownPosition;
+    if (initialPosition == null) {
+      return;
+    }
+    if ((event.position - initialPosition).distance > _globalGestureSlop) {
+      _trackedGlobalPointerMoved = true;
+      _globalLongPressTimer?.cancel();
+      _globalLongPressTimer = null;
+    }
+  }
+
+  void _handleGlobalPointerEnd(PointerEvent event) {
+    if (event.pointer == _trackedGlobalPointer) {
+      final bool shouldClearSelection = !_trackedGlobalLongPressTriggered &&
+          !_trackedGlobalPointerMoved &&
+          _canTrackTapToClearSelection &&
+          !_detectorController.isPointOnInteractiveSelectionUi(event.position);
+      if (shouldClearSelection) {
+        _detectorController.clearSelection();
+      }
+      _cancelTrackedGlobalPointer();
+    }
+  }
+
+  void _handleGlobalPointerEvent(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      _handleGlobalPointerDown(event);
+      return;
+    }
+
+    if (event is PointerMoveEvent) {
+      _handleGlobalPointerMove(event);
+      return;
+    }
+
+    if (event is PointerUpEvent) {
+      _globalActivePointers =
+          _globalActivePointers > 0 ? _globalActivePointers - 1 : 0;
+      _handleGlobalPointerEnd(event);
+      return;
+    }
+
+    if (event is PointerCancelEvent) {
+      _globalActivePointers =
+          _globalActivePointers > 0 ? _globalActivePointers - 1 : 0;
+      _handleGlobalPointerEnd(event);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isEligible || widget.file is TrashFile || widget.isGuestView) {
       return const SizedBox.shrink();
     }
 
-    final isZoomedNotifier =
-        InheritedDetailPageState.maybeOf(context)?.isZoomedNotifier;
+    final detailState = InheritedDetailPageState.of(context);
+    final isZoomedNotifier = detailState.isZoomedNotifier;
 
     // During the wait period (hasText passed but 1s timer hasn't fired),
     // show a transparent gesture layer to capture long press.
@@ -230,26 +396,108 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       );
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: isZoomedNotifier ?? _defaultZoomNotifier,
-      builder: (context, isZoomed, _) {
-        final bool shouldHide = isZoomed;
+    final zoomTransformNotifier = detailState.zoomTransformNotifier;
 
-        return Positioned.fill(
-          child: IgnorePointer(
-            ignoring: shouldHide,
-            child: AnimatedOpacity(
-              opacity: shouldHide ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: _buildInlineOverlay(context),
-            ),
-          ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: isZoomedNotifier,
+      builder: (context, isZoomed, _) {
+        _isCurrentlyZoomed = isZoomed;
+        if (!isZoomed) {
+          _zoomGestureSettled = false;
+          _zoomSettleTimer?.cancel();
+          _lastSeenTransform = null;
+        }
+        return ValueListenableBuilder<ZoomTransform>(
+          valueListenable: zoomTransformNotifier,
+          builder: (context, transform, _) {
+            // Only reset the debounce when the transform has genuinely changed.
+            // Guarding on value change prevents the setState rebuild from the
+            // timer itself from re-entering this block and restarting the timer,
+            // which would create an infinite loop where _zoomGestureSettled
+            // can never stay true.
+            if (isZoomed && transform != _lastSeenTransform) {
+              _lastSeenTransform = transform;
+              _zoomGestureSettled = false;
+              _zoomSettleTimer?.cancel();
+              _zoomSettleTimer = Timer(const Duration(milliseconds: 200), () {
+                if (mounted) {
+                  setState(() {
+                    _zoomGestureSettled = true;
+                  });
+                }
+              });
+            }
+
+            Widget overlay = _buildInlineOverlay(
+              context,
+              isZoomed: isZoomed,
+              uiScale: transform.scale,
+              uiOffset: transform.offset,
+            );
+
+            // Always apply the Transform, even when not zoomed.
+            // When not zoomed, transform == ZoomTransform.identity (scale=1,
+            // offset=zero), so this is a no-op visually. Applying it
+            // unconditionally means teardrops and text boundaries immediately
+            // track zoom from the very first stream event, with no flash at
+            // the unscaled position that occurs when the Transform was only
+            // added after isZoomedNotifier fired.
+            overlay = Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..translate(transform.offset.dx, transform.offset.dy)
+                ..scale(transform.scale),
+              child: overlay,
+            );
+
+            // Ignore pointer events when:
+            // - Actively pinching (2+ fingers down) — let PhotoView handle zoom
+            // - Zoomed but gesture not yet settled — transform is still changing
+            final shouldIgnore =
+                _isPinching || (isZoomed && !_zoomGestureSettled);
+
+            return Positioned.fill(
+              child: Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerDown: (_) {
+                  _activePointers++;
+                  if (_activePointers >= 2 && !_isPinching) {
+                    setState(() {
+                      _isPinching = true;
+                      _zoomGestureSettled = false;
+                    });
+                  }
+                },
+                onPointerUp: (_) {
+                  if (_activePointers > 0) _activePointers--;
+                  if (_activePointers < 2 && _isPinching) {
+                    setState(() => _isPinching = false);
+                  }
+                },
+                onPointerCancel: (_) {
+                  if (_activePointers > 0) _activePointers--;
+                  if (_activePointers < 2 && _isPinching) {
+                    setState(() => _isPinching = false);
+                  }
+                },
+                child: IgnorePointer(
+                  ignoring: shouldIgnore,
+                  child: overlay,
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildInlineOverlay(BuildContext context) {
+  Widget _buildInlineOverlay(
+    BuildContext context, {
+    required bool isZoomed,
+    double uiScale = 1.0,
+    Offset uiOffset = Offset.zero,
+  }) {
     final l10n = context.l10n;
     return ListenableBuilder(
       listenable: _detectorController,
@@ -291,6 +539,20 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         showEditorHint: false,
         initialInteractionPosition: _pendingLongPressPosition,
         controller: _detectorController,
+        isImageZoomed: isZoomed,
+        onDoubleTapWhenZoomed: isZoomed
+            ? () {
+                Bus.instance.fire(
+                  ResetZoomOfPhotoView(
+                    uploadedFileID: widget.file.uploadedFileID,
+                    localID: widget.file.localID,
+                  ),
+                );
+              }
+            : null,
+        uiScale: uiScale,
+        uiOffset: uiOffset,
+        zoomedInteractionPolicy: ZoomedInteractionPolicy.panFirst,
         strings: TextDetectorStrings(
           processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
           selectionHint: l10n.ocrSelectionHint,

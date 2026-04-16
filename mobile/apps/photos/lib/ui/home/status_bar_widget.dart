@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
@@ -123,7 +124,16 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   },
                   child: const SyncStatusWidget(),
                 )
-              : const Text("ente", style: brandStyleMedium),
+              : SvgPicture.asset(
+                  "assets/ente-branding.svg",
+                  height: 15,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
         ),
         _showErrorBanner
             ? Divider(

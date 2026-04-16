@@ -4,6 +4,8 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/clip_memory.dart";
+import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/memory_spec.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
@@ -11,7 +13,7 @@ import "package:photos/models/memories/trip_memory.dart";
 
 const kPersonShowTimeout = Duration(days: 16 * kMemoriesUpdateFrequencyDays);
 const kClipShowTimeout = Duration(days: 10 * kMemoriesUpdateFrequencyDays);
-const kTripShowTimeout = Duration(days: 50 * kMemoriesUpdateFrequencyDays);
+const kTripShowTimeout = Duration(days: 40 * kMemoriesUpdateFrequencyDays);
 
 final maxShowTimeout = [
       kPersonShowTimeout,
@@ -86,18 +88,26 @@ class ToShowMemory {
   final PeopleMemoryType? peopleMemoryType;
   final ClipMemoryType? clipMemoryType;
   final Location? location;
+  final MemorySpec? spec;
 
   bool get isOld {
     final now = DateTime.now().microsecondsSinceEpoch;
     return now > lastTimeToShow;
   }
 
+  bool isRelevantAt(int timestamp) {
+    return timestamp >= firstTimeToShow && timestamp < lastTimeToShow;
+  }
+
   bool shouldShowNow() {
     final now = DateTime.now().microsecondsSinceEpoch;
-    final relevantForNow = now >= firstTimeToShow && now < lastTimeToShow;
+    final relevantForNow = isRelevantAt(now);
     final calculatedForNow = (now >= calculationTime) &&
         (now < calculationTime + kMemoriesUpdateFrequency.inMicroseconds);
-    return relevantForNow && (calculatedForNow || type == MemoryType.onThisDay);
+    return relevantForNow &&
+        (calculatedForNow ||
+            type == MemoryType.onThisDay ||
+            type == MemoryType.trips);
   }
 
   ToShowMemory(
@@ -116,8 +126,10 @@ class ToShowMemory {
     this.peopleMemoryType,
     this.clipMemoryType,
     this.location,
+    this.spec,
   }) : assert(
-          (type == MemoryType.people &&
+          (spec != null) ||
+              (type == MemoryType.people &&
                   personID != null &&
                   peopleMemoryType != null) ||
               (type == MemoryType.trips && location != null) ||
@@ -151,6 +163,7 @@ class ToShowMemory {
     } else if (memory is ClipMemory) {
       clipMemoryType = memory.clipMemoryType;
     }
+    final spec = MemorySpec.fromSmartMemory(memory);
     final fileUploadedIDs = memory.memories
         .where((m) => m.file.uploadedFileID != null)
         .map((m) => m.file.uploadedFileID!)
@@ -171,10 +184,14 @@ class ToShowMemory {
       peopleMemoryType: peopleMemoryType,
       clipMemoryType: clipMemoryType,
       location: location,
+      spec: spec,
     );
   }
 
   factory ToShowMemory.fromJson(Map<String, dynamic> json) {
+    final spec = MemorySpec.fromJson(
+      json['spec'] != null ? Map<String, dynamic>.from(json['spec']) : null,
+    );
     return ToShowMemory(
       json['title'],
       List<int>.from(json['fileUploadedIDs']),
@@ -202,6 +219,7 @@ class ToShowMemory {
               longitude: json['location']['longitude'],
             )
           : null,
+      spec: spec,
     );
   }
 
@@ -221,6 +239,7 @@ class ToShowMemory {
       'isUnnamedCluster': isUnnamedCluster,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'clipMemoryType': clipMemoryType?.toString().split('.').last,
+      if (spec != null) 'spec': spec!.toJson(),
       'location': location != null
           ? {
               'latitude': location!.latitude!,
@@ -238,6 +257,65 @@ class ToShowMemory {
   static List<ToShowMemory> decodeJsonToList(String jsonString) {
     final jsonList = jsonDecode(jsonString) as List;
     return jsonList.map((json) => ToShowMemory.fromJson(json)).toList();
+  }
+
+  bool get hasTypedSpec => spec != null;
+
+  String? get tripKey {
+    final currentSpec = spec;
+    if (currentSpec is TripMemorySpec) {
+      return currentSpec.tripKey;
+    }
+    return null;
+  }
+
+  String get tripIdentityKey {
+    final key = tripKey;
+    if (key != null && key.isNotEmpty) {
+      return "trip:$key";
+    }
+    final loc = location;
+    if (loc == null) {
+      return "legacy:$id";
+    }
+    final latitude = (loc.latitude ?? 0).toStringAsFixed(2);
+    final longitude = (loc.longitude ?? 0).toStringAsFixed(2);
+    return "legacy:$latitude:$longitude";
+  }
+
+  SmartMemory toSmartMemory(List<Memory> memories) {
+    if (spec != null) {
+      return spec!.toSmartMemory(
+        memories,
+        firstDateToShow: firstTimeToShow,
+        lastDateToShow: lastTimeToShow,
+        title: title,
+        id: id,
+      );
+    }
+
+    if (type == MemoryType.people) {
+      return PeopleMemory(
+        memories,
+        firstTimeToShow,
+        lastTimeToShow,
+        peopleMemoryType!,
+        personID!,
+        personName,
+        isUnnamedCluster: isUnnamedCluster ?? false,
+        title: title,
+        id: id,
+      );
+    }
+
+    return SmartMemory(
+      memories,
+      type,
+      title,
+      firstTimeToShow,
+      lastTimeToShow,
+      id: id,
+    );
   }
 }
 
@@ -339,10 +417,12 @@ class ClipShownLog {
 class TripsShownLog {
   final Location location;
   final int lastTimeShown;
+  final String? tripKey;
 
   TripsShownLog(
     this.location,
     this.lastTimeShown,
+    this.tripKey,
   );
 
   factory TripsShownLog.fromOldCacheMemory(ToShowMemory memory) {
@@ -350,6 +430,7 @@ class TripsShownLog {
     return TripsShownLog(
       memory.location!,
       memory.lastTimeToShow,
+      memory.tripKey,
     );
   }
 
@@ -360,6 +441,7 @@ class TripsShownLog {
         longitude: json['location']['longitude'],
       ),
       json['lastTimeShown'],
+      json['tripKey'] as String?,
     );
   }
 
@@ -370,6 +452,7 @@ class TripsShownLog {
         'longitude': location.longitude!,
       },
       'lastTimeShown': lastTimeShown,
+      'tripKey': tripKey,
     };
   }
 

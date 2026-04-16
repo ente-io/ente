@@ -5,8 +5,12 @@ on:
     pull_request:
         paths:
             - "mobile/packages/**"
+            - "mobile/**/pubspec*.yaml"
+            - "mobile/**/pubspec.lock"
             - "rust/photos/**"
             - ".github/workflows/mobile-packages-lint.yml"
+            - "mobile/scripts/check_frozen_pubspecs.rb"
+            - ".github/scripts/get-affected-packages.sh"
             - "mobile/analysis_options.yaml"
     # Allow manual trigger for testing
     workflow_dispatch:
@@ -32,7 +36,7 @@ jobs:
             rust_changed: ${{ steps.filter.outputs.rust_changed }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Detect changed files
               uses: dorny/paths-filter@v3
@@ -88,16 +92,24 @@ jobs:
                   echo "Lint all: $LINT_ALL"
                   echo "Rust changed: ${{ steps.changes.outputs.rust }}"
 
+    pubspec-constraints:
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Verify frozen mobile pubspecs
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile
+
     packages-lint:
         needs: detect-changes
         runs-on: ubuntu-latest
         # Skip if no packages need linting
         if: needs.detect-changes.outputs.lint_all == 'true' || needs.detect-changes.outputs.packages != ''
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -135,102 +147,102 @@ jobs:
             # Lint all affected packages conditionally
             - name: Lint package - accounts
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'accounts')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/accounts
 
             - name: Lint package - base
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'base')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/base
 
             - name: Lint package - configuration
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'configuration')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/configuration
 
             - name: Lint package - scoped_dir_access
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'scoped_dir_access')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/scoped_dir_access
 
             - name: Lint package - ente_crypto_api
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_api')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/ente_crypto_api
 
             - name: Lint package - ente_crypto_dart_adapter
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_dart_adapter')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/ente_crypto_dart_adapter
 
             - name: Lint package - ente_icons
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_icons')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/ente_icons
 
             - name: Lint package - ente_pure_utils
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_pure_utils')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/ente_pure_utils
 
             - name: Lint package - events
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'events')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/events
 
             - name: Lint package - legacy
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'legacy')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/legacy
 
             - name: Lint package - lock_screen
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'lock_screen')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/lock_screen
 
             - name: Lint package - log_viewer
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'log_viewer')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/log_viewer
 
             - name: Lint package - logging
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'logging')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/logging
 
             - name: Lint package - native_video_editor
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'native_video_editor')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/native_video_editor
 
             - name: Lint package - network
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'network')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/network
 
             - name: Lint package - qr
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'qr')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/qr
 
             - name: Lint package - sharing
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'sharing')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/sharing
 
             - name: Lint package - strings
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'strings')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/strings
 
             - name: Lint package - ui
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ui')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/ui
 
             - name: Lint package - utils
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'utils')
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/utils
 
     rust-lint:
@@ -238,10 +250,8 @@ jobs:
         runs-on: ubuntu-latest
         if: needs.detect-changes.outputs.rust_changed == 'true'
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -314,9 +324,14 @@ jobs:
         if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_auth == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
         steps:
             - name: Checkout code and submodules
-              uses: actions/checkout@v4
+              if: needs.detect-changes.outputs.lint_auth == 'true'
+              uses: actions/checkout@v6
               with:
                   submodules: recursive
+
+            - name: Checkout code
+              if: needs.detect-changes.outputs.lint_auth != 'true'
+              uses: actions/checkout@v6
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -326,7 +341,7 @@ jobs:
                   cache: true
 
             - name: Install Rust ${{ env.RUST_VERSION }}
-              if: needs.detect-changes.outputs.lint_photos == 'true'
+              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               uses: dtolnay/rust-toolchain@stable
               with:
                   toolchain: ${{ env.RUST_VERSION }}
@@ -342,11 +357,11 @@ jobs:
                   key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
 
             - name: Install Flutter Rust Bridge
-              if: needs.detect-changes.outputs.lint_photos == 'true'
+              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               run: cargo install flutter_rust_bridge_codegen
 
             - name: Generate Rust bindings (Core package)
-              if: needs.detect-changes.outputs.lint_photos == 'true'
+              if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
               run: flutter_rust_bridge_codegen generate
               working-directory: mobile/packages/rust
 
@@ -361,15 +376,15 @@ jobs:
 
             - name: Lint app - photos
               if: needs.detect-changes.outputs.lint_photos == 'true'
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/apps/photos
 
             - name: Lint app - auth
               if: needs.detect-changes.outputs.lint_auth == 'true'
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/apps/auth
 
             - name: Lint app - locker
               if: needs.detect-changes.outputs.lint_locker == 'true'
-              run: flutter pub get && flutter analyze --no-fatal-infos
+              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
               working-directory: mobile/apps/locker

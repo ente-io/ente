@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 
 class ContactsFilter extends HierarchicalSearchFilter {
   final User user;
@@ -17,11 +17,7 @@ class ContactsFilter extends HierarchicalSearchFilter {
 
   @override
   String name() {
-    final name = user.displayName;
-    if (name == null || name.isEmpty) {
-      return user.email;
-    }
-    return name;
+    return resolveDisplayName(user);
   }
 
   @override

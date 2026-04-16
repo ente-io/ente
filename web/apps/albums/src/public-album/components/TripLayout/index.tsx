@@ -92,6 +92,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     const [highlightCommentID, setHighlightCommentID] = useState<
         string | undefined
     >(undefined);
+    const [initialAnonUserNames, setInitialAnonUserNames] = useState<
+        Map<string, string> | undefined
+    >(undefined);
 
     // File viewer hook
     const {
@@ -138,6 +141,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         // Set navigation state and open file viewer
         setInitialSidebar(sidebar);
         setHighlightCommentID(info.commentID);
+        setInitialAnonUserNames(
+            info.anonUserNames ? new Map(info.anonUserNames) : undefined,
+        );
         handleOpenFileViewer(cluster, info.fileID);
     };
 
@@ -147,6 +153,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     const handleCloseFileViewerWithCleanup = () => {
         setInitialSidebar(undefined);
         setHighlightCommentID(undefined);
+        setInitialAnonUserNames(undefined);
         handleCloseFileViewer();
     };
 
@@ -590,6 +597,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                     initialIndex={currentFileIndex}
                     initialSidebar={initialSidebar}
                     highlightCommentID={highlightCommentID}
+                    initialAnonUserNames={initialAnonUserNames}
                     files={viewerFiles}
                     disableDownload={!enableDownload}
                     publicAlbumsCredentials={credentials?.current}

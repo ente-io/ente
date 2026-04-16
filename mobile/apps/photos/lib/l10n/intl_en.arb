@@ -807,6 +807,15 @@
       }
     }
   },
+  "yourStorageIsLimitedTo": "Your storage is limited to {limit}",
+  "@yourStorageIsLimitedTo": {
+    "placeholders": {
+      "limit": {
+        "type": "String",
+        "example": "50 GB"
+      }
+    }
+  },
   "storageLimitExplanation": "Set the maximum storage this member can use. They will not be able to upload once the limit is reached.",
   "limit": "Limit",
   "noLimit": "No limit",
@@ -1214,6 +1223,16 @@
   "clickOnTheOverflowMenu": "• Click on the overflow menu",
   "click": "• Click",
   "nothingToSeeHere": "Nothing to see here! 👀",
+  "addANameAndPhoto": "Add a name and photo",
+  "photosSharedByWillAppearHere": "Photos shared by {email} will appear here.",
+  "@photosSharedByWillAppearHere": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "a@test.test"
+      }
+    }
+  },
   "selectFoldersToBackup": "<action>Select folders</action> to view and\nbackup on ente.",
   "unarchiveAlbum": "Unarchive album",
   "archiveAlbum": "Archive album",
@@ -1733,8 +1752,14 @@
   "editEmailAlreadyLinked": "This email is already linked to {name}.",
   "viewPersonToUnlink": "View {name} to unlink",
   "enterName": "Enter name",
+  "editContact": "Edit contact",
+  "autoFetchFromPeople": "Auto-fetch from people",
+  "useTheirNameAndPhoto": "Use their name and photo",
   "savePerson": "Save person",
+  "saveContact": "Save contact",
   "editPerson": "Edit person",
+  "enterDateOfBirthHint": "Enter date of birth",
+  "setAContactPhoto": "Set a contact photo",
   "mergedPhotos": "Merged photos",
   "orMergeWithExistingPerson": "Or merge with existing",
   "enterDateOfBirth": "Birthday (optional)",
@@ -2358,11 +2383,11 @@
   "spotlightOnThem": "Spotlight on {name}",
   "personIsAge": "{name} is {age}!",
   "personTurningAge": "{name} turning {age} soon",
-  "lastTimeWithThem": "Last time with {name}",
+  "throwbackWithThem": "Throwback with {name}",
   "unnamedPeopleSpotlight": "A familiar face",
   "unnamedPeopleYouAndThem": "You two",
   "unnamedPeopleDoingSomethingTogether": "Doing it together",
-  "unnamedPeopleLastTimeYouSawThem": "Last time together",
+  "unnamedPeopleThrowbackTogether": "Throwback together",
   "tripToLocation": "Trip to {location}",
   "tripInYear": "Trip in {year}",
   "lastYearsTrip": "Last year's trip",
@@ -2430,6 +2455,7 @@
   "thisWeek": "This week",
   "lastWeek": "Last week",
   "thisMonth": "This month",
+  "lastMonth": "Last month",
   "thisYear": "This year",
   "groupBy": "Group by",
   "groupByDay": "Day",
@@ -2964,6 +2990,10 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
+  "couldNotLoadSelectedPhoto": "Could not load selected photo",
+  "@couldNotLoadSelectedPhoto": {
+    "description": "Toast when the selected contact photo cannot be loaded"
+  },
   "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
@@ -3037,6 +3067,9 @@
   "moreThanJustAGallery": "More than just a gallery.",
   "encryptedBackupDescription": "Encrypted backup, smart search, shareable links, and seamless sync across all your devices.",
   "getStarted": "Get started",
+  "offlineHomeSignupBannerTitle": "Protect your memories forever",
+  "offlineHomeSignupBannerDescription": "Encrypted backups across 3 locations to keep your memories safe.",
+  "offlineHomeSignupBannerAction": "Back up now",
   "unlockSmartFeatures": "Unlock smart features",
   "enableOnDeviceMLDescription": "Enable on-device ML to search by faces, places, and more. Your photos never leave your device.",
   "offlineEnableSharingTitle": "Sharing starts here",

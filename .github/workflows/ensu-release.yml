@@ -50,10 +50,10 @@ jobs:
                   echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22
                   cache: "yarn"
@@ -242,10 +242,8 @@ jobs:
                 working-directory: mobile/native/android/apps/ensu
 
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Set release tag
               shell: bash

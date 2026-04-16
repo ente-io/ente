@@ -29,7 +29,7 @@ const (
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
 	storageWarningOneDayInMicroseconds         = 24 * time.MicroSecondsInOneHour
 	storageWarningBufferedCadenceExtraGrace    = 2 * storageWarningOneDayInMicroseconds
-	storageWarningRolloutPercentage            = 5
+	storageWarningRolloutPercentage            = 30
 	storageWarningRolloutNonce                 = "storage-warning-v1"
 
 	storageWarningActiveOverageNotificationGroup = "storage_warning_active_overage"

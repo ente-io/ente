@@ -19,7 +19,7 @@ jobs:
 
         steps:
             - name: Checkout code and submodules
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   submodules: recursive
 
@@ -38,6 +38,9 @@ jobs:
             - name: Generate strings localizations
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
 
             - name: Setup keys
               uses: timheuer/base64-to-file@v1

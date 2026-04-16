@@ -66,6 +66,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
+  StreamSubscription<dynamic>? _zoomStreamSubscription;
+
+  // Baseline PhotoView scale for the current image/controller when the image
+  // is at its contained size. ZoomTransform.scale is reported relative to this.
+  double? _initialScale;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   late final StreamSubscription<ResetZoomOfPhotoView> _resetZoomSubscription;
@@ -85,12 +90,15 @@ class _ZoomableImageState extends State<ZoomableImage> {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
-      InheritedDetailPageState.maybeOf(context)
-          ?.isZoomedNotifier
-          .value = _isZooming;
-      debugPrint("isZooming = $_isZooming, currentState $value");
-      // _logger.info('is reakky zooming $_isZooming with state $value');
+      final state = InheritedDetailPageState.maybeOf(context);
+      state?.isZoomedNotifier.value = _isZooming;
+      if (!_isZooming) {
+        _initialScale = _photoViewController.scale ?? _initialScale;
+        state?.zoomTransformNotifier.value = ZoomTransform.identity;
+      }
     };
+
+    _subscribeToZoomStream();
 
     _captionUpdatedSubscription =
         Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
@@ -112,8 +120,27 @@ class _ZoomableImageState extends State<ZoomableImage> {
     });
   }
 
+  void _subscribeToZoomStream() {
+    _zoomStreamSubscription =
+        _photoViewController.outputStateStream.listen((value) {
+      final state = InheritedDetailPageState.maybeOf(context);
+      if (value.scale == null) return;
+      if (!_isZooming) {
+        _initialScale = value.scale;
+        state?.zoomTransformNotifier.value = ZoomTransform.identity;
+        return;
+      }
+      _initialScale ??= value.scale;
+      state?.zoomTransformNotifier.value = ZoomTransform(
+        scale: value.scale! / _initialScale!,
+        offset: value.position,
+      );
+    });
+  }
+
   @override
   void dispose() {
+    _zoomStreamSubscription?.cancel();
     _photoViewController.dispose();
     _scaleStateController.dispose();
     _captionUpdatedSubscription.cancel();
@@ -462,13 +489,26 @@ class _ZoomableImageState extends State<ZoomableImage> {
     if (shouldFixPosition) {
       final prevImageInfo = await getImageInfo(previewImageProvider);
       finalImageInfo = await getImageInfo(finalImageProvider);
-      final scale = _photoViewController.scale! /
+      final previousScale = _photoViewController.scale!;
+      final previousRelativeScale = _initialScale != null && _initialScale! > 0
+          ? previousScale / _initialScale!
+          : null;
+      final scale = previousScale /
           (finalImageInfo.image.width / prevImageInfo.image.width);
       final currentPosition = _photoViewController.value.position;
+      unawaited(_zoomStreamSubscription?.cancel());
       _photoViewController = PhotoViewController(
         initialPosition: currentPosition,
         initialScale: scale,
       );
+      if (previousRelativeScale != null &&
+          previousRelativeScale.isFinite &&
+          previousRelativeScale > 0) {
+        _initialScale = scale / previousRelativeScale;
+      } else {
+        _initialScale = null;
+      }
+      _subscribeToZoomStream();
       // Fix for auto-zooming when final image is loaded after double tapping
       //twice.
       _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;

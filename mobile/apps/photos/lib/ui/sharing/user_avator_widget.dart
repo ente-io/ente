@@ -1,14 +1,16 @@
 import "dart:async";
+import "dart:typed_data";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
-import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/contacts_changed_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/photos_contacts_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/people/person_face_widget.dart";
@@ -38,11 +40,13 @@ class UserAvatarWidget extends StatefulWidget {
 }
 
 class _UserAvatarWidgetState extends State<UserAvatarWidget> {
-  Future<String?>? _personID;
+  String? _personId;
+  Uint8List? _contactPhotoBytes;
   bool _canUsePersonFaceWidget = false;
+  int _photoLoadGeneration = 0;
   int lastSyncTimeForKey = 0;
-  final _logger = Logger("_UserAvatarWidgetState");
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
+  StreamSubscription<ContactsChangedEvent>? _contactsChangedSubscription;
   final _debouncer = Debouncer(
     const Duration(milliseconds: 250),
     executionInterval: const Duration(seconds: 20),
@@ -60,12 +64,19 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
         _reload();
       }
     });
+    _contactsChangedSubscription =
+        Bus.instance.on<ContactsChangedEvent>().listen((event) {
+      if (event.matchesContactUserId(widget.user.id)) {
+        _reload();
+      }
+    });
   }
 
   @override
   void didUpdateWidget(covariant UserAvatarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.user.email != widget.user.email) {
+    if (oldWidget.user.email != widget.user.email ||
+        oldWidget.user.id != widget.user.id) {
       _reload();
     }
   }
@@ -73,6 +84,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   void dispose() {
     _peopleChangedSubscription.cancel();
+    _contactsChangedSubscription?.cancel();
     _debouncer.cancelDebounceTimer();
     super.dispose();
   }
@@ -85,12 +97,34 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             .instance.emailToPartialPersonDataMapCache[widget.user.email];
         if (data != null && data.containsKey(PersonService.kPersonIDKey)) {
           _canUsePersonFaceWidget = true;
-          _personID = Future.value(data[PersonService.kPersonIDKey]);
+          _personId = data[PersonService.kPersonIDKey] as String;
           lastSyncTimeForKey = PersonService.instance.lastRemoteSyncTime();
         } else {
           _canUsePersonFaceWidget = false;
-          _personID = Future.value(null);
+          _personId = null;
         }
+        _contactPhotoBytes = PhotosContactsService.instance
+            .getCachedProfilePictureBytesByUserId(widget.user.id);
+      });
+      final userId = widget.user.id;
+      if (userId == null ||
+          PhotosContactsService.instance.hasResolvedProfilePictureByUserId(
+            userId,
+          )) {
+        return;
+      }
+      final loadGeneration = ++_photoLoadGeneration;
+      final photoBytes =
+          await PhotosContactsService.instance.getProfilePictureBytesByUserId(
+        userId,
+      );
+      if (!mounted ||
+          loadGeneration != _photoLoadGeneration ||
+          widget.user.id != userId) {
+        return;
+      }
+      setState(() {
+        _contactPhotoBytes = photoBytes;
       });
     });
   }
@@ -100,7 +134,35 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
     final double size = getAvatarSize(widget.type);
     final int cachedPixelWidth =
         (size * MediaQuery.devicePixelRatioOf(context)).toInt();
-    return _personID != null
+    if (_contactPhotoBytes != null) {
+      return Container(
+        padding: widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+        decoration: widget.addStroke
+            ? BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.thumbnailView
+                      ? strokeMutedDark
+                      : getEnteColorScheme(context).strokeMuted,
+                  width: UserAvatarWidget.strokeWidth,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+              )
+            : null,
+        child: SizedBox(
+          height: size,
+          width: size,
+          child: ClipOval(
+            child: Image.memory(
+              _contactPhotoBytes!,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+            ),
+          ),
+        ),
+      );
+    }
+    return _personId != null
         ? Container(
             padding:
                 widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
@@ -119,55 +181,28 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             child: SizedBox(
               height: size,
               width: size,
-              child: FutureBuilder(
-                future: _personID,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final personID = snapshot.data as String;
-                    return ClipOval(
-                      child: _canUsePersonFaceWidget
-                          ? PersonFaceWidget(
-                              key: ValueKey('$personID-$lastSyncTimeForKey'),
-                              personId: personID,
-                              cachedPixelWidth: cachedPixelWidth,
-                              onErrorCallback: () {
-                                if (mounted) {
-                                  setState(() {
-                                    _personID = null;
-                                    _canUsePersonFaceWidget = false;
-                                  });
-                                }
-                              },
-                            )
-                          : _FirstLetterCircularAvatar(
-                              user: widget.user,
-                              currentUserID: widget.currentUserID,
-                              thumbnailView: widget.thumbnailView,
-                              type: widget.type,
-                              addStroke: widget.addStroke,
-                            ),
-                    );
-                  } else if (snapshot.hasError) {
-                    _logger.severe("Error loading personID", snapshot.error);
-                    return _FirstLetterCircularAvatar(
-                      user: widget.user,
-                      currentUserID: widget.currentUserID,
-                      thumbnailView: widget.thumbnailView,
-                      type: widget.type,
-                      addStroke: widget.addStroke,
-                    );
-                  } else if (snapshot.connectionState == ConnectionState.done &&
-                      snapshot.data == null) {
-                    return _FirstLetterCircularAvatar(
-                      user: widget.user,
-                      currentUserID: widget.currentUserID,
-                      thumbnailView: widget.thumbnailView,
-                      type: widget.type,
-                      addStroke: widget.addStroke,
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+              child: ClipOval(
+                child: _canUsePersonFaceWidget
+                    ? PersonFaceWidget(
+                        key: ValueKey('$_personId-$lastSyncTimeForKey'),
+                        personId: _personId!,
+                        cachedPixelWidth: cachedPixelWidth,
+                        onErrorCallback: () {
+                          if (mounted) {
+                            setState(() {
+                              _personId = null;
+                              _canUsePersonFaceWidget = false;
+                            });
+                          }
+                        },
+                      )
+                    : _FirstLetterCircularAvatar(
+                        user: widget.user,
+                        currentUserID: widget.currentUserID,
+                        thumbnailView: widget.thumbnailView,
+                        type: widget.type,
+                        addStroke: widget.addStroke,
+                      ),
               ),
             ),
           )
@@ -205,18 +240,18 @@ class _FirstLetterCircularAvatarState
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final displayChar =
-        (widget.user.displayName == null || widget.user.displayName!.isEmpty)
-            ? ((widget.user.email.isEmpty)
-                ? " "
-                : widget.user.email.substring(0, 1))
-            : widget.user.displayName!.substring(0, 1);
+    final resolvedDisplayName = resolveDisplayName(widget.user);
+    final displayChar = resolvedDisplayName.isEmpty
+        ? ((widget.user.email.isEmpty)
+            ? " "
+            : widget.user.email.substring(0, 1))
+        : resolvedDisplayName.substring(0, 1);
     Color decorationColor;
     if (widget.user.email == Configuration.instance.getEmail()) {
       decorationColor = Colors.black;
     } else {
       final colorIndex = widget.user.email.contains("unknown.com")
-          ? (widget.user.displayName?.length ?? 0)
+          ? resolvedDisplayName.length
           : widget.user.email.length;
       decorationColor = colorScheme
           .avatarColors[colorIndex.remainder(colorScheme.avatarColors.length)];
@@ -322,15 +357,16 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final displayChar = (user.displayName == null || user.displayName!.isEmpty)
+    final resolvedDisplayName = resolveDisplayName(user);
+    final displayChar = resolvedDisplayName.isEmpty
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
-        : user.displayName!.substring(0, 1);
+        : resolvedDisplayName.substring(0, 1);
     Color decorationColor;
     if (user.email == currentUserEmail) {
       decorationColor = Colors.black;
     } else {
       final colorIndex = user.email.contains("unknown.com")
-          ? (user.displayName?.length ?? 0)
+          ? resolvedDisplayName.length
           : user.email.length;
       decorationColor = colorScheme
           .avatarColors[colorIndex.remainder(colorScheme.avatarColors.length)];

@@ -111,10 +111,10 @@ export const setLastShownChangelogVersion = (version: number) =>
  * Return true if the dock icon should be hidden when the window is closed
  * [macOS only].
  *
- * On macOS, if this function returns true then when hiding ("closing" it with
- * the x traffic light) the window we also hide the app's icon in the dock. The
- * user can modify their preference using the Menu bar > ente > Settings > Hide
- * dock icon checkbox.
+ * On macOS, if this function returns true then when the user closes the window
+ * using the x traffic light we also hide the app's icon in the dock. The user
+ * can modify their preference using the Menu bar > ente > Settings > Hide dock
+ * icon checkbox.
  *
  * If the user has not set a value for this preference (i.e., the value is
  * `undefined`), we use the default `true`. This is confusing, but this way we

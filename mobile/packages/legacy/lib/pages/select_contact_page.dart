@@ -1,10 +1,12 @@
 import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
+import "package:ente_contacts/contacts.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/components/recovery_date_selector.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/services/emergency_service.dart";
+import "package:ente_sharing/extensions/user_extension.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
@@ -31,10 +33,7 @@ Future<bool?> showAddContactSheet(
     title: context.strings.addTrustedContact,
     headerSpacing: 20,
     isKeyboardAware: true,
-    child: AddContactSheet(
-      emergencyInfo: emergencyInfo,
-      config: config,
-    ),
+    child: AddContactSheet(emergencyInfo: emergencyInfo, config: config),
   );
 }
 
@@ -73,69 +72,74 @@ class _AddContactSheetState extends State<AddContactSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final List<User> suggestedUsers = _getSuggestedUser();
-    final bool canAdd = selectedEmail.isNotEmpty || _emailIsValid;
+    return ValueListenableBuilder<int>(
+      valueListenable: ContactsDisplayService.instance.changes,
+      builder: (context, __, ___) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+        final List<User> suggestedUsers = _getSuggestedUser();
+        final bool canAdd = selectedEmail.isNotEmpty || _emailIsValid;
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildEmailInputRow(colorScheme),
-          if (suggestedUsers.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            _buildExistingContactsSection(
-              suggestedUsers,
-              colorScheme,
-              textTheme,
-            ),
-          ],
-          const SizedBox(height: 20),
-          Column(
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                context.strings.chooseARecoveryTime,
-                style: textTheme.bodyMuted,
+              _buildEmailInputRow(colorScheme),
+              if (suggestedUsers.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                _buildExistingContactsSection(
+                  suggestedUsers,
+                  colorScheme,
+                  textTheme,
+                ),
+              ],
+              const SizedBox(height: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.strings.chooseARecoveryTime,
+                    style: textTheme.bodyMuted,
+                  ),
+                  const SizedBox(height: 12),
+                  RecoveryDateSelector(
+                    selectedDays: _selectedRecoveryDays,
+                    onDaysChanged: (days) {
+                      setState(() {
+                        _selectedRecoveryDays = days;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              GradientButton(
+                text: context.strings.addTrustedContact,
+                onTap: canAdd ? _onAddContactTap : null,
               ),
               const SizedBox(height: 12),
-              RecoveryDateSelector(
-                selectedDays: _selectedRecoveryDays,
-                onDaysChanged: (days) {
-                  setState(() {
-                    _selectedRecoveryDays = days;
-                  });
-                },
+              Center(
+                child: GestureDetector(
+                  onTap: _onVerifyTap,
+                  child: Text(
+                    context.strings.verifyIDLabel,
+                    style: textTheme.bodyBold.copyWith(
+                      color: canAdd
+                          ? getEnteColorScheme(context).primary700
+                          : getEnteColorScheme(context).textMuted,
+                      decoration: TextDecoration.underline,
+                      decorationColor: canAdd
+                          ? getEnteColorScheme(context).primary700
+                          : getEnteColorScheme(context).textMuted,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          GradientButton(
-            text: context.strings.addTrustedContact,
-            onTap: canAdd ? _onAddContactTap : null,
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: GestureDetector(
-              onTap: _onVerifyTap,
-              child: Text(
-                context.strings.verifyIDLabel,
-                style: textTheme.bodyBold.copyWith(
-                  color: canAdd
-                      ? getEnteColorScheme(context).primary700
-                      : getEnteColorScheme(context).textMuted,
-                  decoration: TextDecoration.underline,
-                  decorationColor: canAdd
-                      ? getEnteColorScheme(context).primary700
-                      : getEnteColorScheme(context).textMuted,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -216,7 +220,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
                     final isLast = index == suggestedUsers.length - 1;
                     return MenuItemWidgetV2(
                       captionedTextWidget: CaptionedTextWidgetV2(
-                        title: user.email,
+                        title: user.resolvedDisplayName,
                         textStyle: textTheme.small.copyWith(
                           color: colorScheme.textMuted,
                         ),
@@ -362,10 +366,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
     return showAlertBottomSheet<bool>(
       context,
       title: context.strings.warning,
-      message: context.strings.confirmAddingTrustedContact(
-        email,
-        recoveryDays,
-      ),
+      message: context.strings.confirmAddingTrustedContact(email, recoveryDays),
       assetPath: "assets/warning-blue.png",
       buttons: [
         GradientButton(
@@ -424,12 +425,14 @@ class _AddContactSheetState extends State<AddContactSheet> {
     // Filter by search text
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(
-        (element) => !element.email
-            .toLowerCase()
-            .contains(_textController.text.trim().toLowerCase()),
+        (element) => !element.matchesResolvedNameOrEmail(_textController.text),
       );
     }
-    suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+    suggestedUsers.sort(
+      (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+            b.resolvedDisplayName.toLowerCase(),
+          ),
+    );
 
     return suggestedUsers;
   }

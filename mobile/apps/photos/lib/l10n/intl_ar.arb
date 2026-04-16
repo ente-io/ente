@@ -1073,8 +1073,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "تعيين نصف القطر",
-  "familyPlanPortalTitle": "العائلة",
-  "familyPlanOverview": "أضف 5 أفراد من عائلتك إلى خطتك الحالية دون دفع رسوم إضافية.\n\nيحصل كل فرد على مساحة خاصة به، ولا يمكنهم رؤية ملفات بعضهم البعض إلا إذا تمت مشاركتها.\n\nالخطط العائلية متاحة للعملاء الذين لديهم اشتراك Ente مدفوع.\n\nاشترك الآن للبدء!",
   "androidBiometricHint": "تحقق من الهوية",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

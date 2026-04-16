@@ -242,7 +242,7 @@
     "leave": "Выйсці",
     "leave_family_plan_confirm": "Вы сапраўды хочаце выйсці з сямейнага тарыфнага плана?",
     "choose_plan": "",
-    "manage_plan": "Кіраваць падпіскай",
+    "manage_plan": "",
     "current_usage": "",
     "two_months_free": "",
     "free_plan_option": "",
@@ -834,9 +834,6 @@
     "confirm_pin": "",
     "confirm": "",
     "incorrect_pin_or_password": "",
-    "too_many_attempts": "",
-    "try_again_in": "",
-    "too_many_wrong_attempts": "",
     "app_lock_disable_confirm": "",
     "lock_type": "",
     "auto_lock": "",
@@ -848,7 +845,6 @@
     "app_lock_confirm_password": "",
     "app_lock_set_password": "",
     "app_lock_password_mismatch": "",
-    "app_lock_incorrect": "",
     "app_lock_enter_pin_to_unlock": "",
     "app_lock_pin_digit_label": "",
     "app_lock_please_try_again_in": "",
@@ -871,7 +867,5 @@
     "auto_lock_5_minutes": "",
     "auto_lock_30_minutes": "",
     "wrong_unlock_code_one": "",
-    "wrong_unlock_code_other": "",
-    "one_more_wrong_attempt_logout": "",
-    "next_wrong_attempt_wait": ""
+    "wrong_unlock_code_other": ""
 }

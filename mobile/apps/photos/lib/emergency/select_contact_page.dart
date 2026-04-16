@@ -10,6 +10,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
@@ -124,7 +125,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
                         listIndex: index,
                         isLastItem: isLastItem,
                         child: MenuItemWidgetNew(
-                          title: user.email,
+                          title: resolveDisplayName(user),
                           titleColor: colorScheme.textMuted,
                           leadingIconWidget: UserAvatarWidget(
                             user,

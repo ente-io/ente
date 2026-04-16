@@ -1,12 +1,36 @@
-import { LaneMemoryViewer } from "../components/LaneMemoryViewer";
-import { MemoryViewer } from "../components/MemoryViewer";
+import dynamic from "next/dynamic";
 import {
     PublicMemoryEmptyState,
     PublicMemoryErrorState,
+    PublicMemoryLoadingContent,
     PublicMemoryLoadingState,
     PublicMemoryPageShell,
 } from "../components/PublicMemoryPageShell";
+import type {
+    LaneMemoryViewerProps,
+    MemoryViewerProps,
+} from "../components/PublicMemoryViewerShared";
 import { usePublicMemoryPage } from "../hooks/usePublicMemoryPage";
+
+function ViewerChunkLoadingFallback() {
+    return <PublicMemoryLoadingContent />;
+}
+
+const LaneMemoryViewer = dynamic<LaneMemoryViewerProps>(
+    () =>
+        import("../components/LaneMemoryViewer").then(
+            (module) => module.LaneMemoryViewer,
+        ),
+    { loading: ViewerChunkLoadingFallback },
+);
+
+const MemoryViewer = dynamic<MemoryViewerProps>(
+    () =>
+        import("../components/MemoryViewer").then(
+            (module) => module.MemoryViewer,
+        ),
+    { loading: ViewerChunkLoadingFallback },
+);
 
 /**
  * Index page that handles both root redirect and memory share links
@@ -51,23 +75,27 @@ export default function PublicMemoryPage() {
         return <PublicMemoryEmptyState />;
     }
 
-    const sharedViewerProps = {
+    const sharedViewerProps: MemoryViewerProps = {
         files,
         currentIndex,
         memoryName,
-        memoryMetadata,
-        laneFrames,
         onNext: goToNext,
         onPrev: goToPrev,
         onSeek: handleSeek,
     };
 
+    const laneViewerProps: LaneMemoryViewerProps = {
+        ...sharedViewerProps,
+        memoryMetadata,
+        laneFrames,
+    };
+
     return (
         <PublicMemoryPageShell>
             {viewerVariant === "lane" ? (
-                <LaneMemoryViewer {...sharedViewerProps} />
+                <LaneMemoryViewer {...laneViewerProps} />
             ) : (
-                <MemoryViewer {...sharedViewerProps} variant={viewerVariant} />
+                <MemoryViewer {...sharedViewerProps} />
             )}
         </PublicMemoryPageShell>
     );

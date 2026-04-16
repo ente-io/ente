@@ -20,7 +20,7 @@ jobs:
                   echo "museum_commit=$(curl -s https://api.ente.io/ping | jq -r .id)" >> $GITHUB_ENV
 
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   ref: ${{ env.museum_commit }}
 

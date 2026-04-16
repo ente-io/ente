@@ -1034,8 +1034,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Setare rază",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Adăugați 5 membri ai familiei la planul dvs. existent fără a plăti suplimentar.\n\nFiecare membru primește propriul spațiu privat și nu poate vedea fișierele celuilalt decât dacă acestea sunt partajate.\n\nPlanurile de familie sunt disponibile pentru clienții care au un abonament Ente plătit.\n\nAbonați-vă acum pentru a începe!",
   "androidBiometricHint": "Verificați-vă identitatea",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
