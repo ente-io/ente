@@ -577,7 +577,7 @@
   "addNew": "نیا شامل کریں",
   "selected": "منتخب شدہ",
   "moveMultipleToTrashMessage": "کیا آپ واقعی {count} آئٹم(ز) کو ٹریش میں منتقل کرنا چاہتے ہیں؟",
-  "nSelected": "{count, plural, =1{۱ منتخب} other{{count} منتخب}}",
+  "nSelected": "{count, plural, one {{count} منتخب} other{{count} منتخب}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -588,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{۱ آئٹم پن کیا گیا} other{{count} آئٹمز پن کیے گئے}}",
+  "pinnedCount": "{count, plural, one{{count} آئٹم پن کیا گیا} other{{count} آئٹمز پن کیے گئے}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -599,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{۱ آئٹم ان پن کیا گیا} other{{count} آئٹمز ان پن کیے گئے}}",
+  "unpinnedCount": "{count, plural, one{{count} آئٹم ان پن کیا گیا} other{{count} آئٹمز ان پن کیے گئے}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {
