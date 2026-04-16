@@ -33,7 +33,6 @@ interface UseCollectionShareResult {
     downloadProgress: number | null;
     errorTitle: string | null;
     error: string | null;
-    errorIsExpired: boolean;
     collectionInfo: PublicCollectionShareInfo | null;
     selectedItem: SharedCollectionItemInfo | null;
     notificationAttributes: NotificationAttributes | undefined;
@@ -50,7 +49,6 @@ interface UseCollectionShareResult {
 interface CollectionShareLoadError {
     title: string;
     message: string;
-    isExpired: boolean;
 }
 
 const readLocalStorageItem = (key: string): string | null => {
@@ -106,7 +104,6 @@ const collectionShareLoadError = async (
                     title: "Link expired",
                     message:
                         "This link has either expired or has been disabled.",
-                    isExpired: true,
                 };
             }
         } catch {
@@ -116,7 +113,14 @@ const collectionShareLoadError = async (
         return {
             title: "Link expired",
             message: "This link has either expired or has been disabled.",
-            isExpired: true,
+        };
+    }
+
+    if (isHTTPErrorWithStatus(err, 429)) {
+        return {
+            title: "Too many viewers",
+            message:
+                "This link has reached its device limit. Ask the owner to increase the limit or try again later.",
         };
     }
 
@@ -129,7 +133,6 @@ const collectionShareLoadError = async (
             title: "Unable to open this collection",
             message:
                 "This collection link is no longer available. It may have been removed or expired.",
-            isExpired: false,
         };
     }
 
@@ -137,13 +140,44 @@ const collectionShareLoadError = async (
         title: "Unable to open this collection",
         message:
             "Unable to load this collection right now. Please try again later.",
-        isExpired: false,
     };
+};
+
+const ITEM_BACK_STATE_KEY = "__enteCollectionShareItemBack";
+const RESUME_REVALIDATE_AFTER_MS = 30_000;
+
+const addItemBackStateMarker = (state: unknown, marker: string) =>
+    state && typeof state == "object"
+        ? {
+              ...(state as Record<string, unknown>),
+              [ITEM_BACK_STATE_KEY]: marker,
+          }
+        : { [ITEM_BACK_STATE_KEY]: marker };
+
+const hasItemBackStateMarker = (state: unknown, marker: string) =>
+    !!state &&
+    typeof state == "object" &&
+    (state as Record<string, unknown>)[ITEM_BACK_STATE_KEY] == marker;
+
+const getItemBackStateMarker = (state: unknown) =>
+    state && typeof state == "object"
+        ? (state as Record<string, unknown>)[ITEM_BACK_STATE_KEY]
+        : undefined;
+
+const shouldPreserveLoadedStateOnSilentRefreshError = (err: unknown) => {
+    if (!(err instanceof HTTPError)) {
+        return true;
+    }
+
+    return err.res.status >= 500;
 };
 
 export const useCollectionShare = (): UseCollectionShareResult => {
     const router = useRouter();
+    const initialLoadStartedRef = useRef(false);
     const isRevalidatingRef = useRef(false);
+    const lastResumeRevalidateAtRef = useRef(0);
+    const browserBackStateRef = useRef<string | undefined>(undefined);
     const [loading, setLoading] = useState(true);
     const [downloadingItemID, setDownloadingItemID] = useState<number | null>(
         null,
@@ -153,7 +187,6 @@ export const useCollectionShare = (): UseCollectionShareResult => {
     );
     const [errorTitle, setErrorTitle] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [errorIsExpired, setErrorIsExpired] = useState(false);
     const [collectionInfo, setCollectionInfo] =
         useState<PublicCollectionShareInfo | null>(null);
     const [selectedItem, setSelectedItem] =
@@ -183,13 +216,15 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 accessToken: string;
                 collectionKey: string;
                 accessTokenJWT: string;
+                silent: boolean;
             }>,
         ) => {
             try {
-                setLoading(true);
+                if (!opts?.silent) {
+                    setLoading(true);
+                }
                 setError(null);
                 setErrorTitle(null);
-                setErrorIsExpired(false);
                 setPasswordProtectedPublicURL(null);
 
                 const url = new URL(window.location.href);
@@ -200,9 +235,15 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                     return;
                 }
 
-                const resolvedCollectionKey =
-                    opts?.collectionKey ??
-                    (await extractCollectionKeyFromShareURL(url));
+                let resolvedCollectionKey: string | undefined;
+                try {
+                    resolvedCollectionKey =
+                        opts?.collectionKey ??
+                        (await extractCollectionKeyFromShareURL(url));
+                } catch {
+                    setInvalidLinkState();
+                    return;
+                }
                 if (!resolvedCollectionKey) {
                     setInvalidLinkState();
                     return;
@@ -243,7 +284,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                             accessToken: token,
                             accessTokenJWT: activeAccessTokenJWT,
                         },
-                        resolvedCollectionKey,
+                        metadata,
                     );
                 } catch (err) {
                     if (activeAccessTokenJWT && isHTTP401Error(err)) {
@@ -262,20 +303,29 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 setPasswordProtectedPublicURL(null);
                 setCollectionInfo(info);
             } catch (err) {
+                if (
+                    opts?.silent &&
+                    shouldPreserveLoadedStateOnSilentRefreshError(err)
+                ) {
+                    return;
+                }
+
                 clearLoadedState();
                 const loadError = await collectionShareLoadError(err);
                 setErrorTitle(loadError.title);
                 setError(loadError.message);
-                setErrorIsExpired(loadError.isExpired);
             } finally {
-                setLoading(false);
+                if (!opts?.silent) {
+                    setLoading(false);
+                }
             }
         },
         [clearLoadedState, setInvalidLinkState],
     );
 
     useEffect(() => {
-        if (router.isReady) {
+        if (router.isReady && !initialLoadStartedRef.current) {
+            initialLoadStartedRef.current = true;
             void loadCollection();
         }
     }, [router.isReady, loadCollection]);
@@ -293,8 +343,17 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 return;
             }
 
+            const now = Date.now();
+            if (
+                now - lastResumeRevalidateAtRef.current <
+                RESUME_REVALIDATE_AFTER_MS
+            ) {
+                return;
+            }
+
+            lastResumeRevalidateAtRef.current = now;
             isRevalidatingRef.current = true;
-            void loadCollection().finally(() => {
+            void loadCollection({ silent: true }).finally(() => {
                 isRevalidatingRef.current = false;
             });
         };
@@ -318,6 +377,56 @@ export const useCollectionShare = (): UseCollectionShareResult => {
             );
         };
     }, [router.isReady, loadCollection]);
+
+    useEffect(() => {
+        if (!selectedItem) {
+            return;
+        }
+
+        const currentState: unknown = window.history.state;
+        const existingMarker = getItemBackStateMarker(currentState);
+        const stateMarker =
+            typeof existingMarker == "string" && existingMarker
+                ? existingMarker
+                : `${selectedItem.id}-${Date.now()}-${Math.random()
+                      .toString(36)
+                      .slice(2)}`;
+        browserBackStateRef.current = stateMarker;
+
+        if (!existingMarker) {
+            const itemState = addItemBackStateMarker(currentState, stateMarker);
+            try {
+                window.history.pushState(itemState, "", window.location.href);
+            } catch {
+                browserBackStateRef.current = undefined;
+                return;
+            }
+        }
+
+        const onPopState = () => {
+            if (browserBackStateRef.current != stateMarker) {
+                return;
+            }
+
+            browserBackStateRef.current = undefined;
+            setSelectedItem(null);
+        };
+
+        window.addEventListener("popstate", onPopState);
+        return () => {
+            window.removeEventListener("popstate", onPopState);
+            if (browserBackStateRef.current != stateMarker) {
+                return;
+            }
+
+            browserBackStateRef.current = undefined;
+
+            const latestHistoryState: unknown = window.history.state;
+            if (hasItemBackStateMarker(latestHistoryState, stateMarker)) {
+                window.history.back();
+            }
+        };
+    }, [selectedItem]);
 
     const handleCloseItem = () => {
         setSelectedItem(null);
@@ -436,7 +545,6 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         downloadProgress,
         errorTitle,
         error,
-        errorIsExpired,
         collectionInfo,
         selectedItem,
         notificationAttributes,

@@ -1,7 +1,5 @@
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import { useColorScheme } from "@mui/material/styles";
 import { Notification } from "ente-new/photos/components/Notification";
-import Head from "next/head";
 import React from "react";
 import { useFileShare } from "../../hooks/useFileShare";
 import { formatFileSize } from "../../services/file-share";
@@ -9,9 +7,6 @@ import { getLockerFileIcon } from "../../utils/file-type";
 import { LockerTypeDisplay } from "./LockerTypeDisplay";
 
 export const FileShareView: React.FC = () => {
-    const { systemMode } = useColorScheme();
-    const isDarkMode = systemMode === "dark";
-
     const {
         loading,
         downloading,
@@ -29,33 +24,33 @@ export const FileShareView: React.FC = () => {
         : null;
 
     return (
-        <>
-            <Head>
-                <meta name="robots" content="noindex, nofollow" />
-            </Head>
-            <Box
-                sx={{
-                    minHeight: "100dvh",
-                    bgcolor: "accent.main",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    padding: { xs: 1, md: 3 },
-                    boxSizing: "border-box",
-                }}
-            >
+        <Box
+            sx={{
+                minHeight: "100dvh",
+                width: "100%",
+                maxWidth: "100%",
+                bgcolor: "accent.main",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                p: { xs: 1.25, md: 2 },
+                boxSizing: "border-box",
+                overflowX: "hidden",
+            }}
+        >
                 <Box
                     sx={{
-                        minHeight: {
-                            xs: "calc(100dvh - 16px)",
-                            md: "calc(100dvh - 48px)",
+                        height: {
+                            xs: "calc(100dvh - 20px)",
+                            md: "calc(100dvh - 32px)",
                         },
                         width: "100%",
                         bgcolor: "background.default",
-                        borderRadius: { xs: "20px", md: "40px" },
+                        borderRadius: { xs: "24px", md: "34px" },
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
+                        overflow: "hidden",
                         "& ::selection": {
                             backgroundColor: "accent.main",
                             color: "fixed.white",
@@ -69,10 +64,13 @@ export const FileShareView: React.FC = () => {
                     {/* Ente Locker Logo */}
                     <Box
                         sx={{
-                            mt: { xs: 5, md: 6 },
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: { xs: "center", md: "flex-end" },
+                            minHeight: { xs: 88, md: 104 },
+                            px: { xs: 3, md: 4.5 },
                             mb: fileInfo?.lockerType ? { xs: 16, md: 0 } : 0,
-                            alignSelf: { xs: "center", md: "flex-end" },
-                            mr: { xs: 0, md: 6 },
                         }}
                     >
                         <a
@@ -81,16 +79,18 @@ export const FileShareView: React.FC = () => {
                             rel="noopener noreferrer"
                             style={{ display: "block", lineHeight: 0 }}
                         >
-                            <Box
-                                component="img"
-                                src={
-                                    isDarkMode
-                                        ? "/images/ente-locker-white.svg"
-                                        : "/images/ente-locker.svg"
-                                }
-                                alt="Ente Locker"
-                                sx={{ height: "56px", cursor: "pointer" }}
-                            />
+                            <picture>
+                                <source
+                                    srcSet="/images/ente-locker-white.svg"
+                                    media="(prefers-color-scheme: dark)"
+                                />
+                                <Box
+                                    component="img"
+                                    src="/images/ente-locker.svg"
+                                    alt="Ente Locker"
+                                    sx={{ height: "56px", cursor: "pointer" }}
+                                />
+                            </picture>
                         </a>
                     </Box>
 
@@ -277,7 +277,6 @@ export const FileShareView: React.FC = () => {
                         attributes={notificationAttributes}
                     />
                 </Box>
-            </Box>
-        </>
+        </Box>
     );
 };

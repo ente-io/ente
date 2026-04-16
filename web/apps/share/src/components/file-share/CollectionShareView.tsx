@@ -58,21 +58,11 @@ const passwordCardSx = {
     px: { xs: 3, sm: 4 },
     py: { xs: 3.5, sm: 4 },
     borderRadius: "20px",
-    backgroundColor: "rgba(19, 21, 24, 0.96)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow:
-        "0 24px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
-    color: "#FFFFFF",
-    "& .MuiTypography-root": { color: "inherit" },
-    "& .MuiFormLabel-root": { color: "rgba(255, 255, 255, 0.64)" },
+    backgroundColor: "background.paper",
+    border: "1px solid",
+    borderColor: "divider",
+    color: "text.base",
     "& .MuiFormLabel-root.Mui-focused": { color: "accent.light" },
-    "& .MuiInputBase-root": {
-        backgroundColor: "rgba(255, 255, 255, 0.08)",
-        color: "#FFFFFF",
-    },
-    "& .MuiInputBase-input": { color: "#FFFFFF" },
-    "& .MuiInputAdornment-root": { color: "rgba(255, 255, 255, 0.52)" },
-    "& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.6)" },
     "& .MuiButton-root": {
         backgroundColor: "accent.main",
         color: "accent.contrastText",
@@ -169,13 +159,13 @@ export const CollectionShareView: React.FC = () => {
                     <Paper elevation={0} sx={passwordCardSx}>
                         <Typography
                             variant="h4"
-                            sx={{ fontWeight: 700, color: "#FFFFFF", mb: 1.5 }}
+                            sx={{ fontWeight: 700, color: "text.base", mb: 1.5 }}
                         >
                             {passwordTitle}
                         </Typography>
                         <Typography
                             variant="body"
-                            sx={{ color: "rgba(255, 255, 255, 0.72)", mb: 2 }}
+                            sx={{ color: "text.muted", mb: 2 }}
                         >
                             {passwordDescription}
                         </Typography>
@@ -217,9 +207,12 @@ export const CollectionShareView: React.FC = () => {
                         sx={{
                             width: "100%",
                             flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            overflow: "hidden",
+                            minHeight: 0,
                             px: { xs: 2, sm: 3 },
-                            pb: "calc(env(safe-area-inset-bottom) + 120px)",
-                            pt: { xs: 3, md: 5 },
+                            pt: { xs: 2, md: 2 },
                         }}
                     >
                         <Stack
@@ -230,8 +223,10 @@ export const CollectionShareView: React.FC = () => {
                                 gap: 2,
                                 maxWidth: contentMaxWidth,
                                 mx: "auto",
+                                width: "100%",
                                 mt: 1,
                                 mb: 2.25,
+                                flexShrink: 0,
                             }}
                         >
                             <Box sx={{ minWidth: 0 }}>
@@ -257,8 +252,14 @@ export const CollectionShareView: React.FC = () => {
                             sx={{
                                 maxWidth: contentMaxWidth,
                                 mx: "auto",
+                                width: "100%",
                                 gap: 1.1,
                                 mt: 1.25,
+                                flex: 1,
+                                minHeight: 0,
+                                overflowY: "auto",
+                                pr: 0.5,
+                                pb: "calc(env(safe-area-inset-bottom) + 24px)",
                             }}
                         >
                             {collectionInfo.items.map((item) => {
@@ -270,11 +271,12 @@ export const CollectionShareView: React.FC = () => {
                                 return (
                                     <ButtonBase
                                         key={`${item.collectionID}-${item.id}`}
-                                        component="div"
                                         onClick={() => handleItemClick(item)}
+                                        aria-label={`Open ${item.fileName}`}
                                         sx={(theme) => ({
                                             display: "flex",
                                             width: "100%",
+                                            flexShrink: 0,
                                             textAlign: "left",
                                             borderRadius: "18px",
                                             overflow: "hidden",
@@ -292,9 +294,13 @@ export const CollectionShareView: React.FC = () => {
                                                         .faintHover,
                                             },
                                             ...theme.applyStyles("light", {
-                                                backgroundColor: "#FFFFFF",
+                                                backgroundColor:
+                                                    theme.vars.palette
+                                                        .background.paper,
                                                 "&:hover": {
-                                                    backgroundColor: "#FFFFFF",
+                                                    backgroundColor:
+                                                        theme.vars.palette.fill
+                                                            .faintHover,
                                                 },
                                             }),
                                         })}

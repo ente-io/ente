@@ -234,6 +234,7 @@ const fetchPublicCollectionDiff = async (
     let hasMore = true;
 
     while (hasMore) {
+        const prevSinceTime = sinceTime;
         const res = await fetch(
             await apiURL("/public-collection/diff", { sinceTime }),
             {
@@ -253,6 +254,9 @@ const fetchPublicCollectionDiff = async (
             }
         }
         hasMore = parsed.hasMore;
+        // Defensive guard: if the server claims more pages but sinceTime did
+        // not advance, stop to avoid spinning on a broken server contract.
+        if (hasMore && sinceTime === prevSinceTime) break;
     }
 
     return [...filesByID.values()];
@@ -313,12 +317,8 @@ export const fetchPublicCollectionShareMetadata = async (
 
 export const fetchPublicCollectionShare = async (
     credentials: PublicAlbumsCredentials,
-    collectionKey: string,
+    metadata: PublicCollectionShareMetadata,
 ): Promise<PublicCollectionShareInfo> => {
-    const metadata = await fetchPublicCollectionShareMetadata(
-        credentials.accessToken,
-        collectionKey,
-    );
     const remoteFiles = await fetchPublicCollectionDiff(credentials);
     const items = await Promise.all(
         remoteFiles.map((file) =>

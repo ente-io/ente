@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import Head from "next/head";
 import React, { type ReactNode } from "react";
 
 interface PublicShareScaffoldProps {
@@ -10,39 +9,51 @@ export const PublicShareScaffold: React.FC<PublicShareScaffoldProps> = ({
     children,
 }) => {
     return (
-        <>
-            <Head>
-                <meta name="robots" content="noindex, nofollow" />
-            </Head>
+        <Box
+            sx={{
+                minHeight: "100dvh",
+                width: "100%",
+                maxWidth: "100%",
+                bgcolor: "accent.main",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                p: { xs: 1.25, md: 2 },
+                boxSizing: "border-box",
+                overflowX: "hidden",
+                "& ::selection": {
+                    backgroundColor: "accent.main",
+                    color: "fixed.white",
+                },
+                "& ::-moz-selection": {
+                    backgroundColor: "accent.main",
+                    color: "fixed.white",
+                },
+            }}
+        >
             <Box
                 sx={{
-                    minHeight: "100dvh",
-                    bgcolor: "#08090A",
+                    height: {
+                        xs: "calc(100dvh - 20px)",
+                        md: "calc(100dvh - 32px)",
+                    },
+                    width: "100%",
+                    bgcolor: "background.default",
+                    borderRadius: { xs: "24px", md: "34px" },
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    boxSizing: "border-box",
-                    "& ::selection": {
-                        backgroundColor: "#1071FF",
-                        color: "#FFFFFF",
-                    },
-                    "& ::-moz-selection": {
-                        backgroundColor: "#1071FF",
-                        color: "#FFFFFF",
-                    },
+                    overflow: "hidden",
                 }}
             >
                 <Box
                     sx={{
                         width: "100%",
-                        background:
-                            "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        px: { xs: 2, sm: 3 },
-                        pt: 2,
-                        pb: 2.5,
+                        justifyContent: { xs: "center", md: "flex-end" },
+                        minHeight: { xs: 88, md: 104 },
+                        px: { xs: 3, md: 4.5 },
                     }}
                 >
                     <a
@@ -51,12 +62,18 @@ export const PublicShareScaffold: React.FC<PublicShareScaffoldProps> = ({
                         rel="noopener noreferrer"
                         style={{ display: "block", lineHeight: 0 }}
                     >
-                        <Box
-                            component="img"
-                            src="/images/ente-locker-white.svg"
-                            alt="Ente Locker"
-                            sx={{ height: { xs: "30px", md: "34px" } }}
-                        />
+                        <picture>
+                            <source
+                                srcSet="/images/ente-locker-white.svg"
+                                media="(prefers-color-scheme: dark)"
+                            />
+                            <Box
+                                component="img"
+                                src="/images/ente-locker.svg"
+                                alt="Ente Locker"
+                                sx={{ height: "56px", cursor: "pointer" }}
+                            />
+                        </picture>
                     </a>
                 </Box>
                 <Box
@@ -65,12 +82,12 @@ export const PublicShareScaffold: React.FC<PublicShareScaffoldProps> = ({
                         flex: 1,
                         display: "flex",
                         flexDirection: "column",
-                        bgcolor: "#08090A",
+                        minHeight: 0,
                     }}
                 >
                     {children}
                 </Box>
             </Box>
-        </>
+        </Box>
     );
 };

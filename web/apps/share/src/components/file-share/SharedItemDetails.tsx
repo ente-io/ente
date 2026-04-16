@@ -58,6 +58,7 @@ export const SharedItemDetails: React.FC<SharedItemDetailsProps> = ({
                 <Box sx={{ width: "100%", mb: 4 }}>
                     <IconButton
                         onClick={onBack}
+                        aria-label="Back"
                         sx={{
                             color: "text.base",
                             ml: -1,
