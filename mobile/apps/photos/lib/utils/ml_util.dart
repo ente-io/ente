@@ -538,7 +538,7 @@ Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
     return instructions.where((instruction) => instruction.pendingML).toList();
   }
   _logger.info("fetching embeddings for ${ids.length} files");
-  final res = flagService.internalUser
+  final res = flagService.mLHydrationStaleFileRecovery
       ? await _fetchFilesDataForMlHydrationWithRecovery(pendingIndex)
       : await fileDataService.getFilesData(ids);
   _logger.info("embeddingResponse ${res.debugLog()}");
