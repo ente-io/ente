@@ -44,7 +44,11 @@ class FileUtil {
 
     final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
     if (await cachedDecryptedFile.exists()) {
-      await _launchFile(context, cachedDecryptedFile, displayName: file.displayName);
+      await _launchFile(
+        context,
+        cachedDecryptedFile,
+        displayName: file.displayName,
+      );
       return;
     }
 
@@ -77,7 +81,11 @@ class FileUtil {
       await dialog.hide();
 
       if (decryptedFile != null) {
-        await _launchFile(context, decryptedFile, displayName: file.displayName);
+        await _launchFile(
+          context,
+          decryptedFile,
+          displayName: file.displayName,
+        );
       } else {
         await showAlertBottomSheet(
           context,
@@ -425,6 +433,12 @@ class FileUtil {
         context: context,
         error: e,
       );
+    } finally {
+      if (fileToOpen.path != file.path) {
+        try {
+          await fileToOpen.delete();
+        } catch (_) {}
+      }
     }
   }
 }
