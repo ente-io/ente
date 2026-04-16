@@ -1,5 +1,6 @@
 import { Box, CircularProgress } from "@mui/material";
 import { CustomHeadShare } from "ente-base/components/Head";
+import Head from "next/head";
 import React, { useEffect, useState } from "react";
 import { CollectionShareView } from "../components/file-share/CollectionShareView";
 import { FileShareView } from "../components/file-share/FileShareView";
@@ -49,6 +50,9 @@ const Page: React.FC = () => {
     return (
         <>
             <CustomHeadShare title="Ente Locker" />
+            <Head>
+                <meta name="robots" content="noindex, nofollow" />
+            </Head>
             {!hideContent && shareView === null && (
                 <Box
                     sx={{
