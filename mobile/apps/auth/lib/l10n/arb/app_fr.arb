@@ -581,7 +581,7 @@
   "addNew": "Ajouter un nouveau",
   "selected": "Sélectionné",
   "moveMultipleToTrashMessage": "Êtes-vous sûr de vouloir déplacer {count} éléments vers la corbeille ?",
-  "nSelected": "{count, plural, one {}=1{1 sélectionné} other{{count} sélectionné}}",
+  "nSelected": "{count, plural, one {{count} sélectionné} other {{count} sélectionnés}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -592,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {}=1{Épinglé 1 élément} other{Épinglé {count} objets}}",
+  "pinnedCount": "{count, plural, one{Épinglé {count} élément} other{Épinglé {count} éléments}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -603,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, one {}=1{Désépinglé 1 élément} other{Désépinglé {count} objets}}",
+  "unpinnedCount": "{count, plural, one{Désépinglé {count} élément} other{Désépinglé {count} éléments}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

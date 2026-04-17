@@ -16,14 +16,14 @@ class WrappedRootContactKey {
 
 enum ContactAttachmentType { profilePicture }
 
-enum RootKeySource { cache, server, created }
+enum RootKeySource { cache, unresolved }
 
 class OpenContactsContextInput {
   final String baseUrl;
   final String authToken;
   final int userId;
   final Uint8List accountKey;
-  final WrappedRootContactKey? cachedRootKey;
+  final WrappedRootContactKey? cachedWrappedRootContactKey;
   final String? userAgent;
   final String? clientPackage;
   final String? clientVersion;
@@ -33,7 +33,7 @@ class OpenContactsContextInput {
     required this.authToken,
     required this.userId,
     required this.accountKey,
-    this.cachedRootKey,
+    this.cachedWrappedRootContactKey,
     this.userAgent,
     this.clientPackage,
     this.clientVersion,
@@ -42,12 +42,12 @@ class OpenContactsContextInput {
 
 class OpenContactsContextResult {
   final ContactsRustContext ctx;
-  final WrappedRootContactKey wrappedRootKey;
+  final WrappedRootContactKey? wrappedRootContactKey;
   final RootKeySource rootKeySource;
 
   const OpenContactsContextResult({
     required this.ctx,
-    required this.wrappedRootKey,
+    required this.wrappedRootContactKey,
     required this.rootKeySource,
   });
 }
@@ -57,7 +57,7 @@ abstract class ContactsRustContext {
 
   Future<void> updateAuthToken(String authToken);
 
-  WrappedRootContactKey currentWrappedRootKey();
+  WrappedRootContactKey? currentWrappedRootContactKey();
 
   Future<ContactRecord> createContact(ContactData data);
 
@@ -110,11 +110,11 @@ class FrbContactsRustApi implements ContactsRustApi {
         authToken: input.authToken,
         userId: input.userId,
         masterKey: input.accountKey,
-        cachedRootKey: input.cachedRootKey == null
+        cachedWrappedRootContactKey: input.cachedWrappedRootContactKey == null
             ? null
             : rust.WrappedRootContactKey(
-                encryptedKey: input.cachedRootKey!.encryptedKey,
-                header: input.cachedRootKey!.header,
+                encryptedKey: input.cachedWrappedRootContactKey!.encryptedKey,
+                header: input.cachedWrappedRootContactKey!.header,
               ),
         userAgent: input.userAgent,
         clientPackage: input.clientPackage,
@@ -124,14 +124,15 @@ class FrbContactsRustApi implements ContactsRustApi {
 
     return OpenContactsContextResult(
       ctx: _FrbContactsRustContext(result.ctx),
-      wrappedRootKey: WrappedRootContactKey(
-        encryptedKey: result.wrappedRootKey.encryptedKey,
-        header: result.wrappedRootKey.header,
-      ),
+      wrappedRootContactKey: result.wrappedRootContactKey == null
+          ? null
+          : WrappedRootContactKey(
+              encryptedKey: result.wrappedRootContactKey!.encryptedKey,
+              header: result.wrappedRootContactKey!.header,
+            ),
       rootKeySource: switch (result.rootKeySource) {
         rust.RootKeySource.cache => RootKeySource.cache,
-        rust.RootKeySource.server => RootKeySource.server,
-        rust.RootKeySource.created => RootKeySource.created,
+        rust.RootKeySource.unresolved => RootKeySource.unresolved,
       },
     );
   }
@@ -151,8 +152,11 @@ class _FrbContactsRustContext implements ContactsRustContext {
   }
 
   @override
-  WrappedRootContactKey currentWrappedRootKey() {
-    final current = _inner.currentWrappedRootKey();
+  WrappedRootContactKey? currentWrappedRootContactKey() {
+    final current = _inner.currentWrappedRootContactKey();
+    if (current == null) {
+      return null;
+    }
     return WrappedRootContactKey(
       encryptedKey: current.encryptedKey,
       header: current.header,

@@ -2051,6 +2051,7 @@ const CommentsContainer = styled(Box)(({ theme }) => ({
     overflow: "auto",
     marginBottom: 16,
     marginRight: -24,
+    paddingRight: 24,
     position: "relative",
     display: "flex",
     flexDirection: "column-reverse",

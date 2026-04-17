@@ -1,3 +1,7 @@
+import { savedKeyAttributes } from "ente-accounts-rs/services/accounts-db";
+import { getUserRecoveryKey } from "ente-accounts-rs/services/recovery-key";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { clientPackageName, desktopAppVersion, isDesktop } from "ente-base/app";
 import log from "ente-base/log";
 import { apiOrigin } from "ente-base/origins";
@@ -22,6 +26,25 @@ import type {
     ContactDisplayRecord,
     ContactLookup,
     ContactsDisplaySnapshot,
+    LegacyContactState,
+    LegacyInfo,
+    LegacyRecoveryBundle,
+    LegacyRecoveryStatus,
+    ResolvedContactAvatar,
+    ResolvedContactDisplay,
+    WrappedRootContactKey,
+} from "./types";
+export type {
+    ContactDisplayRecord,
+    ContactLookup,
+    ContactsDisplaySnapshot,
+    LegacyContactRecord,
+    LegacyContactState,
+    LegacyInfo,
+    LegacyRecoveryBundle,
+    LegacyRecoverySession,
+    LegacyRecoveryStatus,
+    LegacyUser,
     ResolvedContactAvatar,
     ResolvedContactDisplay,
     WrappedRootContactKey,
@@ -43,9 +66,45 @@ interface RemoteContactRecord {
     updatedAt: number | bigint;
 }
 
+interface RemoteLegacyUser {
+    id: number | bigint;
+    email: string;
+}
+
+interface RemoteLegacyContactRecord {
+    user: RemoteLegacyUser;
+    emergencyContact: RemoteLegacyUser;
+    state: LegacyContactState;
+    recoveryNoticeInDays: number | bigint;
+}
+
+interface RemoteLegacyRecoverySession {
+    id: string;
+    user: RemoteLegacyUser;
+    emergencyContact: RemoteLegacyUser;
+    status: LegacyRecoveryStatus;
+    waitTill: number | bigint;
+    createdAt: number | bigint;
+}
+
+interface RemoteLegacyInfo {
+    contacts: RemoteLegacyContactRecord[];
+    recoverSessions: RemoteLegacyRecoverySession[];
+    othersEmergencyContact: RemoteLegacyContactRecord[];
+    othersRecoverySession: RemoteLegacyRecoverySession[];
+}
+
 interface ContactsReadyInput {
     userID: number;
     masterKeyB64: string;
+}
+
+type RootKeySource = "cache" | "unresolved";
+
+interface OpenedContactsCtx {
+    ctx: ContactsCtxHandle;
+    wrappedRootContactKey?: WrappedRootContactKey;
+    rootKeySource: RootKeySource;
 }
 
 interface ContactsState {
@@ -288,7 +347,7 @@ const loadLocalSessionState = async (sessionKey: string) => {
     emitSnapshot(true);
 };
 
-const syncContacts = async ({
+const ensureContactsCtxOpen = async ({
     sessionKey,
     baseURL,
     authToken,
@@ -301,35 +360,36 @@ const syncContacts = async ({
 }) => {
     let ctx = state.ctx;
     const generation = state.sessionGeneration;
+
     if (!ctx) {
-        const cachedRootKey = await savedWrappedRootContactKey(sessionKey);
+        const cachedWrappedRootContactKey =
+            await savedWrappedRootContactKey(sessionKey);
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
         const { contacts_open_ctx } = await loadEnteWasm();
-        const openedCtx = await contacts_open_ctx({
+        const openedCtx = (await contacts_open_ctx({
             baseUrl: baseURL,
             authToken,
             userId: userID,
             masterKeyB64,
-            cachedRootKey,
-            userAgent:
-                typeof navigator === "undefined"
-                    ? undefined
-                    : navigator.userAgent,
+            cachedWrappedRootContactKey,
             clientPackage: clientPackageName,
             clientVersion: isDesktop ? desktopAppVersion : undefined,
-        });
+        })) as OpenedContactsCtx;
         if (!isCurrentSession(sessionKey, generation)) {
             return;
         }
-        state.ctx = openedCtx;
-        ctx = openedCtx;
-        const wrappedRootKey =
-            openedCtx.current_wrapped_root_key() as WrappedRootContactKey;
-        await saveWrappedRootContactKey(sessionKey, wrappedRootKey);
-        if (!isCurrentSession(sessionKey, generation)) {
-            return;
+        state.ctx = openedCtx.ctx;
+        ctx = openedCtx.ctx;
+        if (openedCtx.wrappedRootContactKey) {
+            await saveWrappedRootContactKey(
+                sessionKey,
+                openedCtx.wrappedRootContactKey,
+            );
+            if (!isCurrentSession(sessionKey, generation)) {
+                return;
+            }
         }
     } else if (state.currentAuthToken !== authToken) {
         ctx.update_auth_token(authToken);
@@ -340,6 +400,31 @@ const syncContacts = async ({
     }
 
     state.currentAuthToken = authToken;
+    return ctx;
+};
+
+const syncContacts = async ({
+    sessionKey,
+    baseURL,
+    authToken,
+    userID,
+    masterKeyB64,
+}: ContactsReadyInput & {
+    sessionKey: string;
+    baseURL: string;
+    authToken: string;
+}) => {
+    const ctx = await ensureContactsCtxOpen({
+        sessionKey,
+        baseURL,
+        authToken,
+        userID,
+        masterKeyB64,
+    });
+    if (!ctx) {
+        return;
+    }
+    const generation = state.sessionGeneration;
 
     let sinceTime = (await savedContactsSinceTime(sessionKey)) ?? 0;
     let didChange = false;
@@ -370,6 +455,16 @@ const syncContacts = async ({
     if (didChange) {
         if (!isCurrentSession(sessionKey, generation)) {
             return;
+        }
+        const wrappedRootContactKey =
+            (await ctx.current_wrapped_root_contact_key()) as
+                | WrappedRootContactKey
+                | undefined;
+        if (wrappedRootContactKey) {
+            await saveWrappedRootContactKey(sessionKey, wrappedRootContactKey);
+            if (!isCurrentSession(sessionKey, generation)) {
+                return;
+            }
         }
         await saveContactDisplayRecords(sessionKey, [
             ...state.contactsByID.values(),
@@ -439,6 +534,210 @@ export const ensureContactsReady = async ({
     state.readyPromise = readyPromise;
 
     return readyPromise;
+};
+
+const ensureCurrentLegacyCtx = async () => {
+    const masterKeyB64 = await masterKeyFromSession();
+    if (!masterKeyB64) {
+        throw new Error("Missing current master key");
+    }
+    const authToken = await savedAuthToken();
+    if (!authToken) {
+        throw new Error("Missing auth token");
+    }
+    const user = ensureLocalUser();
+    const baseURL = await apiOrigin();
+    const sessionKey = buildSessionKey(baseURL, user.id);
+    if (state.currentSessionKey !== sessionKey) {
+        await loadLocalSessionState(sessionKey);
+    }
+    const ctx = await ensureContactsCtxOpen({
+        sessionKey,
+        baseURL,
+        authToken,
+        userID: user.id,
+        masterKeyB64,
+    });
+    if (!ctx) {
+        throw new Error("Contacts context not available");
+    }
+    return ctx;
+};
+
+const ensureCurrentLegacyKeyAttributes = () => {
+    const keyAttributes = savedKeyAttributes();
+    if (!keyAttributes) {
+        throw new Error("Missing current key attributes");
+    }
+    return keyAttributes as unknown as Record<string, unknown>;
+};
+
+const normalizeLegacyUser = (user: RemoteLegacyUser) => ({
+    id: Number(user.id),
+    email: user.email,
+});
+
+const normalizeLegacyContactRecord = (record: RemoteLegacyContactRecord) => ({
+    user: normalizeLegacyUser(record.user),
+    emergencyContact: normalizeLegacyUser(record.emergencyContact),
+    state: record.state,
+    recoveryNoticeInDays: Number(record.recoveryNoticeInDays),
+});
+
+const normalizeLegacyRecoverySession = (
+    session: RemoteLegacyRecoverySession,
+) => ({
+    id: session.id,
+    user: normalizeLegacyUser(session.user),
+    emergencyContact: normalizeLegacyUser(session.emergencyContact),
+    status: session.status,
+    waitTill: Number(session.waitTill),
+    createdAt: Number(session.createdAt),
+});
+
+const normalizeLegacyInfo = (info: RemoteLegacyInfo): LegacyInfo => ({
+    contacts: info.contacts.map(normalizeLegacyContactRecord),
+    recoverSessions: info.recoverSessions.map(normalizeLegacyRecoverySession),
+    othersEmergencyContact: info.othersEmergencyContact.map(
+        normalizeLegacyContactRecord,
+    ),
+    othersRecoverySession: info.othersRecoverySession.map(
+        normalizeLegacyRecoverySession,
+    ),
+});
+
+export const legacyGetInfo = async (): Promise<LegacyInfo> => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return normalizeLegacyInfo(
+        (await ctx.legacy_get_info()) as RemoteLegacyInfo,
+    );
+};
+
+export const legacyPublicKey = async (email: string) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    const publicKey = (await ctx.legacy_public_key(email)) as
+        | string
+        | null
+        | undefined;
+    return publicKey ?? undefined;
+};
+
+export const legacyVerificationID = async (email: string) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    const publicKey = (await ctx.legacy_public_key(email)) as
+        | string
+        | null
+        | undefined;
+    return publicKey ? ctx.legacy_verification_id(publicKey) : undefined;
+};
+
+export const legacyAddContact = async (
+    email: string,
+    recoveryNoticeInDays?: number,
+) => {
+    await getUserRecoveryKey();
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_add_contact(
+        email,
+        ensureCurrentLegacyKeyAttributes(),
+        recoveryNoticeInDays,
+    );
+};
+
+export const legacyUpdateContact = async (
+    userID: number,
+    emergencyContactID: number,
+    state: LegacyContactState,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_update_contact(
+        BigInt(userID),
+        BigInt(emergencyContactID),
+        state,
+    );
+};
+
+export const legacyUpdateRecoveryNotice = async (
+    emergencyContactID: number,
+    recoveryNoticeInDays: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_update_recovery_notice(
+        BigInt(emergencyContactID),
+        recoveryNoticeInDays,
+    );
+};
+
+export const legacyStartRecovery = async (
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_start_recovery(
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyStopRecovery = async (
+    recoveryID: string,
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_stop_recovery(
+        recoveryID,
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyRejectRecovery = async (
+    recoveryID: string,
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_reject_recovery(
+        recoveryID,
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyApproveRecovery = async (
+    recoveryID: string,
+    userID: number,
+    emergencyContactID: number,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_approve_recovery(
+        recoveryID,
+        BigInt(userID),
+        BigInt(emergencyContactID),
+    );
+};
+
+export const legacyRecoveryBundle = async (
+    recoveryID: string,
+): Promise<LegacyRecoveryBundle> => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return (await ctx.legacy_recovery_bundle(
+        recoveryID,
+        ensureCurrentLegacyKeyAttributes(),
+    )) as LegacyRecoveryBundle;
+};
+
+export const legacyChangePassword = async (
+    recoveryID: string,
+    newPassword: string,
+) => {
+    const ctx = await ensureCurrentLegacyCtx();
+    return ctx.legacy_change_password(
+        recoveryID,
+        ensureCurrentLegacyKeyAttributes(),
+        newPassword,
+    );
 };
 
 const inferImageMimeType = (bytes: Uint8Array) => {

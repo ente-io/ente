@@ -36,7 +36,7 @@ jobs:
             rust_changed: ${{ steps.filter.outputs.rust_changed }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Detect changed files
               uses: dorny/paths-filter@v3
@@ -97,7 +97,7 @@ jobs:
         if: github.event_name == 'pull_request'
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Verify frozen mobile pubspecs
               run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile
@@ -109,7 +109,7 @@ jobs:
         if: needs.detect-changes.outputs.lint_all == 'true' || needs.detect-changes.outputs.packages != ''
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -251,7 +251,7 @@ jobs:
         if: needs.detect-changes.outputs.rust_changed == 'true'
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -325,13 +325,13 @@ jobs:
         steps:
             - name: Checkout code and submodules
               if: needs.detect-changes.outputs.lint_auth == 'true'
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   submodules: recursive
 
             - name: Checkout code
               if: needs.detect-changes.outputs.lint_auth != 'true'
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
