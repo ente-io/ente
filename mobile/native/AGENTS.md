@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 - `android/apps/ensu`: Android app workspace (Gradle Kotlin DSL). Key modules include `app-ui`, `domain`, `data`, `crypto-auth-core`, and `rust`.
 - `android/packages/rust`: Shared Rust/Android integration module referenced by the app workspace.
-- `darwin/Apps/ensu` and `darwin/Apps/tv`: Xcode projects for Apple platforms.
+- `darwin/Apps/Ensu` and `darwin/Apps/tv`: Xcode projects for Apple platforms.
 - `darwin/Packages/*`: Swift Package Manager libraries. Source code under `Sources/`, tests under `Tests/`.
 
 ## Build, Test, and Development Commands
@@ -11,7 +11,7 @@ Run commands from the module root noted below.
 - Android build (debug): `cd android/apps/ensu && ./gradlew assembleDebug`
 - Android unit tests: `cd android/apps/ensu && ./gradlew test`
 - Apple apps (open in Xcode):
-  - `open darwin/Apps/ensu/ensu.xcodeproj`
+  - `open darwin/Apps/Ensu/Ensu.xcodeproj`
   - `open darwin/darwin.xcworkspace`
 - Swift package tests: `swift test --package-path darwin/Packages/EnteCore`
 
