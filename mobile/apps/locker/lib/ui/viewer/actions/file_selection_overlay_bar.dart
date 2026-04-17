@@ -62,8 +62,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   List<EnteFile> _getOwnedFiles(List<EnteFile> files) {
     final currentUserID = Configuration.instance.getUserID();
-    final ownedFiles =
-        files.where((file) => file.ownerID == currentUserID).toList();
+    final ownedFiles = files
+        .where((file) => file.ownerID == currentUserID)
+        .toList();
 
     final sharedCount = files.length - ownedFiles.length;
     if (sharedCount > 0 && mounted) {
@@ -182,10 +183,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                         widget.selectedFiles.files;
                                     final isAllSelected =
                                         widget.files.isNotEmpty &&
-                                            widget.files.every(
-                                              (file) =>
-                                                  selectedSet.contains(file),
-                                            );
+                                        widget.files.every(
+                                          (file) => selectedSet.contains(file),
+                                        );
                                     final buttonText = isAllSelected
                                         ? context.l10n.deselectAll
                                         : context.l10n.selectAll;
@@ -198,16 +198,18 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                         if (isAllSelected) {
                                           widget.selectedFiles.clearAll();
                                         } else {
-                                          widget.selectedFiles
-                                              .selectAll(widget.files.toSet());
+                                          widget.selectedFiles.selectAll(
+                                            widget.files.toSet(),
+                                          );
                                         }
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color:
                                               colorScheme.backgroundElevated2,
-                                          borderRadius:
-                                              BorderRadius.circular(50),
+                                          borderRadius: BorderRadius.circular(
+                                            50,
+                                          ),
                                         ),
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12.0,
@@ -237,8 +239,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                   listenable: widget.selectedFiles,
                                   builder: (context, child) {
                                     final count = widget.selectedFiles.count;
-                                    final countText =
-                                        context.l10n.selectedCount(count);
+                                    final countText = context.l10n
+                                        .selectedCount(count);
 
                                     return InkWell(
                                       onTap: () {
@@ -248,8 +250,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                         decoration: BoxDecoration(
                                           color:
                                               colorScheme.backgroundElevated2,
-                                          borderRadius:
-                                              BorderRadius.circular(50),
+                                          borderRadius: BorderRadius.circular(
+                                            50,
+                                          ),
                                         ),
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12.0,
@@ -339,27 +342,32 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final file = isSingleSelection ? files.first : null;
     final viewType = widget.collectionViewType;
 
-    final isImportant = isSingleSelection &&
+    final isImportant =
+        isSingleSelection &&
         file != null &&
         FavoritesService.instance.isFavoriteCache(file);
 
     final showImportant = viewType?.showMarkImportantOption ?? true;
     final showDelete = viewType?.showDeleteOption ?? true;
 
-    final eligibleOfflineFiles =
-        OfflineFilesService.instance.getEligibleFiles(files);
+    final eligibleOfflineFiles = OfflineFilesService.instance.getEligibleFiles(
+      files,
+    );
     final showOffline = viewType?.showOfflineOption ?? true;
     final actions = <Widget>[];
 
     if (showOffline && eligibleOfflineFiles.isNotEmpty) {
-      final shouldRemoveOffline = isSingleSelection &&
+      final shouldRemoveOffline =
+          isSingleSelection &&
           eligibleOfflineFiles.length == 1 &&
           LockerDB.instance.isFileMarkedOffline(eligibleOfflineFiles.first);
 
       actions.add(
         SelectionActionButton(
           hugeIcon: SvgPicture.asset(
-            "assets/svg/cloud-download.svg",
+            shouldRemoveOffline
+                ? "assets/svg/cloud-download-cancel.svg"
+                : "assets/svg/cloud-download.svg",
             width: 24,
             height: 24,
             colorFilter: ColorFilter.mode(
@@ -389,8 +397,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                   icon: HugeIcons.strokeRoundedStar,
                   color: colorScheme.textBase,
                 ),
-          label:
-              isImportant ? context.l10n.unimportant : context.l10n.important,
+          label: isImportant
+              ? context.l10n.unimportant
+              : context.l10n.important,
           onTap: () => isSingleSelection
               ? _markImportant(context, file!)
               : _markMultipleImportant(context, files),
@@ -414,9 +423,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    return Row(
-      children: _buildActionRow(actions),
-    );
+    return Row(children: _buildActionRow(actions));
   }
 
   Widget _buildTrashActionRow(
@@ -431,9 +438,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       child: Row(
         children: _buildActionRow([
           SelectionActionButton(
-            hugeIcon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedRefresh,
-            ),
+            hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh),
             label: context.l10n.restore,
             onTap: () => _restoreFiles(context, files),
           ),
@@ -465,9 +470,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: Row(
-        children: _buildActionRow(actions, spacing: 0),
-      ),
+      child: Row(children: _buildActionRow(actions, spacing: 0)),
     );
   }
 
@@ -496,9 +499,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (isSingleSelection && showEdit) {
       actions.add(
         SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedPencilEdit02,
-          ),
+          hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit02),
           label: context.l10n.edit,
           onTap: () => _editFile(context, file!),
         ),
@@ -508,9 +509,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (isSingleSelection && showShare) {
       actions.add(
         SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedNavigation06,
-          ),
+          hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedNavigation06),
           label: context.l10n.share,
           onTap: () => _shareFileLink(context, file!),
         ),
@@ -520,9 +519,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (showAddTo) {
       actions.add(
         SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowRight03,
-          ),
+          hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowRight03),
           label: context.l10n.addTo,
           onTap: () => _showAddToDialog(context, files),
         ),
@@ -531,9 +528,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
     actions.add(
       SelectionActionButton(
-        hugeIcon: const HugeIcon(
-          icon: HugeIcons.strokeRoundedDownload01,
-        ),
+        hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedDownload01),
         label: context.l10n.download,
         onTap: () => isSingleSelection
             ? _downloadFile(context, file!)
@@ -550,14 +545,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     required bool shouldRemoveOffline,
   }) async {
     final success = shouldRemoveOffline
-        ? await OfflineFilesService.instance.unmarkFilesOffline(
-            context,
-            files,
-          )
-        : await OfflineFilesService.instance.markFilesOffline(
-            context,
-            files,
-          );
+        ? await OfflineFilesService.instance.unmarkFilesOffline(context, files)
+        : await OfflineFilesService.instance.markFilesOffline(context, files);
 
     if (success) {
       widget.selectedFiles.clearAll();
@@ -573,10 +562,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     } catch (e, stackTrace) {
       _logger.severe("Failed to download file: $e", e, stackTrace);
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }
@@ -597,10 +583,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     } catch (e, stackTrace) {
       _logger.severe("Failed to download files: $e", e, stackTrace);
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }
@@ -637,8 +620,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       'Opening add-to dialog for ${ownedFiles.length} file(s); fetching collections.',
     );
 
-    final allCollections =
-        await CollectionService.instance.getCollectionsForUI();
+    final allCollections = await CollectionService.instance
+        .getCollectionsForUI();
     final dedupedCollections = uniqueCollectionsById(allCollections);
     _logger.info(
       'Presenting ${dedupedCollections.length} unique collection option(s) '
@@ -673,8 +656,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           );
           List<Collection> currentCollections;
           try {
-            currentCollections =
-                await CollectionService.instance.getCollectionsForFile(file);
+            currentCollections = await CollectionService.instance
+                .getCollectionsForFile(file);
           } catch (_) {
             _logger.warning(
               'Failed to fetch existing collections for file ${file.uploadedFileID}',
@@ -682,8 +665,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             currentCollections = <Collection>[];
           }
 
-          final currentCollectionIds =
-              currentCollections.map((collection) => collection.id).toSet();
+          final currentCollectionIds = currentCollections
+              .map((collection) => collection.id)
+              .toSet();
 
           final collectionsToAdd = result.selectedCollections.where(
             (collection) => !currentCollectionIds.contains(collection.id),
@@ -706,10 +690,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         if (addFutures.isEmpty) {
           await dialog.hide();
           widget.selectedFiles.clearAll();
-          showToast(
-            context,
-            context.l10n.noChangesWereMade,
-          );
+          showToast(context, context.l10n.noChangesWereMade);
           return;
         }
 
@@ -723,20 +704,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         widget.selectedFiles.clearAll();
 
-        showToast(
-          context,
-          context.l10n.fileUpdatedSuccessfully,
-        );
+        showToast(context, context.l10n.fileUpdatedSuccessfully);
       } catch (e) {
         await dialog.hide();
-        _logger.severe(
-          'Failed add-to operation: $e',
-        );
+        _logger.severe('Failed add-to operation: $e');
 
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }
@@ -788,8 +761,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       await dialog.show();
 
       for (final file in ownedFiles) {
-        final collections =
-            await CollectionService.instance.getCollectionsForFile(file);
+        final collections = await CollectionService.instance
+            .getCollectionsForFile(file);
 
         if (collections.isNotEmpty) {
           await CollectionService.instance.trashFile(file, collections.first);
@@ -800,10 +773,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
       widget.selectedFiles.clearAll();
 
-      showToast(
-        context,
-        context.l10n.fileDeletedSuccessfully,
-      );
+      showToast(context, context.l10n.fileDeletedSuccessfully);
     } catch (e, stackTrace) {
       await dialog.hide();
 
@@ -815,10 +785,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (!context.mounted) {
         return;
       }
-      await showGenericErrorBottomSheet(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 
@@ -860,8 +827,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _restoreFiles(BuildContext context, List<EnteFile> files) async {
     _logger.info('Opening restore dialog for ${files.length} file(s)');
 
-    final allCollections =
-        await CollectionService.instance.getCollectionsForUI();
+    final allCollections = await CollectionService.instance
+        .getCollectionsForUI();
     final dedupedCollections = uniqueCollectionsById(allCollections);
 
     final result = await showAddToCollectionSheet(
@@ -904,10 +871,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       _logger.severe('Failed to restore files: $e', e, stackTrace);
 
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }
@@ -946,20 +910,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       widget.selectedFiles.clearAll();
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.filesDeletedPermanently(files.length),
-        );
+        showToast(context, context.l10n.filesDeletedPermanently(files.length));
       }
     } catch (e, stackTrace) {
       await dialog.hide();
       _logger.severe('Failed to delete files from trash: $e', e, stackTrace);
 
       if (context.mounted) {
-        await showGenericErrorBottomSheet(
-          context: context,
-          error: e,
-        );
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }
