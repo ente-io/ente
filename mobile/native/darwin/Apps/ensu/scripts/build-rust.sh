@@ -122,13 +122,7 @@ ensure_generated_bindings() {
   sanitize_generated_swift_bindings "${GENERATED_DIR}/sync.swift"
 }
 
-if [ "$(uname -s)" = "Darwin" ]; then
-  HOST_LIB_EXT="dylib"
-elif [ "$(uname -s)" = "Linux" ]; then
-  HOST_LIB_EXT="so"
-else
-  HOST_LIB_EXT="dll"
-fi
+HOST_LIB_EXT="dylib"
 
 ensure_uniffi_bindgen() {
   if command -v uniffi-bindgen >/dev/null 2>&1; then
