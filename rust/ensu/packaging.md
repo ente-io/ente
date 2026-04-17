@@ -29,5 +29,4 @@ Android and Apple native apps use UniFFI + adapters.
 ## Native packaging layers
 
 - Android: `mobile/native/android/packages/rust`
-- Apple (`core`, `db`, `sync`): `mobile/native/darwin/Apps/ensu`
-- Apple (`inference`): `mobile/native/darwin/Packages/Rust`
+- Apple: `mobile/native/darwin/Apps/ensu`
