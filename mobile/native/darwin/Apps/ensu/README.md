@@ -46,6 +46,23 @@ xcodebuild \
   -derivedDataPath build
 ```
 
+## Tests
+
+Run the app-hosted inference integration test from Terminal with `TEST_RUNNER_...` environment
+variables so they reach the XCTest runner process:
+
+```bash
+cd darwin/Apps/ensu
+TEST_RUNNER_ENSU_TEST_MODEL=/path/to/model.gguf \
+TEST_RUNNER_ENSU_TEST_MMPROJ=/path/to/mmproj.gguf \
+TEST_RUNNER_ENSU_TEST_IMAGE=/path/to/image.png \
+xcodebuild test \
+  -project ensu.xcodeproj \
+  -scheme ensu \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  SWIFT_ENABLE_EXPLICIT_MODULES=NO
+```
+
 ### Debug Build (Device)
 ```bash
 cd darwin/Apps/ensu
