@@ -187,15 +187,6 @@ rust_target_for() {
         echo "" # unsupported
       fi
       ;;
-    macosx)
-      if [ "$arch" = "arm64" ]; then
-        echo "aarch64-apple-darwin"
-      elif [ "$arch" = "x86_64" ]; then
-        echo "x86_64-apple-darwin"
-      else
-        echo "" # unsupported
-      fi
-      ;;
     *)
       echo "" # unsupported
       ;;
@@ -210,9 +201,6 @@ sdk_for_platform() {
       ;;
     iphonesimulator)
       echo "iphonesimulator";
-      ;;
-    macosx)
-      echo "macosx";
       ;;
     *)
       echo "";
@@ -273,9 +261,7 @@ build_crate_universal() {
     eval "export CFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
     eval "export CXXFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
 
-    if [ "${PLATFORM_NAME}" = "macosx" ] && [ -n "${MACOSX_DEPLOYMENT_TARGET:-}" ]; then
-      export CMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}"
-    elif [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
+    if [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
       export CMAKE_OSX_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"
     fi
 

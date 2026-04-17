@@ -7,17 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteNetwork */; };
 		A10000012F11111100AA0001 /* InferenceIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022F11111100AA0001 /* InferenceIntegrationTests.swift */; };
 		DACC3DC92E618D6A00DAF993 /* EnteNetwork in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteNetwork */; };
 		DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
-		DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
 		DB9F1C3C2F9D123400ABCD02 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = DB9F1C3B2F9D123400ABCD02 /* Markdown */; };
-		DB9F1C3D2F9D123400ABCD02 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = DB9F1C3B2F9D123400ABCD02 /* Markdown */; };
 		DBA3E91C2F7A6B9000AA11BB /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = DBA3E91B2F7A6B9000AA11BB /* SwiftMath */; };
-		DBA3E91D2F7A6B9000AA11BB /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = DBA3E91B2F7A6B9000AA11BB /* SwiftMath */; };
 		DBC1A0032FD0123400ABCD02 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = DBC1A0022FD0123400ABCD02 /* RiveRuntime */; };
-		DBC1A0042FD0123400ABCD02 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = DBC1A0022FD0123400ABCD02 /* RiveRuntime */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,26 +26,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		77E1DDDF900AB047CB554122 /* Ensu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ensu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000022F11111100AA0001 /* InferenceIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceIntegrationTests.swift; sourceTree = "<group>"; };
 		A10000032F11111100AA0001 /* EnsuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnsuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA72BC612E5F87A000D128FF /* ensu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ensu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		8E70A4C58F3DCEC48083BAFB /* Exceptions for "ensu" folder in "ensu-macos" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Info-macOS.plist",
-				Info.plist,
-				LaunchScreen.storyboard,
-			);
-			target = EC53501B1BEF7BA36025B216 /* ensu-macos */;
-		};
 		DA01087C2E682336006E79AE /* Exceptions for "ensu" folder in "ensu" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"Info-macOS.plist",
 				Info.plist,
 			);
 			target = DA72BC602E5F87A000D128FF /* ensu */;
@@ -62,7 +46,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				DA01087C2E682336006E79AE /* Exceptions for "ensu" folder in "ensu" target */,
-				8E70A4C58F3DCEC48083BAFB /* Exceptions for "ensu" folder in "ensu-macos" target */,
 			);
 			path = ensu;
 			sourceTree = "<group>";
@@ -70,18 +53,6 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0BCBB02794980AFFDC386B69 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks */,
-				DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
-				DBA3E91D2F7A6B9000AA11BB /* SwiftMath in Frameworks */,
-				DB9F1C3D2F9D123400ABCD02 /* Markdown in Frameworks */,
-				DBC1A0042FD0123400ABCD02 /* RiveRuntime in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		A10000052F11111100AA0001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -126,7 +97,6 @@
 			isa = PBXGroup;
 			children = (
 				DA72BC612E5F87A000D128FF /* ensu.app */,
-				77E1DDDF900AB047CB554122 /* Ensu.app */,
 				A10000032F11111100AA0001 /* EnsuTests.xctest */,
 			);
 			name = Products;
@@ -190,34 +160,6 @@
 			productReference = DA72BC612E5F87A000D128FF /* ensu.app */;
 			productType = "com.apple.product-type.application";
 		};
-		EC53501B1BEF7BA36025B216 /* ensu-macos */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9C5C5C140967470293DCAAF2 /* Build configuration list for PBXNativeTarget "ensu-macos" */;
-			buildPhases = (
-				25484CE4873ED7217FB27990 /* Build Rust (core/db/sync/inference) */,
-				BB83D829CC14232E7E8BDD51 /* Sources */,
-				0BCBB02794980AFFDC386B69 /* Frameworks */,
-				1FDE2B245F9DADEF5E026D0B /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				DA72BC632E5F87A000D128FF /* ensu */,
-			);
-			name = "ensu-macos";
-			packageProductDependencies = (
-				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
-				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
-				DBA3E91B2F7A6B9000AA11BB /* SwiftMath */,
-				DB9F1C3B2F9D123400ABCD02 /* Markdown */,
-				DBC1A0022FD0123400ABCD02 /* RiveRuntime */,
-			);
-			productName = Ensu;
-			productReference = 77E1DDDF900AB047CB554122 /* Ensu.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -233,9 +175,6 @@
 						TestTargetID = DA72BC602E5F87A000D128FF;
 					};
 					DA72BC602E5F87A000D128FF = {
-						CreatedOnToolsVersion = 16.3;
-					};
-					EC53501B1BEF7BA36025B216 = {
 						CreatedOnToolsVersion = 16.3;
 					};
 				};
@@ -263,19 +202,11 @@
 			targets = (
 				A10000062F11111100AA0001 /* EnsuTests */,
 				DA72BC602E5F87A000D128FF /* ensu */,
-				EC53501B1BEF7BA36025B216 /* ensu-macos */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1FDE2B245F9DADEF5E026D0B /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		A10000082F11111100AA0001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -293,36 +224,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		25484CE4873ED7217FB27990 /* Build Rust (core/db/sync/inference) */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Build Rust (core/db/sync/inference)";
-			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-				"$(SRCROOT)/ensu/Generated/core.swift",
-				"$(SRCROOT)/ensu/Generated/coreFFI.h",
-				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
-				"$(SRCROOT)/ensu/Generated/db.swift",
-				"$(SRCROOT)/ensu/Generated/dbFFI.h",
-				"$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
-				"$(SRCROOT)/ensu/Generated/sync.swift",
-				"$(SRCROOT)/ensu/Generated/syncFFI.h",
-				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
-				"$(SRCROOT)/ensu/Generated/inference.swift",
-				"$(SRCROOT)/ensu/Generated/inferenceFFI.h",
-				"$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
-		};
 		CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -364,13 +265,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BB83D829CC14232E7E8BDD51 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		DA72BC5D2E5F87A000D128FF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -389,118 +283,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		903C407D9F16DA01750450CF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconMac;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
-				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
-				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				GENERATE_INFOPLIST_FILE = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/ensu/Generated",
-				);
-				INFOPLIST_FILE = "ensu/Info-macOS.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Ensu;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(TARGET_TEMP_DIR)/ensu_rust",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.15;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					SystemConfiguration,
-					"-framework",
-					Accelerate,
-					"-framework",
-					Metal,
-					"-framework",
-					MetalKit,
-					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
-				PRODUCT_NAME = Ensu;
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/ensu/Generated";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		951526E3C06548C816E1D750 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconMac;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
-				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
-				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				GENERATE_INFOPLIST_FILE = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/ensu/Generated",
-				);
-				INFOPLIST_FILE = "ensu/Info-macOS.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Ensu;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(TARGET_TEMP_DIR)/ensu_rust",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.15;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					SystemConfiguration,
-					"-framework",
-					Accelerate,
-					"-framework",
-					Metal,
-					"-framework",
-					MetalKit,
-					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
-				PRODUCT_NAME = Ensu;
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/ensu/Generated";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
 		A100000C2F11111100AA0001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -793,15 +575,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9C5C5C140967470293DCAAF2 /* Build configuration list for PBXNativeTarget "ensu-macos" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				951526E3C06548C816E1D750 /* Debug */,
-				903C407D9F16DA01750450CF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		A100000B2F11111100AA0001 /* Build configuration list for PBXNativeTarget "EnsuTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
