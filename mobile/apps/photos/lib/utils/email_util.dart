@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -308,8 +309,27 @@ Future<bool> sendComposedEmail(
         attachmentPaths: attachmentPaths,
         isHTML: false,
       );
-      await FlutterEmailSender.send(email);
-      return true;
+      try {
+        await FlutterEmailSender.send(email);
+        return true;
+      } on PlatformException catch (e, s) {
+        // iOS MFMailComposeViewController reports `not_available` when the
+        // native Mail.app has no account configured. Third-party mail apps
+        // (Gmail, Proton, Outlook) are reachable via the share sheet instead.
+        if (e.code == "not_available") {
+          _logger.info(
+            "FlutterEmailSender not_available, falling back to share sheet",
+          );
+          return _shareAttachmentsViaSheet(
+            context,
+            subject: subject,
+            body: body,
+            attachmentPaths: attachmentPaths,
+          );
+        }
+        _logger.severe("Failed to send composed email to $to", e, s);
+        return false;
+      }
     }
 
     final emailContent = EmailContent(
@@ -372,6 +392,33 @@ Future<bool> sendComposedEmail(
     return true;
   } catch (e, s) {
     _logger.severe("Failed to send composed email to $to", e, s);
+    return false;
+  }
+}
+
+Future<bool> _shareAttachmentsViaSheet(
+  BuildContext context, {
+  required String subject,
+  required String body,
+  required List<String> attachmentPaths,
+}) async {
+  try {
+    final Size size = MediaQuery.of(context).size;
+    unawaited(
+      SharePlus.instance.share(
+        ShareParams(
+          subject: subject,
+          text: body,
+          files: attachmentPaths
+              .map((p) => XFile(p, mimeType: "application/zip"))
+              .toList(),
+          sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+        ),
+      ),
+    );
+    return true;
+  } catch (e, s) {
+    _logger.severe("Share sheet fallback failed", e, s);
     return false;
   }
 }
