@@ -2106,9 +2106,7 @@ const OwnTimestamp = styled(Typography)(({ theme }) => ({
     textAlign: "right",
     marginBottom: 4,
     paddingRight: 52,
-    "@media (max-width: 450px)": {
-        paddingRight: 40,
-    },
+    "@media (max-width: 450px)": { paddingRight: 40 },
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
@@ -2133,9 +2131,7 @@ const CommentBubbleWrapper = styled(Box, {
     paddingLeft: isOwn ? 0 : 28,
     position: "relative",
     zIndex: isHighlighted ? 11 : "auto",
-    "@media (max-width: 450px)": {
-        paddingRight: isOwn ? 40 : 0,
-    },
+    "@media (max-width: 450px)": { paddingRight: isOwn ? 40 : 0 },
 }));
 
 const CommentBubbleInner = styled(Box)(() => ({
