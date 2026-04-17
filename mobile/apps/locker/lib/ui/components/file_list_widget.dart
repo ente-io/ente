@@ -2,6 +2,7 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -224,12 +225,12 @@ class FileListWidget extends StatelessWidget {
     }
 
     if (isMarkedOffline) {
-      return HugeIcon(
+      return SvgPicture.asset(
+        "assets/svg/cloud-download.svg",
         key: const ValueKey("offline"),
-        icon: HugeIcons.strokeRoundedBookmark02,
-        color: primaryColor,
-        size: 20.0,
-        strokeWidth: 2.0,
+        width: 20.0,
+        height: 20.0,
+        colorFilter: ColorFilter.mode(primaryColor, BlendMode.srcIn),
       );
     }
 
