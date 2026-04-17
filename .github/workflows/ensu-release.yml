@@ -109,10 +109,6 @@ jobs:
               working-directory: rust/apps/ensu/src-tauri
               run: cargo fetch
 
-            - name: Patch llama.cpp mtmd sources
-              shell: bash
-              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
-
             - name: Install trusted-signing-cli (Windows only)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
               shell: bash

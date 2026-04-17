@@ -7,9 +7,6 @@ CORE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/core"
 INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/inference"
 CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/db"
 CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/sync"
-# Patch llama.cpp mtmd sources so mmproj models load correctly.
-PATCH_SCRIPT="$REPO_ROOT/rust/ensu/inference/tool/patch_llama_mtmd.sh"
-APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 OUT_DIR="$ROOT/src/main/jniLibs"
 CORE_KOTLIN_OUT_DIR="$REPO_ROOT/mobile/native/android/apps/ensu/crypto-auth-core/src/main/java"
 RUST_KOTLIN_OUT_DIR="$ROOT/src/main/kotlin"
@@ -86,15 +83,6 @@ fi
 if [[ -z "$NDK_ROOT_PATH" || ! -d "$NDK_ROOT_PATH" ]]; then
   echo "Android NDK not found. Install an NDK under $SDK_ROOT/ndk or set NDK_VERSION to a specific version." >&2
   exit 1
-fi
-
-if [[ "$APPLY_LLAMA_MTMD_PATCH" != "0" && -f "$PATCH_SCRIPT" ]]; then
-  if ! command -v python3 >/dev/null 2>&1; then
-    echo "python3 is required to apply the llama mtmd patch." >&2
-    exit 1
-  fi
-  echo "Applying llama mtmd patch..."
-  bash "$PATCH_SCRIPT"
 fi
 
 export ANDROID_NDK="$NDK_ROOT_PATH"

@@ -52,10 +52,6 @@ jobs:
             - name: Fetch Rust dependencies
               run: cargo fetch
 
-            - name: Patch llama.cpp mtmd sources
-              shell: bash
-              run: ../../../ensu/inference/tool/patch_llama_mtmd.sh
-
             - name: Ensure Tauri distDir exists for macro checks
               run: mkdir -p ../../../../web/apps/ensu/out
 
