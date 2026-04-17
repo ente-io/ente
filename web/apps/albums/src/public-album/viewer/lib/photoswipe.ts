@@ -1755,6 +1755,31 @@ export class FileViewerPhotoSwipe {
             return false;
         };
 
+        const shouldAutoHideViewerUI =
+            typeof window != "undefined" &&
+            "matchMedia" in window &&
+            window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+        let idleTimer: ReturnType<typeof setTimeout> | undefined;
+
+        const clearIdleTimer = () => {
+            if (idleTimer) {
+                clearTimeout(idleTimer);
+                idleTimer = undefined;
+            }
+        };
+
+        const handleIdleMouseMove = () => {
+            if (!shouldAutoHideViewerUI) return;
+
+            clearIdleTimer();
+            pswp.element?.classList.remove("pswp--idle");
+            idleTimer = setTimeout(() => {
+                pswp.element?.classList.add("pswp--idle");
+                idleTimer = undefined;
+            }, 2000);
+        };
+
         // Some actions routed via the delegate
 
         const handleDelete = () => delegate.performKeyAction("delete");
@@ -1927,10 +1952,12 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("initialLayout", () => {
             pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
+            pswp.element!.addEventListener("mousemove", handleIdleMouseMove);
             document.addEventListener(
                 "fullscreenchange",
                 handleFullscreenChange,
             );
+            handleIdleMouseMove();
         });
 
         // The PhotoSwipe dialog has being closed and the animations have
@@ -1940,6 +1967,7 @@ export class FileViewerPhotoSwipe {
                 "mousedown",
                 blurMediaChromeFocus,
             );
+            pswp.element?.removeEventListener("mousemove", handleIdleMouseMove);
             document.removeEventListener(
                 "fullscreenchange",
                 handleFullscreenChange,
@@ -1951,6 +1979,7 @@ export class FileViewerPhotoSwipe {
             if (hideControlsTimer) {
                 clearTimeout(hideControlsTimer);
             }
+            clearIdleTimer();
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();

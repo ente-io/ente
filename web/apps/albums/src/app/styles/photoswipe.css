@@ -9,6 +9,7 @@
    entire amount. See also: [Note: Customize the desktop title bar] */
 .pswp-ente .pswp__top-bar {
     top: calc(env(titlebar-area-height, 0px) * 0.4);
+    transition: opacity 0.3s ease;
 }
 
 @media (width >= 450px) {
@@ -525,6 +526,14 @@ body:has(
     flex-direction: column-reverse;
     align-items: flex-end;
     gap: 12px;
+    transition: opacity 0.3s ease;
+}
+
+.pswp-ente.pswp--idle:not(.pswp--video-fullscreen) .pswp__top-bar,
+.pswp-ente.pswp--idle:not(.pswp--video-fullscreen)
+    .pswp__bottom-right-controls {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Black gradient overlay at the bottom */
