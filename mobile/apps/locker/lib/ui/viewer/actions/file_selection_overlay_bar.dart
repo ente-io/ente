@@ -6,6 +6,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
@@ -357,9 +358,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
       actions.add(
         SelectionActionButton(
-          hugeIcon: HugeIcon(
-            icon: HugeIcons.strokeRoundedBookmark02,
-            color: colorScheme.textBase,
+          hugeIcon: SvgPicture.asset(
+            "assets/svg/cloud-download.svg",
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              colorScheme.textBase,
+              BlendMode.srcIn,
+            ),
           ),
           label: shouldRemoveOffline
               ? context.l10n.cloudOnly
