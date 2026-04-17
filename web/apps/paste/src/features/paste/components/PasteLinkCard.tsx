@@ -284,7 +284,6 @@ export const PasteLinkCard = ({
                             width: "100%",
                             maxWidth: "100%",
                             gap: 0.9,
-                            minWidth: 0,
                             color: tokens.text.primary,
                             textDecoration: "none",
                             fontSize: { xs: "0.9rem", sm: "0.93rem" },
@@ -599,9 +598,18 @@ export const PasteLinkCard = ({
                                 backdropFilter: "blur(8px) saturate(106%)",
                                 WebkitBackdropFilter:
                                     "blur(8px) saturate(106%)",
+                                minWidth: 0,
+                                overflow: "visible",
                             }}
                         >
-                            <PasteQrCode value={link} tokens={tokens} />
+                            <PasteQrCode
+                                value={link}
+                                tokens={tokens}
+                                onClose={() => {
+                                    setShowQr(false);
+                                }}
+                                resolvedMode={resolvedMode}
+                            />
                         </Box>
                     )}
                 </Stack>
@@ -762,17 +770,22 @@ export const PasteLinkCard = ({
                                     bgcolor: tokens.surface.floatingCardBg,
                                     boxShadow:
                                         tokens.surface.floatingCardShadow,
+                                    overflow: "visible",
                                 },
                             },
                         }}
                     >
-                        <Box sx={{ p: 1.15 }}>
+                        <Box sx={{ p: 1.15, overflow: "visible" }}>
                             <PasteQrCode
                                 value={link}
                                 tokens={tokens}
                                 size={226}
                                 paperBg={tokens.qr.mobilePaperBg}
                                 borderRadius="12px"
+                                onClose={() => {
+                                    setShowQr(false);
+                                }}
+                                resolvedMode={resolvedMode}
                             />
                         </Box>
                     </Dialog>
