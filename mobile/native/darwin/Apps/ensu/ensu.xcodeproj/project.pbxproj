@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteNetwork */; };
-		DAB0F20D2F5E123400ABCD01 /* InferenceRS in Frameworks */ = {isa = PBXBuildFile; productRef = DAB0F20C2F5E123400ABCD01 /* InferenceRS */; };
-		DAB0F20E2F5E123400ABCD01 /* InferenceRS in Frameworks */ = {isa = PBXBuildFile; productRef = DAB0F20C2F5E123400ABCD01 /* InferenceRS */; };
 		DACC3DC92E618D6A00DAF993 /* EnteNetwork in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteNetwork */; };
 		DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
 		DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
@@ -64,7 +62,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks */,
-				DAB0F20E2F5E123400ABCD01 /* InferenceRS in Frameworks */,
 				DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
 				DBA3E91D2F7A6B9000AA11BB /* SwiftMath in Frameworks */,
 				DB9F1C3D2F9D123400ABCD02 /* Markdown in Frameworks */,
@@ -77,7 +74,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DACC3DC92E618D6A00DAF993 /* EnteNetwork in Frameworks */,
-				DAB0F20D2F5E123400ABCD01 /* InferenceRS in Frameworks */,
 				DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
 				DBA3E91C2F7A6B9000AA11BB /* SwiftMath in Frameworks */,
 				DB9F1C3C2F9D123400ABCD02 /* Markdown in Frameworks */,
@@ -120,7 +116,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "ensu" */;
 			buildPhases = (
-				CC142736A470612F436ECF8E /* Build Rust (core/db/sync) */,
+				CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,
@@ -135,7 +131,6 @@
 			name = ensu;
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
-				DAB0F20C2F5E123400ABCD01 /* InferenceRS */,
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 				DBA3E91B2F7A6B9000AA11BB /* SwiftMath */,
 				DB9F1C3B2F9D123400ABCD02 /* Markdown */,
@@ -149,7 +144,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9C5C5C140967470293DCAAF2 /* Build configuration list for PBXNativeTarget "ensu-macos" */;
 			buildPhases = (
-				25484CE4873ED7217FB27990 /* Build Rust (core/db/sync) */,
+				25484CE4873ED7217FB27990 /* Build Rust (core/db/sync/inference) */,
 				BB83D829CC14232E7E8BDD51 /* Sources */,
 				0BCBB02794980AFFDC386B69 /* Frameworks */,
 				1FDE2B245F9DADEF5E026D0B /* Resources */,
@@ -164,7 +159,6 @@
 			name = "ensu-macos";
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
-				DAB0F20C2F5E123400ABCD01 /* InferenceRS */,
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 				DBA3E91B2F7A6B9000AA11BB /* SwiftMath */,
 				DB9F1C3B2F9D123400ABCD02 /* Markdown */,
@@ -203,7 +197,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				DACC3DC62E618D5300DAF993 /* XCLocalSwiftPackageReference "../../Packages/EnteNetwork" */,
-				DAB0F20B2F5E123400ABCD01 /* XCLocalSwiftPackageReference "../../Packages/Rust" */,
 				DBA3E91A2F7A6B9000AA11BB /* XCRemoteSwiftPackageReference "SwiftMath" */,
 				DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				DB9F1C3A2F9D123400ABCD02 /* XCRemoteSwiftPackageReference "swift-markdown" */,
@@ -238,18 +231,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		25484CE4873ED7217FB27990 /* Build Rust (core/db/sync) */ = {
+		25484CE4873ED7217FB27990 /* Build Rust (core/db/sync/inference) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (core/db/sync)";
+			name = "Build Rust (core/db/sync/inference)";
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				"$(SRCROOT)/ensu/Generated/core.swift",
 				"$(SRCROOT)/ensu/Generated/coreFFI.h",
 				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
@@ -259,23 +253,27 @@
 				"$(SRCROOT)/ensu/Generated/sync.swift",
 				"$(SRCROOT)/ensu/Generated/syncFFI.h",
 				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/inference.swift",
+				"$(SRCROOT)/ensu/Generated/inferenceFFI.h",
+				"$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
 		};
-		CC142736A470612F436ECF8E /* Build Rust (core/db/sync) */ = {
+		CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (core/db/sync)";
+			name = "Build Rust (core/db/sync/inference)";
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				"$(SRCROOT)/ensu/Generated/core.swift",
 				"$(SRCROOT)/ensu/Generated/coreFFI.h",
 				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
@@ -285,6 +283,9 @@
 				"$(SRCROOT)/ensu/Generated/sync.swift",
 				"$(SRCROOT)/ensu/Generated/syncFFI.h",
 				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/inference.swift",
+				"$(SRCROOT)/ensu/Generated/inferenceFFI.h",
+				"$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -343,12 +344,19 @@
 					"$(inherited)",
 					"-framework",
 					SystemConfiguration,
+					"-framework",
+					Accelerate,
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = Ensu;
 				SDKROOT = macosx;
@@ -392,12 +400,19 @@
 					"$(inherited)",
 					"-framework",
 					SystemConfiguration,
+					"-framework",
+					Accelerate,
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = Ensu;
 				SDKROOT = macosx;
@@ -565,12 +580,19 @@
 				MARKETING_VERSION = 0.1.15;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -615,12 +637,19 @@
 				MARKETING_VERSION = 0.1.15;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -664,10 +693,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		DAB0F20B2F5E123400ABCD01 /* XCLocalSwiftPackageReference "../../Packages/Rust" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../Packages/Rust;
-		};
 		DACC3DC62E618D5300DAF993 /* XCLocalSwiftPackageReference "../../Packages/EnteNetwork" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Packages/EnteNetwork;
@@ -710,10 +735,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DAB0F20C2F5E123400ABCD01 /* InferenceRS */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = InferenceRS;
-		};
 		DACC3DC82E618D6A00DAF993 /* EnteNetwork */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = EnteNetwork;

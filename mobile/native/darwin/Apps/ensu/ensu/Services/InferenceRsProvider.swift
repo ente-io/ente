@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 struct InferenceModelTarget: Equatable {
     let id: String
@@ -41,10 +42,6 @@ struct InferenceGenerationSummary {
     let generatedTokens: Int
     let totalTimeMs: Int64?
 }
-
-#if canImport(InferenceRS)
-import CryptoKit
-import InferenceRS
 
 final class InferenceRsProvider {
     private struct LoadedModelKey: Equatable {
@@ -155,7 +152,7 @@ final class InferenceRsProvider {
         currentJobId = nil
 
         let nativeMessages = messages.map {
-            InferenceRS.ChatMessage(role: $0.role.roleString, content: $0.text)
+            ChatMessage(role: $0.role.roleString, content: $0.text)
         }
 
         let mmprojPath = imageFiles.isEmpty ? nil : mmprojPathFor(target: target)?.path
@@ -314,7 +311,7 @@ final class InferenceRsProvider {
 
     private func loadModelHandle(target: InferenceModelTarget, modelPath: URL) throws {
         let params = ModelLoadParams(modelPath: modelPath.path, nGpuLayers: 0, useMmap: true, useMlock: false)
-        let model = try InferenceRS.loadModel(params: params)
+        let model = try loadModel(params: params)
         modelHandle = model
 
         let desiredContext = target.contextLength ?? 12000
@@ -480,66 +477,3 @@ private final class CallbackSink: GenerateEventCallback, @unchecked Sendable {
         handler(event)
     }
 }
-#else
-final class InferenceRsProvider {
-    init(modelDir: URL) {
-        _ = modelDir
-    }
-
-    func ensureModelReady(
-        target: InferenceModelTarget,
-        onProgress: @escaping (InferenceDownloadProgress) -> Void
-    ) async throws {
-        _ = target
-        _ = onProgress
-        throw NSError(domain: "InferenceRsProvider", code: -100, userInfo: [NSLocalizedDescriptionKey: "InferenceRS not available"])
-    }
-
-    func generateChat(
-        target: InferenceModelTarget,
-        messages: [InferenceMessage],
-        imageFiles: [URL],
-        temperature: Float,
-        maxTokens: Int?,
-        onToken: @escaping (String) -> Void
-    ) async throws -> InferenceGenerationSummary {
-        _ = target
-        _ = messages
-        _ = imageFiles
-        _ = temperature
-        _ = maxTokens
-        _ = onToken
-        throw NSError(domain: "InferenceRsProvider", code: -101, userInfo: [NSLocalizedDescriptionKey: "InferenceRS not available"])
-    }
-
-    func stopGeneration() {}
-
-    func resetContext() {}
-
-    func cancelDownload() {}
-
-    func cancelStaleDownloads(target: InferenceModelTarget) {
-        _ = target
-    }
-
-    func isModelDownloaded(target: InferenceModelTarget) -> Bool {
-        _ = target
-        return false
-    }
-
-    func estimatedDownloadSize(target: InferenceModelTarget) async -> Int64? {
-        _ = target
-        return nil
-    }
-
-    func currentDownloadProgress(target: InferenceModelTarget) async -> InferenceDownloadProgress? {
-        _ = target
-        return nil
-    }
-
-    func loadedContextLength(target: InferenceModelTarget) -> Int? {
-        _ = target
-        return nil
-    }
-}
-#endif

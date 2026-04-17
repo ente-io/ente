@@ -2,7 +2,7 @@
 import SwiftUI
 
 struct MessageListView: View {
-    let messages: [ChatMessage]
+    let messages: [RenderedChatMessage]
     let streamingResponse: String
     let streamingParentId: UUID?
     let isGenerating: Bool
@@ -11,10 +11,10 @@ struct MessageListView: View {
     let inputBarHeight: CGFloat
     let emptyStateTitle: String
     let emptyStateSubtitle: String?
-    let onEdit: (ChatMessage) -> Void
-    let onCopy: (ChatMessage) -> Void
-    let onRetry: (ChatMessage) -> Void
-    let onBranchChange: (ChatMessage, Int) -> Void
+    let onEdit: (RenderedChatMessage) -> Void
+    let onCopy: (RenderedChatMessage) -> Void
+    let onRetry: (RenderedChatMessage) -> Void
+    let onBranchChange: (RenderedChatMessage, Int) -> Void
     let onDismissKeyboard: () -> Void
 
     @State private var isAtBottom = true

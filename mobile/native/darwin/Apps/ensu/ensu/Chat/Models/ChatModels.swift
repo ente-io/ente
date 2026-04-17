@@ -62,7 +62,7 @@ struct AttachmentDownloadItem: Identifiable, Equatable {
     }
 }
 
-struct ChatMessage: Identifiable, Equatable {
+struct RenderedChatMessage: Identifiable, Equatable {
     enum Role: String {
         case user
         case assistant

@@ -84,7 +84,7 @@ struct QuickLookPreview: NSViewRepresentable {
 #endif
 
 struct UserMessageBubbleView: View {
-    let message: ChatMessage
+    let message: RenderedChatMessage
     let onEdit: () -> Void
     let onCopy: () -> Void
     let onBranchChange: (Int) -> Void
@@ -160,7 +160,7 @@ struct UserMessageBubbleView: View {
 }
 
 struct AssistantMessageBubbleView: View {
-    let message: ChatMessage
+    let message: RenderedChatMessage
     let isLastMessage: Bool
     let onCopy: () -> Void
     let onRetry: () -> Void

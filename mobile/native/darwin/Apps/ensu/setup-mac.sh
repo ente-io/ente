@@ -8,17 +8,14 @@ set -euo pipefail
 #   1. Ensure required local developer tools are installed.
 #   2. Ensure the required Rust Apple targets are installed.
 #   3. Ensure the expected uniffi-bindgen version is available.
-#   4. Build the local InferenceRS xcframework used by SwiftPM.
-#   5. Resolve Swift package dependencies for the Xcode project.
-#   6. Print the archive command to run next.
+#   4. Resolve Swift package dependencies for the Xcode project.
+#   5. Print the archive command to run next.
 #
 # Usage:
 #   ./setup-mac.sh
 #   ./setup-mac.sh --archive
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-RUST_PACKAGE_DIR="$(cd "$ROOT/../../Packages/Rust" && pwd)"
-XCFRAMEWORK_SCRIPT="$RUST_PACKAGE_DIR/tool/build_xcframework.sh"
 PROJECT="ensu.xcodeproj"
 SCHEME="ensu"
 DERIVED_DATA_PATH="$ROOT/build"
@@ -105,7 +102,6 @@ require_command cargo "Install Rust and ensure cargo is on PATH."
 require_command rustup "Install rustup and ensure it is on PATH."
 require_command cmake "Install CMake, for example with 'brew install cmake'."
 require_command lipo "Install Xcode command line tools and ensure lipo is on PATH."
-require_command python3 "Install python3 and ensure it is on PATH."
 require_uniffi_bindgen
 
 print_step "Checking required Rust Apple targets"
@@ -114,12 +110,6 @@ require_rust_target aarch64-apple-ios-sim
 require_rust_target x86_64-apple-ios
 require_rust_target aarch64-apple-darwin
 require_rust_target x86_64-apple-darwin
-
-print_step "Building local InferenceRS xcframework"
-(
-  cd "$RUST_PACKAGE_DIR"
-  ./tool/build_xcframework.sh
-)
 
 print_step "Resolving Swift package dependencies"
 (

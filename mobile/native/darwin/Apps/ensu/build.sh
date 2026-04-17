@@ -5,8 +5,6 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 PROJECT="ensu.xcodeproj"
 SCHEME="ensu"
 DERIVED_DATA_PATH="$ROOT/build"
-INFERENCE_RS_PACKAGE_DIR="$(cd "$ROOT/../../Packages/Rust" && pwd)"
-INFERENCE_RS_XCFRAMEWORK="$INFERENCE_RS_PACKAGE_DIR/InferenceRSFFI.xcframework"
 
 MODE="sim"
 DESTINATION_ID=""
@@ -46,18 +44,6 @@ resolve_package_dependencies() {
     -scheme "$SCHEME" \
     -derivedDataPath "$DERIVED_DATA_PATH" \
     "${XCODE_EXTRA_ARGS[@]}"
-}
-
-ensure_inference_rs_xcframework() {
-  if [[ -d "$INFERENCE_RS_XCFRAMEWORK" ]]; then
-    return
-  fi
-
-  echo "==> Building local InferenceRS xcframework"
-  (
-    cd "$INFERENCE_RS_PACKAGE_DIR"
-    ./tool/build_xcframework.sh
-  )
 }
 
 usage() {
@@ -224,7 +210,6 @@ if [[ -n "$ENDPOINT" ]]; then
   export ENTE_API_ENDPOINT="$ENDPOINT"
 fi
 
-ensure_inference_rs_xcframework
 resolve_package_dependencies
 
 build_archive() {

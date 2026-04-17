@@ -11,7 +11,7 @@ struct MessageInputView: View {
     @Binding var attachments: [ChatAttachment]
     let isGenerating: Bool
     let isDownloading: Bool
-    let editingMessage: ChatMessage?
+    let editingMessage: RenderedChatMessage?
     let isProcessingAttachments: Bool
     let isAttachmentDownloadBlocked: Bool
     let onSend: () -> Void
@@ -274,7 +274,7 @@ struct MessageInputView: View {
         return isSendEnabled ? EnsuColor.textPrimary : EnsuColor.textMuted
     }
 
-    private func editBanner(for message: ChatMessage) -> some View {
+    private func editBanner(for message: RenderedChatMessage) -> some View {
         HStack(spacing: EnsuSpacing.sm) {
             Image("Edit01Icon")
                 .resizable()

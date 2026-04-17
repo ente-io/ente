@@ -7,6 +7,7 @@ set -euo pipefail
 #   $TARGET_TEMP_DIR/ensu_rust/libcore.a
 #   $TARGET_TEMP_DIR/ensu_rust/libdb.a
 #   $TARGET_TEMP_DIR/ensu_rust/libsync.a
+#   $TARGET_TEMP_DIR/ensu_rust/libinference.a
 
 if [ -z "${SRCROOT:-}" ] || [ -z "${TARGET_TEMP_DIR:-}" ] || [ -z "${PLATFORM_NAME:-}" ] || [ -z "${ARCHS:-}" ]; then
   echo "Missing required Xcode environment variables (SRCROOT/TARGET_TEMP_DIR/PLATFORM_NAME/ARCHS)" >&2
@@ -16,6 +17,7 @@ fi
 REPO_ROOT="$(cd "${SRCROOT}/../../../../.." && pwd)"
 OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
 GENERATED_DIR="${SRCROOT}/ensu/Generated"
+PATCH_SCRIPT="${REPO_ROOT}/rust/ensu/inference/tool/patch_llama_mtmd.sh"
 
 mkdir -p "${OUT_DIR}"
 mkdir -p "${GENERATED_DIR}"
@@ -66,7 +68,10 @@ bindings_missing() {
     "${GENERATED_DIR}/dbFFI.modulemap" \
     "${GENERATED_DIR}/sync.swift" \
     "${GENERATED_DIR}/syncFFI.h" \
-    "${GENERATED_DIR}/syncFFI.modulemap"; do
+    "${GENERATED_DIR}/syncFFI.modulemap" \
+    "${GENERATED_DIR}/inference.swift" \
+    "${GENERATED_DIR}/inferenceFFI.h" \
+    "${GENERATED_DIR}/inferenceFFI.modulemap"; do
     if [ ! -f "${binding}" ]; then
       return 0
     fi
@@ -112,6 +117,7 @@ ensure_generated_bindings() {
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/core" "libcore.dylib"
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.dylib"
   generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/inference" "libinference.dylib"
   sanitize_generated_swift_bindings "${GENERATED_DIR}/db.swift"
   sanitize_generated_swift_bindings "${GENERATED_DIR}/sync.swift"
 }
@@ -227,12 +233,18 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 # Ensure host builds (build scripts) use the macOS SDK.
 export SDKROOT="${HOST_SDKROOT}"
 
+if [ -f "${PATCH_SCRIPT}" ]; then
+  echo "Applying llama mtmd patch..."
+  bash "${PATCH_SCRIPT}"
+fi
+
 ensure_uniffi_bindgen
 ensure_generated_bindings
 write_endpoint_config
 generate_swift_bindings "core" "${REPO_ROOT}/rust/uniffi/core" "core"
 generate_swift_bindings "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "db"
 generate_swift_bindings "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "sync"
+generate_swift_bindings "inference" "${REPO_ROOT}/rust/uniffi/ensu/inference" "inference"
 
 build_crate_universal() {
   crate_name="$1"           # e.g. core
@@ -260,6 +272,12 @@ build_crate_universal() {
     eval "export CARGO_TARGET_${target_env}_LINKER=\"${TARGET_CLANG}\""
     eval "export CFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
     eval "export CXXFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
+
+    if [ "${PLATFORM_NAME}" = "macosx" ] && [ -n "${MACOSX_DEPLOYMENT_TARGET:-}" ]; then
+      export CMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}"
+    elif [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
+      export CMAKE_OSX_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"
+    fi
 
     RUSTFLAGS_TARGET="${RUSTFLAGS:-} -C link-arg=-isysroot -C link-arg=${TARGET_SDKROOT}"
     if [ "${PLATFORM_NAME}" = "iphonesimulator" ] && [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
@@ -301,3 +319,4 @@ build_crate_universal() {
 build_crate_universal "core" "${REPO_ROOT}/rust/uniffi/core" "libcore.a"
 build_crate_universal "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.a"
 build_crate_universal "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.a"
+build_crate_universal "inference" "${REPO_ROOT}/rust/uniffi/ensu/inference" "libinference.a"

@@ -418,7 +418,7 @@ final class ChatViewModel: ObservableObject {
 
     @Published var sessions: [ChatSession]
     @Published var currentSessionId: UUID?
-    @Published var messages: [ChatMessage]
+    @Published var messages: [RenderedChatMessage]
     @Published var streamingResponse: String = ""
     @Published var streamingParentId: UUID? = nil
     @Published var overflowAlert: OverflowAlertState? = nil
@@ -993,7 +993,7 @@ final class ChatViewModel: ObservableObject {
         refreshAttachmentDownloadState()
     }
 
-    func beginEditing(message: ChatMessage) {
+    func beginEditing(message: RenderedChatMessage) {
         guard message.role == .user else { return }
         editingMessageId = message.id
         draftText = message.text
@@ -1392,7 +1392,7 @@ final class ChatViewModel: ObservableObject {
         startModelDownload(userInitiated: true)
     }
 
-    func retryAssistantResponse(_ message: ChatMessage) {
+    func retryAssistantResponse(_ message: RenderedChatMessage) {
         guard message.role == .assistant else { return }
         if isGenerating {
             stopGenerating()
@@ -1423,7 +1423,7 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    func changeBranch(for message: ChatMessage, delta: Int) {
+    func changeBranch(for message: RenderedChatMessage, delta: Int) {
         if isGenerating {
             stopGenerating()
         }
@@ -2153,7 +2153,7 @@ final class ChatViewModel: ObservableObject {
             let nodes: [MessageNode] = rawMessages.compactMap { msg in
                 guard let messageId = UUID(uuidString: msg.uuid) else { return nil }
                 let parentId = msg.parentMessageUuid.flatMap { UUID(uuidString: $0) }
-                let role: ChatMessage.Role = (msg.sender == .selfUser) ? .user : .assistant
+                let role: RenderedChatMessage.Role = (msg.sender == .selfUser) ? .user : .assistant
                 let timestamp = Date(timeIntervalSince1970: Double(msg.createdAtUs) / 1_000_000.0)
 
                 let attachments: [ChatAttachment] = msg.attachments.compactMap { meta in
@@ -2209,7 +2209,7 @@ final class ChatViewModel: ObservableObject {
             let selectedId = selectionMap[parentKey]
             let index = siblings.firstIndex { $0.id == selectedId } ?? (siblings.count - 1)
 
-            return ChatMessage(
+            return RenderedChatMessage(
                 id: node.id,
                 role: node.role,
                 text: node.text,
@@ -2223,14 +2223,14 @@ final class ChatViewModel: ObservableObject {
             )
         }
 
-        var augmented: [ChatMessage] = []
+        var augmented: [RenderedChatMessage] = []
         for (i, msg) in messages.enumerated() {
             augmented.append(msg)
             if msg.role == .user {
                 let next = i + 1 < messages.count ? messages[i + 1] : nil
                 let isLastAndGenerating = i == messages.count - 1 && isGenerating
                 if next?.role != .assistant && !isLastAndGenerating {
-                    augmented.append(ChatMessage(
+                    augmented.append(RenderedChatMessage(
                         id: deterministicSyntheticMessageId(parentId: msg.id),
                         role: .assistant,
                         text: "Response was interrupted",
@@ -2745,7 +2745,7 @@ final class ChatViewModel: ObservableObject {
         let id: UUID
         let sessionId: UUID
         let parentId: UUID?
-        let role: ChatMessage.Role
+        let role: RenderedChatMessage.Role
         let text: String
         let timestamp: Date
         let attachments: [ChatAttachment]
