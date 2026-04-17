@@ -8,7 +8,6 @@ name = "inference_rs"
 crate-type = ["rlib"]
 
 [dependencies]
-llama-cpp-sys-2 = { version = "=0.1.138", features = ["mtmd"] }
 parking_lot = "0.12"
 self_cell = "1"
 serde = { version = "1", features = ["derive"] }
