@@ -2,7 +2,7 @@
 
 ## Build (Terminal)
 
-All commands below assume you run them from `darwin/Apps/ensu`.
+All commands below assume you run them from `darwin/Apps/Ensu`.
 
 ## Quick scripts
 
@@ -28,18 +28,18 @@ Run `./build.sh --help` or `./run.sh --help` for full options.
 
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
 - UniFFI Swift bindings are generated locally and gitignored:
-  - `ensu/Generated/core*`, `ensu/Generated/db*`, `ensu/Generated/sync*`, `ensu/Generated/inference*`
+  - `Ensu/Generated/core*`, `Ensu/Generated/db*`, `Ensu/Generated/sync*`, `Ensu/Generated/inference*`
 
 The Xcode build script (`scripts/build-rust.sh`) builds the Rust static libs directly into
 `$(TARGET_TEMP_DIR)/ensu_rust` and regenerates the `core`, `db`, `sync`, and `inference`
-Swift bindings into `ensu/Generated/` as part of the build.
+Swift bindings into `Ensu/Generated/` as part of the build.
 
 ### Debug Build (Simulator)
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 xcodebuild \
-  -project ensu.xcodeproj \
-  -scheme ensu \
+  -project Ensu.xcodeproj \
+  -scheme Ensu \
   -configuration Debug \
   -sdk iphonesimulator \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
@@ -52,23 +52,23 @@ Run the app-hosted inference integration test from Terminal with `TEST_RUNNER_..
 variables so they reach the XCTest runner process:
 
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 TEST_RUNNER_ENSU_TEST_MODEL=/path/to/model.gguf \
 TEST_RUNNER_ENSU_TEST_MMPROJ=/path/to/mmproj.gguf \
 TEST_RUNNER_ENSU_TEST_IMAGE=/path/to/image.png \
 xcodebuild test \
-  -project ensu.xcodeproj \
-  -scheme ensu \
+  -project Ensu.xcodeproj \
+  -scheme Ensu \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
   SWIFT_ENABLE_EXPLICIT_MODULES=NO
 ```
 
 ### Debug Build (Device)
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 xcodebuild \
-  -project ensu.xcodeproj \
-  -scheme ensu \
+  -project Ensu.xcodeproj \
+  -scheme Ensu \
   -configuration Debug \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
@@ -77,23 +77,23 @@ xcodebuild \
 
 ### Release Build (Archive)
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 xcodebuild \
-  -project ensu.xcodeproj \
-  -scheme ensu \
+  -project Ensu.xcodeproj \
+  -scheme Ensu \
   -configuration Release \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
-  -archivePath build/Archive/ensu.xcarchive \
+  -archivePath build/Archive/Ensu.xcarchive \
   archive
 ```
 
 ### Release IPA (App Store)
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 xcodebuild \
   -exportArchive \
-  -archivePath build/Archive/ensu.xcarchive \
+  -archivePath build/Archive/Ensu.xcarchive \
   -exportPath build/Export \
   -exportOptionsPlist ExportOptions-AppStore.plist
 ```
@@ -102,19 +102,19 @@ xcodebuild \
 
 ### Debug (Simulator)
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 xcrun simctl boot "iPhone 15" || true
-xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/ensu.app
+xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Ensu.app
 xcrun simctl launch booted io.ente.ensu
 ```
 
 ### Debug (Physical Device)
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 xcrun devicectl device list
 xcrun devicectl device install app \
   --device <DEVICE_UDID> \
-  build/Build/Products/Debug-iphoneos/ensu.app
+  build/Build/Products/Debug-iphoneos/Ensu.app
 ```
 
 ### Release (IPA)
@@ -127,11 +127,11 @@ Note: App Store IPA export requires valid distribution signing certificate/profi
 Set the endpoint at build time using `ENTE_API_ENDPOINT`. If it is not set, the app defaults to `https://api.ente.io`.
 
 ```bash
-cd darwin/Apps/ensu
+cd darwin/Apps/Ensu
 ENTE_API_ENDPOINT="https://your-endpoint.example" \
   xcodebuild \
-  -project ensu.xcodeproj \
-  -scheme ensu \
+  -project Ensu.xcodeproj \
+  -scheme Ensu \
   -configuration Debug \
   -sdk iphonesimulator \
   -destination 'platform=iOS Simulator,name=iPhone 15' \

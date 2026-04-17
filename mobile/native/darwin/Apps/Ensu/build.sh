@@ -2,14 +2,14 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-PROJECT="ensu.xcodeproj"
-SCHEME="ensu"
+PROJECT="Ensu.xcodeproj"
+SCHEME="Ensu"
 DERIVED_DATA_PATH="$ROOT/build"
 
 MODE="sim"
 DESTINATION_ID=""
 ENDPOINT=""
-ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/ensu.xcarchive"
+ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/Ensu.xcarchive"
 EXPORT_PATH="$DERIVED_DATA_PATH/Export"
 EXPORT_OPTIONS_PLIST="$ROOT/ExportOptions-AppStore.plist"
 

@@ -7,7 +7,7 @@ A map of Ensu related paths in the monorepo.
 - Web: `web/apps/ensu`
 - Desktop: `rust/apps/ensu/src-tauri`, which wraps `web/apps/ensu`
 - Android native: `mobile/native/android/apps/ensu`
-- Apple native: `mobile/native/darwin/Apps/ensu`
+- Apple native: `mobile/native/darwin/Apps/Ensu`
 
 ## Rust crates
 
@@ -29,4 +29,4 @@ Android and Apple native apps use UniFFI + adapters.
 ## Native packaging layers
 
 - Android: `mobile/native/android/packages/rust`
-- Apple: `mobile/native/darwin/Apps/ensu`
+- Apple: `mobile/native/darwin/Apps/Ensu`

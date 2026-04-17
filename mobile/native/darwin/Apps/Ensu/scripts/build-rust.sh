@@ -16,7 +16,7 @@ fi
 
 REPO_ROOT="$(cd "${SRCROOT}/../../../../.." && pwd)"
 OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
-GENERATED_DIR="${SRCROOT}/ensu/Generated"
+GENERATED_DIR="${SRCROOT}/Ensu/Generated"
 PATCH_SCRIPT="${REPO_ROOT}/rust/ensu/inference/tool/patch_llama_mtmd.sh"
 
 mkdir -p "${OUT_DIR}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Bootstraps the local macOS prerequisites needed to archive ensu.
+# Bootstraps the local macOS prerequisites needed to archive Ensu.
 #
 # This script intentionally stops before provisioning and TestFlight upload.
 # It covers the setup steps we had to take locally to make `archive` work:
@@ -16,10 +16,10 @@ set -euo pipefail
 #   ./setup-mac.sh --archive
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-PROJECT="ensu.xcodeproj"
-SCHEME="ensu"
+PROJECT="Ensu.xcodeproj"
+SCHEME="Ensu"
 DERIVED_DATA_PATH="$ROOT/build"
-ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/ensu.xcarchive"
+ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/Ensu.xcarchive"
 
 ARCHIVE_AFTER_SETUP=0
 
@@ -31,7 +31,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -h|--help)
       cat <<'EOF'
-Prepare a Mac to archive ensu locally.
+Prepare a Mac to archive Ensu locally.
 
 Usage:
   ./setup-mac.sh [--archive]
@@ -75,7 +75,7 @@ require_rust_target() {
 
   echo "Missing required Rust target: $target" >&2
   echo "Install Apple targets with:" >&2
-  echo "  rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios aarch64-apple-darwin x86_64-apple-darwin" >&2
+  echo "  rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios" >&2
   exit 1
 }
 
@@ -108,9 +108,6 @@ print_step "Checking required Rust Apple targets"
 require_rust_target aarch64-apple-ios
 require_rust_target aarch64-apple-ios-sim
 require_rust_target x86_64-apple-ios
-require_rust_target aarch64-apple-darwin
-require_rust_target x86_64-apple-darwin
-
 print_step "Resolving Swift package dependencies"
 (
   cd "$ROOT"
@@ -143,7 +140,7 @@ Notes:
 EOF
 
 if [[ "$ARCHIVE_AFTER_SETUP" == "1" ]]; then
-  print_step "Archiving ensu"
+  print_step "Archiving Ensu"
   (
     cd "$ROOT"
     xcodebuild \

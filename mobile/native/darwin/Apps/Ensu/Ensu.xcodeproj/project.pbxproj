@@ -21,33 +21,33 @@
 			containerPortal = DA72BC592E5F87A000D128FF /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = DA72BC602E5F87A000D128FF;
-			remoteInfo = ensu;
+			remoteInfo = Ensu;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A10000022F11111100AA0001 /* InferenceIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceIntegrationTests.swift; sourceTree = "<group>"; };
 		A10000032F11111100AA0001 /* EnsuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnsuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA72BC612E5F87A000D128FF /* ensu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ensu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA72BC612E5F87A000D128FF /* Ensu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ensu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DA01087C2E682336006E79AE /* Exceptions for "ensu" folder in "ensu" target */ = {
+		DA01087C2E682336006E79AE /* Exceptions for "Ensu" folder in "Ensu" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = DA72BC602E5F87A000D128FF /* ensu */;
+			target = DA72BC602E5F87A000D128FF /* Ensu */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA72BC632E5F87A000D128FF /* ensu */ = {
+		DA72BC632E5F87A000D128FF /* Ensu */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				DA01087C2E682336006E79AE /* Exceptions for "ensu" folder in "ensu" target */,
+				DA01087C2E682336006E79AE /* Exceptions for "Ensu" folder in "Ensu" target */,
 			);
-			path = ensu;
+			path = Ensu;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -86,7 +86,7 @@
 		DA72BC582E5F87A000D128FF = {
 			isa = PBXGroup;
 			children = (
-				DA72BC632E5F87A000D128FF /* ensu */,
+				DA72BC632E5F87A000D128FF /* Ensu */,
 				A10000042F11111100AA0001 /* EnsuTests */,
 				DACC3DC72E618D6A00DAF993 /* Frameworks */,
 				DA72BC622E5F87A000D128FF /* Products */,
@@ -96,7 +96,7 @@
 		DA72BC622E5F87A000D128FF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DA72BC612E5F87A000D128FF /* ensu.app */,
+				DA72BC612E5F87A000D128FF /* Ensu.app */,
 				A10000032F11111100AA0001 /* EnsuTests.xctest */,
 			);
 			name = Products;
@@ -132,9 +132,9 @@
 			productReference = A10000032F11111100AA0001 /* EnsuTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		DA72BC602E5F87A000D128FF /* ensu */ = {
+		DA72BC602E5F87A000D128FF /* Ensu */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "ensu" */;
+			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Ensu" */;
 			buildPhases = (
 				CC142736A470612F436ECF8E /* Build Rust (core/db/sync/inference) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
@@ -146,9 +146,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				DA72BC632E5F87A000D128FF /* ensu */,
+				DA72BC632E5F87A000D128FF /* Ensu */,
 			);
-			name = ensu;
+			name = Ensu;
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
@@ -156,8 +156,8 @@
 				DB9F1C3B2F9D123400ABCD02 /* Markdown */,
 				DBC1A0022FD0123400ABCD02 /* RiveRuntime */,
 			);
-			productName = ensu;
-			productReference = DA72BC612E5F87A000D128FF /* ensu.app */;
+			productName = Ensu;
+			productReference = DA72BC612E5F87A000D128FF /* Ensu.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -179,7 +179,7 @@
 					};
 				};
 			};
-			buildConfigurationList = DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "ensu" */;
+			buildConfigurationList = DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "Ensu" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -201,7 +201,7 @@
 			projectRoot = "";
 			targets = (
 				A10000062F11111100AA0001 /* EnsuTests */,
-				DA72BC602E5F87A000D128FF /* ensu */,
+				DA72BC602E5F87A000D128FF /* Ensu */,
 			);
 		};
 /* End PBXProject section */
@@ -237,18 +237,18 @@
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-				"$(SRCROOT)/ensu/Generated/core.swift",
-				"$(SRCROOT)/ensu/Generated/coreFFI.h",
-				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
-				"$(SRCROOT)/ensu/Generated/db.swift",
-				"$(SRCROOT)/ensu/Generated/dbFFI.h",
-				"$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
-				"$(SRCROOT)/ensu/Generated/sync.swift",
-				"$(SRCROOT)/ensu/Generated/syncFFI.h",
-				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
-				"$(SRCROOT)/ensu/Generated/inference.swift",
-				"$(SRCROOT)/ensu/Generated/inferenceFFI.h",
-				"$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap",
+				"$(SRCROOT)/Ensu/Generated/core.swift",
+				"$(SRCROOT)/Ensu/Generated/coreFFI.h",
+				"$(SRCROOT)/Ensu/Generated/coreFFI.modulemap",
+				"$(SRCROOT)/Ensu/Generated/db.swift",
+				"$(SRCROOT)/Ensu/Generated/dbFFI.h",
+				"$(SRCROOT)/Ensu/Generated/dbFFI.modulemap",
+				"$(SRCROOT)/Ensu/Generated/sync.swift",
+				"$(SRCROOT)/Ensu/Generated/syncFFI.h",
+				"$(SRCROOT)/Ensu/Generated/syncFFI.modulemap",
+				"$(SRCROOT)/Ensu/Generated/inference.swift",
+				"$(SRCROOT)/Ensu/Generated/inferenceFFI.h",
+				"$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -277,7 +277,7 @@
 /* Begin PBXTargetDependency section */
 		A100000A2F11111100AA0001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DA72BC602E5F87A000D128FF /* ensu */;
+			target = DA72BC602E5F87A000D128FF /* Ensu */;
 			targetProxy = A10000072F11111100AA0001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -294,18 +294,18 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/ensu/Generated",
+					"$(SRCROOT)/Ensu/Generated",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 0.1.15;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/ensu/Generated";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Ensu/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ensu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ensu";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ensu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ensu";
 			};
 			name = Debug;
 		};
@@ -320,18 +320,18 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/ensu/Generated",
+					"$(SRCROOT)/Ensu/Generated",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 0.1.15;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/ensu/Generated";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Ensu/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ensu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ensu";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ensu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ensu";
 			};
 			name = Release;
 		};
@@ -473,9 +473,9 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/ensu/Generated",
+					"$(SRCROOT)/Ensu/Generated",
 				);
-				INFOPLIST_FILE = ensu/Info.plist;
+				INFOPLIST_FILE = Ensu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ensu;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -504,12 +504,12 @@
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/ensu/Generated";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Ensu/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -530,9 +530,9 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/ensu/Generated",
+					"$(SRCROOT)/Ensu/Generated",
 				);
-				INFOPLIST_FILE = ensu/Info.plist;
+				INFOPLIST_FILE = Ensu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ensu;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -561,12 +561,12 @@
 					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/ensu/Generated/inferenceFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/coreFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/dbFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/syncFFI.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/ensu/Generated";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Ensu/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -584,7 +584,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "ensu" */ = {
+		DA72BC5C2E5F87A000D128FF /* Build configuration list for PBXProject "Ensu" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA72BC852E5F87A100D128FF /* Debug */,
@@ -593,7 +593,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "ensu" */ = {
+		DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "Ensu" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA72BC882E5F87A100D128FF /* Debug */,

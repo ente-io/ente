@@ -1,5 +1,5 @@
 import XCTest
-@testable import ensu
+@testable import Ensu
 
 private final class GenerateEventCollector: GenerateEventCallback {
     private(set) var events: [GenerateEvent] = []

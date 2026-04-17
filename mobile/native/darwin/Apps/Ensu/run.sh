@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 APP_BUNDLE_ID="io.ente.ensu"
-APP_PATH="$ROOT/build/Build/Products/Debug-iphonesimulator/ensu.app"
+APP_PATH="$ROOT/build/Build/Products/Debug-iphonesimulator/Ensu.app"
 
 DESTINATION_ID=""
 SKIP_BUILD=0
@@ -76,7 +76,7 @@ PY
 pick_simulator_id() {
   local destinations
 
-  destinations="$(xcodebuild -project ensu.xcodeproj -scheme ensu -showdestinations 2>/dev/null \
+  destinations="$(xcodebuild -project Ensu.xcodeproj -scheme Ensu -showdestinations 2>/dev/null \
     | sed -n 's/.*platform:iOS Simulator,.*id:\([^,}]*\).*, name:\([^}]*\).*/\1|\2/p' \
     | grep -v '^dvtdevice-' || true)"
 

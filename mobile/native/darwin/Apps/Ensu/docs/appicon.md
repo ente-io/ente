@@ -13,7 +13,7 @@ The iOS app icon uses a 1024×1024 foreground image centered on a square canvas.
 ## Assets to update
 Update the files inside:
 ```
-mobile/native/darwin/Apps/ensu/ensu/Assets.xcassets/AppIcon.appiconset
+mobile/native/darwin/Apps/Ensu/Ensu/Assets.xcassets/AppIcon.appiconset
 ```
 
 Required files:
