@@ -113,8 +113,26 @@ class RemoteAssetsService {
     bool allowResume = true,
   }) async {
     _logger.info("Downloading " + url);
+    if (!allowResume && _shouldLogProbeDiagnosticsFor(url)) {
+      _logger.info(
+        "Retrying $url with single-shot download after disabling resumable mode",
+      );
+    }
     final probe = await _probeRemoteAsset(url);
-    if (allowResume && _shouldUseResumableDownload(probe)) {
+    final useResumable = allowResume && _shouldUseResumableDownload(probe);
+    if (probe != null &&
+        probe.totalBytes > _resumableThresholdBytes &&
+        _shouldLogProbeDiagnosticsFor(url)) {
+      _logger.info(
+        useResumable
+            ? "Using resumable download for $url (${probe.totalBytes} bytes)"
+            : "Using single-shot download for $url despite resumable "
+                "downloads being enabled (size: ${probe.totalBytes} bytes, "
+                "acceptsRanges: ${probe.acceptsRanges}, "
+                "strongEtag: ${probe.ifRangeValidator != null})",
+      );
+    }
+    if (useResumable) {
       await _downloadFileResumable(url, savePath, probe!);
     } else {
       await _downloadFileSingleShot(url, savePath);
@@ -194,12 +212,34 @@ class RemoteAssetsService {
 
     try {
       final response = await _dio.head<void>(url);
-      return _RemoteAssetProbe.fromHeaders(
+      final probe = _RemoteAssetProbe.fromHeaders(
         url,
         response.headers,
       );
-    } catch (e) {
-      _logger.fine("HEAD probe failed for $url: $e");
+      if (probe == null && _shouldLogProbeDiagnosticsFor(url)) {
+        final contentLength =
+            response.headers.value(HttpHeaders.contentLengthHeader) ??
+                "missing";
+        final acceptRanges =
+            response.headers.value("accept-ranges")?.trim() ?? "missing";
+        final etag = response.headers.value(HttpHeaders.etagHeader)?.trim();
+        _logger.info(
+          "HEAD probe did not qualify $url for resumable download "
+          "(contentLength: $contentLength, acceptRanges: $acceptRanges, "
+          "strongEtag: ${_strongETag(etag) != null})",
+        );
+      }
+      return probe;
+    } catch (e, s) {
+      if (_shouldLogProbeDiagnosticsFor(url)) {
+        _logger.warning(
+          "HEAD probe failed for $url, falling back to single-shot download",
+          e,
+          s,
+        );
+      } else {
+        _logger.fine("HEAD probe failed for $url: $e");
+      }
       return null;
     }
   }
@@ -214,6 +254,11 @@ class RemoteAssetsService {
       tempFile,
       probe,
     );
+    if (existingBytes > 0 && _shouldLogProbeDiagnosticsFor(url)) {
+      _logger.info(
+        "Resuming download for $url from $existingBytes / ${probe.totalBytes} bytes",
+      );
+    }
 
     await _writeResumeMetadata(savePath, probe);
 
@@ -227,12 +272,19 @@ class RemoteAssetsService {
 
     try {
       await _startResumableDownload(url, savePath, probe, existingBytes);
-    } on DioException catch (e) {
+    } on DioException catch (e, s) {
       if (existingBytes > 0 && _shouldRestartDownloadFromScratch(e)) {
         _logger.info("Restarting resumable download from scratch for $url");
         await _clearResumeArtifacts(savePath);
         await _downloadFile(url, savePath, allowResume: false);
         return;
+      }
+      if (_shouldLogProbeDiagnosticsFor(url)) {
+        _logger.severe(
+          "Resumable download failed for $url at $existingBytes / ${probe.totalBytes} bytes",
+          e,
+          s,
+        );
       }
       rethrow;
     } on _ResumeValidationException catch (e, s) {
@@ -443,6 +495,11 @@ class RemoteAssetsService {
     } else if (kDebugMode) {
       debugPrint("$url Received: $received, Total: $total");
     }
+  }
+
+  bool _shouldLogProbeDiagnosticsFor(String url) {
+    final host = Uri.tryParse(url)?.host;
+    return host == "models.ente.io";
   }
 }
 
