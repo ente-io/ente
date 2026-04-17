@@ -137,15 +137,15 @@ TextInputTheme buildTextInputTheme(EnteColorScheme colorScheme) {
     disabledBg: colorScheme.fill,
     errorBg: colorScheme.fill,
     defaultBorder: colorScheme.strokeSolid,
-    focusedBorder: colorScheme.greenBase,
+    focusedBorder: colorScheme.primary700,
     errorBorder: colorScheme.redBase,
-    successBorder: colorScheme.greenBase,
+    successBorder: colorScheme.primary700,
     textColor: colorScheme.content,
     hintColor: colorScheme.contentLighter,
     disabledTextColor: colorScheme.contentLightest,
     labelColor: colorScheme.content,
     iconColor: colorScheme.contentLighter,
     errorColor: colorScheme.redBase,
-    successColor: colorScheme.greenBase,
+    successColor: colorScheme.primary700,
   );
 }

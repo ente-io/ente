@@ -6,6 +6,7 @@ import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/theme/text_style.dart';
+import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -207,8 +208,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
   }
 
   void _syncLoadingController() {
-    final showLoading =
-        _executionState == ExecutionState.inProgress &&
+    final showLoading = _executionState == ExecutionState.inProgress &&
         widget.shouldSurfaceExecutionStates;
     if (showLoading) {
       if (!_loadingController.isAnimating) {
@@ -276,7 +276,10 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
   @override
   Widget build(BuildContext context) {
     final colorScheme = widget.shouldStickToDarkTheme
-        ? darkScheme
+        ? EnteColorScheme.fromApp(
+            AppThemeConfig.currentApp,
+            brightness: Brightness.dark,
+          )
         : getEnteColorScheme(context);
     final textTheme = widget.shouldStickToDarkTheme
         ? darkTextTheme
@@ -325,9 +328,8 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
           behavior: HitTestBehavior.opaque,
           child: Container(
             height: _isMultiline ? null : _kHeight,
-            constraints: _isMultiline
-                ? const BoxConstraints(minHeight: _kHeight)
-                : null,
+            constraints:
+                _isMultiline ? const BoxConstraints(minHeight: _kHeight) : null,
             padding: EdgeInsets.symmetric(
               horizontal: _kHorizontalPadding,
               vertical: _isMultiline ? 16 : 0,
@@ -354,13 +356,11 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                         ? 1
                         : widget.maxLines ?? (_isMultiline ? null : 1),
                     minLines: widget.isPasswordInput ? null : widget.minLines,
-                    autofillHints:
-                        widget.autofillHints ??
+                    autofillHints: widget.autofillHints ??
                         (widget.isPasswordInput
                             ? const [AutofillHints.password]
                             : const []),
-                    inputFormatters:
-                        widget.textInputFormatter ??
+                    inputFormatters: widget.textInputFormatter ??
                         (widget.maxLength != null
                             ? [
                                 LengthLimitingTextInputFormatter(
@@ -424,7 +424,7 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
     } else if (_showSuccess) {
       child = HugeIcon(
         icon: HugeIcons.strokeRoundedTick02,
-        color: colorScheme.greenBase,
+        color: colorScheme.primary700,
       );
     } else if (widget.isPasswordInput) {
       child = GestureDetector(
@@ -496,15 +496,15 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
 
     return switch (widget.messageType) {
       TextInputMessageType.alert => HugeIcon(
-        icon: HugeIcons.strokeRoundedAlert02,
-        size: 18,
-        color: color,
-      ),
+          icon: HugeIcons.strokeRoundedAlert02,
+          size: 18,
+          color: color,
+        ),
       TextInputMessageType.success => HugeIcon(
-        icon: HugeIcons.strokeRoundedTick02,
-        size: 18,
-        color: color,
-      ),
+          icon: HugeIcons.strokeRoundedTick02,
+          size: 18,
+          color: color,
+        ),
       TextInputMessageType.error || TextInputMessageType.guide => null,
     };
   }
