@@ -100,6 +100,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         overflow: TextOverflow.ellipsis,
       ),
       actions: _getDefaultActions(context),
+      scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
     );
   }
