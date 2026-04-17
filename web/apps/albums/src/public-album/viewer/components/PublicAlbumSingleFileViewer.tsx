@@ -5,6 +5,7 @@ import type { AddSaveGroup } from "@/shared/state/save-groups";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -87,6 +88,8 @@ export const PublicAlbumSingleFileViewer: React.FC<
     const [isPhotoSwipeUIVisible, setIsPhotoSwipeUIVisible] = useState(true);
     const [isPhotoSwipeContentLoading, setIsPhotoSwipeContentLoading] =
         useState(false);
+    const [isPhotoSwipeContentError, setIsPhotoSwipeContentError] =
+        useState(false);
     const isLivePhotoFile = file.metadata.fileType === FileType.livePhoto;
     const [livePhotoControls, setLivePhotoControls] =
         useState<LivePhotoControlsState>({
@@ -105,6 +108,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
     );
     const isViewerPrimed = !needsThumbnailPrime || primedFileID === file.id;
     const viewerFiles = useMemo(() => [viewerFile], [viewerFile]);
+    const shouldShowWarningIcon = isPhotoSwipeContentError;
 
     useEffect(() => {
         document.body.classList.add(bodyClassName);
@@ -132,8 +136,10 @@ export const PublicAlbumSingleFileViewer: React.FC<
     useEffect(() => {
         let classObserver: MutationObserver | undefined;
         let preloaderObserver: MutationObserver | undefined;
+        let errorObserver: MutationObserver | undefined;
         let pswpElement: HTMLElement | null = null;
         let preloaderElement: HTMLElement | null = null;
+        let errorElement: HTMLElement | null = null;
 
         const updateVisibility = () => {
             setIsPhotoSwipeUIVisible(
@@ -146,6 +152,13 @@ export const PublicAlbumSingleFileViewer: React.FC<
                 preloaderElement?.classList.contains(
                     "pswp__preloader--active",
                 ) ?? false,
+            );
+        };
+
+        const updateError = () => {
+            setIsPhotoSwipeContentError(
+                errorElement?.classList.contains("pswp__error--active") ??
+                    false,
             );
         };
 
@@ -171,6 +184,28 @@ export const PublicAlbumSingleFileViewer: React.FC<
             updateLoading();
         };
 
+        const bindToErrorElement = () => {
+            const next =
+                pswpElement?.querySelector<HTMLElement>(".pswp__error");
+            if (next === errorElement) return;
+
+            errorObserver?.disconnect();
+            errorObserver = undefined;
+            errorElement = next ?? null;
+
+            if (!errorElement) {
+                setIsPhotoSwipeContentError(false);
+                return;
+            }
+
+            errorObserver = new MutationObserver(updateError);
+            errorObserver.observe(errorElement, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
+            updateError();
+        };
+
         const bindToPhotoSwipeElement = () => {
             const next = document.querySelector<HTMLElement>(".pswp");
             if (next !== pswpElement) {
@@ -181,9 +216,13 @@ export const PublicAlbumSingleFileViewer: React.FC<
                 if (!pswpElement) {
                     preloaderObserver?.disconnect();
                     preloaderObserver = undefined;
+                    errorObserver?.disconnect();
+                    errorObserver = undefined;
                     preloaderElement = null;
+                    errorElement = null;
                     setIsPhotoSwipeUIVisible(true);
                     setIsPhotoSwipeContentLoading(false);
+                    setIsPhotoSwipeContentError(false);
                     return;
                 }
 
@@ -196,6 +235,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
             }
 
             bindToPreloaderElement();
+            bindToErrorElement();
         };
 
         const treeObserver = new MutationObserver(bindToPhotoSwipeElement);
@@ -206,6 +246,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
             treeObserver.disconnect();
             classObserver?.disconnect();
             preloaderObserver?.disconnect();
+            errorObserver?.disconnect();
         };
     }, []);
 
@@ -491,6 +532,8 @@ export const PublicAlbumSingleFileViewer: React.FC<
                         { display: "none !important" },
                     [`body.${bodyClassName} .pswp-ente-public-album .pswp__preloader`]:
                         { display: "none !important" },
+                    [`body.${bodyClassName} .pswp-ente-public-album .pswp__error`]:
+                        { display: "none !important" },
                 }}
             />
             <FileViewer
@@ -565,14 +608,43 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                 >
                                     <EnteLogo height={17} />
                                 </Box>
-                                {isPhotoSwipeContentLoading ? (
-                                    <CircularProgress
-                                        size={16}
-                                        thickness={5}
+                                {shouldShowWarningIcon ? (
+                                    <Box
                                         sx={{
-                                            color: "rgb(255 255 255 / 0.85)",
+                                            color: "var(--mui-palette-fixed-golden)",
+                                            opacity: 0.85,
+                                            lineHeight: 0,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            flexShrink: 0,
+                                            transform: "translateY(1px)",
                                         }}
-                                    />
+                                    >
+                                        <ErrorOutlineIcon
+                                            aria-hidden="true"
+                                            sx={{
+                                                fontSize: 20,
+                                                display: "block",
+                                            }}
+                                        />
+                                    </Box>
+                                ) : isPhotoSwipeContentLoading ? (
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            flexShrink: 0,
+                                            transform: "translateY(1px)",
+                                        }}
+                                    >
+                                        <CircularProgress
+                                            size={16}
+                                            thickness={5}
+                                            sx={{
+                                                color: "rgb(255 255 255 / 0.85)",
+                                            }}
+                                        />
+                                    </Box>
                                 ) : (
                                     isLivePhotoFile && (
                                         <Stack
