@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
-RUST_DIR="$ROOT/rust"
+RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/inference"
 CORE_ROOT="$REPO_ROOT/rust/ensu/inference"
 PATCH_SCRIPT="$CORE_ROOT/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
@@ -64,7 +64,7 @@ else
   LIB_EXT="dll"
 fi
 
-LIB_PATH="$RUST_DIR/target/release/libinference_rs_uniffi.$LIB_EXT"
+LIB_PATH="$RUST_DIR/target/release/libinference.$LIB_EXT"
 
 if [[ ! -f "$LIB_PATH" ]]; then
   echo "Expected $LIB_PATH to exist" >&2
@@ -72,8 +72,8 @@ if [[ ! -f "$LIB_PATH" ]]; then
 fi
 
 mkdir -p "$OUT_DIR"
-rm -f "$OUT_DIR"/inference_rs_*
+rm -f "$OUT_DIR"/inference* "$OUT_DIR"/inference_rs_uniffi*
 
 pushd "$RUST_DIR" >/dev/null
-uniffi-bindgen generate "$LIB_PATH" --language swift --out-dir "$OUT_DIR" --crate inference_rs_uniffi
+uniffi-bindgen generate "$LIB_PATH" --language swift --out-dir "$OUT_DIR" --crate inference
 popd >/dev/null

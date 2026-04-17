@@ -3,11 +3,11 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
-RUST_DIR="$ROOT/rust"
+RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/inference"
 CORE_ROOT="$REPO_ROOT/rust/ensu/inference"
 PATCH_SCRIPT="$CORE_ROOT/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
-LIB_NAME="libinference_rs_uniffi.a"
+LIB_NAME="libinference.a"
 
 require_command() {
   local name="$1"
@@ -60,8 +60,8 @@ fi
 "$ROOT/tool/generate_bindings.sh"
 
 HEADER_DIR="$ROOT/build/headers"
-HEADER_SRC="$ROOT/Sources/InferenceRS/inference_rs_uniffiFFI.h"
-MODULEMAP_SRC="$ROOT/Sources/InferenceRS/inference_rs_uniffiFFI.modulemap"
+HEADER_SRC="$ROOT/Sources/InferenceRS/inferenceFFI.h"
+MODULEMAP_SRC="$ROOT/Sources/InferenceRS/inferenceFFI.modulemap"
 
 rm -rf "$HEADER_DIR"
 mkdir -p "$ROOT/build/ios" "$ROOT/build/macos" "$HEADER_DIR"

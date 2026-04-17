@@ -1,6 +1,7 @@
 # InferenceRS (Swift)
 
-Swift bindings generated via UniFFI for the Rust core in `rust/ensu/inference`.
+Swift bindings generated via UniFFI from the shared Rust binding crate in
+`rust/uniffi/ensu/inference`, backed by `rust/ensu/inference`.
 
 ## Generate bindings
 
