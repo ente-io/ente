@@ -2,15 +2,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-PROJECT="Ensu.xcodeproj"
-SCHEME="Ensu"
-DERIVED_DATA_PATH="$ROOT/build"
 
 MODE="sim"
 DESTINATION_ID=""
 ENDPOINT=""
-ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/Ensu.xcarchive"
-EXPORT_PATH="$DERIVED_DATA_PATH/Export"
+ARCHIVE_PATH="$ROOT/build/Archive/Ensu.xcarchive"
+EXPORT_PATH="$ROOT/build/Export"
 EXPORT_OPTIONS_PLIST="$ROOT/ExportOptions-AppStore.plist"
 
 XCODE_EXTRA_ARGS=()
@@ -40,9 +37,7 @@ resolve_package_dependencies() {
   echo "==> Resolving Swift package dependencies"
   run_xcodebuild \
     -resolvePackageDependencies \
-    -project "$PROJECT" \
-    -scheme "$SCHEME" \
-    -derivedDataPath "$DERIVED_DATA_PATH" \
+    -scheme Ensu \
     "${XCODE_EXTRA_ARGS[@]}"
 }
 
@@ -126,7 +121,7 @@ pick_destination_id() {
   local prefer_iphone="${2:-0}"
   local destinations
 
-  destinations="$(xcodebuild -project "$PROJECT" -scheme "$SCHEME" -showdestinations 2>/dev/null \
+  destinations="$(xcodebuild -scheme Ensu -showdestinations 2>/dev/null \
     | sed -n "s/.*platform:${platform},.*id:\([^,}]*\).*, name:\([^}]*\).*/\1|\2/p" \
     | grep -v '^dvtdevice-' || true)"
 
@@ -216,8 +211,7 @@ build_archive() {
   mkdir -p "$(dirname "$ARCHIVE_PATH")"
   echo "==> Building Release archive"
   run_xcodebuild \
-    -project "$PROJECT" \
-    -scheme "$SCHEME" \
+    -scheme Ensu \
     -configuration Release \
     -sdk iphoneos \
     -destination 'generic/platform=iOS' \
@@ -242,12 +236,10 @@ case "$MODE" in
 
     echo "==> Building Debug for simulator (id=$DESTINATION_ID)"
     run_xcodebuild \
-      -project "$PROJECT" \
-      -scheme "$SCHEME" \
+      -scheme Ensu \
       -configuration Debug \
       -sdk iphonesimulator \
       -destination "id=$DESTINATION_ID" \
-      -derivedDataPath "$DERIVED_DATA_PATH" \
       "${XCODE_EXTRA_ARGS[@]}"
     ;;
   device)
@@ -261,12 +253,10 @@ case "$MODE" in
 
     echo "==> Building Debug for device (id=$DESTINATION_ID)"
     run_xcodebuild \
-      -project "$PROJECT" \
-      -scheme "$SCHEME" \
+      -scheme Ensu \
       -configuration Debug \
       -sdk iphoneos \
       -destination "id=$DESTINATION_ID" \
-      -derivedDataPath "$DERIVED_DATA_PATH" \
       "${XCODE_EXTRA_ARGS[@]}"
     ;;
   archive)

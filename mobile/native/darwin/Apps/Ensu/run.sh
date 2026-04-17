@@ -3,7 +3,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 APP_BUNDLE_ID="io.ente.ensu"
-APP_PATH="$ROOT/build/Build/Products/Debug-iphonesimulator/Ensu.app"
 
 DESTINATION_ID=""
 SKIP_BUILD=0
@@ -76,7 +75,7 @@ PY
 pick_simulator_id() {
   local destinations
 
-  destinations="$(xcodebuild -project Ensu.xcodeproj -scheme Ensu -showdestinations 2>/dev/null \
+  destinations="$(xcodebuild -scheme Ensu -showdestinations 2>/dev/null \
     | sed -n 's/.*platform:iOS Simulator,.*id:\([^,}]*\).*, name:\([^}]*\).*/\1|\2/p' \
     | grep -v '^dvtdevice-' || true)"
 
@@ -92,6 +91,26 @@ pick_simulator_id() {
   fi
 
   printf "%s\n" "$destinations" | head -n 1 | cut -d'|' -f1
+}
+
+app_path_for_destination() {
+  xcodebuild \
+    -scheme Ensu \
+    -configuration Debug \
+    -sdk iphonesimulator \
+    -destination "id=$DESTINATION_ID" \
+    -showBuildSettings 2>/dev/null \
+    | awk '
+      /^Build settings for action build and target Ensu:/ { in_target=1; next }
+      /^Build settings for action build and target / { in_target=0 }
+      in_target && $1 == "TARGET_BUILD_DIR" { build_dir=$3 }
+      in_target && $1 == "WRAPPER_NAME" { wrapper_name=$3 }
+      END {
+        if (build_dir != "" && wrapper_name != "") {
+          print build_dir "/" wrapper_name
+        }
+      }
+    '
 }
 
 while [[ $# -gt 0 ]]; do
@@ -147,6 +166,12 @@ if [[ "$SKIP_BUILD" -eq 0 ]]; then
     BUILD_ARGS+=(--endpoint "$ENDPOINT")
   fi
   "$ROOT/build.sh" "${BUILD_ARGS[@]}"
+fi
+
+APP_PATH="$(app_path_for_destination)"
+if [[ -z "$APP_PATH" ]]; then
+  echo "Could not determine built app path from Xcode build settings." >&2
+  exit 1
 fi
 
 if [[ ! -d "$APP_PATH" ]]; then

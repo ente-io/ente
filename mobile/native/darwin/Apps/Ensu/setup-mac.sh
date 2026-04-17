@@ -16,10 +16,7 @@ set -euo pipefail
 #   ./setup-mac.sh --archive
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-PROJECT="Ensu.xcodeproj"
-SCHEME="Ensu"
-DERIVED_DATA_PATH="$ROOT/build"
-ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/Ensu.xcarchive"
+ARCHIVE_PATH="$ROOT/build/Archive/Ensu.xcarchive"
 
 ARCHIVE_AFTER_SETUP=0
 
@@ -113,9 +110,7 @@ print_step "Resolving Swift package dependencies"
   cd "$ROOT"
   xcodebuild \
     -resolvePackageDependencies \
-    -project "$PROJECT" \
-    -scheme "$SCHEME" \
-    -derivedDataPath "$DERIVED_DATA_PATH"
+    -scheme Ensu
 )
 
 print_step "Setup complete"
@@ -125,8 +120,7 @@ Local archive prerequisites are ready.
 Archive command:
   cd "$ROOT"
   xcodebuild \\
-    -project $PROJECT \\
-    -scheme $SCHEME \\
+    -scheme Ensu \\
     -configuration Release \\
     -sdk iphoneos \\
     -destination 'generic/platform=iOS' \\
@@ -144,8 +138,7 @@ if [[ "$ARCHIVE_AFTER_SETUP" == "1" ]]; then
   (
     cd "$ROOT"
     xcodebuild \
-      -project "$PROJECT" \
-      -scheme "$SCHEME" \
+      -scheme Ensu \
       -configuration Release \
       -sdk iphoneos \
       -destination 'generic/platform=iOS' \

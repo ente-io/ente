@@ -24,6 +24,9 @@ Helpful flags:
 
 Run `./build.sh --help` or `./run.sh --help` for full options.
 
+The helper scripts default release outputs to `build/Archive/Ensu.xcarchive` and `build/Export/`
+unless you override them.
+
 ## Generated bindings & dependencies
 
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
@@ -38,12 +41,10 @@ Swift bindings into `Ensu/Generated/` as part of the build.
 ```bash
 cd darwin/Apps/Ensu
 xcodebuild \
-  -project Ensu.xcodeproj \
   -scheme Ensu \
   -configuration Debug \
   -sdk iphonesimulator \
-  -destination 'platform=iOS Simulator,name=iPhone 15' \
-  -derivedDataPath build
+  -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
 ## Tests
@@ -57,7 +58,6 @@ TEST_RUNNER_ENSU_TEST_MODEL=/path/to/model.gguf \
 TEST_RUNNER_ENSU_TEST_MMPROJ=/path/to/mmproj.gguf \
 TEST_RUNNER_ENSU_TEST_IMAGE=/path/to/image.png \
 xcodebuild test \
-  -project Ensu.xcodeproj \
   -scheme Ensu \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
   SWIFT_ENABLE_EXPLICIT_MODULES=NO
@@ -67,19 +67,16 @@ xcodebuild test \
 ```bash
 cd darwin/Apps/Ensu
 xcodebuild \
-  -project Ensu.xcodeproj \
   -scheme Ensu \
   -configuration Debug \
   -sdk iphoneos \
-  -destination 'generic/platform=iOS' \
-  -derivedDataPath build
+  -destination 'generic/platform=iOS'
 ```
 
 ### Release Build (Archive)
 ```bash
 cd darwin/Apps/Ensu
 xcodebuild \
-  -project Ensu.xcodeproj \
   -scheme Ensu \
   -configuration Release \
   -sdk iphoneos \
@@ -103,19 +100,16 @@ xcodebuild \
 ### Debug (Simulator)
 ```bash
 cd darwin/Apps/Ensu
-xcrun simctl boot "iPhone 15" || true
-xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Ensu.app
-xcrun simctl launch booted io.ente.ensu
+./run.sh
 ```
 
 ### Debug (Physical Device)
 ```bash
 cd darwin/Apps/Ensu
-xcrun devicectl device list
-xcrun devicectl device install app \
-  --device <DEVICE_UDID> \
-  build/Build/Products/Debug-iphoneos/Ensu.app
+./build.sh device --destination-id <DEVICE_UDID>
 ```
+
+Install the built app from Xcode or `devicectl` using the product under Xcode `DerivedData`.
 
 ### Release (IPA)
 Install the exported IPA via Apple Configurator or TestFlight after `xcodebuild -exportArchive`.
@@ -130,10 +124,8 @@ Set the endpoint at build time using `ENTE_API_ENDPOINT`. If it is not set, the 
 cd darwin/Apps/Ensu
 ENTE_API_ENDPOINT="https://your-endpoint.example" \
   xcodebuild \
-  -project Ensu.xcodeproj \
   -scheme Ensu \
   -configuration Debug \
   -sdk iphonesimulator \
-  -destination 'platform=iOS Simulator,name=iPhone 15' \
-  -derivedDataPath build
+  -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
