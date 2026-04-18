@@ -1,3 +1,6 @@
+[alias]
+codegen = ["run", "-p", "codegen", "--"]
+
 [target.'cfg(target_arch = "aarch64")']
 rustflags = ["--cfg", "chacha20_force_neon"]
 

@@ -7,7 +7,7 @@ set -euo pipefail
 # It covers the setup steps we had to take locally to make `archive` work:
 #   1. Ensure required local developer tools are installed.
 #   2. Ensure the required Rust Apple targets are installed.
-#   3. Ensure the expected uniffi-bindgen version is available.
+#   3. Ensure the generated UniFFI Swift bindings already exist.
 #   4. Resolve Swift package dependencies for the Xcode project.
 #   5. Print the archive command to run next.
 #
@@ -76,21 +76,30 @@ require_rust_target() {
   exit 1
 }
 
-require_uniffi_bindgen() {
-  if command -v uniffi-bindgen >/dev/null 2>&1; then
-    local version
-    version="$(uniffi-bindgen --version 2>/dev/null || true)"
-    if printf "%s" "$version" | grep -q "0.31."; then
-      return
-    fi
-    echo "Found incompatible ${version:-uniffi-bindgen version}." >&2
-  else
-    echo "Missing required command: uniffi-bindgen" >&2
-  fi
+require_generated_bindings() {
+  local generated_dir="$ROOT/Ensu/Generated"
 
-  echo "Install a compatible version with:" >&2
-  echo "  cargo install --locked --version 0.31.0 uniffi --features cli --bin uniffi-bindgen" >&2
-  exit 1
+  for binding in \
+    "$generated_dir/core.swift" \
+    "$generated_dir/coreFFI.h" \
+    "$generated_dir/coreFFI.modulemap" \
+    "$generated_dir/db.swift" \
+    "$generated_dir/dbFFI.h" \
+    "$generated_dir/dbFFI.modulemap" \
+    "$generated_dir/sync.swift" \
+    "$generated_dir/syncFFI.h" \
+    "$generated_dir/syncFFI.modulemap" \
+    "$generated_dir/inference.swift" \
+    "$generated_dir/inferenceFFI.h" \
+    "$generated_dir/inferenceFFI.modulemap"; do
+    if [[ ! -f "$binding" ]]; then
+      echo "Missing generated UniFFI Swift bindings under $generated_dir" >&2
+      echo "Run the repo-local codegen step first:" >&2
+      echo "  cd \"$ROOT/../../../../../rust\"" >&2
+      echo "  cargo codegen ensu-ios" >&2
+      exit 1
+    fi
+  done
 }
 
 print_step "Checking required local tools"
@@ -99,12 +108,13 @@ require_command cargo "Install Rust and ensure cargo is on PATH."
 require_command rustup "Install rustup and ensure it is on PATH."
 require_command cmake "Install CMake, for example with 'brew install cmake'."
 require_command lipo "Install Xcode command line tools and ensure lipo is on PATH."
-require_uniffi_bindgen
 
 print_step "Checking required Rust Apple targets"
 require_rust_target aarch64-apple-ios
 require_rust_target aarch64-apple-ios-sim
 require_rust_target x86_64-apple-ios
+print_step "Checking generated UniFFI Swift bindings"
+require_generated_bindings
 print_step "Resolving Swift package dependencies"
 (
   cd "$ROOT"
@@ -128,6 +138,9 @@ Archive command:
     archive
 
 Notes:
+  - If the generated Swift bindings are missing, run:
+      cd "$ROOT/../../../../../rust"
+      cargo codegen ensu-ios
   - Provisioning/TestFlight export is intentionally not handled here.
   - If Xcode still shows missing package products, run:
       File > Packages > Resolve Package Versions

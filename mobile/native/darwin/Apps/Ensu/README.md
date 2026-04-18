@@ -31,13 +31,20 @@ cmake is a prerequisite (e.g. `brew install cmake`).
 
 ## Generated bindings & dependencies
 
+- On a fresh checkout, from the repo root run the repo-local codegen step before any Xcode build:
+
+```bash
+cd rust
+cargo codegen ensu-ios
+```
+
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
 - UniFFI Swift bindings are generated locally and gitignored:
   - `Ensu/Generated/core*`, `Ensu/Generated/db*`, `Ensu/Generated/sync*`, `Ensu/Generated/inference*`
 
 The Xcode build script (`scripts/build-rust.sh`) builds the Rust static libs directly into
-`$(TARGET_TEMP_DIR)/ensu_rust` and regenerates the `core`, `db`, `sync`, and `inference`
-Swift bindings into `Ensu/Generated/` as part of the build.
+`$(TARGET_TEMP_DIR)/ensu_rust` and consumes the generated `core`, `db`, `sync`, and `inference`
+Swift bindings from `Ensu/Generated/`. It does not generate bindings or install tools.
 
 ### Debug Build (Simulator)
 ```bash
