@@ -1908,10 +1908,9 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     final lowerLink = link.toLowerCase();
-    if (mounted && (lowerLink.startsWith("ente-auth://") || lowerLink.startsWith("enteauth://"))) {
+    if (mounted && lowerLink.startsWith("enteauth://search")) {
       try {
         final uri = Uri.parse(link);
-        if (uri.host != "search") return;
         final searchQuery = uri.queryParameters['query'];
         if (searchQuery != null && searchQuery.isNotEmpty) {
           _showSearchBox = true;
@@ -1920,7 +1919,7 @@ class _HomePageState extends State<HomePage> {
           _applyFilteringAndRefresh();
         }
       } catch (e) {
-        _logger.warning("Malformed ente-auth deep link: $link", e);
+        _logger.warning("Malformed enteauth deep link: $link", e);
       }
     } else if (mounted && lowerLink.startsWith("otpauth://")) {
       if (DateTime.now().millisecondsSinceEpoch - lastScanTime < 1000) {
