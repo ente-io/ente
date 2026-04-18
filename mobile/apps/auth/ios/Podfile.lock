@@ -53,13 +53,6 @@ PODS:
   - Flutter (1.0.0)
   - flutter_email_sender (0.0.1):
     - Flutter
-  - flutter_inappwebview_ios (0.0.1):
-    - Flutter
-    - flutter_inappwebview_ios/Core (= 0.0.1)
-    - OrderedSet (~> 6.0.3)
-  - flutter_inappwebview_ios/Core (0.0.1):
-    - Flutter
-    - OrderedSet (~> 6.0.3)
   - flutter_local_authentication (1.2.0):
     - Flutter
   - flutter_local_notifications (0.0.1):
@@ -80,7 +73,6 @@ PODS:
   - MTBBarcodeScanner (5.0.11)
   - objective_c (0.0.1):
     - Flutter
-  - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -152,7 +144,6 @@ DEPENDENCIES:
   - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
-  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_local_authentication (from `.symlinks/plugins/flutter_local_authentication/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
@@ -181,7 +172,6 @@ SPEC REPOS:
     - DKImagePickerController
     - DKPhotoGallery
     - MTBBarcodeScanner
-    - OrderedSet
     - SDWebImage
     - Sentry
     - sqlite3
@@ -210,8 +200,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
-  flutter_inappwebview_ios:
-    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_local_authentication:
     :path: ".symlinks/plugins/flutter_local_authentication/ios"
   flutter_local_notifications:
@@ -271,7 +259,6 @@ SPEC CHECKSUMS:
   fk_user_agent: 137145b086229251761678fe034da53753f4ce59
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
-  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_local_authentication: 989278c681612f1ee0e36019e149137f114b9d7f
   flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
@@ -282,7 +269,6 @@ SPEC CHECKSUMS:
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
-  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4

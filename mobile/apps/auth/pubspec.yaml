@@ -72,9 +72,6 @@ dependencies:
   flutter_context_menu: 0.2.4
   flutter_displaymode: 0.6.0
   flutter_email_sender: 7.0.0
-  # revert to pub.dev when merged
-  # https://github.com/pichillilorenzo/flutter_inappwebview/pull/2548
-  flutter_inappwebview: 6.1.5
   flutter_launcher_icons: 0.14.4
   flutter_local_authentication: # linux fprintd fix is not published on pub.dev
     git:
