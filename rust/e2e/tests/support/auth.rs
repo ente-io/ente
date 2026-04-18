@@ -1,20 +1,14 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use base64::{Engine, engine::general_purpose::URL_SAFE};
-use ente_core::crypto::SecretVec;
-use ente_rs::{
-    api::ApiClient,
-    auth_flow::{
-        AuthFlow, AuthFlowUi, AuthenticatedAccount, CreateAccountParams, LoginParams, OtpPurpose,
-        SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
-    },
-    models::{
-        account::App,
-        error::{Error as CliError, Result as CliResult},
-    },
+use ente_accounts::{
+    AccountsClient, AccountsClientConfig, AuthFlow, AuthFlowUi, AuthenticatedAccount,
+    CreateAccountParams, Error as CliError, KeyAttributes, LoginParams, OtpPurpose,
+    Result as CliResult, SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
 };
+use ente_core::crypto::SecretVec;
+use ente_rs::models::account::App;
 use hmac::{Hmac, Mac};
-use serde::Deserialize;
 use sha1::Sha1;
 use zeroize::Zeroizing;
 
@@ -27,7 +21,7 @@ pub struct TestAccount {
     pub user_id: i64,
     pub auth_token: String,
     pub master_key: Vec<u8>,
-    pub key_attributes: ente_rs::api::models::KeyAttributes,
+    pub key_attributes: KeyAttributes,
 }
 
 struct TestUi {
@@ -106,21 +100,12 @@ impl AuthFlowUi for TestUi {
     }
 }
 
-#[derive(Deserialize)]
-struct TwoFactorStatusResponse {
-    status: bool,
-}
-
 pub async fn create_account(endpoint: &str, email: String, password: String) -> TestAccount {
-    let api = ApiClient::new_with_client_package(
-        Some(endpoint.to_string()),
-        App::Photos.client_package(),
-    )
-    .unwrap();
+    let client = accounts_client(endpoint).unwrap();
     let mut ui = TestUi::otp_only();
 
     let authenticated = tokio::time::timeout(Duration::from_secs(180), async {
-        let mut flow = AuthFlow::new(&api, App::Photos, &mut ui);
+        let mut flow = AuthFlow::new(&client, &mut ui);
         flow.create_account(CreateAccountParams {
             email: email.clone(),
             password: Zeroizing::new(password.clone()),
@@ -160,14 +145,10 @@ async fn login_with_ui<U: AuthFlowUi>(
     password: &str,
     ui: &mut U,
 ) -> CliResult<AuthenticatedAccount> {
-    let api = ApiClient::new_with_client_package(
-        Some(endpoint.to_string()),
-        App::Photos.client_package(),
-    )
-    .unwrap();
+    let client = accounts_client(endpoint)?;
 
     tokio::time::timeout(Duration::from_secs(90), async {
-        let mut flow = AuthFlow::new(&api, App::Photos, ui);
+        let mut flow = AuthFlow::new(&client, ui);
         flow.login(LoginParams {
             email: email.to_string(),
             password: Zeroizing::new(password.to_string()),
@@ -179,18 +160,13 @@ async fn login_with_ui<U: AuthFlowUi>(
 }
 
 pub async fn enable_totp(endpoint: &str, account: &TestAccount) -> String {
-    let api = ApiClient::new_with_client_package(
-        Some(endpoint.to_string()),
-        App::Photos.client_package(),
-    )
-    .unwrap();
-    api.add_token(&account.email, &account.auth_token);
+    let client = accounts_client(endpoint).unwrap();
+    client.set_auth_token(Some(account.auth_token.clone()));
     let mut ui = TestUi::with_totp(None);
 
     let result = tokio::time::timeout(Duration::from_secs(60), async {
-        let mut flow = AuthFlow::new(&api, App::Photos, &mut ui);
+        let mut flow = AuthFlow::new(&client, &mut ui);
         flow.setup_two_factor(SetupTwoFactorParams {
-            account_id: account.email.clone(),
             master_key: SecretVec::new(account.master_key.clone()),
             key_attributes: Some(account.key_attributes.clone()),
         })
@@ -204,23 +180,16 @@ pub async fn enable_totp(endpoint: &str, account: &TestAccount) -> String {
 }
 
 pub async fn fetch_two_factor_status(endpoint: &str, account: &TestAccount) -> CliResult<bool> {
-    fetch_two_factor_status_with_token(endpoint, &account.email, &account.auth_token).await
+    fetch_two_factor_status_with_token(endpoint, &account.auth_token).await
 }
 
 async fn fetch_two_factor_status_with_token(
     endpoint: &str,
-    account_id: &str,
     auth_token: &str,
 ) -> CliResult<bool> {
-    let api = ApiClient::new_with_client_package(
-        Some(endpoint.to_string()),
-        App::Photos.client_package(),
-    )?;
-    api.add_token(account_id, auth_token);
-    let response: TwoFactorStatusResponse = api
-        .get("/users/two-factor/status", Some(account_id))
-        .await?;
-    Ok(response.status)
+    let client = accounts_client(endpoint)?;
+    client.set_auth_token(Some(auth_token.to_string()));
+    client.get_two_factor_status().await
 }
 
 fn auth_token_from_authenticated(account: &AuthenticatedAccount) -> String {
@@ -294,4 +263,12 @@ fn decode_base32(secret: &str) -> Vec<u8> {
     }
 
     output
+}
+
+fn accounts_client(endpoint: &str) -> CliResult<AccountsClient> {
+    AccountsClient::new(
+        AccountsClientConfig::new(App::Photos.client_package())
+            .with_base_url(endpoint.to_string())
+            .with_user_agent("ente-e2e"),
+    )
 }

@@ -822,19 +822,37 @@ async fn create_root_key(
 
     match http.post_empty("/user-entity/key", &request).await {
         Ok(()) => Ok(None),
-        Err(HttpError::Http { status, message }) if status == 409 => {
+        Err(HttpError::Http {
+            status,
+            code,
+            message,
+        }) if status == 409 => {
             if let Some(remote_root_key) = fetch_root_key(http).await? {
                 Ok(Some(remote_root_key))
             } else {
                 Err(with_http_context(
                     "contacts root key create failed",
-                    HttpError::Http { status, message }.into(),
+                    HttpError::Http {
+                        status,
+                        code,
+                        message,
+                    }
+                    .into(),
                 ))
             }
         }
-        Err(HttpError::Http { status, message }) => Err(with_http_context(
+        Err(HttpError::Http {
+            status,
+            code,
+            message,
+        }) => Err(with_http_context(
             "contacts root key create failed",
-            HttpError::Http { status, message }.into(),
+            HttpError::Http {
+                status,
+                code,
+                message,
+            }
+            .into(),
         )),
         Err(err) => Err(with_http_context(
             "contacts root key create failed",
@@ -848,9 +866,14 @@ fn with_http_context(context: &'static str, error: ContactsError) -> ContactsErr
         ContactsError::Http(HttpError::Network(message)) => {
             ContactsError::Http(HttpError::Network(format!("{context}: {message}")))
         }
-        ContactsError::Http(HttpError::Http { status, message }) => {
+        ContactsError::Http(HttpError::Http {
+            status,
+            code,
+            message,
+        }) => {
             ContactsError::Http(HttpError::Http {
                 status,
+                code,
                 message: format!("{context}: {message}"),
             })
         }

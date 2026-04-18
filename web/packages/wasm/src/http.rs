@@ -45,7 +45,9 @@ impl From<CoreError> for HttpError {
                 message,
                 status: None,
             },
-            CoreError::Http { status, message } => HttpError {
+            CoreError::Http {
+                status, message, ..
+            } => HttpError {
                 code: "http".to_string(),
                 message,
                 status: Some(status),

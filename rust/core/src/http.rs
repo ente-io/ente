@@ -29,6 +29,8 @@ pub enum Error {
     /// Server returned an HTTP error status.
     #[error("HTTP {status}: {message}")]
     Http {
+        /// Optional structured server error code.
+        code: Option<String>,
         /// Error message or response body.
         message: String,
         /// HTTP status code.
@@ -45,6 +47,30 @@ pub enum Error {
 }
 
 impl Error {
+    /// Return the HTTP status code if this is an HTTP error.
+    pub fn status_code(&self) -> Option<u16> {
+        match self {
+            Error::Http { status, .. } => Some(*status),
+            _ => None,
+        }
+    }
+
+    /// Return the structured server error code when available.
+    pub fn api_code(&self) -> Option<&str> {
+        match self {
+            Error::Http { code, .. } => code.as_deref(),
+            _ => None,
+        }
+    }
+
+    /// Return the server message when available.
+    pub fn api_message(&self) -> Option<&str> {
+        match self {
+            Error::Http { message, .. } => Some(message.as_str()),
+            _ => None,
+        }
+    }
+
     fn with_request_context(self, request_context: &str) -> Self {
         fn append_context(message: String, request_context: &str) -> String {
             if message.contains("[request:") {
@@ -56,8 +82,13 @@ impl Error {
 
         match self {
             Error::Network(message) => Error::Network(append_context(message, request_context)),
-            Error::Http { status, message } => Error::Http {
+            Error::Http {
                 status,
+                code,
+                message,
+            } => Error::Http {
+                status,
+                code,
                 message: append_context(message, request_context),
             },
             Error::Parse(message) => Error::Parse(append_context(message, request_context)),
@@ -74,12 +105,32 @@ impl From<reqwest::Error> for Error {
         if let Some(status) = e.status() {
             Error::Http {
                 status: status.as_u16(),
+                code: None,
                 message,
             }
         } else {
             Error::Network(message)
         }
     }
+}
+
+#[derive(Deserialize)]
+struct ApiErrorBody {
+    code: Option<String>,
+    message: Option<String>,
+}
+
+fn parse_api_error_body(body: &str) -> (Option<String>, String) {
+    if let Ok(error_body) = serde_json::from_str::<ApiErrorBody>(body) {
+        let message = error_body
+            .message
+            .clone()
+            .or_else(|| error_body.code.clone())
+            .unwrap_or_else(|| body.to_string());
+        return (error_body.code, message);
+    }
+
+    (None, body.to_string())
 }
 
 impl From<serde_json::Error> for Error {
@@ -750,11 +801,16 @@ fn resolve_redirect(current_url: &Url, location: &HeaderValue) -> Result<Url, Er
 async fn parse_text_response(response: Response) -> Result<String, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     response.text().await.map_err(Into::into)
 }
@@ -767,11 +823,16 @@ async fn parse_json_response<T: DeserializeOwned>(response: Response) -> Result<
 async fn parse_empty_response(response: Response) -> Result<(), Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     Ok(())
 }
@@ -779,11 +840,16 @@ async fn parse_empty_response(response: Response) -> Result<(), Error> {
 async fn parse_bytes_response(response: Response) -> Result<Vec<u8>, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     response
         .bytes()
@@ -828,6 +894,21 @@ mod tests {
         let bad_json = "not json";
         let err: Result<PingResponse, Error> = serde_json::from_str(bad_json).map_err(|e| e.into());
         assert!(matches!(err, Err(Error::Parse(_))))
+    }
+
+    #[test]
+    fn test_parse_api_error_body_prefers_message_and_preserves_code() {
+        let (code, message) =
+            parse_api_error_body(r#"{"code":"TOO_MANY_WRONG_ATTEMPTS","message":"wait"}"#);
+        assert_eq!(code.as_deref(), Some("TOO_MANY_WRONG_ATTEMPTS"));
+        assert_eq!(message, "wait");
+    }
+
+    #[test]
+    fn test_parse_api_error_body_falls_back_to_code_when_message_missing() {
+        let (code, message) = parse_api_error_body(r#"{"code":"SESSION_EXPIRED"}"#);
+        assert_eq!(code.as_deref(), Some("SESSION_EXPIRED"));
+        assert_eq!(message, "SESSION_EXPIRED");
     }
 
     #[test]
