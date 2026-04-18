@@ -279,9 +279,7 @@ export const PasteQrCode = ({
                             ? "rgba(26, 36, 72, 1)"
                             : "rgba(237, 244, 255, 1)",
                     },
-                    "& .MuiSvgIcon-root": {
-                        opacity: 1,
-                    },
+                    "& .MuiSvgIcon-root": { opacity: 1 },
                 }}
             >
                 <CloseRoundedIcon sx={{ fontSize: 16 }} />
