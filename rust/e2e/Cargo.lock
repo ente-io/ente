@@ -617,6 +617,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-accounts"
+version = "0.0.1"
+dependencies = [
+ "base64",
+ "ente-core",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "urlencoding",
+ "uuid",
+ "zeroize",
+]
+
+[[package]]
 name = "ente-contacts"
 version = "0.0.1"
 dependencies = [
@@ -660,6 +676,7 @@ name = "ente-e2e"
 version = "0.0.1"
 dependencies = [
  "base64",
+ "ente-accounts",
  "ente-contacts",
  "ente-core",
  "ente-rs",
@@ -681,6 +698,7 @@ dependencies = [
  "clap",
  "dialoguer",
  "dirs",
+ "ente-accounts",
  "ente-core",
  "env_logger",
  "futures",

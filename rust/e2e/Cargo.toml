@@ -6,6 +6,7 @@ publish = false
 
 [dependencies]
 ente-rs = { path = "../cli" }
+ente-accounts = { path = "../accounts" }
 ente-contacts = { path = "../contacts" }
 ente-core = { path = "../core", features = ["srp"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }

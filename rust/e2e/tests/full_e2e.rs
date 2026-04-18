@@ -2,8 +2,8 @@ mod support;
 
 use ente_contacts::legacy_models::{LegacyContactState, LegacyRecoveryStatus};
 use ente_contacts::models::ContactData;
+use ente_accounts::Error as CliError;
 use ente_core::http::Error as CoreHttpError;
-use ente_rs::models::error::Error as CliError;
 
 use support::{auth, contacts, legacy};
 
@@ -242,7 +242,7 @@ async fn run_legacy_reset_stage(endpoint: &str, pair: &legacy::LegacyPair) {
         Err(CliError::AuthenticationFailed(message)) => {
             assert_eq!(message, "Incorrect password");
         }
-        Err(CliError::ApiError { status: 401, .. }) => {}
+        Err(error) if error.is_http_status(&[401]) => {}
         other => panic!("expected old password login to fail, got {other:?}"),
     }
 
