@@ -25,7 +25,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_animate: 4.5.2
-  flutter_inappwebview: 6.1.5
   fluttertoast: 8.2.14
   hugeicons: 1.1.5
   modal_bottom_sheet: 3.0.0
