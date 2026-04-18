@@ -71,12 +71,6 @@ jobs:
               with:
                   targets: ${{ matrix.platform.rust-target }}
 
-            - name: Set macOS deployment target
-              if: matrix.platform.os == 'macos-latest'
-              run: |
-                  echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
-                  echo "CMAKE_OSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
-
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
               run: |
@@ -199,8 +193,6 @@ jobs:
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   TAURI_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
                   TAURI_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
-                  CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
                   APPLE_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}
                   APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
                   APPLE_SIGNING_IDENTITY: "Developer ID Application"
