@@ -27,6 +27,8 @@ Run `./build.sh --help` or `./run.sh --help` for full options.
 The helper scripts default release outputs to `build/Archive/Ensu.xcarchive` and `build/Export/`
 unless you override them.
 
+cmake is a prerequisite (e.g. `brew install cmake`).
+
 ## Generated bindings & dependencies
 
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).

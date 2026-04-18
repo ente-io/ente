@@ -17,7 +17,6 @@ fi
 REPO_ROOT="$(cd "${SRCROOT}/../../../../.." && pwd)"
 OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
 GENERATED_DIR="${SRCROOT}/Ensu/Generated"
-PATCH_SCRIPT="${REPO_ROOT}/rust/ensu/inference/tool/patch_llama_mtmd.sh"
 
 mkdir -p "${OUT_DIR}"
 mkdir -p "${GENERATED_DIR}"
@@ -214,11 +213,6 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
 # Ensure host builds (build scripts) use the macOS SDK.
 export SDKROOT="${HOST_SDKROOT}"
-
-if [ -f "${PATCH_SCRIPT}" ]; then
-  echo "Applying llama mtmd patch..."
-  bash "${PATCH_SCRIPT}"
-fi
 
 ensure_uniffi_bindgen
 ensure_generated_bindings
