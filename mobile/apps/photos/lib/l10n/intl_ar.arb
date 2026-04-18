@@ -26,7 +26,6 @@
   "deleteReason4": "سببي غير مدرج",
   "sendEmail": "إرسال بريد إلكتروني",
   "deleteRequestSLAText": "ستتم معالجة طلبك خلال 72 ساعة.",
-  "deleteEmailRequest": "أرسل بريدًا إلكترونيًا إلى <warning>account-deletion@ente.com</warning> من عنوان بريدك الإلكتروني المسجل.",
   "entePhotosPerm": "Ente <i>بحاجة إلى إذن</i> لحفظ صورك",
   "ok": "حسنًا",
   "createAccount": "إنشاء حساب",
@@ -264,11 +263,8 @@
   "verificationId": "معرّف التحقق",
   "verifyEmailID": "التحقق من {email}",
   "emailNoEnteAccount": "{email} لا يملك حسابًا على Ente.\n\nأرسل له دعوة لمشاركة الصور.",
-  "shareMyVerificationID": "إليك معرّف التحقق الخاص بي لـ ente.com: {verificationID}",
-  "shareTextConfirmOthersVerificationID": "مرحبًا، هل يمكنك تأكيد أن هذا هو معرّف التحقق الخاص بك على ente.com: {verificationID}",
   "somethingWentWrong": "حدث خطأ ما",
   "sendInvite": "إرسال دعوة",
-  "shareTextRecommendUsingEnte": "قم بتنزيل تطبيق Ente حتى نتمكن من مشاركة الصور ومقاطع الفيديو بالجودة الأصلية بسهولة.\n\nhttps://ente.com",
   "done": "تم",
   "applyCodeTitle": "تطبيق الرمز",
   "enterCodeDescription": "أدخل الرمز المقدم من صديقك للمطالبة بمساحة تخزين مجانية لكما",
@@ -603,7 +599,6 @@
   "subscription": "الاشتراك",
   "paymentDetails": "تفاصيل الدفع",
   "manageFamily": "إدارة العائلة",
-  "contactToManageSubscription": "يرجى التواصل معنا على support@ente.com لإدارة اشتراكك في {provider}.",
   "renewSubscription": "تجديد الاشتراك",
   "cancelSubscription": "إلغاء الاشتراك",
   "areYouSureYouWantToRenew": "هل أنت متأكد من رغبتك في التجديد؟",
@@ -652,7 +647,6 @@
   "subAlreadyLinkedErrMessage": "تم ربط {id} الخاص بك بحساب Ente آخر.\nإذا كنت ترغب في استخدام {id} مع هذا الحساب، يرجى الاتصال بدعمنا.",
   "visitWebToManage": "يرجى زيارة web.ente.io لإدارة اشتراكك.",
   "couldNotUpdateSubscription": "تعذر تحديث الاشتراك.",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "يرجى التواصل مع support@ente.com وسنكون سعداء بمساعدتك!",
   "paymentFailed": "فشلت عملية الدفع",
   "paymentFailedTalkToProvider": "يرجى التواصل مع دعم {providerName} إذا تم خصم المبلغ منك.",
   "@paymentFailedTalkToProvider": {
@@ -1079,8 +1073,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "تعيين نصف القطر",
-  "familyPlanPortalTitle": "العائلة",
-  "familyPlanOverview": "أضف 5 أفراد من عائلتك إلى خطتك الحالية دون دفع رسوم إضافية.\n\nيحصل كل فرد على مساحة خاصة به، ولا يمكنهم رؤية ملفات بعضهم البعض إلا إذا تمت مشاركتها.\n\nالخطط العائلية متاحة للعملاء الذين لديهم اشتراك Ente مدفوع.\n\nاشترك الآن للبدء!",
   "androidBiometricHint": "تحقق من الهوية",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

@@ -19,6 +19,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/trash_file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
@@ -49,6 +50,7 @@ class FileAppBar extends StatefulWidget {
   final Function(EnteFile) onFileRemoved;
   final Function(EnteFile) onEditRequested;
   final ValueNotifier<bool> enableFullScreenNotifier;
+  final GalleryType? galleryType;
   final DetailPageMode mode;
 
   const FileAppBar(
@@ -56,6 +58,7 @@ class FileAppBar extends StatefulWidget {
     this.onFileRemoved,
     this.onEditRequested, {
     required this.enableFullScreenNotifier,
+    this.galleryType,
     this.mode = DetailPageMode.full,
     super.key,
   });
@@ -659,10 +662,15 @@ class FileAppBarState extends State<FileAppBar> {
     }
 
     final fileToDownload =
-        !file.isRemoteFile ? file.copyWith(localID: null) : file;
+        !file.isRemoteFile ? (file.copyWith()..localID = null) : file;
+    final persistToFilesDB =
+        widget.galleryType != GalleryType.sharedPublicCollection;
     if (flagService.internalUser) {
       try {
-        await galleryDownloadQueueService.enqueueFiles([fileToDownload]);
+        await galleryDownloadQueueService.enqueueFiles(
+          [fileToDownload],
+          persistToFilesDB: persistToFilesDB,
+        );
       } catch (e) {
         _logger.warning("Failed to save file", e);
         await showGenericErrorDialog(context: context, error: e);
@@ -677,7 +685,10 @@ class FileAppBarState extends State<FileAppBar> {
     );
     await dialog.show();
     try {
-      await downloadToGallery(fileToDownload);
+      await downloadToGallery(
+        fileToDownload,
+        persistToFilesDB: persistToFilesDB,
+      );
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {

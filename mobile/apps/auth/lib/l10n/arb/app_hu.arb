@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Bocsánat",
-  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.\nKérjük, írj a support@ente.com címre, ha segítségre van szükséged!",
   "pendingSyncs": "Figyelmeztetés",
   "pendingSyncsWarningBody": "Néhány kódról nem készült biztonsági másolat.\n\nKérjük, győződj meg arról, hogy van biztonsági másolata ezekről a kódokról, mielőtt kijelentkezel.",
   "checkInboxAndSpamFolder": "Kérjük, ellenőrizd beérkező leveleid (spam mappát is) az ellenőrzés befejezéséhez",
@@ -578,7 +577,7 @@
   "addNew": "Új hozzáadása",
   "selected": "kiválasztva",
   "moveMultipleToTrashMessage": "Biztosan a kukába szeretnéd helyezni a(z) {count} elemet?",
-  "nSelected": "{count, plural, =1{1 kiválasztva} other{{count} kiválasztva}}",
+  "nSelected": "{count, plural, one {{count} kiválasztva} other{{count} kiválasztva}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1 elem rögzítve} other{{count} elem rögzítve}}",
+  "pinnedCount": "{count, plural, one{{count} elem rögzítve} other{{count} elem rögzítve}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 elem feloldva} other{{count} elem feloldva}}",
+  "unpinnedCount": "{count, plural, one{{count} elem feloldva} other{{count} elem feloldva}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

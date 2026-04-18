@@ -13,8 +13,8 @@ authentication when opened.
 **On mobile:**
 Open `Settings > Security > App lock`, then turn on **App lock**.
 
-**On desktop / web:**
-Open `Settings > Account > App lock`, then turn on **App lock**.
+**On desktop:**
+Open `Settings > Preferences > App lock`, then turn on **App lock**.
 
 ## Lock methods
 
@@ -43,3 +43,7 @@ disable screenshots on Android).
 
 - [Account overview](/photos/features/account/)
 - [Passkeys](/photos/features/account/passkeys)
+
+## Related FAQs
+
+- [Can I use app lock to protect Ente Photos?](/photos/faq/security-and-privacy#app-lock)

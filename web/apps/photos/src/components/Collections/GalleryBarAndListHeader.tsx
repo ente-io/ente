@@ -15,10 +15,6 @@ import {
 } from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
 import {
-    sortPeople,
-    type PeopleSortBy,
-} from "ente-new/photos/components/PeopleSortOptions";
-import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
@@ -27,6 +23,10 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
+import {
+    sortPeople,
+    type PeopleSortBy,
+} from "ente-new/photos/components/people-sort";
 import {
     collectionsSortBy,
     haveOnlySystemCollections,
@@ -65,6 +65,7 @@ type GalleryBarAndListHeaderProps = Omit<
     saveGroups: SaveGroup[];
 } & Pick<
         CollectionHeaderProps,
+        | "files"
         | "onRemotePull"
         | "onAddSaveGroup"
         | "onMarkTempDeleted"
@@ -115,6 +116,7 @@ export const GalleryBarAndListHeader: React.FC<
     setBlockingLoad,
     people,
     saveGroups,
+    files,
     activePerson,
     emailByUserID,
     shareSuggestionEmails,
@@ -210,6 +212,7 @@ export const GalleryBarAndListHeader: React.FC<
                 <CollectionHeader
                     {...{
                         activeCollection,
+                        files,
                         setActiveCollectionID,
                         isActiveCollectionDownloadInProgress,
                         onRemotePull,
@@ -255,6 +258,7 @@ export const GalleryBarAndListHeader: React.FC<
         activeCollection,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
+        files,
         activePerson,
         showCollectionShare,
         openCollectionShare,

@@ -5,7 +5,6 @@ import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import {
@@ -35,11 +34,11 @@ import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
     fileCreationTime,
+    fileLocation,
     type ParsedMetadata,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
-import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
@@ -262,8 +261,6 @@ class UploadManager {
     private onUploadFile: ((file: EnteFile) => void) | undefined;
     private collections = new Map<number, Collection>();
     private uploadInProgress = false;
-    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
-    private uploaderName: string | undefined;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
@@ -276,12 +273,10 @@ class UploadManager {
     public init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
-        publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
     ) {
         this.uiService.init(progressUpdater);
-        UploadService.init(publicAlbumsCredentials);
+        UploadService.init(undefined);
         this.onUploadFile = onUploadFile;
-        this.publicAlbumsCredentials = publicAlbumsCredentials;
     }
 
     logout() {
@@ -300,7 +295,6 @@ class UploadManager {
         this.failedItems = [];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
-        this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
 
         this.uiService.reset();
@@ -309,6 +303,10 @@ class UploadManager {
 
     showUploadProgressDialog() {
         this.uiService.setUploadProgressView(true);
+    }
+
+    hideUploadProgressDialog() {
+        this.uiService.setUploadProgressView(false);
     }
 
     /**
@@ -333,14 +331,12 @@ class UploadManager {
     public async uploadItems(
         itemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-        uploaderName?: string,
     ) {
         if (this.uploadInProgress)
             throw new Error("Cannot run multiple uploads at once");
 
         log.info(`Uploading ${itemsWithCollection.length} files`);
         this.uploadInProgress = true;
-        this.uploaderName = uploaderName;
 
         const logInterval = setInterval(logAboutMemoryPressureIfNeeded, 1000);
 
@@ -417,20 +413,30 @@ class UploadManager {
         const timestamp = fileCreationTime(sourceEnteFile);
         const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
         const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
+        const location = fileLocation(sourceEnteFile);
 
         const creationDate: ParsedMetadata["creationDate"] = dateTime
             ? { timestamp, dateTime, offset }
             : undefined;
 
-        // Fallback to the timestamp if a creationDate could not be constructed.
-        const creationTime = creationDate ? undefined : timestamp;
+        // Canvas exports do not retain the original file's embedded metadata, so
+        // preserve the metadata Ente already knows about the source file.
+        //
+        // Preserve the richer creationDate when available so the edited copy
+        // retains the original photo's local capture date/time semantics (and
+        // optional offset), not just the raw UTC timestamp.
+        const externalParsedMetadata = {
+            creationDate,
+            creationTime: creationDate ? undefined : timestamp,
+            location,
+        };
 
         const item = {
             uploadItem: file,
             pathPrefix: undefined,
             localID: 1,
             collectionID: collection.id,
-            externalParsedMetadata: { creationDate, creationTime },
+            externalParsedMetadata,
         };
 
         return this.uploadItems([item], [collection]);
@@ -443,15 +449,9 @@ class UploadManager {
     };
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicAlbumsCredentials) {
-            this.existingFiles = await savedPublicCollectionFiles(
-                this.publicAlbumsCredentials.accessToken,
-            );
-        } else {
-            const files = await computeNormalCollectionFilesFromSaved();
-            const userID = ensureLocalUser().id;
-            this.existingFiles = files.filter((file) => file.ownerID == userID);
-        }
+        const files = await computeNormalCollectionFilesFromSaved();
+        const userID = ensureLocalUser().id;
+        this.existingFiles = files.filter((file) => file.ownerID == userID);
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),
         );
@@ -503,7 +503,6 @@ class UploadManager {
         const uiService = this.uiService;
         const uploadContext = {
             isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
-            publicAlbumsCredentials: this.publicAlbumsCredentials,
             abortIfCancelled: this.abortIfCancelled.bind(this),
             updateUploadProgress:
                 uiService.updateUploadProgress.bind(uiService),
@@ -523,7 +522,7 @@ class UploadManager {
 
             const uploadResult = await upload(
                 uploadableItem,
-                this.uploaderName,
+                undefined,
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
@@ -602,10 +601,6 @@ class UploadManager {
             collections: [...this.collections.values()],
             parsedMetadataJSONMap: this.parsedMetadataJSONMap,
         };
-    }
-
-    public getUploaderName() {
-        return this.uploaderName;
     }
 
     private updateExistingFiles(file: EnteFile) {
@@ -712,6 +707,7 @@ const clusterLivePhotos = async (
     type ItemAsset = PotentialLivePhotoAsset & {
         localID: number;
         isLivePhoto?: boolean;
+        externalParsedMetadata?: UploadItemWithCollectionIDAndName["externalParsedMetadata"];
     };
     const items: ItemAsset[] = _items.map((item) => ({
         localID: item.localID,
@@ -721,6 +717,7 @@ const clusterLivePhotos = async (
         collectionID: item.collectionID,
         uploadItem: item.uploadItem!,
         pathPrefix: item.pathPrefix,
+        externalParsedMetadata: item.externalParsedMetadata,
     }));
     items
         .sort((f, g) => {
@@ -743,6 +740,7 @@ const clusterLivePhotos = async (
                 fileName: image.fileName,
                 isLivePhoto: true,
                 pathPrefix: image.pathPrefix,
+                externalParsedMetadata: image.externalParsedMetadata,
                 livePhotoAssets: {
                     image: image.uploadItem,
                     video: video.uploadItem,

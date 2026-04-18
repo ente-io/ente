@@ -63,7 +63,7 @@ const (
 	inactiveUserGap7dTo1d    = 6 * inactiveUserOneDayInMicroSeconds
 	inactiveUserGap1dToFinal = inactiveUserOneDayInMicroSeconds
 
-	inactiveUserRolloutPercentage = 20
+	inactiveUserRolloutPercentage = 60
 	inactiveUserRolloutNonce      = "inactive-user-deletion-v1"
 )
 

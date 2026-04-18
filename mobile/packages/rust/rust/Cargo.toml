@@ -7,8 +7,9 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-flutter_rust_bridge = "=2.11.1"
+flutter_rust_bridge = "=2.12.0"
 ente-core = { path = "../../../../rust/core" }
+ente-contacts = { path = "../../../../rust/contacts" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

@@ -2,22 +2,33 @@
 //!
 //! This module provides password-based key derivation using Argon2id.
 
+use std::fmt;
+
 use argon2::{Algorithm, Argon2, Params, Version};
 
 use crate::crypto::{CryptoError, Result, SecretVec};
-use zeroize::Zeroizing;
 
 /// Result of key derivation with password.
-#[derive(Debug, Clone)]
 pub struct DerivedKeyResult {
     /// The derived key.
-    pub key: Vec<u8>,
+    pub key: SecretVec,
     /// The salt used for derivation.
     pub salt: Vec<u8>,
     /// Memory limit used.
     pub mem_limit: u32,
     /// Operations limit used.
     pub ops_limit: u32,
+}
+
+impl fmt::Debug for DerivedKeyResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DerivedKeyResult")
+            .field("key", &"[REDACTED]")
+            .field("salt_len", &self.salt.len())
+            .field("mem_limit", &self.mem_limit)
+            .field("ops_limit", &self.ops_limit)
+            .finish()
+    }
 }
 
 /// Memory limit for interactive operations (64 MiB).
@@ -28,6 +39,11 @@ pub const MEMLIMIT_MODERATE: u32 = 268_435_456;
 
 /// Memory limit for sensitive operations (1 GiB).
 pub const MEMLIMIT_SENSITIVE: u32 = 1_073_741_824;
+
+/// Minimum memory limit for adaptive sensitive derivation (128 MiB).
+///
+/// This matches the server-side floor for accepted account key attributes.
+pub const MEMLIMIT_SENSITIVE_MIN: u32 = 134_217_728;
 
 /// Minimum memory limit.
 pub const MEMLIMIT_MIN: u32 = 8_192;
@@ -130,7 +146,7 @@ pub fn derive_key_secure(
     ops_limit: u32,
 ) -> Result<SecretVec> {
     let key = derive_key(password, salt, mem_limit, ops_limit)?;
-    Ok(Zeroizing::new(key))
+    Ok(SecretVec::new(key))
 }
 
 /// Derive a key with interactive parameters (fast, for UI responsiveness).
@@ -147,7 +163,7 @@ pub fn derive_interactive_key(password: &str) -> Result<DerivedKeyResult> {
     let salt = super::keys::generate_salt();
     let key = derive_key(password, &salt, MEMLIMIT_INTERACTIVE, OPSLIMIT_INTERACTIVE)?;
     Ok(DerivedKeyResult {
-        key,
+        key: SecretVec::new(key),
         salt,
         mem_limit: MEMLIMIT_INTERACTIVE,
         ops_limit: OPSLIMIT_INTERACTIVE,
@@ -185,6 +201,10 @@ pub fn derive_moderate_key(password: &str, salt: &[u8]) -> Result<Vec<u8>> {
 /// Starts with MEMLIMIT_MODERATE and scales OPSLIMIT to preserve the
 /// MEMLIMIT_SENSITIVE * OPSLIMIT_SENSITIVE strength. If derivation fails,
 /// it halves mem_limit and doubles ops_limit until limits are reached.
+///
+/// This mirrors the established adaptive "sensitive" policy used by the
+/// existing web and Flutter clients so that newly generated key attributes
+/// remain consistent across platforms.
 ///
 /// # Arguments
 /// * `password` - Password bytes.
@@ -225,11 +245,11 @@ pub fn derive_sensitive_key_with_salt_adaptive(
     }
 
     let mut last_error = None;
-    while mem_limit >= MEMLIMIT_MIN {
+    while mem_limit >= MEMLIMIT_SENSITIVE_MIN {
         match derive_key_bytes(password, salt, mem_limit, ops_limit) {
             Ok(key) => {
                 return Ok(DerivedKeyResult {
-                    key,
+                    key: SecretVec::new(key),
                     salt: salt.to_vec(),
                     mem_limit,
                     ops_limit,
@@ -250,7 +270,7 @@ pub fn derive_sensitive_key_with_salt_adaptive(
     Err(last_error.unwrap_or(CryptoError::KeyDerivationFailed))
 }
 
-/// Derive a key with sensitive parameters (maximum security).
+/// Derive a key with the current adaptive sensitive client policy.
 ///
 /// Uses adaptive mem/ops fallback while preserving sensitive strength.
 ///
@@ -415,6 +435,48 @@ mod tests {
         );
         assert!(result.mem_limit <= MEMLIMIT_MODERATE);
         assert!(result.ops_limit >= OPSLIMIT_SENSITIVE);
+        assert!(result.mem_limit >= MEMLIMIT_SENSITIVE_MIN);
+    }
+
+    #[test]
+    fn test_sensitive_policy_matches_existing_client_bounds() {
+        let desired_strength = u64::from(MEMLIMIT_SENSITIVE) * u64::from(OPSLIMIT_SENSITIVE);
+        let factor = MEMLIMIT_SENSITIVE / MEMLIMIT_MODERATE;
+        let mut mem_limit = MEMLIMIT_MODERATE;
+        let mut ops_limit = OPSLIMIT_SENSITIVE * factor;
+        let mut attempts = Vec::new();
+
+        while mem_limit >= MEMLIMIT_SENSITIVE_MIN {
+            attempts.push((mem_limit, ops_limit));
+            mem_limit /= 2;
+            ops_limit *= 2;
+        }
+
+        assert_eq!(
+            attempts.first(),
+            Some(&(MEMLIMIT_MODERATE, OPSLIMIT_SENSITIVE * factor))
+        );
+        assert_eq!(attempts.last(), Some(&(MEMLIMIT_SENSITIVE_MIN, 32)));
+        assert!(
+            attempts
+                .iter()
+                .all(|(mem, ops)| u64::from(*mem) * u64::from(*ops) == desired_strength)
+        );
+    }
+
+    #[test]
+    fn test_derived_key_result_debug_redacts_secret_material() {
+        let result = DerivedKeyResult {
+            key: SecretVec::new(vec![1, 2, 3]),
+            salt: vec![4, 5, 6],
+            mem_limit: 123,
+            ops_limit: 456,
+        };
+
+        let debug = format!("{result:?}");
+        assert!(debug.contains("[REDACTED]"));
+        assert!(!debug.contains("[1, 2, 3]"));
+        assert!(debug.contains("salt_len"));
     }
 
     #[test]

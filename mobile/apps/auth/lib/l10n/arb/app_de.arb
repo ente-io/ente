@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Entschuldigen Sie",
-  "importFailureDesc": "Ausgewählte Datei ließ sich nicht verarbeiten.\nBitte wenden Sie sich an support@ente.com für Hilfe!",
   "pendingSyncs": "Warnung",
   "pendingSyncsWarningBody": "Einige Codes wurden nicht gesichert.\n\nBitte gehen Sie sicher, dass Sie einen Backupcode für diese Codes haben bevor Sie sich ausloggen.",
   "checkInboxAndSpamFolder": "Bitte überprüfen Sie Ihren E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",
@@ -578,7 +577,7 @@
   "addNew": "Hinzufügen",
   "selected": "ausgewählt",
   "moveMultipleToTrashMessage": "Sind Sie sich sicher, dass Sie {count} Item(s) in den Papierkorb verschieben möchten?",
-  "nSelected": "{count, plural, =1{1 ausgewählt} other{{count} ausgewählt}}",
+  "nSelected": "{count, plural, one {{count} ausgewählt} other{{count} ausgewählt}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1 Item angeheftet} other{{count} angeheftete items}}",
+  "pinnedCount": "{count, plural, one{{count} Item angeheftet} other{{count} angeheftete items}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 item losgelöst} other{{count} items losgelöst}}",
+  "unpinnedCount": "{count, plural, one{{count} item losgelöst} other{{count} items losgelöst}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

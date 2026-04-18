@@ -6,7 +6,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
-import "package:photos/extensions/user_extension.dart";
 import 'package:photos/gateways/collections/models/create_request.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -17,6 +16,7 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/contacts/contact_identity_resolver.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -195,7 +195,7 @@ class CollectionActions {
       ],
       title: AppLocalizations.of(context).removeWithQuestionMark,
       body: AppLocalizations.of(context)
-          .removeParticipantBody(userEmail: user.displayName ?? user.email),
+          .removeParticipantBody(userEmail: resolveDisplayName(user)),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

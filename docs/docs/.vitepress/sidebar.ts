@@ -81,6 +81,10 @@ export const sidebar = [
                                 link: "/photos/features/account/passkeys",
                             },
                             {
+                                text: "App lock",
+                                link: "/photos/features/account/app-lock",
+                            },
+                            {
                                 text: "Referral program",
                                 link: "/photos/features/account/referral-program/",
                             },
@@ -518,6 +522,17 @@ export const sidebar = [
                         link: "/locker/faq/troubleshooting",
                     },
                 ],
+            },
+        ],
+    },
+    {
+        text: "Ensu",
+        collapsed: true,
+        items: [
+            { text: "Introduction", link: "/ensu/" },
+            {
+                text: "FAQ",
+                link: "/ensu/faq/",
             },
         ],
     },

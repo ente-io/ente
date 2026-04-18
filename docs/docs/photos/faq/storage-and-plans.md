@@ -173,7 +173,7 @@ No. Storage from different accounts does not stack.
 
 When you create a family and add members, everyone in the family shares the storage of the admin's subscription.
 
-(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant— they will use the shared family storage instead.)
+(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant - they will use the shared family storage instead.)
 
 Family plans are designed to allow multiple people to use a single subscription, not to combine multiple plans into a larger pool.
 
@@ -256,6 +256,14 @@ Common reasons and solutions:
 
 - Family plans may have limited functionality for App Store purchases
 - Consider managing your subscription through [web.ente.io](https://web.ente.io) instead
+
+### How do I add a family member who already has a paid subscription? {#add-family-member-existing-subscriber}
+
+1. Subscribe to a paid plan on your account if you have not already.
+2. Ask your family member to cancel their existing subscription, then contact [support@ente.com](mailto:support@ente.com) so we can switch their account to the free plan.
+3. Once their account is on the free plan, add them via `Settings > Storage/Subscription > Manage subscription > Manage family`, or via `Settings > Account > Manage subscription`.
+
+> **Note**: Each family member gets their own private space. Members cannot see each other's files unless explicitly shared. Family plans are for sharing storage, not for sharing photos automatically.
 
 ### How do I remove someone from my family plan? {#remove-family-member}
 
@@ -633,7 +641,8 @@ Use our [referral program](/photos/features/account/referral-program/). When fri
 ### Why did I receive this email? {#inactive-account-email-received}
 
 We recently sent an email to accounts that have not shown activity for 12
-months as part of our inactive-account policy.
+months as part of our inactive-account policy. Free accounts with no active
+paid subscription are deleted after 12 consecutive months of inactivity.
 
 ### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
 
@@ -642,8 +651,8 @@ The email includes the email address associated with the inactive account.
 If you are using Ente regularly, check the registered email address shown inside
 the app to confirm which account you are currently using.
 
-Open `Settings > Account`. The registered email address will appear in a green
-box.
+Open Settings in the Ente app. The registered email address will appear at the
+very top.
 
 ### What should I do if I received this email? {#inactive-account-action}
 
@@ -653,5 +662,5 @@ This will mark the account as active.
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
 Contact support at [support@ente.com](mailto:support@ente.com) and share a
-screenshot of the `Settings > Account` page showing the registered email address
-(green box), so we can verify the account.
+screenshot of the Settings showing the registered email address at the top so we
+can verify the account.

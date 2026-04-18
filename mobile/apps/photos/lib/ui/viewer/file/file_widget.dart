@@ -1,3 +1,4 @@
+import "package:ente_qr/ente_qr.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
@@ -15,6 +16,7 @@ class FileWidget extends StatelessWidget {
   final bool? autoPlay;
   final bool? isFromMemories;
   final Function({required int memoryDuration})? onFinalFileLoad;
+  final ValueNotifier<List<QrDetection>>? qrDetectionsNotifier;
 
   const FileWidget(
     this.file, {
@@ -25,6 +27,7 @@ class FileWidget extends StatelessWidget {
     this.backgroundDecoration,
     this.isFromMemories = false,
     this.onFinalFileLoad,
+    this.qrDetectionsNotifier,
     super.key,
   });
 
@@ -45,6 +48,7 @@ class FileWidget extends StatelessWidget {
         isFromMemories: isFromMemories ?? false,
         key: key ?? ValueKey(fileKey),
         onFinalFileLoad: onFinalFileLoad,
+        qrDetectionsNotifier: qrDetectionsNotifier,
       );
     } else if (file.fileType == FileType.video) {
       // use old video widget on iOS simulator as the new one crashes while

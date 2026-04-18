@@ -73,6 +73,7 @@ export interface ChatDialogsProps {
     isLoggedIn: boolean;
     signedInEmail?: string | null;
     saveLogs: () => void | Promise<void>;
+    handleCheckForUpdates: () => void | Promise<void>;
     handleLogout: () => void;
     openLoginFromChat: () => void;
     openPasskeysFromChat: () => void;
@@ -127,6 +128,7 @@ export const ChatDialogs = memo(
         isLoggedIn,
         signedInEmail,
         saveLogs,
+        handleCheckForUpdates,
         handleLogout,
         openLoginFromChat,
         openPasskeysFromChat,
@@ -186,7 +188,7 @@ export const ChatDialogs = memo(
             }
 
             if (typeof window !== "undefined") {
-                const popup = window.open(url, "_blank", "noopener,noreferrer");
+                const popup = window.open(url, "_blank", "noopener");
                 if (!popup) {
                     window.location.href = url;
                 }
@@ -458,6 +460,31 @@ export const ChatDialogs = memo(
                                         {...smallIconProps}
                                     />
                                 </ListItemButton>
+
+                                {isTauriRuntime && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            void handleCheckForUpdates();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={InformationCircleIcon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Check for updates
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
 
                                 <ListItemButton
                                     onClick={() => {

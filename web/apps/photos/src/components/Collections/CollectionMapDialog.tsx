@@ -30,8 +30,6 @@ import {
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
     addToFavoritesCollection,
-    isArchivedCollection,
-    isHiddenCollection,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -55,8 +53,6 @@ import Supercluster from "supercluster";
 import type { SelectedState } from "utils/file";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
-import { calculateOptimalZoom } from "../TripLayout/mapHelpers";
-import type { JourneyPoint } from "../TripLayout/types";
 
 interface CollectionMapDialogProps
     extends ModalVisibilityProps,
@@ -74,6 +70,7 @@ interface CollectionMapDialogProps
         > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection | undefined;
+    files: EnteFile[];
     onRemotePull?: (opts?: RemotePullOpts) => Promise<void>;
 }
 
@@ -145,6 +142,16 @@ interface MapIndexPoint {
     lat: number;
     lng: number;
     timestamp: number;
+}
+
+interface MapPhotoPoint {
+    lat: number;
+    lng: number;
+    name: string;
+    country: string;
+    timestamp: string;
+    image: string;
+    fileId: number;
 }
 
 /**
@@ -245,6 +252,7 @@ type SuperclusterConstructor = new (options?: MapClusterOptions) => MapIndex;
 
 //OpenStreetMap only supports clustering till this zoom level and this tell the supercluster what the max limit is for the zoom.
 const MAX_MAP_ZOOM = 19;
+const DEFAULT_MAP_ZOOM = 10;
 //Instead of loading just the tiles which are in view, we're actually loading the 15% of the surrounding zone as well for smoother experience.
 //Leaflet LatLngBounds.pad expects a ratio (0.15 = 15%).
 const PREFETCH_BOUNDS_PADDING = 0.15;
@@ -440,7 +448,7 @@ const getLatestFileIdFromPoints = (points: MapIndexPoint[]) =>
 function useMapData(
     open: boolean,
     collectionSummary: CollectionSummary,
-    activeCollection: Collection | undefined,
+    files: EnteFile[],
     onGenericError: (e: unknown) => void,
 ): MapDataResult {
     const [state, setState] = useState<MapDataState>({
@@ -466,9 +474,9 @@ function useMapData(
     // Include fileCount to detect when collection content changes
     const loadedCollectionRef = useRef<{
         summaryId: number;
-        collectionId: number | undefined;
         fileCount: number;
         updationTime: number | null;
+        files: EnteFile[];
     } | null>(null);
 
     //Syncing the refs with the state for the stale closure prevention.
@@ -569,7 +577,6 @@ function useMapData(
 
         // Skip reload if we already have data for this collection with same file count
         const currentSummaryId = collectionSummary.id;
-        const currentCollectionId = activeCollection?.id;
         const currentFileCount = collectionSummary.fileCount;
         const currentUpdationTime = collectionSummary.updationTime ?? null;
         const loaded = loadedCollectionRef.current;
@@ -578,9 +585,9 @@ function useMapData(
         if (
             loaded &&
             loaded.summaryId === currentSummaryId &&
-            loaded.collectionId === currentCollectionId &&
             loaded.fileCount === currentFileCount &&
-            loaded.updationTime === currentUpdationTime
+            loaded.updationTime === currentUpdationTime &&
+            loaded.files === files
         ) {
             return;
         }
@@ -591,18 +598,17 @@ function useMapData(
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
             try {
-                const files = await getFilesForCollection(
-                    collectionSummary,
-                    activeCollection,
-                );
+                const uniqueFiles = uniqueFilesByID(files);
 
                 //Creating a id <- file mapping to drive renders and update the UI, changes to this will result in UI re-renders
-                const filesByID = new Map(files.map((file) => [file.id, file]));
+                const filesByID = new Map(
+                    uniqueFiles.map((file) => [file.id, file]),
+                );
                 //ref mirrow for using in the useCallbacks
                 filesByIDRef.current = filesByID;
 
                 const { points, latestFileId } =
-                    await buildMapIndexPoints(files);
+                    await buildMapIndexPoints(uniqueFiles);
 
                 //mapIndex has the SuperCluster Spatial Index
                 const mapIndex = buildMapIndex(points);
@@ -628,9 +634,9 @@ function useMapData(
                 // Mark this collection as loaded
                 loadedCollectionRef.current = {
                     summaryId: currentSummaryId,
-                    collectionId: currentCollectionId,
                     fileCount: currentFileCount,
                     updationTime: currentUpdationTime,
+                    files,
                 };
 
                 const coverId = collectionSummary.coverFile?.id ?? latestFileId;
@@ -655,13 +661,7 @@ function useMapData(
         };
 
         void loadMapData();
-    }, [
-        open,
-        collectionSummary,
-        activeCollection,
-        onGenericError,
-        queueThumbnailFetch,
-    ]);
+    }, [open, collectionSummary, files, onGenericError, queueThumbnailFetch]);
 
     /**
      * This function is used to update the map view, after a file has been
@@ -932,7 +932,7 @@ function useFavorites(
  * @returns An object containing the visible photos array and setter.
  */
 function useVisiblePhotos() {
-    const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
+    const [visiblePhotos, setVisiblePhotos] = useState<MapPhotoPoint[]>([]);
     const [isVisiblePhotosUpdating, setIsVisiblePhotosUpdating] =
         useState(false);
 
@@ -957,12 +957,11 @@ function createMarkerIcon(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const leaflet = require("leaflet") as typeof import("leaflet");
 
-    const pinSize = size + 16; // Add padding for consistent sizing with TripLayout
+    const pinSize = size + 16;
     const triangleHeight = 10;
     const pinHeight = pinSize + triangleHeight + 2;
     const hasImage = imageSrc && imageSrc.trim() !== "";
 
-    // Border radius matching TripLayout style
     const outerBorderRadius = 16;
     const innerBorderRadius = 12;
 
@@ -1033,13 +1032,12 @@ function createClusterIcon(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const leaflet = require("leaflet") as typeof import("leaflet");
 
-    const pinSize = size + 16; // Add padding for consistent sizing with TripLayout
+    const pinSize = size + 16;
     const triangleHeight = 10;
     const pinHeight = pinSize + triangleHeight + 2;
     const hasImage = imageSrc && imageSrc.trim() !== "";
     const badgeOverflow = 6;
 
-    // Border radius matching TripLayout style
     const outerBorderRadius = 16;
     const innerBorderRadius = 12;
 
@@ -1131,70 +1129,6 @@ function createClusterIcon(
 // Helper Functions
 // ============================================================================
 
-/**
- * Returns true if the file is visible (not archived or hidden).
- */
-function isFileVisible(file: EnteFile): boolean {
-    const visibility = file.magicMetadata?.data.visibility;
-    // Files without visibility metadata are considered visible (default state)
-    return visibility === undefined || visibility === ItemVisibility.visible;
-}
-
-/**
- * Loads every locally stored file, filters those belonging to the
- * target collection, removes duplicates by ID, filters out hidden/archived
- * files, and returns the unique set of visible files. For "All", it also
- * excludes files that belong to hidden or archived collections.
- */
-async function getFilesForCollection(
-    collectionSummary: CollectionSummary,
-    activeCollection: Collection | undefined,
-): Promise<EnteFile[]> {
-    if (collectionSummary.type === "all") {
-        const [allFiles, collections] = await Promise.all([
-            savedCollectionFiles(),
-            savedCollections(),
-        ]);
-        // Filter out hidden and archived files to prevent leaking items users expect to remain hidden.
-        const visibleFiles = allFiles.filter(isFileVisible);
-        const hiddenCollectionIDs = new Set(
-            collections
-                .filter(isHiddenCollection)
-                .map((collection) => collection.id),
-        );
-        const archivedCollectionIDs = new Set(
-            collections
-                .filter(isArchivedCollection)
-                .map((collection) => collection.id),
-        );
-        const hiddenFileIDs = new Set(
-            allFiles
-                .filter((file) => hiddenCollectionIDs.has(file.collectionID))
-                .map((file) => file.id),
-        );
-        const archivedFileIDs = new Set(
-            allFiles
-                .filter((file) => archivedCollectionIDs.has(file.collectionID))
-                .map((file) => file.id),
-        );
-        const filtered = visibleFiles.filter(
-            (file) =>
-                !hiddenFileIDs.has(file.id) && !archivedFileIDs.has(file.id),
-        );
-        return uniqueFilesByID(filtered);
-    }
-    const allFiles = await savedCollectionFiles();
-    // Filter out hidden and archived files to prevent leaking items users expect to remain hidden.
-    const visibleFiles = allFiles.filter(isFileVisible);
-    if (!activeCollection) {
-        return [];
-    }
-    const filtered = visibleFiles.filter(
-        (file) => file.collectionID === activeCollection.id,
-    );
-    return uniqueFilesByID(filtered);
-}
-
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -1208,6 +1142,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     onClose,
     collectionSummary,
     activeCollection,
+    files,
     onRemotePull,
     onAddSaveGroup,
     onMarkTempDeleted,
@@ -1223,7 +1158,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
-    const optimalZoom = calculateOptimalZoom();
+    const optimalZoom = DEFAULT_MAP_ZOOM;
 
     const {
         mapCenter,
@@ -1237,7 +1172,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         removeFiles: removeFilesFromMap,
         updateFileVisibility,
         queueThumbnailFetch,
-    } = useMapData(open, collectionSummary, activeCollection, onGenericError);
+    } = useMapData(open, collectionSummary, files, onGenericError);
 
     const {
         visiblePhotos,
@@ -1272,7 +1207,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             [isFileViewerOpen],
         );
 
-    // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
+    // Convert visible map photo points to EnteFiles for FileListWithViewer
     const visibleFiles = useMemo(() => {
         return visiblePhotos
             .map((p) => filesByID.get(p.fileId))
@@ -1498,7 +1433,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
  */
 interface MapLayoutProps {
     collectionSummary: CollectionSummary;
-    visiblePhotos: JourneyPoint[];
+    visiblePhotos: MapPhotoPoint[];
     visibleFiles: EnteFile[];
     visiblePhotosUpdating: boolean;
     mapIndex: MapIndex | null;
@@ -1508,7 +1443,7 @@ interface MapLayoutProps {
     mapCenter: [number, number];
     optimalZoom: number;
     onClose: () => void;
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosChange: (photosInView: MapPhotoPoint[]) => void;
     onVisiblePhotosLoadingChange: (loading: boolean) => void;
     onPrefetchThumbnails: (fileIDs: number[]) => void;
     user: ReturnType<typeof useCurrentUser>;
@@ -1885,7 +1820,7 @@ interface MapCanvasProps {
     mapIndex: MapIndex | null;
     optimalZoom: number;
     thumbByFileID: Map<number, string>;
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosChange: (photosInView: MapPhotoPoint[]) => void;
     onVisiblePhotosLoadingChange: (loading: boolean) => void;
     onPrefetchThumbnails: (fileIDs: number[]) => void;
 }
@@ -2025,7 +1960,7 @@ interface MapClustersProps {
     useMap: typeof import("react-leaflet").useMap;
     mapIndex: MapIndex;
     thumbByFileID: Map<number, string>;
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosChange: (photosInView: MapPhotoPoint[]) => void;
     onVisiblePhotosLoadingChange: (loading: boolean) => void;
     onPrefetchThumbnails: (fileIDs: number[]) => void;
     Marker: typeof import("react-leaflet").Marker;

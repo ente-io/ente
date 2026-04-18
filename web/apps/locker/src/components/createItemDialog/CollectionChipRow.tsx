@@ -1,3 +1,4 @@
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import { Box, ButtonBase, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -17,16 +18,17 @@ export const CollectionChipRow: React.FC<{
     onCreateClick?: () => void;
 }> = ({ items, createOpen, disabled, onCreateClick }) => {
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-    const [showScrollHint, setShowScrollHint] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const scrollRight = () => {
+    const scrollBy = (direction: number) => {
         const container = scrollContainerRef.current;
         if (!container) {
             return;
         }
 
         container.scrollBy({
-            left: Math.max(container.clientWidth * 0.6, 160),
+            left: direction * Math.max(container.clientWidth * 0.6, 160),
             behavior: "smooth",
         });
     };
@@ -37,23 +39,24 @@ export const CollectionChipRow: React.FC<{
             return;
         }
 
-        const updateScrollHint = () => {
+        const updateScrollHints = () => {
+            setCanScrollLeft(container.scrollLeft > 8);
             const remainingScroll =
                 container.scrollWidth -
                 container.clientWidth -
                 container.scrollLeft;
-            setShowScrollHint(remainingScroll > 8);
+            setCanScrollRight(remainingScroll > 8);
         };
 
-        updateScrollHint();
-        container.addEventListener("scroll", updateScrollHint, {
+        updateScrollHints();
+        container.addEventListener("scroll", updateScrollHints, {
             passive: true,
         });
-        window.addEventListener("resize", updateScrollHint);
+        window.addEventListener("resize", updateScrollHints);
 
         return () => {
-            container.removeEventListener("scroll", updateScrollHint);
-            window.removeEventListener("resize", updateScrollHint);
+            container.removeEventListener("scroll", updateScrollHints);
+            window.removeEventListener("resize", updateScrollHints);
         };
     }, [createOpen, items.length]);
 
@@ -81,8 +84,39 @@ export const CollectionChipRow: React.FC<{
                     {t("collections")}
                 </Typography>
             </Stack>
-            <Stack direction="row" sx={{ alignItems: "stretch", gap: 0 }}>
-                <Box sx={{ position: "relative", flex: 1, minWidth: 0 }}>
+            <Box sx={{ position: "relative", minWidth: 0 }}>
+                <Box
+                    sx={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        zIndex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
+                    {canScrollLeft && (
+                        <ButtonBase
+                            onClick={() => scrollBy(-1)}
+                            disabled={disabled}
+                            sx={(theme) => ({
+                                width: 28,
+                                height: 28,
+                                color: "#4A4A4A",
+                                borderRadius: "999px",
+                                backgroundColor:
+                                    theme.vars.palette.background.paper,
+                                ...theme.applyStyles("dark", {
+                                    color: "#FFFFFF",
+                                }),
+                            })}
+                        >
+                            <ChevronLeftRoundedIcon sx={{ fontSize: 28 }} />
+                        </ButtonBase>
+                    )}
+                </Box>
+                <Box sx={{ position: "relative", minWidth: 0 }}>
                     <Stack
                         ref={scrollContainerRef}
                         direction="row"
@@ -91,14 +125,24 @@ export const CollectionChipRow: React.FC<{
                             flexWrap: "nowrap",
                             overflowX: "auto",
                             overflowY: "hidden",
-                            pr: 2,
+                            px: 0.5,
                             pb: 0.5,
-                            maskImage: showScrollHint
-                                ? "linear-gradient(90deg, #000 0%, #000 calc(100% - 64px), rgba(0, 0, 0, 0) 100%)"
-                                : undefined,
-                            WebkitMaskImage: showScrollHint
-                                ? "linear-gradient(90deg, #000 0%, #000 calc(100% - 64px), rgba(0, 0, 0, 0) 100%)"
-                                : undefined,
+                            maskImage:
+                                canScrollLeft && canScrollRight
+                                    ? "linear-gradient(90deg, rgba(0,0,0,0) 0%, #000 64px, #000 calc(100% - 64px), rgba(0,0,0,0) 100%)"
+                                    : canScrollLeft
+                                      ? "linear-gradient(90deg, rgba(0,0,0,0) 0%, #000 64px)"
+                                      : canScrollRight
+                                        ? "linear-gradient(90deg, #000 0%, #000 calc(100% - 64px), rgba(0,0,0,0) 100%)"
+                                        : undefined,
+                            WebkitMaskImage:
+                                canScrollLeft && canScrollRight
+                                    ? "linear-gradient(90deg, rgba(0,0,0,0) 0%, #000 64px, #000 calc(100% - 64px), rgba(0,0,0,0) 100%)"
+                                    : canScrollLeft
+                                      ? "linear-gradient(90deg, rgba(0,0,0,0) 0%, #000 64px)"
+                                      : canScrollRight
+                                        ? "linear-gradient(90deg, #000 0%, #000 calc(100% - 64px), rgba(0,0,0,0) 100%)"
+                                        : undefined,
                             scrollbarWidth: "none",
                             "&::-webkit-scrollbar": { display: "none" },
                         }}
@@ -153,22 +197,26 @@ export const CollectionChipRow: React.FC<{
                 </Box>
                 <Box
                     sx={{
-                        width: 28,
-                        flexShrink: 0,
+                        position: "absolute",
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        zIndex: 1,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
                     }}
                 >
-                    {showScrollHint && (
+                    {canScrollRight && (
                         <ButtonBase
-                            onClick={scrollRight}
+                            onClick={() => scrollBy(1)}
                             disabled={disabled}
                             sx={(theme) => ({
                                 width: 28,
-                                height: "100%",
+                                height: 28,
                                 color: "#4A4A4A",
                                 borderRadius: "999px",
+                                backgroundColor:
+                                    theme.vars.palette.background.paper,
                                 ...theme.applyStyles("dark", {
                                     color: "#FFFFFF",
                                 }),
@@ -178,7 +226,7 @@ export const CollectionChipRow: React.FC<{
                         </ButtonBase>
                     )}
                 </Box>
-            </Stack>
+            </Box>
         </Box>
     );
 };

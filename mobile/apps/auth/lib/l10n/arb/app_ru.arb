@@ -10,7 +10,7 @@
   "featureBackupCodes": "Сквозное шифрование резервного копирования и синхронизация",
   "featureSearchEtc": "Поиск, теги, поделиться,\nследующий одноразовый код и многое другое",
   "featureOpenSource": "Открытый исходный код\nпроверенный экспертами по безопасности",
-  "signUp": "Войти",
+  "signUp": "Регистрация",
   "onBoardingGetStarted": "Начать",
   "setupFirstAccount": "Настройте свою первую\nучетную запись",
   "allTabEmptyHint": "Ничего не найдено. Нажмите +, чтобы добавить код, или откройте Корзину, чтобы восстановить его.",
@@ -333,7 +333,7 @@
     }
   },
   "sorry": "Извините",
-  "importFailureDesc": "Не удалось разобрать выбранный файл.\nПожалуйста, напишите на support@ente.com, если вам нужна помощь!",
+  "importFailureDesc": "Не удалось обработать выбранный файл.\nПожалуйста, напишите на support@ente.com, если Вам нужна помощь!",
   "pendingSyncs": "Предупреждение",
   "pendingSyncsWarningBody": "Некоторые из ваших кодов не были сохранены.\n\nПожалуйста, убедитесь, что у вас есть резервная копия для этих кодов перед выходом.",
   "checkInboxAndSpamFolder": "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации",
@@ -581,7 +581,7 @@
   "addNew": "",
   "selected": "выбрано",
   "moveMultipleToTrashMessage": "Вы уверены, что хотите переместить {count} элемент(ы) в корзину?",
-  "nSelected": "{count, plural, =1{1 выбран} other{{count} выбрано}}",
+  "nSelected": "{count, plural, one{{count} выбран} few{{count} выбрано} many{{count} выбрано} other{{count} выбрано}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -592,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{Закреплён 1 элемент} other{Закреплёно {count} элементов}}",
+  "pinnedCount": "{count, plural, one{Закреплён {count} элемент} few{Закреплено {count} элемента} many{Закреплено {count} элементов} other{Закреплено {count} элементов}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -603,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{Откреплён 1 элемент} other{Откреплёно {count} элементов}}",
+  "unpinnedCount": "{count, plural, one{Откреплён {count} элемент} few{Откреплено {count} элемента} many{Откреплено {count} элементов} other{Откреплено {count} элементов}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ente-io/museum/pkg/utils/network"
@@ -36,6 +37,12 @@ func shouldSkipBodyLog(method string, path string) bool {
 		return true
 	}
 	if path == "/user-entity/entity" && (method == "POST" || method == "PUT") {
+		return true
+	}
+	if path == "/contacts" && method == http.MethodPost {
+		return true
+	}
+	if strings.HasPrefix(path, "/contacts/") && method == http.MethodPut {
 		return true
 	}
 	if path == "/files/data" && method == "PUT" {

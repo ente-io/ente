@@ -25,7 +25,6 @@
   "deleteReason4": "該当する理由がない",
   "sendEmail": "メールを送信する",
   "deleteRequestSLAText": "リクエストは72時間以内に処理されます",
-  "deleteEmailRequest": "<warning>account-deletion@ente.com</warning>にあなたの登録したメールアドレスからメールを送信してください",
   "entePhotosPerm": "写真を大切にバックアップするために<i>許可が必要</i>です",
   "ok": "OK",
   "createAccount": "アカウント作成",
@@ -263,11 +262,8 @@
   "verificationId": "確認用ID",
   "verifyEmailID": "{email} を確認",
   "emailNoEnteAccount": "{email} はEnteアカウントを持っていません。\n\n写真を共有するために「招待」を送信してください。",
-  "shareMyVerificationID": "私の確認ID: ente.comの {verificationID}",
-  "shareTextConfirmOthersVerificationID": "これがあなたのente.com確認用IDであることを確認できますか？ {verificationID}",
   "somethingWentWrong": "エラーが発生しました",
   "sendInvite": "招待を送る",
-  "shareTextRecommendUsingEnte": "Enteをダウンロードして、写真や動画の共有を簡単に！\n\nhttps://ente.com",
   "done": "完了",
   "applyCodeTitle": "コードを適用",
   "enterCodeDescription": "もらったコードを入力して、無料のストレージを入手してください",
@@ -587,7 +583,6 @@
   "subscription": "サブスクリプション",
   "paymentDetails": "お支払い情報",
   "manageFamily": "ファミリーの管理",
-  "contactToManageSubscription": "{provider} サブスクリプションを管理するには、support@ente.com までご連絡ください。",
   "renewSubscription": "サブスクリプションの更新",
   "cancelSubscription": "サブスクリプションをキャンセル",
   "areYouSureYouWantToRenew": "更新してもよろしいですか？",
@@ -636,7 +631,6 @@
   "subAlreadyLinkedErrMessage": "あなたの {id} はすでに別のEnteアカウントにリンクされています。\nこのアカウントであなたの {id} を使用したい場合は、サポートにお問い合わせください。",
   "visitWebToManage": "サブスクリプションを管理するにはweb.ente.ioをご覧ください",
   "couldNotUpdateSubscription": "サブスクリプションを更新できませんでした",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Support@ente.comにお問い合わせください、お手伝いいたします。",
   "paymentFailed": "支払いに失敗しました",
   "paymentFailedTalkToProvider": "請求された場合は、 {providerName} のサポートに連絡してください",
   "@paymentFailedTalkToProvider": {
@@ -1041,8 +1035,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "半径の設定",
-  "familyPlanPortalTitle": "ファミリー",
-  "familyPlanOverview": "5人までの家族をファミリープランに追加しましょう(追加料金無し)\n\n一人ひとりがプライベートなストレージを持ち、共有されない限りお互いに見ることはありません。\n\nファミリープランはEnteサブスクリプションに登録した人が利用できます。\n\nさっそく登録しましょう！",
   "androidBiometricHint": "本人確認を行う",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

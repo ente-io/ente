@@ -23,12 +23,16 @@ jobs:
                 platform:
                     - os: ubuntu-22.04
                       rust-target: x86_64-unknown-linux-gnu
+                      bundle-targets: appimage,deb,rpm,updater
                     - os: macos-latest
                       rust-target: x86_64-apple-darwin
+                      bundle-targets: app,dmg,updater
                     - os: macos-latest
                       rust-target: aarch64-apple-darwin
+                      bundle-targets: app,dmg,updater
                     - os: windows-latest
                       rust-target: x86_64-pc-windows-msvc
+                      bundle-targets: nsis,updater
 
         runs-on: ${{ matrix.platform.os }}
         env:
@@ -46,14 +50,19 @@ jobs:
                   echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
 
             # Pin to 1.93.0: Rust 1.94.0 has a trait glob-import regression
             # that breaks wry 0.24.x (SettingsExt not found via traits::*).
@@ -99,10 +108,6 @@ jobs:
               shell: bash
               working-directory: rust/apps/ensu/src-tauri
               run: cargo fetch
-
-            - name: Patch llama.cpp mtmd sources
-              shell: bash
-              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
             - name: Install trusted-signing-cli (Windows only)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
@@ -173,6 +178,7 @@ jobs:
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
                   ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
+                  ENSU_TAURI_REQUIRE_UPDATER_PUBKEY: "1"
               run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
 
             - name: Ensure ENSU Tauri signing key is configured
@@ -217,7 +223,7 @@ jobs:
                   includeDebug: false
                   includeRelease: true
                   includeUpdaterJson: false
-                  args: ${{ matrix.platform.rust-target == 'aarch64-apple-darwin' && '--target aarch64-apple-darwin --bundles app' || matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+                  args: ${{ format('--target {0} --bundles {1} --features updater', matrix.platform.rust-target, matrix.platform.bundle-targets) }}
 
     build-android:
         runs-on: ubuntu-22.04
@@ -232,10 +238,8 @@ jobs:
                 working-directory: mobile/native/android/apps/ensu
 
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Set release tag
               shell: bash

@@ -121,6 +121,9 @@
   "importAegisGuide": "Utilitza l'opció \"Exporta la caixa forta\" a la configuració d'Aegis.\n\nSi la teva caixa forta està xifrada, hauràs d'introduir la contrasenya per desxifrar-la.",
   "import2FasGuide": "Utilitza l'opció \"Configuració->Còpia de seguretat - Exporta\" a 2FAS.\n\nSi la teva còpia de seguretat està xifrada, hauràs d'introduir la contrasenya per desxifrar-la.",
   "importLastpassGuide": "Utilitza l'opció \"Transferir comptes\" a la configuració de Lastpass Authenticator i prem \"Exporta comptes a fitxer\". Importa el fitxer JSON descarregat.",
+  "importProtonAuthGuide": "Si l'exportació està protegida amb contrasenya, haureu d'introduir la contrasenya per desxifrar-la.",
+  "invalidProtonExportTitle": "Exportació de Proton no vàlida",
+  "invalidProtonExportMessage": "El fitxer seleccionat no és una exportació vàlida de Proton Authenticator.",
   "exportCodes": "Exporta codis",
   "importLabel": "Importa",
   "importInstruction": "Si us plau, selecciona un fitxer que contingui una llista dels teus codis en el següent format",
@@ -330,7 +333,7 @@
     }
   },
   "sorry": "Ho sentim",
-  "importFailureDesc": "No s'ha pogut analitzar el fitxer seleccionat.\nEscriu a support@ente.com si necessites ajuda!",
+  "importFailureDesc": "No s'ha pogut analitzar el fitxer seleccionat.\nSi necessiteu ajuda, escriviu a support@ente.com!",
   "pendingSyncs": "Advertència",
   "pendingSyncsWarningBody": "Alguns dels teus codis no s'han sincronitzat.\n\nSi us plau, assegura't de tenir una còpia de seguretat d'aquests codis abans de tancar la sessió.",
   "checkInboxAndSpamFolder": "Comprova la teva safata d'entrada (i el correu no desitjat) per completar la verificació",
@@ -578,7 +581,7 @@
   "addNew": "Afegir nou",
   "selected": "seleccionat",
   "moveMultipleToTrashMessage": "Esteu segur que voleu moure {count} element(s) a la paperera?",
-  "nSelected": "{count, plural, =1{1 seleccionat} other{{count} seleccionats}}",
+  "nSelected": "{count, plural, one {{count} seleccionat} other{{count} seleccionats}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1 element fixat} other{{count} elements fixats}}",
+  "pinnedCount": "{count, plural, one{{count} element fixat} other{{count} elements fixats}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 element deixat de fixar} other{{count} elements deixats de fixar}}",
+  "unpinnedCount": "{count, plural, one{{count} element deixat de fixar} other{{count} elements deixats de fixar}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

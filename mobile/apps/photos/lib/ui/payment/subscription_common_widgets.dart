@@ -103,7 +103,7 @@ class SubFaqWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: MenuItemWidgetNew(
         title: AppLocalizations.of(context).faqs,
         menuItemColor: colorScheme.fillFaint,

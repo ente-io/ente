@@ -83,8 +83,6 @@ ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
       hoverForeground: c.redDark,
       pressedForeground: c.redDarker,
       disabledForeground: c.contentLighter,
-      defaultBorder: c.redBase,
-      disabledBorder: c.fillDark,
       disabledIconColor: c.contentLighter,
     );
 

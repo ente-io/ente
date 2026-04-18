@@ -7,7 +7,6 @@
 - Android SDK with API level 35 (install in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT`)
 - Android NDK (install via `sdkmanager "ndk;<version>"`; optionally set `NDK_VERSION` to select a specific version)
 - Rust toolchain and `cargo-ndk` (`cargo install cargo-ndk`)
-- Python 3 (used to patch llama.cpp mtmd sources)
 
 ## Quick scripts
 
@@ -33,7 +32,7 @@ Run `./build.sh --help` or `./run.sh --help` for full options.
 
 ### 1. Build Rust Libraries
 
-Before building the Android app, compile the Rust native libraries. Ensure the SDK is installed in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT` to the SDK containing an NDK. Optionally set `NDK_VERSION` to select a specific version. The build script applies the llama.cpp mtmd patch; set `APPLY_LLAMA_MTMD_PATCH=0` to skip it.
+Before building the Android app, compile the Rust native libraries. Ensure the SDK is installed in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT` to the SDK containing an NDK. Optionally set `NDK_VERSION` to select a specific version.
 
 ```bash
 cd mobile/native/android/packages/rust/tool
@@ -67,17 +66,6 @@ Output: `app-ui/build/outputs/apk/debug/app-ui-debug.apk`
 Output: `app-ui/build/outputs/apk/release/app-ui-release.apk`
 
 Note: Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app-ui/build.gradle.kts`.
-
-## Certificate Fingerprints
-
-- **SHA1**: 55:32:94:80:28:F7:C7:43:9F:41:07:58:4B:13:F1:56:38:00:75:0C
-- **SHA256**: 66:99:CF:8C:42:AF:42:7B:55:2C:96:20:54:E5:D6:95:89:FA:49:09:96:55:3A:53:04:5E:B3:9C:C3:4F:2E:66
-
-To verify these fingerprints, use the following command:
-
-```bash
-apksigner verify --print-certs <path_to_apk>
-```
 
 ## Installation
 

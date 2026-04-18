@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Lo sentimos",
-  "importFailureDesc": "No se pudo analizar el archivo seleccionado.\n¡Por favor escriba a support@ente.com si necesita ayuda!",
   "pendingSyncs": "Atención",
   "pendingSyncsWarningBody": "Algunos de tus códigos no tienen copia de seguridad.\n\nPor favor, asegúrate de tener una copia de seguridad de estos códigos antes de cerrar la sesión.",
   "checkInboxAndSpamFolder": "Por favor revisa tu bandeja de entrada (y spam) para completar la verificación",
@@ -578,7 +577,7 @@
   "addNew": "Añadir nuevo",
   "selected": "seleccionado",
   "moveMultipleToTrashMessage": "¿Está seguro de que desea mover {count} elemento(s) a la papelera?",
-  "nSelected": "{count, plural, one {}=1{1 seleccionado} other{{count} seleccionados}}",
+  "nSelected": "{count, plural, one {{count} seleccionado} other{{count} seleccionados}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {}=1{1 elemento anclado} other{{count} elementos anclados}}",
+  "pinnedCount": "{count, plural, one{{count} elemento anclado} other{{count} elementos anclados}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, one {}=1{1 elemento desanclado} other{{count} elementos desanclados}}",
+  "unpinnedCount": "{count, plural, one{{count} elemento desanclado} other{{count} elementos desanclados}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

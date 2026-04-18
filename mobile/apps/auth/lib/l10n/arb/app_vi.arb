@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Rất tiếc",
-  "importFailureDesc": "Không thể phân tích tệp đã chọn.\nVui lòng liên hệ support@ente.com nếu bạn cần trợ giúp!",
   "pendingSyncs": "Cảnh báo",
   "pendingSyncsWarningBody": "Một số mã của bạn chưa được sao lưu.\n\nVui lòng đảm bảo rằng bạn có bản sao lưu cho các mã này trước khi đăng xuất.",
   "checkInboxAndSpamFolder": "Vui lòng kiểm tra hộp thư đến (và thư rác) để hoàn tất xác minh",
@@ -578,7 +577,7 @@
   "addNew": "Thêm mới",
   "selected": "đã chọn",
   "moveMultipleToTrashMessage": "Bạn có chắc muốn di chuyển {count} mục vào thùng rác?",
-  "nSelected": "{count, plural, =1{1 đã chọn} other{{count} đã chọn}}",
+  "nSelected": "{count, plural, one {{count} đã chọn} other{{count} đã chọn}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{Đã ghim 1 mục} other{Đã ghim {count} mục}}",
+  "pinnedCount": "{count, plural, one{Đã ghim {count} mục} other{Đã ghim {count} mục}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{Đã bỏ ghim 1 mục} other{Đã bỏ ghim {count} mục}}",
+  "unpinnedCount": "{count, plural, one{Đã bỏ ghim {count} mục} other{Đã bỏ ghim {count} mục}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

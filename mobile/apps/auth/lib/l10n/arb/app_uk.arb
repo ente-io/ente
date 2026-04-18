@@ -101,7 +101,7 @@
   "emailNotRegistered": "Пошту не зареєстровано.",
   "madeWithLoveAtPrefix": "зроблено з ❤️ в ",
   "supportDevs": "Підпишіться на <bold-green>ente</bold-green>, щоб підтримати нас",
-  "supportDiscount": "Використовуйте купон \"AUTH\", щоб отримати 10% знижки за перший рік",
+  "supportDiscount": "Скористайтеся кодом «AUTH», щоб отримати знижку в 10% на перший рік",
   "changeEmail": "Змінити адресу електронної пошти",
   "changePassword": "Змінити пароль",
   "data": "Дані",
@@ -121,6 +121,9 @@
   "importAegisGuide": "Скористайтеся опцією «Export the vault» у параметрах Aegis.\n\nЯкщо ваше сховище зашифровано, вам потрібно буде ввести пароль сховища, щоб розшифрувати його.",
   "import2FasGuide": "Скористайтеся опцією «Settings->Backup -Export» у 2FAS.\n\nЯкщо ваша резервна копія зашифрована, вам потрібно буде ввести пароль, щоб розшифрувати її",
   "importLastpassGuide": "Скористайтеся опцією «Transfer accounts» у налаштуваннях Lastpass Authenticator і натисніть «Export accounts to file». Імпортуйте завантажений JSON.",
+  "importProtonAuthGuide": "Використовуйте опцію «Експорт» у налаштуваннях Proton Authenticator для експорту ваших кодів.\n\nЯкщо ваш експорт захищено паролем, вам потрібно буде ввести пароль для його дешифрування.",
+  "invalidProtonExportTitle": "Недійсний експорт Proton",
+  "invalidProtonExportMessage": "Обраний файл не є дійсним експортом Proton Authenticator.",
   "exportCodes": "Експортувати коди",
   "importLabel": "Імпортувати",
   "importInstruction": "Будь ласка, виберіть файл, що містить список кодів у наступному форматі",
@@ -282,7 +285,7 @@
   "invalidRecoveryKey": "Уведений вами ключ відновлення недійсний. Переконайтеся, що він містить 24 слова, а також перевірте правопис кожного.\n\nЯкщо ви ввели старий код відновлення, переконайтеся, що він має 64 символи, а також перевірте кожен з них.",
   "recreatePasswordTitle": "Повторно створити пароль",
   "recreatePasswordBody": "Поточний пристрій не є достатньо потужним для підтвердження пароля, але ми можемо відновити його таким чином, щоб він працював на всіх пристроях.\n\nБудь ласка, увійдіть за допомогою вашого ключа відновлення і відновіть ваш пароль (ви можете знову використати той самий пароль, якщо бажаєте).",
-  "invalidKey": "Хибний ключ",
+  "invalidKey": "Недійсний ключ",
   "tryAgain": "Спробуйте ще раз",
   "viewRecoveryKey": "Переглянути ключ відновлення",
   "confirmRecoveryKey": "Підтвердити ключ відновлення",
@@ -578,7 +581,7 @@
   "addNew": "Додати нову",
   "selected": "вибрано",
   "moveMultipleToTrashMessage": "Наступну кількість кодів буде переміщено до смітника: {count}. Продовжити?",
-  "nSelected": "{count, plural, =1 {1 вибраний} one {{count} вибраний} few {{count} вибрані} many {{count} вибраних} other{{count} вибраних}}",
+  "nSelected": "{count, plural, one {{count} вибраний} few {{count} вибрані} many {{count} вибраних} other{{count} вибраних}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1 {Закріплено 1 елемент} one {Закріплено {count} елемент} few {Закріплено {count} елементи} many {Закріплено {count} елементів} other{Закріплено {count} елементів}}",
+  "pinnedCount": "{count, plural, one {Закріплено {count} елемент} few {Закріплено {count} елементи} many {Закріплено {count} елементів} other{Закріплено {count} елементів}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1 {Відкріплено 1 елемент} one {Відкріплено {count} елемент} few {Відкріплено {count} елементи} many {Відкріплено {count} елементів} other{Відкріплено {count} елементів}}",
+  "unpinnedCount": "{count, plural, one {Відкріплено {count} елемент} few {Відкріплено {count} елементи} many {Відкріплено {count} елементів} other{Відкріплено {count} елементів}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

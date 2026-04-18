@@ -36,6 +36,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
@@ -48,11 +49,13 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/services/update_service.dart";
 import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -124,6 +127,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _showShowBackupHook = false;
   bool _personSyncTriggered = false;
   bool _collectionsSyncTriggered = false;
+  bool _isShowingChangeLog = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
@@ -222,6 +226,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AppModeChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
+        _scheduleChangeLogCheck(
+          delay: const Duration(milliseconds: 250),
+        );
       }
     });
     _firstImportEvent =
@@ -294,13 +301,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => Future.delayed(
-        const Duration(seconds: 1),
-        () => {
-          if (mounted) {showChangeLog(context)},
-        },
-      ),
+    _scheduleChangeLogCheck(
+      delay: const Duration(seconds: 1),
     );
 
     if (Platform.isAndroid &&
@@ -332,6 +334,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         setState(() {});
       }
     });
+    if (!isOfflineMode && Configuration.instance.hasConfiguredAccount()) {
+      MemoryShareService.instance.listMemoryShares().ignore();
+    }
   }
 
   Future<void> syncWidget() async {
@@ -341,6 +346,18 @@ class _HomeWidgetState extends State<HomeWidget> {
     await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
     await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
     await MemoryHomeWidgetService.instance.checkPendingMemorySync();
+  }
+
+  void _scheduleChangeLogCheck({
+    required Duration delay,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(delay, () {
+        if (mounted) {
+          showChangeLog(context);
+        }
+      });
+    });
   }
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
@@ -488,6 +505,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 sharedFiles,
                 0,
                 "sharedPublicCollection",
+                galleryType: GalleryType.sharedPublicCollection,
               ),
             ),
           );
@@ -1073,33 +1091,50 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   showChangeLog(BuildContext context) async {
-    final bool show = await updateService.showChangeLog();
-    if (!show || !Configuration.instance.isLoggedIn()) {
+    if (_isShowingChangeLog) {
       return;
     }
-    final colorScheme = getEnteColorScheme(context);
-    await showBarModalBottomSheet(
-      topControl: const SizedBox.shrink(),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
+    _isShowingChangeLog = true;
+    try {
+      final action = await updateService.getChangeLogAction(
+        locale: Localizations.localeOf(context),
+        isOffline: isOfflineMode,
+        isSignedIn: Configuration.instance.isLoggedIn(),
+      );
+      if (!mounted || action == ChangeLogAction.skip) {
+        return;
+      }
+      if (action == ChangeLogAction.consumeWithoutShowing) {
+        updateService.hideChangeLog().ignore();
+        return;
+      }
+      final colorScheme = getEnteColorScheme(context);
+      await showBarModalBottomSheet(
+        topControl: const SizedBox.shrink(),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
         ),
-      ),
-      backgroundColor: colorScheme.backgroundElevated,
-      enableDrag: false,
-      barrierColor: backdropFaintDark,
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: const ChangeLogPage(),
-        );
-      },
-    );
-    // Do not show change dialog again
-    updateService.hideChangeLog().ignore();
+        backgroundColor: colorScheme.backgroundElevated,
+        enableDrag: false,
+        barrierColor: backdropFaintDark,
+        context: context,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: const ChangeLogPage(),
+          );
+        },
+      );
+      // Do not show change dialog again
+      await updateService.hideChangeLog();
+    } finally {
+      _isShowingChangeLog = false;
+    }
   }
 
   void _onDidReceiveNotificationResponse(

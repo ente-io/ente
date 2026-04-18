@@ -329,7 +329,6 @@
     }
   },
   "sorry": "申し訳ありません",
-  "importFailureDesc": "選択されたファイルを解析できませんでした。\n手助けが必要な場合は support@ente.com までご連絡ください。",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "いくつかのコードがバックアップされていません。\n\nログアウトする前に、これらのコードのバックアップがあることを確認してください。",
   "checkInboxAndSpamFolder": "受信トレイ（および迷惑メール）を確認して認証を完了してください",
@@ -562,7 +561,7 @@
   "addNew": "新規追加",
   "selected": "選択済み",
   "moveMultipleToTrashMessage": "{count} アイテムをゴミ箱に移動してもよろしいですか？",
-  "nSelected": "{count, plural, =1{1 個選択} other{{count} 個選択}}",
+  "nSelected": "{count, plural, one {{count} 個選択} other{{count} 個選択}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -573,7 +572,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural,=1 {1 個の項目を固定} other {{count} 個の項目を固定}}",
+  "pinnedCount": "{count, plural, one {{count} 個の項目を固定} other {{count} 個の項目を固定}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {

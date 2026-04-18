@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Tyvärr",
-  "importFailureDesc": "Det gick inte att tolka den valda filen.\nSkriv till support@ente.com om du behöver hjälp!",
   "pendingSyncs": "Varning",
   "pendingSyncsWarningBody": "En del av dina koder har inte säkerhetskopierats.\n\nSe till att du har en säkerhetskopia för dessa koder innan du loggar ut.",
   "checkInboxAndSpamFolder": "Vänligen kontrollera din inkorg (och skräppost) för att slutföra verifieringen",
@@ -578,7 +577,7 @@
   "addNew": "Lägg till ny",
   "selected": "vald",
   "moveMultipleToTrashMessage": "Är du säker på att du vill flytta {count} objekt till papperskorgen?",
-  "nSelected": "{count, plural, one {}=1{1 vald} other{{count} valda}}",
+  "nSelected": "{count, plural, one {{count} vald} other{{count} valda}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {}=1{Fäst 1 objekt} other{Fäst {count} objekt}}",
+  "pinnedCount": "{count, plural, one {Fäst {count} objekt} other{Fäst {count} objekt}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, one {}=1{Fäst 1 objekt} other{Fäst {count} objekt}}",
+  "unpinnedCount": "{count, plural, one {Fäst {count} objekt} other{Fäst {count} objekt}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

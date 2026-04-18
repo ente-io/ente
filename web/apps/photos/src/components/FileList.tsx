@@ -168,33 +168,6 @@ export type EnteTrashFile = EnteFile & {
     deleteBy?: number;
 };
 
-interface MasonryLayoutItem {
-    file: EnteFile;
-    fileIndex: number;
-    left: number;
-    top: number;
-    bottom: number;
-    width: number;
-    height: number;
-}
-
-interface MasonryLayout {
-    items: MasonryLayoutItem[];
-    rows: MasonryLayoutItem[][];
-    totalHeight: number;
-}
-
-interface MasonrySourceItem {
-    file: EnteFile;
-    fileIndex: number;
-    aspectRatio: number;
-}
-
-interface Dimensions {
-    width: number;
-    height: number;
-}
-
 export interface FileListProps {
     /** The height we should occupy (needed since the list is virtualized). */
     height: number;
@@ -217,10 +190,6 @@ export interface FileListProps {
      */
     modePlus?: GalleryBarMode | "search";
     /**
-     * The visual layout used to render the file listing.
-     */
-    layout?: "grid" | "masonry";
-    /**
      * An optional component shown before all the items in the list.
      *
      * It is not sticky, and scrolls along with the content of the list.
@@ -234,10 +203,6 @@ export interface FileListProps {
     footer?: FileListHeaderOrFooter;
     /**
      * The logged in user, if any.
-     *
-     * This is only expected to be present when the listing is shown within the
-     * photos app, where we have a logged in user. The public albums app can
-     * omit this prop.
      */
     user?: LocalUser;
     /**
@@ -262,15 +227,10 @@ export interface FileListProps {
     activePersonID?: string | undefined;
     /**
      * File IDs of all the files that the user has marked as a favorite.
-     *
-     * Not set in the context of the shared albums app.
      */
     favoriteFileIDs?: Set<number>;
     /**
      * A map from known Ente user IDs to their emails.
-     *
-     * This is only expected in the context of the photos app, and will be
-     * omitted when running in the public albums app.
      */
     emailByUserID?: Map<number, string>;
     /**
@@ -331,7 +291,6 @@ export const FileList: React.FC<FileListProps> = ({
     listBorderRadius,
     mode,
     modePlus,
-    layout = "grid",
     header,
     footer,
     user,
@@ -362,11 +321,6 @@ export const FileList: React.FC<FileListProps> = ({
     );
     const [hoverIndex, setHoverIndex] = useState<number | undefined>(undefined);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-    const [masonryScrollTop, setMasonryScrollTop] = useState(0);
-    const [masonryIsScrolling, setMasonryIsScrolling] = useState(false);
-    const masonryScrollIdleTimeoutRef = useRef<
-        ReturnType<typeof setTimeout> | undefined
-    >(undefined);
     // Timeline date strings for which all photos have been selected.
     //
     // See: [Note: Timeline date string]
@@ -401,14 +355,8 @@ export const FileList: React.FC<FileListProps> = ({
         () => computeThumbnailGridLayoutParams(width),
         [width],
     );
-    const shouldUseMasonry = layout === "masonry";
 
     useEffect(() => {
-        if (shouldUseMasonry) {
-            setItems([]);
-            return;
-        }
-
         // Since width and height are dependencies, there might be too many
         // updates to the list during a resize. The list computation too, while
         // fast, is non-trivial.
@@ -556,7 +504,6 @@ export const FileList: React.FC<FileListProps> = ({
         footer,
         annotatedFiles,
         disableGrouping,
-        shouldUseMasonry,
         layoutParams,
     ]);
 
@@ -661,8 +608,6 @@ export const FileList: React.FC<FileListProps> = ({
         },
         [isSelectionContextMatching, selected, suppressSelectionUI],
     );
-
-    const haveSelection = !suppressSelectionUI && selected.count > 0;
 
     const handleRangeSelect = useCallback(
         (index: number) => {
@@ -954,7 +899,6 @@ export const FileList: React.FC<FileListProps> = ({
             contextMenu,
             emailByUserID,
             favoriteFileIDs,
-            haveSelection,
             handleContextMenu,
             handleRangeSelect,
             handleSelect,
@@ -1030,401 +974,9 @@ export const FileList: React.FC<FileListProps> = ({
         [onScroll, onVisibleDateChange, items],
     );
 
-    const masonryTargetRowHeight = useMemo(
-        () => preferredMasonryRowHeight(layoutParams.containerWidth),
-        [layoutParams.containerWidth],
-    );
-    const masonryInnerWidth = useMemo(
-        () => Math.max(0, width - 2 * layoutParams.paddingInline),
-        [layoutParams.paddingInline, width],
-    );
-    const masonryLayout = useMemo<MasonryLayout>(() => {
-        if (
-            !shouldUseMasonry ||
-            masonryTargetRowHeight <= 0 ||
-            masonryInnerWidth <= 0 ||
-            !annotatedFiles.length
-        ) {
-            return { items: [], rows: [], totalHeight: 0 };
-        }
-
-        const rows = new Array<MasonryLayoutItem[]>();
-        const items: MasonryLayoutItem[] = [];
-        const masonrySourceItems = new Array<MasonrySourceItem>();
-        let rowTop = 0;
-        let currentRow = new Array<MasonrySourceItem>();
-        let currentRowAspectRatio = 0;
-        const useAdaptiveMobileRows = shouldUseAdaptiveMobileMasonryRows(
-            layoutParams.containerWidth,
-        );
-
-        const placeCurrentRow = (fitToWidth: boolean) => {
-            if (!currentRow.length || currentRowAspectRatio <= 0) return;
-            const totalGapWidth = (currentRow.length - 1) * layoutParams.gap;
-            const maxContentWidth = Math.max(
-                1,
-                masonryInnerWidth - totalGapWidth,
-            );
-            const naturalRowHeight = Math.max(
-                1,
-                maxContentWidth / currentRowAspectRatio,
-            );
-            const rowHeight = fitToWidth
-                ? naturalRowHeight
-                : Math.min(masonryTargetRowHeight, naturalRowHeight);
-            const row = new Array<MasonryLayoutItem>();
-            let left = 0;
-
-            for (const { file, fileIndex, aspectRatio } of currentRow) {
-                const itemWidth = Math.max(1, rowHeight * aspectRatio);
-                const item = {
-                    file,
-                    fileIndex,
-                    top: rowTop,
-                    bottom: rowTop + rowHeight,
-                    left,
-                    width: itemWidth,
-                    height: rowHeight,
-                } satisfies MasonryLayoutItem;
-                items.push(item);
-                row.push(item);
-                left += itemWidth + layoutParams.gap;
-            }
-
-            rows.push(row);
-            rowTop += rowHeight + layoutParams.gap;
-            currentRow = [];
-            currentRowAspectRatio = 0;
-        };
-
-        for (const [fileIndex, { file }] of annotatedFiles.entries()) {
-            const dimensions = fileMasonryDimensions(file);
-            const aspectRatio = Math.max(
-                0.1,
-                dimensions.width / dimensions.height,
-            );
-            masonrySourceItems.push({ file, fileIndex, aspectRatio });
-        }
-
-        if (useAdaptiveMobileRows) {
-            let sourceIndex = 0;
-            let rowIndex = 0;
-            while (sourceIndex < masonrySourceItems.length) {
-                const desiredCount = preferredMobileMasonryRowItemCount(
-                    masonrySourceItems,
-                    sourceIndex,
-                    rowIndex,
-                );
-                const boundedCount = Math.max(
-                    1,
-                    Math.min(
-                        desiredCount,
-                        masonrySourceItems.length - sourceIndex,
-                    ),
-                );
-                for (let i = 0; i < boundedCount; i += 1) {
-                    const sourceItem = masonrySourceItems[sourceIndex + i]!;
-                    currentRow.push(sourceItem);
-                    currentRowAspectRatio += sourceItem.aspectRatio;
-                }
-                placeCurrentRow(true);
-                sourceIndex += boundedCount;
-                rowIndex += 1;
-            }
-        } else {
-            for (const sourceItem of masonrySourceItems) {
-                currentRow.push(sourceItem);
-                currentRowAspectRatio += sourceItem.aspectRatio;
-
-                const rowWidthAtTargetHeight =
-                    currentRowAspectRatio * masonryTargetRowHeight +
-                    (currentRow.length - 1) * layoutParams.gap;
-                if (rowWidthAtTargetHeight >= masonryInnerWidth) {
-                    placeCurrentRow(true);
-                }
-            }
-            placeCurrentRow(false);
-        }
-
-        const totalHeight = Math.max(0, rowTop - layoutParams.gap);
-        return { items, rows, totalHeight };
-    }, [
-        annotatedFiles,
-        masonryInnerWidth,
-        layoutParams.containerWidth,
-        layoutParams.gap,
-        masonryTargetRowHeight,
-        shouldUseMasonry,
-    ]);
-    const masonryHeaderHeight = header?.height ?? 0;
-    const masonryViewportTop = Math.max(
-        0,
-        masonryScrollTop - masonryHeaderHeight,
-    );
-    const masonryViewportBottom = masonryViewportTop + height;
-    const masonryOverscan = Math.max(height, 800);
-    const masonryVisibleItems = useMemo(() => {
-        const minTop = masonryViewportTop - masonryOverscan;
-        const maxTop = masonryViewportBottom + masonryOverscan;
-        const visible = new Array<MasonryLayoutItem>();
-        const startRowIndex = firstVisibleMasonryRowIndex(
-            masonryLayout.rows,
-            minTop,
-        );
-
-        for (
-            let rowIndex = startRowIndex;
-            rowIndex < masonryLayout.rows.length;
-            rowIndex += 1
-        ) {
-            const row = masonryLayout.rows[rowIndex]!;
-            if (!row.length) continue;
-            if (row[0]!.top > maxTop) break;
-            const startIndex = firstVisibleIndexForMasonryTrack(row, minTop);
-            for (let i = startIndex; i < row.length; i += 1) {
-                const item = row[i]!;
-                if (item.top > maxTop) break;
-                visible.push(item);
-            }
-        }
-
-        return visible;
-    }, [
-        masonryLayout.rows,
-        masonryOverscan,
-        masonryViewportBottom,
-        masonryViewportTop,
-    ]);
-
-    const handleMasonryScroll: React.UIEventHandler<HTMLDivElement> =
-        useCallback(
-            (event) => {
-                const scrollOffset = event.currentTarget.scrollTop;
-                onScroll?.(scrollOffset);
-                setShowBackToTop(scrollOffset > 500);
-                setMasonryScrollTop(scrollOffset);
-                setMasonryIsScrolling(true);
-                if (masonryScrollIdleTimeoutRef.current) {
-                    clearTimeout(masonryScrollIdleTimeoutRef.current);
-                }
-                masonryScrollIdleTimeoutRef.current = setTimeout(() => {
-                    setMasonryIsScrolling(false);
-                    masonryScrollIdleTimeoutRef.current = undefined;
-                }, masonryScrollIdleMs);
-            },
-            [onScroll],
-        );
-
-    useEffect(
-        () => () => {
-            if (masonryScrollIdleTimeoutRef.current) {
-                clearTimeout(masonryScrollIdleTimeoutRef.current);
-            }
-        },
-        [],
-    );
-
-    useEffect(() => {
-        if (!shouldUseMasonry) {
-            setMasonryScrollTop(0);
-            setMasonryIsScrolling(false);
-            if (masonryScrollIdleTimeoutRef.current) {
-                clearTimeout(masonryScrollIdleTimeoutRef.current);
-                masonryScrollIdleTimeoutRef.current = undefined;
-            }
-        }
-    }, [shouldUseMasonry]);
-
-    useEffect(() => {
-        if (!shouldUseMasonry || !onVisibleDateChange) return;
-        const topVisibleItem = masonryVisibleItems.reduce<
-            MasonryLayoutItem | undefined
-        >(
-            (best, item) =>
-                item.bottom > masonryViewportTop &&
-                (!best || item.top < best.top)
-                    ? item
-                    : best,
-            undefined,
-        );
-        const visibleDate =
-            topVisibleItem &&
-            annotatedFiles[topVisibleItem.fileIndex]?.timelineDateString;
-        const currentDate =
-            visibleDate ?? annotatedFiles[0]?.timelineDateString;
-        if (currentDate !== lastVisibleDateRef.current) {
-            lastVisibleDateRef.current = currentDate;
-            onVisibleDateChange(currentDate);
-        }
-    }, [
-        annotatedFiles,
-        masonryVisibleItems,
-        masonryViewportTop,
-        onVisibleDateChange,
-        shouldUseMasonry,
-    ]);
-
-    const renderMasonryItem = useCallback(
-        ({
-            file,
-            fileIndex,
-            top,
-            left,
-            width,
-            height,
-            bottom,
-        }: MasonryLayoutItem) => {
-            const isInViewport =
-                bottom > masonryViewportTop && top < masonryViewportBottom;
-            return (
-                <Box
-                    key={`masonry-photo-${file.id}-${fileIndex}`}
-                    sx={{ position: "absolute", top, left, width, height }}
-                >
-                    <FileThumbnail
-                        key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                        {...{
-                            user,
-                            emailByUserID,
-                            enableSelect:
-                                !!enableSelect && !suppressSelectionUI,
-                        }}
-                        file={file}
-                        selected={isFileSelected(file)}
-                        selectOnClick={haveSelection}
-                        isRangeSelectActive={isShiftKeyPressed && haveSelection}
-                        isInSelectRange={
-                            rangeStartIndex !== undefined &&
-                            hoverIndex !== undefined &&
-                            ((fileIndex >= rangeStartIndex &&
-                                fileIndex <= hoverIndex) ||
-                                (fileIndex >= hoverIndex &&
-                                    fileIndex <= rangeStartIndex))
-                        }
-                        activeCollectionID={activeCollectionID}
-                        showPlaceholder={masonryIsScrolling && !isInViewport}
-                        isFav={!!favoriteFileIDs?.has(file.id)}
-                        onClick={() => onItemClick(fileIndex)}
-                        onSelect={handleSelect(file, fileIndex)}
-                        onHover={() => setHoverIndex(fileIndex)}
-                        onRangeSelect={() => handleRangeSelect(fileIndex)}
-                        onContextMenu={
-                            onContextMenuAction
-                                ? (e) => handleContextMenu(e, file, fileIndex)
-                                : undefined
-                        }
-                        isMasonry
-                        style={{ width: "100%", height: "100%" }}
-                    />
-                </Box>
-            );
-        },
-        [
-            activeCollectionID,
-            emailByUserID,
-            enableSelect,
-            favoriteFileIDs,
-            handleContextMenu,
-            handleRangeSelect,
-            handleSelect,
-            haveSelection,
-            hoverIndex,
-            isFileSelected,
-            isShiftKeyPressed,
-            masonryIsScrolling,
-            masonryViewportBottom,
-            masonryViewportTop,
-            onContextMenuAction,
-            onItemClick,
-            rangeStartIndex,
-            selected,
-            suppressSelectionUI,
-            user,
-        ],
-    );
-
     const handleScrollToTop = useCallback(() => {
         outerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
-
-    if (shouldUseMasonry) {
-        return (
-            <Box sx={{ position: "relative", width, height }}>
-                <Box
-                    ref={outerRef}
-                    sx={{
-                        width: "100%",
-                        height: "100%",
-                        overflowY: "auto",
-                        ...(listBorderRadius && {
-                            borderRadius: listBorderRadius,
-                        }),
-                    }}
-                    onScroll={handleMasonryScroll}
-                >
-                    {header && (
-                        <Box
-                            sx={{
-                                px: header.extendToInlineEdges
-                                    ? 0
-                                    : `${layoutParams.paddingInline}px`,
-                            }}
-                        >
-                            {header.component}
-                        </Box>
-                    )}
-                    {masonryLayout.items.length > 0 ? (
-                        <Box sx={{ px: `${layoutParams.paddingInline}px` }}>
-                            <Box
-                                sx={{
-                                    width: masonryInnerWidth,
-                                    position: "relative",
-                                    height: masonryLayout.totalHeight,
-                                }}
-                            >
-                                {masonryVisibleItems.map(renderMasonryItem)}
-                            </Box>
-                        </Box>
-                    ) : (
-                        <NoFilesListItem sx={{ minHeight: "100%" }}>
-                            <Typography sx={{ color: "text.faint" }}>
-                                {t("nothing_here")}
-                            </Typography>
-                        </NoFilesListItem>
-                    )}
-                    {footer && (
-                        <Box
-                            sx={{
-                                px: footer.extendToInlineEdges
-                                    ? 0
-                                    : `${layoutParams.paddingInline}px`,
-                            }}
-                        >
-                            {footer.component}
-                        </Box>
-                    )}
-                </Box>
-                {showBackToTop && (
-                    <BackToTopButton
-                        size="small"
-                        aria-label="scroll to top"
-                        onClick={handleScrollToTop}
-                    >
-                        <KeyboardArrowUpIcon />
-                    </BackToTopButton>
-                )}
-                {onContextMenuAction && (
-                    <FileContextMenu
-                        open={contextMenu !== null}
-                        anchorPosition={contextMenu?.position}
-                        onClose={handleContextMenuClose}
-                        actions={contextMenuActions}
-                        onAction={handleContextMenuActionWithTracking}
-                    />
-                )}
-            </Box>
-        );
-    }
 
     if (!items.length) {
         return <></>;
@@ -1502,104 +1054,6 @@ const splitByDate = (annotatedFiles: FileListAnnotatedFile[]) =>
         ),
         new Array<FileListAnnotatedFile[]>(),
     );
-
-const firstVisibleIndexForMasonryTrack = (
-    track: MasonryLayoutItem[],
-    minTop: number,
-) => {
-    let low = 0;
-    let high = track.length;
-    while (low < high) {
-        const mid = Math.floor((low + high) / 2);
-        if (track[mid]!.bottom < minTop) {
-            low = mid + 1;
-        } else {
-            high = mid;
-        }
-    }
-    return low;
-};
-
-const firstVisibleMasonryRowIndex = (
-    rows: MasonryLayoutItem[][],
-    minTop: number,
-) => {
-    let low = 0;
-    let high = rows.length;
-    while (low < high) {
-        const mid = Math.floor((low + high) / 2);
-        const row = rows[mid]!;
-        const rowBottom = row.length ? row[row.length - 1]!.bottom : -Infinity;
-        if (rowBottom < minTop) {
-            low = mid + 1;
-        } else {
-            high = mid;
-        }
-    }
-    return low;
-};
-
-const fileMasonryDimensions = (file: EnteFile) => {
-    if (shouldUseSquareMasonryDimensions(file)) {
-        return { width: 1, height: 1 };
-    }
-
-    const width = file.pubMagicMetadata?.data.w;
-    const height = file.pubMagicMetadata?.data.h;
-    if (width && height && width > 0 && height > 0) {
-        return { width, height };
-    }
-
-    return { width: 1, height: 1 };
-};
-
-const shouldUseSquareMasonryDimensions = (file: EnteFile) =>
-    file.metadata.fileType === FileType.video ||
-    file.metadata.fileType === FileType.livePhoto;
-
-const masonryScrollIdleMs = 120;
-
-const preferredMasonryRowHeight = (containerWidth: number) => {
-    if (containerWidth < 560) return 210;
-    if (containerWidth < 900) return 250;
-    if (containerWidth < 1280) return 300;
-    if (containerWidth < 1800) return 345;
-    return 385;
-};
-
-const shouldUseAdaptiveMobileMasonryRows = (containerWidth: number) =>
-    containerWidth < 560;
-
-const preferredMobileMasonryRowItemCount = (
-    sourceItems: MasonrySourceItem[],
-    startIndex: number,
-    rowIndex: number,
-) => {
-    const first = sourceItems[startIndex];
-    const second = sourceItems[startIndex + 1];
-    const third = sourceItems[startIndex + 2];
-    if (!first || !second) return 1;
-
-    const firstRatio = first.aspectRatio;
-    const secondRatio = second.aspectRatio;
-    if (firstRatio >= 1.25) return 1;
-
-    const firstIsPortrait = firstRatio < 0.9;
-    const secondIsPortrait = secondRatio < 0.9;
-    const thirdIsPortrait = !!third && third.aspectRatio < 0.9;
-
-    // Occasionally show one tall portrait in a row to mimic the mobile collage feel.
-    if (firstRatio <= 0.62 && rowIndex % 4 === 1) return 1;
-
-    if (firstIsPortrait && secondIsPortrait && third && thirdIsPortrait) {
-        return rowIndex % 3 === 0 ? 3 : 2;
-    }
-    if (firstIsPortrait && secondIsPortrait) return 2;
-
-    if (firstRatio + secondRatio >= 1.6) return 2;
-    if (third && firstRatio + secondRatio + third.aspectRatio >= 1.9) return 3;
-    return 2;
-};
 
 /**
  * For each element of {@link xs}, obtain an array by applying {@link f},
@@ -1747,8 +1201,6 @@ type FileThumbnailProps = {
     onHover: () => void;
     onRangeSelect: () => void;
     onContextMenu?: (event: React.MouseEvent) => void;
-    onImageDimensions?: (dimensions: Dimensions) => void;
-    isMasonry?: boolean;
     style?: React.CSSProperties;
 } & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
 
@@ -1769,8 +1221,6 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     onHover,
     onRangeSelect,
     onContextMenu,
-    onImageDimensions,
-    isMasonry,
     style,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
@@ -1851,7 +1301,6 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onContextMenu={onContextMenu}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            $disableBottomMargin={!!isMasonry}
             style={style}
             {...(enableSelect && longPressHandlers)}
         >
@@ -1867,17 +1316,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             {file.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={file.metadata.fileType} />
             ) : imageURL ? (
-                <img
-                    src={imageURL}
-                    onLoad={(event) => {
-                        const { naturalWidth, naturalHeight } =
-                            event.currentTarget;
-                        onImageDimensions?.({
-                            width: naturalWidth,
-                            height: naturalHeight,
-                        });
-                    }}
-                />
+                <img src={imageURL} />
             ) : (
                 <LoadingThumbnail />
             )}
@@ -1919,14 +1358,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     );
 };
 
-const FileThumbnail_ = styled("div")<{
-    disabled: boolean;
-    $disableBottomMargin: boolean;
-}>`
+const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
     display: flex;
     width: fit-content;
-    margin-bottom: ${({ $disableBottomMargin }) =>
-        $disableBottomMargin ? "0px" : `${thumbnailGap}px`};
+    margin-bottom: ${thumbnailGap}px;
     min-width: 100%;
     overflow: hidden;
     position: relative;

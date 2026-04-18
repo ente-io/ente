@@ -22,10 +22,8 @@ jobs:
                 working-directory: mobile/apps/photos
 
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Free Disk Space (Ubuntu)
               uses: jlumbroso/free-disk-space@main
@@ -55,6 +53,19 @@ jobs:
               with:
                   toolchain: ${{ env.RUST_VERSION }}
 
+            # Cargokit resolves the toolchain as "stable" rather than the
+            # pinned Rust version used in CI. Our vendored Cargokit now
+            # serializes `rustup target add` per target, so this pre-install
+            # is no longer required for correctness. We still do it for now
+            # to keep the setup straightforward, and because this step may
+            # become more useful if we later cache Rust toolchain state.
+            - name: Pre-install Android Rust targets
+              run: |
+                  rustup target add --toolchain stable armv7-linux-androideabi aarch64-linux-android
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 
@@ -75,7 +86,7 @@ jobs:
 
                   sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
                   echo "Building with version ${NEW_VERSION}"
-                  
+
                   # Store version for later use
                   echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
                   echo "NEW_VERSION_CODE=${NEW_VERSION_CODE}" >> $GITHUB_ENV
@@ -115,11 +126,11 @@ jobs:
 
                   echo "✅ Changelog valid:"
                   cat "$OUTPUT_FILE"
-                  
+
                   # Store changelog for Play Store (with escaped newlines)
                   CHANGELOG_PLAYSTORE=$(cat "$OUTPUT_FILE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
                   echo "CHANGELOG=${CHANGELOG_PLAYSTORE}" >> $GITHUB_ENV
-                  
+
                   # Store changelog for Discord (with proper newlines)
                   CHANGELOG_DISCORD=$(cat "$DISCORD_FILE" | sed 's/"/\\"/g')
                   echo "CHANGELOG_DISCORD<<EOF" >> $GITHUB_ENV

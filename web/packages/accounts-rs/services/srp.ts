@@ -10,6 +10,7 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensure } from "ente-utils/ensure";
+import { loadEnteWasm } from "ente-wasm/load";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { saveSRPAttributes } from "./accounts-db";
@@ -17,7 +18,6 @@ import {
     RemoteSRPVerificationResponse,
     type EmailOrSRPVerificationResponse,
 } from "./user";
-import { enteWasm } from "./wasm";
 
 export interface SRPAttributes {
     srpUserID: string;
@@ -105,7 +105,7 @@ const createSRPSession = async (
     srpUserID: string,
     loginSubKey: string,
 ) => {
-    const wasm = await enteWasm();
+    const wasm = await loadEnteWasm();
     return new wasm.SrpSession(srpUserID, srpSalt, loginSubKey);
 };
 

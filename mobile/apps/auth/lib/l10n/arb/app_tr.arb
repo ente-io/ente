@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Üzgünüz",
-  "importFailureDesc": "Seçilen dosya ayrıştırılamadı.\nYardıma ihtiyacınız varsa lütfen support@ente.com adresine yazın!",
   "pendingSyncs": "Uyarı",
   "pendingSyncsWarningBody": "Kodlarınızdan bazıları yedeklenmemiş.\n\nLütfen oturumu kapatmadan önce bu kodların yedeğini aldığınızdan emin olun.",
   "checkInboxAndSpamFolder": "Doğrulamayı tamamlamak için lütfen gelen kutunuzu (ve spam kutunuzu) kontrol edin",
@@ -578,7 +577,7 @@
   "addNew": "Yeni ekle",
   "selected": "seçildi",
   "moveMultipleToTrashMessage": "{count} öğeyi çöp kutusuna taşımak istediğinizden emin misiniz?",
-  "nSelected": "{count, plural, =1 {1 seçildi} other{{count} seçildi}}",
+  "nSelected": "{count, plural, one {{count} seçildi} other{{count} seçildi}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1 {1 öğe sabitlendi} other{{count} öğe sabitlendi}}",
+  "pinnedCount": "{count, plural, one {{count} öğe sabitlendi} other{{count} öğe sabitlendi}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1 {1 öğenin sabitlemesi kaldırıldı} other{{count} öğenin sabitlemesi kaldırıldı}}",
+  "unpinnedCount": "{count, plural, one {{count} öğenin sabitlemesi kaldırıldı} other{{count} öğenin sabitlemesi kaldırıldı}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

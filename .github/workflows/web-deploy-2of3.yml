@@ -16,16 +16,21 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
             - name: Setup node and enable yarn caching
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
 
             - name: Install dependencies
               run: yarn install --frozen-lockfile

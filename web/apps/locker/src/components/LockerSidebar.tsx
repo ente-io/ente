@@ -1,5 +1,6 @@
 import {
     Delete02Icon,
+    FavouriteIcon,
     HelpCircleIcon,
     Home01Icon,
     InformationCircleIcon,
@@ -12,17 +13,30 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { useBaseContext } from "ente-base/context";
+import {
+    mergeLegacySuggestedUsers,
+    type LegacySuggestedUser,
+} from "ente-contacts-web/legacy";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
-import { effectiveLockerFileLimit } from "services/locker-limits";
+import dynamic from "next/dynamic";
+import React, { useEffect, useMemo, useState } from "react";
 import type { LockerCollection } from "types";
 import { visibleLockerCollections } from "types";
 import { LockerAboutDrawer } from "./LockerAboutDrawer";
 import { LockerAccountDrawer } from "./LockerAccountDrawer";
+import { LockerAuthenticateUser } from "./LockerAuthenticateUser";
 import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
 import { LockerSidebarDrawer } from "./LockerSidebarShell";
 import { LockerSocialFooter } from "./LockerSocialFooter";
 import { LockerSupportDrawer } from "./LockerSupportDrawer";
+
+const LockerLegacyDrawer = dynamic(
+    () =>
+        import("./LockerLegacyDrawer").then(
+            ({ LockerLegacyDrawer }) => LockerLegacyDrawer,
+        ),
+    { ssr: false },
+);
 
 interface LockerSidebarProps {
     open: boolean;
@@ -35,7 +49,6 @@ interface LockerSidebarProps {
     isHomeView: boolean;
     isTrashView: boolean;
     isCollectionsView: boolean;
-    isProductionEndpoint: boolean;
     userDetails?: {
         email: string;
         usage: number;
@@ -64,7 +77,6 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     isHomeView,
     isTrashView,
     isCollectionsView,
-    isProductionEndpoint,
     userDetails,
 }) => {
     const { logout } = useBaseContext();
@@ -75,14 +87,31 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
         0,
     );
     const [isAccountOpen, setIsAccountOpen] = useState(false);
+    const [isLegacyAuthenticateOpen, setIsLegacyAuthenticateOpen] =
+        useState(false);
+    const [isLegacyOpen, setIsLegacyOpen] = useState(false);
     const [isSupportOpen, setIsSupportOpen] = useState(false);
     const [isAboutOpen, setIsAboutOpen] = useState(false);
+    const legacySuggestedUsers = useMemo(() => {
+        const participants: LegacySuggestedUser[] = collections.flatMap(
+            (collection) =>
+                [collection.owner, ...collection.sharees]
+                    .filter(
+                        (
+                            participant,
+                        ): participant is { id: number; email: string } =>
+                            !!participant.email?.trim(),
+                    )
+                    .map((participant) => ({
+                        id: participant.id,
+                        email: participant.email,
+                    })),
+        );
+        return mergeLegacySuggestedUsers(participants);
+    }, [collections]);
 
     const maxFileCount = userDetails
-        ? effectiveLockerFileLimit(
-              userDetails.lockerFileLimit,
-              isProductionEndpoint,
-          )
+        ? Math.max(userDetails.lockerFileLimit, 1)
         : 1;
     const userProgress = userDetails
         ? Math.min(userDetails.fileCount / maxFileCount, 1)
@@ -102,6 +131,8 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     useEffect(() => {
         if (!open) {
             setIsAccountOpen(false);
+            setIsLegacyAuthenticateOpen(false);
+            setIsLegacyOpen(false);
             setIsSupportOpen(false);
             setIsAboutOpen(false);
         }
@@ -358,6 +389,14 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                                     onClick={() => setIsAccountOpen(true)}
                                 />
                                 <LockerSidebarCardButton
+                                    icon={FavouriteIcon}
+                                    label="Legacy"
+                                    endIcon={<ChevronRightIcon />}
+                                    onClick={() =>
+                                        setIsLegacyAuthenticateOpen(true)
+                                    }
+                                />
+                                <LockerSidebarCardButton
                                     icon={HelpCircleIcon}
                                     label={t("help_and_support")}
                                     endIcon={<ChevronRightIcon />}
@@ -406,6 +445,17 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                 open={isAccountOpen}
                 onClose={() => setIsAccountOpen(false)}
                 onRootClose={onClose}
+            />
+            <LockerLegacyDrawer
+                open={isLegacyOpen}
+                onClose={() => setIsLegacyOpen(false)}
+                onRootClose={onClose}
+                suggestedUsers={legacySuggestedUsers}
+            />
+            <LockerAuthenticateUser
+                open={isLegacyAuthenticateOpen}
+                onClose={() => setIsLegacyAuthenticateOpen(false)}
+                onAuthenticate={() => setIsLegacyOpen(true)}
             />
             <LockerSupportDrawer
                 open={isSupportOpen}
