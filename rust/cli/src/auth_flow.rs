@@ -651,10 +651,13 @@ mod tests {
             Some(signup_token.as_str())
         );
 
-        let state = signup_state.lock().unwrap();
-        let uploaded_key_attributes = state.uploaded_key_attributes.clone().unwrap();
-        let remote_srp_attributes = state.remote_srp_attributes.clone().unwrap();
-        drop(state);
+        let (uploaded_key_attributes, remote_srp_attributes) = {
+            let state = signup_state.lock().unwrap();
+            (
+                state.uploaded_key_attributes.clone().unwrap(),
+                state.remote_srp_attributes.clone().unwrap(),
+            )
+        };
 
         assert_eq!(created.user_id, 99);
         assert_eq!(created.secrets.token, signup_token_bytes);
