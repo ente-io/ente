@@ -46,7 +46,11 @@ impl<'a> AuthClient<'a> {
         client_public: &[u8],
     ) -> Result<CreateSrpSessionResponse> {
         let client = shared_client(self.api, None)?;
-        convert(client.create_srp_session(srp_user_id, client_public).await?)
+        convert(
+            client
+                .create_srp_session(srp_user_id, client_public)
+                .await?,
+        )
     }
 
     pub async fn verify_srp_session(
@@ -156,6 +160,9 @@ impl<'a> AuthClient<'a> {
             encrypted_two_factor_secret: request.encrypted_two_factor_secret.clone(),
             two_factor_secret_decryption_nonce: request.two_factor_secret_decryption_nonce.clone(),
         };
-        client.enable_two_factor(&request).await.map_err(Error::from)
+        client
+            .enable_two_factor(&request)
+            .await
+            .map_err(Error::from)
     }
 }

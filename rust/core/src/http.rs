@@ -898,7 +898,8 @@ mod tests {
 
     #[test]
     fn test_parse_api_error_body_prefers_message_and_preserves_code() {
-        let (code, message) = parse_api_error_body(r#"{"code":"TOO_MANY_WRONG_ATTEMPTS","message":"wait"}"#);
+        let (code, message) =
+            parse_api_error_body(r#"{"code":"TOO_MANY_WRONG_ATTEMPTS","message":"wait"}"#);
         assert_eq!(code.as_deref(), Some("TOO_MANY_WRONG_ATTEMPTS"));
         assert_eq!(message, "wait");
     }

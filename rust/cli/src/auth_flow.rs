@@ -19,7 +19,11 @@ where
     serde_json::from_value(serde_json::to_value(value)?).map_err(Error::from)
 }
 
-fn shared_client(api_client: &ApiClient, app: App, account_id: Option<&str>) -> Result<shared::AccountsClient> {
+fn shared_client(
+    api_client: &ApiClient,
+    app: App,
+    account_id: Option<&str>,
+) -> Result<shared::AccountsClient> {
     let mut config = shared::AccountsClientConfig::new(app.client_package())
         .with_base_url(api_client.base_url().to_string())
         .with_user_agent(format!("ente-rs/{}", env!("CARGO_PKG_VERSION")));
@@ -76,7 +80,12 @@ struct UiAdapter<'a, U> {
 }
 
 impl<U: AuthFlowUi> shared::AuthFlowUi for UiAdapter<'_, U> {
-    fn read_email_otp(&mut self, email: &str, purpose: OtpPurpose, resent: bool) -> shared::Result<String> {
+    fn read_email_otp(
+        &mut self,
+        email: &str,
+        purpose: OtpPurpose,
+        resent: bool,
+    ) -> shared::Result<String> {
         self.inner
             .read_email_otp(email, purpose, resent)
             .map_err(to_shared_error)
@@ -225,7 +234,11 @@ where
     U: AuthFlowUi,
 {
     pub fn new(api_client: &'a ApiClient, app: App, ui: &'a mut U) -> Self {
-        Self { api_client, app, ui }
+        Self {
+            api_client,
+            app,
+            ui,
+        }
     }
 
     pub async fn create_account(
