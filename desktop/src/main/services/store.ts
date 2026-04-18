@@ -1,4 +1,5 @@
 import { safeStorage } from "electron/main";
+import type { PersistedAppLockConfig } from "../../types/ipc";
 import { safeStorageStore } from "../stores/safe-storage";
 import { uploadStatusStore } from "../stores/upload-status";
 import { userPreferences } from "../stores/user-preferences";
@@ -37,6 +38,69 @@ export const masterKeyFromSafeStorage = (): string | undefined => {
     return safeStorage.decryptString(encryptedKeyBuffer);
 };
 
+const saveAppLockConfigStringInSafeStorage = (value: string) => {
+    const encryptedValueBuffer = safeStorage.encryptString(value);
+    const encryptedValue = Buffer.from(encryptedValueBuffer).toString("base64");
+    safeStorageStore.set("appLockConfig", encryptedValue);
+};
+
+const appLockConfigStringFromSafeStorage = (): string | undefined => {
+    const encryptedValue = safeStorageStore.get("appLockConfig");
+    if (!encryptedValue) return undefined;
+    const encryptedValueBuffer = Buffer.from(encryptedValue, "base64");
+    return safeStorage.decryptString(encryptedValueBuffer);
+};
+
+const parsePersistedAppLockConfig = (json: string): PersistedAppLockConfig => {
+    const parsed: unknown = JSON.parse(json);
+    if (!parsed || typeof parsed !== "object") {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    const { enabled, lockType, autoLockTimeMs } = parsed as Record<
+        string,
+        unknown
+    >;
+    if (
+        typeof enabled !== "boolean" ||
+        (lockType !== "pin" &&
+            lockType !== "password" &&
+            lockType !== "device" &&
+            lockType !== "none") ||
+        typeof autoLockTimeMs !== "number" ||
+        !Number.isFinite(autoLockTimeMs)
+    ) {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    return { enabled, lockType, autoLockTimeMs };
+};
+
+export const saveAppLockConfigInSafeStorage = (
+    config: PersistedAppLockConfig,
+) => {
+    saveAppLockConfigStringInSafeStorage(JSON.stringify(config));
+};
+
+export const appLockConfigFromSafeStorage = ():
+    | PersistedAppLockConfig
+    | undefined => {
+    const config = appLockConfigStringFromSafeStorage();
+
+    /*
+     * if a key is not found then it will naturally return undefined, so
+     * therefore if the config is not present returning undefined
+     */
+
+    if (!config) return undefined;
+
+    return parsePersistedAppLockConfig(config);
+};
+
+export const clearAppLockConfigFromSafeStorage = () => {
+    safeStorageStore.delete("appLockConfig");
+};
+
 export const lastShownChangelogVersion = (): number | undefined =>
     userPreferences.get("lastShownChangelogVersion");
 
@@ -47,10 +111,10 @@ export const setLastShownChangelogVersion = (version: number) =>
  * Return true if the dock icon should be hidden when the window is closed
  * [macOS only].
  *
- * On macOS, if this function returns true then when hiding ("closing" it with
- * the x traffic light) the window we also hide the app's icon in the dock. The
- * user can modify their preference using the Menu bar > ente > Settings > Hide
- * dock icon checkbox.
+ * On macOS, if this function returns true then when the user closes the window
+ * using the x traffic light we also hide the app's icon in the dock. The user
+ * can modify their preference using the Menu bar > ente > Settings > Hide dock
+ * icon checkbox.
  *
  * If the user has not set a value for this preference (i.e., the value is
  * `undefined`), we use the default `true`. This is confusing, but this way we

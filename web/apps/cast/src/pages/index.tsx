@@ -71,8 +71,8 @@ const Page: React.FC = () => {
             {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
             <Typography variant="h6" sx={{ fontWeight: "regular", mt: 3 }}>
                 Visit{" "}
-                <a href="https://ente.io/cast" target="_blank" rel="noopener">
-                    ente.io/cast
+                <a href="https://ente.com/cast" target="_blank" rel="noopener">
+                    ente.com/cast
                 </a>{" "}
                 for help
             </Typography>

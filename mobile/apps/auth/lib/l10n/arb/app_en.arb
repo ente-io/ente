@@ -121,7 +121,9 @@
   "importAegisGuide": "Use the \"Export the vault\" option in Aegis's Settings.\n\nIf your vault is encrypted, you will need to enter vault password to decrypt the vault.",
   "import2FasGuide": "Use the \"Settings->Backup -Export\" option in 2FAS.\n\nIf your backup is encrypted, you will need to enter the password to decrypt the backup",
   "importLastpassGuide": "Use the \"Transfer accounts\" option within Lastpass Authenticator Settings and press \"Export accounts to file\". Import the JSON downloaded.",
-  "importProtonAuthGuide": "Use the \"Export\" option in Proton Authenticator Settings to export your codes.",
+  "importProtonAuthGuide": "Use the \"Export\" option in Proton Authenticator Settings to export your codes.\n\nIf your export is password protected, you will need to enter the password to decrypt it.",
+  "invalidProtonExportTitle": "Invalid Proton export",
+  "invalidProtonExportMessage": "The selected file is not a valid Proton Authenticator export.",
   "exportCodes": "Export codes",
   "importLabel": "Import",
   "importInstruction": "Please select a file that contains a list of your codes in the following format",
@@ -331,7 +333,7 @@
     }
   },
   "sorry": "Sorry",
-  "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
+  "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.com if you need help!",
   "pendingSyncs": "Warning",
   "pendingSyncsWarningBody": "Some of your codes have not been backed up.\n\nPlease ensure that you have a backup for these codes before you logout.",
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
@@ -344,7 +346,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -525,7 +527,7 @@
   "dropReviewAndroid": "Drop a review on the Play Store",
   "supportEnte": "Support <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Give us a star on Github",
-  "free5GB": "5GB free on <bold-green>ente</bold-green> Photos",
+  "free10GB": "10GB free on <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Login with your Auth account",
   "freeStorageOffer": "10% off on <bold-green>ente</bold-green> photos",
   "freeStorageOfferDescription": "Use code \"AUTH\" to get 10% off first year",
@@ -581,7 +583,7 @@
   "addNew": "Add new",
   "selected": "selected",
   "moveMultipleToTrashMessage": "Are you sure you want to move {count} item(s) to the trash?",
-  "nSelected": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "nSelected": "{count, plural, one {{count} selected} other{{count} selected}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -592,7 +594,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{Pinned 1 item} other{Pinned {count} items}}",
+  "pinnedCount": "{count, plural, one {Pinned {count} item} other{Pinned {count} items}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -603,7 +605,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{Unpinned 1 item} other{Unpinned {count} items}}",
+  "unpinnedCount": "{count, plural, one {Unpinned {count} item} other {Unpinned {count} items}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {
@@ -627,5 +629,6 @@
   "appIcon": "App icon",
   "importAndOTPGuide": "Export your backup from andOTP using the \"Backup\" option in Settings.\n\nIf your backup is encrypted, you will need to enter the backup password to decrypt it.",
   "enterPasswordToDecryptAndOTP": "Enter password to decrypt andOTP backup",
-  "failedToDecryptAndOTPBackup": "Failed to decrypt andOTP backup"
+  "failedToDecryptAndOTPBackup": "Failed to decrypt andOTP backup",
+  "notSupportedForHOTP": "Not supported for HOTP"
 }

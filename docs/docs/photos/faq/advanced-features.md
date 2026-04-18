@@ -203,9 +203,25 @@ While video streaming is in beta, streams do not count against your storage quot
 Video streaming is still in beta. If something isn't working:
 
 - Create a thread in `#feedback` on [Discord](https://discord.com/channels/948937918347608085/1121126215995113552)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)
 
 For crashes or upload failures with streaming enabled, see [Troubleshooting](/photos/faq/troubleshooting#app-crashes-ml-video).
+
+### How can I check if a video is being streamed? {#check-streaming-detection}
+
+**On mobile:**
+
+If you see a green "Play Original" button, the streamed version is being used.
+
+**On desktop/web:**
+
+Open the video and click the gear icon in the player. If it shows **Auto**, the video is being streamed.
+
+### Why does my shared video start downloading instead of playing immediately? {#shared-video-downloads-instead-of-playing}
+
+If a video hasn't had a stream generated yet, the browser may start downloading the entire file (or a large portion of it) before playback begins. This can happen with large files like 1–2 GB videos.
+
+To avoid this, ensure video streaming is enabled so that streamable versions are generated for your videos. Learn more in the [Video Streaming feature guide](/photos/features/utilities/video-streaming).
 
 ### How does Cast work? {#how-does-cast-work}
 
@@ -221,7 +237,7 @@ Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente
 
 If the app crashes when watching videos or using machine learning, especially on iOS or older devices:
 
-1. Open `Settings > General > Advanced`
+1. Open `Settings`
 2. Disable "Video streaming" or "Enable video playback"
 3. Disable "Machine learning" if crashes continue
 4. Restart the app
@@ -268,7 +284,81 @@ Notifications are currently only available on mobile apps. See the [Notification
 
 ### How do I manage notification settings? {#manage-notifications}
 
-Open `Settings > General > Notifications` to enable or disable specific notification categories. All categories are enabled by default when you grant notification permission.
+Open `Settings > Notifications` to enable or disable specific notification categories. All categories are enabled by default when you grant notification permission.
+
+## Home Widgets
+
+### How do I add a home widget? {#add-home-widget}
+
+**On iOS:**
+
+1. Long press on your home screen until apps start jiggling
+2. Tap the **+** button in the top left corner
+3. Search for "Ente" or scroll to find Ente Photos
+4. Choose the widget type (Memories, Albums, or People)
+5. Select your preferred widget size
+6. Tap **Add Widget**
+
+**On Android:**
+
+1. Long press on an empty area of your home screen
+2. Tap **Widgets**
+3. Find and expand **Ente Photos**
+4. Long press your desired widget and drag it to your home screen
+
+Learn more in the [Home Widgets guide](/photos/features/utilities/home-widgets).
+
+### How do I configure which albums appear on my widget? {#configure-widget-albums}
+
+Open `Settings > Widgets > Albums widget` in the Ente app.
+
+From here, you can select which albums to display. By default, the **Favorites** album is selected. You can select multiple albums to show more variety on your home screen.
+
+Learn more in the [Home Widgets guide](/photos/features/utilities/home-widgets#configuring-the-albums-widget).
+
+### Why does the People widget require face recognition? {#people-widget-face-recognition}
+
+The People widget displays photos of specific people from your library. To identify people in your photos, Ente needs to use face recognition, which is part of the machine learning features.
+
+To use the People widget:
+
+1. Enable face recognition in `Settings > Machine learning`
+2. Wait for face indexing to complete
+3. Open `Settings > Widgets > People widget` to select people
+
+Learn more about [Face recognition](/photos/features/search-and-discovery/face-recognition).
+
+### How often do widgets refresh? {#widget-refresh-rate}
+
+Widgets automatically refresh approximately every **15 minutes**. This refresh happens in the background by the operating system, so you'll see different photos throughout the day without manual intervention.
+
+Opening the Ente app also triggers a widget sync, which can update your widgets sooner.
+
+### Widget not showing photos {#widget-not-showing-photos}
+
+If your widget appears blank or isn't showing photos:
+
+1. **Open the Ente app** and wait for it to sync completely
+2. **Check your configuration** - ensure you have photos in the configured albums or people
+3. **Verify storage** - make sure your device has enough storage for widget cache
+4. **Remove and re-add the widget** to force a refresh
+5. **Check background app refresh** - ensure Ente is allowed to refresh in the background in your device settings
+
+If the People widget shows no options, make sure face recognition is enabled and has finished indexing your photos.
+
+### What types of memories appear in the Memories widget? {#memories-widget-types}
+
+The Memories widget can display three types of memories:
+
+- **On This Day**: Photos from the same date in previous years
+- **Past Years**: Memories from past years
+- **Smart Memories**: AI-curated memorable moments
+
+You can toggle which memory types appear by opening `Settings > Widgets > Memories widget`.
+
+### Are widgets available on desktop or web? {#widgets-platform-availability}
+
+No, home widgets are only available on mobile apps (iOS and Android). Desktop apps and web browsers do not support home screen widgets.
 
 ## Other Advanced Features
 
@@ -295,7 +385,7 @@ Note that these FAQs are primarily for Ente's cloud service. Self-hosting has ad
 You can:
 
 1. **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
-2. **Discord**: Join our [Discord community](https://ente.io/discord) for discussions
-3. **Email**: Contact [support@ente.io](mailto:support@ente.io)
+2. **Discord**: Join our [Discord community](https://ente.com/discord) for discussions
+3. **Email**: Contact [support@ente.com](mailto:support@ente.com)
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

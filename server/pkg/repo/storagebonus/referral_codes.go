@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	maxReferralChangeAllowed = 3
+	MaxReferralCodeChangeAllowed = 3
 )
 
 // Add context as first parameter in all methods in this file
@@ -46,10 +46,10 @@ func (r *Repository) AddNewCode(ctx context.Context, userID int64, code string, 
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get storagebonus code count for user %d", userID)
 	}
-	if !isAdminEdit && count > maxReferralChangeAllowed {
+	if !isAdminEdit && count > MaxReferralCodeChangeAllowed {
 		return stacktrace.Propagate(&ente.ApiError{
 			Code:           "REFERRAL_CHANGE_LIMIT_REACHED",
-			Message:        fmt.Sprintf("max referral code change limit %d reached", maxReferralChangeAllowed),
+			Message:        fmt.Sprintf("max referral code change limit %d reached", MaxReferralCodeChangeAllowed),
 			HttpStatusCode: http.StatusTooManyRequests,
 		}, "max referral code change limit reached for user %d", userID)
 	}
@@ -67,6 +67,17 @@ func (r *Repository) AddNewCode(ctx context.Context, userID int64, code string, 
 		return stacktrace.Propagate(err, "failed to update remove existing code code for user %d", userID)
 	}
 	return r.InsertCode(ctx, userID, code)
+}
+
+// GetCodeChangeCount returns the number of times the user has changed their referral code.
+// A count of 1 means no changes (only the initial code exists).
+func (r *Repository) GetCodeChangeCount(ctx context.Context, userID int64) (int, error) {
+	var count int
+	err := r.DB.QueryRowContext(ctx, "SELECT COALESCE(COUNT(*),0) FROM referral_codes WHERE user_id = $1", userID).Scan(&count)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to get referral code count for user %d", userID)
+	}
+	return count, nil
 }
 
 // GetUserIDByCode returns the userID for the given storagebonus code. The method will also return the userID

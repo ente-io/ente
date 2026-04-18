@@ -47,22 +47,24 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
-import { isHTTPErrorWithStatus } from "ente-base/http";
+import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
+import { useResolvedContactDisplay } from "ente-contacts-web";
 import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
     CollectionNewParticipantRole,
     PublicURL,
 } from "ente-media/collection";
-import { type CollectionUser } from "ente-media/collection";
+import { CollectionSubType, type CollectionUser } from "ente-media/collection";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
     createPublicURL,
+    deleteCollection,
     deleteShareURL,
     getCollectionByID,
     shareCollection,
@@ -108,7 +110,13 @@ export type CollectionShareProps = ModalVisibilityProps & {
      * Called when an operation in the share menu requires a full remote pull.
      */
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    /**
+     * When set, opens a specific nested share view directly.
+     */
+    intent?: CollectionShareIntent;
 };
+
+export type CollectionShareIntent = "manage-link";
 
 export const CollectionShare: React.FC<CollectionShareProps> = ({
     open,
@@ -120,9 +128,8 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     shareSuggestionEmails,
     setBlockingLoad,
     onRemotePull,
+    intent,
 }) => {
-    const settings = useSettingsSnapshot();
-    const { isAdminRoleEnabled, isSurfacePublicLinkEnabled } = settings;
     const { onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
 
@@ -175,13 +182,11 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     );
     const isOwner = user.id == collection?.owner?.id;
     const isAdmin = currentSharee?.role == "ADMIN";
-    const canManageParticipants = isOwner || (isAdminRoleEnabled && isAdmin);
+    const canManageParticipants = isOwner || isAdmin;
     const isSharedIncoming = collectionSummary?.type == "sharedIncoming";
     const showEmailSection = !isSharedIncoming || canManageParticipants;
     const hasPublicLink = collection?.publicURLs.length > 0;
-    const showPublicShare =
-        isOwner ||
-        (isSharedIncoming && hasPublicLink && isSurfacePublicLinkEnabled);
+    const showPublicShare = isOwner || (isSharedIncoming && hasPublicLink);
 
     // Use a ref to track if we've already fetched for this dialog session
     const hasFetchedForSession = useRef(false);
@@ -274,6 +279,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                             onRootClose={onClose}
                             {...{ collection, setBlockingLoad, onRemotePull }}
                             canManage={isOwner}
+                            openManageLink={intent == "manage-link"}
                         />
                     ) : null}
                     {isSharedIncoming ? (
@@ -292,6 +298,64 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     );
 };
 
+type ResolvedEmailRowCommonProps = Pick<
+    CollectionShareProps,
+    "user" | "emailByUserID"
+> & { email?: string; fallbackLabel?: string };
+
+const ResolvedEmailRowLabel: React.FC<ResolvedEmailRowCommonProps> = ({
+    email,
+    fallbackLabel,
+    user,
+    emailByUserID,
+}) => {
+    const resolved = useResolvedContactDisplay({ email });
+
+    return (
+        <RowLabel
+            startIcon={<Avatar email={email} {...{ user, emailByUserID }} />}
+            label={(fallbackLabel ?? resolved.primaryLabel) || email || ""}
+        />
+    );
+};
+
+type ResolvedEmailRowButtonProps = ResolvedEmailRowCommonProps & {
+    disabled?: boolean;
+    onClick?: () => void;
+    endIcon?: React.ReactNode;
+};
+
+const ResolvedEmailRowButton: React.FC<ResolvedEmailRowButtonProps> = ({
+    disabled,
+    email,
+    endIcon,
+    fallbackLabel,
+    onClick,
+    user,
+    emailByUserID,
+}) => {
+    const resolved = useResolvedContactDisplay({ email });
+
+    return (
+        <RowButton
+            fontWeight="regular"
+            disabled={disabled}
+            onClick={onClick ?? (() => undefined)}
+            label={(fallbackLabel ?? resolved.primaryLabel) || email || ""}
+            startIcon={<Avatar email={email} {...{ user, emailByUserID }} />}
+            endIcon={endIcon}
+        />
+    );
+};
+
+const ResolvedEmailText: React.FC<{
+    email?: string;
+    fallbackLabel?: string;
+}> = ({ email, fallbackLabel }) => {
+    const resolved = useResolvedContactDisplay({ email });
+    return <>{(fallbackLabel ?? resolved.primaryLabel) || email || ""}</>;
+};
+
 type SharingDetailsProps = Pick<
     CollectionShareProps,
     "user" | "collection" | "emailByUserID" | "collectionSummary"
@@ -303,8 +367,6 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
     collectionSummary,
     emailByUserID,
 }) => {
-    const settings = useSettingsSnapshot();
-    const { isAdminRoleEnabled } = settings;
     const isOwner = user.id == collection.owner?.id;
     const currentSharee = collection.sharees.find(
         (sharee) => sharee.id == user.id,
@@ -314,44 +376,30 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
     const ownerEmail = isOwner ? user?.email : collection.owner?.email;
 
     const collaborators = collection.sharees
-        .filter(
-            (sharee) =>
-                sharee.role == "COLLABORATOR" ||
-                (!isAdminRoleEnabled && sharee.role == "ADMIN"),
-        )
+        .filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email)
         .filter((email) => email !== undefined);
 
-    const admins = isAdminRoleEnabled
-        ? collection.sharees
-              .filter((sharee) => sharee.role == "ADMIN")
-              .map((sharee) => sharee.email)
-              .filter((email) => email !== undefined)
-        : [];
+    const admins = collection.sharees
+        .filter((sharee) => sharee.role == "ADMIN")
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
 
     const viewers = collection.sharees
         .filter((sharee) => sharee.role == "VIEWER")
         .map((sharee) => sharee.email)
         .filter((email) => email !== undefined);
 
-    const userOrEmail = (email: string) =>
-        email == user.email ? t("you") : email;
-
-    if (isAdminRoleEnabled && !isOwner && isAdmin) {
+    if (!isOwner && isAdmin) {
         return (
             <Stack>
                 <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                     {t("owner")}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
-                    <RowLabel
-                        startIcon={
-                            <Avatar
-                                email={ownerEmail}
-                                {...{ user, emailByUserID }}
-                            />
-                        }
-                        label={ownerEmail ?? ""}
+                    <ResolvedEmailRowLabel
+                        email={ownerEmail}
+                        {...{ user, emailByUserID }}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -365,18 +413,14 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     {t("owner")}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
-                    <RowLabel
-                        startIcon={
-                            <Avatar
-                                email={ownerEmail}
-                                {...{ user, emailByUserID }}
-                            />
-                        }
-                        label={isOwner ? t("you") : (ownerEmail ?? "")}
+                    <ResolvedEmailRowLabel
+                        email={ownerEmail}
+                        fallbackLabel={isOwner ? t("you") : undefined}
+                        {...{ user, emailByUserID }}
                     />
                 </RowButtonGroup>
             </Stack>
-            {isAdminRoleEnabled && admins.length > 0 && (
+            {admins.length > 0 && (
                 <Stack>
                     <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                         {t("admins", { defaultValue: "Admins" })}
@@ -384,14 +428,14 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     <RowButtonGroup>
                         {admins.map((email, index) => (
                             <React.Fragment key={email}>
-                                <RowLabel
-                                    startIcon={
-                                        <Avatar
-                                            email={email}
-                                            {...{ user, emailByUserID }}
-                                        />
+                                <ResolvedEmailRowLabel
+                                    email={email}
+                                    fallbackLabel={
+                                        email == user.email
+                                            ? t("you")
+                                            : undefined
                                     }
-                                    label={userOrEmail(email)}
+                                    {...{ user, emailByUserID }}
                                 />
                                 {index != admins.length - 1 && (
                                     <RowButtonDivider />
@@ -410,14 +454,14 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                         <RowButtonGroup>
                             {collaborators.map((email, index) => (
                                 <React.Fragment key={email}>
-                                    <RowLabel
-                                        startIcon={
-                                            <Avatar
-                                                email={email}
-                                                {...{ user, emailByUserID }}
-                                            />
+                                    <ResolvedEmailRowLabel
+                                        email={email}
+                                        fallbackLabel={
+                                            email == user.email
+                                                ? t("you")
+                                                : undefined
                                         }
-                                        label={userOrEmail(email)}
+                                        {...{ user, emailByUserID }}
                                     />
                                     {index != collaborators.length - 1 && (
                                         <RowButtonDivider />
@@ -435,14 +479,14 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     <RowButtonGroup>
                         {viewers.map((email, index) => (
                             <React.Fragment key={email}>
-                                <RowLabel
-                                    startIcon={
-                                        <Avatar
-                                            email={email}
-                                            {...{ user, emailByUserID }}
-                                        />
+                                <ResolvedEmailRowLabel
+                                    email={email}
+                                    fallbackLabel={
+                                        email == user.email
+                                            ? t("you")
+                                            : undefined
                                     }
-                                    label={userOrEmail(email)}
+                                    {...{ user, emailByUserID }}
                                 />
                                 {index != viewers.length - 1 && (
                                     <RowButtonDivider />
@@ -482,9 +526,6 @@ const EmailShare: React.FC<EmailShareProps> = ({
     const { show: showManageEmail, props: manageEmailVisibilityProps } =
         useModalVisibility();
 
-    const settings = useSettingsSnapshot();
-    const { isAdminRoleEnabled } = settings;
-
     const [participantRole, setParticipantRole] =
         // Initial value is arbitrary, it always gets reset before
         // `showAddParticipant` is called.
@@ -511,7 +552,7 @@ const EmailShare: React.FC<EmailShareProps> = ({
     );
     const isOwner = user.id == collection.owner?.id;
     const isAdmin = currentSharee?.role == "ADMIN";
-    const canManageParticipants = isOwner || (isAdminRoleEnabled && isAdmin);
+    const canManageParticipants = isOwner || isAdmin;
 
     return (
         <>
@@ -531,9 +572,11 @@ const EmailShare: React.FC<EmailShareProps> = ({
                                     />
                                 }
                                 label={
-                                    collection.sharees.length === 1
-                                        ? collection.sharees[0]?.email
-                                        : null
+                                    collection.sharees.length === 1 ? (
+                                        <ResolvedEmailText
+                                            email={collection.sharees[0]?.email}
+                                        />
+                                    ) : null
                                 }
                                 endIcon={<ChevronRightIcon />}
                                 onClick={showManageEmail}
@@ -556,18 +599,14 @@ const EmailShare: React.FC<EmailShareProps> = ({
                                 onClick={showAddCollaborator}
                                 label={t("add_collaborators")}
                             />
-                            {isAdminRoleEnabled ? (
-                                <>
-                                    <RowButtonDivider />
-                                    <RowButton
-                                        startIcon={<AddIcon />}
-                                        onClick={showAddAdmin}
-                                        label={t("add_admins", {
-                                            defaultValue: "Add admins",
-                                        })}
-                                    />
-                                </>
-                            ) : null}
+                            <RowButtonDivider />
+                            <RowButton
+                                startIcon={<AddIcon />}
+                                onClick={showAddAdmin}
+                                label={t("add_admins", {
+                                    defaultValue: "Add admins",
+                                })}
+                            />
                         </>
                     ) : null}
                 </RowButtonGroup>
@@ -596,7 +635,6 @@ const EmailShare: React.FC<EmailShareProps> = ({
                     wrap,
                     onRemotePull,
                     canManageParticipants,
-                    adminRoleEnabled: isAdminRoleEnabled,
                 }}
             />
         </>
@@ -886,16 +924,10 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
                         <RowButtonGroup>
                             {existingEmails.map((email, index) => (
                                 <React.Fragment key={email}>
-                                    <RowButton
-                                        fontWeight="regular"
+                                    <ResolvedEmailRowButton
+                                        email={email}
                                         onClick={createToggleEmail(email)}
-                                        label={email}
-                                        startIcon={
-                                            <Avatar
-                                                email={email}
-                                                {...{ user, emailByUserID }}
-                                            />
-                                        }
+                                        {...{ user, emailByUserID }}
                                         endIcon={
                                             formik.values.selectedEmails.includes(
                                                 email,
@@ -931,7 +963,6 @@ type ManageEmailShareProps = ModalVisibilityProps & {
     participantCount: number;
     wrap: (f: () => Promise<void>) => () => void;
     canManageParticipants: boolean;
-    adminRoleEnabled: boolean;
 } & Pick<
         CollectionShareProps,
         | "user"
@@ -953,7 +984,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     wrap,
     onRemotePull,
     canManageParticipants,
-    adminRoleEnabled,
 }) => {
     const { show: showAddParticipant, props: addParticipantVisibilityProps } =
         useModalVisibility();
@@ -1005,25 +1035,18 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const isOwner = user.id == collection.owner?.id;
 
     const collaborators = collection.sharees
-        .filter(
-            (sharee) =>
-                sharee.role == "COLLABORATOR" ||
-                (!adminRoleEnabled && sharee.role == "ADMIN"),
-        )
+        .filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email)
         .filter((email) => email !== undefined);
 
-    const admins = adminRoleEnabled
-        ? collection.sharees
-              .filter((sharee) => sharee.role == "ADMIN")
-              .map((sharee) => sharee.email)
-              .filter((email) => email !== undefined)
-        : [];
+    const admins = collection.sharees
+        .filter((sharee) => sharee.role == "ADMIN")
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
     const currentSharee = collection.sharees.find(
         (sharee) => sharee.email == user.email,
     );
     if (
-        adminRoleEnabled &&
         currentSharee?.role == "ADMIN" &&
         user.email &&
         !admins.includes(user.email)
@@ -1051,19 +1074,14 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             {t("owner")}
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
-                            <RowLabel
-                                startIcon={
-                                    <Avatar
-                                        email={ownerEmail}
-                                        {...{ user, emailByUserID }}
-                                    />
-                                }
-                                label={isOwner ? t("you") : (ownerEmail ?? "")}
+                            <ResolvedEmailRowLabel
+                                email={ownerEmail}
+                                fallbackLabel={isOwner ? t("you") : undefined}
+                                {...{ user, emailByUserID }}
                             />
                         </RowButtonGroup>
                     </Stack>
-                    {adminRoleEnabled &&
-                    (admins.length > 0 || canManageParticipants) ? (
+                    {(admins.length > 0 || canManageParticipants) && (
                         <Stack>
                             <RowButtonGroupTitle
                                 icon={<AdminPanelSettingsIcon />}
@@ -1077,8 +1095,8 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                         canManageParticipants && !isSelf;
                                     return (
                                         <React.Fragment key={item}>
-                                            <RowButton
-                                                fontWeight="regular"
+                                            <ResolvedEmailRowButton
+                                                email={item}
                                                 disabled={!canManageThis}
                                                 onClick={() => {
                                                     if (canManageThis) {
@@ -1087,20 +1105,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                                         );
                                                     }
                                                 }}
-                                                label={
+                                                fallbackLabel={
                                                     isSelf
                                                         ? t("you")
-                                                        : (item ?? "")
+                                                        : undefined
                                                 }
-                                                startIcon={
-                                                    <Avatar
-                                                        email={item}
-                                                        {...{
-                                                            user,
-                                                            emailByUserID,
-                                                        }}
-                                                    />
-                                                }
+                                                {...{ user, emailByUserID }}
                                                 endIcon={
                                                     canManageThis ? (
                                                         <ChevronRightIcon />
@@ -1130,7 +1140,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 ) : null}
                             </RowButtonGroup>
                         </Stack>
-                    ) : null}
+                    )}
                     <Stack>
                         <RowButtonGroupTitle icon={<ModeEditIcon />}>
                             {t("collaborators")}
@@ -1141,8 +1151,8 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     canManageParticipants && item != user.email;
                                 return (
                                     <React.Fragment key={item}>
-                                        <RowButton
-                                            fontWeight="regular"
+                                        <ResolvedEmailRowButton
+                                            email={item}
                                             disabled={!canManageThis}
                                             onClick={() => {
                                                 if (canManageThis) {
@@ -1151,13 +1161,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                                     );
                                                 }
                                             }}
-                                            label={item}
-                                            startIcon={
-                                                <Avatar
-                                                    email={item}
-                                                    {...{ user, emailByUserID }}
-                                                />
-                                            }
+                                            {...{ user, emailByUserID }}
                                             endIcon={
                                                 canManageThis ? (
                                                     <ChevronRightIcon />
@@ -1195,8 +1199,8 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     canManageParticipants && item != user.email;
                                 return (
                                     <React.Fragment key={item}>
-                                        <RowButton
-                                            fontWeight="regular"
+                                        <ResolvedEmailRowButton
+                                            email={item}
                                             disabled={!canManageThis}
                                             onClick={() => {
                                                 if (canManageThis) {
@@ -1205,13 +1209,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                                     );
                                                 }
                                             }}
-                                            label={item}
-                                            startIcon={
-                                                <Avatar
-                                                    email={item}
-                                                    {...{ user, emailByUserID }}
-                                                />
-                                            }
+                                            {...{ user, emailByUserID }}
                                             endIcon={
                                                 canManageThis ? (
                                                     <ChevronRightIcon />
@@ -1254,13 +1252,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
-                {...{
-                    onRootClose,
-                    wrap,
-                    collection,
-                    onRemotePull,
-                    adminRoleEnabled,
-                }}
+                {...{ onRootClose, wrap, collection, onRemotePull }}
                 participant={selectedParticipant}
             />
         </>
@@ -1277,7 +1269,6 @@ type ManageParticipantProps = ModalVisibilityProps & {
      * when {@link open} is `true`, but the types don't reflect this.
      */
     participant: CollectionUser | undefined;
-    adminRoleEnabled: boolean;
 } & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManageParticipant: React.FC<ManageParticipantProps> = ({
@@ -1288,7 +1279,6 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     participant,
     wrap,
     onRemotePull,
-    adminRoleEnabled,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -1383,6 +1373,11 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         });
     };
 
+    const participantDisplay = useResolvedContactDisplay({
+        userID: participant?.id,
+        email: participant?.email,
+    });
+
     if (!participant) {
         return <></>;
     }
@@ -1393,7 +1388,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             {...{ open, onClose }}
             onRootClose={handleRootClose}
             title={t("manage")}
-            caption={participant.email}
+            caption={participantDisplay.primaryLabel || participant.email || ""}
         >
             <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                 <Stack>
@@ -1405,24 +1400,16 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                     </Typography>
 
                     <RowButtonGroup>
-                        {adminRoleEnabled ? (
-                            <>
-                                <RowButton
-                                    fontWeight="regular"
-                                    onClick={createOnRoleChange("ADMIN")}
-                                    label={t("admin", {
-                                        defaultValue: "Admin",
-                                    })}
-                                    startIcon={<AdminPanelSettingsIcon />}
-                                    endIcon={
-                                        participant.role === "ADMIN" && (
-                                            <DoneIcon />
-                                        )
-                                    }
-                                />
-                                <RowButtonDivider />
-                            </>
-                        ) : null}
+                        <RowButton
+                            fontWeight="regular"
+                            onClick={createOnRoleChange("ADMIN")}
+                            label={t("admin", { defaultValue: "Admin" })}
+                            startIcon={<AdminPanelSettingsIcon />}
+                            endIcon={
+                                participant.role === "ADMIN" && <DoneIcon />
+                            }
+                        />
+                        <RowButtonDivider />
                         <RowButton
                             fontWeight="regular"
                             onClick={createOnRoleChange("COLLABORATOR")}
@@ -1478,7 +1465,11 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     );
 };
 
-type PublicShareProps = { onRootClose: () => void; canManage: boolean } & Pick<
+type PublicShareProps = {
+    onRootClose: () => void;
+    canManage: boolean;
+    openManageLink: boolean;
+} & Pick<
     CollectionShareProps,
     "collection" | "setBlockingLoad" | "onRemotePull"
 >;
@@ -1489,6 +1480,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
     setBlockingLoad,
     onRemotePull,
     canManage,
+    openManageLink,
 }) => {
     const { customDomain } = useSettingsSnapshot();
 
@@ -1535,6 +1527,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
             {publicURL && resolvedURL ? (
                 canManage ? (
                     <ManagePublicShare
+                        openOnMount={openManageLink}
                         {...{
                             onRootClose,
                             collection,
@@ -1590,14 +1583,17 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
         setErrorMessage("");
         setPending(attributes ? "collect" : "link");
 
-        void createPublicURL(collection.id, attributes)
-            .then((publicURL) => {
+        void (async () => {
+            try {
+                const publicURL = await createPublicURL(
+                    collection.id,
+                    attributes,
+                );
                 setPending("");
                 setPublicURL(publicURL);
                 onLinkCreated();
                 void onRemotePull({ silent: true });
-            })
-            .catch((e: unknown) => {
+            } catch (e: unknown) {
                 log.error("Could not create public link", e);
                 setErrorMessage(
                     isHTTPErrorWithStatus(e, 402)
@@ -1605,7 +1601,8 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                         : t("generic_error"),
                 );
                 setPending("");
-            });
+            }
+        })();
     };
 
     return (
@@ -1659,7 +1656,7 @@ type ManagePublicShareProps = { onRootClose: () => void } & Pick<
     Pick<
         CollectionShareProps,
         "collection" | "setBlockingLoad" | "onRemotePull"
-    >;
+    > & { openOnMount: boolean };
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     onRootClose,
@@ -1669,6 +1666,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     resolvedURL,
     setBlockingLoad,
     onRemotePull,
+    openOnMount,
 }) => {
     const {
         show: showManagePublicShare,
@@ -1676,6 +1674,15 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     } = useModalVisibility();
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
+
+    useEffect(() => {
+        if (openOnMount) showManagePublicShare();
+    }, [openOnMount, showManagePublicShare]);
+
+    const handleManagePublicShareClose = useCallback(() => {
+        managePublicShareVisibilityProps.onClose();
+        if (openOnMount) onRootClose();
+    }, [managePublicShareVisibilityProps, openOnMount, onRootClose]);
 
     return (
         <>
@@ -1717,6 +1724,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
             </Stack>
             <ManagePublicShareOptions
                 {...managePublicShareVisibilityProps}
+                onClose={handleManagePublicShareClose}
                 {...{
                     onRootClose,
                     collection,
@@ -1817,7 +1825,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
-            setErrorMessage(t("generic_error"));
+            if (await isMuseumHTTPError(e, 403, "LINK_EDIT_NOT_ALLOWED")) {
+                setErrorMessage(t("link_edit_disabled_for_free_accounts"));
+            } else {
+                setErrorMessage(t("generic_error"));
+            }
         } finally {
             setBlockingLoad(false);
         }
@@ -1826,6 +1838,17 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         setBlockingLoad(true);
         setErrorMessage("");
         try {
+            const isQuickLinkAlbum =
+                collection.magicMetadata?.data.subType ==
+                CollectionSubType.quicklink;
+            if (isQuickLinkAlbum && collection.sharees.length === 0) {
+                await deleteCollection(collection.id, { keepFiles: true });
+                setPublicURL(undefined);
+                void onRemotePull({ silent: true });
+                handleRootClose();
+                return;
+            }
+
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
             void onRemotePull({ silent: true });
@@ -1843,7 +1866,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={t("share_album")}
+            title={t("manage_link")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
                 <ManageLayout
@@ -1869,6 +1892,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     />
                     <RowButtonDivider />
                     <ManageDownloadAccess
+                        {...{ publicURL }}
+                        onUpdate={handlePublicURLUpdate}
+                    />
+                    <RowButtonDivider />
+                    <ManageJoinAlbum
                         {...{ publicURL }}
                         onUpdate={handlePublicURLUpdate}
                     />
@@ -1945,8 +1973,12 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     publicURL,
     onUpdate,
 }) => {
-    const handleFileDownloadSetting = () => {
+    const handleCollectSetting = () => {
         void onUpdate({ enableCollect: !publicURL.enableCollect });
+    };
+
+    const handleCommentSetting = () => {
+        void onUpdate({ enableComment: !publicURL.enableComment });
     };
 
     return (
@@ -1955,7 +1987,13 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                 <RowSwitch
                     label={t("allow_adding_photos")}
                     checked={publicURL.enableCollect}
-                    onClick={handleFileDownloadSetting}
+                    onClick={handleCollectSetting}
+                />
+                <RowButtonDivider />
+                <RowSwitch
+                    label={t("enable_comments")}
+                    checked={publicURL.enableComment}
+                    onClick={handleCommentSetting}
                 />
             </RowButtonGroup>
         </Stack>
@@ -1993,7 +2031,9 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                         isLinkExpired(publicURL.validTill)
                             ? t("link_expired")
                             : publicURL.validTill
-                              ? formattedDateTime(publicURL.validTill)
+                              ? formattedDateTime(publicURL.validTill, {
+                                    omitWeekdayWhenYearIncluded: true,
+                                })
                               : t("never")
                     }
                 />
@@ -2149,6 +2189,23 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
     );
 };
 
+const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
+    publicURL,
+    onUpdate,
+}) => {
+    const handleJoinSetting = () => {
+        void onUpdate({ enableJoin: !publicURL.enableJoin });
+    };
+
+    return (
+        <RowSwitch
+            label={t("allow_joining_album")}
+            checked={publicURL.enableJoin}
+            onClick={handleJoinSetting}
+        />
+    );
+};
+
 const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
     publicURL,
     onUpdate,
@@ -2273,8 +2330,9 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 
     const options = useMemo(() => layoutOptions(), []);
 
-    const currentLayout =
-        collection.pubMagicMetadata?.data?.layout || "grouped";
+    const currentLayout = normalizedLayoutValue(
+        collection.pubMagicMetadata?.data?.layout,
+    );
 
     const changeLayoutValue = (value: string) => async () => {
         if (value === currentLayout) return;
@@ -2299,7 +2357,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
             <RowButtonGroup>
                 <RowButton
                     label={t("album_layout")}
-                    caption={t(currentLayout)}
+                    caption={layoutLabel(currentLayout)}
                     onClick={showLayoutOptions}
                     endIcon={<ChevronRightIcon />}
                 />
@@ -2360,7 +2418,22 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 };
 
 const layoutOptions = () => [
-    { label: t("grouped"), value: "grouped" },
-    { label: t("continuous"), value: "continuous" },
+    { label: layoutLabel("masonry"), value: "masonry" },
     { label: t("trip"), value: "trip" },
+    { label: t("grouped"), value: "grouped" },
 ];
+
+const normalizedLayoutValue = (layout: string | undefined) => {
+    if (layout === "continuous") {
+        return "masonry";
+    }
+    if (layout === "grouped" || layout === "trip" || layout === "masonry") {
+        return layout;
+    }
+    return "masonry";
+};
+
+const layoutLabel = (layout: string) =>
+    layout === "masonry"
+        ? t("masonry", { defaultValue: "Masonry" })
+        : t(layout);

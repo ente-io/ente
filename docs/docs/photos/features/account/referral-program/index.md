@@ -16,7 +16,7 @@ you and your friend receive an additional 10 GB of storage.
 
 ## Find your referral code
 
-You can find your referral code under `Settings > General > Referrals`.
+You can find your referral code under `Settings > Referrals`.
 
 <div align="center">
 
@@ -26,13 +26,25 @@ You can find your referral code under `Settings > General > Referrals`.
 
 ## Apply a referral code
 
-Referral codes can be applied within `Settings > General > Referrals > Apply Code`.
+Referral codes can be applied within `Settings > Referrals > Apply Code`.
 
 <div align="center">
 
 ![Apply referral code screen](referral-code-application.png){width=400px}
 
 </div>
+
+## Customize your referral code
+
+You can personalize your referral code to make it easier to share. To change your
+code, go to `Settings > Referrals` and tap on your current code.
+
+Requirements for custom referral codes:
+
+- Must be between 4 and 20 characters
+- Must contain only letters and numbers (alphanumeric)
+
+Note: You can change your referral code up to **3 times**.
 
 ## Related FAQs
 
@@ -41,4 +53,4 @@ Referral codes can be applied within `Settings > General > Referrals > Apply Cod
 - [What happens if I refer more people than my plan allows?](/photos/faq/storage-and-plans#referral-overflow)
 - [What counts as abuse of the referral program?](/photos/faq/storage-and-plans#referral-abuse)
 
-More questions? Drop a mail to [referrals@ente.io](mailto:referrals@ente.io)!
+More questions? Drop a mail to [referrals@ente.com](mailto:referrals@ente.com)!

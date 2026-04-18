@@ -9,7 +9,7 @@ import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_base/models/private_key_attributes.dart';
 import 'package:ente_configuration/constants.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/endpoint_updated_event.dart';
 import 'package:ente_events/models/signed_in_event.dart';
@@ -17,6 +17,7 @@ import 'package:ente_events/models/signed_out_event.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
@@ -45,7 +46,6 @@ class BaseConfiguration {
   String? _key;
   String? _secretKey;
   late FlutterSecureStorage _secureStorage;
-  late String _documentsDirectory;
   late String _cacheDirectory;
   late String _tempDocumentsDirPath;
   late List<EnteBaseDatabase> _databases;
@@ -57,8 +57,8 @@ class BaseConfiguration {
 
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
-    _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDocumentsDirPath = "${(await getTemporaryDirectory()).path}/temp/";
+    _tempDocumentsDirPath =
+        "${p.join((await getTemporaryDirectory()).path, "temp")}${p.separator}";
     _preferences = await SharedPreferences.getInstance();
     _secureStorage = const FlutterSecureStorage(
       iOptions: IOSOptions(
@@ -67,6 +67,7 @@ class BaseConfiguration {
     );
     await _setupKeys();
     await _setupFolders();
+    _logger.info("User ID: ${getUserID()}");
   }
 
   Future<void> logout({bool autoLogout = false}) async {
@@ -118,7 +119,7 @@ class BaseConfiguration {
     // Generate a public-private keypair and encrypt the latter
     final keyPair = CryptoUtil.generateKeyPair();
     final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.secretKey.extractBytes(), masterKey);
+        CryptoUtil.encryptSync(keyPair.secretKey, masterKey);
 
     final attributes = KeyAttributes(
       CryptoUtil.bin2base64(kekSalt),
@@ -137,7 +138,7 @@ class BaseConfiguration {
     final privateAttributes = PrivateKeyAttributes(
       CryptoUtil.bin2base64(masterKey),
       CryptoUtil.bin2hex(recoveryKey),
-      CryptoUtil.bin2base64(keyPair.secretKey.extractBytes()),
+      CryptoUtil.bin2base64(keyPair.secretKey),
     );
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }
@@ -450,7 +451,8 @@ class BaseConfiguration {
     }
     tempDirectory.createSync(recursive: true);
 
-    _cacheDirectory = "$_documentsDirectory/cache/";
+    _cacheDirectory =
+        "${p.join(p.dirname(_tempDocumentsDirPath), "cache")}${p.separator}";
     if (!io.Directory(_cacheDirectory).existsSync()) {
       io.Directory(_cacheDirectory).createSync(recursive: true);
     }

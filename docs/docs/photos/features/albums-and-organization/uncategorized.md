@@ -14,11 +14,16 @@ description: Uncategorized items in Ente Photos
 
 ## Cleaning up Uncategorized items
 
-In the mobile app:
+**On mobile:**
 
 1. Open the Uncategorized album
 2. Tap the overflow menu (three dots)
 3. Select **Clean Uncategorized**
+
+**On web/desktop:**
+
+1. Open the Uncategorized album
+2. Click the clean icon (broom)
 
 All files that are also present in another album you own will be removed from Uncategorized.
 

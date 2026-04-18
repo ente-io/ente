@@ -4,11 +4,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
-import "package:pro_image_editor/mixins/converted_configs.dart";
-import "package:pro_image_editor/models/editor_callbacks/pro_image_editor_callbacks.dart";
-import "package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart";
-import "package:pro_image_editor/modules/paint_editor/paint_editor.dart";
-import "package:pro_image_editor/widgets/animated/fade_in_up.dart";
+import 'package:pro_image_editor/core/mixins/converted_configs.dart';
+import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorPaintBar extends StatefulWidget with SimpleConfigsAccess {
   const ImageEditorPaintBar({
@@ -19,7 +16,7 @@ class ImageEditorPaintBar extends StatefulWidget with SimpleConfigsAccess {
     required this.i18nColor,
   });
 
-  final PaintingEditorState editor;
+  final PaintEditorState editor;
 
   @override
   final ProImageEditorConfigs configs;
@@ -77,7 +74,7 @@ class _ImageEditorPaintBarState extends State<ImageEditorPaintBar>
                   });
                   final hue = value * 360;
                   final color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
-                  widget.editor.colorChanged(color);
+                  widget.editor.setColor(color);
                 },
               ),
             ],

@@ -5,10 +5,12 @@
   "accountWelcomeBack": "Chào mừng bạn trở lại!",
   "emailAlreadyRegistered": "Email đã được đăng ký.",
   "emailNotRegistered": "Email chưa được đăng ký.",
+  "accountSetupIncompleteCreateAccount": "Thiết lập tài khoản chưa hoàn tất. Hãy tạo tài khoản để hoàn tất thiết lập.",
   "email": "Email",
   "cancel": "Hủy",
   "verify": "Xác minh",
   "invalidEmailAddress": "Địa chỉ email không hợp lệ",
+  "validEmailAddress": "Địa chỉ email hợp lệ",
   "enterValidEmail": "Vui lòng nhập một địa chỉ email hợp lệ.",
   "deleteAccount": "Xóa tài khoản",
   "deleteAccountWarning": "Việc này sẽ xóa Ente Auth, Ente Photos và tài khoản Ente Locker của bạn.",
@@ -27,10 +29,11 @@
   "deleteReason4": "Lý do không có trong danh sách",
   "sendEmail": "Gửi email",
   "deleteRequestSLAText": "Yêu cầu của bạn sẽ được xử lý trong vòng 72 giờ.",
-  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.io</warning> từ địa chỉ email đã đăng ký của bạn.",
+  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.com</warning> từ địa chỉ email đã đăng ký của bạn.",
   "entePhotosPerm": "Ente <i>cần quyền để</i> lưu giữ ảnh của bạn",
   "ok": "OK",
   "createAccount": "Tạo tài khoản",
+  "createAccountTitle": "Tạo một tài khoản",
   "createNewAccount": "Tạo tài khoản mới",
   "password": "Mật khẩu",
   "confirmPassword": "Xác nhận mật khẩu",
@@ -59,7 +62,7 @@
   "incorrectRecoveryKeyBody": "Mã khôi phục bạn nhập không chính xác",
   "forgotPassword": "Quên mật khẩu",
   "enterYourRecoveryKey": "Nhập mã khôi phục của bạn",
-  "noRecoveryKey": "Không có mã khôi phục?",
+  "noRecoveryKey": "Quên mã khôi phục?",
   "sorry": "Xin lỗi",
   "noRecoveryKeyNoDecryption": "Do tính chất của giao thức mã hóa đầu cuối, không thể giải mã dữ liệu của bạn mà không có mật khẩu hoặc mã khôi phục",
   "verifyEmail": "Xác minh email",
@@ -67,6 +70,7 @@
   "checkInboxAndSpamFolder": "Vui lòng kiểm tra hộp thư đến (và thư rác) để hoàn tất xác minh",
   "tapToEnterCode": "Nhấn để nhập mã",
   "resendEmail": "Gửi lại email",
+  "resendCode": "Gửi lại mã",
   "weHaveSendEmailTo": "Chúng tôi đã gửi một email đến <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
@@ -74,7 +78,18 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Chúng tôi đã gửi một mã đến {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.com"
       }
     }
   },
@@ -88,6 +103,10 @@
   "weakStrength": "Yếu",
   "strongStrength": "Mạnh",
   "moderateStrength": "Trung bình",
+  "strongPassword": "Mật khẩu mạnh",
+  "passwordRequirements": "Từ 9 ký tự trở lên, có viết hoa và ký tự đặc biệt",
+  "passwordsMatch": "Mật khẩu khớp",
+  "passwordsDontMatch": "Mật khẩu không khớp",
   "passwordStrength": "Độ mạnh mật khẩu: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -104,6 +123,7 @@
   "generatingEncryptionKeys": "Đang mã hóa...",
   "pleaseWait": "Vui lòng chờ...",
   "continueLabel": "Tiếp tục",
+  "continueInMailApp": "Tiếp tục trong ứng dụng email",
   "insecureDevice": "Thiết bị không an toàn",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Rất tiếc, chúng tôi không thể tạo khóa an toàn trên thiết bị này.\n\nVui lòng đăng ký từ một thiết bị khác.",
   "howItWorks": "Cách thức hoạt động",
@@ -117,6 +137,8 @@
   "changeEmail": "Đổi email",
   "enterYourPassword": "Nhập mật khẩu của bạn",
   "welcomeBack": "Chào mừng trở lại!",
+  "readyToBackupTitle": "Sẵn sàng sao lưu",
+  "readyToBackupSubtitle": "Ảnh của bạn sẽ được đồng bộ trong nền. Lần sao lưu đầu tiên có thể hơi lâu.",
   "contactSupport": "Liên hệ hỗ trợ",
   "locationPickerTip": "Bạn cũng có thể thêm vị trí tập trung vào ảnh từ phần thông tin của ảnh",
   "@locationPickerTip": {
@@ -130,9 +152,10 @@
   "verifyPassword": "Xác minh mật khẩu",
   "recoveryKey": "Mã khôi phục",
   "recoveryKeyOnForgotPassword": "Nếu bạn quên mật khẩu, cách duy nhất để khôi phục dữ liệu của bạn là dùng mã này.",
-  "recoveryKeySaveDescription": "Chúng tôi không lưu trữ mã này, nên hãy lưu nó ở nơi an toàn.",
+  "recoveryKeySaveDescription": "Hãy lưu mã này ở nơi an toàn.",
   "doThisLater": "Để sau",
   "saveKey": "Lưu mã",
+  "shareKey": "Chia sẻ mã",
   "recoveryKeyCopiedToClipboard": "Đã sao chép mã khôi phục vào bộ nhớ tạm",
   "recoverAccount": "Khôi phục tài khoản",
   "recover": "Khôi phục",
@@ -142,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -153,6 +176,7 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Chép & dán mã này\nvào ứng dụng xác thực của bạn",
   "tapToCopy": "nhấn để sao chép",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Quét mã vạch này bằng\nứng dụng xác thực của bạn",
+  "twoFAVerification": "Xác thực 2FA",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Nhập mã 6 chữ số từ\nứng dụng xác thực của bạn",
   "confirm": "Xác nhận",
   "setupComplete": "Cài đặt hoàn tất",
@@ -172,6 +196,11 @@
   "confirmYourRecoveryKey": "Xác nhận mã khôi phục của bạn",
   "addViewer": "Thêm người xem",
   "addCollaborator": "Thêm cộng tác viên",
+  "admin": "Quản trị",
+  "admins": "Quản trị viên",
+  "addAdmin": "Thêm quản trị viên",
+  "addMoreAdmins": "Thêm quản trị viên khác",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Quản trị viên và cộng tác viên có thể thêm ảnh. Quản trị viên có thể quản lý ảnh và người tham gia.",
   "addANewEmail": "Thêm một email mới",
   "orPickAnExistingOne": "Hoặc chọn một cái có sẵn",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ.",
@@ -203,6 +232,7 @@
   },
   "allowJoiningAlbum": "Cho phép ghép album",
   "allowAddPhotosDescription": "Cho phép người có liên kết thêm ảnh vào album chia sẻ.",
+  "enableComment": "Bình luận và bày tỏ cảm xúc",
   "passwordLock": "Khóa bằng mật khẩu",
   "canNotOpenTitle": "Không thể mở album này",
   "canNotOpenBody": "Rất tiếc, album này không thể mở trong ứng dụng.",
@@ -215,6 +245,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Bố cục album",
+  "layoutMasonry": "Masonry",
   "layoutGrouped": "Đã phân nhóm",
   "layoutContinuous": "Liên tục",
   "layoutTrip": "Chuyến đi",
@@ -263,6 +294,7 @@
   "copyLink": "Sao chép liên kết",
   "copyEmbedHtml": "Sao chép mã nhúng HTML",
   "linkHasExpired": "Liên kết đã hết hạn",
+  "linkRequestLimitExceeded": "Album này đang được xem trên quá nhiều thiết bị",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
   "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm người dùng gói miễn phí.",
@@ -283,27 +315,31 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID xác minh",
   "verifyEmailID": "Xác minh {email}",
   "emailNoEnteAccount": "{email} không có tài khoản Ente.\n\nGửi họ một lời mời để chia sẻ ảnh.",
-  "shareMyVerificationID": "Đây là ID xác minh của tôi: {verificationID} cho ente.io.",
-  "shareTextConfirmOthersVerificationID": "Chào, bạn có thể xác nhận rằng đây là ID xác minh ente.io của bạn: {verificationID}",
+  "shareMyVerificationID": "Đây là ID xác minh của tôi: {verificationID} cho ente.com.",
+  "shareTextConfirmOthersVerificationID": "Chào, bạn có thể xác nhận rằng đây là ID xác minh ente.com của bạn: {verificationID}",
   "somethingWentWrong": "Có gì đó không ổn",
   "sendInvite": "Gửi lời mời",
-  "shareTextRecommendUsingEnte": "Tải Ente để chúng ta có thể dễ dàng chia sẻ ảnh và video chất lượng gốc\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Tải Ente để chúng ta có thể dễ dàng chia sẻ ảnh và video chất lượng gốc\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Tải Ente để tôi có thể thêm bạn vào gói gia đình\n\nhttps://ente.com",
   "done": "Xong",
   "applyCodeTitle": "Áp dụng mã",
   "enterCodeDescription": "Nhập mã do bạn bè cung cấp để nhận thêm dung lượng miễn phí cho cả hai",
   "apply": "Áp dụng",
   "failedToApplyCode": "Không thể áp dụng mã",
+  "invalidReferralCode": "Mã không hợp lệ",
   "enterReferralCode": "Nhập mã giới thiệu",
   "codeAppliedPageTitle": "Mã đã được áp dụng",
-  "changeYourReferralCode": "Thay đổi mã giới thiệu của bạn",
+  "changeYourReferralCode": "Thay đổi mã",
   "change": "Thay đổi",
+  "saveCode": "Lưu mã",
+  "referralCodeHint": "Bạn có thể đổi mã này tối đa 3 lần",
   "unavailableReferralCode": "Rất tiếc, mã này không khả dụng.",
   "codeChangeLimitReached": "Rất tiếc, bạn đã đạt hạn mức thay đổi mã.",
   "onlyFamilyAdminCanChangeCode": "Vui lòng liên hệ {familyAdminEmail} để thay đổi mã của bạn.",
@@ -312,19 +348,26 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB đã nhận!",
   "details": "Chi tiết",
   "claimMore": "Nhận thêm!",
+  "earnMoreSpace": "Nhận thêm dung lượng!",
   "theyAlsoGetXGb": "Họ cũng nhận được {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB cho họ + {storageAmountInGB} GB cho bạn khi nâng cấp.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB mỗi khi ai đó đăng ký gói trả phí và áp dụng mã của bạn",
-  "shareTextReferralCode": "Mã giới thiệu Ente: {referralCode} \n\nÁp dụng nó trong Cài đặt → Chung → Giới thiệu để nhận thêm {referralStorageInGB} GB miễn phí sau khi bạn đăng ký gói trả phí\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos là nơi lưu trữ ảnh riêng tư và an toàn của bạn\n* Tải xuống Ente Photos từ https://ente.com/app\n* Tạo tài khoản\n* Áp mã giới thiệu {referralCode} trong Cài đặt->Giới thiệu bạn bè\n* Nhận {referralStorageInGB}GB thêm khi nâng cấp gói trả phí",
   "claimFreeStorage": "Nhận thêm dung lượng",
   "inviteYourFriends": "Mời bạn bè của bạn",
+  "earnFreeStorage": "Nhận thêm dung lượng",
+  "shareCodeEarnStorage": "Chia sẻ mã, nhận dung lượng.",
+  "youBothGet": "Cả hai nhận",
+  "free": "miễn phí",
   "failedToFetchReferralDetails": "Không thể lấy thông tin giới thiệu. Vui lòng thử lại sau.",
-  "referralStep1": "1. Đưa mã này cho bạn bè của bạn",
-  "referralStep2": "2. Họ đăng ký gói trả phí",
-  "referralStep3": "3. Cả hai nhận thêm {storageInGB} GB* miễn phí",
+  "referralStep1": "1. Tùy chỉnh và chia sẻ mã của bạn.",
+  "referralStep2": "2. Họ đăng ký Ente bằng mã của bạn.",
+  "referralStep3": "3. {storageInGB}GB miễn phí cho họ + {storageInGB}GB cho bạn khi bạn nâng cấp.",
   "referralsAreCurrentlyPaused": "Giới thiệu hiện đang tạm dừng",
-  "youCanAtMaxDoubleYourStorage": "* Bạn có thể tối đa ×2 dung lượng của mình",
+  "youCanAtMaxDoubleYourStorage": "Bạn có thể tối đa ×2 dung lượng của mình",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Gia đình bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} false {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} other {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -348,6 +391,12 @@
   "freeStorageClaimed": "Dung lượng miễn phí đã nhận",
   "freeStorageUsable": "Dung lượng miễn phí có thể dùng",
   "usableReferralStorageInfo": "Dung lượng có thể dùng bị giới hạn bởi gói hiện tại của bạn. Dung lượng nhận thêm vượt hạn mức sẽ tự động có thể dùng khi bạn nâng cấp gói.",
+  "referralStats": "Thống kê lượt giới thiệu",
+  "usedYourCode": "đã dùng mã của bạn",
+  "claimedByYou": "đã lấy bởi bạn",
+  "earned": "kiếm được",
+  "usable": "có thể dùng",
+  "referralStorageInfo": "Giới thiệu người dùng trả phí sẽ nhận được dung lượng lưu trữ thưởng.\n\nBạn có thể sử dụng dung lượng lưu trữ đến giới hạn của gói dịch vụ. Nâng cấp để sử dụng phần dung lượng còn lại mà bạn đã nhận được.",
   "removeFromAlbumTitle": "Xóa khỏi album?",
   "removeFromAlbum": "Xóa khỏi album",
   "itemsWillBeRemovedFromAlbum": "Các mục đã chọn sẽ bị xóa khỏi album này",
@@ -357,8 +406,11 @@
   "sorryCouldNotAddToFavorites": "Xin lỗi, không thể thêm vào mục yêu thích!",
   "sorryCouldNotRemoveFromFavorites": "Xin lỗi, không thể xóa khỏi mục yêu thích!",
   "subscribeToEnableSharing": "Bạn phải dùng gói trả phí mới có thể chia sẻ.",
+  "subscribeToChangeLinkSetting": "Bạn cần mua gói trả phí để thay đổi cài đặt liên kết này.",
   "subscribe": "Đăng ký gói",
   "canOnlyRemoveFilesOwnedByYou": "Chỉ có thể xóa các tệp thuộc sở hữu của bạn",
+  "cannotMoveToSharedAlbums": "Không thể chuyển vào album đã chia sẻ",
+  "cannotMoveToSharedAlbumsMessage": "Bạn chỉ có thể thêm mục vào album đã chia sẻ, không thể di chuyển. Bạn có muốn thêm thay vì di chuyển?",
   "deleteSharedAlbum": "Xóa album chia sẻ?",
   "deleteAlbum": "Xóa album",
   "deleteAlbumDialog": "Xóa luôn ảnh (và video) có trong album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
@@ -411,7 +463,7 @@
       }
     }
   },
-  "selectedPhotos": "{count} đã chọn",
+  "selectedPhotos": "Đã chọn {count} mục",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
     "type": "text",
@@ -442,7 +494,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Kích thước lưới ảnh",
-  "manageDeviceStorage": "Quản lý bộ nhớ đệm của thiết bị",
+  "manageDeviceStorage": "Quản lý bộ nhớ đệm thiết bị",
   "manageDeviceStorageDesc": "Xem và xóa bộ nhớ đệm trên thiết bị.",
   "machineLearning": "Học máy",
   "mlConsent": "Bật học máy",
@@ -451,6 +503,10 @@
   "mlConsentPrivacy": "Vui lòng nhấn vào đây để biết thêm chi tiết về tính năng này trong chính sách quyền riêng tư của chúng tôi",
   "mlConsentConfirmation": "Tôi hiểu và muốn bật học máy",
   "magicSearch": "Tìm kiếm vi diệu",
+  "magic": "Phép màu",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Khám phá",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -470,7 +526,7 @@
   "discover_sunset": "Hoàng hôn",
   "discover_hills": "Đồi",
   "discover_greenery": "Cây cối",
-  "mlIndexingDescription": "Lưu ý rằng việc học máy sẽ khiến tốn băng thông và pin nhiều hơn cho đến khi tất cả mục được lập chỉ mục. Hãy sử dụng ứng dụng máy tính để lập chỉ mục nhanh hơn. Mọi kết quả sẽ được tự động đồng bộ.",
+  "mlIndexingDescription": "Lưu ý rằng việc học máy sẽ khiến tốn băng thông và pin nhiều hơn cho đến khi tất cả mục được xử lý. Hãy sử dụng ứng dụng máy tính để xử lý nhanh hơn. Mọi kết quả sẽ được tự động đồng bộ.",
   "loadingModel": "Đang tải mô hình...",
   "waitingForWifi": "Đang chờ WiFi...",
   "status": "Trạng thái",
@@ -478,10 +534,31 @@
   "pendingItems": "Các mục đang chờ",
   "clearIndexes": "Xóa chỉ mục",
   "selectFoldersForBackup": "Chọn thư mục để sao lưu",
+  "selectFolders": "Chọn nhiều thư mục",
+  "backupToEnte": "Sao lưu lên Ente",
+  "selectAlbumsToBackUpToEnte": "Chọn những album sẽ sao lưu lên Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Các thư mục đã chọn sẽ được mã hóa và sao lưu",
   "unselectAll": "Bỏ chọn tất cả",
   "selectAll": "Chọn tất cả",
   "skip": "Bỏ qua",
+  "chooseBackupModeHeader": "<i>Chọn cách </i>Ente sao lưu ảnh của bạn",
+  "startWithLatestPhotos": "Bắt đầu với những ảnh mới nhất",
+  "backingUpLastSevenDaysPhotos": "Sao lưu ảnh của 7 ngày qua",
+  "backupOnlyNewPhotos": "Sao lưu chỉ ảnh mới",
+  "backupOnlyNewPhotosAllFoldersSelected": "Tất cả các thư mục hiện đã được chọn để sao lưu.\n\nBạn có thể tiếp tục ngay bây giờ, hoặc cập nhật các thư mục đã chọn.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Hiện chưa có thư mục nào được chọn để sao lưu.\n\nBạn có thể tiếp tục hoặc cập nhật các thư mục đã chọn.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Hiện chưa có thư mục nào được chọn để sao lưu.\n\nVui lòng chọn thư mục để tiếp tục.",
+  "backupOnlyNewPhotosWarningBody": "Bạn hiện đang sao lưu ảnh từ ngày {formattedDate}. Vui lòng cập nhật cài đặt để sao lưu tất cả ảnh.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Cập nhật cài đặt",
   "updatingFolderSelection": "Đang cập nhật lựa chọn thư mục...",
   "itemCount": "{count, plural, other{{count} mục}}",
   "deleteItemCount": "{count, plural, =1 {Xóa {count} mục} other {Xóa {count} mục}}",
@@ -543,16 +620,25 @@
   "backup": "Sao lưu",
   "freeUpDeviceSpace": "Giải phóng dung lượng thiết bị",
   "freeUpDeviceSpaceDesc": "Tiết kiệm dung lượng thiết bị của bạn bằng cách xóa các tệp đã được sao lưu.",
+  "freeUpDeviceSpaceDescICloud": "Tệp trong album chia sẻ iCloud không thể xóa.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Tất cả đã xong",
   "noDeviceThatCanBeDeleted": "Bạn không có tệp nào có thể xóa trên thiết bị này",
-  "removeDuplicates": "Xóa trùng lặp",
-  "removeDuplicatesDesc": "Xem và xóa các tệp bị trùng lặp.",
-  "viewLargeFiles": "Tệp lớn",
-  "viewLargeFilesDesc": "Xem các tệp đang chiếm nhiều dung lượng nhất.",
+  "removeDuplicates": "Xóa tệp trùng lặp",
+  "removeDuplicatesDesc": "Xem và xóa các tệp hoàn toàn giống nhau.",
+  "viewLargeFiles": "Xóa tệp dung lượng lớn",
+  "viewLargeFilesDesc": "Xem các tệp đang chiếm dung lượng nhiều nhất.",
+  "deleteSuggestions": "Gợi ý xóa",
+  "deleteSuggestionsDesc": "Xem các tệp được gợi ý xóa.",
+  "rejectSuggestions": "Từ chối gợi ý",
+  "noDeleteSuggestion": "Không có gợi ý xóa",
+  "youHaveNoFileSuggestedForDeletion": "Bạn không có tệp được đề xuất xóa",
   "noDuplicates": "✨ Không có trùng lặp",
   "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp nào bị trùng để xóa",
   "success": "Thành công",
-  "rateUs": "Đánh giá chúng tôi",
+  "rateUs": "Xếp hạng ứng dụng",
   "remindToEmptyDeviceTrash": "Hãy xóa luôn \"Đã xóa gần đây\" từ \"Cài đặt\" -> \"Lưu trữ\" để lấy lại dung lượng đã giải phóng",
   "youHaveSuccessfullyFreedUp": "Bạn đã giải phóng thành công {storageSaved}!",
   "@youHaveSuccessfullyFreedUp": {
@@ -583,10 +669,164 @@
     }
   },
   "familyPlans": "Gói gia đình",
-  "referrals": "Giới thiệu",
+  "family": "Gia đình",
+  "designedForFamilies": "Thiết kế cho mọi gia đình",
+  "shareYourSubscription": "Chia sẻ gói của bạn với những người thân",
+  "shareStorageWith5Members": "Chia sẻ dung lượng bộ nhớ với 5 thành viên",
+  "privateSpaceForEveryMember": "Không gian riêng tư cho từng thành viên",
+  "feedToEngageWithFamily": "Một bảng tin để tương tác với gia đình",
+  "plansStartAt": "Gói bắt đầu {price}/tháng",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Xem các gói",
+  "bringYourFamilyAlong": "Mang cả gia đình bạn theo",
+  "yourPlanSupportsFamily": "Gói của bạn hỗ trợ cả gia đình",
+  "addUpTo5MembersFree": "Tối đa 5 thành viên miễn phí",
+  "addFamilyMember": "Thêm thành viên gia đình",
+  "addMember": "Thêm thành viên",
+  "inviteMembers": "Mời thành viên",
+  "enterEmailAddresses": "Nhập địa chỉ email của họ. Họ cần có tài khoản Ente.",
+  "inviteLimitReached": "Bạn đã thêm 5 lời mời. Xóa bớt một",
+  "emailAddress": "Địa chỉ email",
+  "sendInvites": "Gửi lời mời",
+  "sendCountInvites": "{count, plural, =0 {Gửi lời mời} =1 {Gửi 1 lời mời} other {Gửi {count} lời mời}}",
+  "@sendCountInvites": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterAnEmailAddress": "Nhập địa chỉ email",
+  "enterAValidEmailAddress": "Nhập địa chỉ email hợp lệ",
+  "alreadyAdded": "Đã thêm",
+  "thisUserIsNotOnEnte": "Người này chưa có tài khoản Ente",
+  "emailNeedsEnteAccountForFamily": "{email} chưa có tài khoản Ente.\n\nHãy gửi lời mời cho họ và thêm họ vào danh sách gia đình của bạn sau khi họ đã tạo tài khoản trên Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "invitesSentCount": "{count, plural, =1 {Lời mời đã gửi} other {Lời mời đã gửi}}",
+  "@invitesSentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToInvite": "Không thể mời {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInviteCount": "Không thể mời {count} thành viên",
+  "@failedToInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{used}/{total} đã dùng",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Các thành viên",
+  "pending": "Đang chờ",
+  "closeFamilyPlan": "Đóng gói gia đình",
+  "closeFamilyConfirmTitle": "Đóng gói gia đình?",
+  "closeFamilyConfirmBody": "Tất cả thành viên sẽ mất quyền truy cập vào bộ nhớ dùng chung. Quyết định này không thể đảo ngược.",
+  "editStorageLimit": "Sửa dung lượng giới hạn",
+  "noLimitSet": "Chưa đặt giới hạn",
+  "removeFromFamily": "Xóa khỏi gia đình",
+  "removeMemberConfirmTitle": "Xóa thành viên?",
+  "removeMemberConfirmBody": "{email} sẽ mất truy cập vào dung lượng đã chia sẻ.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Gửi lại lời mời",
+  "revokeInviteConfirmTitle": "Gỡ lời mời?",
+  "revokeInviteConfirmBody": "Lời mời tới {email} sẽ bị hủy bỏ.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Gỡ",
+  "inviteResent": "Đã gửi lại lời mời",
+  "memberStorageUsed": "{amount} đã dùng",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Giới hạn dung lượng",
+  "usingStorage": "Đang dùng {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimitExplanation": "Đặt dung lượng lưu trữ tối đa mà thành viên này có thể sử dụng. Họ sẽ không thể tải lên nữa khi đạt đến giới hạn.",
+  "limit": "Giới hạn",
+  "noLimit": "Không giới hạn",
+  "currentUsageNote": "Dung lượng hiện tại: {amount}. Đặt thành 0 nghĩa là không giới hạn.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Rời gói gia đình?",
+  "leaveFamilyConfirmBody": "Bạn sẽ mất truy cập vào dung lượng đã chia sẻ.",
+  "referrals": "Giới thiệu bạn bè",
   "notifications": "Thông báo",
-  "sharedPhotoNotifications": "Ảnh chia sẻ mới",
-  "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
+  "sharedPhotoNotifications": "Ảnh và album mới chia sẻ",
+  "sharedPhotoNotificationsExplanation": "Nhận thông báo về những ảnh mới chia sẻ trong các album mà bạn tham gia hoặc những album mới chia sẻ với bạn.",
+  "socialNotifications": "Thích và bình luận",
+  "socialNotificationsExplanation": "Nhận thông báo khi có lượt thích trên ảnh của bạn và bình luận trên các album mà bạn tham gia",
   "advanced": "Nâng cao",
   "general": "Chung",
   "security": "Bảo mật",
@@ -602,7 +842,7 @@
   "no": "Không",
   "yes": "Có",
   "social": "Mạng xã hội",
-  "rateUsOnStore": "Đánh giá chúng tôi trên {storeName}",
+  "rateUsOnStore": "Xếp hạng trên {storeName}",
   "blog": "Blog",
   "merchandise": "Vật phẩm",
   "twitter": "Twitter",
@@ -615,12 +855,68 @@
   "reportBug": "Báo lỗi",
   "suggestFeatures": "Đề xuất tính năng",
   "support": "Hỗ trợ",
+  "helpAndSupport": "Trợ giúp & Hỗ trợ",
+  "browseHelpPages": "Duyệt các trang hỗ trợ",
+  "searchAndDiscovery": "Tìm kiếm và Khám phá",
+  "searchAndDiscoveryDesc": "Gương mặt, địa điểm, miêu tả và nhiều hơn nữa",
+  "backupAndSync": "Sao lưu và đồng bộ",
+  "backupAndSyncDesc": "Tự động sao lưu, trạng thái đồng bộ và tải lên",
+  "sharingAndCollaboration": "Chia sẻ và cộng tác",
+  "sharingAndCollaborationDesc": "Album, liên kết và gói gia đình",
+  "storageAndPlans": "Dung lượng và gói",
+  "storageAndPlansDesc": "Gói, hóa đơn và dung lượng",
+  "troubleshooting": "Khắc phục sự cố",
+  "troubleshootingDesc": "Những vấn đề chung và giải pháp",
+  "viewAllHelpTopics": "Xem tất cả chủ đề trợ giúp",
+  "getInTouch": "Liên hệ",
+  "reportAnIssue": "Báo cáo sự cố",
+  "askAQuestion": "Đặt câu hỏi",
+  "requestAFeature": "Đề xuất tính năng",
+  "subject": "Tiêu đề",
+  "description": "Mô tả",
+  "oneLineAboutTheIssue": "Một dòng về vấn đề",
+  "detailsAboutTheIssue": "Những chi tiết về sự cố",
+  "yourQuestion": "Câu hỏi của bạn",
+  "anyAdditionalInformation": "Thông tin bổ sung bất kỳ",
+  "attachLogs": "Đính kèm log",
+  "attachLogsHelper": "Giúp chẩn đoán sự cố nhanh hơn",
+  "pleaseEnterASubject": "Vui lòng nhập một tiêu đề",
+  "pleaseEnterADescription": "Vui lòng nhập một mô tả",
+  "noEmailAppFound": "Không tìm thấy ứng dụng email",
+  "noEmailAppBody": "Sao chép thông điệp của bạn và gửi nó tới {email} từ bất cứ dịch vụ email nào.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.com"
+      }
+    }
+  },
+  "message": "Nội dung tin nhắn",
+  "deviceInfo": "Thông tin thiết bị",
+  "logs": "Log",
+  "export": "Xuất",
+  "logsNotCopiedDownloadNote": "Chưa sao chép log. Xuất log và đính kèm chúng vào email.",
+  "attachedSize": "Đã đính kèm ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Sao chép tất cả vào clipboard",
+  "copied": "Đã sao chép",
+  "appearance": "Giao diện",
   "theme": "Chủ đề",
   "lightTheme": "Sáng",
   "darkTheme": "Tối",
   "systemTheme": "Giống hệ thống",
   "freeTrial": "Dùng thử miễn phí",
-  "selectYourPlan": "Chọn gói của bạn",
+  "chooseYourPlan": "Chọn gói của bạn",
   "enteSubscriptionPitch": "Ente lưu giữ kỷ niệm của bạn, vì vậy chúng luôn có sẵn, ngay cả khi bạn mất thiết bị.",
   "enteSubscriptionShareWithFamily": "Bạn có thể thêm gia đình vào gói của mình.",
   "currentUsageIs": "Dung lượng hiện tại ",
@@ -641,7 +937,7 @@
   "subscription": "Gói đăng ký",
   "paymentDetails": "Chi tiết thanh toán",
   "manageFamily": "Quản lý gia đình",
-  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.io để quản lý gói {provider} của bạn.",
+  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.com để quản lý gói {provider} của bạn.",
   "renewSubscription": "Gia hạn gói",
   "cancelSubscription": "Hủy gói",
   "areYouSureYouWantToRenew": "Bạn có chắc muốn gia hạn không?",
@@ -689,8 +985,9 @@
   "appstoreSubscription": "Gói AppStore",
   "subAlreadyLinkedErrMessage": "ID {id} của bạn đã được liên kết với một tài khoản Ente khác.\nNếu bạn muốn sử dụng ID {id} này với tài khoản này, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.",
   "visitWebToManage": "Vui lòng truy cập web.ente.io để quản lý gói đăng ký",
+  "managePaymentMethod": "Quản lý phương thức thanh toán",
   "couldNotUpdateSubscription": "Không thể cập nhật gói",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.io và chúng tôi rất sẵn sàng giúp đỡ!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.com và chúng tôi rất sẵn sàng giúp đỡ!",
   "paymentFailed": "Thanh toán thất bại",
   "paymentFailedTalkToProvider": "Vui lòng trao đổi với bộ phận hỗ trợ {providerName} nếu bạn đã bị tính phí",
   "@paymentFailedTalkToProvider": {
@@ -712,6 +1009,26 @@
   "youAreOnAFamilyPlan": "Bạn đang dùng gói gia đình!",
   "contactFamilyAdmin": "Vui lòng liên hệ <green>{familyAdminEmail}</green> để quản lý gói của bạn",
   "leaveFamily": "Rời khỏi gia đình",
+  "youAreOnAFamilyPlanSubtitle": "Bạn đang trong một gói gia đình.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " quản lý gói này.\nLiên hệ họ nếu có thay đổi.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Rời gói gia đình",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Cần trợ giúp? Liên hệ ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Bạn có chắc muốn rời khỏi gói gia đình không?",
   "leave": "Rời",
   "rateTheApp": "Đánh giá ứng dụng",
@@ -721,20 +1038,15 @@
   "grantFullAccessPrompt": "Vui lòng cho phép truy cập vào tất cả ảnh trong ứng dụng Cài đặt",
   "allowPermTitle": "Cho phép truy cập ảnh",
   "allowPermBody": "Vui lòng cho phép truy cập vào ảnh của bạn từ Cài đặt để Ente có thể hiển thị và sao lưu thư viện của bạn.",
-  "openSettings": "Mở Cài đặt",
+  "openSettings": "Mở cài đặt",
   "selectMorePhotos": "Chọn thêm ảnh",
   "existingUser": "Người dùng hiện tại",
-  "privateBackups": "Sao lưu riêng tư",
-  "forYourMemories": "cho những kỷ niệm của bạn",
-  "endtoendEncryptedByDefault": "Mã hóa đầu cuối theo mặc định",
-  "safelyStored": "Lưu trữ an toàn",
-  "atAFalloutShelter": "ở hầm trú ẩn hạt nhân",
-  "designedToOutlive": "Được thiết kế để trường tồn",
-  "available": "Có sẵn",
-  "everywhere": "mọi nơi",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Di động, Web, Desktop",
   "newToEnte": "Mới dùng Ente",
+  "createAnEnteAccount": "Tạo tài khoản Ente",
+  "continueWithoutAccount": "Tiếp tục không cần tài khoản",
+  "loginToExistingAccount": "Đăng nhập tài khoản có sẵn",
+  "shareTheMoment": "Chia sẻ khoảnh khắc",
+  "letFriendsAndFamilyReact": "Hãy để bạn bè và gia đình tương tác và nhận xét về ảnh của bạn.",
   "pleaseLoginAgain": "Vui lòng đăng nhập lại",
   "autoLogoutMessage": "Do sự cố kỹ thuật, bạn đã bị đăng xuất. Chúng tôi xin lỗi vì sự bất tiện.",
   "yourSubscriptionHasExpired": "Gói của bạn đã hết hạn",
@@ -750,7 +1062,7 @@
   "couldNotBackUpTryLater": "Chúng tôi không thể sao lưu dữ liệu của bạn.\nChúng tôi sẽ thử lại sau.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente chỉ có thể mã hóa và lưu giữ tệp nếu bạn cấp quyền truy cập chúng",
   "pleaseGrantPermissions": "Vui lòng cấp quyền",
-  "grantPermission": "Cấp quyền",
+  "grantPermissionDesc": "Vui lòng cho phép Ente truy cập thư viện của bạn để chúng tôi có thể sắp xếp bằng nhận diện khuôn mặt. Toàn bộ quá trình này diễn ra trên thiết bị của bạn.",
   "privateSharing": "Chia sẻ riêng tư",
   "shareOnlyWithThePeopleYouWant": "Chỉ chia sẻ với những người bạn muốn",
   "usePublicLinksForPeopleNotOnEnte": "Dùng liên kết công khai cho những người không dùng Ente",
@@ -772,6 +1084,7 @@
   "name": "Tên",
   "newest": "Mới nhất",
   "lastUpdated": "Mới cập nhật",
+  "updated": "Đã cập nhật",
   "deleteEmptyAlbums": "Xóa album trống",
   "deleteEmptyAlbumsWithQuestionMark": "Xóa album trống?",
   "deleteAlbumsDialogBody": "Tất cả album trống sẽ bị xóa. Sẽ hữu ích khi bạn muốn giảm bớt sự lộn xộn trong danh sách album của mình.",
@@ -806,7 +1119,20 @@
   "unarchive": "Bỏ lưu trữ",
   "favorite": "Thích",
   "removeFromFavorite": "Xóa khỏi mục đã thích",
+  "shareMemories": "Chia sẻ kỷ niệm",
+  "shareTheseMemories": "Chia sẻ những kỷ niệm này",
+  "shareThisPhoto": "Chia sẻ ảnh này",
+  "shareThisVideo": "Chia sẻ video này",
   "shareLink": "Chia sẻ liên kết",
+  "memoryShareLinkDescription": "Liên kết này sẽ tự hết hạn sau 7 ngày.",
+  "deleteLink": "Xóa liên kết",
+  "deleteLinkQuestion": "Xóa liên kết?",
+  "deleteMemoryLinkMessage": "Những người mà bạn đã chia sẻ liên kết sẽ không thể truy cập.",
+  "linkDeletedSuccessfully": "Xóa liên kết thành công",
+  "memoryLinks": "Liên kết kỷ niệm",
+  "openLink": "Mở liên kết",
+  "pay": "Thanh toán",
+  "noPaymentAppFound": "Không tìm thấy ứng dụng thanh toán",
   "createCollage": "Tạo ảnh ghép",
   "saveCollage": "Lưu ảnh ghép",
   "collageSaved": "Ảnh ghép đã được lưu vào thư viện",
@@ -822,7 +1148,7 @@
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {Thêm mục} other {Thêm các mục}}",
+  "addItem": "{count, plural, =1 {Thêm vào} other {Thêm vào}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -870,6 +1196,8 @@
   "sortAlbumsBy": "Sắp xếp theo",
   "sortNewestFirst": "Mới nhất trước",
   "sortOldestFirst": "Cũ nhất trước",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Đổi tên",
   "leaveSharedAlbum": "Rời album được chia sẻ?",
   "leaveAlbum": "Rời khỏi album",
@@ -886,6 +1214,7 @@
   "clickOnTheOverflowMenu": "• Nhấn vào menu xổ xuống",
   "click": "• Nhấn",
   "nothingToSeeHere": "Ở đây không có gì để xem! 👀",
+  "selectFoldersToBackup": "<action>Chọn các thư mục</action> để xem\nvà sao lưu trên ente.",
   "unarchiveAlbum": "Bỏ lưu trữ album",
   "archiveAlbum": "Lưu trữ album",
   "calculating": "Đang tính toán...",
@@ -908,6 +1237,39 @@
   "filesSavedToGallery": "Các tệp đã được lưu vào thư viện",
   "fileFailedToSaveToGallery": "Không thể lưu tệp vào thư viện",
   "download": "Tải xuống",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} đã có sẵn trong album {albumName} trên thiết bị của bạn",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionSingleFile": "Đã hủy tải xuống {fileName} vì nó có sẵn trong album {albumName} trên thiết bị của bạn",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "Đã hủy tải xuống {fileCount} tệp vì chúng có sẵn trên thiết bị của bạn",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Nhấn giữ để phát video",
   "pressAndHoldToPlayVideoDetailed": "Nhấn giữ ảnh để phát video",
   "downloadFailed": "Tải xuống thất bại",
@@ -1036,7 +1398,7 @@
   "networkHostLookUpErr": "Không thể kết nối với Ente, vui lòng kiểm tra cài đặt mạng của bạn và liên hệ với bộ phận hỗ trợ nếu lỗi vẫn tiếp diễn.",
   "networkConnectionRefusedErr": "Không thể kết nối với Ente, vui lòng thử lại sau ít phút. Nếu lỗi vẫn tiếp diễn, hãy liên hệ với bộ phận hỗ trợ.",
   "cachedData": "Dữ liệu đã lưu trong bộ nhớ đệm",
-  "clearCaches": "Xóa bộ nhớ cache",
+  "clearCaches": "Xóa bộ nhớ đệm",
   "remoteImages": "Ảnh bên ngoài",
   "remoteVideos": "Video bên ngoài",
   "remoteThumbnails": "Ảnh thu nhỏ bên ngoài",
@@ -1055,7 +1417,14 @@
   "didYouKnow": "Bạn có biết?",
   "loadingMessage": "Đang tải ảnh của bạn...",
   "loadMessage1": "Bạn có thể chia sẻ gói của mình với gia đình",
-  "loadMessage2": "Chúng tôi đã lưu giữ hơn 200 triệu kỷ niệm cho đến hiện tại",
+  "loadMessage2": "Chúng tôi đã phục vụ hơn {memoriesCountInMillions} triệu kỷ niệm",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Chúng tôi giữ 3 bản sao dữ liệu của bạn, một cái lưu ở hầm trú ẩn hạt nhân",
   "loadMessage4": "Tất cả các ứng dụng của chúng tôi đều là mã nguồn mở",
   "loadMessage5": "Mã nguồn và mã hóa của chúng tôi đã được kiểm nghiệm ngoại bộ",
@@ -1064,6 +1433,46 @@
   "loadMessage8": "web.ente.io có một trình tải lên mượt mà",
   "loadMessage9": "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn",
   "photoDescriptions": "Mô tả ảnh",
+  "searchResultFileName": "Tên tệp",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Mô tả",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Loại",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Định dạng",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Người",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Đã chia sẻ",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Tải lên bởi",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Hãng máy ảnh",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Dòng máy ảnh",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Tệp",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Loại tệp và tên",
   "location": "Vị trí",
   "moments": "Khoảnh khắc",
@@ -1076,6 +1485,14 @@
   "searchCaptionEmptySection": "Thêm mô tả như \"#phượt\" trong thông tin ảnh để tìm nhanh thấy chúng ở đây",
   "language": "Ngôn ngữ",
   "selectLanguage": "Chọn ngôn ngữ",
+  "noLocation": "Không có địa điểm",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "Không có thẻ địa điểm",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Tên vị trí",
   "addLocation": "Thêm vị trí",
   "groupNearbyPhotos": "Nhóm ảnh gần nhau",
@@ -1123,7 +1540,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} trống",
-  "appVersion": "Phiên bản: {versionValue}",
+  "appVersion": "Phiên bản {versionValue}",
   "verifyIDLabel": "Xác minh",
   "fileInfoAddDescHint": "Thêm mô tả...",
   "editLocationTagTitle": "Chỉnh sửa vị trí",
@@ -1132,8 +1549,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Đặt bán kính",
-  "familyPlanPortalTitle": "Gia đình",
-  "familyPlanOverview": "Thêm 5 thành viên gia đình vào gói hiện tại của bạn mà không phải trả thêm phí.\n\nMỗi thành viên có không gian riêng tư của mình và không thể xem tệp của nhau trừ khi được chia sẻ.\n\nGói gia đình có sẵn cho người dùng Ente gói trả phí.\n\nĐăng ký ngay để bắt đầu!",
   "androidBiometricHint": "Xác minh danh tính",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1206,16 +1621,20 @@
   "unpinAlbum": "Bỏ ghim album",
   "pinAlbum": "Ghim album",
   "pin": "Ghim",
+  "pinPerson": "Ghim người này",
   "pinToTop": "Ghim lên đầu",
   "unpin": "Bỏ ghim",
+  "unpinPerson": "Bỏ ghim người này",
   "visibility": "Hiển thị",
   "hideFromMemories": "Ẩn khỏi kỷ niệm",
+  "showInMemories": "Hiện trong kỷ niệm",
+  "showIgnored": "Hiện những bỏ qua",
   "create": "Tạo",
   "viewAll": "Xem tất cả",
-  "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
+  "nothingSharedWithYouYet": "Chưa có ai chia sẻ với bạn",
   "noAlbumsSharedByYouYet": "Bạn chưa chia sẻ album nào",
-  "sharedWithYou": "Được chia sẻ với bạn",
-  "sharedByYou": "Được chia sẻ bởi bạn",
+  "sharedWithYou": "Đã chia sẻ với bạn",
+  "sharedByYou": "Do bạn chia sẻ",
   "inviteYourFriendsToEnte": "Mời bạn bè dùng Ente",
   "failedToDownloadVideo": "Không thể tải video",
   "hiding": "Đang ẩn...",
@@ -1228,7 +1647,7 @@
   "moveToHiddenAlbum": "Di chuyển đến album ẩn",
   "fileTypes": "Loại tệp",
   "deleteConfirmDialogBody": "Tài khoản này được liên kết với các ứng dụng Ente khác, nếu bạn có dùng. Dữ liệu bạn đã tải lên, trên tất cả ứng dụng Ente, sẽ được lên lịch để xóa, và tài khoản của bạn sẽ bị xóa vĩnh viễn.",
-  "hearUsWhereTitle": "Bạn biết Ente từ đâu? (tùy chọn)",
+  "hearUsWhereTitle": "Bạn biết Ente từ đâu?",
   "hearUsExplanation": "Chúng tôi không theo dõi cài đặt ứng dụng, nên nếu bạn bật mí bạn tìm thấy chúng tôi từ đâu sẽ rất hữu ích!",
   "viewAddOnButton": "Xem tiện ích mở rộng",
   "addOns": "Tiện ích mở rộng",
@@ -1263,7 +1682,7 @@
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
-  "contacts": "Danh bạ",
+  "contacts": "Liên hệ",
   "noInternetConnection": "Không có kết nối internet",
   "pleaseCheckYourInternetConnectionAndTryAgain": "Vui lòng kiểm tra kết nối internet của bạn và thử lại.",
   "signOutFromOtherDevices": "Đăng xuất khỏi các thiết bị khác",
@@ -1321,6 +1740,8 @@
   "enterDateOfBirth": "Sinh nhật (tùy chọn)",
   "birthday": "Sinh nhật",
   "removePersonLabel": "Xóa nhãn người",
+  "removePersonTag": "Xóa nhãn người",
+  "areYouSureRemoveThisPersonTag": "Bạn có chắc muốn xóa nhãn người này?",
   "autoPairDesc": "Kết nối tự động chỉ hoạt động với các thiết bị hỗ trợ Chromecast.",
   "manualPairDesc": "Kết nối bằng PIN hoạt động với bất kỳ màn hình nào bạn muốn.",
   "connectToDevice": "Kết nối với thiết bị",
@@ -1372,6 +1793,7 @@
   "enterPin": "Nhập PIN",
   "setNewPin": "Đặt PIN mới",
   "appLock": "Khóa ứng dụng",
+  "lockScreenType": "Kiểu khóa",
   "noSystemLockFound": "Không tìm thấy khóa hệ thống",
   "tapToUnlock": "Nhấn để mở khóa",
   "tooManyIncorrectAttempts": "Thử sai nhiều lần",
@@ -1400,14 +1822,83 @@
   "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
   "showPerson": "Hiện người",
   "sort": "Sắp xếp",
+  "recent": "Gần đây",
   "mostRecent": "Mới nhất",
   "mostRelevant": "Liên quan nhất",
   "loadingYourPhotos": "Đang tải ảnh của bạn...",
   "processingImport": "Đang xử lý {folderName}...",
   "personName": "Tên người",
+  "addPerson": "Thêm người",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Thêm vào người",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Vui lòng đặt tên trong mục Mọi người trước",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ các tệp đã tải lên mới có thể được thêm vào người",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Không phát hiện khuôn mặt nào, hãy chạm để thêm.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Đã thêm 1 tệp vào {personName}} other {Đã thêm {count} tệp vào {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1tệp đã được liên kết với {personName}} other {{count} tệp đã được liên kết với {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Thêm người mới",
   "addNameOrMerge": "Thêm tên hoặc hợp nhất",
   "mergeWithExisting": "Hợp nhất với người đã có",
+  "mergeWithPersonTitle": "Gộp với {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Tất cả ảnh từ cả hai nhóm khuôn mặt sẽ được gộp lại thành {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Người mới",
   "addName": "Thêm tên",
   "add": "Thêm",
@@ -1421,7 +1912,9 @@
   },
   "extraPhotosFound": "Tìm thấy ảnh bổ sung",
   "configuration": "Cấu hình",
-  "localIndexing": "Chỉ mục cục bộ",
+  "localIndexing": "Xử lý cục bộ",
+  "offlineLocalIndexingDisabledDescription": "Thiết bị này mặc định tắt xử lý cục bộ để giảm bộ nhớ sử dụng.",
+  "offlineLocalIndexingDisabledCardDescription": "Thiết bị này mặc định tắt xử lý cục bộ để giảm bộ nhớ sử dụng. Bật lại trong cài đặt nếu bạn muốn nhận diện gương mặt và tìm kiếm thông minh không cần mạng.",
   "processed": "Đã xử lý",
   "resetPerson": "Xóa",
   "areYouSureYouWantToResetThisPerson": "Bạn có chắc muốn đặt lại người này không?",
@@ -1452,6 +1945,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Chưa thêm quản trị viên} =1 {Đã thêm 1 quản trị viên} other {Đã thêm {count} quản trị viên}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Thêm quản trị viên} =1 {Thêm quản trị viên} other {Thêm quản trị viên}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Quản trị viên có thể quản lý ảnh và người tham gia.",
+  "suggestDeletion": "Đề xuất xóa",
+  "suggestDeletionDescription": "Những ảnh được chọn sẽ bị xóa khỏi album này. Chủ sở hữu ảnh cũng sẽ nhận được đề xuất xem xét và xóa ảnh.",
+  "deleteSuggestionSent": "Xóa gợi ý đã gửi",
   "accountIsAlreadyConfigured": "Tài khoản đã được cấu hình.",
   "sessionIdMismatch": "Mã phiên không khớp",
   "@sessionIdMismatch": {
@@ -1567,9 +2084,93 @@
   "legacyAccounts": "Tài khoản thừa kế",
   "trustedContacts": "Liên hệ tin cậy",
   "addTrustedContact": "Thêm liên hệ tin cậy",
+  "chooseFromAnExistingContact": "Chọn từ danh bạ hiện có",
+  "chooseARecoveryTime": "Chọn thời điểm khôi phục",
+  "addContact": "Thêm liên hệ",
   "removeInvite": "Gỡ bỏ lời mời",
   "recoveryWarning": "Một liên hệ tin cậy đang cố gắng truy cập tài khoản của bạn",
   "rejectRecovery": "Từ chối khôi phục",
+  "cannotUpdateRecoveryTime": "Không thể cập nhật thời gian khôi phục",
+  "cannotUpdateRecoveryTimeMessage": "Thời gian khôi phục không thể thay đổi khi đang trong một phiên khôi phục hoạt động. Vui lòng từ chối hoặc đợi khôi phục hoàn tất.",
+  "updateTime": "Cập nhật thời gian",
+  "revokeInvite": "Gỡ lời mời",
+  "trustedContactInvitePending": "Bạn đã mời {email} làm một liên hệ tin cậy. Họ chưa chấp nhận lời mời của bạn.",
+  "@trustedContactInvitePending": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedContactAccepted": "Bạn đã mời {email} làm một liên hệ tin cậy. Họ đã chấp nhận lời mời của bạn.",
+  "@trustedContactAccepted": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Hủy lời mời",
+  "cancelInviteDesc": "Nếu bạn xóa lời mời này, bạn sẽ phải gửi một lời mời mới nếu bạn đổi ý.",
+  "removeContactDesc": "Nếu bạn xóa lời mời này, bạn sẽ phải gửi một lời mời mới, và liên hệ cũng cần chấp nhận lại.",
+  "removeContact": "Gỡ liên hệ",
+  "letsTryThatAgain": "Hãy thử lại",
+  "removeYourselfDesc": "Nếu bạn tự gỡ bạn khỏi liên hệ tin cậy, bạn sẽ mất quyền truy cập tài khoản {email} sau chu kỳ họ không hoạt động.",
+  "@removeYourselfDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecovery": "Hủy khôi phục",
+  "cancelRecoveryDesc": "Bạn có chắc muốn hủy khôi phục tài khoản {email}?",
+  "@cancelRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecovery": "Bắt đầu khôi phục",
+  "startRecoveryDesc": "Bạn có chắc muốn bắt đầu khôi phục tài khoản {email}?",
+  "@startRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "Bạn có thể khôi phục tài khoản {email} trong {days} ngày sau khi bắt đầu quá trình khôi phục.",
+  "@recoverAccountDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "Bạn có thể khôi phục tài khoản {email} sau {time}.",
+  "@recoverAccountAfter": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Hoặc gỡ bạn khỏi vai trò liên hệ tin cậy của {email}",
+  "@orRemoveYourself": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "recoveryInitiated": "Quá trình khôi phục đã được khởi động",
   "recoveryInitiatedDesc": "Bạn có thể truy cập tài khoản sau {days} ngày. Một thông báo sẽ được gửi đến {email}.",
   "@recoveryInitiatedDesc": {
@@ -1615,10 +2216,22 @@
       }
     }
   },
+  "confirmAddingTrustedContacts": "Bạn sắp thêm {count} liên hệ tin cậy. Họ sẽ có thể khôi phục tài khoản của bạn nếu bạn vắng mặt {numOfDays} ngày.",
+  "@confirmAddingTrustedContacts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy",
   "hideSharedItemsFromHomeGallery": "Ẩn các mục được chia sẻ khỏi thư viện chính",
-  "swipeToSelect": "Quẹt để chọn",
   "gallery": "Thư viện",
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
@@ -1627,7 +2240,7 @@
   "linkEmail": "Liên kết email",
   "link": "Liên kết",
   "noEnteAccountExclamation": "Chưa có tài khoản Ente!",
-  "orPickFromYourContacts": "hoặc chọn từ danh bạ",
+  "orPickFromYourContacts": "hoặc chọn từ liên hệ của bạn",
   "emailDoesNotHaveEnteAccount": "{email} chưa có tài khoản Ente.",
   "@emailDoesNotHaveEnteAccount": {
     "description": "Shown when email doesn't have an Ente account",
@@ -1691,14 +2304,14 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Phát trực tuyến video",
+  "videoStreaming": "Stream video",
   "processingVideos": "Đang xử lý video",
-  "streamDetails": "Chi tiết phát",
+  "streamDetails": "Chi tiết stream",
   "processing": "Đang xử lý",
   "queued": "Đang chờ",
   "ineligible": "Không đủ điều kiện",
   "failed": "Không thành công",
-  "playStream": "Phát trực tiếp",
+  "playStream": "Phát stream",
   "playOriginal": "Phát tệp gốc",
   "joinAlbumConfirmationDialogBody": "Tham gia một album sẽ khiến email của bạn hiển thị với những người tham gia khác.",
   "pleaseWaitThisWillTakeAWhile": "Vui lòng chờ, có thể mất một lúc.",
@@ -1746,6 +2359,10 @@
   "personIsAge": "{name} đã {age} tuổi!",
   "personTurningAge": "{name} sắp {age} tuổi",
   "lastTimeWithThem": "Lần cuối với {name}",
+  "unnamedPeopleSpotlight": "Khuôn mặt giống",
+  "unnamedPeopleYouAndThem": "Cả hai",
+  "unnamedPeopleDoingSomethingTogether": "Làm gì đó với nhau",
+  "unnamedPeopleLastTimeYouSawThem": "Lần cuối bên nhau",
   "tripToLocation": "Phượt ở {location}",
   "tripInYear": "Phượt năm {year}",
   "lastYearsTrip": "Phượt năm ngoái",
@@ -1759,16 +2376,16 @@
   "food": "Ăn chơi",
   "pets": "Thú cưng",
   "curatedMemories": "Kỷ niệm đáng nhớ",
-  "widgets": "Tiện ích",
+  "widgets": "Widget màn hình",
   "memories": "Kỷ niệm",
-  "peopleWidgetDesc": "Chọn những người bạn muốn thấy trên màn hình chính của mình.",
+  "peopleWidgetDesc": "Chọn người muốn thấy trên màn hình chính.",
   "albumsWidgetDesc": "Chọn những album bạn muốn thấy trên màn hình chính của mình.",
   "memoriesWidgetDesc": "Chọn những loại kỷ niệm bạn muốn thấy trên màn hình chính của mình.",
   "smartMemories": "Gợi nhớ kỷ niệm",
   "pastYearsMemories": "Kỷ niệm năm ngoái",
   "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) có trong {count} album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
   "addParticipants": "Thêm người tham gia",
-  "selectedAlbums": "{count} đã chọn",
+  "selectedAlbums": "Đã chọn {count} album",
   "actionNotSupportedOnFavouritesAlbum": "Hành động không áp dụng trong album Đã thích",
   "onThisDayMemories": "Kỷ niệm hôm nay",
   "onThisDay": "Vào ngày này",
@@ -1777,9 +2394,9 @@
   "sorryWeHadToPauseYourBackups": "Rất tiếc, chúng tôi phải dừng sao lưu cho bạn",
   "clickToInstallOurBestVersionYet": "Nhấn để cài đặt phiên bản tốt nhất",
   "onThisDayNotificationExplanation": "Nhắc về những kỷ niệm ngày này trong những năm trước.",
-  "addMemoriesWidgetPrompt": "Thêm tiện ích kỷ niệm vào màn hình chính và quay lại đây để tùy chỉnh.",
-  "addAlbumWidgetPrompt": "Thêm tiện ích album vào màn hình chính và quay lại đây để tùy chỉnh.",
-  "addPeopleWidgetPrompt": "Thêm tiện ích người vào màn hình chính và quay lại đây để tùy chỉnh.",
+  "addMemoriesWidgetPrompt": "Thêm một widget kỷ niệm vào màn hình chính để tùy chỉnh nó ở đây.",
+  "addAlbumWidgetPrompt": "Thêm một widget album vào màn hình chính để tùy chỉnh nó ở đây.",
+  "addPeopleWidgetPrompt": "Thêm một widget người vào màn hình chính để tùy chỉnh nó ở đây.",
   "birthdayNotifications": "Thông báo sinh nhật",
   "receiveRemindersOnBirthdays": "Nhắc khi đến sinh nhật của ai đó. Nhấn vào thông báo sẽ đưa bạn đến ảnh của người sinh nhật.",
   "happyBirthday": "Chúc mừng sinh nhật! 🥳",
@@ -1800,17 +2417,25 @@
   "thePersonGroupsWillNotBeDisplayed": "Nhóm người sẽ không được hiển thị trong phần người nữa. Ảnh sẽ vẫn được giữ nguyên.",
   "thePersonWillNotBeDisplayed": "Người sẽ không được hiển thị trong phần người nữa. Ảnh sẽ vẫn được giữ nguyên.",
   "areYouSureYouWantToMergeThem": "Bạn có chắc muốn hợp nhất họ?",
-  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Tất cả nhóm không có tên sẽ được hợp nhất vào người đã chọn. Điều này vẫn có thể được hoàn tác từ tổng quan lịch sử đề xuất của người đó.",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Tất cả nhóm không có tên sẽ được hợp nhất vào người đã chọn. Điều này vẫn có thể được hoàn tác từ tổng quan lịch sử gợi ý của người đó.",
   "yesIgnore": "Có, bỏ qua",
+  "areYouSureYouWantToShowThisPersonInPeopleSectionAgain": "Bạn có chắc muốn hiển thị lại người này trong phần mọi người?",
+  "areYouSureYouWantToShowThesePeopleInPeopleSectionAgain": "Bạn có chắc muốn hiển thị lại những người này trong phần mọi người?",
+  "yesShowPerson": "Có, hiện người này",
+  "yesShowPeople": "Có, hiện những người này",
   "same": "Chính xác",
   "different": "Khác",
   "sameperson": "Cùng một người?",
-  "indexingPausedStatusDescription": "Lập chỉ mục bị tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị đã sẵn sàng. Thiết bị được coi là sẵn sàng khi mức pin, tình trạng pin và trạng thái nhiệt độ nằm trong phạm vi tốt.",
+  "indexingPausedStatusDescription": "Xử lý bị tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị đã sẵn sàng. Thiết bị được coi là sẵn sàng khi mức pin, tình trạng pin và trạng thái nhiệt độ nằm trong phạm vi tốt.",
   "thisWeek": "Tuần này",
   "lastWeek": "Tuần trước",
   "thisMonth": "Tháng này",
   "thisYear": "Năm nay",
   "groupBy": "Phân nhóm theo",
+  "groupByDay": "Ngày",
+  "groupByWeek": "Tuần",
+  "groupByMonth": "Tháng",
+  "groupByYear": "Năm",
   "faceThumbnailGenerationFailed": "Không thể tạo ảnh thu nhỏ khuôn mặt",
   "fileAnalysisFailed": "Không thể xác định tệp",
   "editAutoAddPeople": "Sửa tự động thêm người",
@@ -1819,9 +2444,9 @@
   "shouldRemoveFilesSmartAlbumsDesc": "Bạn có muốn xóa các tệp liên quan đến người đã được chọn trước đó trong album thông minh không?",
   "addingPhotos": "Đang thêm ảnh",
   "gettingReady": "Chuẩn bị sẵn sàng",
-  "addSomePhotosDesc1": "Thêm vài ảnh hoặc chọn ",
-  "addSomePhotosDesc2": "những khuôn mặt giống nhau",
-  "addSomePhotosDesc3": "\nđể bắt đầu với",
+  "addSomePhotosDesc1": "Thêm ảnh hoặc chọn ",
+  "addSomePhotosDesc2": "khuôn mặt giống nhau",
+  "addSomePhotosDesc3": "\nđể bắt đầu",
   "ignorePerson": "Bỏ qua người",
   "mixedGrouping": "Nhóm hỗn hợp?",
   "analysis": "Phân tích",
@@ -1851,13 +2476,13 @@
   "videosProcessed": "Video đã được xử lý",
   "totalVideos": "Tổng số video",
   "skippedVideos": "Video bị bỏ qua",
-  "videoStreamingDescriptionLine1": "Phát video trên bất kỳ thiết bị.",
-  "videoStreamingDescriptionLine2": "Bật để xử lý luồng phát video trên thiết bị này.",
-  "videoStreamingNote": "Thiết bị này chỉ xử lý các video từ 60 ngày trở xuống và có thời lượng dưới 1 phút. Đối với các video cũ hơn/dài hơn, hãy bật tính năng phát trực tuyến trong ứng dụng máy tính để bàn.",
-  "createStream": "Tạo phát trực tiếp",
-  "recreateStream": "Tạo lại phát trực tiếp",
-  "addedToStreamCreationQueue": "Đã thêm vào hàng đợi tạo luồng",
-  "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại luồng",
+  "videoStreamingDescriptionLine1": "Phát video lập tức trên mọi thiết bị.",
+  "videoStreamingDescriptionLine2": "Bật để xử lý luồng stream video trên thiết bị này.",
+  "videoStreamingNote": "Chỉ xử lý các video 60 ngày gần đây và có thời lượng dưới 1 phút trên thiết bị này. Đối với các video cũ hơn/dài hơn, hãy bật tính năng Stream video trên ứng dụng máy tính để bàn.",
+  "createStream": "Tạo stream",
+  "recreateStream": "Tạo lại stream",
+  "addedToStreamCreationQueue": "Đã thêm vào hàng đợi tạo stream",
+  "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại stream",
   "videoPreviewAlreadyExists": "Bản xem trước video đã tồn tại",
   "videoAlreadyInQueue": "Tệp video đã có trong hàng đợi",
   "videoExportFailed": "Tạo video không thành công. Vui lòng thử lại.",
@@ -1873,7 +2498,7 @@
     }
   },
   "addedToQueue": "Đã thêm vào hàng đợi",
-  "creatingStream": "Đang tạo luồng",
+  "creatingStream": "Đang tạo stream",
   "similarImages": "Ảnh giống nhau",
   "findSimilarImages": "Tìm ảnh giống nhau",
   "noSimilarImagesFound": "Không tìm thấy ảnh giống nhau",
@@ -1956,6 +2581,7 @@
     }
   },
   "size": "Dung lượng",
+  "closest": "Gần nhất",
   "similarity": "Sự giống nhau",
   "analyzingPhotosLocally": "Phân tích ảnh của bạn trên thiết bị...",
   "lookingForVisualSimilarities": "Tìm theo sự tương đồng thị giác...",
@@ -1972,14 +2598,6 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Chuyển đến ngày",
-  "cLDesc1": "Xem các ảnh xung quanh cho bất kỳ ảnh nào bằng cách chọn tùy chọn chuyển đến ngày trong ngăn thông tin của tệp.",
-  "cLTitle2": "Chỉnh sửa video nhanh hơn",
-  "cLDesc2": "Trình chỉnh sửa video đã được cải tiến để cải thiện đáng kể tốc độ khi chỉnh sửa video lớn cũng như cải thiện UX.",
-  "cLTitle3": "Kỷ niệm mới",
-  "cLDesc3": "\"Những đứa trẻ vui tươi\", \"Cuộc phiêu lưu mùa đông\", \"Đêm neon\" và hơn thế nữa.",
-  "cLTitle4": "Phòng trưng bày phong cảnh và hơn thế nữa",
-  "cLDesc4": "Hỗ trợ bố cục ngang trong thư viện chính của ứng dụng. Hiển thị những người không có bất kỳ ảnh liên quan nào thay vì lọc chúng ra. Cải thiện khả năng phát hiện khía cạnh video khi được chia sẻ từ các ứng dụng bên ngoài.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2015,13 +2633,13 @@
   "artisticPortraits": "Chân dung nghệ thuật",
   "streetFood": "Món ngon đường phố",
   "riverCruises": "Cảnh quan trên sông",
-  "facesTimelineBannerTitle": "Hồi Ức",
+  "facesTimelineBannerTitle": "Hồi ức",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Xem ảnh của {name} qua từng năm",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,10 +2697,20 @@
   },
   "facesTimelineUnavailable": "Đang chuẩn bị dòng thời gian...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Trẻ em vui chơi",
   "coastalCliffs": "Vách đá bên bờ biển",
+  "candidLaughter": "Một tràng cười",
+  "groupSelfies": "Tất cả chúng ta",
+  "birthdayJoy": "Niềm vui sinh nhật",
+  "weddingMoments": "Ngày cưới em",
+  "goldenHourPortraits": "Chân dung giờ vàng",
+  "concertNights": "Đêm concert",
+  "poolDays": "Bể bơi ngày",
+  "picnicDays": "Kỷ niệm dã ngoại",
+  "campingMoments": "Kỷ niệm cắm trại",
+  "babySmiles": "Em bé cười",
   "ritualsTitle": "Thói quen",
   "ritualAddTooltip": "Thêm thói quen",
   "ritualActivityHeading": "Hoạt động",
@@ -2139,17 +2767,22 @@
   "ritualAlbumNotSet": "Album chưa đặt tên",
   "ritualOpenCameraTooltip": "Mở camera thói quen",
   "ritualEditorLabel": "Trình chỉnh sửa thói quen",
-  "ritualNew": "Thói quen mới",
+  "ritualNew": "Tạo thói quen mới",
+  "ritualCreateNewTitle": "Tạo thói quen mới",
   "ritualEdit": "Sửa thói quen",
-  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterPrompt": "Tên thói quen",
   "ritualEnterDescription": "Vui lòng nhập mô tả",
+  "ritualChooseDaysLabel": "Chọn ngày cho thói quen",
   "ritualDayLabel": "Ngày",
   "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
   "ritualTimeLabel": "Thời gian",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Lưu thói quen",
+  "ritualCreateAction": "Tạo thói quen",
   "ritualUpdate": "Cập nhật thói quen",
   "ritualSelectAlbumTitle": "Chọn album",
+  "ritualChooseAlbumLabel": "Chọn một album",
+  "ritualSendReminderLabel": "Gửi lời nhắc",
   "ritualSearchOrCreate": "Tìm kiếm hoặc tạo mới",
   "ritualNoAlbumsYet": "Chưa có album nào",
   "ritualNoMatchingAlbums": "Không có album trùng khớp",
@@ -2167,6 +2800,280 @@
   "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
   "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
   "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
-  "ritualEmojiUseAction": "Sử dụng",
-  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
+  "ritualEmojiUseAction": "Dùng",
+  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn.",
+  "feed": "Bảng tin",
+  "newCommentNotificationTitle": "Bạn có bình luận mới",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Bạn có lượt thích mới",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "likedYourPhoto": "đã thích ảnh của bạn",
+  "@likedYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAPhoto": "đã thích một ảnh",
+  "@likedAPhoto": {
+    "description": "Social action text shown after a person's name, for example 'John liked a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourVideo": "đã thích video của bạn",
+  "@likedYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourPhoto": "đã bình luận về video của bạn",
+  "@commentedOnYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAPhoto": "đã bình luận về một ảnh",
+  "@commentedOnAPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourVideo": "đã bình luận về video của bạn",
+  "@commentedOnYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAVideo": "đã bình luận về một video",
+  "@commentedOnAVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToYourComment": "đã trả lời bình luận của bạn",
+  "@repliedToYourComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToAComment": "đã trả lời một bình luận",
+  "@repliedToAComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourComment": "đã thích bình luận của bạn",
+  "@likedYourComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAComment": "đã thích một bình luận",
+  "@likedAComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourReply": "đã thích trả lời của bạn",
+  "@likedYourReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked your reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAReply": "đã thích một trả lời",
+  "@likedAReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked a reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "addedAMemoryTo": "đã thêm một kỷ niệm vào {albumName}",
+  "@addedAMemoryTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added a memory to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "đã thêm {count} kỷ niệm vào {albumName}",
+  "@addedNMemoriesTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added 4 memories to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedAlbumWithYou": "đã chia sẻ {albumName} với bạn",
+  "@sharedAlbumWithYou": {
+    "description": "Social notification action text shown after a person's name, for example 'John shared Recents with you'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "and1Other": "và một người khác",
+  "andXOthers": "và {count} người khác",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Chưa có hoạt động",
+  "like": "Thích",
+  "comments": "Bình luận",
+  "commentHint": "Nói gì đó tử tế!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Trả lời",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Bạn chắc chứ?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Xóa bình luận",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Bình luận của bạn \"{comment}\" sẽ bị xóa vĩnh viễn",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 thích} other{{count} thích}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Chưa có lượt thích",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Không thể tải lượt thích",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Không thể cập nhật lượt thích",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Không thể thích 1 album} other{Không thể thích {count} album}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Không thể tải album",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 album} other{{count} album}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Thích tất cả",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Chọn album để thích video này",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Chọn album để thích ảnh này",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Không thể thích bình luận",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Không thể xóa bình luận",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(đã xóa)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Đang trả lời bạn",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Trả lời đến {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Chưa có bình luận} =1{1 bình luận} other{{count} bình luận}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchSettings": "Tìm kiếm cài đặt",
+  "suggestions": "Gợi ý",
+  "cleanupHiddenFiles": "Dọn dẹp các tệp ẩn",
+  "cleanupHiddenFilesDescription": "Một số tệp trong các album ẩn vẫn tồn tại trong các album không-ẩn, khiến chúng hiển thị bên ngoài phần ẩn. Việc dọn dẹp sẽ xóa chúng khỏi các album không-ẩn.",
+  "cleanupComplete": "Dọn dẹp hoàn tất",
+  "deleteHiddenFilesFromDevice": "Xóa các tệp ẩn khỏi thiết bị",
+  "deleteHiddenFilesFromDeviceDescription": "Xóa các bản sao cục bộ của các tệp ẩn khỏi thiết bị của bạn",
+  "deleteOnDeviceFiles": "Xóa trên các tệp thiết bị",
+  "noHiddenFilesOnDevice": "Không có tệp ẩn trên thiết bị",
+  "welcome": "Chào mừng",
+  "grantGalleryPermissionDesc": "Cấp quyền truy cập và sắp xếp ảnh bằng nhận dạng khuôn mặt. Tất cả quá trình xử lý diễn ra trên thiết bị của bạn.",
+  "grantPermission": "Cấp quyền",
+  "privateAI": "AI Riêng tư",
+  "privateAIDescription": "Ente sử dụng AI trên thiết bị để phân tích ảnh của bạn nhằm tìm khuôn mặt, vật thể, vị trí và văn bản. Dữ liệu này được sử dụng để hỗ trợ các tính năng như nhận dạng khuôn mặt và tìm kiếm thông minh. Mọi thứ đều được xử lý và lưu trữ cục bộ trên thiết bị của bạn — không có gì được tải lên máy chủ của chúng tôi.",
+  "byAgreeing": "Tôi đồng ý với <terms>điều khoản dịch vụ</terms> và <policy>chính sách bảo mật</policy>.",
+  "moreThanJustAGallery": "Nhiều hơn một thư viện ảnh.",
+  "encryptedBackupDescription": "Sao lưu được mã hóa, tìm kiếm thông minh, liên kết có thể chia sẻ và đồng bộ hóa liền mạch trên tất cả các thiết bị của bạn.",
+  "getStarted": "Bắt đầu",
+  "unlockSmartFeatures": "Mở khóa các tính năng thông minh",
+  "enableOnDeviceMLDescription": "Bật ML trên thiết bị để tìm kiếm theo khuôn mặt, địa điểm, v.v. Ảnh của bạn không bao giờ rời khỏi thiết bị của bạn.",
+  "offlineEnableSharingTitle": "Bắt đầu chia sẻ ở đây",
+  "offlineEnableSharingDesc": "Đăng ký để chia sẻ ảnh với mọi người - ngay cả những người không có trên Ente",
+  "offlineEnableBackupTitle": "Album sao lưu của bạn sẽ xuất hiện ở đây",
+  "offlineEnableBackupDesc": "Đăng ký để lưu giữ những kỷ niệm của bạn với Ente.",
+  "offlineEnableBackupTagLabel": "10 GB MIỄN PHÍ!",
+  "offlineEnableBackupAction": "Bắt đầu với 10 GB miễn phí",
+  "offlineSettingsBannerTitle": "Chúng tôi không thể nhìn thấy ảnh của bạn. Không bao giờ.",
+  "offlineSettingsBannerDesc": "Mã hóa không có kiến ​​thức có nghĩa là ký ức của bạn vẫn là của bạn.",
+  "alreadyHaveAnAccount": "Đã có tài khoản?",
+  "dontHaveAnAccount": "Chưa có tài khoản?",
+  "loginToEnte": "Đăng nhập Ente",
+  "searchAndDiscover": "Tìm kiếm và Khám phá",
+  "searchAndDiscoverDesc": "Tìm kiếm ảnh và khám phá những kỷ niệm với học máy trên thiết bị",
+  "shareYourMemories": "Chia sẻ những kỷ niệm của bạn",
+  "shareYourMemoriesDesc": "Chia sẻ album, thu thập ảnh và nhận bình luận bằng liên kết công khai",
+  "privateAndSecureBackups": "Sao lưu Riêng tư",
+  "privateAndSecureBackupsDesc": "Mã hóa đầu cuối, chẩn đoán độc lập và mã nguồn mở hoàn toàn",
+  "mlProgressBannerTitle": "Hãy kiên nhẫn!",
+  "mlProgressBannerDescription": "Ảnh của bạn đang được xử lý trên thiết bị để nhận diện khuôn mặt, sự vật và nhiều khác.",
+  "mlProgressBannerStatus": "{indexed} trong {total} ảnh đã được xử lý",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineFacesBannerTitle": "Muốn lưu những khuôn mặt này?",
+  "offlineFacesBannerSubtitle": "Đăng ký để gắn thẻ mọi người và dễ dàng tìm họ sau.",
+  "offlineNameFaceBannerTitle": "Đặt tên cho khuôn mặt này",
+  "offlineNameFaceBannerSubtitle": "Đăng ký để gắn thẻ họ và dễ dàng tìm ảnh của họ sau.",
+  "signUp": "Đăng ký",
+  "dog": "Chó",
+  "cat": "Mèo"
 }

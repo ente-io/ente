@@ -7,22 +7,18 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
-import log from "ente-base/log";
 import {
-    albumsAppOrigin,
-    customAPIHost,
-    shouldOnlyServeAlbumsApp,
-} from "ente-base/origins";
+    JOIN_ALBUM_CONTEXT_KEY,
+    type JoinAlbumContext,
+} from "ente-base/join-album";
+import log from "ente-base/log";
+import { customAPIHost } from "ente-base/origins";
 import {
     masterKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
-import {
-    JOIN_ALBUM_CONTEXT_KEY,
-    type JoinAlbumContext,
-} from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -64,12 +60,17 @@ const Page: React.FC = () => {
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 try {
-                    // Format: joinAlbum?=accessToken&jwt=<jwtToken>#collectionKeyHash
+                    // Format: ?joinAlbum=accessToken&collectionId=123#collectionKeyHash&jwt=<jwtToken>
                     const accessToken = joinAlbumParam;
-                    const collectionKeyHash = currentURL.hash.slice(1);
-                    const jwtFromURL = currentURL.searchParams.get("jwt");
+                    const collectionIdParam =
+                        currentURL.searchParams.get("collectionId");
+                    const [collectionKeyHash, fragmentParams = ""] =
+                        currentURL.hash.slice(1).split("&", 2);
+                    const jwtFromURL =
+                        new URLSearchParams(fragmentParams).get("jwt") ??
+                        undefined;
 
-                    if (accessToken && collectionKeyHash) {
+                    if (accessToken && collectionKeyHash && collectionIdParam) {
                         // Import the necessary functions to convert the collection key
                         const { extractCollectionKeyFromShareURL } =
                             await import("ente-gallery/services/share");
@@ -85,7 +86,7 @@ const Page: React.FC = () => {
                             accessToken,
                             collectionKey,
                             collectionKeyHash,
-                            collectionID: 0,
+                            collectionID: parseInt(collectionIdParam, 10),
                             ...(jwtFromURL && { accessTokenJWT: jwtFromURL }),
                         };
 
@@ -106,33 +107,11 @@ const Page: React.FC = () => {
                 }
             }
 
-            const albumsURL = new URL(albumsAppOrigin());
-            currentURL.pathname = router.pathname;
-            if (
-                (shouldOnlyServeAlbumsApp ||
-                    currentURL.host == albumsURL.host) &&
-                currentURL.pathname != "/shared-albums"
-            ) {
-                const end = currentURL.hash.lastIndexOf("&");
-                const hash = currentURL.hash.slice(
-                    1,
-                    end !== -1 ? end : undefined,
-                );
-                await router.replace({
-                    pathname: "/shared-albums",
-                    search: currentURL.search,
-                    hash: hash,
-                });
-            } else {
-                await updateSessionFromElectronSafeStorageIfNeeded();
-                if (
-                    (await masterKeyFromSession()) &&
-                    (await savedAuthToken())
-                ) {
-                    await router.push("/gallery");
-                } else if (savedPartialLocalUser()?.email) {
-                    await router.push("/verify");
-                }
+            await updateSessionFromElectronSafeStorageIfNeeded();
+            if ((await masterKeyFromSession()) && (await savedAuthToken())) {
+                await router.push("/gallery");
+            } else if (savedPartialLocalUser()?.email) {
+                await router.push("/verify");
             }
             if (!(await canAccessIndexedDB())) {
                 showMiniDialog({
@@ -222,7 +201,7 @@ const TappableContainer: React.FC<
     // up a page where they can configure the endpoint that the app should
     // connect to.
     //
-    // See: https://ente.io/help/self-hosting/guides/custom-server/
+    // See: https://ente.com/help/self-hosting/installation/post-install/
     const [tapCount, setTapCount] = useState(0);
     const [showDevSettings, setShowDevSettings] = useState(false);
 

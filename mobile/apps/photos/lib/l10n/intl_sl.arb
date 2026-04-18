@@ -103,16 +103,13 @@
   "dayToday": "Danes",
   "dayYesterday": "Včeraj",
   "storageBreakupFamily": "Družina",
-  "appVersion": "Verzija: {versionValue}",
   "editLocationTagTitle": "Uredi lokacijo",
-  "familyPlanPortalTitle": "Družina",
   "goToSettings": "Pojdi v nastavitve",
   "@goToSettings": {
     "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
   },
   "quickLinks": "Hitre povezave",
   "addSelected": "Dodaj izbrane",
-  "hearUsWhereTitle": "Kako ste slišali o Ente? (izbirno)",
   "faces": "Obrazi",
   "people": "Ljudje",
   "noInternetConnection": "Ni internetne povezave",

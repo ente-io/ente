@@ -5,7 +5,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { ensureElectron } from "ente-base/electron";
+import {
+    ensureElectron,
+    suppressMainWindowBlurForTrustedPrompt,
+} from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import {
@@ -189,6 +192,7 @@ class ExportService {
         success: 0,
         failed: 0,
     };
+    private currentExportStage: ExportStage = ExportStage.init;
     // @ts-ignore
     private cachedMetadataDateTimeFormatter: Intl.DateTimeFormat;
 
@@ -221,6 +225,7 @@ class ExportService {
     setUIUpdaters(uiUpdater: ExportUIUpdaters) {
         this.uiUpdater = uiUpdater;
         this.uiUpdater.setExportProgress(this.currentExportProgress);
+        this.uiUpdater.setExportStage(this.currentExportStage);
     }
 
     private updateExportProgress(exportProgress: ExportProgress) {
@@ -233,6 +238,7 @@ class ExportService {
         // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         const exportFolder = this.getExportSettings()?.folder!;
         await this.updateExportRecord(exportFolder, { stage });
+        this.currentExportStage = stage;
         this.uiUpdater.setExportStage(stage);
     }
 
@@ -318,6 +324,7 @@ class ExportService {
             // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
             const exportFolder = this.getExportSettings()?.folder!;
             if (!(await this.exportFolderExists(exportFolder))) {
+                this.currentExportStage = ExportStage.init;
                 this.uiUpdater.setExportStage(ExportStage.init);
                 return;
             }
@@ -453,7 +460,7 @@ class ExportService {
             );
             let success = 0;
             let failed = 0;
-            this.uiUpdater.setExportProgress({
+            this.updateExportProgress({
                 success: success,
                 failed: failed,
                 total: filesToExport.length,
@@ -900,11 +907,11 @@ class ExportService {
             if (!exportRecord.fileExportNames) {
                 exportRecord.fileExportNames = {};
             }
-            exportRecord.fileExportNames = {
+            const fileExportNames = {
                 ...exportRecord.fileExportNames,
                 [fileUID]: fileExportName,
             };
-            await this.updateExportRecord(folder, exportRecord);
+            await this.updateExportRecord(folder, { fileExportNames });
         } catch (e) {
             // @ts-ignore
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
@@ -924,12 +931,12 @@ class ExportService {
             if (!exportRecord?.collectionExportNames) {
                 exportRecord.collectionExportNames = {};
             }
-            exportRecord.collectionExportNames = {
+            const collectionExportNames = {
                 ...exportRecord.collectionExportNames,
                 [collectionID]: collectionExportName,
             };
 
-            await this.updateExportRecord(folder, exportRecord);
+            await this.updateExportRecord(folder, { collectionExportNames });
         } catch (e) {
             // @ts-ignore
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
@@ -943,13 +950,13 @@ class ExportService {
         try {
             const exportRecord = await this.getExportRecord(folder);
 
-            exportRecord.collectionExportNames = Object.fromEntries(
+            const collectionExportNames = Object.fromEntries(
                 Object.entries(exportRecord.collectionExportNames).filter(
                     ([key]) => key !== collectionID.toString(),
                 ),
             );
 
-            await this.updateExportRecord(folder, exportRecord);
+            await this.updateExportRecord(folder, { collectionExportNames });
         } catch (e) {
             // @ts-ignore
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
@@ -962,12 +969,12 @@ class ExportService {
     async removeFileExportedRecord(folder: string, fileUID: string) {
         try {
             const exportRecord = await this.getExportRecord(folder);
-            exportRecord.fileExportNames = Object.fromEntries(
+            const fileExportNames = Object.fromEntries(
                 Object.entries(exportRecord.fileExportNames).filter(
                     ([key]) => key !== fileUID,
                 ),
             );
-            await this.updateExportRecord(folder, exportRecord);
+            await this.updateExportRecord(folder, { fileExportNames });
         } catch (e) {
             // @ts-ignore
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
@@ -1203,6 +1210,10 @@ class ExportService {
         return this.exportInProgress;
     };
 
+    getCurrentExportStage = () => {
+        return this.currentExportStage;
+    };
+
     exportFolderExists = async (exportFolder: string | undefined) => {
         return exportFolder && (await ensureElectron().fs.exists(exportFolder));
     };
@@ -1267,6 +1278,7 @@ export const selectAndPrepareExportDirectory = async (): Promise<
 > => {
     const electron = ensureElectron();
 
+    suppressMainWindowBlurForTrustedPrompt();
     const rootDir = await electron.selectDirectory();
     if (!rootDir) return undefined;
 

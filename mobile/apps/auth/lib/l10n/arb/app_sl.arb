@@ -315,7 +315,6 @@
     }
   },
   "sorry": "Oprostite",
-  "importFailureDesc": "Izbrane datoteke ni bilo možno prebrati. Če potrebujete pomoč, nam pišite na support@ente.io",
   "pendingSyncs": "Opozorilo",
   "pendingSyncsWarningBody": "Nekatere vaše kode niso varnostno kopirane.\n\nProsimo, prepričajte se, da so te kode varnostno kopirane preden se odjavite.",
   "checkInboxAndSpamFolder": "Prosimo, preverite svoj e-poštni predal (in nezaželeno pošto), da končate verifikacijo",
@@ -328,7 +327,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -505,7 +504,6 @@
   "tellUsWhatYouThink": "Povejte nam kaj mislite",
   "supportEnte": "Podpiraj <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Dajte nam zvezdico na Githubu",
-  "free5GB": "5 GB zastonj na <bold-green>ente</bold-green> fotografije",
   "loginWithAuthAccount": "Prijavite se s svojim Auth računom",
   "freeStorageOffer": "10 % popust na <bold-green>ente</bold-green> fotografije",
   "freeStorageOfferDescription": "Uporabite kupon \"AUTH\" za 10% popusta za prvo leto"

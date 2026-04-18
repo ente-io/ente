@@ -1,16 +1,21 @@
 use crate::{
-    api::{ApiClient, AuthClient},
     cli::account::{AccountCommand, AccountSubcommands},
-    crypto::{decode_base64, sealed_box_open, secret_box_open},
     models::{
-        account::{Account, AccountSecrets, App},
-        error::Result,
+        account::{Account, AccountSecrets as StoredAccountSecrets, App},
+        error::{Error, Result},
     },
     storage::Storage,
 };
 use base64::Engine;
 use dialoguer::{Input, Password, Select};
-use std::path::PathBuf;
+use ente_accounts::{
+    AccountsClient, AccountsClientConfig, AuthFlow, AuthFlowUi, AuthenticatedAccount,
+    CreateAccountParams, Error as AccountsError, LoginParams, OtpPurpose, Result as AccountsResult,
+    SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
+};
+use ente_core::crypto::SecretVec;
+use std::{path::PathBuf, str::FromStr};
+use zeroize::Zeroizing;
 
 pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> Result<()> {
     match cmd.command {
@@ -21,11 +26,188 @@ pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> R
             app,
             endpoint,
             export_dir,
-        } => add_account(storage, email, password, app, endpoint, export_dir).await,
+            otp,
+            totp_code,
+            second_factor,
+        } => {
+            add_account(
+                storage,
+                email,
+                password,
+                &app,
+                endpoint,
+                export_dir,
+                otp,
+                totp_code,
+                second_factor,
+            )
+            .await
+        }
+        AccountSubcommands::Create {
+            email,
+            password,
+            app,
+            endpoint,
+            export_dir,
+            otp,
+            source,
+            setup_2fa,
+            totp_code,
+            show_recovery_key,
+        } => {
+            create_account(
+                storage,
+                email,
+                password,
+                &app,
+                endpoint,
+                export_dir,
+                otp,
+                source,
+                setup_2fa,
+                totp_code,
+                show_recovery_key,
+            )
+            .await
+        }
         AccountSubcommands::Update { email, dir, app } => {
             update_account(storage, &email, &dir, &app).await
         }
         AccountSubcommands::GetToken { email, app } => get_token(storage, &email, &app).await,
+        AccountSubcommands::TwoFactor {
+            email,
+            app,
+            totp_code,
+            show_recovery_key,
+        } => enable_two_factor(storage, &email, &app, totp_code, show_recovery_key).await,
+    }
+}
+
+struct DialoguerAuthFlowUi {
+    email_otp: Option<String>,
+    totp_code: Option<String>,
+    second_factor: Option<SecondFactorMethod>,
+    passkey_presented: bool,
+}
+
+impl DialoguerAuthFlowUi {
+    fn new(
+        email_otp: Option<String>,
+        totp_code: Option<String>,
+        second_factor: Option<SecondFactorMethod>,
+    ) -> Self {
+        Self {
+            email_otp,
+            totp_code,
+            second_factor,
+            passkey_presented: false,
+        }
+    }
+}
+
+impl AuthFlowUi for DialoguerAuthFlowUi {
+    fn read_email_otp(
+        &mut self,
+        email: &str,
+        purpose: OtpPurpose,
+        resent: bool,
+    ) -> AccountsResult<String> {
+        if let Some(code) = self.email_otp.take() {
+            return Ok(code);
+        }
+
+        let prompt = match (purpose, resent) {
+            (OtpPurpose::Signup, false) => {
+                format!("Enter the signup verification code sent to {email}")
+            }
+            (OtpPurpose::Signup, true) => {
+                format!("Enter the new signup verification code sent to {email}")
+            }
+            (OtpPurpose::Login, false) => {
+                format!("Enter the email-MFA code sent to {email}")
+            }
+            (OtpPurpose::Login, true) => {
+                format!("Enter the new email-MFA code sent to {email}")
+            }
+        };
+
+        read_six_digit_code_for_accounts(&prompt)
+    }
+
+    fn read_totp_code(&mut self, purpose: TotpPurpose) -> AccountsResult<String> {
+        if let Some(code) = self.totp_code.take() {
+            return Ok(code);
+        }
+
+        let prompt = match purpose {
+            TotpPurpose::Login => "Enter TOTP code",
+            TotpPurpose::Setup => "Enter the current TOTP from your authenticator app",
+        };
+
+        read_six_digit_code_for_accounts(prompt)
+    }
+
+    fn report_retryable_error(&mut self, message: &str) -> AccountsResult<()> {
+        println!("\n{message}");
+        Ok(())
+    }
+
+    fn choose_second_factor(
+        &mut self,
+        methods: &[SecondFactorMethod],
+    ) -> AccountsResult<SecondFactorMethod> {
+        if let Some(choice) = self.second_factor {
+            return Ok(choice);
+        }
+
+        let options: Vec<&str> = methods
+            .iter()
+            .map(|method| match method {
+                SecondFactorMethod::Totp => "TOTP (Authenticator app)",
+                SecondFactorMethod::Passkey => "Passkey",
+            })
+            .collect();
+
+        let index = Select::new()
+            .with_prompt("Choose verification method")
+            .items(&options)
+            .default(0)
+            .interact()
+            .map_err(|e| AccountsError::InvalidInput(e.to_string()))?;
+
+        methods
+            .get(index)
+            .copied()
+            .ok_or_else(|| AccountsError::InvalidInput("Invalid second-factor selection".into()))
+    }
+
+    fn present_passkey_verification(&mut self, url: &str) -> AccountsResult<()> {
+        println!("\nPasskey verification required");
+        println!("Open this URL in your browser to verify your passkey:\n{url}");
+
+        if !self.passkey_presented {
+            if let Err(error) = open::that(url) {
+                log::error!("failed to open browser: {error}");
+            }
+            self.passkey_presented = true;
+        }
+
+        Ok(())
+    }
+
+    fn wait_for_passkey_verification(&mut self) -> AccountsResult<()> {
+        let _: String = Input::new()
+            .with_prompt("Press Enter once you have completed passkey verification")
+            .allow_empty(true)
+            .interact_text()
+            .map_err(|e| AccountsError::InvalidInput(e.to_string()))?;
+        Ok(())
+    }
+
+    fn present_totp_secret(&mut self, secret_code: &str, _qr_code: &str) -> AccountsResult<()> {
+        println!("\nTOTP setup secret: {secret_code}");
+        println!("Add this secret to your authenticator app, then enter the current code.");
+        Ok(())
     }
 }
 
@@ -33,7 +215,7 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     let accounts = storage.accounts().list()?;
 
     if accounts.is_empty() {
-        println!("No accounts configured. Use 'ente account add' to add an account.");
+        println!("No accounts configured. Use 'ente account create' or 'ente account add'.");
         return Ok(());
     }
 
@@ -45,7 +227,6 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     println!("{}", "-".repeat(110));
 
     for account in accounts {
-        // Shorten endpoint display for better readability
         let endpoint_display = if account.endpoint == "https://api.ente.io" {
             "api.ente.io (prod)".to_string()
         } else if account.endpoint.starts_with("http://localhost") {
@@ -60,7 +241,7 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
         println!(
             "{:<30} {:<10} {:<30} {:<40}",
             account.email,
-            format!("{:?}", account.app).to_lowercase(),
+            account.app.to_string(),
             endpoint_display,
             account.export_dir.as_deref().unwrap_or("Not configured")
         );
@@ -69,304 +250,356 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn add_account(
     storage: &Storage,
     email_arg: Option<String>,
     password_arg: Option<String>,
-    app_arg: String,
+    app_arg: &str,
     endpoint: String,
     export_dir_arg: Option<String>,
+    otp: Option<String>,
+    totp_code: Option<String>,
+    second_factor: Option<String>,
 ) -> Result<()> {
-    println!("\n=== Add Ente Account ===\n");
+    println!("\n=== Add Existing Ente Account ===\n");
 
-    // Get email (from arg or prompt)
-    let email = if let Some(email) = email_arg {
-        email
-    } else {
-        Input::new()
-            .with_prompt("Enter your email address")
-            .interact_text()
-            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
-    };
+    let email = prompt_email(email_arg)?;
+    let interactive_password = password_arg.is_none();
+    let mut password = Zeroizing::new(prompt_password(password_arg, "Enter your password")?);
+    let app = resolve_app(app_arg)?;
+    let second_factor = parse_second_factor(second_factor.as_deref())?;
 
-    // Parse app type
-    let app = match app_arg.to_lowercase().as_str() {
-        "photos" => App::Photos,
-        "locker" => App::Locker,
-        "auth" => App::Auth,
-        _ => {
-            // If invalid app provided via CLI, use interactive selection
-            if password_arg.is_some() {
-                return Err(crate::models::error::Error::InvalidInput(format!(
-                    "Invalid app: {app_arg}. Must be one of: photos, locker, auth"
-                )));
-            }
-            let apps = vec!["photos", "locker", "auth"];
-            let app_index = Select::new()
-                .with_prompt("Select the Ente app")
-                .items(&apps)
-                .default(0)
-                .interact()
-                .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
-            match apps[app_index] {
-                "photos" => App::Photos,
-                "locker" => App::Locker,
-                "auth" => App::Auth,
-                _ => unreachable!(),
-            }
-        }
-    };
-
-    // Check if account already exists
-    if let Ok(Some(_existing)) = storage.accounts().get(&email, app) {
-        println!("\n❌ Account already exists for {email} with app {app:?}");
+    if let Ok(Some(_)) = storage.accounts().get(&email, app) {
+        println!("\nAccount already exists for {email} with app {app}");
         return Ok(());
     }
 
-    // Check if we're in non-interactive mode (password provided via CLI)
-    let is_non_interactive = password_arg.is_some();
+    let export_dir = resolve_export_dir(export_dir_arg, &email)?;
+    ensure_export_dir(&export_dir)?;
 
-    // Get password (from arg or prompt)
-    let password = if let Some(password) = password_arg {
-        password
-    } else {
-        Password::new()
-            .with_prompt("Enter your password")
-            .interact()
-            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
+    let client = new_accounts_client(&endpoint, app)?;
+    let mut ui = DialoguerAuthFlowUi::new(otp, totp_code, second_factor);
+    let mut flow = AuthFlow::new(&client, &mut ui);
+    let authenticated = loop {
+        match flow
+            .login(LoginParams {
+                email: email.clone(),
+                password: password.clone(),
+            })
+            .await
+        {
+            Ok(authenticated) => break authenticated,
+            Err(error) if interactive_password && is_retryable_password_error(&error) => {
+                println!("\nIncorrect password. Try again.");
+                password = Zeroizing::new(prompt_password(None, "Re-enter your password")?);
+            }
+            Err(error) => return Err(error.into()),
+        }
     };
 
-    // Get export directory (from arg or use default)
-    let export_dir = if let Some(dir) = export_dir_arg {
-        dir
-    } else if is_non_interactive {
-        // If password was provided via CLI (non-interactive mode), use default path
-        format!("./exports/{email}")
-    } else {
-        Input::new()
-            .with_prompt("Enter export directory path")
-            .default(format!("./exports/{email}"))
-            .interact_text()
-            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
-    };
+    persist_account(storage, &email, app, &endpoint, &export_dir, authenticated)?;
 
-    // Validate export directory
-    let export_path = PathBuf::from(&export_dir);
-    if !export_path.exists() {
-        println!("Creating export directory: {export_dir}");
-        std::fs::create_dir_all(&export_path).map_err(crate::models::error::Error::Io)?;
+    println!("\nAccount added successfully!");
+    println!("  Email: {email}");
+    println!("  App: {app}");
+    println!("  Endpoint: {endpoint}");
+    println!("  Export directory: {export_dir}");
+
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn create_account(
+    storage: &Storage,
+    email_arg: Option<String>,
+    password_arg: Option<String>,
+    app_arg: &str,
+    endpoint: String,
+    export_dir_arg: Option<String>,
+    otp: Option<String>,
+    source: Option<String>,
+    setup_2fa: bool,
+    totp_code: Option<String>,
+    show_recovery_key: bool,
+) -> Result<()> {
+    println!("\n=== Create Ente Account ===\n");
+
+    let email = prompt_email(email_arg)?;
+    let password = Zeroizing::new(prompt_password(password_arg, "Choose a password")?);
+    let app = resolve_app(app_arg)?;
+
+    if let Ok(Some(_)) = storage.accounts().get(&email, app) {
+        println!("\nAccount already exists for {email} with app {app}");
+        return Ok(());
     }
 
-    // Initialize API client with the specified endpoint
-    log::info!("Using API endpoint: {endpoint}");
-    let api_client = ApiClient::new(Some(endpoint.clone()))?;
-    let auth_client = AuthClient::new(&api_client);
+    let export_dir = resolve_export_dir(export_dir_arg, &email)?;
+    ensure_export_dir(&export_dir)?;
 
-    println!("\nAuthenticating with Ente servers...");
+    let client = new_accounts_client(&endpoint, app)?;
+    let mut ui = DialoguerAuthFlowUi::new(otp, totp_code, Some(SecondFactorMethod::Totp));
+    let mut flow = AuthFlow::new(&client, &mut ui);
+    let created = flow
+        .create_account(CreateAccountParams {
+            email: email.clone(),
+            password,
+            source,
+        })
+        .await?;
 
-    // Perform SRP authentication
-    let (auth_response, key_enc_key) = match auth_client.login_with_srp(&email, &password).await {
-        Ok(result) => result,
-        Err(e) => {
-            println!("\n❌ Authentication failed: {e}");
-            return Err(e);
-        }
-    };
+    let AuthenticatedAccount {
+        user_id,
+        key_attributes,
+        secrets,
+        recovery_key,
+    } = created;
 
-    // Handle 2FA if required
-    let auth_response = if auth_response.is_mfa_required() {
-        println!("\n📱 Two-factor authentication required");
-        let totp_code: String = Input::new()
-            .with_prompt("Enter TOTP code")
-            .validate_with(|input: &String| {
-                if input.len() == 6 && input.chars().all(char::is_numeric) {
-                    Ok(())
-                } else {
-                    Err("TOTP code must be 6 digits")
-                }
-            })
-            .interact_text()
-            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
+    let two_factor_master_key = secrets.master_key.clone();
+    let two_factor_key_attributes = key_attributes.clone();
 
-        auth_client
-            .verify_totp(
-                auth_response
-                    .two_factor_session_id
-                    .as_ref()
-                    .ok_or_else(|| {
-                        crate::models::error::Error::AuthenticationFailed(
-                            "No 2FA session ID".to_string(),
-                        )
-                    })?,
-                &totp_code,
-            )
-            .await?
-    } else if auth_response.is_passkey_required() {
-        println!("\n🔑 Passkey verification required");
-        println!("Please complete passkey verification in your browser...");
-        // TODO: Implement passkey verification flow
-        return Err(crate::models::error::Error::Generic(
-            "Passkey verification not yet implemented".to_string(),
-        ));
-    } else {
-        auth_response
-    };
-
-    // Decrypt keys
-    let key_attributes = auth_response.key_attributes.as_ref().ok_or_else(|| {
-        crate::models::error::Error::AuthenticationFailed("No key attributes".to_string())
-    })?;
-
-    println!("\nDecrypting account keys...");
-
-    // Decrypt master key
-    let master_key = secret_box_open(
-        &decode_base64(&key_attributes.encrypted_key)?,
-        &decode_base64(&key_attributes.key_decryption_nonce)?,
-        &key_enc_key,
-    )?;
-    log::info!("Master key decrypted, length: {}", master_key.len());
-
-    // Decrypt secret key
-    let secret_key = secret_box_open(
-        &decode_base64(&key_attributes.encrypted_secret_key)?,
-        &decode_base64(&key_attributes.secret_key_decryption_nonce)?,
-        &master_key,
-    )?;
-    log::info!("Secret key decrypted, length: {}", secret_key.len());
-
-    // Get public key
-    let public_key = decode_base64(&key_attributes.public_key)?;
-
-    // Decrypt token if encrypted
-    let token = if let Some(encrypted_token) = &auth_response.encrypted_token {
-        let encrypted_bytes = decode_base64(encrypted_token)?;
-        log::debug!("Encrypted token bytes length: {}", encrypted_bytes.len());
-
-        let decrypted = sealed_box_open(&encrypted_bytes, &public_key, &secret_key)?;
-        log::debug!("Decrypted token bytes length: {}", decrypted.len());
-
-        // Try to interpret as UTF-8 string first
-        match String::from_utf8(decrypted.clone()) {
-            Ok(token_str) => {
-                log::debug!("Decrypted token is valid UTF-8");
-                // If it's a string, use it as bytes
-                token_str.into_bytes()
-            }
-            Err(_) => {
-                log::debug!("Token is not UTF-8, using raw bytes");
-                // If not UTF-8, use raw bytes
-                decrypted
-            }
-        }
-    } else if let Some(plain_token) = &auth_response.token {
-        plain_token.as_bytes().to_vec()
-    } else {
-        return Err(crate::models::error::Error::AuthenticationFailed(
-            "No token in response".to_string(),
-        ));
-    };
-
-    // Create account
-    let account = Account {
-        user_id: auth_response.id,
-        email: email.clone(),
+    persist_account(
+        storage,
+        &email,
         app,
-        endpoint: endpoint.clone(),
-        export_dir: Some(export_dir.clone()),
-    };
+        &endpoint,
+        &export_dir,
+        AuthenticatedAccount {
+            user_id,
+            key_attributes,
+            secrets,
+            recovery_key: recovery_key.clone(),
+        },
+    )?;
 
-    // Create account secrets
-    let secrets = AccountSecrets {
-        token,
-        master_key,
-        secret_key,
-        public_key,
-    };
+    println!("\nAccount created successfully!");
+    println!("  Email: {email}");
+    println!("  App: {app}");
+    println!("  Endpoint: {endpoint}");
+    println!("  Export directory: {export_dir}");
 
-    // Store account in database
-    storage.accounts().add(&account)?;
-    storage
+    if show_recovery_key {
+        if let Some(recovery_key) = recovery_key.as_deref() {
+            println!("\nRecovery key: {recovery_key}");
+        } else {
+            println!("\nRecovery key is not available for this account.");
+        }
+    }
+
+    if setup_2fa {
+        let result = flow
+            .setup_two_factor(SetupTwoFactorParams {
+                master_key: SecretVec::new(two_factor_master_key),
+                key_attributes: Some(two_factor_key_attributes),
+            })
+            .await?;
+
+        println!("\nTwo-factor authentication enabled.");
+        if show_recovery_key {
+            println!("Recovery key: {}", result.recovery_key);
+        }
+    }
+
+    Ok(())
+}
+
+async fn enable_two_factor(
+    storage: &Storage,
+    email: &str,
+    app_arg: &str,
+    totp_code: Option<String>,
+    show_recovery_key: bool,
+) -> Result<()> {
+    let app = resolve_app(app_arg)?;
+    let account = storage
         .accounts()
-        .store_secrets(account.user_id, account.app, &secrets)?;
+        .get(email, app)?
+        .ok_or_else(|| Error::NotFound(format!("Account not found: {email}")))?;
+    let secrets = storage
+        .accounts()
+        .get_secrets(account.user_id, account.app)?
+        .ok_or_else(|| Error::NotFound(format!("Secrets not found for account {email}")))?;
 
-    println!("\n✅ Account added successfully!");
-    println!("   Email: {email}");
-    println!("   App: {app:?}");
-    println!("   Endpoint: {endpoint}");
-    println!("   Export directory: {export_dir}");
+    let client = new_accounts_client(&account.endpoint, app)?;
+    let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
+    client.set_auth_token(Some(token));
+
+    let mut ui = DialoguerAuthFlowUi::new(None, totp_code, Some(SecondFactorMethod::Totp));
+    let mut flow = AuthFlow::new(&client, &mut ui);
+    let result = flow
+        .setup_two_factor(SetupTwoFactorParams {
+            master_key: SecretVec::new(secrets.master_key.clone()),
+            key_attributes: None,
+        })
+        .await?;
+
+    println!("\nTwo-factor authentication enabled for {email}.");
+    if show_recovery_key {
+        println!("Recovery key: {}", result.recovery_key);
+    }
 
     Ok(())
 }
 
 async fn update_account(storage: &Storage, email: &str, dir: &str, app_str: &str) -> Result<()> {
-    let app = match app_str.to_lowercase().as_str() {
-        "photos" => App::Photos,
-        "locker" => App::Locker,
-        "auth" => App::Auth,
-        _ => {
-            return Err(crate::models::error::Error::InvalidInput(format!(
-                "Invalid app: {app_str}. Must be one of: photos, locker, auth"
-            )));
-        }
-    };
+    let app = resolve_app(app_str)?;
 
-    // Check if account exists
     if storage.accounts().get(email, app)?.is_none() {
-        return Err(crate::models::error::Error::NotFound(format!(
-            "Account not found: {} (app: {:?})",
+        return Err(Error::NotFound(format!(
+            "Account not found: {} (app: {})",
             email, app
         )));
     }
 
-    // Validate export directory
-    let export_path = PathBuf::from(dir);
-    if !export_path.exists() {
-        println!("Creating export directory: {dir}");
-        std::fs::create_dir_all(&export_path).map_err(crate::models::error::Error::Io)?;
-    }
-
-    // Update account
+    ensure_export_dir(dir)?;
     storage.accounts().update_export_dir(email, app, dir)?;
 
-    println!("\n✅ Account updated successfully!");
-    println!("   Email: {email}");
-    println!("   App: {app:?}");
-    println!("   New export directory: {dir}");
+    println!("\nAccount updated successfully!");
+    println!("  Email: {email}");
+    println!("  App: {app}");
+    println!("  New export directory: {dir}");
 
     Ok(())
 }
 
 async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> {
-    let app = match app_str.to_lowercase().as_str() {
-        "photos" => App::Photos,
-        "locker" => App::Locker,
-        "auth" => App::Auth,
-        _ => {
-            return Err(crate::models::error::Error::InvalidInput(format!(
-                "Invalid app: {app_str}. Must be one of: photos, locker, auth"
-            )));
-        }
-    };
+    let app = resolve_app(app_str)?;
 
-    // Get account
-    let account = storage.accounts().get(email, app)?.ok_or_else(|| {
-        crate::models::error::Error::NotFound(format!("Account not found: {email}"))
-    })?;
+    let account = storage
+        .accounts()
+        .get(email, app)?
+        .ok_or_else(|| Error::NotFound(format!("Account not found: {email}")))?;
 
-    // Get account secrets
     let secrets = storage
         .accounts()
         .get_secrets(account.user_id, account.app)?
-        .ok_or_else(|| {
-            crate::models::error::Error::NotFound(format!("Secrets not found for account {email}"))
-        })?;
+        .ok_or_else(|| Error::NotFound(format!("Secrets not found for account {email}")))?;
 
-    // Token is stored as raw bytes from sealed_box_open
-    // The Go CLI returns it as base64 URL-encoded string WITH padding (matching TokenStr() in Go)
-    let token_str = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
-
-    println!("{token_str}");
+    let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
+    println!("{token}");
 
     Ok(())
+}
+
+fn persist_account(
+    storage: &Storage,
+    email: &str,
+    app: App,
+    endpoint: &str,
+    export_dir: &str,
+    authenticated: AuthenticatedAccount,
+) -> Result<()> {
+    let account = Account {
+        user_id: authenticated.user_id,
+        email: email.to_string(),
+        app,
+        endpoint: endpoint.to_string(),
+        export_dir: Some(export_dir.to_string()),
+    };
+
+    storage.accounts().add(&account)?;
+    let stored_secrets = StoredAccountSecrets {
+        token: authenticated.secrets.token.clone(),
+        master_key: authenticated.secrets.master_key.clone(),
+        secret_key: authenticated.secrets.secret_key.clone(),
+        public_key: authenticated.secrets.public_key.clone(),
+    };
+    storage
+        .accounts()
+        .store_secrets(account.user_id, account.app, &stored_secrets)?;
+
+    Ok(())
+}
+
+fn prompt_email(email_arg: Option<String>) -> Result<String> {
+    if let Some(email) = email_arg {
+        Ok(email)
+    } else {
+        Input::new()
+            .with_prompt("Enter your email address")
+            .interact_text()
+            .map_err(|e| Error::InvalidInput(e.to_string()))
+    }
+}
+
+fn prompt_password(password_arg: Option<String>, prompt: &str) -> Result<String> {
+    if let Some(password) = password_arg {
+        Ok(password)
+    } else {
+        Password::new()
+            .with_prompt(prompt)
+            .interact()
+            .map_err(|e| Error::InvalidInput(e.to_string()))
+    }
+}
+
+fn resolve_export_dir(export_dir_arg: Option<String>, email: &str) -> Result<String> {
+    if let Some(dir) = export_dir_arg {
+        Ok(dir)
+    } else {
+        Input::new()
+            .with_prompt("Enter export directory path")
+            .default(format!("./exports/{email}"))
+            .interact_text()
+            .map_err(|e| Error::InvalidInput(e.to_string()))
+    }
+}
+
+fn ensure_export_dir(dir: &str) -> Result<()> {
+    let export_path = PathBuf::from(dir);
+    if !export_path.exists() {
+        println!("Creating export directory: {dir}");
+        std::fs::create_dir_all(&export_path).map_err(Error::Io)?;
+    }
+    Ok(())
+}
+
+fn resolve_app(app_arg: &str) -> Result<App> {
+    App::from_str(app_arg).map_err(Error::InvalidInput)
+}
+
+fn parse_second_factor(second_factor: Option<&str>) -> Result<Option<SecondFactorMethod>> {
+    second_factor
+        .map(|value| match value.trim().to_ascii_lowercase().as_str() {
+            "totp" => Ok(SecondFactorMethod::Totp),
+            "passkey" => Ok(SecondFactorMethod::Passkey),
+            other => Err(Error::InvalidInput(format!(
+                "Invalid second-factor method: {other}. Must be one of: totp, passkey"
+            ))),
+        })
+        .transpose()
+}
+
+fn new_accounts_client(endpoint: &str, app: App) -> Result<AccountsClient> {
+    AccountsClient::new(
+        AccountsClientConfig::new(app.client_package())
+            .with_base_url(endpoint.to_string())
+            .with_user_agent("ente-rs"),
+    )
+    .map_err(Error::from)
+}
+
+fn is_retryable_password_error(error: &AccountsError) -> bool {
+    matches!(
+        error,
+        AccountsError::AuthenticationFailed(message) if message == "Incorrect password"
+    ) || error.is_http_status(&[401])
+}
+
+fn read_six_digit_code(prompt: &str) -> Result<String> {
+    Input::new()
+        .with_prompt(prompt)
+        .validate_with(|input: &String| {
+            if input.len() == 6 && input.chars().all(char::is_numeric) {
+                Ok(())
+            } else {
+                Err("Code must be 6 digits")
+            }
+        })
+        .interact_text()
+        .map_err(|e| Error::InvalidInput(e.to_string()))
+}
+
+fn read_six_digit_code_for_accounts(prompt: &str) -> AccountsResult<String> {
+    read_six_digit_code(prompt).map_err(|error| AccountsError::InvalidInput(error.to_string()))
 }

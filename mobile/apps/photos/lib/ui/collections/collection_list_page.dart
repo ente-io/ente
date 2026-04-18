@@ -1,7 +1,9 @@
 import "dart:async";
 
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -22,6 +24,8 @@ enum UISectionType {
   incomingCollections,
   outgoingCollections,
   homeCollections,
+  archivedCollections,
+  hiddenCollections,
 }
 
 class CollectionListPage extends StatefulWidget {
@@ -71,6 +75,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     _scrollController = ScrollController(
       initialScrollOffset: widget.initialScrollOffset ?? 0,
     );
+    unawaited(refreshCollections());
   }
 
   @override
@@ -87,7 +92,9 @@ class _CollectionListPageState extends State<CollectionListPage> {
     final bool enableSelectionMode =
         widget.sectionType == UISectionType.homeCollections ||
             widget.sectionType == UISectionType.outgoingCollections ||
-            widget.sectionType == UISectionType.incomingCollections;
+            widget.sectionType == UISectionType.incomingCollections ||
+            widget.sectionType == UISectionType.archivedCollections ||
+            widget.sectionType == UISectionType.hiddenCollections;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -105,19 +112,15 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     heroTag: widget.tag,
                     autoActivateSearch: widget.startInSearchMode,
                     onSearch: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                      refreshCollections();
+                      _searchQuery = value;
+                      unawaited(refreshCollections());
                     },
                     onSearchClosed: () {
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                      refreshCollections();
+                      _searchQuery = '';
+                      unawaited(refreshCollections());
                     },
                     actions: [
-                      _sortMenu(collections!),
+                      _sortMenu(),
                     ],
                   ),
                   CollectionsFlexiGridViewWidget(
@@ -127,6 +130,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     enableSelectionMode: enableSelectionMode,
                     albumViewType: albumViewType ?? AlbumViewType.grid,
                     selectedAlbums: _selectedAlbum,
+                    sectionType: widget.sectionType,
                   ),
                 ],
               ),
@@ -143,7 +147,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     );
   }
 
-  Widget _sortMenu(List<Collection> collections) {
+  Widget _sortMenu() {
     final colorTheme = getEnteColorScheme(context);
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     Widget sortOptionText(AlbumSortKey key) {
@@ -262,30 +266,67 @@ class _CollectionListPageState extends State<CollectionListPage> {
       } else {
         collections = sharedCollections.outgoing;
       }
-      if (_searchQuery.isNotEmpty) {
-        collections = widget.collections
-            ?.where(
-              (c) => c.displayName
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()),
-            )
-            .toList();
-      }
     } else if (widget.sectionType == UISectionType.homeCollections) {
       collections =
           await CollectionsService.instance.getCollectionForOnEnteSection();
-      if (_searchQuery.isNotEmpty) {
-        collections = widget.collections
-            ?.where(
-              (c) => c.displayName
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()),
-            )
-            .toList();
-      }
+    } else if (widget.sectionType == UISectionType.archivedCollections) {
+      collections = await CollectionsService.instance.getArchivedCollection();
+    } else if (widget.sectionType == UISectionType.hiddenCollections) {
+      collections = CollectionsService.instance
+          .getHiddenCollections(includeDefaultHidden: false);
+    }
+    if (_searchQuery.isNotEmpty) {
+      collections = collections
+          ?.where(
+            (c) => c.displayName
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()),
+          )
+          .toList();
+    }
+    if (widget.sectionType == UISectionType.hiddenCollections) {
+      await _sortCollectionsByCurrentPreferences(collections!);
     }
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Future<void> _sortCollectionsByCurrentPreferences(
+    List<Collection> collectionsToSort,
+  ) async {
+    if (collectionsToSort.length < 2) {
+      return;
+    }
+
+    final currentSortKey = localSettings.albumSortKey();
+    final currentSortDirection = localSettings.albumSortDirection();
+
+    Map<int, int>? collectionIDToNewestPhotoTime;
+    if (currentSortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+
+    collectionsToSort.sort((first, second) {
+      int comparison;
+      if (currentSortKey == AlbumSortKey.albumName) {
+        comparison = compareAsciiLowerCaseNatural(
+          first.displayName,
+          second.displayName,
+        );
+      } else if (currentSortKey == AlbumSortKey.newestPhoto) {
+        comparison =
+            (collectionIDToNewestPhotoTime?[second.id] ?? -1 * intMaxValue)
+                .compareTo(
+          collectionIDToNewestPhotoTime?[first.id] ?? -1 * intMaxValue,
+        );
+      } else {
+        comparison = second.updationTime.compareTo(first.updationTime);
+      }
+      return currentSortDirection == AlbumSortDirection.ascending
+          ? comparison
+          : -comparison;
+    });
   }
 }

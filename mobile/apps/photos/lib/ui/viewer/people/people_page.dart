@@ -1,6 +1,8 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -15,8 +17,8 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import 'package:photos/services/memory_lane/memory_lane_service.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -27,13 +29,12 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/people/faces_timeline_banner.dart";
-import "package:photos/ui/viewer/people/faces_timeline_debug_panel.dart";
-import "package:photos/ui/viewer/people/faces_timeline_page.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
+import "package:photos/ui/viewer/people/memory_lane_banner.dart";
+import "package:photos/ui/viewer/people/memory_lane_debug_panel.dart";
+import "package:photos/ui/viewer/people/memory_lane_page.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
@@ -56,7 +57,7 @@ class PeoplePage extends StatefulWidget {
 
 class _PeoplePageState extends State<PeoplePage> {
   final Logger _logger = Logger("_PeoplePageState");
-  final Logger _timelineLogger = Logger("FacesTimelineInteractions");
+  final Logger _timelineLogger = Logger("MemoryLaneInteractions");
   final _selectedFiles = SelectedFiles();
   List<EnteFile>? files;
   Future<List<EnteFile>> filesFuture = Future.value([]);
@@ -69,8 +70,10 @@ class _PeoplePageState extends State<PeoplePage> {
   late SearchFilterDataProvider? _searchFilterDataProvider;
   ValueNotifier<Set<String>>? _timelineNotifier;
   VoidCallback? _timelineListener;
+  bool _memoryLanePrewarmStarted = false;
+  bool _isTryingToPopDeletedPersonPage = false;
 
-  bool get _facesTimelineEnabled => flagService.facesTimeline;
+  bool get _memoryLaneEnabled => flagService.facesTimeline;
 
   @override
   void initState() {
@@ -78,6 +81,11 @@ class _PeoplePageState extends State<PeoplePage> {
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.source == kShowUnnamedIgnoredPersonEventSource &&
+          event.person?.remoteID == _person.remoteID) {
+        unawaited(_popDeletedPersonPageWhenCurrentRoute());
+        return;
+      }
       if (event.type == PeopleEventType.saveOrEditPerson) {
         if (event.person != null &&
             event.person!.remoteID == _person.remoteID) {
@@ -88,7 +96,7 @@ class _PeoplePageState extends State<PeoplePage> {
       }
     });
 
-    filesFuture = loadPersonFiles();
+    filesFuture = _loadPersonFiles();
 
     _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
       event,
@@ -109,41 +117,38 @@ class _PeoplePageState extends State<PeoplePage> {
                 widget.searchResult!.getHierarchicalSearchFilter(),
           )
         : null;
-    if (_facesTimelineEnabled) {
-      _timelineNotifier = FacesTimelineService.instance.readyPersonIds;
+    if (_memoryLaneEnabled) {
+      _timelineNotifier = MemoryLaneService.instance.readyPersonIds;
       _timelineListener = () {
         if (!mounted) return;
         setState(() {});
+        _maybePrewarmMemoryLane();
       };
       _timelineNotifier!.addListener(_timelineListener!);
-      if (!FacesTimelineService.instance.hasReadyTimelineSync(
+      if (!MemoryLaneService.instance.hasReadyTimelineSync(
         _person.remoteID,
       )) {
-        FacesTimelineService.instance.schedulePersonRecompute(
+        MemoryLaneService.instance.schedulePersonRecompute(
           _person.remoteID,
           trigger: "people_page_visit",
         );
+      } else {
+        _maybePrewarmMemoryLane();
       }
     }
   }
 
-  Future<List<EnteFile>> loadPersonFiles() async {
-    final result = await SearchService.instance.getClusterFilesForPersonID(
+  Future<List<EnteFile>> _loadPersonFiles() async {
+    final sortedFiles = await SearchService.instance.getFilesForPersonID(
       _person.remoteID,
+      includeManualAssigned: true,
+      sortOnTime: true,
     );
-    if (result.isEmpty) {
-      _logger.severe(
-        "No files found for person with id ${_person.remoteID}, can't load files",
-      );
-      return [];
-    }
-    final Set<EnteFile> resultFiles = {};
-    for (final e in result.entries) {
-      resultFiles.addAll(e.value);
-    }
-    final List<EnteFile> sortedFiles = List<EnteFile>.from(resultFiles);
-    sortedFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+    final previousCount = files?.length;
     files = sortedFiles;
+    if (mounted && previousCount != sortedFiles.length) {
+      setState(() {});
+    }
     return sortedFiles;
   }
 
@@ -157,29 +162,91 @@ class _PeoplePageState extends State<PeoplePage> {
     super.dispose();
   }
 
-  Future<void> _openFacesTimelinePage() async {
-    if (!_facesTimelineEnabled) return;
+  void _maybePrewarmMemoryLane() {
+    if (_memoryLanePrewarmStarted || !_memoryLaneEnabled) {
+      return;
+    }
+    final bool memoryLaneReady =
+        MemoryLaneService.instance.hasReadyTimelineSync(_person.remoteID);
+    if (!memoryLaneReady) {
+      return;
+    }
+    _memoryLanePrewarmStarted = true;
+    unawaited(
+      MemoryLaneService.instance.prewarmTimelineFrames(
+        _person.remoteID,
+        frameCount: 6,
+      ),
+    );
+  }
+
+  Future<void> _popDeletedPersonPageWhenCurrentRoute() async {
+    if (_isTryingToPopDeletedPersonPage) {
+      return;
+    }
+    _isTryingToPopDeletedPersonPage = true;
+    try {
+      // Wait for any stacked dialog (e.g. confirmation) to close first.
+      for (var i = 0; i < 30; i++) {
+        if (!mounted) {
+          return;
+        }
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          await Navigator.of(context).maybePop();
+          return;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+      }
+    } finally {
+      _isTryingToPopDeletedPersonPage = false;
+    }
+  }
+
+  Future<void> _openMemoryLanePage() async {
+    if (!_memoryLaneEnabled) return;
     _timelineLogger.info("banner_tap person=${_person.remoteID}");
-    await routeToPage(context, FacesTimelinePage(person: _person));
+    await routeToPage(context, MemoryLanePage(person: _person));
     if (!mounted) {
       return;
     }
     setState(() {});
   }
 
+  bool _shouldShowMemoryCountTitleForIgnoredPerson() {
+    final normalizedName = _person.data.name.trim();
+    return _person.data.isIgnored &&
+        (normalizedName.isEmpty ||
+            normalizedName == "(ignored)" ||
+            normalizedName == "(hidden)");
+  }
+
+  String _getPeoplePageTitle(BuildContext context) {
+    if (!_person.data.isIgnored) {
+      return _person.data.name;
+    }
+    if (_shouldShowMemoryCountTitleForIgnoredPerson()) {
+      final memoryCount = files?.length ?? 0;
+      return AppLocalizations.of(context).memoryCount(
+        count: memoryCount,
+        formattedCount: NumberFormat().format(memoryCount),
+      );
+    }
+    return _person.data.name;
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    final bool featureEnabled = _facesTimelineEnabled;
-    final bool facesTimelineReady = featureEnabled
-        ? FacesTimelineService.instance.hasReadyTimelineSync(
+    final bool featureEnabled = _memoryLaneEnabled;
+    final bool memoryLaneReady = featureEnabled
+        ? MemoryLaneService.instance.hasReadyTimelineSync(
             _person.remoteID,
           )
         : false;
-    final bool hasSeenFacesTimeline =
-        localSettings.hasSeenFacesTimeline(_person.remoteID);
-    final bool showFacesTimelineBanner =
-        featureEnabled && facesTimelineReady && !hasSeenFacesTimeline;
+    final bool hasSeenMemoryLane =
+        localSettings.hasSeenMemoryLane(_person.remoteID);
+    final bool showMemoryLaneBanner =
+        featureEnabled && memoryLaneReady && !hasSeenMemoryLane;
 
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -192,14 +259,12 @@ class _PeoplePageState extends State<PeoplePage> {
               ),
               child: PeopleAppBar(
                 GalleryType.peopleTag,
-                _person.data.isIgnored
-                    ? AppLocalizations.of(context).ignored
-                    : _person.data.name,
+                _getPeoplePageTitle(context),
                 _selectedFiles,
                 _person,
-                facesTimelineReady: facesTimelineReady,
-                onFacesTimelineTap: featureEnabled && facesTimelineReady
-                    ? _openFacesTimelinePage
+                memoryLaneReady: memoryLaneReady,
+                onMemoryLaneTap: featureEnabled && memoryLaneReady
+                    ? _openMemoryLanePage
                     : null,
               ),
             ),
@@ -231,17 +296,17 @@ class _PeoplePageState extends State<PeoplePage> {
                                           tagPrefix: widget.tagPrefix,
                                           selectedFiles: _selectedFiles,
                                           personFiles: personFiles,
-                                          loadPersonFiles: loadPersonFiles,
+                                          loadPersonFiles: _loadPersonFiles,
                                           personEntity: _person,
-                                          facesTimelineEnabled: featureEnabled,
+                                          memoryLaneEnabled: featureEnabled,
                                           showTimelineBanner:
-                                              showFacesTimelineBanner,
-                                          onTimelineTap: featureEnabled &&
-                                                  facesTimelineReady
-                                              ? () => unawaited(
-                                                    _openFacesTimelinePage(),
-                                                  )
-                                              : null,
+                                              showMemoryLaneBanner,
+                                          onTimelineTap:
+                                              featureEnabled && memoryLaneReady
+                                                  ? () => unawaited(
+                                                        _openMemoryLanePage(),
+                                                      )
+                                                  : null,
                                         );
                                 },
                               )
@@ -249,16 +314,15 @@ class _PeoplePageState extends State<PeoplePage> {
                                 tagPrefix: widget.tagPrefix,
                                 selectedFiles: _selectedFiles,
                                 personFiles: personFiles,
-                                loadPersonFiles: loadPersonFiles,
+                                loadPersonFiles: _loadPersonFiles,
                                 personEntity: _person,
-                                facesTimelineEnabled: featureEnabled,
-                                showTimelineBanner: showFacesTimelineBanner,
-                                onTimelineTap:
-                                    featureEnabled && facesTimelineReady
-                                        ? () => unawaited(
-                                              _openFacesTimelinePage(),
-                                            )
-                                        : null,
+                                memoryLaneEnabled: featureEnabled,
+                                showTimelineBanner: showMemoryLaneBanner,
+                                onTimelineTap: featureEnabled && memoryLaneReady
+                                    ? () => unawaited(
+                                          _openMemoryLanePage(),
+                                        )
+                                    : null,
                               ),
                         FileSelectionOverlayBar(
                           PeoplePage.overlayType,
@@ -292,7 +356,7 @@ class _Gallery extends StatefulWidget {
   final List<EnteFile> personFiles;
   final Future<List<EnteFile>> Function() loadPersonFiles;
   final PersonEntity personEntity;
-  final bool facesTimelineEnabled;
+  final bool memoryLaneEnabled;
   final bool showTimelineBanner;
   final VoidCallback? onTimelineTap;
 
@@ -302,7 +366,7 @@ class _Gallery extends StatefulWidget {
     required this.personFiles,
     required this.loadPersonFiles,
     required this.personEntity,
-    required this.facesTimelineEnabled,
+    required this.memoryLaneEnabled,
     this.showTimelineBanner = false,
     this.onTimelineTap,
   });
@@ -313,7 +377,7 @@ class _Gallery extends StatefulWidget {
 
 class _GalleryState extends State<_Gallery> {
   bool userDismissedPersonGallerySuggestion = false;
-  final Logger _timelineLogger = Logger("FacesTimelineBanner");
+  final Logger _timelineLogger = Logger("MemoryLaneBanner");
   bool _loggedTimelineImpression = false;
 
   @override
@@ -368,14 +432,13 @@ class _GalleryState extends State<_Gallery> {
                     },
                   ),
                 ),
-          FacesTimelineBannerSection(
-            showBanner:
-                widget.facesTimelineEnabled && widget.showTimelineBanner,
+          MemoryLaneBannerSection(
+            showBanner: widget.memoryLaneEnabled && widget.showTimelineBanner,
             person: widget.personEntity,
-            onTap: widget.facesTimelineEnabled ? widget.onTimelineTap : null,
+            onTap: widget.memoryLaneEnabled ? widget.onTimelineTap : null,
           ),
-          if (widget.facesTimelineEnabled)
-            FacesTimelineDebugPanel(person: widget.personEntity),
+          if (widget.memoryLaneEnabled)
+            MemoryLaneDebugPanel(person: widget.personEntity),
           !userDismissedPersonGallerySuggestion
               ? Dismissible(
                   key: const Key("personGallerySuggestion"),

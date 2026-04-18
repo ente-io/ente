@@ -6,7 +6,7 @@ You can
 [**download** a pre-built binary from releases](https://github.com/ente-io/photos-desktop/releases/latest).
 
 To know more about Ente, see [our main README](../README.md) or visit
-[ente.io](https://ente.io).
+[ente.com](https://ente.com).
 
 ## Building from source
 
@@ -20,8 +20,11 @@ cd ente/desktop
 Install dependencies (requires Yarn v1):
 
 ```sh
-yarn install
+yarn install --frozen-lockfile
 ```
+
+Use plain `yarn install` only when you are intentionally updating dependencies
+and reviewing the resulting `yarn.lock` changes.
 
 Now you can run in development mode (supports hot reload for the renderer
 process)

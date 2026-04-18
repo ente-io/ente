@@ -5,7 +5,9 @@ import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
@@ -17,6 +19,7 @@ import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
+import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -29,26 +32,60 @@ class SemanticSearchService {
 
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
-  late final mlDataDB = MLDataDB.instance;
+  MLDataDB get _mlDataDB =>
+      isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+  ClipVectorDB get _vectorDB =>
+      isOfflineMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
 
   final _cacheLock = Lock();
   bool _imageEmbeddingsAreCached = false;
+  bool? _cachedEmbeddingsOffline;
   Timer? _embeddingsCacheTimer;
   final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
+  static const Duration _vectorDbMigrationDelay = Duration(seconds: 10);
+  Future<void>? _prepareVectorDbFuture;
 
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
   Future<void> init() async {
+    if (!hasGrantedMLConsent) return;
+
+    _initializeIfNeeded();
+    _scheduleWarmup(delayTextModelLoad: true);
+  }
+
+  Future<void> prepareForInteractiveSearch() async {
+    if (!hasGrantedMLConsent) return;
+
+    _initializeIfNeeded();
+    _scheduleWarmup(delayTextModelLoad: false);
+  }
+
+  bool isMagicSearchEnabledAndReady() {
+    return hasGrantedMLConsent && _textModelIsLoaded;
+  }
+
+  Future<void> _prepareVectorDbForSearch() {
+    _prepareVectorDbFuture ??= _prepareVectorDbForSearchInternal();
+    return _prepareVectorDbFuture!;
+  }
+
+  bool get _shouldUseRustExactSearch =>
+      flagService.internalUser &&
+      flagService.usearchForSearch &&
+      localSettings.semanticSearchExactInRustEnabled;
+
+  bool get _shouldUseVectorDbApproximateSearch =>
+      flagService.usearchForSearch && !_shouldUseRustExactSearch;
+
+  void _initializeIfNeeded() {
     if (_hasInitialized) {
-      _logger.info("Initialized already");
       return;
     }
-    final hasGivenConsent = flagService.hasGrantedMLConsent;
-    if (!hasGivenConsent) return;
 
     _logger.info("init called");
     _hasInitialized = true;
@@ -59,12 +96,38 @@ class SemanticSearchService {
         _imageEmbeddingsAreCached = false;
       }
     });
-
-    unawaited(_loadTextModel(delay: true));
   }
 
-  bool isMagicSearchEnabledAndReady() {
-    return flagService.hasGrantedMLConsent && _textModelIsLoaded;
+  void _scheduleWarmup({required bool delayTextModelLoad}) {
+    if (_shouldUseVectorDbApproximateSearch) {
+      unawaited(_prepareVectorDbForSearch());
+    }
+
+    if (_textModelIsLoaded) {
+      return;
+    }
+
+    unawaited(_loadTextModel(delay: delayTextModelLoad));
+  }
+
+  Future<void> _prepareVectorDbForSearchInternal() async {
+    try {
+      if (!_shouldUseVectorDbApproximateSearch) return;
+      if (!flagService.hasGrantedMLConsent) return;
+      if (!await _vectorDB.checkIfMigrationDone()) {
+        await Future.delayed(_vectorDbMigrationDelay);
+        if (!_shouldUseVectorDbApproximateSearch) return;
+        if (!flagService.hasGrantedMLConsent) return;
+        await _mlDataDB.checkMigrateFillClipVectorDB();
+      }
+      if (await _vectorDB.checkIfMigrationDone()) {
+        await _vectorDB.warmupApproxSearch();
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to prepare VectorDB for search", e, s);
+    } finally {
+      _prepareVectorDbFuture = null;
+    }
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -73,7 +136,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${flagService.hasGrantedMLConsent}, loaded: $_textModelIsLoaded ",
+          "ML global consent: $hasGrantedMLConsent, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -101,7 +164,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await mlDataDB.deleteClipIndexes();
+    await _mlDataDB.deleteClipIndexes();
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
@@ -111,15 +174,28 @@ class SemanticSearchService {
     return _cacheLock.synchronized(() async {
       _resetInactivityTimer();
       if (_imageEmbeddingsAreCached) {
+        if (_cachedEmbeddingsOffline != isOfflineMode) {
+          await MLComputer.instance.clearImageEmbeddingsCache();
+          _imageEmbeddingsAreCached = false;
+          _cachedEmbeddingsOffline = null;
+        } else {
+          return;
+        }
+      }
+      if (_imageEmbeddingsAreCached) {
         return;
       }
       final now = DateTime.now();
-      final imageEmbeddings = await mlDataDB.getAllClipVectors();
+      final imageEmbeddings = await _mlDataDB.getAllClipVectors();
       _logger.info(
         "read all ${imageEmbeddings.length} embeddings from DB in ${DateTime.now().difference(now).inMilliseconds} ms",
       );
-      await MLComputer.instance.cacheImageEmbeddings(imageEmbeddings);
+      await MLComputer.instance.cacheImageEmbeddings(
+        imageEmbeddings,
+        cacheRustExact: _shouldUseRustExactSearch,
+      );
       _imageEmbeddingsAreCached = true;
+      _cachedEmbeddingsOffline = isOfflineMode;
       return;
     });
   }
@@ -140,13 +216,13 @@ class SemanticSearchService {
     }
     final textEmbedding = await _getTextEmbedding(query);
 
+    final minimumSimilarity =
+        similarityThreshold ?? kMinimumSimilarityThreshold;
     final similarityResults = await _getSimilarities(
       {query: textEmbedding},
-      minimumSimilarityMap: {
-        query: similarityThreshold ?? kMinimumSimilarityThreshold,
-      },
+      minimumSimilarityMap: {query: minimumSimilarity},
     );
-    final queryResults = similarityResults[query]!;
+    final queryResults = similarityResults[query] ?? <QueryResult>[];
     // Uncomment if needed for debugging: print query for top ten scores
     // if (kDebugMode) {
     //   for (int i = 0; i < min(10, queryResults.length); i++) {
@@ -158,6 +234,14 @@ class SemanticSearchService {
     final Map<int, double> fileIDToScoreMap = {};
     for (final result in queryResults) {
       fileIDToScoreMap[result.id] = result.score;
+    }
+
+    if (isOfflineMode) {
+      return _getOfflineMatchingFiles(
+        queryResults,
+        fileIDToScoreMap,
+        showThreshold,
+      );
     }
 
     final filesMap = await FilesDB.instance
@@ -187,7 +271,49 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(mlDataDB.deleteClipEmbeddings(deletedEntries));
+      unawaited(_mlDataDB.deleteClipEmbeddings(deletedEntries));
+    }
+
+    return results;
+  }
+
+  Future<List<EnteFile>> _getOfflineMatchingFiles(
+    List<QueryResult> queryResults,
+    Map<int, double> fileIDToScoreMap,
+    bool showThreshold,
+  ) async {
+    final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
+      queryResults.map((e) => e.id),
+    );
+    final allFiles = await SearchService.instance.getAllFilesForSearch();
+    final ignoredCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
+    final localIdToFile = <String, EnteFile>{};
+    for (final file in allFiles) {
+      final localId = file.localID;
+      if (localId != null) {
+        localIdToFile[localId] = file;
+      }
+    }
+
+    final results = <EnteFile>[];
+    final deletedEntries = <int>[];
+    for (final result in queryResults) {
+      final localId = localIdMap[result.id];
+      final file = localId != null ? localIdToFile[localId] : null;
+      if (file != null && !ignoredCollections.contains(file.collectionID)) {
+        if (showThreshold) {
+          file.debugCaption =
+              "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
+        }
+        results.add(file);
+      } else {
+        deletedEntries.add(result.id);
+      }
+    }
+
+    if (deletedEntries.isNotEmpty) {
+      unawaited(_mlDataDB.deleteClipEmbeddings(deletedEntries));
     }
 
     return results;
@@ -216,6 +342,7 @@ class SemanticSearchService {
     final queryResults = await _getSimilarities(
       textEmbeddings,
       minimumSimilarityMap: minimumSimilarityMap,
+      maxResults: 0,
     );
 
     final result = <String, List<int>>{};
@@ -235,7 +362,7 @@ class SemanticSearchService {
     _logger.info("Initializing ClipText");
     try {
       if (delay) await Future.delayed(const Duration(seconds: 5));
-      await MLComputer.instance.runClipText("warm up text encoder");
+      await MLComputer.instance.warmUpClipTextEncoder();
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
@@ -249,12 +376,12 @@ class SemanticSearchService {
       embedding: clipResult.embedding,
       version: clipMlVersion,
     );
-    await mlDataDB.putClip([embedding]);
+    await _mlDataDB.putClip([embedding]);
   }
 
   Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
     final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await mlDataDB.putClip([embedding]);
+    await _mlDataDB.putClip([embedding]);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
@@ -271,8 +398,8 @@ class SemanticSearchService {
   Future<Map<String, List<QueryResult>>> _getSimilarities(
     Map<String, List<double>> textQueryToEmbeddingMap, {
     required Map<String, double> minimumSimilarityMap,
+    int? maxResults,
   }) async {
-    final startTime = DateTime.now();
     // Uncomment if needed for debugging: print query embeddings
     // if (kDebugMode) {
     //   for (final queryText in textQueryToEmbeddingMap.keys) {
@@ -280,7 +407,60 @@ class SemanticSearchService {
     //     dev.log("CLIPTEXT Query: $queryText, embedding: $embedding");
     //   }
     // }
+    if (await _canUseVectorDbForSearch()) {
+      final startTime = DateTime.now();
+      try {
+        final queryResults = await _computeApproxSimilaritiesWithVectorDb(
+          textQueryToEmbeddingMap,
+          minimumSimilarityMap,
+          maxResults: maxResults,
+        );
+        final endTime = DateTime.now();
+        _logger.info(
+          "computingSimilarities (usearch approximate) took for ${textQueryToEmbeddingMap.length} queries " +
+              (endTime.millisecondsSinceEpoch -
+                      startTime.millisecondsSinceEpoch)
+                  .toString() +
+              "ms",
+        );
+        return queryResults;
+      } catch (e, s) {
+        _logger.severe(
+          "VectorDB similarity search failed, falling back to in-memory dot-product",
+          e,
+          s,
+        );
+      }
+    }
+
     await _cacheClipVectors();
+    if (_shouldUseRustExactSearch) {
+      final startTime = DateTime.now();
+      try {
+        final queryResults =
+            await MLComputer.instance.computeBulkSimilaritiesWithRust(
+          textQueryToEmbeddingMap,
+          minimumSimilarityMap,
+        );
+        final endTime = DateTime.now();
+        _logger.info(
+          "computingSimilarities (rust simsimd exact) took for ${textQueryToEmbeddingMap.length} queries " +
+              (endTime.millisecondsSinceEpoch -
+                      startTime.millisecondsSinceEpoch)
+                  .toString() +
+              "ms",
+        );
+        return queryResults;
+      } catch (e, s) {
+        _logger.severe(
+          "Rust exact similarity search failed, falling back to Dart in-memory dot-product",
+          e,
+          s,
+        );
+      }
+    }
+
+    final startTime = DateTime.now();
     final Map<String, List<QueryResult>> queryResults =
         await MLComputer.instance.computeBulkSimilarities(
       textQueryToEmbeddingMap,
@@ -288,12 +468,46 @@ class SemanticSearchService {
     );
     final endTime = DateTime.now();
     _logger.info(
-      "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +
+      "computingSimilarities (dot-product) took for ${textQueryToEmbeddingMap.length} queries " +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
               .toString() +
           "ms",
     );
     return queryResults;
+  }
+
+  Future<Map<String, List<QueryResult>>> _computeApproxSimilaritiesWithVectorDb(
+    Map<String, List<double>> textQueryToEmbeddingMap,
+    Map<String, double> minimumSimilarityMap, {
+    int? maxResults,
+  }) async {
+    final queryResults = <String, List<QueryResult>>{};
+    final bool shouldLimitResults = maxResults != null && maxResults > 0;
+    for (final entry in textQueryToEmbeddingMap.entries) {
+      final query = entry.key;
+      final minimumSimilarity = minimumSimilarityMap[query]!;
+      final textEmbedding = entry.value;
+      final results = await _vectorDB.searchApproxSimilaritiesWithinThreshold(
+        textEmbedding,
+        minimumSimilarity,
+      );
+      if (shouldLimitResults && results.length > maxResults) {
+        queryResults[query] = results.sublist(0, maxResults);
+      } else {
+        queryResults[query] = results;
+      }
+    }
+    return queryResults;
+  }
+
+  Future<bool> _canUseVectorDbForSearch() async {
+    if (!_shouldUseVectorDbApproximateSearch) return false;
+    if (!flagService.hasGrantedMLConsent) return false;
+    if (await _vectorDB.checkIfMigrationDone()) return true;
+    // Keep interactive search responsive: prepare/migrate in the background and
+    // immediately fall back to in-memory similarity search for this request.
+    unawaited(_prepareVectorDbForSearch());
+    return false;
   }
 
   void _resetInactivityTimer() {

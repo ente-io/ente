@@ -1,12 +1,11 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:photos/gateways/storage_bonus/models/bonus.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/storage_bonus/bonus.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/payment/add_on_page.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class ViewAddOnButton extends StatelessWidget {
   final BonusData? bonusData;
@@ -20,18 +19,15 @@ class ViewAddOnButton extends StatelessWidget {
     }
     final EnteColorScheme colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
-      child: MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).viewAddOnButton,
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: MenuItemWidgetNew(
+        title: AppLocalizations.of(context).viewAddOnButton,
         menuItemColor: colorScheme.fillFaint,
+        pressedColor: colorScheme.fillFaintPressed,
         trailingWidget: Icon(
           Icons.chevron_right_outlined,
           color: colorScheme.strokeBase,
         ),
-        singleBorderRadius: 4,
-        alignCaptionedTextToLeft: true,
         onTap: () async {
           await routeToPage(context, AddOnPage(bonusData!));
         },

@@ -19,6 +19,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -484,12 +485,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           height: 100,
           child: Stack(
             children: [
-              ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(75),
-                  ),
-                ),
+              FaceThumbnailSquircleClip(
                 child: FileFaceWidget(
                   files[start + index],
                   clusterID: cluserId,
@@ -498,12 +494,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 ),
               ),
               if (start + index == 5 && files.length > 6)
-                ClipPath(
-                  clipper: ShapeBorderClipper(
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(72),
-                    ),
-                  ),
+                FaceThumbnailSquircleClip(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),

@@ -17,6 +17,10 @@ export const sidebar = [
                     },
                     { text: "Sign up", link: "/photos/getting-started/signup" },
                     {
+                        text: "Gallery mode",
+                        link: "/photos/getting-started/gallery-mode",
+                    },
+                    {
                         text: "Migration",
                         link: "/photos/getting-started/migration",
                     },
@@ -75,6 +79,10 @@ export const sidebar = [
                             {
                                 text: "Passkeys",
                                 link: "/photos/features/account/passkeys",
+                            },
+                            {
+                                text: "App lock",
+                                link: "/photos/features/account/app-lock",
                             },
                             {
                                 text: "Referral program",
@@ -155,6 +163,10 @@ export const sidebar = [
                                 link: "/photos/features/sharing-and-collaboration/collaboration",
                             },
                             {
+                                text: "Comments and likes",
+                                link: "/photos/features/sharing-and-collaboration/comments-and-likes",
+                            },
+                            {
                                 text: "Public links",
                                 link: "/photos/features/sharing-and-collaboration/public-links",
                             },
@@ -211,12 +223,24 @@ export const sidebar = [
                                 link: "/photos/features/utilities/cli",
                             },
                             {
+                                text: "Collage",
+                                link: "/photos/features/utilities/collage",
+                            },
+                            {
                                 text: "Detect Text (OCR)",
                                 link: "/photos/features/utilities/detect-text",
                             },
                             {
+                                text: "Home Widgets",
+                                link: "/photos/features/utilities/home-widgets",
+                            },
+                            {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
+                            },
+                            {
+                                text: "Rituals",
+                                link: "/photos/features/utilities/rituals",
                             },
                             {
                                 text: "Swipe to Select",
@@ -244,6 +268,10 @@ export const sidebar = [
                         link: "/photos/faq/account-creation",
                     },
                     {
+                        text: "Gallery Mode",
+                        link: "/photos/faq/gallery-mode",
+                    },
+                    {
                         text: "Advanced Features",
                         link: "/photos/faq/advanced-features",
                     },
@@ -258,6 +286,10 @@ export const sidebar = [
                     {
                         text: "Metadata and Editing",
                         link: "/photos/faq/metadata-and-editing",
+                    },
+                    {
+                        text: "Migration",
+                        link: "/photos/faq/migration",
                     },
                     {
                         text: "Search and Discovery",
@@ -322,6 +354,185 @@ export const sidebar = [
                         link: "/auth/migration/export",
                     },
                 ],
+            },
+        ],
+    },
+    {
+        text: "Locker",
+        items: [
+            { text: "Introduction", link: "/locker/" },
+            {
+                text: "Getting Started",
+                collapsed: true,
+                items: [
+                    { text: "Overview", link: "/locker/getting-started/" },
+                    {
+                        text: "Installation",
+                        link: "/locker/getting-started/installation",
+                    },
+                    {
+                        text: "Sign up",
+                        link: "/locker/getting-started/signup",
+                    },
+                    {
+                        text: "First item",
+                        link: "/locker/getting-started/first-document",
+                    },
+                    {
+                        text: "Family setup",
+                        link: "/locker/getting-started/family-setup",
+                    },
+                ],
+            },
+            {
+                text: "Features",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Item Types",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/information-types/",
+                            },
+                            {
+                                text: "Documents",
+                                link: "/locker/features/information-types/documents",
+                            },
+                            {
+                                text: "Personal Notes",
+                                link: "/locker/features/information-types/personal-notes",
+                            },
+                            {
+                                text: "Account Credentials",
+                                link: "/locker/features/information-types/account-credentials",
+                            },
+                            {
+                                text: "Physical Records",
+                                link: "/locker/features/information-types/physical-records",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Organization",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/organization/",
+                            },
+                            {
+                                text: "Collections",
+                                link: "/locker/features/organization/collections",
+                            },
+                            {
+                                text: "Trash",
+                                link: "/locker/features/organization/trash",
+                            },
+                            {
+                                text: "Search",
+                                link: "/locker/features/organization/search",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Sharing",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/sharing/",
+                            },
+                            {
+                                text: "Share with users",
+                                link: "/locker/features/sharing/share-with-users",
+                            },
+                            {
+                                text: "Public links",
+                                link: "/locker/features/sharing/public-links",
+                            },
+                            {
+                                text: "Ente Paste",
+                                link: "/locker/features/sharing/ente-paste",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Security",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/security/",
+                            },
+                            {
+                                text: "Encryption",
+                                link: "/locker/features/security/encryption",
+                            },
+                            {
+                                text: "Lock screen",
+                                link: "/locker/features/security/lock-screen",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Legacy",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/legacy/",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                text: "FAQ",
+                link: "/locker/faq/",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Getting Started",
+                        link: "/locker/faq/getting-started",
+                    },
+                    {
+                        text: "Item Types",
+                        link: "/locker/faq/information-types",
+                    },
+                    {
+                        text: "Organization",
+                        link: "/locker/faq/organization",
+                    },
+                    {
+                        text: "Sharing",
+                        link: "/locker/faq/sharing",
+                    },
+                    {
+                        text: "Legacy",
+                        link: "/locker/faq/legacy",
+                    },
+                    {
+                        text: "Security",
+                        link: "/locker/faq/security",
+                    },
+                    {
+                        text: "Troubleshooting",
+                        link: "/locker/faq/troubleshooting",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        text: "Ensu",
+        collapsed: true,
+        items: [
+            { text: "Introduction", link: "/ensu/" },
+            {
+                text: "FAQ",
+                link: "/ensu/faq/",
             },
         ],
     },
@@ -405,6 +616,10 @@ export const sidebar = [
                         text: "Building mobile apps",
                         link: "/self-hosting/development/mobile-build",
                     },
+                    {
+                        text: "Using Lima for development",
+                        link: "/self-hosting/development/lima",
+                    },
                 ],
             },
             {
@@ -422,6 +637,10 @@ export const sidebar = [
                     {
                         text: "Ente on Windows",
                         link: "/self-hosting/guides/windows",
+                    },
+                    {
+                        text: "Ente-Photos on Kubernetes (community helm-chart)",
+                        link: "/self-hosting/guides/photos-k8s-helm",
                     },
                 ],
             },

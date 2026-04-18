@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -16,6 +17,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
@@ -24,7 +26,6 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/bg_task_utils.dart";
 import "package:photos/utils/intent_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class EnteApp extends StatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;
@@ -51,6 +52,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   late Debouncer _changeCallbackDebouncer;
+  StreamSubscription<Uri?>? _widgetClickedSubscription;
+  bool _didInitWidgetLaunchHandling = false;
 
   @override
   void initState() {
@@ -85,16 +88,20 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_didInitWidgetLaunchHandling) {
+      return;
+    }
+    _didInitWidgetLaunchHandling = true;
     _checkForWidgetLaunch();
   }
 
   Future<void> _checkForWidgetLaunch() async {
     await HomeWidgetService.instance.setAppGroup();
     await hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
-      (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
+      (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri),
     );
-    hw.HomeWidget.widgetClicked.listen(
-      (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
+    _widgetClickedSubscription = hw.HomeWidget.widgetClicked.listen(
+      (uri) => unawaited(HomeWidgetService.instance.onLaunchFromWidget(uri)),
     );
   }
 
@@ -126,6 +133,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           dark: darkThemeData,
           initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
           builder: (lightTheme, dartTheme) => MaterialApp(
+            navigatorKey: AppNavigationService.instance.navigatorKey,
             title: "ente",
             themeMode: ThemeMode.system,
             theme: lightTheme,
@@ -156,6 +164,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           computeController.onUserInteraction();
         },
         child: MaterialApp(
+          navigatorKey: AppNavigationService.instance.navigatorKey,
           title: "ente",
           themeMode: ThemeMode.system,
           theme: lightThemeData,
@@ -179,6 +188,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _memoriesChangedSubscription.cancel();
     _peopleChangedSubscription.cancel();
+    _changeCallbackDebouncer.cancelDebounceTimer();
+    _widgetClickedSubscription?.cancel();
     super.dispose();
   }
 
@@ -186,11 +197,33 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final String stateChangeReason = 'app -> $state';
     if (state == AppLifecycleState.resumed) {
+      final lastAppOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
       AppLifecycleService.instance
           .onAppInForeground(stateChangeReason + ': sync now');
+      unawaited(_reloadCachesUpdatedInBackground(lastAppOpenTime));
       SyncService.instance.sync();
     } else {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
     }
+  }
+
+  Future<void> _reloadCachesUpdatedInBackground(
+    int lastAppOpenTimeInMicroseconds,
+  ) async {
+    await ServiceLocator.instance.prefs.reload();
+
+    final futures = <Future<void>>[];
+    if (magicCacheService.lastMagicCacheUpdateTimeInMicroseconds >
+        lastAppOpenTimeInMicroseconds) {
+      futures.add(magicCacheService.refreshCache());
+    }
+    if (memoriesCacheService.lastMemoriesCacheUpdateTime >
+        lastAppOpenTimeInMicroseconds) {
+      futures.add(memoriesCacheService.refreshCache());
+    }
+    if (futures.isEmpty) {
+      return;
+    }
+    await Future.wait(futures);
   }
 }

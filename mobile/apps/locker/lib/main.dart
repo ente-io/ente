@@ -3,18 +3,20 @@ import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
+import 'package:ente_crypto_dart_adapter/ente_crypto_dart_adapter.dart';
 import "package:ente_legacy/services/emergency_service.dart";
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
+import 'package:ente_rust/ente_rust.dart';
 import "package:ente_strings/l10n/strings_localizations.dart";
 import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
-import 'package:ente_utils/platform_util.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -22,15 +24,17 @@ import 'package:locker/app.dart';
 import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/app_localizations.dart';
 import 'package:locker/services/collections/collections_api_client.dart';
-import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/contacts_display_service.dart";
+import 'package:locker/services/db/locker_db.dart';
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
-import "package:locker/services/files/links/links_client.dart";
-import "package:locker/services/files/links/links_service.dart";
-import "package:locker/services/trash/trash_db.dart";
+import 'package:locker/services/files/links/links_client.dart';
+import 'package:locker/services/files/links/links_service.dart';
+import 'package:locker/services/files/offline/offline_files_service.dart';
 import 'package:locker/services/trash/trash_service.dart';
+import 'package:locker/services/update_service.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -39,11 +43,14 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
+bool _isRustInitialized = false;
+Future<void>? _rustInitFuture;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerCryptoApi(const EnteCryptoDartAdapter());
 
-  if (PlatformUtil.isDesktop()) {
+  if (PlatformDetector.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
     final WindowOptions windowOptions = WindowOptions(
@@ -71,7 +78,7 @@ void main() async {
 }
 
 Future<void> _initSystemTray() async {
-  if (PlatformUtil.isMobile()) return;
+  if (PlatformDetector.isMobile()) return;
   final String path = Platform.isWindows
       ? 'assets/icons/locker-icon.ico'
       : 'assets/icons/locker-icon.png';
@@ -98,10 +105,12 @@ Future<void> _initSystemTray() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.locker);
-  final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
+  final adaptiveThemeMode = await AdaptiveTheme.getThemeMode();
+  final savedThemeMode = _themeMode(adaptiveThemeMode);
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     try {
+      await _ensureRustInitialized();
       await _init(false, via: 'mainMethod');
     } catch (e, s) {
       _logger.severe("Failed to init", e, s);
@@ -110,7 +119,8 @@ Future<void> _runInForeground() async {
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
-        builder: (args) => App(locale: locale),
+        builder: (args) =>
+            App(locale: locale, savedThemeMode: adaptiveThemeMode),
         lockScreen: LockScreen(Configuration.instance),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
@@ -126,6 +136,25 @@ Future<void> _runInForeground() async {
       ),
     );
   });
+}
+
+Future<void> _ensureRustInitialized() async {
+  if (_isRustInitialized) {
+    return;
+  }
+  final inFlightInit = _rustInitFuture;
+  if (inFlightInit != null) {
+    await inFlightInit;
+    return;
+  }
+  final initFuture = EnteRust.init();
+  _rustInitFuture = initFuture;
+  try {
+    await initFuture;
+    _isRustInitialized = true;
+  } finally {
+    _rustInitFuture = null;
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -158,12 +187,10 @@ Future<void> _init(bool bool, {String? via}) async {
 
     await CryptoUtil.init();
 
-    await CollectionDB.instance.init();
-    await TrashDB.instance.init();
+    await LockerDB.instance.init();
 
     await Configuration.instance.init([
-      CollectionDB.instance,
-      TrashDB.instance,
+      LockerDB.instance,
     ]);
 
     await Network.instance.init(Configuration.instance);
@@ -175,8 +202,9 @@ Future<void> _init(bool bool, {String? via}) async {
     );
     await LockScreenSettings.instance.init(Configuration.instance);
     await CollectionApiClient.instance.init();
-    await CollectionService.instance.init();
+    await CollectionService.instance.init(preferences);
     await FavoritesService.instance.init();
+    await OfflineFilesService.instance.init();
     await LinksClient.instance.init();
     await LinksService.instance.init();
     await ServiceLocator.instance.init(
@@ -185,10 +213,15 @@ Future<void> _init(bool bool, {String? via}) async {
       Network.instance.getDio(),
       packageInfo,
     );
+    await UpdateService.instance.init(preferences, packageInfo);
     await TrashService.instance.init(preferences);
     await EmergencyContactService.instance.init(
       UserService.instance,
       Configuration.instance,
+    );
+    await LockerContactsDisplayService.init(
+      preferences: preferences,
+      packageInfo: packageInfo,
     );
   } catch (e) {
     _logger.severe("Error during initialization", e);

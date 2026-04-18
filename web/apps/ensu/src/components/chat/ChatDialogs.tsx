@@ -1,0 +1,1056 @@
+import {
+    ArrowRight01Icon,
+    Bug01Icon,
+    Cancel01Icon,
+    File01Icon,
+    InformationCircleIcon,
+    Key01Icon,
+    Settings01Icon,
+    SlidersHorizontalIcon,
+    Upload01Icon,
+    ViewIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    ListItemButton,
+    MenuItem,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
+import {
+    Notification,
+    type NotificationAttributes,
+} from "ente-new/photos/components/Notification";
+import React, { memo } from "react";
+
+interface IconProps {
+    size: number;
+    strokeWidth: number;
+}
+
+interface SuggestedModel {
+    name: string;
+    url: string;
+    mmproj?: string;
+}
+
+type ModelGateStatus =
+    | "checking"
+    | "missing"
+    | "preloading"
+    | "downloading"
+    | "ready"
+    | "error";
+
+type SxEntry = Exclude<SxProps<Theme>, readonly unknown[]>;
+
+export interface ModelSettingsDraft {
+    useCustomModel: boolean;
+    modelUrl: string;
+    mmprojUrl: string;
+    contextLength: string;
+    maxTokens: string;
+}
+
+export interface ChatDialogsProps {
+    showSettingsModal: boolean;
+    closeSettingsModal: () => void;
+    dialogPaperSx: SxEntry;
+    dialogTitleSx: SxEntry;
+    actionButtonSx: SxEntry;
+    settingsItemSx: SxEntry;
+    smallIconProps: IconProps;
+    compactIconProps: IconProps;
+    isLoggedIn: boolean;
+    signedInEmail?: string | null;
+    saveLogs: () => void | Promise<void>;
+    handleCheckForUpdates: () => void | Promise<void>;
+    handleLogout: () => void;
+    openLoginFromChat: () => void;
+    openPasskeysFromChat: () => void;
+    advancedUnlocked: boolean;
+    buildVersion: string;
+    handleBuildVersionTap: () => void;
+    openModelSettings: () => void;
+    openSystemPromptSettings: () => void;
+    isSmall: boolean;
+    deleteSessionId: string | null;
+    deleteSessionLabel: string;
+    handleCancelDeleteSession: () => void;
+    handleConfirmDeleteSession: () => void | Promise<void>;
+    showModelSettings: boolean;
+    closeModelSettings: () => void;
+    useCustomModel: boolean;
+    defaultModelName: string;
+    defaultModelUrl: string;
+    defaultModelMmproj?: string;
+    loadedModelName: string | null;
+    allowMmproj: boolean;
+    isTauriRuntime: boolean;
+    modelUrl: string;
+    mmprojUrl: string;
+    suggestedModels: SuggestedModel[];
+    contextLength: string;
+    maxTokens: string;
+    isSavingModel: boolean;
+    handleSaveModel: (draft: ModelSettingsDraft) => void;
+    handleUseDefaultModel: () => void;
+    showSystemPromptSettings: boolean;
+    closeSystemPromptSettings: () => void;
+    systemPrompt: string;
+    handleSaveSystemPrompt: (promptText: string) => void;
+    handleUseDefaultSystemPrompt: () => void;
+    syncNotificationOpen: boolean;
+    setSyncNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    syncNotification?: NotificationAttributes;
+    modelGateStatus: ModelGateStatus;
+}
+
+export const ChatDialogs = memo(
+    ({
+        showSettingsModal,
+        closeSettingsModal,
+        dialogPaperSx,
+        dialogTitleSx,
+        actionButtonSx,
+        settingsItemSx,
+        smallIconProps,
+        compactIconProps,
+        isLoggedIn,
+        signedInEmail,
+        saveLogs,
+        handleCheckForUpdates,
+        handleLogout,
+        openLoginFromChat,
+        openPasskeysFromChat,
+        advancedUnlocked,
+        buildVersion,
+        handleBuildVersionTap,
+        openModelSettings,
+        openSystemPromptSettings,
+        isSmall,
+        deleteSessionId,
+        deleteSessionLabel,
+        handleCancelDeleteSession,
+        handleConfirmDeleteSession,
+        showModelSettings,
+        closeModelSettings,
+        useCustomModel,
+        defaultModelName,
+        defaultModelUrl,
+        defaultModelMmproj,
+        loadedModelName,
+        allowMmproj,
+        isTauriRuntime,
+        modelUrl,
+        mmprojUrl,
+        suggestedModels,
+        contextLength,
+        maxTokens,
+        isSavingModel,
+        handleSaveModel,
+        handleUseDefaultModel,
+        showSystemPromptSettings,
+        closeSystemPromptSettings,
+        systemPrompt,
+        handleSaveSystemPrompt,
+        handleUseDefaultSystemPrompt,
+        syncNotificationOpen,
+        setSyncNotificationOpen,
+        syncNotification,
+        modelGateStatus,
+    }: ChatDialogsProps) => {
+        const openExternalUrl = async (url: string) => {
+            const hasTauriBridge =
+                typeof window !== "undefined" &&
+                ("__TAURI__" in window ||
+                    "__TAURI_IPC__" in window ||
+                    "__TAURI_INTERNALS__" in window ||
+                    "__TAURI_METADATA__" in window);
+
+            if (isTauriRuntime || hasTauriBridge) {
+                try {
+                    const { open } = await import("@tauri-apps/api/shell");
+                    await open(url);
+                    return;
+                } catch {
+                    // fall through to browser open fallback
+                }
+            }
+
+            if (typeof window !== "undefined") {
+                const popup = window.open(url, "_blank", "noopener");
+                if (!popup) {
+                    window.location.href = url;
+                }
+            }
+        };
+
+        // --- Model settings draft state ---
+        const [draftUseCustomModel, setDraftUseCustomModel] =
+            React.useState(false);
+        const [draftModelUrl, setDraftModelUrl] = React.useState("");
+        const [draftMmprojUrl, setDraftMmprojUrl] = React.useState("");
+        const [draftContextLength, setDraftContextLength] = React.useState("");
+        const [draftMaxTokens, setDraftMaxTokens] = React.useState("");
+        const [draftModelUrlError, setDraftModelUrlError] = React.useState<
+            string | null
+        >(null);
+        const [draftMmprojError, setDraftMmprojError] = React.useState<
+            string | null
+        >(null);
+        const [draftContextError, setDraftContextError] = React.useState<
+            string | null
+        >(null);
+        const [draftMaxTokensError, setDraftMaxTokensError] = React.useState<
+            string | null
+        >(null);
+        const [showAdvancedLimits, setShowAdvancedLimits] =
+            React.useState(false);
+        const [selectedModelId, setSelectedModelId] = React.useState("default");
+
+        // --- System prompt draft state ---
+        const [draftSystemPrompt, setDraftSystemPrompt] = React.useState("");
+
+        const modelOptions = React.useMemo(
+            () => [
+                {
+                    id: "default",
+                    name: `${defaultModelName} (Default)`,
+                    url: defaultModelUrl,
+                    mmproj: allowMmproj
+                        ? (defaultModelMmproj ?? undefined)
+                        : "",
+                },
+                ...suggestedModels
+                    .filter((model) => model.url !== defaultModelUrl)
+                    .map((model) => ({
+                        id: model.url,
+                        name: model.name,
+                        url: model.url,
+                        mmproj: model.mmproj,
+                    })),
+                { id: "custom", name: "Custom", url: "", mmproj: "" },
+            ],
+            [
+                allowMmproj,
+                defaultModelMmproj,
+                defaultModelName,
+                defaultModelUrl,
+                suggestedModels,
+            ],
+        );
+        const isCustomSelected = selectedModelId === "custom";
+        const canSaveModelSettings =
+            !isCustomSelected || draftModelUrl.trim().length > 0;
+
+        // Initialize model settings draft from parent state when dialog opens
+        React.useEffect(() => {
+            if (!showModelSettings) return;
+            setDraftUseCustomModel(useCustomModel);
+            setDraftModelUrl(modelUrl);
+            setDraftMmprojUrl(mmprojUrl);
+            setDraftContextLength(contextLength);
+            setDraftMaxTokens(maxTokens);
+            setDraftModelUrlError(null);
+            setDraftMmprojError(null);
+            setDraftContextError(null);
+            setDraftMaxTokensError(null);
+            const matchedOption = useCustomModel
+                ? modelOptions.find((model) => model.url === modelUrl)
+                : undefined;
+            setSelectedModelId(
+                !useCustomModel ? "default" : (matchedOption?.id ?? "custom"),
+            );
+            setShowAdvancedLimits(!!contextLength || !!maxTokens);
+        }, [
+            contextLength,
+            maxTokens,
+            mmprojUrl,
+            modelOptions,
+            modelUrl,
+            showModelSettings,
+            useCustomModel,
+        ]);
+
+        // Initialize system prompt draft from parent state when dialog opens
+        React.useEffect(() => {
+            if (!showSystemPromptSettings) return;
+            setDraftSystemPrompt(systemPrompt);
+        }, [showSystemPromptSettings]); // eslint-disable-line react-hooks/exhaustive-deps
+
+        const validateModelSettings = React.useCallback(() => {
+            const validateUrl = (value: string) => {
+                if (!value) return undefined;
+                try {
+                    const url = new URL(value);
+                    if (
+                        url.hostname !== "huggingface.co" &&
+                        !url.hostname.endsWith(".huggingface.co")
+                    ) {
+                        return "URL must be a huggingface.co link";
+                    }
+                    if (url.pathname.includes("/blob/")) {
+                        return "Use a direct file URL, not a /blob/ page";
+                    }
+                    if (!url.pathname.endsWith(".gguf")) {
+                        return "URL must end with .gguf";
+                    }
+                    return undefined;
+                } catch {
+                    return "Enter a valid URL";
+                }
+            };
+
+            const modelError = draftUseCustomModel
+                ? draftModelUrl
+                    ? validateUrl(draftModelUrl)
+                    : "Required"
+                : undefined;
+            const mmprojErr =
+                draftUseCustomModel && isTauriRuntime
+                    ? validateUrl(draftMmprojUrl)
+                    : undefined;
+
+            const contextErrorValue =
+                draftContextLength && !/^\d+$/.test(draftContextLength)
+                    ? "Enter a number"
+                    : undefined;
+            const maxTokensErrorValue =
+                draftMaxTokens && !/^\d+$/.test(draftMaxTokens)
+                    ? "Enter a number"
+                    : undefined;
+
+            const contextValue = draftContextLength
+                ? Number(draftContextLength)
+                : undefined;
+            const maxTokensValue = draftMaxTokens
+                ? Number(draftMaxTokens)
+                : undefined;
+
+            const maxTokensLimitError =
+                contextValue && maxTokensValue && maxTokensValue > contextValue
+                    ? "Must be <= context length"
+                    : undefined;
+
+            setDraftModelUrlError(modelError ?? null);
+            setDraftMmprojError(mmprojErr ?? null);
+            setDraftContextError(contextErrorValue ?? null);
+            setDraftMaxTokensError(
+                maxTokensErrorValue ?? maxTokensLimitError ?? null,
+            );
+
+            return !(
+                modelError ||
+                mmprojErr ||
+                contextErrorValue ||
+                maxTokensErrorValue ||
+                maxTokensLimitError
+            );
+        }, [
+            draftContextLength,
+            draftMaxTokens,
+            draftMmprojUrl,
+            draftModelUrl,
+            draftUseCustomModel,
+            isTauriRuntime,
+        ]);
+
+        return (
+            <>
+                <Dialog
+                    open={showSettingsModal}
+                    onClose={closeSettingsModal}
+                    maxWidth="xs"
+                    fullWidth
+                    slotProps={{
+                        paper: {
+                            sx: [
+                                dialogPaperSx,
+                                {
+                                    maxHeight:
+                                        "min(500px, calc(var(--ensu-viewport-height, 100svh) - 32px))",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                },
+                            ],
+                        },
+                    }}
+                >
+                    <DialogTitle
+                        sx={[
+                            dialogTitleSx,
+                            {
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: 1,
+                                pr: 1,
+                            },
+                        ]}
+                    >
+                        <Box component="span">Settings</Box>
+                        <IconButton
+                            aria-label="Close settings"
+                            onClick={closeSettingsModal}
+                            sx={actionButtonSx}
+                        >
+                            <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                {...smallIconProps}
+                            />
+                        </IconButton>
+                    </DialogTitle>
+                    <DialogContent sx={{ flex: 1, overflowY: "auto" }}>
+                        <Stack sx={{ gap: 2 }}>
+                            {isLoggedIn && (
+                                <Box
+                                    sx={{
+                                        px: 2,
+                                        py: 1.5,
+                                        borderRadius: 2,
+                                        border: "1px solid",
+                                        borderColor: "divider",
+                                        bgcolor: "background.default",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Signed in as
+                                    </Typography>
+                                    <Typography variant="small">
+                                        {signedInEmail ?? ""}
+                                    </Typography>
+                                </Box>
+                            )}
+
+                            <Stack sx={{ gap: 1 }}>
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void openExternalUrl(
+                                            "https://ente.com/blog/ensu/",
+                                        );
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={InformationCircleIcon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        About
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+
+                                {isTauriRuntime && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            void handleCheckForUpdates();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={InformationCircleIcon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Check for updates
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void saveLogs();
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Bug01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Save logs
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+
+                                {isLoggedIn && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openPasskeysFromChat();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Key01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Passkeys
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                {!isLoggedIn && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openLoginFromChat();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Upload01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Sign In to Backup
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                {isLoggedIn && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            handleLogout();
+                                        }}
+                                        sx={[
+                                            settingsItemSx,
+                                            { color: "critical.main" },
+                                        ]}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Cancel01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1, fontWeight: 600 }}
+                                        >
+                                            Sign Out
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void openExternalUrl(
+                                            "https://ente.com/privacy",
+                                        );
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={ViewIcon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Privacy Policy
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void openExternalUrl(
+                                            "https://ente.com/terms",
+                                        );
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={File01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Terms of Service
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+                            </Stack>
+
+                            {advancedUnlocked && (
+                                <Stack sx={{ gap: 1 }}>
+                                    <Typography
+                                        variant="mini"
+                                        sx={{
+                                            color: "text.muted",
+                                            px: 0.5,
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.08em",
+                                        }}
+                                    >
+                                        Advanced
+                                    </Typography>
+
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openModelSettings();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Settings01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Model settings
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openSystemPromptSettings();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={SlidersHorizontalIcon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            System prompt
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                </Stack>
+                            )}
+
+                            <Typography
+                                variant="mini"
+                                onClick={handleBuildVersionTap}
+                                sx={{
+                                    color: "text.muted",
+                                    textAlign: "center",
+                                    cursor: "pointer",
+                                    userSelect: "none",
+                                    py: 1,
+                                }}
+                            >
+                                Build {buildVersion}
+                            </Typography>
+                        </Stack>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog
+                    open={Boolean(deleteSessionId)}
+                    onClose={handleCancelDeleteSession}
+                    fullScreen={isSmall}
+                    maxWidth="xs"
+                    fullWidth
+                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                >
+                    <DialogTitle sx={dialogTitleSx}>Delete chat?</DialogTitle>
+                    <DialogContent>
+                        <Typography variant="body" sx={{ color: "text.muted" }}>
+                            Delete {deleteSessionLabel}? This cannot be undone.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Button
+                            onClick={handleCancelDeleteSession}
+                            color="secondary"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="critical"
+                            onClick={() => void handleConfirmDeleteSession()}
+                        >
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {advancedUnlocked && (
+                    <Dialog
+                        open={showModelSettings}
+                        onClose={closeModelSettings}
+                        fullScreen={isSmall}
+                        maxWidth="sm"
+                        fullWidth
+                        slotProps={{ paper: { sx: dialogPaperSx } }}
+                    >
+                        <DialogTitle sx={dialogTitleSx}>
+                            Model Settings
+                        </DialogTitle>
+                        <DialogContent>
+                            <Stack sx={{ gap: 3 }}>
+                                <Stack sx={{ gap: 1.5 }}>
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Select model
+                                    </Typography>
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        label="Model"
+                                        value={selectedModelId}
+                                        onChange={(event) => {
+                                            const nextId = event.target.value;
+                                            const nextModel = modelOptions.find(
+                                                (model) => model.id === nextId,
+                                            );
+                                            setSelectedModelId(nextId);
+                                            if (!nextModel) return;
+                                            if (nextId === "default") {
+                                                setDraftUseCustomModel(false);
+                                                setDraftModelUrl("");
+                                                setDraftMmprojUrl("");
+                                                return;
+                                            }
+                                            setDraftUseCustomModel(true);
+                                            if (nextId === "custom") {
+                                                setDraftModelUrl("");
+                                                setDraftMmprojUrl("");
+                                                return;
+                                            }
+                                            setDraftModelUrl(nextModel.url);
+                                            setDraftMmprojUrl(
+                                                allowMmproj
+                                                    ? (nextModel.mmproj ?? "")
+                                                    : "",
+                                            );
+                                        }}
+                                        helperText={
+                                            loadedModelName
+                                                ? `Loaded: ${loadedModelName}`
+                                                : "Custom reveals direct Hugging Face URLs."
+                                        }
+                                    >
+                                        {modelOptions.map((model) => (
+                                            <MenuItem
+                                                key={model.id}
+                                                value={model.id}
+                                            >
+                                                {model.name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Stack>
+
+                                {isCustomSelected && (
+                                    <Stack sx={{ gap: 1.5 }}>
+                                        <TextField
+                                            fullWidth
+                                            label="Model .gguf URL"
+                                            placeholder="https://huggingface.co/..."
+                                            value={draftModelUrl}
+                                            onChange={(event) =>
+                                                setDraftModelUrl(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            error={!!draftModelUrlError}
+                                            helperText={
+                                                draftModelUrlError ?? " "
+                                            }
+                                        />
+                                        {allowMmproj && (
+                                            <TextField
+                                                fullWidth
+                                                label="mmproj .gguf URL"
+                                                placeholder="(optional for multimodal)"
+                                                value={draftMmprojUrl}
+                                                onChange={(event) =>
+                                                    setDraftMmprojUrl(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                error={!!draftMmprojError}
+                                                helperText={
+                                                    draftMmprojError ?? " "
+                                                }
+                                            />
+                                        )}
+                                    </Stack>
+                                )}
+
+                                <Stack sx={{ gap: 1.5 }}>
+                                    <Button
+                                        onClick={() =>
+                                            setShowAdvancedLimits((v) => !v)
+                                        }
+                                        color="secondary"
+                                        sx={{
+                                            justifyContent: "flex-start",
+                                            px: 0,
+                                        }}
+                                    >
+                                        Advanced limits
+                                    </Button>
+                                    {!showAdvancedLimits && (
+                                        <Typography
+                                            variant="mini"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            Context length and max output
+                                        </Typography>
+                                    )}
+                                    {showAdvancedLimits && (
+                                        <Stack
+                                            direction="row"
+                                            sx={{ gap: 1.5 }}
+                                        >
+                                            <TextField
+                                                fullWidth
+                                                label="Context length"
+                                                placeholder="8192"
+                                                value={draftContextLength}
+                                                onChange={(event) =>
+                                                    setDraftContextLength(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                error={!!draftContextError}
+                                                helperText={
+                                                    draftContextError ?? " "
+                                                }
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Max output"
+                                                placeholder="2048"
+                                                value={draftMaxTokens}
+                                                onChange={(event) =>
+                                                    setDraftMaxTokens(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                error={!!draftMaxTokensError}
+                                                helperText={
+                                                    draftMaxTokensError ?? " "
+                                                }
+                                            />
+                                        </Stack>
+                                    )}
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Leave blank to use model defaults
+                                    </Typography>
+                                </Stack>
+                            </Stack>
+                        </DialogContent>
+                        <DialogActions sx={{ px: 3, pb: 3 }}>
+                            <Stack sx={{ width: "100%", gap: 1.5 }}>
+                                <Button
+                                    variant="contained"
+                                    color="accent"
+                                    disabled={
+                                        !canSaveModelSettings ||
+                                        isSavingModel ||
+                                        modelGateStatus === "downloading"
+                                    }
+                                    onClick={() => {
+                                        if (!validateModelSettings()) return;
+                                        handleSaveModel({
+                                            useCustomModel: draftUseCustomModel,
+                                            modelUrl: draftModelUrl,
+                                            mmprojUrl: draftMmprojUrl,
+                                            contextLength: draftContextLength,
+                                            maxTokens: draftMaxTokens,
+                                        });
+                                    }}
+                                >
+                                    Save Model Settings
+                                </Button>
+                                <Button
+                                    onClick={handleUseDefaultModel}
+                                    color="secondary"
+                                >
+                                    Reset to defaults
+                                </Button>
+                                <Typography
+                                    variant="mini"
+                                    sx={{
+                                        color: "text.muted",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    Changes apply the next time the model loads.
+                                </Typography>
+                            </Stack>
+                        </DialogActions>
+                    </Dialog>
+                )}
+
+                <Dialog
+                    open={showSystemPromptSettings}
+                    onClose={closeSystemPromptSettings}
+                    fullScreen={isSmall}
+                    maxWidth="sm"
+                    fullWidth
+                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                >
+                    <DialogTitle sx={dialogTitleSx}>System Prompt</DialogTitle>
+                    <DialogContent>
+                        <Stack sx={{ gap: 2.5 }}>
+                            <Typography
+                                variant="small"
+                                sx={{ color: "text.muted" }}
+                            >
+                                This prompt is used as-is. Use $date anywhere to
+                                insert the current date and time. Leave blank to
+                                use the default prompt.
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                minRows={10}
+                                maxRows={18}
+                                label="Prompt text"
+                                placeholder="You are a concise assistant. Current date and time: $date"
+                                value={draftSystemPrompt}
+                                onChange={(event) =>
+                                    setDraftSystemPrompt(event.target.value)
+                                }
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Stack sx={{ width: "100%", gap: 1.5 }}>
+                            <Button
+                                variant="contained"
+                                color="accent"
+                                onClick={() =>
+                                    handleSaveSystemPrompt(draftSystemPrompt)
+                                }
+                            >
+                                Save
+                            </Button>
+                            <Button
+                                onClick={handleUseDefaultSystemPrompt}
+                                color="secondary"
+                            >
+                                Use Default Prompt
+                            </Button>
+                        </Stack>
+                    </DialogActions>
+                </Dialog>
+
+                <Notification
+                    open={syncNotificationOpen}
+                    onClose={() => setSyncNotificationOpen(false)}
+                    attributes={syncNotification}
+                    horizontal={isSmall ? "left" : "right"}
+                    vertical="bottom"
+                    sx={{
+                        width: "fit-content",
+                        maxWidth: "min(360px, 100vw)",
+                        backgroundColor: "transparent",
+                        boxShadow: "none",
+                        bottom: { xs: 96, md: 24 },
+                        "& .MuiButtonBase-root": {
+                            padding: "4px 8px",
+                            borderRadius: "999px",
+                            minHeight: 0,
+                            bgcolor: "background.paper",
+                            color: "text.base",
+                            boxShadow: "none",
+                        },
+                        "& .MuiStack-root": { gap: 1 },
+                        "& .MuiStack-root svg": { fontSize: "18px" },
+                        "& .MuiTypography-root": {
+                            fontSize: "13px",
+                            lineHeight: "18px",
+                        },
+                        "& .MuiIconButton-root": {
+                            padding: 0,
+                            bgcolor: "transparent",
+                        },
+                    }}
+                />
+            </>
+        );
+    },
+);

@@ -12,13 +12,13 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/app_navigation_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
-import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AlbumHomeWidgetService {
@@ -163,7 +163,6 @@ class AlbumHomeWidgetService {
   Future<void> onLaunchFromWidget(
     int fileId,
     int collectionId,
-    BuildContext context,
   ) async {
     final collection =
         CollectionsService.instance.getCollectionByID(collectionId);
@@ -176,12 +175,13 @@ class AlbumHomeWidgetService {
 
     // First navigate to the collection page
     final thumbnail = await CollectionsService.instance.getCover(collection);
-    routeToPage(
-      context,
-      CollectionPage(
-        CollectionWithThumbnail(collection, thumbnail),
-      ),
-    ).ignore();
+    AppNavigationService.instance
+        .pushPage(
+          CollectionPage(
+            CollectionWithThumbnail(collection, thumbnail),
+          ),
+        )
+        .ignore();
     final getAllFilesCollection =
         await FilesDB.instance.getAllFilesCollection(collection.id);
 
@@ -192,17 +192,18 @@ class AlbumHomeWidgetService {
       return;
     }
 
-    routeToPage(
-      context,
-      DetailPage(
-        DetailPageConfiguration(
-          getAllFilesCollection,
-          getAllFilesCollection.indexOf(file),
-          "albumwidget",
-        ),
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+    AppNavigationService.instance
+        .pushPage(
+          DetailPage(
+            DetailPageConfiguration(
+              getAllFilesCollection,
+              getAllFilesCollection.indexOf(file),
+              "albumwidget",
+            ),
+          ),
+          forceCustomPageRoute: true,
+        )
+        .ignore();
     await _refreshAlbumsWidget();
   }
 

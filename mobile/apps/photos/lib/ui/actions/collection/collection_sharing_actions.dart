@@ -1,13 +1,13 @@
 import "dart:async";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart' hide isValidEmail;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
-import "package:photos/extensions/user_extension.dart";
+import 'package:photos/gateways/collections/models/create_request.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
@@ -16,6 +16,7 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/contacts/contact_identity_resolver.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -30,7 +31,6 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
-import 'package:photos/utils/standalone/date_time.dart';
 import "package:styled_text/styled_text.dart";
 
 class CollectionActions {
@@ -195,7 +195,7 @@ class CollectionActions {
       ],
       title: AppLocalizations.of(context).removeWithQuestionMark,
       body: AppLocalizations.of(context)
-          .removeParticipantBody(userEmail: user.displayName ?? user.email),
+          .removeParticipantBody(userEmail: resolveDisplayName(user)),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -585,7 +585,8 @@ class CollectionActions {
     final isCollectionOwner = collection.owner.id == currentUserID;
     final bool canRemoveAllParticipants =
         collectionsService.canRemoveFilesFromAllParticipants(collection);
-    final bool isCollectionAdmin = canRemoveAllParticipants && !isCollectionOwner;
+    final bool isCollectionAdmin =
+        canRemoveAllParticipants && !isCollectionOwner;
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
@@ -644,6 +645,21 @@ class CollectionActions {
 
     final Map<int, List<EnteFile>> collectionToFilesMap =
         await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
+
+    // Fix files in pendingAssignMap with correct collectionID entries.
+    // This is needed when files are selected after filtering by another album,
+    // as the file's collectionID might point to the filtered album instead of
+    // the current collection.
+    final filesInCurrentCollection = collectionToFilesMap[collection.id];
+    if (filesInCurrentCollection != null) {
+      for (final file in filesInCurrentCollection) {
+        if (file.uploadedFileID != null &&
+            pendingAssignMap.containsKey(file.uploadedFileID) &&
+            file.ownerID == currentUserID) {
+          pendingAssignMap[file.uploadedFileID!] = file;
+        }
+      }
+    }
 
     // Find and map the files from current collection to to entries in other
     // collections. This mapping is done to avoid moving all the files to
@@ -732,9 +748,10 @@ class CollectionActions {
     }
     final Collection? targetCollection =
         collectionsService.getCollectionByID(toCollectionID);
-    // ignore non-cached collections, uncategorized and favorite
-    // collections and collections ignored by others
+    // ignore non-cached, deleted, uncategorized and favorite collections,
+    // and collections ignored by others
     if (targetCollection == null ||
+        targetCollection.isDeleted ||
         (CollectionType.uncategorized == targetCollection.type ||
             targetCollection.type == CollectionType.favorites) ||
         targetCollection.owner.id != userID) {

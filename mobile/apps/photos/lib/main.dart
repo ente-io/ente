@@ -4,6 +4,9 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_rust/ente_rust.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,22 +26,24 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import 'package:photos/services/memory_lane/memory_lane_service.dart';
+import 'package:photos/services/memory_share_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/photos_contacts_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/services/social_notification_coordinator.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
@@ -65,11 +70,13 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
 bool _stopHearBeat = false;
+bool _isRustInitialized = false;
+Future<void>? _rustInitFuture;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
+  FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 
@@ -102,8 +109,27 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(SemanticSearchService.instance.init());
+      unawaited(_warmForegroundDeferredServices());
+    });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
+}
+
+Future<void> _warmForegroundDeferredServices() async {
+  try {
+    await MemoryLaneService.instance.init();
+    if (flagService.facesTimeline) {
+      MemoryLaneService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Memory Lane disabled via feature flag");
+    }
+  } catch (e, s) {
+    _logger.warning("Deferred MemoryLaneService warm failed", e, s);
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -156,6 +182,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await _scheduleHeartBeat(prefs, true);
+    await _ensureRustInitialized(via: 'workmanager:$taskId');
 
     _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
@@ -180,6 +207,10 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    // Initialize early so thermal/battery listeners can warm up while the
+    // rest of background services are being initialized.
+    final controller = computeController;
+    await MemoryShareService.instance.init();
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -195,6 +226,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     // Misc Services
     await UserService.instance.init();
     NotificationService.instance.init(prefs);
+    SocialNotificationCoordinator.instance.init(prefs);
+    await NotificationService.instance.initializeForBackground();
 
     // Begin Execution
     // only runs for android
@@ -211,9 +244,28 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    // await MLService.instance.init();
-    // await PersonService.init(entityService, MLDataDB.instance, prefs);
-    // await MLService.instance.runAllML(force: true);
+    if ((isOfflineMode || flagService.enableMLInBackground) &&
+        hasGrantedMLConsent) {
+      await controller.init();
+      final canRunML = controller.requestCompute(ml: true);
+      if (!canRunML) {
+        _logger.info(
+          "[BG TASK] skipping ML, compute requirements not satisfied",
+        );
+      } else {
+        bool mlRunStarted = false;
+        try {
+          await MLService.instance.init();
+          PersonService.init(entityService, MLDataDB.instance, prefs);
+          mlRunStarted = true;
+          await MLService.instance.runAllML(force: false);
+        } finally {
+          if (!mlRunStarted) {
+            controller.releaseCompute(ml: true);
+          }
+        }
+      }
+    }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 
@@ -231,7 +283,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       if (!initComplete && !isBackground) {
         _logger.severe("Stuck on splash screen for >= 15 seconds");
         triggerSendLogs(
-          "support@ente.io",
+          "support@ente.com",
           "Stuck on splash screen for >= 15 seconds on ${Platform.operatingSystem}",
           null,
         );
@@ -239,12 +291,18 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
+    await _ensureRustInitialized(
+      via: isBackground ? 'background:$via' : 'foreground:$via',
+    );
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _logFGHeartBeatInfo(preferences);
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
+    if (isBackground) {
+      await NotificationService.instance.initializeForBackground();
+    }
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
@@ -272,6 +330,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    await MemoryShareService.instance.init();
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
@@ -280,6 +339,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
     _logger.info("CollectionsService init done $tlog");
+    SocialNotificationCoordinator.instance.init(preferences);
 
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);
@@ -300,9 +360,15 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    _logger.info("ActivityService init $tlog");
-    await activityService.init();
-    _logger.info("ActivityService init done $tlog");
+    if (!isBackground && flagService.internalUser) {
+      _logger.info("GalleryDownloadQueueService init $tlog");
+      await galleryDownloadQueueService.init();
+      _logger.info("GalleryDownloadQueueService init done $tlog");
+    }
+
+    _logger.info("RitualsService init $tlog");
+    await ritualsService.init();
+    _logger.info("RitualsService init done $tlog");
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
@@ -316,20 +382,14 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }).ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(entityService, MLDataDB.instance, preferences);
-    await FacesTimelineService.instance.init();
-    if (flagService.facesTimeline) {
-      FacesTimelineService.instance
-          .queueFullRecompute(trigger: "startup")
-          .ignore();
-    } else {
-      _logger.info("Faces timeline disabled via feature flag");
+    PersonService.init(entityService, MLDataDB.instance, preferences);
+    await PersonService.instance.refreshPersonCache();
+    if (!isBackground && flagService.enableContact) {
+      unawaited(_warmContactsCacheInBackground());
     }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
-    await localSettings.initSwipeToSelectDefault();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -337,6 +397,37 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
+  }
+}
+
+Future<void> _warmContactsCacheInBackground() async {
+  try {
+    await PhotosContactsService.instance.ensureReady();
+  } catch (e, s) {
+    _logger.warning("Deferred contacts warm-up failed", e, s);
+  }
+}
+
+Future<void> _ensureRustInitialized({required String via}) async {
+  if (_isRustInitialized) {
+    return;
+  }
+  final inFlightInit = _rustInitFuture;
+  if (inFlightInit != null) {
+    await inFlightInit;
+    return;
+  }
+
+  final initFuture = Future.wait([
+    EntePhotosRust.init(),
+    EnteRust.init(),
+  ]);
+  _rustInitFuture = initFuture;
+  try {
+    await initFuture;
+    _isRustInitialized = true;
+  } finally {
+    _rustInitFuture = null;
   }
 }
 
@@ -350,7 +441,6 @@ void logLocalSettings() {
     'Gallery grid size': localSettings.getPhotoGridSize(),
     'Video streaming enabled':
         VideoPreviewService.instance.isVideoStreamingEnabled,
-    'Swipe to select enabled': localSettings.isSwipeToSelectEnabled,
   };
 
   final formattedSettings =

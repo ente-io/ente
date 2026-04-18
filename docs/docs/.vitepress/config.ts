@@ -1,6 +1,11 @@
 import { defineConfig } from "vitepress";
 import { sidebar } from "./sidebar";
 
+const docsBaseUrl = "https://ente.com/help";
+
+// Pages with noindex in frontmatter, collected during build to exclude from sitemap
+const noindexPages = new Set<string>();
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     base: "/help/", // Serve under /help path
@@ -12,7 +17,7 @@ export default defineConfig({
     cleanUrls: true,
     ignoreDeadLinks: "localhostLinks",
     sitemap: {
-        hostname: "https://ente.io/help/",
+        hostname: `${docsBaseUrl}/`,
         transformItems: (items) => {
             // Remove trailing slashes for consistency (cleanUrls is enabled)
             // and deduplicate URLs
@@ -20,9 +25,13 @@ export default defineConfig({
             return items
                 .map((item) => ({
                     ...item,
-                    url: item.url.replace(/\/$/, ''),
+                    url: item.url.replace(/\/$/, ""),
                 }))
                 .filter((item) => {
+                    const path = item.url.replace(/\/$/, "");
+                    if (noindexPages.has(path)) {
+                        return false;
+                    }
                     if (seen.has(item.url)) {
                         return false;
                     }
@@ -32,18 +41,41 @@ export default defineConfig({
         },
     },
     transformPageData(pageData) {
+        // Track noindex pages for sitemap exclusion
+        const head = pageData.frontmatter.head;
+        if (Array.isArray(head)) {
+            for (const tag of head) {
+                if (
+                    Array.isArray(tag) &&
+                    tag[0] === "meta" &&
+                    tag[1]?.name === "robots" &&
+                    tag[1]?.content?.includes("noindex")
+                ) {
+                    const path = pageData.relativePath
+                        .replace(/index\.md$/, "")
+                        .replace(/\.md$/, "");
+                    noindexPages.add(path);
+                    break;
+                }
+            }
+        }
+
         // Add canonical URL to all pages
-        const canonicalUrl = `https://ente.io/help/${pageData.relativePath}`
+        const canonicalUrl = `${docsBaseUrl}/${pageData.relativePath}`
             .replace(/index\.md$/, "")
             .replace(/\.md$/, "");
         pageData.frontmatter.canonicalUrl = canonicalUrl;
     },
     async transformHead({ pageData }) {
         const head: any[] = [];
-        const canonicalUrl = pageData.frontmatter.canonicalUrl || `https://ente.io/help/`;
-        const title = pageData.frontmatter.title || pageData.title || "Ente Help";
-        const description = pageData.frontmatter.description || "Documentation and help for Ente's products";
-        const ogImage = "https://ente.io/help/og-image.png"; // You can customize this per page if needed
+        const canonicalUrl =
+            pageData.frontmatter.canonicalUrl || `${docsBaseUrl}/`;
+        const title =
+            pageData.frontmatter.title || pageData.title || "Ente Help";
+        const description =
+            pageData.frontmatter.description ||
+            "Documentation and help for Ente's products";
+        const ogImage = `${docsBaseUrl}/og-image.png`; // You can customize this per page if needed
 
         // Canonical URL
         head.push(["link", { rel: "canonical", href: canonicalUrl }]);
@@ -51,23 +83,35 @@ export default defineConfig({
         // Open Graph tags
         head.push(["meta", { property: "og:type", content: "website" }]);
         head.push(["meta", { property: "og:title", content: title }]);
-        head.push(["meta", { property: "og:description", content: description }]);
+        head.push([
+            "meta",
+            { property: "og:description", content: description },
+        ]);
         head.push(["meta", { property: "og:url", content: canonicalUrl }]);
         head.push(["meta", { property: "og:image", content: ogImage }]);
         head.push(["meta", { property: "og:site_name", content: "Ente Help" }]);
 
         // Twitter Card tags
-        head.push(["meta", { name: "twitter:card", content: "summary_large_image" }]);
+        head.push([
+            "meta",
+            { name: "twitter:card", content: "summary_large_image" },
+        ]);
         head.push(["meta", { name: "twitter:site", content: "@enteio" }]);
         head.push(["meta", { name: "twitter:title", content: title }]);
-        head.push(["meta", { name: "twitter:description", content: description }]);
+        head.push([
+            "meta",
+            { name: "twitter:description", content: description },
+        ]);
         head.push(["meta", { name: "twitter:image", content: ogImage }]);
 
         // Meta description
         head.push(["meta", { name: "description", content: description }]);
 
         // Add FAQ Schema markup for FAQ pages
-        if (pageData.relativePath.includes("/faq/") && pageData.relativePath !== "photos/faq/index.md") {
+        if (
+            pageData.relativePath.includes("/faq/") &&
+            pageData.relativePath !== "photos/faq/index.md"
+        ) {
             const faqSchema = await generateFAQSchema(pageData);
             if (faqSchema) {
                 head.push([
@@ -133,7 +177,8 @@ async function generateFAQSchema(pageData: any) {
 
         // Match headings with IDs (format: ### Question {#id})
         // Updated regex to better match the content structure
-        const questionRegex = /###\s+(.+?)\s+\{#[^}]+\}\s*\n+([\s\S]*?)(?=\n###\s|\n##\s|$)/g;
+        const questionRegex =
+            /###\s+(.+?)\s+\{#[^}]+\}\s*\n+([\s\S]*?)(?=\n###\s|\n##\s|$)/g;
         let match;
 
         while ((match = questionRegex.exec(content)) !== null) {
@@ -161,10 +206,10 @@ async function generateFAQSchema(pageData: any) {
             if (question && answer && answer.length > 20) {
                 questions.push({
                     "@type": "Question",
-                    "name": question,
-                    "acceptedAnswer": {
+                    name: question,
+                    acceptedAnswer: {
                         "@type": "Answer",
-                        "text": answer,
+                        text: answer,
                     },
                 });
             }
@@ -177,43 +222,49 @@ async function generateFAQSchema(pageData: any) {
         return {
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            "mainEntity": questions,
+            mainEntity: questions,
         };
     } catch (error) {
-        console.error(`Error generating FAQ schema for ${pageData.relativePath}:`, error);
+        console.error(
+            `Error generating FAQ schema for ${pageData.relativePath}:`,
+            error,
+        );
         return null;
     }
 }
 
 // Generate Breadcrumb Schema
 function generateBreadcrumbSchema(pageData: any) {
-    const path = pageData.relativePath.replace(/\.md$/, "").replace(/\/index$/, "");
+    const path = pageData.relativePath
+        .replace(/\.md$/, "")
+        .replace(/\/index$/, "");
     if (!path || path === "index") return null;
 
     const parts = path.split("/").filter(Boolean);
     const items = [
         {
             "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://ente.io/help/",
+            position: 1,
+            name: "Home",
+            item: `${docsBaseUrl}/`,
         },
     ];
 
-    let currentPath = "https://ente.io/help";
+    let currentPath = docsBaseUrl;
     parts.forEach((part, index) => {
         currentPath += `/${part}`;
         items.push({
             "@type": "ListItem",
-            "position": index + 2,
-            "name": part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " "),
-            "item": currentPath,
+            position: index + 2,
+            name:
+                part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " "),
+            item: currentPath,
         });
     });
 
     return {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        "itemListElement": items,
+        itemListElement: items,
     };
 }

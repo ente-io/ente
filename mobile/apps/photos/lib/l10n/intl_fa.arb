@@ -26,7 +26,6 @@
   "deleteReason4": "دلیل من ذکر نشده است",
   "sendEmail": "ارسال ایمیل",
   "deleteRequestSLAText": "درخواست شما ظرف مدت ۷۲ ساعت پردازش خواهد شد.",
-  "deleteEmailRequest": "لطفا یک ایمیل به <warning>account-deletion@ente.io</warning> از آدرس ایمیل ثبت شده خود ارسال کنید.",
   "entePhotosPerm": "Ente برای نگه‌داری عکس‌های شما <i>به دسترسی نیاز دارد</i>",
   "ok": "تایید",
   "createAccount": "ایجاد حساب کاربری",
@@ -54,7 +53,6 @@
   "incorrectRecoveryKeyBody": "کلید بازیابی که وارد کردید درست نیست",
   "forgotPassword": "رمز عبور را فراموش کرده‌اید",
   "enterYourRecoveryKey": "کلید بازیابی خود را وارد کنید",
-  "noRecoveryKey": "کلید بازیابی ندارید؟",
   "sorry": "متاسفیم",
   "noRecoveryKeyNoDecryption": "با توجه به ماهیت پروتکل رمزگذاری سرتاسر ما، اطلاعات شما بدون رمز عبور یا کلید بازیابی شما قابل رمزگشایی نیست",
   "verifyEmail": "تایید ایمیل",
@@ -69,7 +67,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -121,7 +119,6 @@
   "verifyPassword": "تایید رمز عبور",
   "recoveryKey": "کلید بازیابی",
   "recoveryKeyOnForgotPassword": "اگر رمز عبور خود را فراموش کردید، تنها راهی که می‌توانید اطلاعات خود را بازیابی کنید با این کلید است.",
-  "recoveryKeySaveDescription": "ما این کلید را ذخیره نمی‌کنیم، لطفا این کلید ۲۴ کلمه‌ای را در مکانی امن ذخیره کنید.",
   "doThisLater": "بعداً انجام شود",
   "saveKey": "ذخیره کلید",
   "recoveryKeyCopiedToClipboard": "کلید بازیابی در کلیپ‌بورد کپی شد",
@@ -133,7 +130,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -209,7 +206,6 @@
   "manageParticipants": "مدیریت",
   "collabLinkSectionDescription": "پیوندی ایجاد کنید تا به افراد اجازه دهید بدون نیاز به برنامه یا حساب کاربری Ente عکس‌ها را در آلبوم اشتراک گذاشته شده شما اضافه و مشاهده کنند. برای جمع‌آوری عکس‌های رویداد عالی است.",
   "verifyEmailID": "تایید {email}",
-  "shareTextRecommendUsingEnte": "Ente را دانلود کنید تا بتوانید به راحتی عکس‌ها و ویدیوهای با کیفیت اصلی را به اشتراک بگذارید\n\nhttps://ente.io",
   "details": "جزئیات",
   "faq": "سوالات متداول",
   "archive": "بایگانی",
@@ -250,8 +246,6 @@
   "backup": "پشتیبان گیری",
   "familyPlans": "برنامه‌های خانوادگی",
   "notifications": "آگاه‌سازی‌ها",
-  "sharedPhotoNotifications": "عکس‌های جدید به اشتراک گذاشته شده",
-  "sharedPhotoNotificationsExplanation": "هنگامی که شخصی عکسی را به آلبوم مشترکی که شما بخشی از آن هستید اضافه می‌کند، آگاه‌سازی دریافت می‌کنید",
   "advanced": "پیشرفته",
   "general": "عمومی",
   "security": "امنیت",
@@ -279,20 +273,10 @@
   "startBackup": "شروع پشتیبان گیری",
   "grantFullAccessPrompt": "لطفا اجازه دسترسی به تمام عکس‌ها را در تنظیمات برنامه بدهید",
   "existingUser": "کاربر موجود",
-  "privateBackups": "پشتیبان گیری خصوصی",
-  "forYourMemories": "برای خاطرات شما",
-  "endtoendEncryptedByDefault": "به صورت پیش‌فرض رمزگذاری سرتاسر",
-  "safelyStored": "به طور ایمن",
-  "atAFalloutShelter": "در یک پناهگاه ذخیره می‌شود",
-  "designedToOutlive": "طراحی شده تا بیشتر زنده بماند",
-  "available": "در دسترس",
-  "everywhere": "همه جا",
-  "androidIosWebDesktop": "اندروید، آی‌اواس، وب، رایانه رومیزی",
   "newToEnte": "کاربر جدید Ente",
   "pleaseLoginAgain": "لطفا دوباره وارد شوید",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente فقط در صورتی می‌تواند پرونده‌ها را رمزگذاری و نگه‌داری کند که به آن‌ها دسترسی داشته باشید",
   "pleaseGrantPermissions": "لطفا دسترسی بدهید",
-  "grantPermission": "دسترسی دادن",
   "privateSharing": "اشتراک گذاری خصوصی",
   "shareOnlyWithThePeopleYouWant": "فقط با افرادی که می‌خواهید به اشتراک بگذارید",
   "usePublicLinksForPeopleNotOnEnte": "استفاده از پیوندهای عمومی برای افرادی که در Ente نیستند",
@@ -326,11 +310,9 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} رایگان",
-  "appVersion": "نسخه: {versionValue}",
   "verifyIDLabel": "تایید",
   "fileInfoAddDescHint": "افزودن توضیحات...",
   "editLocationTagTitle": "ویرایش مکان",
-  "familyPlanPortalTitle": "خانوادگی",
   "androidBiometricHint": "تایید هویت",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -344,10 +326,10 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
   },
   "fileTypes": "انواع پرونده",
-  "hearUsWhereTitle": "از کجا در مورد Ente شنیدی؟ (اختیاری)",
   "hearUsExplanation": "ما نصب برنامه را ردیابی نمی‌کنیم. اگر بگویید کجا ما را پیدا کردید، به ما کمک می‌کند!",
   "developerSettings": "تنظیمات توسعه‌دهنده",
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
-  "reviewSuggestions": "مرور پیشنهادها"
+  "reviewSuggestions": "مرور پیشنهادها",
+  "grantPermission": "دسترسی دادن"
 }

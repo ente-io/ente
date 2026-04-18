@@ -1,6 +1,7 @@
 import "dart:math" as math;
 import "dart:typed_data";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show immutable;
 import "package:intl/intl.dart";
 import "package:ml_linalg/dtype.dart";
@@ -12,16 +13,15 @@ import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/wrapped/models.dart";
-import "package:photos/utils/standalone/data.dart";
 
-part "builders/stats_candidate_builder.dart";
+part "builders/aesthetics_candidate_builder.dart";
+part "builders/badge_selector.dart";
+part "builders/curation_candidate_builder.dart";
+part "builders/media_selector.dart";
+part "builders/narrative_candidate_builder.dart";
 part "builders/people_candidate_builder.dart";
 part "builders/places_candidate_builder.dart";
-part "builders/aesthetics_candidate_builder.dart";
-part "builders/curation_candidate_builder.dart";
-part "builders/narrative_candidate_builder.dart";
-part "builders/badge_selector.dart";
-part "builders/media_selector.dart";
+part "builders/stats_candidate_builder.dart";
 
 const int kWrappedSelectorCandidateCap = 1200;
 

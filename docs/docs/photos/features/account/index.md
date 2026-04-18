@@ -71,6 +71,8 @@ Ente supports multiple 2FA methods for additional security:
 
 Enable 2FA in `Settings > Security` on mobile or desktop apps.
 
+Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos also enables it for Ente Auth, which can be a problem if you store your Ente account's 2FA code inside Ente Auth itself. See [Enteception](/auth/faq/enteception/).
+
 Learn more about [Passkeys](/photos/features/account/passkeys).
 
 ### End-to-end encryption
@@ -101,11 +103,11 @@ Ente offers **10 GB of storage for free, forever**. The free plan includes:
 - ✅ Machine learning features
 - ✅ Map view and location tags
 - ✅ Background sync
-- ✅ Receiving shared albums
+- ✅ Creating /receiving shared albums
+- ✅ Public links ([device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 
 **Free plan limitations:**
 
-- ❌ Cannot create shared albums or public links
 - ❌ Cannot create family plans
 
 ### Paid plans
@@ -114,15 +116,15 @@ Paid plans unlock additional features and storage:
 
 - Multiple storage tiers from 50 GB to multiple TBs
 - Monthly and annual billing (annual plans offer better value)
-- Ability to share albums and create public links
+- Ability to create public links with no device limit
 - Family plan capability to share storage with 5 family members
 - Priority support
 
-See the [pricing page](https://ente.io#pricing) for current plans and pricing.
+See the [pricing page](https://ente.com#pricing) for current plans and pricing.
 
 ### Student discounts
 
-Students receive **30% off** subscription plans. Email [students@ente.io](mailto:students@ente.io) from your school email address or provide proof of enrollment.
+Students receive **30% off** subscription plans. Email [students@ente.com](mailto:students@ente.com) from your school email address or provide proof of enrollment.
 
 Discounts are valid for one year and can be renewed.
 
@@ -158,12 +160,12 @@ Ente accepts multiple payment methods:
 **PayPal**:
 
 - Annual plans only
-- Email [paypal@ente.io](mailto:paypal@ente.io) to request an invoice
+- Email [paypal@ente.com](mailto:paypal@ente.com) to request an invoice
 
 **Cryptocurrency**:
 
 - Bitcoin (BTC), Ethereum (ETH), Dogecoin (DOGE)
-- Email [crypto@ente.io](mailto:crypto@ente.io) to request an invoice
+- Email [crypto@ente.com](mailto:crypto@ente.com) to request an invoice
 - Cannot be combined with discount codes
 
 **App Store payments**:
@@ -249,7 +251,7 @@ Learn more in the [Storage optimization guide](/photos/features/albums-and-organ
 
 Earn free storage by inviting friends:
 
-- Share your referral code from `Settings > General > Referrals`
+- Share your referral code from `Settings > Referrals`
 - When friends upgrade to a paid plan, both of you get **10 GB free**
 - Maximum earned storage equals your plan size (double your storage)
 - Earned storage lasts as long as your subscription is active
@@ -275,6 +277,7 @@ Learn more in the [Legacy guide](/photos/features/account/legacy/).
 ## Related topics
 
 - [Passkeys](/photos/features/account/passkeys) - Use passkeys for two-factor authentication
+- [App lock](/photos/features/account/app-lock) - Add a lock screen for the Ente Photos app
 - [Family Plans](/photos/features/account/family-plans) - Share storage with family members
 - [Referral Program](/photos/features/account/referral-program/) - Earn free storage by inviting friends
 - [Legacy](/photos/features/account/legacy/) - Designate trusted contacts for account recovery

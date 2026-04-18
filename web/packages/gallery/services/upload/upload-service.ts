@@ -58,8 +58,8 @@ import {
     completeMultipartUploadViaWorker,
     fetchMultipartUploadURLs,
     fetchMultipartUploadURLsWithMetadata,
-    fetchPublicAlbumsMultipartUploadURLs,
-    fetchPublicAlbumsUploadURLs,
+    fetchPublicAlbumsMultipartUploadURLsWithMetadata,
+    fetchPublicAlbumsUploadURLWithMetadata,
     fetchUploadURLs,
     fetchUploadURLWithMetadata,
     postEnteFile,
@@ -148,8 +148,8 @@ class UploadService {
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
         if (
-            areChecksumProtectedUploadsEnabled() &&
-            !this.publicAlbumsCredentials
+            areChecksumProtectedUploadsEnabled() ||
+            this.publicAlbumsCredentials
         ) {
             this.uploadURLs = [];
             return;
@@ -165,9 +165,21 @@ class UploadService {
         contentLength: number;
         contentMd5: string;
     }) {
+        if (this.publicAlbumsCredentials) {
+            if (
+                metadata &&
+                metadata.contentLength >= 0 &&
+                metadata.contentMd5
+            ) {
+                return fetchPublicAlbumsUploadURLWithMetadata(
+                    metadata,
+                    this.publicAlbumsCredentials,
+                );
+            }
+            throw new Error("Public uploads require content metadata");
+        }
         if (
             areChecksumProtectedUploadsEnabled() &&
-            !this.publicAlbumsCredentials &&
             metadata &&
             metadata.contentLength >= 0 &&
             metadata.contentMd5
@@ -205,18 +217,16 @@ class UploadService {
     }
 
     private async _refillUploadURLs() {
-        let urls: ObjectUploadURL[];
         if (this.publicAlbumsCredentials) {
-            urls = await fetchPublicAlbumsUploadURLs(
-                this.pendingUploadCount,
-                this.publicAlbumsCredentials,
+            throw new Error(
+                "Public uploads should request metadata upload URLs",
             );
-        } else {
-            try {
-                urls = await fetchUploadURLs(this.pendingUploadCount);
-            } catch (e) {
-                throw translateURLFetchErrorIfNeeded(e);
-            }
+        }
+        let urls: ObjectUploadURL[];
+        try {
+            urls = await fetchUploadURLs(this.pendingUploadCount);
+        } catch (e) {
+            throw translateURLFetchErrorIfNeeded(e);
         }
         urls.forEach((u) => this.uploadURLs.push(u));
     }
@@ -230,9 +240,19 @@ class UploadService {
         },
     ) {
         if (this.publicAlbumsCredentials) {
-            return fetchPublicAlbumsMultipartUploadURLs(
-                uploadPartCount,
-                this.publicAlbumsCredentials,
+            if (
+                metadata &&
+                metadata.contentLength > 0 &&
+                metadata.partLength > 0 &&
+                metadata.partMd5s.length > 0
+            ) {
+                return fetchPublicAlbumsMultipartUploadURLsWithMetadata(
+                    metadata,
+                    this.publicAlbumsCredentials,
+                );
+            }
+            throw new Error(
+                "Public multipart uploads require content metadata",
             );
         }
         if (
@@ -662,7 +682,7 @@ interface UploadContext {
      * credentials for the logged in user, as happens when we're running in the
      * context of the photos app).
      */
-    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    publicAlbumsCredentials?: PublicAlbumsCredentials;
     /**
      * A function that the upload sequence should use to periodically check in
      * and see if the upload has been cancelled by the user.
@@ -1270,8 +1290,18 @@ const extractImageOrVideoMetadata = async (
 
     const caption =
         parsedMetadataJSON?.description ?? parsedMetadata?.description;
-    if (caption) {
-        publicMagicMetadata.caption = caption;
+    if (
+        caption != null &&
+        (typeof caption == "string" || typeof caption == "number")
+    ) {
+        publicMagicMetadata.caption = String(caption);
+    }
+
+    if (parsedMetadata?.cameraMake) {
+        publicMagicMetadata.cameraMake = parsedMetadata.cameraMake;
+    }
+    if (parsedMetadata?.cameraModel) {
+        publicMagicMetadata.cameraModel = parsedMetadata.cameraModel;
     }
 
     return { metadata, publicMagicMetadata };
@@ -1709,6 +1739,8 @@ const uploadToBucket = async (
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
     const checksumEnabled = areChecksumProtectedUploadsEnabled();
+    const shouldSendContentChecksum =
+        checksumEnabled || !!uploadContext.publicAlbumsCredentials;
 
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
@@ -1749,9 +1781,11 @@ const uploadToBucket = async (
                 : await readEntireStream(encryptedData.stream);
         fileSize = data.length;
 
-        const fileMd5 = checksumEnabled ? computeMd5Base64(data) : undefined;
+        const fileMd5 = shouldSendContentChecksum
+            ? computeMd5Base64(data)
+            : undefined;
         const fileUploadURL = await uploadService.getUploadURL(
-            checksumEnabled
+            shouldSendContentChecksum
                 ? { contentLength: data.length, contentMd5: fileMd5! }
                 : undefined,
         );
@@ -1769,11 +1803,11 @@ const uploadToBucket = async (
         updateUploadProgress(localID, maxPercent);
     }
 
-    const thumbnailMd5 = checksumEnabled
+    const thumbnailMd5 = shouldSendContentChecksum
         ? computeMd5Base64(thumbnail.encryptedData)
         : undefined;
     const thumbnailUploadURL = await uploadService.getUploadURL(
-        checksumEnabled
+        shouldSendContentChecksum
             ? {
                   contentLength: thumbnail.encryptedData.length,
                   contentMd5: thumbnailMd5!,
@@ -1857,6 +1891,8 @@ const uploadStreamUsingMultipart = async (
 ) => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
+    const shouldSendPartChecksums =
+        checksumEnabled || !!uploadContext.publicAlbumsCredentials;
 
     const { stream } = dataStream;
     const streamReader = stream.getReader();
@@ -1865,7 +1901,7 @@ const uploadStreamUsingMultipart = async (
         dataStream.chunkCount / multipartChunksPerPart,
     );
 
-    if (checksumEnabled && !uploadContext.publicAlbumsCredentials) {
+    if (shouldSendPartChecksums) {
         const parts: Uint8Array[] = [];
         const partMd5s: string[] = [];
         let fileSize = 0;

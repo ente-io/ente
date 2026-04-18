@@ -44,7 +44,7 @@ jobs:
 
         steps:
             - name: Checkout code and submodules
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   submodules: recursive
 
@@ -95,6 +95,9 @@ jobs:
             - name: Generate strings localizations
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
 
             - name: Update Linux AppData metadata
               run: |
@@ -209,7 +212,7 @@ jobs:
 
         steps:
             - name: Checkout code and submodules
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   submodules: recursive
 
@@ -223,6 +226,9 @@ jobs:
             - name: Generate strings localizations
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
+
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -275,7 +281,7 @@ jobs:
                   updateOnlyUnreleased: true
 
     build-macos:
-        runs-on: macos-13 # latest is 12
+        runs-on: macos-15
 
         defaults:
             run:
@@ -283,7 +289,7 @@ jobs:
 
         steps:
             - name: Checkout code and submodules
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   submodules: recursive
 
@@ -298,9 +304,12 @@ jobs:
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
 
+            - name: Resolve dependencies with lockfile enforcement
+              run: flutter pub get --enforce-lockfile
+
             - name: Install code signing dependencies
               run: |
-                  pip3 install codemagic-cli-tools
+                  pip3 install codemagic-cli-tools --break-system-packages
 
             - name: Add provisioning profiles
               run: |
@@ -332,7 +341,7 @@ jobs:
 
             - name: Install build dependencies
               run: |
-                  python3 -m pip install setuptools
+                  pip3 install setuptools --break-system-packages
                   npm install -g appdmg
 
             - name: Create artifacts directory

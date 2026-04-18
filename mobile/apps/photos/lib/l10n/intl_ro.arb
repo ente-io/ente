@@ -25,7 +25,6 @@
   "deleteReason4": "Motivul meu nu apare",
   "sendEmail": "Trimiteți e-mail",
   "deleteRequestSLAText": "Solicitarea dvs. va fi procesată în 72 de ore.",
-  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.io</warning> de pe adresa dvs. de e-mail înregistrată.",
   "entePhotosPerm": "Ente <i>are nevoie de permisiune</i> pentru a vă păstra fotografiile",
   "ok": "Ok",
   "createAccount": "Creare cont",
@@ -47,7 +46,6 @@
   "incorrectRecoveryKeyBody": "Cheia de recuperare introdusă este incorectă",
   "forgotPassword": "Am uitat parola",
   "enterYourRecoveryKey": "Introduceți cheia de recuperare",
-  "noRecoveryKey": "Nu aveți cheia de recuperare?",
   "sorry": "Ne pare rău",
   "noRecoveryKeyNoDecryption": "Datorită naturii protocolului nostru de criptare integrală, datele dvs. nu pot fi decriptate fără parola sau cheia dvs. de recuperare",
   "verifyEmail": "Verificare e-mail",
@@ -62,7 +60,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -114,7 +112,6 @@
   "verifyPassword": "Verificați parola",
   "recoveryKey": "Cheie de recuperare",
   "recoveryKeyOnForgotPassword": "Dacă vă uitați parola, singura cale de a vă recupera datele este folosind această cheie.",
-  "recoveryKeySaveDescription": "Nu reținem această cheie, vă rugăm să păstrați această cheie de 24 de cuvinte într-un loc sigur.",
   "doThisLater": "Mai târziu",
   "saveKey": "Salvați cheia",
   "recoveryKeyCopiedToClipboard": "Cheie de recuperare copiată în clipboard",
@@ -126,7 +123,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -258,18 +255,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificare",
   "verifyEmailID": "Verificare {email}",
   "emailNoEnteAccount": "{email} nu are un cont Ente.\n\nTrimiteți-le o invitație pentru a distribui fotografii.",
-  "shareMyVerificationID": "Acesta este ID-ul meu de verificare: {verificationID} pentru ente.io.",
-  "shareTextConfirmOthersVerificationID": "Poți confirma că acesta este ID-ul tău de verificare ente.io: {verificationID}",
   "somethingWentWrong": "Ceva nu a funcţionat corect",
   "sendInvite": "Trimiteți invitația",
-  "shareTextRecommendUsingEnte": "Descarcă Ente pentru a putea distribui cu ușurință fotografii și videoclipuri în calitate originală\n\nhttps://ente.io",
   "done": "Finalizat",
   "applyCodeTitle": "Aplicați codul",
   "enterCodeDescription": "Introduceți codul oferit de prietenul dvs. pentru a beneficia de spațiu gratuit pentru amândoi",
@@ -277,7 +271,6 @@
   "failedToApplyCode": "Codul nu a putut fi aplicat",
   "enterReferralCode": "Introduceţi codul de recomandare",
   "codeAppliedPageTitle": "Cod aplicat",
-  "changeYourReferralCode": "Schimbați codul dvs. de recomandare",
   "change": "Schimbați",
   "unavailableReferralCode": "Ne pare rău, acest cod nu este disponibil.",
   "codeChangeLimitReached": "Ne pare rău, ați atins limita de modificări ale codului.",
@@ -291,15 +284,10 @@
   "claimMore": "Revendicați mai multe!",
   "theyAlsoGetXGb": "De asemenea, va primii {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB de fiecare dată când cineva se înscrie pentru un plan plătit și aplică codul dvs.",
-  "shareTextReferralCode": "Codul de recomandare Ente: {referralCode}\n\nAplică-l în Setări → General → Recomandări pentru a obține {referralStorageInGB} GB gratuit după ce te înscrii pentru un plan plătit\n\nhttps://ente.io",
   "claimFreeStorage": "Revendică spațiul gratuit",
   "inviteYourFriends": "Invitați-vă prietenii",
   "failedToFetchReferralDetails": "Nu se pot obține detaliile recomandării. Vă rugăm să încercați din nou mai târziu.",
-  "referralStep1": "1. Dați acest cod prietenilor",
-  "referralStep2": "2. Aceștia se înscriu la un plan cu plată",
-  "referralStep3": "3. Amândoi primiți {storageInGB} GB* gratuit",
   "referralsAreCurrentlyPaused": "Recomandările sunt momentan întrerupte",
-  "youCanAtMaxDoubleYourStorage": "* Cel mult vă puteți dubla spațiul",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Familia dvs. a revendicat {storageAmountInGb} GB până acum} false {Ați revendicat {storageAmountInGb} GB până acum} other {Ați revendicat {storageAmountInGb} de GB până acum!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -429,7 +417,6 @@
   "discover_sunset": "Apusuri",
   "discover_hills": "Dealuri",
   "discover_greenery": "Verdeață",
-  "mlIndexingDescription": "Vă rugăm să rețineți că învățarea automată va duce la o utilizare mai mare a lățimii de bandă și a bateriei până când toate elementele sunt indexate. Luați în considerare utilizarea aplicației desktop pentru o indexare mai rapidă, toate rezultatele vor fi sincronizate automat.",
   "loadingModel": "Se descarcă modelele...",
   "waitingForWifi": "Se așteaptă WiFi...",
   "status": "Status",
@@ -501,7 +488,6 @@
   "backedUpFolders": "Foldere salvate",
   "backup": "Copie de rezervă",
   "freeUpDeviceSpace": "Eliberați spațiu pe dispozitiv",
-  "freeUpDeviceSpaceDesc": "Economisiți spațiu pe dispozitivul dvs. prin ștergerea fișierelor cărora li s-a făcut copie de rezervă.",
   "allClear": "✨ Totul e curat",
   "noDeviceThatCanBeDeleted": "Nu aveți fișiere pe acest dispozitiv care pot fi șterse",
   "removeDuplicates": "Eliminați dublurile",
@@ -543,8 +529,6 @@
   "familyPlans": "Planuri de familie",
   "referrals": "Recomandări",
   "notifications": "Notificări",
-  "sharedPhotoNotifications": "Fotografii partajate noi",
-  "sharedPhotoNotificationsExplanation": "Primiți notificări atunci când cineva adaugă o fotografie la un album distribuit din care faceți parte",
   "advanced": "Avansat",
   "general": "General",
   "security": "Securitate",
@@ -578,7 +562,6 @@
   "darkTheme": "Întunecată",
   "systemTheme": "Sistem",
   "freeTrial": "Perioadă de încercare gratuită",
-  "selectYourPlan": "Selectați planul",
   "enteSubscriptionPitch": "Ente vă păstrează amintirile, astfel încât acestea să vă fie întotdeauna disponibile, chiar dacă vă pierdeți dispozitivul.",
   "enteSubscriptionShareWithFamily": "La planul dvs. vi se poate alătura și familia.",
   "currentUsageIs": "Utilizarea actuală este ",
@@ -599,7 +582,6 @@
   "subscription": "Abonament",
   "paymentDetails": "Detalii de plată",
   "manageFamily": "Administrați familia",
-  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.io pentru a vă gestiona abonamentul {provider}.",
   "renewSubscription": "Reînnoire abonament",
   "cancelSubscription": "Anulare abonament",
   "areYouSureYouWantToRenew": "Sunteți sigur că doriți să reînnoiți?",
@@ -648,7 +630,6 @@
   "subAlreadyLinkedErrMessage": "{id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți {id} cu acest cont, vă rugăm să contactați asistența noastră",
   "visitWebToManage": "Vă rugăm să vizitați web.ente.io pentru a vă gestiona abonamentul",
   "couldNotUpdateSubscription": "Nu s-a putut actualiza abonamentul",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.io și vom fi bucuroși să vă ajutăm!",
   "paymentFailed": "Plata nu a reușit",
   "paymentFailedTalkToProvider": "Vă rugăm să vorbiți cu asistența {providerName} dacă ați fost taxat",
   "@paymentFailedTalkToProvider": {
@@ -679,19 +660,8 @@
   "grantFullAccessPrompt": "Vă rugăm să permiteți accesul la toate fotografiile în aplicația Setări",
   "allowPermTitle": "Permiteți accesul la fotografii",
   "allowPermBody": "Vă rugăm să permiteți accesul la fotografiile dvs. din Setări, astfel încât Ente să vă poată afișa și salva biblioteca.",
-  "openSettings": "Deschideți Setări",
   "selectMorePhotos": "Selectați mai multe fotografii",
   "existingUser": "Utilizator existent",
-  "privateBackups": "Copii de rezervă private",
-  "forYourMemories": "pentru amintirile dvs.",
-  "endtoendEncryptedByDefault": "Criptare integrală implicită",
-  "safelyStored": "Stocare în siguranță",
-  "atAFalloutShelter": "la un adăpost antiatomic",
-  "designedToOutlive": "Conceput pentru a supraviețui",
-  "available": "Disponibil",
-  "everywhere": "pretutindeni",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobil, Web, Desktop",
   "newToEnte": "Nou la Ente",
   "pleaseLoginAgain": "Vă rugăm, autentificați-vă din nou",
   "autoLogoutMessage": "Din cauza unei probleme tehnice, ați fost deconectat. Ne cerem scuze pentru neplăcerile create.",
@@ -707,7 +677,6 @@
   "couldNotBackUpTryLater": "Nu s-a putut face copie de rezervă datelor.\nSe va reîncerca mai târziu.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente poate cripta și păstra fișiere numai dacă acordați accesul la acestea",
   "pleaseGrantPermissions": "Vă rugăm să acordați permisiuni",
-  "grantPermission": "Acordați permisiunea",
   "privateSharing": "Distribuire privată",
   "shareOnlyWithThePeopleYouWant": "Distribuiți numai cu persoanele pe care le doriți",
   "usePublicLinksForPeopleNotOnEnte": "Folosiți linkuri publice pentru persoanele care nu sunt pe Ente",
@@ -1002,7 +971,6 @@
   "fileTypesAndNames": "Tipuri de fișiere și denumiri",
   "location": "Locație",
   "moments": "Momente",
-  "searchFaceEmptySection": "Persoanele vor fi afișate aici odată ce indexarea este finalizată",
   "searchDatesEmptySection": "Căutare după o dată, o lună sau un an",
   "searchLocationEmptySection": "Grupare fotografii realizate în raza unei fotografii",
   "searchPeopleEmptySection": "Invitați persoane și veți vedea aici toate fotografiile distribuite de acestea",
@@ -1058,7 +1026,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} liber",
-  "appVersion": "Versiune: {versionValue}",
   "verifyIDLabel": "Verificare",
   "fileInfoAddDescHint": "Adăugați o descriere...",
   "editLocationTagTitle": "Editare locaţie",
@@ -1067,8 +1034,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Setare rază",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Adăugați 5 membri ai familiei la planul dvs. existent fără a plăti suplimentar.\n\nFiecare membru primește propriul spațiu privat și nu poate vedea fișierele celuilalt decât dacă acestea sunt partajate.\n\nPlanurile de familie sunt disponibile pentru clienții care au un abonament Ente plătit.\n\nAbonați-vă acum pentru a începe!",
   "androidBiometricHint": "Verificați-vă identitatea",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1157,7 +1122,6 @@
   "moveToHiddenAlbum": "Mutați în albumul ascuns",
   "fileTypes": "Tipuri de fișiere",
   "deleteConfirmDialogBody": "Acest cont este legat de alte aplicații Ente, dacă utilizați vreuna. Datele dvs. încărcate în toate aplicațiile Ente vor fi programate pentru ștergere, iar contul dvs. va fi șters definitiv.",
-  "hearUsWhereTitle": "Cum ați auzit de Ente? (opțional)",
   "hearUsExplanation": "Nu urmărim instalările aplicației. Ne-ar ajuta dacă ne-ați spune unde ne-ați găsit!",
   "viewAddOnButton": "Vizualizare suplimente",
   "addOns": "Suplimente",
@@ -1344,7 +1308,6 @@
   },
   "extraPhotosFound": "S-au găsit fotografii extra",
   "configuration": "Configurare",
-  "localIndexing": "Indexare locală",
   "processed": "Procesate",
   "resetPerson": "Eliminare",
   "areYouSureYouWantToResetThisPerson": "Sunteți sigur că doriți să resetaţi această persoană?",
@@ -1460,7 +1423,6 @@
   "legacyPageDesc2": "Persoanele de contact de încredere pot iniția recuperarea contului și, dacă nu este blocată în termen de 30 de zile, vă pot reseta parola și accesa contul.",
   "legacyAccounts": "Conturi de moștenire",
   "trustedContacts": "Contacte de încredere",
-  "addTrustedContact": "Adăugare contact de încredere",
   "removeInvite": "Eliminare invitație",
   "recoveryWarning": "Un contact de încredere încearcă să vă acceseze contul",
   "rejectRecovery": "Respingeți recuperarea",
@@ -1516,5 +1478,6 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare"
+  "join": "Alăturare",
+  "grantPermission": "Acordați permisiunea"
 }

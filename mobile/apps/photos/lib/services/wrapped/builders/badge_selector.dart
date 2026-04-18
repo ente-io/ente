@@ -136,9 +136,8 @@ class WrappedBadgeSelector {
   static _BadgeCandidate _buildConsistencyChamp(
     _BadgeComputationContext metrics,
   ) {
-    final double streakScore = metrics.longestStreakDays <= 0
-        ? 0
-        : metrics.longestStreakDays / 150.0;
+    final double streakScore =
+        metrics.longestStreakDays <= 0 ? 0 : metrics.longestStreakDays / 150.0;
     final double activeRatio = metrics.daysWithCaptures / 365.0;
     final double score = _clamp01(
       0.5 * _clamp01(streakScore) + 0.5 * _clamp01(activeRatio),
@@ -235,18 +234,16 @@ class WrappedBadgeSelector {
     if (!metrics.peopleStats.hasFaceMoments || metrics.totalCount <= 0) {
       return null;
     }
-    final int totalNamedMoments =
-        metrics.peopleStats.totalNamedFaceMoments;
+    final int totalNamedMoments = metrics.peopleStats.totalNamedFaceMoments;
     if (totalNamedMoments <= 0) {
       return null;
     }
-    final double share =
-        totalNamedMoments / metrics.totalCount.toDouble();
+    final double share = totalNamedMoments / metrics.totalCount.toDouble();
     final double score = _clamp01(share);
     final int percent = _percentOf(share);
 
-    final bool eligible = metrics.totalCount >= 80 &&
-        totalNamedMoments >= 16 && score >= 0.30;
+    final bool eligible =
+        metrics.totalCount >= 80 && totalNamedMoments >= 16 && score >= 0.30;
 
     final List<String> chips = <String>[
       "Moments with people: $totalNamedMoments",

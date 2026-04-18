@@ -18,13 +18,16 @@ class WrappedCacheService {
 
   Directory? _cacheDirectory;
 
+  Future<Directory> _cacheDirectoryPath() async {
+    final Directory baseDir = await getApplicationSupportDirectory();
+    return Directory(path.join(baseDir.path, "wrapped_cache"));
+  }
+
   Future<Directory> _ensureCacheDirectory() async {
     if (_cacheDirectory != null) {
       return _cacheDirectory!;
     }
-    final Directory baseDir = await getApplicationSupportDirectory();
-    final Directory directory =
-        Directory(path.join(baseDir.path, "wrapped_cache"));
+    final Directory directory = await _cacheDirectoryPath();
     if (!await directory.exists()) {
       await directory.create(recursive: true);
     }
@@ -104,6 +107,28 @@ class WrappedCacheService {
             stackTrace,
           );
         }
+      }
+    });
+  }
+
+  Future<void> clearAll() {
+    return _lock.synchronized(() async {
+      final Directory directory = await _cacheDirectoryPath();
+      if (!await directory.exists()) {
+        _cacheDirectory = null;
+        return;
+      }
+      try {
+        await directory.delete(recursive: true);
+        _logger.info("Deleted Wrapped cache directory at ${directory.path}");
+      } catch (error, stackTrace) {
+        _logger.warning(
+          "Failed to delete Wrapped cache directory at ${directory.path}",
+          error,
+          stackTrace,
+        );
+      } finally {
+        _cacheDirectory = null;
       }
     });
   }

@@ -1,0 +1,71 @@
+use md5::{Digest, Md5};
+
+use ente_core::crypto::{self, blob, secretbox};
+
+use crate::error::{ContactsError, Result};
+use crate::models::{ContactData, WrappedRootContactKey};
+
+pub fn encrypt_root_contact_key(
+    root_contact_key: &[u8],
+    master_key: &[u8],
+) -> Result<WrappedRootContactKey> {
+    let encrypted = secretbox::encrypt_with_key(root_contact_key, master_key)?;
+    Ok(WrappedRootContactKey {
+        encrypted_key: crypto::encode_b64(&encrypted.ciphertext),
+        header: crypto::encode_b64(&encrypted.nonce),
+    })
+}
+
+pub fn decrypt_root_contact_key(
+    wrapped_root_contact_key: &WrappedRootContactKey,
+    master_key: &[u8],
+) -> Result<Vec<u8>> {
+    let encrypted_key = crypto::decode_b64(&wrapped_root_contact_key.encrypted_key)?;
+    let header = crypto::decode_b64(&wrapped_root_contact_key.header)?;
+    Ok(secretbox::decrypt(&encrypted_key, &header, master_key)?)
+}
+
+pub fn wrap_contact_key(contact_key: &[u8], root_contact_key: &[u8]) -> Result<String> {
+    let encrypted = secretbox::encrypt(contact_key, root_contact_key)?;
+    Ok(crypto::encode_b64(&encrypted.encrypted_data))
+}
+
+pub fn unwrap_contact_key(encrypted_key_b64: &str, root_contact_key: &[u8]) -> Result<Vec<u8>> {
+    let encrypted_key = crypto::decode_b64(encrypted_key_b64)?;
+    Ok(secretbox::decrypt_box(&encrypted_key, root_contact_key)?)
+}
+
+pub fn encrypt_contact_data(data: &ContactData, contact_key: &[u8]) -> Result<String> {
+    let encrypted = blob::encrypt_json_combined(data, contact_key)?;
+    Ok(crypto::encode_b64(&encrypted))
+}
+
+pub fn decrypt_contact_data(encrypted_data_b64: &str, contact_key: &[u8]) -> Result<ContactData> {
+    let encrypted_data = crypto::decode_b64(encrypted_data_b64)?;
+    Ok(blob::decrypt_json_combined(&encrypted_data, contact_key)?)
+}
+
+pub fn encrypt_profile_picture(bytes: &[u8], contact_key: &[u8]) -> Result<Vec<u8>> {
+    Ok(blob::encrypt_combined(bytes, contact_key)?)
+}
+
+pub fn decrypt_profile_picture(bytes: &[u8], contact_key: &[u8]) -> Result<Vec<u8>> {
+    Ok(blob::decrypt_combined(bytes, contact_key)?)
+}
+
+pub fn content_md5_base64(bytes: &[u8]) -> String {
+    let digest = Md5::digest(bytes);
+    crypto::encode_b64(digest.as_slice())
+}
+
+pub fn validate_contact_data(data: &ContactData) -> Result<()> {
+    if data.contact_user_id <= 0 {
+        return Err(ContactsError::InvalidInput(
+            "contact_user_id must be greater than 0".to_string(),
+        ));
+    }
+    if data.name.trim().is_empty() {
+        return Err(ContactsError::InvalidInput("name is required".to_string()));
+    }
+    Ok(())
+}

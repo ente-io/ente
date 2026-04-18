@@ -51,7 +51,7 @@ Magic search is part of Ente's machine learning features. You must enable it man
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning`, enable **Machine learning** and/or **Local indexing**, and wait for indexing to complete.
+Open `Settings > Machine learning`, enable **Machine learning** and/or **Local indexing**, and wait for indexing to complete.
 
 **On desktop:**
 
@@ -130,7 +130,7 @@ Magic search works even better when combined with descriptions (captions) you've
 **On mobile and desktop:**
 
 1. Open a photo
-2. Tap the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on desktop
 3. Enter your description or caption
 4. Save
 

@@ -2,12 +2,15 @@ import "dart:async";
 import 'dart:convert';
 import "dart:io";
 
+import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:ente_contacts/contacts.dart';
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/app_mode.dart";
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
@@ -16,16 +19,19 @@ import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/db/memories_db.dart";
+import "package:photos/db/memory_shares_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/api/user/key_attributes.dart';
-import 'package:photos/models/api/user/key_gen_result.dart';
-import 'package:photos/models/api/user/private_key_attributes.dart';
+import 'package:photos/gateways/users/models/key_attributes.dart';
+import 'package:photos/gateways/users/models/key_gen_result.dart';
+import 'package:photos/gateways/users/models/private_key_attributes.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
@@ -33,8 +39,11 @@ import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/services/memory_share_service.dart";
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
@@ -90,6 +99,10 @@ class Configuration {
         ),
       );
       _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+      final appSupportDirectory = await getApplicationSupportDirectory();
+      // Exclude Documents (SQLite, thumbnails, decrypted media) and Application Support (ML models) from backups since they’re server-derivable or must remain within the device’s E2EE boundary.
+      await excludeFromBackup(_documentsDirectory);
+      await excludeFromBackup(appSupportDirectory.path);
       _tempDocumentsDirPath = _documentsDirectory + "/temp/";
       final tempDocumentsDir = Directory(_tempDocumentsDirPath);
       await _cleanUpStaleFiles(tempDocumentsDir);
@@ -191,6 +204,9 @@ class Configuration {
   Future<void> logout({bool autoLogout = false}) async {
     _logger.info("Logging out, autoLogout: $autoLogout");
     if (!autoLogout) {
+      if (flagService.stopStreamProcess) {
+        VideoPreviewService.instance.stop('logout');
+      }
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();
         try {
@@ -211,13 +227,21 @@ class Configuration {
     _secretKey = null;
     _volatilePassword = null;
 
+    // Clear all scheduled notifications (ritual reminders, memories, etc.)
+    await NotificationService.instance.clearAllScheduledNotifications(
+      logLines: false,
+    );
+
     // Clear all database tables
     await FilesDB.instance.clearTable();
+    await GalleryDownloadsDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
+    await MemorySharesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
     await TrashDB.instance.clearTable();
+    await ContactsDatabase().clearTable();
 
     // Clear all in-memory caches
     ThumbnailInMemoryLruCache.clearAll();
@@ -234,6 +258,7 @@ class Configuration {
     await SimilarImagesService.instance.clearCache();
     await IgnoredFilesService.instance.reset();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+    MemoryShareService.instance.clearCache();
 
     // Clear additional caches (safe to call even if not initialized)
     try {
@@ -249,6 +274,18 @@ class Configuration {
         "MemoriesCacheService not initialized or failed to clear",
         e,
       );
+    }
+
+    // Reset Ente Rewind caches and services
+    try {
+      wrappedService.resetForLogout();
+    } catch (e) {
+      _logger.info("WrappedService not initialized or failed to reset", e);
+    }
+    try {
+      await wrappedCacheService.clearAll();
+    } catch (e) {
+      _logger.info("WrappedCacheService not initialized or failed to clear", e);
     }
 
     if (!autoLogout) {
@@ -517,6 +554,8 @@ class Configuration {
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
+    await localSettings.setAppMode(AppMode.online);
+    Bus.instance.fire(AppModeChangedEvent());
     Bus.instance.fire(SignedInEvent());
   }
 

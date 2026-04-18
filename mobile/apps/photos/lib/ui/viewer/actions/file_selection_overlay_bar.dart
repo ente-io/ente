@@ -112,14 +112,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
     return _galleryType == GalleryType.homepage
         ? _body()
         : PopScope(
-            canPop: false,
+            // iOS pop gesture get's blocked if we do canPop false, so always pop on iOS
+            canPop: Platform.isIOS,
             onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) {
-                if (widget.selectedFiles.files.isEmpty) {
-                  Navigator.of(context).pop();
-                }
-                widget.selectedFiles.clearAll();
+              // for iOS return and don't run anything
+              if (didPop) return;
+
+              // Android specific block
+              // if nothing is selected then pop the page
+              if (widget.selectedFiles.files.isEmpty) {
+                Navigator.of(context).pop();
+                return;
               }
+
+              // clear all selections if something is selected
+              widget.selectedFiles.clearAll();
             },
             child: _body(),
           );

@@ -46,7 +46,7 @@ class InfoItemUtils {
   static Widget getInfoIcon(
     InfoType type, {
     bool showBackground = true,
-    double size = 20,
+    double size = 24,
   }) {
     final config = _getInfoConfig(type);
 

@@ -11,10 +11,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"mime/quotedprintable"
 	"net/http"
 	"net/smtp"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
@@ -25,6 +27,11 @@ import (
 var knownInvalidEmailErrors = []string{
 	"Invalid RCPT TO address provided",
 	"Invalid domain name",
+}
+
+// NormalizeEmail returns a canonical form for case-insensitive email lookup and hashing.
+func NormalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
 }
 
 // https://datatracker.ietf.org/doc/html/rfc5322#section-2.1.1
@@ -82,6 +89,21 @@ func wrapToMaxLineLength(s string, maxLen int) string {
 		}
 	}
 	return b.String()
+}
+
+func buildHTMLMIMEPart(htmlBody string) (string, error) {
+	var encodedBody bytes.Buffer
+	writer := quotedprintable.NewWriter(&encodedBody)
+	if _, err := writer.Write([]byte(htmlBody)); err != nil {
+		return "", err
+	}
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
+
+	return "Content-Type: text/html; charset=utf-8\n" +
+		"Content-Transfer-Encoding: quoted-printable\n\n" +
+		encodedBody.String() + "\n", nil
 }
 
 // Send sends an email
@@ -146,13 +168,17 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		emailAddresses += sanitizeHeaderValue(addr)
 	}
 
-	header := "From: " + cleanFromName + " <" + cleanFromEmail + ">\n" +
+	header := "Date: " + time.Now().Format(time.RFC1123Z) + "\n" +
+		"From: " + cleanFromName + " <" + cleanFromEmail + ">\n" +
 		"To: " + emailAddresses + "\n" +
 		"Subject: " + cleanSubject + "\n" +
 		"MIME-Version: 1.0\n" +
 		"Content-Type: multipart/related; boundary=boundary\n\n" +
 		"--boundary\n"
-	htmlContent := "Content-Type: text/html; charset=us-ascii\n\n" + htmlBody + "\n"
+	htmlContent, err := buildHTMLMIMEPart(htmlBody)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to encode html body")
+	}
 
 	emailMessage = header + htmlContent
 
@@ -352,6 +378,43 @@ func GetMaskedEmail(email string) string {
 		// Should ideally never happen, there should always be an @ symbol
 		return "[invalid_email]"
 	}
+}
+
+// GetMaskedEmailForPublic masks an email for public display.
+// Format: first 2 chars of username + masked remainder + @ + first char of domain + masked middle + last char of domain
+func GetMaskedEmailForPublic(email string) string {
+	email = strings.TrimSpace(email)
+	at := strings.LastIndex(email, "@")
+	if at <= 0 || at == len(email)-1 {
+		return "[invalid_email]"
+	}
+	username := email[:at]
+	domain := email[at+1:]
+
+	maskedUsername := maskForPublicUsername(username)
+	maskedDomain := maskForPublicDomain(domain)
+
+	return maskedUsername + "@" + maskedDomain
+}
+
+// maskForPublicUsername masks a username keeping the first 2 runes visible.
+// Remaining runes are replaced with asterisks.
+func maskForPublicUsername(s string) string {
+	runes := []rune(s)
+	if len(runes) <= 2 {
+		return s
+	}
+	return string(runes[:2]) + strings.Repeat("*", len(runes)-2)
+}
+
+// maskForPublicDomain masks a domain showing first and last rune.
+// Middle runes are replaced with asterisks.
+func maskForPublicDomain(domain string) string {
+	runes := []rune(domain)
+	if len(runes) <= 2 {
+		return domain
+	}
+	return string(runes[0]) + strings.Repeat("*", len(runes)-2) + string(runes[len(runes)-1])
 }
 
 // GetMaskedEmailWithHint masks both the username and non-TLD domain segments while keeping helpful hints.

@@ -433,11 +433,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               CodeDisplay(tags: selectedTags);
       display.note = notes;
       if (widget.code != null) {
-        if (widget.code!.issuer != issuer) {
-          display.iconID = issuer.toLowerCase();
-        }
         if (widget.code!.display.iconID != _customIconID.toLowerCase()) {
           display.iconID = _customIconID.toLowerCase();
+        } else if (widget.code!.issuer != issuer) {
+          display.iconID = issuer.toLowerCase();
         }
       }
 

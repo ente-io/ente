@@ -1,29 +1,27 @@
 import "dart:async";
 
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
-import "package:ente_ui/components/action_sheet_widget.dart";
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
-import "package:ente_ui/components/dialog_widget.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
-import "package:ente_ui/components/user_dialogs.dart";
+import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/email_util.dart";
-import "package:ente_utils/share_utils.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
-import "package:locker/extensions/user_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
-import "package:locker/ui/components/input_dialog_sheet.dart";
-import "package:locker/ui/components/subscription_required_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
+import "package:locker/ui/components/gradient_button.dart";
+import "package:locker/ui/components/input_sheet.dart";
+import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -37,11 +35,11 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputDialogSheet(
+    final result = await showInputSheet(
       context,
-      title: context.l10n.createCollection,
-      hintText: context.l10n.documentsHint,
-      submitButtonLabel: context.l10n.create,
+      title: context.l10n.newCollection,
+      hintText: context.l10n.enterCollectionName,
+      submitButtonLabel: context.l10n.createCollection,
       onSubmit: (String text) async {
         if (text.trim().isEmpty) {
           return;
@@ -59,7 +57,7 @@ class CollectionActions {
 
     if (result is Exception) {
       if (context.mounted) {
-        await showGenericErrorDialog(
+        await showGenericErrorBottomSheet(
           context: context,
           error: result,
         );
@@ -78,7 +76,12 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    await showInputDialogSheet(
+    if (!collection.type.canEdit) {
+      showToast(context, context.l10n.collectionCannotBeEdited);
+      return;
+    }
+
+    await showInputSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',
@@ -108,9 +111,9 @@ class CollectionActions {
         } catch (error) {
           await progressDialog.hide();
 
-          showToast(
-            context,
-            context.l10n.failedToRenameCollection(error.toString()),
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: error,
           );
         }
       },
@@ -124,7 +127,7 @@ class CollectionActions {
   }) async {
     if (collections.isEmpty) return;
 
-    final dialogChoice = await showDeleteConfirmationDialog(
+    final dialogChoice = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body:
@@ -199,7 +202,7 @@ class CollectionActions {
       await progressDialog.hide();
 
       if (errors.isNotEmpty) {
-        await showGenericErrorDialog(
+        await showGenericErrorBottomSheet(
           context: context,
           error: errors.first,
         );
@@ -207,13 +210,13 @@ class CollectionActions {
 
       showToast(
         context,
-        "${collections.length} collections deleted successfully",
+        context.l10n.collectionsDeletedSuccessfully(collections.length),
       );
 
       if (isFavoriteCollection) {
         showToast(
           context,
-          "Action not supported on Favourites album",
+          context.l10n.actionNotSupportedOnFavouritesAlbum,
         );
       }
 
@@ -221,9 +224,9 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      showToast(
-        context,
-        context.l10n.failedToDeleteCollection(error.toString()),
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: error,
       );
     }
   }
@@ -267,9 +270,9 @@ class CollectionActions {
         await progressDialog.hide();
 
         if (context.mounted) {
-          showToast(
-            context,
-            l10n.failedToDeleteCollection(error.toString()),
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: error,
           );
         }
       }
@@ -278,7 +281,7 @@ class CollectionActions {
 
     final collectionName = collection.name ?? 'this collection';
 
-    final result = await showDeleteConfirmationDialog(
+    final result = await showDeleteConfirmationSheet(
       context,
       title: l10n.areYouSure,
       body: l10n.deleteCollectionDialogBody(collectionName),
@@ -318,9 +321,9 @@ class CollectionActions {
       await progressDialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          l10n.failedToDeleteCollection(error.toString()),
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: error,
         );
       }
     }
@@ -331,44 +334,38 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final confirmed = await showAlertBottomSheet(
+      context,
+      title: context.l10n.leaveCollection,
+      message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.leaveCollection,
-          onTap: () async {
-            await CollectionApiClient.instance.leaveCollection(collection);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        SizedBox(
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
         ),
       ],
-      title: context.l10n.leaveCollection,
-      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
     );
-    if (actionResult?.action != null && context.mounted) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      } else if (actionResult.action == ButtonAction.first) {
-        onSuccess?.call();
-        Navigator.of(context).pop();
-        showToast(
-          context,
-          "Leave collection successfully",
-        );
+    if (confirmed == true) {
+      try {
+        await CollectionApiClient.instance.leaveCollection(collection);
+        if (context.mounted) {
+          onSuccess?.call();
+          showToast(
+            context,
+            context.l10n.leaveCollectionSuccessfully,
+          );
+        }
+      } catch (e) {
+        _logger.severe("Failed to leave collection", e);
+        if (context.mounted) {
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: e,
+          );
+        }
       }
     }
   }
@@ -378,46 +375,40 @@ class CollectionActions {
     List<Collection> collections, {
     VoidCallback? onSuccess,
   }) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final confirmed = await showAlertBottomSheet(
+      context,
+      title: context.l10n.leaveCollection,
+      message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.leaveCollection,
-          onTap: () async {
-            for (final col in collections) {
-              await CollectionApiClient.instance.leaveCollection(col);
-            }
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        SizedBox(
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
         ),
       ],
-      title: context.l10n.leaveCollection,
-      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
     );
-    if (actionResult?.action != null && context.mounted) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      } else if (actionResult.action == ButtonAction.first) {
-        onSuccess?.call();
-        Navigator.of(context).pop();
-        showToast(
-          context,
-          "Leave collection successfully",
-        );
+    if (confirmed == true) {
+      try {
+        for (final col in collections) {
+          await CollectionApiClient.instance.leaveCollection(col);
+        }
+        if (context.mounted) {
+          onSuccess?.call();
+          showToast(
+            context,
+            context.l10n.leftCollectionsSuccessfully(collections.length),
+          );
+        }
+      } catch (e) {
+        _logger.severe("Failed to leave collections", e);
+        if (context.mounted) {
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: e,
+          );
+        }
       }
     }
   }
@@ -435,10 +426,10 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (e is SharingNotPermittedForFreeAccountsError) {
-        await showSubscriptionRequiredDialog(context);
+        await showSubscriptionRequiredSheet(context);
       } else {
         _logger.severe("Failed to update shareUrl collection", e);
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
       return false;
     }
@@ -448,41 +439,36 @@ class CollectionActions {
     BuildContext context,
     Collection collection,
   ) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final colorScheme = getEnteColorScheme(context);
+    final shouldRemove = await showAlertBottomSheet<bool>(
+      context,
+      title: context.l10n.removePublicLink,
+      message: context.l10n
+          .removePublicLinkConfirmation(collection.name ?? "this collection"),
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: "Yes, remove",
-          onTap: () async {
-            await CollectionApiClient.instance.disableShareUrl(collection);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        GradientButton(
+          text: context.l10n.yesRemove,
+          backgroundColor: colorScheme.warning400,
+          onTap: () => Navigator.of(context).pop(true),
         ),
       ],
-      title: "Remove public link",
-      body:
-          "This will remove the public link for accessing \"${collection.name}\".",
     );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
+
+    if (shouldRemove != true) {
+      return false;
+    }
+
+    try {
+      await CollectionApiClient.instance.disableShareUrl(collection);
+      return true;
+    } catch (e) {
+      if (context.mounted) {
+        await showGenericErrorBottomSheet(
           context: context,
-          error: actionResult.exception,
+          error: e,
         );
       }
-      return actionResult.action == ButtonAction.first;
-    } else {
       return false;
     }
   }
@@ -507,7 +493,7 @@ class CollectionActions {
     } catch (e) {
       await dialog?.hide();
       _logger.severe("Failed to get public key", e);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
     // getPublicKey can return null when no user is associated with given
@@ -515,7 +501,7 @@ class CollectionActions {
     if (publicKey == null || publicKey == '') {
       // todo: neeraj replace this as per the design where a new screen
       // is used for error. Do this change along with handling of network errors
-      await showInviteDialog(context, email);
+      await showInviteSheet(context, email: email);
       return false;
     } else {
       return true;
@@ -531,17 +517,19 @@ class CollectionActions {
     bool showProgress = false,
   }) async {
     if (!isValidEmail(email)) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.l10n.invalidEmailAddress,
-        context.l10n.enterValidEmail,
+        title: context.l10n.invalidEmailAddress,
+        message: context.l10n.enterValidEmail,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.l10n.oops,
-        context.l10n.youCannotShareWithYourself,
+        title: context.l10n.oops,
+        message: context.l10n.youCannotShareWithYourself,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     }
@@ -562,36 +550,14 @@ class CollectionActions {
     } catch (e) {
       await dialog?.hide();
       _logger.severe("Failed to get public key", e);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
     // getPublicKey can return null when no user is associated with given
     // email id
     if (publicKey == null || publicKey == '') {
-      // todo: neeraj replace this as per the design where a new screen
-      // is used for error. Do this change along with handling of network errors
-      await showDialogWidget(
-        context: context,
-        title: context.l10n.inviteToEnte,
-        icon: Icons.info_outline,
-        body: context.l10n.emailNoEnteAccount(email),
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.neutral,
-            icon: Icons.adaptive.share,
-            labelText: context.l10n.sendInvite,
-            isInAlert: true,
-            onTap: () async {
-              unawaited(
-                shareText(
-                  context.l10n.shareTextRecommendUsingEnte,
-                ),
-              );
-            },
-          ),
-        ],
-      );
+      await dialog?.hide();
+      await showInviteSheet(context, email: email);
       return false;
     } else {
       try {
@@ -603,10 +569,10 @@ class CollectionActions {
       } catch (e) {
         await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await showSubscriptionRequiredDialog(context);
+          await showSubscriptionRequiredSheet(context);
         } else {
           _logger.severe("failed to share collection", e);
-          await showGenericErrorDialog(context: context, error: e);
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
         return false;
       }
@@ -619,42 +585,15 @@ class CollectionActions {
     Collection collection,
     User user,
   ) async {
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.yesRemove,
-          onTap: () async {
-            final newSharees = await CollectionApiClient.instance
-                .unshare(collection.id, user.email);
-            collection.updateSharees(newSharees);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
-        ),
-      ],
-      title: context.l10n.removeWithQuestionMark,
-      body: context.l10n.removeParticipantBody(user.displayName ?? user.email),
-    );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      }
-      return actionResult.action == ButtonAction.first;
+    try {
+      final newSharees =
+          await CollectionApiClient.instance.unshare(collection.id, user.email);
+      collection.updateSharees(newSharees);
+      return true;
+    } catch (e) {
+      _logger.severe("Failed to remove participant", e);
+      await showGenericErrorBottomSheet(context: context, error: e);
+      return false;
     }
-    return false;
   }
 }

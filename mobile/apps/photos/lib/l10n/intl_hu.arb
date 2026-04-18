@@ -26,7 +26,6 @@
   "deleteReason4": "Nincs a listán az ok",
   "sendEmail": "Email küldése",
   "deleteRequestSLAText": "A kérése 72 órán belül feldolgozásra kerül.",
-  "deleteEmailRequest": "Kérem küldjön egy emailt a regisztrált email címéről, erre az emailcímre: <warning>account-deletion@ente.io</warning>.",
   "entePhotosPerm": "Az Entének <i>engedélyre van szüksége </i>, hogy tárolhassa fotóit",
   "ok": "Rendben",
   "createAccount": "Felhasználó létrehozás",
@@ -48,7 +47,6 @@
   "incorrectRecoveryKeyBody": "A megadott visszaállítási kulcs hibás",
   "forgotPassword": "Elfelejtett jelszó",
   "enterYourRecoveryKey": "Adja meg visszaállítási kulcsát",
-  "noRecoveryKey": "Nincs visszaállítási kulcsa?",
   "sorry": "Sajnálom",
   "noRecoveryKeyNoDecryption": "Az általunk használt végpontok közötti titkosítás miatt, az adatait nem lehet dekódolni a jelszava, vagy visszaállítási kulcsa nélkül",
   "verifyEmail": "Emailcím megerősítés",
@@ -63,7 +61,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -115,7 +113,6 @@
   "verifyPassword": "Jelszó megerősítése",
   "recoveryKey": "Visszaállítási kulcs",
   "recoveryKeyOnForgotPassword": "Ha elfelejti jelszavát, csak ezzel a kulccsal tudja visszaállítani adatait.",
-  "recoveryKeySaveDescription": "Ezt a kulcsot nem tároljuk, kérjük, őrizze meg ezt a 24 szavas kulcsot egy biztonságos helyen.",
   "doThisLater": "Később",
   "saveKey": "Mentés",
   "recoveryKeyCopiedToClipboard": "A helyreállítási kulcs a vágólapra másolva",
@@ -127,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -259,17 +256,14 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ellenőrző azonosító",
   "emailNoEnteAccount": "{email} címnek nincs Ente fiókja.\n\nKüldjön nekik meghívót fotók megosztására.",
-  "shareMyVerificationID": "Itt az ellenőrző azonosítóm: {verificationID} az ente.io-hoz.",
-  "shareTextConfirmOthersVerificationID": "Szia, meg tudnád erősíteni, hogy ez az ente.io ellenőrző azonosítód? {verificationID}",
   "somethingWentWrong": "Valami hiba történt",
   "sendInvite": "Meghívó küldése",
-  "shareTextRecommendUsingEnte": "Töltsd le az Ente-t, hogy könnyen megoszthassunk eredeti minőségű fotókat és videókat\n\nhttps://ente.io",
   "done": "Kész",
   "applyCodeTitle": "Kód alkalmazása",
   "enterCodeDescription": "Add meg a barátod által megadott kódot, hogy mindkettőtöknek ingyenes tárhelyet igényelhess",
@@ -277,7 +271,6 @@
   "failedToApplyCode": "Nem sikerült alkalmazni a kódot",
   "enterReferralCode": "Adja meg az ajánló kódot",
   "codeAppliedPageTitle": "Kód alkalmazva",
-  "changeYourReferralCode": "Módosítsa ajánló kódját",
   "change": "Módosítás",
   "unavailableReferralCode": "Sajnáljuk, ez a kód nem érhető el.",
   "codeChangeLimitReached": "Sajnáljuk, elérted a kódmódosítások maximális számát.",
@@ -291,15 +284,10 @@
   "claimMore": "Igényelj többet!",
   "theyAlsoGetXGb": "Emellett {storageAmountInGB} GB-ot kapnak",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB minden alkalommal, amikor valaki fizetős csomagra fizet elő és felhasználja a kódodat",
-  "shareTextReferralCode": "Add meg a következő ajánlási kódot: {referralCode}\n\nAlkalmazd a Beállítások → Általános → Ajánlások menüpontban, hogy {referralStorageInGB} GB ingyenes tárhelyet kapj, miután regisztráltál egy fizetős csomagra\n\nhttps://ente.io",
   "claimFreeStorage": "Igényeljen ingyenes tárhelyet",
   "inviteYourFriends": "Hívd meg a barátaidat",
   "failedToFetchReferralDetails": "Nem sikerült lekérni a hivatkozási adatokat. Kérjük, próbálja meg később.",
-  "referralStep1": "1. Add meg ezt a kódot a barátaidnak",
-  "referralStep2": "2. Fizetős csomagra fizetnek elő",
-  "referralStep3": "3. Mindketten {storageInGB} GB* ingyenes tárhelyet kaptok",
   "referralsAreCurrentlyPaused": "Az ajánlások jelenleg szünetelnek",
-  "youCanAtMaxDoubleYourStorage": "* Maximum megduplázhatod a tárhelyed",
   "claimedStorageSoFar": "{isFamilyMember, select, true {A családod eddig {storageAmountInGb} GB tárhelyet igényelt} false {Eddig {storageAmountInGb} GB tárhelyet igényelt} other {Eddig {storageAmountInGb} GB tárhelyet igényelt!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -444,7 +432,6 @@
   "discover_sunset": "Napnyugta",
   "discover_hills": "Dombok",
   "discover_greenery": "Lomb",
-  "mlIndexingDescription": "Kérjük, vegye figyelembe, hogy a gépi tanulás nagyobb sávszélességet és akkumulátorhasználatot eredményez, amíg az összes elem indexelése meg nem történik. A gyorsabb indexelés érdekében érdemes lehet asztali alkalmazást használni, mivel minden eredmény automatikusan szinkronizálódik.",
   "loadingModel": "Modellek letöltése...",
   "waitingForWifi": "Várakozás a WiFi-re...",
   "status": "Állapot",
@@ -516,7 +503,6 @@
   "backedUpFolders": "Biztonsági másolatban lévő mappák",
   "backup": "Biztonsági mentés",
   "freeUpDeviceSpace": "Szabadítson fel tárhelyet",
-  "freeUpDeviceSpaceDesc": "Takarítson meg helyet az eszközén a már mentett fájlok törlésével.",
   "allClear": "✨ Minden tiszta",
   "noDeviceThatCanBeDeleted": "Nincsenek törölhető fájlok ezen az eszközön.",
   "removeDuplicates": "Távolítsa el a duplikációkat",

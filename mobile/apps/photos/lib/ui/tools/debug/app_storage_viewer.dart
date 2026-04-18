@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import "package:logging/logging.dart";
@@ -16,7 +17,6 @@ import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/tools/debug/path_storage_viewer.dart';
-import 'package:photos/utils/standalone/directory_content.dart';
 
 class AppStorageViewer extends StatefulWidget {
   const AppStorageViewer({super.key});

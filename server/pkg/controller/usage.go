@@ -35,6 +35,25 @@ const lockerPaidStorageLimit = 10 * 1024 * 1024 * 1024 // 10 GiB
 
 const hundredMBInBytes = 100 * 1024 * 1024
 
+type LockerLimits struct {
+	IsPaid       bool
+	FileLimit    int64
+	StorageLimit int64
+}
+
+func GetLockerLimitsForTier(isPaid bool) LockerLimits {
+	limits := LockerLimits{
+		IsPaid:       isPaid,
+		FileLimit:    int64(lockerFreeFileLimit),
+		StorageLimit: int64(lockerFreeStorageLimit),
+	}
+	if isPaid {
+		limits.FileLimit = int64(lockerPaidFileLimit)
+		limits.StorageLimit = int64(lockerPaidStorageLimit)
+	}
+	return limits
+}
+
 // CanUploadFile returns error if the file of given size (with StorageOverflowAboveSubscriptionLimit buffer) can be
 // uploaded or not. If size is not passed, it validates if current usage is less than subscription storage.
 func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
@@ -88,43 +107,6 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		subscriptionAdminID = userID
 		subscriptionUserIDs = []int64{userID}
 	}
-	var lockerUsage *repo.LockerUsage
-	var lUsageErr error
-	if app == ente.Locker {
-		lockerUsage, lUsageErr = c.UsageRepo.GetLockerUsage(ctx, subscriptionUserIDs)
-		if lUsageErr != nil {
-			return stacktrace.Propagate(lUsageErr, "failed to fetch locker usage")
-		}
-
-		// Determine if user has paid subscription for tiered limits
-		isPaidUser := false
-		if err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(subscriptionAdminID, true); err == nil {
-			isPaidUser = true
-		}
-
-		// Apply tiered file and storage limits
-		maxFiles := int64(lockerFreeFileLimit)
-		maxStorage := int64(lockerFreeStorageLimit)
-		if isPaidUser {
-			maxFiles = int64(lockerPaidFileLimit)
-			maxStorage = int64(lockerPaidStorageLimit)
-		}
-
-		// Check file count limit
-		if lockerUsage.TotalFileCount >= maxFiles {
-			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
-		}
-
-		// Check storage limit
-		projectedLockerUsage := lockerUsage.TotalUsage
-		if size != nil {
-			projectedLockerUsage += *size
-		}
-		if projectedLockerUsage >= maxStorage {
-			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
-				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", maxStorage, projectedLockerUsage))
-		}
-	}
 
 	var subStorage int64
 	var bonus *bonus.ActiveStorageBonus
@@ -146,6 +128,41 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 	} else {
 		subStorage = sub.Storage
 	}
+	// Plan expiry check is done at this point
+	var lockerUsage *repo.LockerUsage
+	var lUsageErr error
+	if app == ente.Locker {
+		lockerUsage, lUsageErr = c.UsageRepo.GetLockerUsage(ctx, subscriptionUserIDs)
+		if lUsageErr != nil {
+			return stacktrace.Propagate(lUsageErr, "failed to fetch locker usage")
+		}
+
+		// Determine if user has paid subscription for tiered limits
+		isPaidUser := false
+		if err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(subscriptionAdminID, true); err == nil {
+			isPaidUser = true
+		}
+
+		limits := GetLockerLimitsForTier(isPaidUser)
+
+		// Check file count limit
+		if lockerUsage.TotalFileCount >= limits.FileLimit {
+			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
+		}
+
+		// Check storage limit
+		projectedLockerUsage := lockerUsage.TotalUsage
+		if size != nil {
+			projectedLockerUsage += *size
+		}
+		if projectedLockerUsage >= limits.StorageLimit {
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
+				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", limits.StorageLimit, projectedLockerUsage))
+		}
+		// Locker uploads should not be blocked by Photos subscription limits.
+		return nil
+	}
+
 	usage, err := c.UsageRepo.GetCombinedUsage(ctx, subscriptionUserIDs)
 	if err != nil {
 		return stacktrace.Propagate(err, "")

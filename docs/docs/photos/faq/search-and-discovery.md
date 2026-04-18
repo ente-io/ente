@@ -81,7 +81,7 @@ Learn more about [Map and location](/photos/features/search-and-discovery/map-an
 **From a photo:**
 
 1. Open a photo
-2. Click Info (i)
+2. Tap the overflow menu (⋮) and select **Info**
 3. Select "Add Location"
 4. Enter the location name and define a radius
 
@@ -118,7 +118,7 @@ If you're searching for objects (like "food", "car", "dog") or trying to find fa
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning` and toggle ON face recognition and magic search.
+Open `Settings > Machine learning` and toggle ON face recognition and magic search.
 
 **On desktop:**
 
@@ -130,13 +130,42 @@ Open `Settings > Preferences > Machine learning` and toggle ON face recognition 
 - ✅ ML only works on desktop and mobile apps
 - Initial indexing can take time depending on library size
 
+### Why aren't faces appearing on mobile even though ML is fully indexed on desktop? {#faces-not-syncing-to-mobile}
+
+If ML indexing shows 100% on desktop but faces aren't showing up on your mobile app, try clearing the app's cache and storage, then log back in and allow a few minutes for the face data to sync.
+
+**On Android:**
+
+Open device `Settings > Apps > Ente Photos > Storage`, then tap **Clear cache** and **Clear storage**. Log back in and wait a few minutes.
+
+**On iOS:**
+
+Delete and reinstall the app, then log back in and wait a few minutes.
+
+Faces should start appearing shortly after logging back in.
+
+### Why is the People section empty even though Machine Learning shows 100%? {#people-section-empty}
+
+If Machine Learning shows 100% on both Android and Desktop, the People
+section should normally populate shortly after.
+
+Try these steps first:
+
+1. Refresh the desktop app using `Ctrl + F`
+2. Log out and log back in
+3. Check if People start showing up
+
+If the People section is still empty, please
+[send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app
+so we can investigate further.
+
 ### How do I enable face recognition? {#enable-face-recognition}
 
 Face recognition requires enabling **Machine Learning** first:
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning`, enable "Face recognition", and wait for indexing to complete.
+Open `Settings > Machine learning`, enable "Face recognition", and wait for indexing to complete.
 
 **On desktop:**
 
@@ -217,6 +246,12 @@ Please note this functionality is currently only available on mobile.
 
 Yes! Once your photos have been indexed, face recognition and magic search work completely offline. The initial indexing requires downloading your photos (which happens faster over WiFi), but after that all searches happen locally on your device. The indexes are synced across your devices using end-to-end encryption.
 
+### Does ML indexing require internet? {#ml-indexing-internet}
+
+ML indexing requires internet initially to download the ML models and to download any photos not already present locally on your device. Once your photos have been indexed completely, face recognition and magic search work completely offline.
+
+Internet is also required to sync the encrypted indexes across your devices.
+
 ### Is my face data used to train AI models? {#face-data-training}
 
 No. All machine learning (face recognition and magic search) happens entirely on your device. Your photos are downloaded to your device, indexed locally, and the indexes are encrypted before being synced across your devices.
@@ -253,6 +288,17 @@ Yes! Once the app has grouped faces:
 
 You can then search for photos by person name.
 
+### How can I help improve face recognition? {#improve-face-recognition}
+
+You can help improve face grouping by reviewing and confirming suggestions:
+
+1. Open the People section
+2. Tap on a person grouping (make sure it's assigned a name)
+3. Tap "Review suggestions" from the top right menu
+4. Confirm or reject the suggested faces
+
+This helps the app learn and improve grouping accuracy for the specific person over time.
+
 ## Magic Search
 
 ### What is magic search? {#what-is-magic-search}
@@ -273,7 +319,7 @@ Magic search is enabled when you enable machine learning:
 
 **On mobile:**
 
-- `Settings > General > Advanced > Machine learning`
+- `Settings > Machine learning`
 
 **On desktop:**
 
@@ -294,7 +340,7 @@ Yes! Descriptions (captions) you add to photos are searchable, making it easier 
 **To add a description:**
 
 1. Open the photo
-2. Tap the info button (i)
+2. Tap the overflow menu (⋮) and select **Info**
 3. Enter your description
 4. Save
 

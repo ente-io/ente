@@ -114,10 +114,6 @@ The embedded album viewer includes:
 - Password protection (if enabled on the album)
 - Automatic updates when you add new photos to the album
 
-> [!NOTE]
->
-> The embed only supports the continuous layout.
-
 ## Privacy and security
 
 - The embed uses the same encryption and security as regular Ente albums
@@ -133,7 +129,7 @@ The embedded album viewer includes:
 
 Note that by putting the embed link in a webpage, you're making it public for anyone who can view the page, including search engines that can index your webpages. This isn't any different from putting the public link in your webpage or sharing it in a public forum, but it is good to call this out.
 
-The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.io/blog/building-shareable-links/).
+The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.com/blog/building-shareable-links/).
 
 ## Related topics
 

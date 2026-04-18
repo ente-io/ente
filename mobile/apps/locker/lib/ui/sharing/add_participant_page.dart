@@ -1,4 +1,5 @@
 import 'package:email_validator/email_validator.dart';
+import 'package:ente_contacts/contacts.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
@@ -72,173 +73,174 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filterSuggestedUsers = _suggestedUsers
-        .where(
-          (element) =>
-              (element.displayName ?? element.email).toLowerCase().contains(
-                    _textController.text.trim().toLowerCase(),
-                  ),
-        )
-        .toList();
-    isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
-    final enteTextTheme = getEnteTextTheme(context);
-    final enteColorScheme = getEnteColorScheme(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
-      appBar: AppBar(
-        title: Text(
-          _getTitle(),
-        ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              context.l10n.addANewEmail,
-              style: enteTextTheme.small
-                  .copyWith(color: enteColorScheme.textMuted),
+    return ValueListenableBuilder<int>(
+      valueListenable: ContactsDisplayService.instance.changes,
+      builder: (context, __, ___) {
+        final filterSuggestedUsers = _suggestedUsers
+            .where(
+              (element) =>
+                  element.matchesResolvedNameOrEmail(_textController.text),
+            )
+            .toList()
+          ..sort(
+            (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+                  b.resolvedDisplayName.toLowerCase(),
+                ),
+          );
+        isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
+        final enteTextTheme = getEnteTextTheme(context);
+        final enteColorScheme = getEnteColorScheme(context);
+        return Scaffold(
+          resizeToAvoidBottomInset: isKeypadOpen,
+          appBar: AppBar(
+            title: Text(
+              _getTitle(),
             ),
           ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _enterEmailField(),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  filterSuggestedUsers.isNotEmpty
-                      ? MenuSectionTitle(
-                          title: context.l10n.orPickAnExistingOne,
-                        )
-                      : const SizedBox.shrink(),
-                  Expanded(
-                    child: ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        if (index >= filterSuggestedUsers.length) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8.0,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  context.l10n.addANewEmail,
+                  style: enteTextTheme.small
+                      .copyWith(color: enteColorScheme.textMuted),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: _enterEmailField(),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      filterSuggestedUsers.isNotEmpty
+                          ? MenuSectionTitle(
+                              title: context.l10n.orPickAnExistingOne,
+                            )
+                          : const SizedBox.shrink(),
+                      Expanded(
+                        child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            if (index >= filterSuggestedUsers.length) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    filterSuggestedUsers.isNotEmpty
+                                        ? MenuSectionDescriptionWidget(
+                                            content: context.l10n
+                                                .longPressAnEmailToVerifyEndToEndEncryption,
+                                          )
+                                        : const SizedBox.shrink(),
+                                    widget.actionTypesToShow.contains(
+                                      ActionTypesToShow.addCollaborator,
+                                    )
+                                        ? MenuSectionDescriptionWidget(
+                                            content: context.l10n
+                                                .collaboratorsCanAddFilesToTheSharedCollection,
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ],
+                                ),
+                              );
+                            }
+                            final currentUser = filterSuggestedUsers[index];
+                            return Column(
                               children: [
-                                filterSuggestedUsers.isNotEmpty
-                                    ? MenuSectionDescriptionWidget(
-                                        content: context.l10n
-                                            .longPressAnEmailToVerifyEndToEndEncryption,
-                                      )
-                                    : const SizedBox.shrink(),
-                                widget.actionTypesToShow.contains(
-                                  ActionTypesToShow.addCollaborator,
-                                )
-                                    ? MenuSectionDescriptionWidget(
-                                        content: context.l10n
-                                            .collaboratorsCanAddFilesToTheSharedCollection,
-                                      )
-                                    : const SizedBox.shrink(),
-                              ],
-                            ),
-                          );
-                        }
-                        final currentUser = filterSuggestedUsers[index];
-                        return Column(
-                          children: [
-                            MenuItemWidget(
-                              key: ValueKey(
-                                currentUser.displayName ?? currentUser.email,
-                              ),
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: currentUser.displayName ??
-                                    currentUser.email,
-                              ),
-                              leadingIconSize: 24.0,
-                              leadingIconWidget: UserAvatarWidget(
-                                currentUser,
-                                type: AvatarType.mini,
-                                config: Configuration.instance,
-                              ),
-                              menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              pressedColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              trailingIcon:
-                                  (_selectedEmails.contains(currentUser.email))
+                                MenuItemWidget(
+                                  key: ValueKey(
+                                    '${currentUser.id ?? currentUser.email}:${currentUser.resolvedDisplayName}',
+                                  ),
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: currentUser.resolvedDisplayName,
+                                  ),
+                                  leadingIconSize: 24.0,
+                                  leadingIconWidget: UserAvatarWidget(
+                                    currentUser,
+                                    type: AvatarType.mini,
+                                    config: Configuration.instance,
+                                  ),
+                                  menuItemColor:
+                                      getEnteColorScheme(context).fillFaint,
+                                  pressedColor:
+                                      getEnteColorScheme(context).fillFaint,
+                                  trailingIcon: (_selectedEmails
+                                          .contains(currentUser.email))
                                       ? Icons.check
                                       : null,
-                              onTap: () async {
-                                textFieldFocusNode.unfocus();
-                                if (_selectedEmails
-                                    .contains(currentUser.email)) {
-                                  _selectedEmails.remove(currentUser.email);
-                                } else {
-                                  _selectedEmails.add(currentUser.email);
-                                }
+                                  onTap: () async {
+                                    textFieldFocusNode.unfocus();
+                                    if (_selectedEmails
+                                        .contains(currentUser.email)) {
+                                      _selectedEmails.remove(currentUser.email);
+                                    } else {
+                                      _selectedEmails.add(currentUser.email);
+                                    }
 
-                                setState(() => {});
-                                // showShortToast(context, "yet to implement");
-                              },
-                              onLongPress: () {
-                                showDialog(
-                                  useRootNavigator: false,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return VerifyIdentityDialog(
+                                    setState(() => {});
+                                  },
+                                  onLongPress: () {
+                                    showVerifyIdentitySheet(
+                                      context,
                                       self: false,
                                       email: currentUser.email,
                                       config: Configuration.instance,
                                     );
                                   },
-                                );
-                              },
-                              isTopBorderRadiusRemoved: index > 0,
-                              isBottomBorderRadiusRemoved:
-                                  index < (filterSuggestedUsers.length - 1),
-                            ),
-                            (index == (filterSuggestedUsers.length - 1))
-                                ? const SizedBox.shrink()
-                                : DividerWidget(
-                                    dividerType: DividerType.menu,
-                                    bgColor:
-                                        getEnteColorScheme(context).fillFaint,
-                                  ),
-                          ],
-                        );
-                      },
-                      itemCount: filterSuggestedUsers.length + 1,
-                    ),
+                                  isTopBorderRadiusRemoved: index > 0,
+                                  isBottomBorderRadiusRemoved:
+                                      index < (filterSuggestedUsers.length - 1),
+                                ),
+                                (index == (filterSuggestedUsers.length - 1))
+                                    ? const SizedBox.shrink()
+                                    : DividerWidget(
+                                        dividerType: DividerType.menu,
+                                        bgColor: getEnteColorScheme(context)
+                                            .fillFaint,
+                                      ),
+                              ],
+                            );
+                          },
+                          itemCount: filterSuggestedUsers.length + 1,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 8,
+                    bottom: 8,
+                    left: 16,
+                    right: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 8),
+                      ..._actionButtons(),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 8,
-                left: 16,
-                right: 16,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 8),
-                  ..._actionButtons(),
-                  const SizedBox(height: 12),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -352,7 +354,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             controller: _textController,
             focusNode: textFieldFocusNode,
             style: getEnteTextTheme(context).body,
-            autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
                 borderRadius: const BorderRadius.all(Radius.circular(4.0)),
@@ -447,14 +448,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final List<User> suggestedUsers =
         CollectionService.instance.getRelevantContacts();
 
-    if (_textController.text.trim().isNotEmpty) {
-      suggestedUsers.removeWhere(
-        (element) => !(element.displayName ?? element.email)
-            .toLowerCase()
-            .contains(_textController.text.trim().toLowerCase()),
-      );
-    }
-    suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+    suggestedUsers.sort(
+      (a, b) => a.resolvedDisplayName.toLowerCase().compareTo(
+            b.resolvedDisplayName.toLowerCase(),
+          ),
+    );
 
     return suggestedUsers;
   }

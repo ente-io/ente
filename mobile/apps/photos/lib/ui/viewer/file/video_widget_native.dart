@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
@@ -9,6 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
@@ -30,17 +32,18 @@ import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_bu
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/video_stream_change.dart";
+import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/standalone/date_time.dart";
-import "package:photos/utils/standalone/debouncer.dart";
+import "package:video_player/video_player.dart" as vp;
 import "package:visibility_detector/visibility_detector.dart";
 
 class VideoWidgetNative extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final bool isFromMemories;
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
@@ -51,6 +54,7 @@ class VideoWidgetNative extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.isFromMemories = false,
     required this.onStreamChange,
     super.key,
@@ -69,6 +73,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   static const verticalMargin = 64.0;
   final _progressNotifier = ValueNotifier<double?>(null);
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
+  late StreamSubscription<ResumeVideoEvent> resumeVideoSubscription;
   bool _isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   NativeVideoPlayerController? _controller;
@@ -89,6 +94,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   int position = 0;
+  final _transformationController = TransformationController();
+  bool _isZooming = false;
 
   @override
   void initState() {
@@ -106,6 +113,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       _controller?.pause();
+    });
+    resumeVideoSubscription =
+        Bus.instance.on<ResumeVideoEvent>().listen((event) {
+      _controller?.play();
     });
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -213,6 +224,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   @override
   void dispose() {
     _subscription?.cancel();
+    _controller?.stop().ignore();
     _controller?.dispose();
     if (downloadTaskSubscription != null) {
       downloadTaskSubscription!.cancel();
@@ -237,6 +249,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
+    resumeVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -246,9 +259,19 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _captionUpdatedSubscription.cancel();
+    _transformationController.dispose();
     EnteWakeLockService.instance
         .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
     super.dispose();
+  }
+
+  void _onInteractionLockChanged(bool shouldLock) {
+    if (_isZooming != shouldLock) {
+      setState(() {
+        _isZooming = shouldLock;
+      });
+    }
+    widget.shouldDisableScroll?.call(shouldLock);
   }
 
   @override
@@ -265,18 +288,18 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
         },
         child: GestureDetector(
-          onVerticalDragUpdate: _isGuestView
+          // Keep recognizer out of the arena during multi-touch/zoom to avoid
+          // it stealing pinch gestures with predominantly vertical movement.
+          onVerticalDragUpdate: _isGuestView || _isZooming
               ? null
-              : (d) => {
-                    if (d.delta.dy > dragSensitivity)
-                      {
-                        Navigator.of(context).pop(),
-                      }
-                    else if (d.delta.dy < (dragSensitivity * -1))
-                      {
-                        showDetailsSheet(context, widget.file),
-                      },
-                  },
+              : (d) {
+                  if (d.delta.dy > dragSensitivity) {
+                    _stopPlaybackBeforeDismiss();
+                    Navigator.of(context).pop();
+                  } else if (d.delta.dy < (dragSensitivity * -1)) {
+                    showDetailsSheet(context, widget.file);
+                  }
+                },
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 750),
             switchOutCurve: Curves.easeOutExpo,
@@ -288,16 +311,20 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                 : Stack(
                     key: const ValueKey("video_ready"),
                     children: [
-                      Center(
-                        child: AspectRatio(
-                          aspectRatio: aspectRatio ?? 1,
-                          child: NativeVideoPlayerView(
-                            onViewReady: _initializeController,
+                      ZoomableVideoViewer(
+                        transformationController: _transformationController,
+                        onInteractionLockChanged: _onInteractionLockChanged,
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: aspectRatio ?? 1,
+                            child: NativeVideoPlayerView(
+                              onViewReady: _initializeController,
+                            ),
                           ),
                         ),
                       ),
                       GestureDetector(
-                        behavior: HitTestBehavior.opaque,
+                        behavior: HitTestBehavior.translucent,
                         onTap: widget.isFromMemories
                             ? null
                             : () {
@@ -423,6 +450,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           ),
         ),
       ),
+    );
+  }
+
+  void _stopPlaybackBeforeDismiss() {
+    _controller?.pause();
+    _controller?.stop().ignore();
+    widget.playbackCallback?.call(
+      false,
+      FullScreenRequestReason.userInteraction,
     );
   }
 
@@ -721,6 +757,21 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       _logger.info("Getting aspect ratio from preview video");
       return;
     }
+    if (Platform.isIOS) {
+      // FFprobe in ffmpeg_kit can crash on certain iOS media files.
+      // On iOS, use lightweight metadata probing via AVPlayer.
+      if (widget.file.hasDimensions) {
+        aspectRatio = widget.file.width / widget.file.height;
+      } else {
+        aspectRatio ??= 1;
+      }
+      if ((duration == null || duration == "0:00") &&
+          (widget.file.duration ?? 0) > 0) {
+        duration = secondsToDuration(widget.file.duration!);
+      }
+      await _setAspectAndDurationFromIosPlayerProbe();
+      return;
+    }
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
       duration = videoProps.propData?["duration"];
@@ -739,6 +790,52 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     } else {
       _logger.info("Video props are null");
       aspectRatio = 1;
+    }
+  }
+
+  Future<void> _setAspectAndDurationFromIosPlayerProbe() async {
+    final path = _filePath;
+    if (path == null) return;
+    vp.VideoPlayerController? metadataController;
+    try {
+      metadataController = vp.VideoPlayerController.file(File(path));
+      await metadataController.initialize().timeout(const Duration(seconds: 4));
+      final value = metadataController.value;
+      final probeAspectRatio = value.aspectRatio;
+      // Always prefer the probed aspect ratio over file metadata dimensions,
+      // because AVPlayer correctly accounts for video rotation metadata.
+      // Raw file width/height may not reflect rotation (e.g. a portrait video
+      // stored as 1920x1080 with 90° rotation).
+      if (probeAspectRatio > 0) {
+        aspectRatio = probeAspectRatio;
+      }
+      final durationInMilliseconds = value.duration.inMilliseconds;
+      if ((duration == null || duration == "0:00") &&
+          durationInMilliseconds > 0) {
+        duration = secondsToDuration(durationInMilliseconds ~/ 1000);
+      }
+    } on TimeoutException catch (e, s) {
+      _logger.warning(
+        "_setAspectAndDurationFromIosPlayerProbe timed out for ${widget.file.generatedID}",
+        e,
+        s,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "_setAspectAndDurationFromIosPlayerProbe failed for ${widget.file.generatedID}",
+        e,
+        s,
+      );
+    } finally {
+      try {
+        await metadataController?.dispose();
+      } catch (e, s) {
+        _logger.warning(
+          "_setAspectAndDurationFromIosPlayerProbe dispose failed for ${widget.file.generatedID}",
+          e,
+          s,
+        );
+      }
     }
   }
 }

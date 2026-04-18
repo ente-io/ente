@@ -1,10 +1,10 @@
 import "dart:io";
 
 import 'package:ente_base/typedefs.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:ente_utils/debouncer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -32,6 +32,17 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   void initState() {
     toggleValue = widget.value.call();
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ToggleSwitchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newValue = widget.value.call();
+    if (toggleValue != newValue) {
+      setState(() {
+        toggleValue = newValue;
+      });
+    }
   }
 
   @override

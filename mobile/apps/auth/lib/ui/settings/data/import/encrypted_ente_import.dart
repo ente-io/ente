@@ -13,7 +13,7 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';

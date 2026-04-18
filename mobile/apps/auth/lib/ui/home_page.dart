@@ -10,21 +10,22 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
-import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
@@ -32,6 +33,7 @@ import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
+import 'package:ente_auth/ui/home/shortcuts.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/home/widgets/auth_logo_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
@@ -49,7 +51,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
-import 'package:ente_qr_ui/ente_qr_ui.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +61,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:window_manager/window_manager.dart';
 
 class HomePage extends BaseHomePage {
   const HomePage({super.key});
@@ -104,6 +107,7 @@ class _HomePageState extends State<HomePage> {
 
   late CodeSortKey _codeSortKey;
   final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
+  final FocusNode _firstItemFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -157,6 +161,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _saveCodesWithSingleSync(List<Code> updatedCodes) async {
+    if (updatedCodes.isEmpty) {
+      return;
+    }
+    final results = await Future.wait(
+      updatedCodes.map(
+        (code) => CodeStore.instance.addCode(code, shouldSync: false),
+      ),
+    );
+    if (results.any((result) => result != AddResult.duplicate)) {
+      AuthenticatorService.instance.onlineSync().ignore();
+    }
+  }
+
   Future<void> _onRestoreSelectedPressed() async {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
     if (selectedIds.isEmpty) return;
@@ -168,11 +186,13 @@ class _HomePageState extends State<HomePage> {
               ?.where((c) => selectedIds.contains(c.selectionKey))
               .toList() ??
           [];
-      for (final code in codesToRestore) {
-        final updatedCode =
-            code.copyWith(display: code.display.copyWith(trashed: false));
-        unawaited(CodeStore.instance.addCode(updatedCode));
-      }
+      final updatedCodes = codesToRestore
+          .map(
+            (code) =>
+                code.copyWith(display: code.display.copyWith(trashed: false)),
+          )
+          .toList();
+      await _saveCodesWithSingleSync(updatedCodes);
     } catch (e) {
       if (mounted) {
         showGenericErrorDialog(context: context, error: e).ignore();
@@ -282,46 +302,56 @@ class _HomePageState extends State<HomePage> {
         [];
     if (codesToUpdate.isEmpty) return;
 
-    // Determine the state of the current selection (pinned/unpinned)
-    final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
+    try {
+      // Determine the state of the current selection (pinned/unpinned)
+      final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
+      final updatedCodes = <Code>[];
 
-    if (allArePinned) {
-      // if all are pinned, unpin all
-      for (final code in codesToUpdate) {
-        final updatedCode =
-            code.copyWith(display: code.display.copyWith(pinned: false));
-        unawaited(CodeStore.instance.addCode(updatedCode));
-      }
+      if (allArePinned) {
+        // if all are pinned, unpin all
+        for (final code in codesToUpdate) {
+          updatedCodes.add(
+            code.copyWith(display: code.display.copyWith(pinned: false)),
+          );
+        }
 
-      if (codesToUpdate.length == 1) {
-        showToast(
-          context,
-          context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer),
-        );
+        if (codesToUpdate.length == 1) {
+          showToast(
+            context,
+            context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer),
+          );
+        } else {
+          showToast(context, context.l10n.unpinnedCount(codesToUpdate.length));
+        }
       } else {
-        showToast(context, context.l10n.unpinnedCount(codesToUpdate.length));
-      }
-    } else {
-      int pinnedCount = 0;
-      for (final code in codesToUpdate) {
-        if (!code.isPinned) {
-          // Only pin the codes that are currently unpinned
-          final updatedCode =
-              code.copyWith(display: code.display.copyWith(pinned: true));
-          unawaited(CodeStore.instance.addCode(updatedCode));
-          pinnedCount++;
+        int pinnedCount = 0;
+        for (final code in codesToUpdate) {
+          if (!code.isPinned) {
+            // Only pin the codes that are currently unpinned
+            updatedCodes.add(
+              code.copyWith(display: code.display.copyWith(pinned: true)),
+            );
+            pinnedCount++;
+          }
+        }
+
+        if (pinnedCount == 1) {
+          final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
+          showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
+        } else if (pinnedCount > 0) {
+          showToast(context, context.l10n.pinnedCount(pinnedCount));
         }
       }
 
-      if (pinnedCount == 1) {
-        final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
-        showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
-      } else if (pinnedCount > 0) {
-        showToast(context, context.l10n.pinnedCount(pinnedCount));
+      await _saveCodesWithSingleSync(updatedCodes);
+    } catch (e, s) {
+      _logger.severe('Failed to update pin state for selected code(s)', e, s);
+      if (mounted) {
+        showGenericErrorDialog(context: context, error: e).ignore();
       }
+    } finally {
+      _codeDisplayStore.clearSelection();
     }
-
-    _codeDisplayStore.clearSelection();
   }
 
   Future<void> _onUnpinSelectedPressed() async {
@@ -334,25 +364,38 @@ class _HomePageState extends State<HomePage> {
         [];
     if (codesToUpdate.isEmpty) return;
 
-    int unpinnedCount = 0;
-    for (final code in codesToUpdate) {
-      if (code.isPinned) {
-        // only unpin the codes that are currently pinned
-        final updatedCode =
-            code.copyWith(display: code.display.copyWith(pinned: false));
-        unawaited(CodeStore.instance.addCode(updatedCode));
-        unpinnedCount++;
+    try {
+      int unpinnedCount = 0;
+      final updatedCodes = <Code>[];
+      for (final code in codesToUpdate) {
+        if (code.isPinned) {
+          // only unpin the codes that are currently pinned
+          updatedCodes.add(
+            code.copyWith(display: code.display.copyWith(pinned: false)),
+          );
+          unpinnedCount++;
+        }
       }
-    }
 
-    if (unpinnedCount == 1) {
-      final unpinnedCode = codesToUpdate.firstWhere((c) => c.isPinned);
-      showToast(context, context.l10n.unpinnedCodeMessage(unpinnedCode.issuer));
-    } else if (unpinnedCount > 0) {
-      showToast(context, context.l10n.unpinnedCount(unpinnedCount));
-    }
+      if (unpinnedCount == 1) {
+        final unpinnedCode = codesToUpdate.firstWhere((c) => c.isPinned);
+        showToast(
+          context,
+          context.l10n.unpinnedCodeMessage(unpinnedCode.issuer),
+        );
+      } else if (unpinnedCount > 0) {
+        showToast(context, context.l10n.unpinnedCount(unpinnedCount));
+      }
 
-    _codeDisplayStore.clearSelection();
+      await _saveCodesWithSingleSync(updatedCodes);
+    } catch (e, s) {
+      _logger.severe('Failed to unpin selected code(s)', e, s);
+      if (mounted) {
+        showGenericErrorDialog(context: context, error: e).ignore();
+      }
+    } finally {
+      _codeDisplayStore.clearSelection();
+    }
   }
 
   Future<void> _onTrashSelectedPressed() async {
@@ -391,13 +434,14 @@ class _HomePageState extends State<HomePage> {
                   ?.where((c) => selectedIds.contains(c.selectionKey))
                   .toList() ??
               [];
-
-          for (final code in codesToTrash) {
-            final updatedCode = code.copyWith(
-              display: code.display.copyWith(trashed: true),
-            );
-            unawaited(CodeStore.instance.addCode(updatedCode));
-          }
+          final updatedCodes = codesToTrash
+              .map(
+                (code) => code.copyWith(
+                  display: code.display.copyWith(trashed: true),
+                ),
+              )
+              .toList();
+          await _saveCodesWithSingleSync(updatedCodes);
         } catch (e) {
           _logger.severe('Failed to trash code(s): ${e.toString()}');
           if (mounted) {
@@ -456,20 +500,14 @@ class _HomePageState extends State<HomePage> {
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return QrCodeDialog(
+        return AuthQrDialog(
           data: qrData,
-          title: code.account,
-          subtitle: code.issuer,
-          accentColor: accentColor,
+          title: code.issuer,
+          subtitle: code.account,
           shareFileName: 'ente_auth_qr_${code.account}.png',
           shareText: 'QR code for ${code.account}',
           dialogTitle: context.l10n.qrCode,
           shareButtonText: context.l10n.share,
-          logoAssetPath: 'assets/qr_logo.png',
-          branding: const QrSvgBranding(
-            assetPath: 'assets/svg/auth-logo.svg',
-            height: 12,
-          ),
         );
       },
     );
@@ -1013,24 +1051,75 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
+    if (!mounted) return false;
+
+    // Always keep our pressed key state in sync.
     if (event is KeyDownEvent) {
       _pressedKeys.add(event.logicalKey);
-      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
-          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
-              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
-          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.control) ||
-              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
 
-      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
+    // This handler is registered globally via ServicesBinding, so make sure we
+    // only act on shortcuts when HomePage is actually the active surface.
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      return false;
+    }
+
+    // Avoid hijacking keystrokes while the settings drawer (or any other
+    // non-home surface within HomePage) is active.
+    if (_isSettingsOpen) {
+      return false;
+    }
+
+    // If the user is typing into a text field (e.g. password fields in settings),
+    // don't treat typed characters as global shortcuts.
+    final primaryFocus = FocusManager.instance.primaryFocus;
+    final bool isEditableTextFocused =
+        primaryFocus?.context?.widget is EditableText;
+    final bool isHomeSearchFocused = searchBoxFocusNode.hasFocus;
+    if (isEditableTextFocused && !isHomeSearchFocused) {
+      return false;
+    }
+
+    if (event is KeyDownEvent) {
+      final pressed = HardwareKeyboard.instance.logicalKeysPressed;
+
+      final bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (pressed.contains(LogicalKeyboardKey.metaLeft) ||
+              pressed.contains(LogicalKeyboardKey.meta) ||
+              pressed.contains(LogicalKeyboardKey.metaRight))
+          : (pressed.contains(LogicalKeyboardKey.controlLeft) ||
+              pressed.contains(LogicalKeyboardKey.control) ||
+              pressed.contains(LogicalKeyboardKey.controlRight));
+
+      final bool isShiftPressed =
+          pressed.contains(LogicalKeyboardKey.shiftLeft) ||
+              pressed.contains(LogicalKeyboardKey.shiftRight) ||
+              pressed.contains(LogicalKeyboardKey.shift);
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyW) {
+        if (PlatformDetector.isDesktop()) {
+          windowManager.close();
+          return true;
+        }
+      }
+
+      // '/' opens search. Don't trigger this on '?' (Shift + '/').
+      if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) ||
+          (!isHomeSearchFocused &&
+              event.logicalKey == LogicalKeyboardKey.slash &&
+              !isShiftPressed)) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
         });
         return true;
       }
-      if (event.logicalKey == LogicalKeyboardKey.escape) {
+
+      // Only use Escape for the HomePage search UI.
+      if (event.logicalKey == LogicalKeyboardKey.escape && _showSearchBox) {
         setState(() {
           _textController.clear();
           _searchText = "";
@@ -1039,8 +1128,6 @@ class _HomePageState extends State<HomePage> {
         });
         return true;
       }
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(event.logicalKey);
     }
     return false;
   }
@@ -1152,6 +1239,7 @@ class _HomePageState extends State<HomePage> {
     _textController.removeListener(_applyFilteringAndRefresh);
     ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
+    _firstItemFocusNode.dispose();
 
     super.dispose();
   }
@@ -1298,7 +1386,7 @@ class _HomePageState extends State<HomePage> {
     return ValueListenableBuilder<bool>(
       valueListenable: _codeDisplayStore.isSelectionModeActive,
       builder: (context, isSelecting, child) {
-        final bool isDesktop = PlatformUtil.isDesktop();
+        final bool isDesktop = PlatformDetector.isDesktop();
         final appBar = _buildStandardAppBar(l10n, isDesktop);
         return PopScope(
           canPop: false,
@@ -1340,7 +1428,15 @@ class _HomePageState extends State<HomePage> {
               bottom: false,
               child: Builder(
                 builder: (context) {
-                  return _getBody();
+                  return Shortcuts(
+                    shortcuts: <LogicalKeySet, Intent>{
+                      LogicalKeySet(LogicalKeyboardKey.keyC):
+                          const CopyIntent(),
+                      LogicalKeySet(LogicalKeyboardKey.keyN):
+                          const CopyNextIntent(),
+                    },
+                    child: _getBody(),
+                  );
                 },
               ),
             ),
@@ -1396,6 +1492,12 @@ class _HomePageState extends State<HomePage> {
               onChanged: (val) {
                 _searchText = val;
                 _applyFilteringAndRefresh();
+              },
+              onSubmitted: (_) {
+                if (_filteredCodes.isNotEmpty) {
+                  // Move focus to the first item in the grid
+                  _firstItemFocusNode.requestFocus();
+                }
               },
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
@@ -1587,8 +1689,7 @@ class _HomePageState extends State<HomePage> {
     final crossAxisCount = _calculateGridColumnCount(context);
     _currentGridColumns = crossAxisCount;
     final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-    final double gridBottomPadding =
-        80 + (_showSearchBox ? keyboardInset : 0);
+    final double gridBottomPadding = 80 + (_showSearchBox ? keyboardInset : 0);
     if (_hasLoaded) {
       final bool noCodesAnywhere = !hasNonTrashedCodes && !hasTrashedCodes;
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
@@ -1733,14 +1834,15 @@ class _HomePageState extends State<HomePage> {
                         code,
                         isCompactMode: isCompactMode,
                         sortKey: _codeSortKey,
-                        enableDesktopContextActions: PlatformUtil.isDesktop(),
+                        enableDesktopContextActions:
+                            PlatformDetector.isDesktop(),
                         selectedCodesBuilder: _selectedCodesForContextMenu,
                       );
                     }),
                     itemCount: _filteredCodes.length + indexOffset,
                   );
 
-                  if (PlatformUtil.isDesktop() && crossAxisCount > 1) {
+                  if (PlatformDetector.isDesktop() && crossAxisCount > 1) {
                     return GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTapUp: (_) {
@@ -1783,8 +1885,9 @@ class _HomePageState extends State<HomePage> {
                             isCompactMode: isCompactMode,
                             sortKey: _codeSortKey,
                             enableDesktopContextActions:
-                                PlatformUtil.isDesktop(),
+                                PlatformDetector.isDesktop(),
                             selectedCodesBuilder: _selectedCodesForContextMenu,
+                            focusNode: index == 0 ? _firstItemFocusNode : null,
                           );
                         }),
                         itemCount: _filteredCodes.length,
@@ -2159,7 +2262,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
-    if (PlatformUtil.isDesktop()) {
+    if (PlatformDetector.isDesktop()) {
       return FloatingActionButton(
         onPressed: () => _redirectToManualEntryPage(),
         child: const Icon(Icons.add),
@@ -2195,7 +2298,7 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
-        if (PlatformUtil.isMobile())
+        if (PlatformDetector.isMobile())
           SpeedDialChild(
             child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02),
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,

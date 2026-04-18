@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:ui";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_map/flutter_map.dart";
@@ -22,7 +23,6 @@ import "package:photos/ui/map/tile/layers.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class LocationTagsWidget extends StatefulWidget {
   final EnteFile file;
@@ -179,7 +179,7 @@ class _InfoMapState extends State<InfoMap> {
   @override
   void initState() {
     super.initState();
-    _hasEnabledMap = flagService.mapEnabled;
+    _hasEnabledMap = mapEnabled;
     _fileLat = widget.file.location!.latitude!;
     _fileLng = widget.file.location!.longitude!;
 
@@ -300,7 +300,7 @@ class _InfoMapState extends State<InfoMap> {
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () async {
                                   try {
-                                    await flagService.setMapEnabled(true);
+                                    await setMapEnabled(true);
                                     setState(() {
                                       _hasEnabledMap = true;
                                     });

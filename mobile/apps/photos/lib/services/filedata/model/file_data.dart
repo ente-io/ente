@@ -1,5 +1,5 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:photos/models/ml/face/face.dart";
-import "package:photos/utils/standalone/parse.dart";
 
 const _faceKey = 'face';
 const _clipKey = 'clip';
@@ -101,12 +101,18 @@ class RemoteFaceEmbedding {
   final int height;
   final int width;
 
+  /// Bitmask describing properties of this index (e.g. which runtime produced
+  /// it). Bits are defined in `ml_versions.dart`. Absent on the wire => 0
+  /// (legacy).
+  final int flags;
+
   RemoteFaceEmbedding(
     this.faces,
     this.version, {
     required this.client,
     required this.height,
     required this.width,
+    this.flags = 0,
   });
 
   // toJson
@@ -116,6 +122,7 @@ class RemoteFaceEmbedding {
         'client': client,
         'height': height,
         'width': width,
+        if (flags != 0) 'flags': flags,
       };
 
   // fromJson
@@ -128,6 +135,7 @@ class RemoteFaceEmbedding {
       client: json['client'] as String,
       height: json['height'] as int,
       width: json['width'] as int,
+      flags: (json['flags'] as int?) ?? 0,
     );
   }
 }
@@ -137,10 +145,16 @@ class RemoteClipEmbedding {
   final String client;
   final List<double> embedding;
 
+  /// Bitmask describing properties of this index (e.g. which runtime produced
+  /// it). Bits are defined in `ml_versions.dart`. Absent on the wire => 0
+  /// (legacy).
+  final int flags;
+
   RemoteClipEmbedding(
     this.embedding, {
     required this.version,
     required this.client,
+    this.flags = 0,
   });
 
   // toJson
@@ -148,6 +162,7 @@ class RemoteClipEmbedding {
         'embedding': embedding,
         'version': version,
         'client': client,
+        if (flags != 0) 'flags': flags,
       };
 
   // fromJson
@@ -156,6 +171,7 @@ class RemoteClipEmbedding {
       parseAsDoubleList(json['embedding'] as List),
       version: json['version'] as int,
       client: json['client'] as String,
+      flags: (json['flags'] as int?) ?? 0,
     );
   }
 }

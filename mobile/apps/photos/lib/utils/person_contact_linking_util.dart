@@ -1,11 +1,11 @@
 import "package:collection/collection.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/widgets.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 Future<bool> checkIfEmailAlreadyAssignedToAPerson(
   String email,

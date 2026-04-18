@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:ente_events/event_bus.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
+import "package:ente_utils/email_util.dart";
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/core/errors.dart';
@@ -12,7 +14,8 @@ import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
-import 'package:locker/ui/components/file_upload_dialog.dart';
+import 'package:locker/ui/components/file_upload_sheet.dart';
+import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:logging/logging.dart';
 
@@ -56,6 +59,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
 
   Future<bool> uploadFiles(List<File> files) async {
     var didUpload = false;
+    var hasUploadError = false;
     final progressDialog = createProgressDialog(
       context,
       context.l10n.uploadedFilesProgress(0, files.length),
@@ -64,16 +68,12 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
     try {
       final List<Future> futures = [];
 
-      final collections = await CollectionService.instance.getCollections();
-      final regularCollections = collections
-          .where(
-            (c) => c.type != CollectionType.uncategorized,
-          )
-          .toList();
+      final regularCollections =
+          await CollectionService.instance.getCollectionsForUI();
 
       // Navigate to upload screen to get collection selection
       final uploadResult =
-          await Navigator.of(context).push<FileUploadDialogResult>(
+          await Navigator.of(context).push<FileUploadSheetResult>(
         MaterialPageRoute(
           builder: (context) => FileUploadScreen(
             files: files,
@@ -104,14 +104,15 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         for (final file in files) {
           final fileUploadFuture = FileUploader.instance
               .upload(file, uploadResult.selectedCollections.first);
-          futures.add(fileUploadFuture);
           futures.add(
             fileUploadFuture.then((enteFile) async {
               completedUploads++;
-              progressDialog.update(
-                message: context.l10n
-                    .uploadedFilesProgress(completedUploads, files.length),
-              );
+              if (!hasUploadError && progressDialog.isShowing()) {
+                progressDialog.update(
+                  message: context.l10n
+                      .uploadedFilesProgress(completedUploads, files.length),
+                );
+              }
               // Add to additional collections if multiple were selected
               for (int cIndex = 1;
                   cIndex < uploadResult.selectedCollections.length;
@@ -133,16 +134,19 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
                       .editFileCaption(enteFile, uploadResult.note),
                 );
               }
-            }).catchError((e) {
+            }).catchError((e) async {
               completedUploads++;
               _logger.severe('File upload failed', e);
-              progressDialog.update(
-                message: context.l10n.uploadedFilesProgressWithError(
-                  completedUploads,
-                  files.length,
-                  e.toString(),
-                ),
-              );
+              if (hasUploadError) {
+                return;
+              }
+              hasUploadError = true;
+              if (progressDialog.isShowing()) {
+                await progressDialog.hide();
+              }
+              if (mounted) {
+                await _showUploadFailureError(e);
+              }
             }),
           );
         }
@@ -163,32 +167,8 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       if (progressDialog.isShowing()) {
         await progressDialog.hide();
       }
-      if (e is StorageLimitExceededError) {
-        await showErrorDialog(
-          context,
-          context.l10n.uploadStorageLimitErrorTitle,
-          context.l10n.uploadStorageLimitErrorBody,
-          isDismissable: true,
-        );
-      } else if (e is FileLimitReachedError) {
-        await showErrorDialog(
-          context,
-          context.l10n.uploadFileCountLimitErrorTitle,
-          context.l10n.uploadFileCountLimitErrorBody,
-          isDismissable: true,
-        );
-      } else if (e is FileTooLargeForPlanError) {
-        await showErrorDialog(
-          context,
-          context.l10n.uploadFileTooLargeErrorTitle,
-          context.l10n.uploadFileTooLargeErrorBody,
-          isDismissable: true,
-        );
-      } else {
-        await showGenericErrorDialog(
-          context: context,
-          error: e,
-        );
+      if (mounted) {
+        await _showUploadFailureError(e);
       }
     } finally {
       if (progressDialog.isShowing()) {
@@ -197,5 +177,62 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
     }
 
     return didUpload;
+  }
+
+  Future<void> _showUploadFailureError(Object error) async {
+    if (error is NoActiveSubscriptionError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadSubscriptionExpiredErrorTitle,
+        context.l10n.uploadSubscriptionExpiredErrorBody,
+      );
+      return;
+    }
+    if (error is StorageLimitExceededError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadStorageLimitErrorTitle,
+        context.l10n.uploadStorageLimitErrorBody,
+      );
+      return;
+    }
+    if (error is FileLimitReachedError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadFileCountLimitErrorTitle,
+        context.l10n.uploadFileCountLimitErrorBody,
+      );
+      return;
+    }
+    if (error is FileTooLargeForPlanError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadFileTooLargeErrorTitle,
+        context.l10n.uploadFileTooLargeErrorBody,
+      );
+      return;
+    }
+    await showGenericErrorBottomSheet(
+      context: context,
+      error: error,
+    );
+  }
+
+  Future<void> _showUploadErrorSheet(String title, String message) async {
+    await showAlertBottomSheet(
+      context,
+      title: title,
+      message: message,
+      assetPath: "assets/warning-grey.png",
+      isDismissible: true,
+      buttons: [
+        GradientButton(
+          text: context.l10n.contactSupport,
+          onTap: () async {
+            await sendEmail(
+              context,
+              to: "support@ente.com",
+              body: message,
+            );
+          },
+        ),
+      ],
+    );
   }
 }

@@ -110,7 +110,6 @@
   "importAegisGuide": "استخدم خيار \"Export the vault\" في إعدادات Aegis.\n\nإذا كان المخزن الخاص بك مشفرًا، فستحتاج إلى إدخال كلمة مرور المخزن لفك تشفير المخزن.",
   "import2FasGuide": "استخدم خيار \"الإعدادات -> النسخ الاحتياطي - التصدير\" في 2FAS.\n\nإذا تم تشفير النسخة الاحتياطية، سوف تحتاج إلى إدخال كلمة المرور لفك تشفير النسخة الاحتياطية",
   "importLastpassGuide": "استخدم خيار \"حسابات النقل\" ضمن إعدادات مصادقة Lastpass، واضغط على \"تصدير الحسابات إلى الملف\". استيراد JSON الذي تم تنزيله.",
-  "importProtonAuthGuide": "‎استخدم اختيار “التصدير” في إعدادات الموثق بروتون لتصدير رموزك.",
   "exportCodes": "تصدير الرموز",
   "importLabel": "استيراد",
   "importInstruction": "الرجاء تحديد ملف يحتوي على قائمة بالرموز الخاصة بك بالشكل التالي",
@@ -318,7 +317,6 @@
     }
   },
   "sorry": "المعذرة",
-  "importFailureDesc": "تعذر تحليل الملف المحدد.\nالرجاء الكتابة إلى support@ente.io إذا كنت بحاجة إلى مساعدة!",
   "pendingSyncs": "تحذير",
   "pendingSyncsWarningBody": "لم يتم نسخ بعض رموزك احتياطيًا.\n\nيرجى التأكد من أن لديك نسخة احتياطية لهذه الرموز قبل تسجيل الخروج.",
   "checkInboxAndSpamFolder": "الرجاء التحقق من صندوق الوارد (والرسائل غير المرغوب فيها) لإكمال التحقق",
@@ -331,7 +329,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -511,7 +509,6 @@
   "dropReviewAndroid": "اترك مراجعة بلاي ستور",
   "supportEnte": "دعم <bold-green>ente</bold-green></bold-green>",
   "giveUsAStarOnGithub": "من فضلك أعطِنا نجمة على جيت هاب",
-  "free5GB": "5GB  مجانًا على <bold-green>ente</bold-green> صور",
   "loginWithAuthAccount": "سجّل الدخول باستخدام حساب المُصادقة",
   "freeStorageOffer": "خَصْم 10٪ على صور <bold-green>ente</bold-green>",
   "freeStorageOfferDescription": "استخدم الكود \"AUTH\" وأحصل على 10٪ خَصْم في السنة الأولى",

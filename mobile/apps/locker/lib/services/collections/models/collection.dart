@@ -156,6 +156,13 @@ class Collection {
     return CollectionParticipantRole.unknown;
   }
 
+  bool canAdd(int userID) {
+    final participantRole = getRole(userID);
+    return (isOwner(userID) ||
+            participantRole == CollectionParticipantRole.collaborator) &&
+        !isDeleted;
+  }
+
   void updateSharees(List<User> newSharees) {
     sharees.clear();
     sharees.addAll(newSharees);
@@ -289,6 +296,12 @@ String typeToString(CollectionType type) {
 
 extension CollectionTypeExtn on CollectionType {
   bool get canDelete =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
+
+  bool get canEdit =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
+
+  bool get canShare =>
       this != CollectionType.favorites && this != CollectionType.uncategorized;
 }
 

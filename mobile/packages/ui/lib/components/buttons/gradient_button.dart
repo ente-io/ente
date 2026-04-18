@@ -1,83 +1,109 @@
+import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 
+enum GradientButtonType {
+  primary,
+  secondary,
+  critical,
+}
+
 class GradientButton extends StatelessWidget {
-  final Function? onTap;
-
-  // text is ignored if child is specified
+  final VoidCallback? onTap;
   final String text;
-
-  // nullable
-  final IconData? iconData;
-
-  // padding between the text and icon
+  final IconData? icon;
   final double paddingValue;
+  final GradientButtonType buttonType;
 
   const GradientButton({
     super.key,
     this.onTap,
     this.text = '',
-    this.iconData,
-    this.paddingValue = 0.0,
+    this.icon,
+    this.paddingValue = 6.0,
+    this.buttonType = GradientButtonType.primary,
   });
+
+  static const TextStyle _textStyle = TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+  );
 
   @override
   Widget build(BuildContext context) {
-    Widget buttonContent;
-    if (iconData == null) {
-      buttonContent = Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter-SemiBold',
-          fontSize: 18,
-        ),
-      );
-    } else {
-      buttonContent = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            iconData,
-            size: 20,
-            color: Colors.white,
+    final colorScheme = getEnteColorScheme(context);
+    final bool isEnabled = onTap != null;
+
+    final Color effectiveBackgroundColor =
+        _getBackgroundColor(colorScheme, isEnabled);
+    final Color effectiveTextColor = _getTextColor(colorScheme, isEnabled);
+
+    final TextStyle effectiveTextStyle = _textStyle.copyWith(
+      color: effectiveTextColor,
+    );
+
+    final Widget textWidget = Text(text, style: effectiveTextStyle);
+
+    final Widget content = (icon != null)
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: effectiveTextColor,
+              ),
+              Padding(padding: EdgeInsets.symmetric(horizontal: paddingValue)),
+              if (text.isNotEmpty) textWidget,
+            ],
+          )
+        : textWidget;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Material(
+        color: effectiveBackgroundColor,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: isEnabled ? null : Colors.transparent,
+          highlightColor: isEnabled ? null : Colors.transparent,
+          child: SizedBox(
+            height: 56,
+            child: Center(child: content),
           ),
-          const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Inter-SemiBold',
-              fontSize: 18,
-            ),
-          ),
-        ],
-      );
-    }
-    return InkWell(
-      onTap: onTap as void Function()?,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: const Alignment(0.1, -0.9),
-              end: const Alignment(-0.6, 0.9),
-              colors: onTap != null
-                  ? getEnteColorScheme(context).gradientButtonBgColors
-                  : [
-                      getEnteColorScheme(context).fillMuted,
-                      getEnteColorScheme(context).fillMuted,
-                    ],
-            ),
-          ),
-          child: Center(child: buttonContent),
         ),
       ),
     );
+  }
+
+  Color _getBackgroundColor(EnteColorScheme colorScheme, bool isEnabled) {
+    if (!isEnabled) {
+      return colorScheme.fillFaint;
+    }
+    switch (buttonType) {
+      case GradientButtonType.primary:
+        return colorScheme.primary700;
+      case GradientButtonType.secondary:
+        return colorScheme.backdropBase;
+      case GradientButtonType.critical:
+        return colorScheme.warning700;
+    }
+  }
+
+  Color _getTextColor(EnteColorScheme colorScheme, bool isEnabled) {
+    if (!isEnabled) {
+      return colorScheme.textMuted;
+    }
+    switch (buttonType) {
+      case GradientButtonType.primary:
+        return Colors.white;
+      case GradientButtonType.secondary:
+        return colorScheme.textBase;
+      case GradientButtonType.critical:
+        return Colors.white;
+    }
   }
 }

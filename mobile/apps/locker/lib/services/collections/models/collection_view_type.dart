@@ -3,17 +3,44 @@ import "package:locker/services/collections/models/collection.dart";
 
 enum CollectionViewType {
   ownedCollection,
-  sharedCollection,
+  sharedCollectionViewer,
+  sharedCollectionCollaborator,
   hiddenOwnedCollection,
   hiddenSection,
   quickLink,
   uncategorized,
-  favorite
+  favorite,
+}
+
+/// Extension methods to determine which actions are available for each view type
+extension CollectionViewTypeActions on CollectionViewType {
+  bool get isIncomingShare =>
+      this == CollectionViewType.sharedCollectionViewer ||
+      this == CollectionViewType.sharedCollectionCollaborator;
+
+  bool get showDownloadOption => true;
+
+  bool get showEditOption => !isIncomingShare;
+
+  bool get showDeleteOption => !isIncomingShare;
+
+  bool get showShareOption => !isIncomingShare;
+
+  bool get showAddToCollectionOption => !isIncomingShare;
+
+  bool get showOfflineOption => !isIncomingShare;
+
+  bool get showMarkImportantOption => !isIncomingShare;
 }
 
 CollectionViewType getCollectionViewType(Collection c, int userID) {
   if (!c.isOwner(userID)) {
-    return CollectionViewType.sharedCollection;
+    // Check if user is collaborator or viewer
+    final role = c.getRole(userID);
+    if (role == CollectionParticipantRole.collaborator) {
+      return CollectionViewType.sharedCollectionCollaborator;
+    }
+    return CollectionViewType.sharedCollectionViewer;
   }
   if (c.isDefaultHidden()) {
     return CollectionViewType.hiddenSection;
@@ -26,7 +53,8 @@ CollectionViewType getCollectionViewType(Collection c, int userID) {
   } else if (c.isHidden()) {
     return CollectionViewType.hiddenOwnedCollection;
   }
-  debugPrint("Unknown collection type for collection ${c.id}, falling back to "
-      "default");
+  debugPrint(
+    "Unknown collection type for collection ${c.id}, falling back to default",
+  );
   return CollectionViewType.ownedCollection;
 }

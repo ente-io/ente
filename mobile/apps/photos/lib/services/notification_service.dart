@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import "package:flutter_timezone/flutter_timezone.dart";
 import "package:logging/logging.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/services/timezone_aliases.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:timezone/data/latest_10y.dart' as tzdb;
 import "package:timezone/timezone.dart" as tz;
@@ -15,6 +16,8 @@ class NotificationService {
       "notification_permission_granted";
   static const String keyShouldShowNotificationsForSharedPhotos =
       "notifications_enabled_shared_photos";
+  static const String keyShouldShowSocialNotifications =
+      "notifications_enabled_social";
 
   NotificationService._privateConstructor();
 
@@ -22,6 +25,10 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final _logger = Logger("NotificationService");
+  void Function(NotificationResponse notificationResponse)?
+      _onNotificationTapped;
+  bool _pluginInitialized = false;
+  bool _launchDetailsHandled = false;
 
   void init(SharedPreferences preferences) {
     _preferences = preferences;
@@ -34,7 +41,22 @@ class NotificationService {
       NotificationResponse notificationResponse,
     ) onNotificationTapped,
   ) async {
-    await initTimezones();
+    _onNotificationTapped = onNotificationTapped;
+    await _ensurePluginInitialized();
+    await _handleLaunchDetailsIfNeeded();
+    if (!hasGrantedPermissions() &&
+        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      await requestPermissions();
+    }
+  }
+
+  Future<void> initializeForBackground() async {
+    await _ensurePluginInitialized();
+  }
+
+  Future<void> _ensurePluginInitialized() async {
+    if (_pluginInitialized) return;
+    final pluginInitStopwatch = Stopwatch()..start();
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -49,31 +71,106 @@ class NotificationService {
     );
     await _notificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: onNotificationTapped,
+      onDidReceiveNotificationResponse: _handleNotificationResponse,
     );
+    _logger.info(
+      "flutter_local_notifications.initialize took ${pluginInitStopwatch.elapsedMilliseconds}ms",
+    );
+    _pluginInitialized = true;
+  }
 
+  void _handleNotificationResponse(NotificationResponse response) {
+    if (_onNotificationTapped != null) {
+      _onNotificationTapped!(response);
+      return;
+    }
+    _logger.warning(
+      "Notification response received before handler was set; ignoring.",
+    );
+  }
+
+  Future<void> _handleLaunchDetailsIfNeeded() async {
+    if (_launchDetailsHandled) return;
+    final launchDetailsStopwatch = Stopwatch()..start();
     final launchDetails =
         await _notificationsPlugin.getNotificationAppLaunchDetails();
+    _logger.info(
+      "getNotificationAppLaunchDetails took ${launchDetailsStopwatch.elapsedMilliseconds}ms",
+    );
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      onNotificationTapped(launchDetails.notificationResponse!);
+      _onNotificationTapped?.call(launchDetails.notificationResponse!);
     }
-    if (!hasGrantedPermissions() &&
-        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
-      await requestPermissions();
-    }
+    _launchDetailsHandled = true;
   }
 
   Future<void> initTimezones() async {
     if (timezoneInitialized) return;
+    final timezoneInitStopwatch = Stopwatch()..start();
+    final tzdbStopwatch = Stopwatch()..start();
     tzdb.initializeTimeZones();
+    _logger.info(
+      "tz.initializeTimeZones took ${tzdbStopwatch.elapsedMilliseconds}ms",
+    );
+    final localTimezoneStopwatch = Stopwatch()..start();
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    _logger.info(
+      "FlutterTimezone.getLocalTimezone took ${localTimezoneStopwatch.elapsedMilliseconds}ms",
+    );
+    final String resolvedTimeZone = _resolveTimeZoneName(currentTimeZone);
+    tz.setLocalLocation(tz.getLocation(resolvedTimeZone));
     timezoneInitialized = true;
+    _logger.info(
+      "Notification timezone init took ${timezoneInitStopwatch.elapsedMilliseconds}ms",
+    );
+  }
+
+  String _resolveTimeZoneName(String timeZoneName) {
+    if (tz.timeZoneDatabase.locations.containsKey(timeZoneName)) {
+      return timeZoneName;
+    }
+
+    final alias = kTimeZoneAliases[timeZoneName];
+    if (alias != null && tz.timeZoneDatabase.locations.containsKey(alias)) {
+      _logger.warning(
+        'Timezone "$timeZoneName" not found, using alias "$alias".',
+      );
+      return alias;
+    }
+
+    final normalized = timeZoneName.replaceAll(' ', '_');
+    if (normalized != timeZoneName &&
+        tz.timeZoneDatabase.locations.containsKey(normalized)) {
+      _logger.warning(
+        'Timezone "$timeZoneName" not found, using normalized "$normalized".',
+      );
+      return normalized;
+    }
+
+    final lower = timeZoneName.toLowerCase();
+    String? caseMatch;
+    for (final name in tz.timeZoneDatabase.locations.keys) {
+      if (name.toLowerCase() == lower) {
+        caseMatch = name;
+        break;
+      }
+    }
+    if (caseMatch != null) {
+      _logger.warning(
+        'Timezone "$timeZoneName" not found, using "$caseMatch".',
+      );
+      return caseMatch;
+    }
+
+    _logger.warning(
+      'Timezone "$timeZoneName" not found, falling back to UTC.',
+    );
+    return 'UTC';
   }
 
   Future<void> requestPermissions() async {
+    await _ensurePluginInitialized();
     bool? result;
     if (Platform.isIOS) {
       result = await _notificationsPlugin
@@ -99,15 +196,27 @@ class NotificationService {
     return result ?? false;
   }
 
-  bool shouldShowNotificationsForSharedPhotos() {
+  bool shouldShowNotificationsForSharedPhotosAndAlbums() {
     final result =
         _preferences.getBool(keyShouldShowNotificationsForSharedPhotos);
     return result ?? true;
   }
 
-  Future<void> setShouldShowNotificationsForSharedPhotos(bool value) {
+  Future<void> setShouldShowNotificationsForSharedPhotosAndAlbums(bool value) {
     return _preferences.setBool(
       keyShouldShowNotificationsForSharedPhotos,
+      value,
+    );
+  }
+
+  bool shouldShowSocialNotifications() {
+    final result = _preferences.getBool(keyShouldShowSocialNotifications);
+    return result ?? true;
+  }
+
+  Future<void> setShouldShowSocialNotifications(bool value) {
+    return _preferences.setBool(
+      keyShouldShowSocialNotifications,
       value,
     );
   }
@@ -115,10 +224,12 @@ class NotificationService {
   Future<void> showNotification(
     String title,
     String message, {
+    int? id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
     String payload = "ente://home",
   }) async {
+    await _ensurePluginInitialized();
     _logger.info(
       "Showing notification with: $title, $message, $channelID, $channelName, $payload",
     );
@@ -128,13 +239,14 @@ class NotificationService {
       channelDescription: 'ente alerts',
       importance: Importance.max,
       priority: Priority.high,
+      icon: 'notification_icon',
       showWhen: false,
     );
     final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
     final platformChannelSpecs =
         NotificationDetails(android: androidSpecs, iOS: iosSpecs);
     await _notificationsPlugin.show(
-      channelName.hashCode,
+      id ?? channelName.hashCode,
       title,
       message,
       platformChannelSpecs,
@@ -154,6 +266,7 @@ class NotificationService {
     bool logSchedule = true,
   }) async {
     try {
+      await _ensurePluginInitialized();
       if (logSchedule) {
         _logger.info(
           "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
@@ -179,6 +292,7 @@ class NotificationService {
         importance: Importance.max,
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
+        icon: 'notification_icon',
         showWhen: false,
         timeoutAfter: timeoutDurationAndroid?.inMilliseconds,
       );
@@ -223,6 +337,7 @@ class NotificationService {
     bool logLines = true,
   }) async {
     try {
+      await _ensurePluginInitialized();
       if (logLines) {
         _logger.info("Clearing all scheduled notifications");
       }
@@ -261,6 +376,7 @@ class NotificationService {
   }
 
   Future<int> pendingNotifications() async {
+    await _ensurePluginInitialized();
     final pending = await _notificationsPlugin.pendingNotificationRequests();
     return pending.length;
   }

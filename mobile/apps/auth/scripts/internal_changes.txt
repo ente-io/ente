@@ -1,5 +1,3 @@
-- Prateek: App icon picker, refreshed Auth icon/splash, Windows taskbar blur fix, and Linux icon assignment (StartupWMClass)
-- Prateek: Polished empty/initial home screen with unified buttons and refreshed accent; updated primary color to a darker shade
-- Prateek: Branded QR code design and shared dialog (pretty QR) aligned with Photos
-- Prateek: Added andOTP import with encrypted backup support; fixed encrypted import password re-entry regression
-- Prateek: Fixed search bar padding and back navigation handling
+- Fixed system authentication prompt phrasing to read naturally as "... is trying to unlock ..."
+- Added shared `unlock` localization key in `ente_strings` for lock-screen auth reason
+- Added Proton Authenticator import support, including encrypted backups, and normalized Proton TOTP imports to prevent duplicate reimports

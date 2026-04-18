@@ -157,7 +157,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
-pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join, pct.min_role 
+pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_comment, pct.enable_join, pct.min_role 
     FROM collections c
     LEFT JOIN collection_shares cs
     ON (cs.collection_id = c.collection_id AND cs.is_deleted = false)
@@ -184,14 +184,14 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var c ente.Collection
 		var name, encryptedName, nameDecryptionNonce sql.NullString
 		var pctDeviceLimit sql.NullInt32
-		var pctEnableDownload, pctEnableCollect, pctEnableJoin sql.NullBool
+		var pctEnableDownload, pctEnableCollect, pctEnableComment, pctEnableJoin sql.NullBool
 		var shareUserID, pctValidTill, pctCreatedAt, pctUpdatedAt, pctMemLimit, pctOpsLimit sql.NullInt64
 		var encryptedEmail, nonce []byte
 		var shareeRoleType, pctToken, pctPwHash, pctPwNonce, pctMinRole sql.NullString
 
 		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
-			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin, &pctMinRole); err != nil {
+			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableComment, &pctEnableJoin, &pctMinRole); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 
@@ -230,6 +230,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 					ValidTill:       pctValidTill.Int64,
 					EnableDownload:  pctEnableDownload.Bool,
 					EnableCollect:   pctEnableCollect.Bool,
+					EnableComment:   pctEnableComment.Bool,
 					PasswordEnabled: pctPwNonce.Valid,
 					EnableJoin:      pctEnableJoin.Bool,
 				}
@@ -257,7 +258,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 // with a user
 func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
 	query := `
-		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
+		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type, collection_shares.shared_at
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
@@ -282,8 +283,13 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 		var collectionName, encryptedName, nameDecryptionNonce sql.NullString
 		var encryptedEmail, emailDecryptionNonce []byte
 		var roleType sql.NullString
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
+		var sharedAt sql.NullInt64
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType, &sharedAt); err != nil {
 			return collections, stacktrace.Propagate(err, "")
+		}
+		if sharedAt.Valid {
+			sharedAtValue := sharedAt.Int64
+			c.SharedAt = &sharedAtValue
 		}
 		if collectionName.Valid && len(collectionName.String) > 0 {
 			c.Name = collectionName.String
@@ -370,6 +376,37 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 		cIDs = append(cIDs, cID)
 	}
 	return cIDs, nil
+}
+
+// FilterNonDeletedCollectionIDs returns collection IDs that are not deleted and match the provided app.
+func (repo *CollectionRepository) FilterNonDeletedCollectionIDs(collectionIDs []int64, app ente.App) ([]int64, error) {
+	if len(collectionIDs) == 0 {
+		return nil, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collections
+		WHERE collection_id = ANY($1)
+		  AND is_deleted = FALSE
+		  AND app = $2
+	`, pq.Array(collectionIDs), app)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	result := make([]int64, 0, len(collectionIDs))
+	for rows.Next() {
+		var collectionID int64
+		if err := rows.Scan(&collectionID); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result = append(result, collectionID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return result, nil
 }
 
 func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {
@@ -475,10 +512,17 @@ func (repo *CollectionRepository) Share(
 		err = fmt.Errorf("invalid role %s", string(role))
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = tx.ExecContext(context, `INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type) VALUES($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (collection_id, from_user_id, to_user_id)
-		DO UPDATE SET(is_deleted, updation_time, role_type) = (FALSE, $5, $6)`,
-		collectionID, fromUserID, toUserID, encryptedKey, updationTime, role)
+	_, err = tx.ExecContext(context, `INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type, shared_at) VALUES($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT (collection_id, from_user_id, to_user_id)
+			DO UPDATE SET
+				is_deleted = FALSE,
+				updation_time = $5,
+				role_type = $6,
+				shared_at = CASE
+					WHEN collection_shares.is_deleted = TRUE THEN $7
+					ELSE collection_shares.shared_at
+				END`,
+		collectionID, fromUserID, toUserID, encryptedKey, updationTime, role, updationTime)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
@@ -807,7 +851,7 @@ func (repo *CollectionRepository) GetDiff(collectionID int64, sinceTime int64, l
             collection_files.encrypted_key, collection_files.key_decryption_nonce,
             files.file_decryption_header, files.thumbnail_decryption_header,
             files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata, 
-            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time
+            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time, collection_files.created_at
         FROM files
         INNER JOIN collection_files
         ON collection_files.file_id = files.file_id
@@ -832,7 +876,7 @@ func (repo *CollectionRepository) GetFilesWithVersion(collectionID int64, update
             collection_files.encrypted_key, collection_files.key_decryption_nonce,
             files.file_decryption_header, files.thumbnail_decryption_header,
             files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata,
-            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time
+            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time, collection_files.created_at
         FROM files
         INNER JOIN collection_files
         ON collection_files.file_id = files.file_id
@@ -851,7 +895,7 @@ func (repo *CollectionRepository) GetFile(collectionID int64, fileID int64) ([]e
             collection_files.encrypted_key, collection_files.key_decryption_nonce,
             files.file_decryption_header, files.thumbnail_decryption_header,
             files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata,
-            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time
+            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time, collection_files.created_at
         FROM files
         INNER JOIN collection_files
         ON collection_files.file_id = files.file_id

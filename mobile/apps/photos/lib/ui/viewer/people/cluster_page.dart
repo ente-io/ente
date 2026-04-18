@@ -1,33 +1,39 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
-import 'package:flutter/material.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_mode_changed_event.dart";
+import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/file/file.dart";
+import "package:photos/models/file_load_result.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/ml/face/person.dart";
-import 'package:photos/models/selected_files.dart';
+import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/ui/components/banners/name_face_banner.dart";
 import "package:photos/ui/notification/toast.dart";
-import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
-import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
+import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
-import "package:photos/ui/viewer/people/people_banner.dart";
+import "package:photos/ui/viewer/people/merge_clusters_to_person_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/ui/viewer/people/save_person_banner.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class ClusterPage extends StatefulWidget {
   final List<EnteFile> searchResult;
@@ -56,17 +62,28 @@ class ClusterPage extends StatefulWidget {
   State<ClusterPage> createState() => _ClusterPageState();
 }
 
+enum ClusterPageResult {
+  ignoredPerson,
+}
+
 class _ClusterPageState extends State<ClusterPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  late final StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
+  bool _isNamingBannerDismissed = false;
+  bool get _offlineUiMode =>
+      isOfflineMode && !Configuration.instance.hasConfiguredAccount();
 
   @override
   void initState() {
     super.initState();
     ClusterFeedbackService.setLastViewedClusterID(widget.clusterID);
-    files = widget.searchResult;
+    files = List<EnteFile>.from(widget.searchResult)
+      ..sort(
+        (a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0),
+      );
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromEverywhere ||
@@ -95,6 +112,11 @@ class _ClusterPageState extends State<ClusterPage> {
         }
       }
     });
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     kDebugMode
         ? ClusterFeedbackService.instance.debugLogClusterBlurValues(
             widget.clusterID,
@@ -107,10 +129,79 @@ class _ClusterPageState extends State<ClusterPage> {
   void dispose() {
     _filesUpdatedEvent.cancel();
     _peopleChangedEvent.cancel();
+    _appModeChangedEvent.cancel();
     if (ClusterFeedbackService.lastViewedClusterID == widget.clusterID) {
       ClusterFeedbackService.resetLastViewedClusterID();
     }
     super.dispose();
+  }
+
+  Future<void> _handleSavePerson() async {
+    if (_offlineUiMode) {
+      return;
+    }
+    if (widget.personID == null) {
+      final result = await showAssignPersonAction(
+        context,
+        clusterID: widget.clusterID,
+        file: files.isEmpty ? null : files.first,
+      );
+      if (!mounted) {
+        return;
+      }
+      if (result != null) {
+        Navigator.pop(context);
+        final person = result is (PersonEntity, EnteFile) ? result.$1 : result;
+        routeToPage(
+          context,
+          PeoplePage(
+            person: person,
+            searchResult: null,
+          ),
+        ).ignore();
+      }
+    } else {
+      showShortToast(context, "No personID or clusterID");
+    }
+  }
+
+  Future<void> _handleMergePerson() async {
+    if (_offlineUiMode) {
+      return;
+    }
+    final selection = await showMergeClustersToPersonPage(
+      context,
+      seedClusterId: widget.clusterID,
+    );
+    if (!mounted) {
+      return;
+    }
+    if (selection == null || selection.personId.isEmpty) {
+      return;
+    }
+    var person = selection.person;
+    person ??= await PersonService.instance.getPerson(selection.personId);
+    if (person == null) {
+      return;
+    }
+    if (selection.person == null ||
+        selection.seedClusterId != widget.clusterID) {
+      await ClusterFeedbackService.instance.addClusterToExistingPerson(
+        person: person,
+        clusterID: widget.clusterID,
+      );
+    }
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context);
+    routeToPage(
+      context,
+      PeoplePage(
+        person: person,
+        searchResult: null,
+      ),
+    ).ignore();
   }
 
   @override
@@ -142,40 +233,34 @@ class _ClusterPageState extends State<ClusterPage> {
       tagPrefix: widget.tagPrefix + widget.tagPrefix,
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
-      initialFiles: widget.searchResult,
-      header: widget.showNamingBanner && files.isNotEmpty
-          ? PeopleBanner(
-              type: PeopleBannerType.addName,
-              faceWidget: PersonFaceWidget(
-                clusterID: widget.clusterID,
-              ),
-              actionIcon: Icons.add_outlined,
-              text: AppLocalizations.of(context).savePerson,
-              subText: AppLocalizations.of(context).findThemQuickly,
-              onTap: () async {
-                if (widget.personID == null) {
-                  final result = await showAssignPersonAction(
-                    context,
+      initialFiles: files,
+      header: (_offlineUiMode || widget.showNamingBanner) &&
+              files.isNotEmpty &&
+              !_isNamingBannerDismissed
+          ? _offlineUiMode
+              ? const NameFaceBanner()
+              : SavePersonBanner(
+                  faceWidget: PersonFaceWidget(
                     clusterID: widget.clusterID,
-                    file: files.isEmpty ? null : files.first,
-                  );
-                  if (result != null) {
-                    Navigator.pop(context);
-                    final person =
-                        result is (PersonEntity, EnteFile) ? result.$1 : result;
-                    routeToPage(
-                      context,
-                      PeoplePage(
-                        person: person,
-                        searchResult: null,
-                      ),
-                    ).ignore();
-                  }
-                } else {
-                  showShortToast(context, "No personID or clusterID");
-                }
-              },
-            )
+                  ),
+                  text: AppLocalizations.of(context).savePerson,
+                  subText: AppLocalizations.of(context).findThemQuickly,
+                  primaryActionLabel: AppLocalizations.of(context).save,
+                  secondaryActionLabel: AppLocalizations.of(context).merge,
+                  onPrimaryTap: _handleSavePerson,
+                  onSecondaryTap: _handleMergePerson,
+                  onDismissed: () {
+                    if (!mounted) {
+                      return;
+                    }
+                    setState(() {
+                      _isNamingBannerDismissed = true;
+                    });
+                  },
+                  dismissibleKey: ValueKey(
+                    "save-person-banner-${widget.clusterID}",
+                  ),
+                )
           : null,
     );
     return GalleryBoundariesProvider(

@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/magic_sort_change_event.dart";
@@ -11,6 +12,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/search/hierarchical/magic_filter.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart" show isOfflineMode;
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -55,7 +57,8 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<MagicSortChangeEvent> _magicSortChangeEvent;
   late final Logger _logger = Logger("_MagicResultScreenState");
-  late final Map<int, int> fileIDToRelevantPos;
+  late Map<int, int> fileIDToRelevantPos;
+  Map<String, int> _localIdToIntId = const {};
   bool _enableGrouping = false;
   late final SearchFilterDataProvider _searchFilterDataProvider;
 
@@ -65,6 +68,9 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     files = widget.files;
     _enableGrouping = widget.enableGrouping;
     fileIDToRelevantPos = getFileIDToRelevantPos();
+    if (isOfflineMode) {
+      _loadLocalIntIds();
+    }
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
@@ -84,9 +90,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
         if (_enableGrouping) {
           if (fileIDToRelevantPos.isNotEmpty) {
             files.sort(
-              (a, b) =>
-                  fileIDToRelevantPos[a.uploadedFileID]! -
-                  fileIDToRelevantPos[b.uploadedFileID]!,
+              (a, b) => _posForFile(a) - _posForFile(b),
             );
           } else {
             _logger.warning(
@@ -112,6 +116,23 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     );
   }
 
+  Future<void> _loadLocalIntIds() async {
+    final localIds = files
+        .map((file) => file.localID)
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    if (localIds.isEmpty) return;
+    final mapping = await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+    if (!mounted) return;
+    setState(() {
+      _localIdToIntId = mapping;
+      if (widget.fileIdToPosMap.isEmpty && !_enableGrouping) {
+        fileIDToRelevantPos = getFileIDToRelevantPos();
+      }
+    });
+  }
+
   Map<int, int> getFileIDToRelevantPos() {
     if (widget.fileIdToPosMap.isNotEmpty) {
       return widget.fileIdToPosMap;
@@ -121,7 +142,10 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       );
       final map = <int, int>{};
       for (int i = 0; i < files.length; i++) {
-        map[files[i].uploadedFileID!] = i;
+        final fileId = _fileIdForSort(files[i]);
+        if (fileId != null) {
+          map[fileId] = i;
+        }
       }
       return map;
     } else {
@@ -130,6 +154,21 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       );
       return <int, int>{};
     }
+  }
+
+  int _posForFile(EnteFile file) {
+    final fileId = _fileIdForSort(file);
+    if (fileId == null) return 0;
+    return fileIDToRelevantPos[fileId] ?? 0;
+  }
+
+  int? _fileIdForSort(EnteFile file) {
+    if (isOfflineMode) {
+      final localId = file.localID;
+      if (localId == null || localId.isEmpty) return null;
+      return _localIdToIntId[localId];
+    }
+    return file.uploadedFileID ?? file.generatedID;
   }
 
   @override

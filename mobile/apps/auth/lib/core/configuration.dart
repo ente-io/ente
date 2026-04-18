@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:ente_base/models/database.dart';
 import 'package:ente_configuration/base_configuration.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';

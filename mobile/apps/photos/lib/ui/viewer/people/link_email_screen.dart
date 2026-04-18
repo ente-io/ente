@@ -145,7 +145,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                               leadingIconSize: 24.0,
                               leadingIconWidget: UserAvatarWidget(
                                 currentUser,
-                                type: AvatarType.mini,
+                                type: AvatarType.md,
                               ),
                               menuItemColor:
                                   getEnteColorScheme(context).fillFaint,

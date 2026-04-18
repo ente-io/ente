@@ -5,7 +5,132 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 # Changelog - Ente Photos
 
-A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
+A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
+
+## v1.7.22 (desktop) - Mar 2026
+
+- App lock
+- Better people list experience (bigger view with search)
+- Various bug fixes (map view tiles, etc)
+
+## v1.3.22 (mobile) - Mar 2026
+
+- Gallery mode to use Ente Photos without an account
+- New shared albums card in feed
+- Shared albums and shared photos notifications redirect to feed
+- Friendlier help & support page
+- Better people suggestions in person overview
+- Bug fixes and performance improvements
+
+## v1.7.21 (desktop) - Feb 2026
+
+- Masonry layout for public albums
+- Quick links
+- Full viewer experience for single-photo/video links
+- Update album cover
+- Public album improvements
+- Catalan language support
+
+## v1.3.16 (mobile) - Feb 2026
+
+- Fix broken map view
+
+## v1.3.15 (mobile) - Feb 2026
+
+- Faster search and discovery
+- See shared photos in feed
+- Fix window controls hiding app UI on iPadOS
+- Ignore already named persons
+- Fix iOS video player crash
+- Fix pinch to zoom opening info sheet on video
+- Refresh security toggles with latest account state (2FA + email verification)
+- Fix file picker galleries getting clipped on wider screens
+- More collage layouts
+
+## v1.3.13 (mobile) - Feb 2026
+
+- Cleanup hidden files in non-hidden albums
+- Delete hidden files from device
+- Hide shared albums
+- Search in device albums
+
+## v1.3.10 (mobile) - Feb 2026
+
+- Notifications for likes and comments
+- Support for hidden rituals
+- Better upload reliability
+
+## v1.7.18 (desktop) - Jan 2026
+
+- Hide shared albums
+- Right click context menu for photos
+- Cleanup large files
+- Fix search bar losing focus on last backspace
+- Hide empty favorites album from albums bar
+- Cleanup uncategorized photos
+- Hide favorites from album selector dialogs
+- Show current album in album selector for upload flow
+- Sort albums when uploading, adding, moving photos
+- Select all memories in gallery and albums view
+- Edit location of photos and videos
+- More sorting options of albums lists
+- Improved UI for login and sign-up pages
+- Improved map view rendering logic
+- Upload directly to hidden albums
+
+## v1.3.7 (mobile) - Jan 2026
+
+- Settings screen redesign
+- Search within settings
+- Faster search tab loading
+- Search bar moved to top
+- Results screen redesign
+- Search within discovery, location, file type sections
+- Allow admin and album owner to delete comments
+- Pinch to zoom on video
+- View all ignored persons
+- Better merge flow
+- Search and custom sort on people page
+- Consistent sorting of contacts
+- Preview images for unsupported image formats
+- Swap photos and tap to replace in collage creator
+- Performance improvement on file info sheet
+- Fix for music pausing when opening the app
+- Fix for swipe to select issue on Samsung S devices
+- Fix for splash screen issue after backup restore
+- Fix for gallery issues on tablets and landscape mode
+- Fix for uncategorised page not updating after move
+
+## v1.3.0 (mobile) - Jan 2026
+
+- Likes and comments
+- Admin role for albums
+- Video streaming improvements
+
+## v1.7.17 (desktop) - Dec 2025
+
+- Map view.
+- Manually tag people in photos.
+- Album admins can now remove photos added by collaborators.
+- Viewers and collaborators can see and copy public links.
+- Free users can now create public links (device limit of 5).
+
+## v1.2.31 (mobile) - Dec 2025
+
+- Rituals
+- Manually tag people
+- Public links for everyone
+- Shared albums pinning
+- New favorite icon
+
+## v1.2.28 (mobile) - Dec 2025
+
+- Ability to pin people
+- Hide people from memories
+- Fresh QR code designs for links
+- Performance improvements on Rewind
+- Setting to disable Swipe to Select
+
 ## v1.7.16 (desktop) - Nov 2025
 
 - Support Greek translations.

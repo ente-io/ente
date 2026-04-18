@@ -5,7 +5,7 @@
 
 import debounce from "debounce";
 import { ensureElectron } from "ente-base/electron";
-import { basename, dirname } from "ente-base/file-name";
+import { basename, dirname, lowercaseExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import type {
     CollectionMapping,
@@ -17,7 +17,7 @@ import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
 import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import type { EnteFile } from "ente-media/file";
 import { removeFromOwnCollection } from "ente-new/photos/services/collection";
-import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
+import { computeAllCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
@@ -39,6 +39,12 @@ class FolderWatcher {
      * we can ignore any file system events that come for it next.
      */
     private deletedFolderPaths: string[] = [];
+    /**
+     * A set of folder paths that were inaccessible in the last accessibility
+     * check. Used to detect when a folder transitions from inaccessible to
+     * accessible (e.g., when an external drive is reconnected).
+     */
+    private previouslyInaccessiblePaths = new Set<string>();
     /** `true` if we are using the uploader. */
     private uploadRunning = false;
     /** `true` if we are temporarily paused to let a user upload go through. */
@@ -96,7 +102,28 @@ class FolderWatcher {
         this.upload = upload;
         this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
+        this.initializeAccessibilityState();
         this.triggerSyncWithDisk();
+    }
+
+    /**
+     * Initialize the accessibility tracking state by capturing which watches
+     * are currently inaccessible. This allows subsequent checkAccessibility
+     * calls to detect when a folder transitions from inaccessible to accessible.
+     */
+    private initializeAccessibilityState() {
+        void this.getWatches().then((watches) => {
+            for (const watch of watches) {
+                if (watch.isAccessible === false) {
+                    this.previouslyInaccessiblePaths.add(watch.folderPath);
+                }
+            }
+            if (this.previouslyInaccessiblePaths.size > 0) {
+                log.info(
+                    `Folder watch: ${this.previouslyInaccessiblePaths.size} folder(s) currently inaccessible`,
+                );
+            }
+        });
     }
 
     /** Return `true` if we are currently using the uploader. */
@@ -132,6 +159,55 @@ class FolderWatcher {
     /** Return the list of folders we are watching for changes. */
     async getWatches(): Promise<FolderWatch[]> {
         return await ensureElectron().watch.get();
+    }
+
+    /**
+     * Check accessibility of all watch folders and trigger sync if any
+     * previously inaccessible folder has become accessible.
+     *
+     * This is meant to be called when the app gains focus, allowing us to
+     * detect when an external drive has been reconnected.
+     */
+    async checkAccessibility(): Promise<void> {
+        try {
+            const watches = await this.getWatches();
+
+            // Determine which folders are currently inaccessible.
+            const currentlyInaccessiblePaths = new Set<string>();
+            for (const watch of watches) {
+                if (watch.isAccessible === false) {
+                    currentlyInaccessiblePaths.add(watch.folderPath);
+                }
+            }
+
+            // Check if any previously inaccessible folder is now accessible.
+            const newlyAccessiblePaths: string[] = [];
+            for (const path of this.previouslyInaccessiblePaths) {
+                if (!currentlyInaccessiblePaths.has(path)) {
+                    // This folder was inaccessible before but is no longer in
+                    // the inaccessible set. Check if the watch still exists.
+                    const watchStillExists = watches.some(
+                        (w) => w.folderPath === path,
+                    );
+                    if (watchStillExists) {
+                        newlyAccessiblePaths.push(path);
+                    }
+                }
+            }
+
+            // Update our tracking of inaccessible paths for the next check.
+            this.previouslyInaccessiblePaths = currentlyInaccessiblePaths;
+
+            // Only trigger sync if at least one folder became accessible.
+            if (newlyAccessiblePaths.length > 0 && !this.isPaused) {
+                log.info(
+                    `Folder watch: ${newlyAccessiblePaths.length} folder(s) became accessible (${newlyAccessiblePaths.join(", ")}), triggering sync`,
+                );
+                this.triggerSyncWithDisk();
+            }
+        } catch (e) {
+            log.error("Error checking watch folder accessibility", e);
+        }
     }
 
     /**
@@ -250,6 +326,11 @@ class FolderWatcher {
             return;
         }
 
+        if (watch.isAccessible === false) {
+            skip(`folder ${event.folderPath} is inaccessible`);
+            return;
+        }
+
         if (event.action == "upload") {
             const paths = pathsToUpload(event.filePaths, watch);
             if (paths.length == 0) {
@@ -288,8 +369,17 @@ class FolderWatcher {
 
             this.activeWatch = watch;
 
-            await this.moveToTrash(removed);
+            try {
+                await this.moveToTrash(removed);
+            } catch (e) {
+                log.error(
+                    "Failed to trash files from watch folder, clearing stale sync entries",
+                    e,
+                );
+            }
 
+            // Always update syncedFiles to remove stale entries, even if
+            // trashing failed. Otherwise we'll keep retrying forever.
             await ensureElectron().watch.updateSyncedFiles(
                 rest,
                 watch.folderPath,
@@ -480,7 +570,9 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await computeNormalCollectionFilesFromSaved();
+        // Use all collection files (including hidden) so that files removed
+        // from the watch folder are also removed from hidden albums.
+        const files = await computeAllCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (
@@ -553,6 +645,14 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     const events: WatchEvent[] = [];
 
     for (const watch of watches) {
+        // Skip inaccessible folders (e.g., ejected external drives).
+        if (watch.isAccessible === false) {
+            log.info(
+                `Skipping sync for inaccessible folder ${watch.folderPath}`,
+            );
+            continue;
+        }
+
         const folderPath = watch.folderPath;
 
         const filePaths = await electron.fs.findFiles(folderPath);
@@ -580,14 +680,16 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
 };
 
 /**
- * Filter out hidden files and previously synced or ignored paths from
- * {@link paths} to get the list of paths that need to be uploaded to the Ente
- * collection.
+ * Filter out hidden files, non-media files, and previously synced or ignored
+ * paths from {@link paths} to get the list of paths that need to be uploaded
+ * to the Ente collection.
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
         // Filter out files whose names begins with a dot.
         .filter((path) => !basename(path).startsWith("."))
+        // Filter out known non-media files.
+        .filter((path) => !shouldIgnoreForUpload(path))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
 
@@ -610,3 +712,42 @@ const collectionNameForPath = (path: string, watch: FolderWatch) =>
         : parentDirectoryName(path);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));
+
+/**
+ * Extensions of files that should not be uploaded from watch folders.
+ *
+ * These are common non-media file types that might be present in directories
+ * containing photos and videos, but are not themselves media files.
+ */
+const ignoredExtensions = new Set([
+    "zip",
+    "rar",
+    "7z",
+    "tar",
+    "gz",
+    "bz2",
+    "txt",
+    "ini",
+    "sfv",
+    "md5",
+    "sha1",
+    "sha256",
+    "sha512",
+    "sha",
+    "html",
+    "htm",
+    "xmp",
+    "db",
+]);
+
+/**
+ * Return `true` if the file at the given path should be ignored for uploads.
+ *
+ * This is used to filter out known non-media files from watch folders before
+ * attempting to upload them. This prevents spurious "Skipped" messages and
+ * error logs for files that we know beforehand are not photos or videos.
+ */
+const shouldIgnoreForUpload = (path: string): boolean => {
+    const extension = lowercaseExtension(path);
+    return extension !== undefined && ignoredExtensions.has(extension);
+};

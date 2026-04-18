@@ -8,7 +8,7 @@ description: Guide for exporting your photos out from Ente Photos
 Please follow the following simple steps to keep a local copy of the photos and
 videos you have uploaded to Ente.
 
-1. Sign in to [our desktop app](https://ente.io/download/desktop), if you
+1. Sign in to [our desktop app](https://ente.com/download/desktop), if you
    haven't done so already.
 
     ![Ente - Sign in to export data](sign-in.png)
@@ -62,7 +62,7 @@ data reflects the latest album states with new files, moves, and deletions.
 ---
 
 If you run into any issues during your data export, please reach out to
-[support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+[support@ente.com](mailto:support@ente.com) and we will be happy to help you!
 
 Note that we also provide a
 [CLI tool](https://github.com/ente-io/ente/tree/main/cli#export) to export your

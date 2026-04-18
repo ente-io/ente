@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/force_reload_home_gallery_event.dart";
@@ -12,7 +13,6 @@ import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/settings/gallery_settings_screen.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class GalleryLayoutSettings extends StatefulWidget {
   const GalleryLayoutSettings({super.key});

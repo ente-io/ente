@@ -7,7 +7,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -32,13 +32,13 @@ class SocialSectionWidget extends StatelessWidget {
 
     final List<Widget> options = [
       sectionOptionSpacing,
-      if (PlatformUtil.isMobile()) ...[
+      if (PlatformDetector.isMobile()) ...[
         SocialsMenuItemWidget(l10n.rateUsOnStore(ratePlace), rateUrl),
         sectionOptionSpacing,
       ],
       SocialsMenuItemWidget(
         l10n.blog,
-        "https://ente.io/blog",
+        "https://ente.com/blog",
         launchInExternalApp: !Platform.isAndroid,
       ),
       sectionOptionSpacing,
@@ -47,11 +47,12 @@ class SocialSectionWidget extends StatelessWidget {
         "https://shop.ente.io",
         launchInExternalApp: !Platform.isAndroid,
       ),
+      sectionOptionSpacing,
       const SocialsMenuItemWidget("Mastodon", "https://fosstodon.org/@ente"),
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+      const SocialsMenuItemWidget("Discord", "https://ente.com/discord"),
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
       sectionOptionSpacing,

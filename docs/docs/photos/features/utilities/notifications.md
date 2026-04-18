@@ -70,7 +70,7 @@ Receive reminders when it's someone's birthday.
 
 ### Customizing notification categories
 
-Open `Settings > General > Notifications` in the Ente app to:
+Open `Settings > Notifications` in the Ente app to:
 
 - Enable or disable specific notification types
 - Turn off all notifications

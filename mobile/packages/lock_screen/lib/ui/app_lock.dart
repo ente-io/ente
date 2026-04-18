@@ -139,10 +139,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
               settings: settings,
             );
         }
-        return PageRouteBuilder(
-          pageBuilder: (_, __, ___) => this._lockScreen,
-          settings: settings,
-        );
+        return null;
       },
     );
   }

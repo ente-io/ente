@@ -315,7 +315,6 @@
     }
   },
   "sorry": "Съжаляваме",
-  "importFailureDesc": "Неуспешен анализ на избрания файл.\nМоля, пишете на support@ente.io, ако имате нужда от помощ!",
   "pendingSyncs": "Предупреждение",
   "pendingSyncsWarningBody": "Някои от вашите кодове не са архивирани.\n\nМоля, уверете се, че имате резервно копие на тези кодове, преди да излезете.",
   "checkInboxAndSpamFolder": "Моля, проверете входящата си поща (и спама), за да завършите проверката",
@@ -328,7 +327,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -505,7 +504,6 @@
   "tellUsWhatYouThink": "Кажете ни какво мислите",
   "supportEnte": "Подкрепете <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Дайте ни звезда в GitHub",
-  "free5GB": "5GB безплатни в <bold-green>ente</bold-green> Photos",
   "freeStorageOffer": "10% отстъпка в <bold-green>ente</bold-green> Photos",
   "freeStorageOfferDescription": "Използвайте промокод „AUTH“, за да получите 10% отстъпка през първата година"
 }

@@ -76,6 +76,65 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get keepOffline => 'Keep offline';
+
+  @override
+  String get cloudOnly => 'Cloud only';
+
+  @override
+  String get savingOffline => 'Saving offline...';
+
+  @override
+  String filesAvailableOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files saved offline',
+      one: '1 file saved offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesAvailableOfflinePartial(int successCount, int failureCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      successCount,
+      locale: localeName,
+      other: 'Saved $successCount files offline',
+      one: 'Saved 1 file offline',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      failureCount,
+      locale: localeName,
+      other: '$failureCount failed',
+      one: '1 failed',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String failedToSaveFilesOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Failed to save $count files offline',
+      one: 'Failed to save 1 file offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesRemovedFromOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files removed from offline',
+      one: '1 file removed from offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get downloadFailed => 'Download failed';
 
   @override
@@ -122,6 +181,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionCannotBeDeleted => 'This collection cannot be deleted';
+
+  @override
+  String get collectionCannotBeEdited => 'This collection cannot be edited';
+
+  @override
+  String get collectionCannotBeShared => 'This collection cannot be shared';
 
   @override
   String get deleteCollection => 'Delete collection';
@@ -217,6 +282,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
+  String get download => 'Download';
+
+  @override
   String get deleteFile => 'Delete item';
 
   @override
@@ -233,6 +301,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createCollection => 'Create collection';
+
+  @override
+  String get enterCollectionName => 'Enter collection name';
 
   @override
   String get nothingYet => 'Nothing yet';
@@ -344,6 +415,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uncategorized => 'Uncategorized';
+
+  @override
+  String get syncing => 'Syncing...';
 
   @override
   String get syncingTrash => 'Syncing trash...';
@@ -494,6 +568,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'Theme';
 
   @override
+  String get appearance => 'Appearance';
+
+  @override
   String get lightTheme => 'Light';
 
   @override
@@ -509,6 +586,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
+  String get aboutUs => 'About us';
+
+  @override
   String get weAreOpenSource => 'We are open source!';
 
   @override
@@ -521,7 +601,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsOfServicesTitle => 'Terms';
 
   @override
+  String get checkForUpdates => 'Check for updates';
+
+  @override
+  String get checkingForUpdates => 'Checking for updates...';
+
+  @override
+  String get unableToCheckForUpdatesRightNow =>
+      'Unable to check for updates right now';
+
+  @override
+  String get youAreOnTheLatestVersion => 'You are on the latest version';
+
+  @override
+  String get aNewVersionOfEnteLockerIsAvailable =>
+      'A new version of Ente Locker is available.';
+
+  @override
+  String get criticalUpdateAvailable => 'Critical update available';
+
+  @override
+  String get updateAvailable => 'Update available';
+
+  @override
+  String get downloadUpdate => 'Download update';
+
+  @override
   String get support => 'Support';
+
+  @override
+  String get helpAndSupport => 'Help and Support';
 
   @override
   String get contactSupport => 'Contact support';
@@ -761,6 +870,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageLink => 'Manage link';
 
   @override
+  String get linkLabel => 'Link';
+
+  @override
   String get linkExpiry => 'Link expiry';
 
   @override
@@ -992,7 +1104,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendInvite => 'Send invite';
 
   @override
-  String get shareTextRecommendUsingEnte => 'Download Ente\n\nhttps://ente.io';
+  String get shareTextRecommendUsingEnte => 'Download Ente\n\nhttps://ente.com';
 
   @override
   String get thisIsYourVerificationId => 'This is your Verification ID';
@@ -1025,12 +1137,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String shareMyVerificationID(Object verificationID) {
-    return 'Here\'s my verification ID: $verificationID for ente.io.';
+    return 'Here\'s my verification ID: $verificationID for ente.com.';
   }
 
   @override
   String shareTextConfirmOthersVerificationID(Object verificationID) {
-    return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
+    return 'Hey, can you confirm that this is your ente.com verification ID: $verificationID';
   }
 
   @override
@@ -1139,6 +1251,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get uploadStorageLimitErrorBody =>
       'You\'ve run out of storage space. Free up space to continue uploading.';
+
+  @override
+  String get uploadSubscriptionExpiredErrorTitle => 'Subscription expired';
+
+  @override
+  String get uploadSubscriptionExpiredErrorBody =>
+      'Your Ente Photos subscription has expired. Renew your subscription to continue uploading.';
 
   @override
   String get uploadFileCountLimitErrorTitle => 'File limit reached';
@@ -1466,12 +1585,300 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get important => 'Important';
+
+  @override
+  String get unimportant => 'Unimportant';
+
+  @override
+  String get removingFromImportant => 'Removing from important...';
+
+  @override
+  String get markingAsImportant => 'Marking as important...';
+
+  @override
+  String get fileMarkedAsImportant => 'Item marked as important';
+
+  @override
+  String get fileRemovedFromImportant => 'Item removed from important';
+
+  @override
+  String filesMarkedAsImportant(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items marked as important',
+      one: '1 item marked as important',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allFilesAlreadyMarkedAsImportant =>
+      'All items are already marked as important';
+
+  @override
+  String failedToMarkFilesAsImportant(String error) {
+    return 'Failed to mark items as important: $error';
+  }
+
+  @override
+  String failedToUpdateImportantStatus(String error) {
+    return 'Failed to update important status: $error';
+  }
+
+  @override
   String get sorry => 'Sorry';
 
   @override
   String get subscribe => 'Subscribe';
 
   @override
+  String get sharedWith => 'Shared with';
+
+  @override
+  String get shareCollection => 'Share collection';
+
+  @override
+  String get shareLater => 'Share later';
+
+  @override
+  String get enterNameOrEmailToShareWith => 'Enter name or email to share with';
+
+  @override
+  String get chooseFromAnExistingContact => 'Choose from an existing contact';
+
+  @override
+  String get scheduleShare => 'Schedule share';
+
+  @override
+  String get addEmail => 'Add email';
+
+  @override
+  String get addNewEmail => 'Add new email';
+
+  @override
+  String get noSharedUsers =>
+      'Not shared with anyone yet. Share this collection by adding someone\'s email below.';
+
+  @override
+  String get removeAccess => 'Remove access';
+
+  @override
   String get subscriptionRequiredForSharing =>
       'You need a paid subscription to share links';
+
+  @override
+  String get sessionExpired => 'Session expired';
+
+  @override
+  String get pleaseLoginAgain => 'Please login again';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get seeAllCollections => 'All collections';
+
+  @override
+  String get clearAllFilters => 'Clear all';
+
+  @override
+  String get selectLanguage => 'Select language';
+
+  @override
+  String get general => 'General';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String selectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String actionNotSupportedForSharedFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Action is not supported for $count shared files',
+      one: 'Action is not supported for 1 shared file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addTo => 'Add to';
+
+  @override
+  String get shareNotSupportedForSharedFiles =>
+      'Share is not supported for shared files';
+
+  @override
+  String get editNotSupportedForSharedFiles =>
+      'Edit is not supported for shared files';
+
+  @override
+  String get deleteNotSupportedForSharedFiles =>
+      'Delete is not supported for shared files';
+
+  @override
+  String get importantNotSupportedForSharedFiles =>
+      'Important is not supported for shared files';
+
+  @override
+  String get sharingSection => 'Sharing';
+
+  @override
+  String get sharingEnabledToggle => 'Sharing enabled';
+
+  @override
+  String get publicLinkSection => 'Public Link';
+
+  @override
+  String get linkEnabledToggle => 'Link enabled';
+
+  @override
+  String get allowUploads => 'Allow uploads';
+
+  @override
+  String get collectionUpdated => 'Collection updated';
+
+  @override
+  String get actionNotSupportedOnFavouritesAlbum =>
+      'Action not supported on Favourites album';
+
+  @override
+  String get leaveCollectionSuccessfully => 'Left collection successfully';
+
+  @override
+  String leftCollectionsSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Left $count collections successfully',
+      one: 'Left 1 collection successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removePublicLink => 'Remove public link';
+
+  @override
+  String removePublicLinkConfirmation(String collectionName) {
+    return 'This will remove the public link for accessing \"$collectionName\".';
+  }
+
+  @override
+  String collectionsDeletedSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections deleted successfully',
+      one: '1 collection deleted successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get restoreToCollection => 'Restore to collection';
+
+  @override
+  String get restoringFiles => 'Restoring...';
+
+  @override
+  String filesRestoredSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items restored successfully',
+      one: '1 item restored successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedToRestoreFiles => 'Failed to restore items';
+
+  @override
+  String get permanentlyDelete => 'Permanently delete';
+
+  @override
+  String permanentlyDeleteFilesBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'These $count items',
+      one: 'This item',
+    );
+    return '$_temp0 will be permanently deleted and cannot be recovered.';
+  }
+
+  @override
+  String get yesDelete => 'Yes, delete';
+
+  @override
+  String get deletingFiles => 'Deleting...';
+
+  @override
+  String filesDeletedPermanently(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items deleted permanently',
+      one: '1 item deleted permanently',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedToDeleteFiles => 'Failed to delete items';
+
+  @override
+  String get itemsStored => 'Items stored';
+
+  @override
+  String get of_ => 'of';
+
+  @override
+  String get usageYou => 'You';
+
+  @override
+  String get usageFamily => 'Family';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get viewActiveSessions => 'View active sessions';
+
+  @override
+  String get authToViewYourActiveSessions =>
+      'Please authenticate to view your active sessions';
+
+  @override
+  String deleteAccountFeedbackPrompt(String email) {
+    return 'Something not working? Reach out at $email, we\'d love to help.';
+  }
+
+  @override
+  String get sendFeedback => 'Send feedback';
+
+  @override
+  String get deleteAccountPermanentWarning =>
+      'This will permanently delete your Ente Auth, Photos, and Locker data';
 }

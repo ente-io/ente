@@ -20,6 +20,10 @@ type PushToken struct {
 }
 
 func (pt *PushToken) MarshalJSON() ([]byte, error) {
+	trimmedToken := pt.FCMToken
+	if len(trimmedToken) > 9 {
+		trimmedToken = trimmedToken[0:9]
+	}
 	return json.Marshal(&struct {
 		UserID         int64  `json:"userID"`
 		TrimmedToken   string `json:"trimmedToken"`
@@ -27,7 +31,7 @@ func (pt *PushToken) MarshalJSON() ([]byte, error) {
 		LastNotifiedAt string `json:"LastNotifiedAt"`
 	}{
 		UserID:         pt.UserID,
-		TrimmedToken:   pt.FCMToken[0:9],
+		TrimmedToken:   trimmedToken,
 		CreatedAt:      time.Unix(pt.CreatedAt/1000000, 0).String(),
 		LastNotifiedAt: time.Unix(pt.LastNotifiedAt/1000000, 0).String(),
 	})

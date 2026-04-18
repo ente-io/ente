@@ -1,8 +1,11 @@
 import "dart:async";
 import 'dart:io';
+import "dart:math" as math;
 
+import "package:ente_icons/ente_icons.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
@@ -11,11 +14,12 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/trash_file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
@@ -23,11 +27,15 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/video_preview_service.dart";
+import "package:photos/states/detail_page_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
@@ -35,12 +43,14 @@ import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
   final Function(EnteFile) onFileRemoved;
   final Function(EnteFile) onEditRequested;
   final ValueNotifier<bool> enableFullScreenNotifier;
+  final GalleryType? galleryType;
   final DetailPageMode mode;
 
   const FileAppBar(
@@ -48,6 +58,7 @@ class FileAppBar extends StatefulWidget {
     this.onFileRemoved,
     this.onEditRequested, {
     required this.enableFullScreenNotifier,
+    this.galleryType,
     this.mode = DetailPageMode.full,
     super.key,
   });
@@ -63,11 +74,14 @@ class FileAppBarState extends State<FileAppBar> {
   bool isGuestView = false;
   bool shouldLoopVideo = localSettings.shouldLoopVideo();
   bool _reloadActions = false;
+  bool _isMenuOpen = false;
+  bool _pendingActionsReload = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.file.generatedID != widget.file.generatedID) {
+    if (detailPageFileIdentifier(oldWidget.file) !=
+        detailPageFileIdentifier(widget.file)) {
       _getActions();
     }
   }
@@ -81,10 +95,35 @@ class FileAppBarState extends State<FileAppBar> {
         isGuestView = event.isGuestView;
       });
     });
+
+    // Listen to shared collection and thumbnail fallback changes to rebuild actions
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final sharedNotifier = InheritedDetailPageState.maybeOf(context)
+          ?.isInSharedCollectionNotifier;
+      sharedNotifier?.addListener(_onSharedCollectionChanged);
+
+      final fallbackNotifier = InheritedDetailPageState.maybeOf(context)
+          ?.showingThumbnailFallbackNotifier;
+      fallbackNotifier?.addListener(_onThumbnailFallbackChanged);
+    });
+  }
+
+  void _onSharedCollectionChanged() {
+    _requestActionsReload();
+  }
+
+  void _onThumbnailFallbackChanged() {
+    _requestActionsReload();
   }
 
   @override
   void dispose() {
+    InheritedDetailPageState.maybeOf(context)
+        ?.isInSharedCollectionNotifier
+        .removeListener(_onSharedCollectionChanged);
+    InheritedDetailPageState.maybeOf(context)
+        ?.showingThumbnailFallbackNotifier
+        .removeListener(_onThumbnailFallbackChanged);
     _guestViewEventSubscription.cancel();
     super.dispose();
   }
@@ -157,17 +196,90 @@ class FileAppBarState extends State<FileAppBar> {
     );
   }
 
+  void _requestActionsReload() {
+    if (_isMenuOpen) {
+      _pendingActionsReload = true;
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _reloadActions = true;
+        _pendingActionsReload = false;
+      });
+    }
+  }
+
+  void _handleMenuOpened() {
+    _isMenuOpen = true;
+  }
+
+  void _handleMenuClosed() {
+    _isMenuOpen = false;
+    if (_pendingActionsReload && mounted) {
+      setState(() {
+        _reloadActions = true;
+        _pendingActionsReload = false;
+      });
+    }
+  }
+
   List<Widget> _getActions() {
     _actions.clear();
+
+    // Show info icon when thumbnail fallback is active for THIS file
+    final fallbackFileId = InheritedDetailPageState.maybeOf(context)
+        ?.showingThumbnailFallbackNotifier
+        .value;
+    final currentFileId = detailPageFileIdentifier(widget.file);
+    final showingFallback =
+        fallbackFileId != null && fallbackFileId == currentFileId;
+    if (showingFallback) {
+      _actions.add(
+        Tooltip(
+          message:
+              "Your device doesn't support this image format. Showing a preview instead.",
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: backgroundElevated2Dark,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+          preferBelow: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            child: const Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Icon(Icons.info_outline),
+            ),
+          ),
+        ),
+      );
+    }
+
     final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
+    final int? collectionID = widget.file.collectionID;
+    final Collection? collection = collectionID != null
+        ? CollectionsService.instance.getCollectionByID(collectionID)
+        : null;
+    final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
+            ?.isInSharedCollectionNotifier
+            .value ??
+        false;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
-      isFileHidden = CollectionsService.instance
-              .getCollectionByID(widget.file.collectionID!)
-              ?.isHidden() ??
-          false;
+      isFileHidden = collection?.isHidden() ?? false;
     }
+    final bool canSuggestDeleteAction = canSuggestDeleteForFile(
+      file: widget.file,
+      collection: collection,
+    );
     if (widget.file.isLiveOrMotionPhoto) {
       _actions.add(
         IconButton(
@@ -186,7 +298,7 @@ class FileAppBarState extends State<FileAppBar> {
         Center(child: FavoriteWidget(widget.file)),
       );
     }
-    if (!isFileUploaded) {
+    if (!isFileUploaded && !isOfflineMode) {
       _actions.add(
         UploadIconWidget(
           file: widget.file,
@@ -209,7 +321,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (widget.file.isRemoteFile) {
+      if (isFileUploaded) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
@@ -220,6 +332,21 @@ class FileAppBarState extends State<FileAppBar> {
             iconColor: Theme.of(context).iconTheme.color,
           ),
         );
+        if (isOwnedByUser && !isFileHidden) {
+          items.add(
+            EntePopupMenuItem(
+              AppLocalizations.of(context).sendLink,
+              value: 14,
+              iconWidget: Transform.rotate(
+                angle: math.pi / 2,
+                child: Icon(
+                  Icons.navigation_rounded,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
+            ),
+          );
+        }
       }
       // Edit option for images, live photos, and videos
       if (widget.file.fileType == FileType.image ||
@@ -230,6 +357,18 @@ class FileAppBarState extends State<FileAppBar> {
             AppLocalizations.of(context).edit,
             value: 11,
             icon: Icons.tune_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+      // Add to Album option - shown when file is in shared collection
+      // (moved from bottom bar to make room for social icons)
+      if (isInSharedCollection && isFileUploaded && !isFileHidden) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).addToAlbum,
+            value: 10,
+            icon: EnteIcons.addToAlbum,
             iconColor: Theme.of(context).iconTheme.color,
           ),
         );
@@ -250,16 +389,6 @@ class FileAppBarState extends State<FileAppBar> {
         );
       }
 
-      if (widget.file.isUploaded && !isFileHidden) {
-        items.add(
-          EntePopupMenuItem(
-            AppLocalizations.of(context).addToAlbum,
-            value: 10,
-            icon: Icons.add,
-            iconColor: Theme.of(context).iconTheme.color,
-          ),
-        );
-      }
       if ((widget.file.fileType == FileType.image ||
               widget.file.fileType == FileType.livePhoto) &&
           Platform.isAndroid) {
@@ -307,6 +436,17 @@ class FileAppBarState extends State<FileAppBar> {
           ),
         ),
       );
+
+      if (canSuggestDeleteAction) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).suggestDeletion,
+            value: 13,
+            icon: Icons.flag_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
 
       items.add(
         EntePopupMenuItem(
@@ -378,12 +518,17 @@ class FileAppBarState extends State<FileAppBar> {
       _actions.add(
         PopupMenuButton(
           tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+          onOpened: _handleMenuOpened,
           itemBuilder: (context) {
             return items;
           },
+          onCanceled: _handleMenuClosed,
           onSelected: (dynamic value) async {
+            _handleMenuClosed();
             if (value == 1) {
               await _download(widget.file);
+            } else if (value == 14) {
+              await _sendLink(widget.file);
             } else if (value == 2) {
               await _toggleFileArchiveStatus(widget.file);
             } else if (value == 3) {
@@ -411,18 +556,45 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('create');
             } else if (value == 9) {
               await _handleVideoStream('recreate');
-            } else if (value == 10) {
-              await _handleAddToAlbum();
             } else if (value == 11) {
               widget.onEditRequested(widget.file);
             } else if (value == 12) {
               await showDetailsSheet(context, widget.file);
+            } else if (value == 13) {
+              if (collection != null) {
+                await _handleSuggestDelete(collection);
+              }
+            } else if (value == 10) {
+              final selectedFiles = SelectedFiles();
+              selectedFiles.files.add(widget.file);
+              showCollectionActionSheet(
+                context,
+                selectedFiles: selectedFiles,
+                actionType: CollectionActionType.addFiles,
+              );
             }
           },
         ),
       );
     }
+
     return _actions;
+  }
+
+  Future<void> _handleSuggestDelete(Collection collection) async {
+    if (widget.file.uploadedFileID == null) {
+      return;
+    }
+    await showSuggestDeleteSheet(
+      context: context,
+      onConfirm: () async {
+        await CollectionsService.instance.suggestDeleteFromCollection(
+          collection.id,
+          [widget.file],
+        );
+        widget.onFileRemoved(widget.file);
+      },
+    );
   }
 
   _onToggleLoopVideo() {
@@ -472,14 +644,51 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
+    final existingFolderName =
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
+    if (existingFolderName != null) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        showToast(
+          context,
+          l10n.downloadSkippedAlreadyAvailableOnDevice(
+            fileName: getDownloadSkipToastFileName(file),
+            albumName: existingFolderName,
+          ),
+          iosLongToastLengthInSec: 4,
+        );
+      }
+      return;
+    }
+
+    final fileToDownload =
+        !file.isRemoteFile ? (file.copyWith()..localID = null) : file;
+    final persistToFilesDB =
+        widget.galleryType != GalleryType.sharedPublicCollection;
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles(
+          [fileToDownload],
+          persistToFilesDB: persistToFilesDB,
+        );
+      } catch (e) {
+        _logger.warning("Failed to save file", e);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final dialog = createProgressDialog(
       context,
-      context.l10n.downloading,
+      AppLocalizations.of(context).downloading,
       isDismissible: true,
     );
     await dialog.show();
     try {
-      await downloadToGallery(file);
+      await downloadToGallery(
+        fileToDownload,
+        persistToFilesDB: persistToFilesDB,
+      );
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
@@ -487,6 +696,37 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _sendLink(EnteFile file) async {
+    if (!file.isUploaded || !file.isOwner) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).canOnlyCreateLinkForFilesOwnedByYou,
+      );
+      return;
+    }
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).creatingLink,
+      isDismissible: true,
+    );
+    await dialog.show();
+    final Collection? sharedLinkCollection = await CollectionActions(
+      CollectionsService.instance,
+    ).createSharedCollectionLink(context, [file]);
+    if (sharedLinkCollection == null) {
+      await dialog.hide();
+      return;
+    }
+    final String url =
+        CollectionsService.instance.getPublicUrl(sharedLinkCollection);
+    await dialog.hide();
+    unawaited(Clipboard.setData(ClipboardData(text: url)));
+    await shareLinkWithDescription(
+      url,
+      context: context,
+    );
   }
 
   Future<void> _setAs(EnteFile file) async {
@@ -587,15 +827,5 @@ class FileAppBarState extends State<FileAppBar> {
       _logger.severe("Failed to $streamType video stream", e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-  }
-
-  Future<void> _handleAddToAlbum() async {
-    final selectedFiles = SelectedFiles();
-    selectedFiles.files.add(widget.file);
-    showCollectionActionSheet(
-      context,
-      selectedFiles: selectedFiles,
-      actionType: CollectionActionType.addFiles,
-    );
   }
 }

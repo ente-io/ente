@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -12,30 +13,33 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
-import "package:photos/events/diff_sync_complete_event.dart";
+import 'package:photos/events/diff_sync_complete_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import "package:photos/extensions/logger_extension.dart";
-import "package:photos/main.dart" show isProcessBg;
+import 'package:photos/extensions/logger_extension.dart';
+import 'package:photos/main.dart' show isProcessBg;
 import 'package:photos/models/device_collection.dart';
-import "package:photos/models/file/extensions/file_props.dart";
+import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/upload_strategy.dart';
-import "package:photos/service_locator.dart";
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
-import "package:photos/services/language_service.dart";
+import 'package:photos/services/language_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
-import "package:photos/services/notification_service.dart";
+import 'package:photos/services/notification_service.dart';
+import 'package:photos/services/social_notification_coordinator.dart';
+import 'package:photos/services/social_sync_service.dart';
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/network_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
@@ -45,6 +49,7 @@ class RemoteSyncService {
   final Configuration _config = Configuration.instance;
   final CollectionsService _collectionsService = CollectionsService.instance;
   final DiffFetcher _diffFetcher = DiffFetcher();
+  final PhotoManagerPlugin _photoManagerPlugin = PhotoManagerPlugin();
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
@@ -52,6 +57,7 @@ class RemoteSyncService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
+  StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
 
   // _hasCleanupStaleEntry is used to track if we have already cleaned up
   // statle db entries in this sync session.
@@ -77,7 +83,6 @@ class RemoteSyncService {
   static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
   static const kMaximumPermissibleUploadsInThrottledMode = 4;
-
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
 
@@ -86,7 +91,9 @@ class RemoteSyncService {
   void init(SharedPreferences preferences) {
     _prefs = preferences;
 
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
+    _localPhotosUpdatedSubscription?.cancel();
+    _localPhotosUpdatedSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
         if (_existingSync == null) {
           // ignore: unawaited_futures
@@ -118,28 +125,43 @@ class RemoteSyncService {
     );
 
     try {
+      final canPrepareUploadsInBackground =
+          !isProcessBg || await canUseHighBandwidth();
+
       // use flag to decide if we should start marking files for upload before
       // remote-sync is done. This is done to avoid adding existing files to
       // the same or different collection when user had already uploaded them
       // before.
       final bool hasSyncedBefore = _prefs.containsKey(_isFirstRemoteSyncDone);
-      if (hasSyncedBefore) {
+      if (hasSyncedBefore && canPrepareUploadsInBackground) {
         await syncDeviceCollectionFilesForUpload();
       }
       await _pullDiff();
       await trashSyncService.syncTrash();
-      if (flagService.enableAdminRole) {
-        await _collectionsService.movePendingRemovalActionsToUncategorized();
+      await _collectionsService.movePendingRemovalActionsToUncategorized();
+
+      // Sync social data immediately after diff sync, before uploads
+      if (AppLifecycleService.instance.isForeground) {
+        _socialSync().ignore();
+      } else {
+        await _socialSync();
       }
+
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
-        await syncDeviceCollectionFilesForUpload();
+        if (canPrepareUploadsInBackground) {
+          await syncDeviceCollectionFilesForUpload();
+        }
       }
 
       if (
           // We don't need syncFDStatus here if in background
           !isProcessBg) {
         fileDataService.syncFDStatus().ignore();
+      }
+
+      if (!canPrepareUploadsInBackground) {
+        throw WiFiUnavailableError();
       }
 
       final filesToBeUploaded = await _getFilesToBeUploaded();
@@ -404,6 +426,12 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
+        if (flagService.syncRecoveryDiagnostics) {
+          _logger.info(
+            "[${deviceCollection.name}] upload-prep empty: "
+            "pathID=${deviceCollection.id} mappedFromPath=0",
+          );
+        }
         continue;
       }
       final collectionID = await _getCollectionID(deviceCollection);
@@ -462,6 +490,25 @@ class RemoteSyncService {
             "mismatch in num of filesToSync ${localIDsToSync.length} to "
             "fileSynced ${fileFoundForLocalIDs.length}",
           );
+        }
+        if (flagService.syncRecoveryDiagnostics) {
+          final int mappedCount = localIDsToSync.length;
+          final int postFilterCount = localIDsToSync.length;
+          final int missingFileRows =
+              postFilterCount - fileFoundForLocalIDs.length;
+          if (missingFileRows > 0) {
+            final sample =
+                localIDsToSync.difference(fileFoundForLocalIDs).take(3);
+            _logger.warning(
+              "[${deviceCollection.name}] upload-prep missing rows: "
+              "pathID=${deviceCollection.id} "
+              "mappedFromPath=$mappedCount "
+              "postFilter=$postFilterCount "
+              "missingFileRows=$missingFileRows "
+              "collectionID=$collectionID "
+              "sample=${sample.toList()}",
+            );
+          }
         }
       }
     }
@@ -633,131 +680,52 @@ class RemoteSyncService {
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
 
     if (toBeUploaded > 0) {
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Preparing to upload $toBeUploaded files "
-        "(${filesToBeUploaded.length} new, ${updatedFileIDs.length} updated) "
-        "in ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'} mode",
-      );
-
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
       );
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Fired preparingForUpload status update",
-      );
-
-      // Step 1: Verify media location access permission
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Step 1/3: Checking media location access permission...",
-      );
       await _uploader.verifyMediaLocationAccess();
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Step 1/3: Media location access verified ✓",
-      );
-
-      // Step 2: Check network availability for upload
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Step 2/3: Checking network availability for upload...",
-      );
       await _uploader.checkNetworkForUpload();
-      _logger.internalInfo("[UPLOAD-DEBUG] Step 2/3: Network check passed ✓");
-
-      // Step 3: Fetch upload URLs from server
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Step 3/3: Fetching upload URLs from server for $toBeUploaded files...",
-      );
       await _uploader.fetchUploadURLs(toBeUploaded);
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Step 3/3: Upload URLs fetched successfully ✓",
-      );
-
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] All pre-upload checks completed successfully! "
-        "Proceeding to queue individual file uploads...",
-      );
-    } else {
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] No files to upload, skipping upload preparation",
-      );
     }
     final List<Future> futures = [];
 
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
-    );
-    int queuedCount = 0;
-    for (final file in filesToBeUploaded) {
+    var uploadQueue = filesToBeUploaded;
+    if (Platform.isIOS &&
+        isProcessBg &&
+        flagService.enableBgLocalUploadPriority) {
+      uploadQueue = await _buildBgUploadQueue(filesToBeUploaded);
+    }
+
+    for (final file in uploadQueue) {
       if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.internalInfo(
-          "[UPLOAD-DEBUG] Throttle limit reached (${futures.length} files queued). "
-          "Skipping remaining ${filesToBeUploaded.length - queuedCount} files.",
-        );
         break;
       }
       // prefer existing collection ID for manually uploaded files.
       // See https://github.com/ente-io/photos-app/pull/187
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Queueing file ${queuedCount + 1}/${filesToBeUploaded.length}: "
-        "${file.title} (localID: ${file.localID}, generatedID: ${file.generatedID})",
-      );
       try {
         final collectionID = file.collectionID ??
             (await _collectionsService.getOrCreateForPath(
               file.deviceFolder ?? 'Unknown Folder',
             ))
                 .id;
-        _logger.internalInfo(
-          "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
-        );
         _uploadFile(file, collectionID, futures);
-        queuedCount++;
-        _logger.internalInfo(
-          "[UPLOAD-DEBUG] Successfully queued file ${file.title} ($queuedCount queued so far)",
-        );
-      } catch (e, s) {
-        _logger.internalSevere(
-          "[UPLOAD-DEBUG] Failed to queue file ${file.title}",
-          e,
-          s,
-        );
-      }
+      } catch (_) {}
     }
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Finished queueing new files. Total queued: $queuedCount/${filesToBeUploaded.length}",
-    );
 
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Starting to queue ${updatedFileIDs.length} updated files for re-upload...",
-    );
-    int reuploadQueuedCount = 0;
     for (final uploadedFileID in updatedFileIDs) {
       if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.internalInfo(
-          "[UPLOAD-DEBUG] Throttle limit reached for re-uploads (${futures.length} total queued). "
-          "Skipping remaining ${updatedFileIDs.length - reuploadQueuedCount} updated files.",
-        );
         break;
       }
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Processing updated file ${reuploadQueuedCount + 1}/${updatedFileIDs.length} "
-        "(uploadedFileID: $uploadedFileID)",
-      );
       try {
         final allFiles = await _db.getFilesInAllCollection(
           uploadedFileID,
           ownerID,
         );
         if (allFiles.isEmpty) {
-          _logger.internalWarning(
-            "[UPLOAD-DEBUG] No files found for uploadedFileID $uploadedFileID, skipping",
-          );
           continue;
         }
-        _logger.internalInfo(
-          "[UPLOAD-DEBUG] Found ${allFiles.length} file(s) for uploadedFileID $uploadedFileID",
-        );
         EnteFile? fileInCollectionOwnedByUser;
         for (final file in allFiles) {
           if (file.canReUpload(ownerID)) {
@@ -766,142 +734,41 @@ class RemoteSyncService {
           }
         }
         if (fileInCollectionOwnedByUser != null) {
-          _logger.internalInfo(
-            "[UPLOAD-DEBUG] Queueing re-upload for ${fileInCollectionOwnedByUser.title}",
-          );
           _uploadFile(
             fileInCollectionOwnedByUser,
             fileInCollectionOwnedByUser.collectionID!,
             futures,
           );
-          reuploadQueuedCount++;
-          _logger.internalInfo(
-            "[UPLOAD-DEBUG] Successfully queued re-upload ($reuploadQueuedCount re-uploads queued)",
-          );
-        } else {
-          _logger.internalWarning(
-            "[UPLOAD-DEBUG] No re-uploadable file found for uploadedFileID $uploadedFileID",
-          );
         }
-      } catch (e, s) {
-        _logger.internalSevere(
-          "[UPLOAD-DEBUG] Failed to queue re-upload for uploadedFileID $uploadedFileID",
-          e,
-          s,
-        );
-      }
+      } catch (_) {}
     }
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Finished queueing updated files. Total re-uploads queued: "
-      "$reuploadQueuedCount/${updatedFileIDs.length}",
-    );
-
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
-    );
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] SUMMARY: Total ${futures.length} upload futures queued",
-    );
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] - New files queued: $queuedCount/${filesToBeUploaded.length}",
-    );
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] - Re-uploads queued: $reuploadQueuedCount/${updatedFileIDs.length}",
-    );
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] - Process mode: ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'}",
-    );
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Now waiting for all ${futures.length} upload futures to complete...",
-    );
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
-    );
 
     try {
       await Future.wait(futures);
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] All upload futures completed successfully! "
-        "Completed: $_completedUploads, Ignored: $_ignoredUploads",
-      );
-    } on InvalidFileError catch (e, s) {
-      _logger.internalWarning(
-        "[UPLOAD-DEBUG] InvalidFileError caught (ignored)",
-        e,
-        s,
-      );
+    } on InvalidFileError {
       // Do nothing
-    } on FileSystemException catch (e, s) {
-      _logger.internalWarning(
-        "[UPLOAD-DEBUG] FileSystemException caught (ignored - likely concurrency issue)",
-        e,
-        s,
-      );
+    } on FileSystemException {
       // Do nothing since it's caused mostly due to concurrency issues
       // when the foreground app deletes temporary files, interrupting a background
       // upload
-    } on LockAlreadyAcquiredError catch (e, s) {
-      _logger.internalWarning(
-        "[UPLOAD-DEBUG] LockAlreadyAcquiredError caught (ignored)",
-        e,
-        s,
-      );
+    } on LockAlreadyAcquiredError {
       // Do nothing
-    } on SilentlyCancelUploadsError catch (e, s) {
-      _logger.internalWarning(
-        "[UPLOAD-DEBUG] SilentlyCancelUploadsError caught (ignored)",
-        e,
-        s,
-      );
+    } on SilentlyCancelUploadsError {
       // Do nothing
-    } on UserCancelledUploadError catch (e, s) {
-      _logger.internalWarning(
-        "[UPLOAD-DEBUG] UserCancelledUploadError caught (ignored)",
-        e,
-        s,
-      );
+    } on UserCancelledUploadError {
       // Do nothing
-    } catch (e, s) {
-      _logger.internalSevere(
-        "[UPLOAD-DEBUG] Unexpected error during upload",
-        e,
-        s,
-      );
-      rethrow;
     }
 
-    final hasUploaded = _completedUploads > 0;
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Upload process finished. Returning hasUploaded=$hasUploaded "
-      "(completedUploads: $_completedUploads)",
-    );
-    return hasUploaded;
+    return _completedUploads > 0;
   }
 
   void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
-      "(localID: ${file.localID}, collectionID: $collectionID). "
-      "Calling FileUploader.upload()...",
-    );
     final future = _uploader.upload(file, collectionID).then((uploadedFile) {
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Upload completed successfully for ${uploadedFile.title}",
-      );
       return _onFileUploaded(uploadedFile);
     }).onError((error, stackTrace) {
-      _logger.internalSevere(
-        "[UPLOAD-DEBUG] Upload failed for ${file.title}",
-        error,
-        stackTrace,
-      );
       return _onFileUploadError(error, stackTrace, file);
     });
     futures.add(future);
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Upload future added to futures list for ${file.title} "
-      "(futures count: ${futures.length})",
-    );
   }
 
   Future<void> _onFileUploaded(EnteFile file) async {
@@ -1185,56 +1052,167 @@ class RemoteSyncService {
     });
   }
 
-  bool _shouldShowNotification(int collectionID) {
+  /// Builds an upload queue for iOS background sync. For each upload slot,
+  /// checks up to [kMaximumPermissibleUploadsInThrottledMode] candidates to
+  /// find one that's locally available (not iCloud-only). If a local file is
+  /// found, it's picked; otherwise the next file in line is used.
+  /// Files already checked and found to be iCloud-only are tracked to avoid
+  /// re-checking.
+  Future<List<EnteFile>> _buildBgUploadQueue(List<EnteFile> files) async {
+    const maxChecksPerSlot = kMaximumPermissibleUploadsInThrottledMode;
+    const slots = kMaximumPermissibleUploadsInThrottledMode;
+    final Set<int> picked = {};
+    final Set<int> knownICloud = {};
+    final List<EnteFile> queue = [];
+
+    for (int slot = 0; slot < slots && picked.length < files.length; slot++) {
+      int checks = 0;
+      int? fallback;
+      bool found = false;
+
+      for (int i = 0; i < files.length; i++) {
+        if (picked.contains(i)) continue;
+
+        fallback ??= i;
+
+        if (knownICloud.contains(i)) continue;
+
+        if (checks >= maxChecksPerSlot) break;
+        checks++;
+
+        if (await _isOriginLocallyAvailable(files[i])) {
+          queue.add(files[i]);
+          picked.add(i);
+          found = true;
+          break;
+        } else {
+          knownICloud.add(i);
+        }
+      }
+
+      if (!found && fallback != null) {
+        queue.add(files[fallback]);
+        picked.add(fallback);
+      }
+    }
+
+    _logger.internalInfo(
+      "Built bg upload queue: ${queue.length} files, "
+      "${knownICloud.length} iCloud-only skipped",
+    );
+    return queue;
+  }
+
+  Future<bool> _isOriginLocallyAvailable(EnteFile file) async {
+    try {
+      if (file.localID == null) {
+        return false;
+      }
+      return await _photoManagerPlugin.isLocallyAvailable(
+        file.localID!,
+        isOrigin: true,
+        subtype:
+            file.fileType == FileType.livePhoto ? (file.fileSubType ?? 0) : 0,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to determine local availability for ${file.tag}",
+        e,
+        s,
+      );
+      return false;
+    }
+  }
+
+  bool _shouldShowSharedPhotosAndAlbumsNotification(int collectionID) {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     final isForeground = AppLifecycleService.instance.isForeground;
-    final bool showNotification =
-        NotificationService.instance.shouldShowNotificationsForSharedPhotos() &&
-            isFirstRemoteSyncDone() &&
-            !isForeground;
+    final bool shouldShowSharedPhotosAndAlbumsNotification = NotificationService
+            .instance
+            .shouldShowNotificationsForSharedPhotosAndAlbums() &&
+        isFirstRemoteSyncDone() &&
+        !isForeground;
     _logger.info(
-      "[Collection-$collectionID] shouldShow notification: $showNotification, "
+      "[Collection-$collectionID] shouldShow notification: "
+      "$shouldShowSharedPhotosAndAlbumsNotification, "
       "isAppInForeground: $isForeground",
     );
-    return showNotification;
+    return shouldShowSharedPhotosAndAlbumsNotification;
   }
 
   Future<void> _notifyNewFiles(List<int> collectionIDs) async {
-    final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
     for (final collectionID in collectionIDs) {
-      if (!_shouldShowNotification(collectionID)) {
+      if (!_shouldShowSharedPhotosAndAlbumsNotification(collectionID)) {
         continue;
       }
       final files =
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
-      final Set<int> sharedFilesIDs = {};
-      final Set<int> collectedFilesIDs = {};
+      final Set<int> collectedFileIDs = {};
       for (final file in files) {
-        if (file.isUploaded && file.ownerID != userID) {
-          sharedFilesIDs.add(file.uploadedFileID!);
-        } else if (file.isUploaded && file.isCollect) {
-          collectedFilesIDs.add(file.uploadedFileID!);
+        if (file.isUploaded && file.isCollect && file.uploadedFileID != null) {
+          collectedFileIDs.add(file.uploadedFileID!);
         }
       }
-      final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
+      final totalCount = collectedFileIDs.length;
       if (totalCount > 0) {
         final collection = _collectionsService.getCollectionByID(collectionID);
         _logger.info(
           'creating notification for ${collection?.displayName} '
-          'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
+          'collected: $collectedFileIDs files',
         );
         final s = await LanguageService.locals;
         // ignore: unawaited_futures
-        NotificationService.instance.showNotification(
-          collection!.displayName,
-          totalCount.toString() + s.newPhotosEmoji,
-          channelID: "collection:" + collectionID.toString(),
+        _showNotificationSafely(
+          title: collection!.displayName,
+          message: "$totalCount${s.newPhotosEmoji}",
+          channelID: "collection:$collectionID",
           channelName: collection.displayName,
-          payload: "ente://collection/?collectionID=" + collectionID.toString(),
+          payload: "ente://collection/?collectionID=$collectionID",
+          context: 'collection=$collectionID',
         );
       }
+    }
+  }
+
+  Future<void> _showNotificationSafely({
+    required String title,
+    required String message,
+    int? id,
+    required String channelID,
+    required String channelName,
+    required String payload,
+    required String context,
+  }) async {
+    try {
+      await NotificationService.instance.showNotification(
+        title,
+        message,
+        channelID: channelID,
+        channelName: channelName,
+        payload: payload,
+        id: id,
+      );
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Failed to show notification ($context)",
+        e,
+        stackTrace,
+      );
+    }
+  }
+
+  /// Syncs social data and triggers notifications if needed.
+  Future<void> _socialSync() async {
+    try {
+      _logger.info("Starting social sync");
+      await SocialSyncService.instance.syncAllSharedCollections();
+      await SocialNotificationCoordinator.instance.notifyAfterSocialSync(
+        trigger: SocialNotificationTrigger.remoteSync,
+      );
+    } catch (e) {
+      _logger.severe("Social sync failed, continuing", e);
     }
   }
 }

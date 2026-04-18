@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class AddedByWidget extends StatelessWidget {
@@ -16,15 +16,22 @@ class AddedByWidget extends StatelessWidget {
     if (!file.isUploaded) {
       return const SizedBox.shrink();
     }
-    String? addedBy;
-    if (file.isOwner && file.isCollect) {
-      addedBy = file.uploaderName;
+    late final String addedBy;
+    if (file.isOwner) {
+      final uploaderName = file.uploaderName?.trim();
+      if (uploaderName == null || uploaderName.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      addedBy = uploaderName;
     } else {
+      if (file.ownerID == null) {
+        return const SizedBox.shrink();
+      }
       final fileOwner = CollectionsService.instance
           .getFileOwner(file.ownerID!, file.collectionID);
-      addedBy = fileOwner.displayName ?? fileOwner.email;
+      addedBy = resolveDisplayName(fileOwner);
     }
-    if (addedBy == null || addedBy.isEmpty) {
+    if (addedBy.isEmpty) {
       return const SizedBox.shrink();
     }
     return Padding(

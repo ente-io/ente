@@ -109,7 +109,6 @@
   "importAegisGuide": "Gunakan opsi \"Export the vault\" di Pengaturan Aegis.\n\nJika brankas Anda terenkripsi, Anda perlu memasukkan kata sandi brankas untuk mendekripsi brankas.",
   "import2FasGuide": "Gunakan opsi \"Settings->Backup -Export\" di 2FAS.\n\nJika cadangan Anda terenkripsi, Anda perlu memasukkan kata sandi untuk mendekripsi cadangan",
   "importLastpassGuide": "Gunakan opsi \"Transfer accounts\" di Pengaturan Lastpass Authenticator dan tekan \"Export accounts to file\". Impor file JSON yang diunduh.",
-  "importProtonAuthGuide": "Gunakan opsi \"Ekspor\" di pengaturan Proton Authenticator untuk mengekspor kode anda.",
   "exportCodes": "Ekspor kode",
   "importLabel": "Impor",
   "importInstruction": "Harap pilih file yang berisi daftar kode Anda dalam format berikut",
@@ -317,7 +316,6 @@
     }
   },
   "sorry": "Maaf",
-  "importFailureDesc": "Tidak dapat mengurai berkas yang dipilih.\nMohon kirimkan surel ke support@ente.io jika Anda memerlukan bantuan!",
   "pendingSyncs": "Peringatan",
   "pendingSyncsWarningBody": "Ada sebagian kode yang belum dicadangkan.\n\nMohon pastikan bahwa Anda telah mencadangkan kode-kode ini sebelum Anda keluar log.",
   "checkInboxAndSpamFolder": "Mohon cek",
@@ -330,7 +328,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -509,7 +507,6 @@
   "dropReviewAndroid": "Berikan ulasan di Play Store",
   "supportEnte": "Dukung <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Beri kami bintang di Github",
-  "free5GB": "5GB gratis di  <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Masuk dengan akun Auth anda",
   "freeStorageOffer": "Potongan 10% di <bold-green>ente</bold-green> photos",
   "freeStorageOfferDescription": "Gunakan kode \"AUTH\" untuk mendapatkan potongan 10% untuk tahun pertama",

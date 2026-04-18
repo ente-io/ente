@@ -22,7 +22,13 @@ import {
     type FileViewerAnnotatedFile,
     type FileViewerProps,
 } from "./FileViewer";
-import { createPSRegisterElementIconHTML, settingsSVGPath } from "./icons";
+import {
+    commentSVGPath,
+    createPSRegisterElementIconHTML,
+    heartFillSVGPath,
+    heartSVGPath,
+    settingsSVGPath,
+} from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
@@ -65,6 +71,29 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
     /**
+     * Return `true` if the provided file has a green_heart reaction from the
+     * current user.
+     */
+    isLiked: (annotatedFile: FileViewerAnnotatedFile) => boolean;
+    /**
+     * Return the number of comments on the provided file.
+     *
+     * If the file is viewed from within a collection context, this should
+     * return the count of comments in that collection. Otherwise (gallery
+     * view), it should return the count from the collection with most comments.
+     */
+    getCommentCount: (annotatedFile: FileViewerAnnotatedFile) => number;
+    /**
+     * Return `true` if social buttons (like, comment) should be shown for the
+     * given file.
+     *
+     * This is used for gallery view where the file might belong to a shared
+     * collection even though we're not directly viewing that collection.
+     */
+    shouldShowSocialButtons: (
+        annotatedFile: FileViewerAnnotatedFile,
+    ) => boolean;
+    /**
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
      *
@@ -92,7 +121,7 @@ export interface FileViewerPhotoSwipeDelegate {
 
 type FileViewerPhotoSwipeOptions = Pick<
     FileViewerProps,
-    "initialIndex" | "showFullscreenButton"
+    "initialIndex" | "showFullscreenButton" | "disableEscapeClose"
 > & {
     /**
      * `true` if we're running in the context of a logged in user, and so
@@ -107,6 +136,17 @@ type FileViewerPhotoSwipeOptions = Pick<
      * {@link showFavorite} file annotation are true.
      */
     haveUser: boolean;
+    /**
+     * `true` if the like and comment action buttons should be shown.
+     *
+     * These buttons are shown only when viewing files in a shared album
+     * (incoming or outgoing).
+     */
+    showSocialButtons: boolean;
+    /**
+     * `true` if the comments and reactions controls should be enabled.
+     */
+    enableComment: boolean;
     /**
      * Dynamic callbacks.
      *
@@ -134,6 +174,18 @@ type FileViewerPhotoSwipeOptions = Pick<
      * Called when the user activates the info action on a file.
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
+    /**
+     * Called when the user activates the comments action on a file.
+     */
+    onViewComments: () => void;
+    /**
+     * Called when the user activates the likes action on a file (right-click on heart).
+     */
+    onViewLikes: () => void;
+    /**
+     * Called when the user clicks the like button (left-click on heart).
+     */
+    onLikeClick: () => void;
     /**
      * Called when the user activates the download action on a file.
      */
@@ -192,11 +244,17 @@ export class FileViewerPhotoSwipe {
     constructor({
         initialIndex,
         haveUser,
+        showSocialButtons,
+        enableComment,
         showFullscreenButton,
+        disableEscapeClose,
         delegate,
         onClose,
         onAnnotate,
         onViewInfo,
+        onViewComments,
+        onViewLikes,
+        onLikeClick,
         onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
@@ -223,6 +281,9 @@ export class FileViewerPhotoSwipe {
             // auto hide based on mouse activity, but that would not have any
             // effect on touch devices)
             bgClickAction: "toggle-controls",
+            // In single-file public viewer mode we keep Escape for nested UI
+            // interactions while preventing accidental viewer closure.
+            escKey: !disableEscapeClose,
             // At least on macOS, manual zooming with the trackpad is very
             // cumbersome (possibly because of the small multiplier in the
             // PhotoSwipe source, but I'm not sure). The other option to do a
@@ -287,7 +348,7 @@ export class FileViewerPhotoSwipe {
 
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
-        const currentAnnotatedFile = () => {
+        const currentAnnotatedFile = (): FileViewerAnnotatedFile => {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
             if (
@@ -295,10 +356,17 @@ export class FileViewerPhotoSwipe {
                 annotatedFile.file.id != file.id ||
                 annotatedFile.file.updationTime != file.updationTime
             ) {
-                annotatedFile = onAnnotate(file, currSlideData());
-                _currentAnnotatedFile = annotatedFile;
+                // Guard: slide data can be unavailable during state transitions.
+                // If unavailable, we keep using the cached annotatedFile.
+                const slideData = pswp.currSlide?.data as ItemData | undefined;
+                if (slideData) {
+                    annotatedFile = onAnnotate(file, slideData);
+                    _currentAnnotatedFile = annotatedFile;
+                }
             }
-            return annotatedFile;
+            // By design, this should never be undefined after the initial slide
+            // is shown. Use non-null assertion to maintain API contract.
+            return annotatedFile!;
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
@@ -695,10 +763,11 @@ export class FileViewerPhotoSwipe {
         let shouldIgnoreNextVideoQualityChange = false;
 
         /**
-         * If a {@link mediaControllerID} is present in the given
-         * {@link itemData}, then make the media controls visible and link the
-         * media-control-bars (and other containers that house controls) to the
-         * given controller. Otherwise hide the media controls.
+         * Update the media controls for the given {@link itemData}.
+         *
+         * - Show controls only for videos.
+         * - Keep controls visible but disabled while video playback is loading.
+         * - Link controls to the media controller once available.
          */
         const updateVideoControlsAndPlayback = (itemData: ItemData) => {
             // For reasons possibly related to the 1 tick wait in the hls-video
@@ -781,6 +850,20 @@ export class FileViewerPhotoSwipe {
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
+            const showVideoControls =
+                itemData.fileType == FileType.video && !itemData.fetchFailed;
+            const areVideoControlsDisabled =
+                showVideoControls &&
+                (!!itemData.isContentLoading || !itemData.mediaControllerID);
+            container?.classList.toggle(
+                "pswp__media-controls--visible",
+                showVideoControls,
+            );
+            container?.classList.toggle(
+                "pswp__media-controls--disabled",
+                areVideoControlsDisabled,
+            );
+
             const controls =
                 container?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
@@ -1112,6 +1195,47 @@ export class FileViewerPhotoSwipe {
         this.refreshCurrentSlideFavoriteButtonIfNeeded =
             updateFavoriteButtonIfNeeded;
 
+        const updateLikeButtonIfNeeded = () => {
+            const heartIconFill = document.getElementById(
+                "pswp__icn-heart-fill",
+            );
+            const heartIconOutline = document.getElementById("pswp__icn-heart");
+            if (!heartIconFill || !heartIconOutline) {
+                // Early return if we're not currently being shown.
+                return;
+            }
+
+            const af = currentAnnotatedFile();
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (!af) return; // Guard against undefined during initialization
+            const isLiked = delegate.isLiked(af);
+
+            // Show fill (green) if liked, show outline (white) if not liked
+            showIf(heartIconFill, isLiked);
+            showIf(heartIconOutline, !isLiked);
+        };
+
+        this.refreshCurrentSlideLikeButtonIfNeeded = updateLikeButtonIfNeeded;
+
+        const updateCommentCountIfNeeded = () => {
+            const commentCountElement = document.querySelector<HTMLElement>(
+                ".pswp__comment-count",
+            );
+            if (!commentCountElement) {
+                // Early return if we're not currently being shown.
+                return;
+            }
+
+            const af = currentAnnotatedFile();
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (!af) return; // Guard against undefined during initialization
+            const count = delegate.getCommentCount(af);
+            commentCountElement.textContent = String(count);
+        };
+
+        this.refreshCurrentSlideCommentCountIfNeeded =
+            updateCommentCountIfNeeded;
+
         const handleToggleFavorite = () => void toggleFavorite();
 
         const handleToggleFavoriteIfEnabled = () => {
@@ -1397,29 +1521,85 @@ export class FileViewerPhotoSwipe {
             });
 
             ui.registerElement({
-                name: "caption",
+                name: "bottom-right-controls",
                 // After the video controls so that we don't get occluded by
                 // them (nb: the caption will hide when the video is playing).
                 order: 31,
                 appendTo: "root",
-                // The caption uses the line-clamp CSS property, which behaves
-                // unexpectedly when we also assign padding to the "p" element
-                // on which we're setting the line clamp: the "clipped" lines
-                // show through in the padding area.
-                //
-                // As a workaround, wrap the p in a div. Set the line-clamp on
-                // the p, and the padding on the div.
-                html: "<div><p></p></div>",
+                html: bottomRightControlsHTML(),
                 onInit: (element, pswp) => {
+                    const captionEl =
+                        element.querySelector<HTMLElement>(".pswp__caption")!;
+                    // Get the action buttons container.
+                    const actionButtonsEl = element.querySelector<HTMLElement>(
+                        ".pswp__action-buttons",
+                    );
+
+                    const updateSocialButtonsVisibility = () => {
+                        if (!actionButtonsEl) return;
+                        // Guard: _currentAnnotatedFile can be undefined during
+                        // initialization before the first slide is shown.
+                        if (!_currentAnnotatedFile) return;
+                        // Show buttons if: static showSocialButtons is true
+                        // OR delegate says this file should show buttons
+                        // (file in shared collection).
+                        const af = currentAnnotatedFile();
+                        const baseShow =
+                            showSocialButtons ||
+                            delegate.shouldShowSocialButtons(af);
+                        const shouldShow = baseShow && enableComment;
+                        actionButtonsEl.style.display = shouldShow
+                            ? "flex"
+                            : "none";
+                    };
+
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
-                        element.querySelector("p")!.innerText = alt ?? "";
-                        element.style.visibility = alt ? "visible" : "hidden";
-                        element.classList.toggle(
+                        const { text: captionText, wasTruncated } =
+                            truncateCaptionIfNeeded(alt);
+                        const captionP = captionEl.querySelector("p")!;
+                        captionP.innerText = captionText ?? "";
+                        if (wasTruncated) {
+                            const moreLink = document.createElement("span");
+                            moreLink.className = "pswp__caption-more";
+                            moreLink.textContent = "More";
+                            moreLink.addEventListener("click", handleViewInfo);
+                            captionP.appendChild(moreLink);
+                        }
+                        captionEl.style.display = captionText
+                            ? "block"
+                            : "none";
+                        captionEl.classList.toggle(
                             "ente-video",
                             fileType == FileType.video,
                         );
+                        // Update social buttons visibility on each slide change.
+                        updateSocialButtonsVisibility();
                     });
+                    // Wire up click handler for the comment button.
+                    const commentButton = element.querySelector<HTMLElement>(
+                        '.pswp__action-button[aria-label="Comment"]',
+                    );
+                    commentButton?.addEventListener("click", onViewComments);
+                    // Wire up click handlers for the like button.
+                    const likeButton = element.querySelector<HTMLElement>(
+                        '.pswp__action-button[aria-label="Like"]',
+                    );
+                    // Left-click: trigger like action (may open album selector)
+                    likeButton?.addEventListener("click", onLikeClick);
+                    // Right-click: open likes sidebar
+                    likeButton?.addEventListener("contextmenu", (e) => {
+                        e.preventDefault();
+                        onViewLikes();
+                    });
+                    // Update like button state on slide change and initially.
+                    pswp.on("change", updateLikeButtonIfNeeded);
+                    updateLikeButtonIfNeeded();
+                    // Update comment count on slide change and initially.
+                    pswp.on("change", updateCommentCountIfNeeded);
+                    updateCommentCountIfNeeded();
+                    // Initial visibility check.
+                    updateSocialButtonsVisibility();
                 },
             });
         });
@@ -1792,6 +1972,18 @@ export class FileViewerPhotoSwipe {
      * refresh would cause, e.g., the pan and zoom to be reset.
      */
     refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
+
+    /**
+     * Refresh the like button (heart) on the current slide, asking the
+     * delegate for the latest like state.
+     */
+    refreshCurrentSlideLikeButtonIfNeeded: () => void;
+
+    /**
+     * Refresh the comment count on the current slide, asking the delegate
+     * for the latest comment count.
+     */
+    refreshCurrentSlideCommentCountIfNeeded: () => void;
 }
 
 // Requires the following imports to register the Web components we use:
@@ -1888,6 +2080,44 @@ const livePhotoVideoHTML = (videoURL: string) => `
   <source src="${videoURL}" />
 </video>
 `;
+
+/**
+ * HTML for the bottom controls (caption on left, action buttons on right).
+ *
+ * The caption uses the line-clamp CSS property, which behaves unexpectedly
+ * when we also assign padding to the "p" element on which we're setting the
+ * line clamp: the "clipped" lines show through in the padding area.
+ *
+ * As a workaround, wrap the p in a div. Set the line-clamp on the p, and the
+ * padding on the div.
+ */
+const bottomRightControlsHTML = () => `
+<div class="pswp__caption"><p></p></div>
+<div class="pswp__action-buttons">
+  <button class="pswp__action-button" aria-label="Like">
+    <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} id="pswp__icn-heart" />${heartFillSVGPath} id="pswp__icn-heart-fill" /></svg>
+  </button>
+  <button class="pswp__action-button pswp__action-button--comment" aria-label="Comment">
+    <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>
+    <span class="pswp__comment-count"></span>
+  </button>
+</div>
+`;
+
+/**
+ * Truncate caption text to 154 characters.
+ *
+ * @returns An object with the (possibly truncated) text and a flag indicating
+ * whether or not the text was truncated.
+ */
+const truncateCaptionIfNeeded = (
+    text: string | undefined,
+): { text: string | undefined; wasTruncated: boolean } => {
+    if (!text) return { text, wasTruncated: false };
+    const maxLength = 154;
+    if (text.length <= maxLength) return { text, wasTruncated: false };
+    return { text: text.slice(0, maxLength) + "… ", wasTruncated: true };
+};
 
 const createElementFromHTMLString = (htmlString: string) => {
     const template = document.createElement("template");

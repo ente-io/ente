@@ -1,9 +1,11 @@
 {
   "@@locale ": "en",
-  "enterYourEmailAddress": "Sartu zure helbide elektronikoa",
+  "enterYourEmailAddress": "Sartu zure e-posta helbidea",
+  "enterYourNewEmailAddress": "Sartu zure e-posta helbide berria",
   "accountWelcomeBack": "Ongi etorri berriro!",
   "emailAlreadyRegistered": "Helbide hau badago erregistratuta lehendik.",
   "emailNotRegistered": "Helbide hau ez dago erregistratuta.",
+  "accountSetupIncompleteCreateAccount": "Kontuaren kudeaketa ez da bukatu. Egun kontu berria kudeaketa bukatzeko.",
   "email": "E-maila",
   "cancel": "Utzi",
   "verify": "Egiaztatu",
@@ -25,7 +27,6 @@
   "deleteReason4": "Nire arrazoia ez dago zerrendan",
   "sendEmail": "Bidali mezua",
   "deleteRequestSLAText": "Zure eskaera 72 ordutan prozesatua izango da.",
-  "deleteEmailRequest": "Mesedez, bidali e-mail bat <warning>account-deletion@ente.io</warning> helbidea zure erregistatutako helbidetik.",
   "entePhotosPerm": "Ente-k <i>zure baimena behar du</i> zure argazkiak gordetzeko",
   "ok": "Ondo",
   "createAccount": "Sortu kontua",
@@ -47,7 +48,6 @@
   "incorrectRecoveryKeyBody": "Sartu duzun berreskuratze giltza ez da zuzena",
   "forgotPassword": "Ahaztu pasahitza",
   "enterYourRecoveryKey": "Sartu zure berreskuratze giltza",
-  "noRecoveryKey": "Berreskuratze giltzarik ez?",
   "sorry": "Barkatu",
   "noRecoveryKeyNoDecryption": "Gure puntutik-puntura zifratze protokoloa dela eta, zure data ezin da deszifratu zure pasahitza edo berreskuratze giltzarik gabe",
   "verifyEmail": "Egiaztatu e-maila",
@@ -62,7 +62,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -114,7 +114,6 @@
   "verifyPassword": "Egiaztatu pasahitza",
   "recoveryKey": "Berreskuratze giltza",
   "recoveryKeyOnForgotPassword": "Zure pasahitza ahazten baduzu, zure datuak berreskuratzeko modu bakarra gailu honen bidez izango da.",
-  "recoveryKeySaveDescription": "Guk ez dugu gailu hau gordetzen; mesedez, gorde 24 hitzeko giltza hau lege seguru batean.",
   "doThisLater": "Egin hau geroago",
   "saveKey": "Gorde giltza",
   "recoveryKeyCopiedToClipboard": "Berreskuratze giltza arbelean kopiatu da",
@@ -126,7 +125,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -142,7 +141,7 @@
   "setupComplete": "Prestaketa burututa",
   "saveYourRecoveryKeyIfYouHaventAlready": "Gorde zure berreskuratze giltza ez baduzu oraindik egin",
   "thisCanBeUsedToRecoverYourAccountIfYou": "Hau zure kontua berreskuratzeko erabili ahal duzu, zure bigarren faktorea ahaztuz gero",
-  "twofactorAuthenticationPageTitle": "Faktore biko autentifikatzea",
+  "twofactorAuthenticationPageTitle": "Faktore biko autentifikazioa",
   "lostDevice": "Gailua galdu duzu?",
   "verifyingRecoveryKey": "Berreskuratze giltza egiaztatuz...",
   "recoveryKeyVerified": "Berreskuratze giltza egiaztatuta",
@@ -181,7 +180,7 @@
   "changePermissions": "Baimenak aldatu nahi?",
   "yesConvertToViewer": "Bai, egin ikusle",
   "cannotAddMorePhotosAfterBecomingViewer": "{user}-(e)k ezin izango du argazki gehiago gehitu album honetan \n\nBaina haiek gehitutako argazkiak kendu ahal izango dituzte",
-  "allowAddingPhotos": "Baimendu argazkiak gehitzea",
+  "allowAddingPhotos": "Utzi argazkiak gehitzen",
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
@@ -258,18 +257,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Egiaztatze IDa",
   "verifyEmailID": "Egiaztatu {email}",
   "emailNoEnteAccount": "{email}-(e)k ez du Ente konturik. \n\nBidali gonbidapena argazkiak partekatzeko.",
-  "shareMyVerificationID": "Hau da nire Egiaztatze IDa: {verificationID} ente.io-rako.",
-  "shareTextConfirmOthersVerificationID": "Ei, baieztatu ahal duzu hau dela zure ente.io Egiaztatze IDa?: {verificationID}",
   "somethingWentWrong": "Zerbait oker joan da",
   "sendInvite": "Bidali gonbidapena",
-  "shareTextRecommendUsingEnte": "Jaitsi Ente argazkiak eta bideoak jatorrizko kalitatean errez partekatu ahal izateko \n\nhttps://ente.io",
   "done": "Eginda",
   "applyCodeTitle": "Aplikatu kodea",
   "enterCodeDescription": "Sartu zure lagunak emandako kodea, biontzat debaldeko biltegiratzea lortzeko",
@@ -277,7 +273,6 @@
   "failedToApplyCode": "Akatsa kodea aplikatzean",
   "enterReferralCode": "Sartu erreferentzia kodea",
   "codeAppliedPageTitle": "Kodea aplikatuta",
-  "changeYourReferralCode": "Aldatu zure erreferentzia kodea",
   "change": "Aldatu",
   "unavailableReferralCode": "Sentitzen dugu, kode hau ezin da erabili.",
   "codeChangeLimitReached": "Sentitzen dugu, zure kode aldaketa muga gainditu duzu.",
@@ -291,15 +286,10 @@
   "claimMore": "Eskatu gehiago!",
   "theyAlsoGetXGb": "Haiek ere lortuko dute {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB norbaitek ordainpeko plan batean sartzen denean zure kodea aplikatzen badu",
-  "shareTextReferralCode": "Sartu erreferentzia kodea: {referralCode}\n\nAplikatu hemen: Ezarpenak → Orokorra→ Erreferentziak, {referralStorageInGB} GB dohainik izateko ordainpeko plan batean \n\nhttps://ente.io",
   "claimFreeStorage": "Eskatu debaldeko biltegiratzea",
   "inviteYourFriends": "Gonbidatu zure lagunak",
   "failedToFetchReferralDetails": "Ezin dugu zure erreferentziaren detailerik lortu. Mesedez, saiatu berriro geroago.",
-  "referralStep1": "1. Eman kode hau zure lagunei",
-  "referralStep2": "2. Haiek ordainpeko plan batean sinatu behar dute",
-  "referralStep3": "3. Bai zuk bai haiek {storageInGB} GB* dohainik izango duzue",
   "referralsAreCurrentlyPaused": "Erreferentziak momentuz geldituta daude",
-  "youCanAtMaxDoubleYourStorage": "* Gehienez zure biltegiratzea bikoiztu ahal duzu",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Zure familiak {storageAmountInGb} GB eskatu du dagoeneko} false {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko} other {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko!}}",
   "@claimedStorageSoFar": {
     "placeholders": {

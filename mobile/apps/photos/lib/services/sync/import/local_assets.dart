@@ -96,15 +96,27 @@ Future<List<Tuple2<AssetPathEntity, String>>>
   return result;
 }
 
-Future<List<LocalPathAsset>> getAllLocalAssets() async {
+Future<List<LocalPathAsset>> getAllLocalAssets({bool? needsTitle}) async {
   final filterOptionGroup = FilterOptionGroup();
+  final FilterOption imageFilterOption = needsTitle == null
+      ? const FilterOption(sizeConstraint: ignoreSizeConstraint)
+      : FilterOption(
+          needTitle: needsTitle,
+          sizeConstraint: ignoreSizeConstraint,
+        );
+  final FilterOption videoFilterOption = needsTitle == null
+      ? const FilterOption(sizeConstraint: ignoreSizeConstraint)
+      : FilterOption(
+          needTitle: needsTitle,
+          sizeConstraint: ignoreSizeConstraint,
+        );
   filterOptionGroup.setOption(
     AssetType.image,
-    const FilterOption(sizeConstraint: ignoreSizeConstraint),
+    imageFilterOption,
   );
   filterOptionGroup.setOption(
     AssetType.video,
-    const FilterOption(sizeConstraint: ignoreSizeConstraint),
+    videoFilterOption,
   );
   filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
   final assetPaths = await PhotoManager.getAssetPathList(
@@ -242,7 +254,7 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
       'modifiedDateTime',
     );
     final bool assetCreatedOrUpdatedAfterGivenTime =
-        max(createMs, modifiedMs) >= (fromTime / ~1000);
+        max(createMs, modifiedMs) >= (fromTime ~/ 1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       final file = await EnteFile.fromAsset(pathEntity.name, entity);

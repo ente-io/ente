@@ -21,7 +21,7 @@ The first time you open Ente Photos on a mobile device, you'll be prompted to se
 You can change backed up albums later in **Settings > Backup > Backed up folders**.
 
 **On desktop:**
-Desktop works differently - instead of albums, you set up [watch folders](/photos/features/backup-and-sync/watch-folders) that automatically sync whenever files are added or changed.
+Desktop works differently - instead of albums, you set up [watch folders](/photos/features/backup-and-sync/watch-folders) that automatically sync whenever files are added or deleted.
 
 ## Understanding automatic backup
 
@@ -55,7 +55,7 @@ Machine learning powers search in Ente Photos, allowing you to search for photos
 **How to enable:**
 
 **On mobile:**
-Open `Settings > General > Advanced > Machine learning` and enable "Machine learning" and/or "Local indexing".
+Open `Settings > Machine learning` and enable "Machine learning" and/or "Local indexing".
 
 **On desktop:**
 Open `Settings > Preferences > Machine learning` and enable "Machine learning" and/or "Local indexing".

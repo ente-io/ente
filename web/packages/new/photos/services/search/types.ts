@@ -17,7 +17,7 @@ import type { LocationTag } from "../user-entity";
  * - `shortcuts.*`: Quick access actions like uncategorized items, archive, hidden items, and trash
  * - `utility.*`: General utility actions such as account management, folder watching, deduplication, preferences, help, export, and logout
  * - `account.*`: Account-specific settings including recovery key, two-factor authentication, passkeys, password/email management, and account deletion
- * - `preferences.*`: User preference options like language, theme, custom domains, map settings, advanced options, ML search, and streamable videos
+ * - `preferences.*`: User preference options like language, theme, app lock, custom domains, map settings, advanced options, ML search, and streamable videos
  * - `help.*`: Help-related actions including help center, blog, feature requests, support, log viewing, and test upload
  *
  * @remarks
@@ -30,11 +30,13 @@ export type SidebarActionID =
     | "shortcuts.trash"
     | "utility.account"
     | "utility.watchFolders"
-    | "utility.deduplicate"
+    | "utility.freeUpSpace"
     | "utility.preferences"
     | "utility.help"
     | "utility.export"
     | "utility.logout"
+    | "freeUpSpace.deduplicate"
+    | "freeUpSpace.largeFiles"
     | "account.subscription"
     | "account.recoveryKey"
     | "account.twoFactor"
@@ -46,6 +48,7 @@ export type SidebarActionID =
     | "account.sessions"
     | "preferences.language"
     | "preferences.theme"
+    | "preferences.appLock"
     | "preferences.customDomains"
     | "preferences.map"
     | "preferences.advanced"
@@ -71,6 +74,8 @@ export type SearchSuggestion = { label: string } & (
     | { type: "fileType"; fileType: FileType }
     | { type: "fileName"; fileIDs: number[] }
     | { type: "fileCaption"; fileIDs: number[] }
+    | { type: "cameraMake"; fileIDs: number[] }
+    | { type: "cameraModel"; fileIDs: number[] }
     | { type: "date"; dateComponents: SearchDateComponents }
     | { type: "location"; locationTag: LocationTag }
     | { type: "city"; city: City }

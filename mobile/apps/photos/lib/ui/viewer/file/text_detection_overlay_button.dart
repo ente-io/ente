@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -11,7 +12,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/text_detection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class TextDetectionOverlayButton extends StatefulWidget {
   final EnteFile file;
@@ -184,7 +184,30 @@ class _TextDetectionOverlayButtonState
         if (shouldHide) {
           return const SizedBox.shrink();
         }
-        final double bottomOffset = MediaQuery.paddingOf(context).bottom + 72.0;
+
+        double bottomOffset = MediaQuery.paddingOf(context).bottom + 72.0;
+
+        final caption = widget.file.caption;
+        if (caption != null && caption.trim().isNotEmpty) {
+          // 1. Configure the text engine with a 3-line maximum
+          final textPainter = TextPainter(
+            text: TextSpan(
+              text: caption.trim(),
+              style: getEnteTextTheme(context).mini,
+            ),
+            textDirection: TextDirection.ltr,
+            textScaler: MediaQuery.textScalerOf(context),
+            maxLines: 3,
+          );
+
+          // 2. Measure against the available screen width
+          final double maxWidth = MediaQuery.sizeOf(context).width - 16.0;
+          textPainter.layout(maxWidth: maxWidth);
+
+          // 3. Add the exact calculated text height (capped at 3 lines) + 24px safe padding buffer
+          bottomOffset += textPainter.height + 24.0;
+        }
+
         return Positioned(
           bottom: bottomOffset,
           left: 0,
@@ -219,7 +242,9 @@ class _TextDetectionOverlayButtonState
                     const SizedBox(width: 8),
                     Text(
                       "Select text",
-                      style: getEnteTextTheme(context).mini,
+                      style: getEnteTextTheme(context).mini.copyWith(
+                            color: Colors.white,
+                          ),
                     ),
                   ],
                 ),

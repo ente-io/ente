@@ -37,12 +37,13 @@ const mnemonicKeyWordCount = 24;
 // https://stackoverflow.com/a/61162219
 const dragSensitivity = 8;
 
-const supportEmail = 'support@ente.io';
+const supportEmail = 'support@ente.com';
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 const multipartPartSize = 20 * 1024 * 1024;
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
+const kUploadProxyEndpoint = 'https://uploader.ente.io';
 const kAccountsUrl = 'https://accounts.ente.io';
 const kCasUrl = 'https://cas.ente.io';
 const kFamilyUrl = 'https://family.ente.io';

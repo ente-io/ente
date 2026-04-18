@@ -11,6 +11,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
@@ -29,6 +30,32 @@ import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/utils/file_util.dart";
 
+Future<Set<int>> _getFileIDsOfPersonIncludingManualAssignments(
+  String personID,
+) async {
+  final fileIDs =
+      (await MLDataDB.instance.getFileIDsOfPersonID(personID)).toSet();
+  final person = await PersonService.instance.getPerson(personID);
+  if (person != null) {
+    fileIDs.addAll(person.data.manuallyAssigned);
+  }
+  return fileIDs;
+}
+
+Future<Set<int>> _getManualAssignmentFileIDsOfOtherPersons(
+  Set<String> selectedPersonIDs,
+) async {
+  final fileIDs = <int>{};
+  final persons = await PersonService.instance.getPersons();
+  for (final person in persons) {
+    if (selectedPersonIDs.contains(person.remoteID)) {
+      continue;
+    }
+    fileIDs.addAll(person.data.manuallyAssigned);
+  }
+  return fileIDs;
+}
+
 Future<List<EnteFile>> getFilteredFiles(
   List<HierarchicalSearchFilter> filters,
 ) async {
@@ -45,7 +72,7 @@ Future<List<EnteFile>> getFilteredFiles(
     if (filter is FaceFilter && filter.matchedUploadedIDs.isEmpty) {
       try {
         if (filter.personId != null) {
-          final fileIDs = await mlDataDB.getFileIDsOfPersonID(
+          final fileIDs = await _getFileIDsOfPersonIncludingManualAssignments(
             filter.personId!,
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
@@ -92,6 +119,11 @@ Future<List<EnteFile>> getFilteredFiles(
         final fileIDsToAvoid =
             await mlDataDB.getAllFilesAssociatedWithAllClusters(
           exceptClusters: selectedClusterIDs,
+        );
+        fileIDsToAvoid.addAll(
+          await _getManualAssignmentFileIDsOfOtherPersons(
+            selectedPersonIDs.toSet(),
+          ),
         );
 
         final filesOfFaceIDsNotInAnyCluster =
@@ -158,6 +190,7 @@ Future<void> curateFilters(
     );
     final contactsFilters = _curateContactsFilter(files);
     final uploaderFilters = _curateUploaderFilter(files);
+    final cameraFilters = _curateCameraFilters(files);
     final faceFilters = await curateFaceFilters(files);
     final magicFilters = await curateMagicFilters(files, context);
     final onlyThemFilter = getOnlyThemFilter(
@@ -173,6 +206,7 @@ Future<void> curateFilters(
         ...fileTypeFilters,
         ...contactsFilters,
         ...uploaderFilters,
+        ...cameraFilters,
         ...albumFilters,
         ...locationFilters,
       ],
@@ -350,6 +384,32 @@ List<ContactsFilter> _curateContactsFilter(
   return contactsFilters;
 }
 
+List<CameraFilter> _curateCameraFilters(
+  List<EnteFile> files,
+) {
+  final cameraFilters = <CameraFilter>[];
+  final modelToOccurrence = <String, int>{};
+
+  for (final file in files) {
+    final cameraModel = file.cameraModel;
+    if (cameraModel == null || cameraModel.isEmpty) {
+      continue;
+    }
+    modelToOccurrence[cameraModel] = (modelToOccurrence[cameraModel] ?? 0) + 1;
+  }
+
+  for (final entry in modelToOccurrence.entries) {
+    cameraFilters.add(
+      CameraFilter(
+        cameraModel: entry.key,
+        occurrence: entry.value,
+      ),
+    );
+  }
+
+  return cameraFilters;
+}
+
 List<UploaderFilter> _curateUploaderFilter(
   List<EnteFile> files,
 ) {
@@ -389,7 +449,13 @@ Future<List<FaceFilter>> curateFaceFilters(
 
     final Map<String, List<EnteFile>> clusterIdToFiles = {};
     final Map<String, List<EnteFile>> personIdToFiles = {};
+    final Map<String, Set<int>> personIdToFileIDs = {};
+    final Map<int, EnteFile> uploadedIdToFile = {};
     for (final f in files) {
+      final uploadedFileID = f.uploadedFileID;
+      if (uploadedFileID != null && uploadedFileID != -1) {
+        uploadedIdToFile[uploadedFileID] = f;
+      }
       if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
         continue;
       }
@@ -398,17 +464,45 @@ Future<List<FaceFilter>> curateFaceFilters(
         final PersonEntity? p =
             personIdToPerson[clusterIDToPersonID[clusterId] ?? ""];
         if (p != null) {
-          if (personIdToFiles.containsKey(p.remoteID)) {
-            personIdToFiles[p.remoteID]!.add(f);
-          } else {
-            personIdToFiles[p.remoteID] = [f];
+          final uploadedFileID = f.uploadedFileID;
+          if (uploadedFileID == null || uploadedFileID == -1) {
+            personIdToFiles.putIfAbsent(p.remoteID, () => <EnteFile>[]).add(f);
+            continue;
           }
+          final fileIDsForPerson =
+              personIdToFileIDs.putIfAbsent(p.remoteID, () => <int>{});
+          if (!fileIDsForPerson.add(uploadedFileID)) {
+            continue;
+          }
+          personIdToFiles.putIfAbsent(p.remoteID, () => <EnteFile>[]).add(f);
         } else {
           if (clusterIdToFiles.containsKey(clusterId)) {
             clusterIdToFiles[clusterId]!.add(f);
           } else {
             clusterIdToFiles[clusterId] = [f];
           }
+        }
+      }
+    }
+
+    for (final entry in personIdToPerson.entries) {
+      final manualIDs = entry.value.data.manuallyAssigned.toSet();
+      if (manualIDs.isEmpty) {
+        continue;
+      }
+
+      final filesForPerson =
+          personIdToFiles.putIfAbsent(entry.key, () => <EnteFile>[]);
+      final fileIDsForPerson =
+          personIdToFileIDs.putIfAbsent(entry.key, () => <int>{});
+
+      for (final manualID in manualIDs) {
+        if (!fileIDsForPerson.add(manualID)) {
+          continue;
+        }
+        final file = uploadedIdToFile[manualID];
+        if (file != null) {
+          filesForPerson.add(file);
         }
       }
     }
@@ -538,6 +632,13 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     searchFilterDataProvider.recommendations.whereType<UploaderFilter>(),
   );
 
+  final cameraFilters = searchFilterDataProvider.appliedFilters
+      .whereType<CameraFilter>()
+      .toList();
+  cameraFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<CameraFilter>(),
+  );
+
   final magicFilters =
       searchFilterDataProvider.appliedFilters.whereType<MagicFilter>().toList();
   magicFilters.addAll(
@@ -555,6 +656,7 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     "locationFilters": locationFilters,
     "contactsFilters": contactsFilters,
     "uploaderFilters": uploaderFilters,
+    "cameraFilters": cameraFilters,
     "albumFilters": albumFilters,
     "fileTypeFilters": fileTypeFilters,
     "topLevelGenericFilter": topLevelGenericFilter,
@@ -605,6 +707,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
   final locationReccos = <LocationFilter>[];
   final contactsReccos = <ContactsFilter>[];
   final uploaderReccos = <UploaderFilter>[];
+  final cameraReccos = <CameraFilter>[];
   final albumReccos = <AlbumFilter>[];
   final fileTypeReccos = <FileTypeFilter>[];
   final onlyThemFilter = <OnlyThemFilter>[];
@@ -622,6 +725,8 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
       contactsReccos.add(recommendation);
     } else if (recommendation is UploaderFilter) {
       uploaderReccos.add(recommendation);
+    } else if (recommendation is CameraFilter) {
+      cameraReccos.add(recommendation);
     } else if (recommendation is AlbumFilter) {
       albumReccos.add(recommendation);
     } else if (recommendation is FileTypeFilter) {
@@ -636,6 +741,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
     ...locationReccos,
     ...contactsReccos,
     ...uploaderReccos,
+    ...cameraReccos,
     ...albumReccos,
     ...fileTypeReccos,
   ];

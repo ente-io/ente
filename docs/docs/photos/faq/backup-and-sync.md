@@ -28,6 +28,19 @@ Open `Settings > Backup > Backed up folders` and select the albums you want to a
 
 Once configured, new photos added to these albums will automatically sync in the background.
 
+### Can I backup only new photos without uploading my existing library? {#backup-only-new-photos}
+
+Yes. You can enable this during signup/login on the permissions screen, or later via `Settings > Backup > Backup settings` by toggling on **Backup only new photos**.
+
+- **During onboarding**: Ente backs up from the **last 7 days** onward, so you have some recent photos available right away.
+- **Via the settings toggle**: Ente uses the current moment as the cutoff - only photos taken from that point forward are backed up.
+
+In both cases, photos older than the cutoff will not be uploaded to Ente.
+
+To resume backing up your full library, toggle the setting off.
+
+Learn more in the [Backup only new photos](/photos/features/backup-and-sync/#backup-only-new-photos) guide.
+
 ### Can I backup over mobile data or only WiFi? {#mobile-data}
 
 By default, Ente only backs up photos over WiFi to save mobile data and battery. However, you can change this setting:
@@ -136,7 +149,7 @@ Ente tracks which files have been uploaded and won't upload them again, even if 
 
 **To force a re-upload of previously uploaded files:**
 
-You would need to use "Reset ignored files" in `Settings > Backup`. However, this is rarely needed and should be done carefully as it will re-upload all previously uploaded files.
+You would need to use "Reset ignored files" option seen when opening an 'On Device' album that is backed up. However, this is rarely needed and should be done carefully as it will re-upload all previously uploaded files.
 
 ### How does Ente handle duplicate files during backup? {#duplicate-handling}
 
@@ -231,6 +244,23 @@ Ente backs up a single primary full-resolution image from the Burst. Additional 
 
 iCloud Shared Albums store compressed copies, not the original files. Because of this, Ente sees the shared-album copy as a different file, so it gets backed up separately and appears as a duplicate.
 
+### On my iPhone, why are my photos not seen in the same albums as selected for backup? {#ios-album-assignment}
+
+When a photo belongs to multiple default albums on iOS and those albums are selected for backup, Ente identifies which album has the fewest photos and uploads the photo into that corresponding album on Ente. For example, if both Recents and Live Photos are marked for backup, live photos are added to the Live Photos album on Ente.
+
+### Why are 2 copies of the same photo seen, one synced and one unsynced (slashed cloud icon) during device migration? {#migration-duplicate-photos}
+
+During migration, Ente rechecks all local photos against what is already uploaded. While this scan is in progress, the same photo can appear twice:
+
+- One as synced (already uploaded)
+- One as unsynced (slashed cloud), representing the local copy being verified
+
+This is temporary. Once verification finishes, the duplicate view disappears and only the synced photo remains.
+
+### When I choose "Delete Both" on a photo, why do I still see it in my device's native gallery? {#delete-both-photo-still-visible}
+
+When you select "Delete Both", Ente deletes the copy stored in Ente as well as the copy stored on your device. However, if you have Google Photos backup or iCloud backup enabled, the cloud copy from those services will still be visible in your native gallery. That copy is managed by Google or Apple, not by Ente.
+
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}
@@ -313,7 +343,7 @@ On Android, the app can run background processes more freely than iOS. However, 
 
 ### How do watch folders work? {#how-watch-folders-work}
 
-Watch folders allow the Ente desktop app to automatically monitor specific directories on your computer and sync any changes to Ente. When you add or modify files in a watched folder, they're automatically uploaded.
+Watch folders allow the Ente desktop app to automatically monitor specific directories on your computer and sync new files and deletions to Ente. When you add new files in a watched folder, they're automatically uploaded.
 
 **Key features:**
 
@@ -325,12 +355,31 @@ Watch folders allow the Ente desktop app to automatically monitor specific direc
 
 Learn more in the [Watch folders feature guide](/photos/features/backup-and-sync/watch-folders).
 
+### Does Ente keep my phone and PC folders in sync with each other? {#folder-sync-phone-pc}
+
+Ente backs up photos from your phone and computer to Ente's servers, making them available across all your Ente apps. However, Ente is not a two-way folder sync service - it won't automatically mirror a folder on your PC and your phone's local storage with each other.
+
+- **On mobile**: Your photos remain in your device photo library. Ente backs up the albums you select.
+- **On desktop**: Your photos remain in the folder you chose to watch. The desktop app uploads them to Ente using Watch folders.
+
+Once uploaded, your library is accessible across all your devices through Ente.
+
+### Can Ente create albums automatically from my watch folder structure? {#albums-from-watch-folder-structure}
+
+Yes. When you add a parent folder in Watch folders and choose **Separate albums**, each subfolder is created as its own Ente album.
+
+For example, if you have a `Photos` folder containing `Trip A` and `Trip B` subfolders, watching `Photos` in Separate albums mode creates two albums called "Trip A" and "Trip B".
+
+> **Note**: Ente albums are flat, not nested. All albums appear as top-level albums regardless of how your folders are structured on disk.
+
+Learn more in the [Watch folders guide](/photos/features/backup-and-sync/watch-folders).
+
 ### What are watch folders? {#what-are-watch-folders}
 
 Watch folders is a desktop app feature that automatically syncs specific folders on your computer to Ente. Once you add a folder to watch, the app will:
 
 - Immediately upload all existing files in that folder
-- Continuously monitor the folder for changes
+- Continuously monitor the folder for new files and deletions
 - Automatically upload any new files added to the folder
 - Move files to Uncategorized if you delete them locally
 
@@ -344,7 +393,7 @@ This creates a one-way background sync from your computer to Ente, automating yo
 4. If the folder has nested subfolders, choose between:
     - **Single album**: All files go into one Ente album
     - **Separate albums**: Each subfolder becomes its own album
-5. The folder will be initially synced and then monitored for changes
+5. The folder will be initially synced and then monitored for new files and deletions
 
 The sync happens in the background even when the app is minimized. You can see progress in the bottom right corner.
 
@@ -512,6 +561,20 @@ Yes! You can use Ente on as many devices as you want simultaneously. All your de
 
 The sync happens automatically in the background when devices are connected to the internet.
 
+### Why is my mobile app and desktop app not syncing? {#mobile-desktop-not-syncing}
+
+This usually occurs due to a network connectivity issue:
+
+- Check your internet connection is active
+- Try switching networks (WiFi to mobile data or vice versa)
+- If network connection is fine and sync is still not occurring, please send us
+  your debug logs via **Settings > Help > View logs** so we can investigate
+  further. You can reach us at [support@ente.com](mailto:support@ente.com).
+
+### Is there a way to filter photos that are backed up to Ente but no longer on my device? {#filter-cloud-only-photos}
+
+No. There is currently no way to filter cloud-only photos (photos that exist in Ente but are no longer on your device).
+
 ## File Support & Upload Limits
 
 ### What file formats does Ente support? {#file-formats}
@@ -520,7 +583,7 @@ Ente supports all files that have a mime type of `image/*` or `video/*` regardle
 
 However, we only have limited support for RAW currently. We are working towards adding full support, and you can watch this [thread](https://github.com/ente-io/ente/discussions/625) for updates.
 
-If you find an issue with ente's ability to parse a certain file type, please write to [support@ente.io](mailto:support@ente.io) with details of the unsupported file format and we will do our best to help you out.
+If you find an issue with ente's ability to parse a certain file type, please write to [support@ente.com](mailto:support@ente.com) with details of the unsupported file format and we will do our best to help you out.
 
 ### Is there a file size limit? {#file-size-limit}
 

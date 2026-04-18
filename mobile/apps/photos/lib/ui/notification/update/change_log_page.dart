@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -8,6 +7,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import 'package:photos/ui/notification/update/change_log_strings.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -19,6 +19,14 @@ class ChangeLogPage extends StatefulWidget {
 }
 
 class _ChangeLogPageState extends State<ChangeLogPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
@@ -41,7 +49,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
           const SizedBox(
             height: 24,
           ),
-          Flexible(child: _getChangeLog(context)),
+          Flexible(child: _getChangeLog()),
           const DividerWidget(
             dividerType: DividerType.solid,
           ),
@@ -62,8 +70,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     labelText: AppLocalizations.of(context).continueLabel,
                     icon: Icons.arrow_forward_outlined,
                     onTap: () async {
-                      await updateService.hideChangeLog();
-                      if (mounted && Navigator.of(context).canPop()) {
+                      if (Navigator.of(context).canPop()) {
                         Navigator.of(context).pop();
                       }
                     },
@@ -89,28 +96,55 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     );
   }
 
-  Widget _getChangeLog(BuildContext ctx) {
-    final scrollController = ScrollController();
-    final List<ChangeLogEntry> items = [];
-    items.addAll([
+  Widget _getChangeLog() {
+    final strings = ChangeLogStrings.maybeForLocale(
+      Localizations.localeOf(context),
+      isOffline: isOfflineMode,
+    );
+    if (strings == null) {
+      return const SizedBox.shrink();
+    }
+    final items = <ChangeLogEntry>[
       ChangeLogEntry(
-        context.l10n.cLTitle1,
-        context.l10n.cLDesc1,
+        strings.title1,
+        description: strings.desc1,
+        items: [
+          strings.desc1Item1,
+          strings.desc1Item2,
+        ].where((item) => item.trim().isNotEmpty).toList(growable: false),
         isFeature: true,
       ),
       ChangeLogEntry(
-        context.l10n.cLTitle2,
-        context.l10n.cLDesc2,
+        strings.title2,
+        description: strings.desc2,
         isFeature: true,
       ),
-    ]);
+      ChangeLogEntry(
+        strings.title3,
+        description: strings.desc3,
+        isFeature: true,
+      ),
+      ChangeLogEntry(
+        strings.title4,
+        description: strings.desc4,
+        isFeature: true,
+      ),
+    ]
+        .where(
+          (entry) =>
+              entry.title.trim().isNotEmpty ||
+              (entry.description?.trim().isNotEmpty ?? false) ||
+              entry.items.isNotEmpty,
+        )
+        .toList(growable: false);
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
-        controller: scrollController,
+        controller: _scrollController,
         thumbVisibility: true,
         thickness: 2.0,
-        child: ListView.builder(
+        child: ListView.separated(
+          controller: _scrollController,
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
@@ -119,6 +153,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               child: ChangeLogEntryWidget(entry: items[index]),
             );
           },
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
           itemCount: items.length,
         ),
       ),

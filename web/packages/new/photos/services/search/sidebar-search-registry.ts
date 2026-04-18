@@ -24,10 +24,10 @@ export interface SidebarActionContext {
     showAccount: () => void;
     showPreferences: () => void;
     showHelp: () => void;
+    showFreeUpSpace: () => void;
     onShowExport: () => void;
     onShowPlanSelector: () => void;
     onLogout: () => void;
-    onRouteToDeduplicate: () => Promise<unknown>;
     onShowWatchFolder: () => void;
     pseudoIDs: {
         uncategorized: number;
@@ -40,6 +40,7 @@ export interface SidebarActionContext {
     setPendingAccountAction: (a: SidebarActionID | undefined) => void;
     setPendingPreferencesAction: (a: SidebarActionID | undefined) => void;
     setPendingHelpAction: (a: SidebarActionID | undefined) => void;
+    setPendingFreeUpSpaceAction: (a: SidebarActionID | undefined) => void;
 }
 
 // Construct sidebar actions at call time so we always use initialized i18n
@@ -53,15 +54,9 @@ const sidebarActions = (): SidebarAction[] => {
     return [
         {
             id: "account.subscription",
-            label: t("subscription"),
-            path: [accountCategory, t("subscription")],
-            keywords: [
-                "subscription",
-                "plan",
-                "upgrade",
-                "billing",
-                "pricings",
-            ],
+            label: t("manage_plan"),
+            path: [accountCategory, t("manage_plan")],
+            keywords: ["subscription", "plan", "upgrade", "billing", "pricing"],
         },
         {
             id: "shortcuts.uncategorized",
@@ -101,10 +96,30 @@ const sidebarActions = (): SidebarAction[] => {
             available: () => isDesktop,
         },
         {
-            id: "utility.deduplicate",
+            id: "utility.freeUpSpace",
+            label: t("free_up_space"),
+            path: [preferencesCategory, t("free_up_space")],
+            keywords: ["free", "space", "storage", "clean"],
+        },
+        {
+            id: "freeUpSpace.deduplicate",
             label: t("deduplicate_files"),
-            path: [preferencesCategory, t("deduplicate_files")],
+            path: [
+                preferencesCategory,
+                t("free_up_space"),
+                t("deduplicate_files"),
+            ],
             keywords: ["duplicate", "dedupe"],
+        },
+        {
+            id: "freeUpSpace.largeFiles",
+            label: t("large_files_title"),
+            path: [
+                preferencesCategory,
+                t("free_up_space"),
+                t("large_files_title"),
+            ],
+            keywords: ["large", "big", "files", "size", "space"],
         },
         {
             id: "utility.preferences",
@@ -184,6 +199,13 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("theme"),
             path: [preferencesCategory, t("theme")],
             keywords: ["appearance", "dark mode", "light mode"],
+        },
+        {
+            id: "preferences.appLock",
+            label: t("app_lock"),
+            path: [preferencesCategory, t("app_lock")],
+            keywords: ["lock", "pin", "password", "biometric", "privacy"],
+            available: () => isDesktop,
         },
         {
             id: "preferences.customDomains",
@@ -332,8 +354,15 @@ export const performSidebarAction = async (
             ctx.onShowWatchFolder();
             return Promise.resolve();
 
-        case "utility.deduplicate":
-            return ctx.onRouteToDeduplicate().then(() => ctx.onClose());
+        case "utility.freeUpSpace":
+            ctx.showFreeUpSpace();
+            return Promise.resolve();
+
+        case "freeUpSpace.deduplicate":
+        case "freeUpSpace.largeFiles":
+            ctx.setPendingFreeUpSpaceAction(actionID);
+            ctx.showFreeUpSpace();
+            return Promise.resolve();
 
         case "utility.preferences":
             ctx.showPreferences();
@@ -352,6 +381,7 @@ export const performSidebarAction = async (
             ctx.onLogout();
             return Promise.resolve();
 
+        case "account.subscription":
         case "account.recoveryKey":
         case "account.twoFactor":
         case "account.twoFactor.reconfigure":
@@ -363,13 +393,10 @@ export const performSidebarAction = async (
             ctx.setPendingAccountAction(actionID);
             ctx.showAccount();
             return Promise.resolve();
-        case "account.subscription":
-            ctx.onClose();
-            ctx.onShowPlanSelector();
-            return Promise.resolve();
 
         case "preferences.language":
         case "preferences.theme":
+        case "preferences.appLock":
         case "preferences.customDomains":
         case "preferences.map":
         case "preferences.advanced":

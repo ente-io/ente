@@ -25,6 +25,13 @@ class SelectionActionButton extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final color = isDestructive ? colorScheme.warning500 : colorScheme.textBase;
+    final iconWidget =
+        hugeIcon ??
+        Icon(
+          icon!,
+          color: color,
+          size: 24,
+        );
 
     return GestureDetector(
       onTap: onTap,
@@ -33,24 +40,20 @@ class SelectionActionButton extends StatelessWidget {
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(24.0),
         ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 18.0,
-          horizontal: 12.0,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            hugeIcon ??
-                Icon(
-                  icon!,
-                  color: color,
-                  size: 24,
-                ),
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: Center(child: iconWidget),
+            ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: textTheme.body.copyWith(
+              style: textTheme.small.copyWith(
                 color: color,
               ),
               textAlign: TextAlign.center,

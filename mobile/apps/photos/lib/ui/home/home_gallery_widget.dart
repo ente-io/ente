@@ -1,8 +1,10 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/core/user_config.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -21,7 +23,6 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class HomeGalleryWidget extends StatefulWidget {
   final Widget? header;
@@ -80,9 +81,10 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
     final gallery = Gallery(
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final ownerID = Configuration.instance.getUserID();
+        final ownerID = Configuration.instance.getUserIDV2();
         final hasSelectedAllForBackup =
-            backupPreferenceService.hasSelectedAllFoldersForBackup;
+            backupPreferenceService.hasSelectedAllFoldersForBackup ||
+                isOfflineMode;
         final collectionsToHide =
             CollectionsService.instance.archivedOrHiddenCollectionIds();
         FileLoadResult result;
@@ -97,7 +99,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
             creationEndTime,
-            ownerID!,
+            ownerID,
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
@@ -106,7 +108,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(
             creationStartTime,
             creationEndTime,
-            ownerID!,
+            ownerID,
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
@@ -132,6 +134,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       footer: widget.footer,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
+      priorityReloadDebounceTime: const Duration(milliseconds: 200),
       galleryType: GalleryType.homepage,
       groupType: widget.groupType,
       showGallerySettingsCTA: true,

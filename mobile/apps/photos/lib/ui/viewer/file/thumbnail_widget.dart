@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math";
 import "dart:typed_data";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -18,6 +19,7 @@ import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
@@ -25,7 +27,6 @@ import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_context_state.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/standalone/task_queue.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -42,6 +43,7 @@ class ThumbnailWidget extends StatefulWidget {
   final Duration? diskLoadDeferDuration;
   final Duration? serverLoadDeferDuration;
   final int thumbnailSize;
+  final bool useRequestedThumbnailSizeForLocalCache;
   final bool shouldShowOwnerAvatar;
   final bool shouldShowFavoriteIcon;
 
@@ -64,6 +66,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
+    this.useRequestedThumbnailSizeForLocalCache = false,
     this.shouldShowFavoriteIcon = true,
     this.shouldShowVideoDuration = false,
     this.shouldShowVideoOverlayIcon = true,
@@ -85,6 +88,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   int? optimizedImageWidth;
   String? _localThumbnailQueueTaskId;
   static const _maxLocalThumbnailRetries = 8;
+
+  int get _localCacheThumbnailSize {
+    if (widget.useRequestedThumbnailSizeForLocalCache) {
+      return widget.thumbnailSize;
+    }
+    return thumbnailSmallSize;
+  }
 
   @override
   void initState() {
@@ -175,6 +185,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     } else {
       _loadLocalImage(context);
     }
+    final galleryContext = GalleryContextState.of(context);
     Widget? image;
     if (_imageProvider != null) {
       image = Image(
@@ -190,6 +201,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (widget.rawThumbnail) {
         return image;
       }
+      final shouldShowOwnerAvatar = widget.shouldShowOwnerAvatar &&
+          galleryContext?.galleryType != GalleryType.sharedPublicCollection;
       final List<Widget> contentChildren = [image];
       if (widget.shouldShowFavoriteIcon) {
         if (FavoritesService.instance.isFavoriteCache(
@@ -200,18 +213,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
       }
 
-      if (widget.file.fileType == FileType.video) {
-        if (widget.shouldShowVideoDuration) {
-          contentChildren
-              .add(VideoOverlayDuration(duration: widget.file.duration!));
-        } else if (widget.shouldShowVideoOverlayIcon) {
-          contentChildren.add(const VideoOverlayIcon());
-        }
-      } else if (widget.shouldShowLivePhotoOverlay &&
+      if (widget.file.fileType != FileType.video &&
+          widget.shouldShowLivePhotoOverlay &&
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
-      if (widget.shouldShowOwnerAvatar) {
+      if (shouldShowOwnerAvatar) {
         if (!widget.file.isOwner) {
           final owner = CollectionsService.instance
               .getFileOwner(widget.file.ownerID!, widget.file.collectionID);
@@ -238,13 +245,24 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
-    if (widget.shouldShowSyncStatus && !widget.file.isUploaded) {
+    if (!widget.rawThumbnail && widget.file.fileType == FileType.video) {
+      if (widget.shouldShowVideoDuration) {
+        viewChildren.add(
+          VideoOverlayDuration(duration: widget.file.duration),
+        );
+      } else if (widget.shouldShowVideoOverlayIcon) {
+        viewChildren.add(const VideoOverlayIcon());
+      }
+    }
+    if (widget.shouldShowSyncStatus &&
+        !widget.file.isUploaded &&
+        !isOfflineMode) {
       viewChildren.add(const UnSyncedIcon());
     }
 
     if (widget.file.isTrash) {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
-    } else if (GalleryContextState.of(context)?.type == GroupType.size) {
+    } else if (galleryContext?.type == GroupType.size) {
       viewChildren.add(FileSizeOverlayText(widget.file));
     } else if (widget.file.debugCaption != null) {
       viewChildren.add(FileOverlayText(widget.file.debugCaption!));
@@ -296,7 +314,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
+          ThumbnailInMemoryLruCache.get(widget.file, _localCacheThumbnailSize);
       if (cachedSmallThumbnail != null) {
         final imageProvider = Image.memory(
           cachedSmallThumbnail,
@@ -357,7 +375,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       ThumbnailInMemoryLruCache.put(
         widget.file,
         thumbData,
-        thumbnailSmallSize,
+        _localCacheThumbnailSize,
       );
     }).catchError((e) {
       _errorLoadingLocalThumbnail = true;

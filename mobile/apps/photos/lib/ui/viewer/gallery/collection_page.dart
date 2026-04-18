@@ -32,12 +32,14 @@ class CollectionPage extends StatelessWidget {
   final String tagPrefix;
   final bool? hasVerifiedLock;
   final bool isFromCollectPhotos;
+  final EnteFile? fileToJumpTo;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
     this.isFromCollectPhotos = false,
+    this.fileToJumpTo,
     super.key,
   });
 
@@ -114,6 +116,7 @@ class CollectionPage extends StatelessWidget {
       footer: isFromCollectPhotos
           ? const SizedBox(height: 20)
           : const SizedBox(height: 212),
+      fileToJumpTo: fileToJumpTo,
     );
 
     return GalleryFilesState(

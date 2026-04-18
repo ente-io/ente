@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
@@ -6,7 +7,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 // TODO: Use a single instance variable for `allMemories` and `allTitles`
 class MemoryCoverWidget extends StatefulWidget {

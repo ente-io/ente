@@ -9,13 +9,13 @@
 
 **This is the most impactful contribution you can make**.
 
-[Spread the word](https://ente.io/help/photos/features/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
+[Spread the word](https://ente.com/help/photos/features/account/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
 
 ## Engage with the community
 
 Just hang around, enjoy the vibe. The Ente community — the people who are building Ente, and the people who are using Ente — hang out at various places depending on their proclivity:
 
-- [Discord](https://discord.ente.io)
+- [Discord](https://ente.com/discord)
 - [Mastodon](https://fosstodon.org/@ente)
 - [X / Twitter](https://twitter.com/enteio)
 - [Github Discussions](https://github.com/ente-io/ente/discussions)
@@ -29,11 +29,12 @@ Visit our Crowdin projects to help with translations:
 | Project                                                             |                                                                                                                                   |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | [Auth](https://crowdin.com/project/ente-authenticator-app)          | [![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app) |
+| [Locker](https://crowdin.com/project/ente-locker)                  | [![Crowdin](https://badges.crowdin.net/ente-locker/localized.svg)](https://crowdin.com/project/ente-locker)                       |
 | [Photos](https://crowdin.com/project/ente-photos-app)               | [![Crowdin](https://badges.crowdin.net/ente-photos-app/localized.svg)](https://crowdin.com/project/ente-photos-app)               |
 | [Photos Web / Desktop](https://crowdin.com/project/ente-photos-web) | [![Crowdin](https://badges.crowdin.net/ente-photos-web/localized.svg)](https://crowdin.com/project/ente-photos-web)               |
 
 If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A+%0AProject%3A+auth%2Fphotos%2Fboth)
+issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A+%0AProject%3A+auth%2Flocker%2Fphotos%2Fweb)
 to have it added. It is okay to have partial translations. Once ~90% of the
 strings in a language get translated, we will start surfacing it in the apps.
 

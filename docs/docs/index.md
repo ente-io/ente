@@ -10,12 +10,13 @@ description: >
 
 ## Introduction
 
-Ente (pronounced en-_tay_) is a end-to-end encrypted platform for privately,
-reliably, and securely storing your data on the cloud, over which 2 applications
-have been developed and made available for mobile, web and desktop, namely:
+Ente (pronounced en-_tay_) is an end-to-end encrypted platform for privately,
+reliably, and securely storing your data on the cloud, over which 3 applications
+have been developed and made available, namely:
 
 - **Ente Photos** - An alternative to Google Photos and Apple Photos.
 - **Ente Auth** - A free 2FA alternative to Authy.
+- **Ente Locker** - Secure storage for documents and sensitive information.
 
 ## History
 
@@ -32,14 +33,14 @@ literally means "my photos".
 
 But one day, he discovered that "ente" means "duck" in German. This unexpected
 connection sealed the deal after looking for alternative names and led to the
-adoption of ["Ducky"](https://ente.io/blog/ducky/), representing the playfulness
+adoption of ["Ducky"](https://ente.com/blog/ducky/), representing the playfulness
 and friendly nature of the community and team.
 
 ## Getting Started
 
-We recommend reading the documentation for [Ente Photos](/photos/) or
-[Ente Auth](/auth/) to get started with installation on the desired platform,
-explore available features and usage.
+We recommend reading the documentation for [Ente Photos](/photos/),
+[Ente Auth](/auth/), or [Ente Locker](/locker/) to get started with installation
+on the desired platform, explore available features and usage.
 
 If you are looking to self-host Ente, we recommend you to read the
 [official documentation](/self-hosting/) for updated information on getting
@@ -61,22 +62,22 @@ You can find our contribution guidelines
 You can always engage with our community and team to hang out, answer queries
 and stay updated:
 
-- Chat: [Discord](https://ente.io/discord)
+- Chat: [Discord](https://ente.com/discord)
 - Discussions: [GitHub](https://github.com/ente-io/ente/discussions)
 - Socials:
     - Twitter: [enteio](https://twitter.com/enteio)
     - Mastodon: [@ente@fosstodon.org](https://fosstodon.org/@ente)
-    - Bluesky: [ente.io](https://bsky.app/profile/ente.io)
+    - Bluesky: [ente.com](https://bsky.app/profile/ente.io)
     - Instagram: [ente.app](https://www.instagram.com/ente.app)
 - Website:
-    - [Blog](https://ente.io/blog)
-    - [RSS](https://ente.io/blog/rss.xml)
+    - [Blog](https://ente.com/blog)
+    - [RSS](https://ente.com/blog/rss.xml)
 
 ## Getting Help
 
 If you encounter any issues with any of the products that's not answered by our
 documentation, please reach out to our team by sending an email to
-[support@ente.io](mailto:support@ente.io).
+[support@ente.com](mailto:support@ente.com).
 
 For community support, please post your queries on our
 [Discord](https://discord.gg/z2YVKkycX3) server.

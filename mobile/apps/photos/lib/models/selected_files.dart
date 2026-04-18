@@ -115,10 +115,37 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Removes [file] from internal sets before a mutation that changes fields
+  /// participating in `==`/`hashCode`, then re-adds it after the mutation.
+  ///
+  /// Call this around in-place mutations (e.g. [EnteFile.applyUploadedData])
+  /// so that the hash-based sets stay consistent.
+  void mutateFile(EnteFile file, void Function() mutate) {
+    final wasInFiles = files.remove(file);
+    final wasInLastOp = lastSelectionOperationFiles.remove(file);
+    mutate();
+    if (wasInFiles) files.add(file);
+    if (wasInLastOp) lastSelectionOperationFiles.add(file);
+    if (wasInFiles || wasInLastOp) notifyListeners();
+  }
+
   ///Retains only the files that are present in the [filesToRetain] set in
   ///[files]. Takes the intersection of the two sets.
   void retainFiles(Set<EnteFile> filesToRetain) {
     files.retainAll(filesToRetain);
+    notifyListeners();
+  }
+
+  ///Replaces the current selection with [filesToSelect] in a single update.
+  void replaceSelection(Set<EnteFile> filesToSelect) {
+    final nonDummyFiles =
+        filesToSelect.where((file) => file is! DummyFile).toSet();
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.addAll(files);
+    files
+      ..clear()
+      ..addAll(nonDummyFiles);
+    lastSelectionOperationFiles.addAll(nonDummyFiles);
     notifyListeners();
   }
 }

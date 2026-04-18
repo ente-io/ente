@@ -26,7 +26,6 @@
   "deleteReason4": "Мој разлог није на листи",
   "sendEmail": "Пошаљи е-пошту",
   "deleteRequestSLAText": "Ваш захтев ће бити обрађен у року од 72 сата.",
-  "deleteEmailRequest": "Молимо пошаљите имејл на <warning>account-deletion@ente.io</warning> са ваше регистроване адресе е-поште.",
   "entePhotosPerm": "Енте-у <i>је потребна дозвола да</i> сачува ваше фотографије",
   "ok": "Ок",
   "createAccount": "Направи налог",
@@ -48,7 +47,6 @@
   "incorrectRecoveryKeyBody": "Унети кључ за опоравак је натачан",
   "forgotPassword": "Заборавио сам лозинку",
   "enterYourRecoveryKey": "Унесите Ваш кључ за опоравак",
-  "noRecoveryKey": "Немате кључ за опоравак?",
   "sorry": "Извините",
   "noRecoveryKeyNoDecryption": "Због природе нашег протокола за крај-до-крај енкрипцију, ваши подаци не могу бити дешифровани без ваше лозинке или кључа за опоравак",
   "verifyEmail": "Верификуј е-пошту",
@@ -63,7 +61,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -115,7 +113,6 @@
   "verifyPassword": "Верификујте лозинку",
   "recoveryKey": "Кључ за опоравак",
   "recoveryKeyOnForgotPassword": "Ако заборавите лозинку, једини начин на који можете повратити податке је са овим кључем.",
-  "recoveryKeySaveDescription": "Не чувамо овај кључ, молимо да сачувате кључ од 24 речи на сигурном месту.",
   "doThisLater": "Уради ово касније",
   "saveKey": "Сачувај кључ",
   "recoveryKeyCopiedToClipboard": "Кључ за опоравак је копиран у међуспремник",
@@ -127,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -254,18 +251,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ИД за верификацију",
   "verifyEmailID": "Верификуј {email}",
   "emailNoEnteAccount": "{email} нема Енте налог.\n\nПошаљи им позивницу за дељење фотографија.",
-  "shareMyVerificationID": "Ево мог ИД-а за верификацију: {verificationID} за ente.io.",
-  "shareTextConfirmOthersVerificationID": "Здраво, можеш ли да потврдиш да је ово твој ente.io ИД за верификацију: {verificationID}",
   "somethingWentWrong": "Нешто није у реду",
   "sendInvite": "Пошаљи позивницу",
-  "shareTextRecommendUsingEnte": "Преузми Енте да бисмо лако делили фотографије и видео записе у оригиналном квалитету\n\nhttps://ente.io",
   "done": "Готово",
   "applyCodeTitle": "Примени кôд",
   "enterCodeDescription": "Унеси код који ти је дао пријатељ да бисте обоје добили бесплатан простор за складиштење",
@@ -273,7 +267,6 @@
   "failedToApplyCode": "Грешка у примењивању кôда",
   "enterReferralCode": "Унеси реферални код",
   "codeAppliedPageTitle": "Кôд примењен",
-  "changeYourReferralCode": "Промени свој реферални код",
   "change": "Измени",
   "unavailableReferralCode": "Жао нам је, овај кôд није доступан.",
   "codeChangeLimitReached": "Жао нам је, достигли сте максимум броја промена кôда.",
@@ -289,11 +282,7 @@
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ сваки пут када се неко претплати на неку од наших понуда и при том унесе ваш код",
   "claimFreeStorage": "Освоји бесплатан простор на диску",
   "inviteYourFriends": "Позови своје пријатеље",
-  "referralStep1": "1. Дај овај код својим пријатељима",
-  "referralStep2": "2. Они се претплате на понуду која се плаћа",
-  "referralStep3": "3. Обоје добијате {storageInGB} ГБ* бесплатно",
   "referralsAreCurrentlyPaused": "Препоручивање је тренутно паузирано",
-  "youCanAtMaxDoubleYourStorage": "* У најбољем случају можете удвостручити ваш простор",
   "faq": "Честа питања",
   "help": "Помоћ",
   "oopsSomethingWentWrong": "Упс, дошло је до грешке",
@@ -514,8 +503,6 @@
   "familyPlans": "Породичне понуде",
   "referrals": "Препоруке",
   "notifications": "Обавештења",
-  "sharedPhotoNotifications": "Нове дељене фотографије",
-  "sharedPhotoNotificationsExplanation": "Добиј обавештење када неко дода фотографију у албум у којем ви учествујете",
   "advanced": "Напредно",
   "general": "Опште",
   "security": "Сигурност",
@@ -539,7 +526,6 @@
   "darkTheme": "Тамна",
   "systemTheme": "Системска",
   "freeTrial": "Бесплатна проба",
-  "selectYourPlan": "Изабери пакет",
   "enteSubscriptionPitch": "Енте чува твоје успомене тако да су увек са тобом, чак и ако изгубиш уређај.",
   "enteSubscriptionShareWithFamily": "Можеш додати и породицу у оквиру овог пакета.",
   "currentUsageIs": "Тренутно искоришћено",
@@ -606,7 +592,6 @@
   "appstoreSubscription": "Претплата путем Епл продавнице",
   "visitWebToManage": "Претплатом можете управљати на страници web.ente.io",
   "couldNotUpdateSubscription": "Неуспешно ажурирање претплате",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Контактирајте подршку на support@ente.io и радо ћемо вам помоћи!",
   "paymentFailed": "Неуспела уплата",
   "continueOnFreeTrial": "Настави бесплатни пробни период",
   "areYouSureYouWantToExit": "Сигурно желите да изађете?",
@@ -621,16 +606,8 @@
   "preserveMore": "Сачувај још",
   "grantFullAccessPrompt": "Дозволите приступ свим фотографијама у подешавањима уређаја",
   "allowPermTitle": "Дозволи приступ фотографијама",
-  "openSettings": "Отвори подешавања",
   "selectMorePhotos": "Изабери још фотографија",
   "existingUser": "Постојећи корисник",
-  "privateBackups": "Приватни бекапи",
-  "forYourMemories": "за твоје успомене",
-  "safelyStored": "Сигурно похрањено",
-  "atAFalloutShelter": "у подземном бункеру",
-  "designedToOutlive": "Направљено да надживи",
-  "available": "Доступно",
-  "everywhere": "свуда",
   "newToEnte": "Нови на Енте",
   "pleaseLoginAgain": "Молимо, улогујте се поново",
   "autoLogoutMessage": "Излоговани сте услед техничке грешке. Извињавамо се за непријатност.",
@@ -647,7 +624,6 @@
   "couldNotBackUpTryLater": "Нисмо могли да бекапујемо ваше податке.\nПокушаћемо касније.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Енте може да екриптује и сачува фајлове једино ако дозволите приступ њима",
   "pleaseGrantPermissions": "Молимо, дозволите приступ",
-  "grantPermission": "Дозволите приступ",
   "privateSharing": "Приватно дељење",
   "shareOnlyWithThePeopleYouWant": "Дели само са људима са којима желиш",
   "usePublicLinksForPeopleNotOnEnte": "Користи јавне линкове за људима који нису на Енте",
@@ -826,7 +802,6 @@
   "newPerson": "Нова особа",
   "addName": "Додај име",
   "add": "Додај",
-  "localIndexing": "Локално индексирање",
   "resetPerson": "Уклони",
   "month": "месец",
   "yearShort": "год",
@@ -890,7 +865,6 @@
   "areThey": "Да ли је то",
   "questionmark": "?",
   "saveAsAnotherPerson": "Сачувај као другу особу",
-  "showLessFaces": "Прикажи мање лица",
   "showMoreFaces": "Прикажи још лица",
   "ignore": "Игнориши",
   "merge": "Споји",
@@ -919,5 +893,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "grantPermission": "Дозволите приступ"
 }

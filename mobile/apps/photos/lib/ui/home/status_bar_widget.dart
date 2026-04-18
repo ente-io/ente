@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/christmas_banner_event.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -15,11 +18,12 @@ import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_widget.dart';
+import 'package:photos/ui/home/christmas/christmas_lights_banner.dart';
+import 'package:photos/ui/home/christmas/christmas_utils.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
-import "package:photos/ui/settings/ml/enable_ml_consent.dart";
-import 'package:photos/utils/navigation_util.dart';
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 
 const double kContainerHeight = 36;
 
@@ -35,11 +39,12 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
+  late StreamSubscription<ChristmasBannerEvent> _christmasBannerSubscription;
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  bool _showMlBanner = !flagService.hasGrantedMLConsent &&
-      flagService.hasSyncedAccountFlags() &&
+  bool _showMlBanner = !hasGrantedMLConsent &&
+      (isOfflineMode || flagService.hasSyncedAccountFlags()) &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
 
@@ -77,8 +82,14 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
-        _showMlBanner = !flagService.hasGrantedMLConsent &&
-            !localSettings.hasSeenMLEnablingBanner;
+        _showMlBanner =
+            !hasGrantedMLConsent && !localSettings.hasSeenMLEnablingBanner;
+        setState(() {});
+      }
+    });
+    _christmasBannerSubscription =
+        Bus.instance.on<ChristmasBannerEvent>().listen((_) {
+      if (mounted) {
         setState(() {});
       }
     });
@@ -90,6 +101,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void dispose() {
     _subscription.cancel();
     _notificationSubscription.cancel();
+    _christmasBannerSubscription.cancel();
     super.dispose();
   }
 
@@ -97,6 +109,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        if (isChristmasPeriod()) const ChristmasLightsBanner(),
         HomeHeaderWidget(
           centerWidget: _showStatus && !_showErrorBanner
               ? GestureDetector(
@@ -111,7 +124,16 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   },
                   child: const SyncStatusWidget(),
                 )
-              : const Text("ente", style: brandStyleMedium),
+              : SvgPicture.asset(
+                  "assets/ente-branding.svg",
+                  height: 15,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
         ),
         _showErrorBanner
             ? Divider(
@@ -136,7 +158,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   onTap: () async => {
                     await routeToPage(
                       context,
-                      const EnableMachineLearningConsent(),
+                      const MachineLearningSettingsPage(),
                       forceCustomPageRoute: true,
                     ),
                   },

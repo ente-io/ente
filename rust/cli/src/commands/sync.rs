@@ -1,11 +1,11 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::secret_box_open;
 use crate::models::{account::Account, metadata::FileMetadata};
 use crate::storage::Storage;
 use crate::sync::{SyncEngine, SyncStats, download::DownloadManager};
 use base64::Engine;
+use ente_core::crypto;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -15,7 +15,7 @@ pub async fn run_sync(
     full_sync: bool,
 ) -> Result<()> {
     // Initialize crypto
-    crate::crypto::init()?;
+    crypto::init()?;
 
     // Open database
     let config_dir = crate::utils::get_cli_config_dir()?;
@@ -75,7 +75,8 @@ async fn sync_account(
         .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
 
     // Create API client with account's endpoint
-    let api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    let api_client =
+        ApiClient::new_with_client_package(Some(account.endpoint.clone()), account.app.client_package())?;
 
     // Store token for this account
     let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
@@ -93,7 +94,8 @@ async fn sync_account(
         .ok_or_else(|| crate::Error::Generic("Database path not available".into()))?;
 
     // Create API client for sync engine
-    let sync_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    let sync_api_client =
+        ApiClient::new_with_client_package(Some(account.endpoint.clone()), account.app.client_package())?;
     sync_api_client.add_token(&account.email, &token);
 
     let sync_storage = Storage::new(db_path)?;
@@ -128,7 +130,10 @@ async fn sync_account(
 
             // Create download manager
             // Create a new API client for the download manager
-            let download_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+            let download_api_client = ApiClient::new_with_client_package(
+                Some(account.endpoint.clone()),
+                account.app.client_package(),
+            )?;
             download_api_client.add_token(&account.email, &token);
 
             let mut download_manager = DownloadManager::new(download_api_client)?;
@@ -251,7 +256,7 @@ fn decrypt_collection_keys(
         let encrypted_bytes = BASE64.decode(&collection.encrypted_key)?;
         let nonce_bytes = BASE64.decode(&collection.key_decryption_nonce)?;
 
-        match secret_box_open(&encrypted_bytes, &nonce_bytes, master_key) {
+        match crypto::secretbox::decrypt(&encrypted_bytes, &nonce_bytes, master_key) {
             Ok(key) => {
                 keys.insert(collection.id, key);
             }
@@ -289,7 +294,6 @@ async fn prepare_download_tasks(
     collections: &[crate::api::models::Collection],
     download_manager: &DownloadManager,
 ) -> Result<Vec<(crate::models::file::RemoteFile, PathBuf)>> {
-    use crate::crypto::decrypt_stream;
     use base64::engine::general_purpose::STANDARD as BASE64;
     use chrono::{TimeZone, Utc};
 
@@ -312,7 +316,7 @@ async fn prepare_download_tasks(
             let file_key = {
                 let key_bytes = BASE64.decode(&file.encrypted_key)?;
                 let nonce = BASE64.decode(&file.key_decryption_nonce)?;
-                secret_box_open(&key_bytes, &nonce, col_key)?
+                crypto::secretbox::decrypt(&key_bytes, &nonce, col_key)?
             };
 
             // Decrypt regular metadata
@@ -321,7 +325,7 @@ async fn prepare_download_tasks(
                     let encrypted_bytes = BASE64.decode(&file.metadata.encrypted_data)?;
                     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
 
-                    match decrypt_stream(&encrypted_bytes, &header_bytes, &file_key) {
+                    match crypto::stream::decrypt(&encrypted_bytes, &header_bytes, &file_key) {
                         Ok(decrypted) => serde_json::from_slice::<FileMetadata>(&decrypted).ok(),
                         Err(e) => {
                             log::warn!("Failed to decrypt metadata for file {}: {}", file.id, e);
@@ -341,7 +345,7 @@ async fn prepare_download_tasks(
                     let encrypted_bytes = BASE64.decode(&magic.data)?;
                     let header_bytes = BASE64.decode(&magic.header)?;
 
-                    match decrypt_stream(&encrypted_bytes, &header_bytes, &file_key) {
+                    match crypto::stream::decrypt(&encrypted_bytes, &header_bytes, &file_key) {
                         Ok(decrypted) => {
                             serde_json::from_slice::<serde_json::Value>(&decrypted).ok()
                         }

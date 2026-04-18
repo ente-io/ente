@@ -1,28 +1,29 @@
+import "dart:async";
 import "dart:convert";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/components/menu_section_description_widget.dart";
+import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
-import "package:locker/utils/date_time_util.dart";
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -43,12 +44,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isCollectEnabled =
-        widget.collection!.publicURLs.firstOrNull?.enableCollect ?? false;
-    final isDownloadEnabled =
-        widget.collection!.publicURLs.firstOrNull?.enableDownload ?? true;
-    final isPasswordEnabled =
-        widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
@@ -56,6 +51,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        centerTitle: false,
         title: Text(context.l10n.manageLink),
       ),
       body: SingleChildScrollView(
@@ -66,39 +62,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MenuItemWidget(
-                    key: ValueKey("Allow collect $isCollectEnabled"),
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: context.l10n.allowAddingFiles,
-                    ),
+                  MenuItemWidgetV2(
                     alignCaptionedTextToLeft: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
-                    trailingWidget: ToggleSwitchWidget(
-                      value: () => isCollectEnabled,
-                      onChanged: () async {
-                        await _updateUrlSettings(
-                          context,
-                          {'enableCollect': !isCollectEnabled},
-                        );
-                      },
-                    ),
-                  ),
-                  MenuSectionDescriptionWidget(
-                    content: context.l10n.allowAddFilesDescription,
-                  ),
-                  const SizedBox(height: 24),
-                  MenuItemWidget(
-                    alignCaptionedTextToLeft: true,
-                    captionedTextWidget: CaptionedTextWidget(
+                    captionedTextWidget: CaptionedTextWidgetV2(
                       title: context.l10n.linkExpiry,
-                      subTitle: (url.hasExpiry
+                      subTitle: url.hasExpiry
                           ? (url.isExpired
                               ? context.l10n.linkExpired
-                              : context.l10n.linkEnabled)
-                          : context.l10n.linkNeverExpires),
+                              : getFormattedTime(
+                                  DateTime.fromMicrosecondsSinceEpoch(
+                                    url.validTill,
+                                  ),
+                                ))
+                          : context.l10n.never,
                       subTitleColor: url.isExpired ? warning500 : null,
                     ),
-                    trailingIcon: Icons.chevron_right,
+                    trailingWidget: HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      color: enteColorScheme.textMuted,
+                      size: 20,
+                    ),
                     menuItemColor: enteColorScheme.fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
@@ -111,28 +94,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       });
                     },
                   ),
-                  url.hasExpiry
-                      ? MenuSectionDescriptionWidget(
-                          content: url.isExpired
-                              ? context.l10n.expiredLinkInfo
-                              : context.l10n.linkExpiresOn(
-                                  getFormattedTime(
-                                    DateTime.fromMicrosecondsSinceEpoch(
-                                      url.validTill,
-                                    ),
-                                  ),
-                                ),
-                        )
-                      : const SizedBox.shrink(),
                   const Padding(padding: EdgeInsets.only(top: 24)),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
+                  MenuItemWidgetV2(
+                    captionedTextWidget: CaptionedTextWidgetV2(
                       title: context.l10n.linkDeviceLimit,
                       subTitle: url.deviceLimit == 0
                           ? context.l10n.noDeviceLimit
                           : "${url.deviceLimit}",
                     ),
-                    trailingIcon: Icons.chevron_right,
+                    trailingWidget: HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      color: enteColorScheme.textMuted,
+                      size: 20,
+                    ),
                     menuItemColor: enteColorScheme.fillFaint,
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
@@ -148,79 +122,46 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     surfaceExecutionStates: false,
                   ),
                   DividerWidget(
-                    dividerType: DividerType.menuNoIcon,
-                    bgColor: getEnteColorScheme(context).fillFaint,
+                    dividerType: DividerType.menu,
+                    bgColor: enteColorScheme.fillFaint,
                   ),
-                  MenuItemWidget(
-                    key: ValueKey("Allow downloads $isDownloadEnabled"),
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: context.l10n.allowDownloads,
-                    ),
-                    alignCaptionedTextToLeft: true,
-                    isBottomBorderRadiusRemoved: true,
-                    isTopBorderRadiusRemoved: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
-                    trailingWidget: ToggleSwitchWidget(
-                      value: () => isDownloadEnabled,
-                      onChanged: () async {
-                        await _updateUrlSettings(
-                          context,
-                          {'enableDownload': !isDownloadEnabled},
-                        );
-                        if (isDownloadEnabled) {
-                          // ignore: unawaited_futures
-                          showErrorDialog(
-                            context,
-                            context.l10n.disableDownloadWarningTitle,
-                            context.l10n.disableDownloadWarningBody,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                  DividerWidget(
-                    dividerType: DividerType.menuNoIcon,
-                    bgColor: getEnteColorScheme(context).fillFaint,
-                  ),
-                  MenuItemWidget(
-                    key: ValueKey("Password lock $isPasswordEnabled"),
-                    captionedTextWidget: CaptionedTextWidget(
+                  MenuItemWidgetV2(
+                    key: ValueKey("Password lock ${url.passwordEnabled}"),
+                    captionedTextWidget: CaptionedTextWidgetV2(
                       title: context.l10n.passwordLock,
                     ),
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: ToggleSwitchWidget(
-                      value: () => isPasswordEnabled,
+                      value: () => url.passwordEnabled,
                       onChanged: () async {
-                        if (!isPasswordEnabled) {
-                          // ignore: unawaited_futures
-                          showTextInputDialog(
+                        if (!url.passwordEnabled) {
+                          await showInputSheet(
                             context,
-                            title: context.l10n.setPasswordTitle,
+                            title: context.l10n.setAPassword,
                             submitButtonLabel: context.l10n.lockButtonLabel,
                             hintText: context.l10n.enterPassword,
-                            isPasswordInput: true,
-                            alwaysShowSuccessState: true,
                             onSubmit: (String password) async {
-                              if (password.trim().isNotEmpty) {
-                                final propToUpdate =
-                                    await _getEncryptedPassword(
-                                  password,
-                                );
-                                await _updateUrlSettings(
-                                  context,
-                                  propToUpdate,
-                                  showProgressDialog: false,
-                                );
+                              if (password.trim().isEmpty) {
+                                return;
                               }
+                              final propToUpdate =
+                                  await _getEncryptedPassword(password);
+                              await _updateUrlSettings(
+                                context,
+                                propToUpdate,
+                                showProgressDialog: false,
+                              );
                             },
+                            isPasswordInput: true,
+                            textCapitalization: TextCapitalization.none,
+                            maxLength: 256,
                           );
                         } else {
-                          await _updateUrlSettings(
-                            context,
-                            {'disablePassword': true},
-                          );
+                          await _updateUrlSettings(context, {
+                            'disablePassword': true,
+                          });
                         }
                       },
                     ),
@@ -229,23 +170,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     height: 24,
                   ),
                   if (url.isExpired)
-                    MenuItemWidget(
-                      captionedTextWidget: CaptionedTextWidget(
+                    MenuItemWidgetV2(
+                      captionedTextWidget: CaptionedTextWidgetV2(
                         title: context.l10n.linkExpired,
                         textColor: getEnteColorScheme(context).warning500,
                       ),
                       leadingIcon: Icons.error_outline,
                       leadingIconColor: getEnteColorScheme(context).warning500,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      isBottomBorderRadiusRemoved: true,
                     ),
                   if (!url.isExpired)
-                    MenuItemWidget(
-                      captionedTextWidget: CaptionedTextWidget(
+                    MenuItemWidgetV2(
+                      captionedTextWidget: CaptionedTextWidgetV2(
                         title: context.l10n.copyLink,
                         makeTextBold: true,
                       ),
-                      leadingIcon: Icons.copy,
+                      leadingIconWidget: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCopy01,
+                        color: enteColorScheme.textBase,
+                        size: 20,
+                      ),
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       showOnlyLoadingState: true,
                       onTap: () async {
@@ -263,32 +207,35 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
                   if (!url.isExpired)
-                    MenuItemWidget(
+                    MenuItemWidgetV2(
                       key: sendLinkButtonKey,
-                      captionedTextWidget: CaptionedTextWidget(
+                      captionedTextWidget: CaptionedTextWidgetV2(
                         title: context.l10n.sendLink,
                         makeTextBold: true,
                       ),
-                      leadingIcon: Icons.adaptive.share,
+                      leadingIconWidget: HugeIcon(
+                        icon: HugeIcons.strokeRoundedShare08,
+                        color: enteColorScheme.textBase,
+                        size: 20,
+                      ),
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        // ignore: unawaited_futures
-                        await shareText(
-                          urlValue,
-                          context: context,
-                        );
+                        unawaited(shareText(urlValue, context: context));
                       },
                       isTopBorderRadiusRemoved: true,
                     ),
                   const SizedBox(height: 24),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
+                  MenuItemWidgetV2(
+                    captionedTextWidget: CaptionedTextWidgetV2(
                       title: context.l10n.removeLink,
                       textColor: warning500,
                       makeTextBold: true,
                     ),
-                    leadingIcon: Icons.remove_circle_outline,
-                    leadingIconColor: warning500,
+                    leadingIconWidget: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedDelete02,
+                      color: warning500,
+                      size: 20,
+                    ),
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
@@ -337,16 +284,18 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         : null;
     await dialog?.show();
     try {
-      await CollectionApiClient.instance
-          .updateShareUrl(widget.collection!, prop);
+      await CollectionApiClient.instance.updateShareUrl(
+        widget.collection!,
+        prop,
+      );
       await dialog?.hide();
-      showShortToast(context, "Collection updated");
+      showShortToast(context, context.l10n.collectionUpdated);
       if (mounted) {
         setState(() {});
       }
     } catch (e) {
       await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       rethrow;
     }
   }

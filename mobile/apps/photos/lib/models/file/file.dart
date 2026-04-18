@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -13,7 +14,6 @@ import "package:photos/module/download/file_url.dart";
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/panorama_util.dart";
-import 'package:photos/utils/standalone/date_time.dart';
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
@@ -95,8 +95,10 @@ class EnteFile {
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
-    file.location =
-        Location(latitude: asset.latitude, longitude: asset.longitude);
+    file.location = Location(
+      latitude: asset.latitude,
+      longitude: asset.longitude,
+    );
     file.fileType = fileTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = _safeGetMicroseconds(
@@ -212,8 +214,10 @@ class EnteFile {
       creationTime = exifTime.time!.microsecondsSinceEpoch;
     }
     if (mediaUploadData.exifData != null) {
-      mediaUploadData.isPanorama =
-          checkPanoramaFromEXIF(null, mediaUploadData.exifData);
+      mediaUploadData.isPanorama = checkPanoramaFromEXIF(
+        null,
+        mediaUploadData.exifData,
+      );
     }
     if (mediaUploadData.isPanorama != true &&
         fileType == FileType.image &&
@@ -331,6 +335,22 @@ class EnteFile {
     return '''File(generatedID: $generatedID, localID: $localID, title: $title, 
       type: $fileType, uploadedFileId: $uploadedFileID, modificationTime: $modificationTime, 
       ownerID: $ownerID, collectionID: $collectionID, updationTime: $updationTime)''';
+  }
+
+  /// Mutates this file in place with upload-result fields from [uploadedFile].
+  /// Used by the gallery's soft refresh path so that all existing references
+  /// (GalleryGroups sub-lists, GalleryFileWidget.widget.file, etc.) see the
+  /// updated state without needing to rebuild GalleryGroups.
+  void applyUploadedData(EnteFile uploadedFile) {
+    uploadedFileID = uploadedFile.uploadedFileID;
+    collectionID = uploadedFile.collectionID;
+    updationTime = uploadedFile.updationTime;
+    ownerID = uploadedFile.ownerID;
+    encryptedKey = uploadedFile.encryptedKey;
+    keyDecryptionNonce = uploadedFile.keyDecryptionNonce;
+    fileDecryptionHeader = uploadedFile.fileDecryptionHeader;
+    thumbnailDecryptionHeader = uploadedFile.thumbnailDecryptionHeader;
+    metadataDecryptionHeader = uploadedFile.metadataDecryptionHeader;
   }
 
   @override

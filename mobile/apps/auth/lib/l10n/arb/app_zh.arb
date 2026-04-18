@@ -317,7 +317,7 @@
     }
   },
   "sorry": "抱歉",
-  "importFailureDesc": "无法解析所选文件。\n如果您需要帮助，请发邮件给 support@ente.io！",
+  "importFailureDesc": "无法解析所选文件。\n如果您需要帮助，请发邮件给 support@ente.com！",
   "pendingSyncs": "警告",
   "pendingSyncsWarningBody": "您的一些代码尚未备份。\n\n请确保您在登出之前备份这些代码。",
   "checkInboxAndSpamFolder": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
@@ -330,7 +330,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -508,7 +508,7 @@
   "dropReview": "在 App Store/Play 商店上发表评测",
   "supportEnte": "支持 <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "在 Github 上给我们一个星标",
-  "free5GB": "<bold-green>ente</bold-green> Photos 上 5GB 可用空间",
+  "free10GB": "<bold-green>ente</bold-green> Photos 上 10GB 可用空间",
   "loginWithAuthAccount": "使用您的认证账户登录",
   "freeStorageOffer": "购买 <bold-green>ente</bold-green> Photos 可享受 10% 优惠",
   "freeStorageOfferDescription": "使用优惠码“AUTH”可享受首年 10% 折扣"

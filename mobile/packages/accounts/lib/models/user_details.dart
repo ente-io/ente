@@ -14,6 +14,7 @@ class UserDetails {
   final FamilyData? familyData;
   final ProfileData? profileData;
   final BonusData? bonusData;
+  final LockerFamilyUsage? lockerFamilyUsage;
 
   const UserDetails(
     this.email,
@@ -25,6 +26,7 @@ class UserDetails {
     this.familyData,
     this.profileData,
     this.bonusData,
+    this.lockerFamilyUsage,
   );
 
   // Locker-specific limits computed client-side based on subscription
@@ -134,6 +136,7 @@ class UserDetails {
       FamilyData.fromMap(map['familyData']),
       ProfileData.fromJson(map['profileData']),
       BonusData.fromJson(map['bonusData']),
+      LockerFamilyUsage.fromJson(map['lockerFamilyUsage']),
     );
   }
 
@@ -148,6 +151,7 @@ class UserDetails {
       'familyData': familyData?.toMap(),
       'profileData': profileData?.toJson(),
       'bonusData': bonusData?.toJson(),
+      'lockerFamilyUsage': lockerFamilyUsage?.toJson(),
     };
   }
 
@@ -284,4 +288,22 @@ class FamilyData {
 
   factory FamilyData.fromJson(String source) =>
       FamilyData.fromMap(json.decode(source));
+}
+
+class LockerFamilyUsage {
+  final int familyFileCount;
+
+  const LockerFamilyUsage(this.familyFileCount);
+
+  factory LockerFamilyUsage.fromJson(Map<String, dynamic>? json) {
+    return LockerFamilyUsage(
+      (json?['familyFileCount'] ?? 0) as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'familyFileCount': familyFileCount,
+    };
+  }
 }

@@ -27,7 +27,6 @@
   "deleteReason4": "Ο λόγος δεν συμπεριλαμβάνεται στη λίστα",
   "sendEmail": "Αποστολή email",
   "deleteRequestSLAText": "Το αίτημά σας θα εξεταστεί εντός 72 ωρών.",
-  "deleteEmailRequest": "Παρακαλούμε στείλτε ένα μήνυμα ηλ. ταχυδρομείου στο <warning>account-deletion@ente.io</warning> από την καταχωρημένη διεύθυνσή σας.",
   "entePhotosPerm": "Το Ente <i>χρειάζεται άδεια</i> για να διατηρεί τις φωτογραφίες σας",
   "ok": "OK",
   "createAccount": "Δημιουργία λογαριασμού",
@@ -59,7 +58,6 @@
   "incorrectRecoveryKeyBody": "Το κλειδί ανάκτησης που εισάγατε είναι εσφαλμένο",
   "forgotPassword": "Ξέχασα τον κωδικό πρόσβασης",
   "enterYourRecoveryKey": "Εισάγετε το κλειδί ανάκτησής σας",
-  "noRecoveryKey": "Δεν έχετε το κλειδί ανάκτησης;",
   "sorry": "Συγνώμη",
   "noRecoveryKeyNoDecryption": "Λόγω της φύσης του πρωτοκόλλου κρυπτογράφησης από άκρο σε άκρο, τα δεδομένα σας δεν μπορούν να αποκρυπτογραφηθούν χωρίς τον κωδικό πρόσβασης ή το κλειδί ανάκτησης",
   "verifyEmail": "Επαλήθευση email",
@@ -74,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -130,7 +128,6 @@
   "verifyPassword": "Επαλήθευση κωδικού πρόσβασης",
   "recoveryKey": "Κλειδί ανάκτησης",
   "recoveryKeyOnForgotPassword": "Εάν ξεχάσετε τον κωδικό πρόσβασής σας, ο μόνος τρόπος για να ανακτήσετε τα δεδομένα σας είναι με αυτό το κλειδί.",
-  "recoveryKeySaveDescription": "Δεν αποθηκεύουμε αυτό το κλειδί, παρακαλώ αποθηκεύστε αυτό το κλειδί 24 λέξεων σε μια ασφαλή τοποθεσία.",
   "doThisLater": "Θα το κάνω αργότερα",
   "saveKey": "Αποθήκευση κλειδιού",
   "recoveryKeyCopiedToClipboard": "Το κλειδί ανάκτησης αντιγράφηκε στο πρόχειρο",
@@ -142,7 +139,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -197,7 +194,7 @@
   "publicLinkEnabled": "Ο δημόσιος σύνδεσμος ενεργοποιήθηκε",
   "shareALink": "Μοιραστείτε έναν σύνδεσμο",
   "sharedAlbumSectionDescription": "Δημιουργία κοινόχρηστων και συνεργατικών άλμπουμ με άλλους χρήστες Ente, συμπεριλαμβανομένων των χρηστών με δωρεάν συνδρομή.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -214,18 +211,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Κωδικός επαλήθευσης",
   "verifyEmailID": "Επαλήθευση {email}",
   "emailNoEnteAccount": "Η διεύθυνση {email} δεν αντιστοιχεί σε λογαριασμό Ente.\n\nΣτείλτε μια πρόσκληση για να μοιραστείτε φωτογραφίες.",
-  "shareMyVerificationID": "Αυτός είναι ο κωδικός επαλήθευσής μου: {verificationID} για το ente.io.",
-  "shareTextConfirmOthersVerificationID": "Γεια σας, θα μπορούσατε να επιβεβαιώσετε ότι αυτό είναι το αναγνωριστικό επαλήθευσής σας για το ente.io: {verificationID}",
   "somethingWentWrong": "Κάτι πήγε στραβά",
   "sendInvite": "Αποστολή πρόσκλησης",
-  "shareTextRecommendUsingEnte": "Κατεβάστε το Ente ώστε να μπορούμε εύκολα να μοιραστούμε φωτογραφίες και βίντεο στην αυθεντική τους ποιότητα\n\nhttps://ente.io",
   "done": "Ολοκληρώθηκε",
   "applyCodeTitle": "Εφαρμογή κωδικού",
   "enterCodeDescription": "Εισάγετε τον κωδικό που παρέχεται από το φίλο σας για να κερδίσετε δωρεάν αποθήκευση και για τους δύο σας",
@@ -233,7 +227,6 @@
   "failedToApplyCode": "Αποτυχία εφαρμογής κωδικού",
   "enterReferralCode": "Εισάγετε τον προωθητικό κωδικό",
   "codeAppliedPageTitle": "Ο κωδικός εφαρμόστηκε",
-  "changeYourReferralCode": "Αλλάξτε τον προωθητικό κωδικό σας",
   "change": "Αλλαγή",
   "unavailableReferralCode": "Λυπούμαστε, αυτός ο κωδικός δεν είναι διαθέσιμος.",
   "codeChangeLimitReached": "Λυπούμαστε, έχετε συμπληρώσει το όριο των αλλαγών κωδικού.",
@@ -247,15 +240,10 @@
   "claimMore": "Κερδίστε περισσότερα!",
   "theyAlsoGetXGb": "Κερδίζουν και εκείνοι {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB κάθε φορά που κάποιος ξεκινά μία συνδρομή επί πληρωμή και εφαρμόζει τον κωδικό σας",
-  "shareTextReferralCode": "Προωθητικό κωδικός Ente: {referralCode} \n\nΕφαρμόστε το στις Ρυθμίσεις → Γενικές → Παραπομπές για να πάρετε {referralStorageInGB} GB δωρεάν μετά την εγγραφή σας για μία συνδρομή επί πληρωμή\n\nhttps://ente.io",
   "claimFreeStorage": "Κερδίστε δωρεάν χώρο αποθήκευσης",
   "inviteYourFriends": "Προσκαλέστε τους φίλους σας",
   "failedToFetchReferralDetails": "Δεν είναι δυνατή η λήψη λεπτομερειών σχετικά με τον προώθησης. Παρακαλώ προσπαθήστε ξανά αργότερα.",
-  "referralStep1": "1. Δώστε αυτόν τον κωδικό στους φίλους σας",
-  "referralStep2": "2. Ξεκινούν μία συνδρομή επί πληρωμή",
-  "referralStep3": "3. Και οι δύο κερδίζετε {storageInGB} GB* δωρεάν",
   "referralsAreCurrentlyPaused": "Οι παραπομπές είναι σε παύση αυτή τη στιγμή",
-  "youCanAtMaxDoubleYourStorage": "* Μπορείτε κατά μέγιστο να διπλασιάσετε τον αποθηκευτικό σας χώρο",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Η οικογένειά σας έχει κερδίσει {storageAmountInGb} GB μέχρι τώρα} false {Έχετε κερδίσει {storageAmountInGb} GB μέχρι τώρα} other {Έχετε κερδίσει {storageAmountInGb} GB μέχρι τώρα!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -400,7 +388,6 @@
   "discover_sunset": "Ηλιοβασιλέματα",
   "discover_hills": "Λόφοι",
   "discover_greenery": "Πράσινο",
-  "mlIndexingDescription": "Έχετε υπόψιν ότι η μηχανική μάθηση θα έχει ως αποτέλεσμα υψηλότερη χρήση δικτύου και μπαταρίας μέχρι όλα τα αντικείμενα να εισαχθούν στο ευρετήριο. Εξετάστε το ενδεχόμενο να χρησιμοποιήσετε την εφαρμογή για υπολογιστές ώστε η ευρετηρίαση να ολοκληρωθεί ταχύτερα, όλα τα αποτελέσματα θα συγχρονιστούν αυτόματα.",
   "loadingModel": "Γίνεται λήψη μοντέλων...",
   "waitingForWifi": "Αναμονή για WiFi...",
   "status": "Κατάσταση",
@@ -414,7 +401,7 @@
   "skip": "Παράλειψη",
   "updatingFolderSelection": "Ενημέρωση επιλογής φακέλων...",
   "itemCount": "{count, plural, one{{count} αντικείμενο} other{{count} αντικείμενα}}",
-  "deleteItemCount": "{count, plural, one {}=1 {Διαγραφή {count} αντικειμένου} other {Διαγραφή {count} αντικειμένων}}",
+  "deleteItemCount": "{count, plural, =1 {Διαγραφή {count} αντικειμένου} other {Διαγραφή {count} αντικειμένων}}",
   "duplicateItemsGroup": "{count} αρχεία, {formattedSize} το καθένα",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -505,8 +492,6 @@
   "familyPlans": "Οικογενειακό πρόγραμμα",
   "referrals": "Συστάσεις",
   "notifications": "Ειδοποιήσεις",
-  "sharedPhotoNotifications": "Νέες κοινόχρηστες φωτογραφίες",
-  "sharedPhotoNotificationsExplanation": "Λάβετε ειδοποιήσεις όταν κάποιος προσθέτει μια φωτογραφία σε ένα κοινόχρηστο άλμπουμ που είστε μέρος του",
   "advanced": "Για προχωρημένους",
   "general": "Γενικά",
   "security": "Ασφάλεια",
@@ -540,7 +525,6 @@
   "darkTheme": "Σκοτεινό",
   "systemTheme": "Προεπιλογή συστήματος",
   "freeTrial": "Δωρεάν δοκιμή",
-  "selectYourPlan": "Επιλέξτε το πλάνο σας",
   "enteSubscriptionPitch": "Το Ente διατηρεί τις αναμνήσεις σας για να είναι πάντα στη διάθεσή σας, ακόμα και αν χάσετε τη συσκευή σας.",
   "enteSubscriptionShareWithFamily": "Μπορείτε να προσθέσετε και την οικογένειά σας στο πλάνο σας.",
   "currentUsageIs": "Η τρέχουσα χρήση σας είναι ",
@@ -552,7 +536,6 @@
     "type": "text"
   },
   "couldNotUpdateSubscription": "Αδυναμία ενημέρωσης συνδρομής",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Παρακαλούμε επικοινωνήστε με το support@ente.io και θα χαρούμε να βοηθήσουμε!",
   "paymentFailed": "Η πληρωμή απέτυχε",
   "paymentFailedTalkToProvider": "Παρακαλούμε επικοινωνήστε με την υποστήριξη του {providerName} εάν έχετε χρεωθεί",
   "@paymentFailedTalkToProvider": {
@@ -583,19 +566,8 @@
   "grantFullAccessPrompt": "Παρακαλούμε επιτρέψτε την πρόσβαση σε όλες τις φωτογραφίες από τις Ρυθμίσεις της συσκευής σας",
   "allowPermTitle": "Να επιτρέπεται η πρόσβαση στις φωτογραφίες",
   "allowPermBody": "Παρακαλούμε επιτρέψτε την πρόσβαση στις φωτογραφίες σας από τις Ρυθμίσεις, ώστε το Ente να μπορεί να εμφανίζει και να δημιουργεί αντίγραφα ασφαλείας της βιβλιοθήκης σας.",
-  "openSettings": "Άνοιγμα Ρυθμίσεων",
   "selectMorePhotos": "Επιλογή περισσότερων φωτογραφιών",
   "existingUser": "Υπάρχων χρήστης",
-  "privateBackups": "Ιδιωτικά αντίγραφα ασφαλείας",
-  "forYourMemories": "για τις αναμνήσεις",
-  "endtoendEncryptedByDefault": "Από προεπιλογή κρυπτογραφημένο από άκρο σε άκρο",
-  "safelyStored": "Ασφαλής αποθήκευση",
-  "atAFalloutShelter": "σε καταφύγιο",
-  "designedToOutlive": "Σχεδιάστηκε για να διαρκέσει για πάντα",
-  "available": "Διαθέσιμο",
-  "everywhere": "παντού",
-  "androidIosWebDesktop": "Android, iOS, Ίντερνετ, Υπολογιστές",
-  "mobileWebDesktop": "Κινητά, Ίντερνετ, Υπολογιστές",
   "newToEnte": "Νέος/α στο Ente",
   "pleaseLoginAgain": "Παρακαλούμε συνδεθείτε ξανά",
   "autoLogoutMessage": "Έχετε αποσυνδεθεί λόγω τεχνικής δυσλειτουργίας. Ζητούμε συγνώμη για την ταλαιπωρία.",
@@ -612,7 +584,6 @@
   "couldNotBackUpTryLater": "Δεν ήταν δυνατή η δημιουργία αντιγράφων ασφαλείας.\nΘα προσπαθήσουμε ξανά αργότερα.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Το Ente μπορεί να κρυπτογραφεί και να διατηρεί αρχεία μόνο αν του δώσετε πρόσβαση σε αυτά",
   "pleaseGrantPermissions": "Παρακαλούμε παραχωρήστε τα δικαιώματα",
-  "grantPermission": "Παραχώρηση δικαιωμάτων",
   "privateSharing": "Ιδιωτική κοινή χρήση",
   "shareOnlyWithThePeopleYouWant": "Μοιραστείτε μόνο με τους ανθρώπους που θέλετε",
   "usePublicLinksForPeopleNotOnEnte": "Χρησιμοποιήστε δημόσιους συνδέσμους για όσους δεν έχουν Ente",
@@ -680,11 +651,11 @@
   "share": "Κοινοποίηση",
   "unhideToAlbum": "Επανεμφάνιση στο άλμπουμ",
   "restoreToAlbum": "Επαναφορά στο άλμπουμ",
-  "moveItem": "{count, plural, one {}=1 {Μετακίνηση αντικειμένου} other {Μετακίνηση αντικειμένων}}",
+  "moveItem": "{count, plural, =1 {Μετακίνηση αντικειμένου} other {Μετακίνηση αντικειμένων}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {}=1 {Προσθήκη αντικειμένου} other {Προσθήκη αντικειμένων}}",
+  "addItem": "{count, plural, =1 {Προσθήκη αντικειμένου} other {Προσθήκη αντικειμένων}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -695,7 +666,7 @@
   "enterAlbumName": "Εισάγετε όνομα άλμπουμ",
   "askYourLovedOnesToShare": "Ζητήστε από τα αγαπημένα σας πρόσωπα να συνεισφέρουν",
   "invite": "Πρόσκληση",
-  "trashDaysLeft": "{count, plural, one {}=0 {Σύντομα} =1 {1 ημέρα} other {{count} ημέρες}}",
+  "trashDaysLeft": "{count, plural, =0 {Σύντομα} =1 {1 ημέρα} other {{count} ημέρες}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -732,7 +703,7 @@
   "authToViewYourMemories": "Παρακαλώ πραγματοποιήστε έλεγχο ταυτότητας για να δείτε τις αναμνήσεις σας",
   "unlock": "Ξεκλείδωμα",
   "freeUpSpace": "Ελευθερώστε χώρο",
-  "freeUpSpaceSaving": "{count, plural, one {}=1 {Μπορεί να διαγραφεί από τη συσκευή για να ελευθερώσει {formattedSize}} other {Μπορούν να διαγραφούν από τη συσκευή για να ελευθερώσουν {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Μπορεί να διαγραφεί από τη συσκευή για να ελευθερώσει {formattedSize}} other {Μπορούν να διαγραφούν από τη συσκευή για να ελευθερώσουν {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 αρχείο} other {{formattedNumber} αρχεία}} σε αυτό το άλμπουμ έχουν αντίγραφα ασφαλείας",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -766,7 +737,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Μπορείτε να {count, plural, one {}=1 {το} other {τα}} βρείτε στο Ente όσο έχετε ενεργή συνδρομή",
+  "freeUpAccessPostDelete": "Μπορείτε να {count, plural, =1 {το} other {τα}} βρείτε στο Ente όσο έχετε ενεργή συνδρομή",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -807,7 +778,6 @@
   "fileTypesAndNames": "Τύποι και ονόματα αρχείων",
   "location": "Τοποθεσία",
   "moments": "Στιγμές",
-  "searchFaceEmptySection": "Τα άτομα θα εμφανιστούν εδώ μόλις ολοκληρωθεί η δημιουργία ευρετηρίου",
   "searchDatesEmptySection": "Αναζήτηση με ημερομηνία, μήνα ή έτος",
   "searchLocationEmptySection": "Ομαδοποίηση φωτογραφιών που τραβήχθηκαν σε συγκεκριμένη ακτίνα από μία φωτογραφία",
   "searchPeopleEmptySection": "Προσκαλέστε ανθρώπους και δείτε όλες τις φωτογραφίες που θα μοιραστούν εδώ",
@@ -863,7 +833,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} ελεύθερα",
-  "appVersion": "Έκδοση: {versionValue}",
   "verifyIDLabel": "Επαλήθευση",
   "fileInfoAddDescHint": "Προσθήκη περιγραφής...",
   "editLocationTagTitle": "Επεξεργασία τοποθεσίας",
@@ -872,8 +841,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Ορισμός ακτίνας",
-  "familyPlanPortalTitle": "Οικογένεια",
-  "familyPlanOverview": "Προσθέστε 5 μέλη της οικογένειας στη συνδρομή σας χωρίς να πληρώσετε επιπλέον.\n\nΚάθε μέλος έχει τον δικό του ιδιωτικό χώρο και δεν μπορεί να δει τα αρχεία των άλλων εκτός αν του κοινοποιηθούν.\n\nΤα οικογενειακά σχέδια είναι διαθέσιμα σε χρήστες που έχουν συνδρομή επί πληρωμή στο Ente.\n\nΕγγραφείτε τώρα για να ξεκινήσετε!",
   "androidBiometricHint": "Επαλήθευση ταυτότητας",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -980,8 +947,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Εύρεση ατόμων γρήγορα με το όνομά τους",
-  "addViewers": "{count, plural, one {}=0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
-  "addCollaborators": "{count, plural, one {}=0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
+  "addViewers": "{count, plural, =0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
+  "addCollaborators": "{count, plural, =0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Πατήστε παρατεταμένα ένα email για να επιβεβαιώσετε την κρυπτογράφηση από άκρη σε άκρη.",
   "developerSettingsWarning": "Είστε σίγουροι ότι θέλετε να τροποποιήσετε τις ρυθμίσεις προγραμματιστή;",
   "developerSettings": "Ρυθμίσεις προγραμματιστή",
@@ -1042,7 +1009,6 @@
   },
   "extraPhotosFound": "Βρέθηκαν επιπλέον φωτογραφίες",
   "configuration": "Παραμετροποίηση",
-  "localIndexing": "Τοπική δημιουργία ευρετηρίων",
   "processed": "Έγινε επεξεργασία",
   "resetPerson": "Αφαίρεση",
   "areYouSureYouWantToResetThisPerson": "Θέλετε σίγουρα να επαναφέρετε αυτό το άτομο;",
@@ -1050,7 +1016,6 @@
   "legacyPageDesc2": "Οι αξιόπιστες επαφές μπορούν να ξεκινήσουν ανάκτηση του λογαριασμού και, αν δεν αποκλειστούν εντός 30 ημερών, να επαναφέρουν τον κωδικό πρόσβασής σας και να αποκτήσουν πρόσβαση στο λογαριασμό σας.",
   "legacyAccounts": "Κληρονομιά λογαριασμού",
   "trustedContacts": "Έμπιστες επαφές",
-  "addTrustedContact": "Προσθήκη Έμπιστης Επαφής",
   "removeInvite": "Ανάκληση πρόσκλησης",
   "recoveryWarning": "Μια έμπιστη επαφή προσπαθεί να αποκτήσει πρόσβαση στο λογαριασμό σας",
   "rejectRecovery": "Απόρριψη ανάκτησης",
@@ -1175,5 +1140,6 @@
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
   "videoStreaming": "Βίντεο με υποστήριξη μετάδοσης",
-  "processingVideos": "Επεξεργασία βίντεο"
+  "processingVideos": "Επεξεργασία βίντεο",
+  "grantPermission": "Παραχώρηση δικαιωμάτων"
 }

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/family"
 	"github.com/ente-io/museum/pkg/repo"
+	contactrepo "github.com/ente-io/museum/pkg/repo/contact"
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -34,32 +36,34 @@ import (
 
 // UserController exposes request handlers for all user related requests
 type UserController struct {
-	UserRepo               *repo.UserRepository
-	TwoFactorRecoveryRepo  *two_factor_recovery.Repository
-	UsageRepo              *repo.UsageRepository
-	UserAuthRepo           *repo.UserAuthRepository
-	TwoFactorRepo          *repo.TwoFactorRepository
-	PasskeyRepo            *passkey.Repository
-	StorageBonusRepo       *storageBonusRepo.Repository
-	FileRepo               *repo.FileRepository
-	CollectionRepo         *repo.CollectionRepository
-	DataCleanupRepo        *datacleanup.Repository
-	CollectionCtrl         *collections.CollectionController
-	BillingRepo            *repo.BillingRepository
-	BillingController      *controller.BillingController
-	FamilyController       *family.Controller
-	DiscordController      *discord.DiscordController
-	MailingListsController *controller.MailingListsController
-	PushController         *controller.PushController
-	HashingKey             []byte
-	SecretEncryptionKey    []byte
-	JwtSecret              []byte
-	Cache                  *cache.Cache // refers to the auth token cache
-	HardCodedOTT           HardCodedOTT
-	UserCache              *cache2.UserCache
-	UserCacheController    *usercache.Controller
-	SRPLimiter             *limiter.Limiter
-	OTTLimiter             *limiter.Limiter
+	UserRepo                *repo.UserRepository
+	TwoFactorRecoveryRepo   *two_factor_recovery.Repository
+	UsageRepo               *repo.UsageRepository
+	UserAuthRepo            *repo.UserAuthRepository
+	TwoFactorRepo           *repo.TwoFactorRepository
+	PasskeyRepo             *passkey.Repository
+	StorageBonusRepo        *storageBonusRepo.Repository
+	FileRepo                *repo.FileRepository
+	CollectionRepo          *repo.CollectionRepository
+	DataCleanupRepo         *datacleanup.Repository
+	NotificationHistoryRepo *repo.NotificationHistoryRepository
+	CollectionCtrl          *collections.CollectionController
+	BillingRepo             *repo.BillingRepository
+	BillingController       *controller.BillingController
+	FamilyController        *family.Controller
+	DiscordController       *discord.DiscordController
+	MailingListsController  *controller.MailingListsController
+	PushController          *controller.PushController
+	ContactRepo             *contactrepo.Repository
+	HashingKey              []byte
+	SecretEncryptionKey     []byte
+	JwtSecret               []byte
+	Cache                   *cache.Cache // refers to the auth token cache
+	HardCodedOTT            HardCodedOTT
+	UserCache               *cache2.UserCache
+	UserCacheController     *usercache.Controller
+	SRPLimiter              *limiter.Limiter
+	OTTLimiter              *limiter.Limiter
 }
 
 const (
@@ -112,6 +116,7 @@ func NewUserController(
 	collectionController *collections.CollectionController,
 	collectionRepo *repo.CollectionRepository,
 	dataCleanupRepository *datacleanup.Repository,
+	notificationHistoryRepo *repo.NotificationHistoryRepository,
 	billingRepo *repo.BillingRepository,
 	secretEncryptionKeyBytes []byte,
 	hashingKeyBytes []byte,
@@ -124,36 +129,39 @@ func NewUserController(
 	pushController *controller.PushController,
 	userCache *cache2.UserCache,
 	userCacheController *usercache.Controller,
+	contactRepo *contactrepo.Repository,
 ) *UserController {
 	srpLimiter := util.NewRateLimiter("100-H")
 	ottLimiter := util.NewRateLimiter("100-H")
 	return &UserController{
-		UserRepo:               userRepo,
-		UsageRepo:              usageRepo,
-		TwoFactorRecoveryRepo:  twoFactorRecoveryRepo,
-		UserAuthRepo:           userAuthRepo,
-		StorageBonusRepo:       storageBonusRepo,
-		TwoFactorRepo:          twoFactorRepo,
-		PasskeyRepo:            passkeyRepo,
-		FileRepo:               fileRepo,
-		CollectionCtrl:         collectionController,
-		CollectionRepo:         collectionRepo,
-		DataCleanupRepo:        dataCleanupRepository,
-		BillingRepo:            billingRepo,
-		SecretEncryptionKey:    secretEncryptionKeyBytes,
-		HashingKey:             hashingKeyBytes,
-		Cache:                  authCache,
-		JwtSecret:              jwtSecretBytes,
-		BillingController:      billingController,
-		FamilyController:       familyController,
-		DiscordController:      discordController,
-		MailingListsController: mailingListsController,
-		PushController:         pushController,
-		HardCodedOTT:           ReadHardCodedOTTFromConfig(),
-		UserCache:              userCache,
-		UserCacheController:    userCacheController,
-		SRPLimiter:             srpLimiter,
-		OTTLimiter:             ottLimiter,
+		UserRepo:                userRepo,
+		UsageRepo:               usageRepo,
+		TwoFactorRecoveryRepo:   twoFactorRecoveryRepo,
+		UserAuthRepo:            userAuthRepo,
+		StorageBonusRepo:        storageBonusRepo,
+		TwoFactorRepo:           twoFactorRepo,
+		PasskeyRepo:             passkeyRepo,
+		FileRepo:                fileRepo,
+		CollectionCtrl:          collectionController,
+		CollectionRepo:          collectionRepo,
+		DataCleanupRepo:         dataCleanupRepository,
+		NotificationHistoryRepo: notificationHistoryRepo,
+		BillingRepo:             billingRepo,
+		SecretEncryptionKey:     secretEncryptionKeyBytes,
+		HashingKey:              hashingKeyBytes,
+		Cache:                   authCache,
+		JwtSecret:               jwtSecretBytes,
+		BillingController:       billingController,
+		FamilyController:        familyController,
+		DiscordController:       discordController,
+		MailingListsController:  mailingListsController,
+		PushController:          pushController,
+		ContactRepo:             contactRepo,
+		HardCodedOTT:            ReadHardCodedOTTFromConfig(),
+		UserCache:               userCache,
+		UserCacheController:     userCacheController,
+		SRPLimiter:              srpLimiter,
+		OTTLimiter:              ottLimiter,
 	}
 }
 
@@ -235,17 +243,41 @@ func (c *UserController) GetTwoFactorStatus(userID int64) (bool, error) {
 }
 
 func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, logger *logrus.Entry) (*ente.DeleteAccountResponse, error) {
+	return c.handleAccountDeletion(ctx, userID, logger, true)
+}
+
+func (c *UserController) HandleAutomatedAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) (*ente.DeleteAccountResponse, error) {
+	return c.handleAccountDeletion(ctx, userID, logger, false)
+}
+
+func (c *UserController) ResetUserAccess(ctx context.Context, userID int64, logger *logrus.Entry) error {
+	logger.Info("remove locker and photos tokens for user")
+	if err := c.RemoveTokensForApps(userID, []ente.App{ente.Locker, ente.Photos}); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	if err := c.CollectionCtrl.ResetUserSharingAccess(ctx, userID, logger); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	if err := c.FamilyController.ResetUserFamilyAccess(ctx, userID, logger); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+func (c *UserController) handleAccountDeletion(
+	ctx context.Context,
+	userID int64,
+	logger *logrus.Entry,
+	sendDeletionEmail bool,
+) (*ente.DeleteAccountResponse, error) {
 	isSubscriptionCancelled, err := c.BillingController.HandleAccountDeletion(ctx, userID, logger)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	err = c.CollectionCtrl.HandleAccountDeletion(ctx, userID, logger)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-
-	err = c.FamilyController.HandleAccountDeletion(ctx, userID, logger)
+	err = c.ResetUserAccess(ctx, userID, logger)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -253,8 +285,8 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 	logger.Info("remove push tokens for user")
 	c.PushController.RemoveTokensForUser(userID)
 
-	logger.Info("remove active tokens for user")
-	err = c.UserAuthRepo.RemoveAllTokens(userID)
+	logger.Info("remove remaining active tokens for user")
+	err = c.RemoveAllTokens(userID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -267,7 +299,12 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 	email := user.Email
 	// See also: Do not block on mailing list errors
 	go func() {
-		_ = c.MailingListsController.Unsubscribe(email)
+		if err := c.MailingListsController.Unsubscribe(email); err != nil {
+			logger.WithError(err).WithFields(logrus.Fields{
+				"user_id": userID,
+				"email":   email,
+			}).Error("mailing list unsubscribe failed")
+		}
 	}()
 
 	logger.Info("mark user as deleted")
@@ -282,7 +319,9 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
+	if sendDeletionEmail {
+		go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
+	}
 
 	return &ente.DeleteAccountResponse{
 		IsSubscriptionCancelled: isSubscriptionCancelled,
@@ -309,7 +348,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 
 	templateData := make(map[string]interface{})
 	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.io", recoverToken)
-	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.io",
+	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.com",
 		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to send the account deletion email to %s", userEmail)
@@ -367,7 +406,7 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 		}
 		return stacktrace.Propagate(keyErr, "keyAttributes missing? Account can not be recovered")
 	}
-	email := strings.ToLower(req.EmailID)
+	email := email.NormalizeEmail(req.EmailID)
 	encryptedEmail, err := crypto.Encrypt(email, c.SecretEncryptionKey)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -380,6 +419,7 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to update email")
 	}
+	c.touchContactsAfterEmailUpdate(ctx, req.UserID)
 	err = c.DataCleanupRepo.RemoveScheduledDelete(ctx, req.UserID)
 	if err != nil {
 		logrus.WithError(err).Error("failed to remove scheduled delete")
@@ -426,7 +466,12 @@ func (c *UserController) createUser(email string, source *string) (int64, ente.S
 	// perform these actions async, and ignore errors that happen with them (a
 	// notification will be sent to Discord for those).
 	go func() {
-		_ = c.MailingListsController.Subscribe(email)
+		if err := c.MailingListsController.Subscribe(email); err != nil {
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"user_id": userID,
+				"email":   email,
+			}).Error("mailing list subscribe failed")
+		}
 	}()
 	return userID, subscription, nil
 }

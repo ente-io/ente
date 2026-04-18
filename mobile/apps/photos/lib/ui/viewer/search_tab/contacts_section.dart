@@ -1,24 +1,20 @@
 import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/sharing/user_avator_widget.dart";
-import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/ui/viewer/search/contact_avatar_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class ContactsSection extends StatefulWidget {
   final List<GenericSearchResult> contactSearchResults;
@@ -153,20 +149,15 @@ class ContactRecommendation extends StatefulWidget {
 }
 
 class _ContactRecommendationState extends State<ContactRecommendation> {
-  bool _canUsePersonFaceWidget = true;
-  late String? _personID;
-  final _logger = Logger("_ContactRecommendationState");
-
-  @override
-  void initState() {
-    super.initState();
-    _personID = widget.contactSearchResult.params[kPersonParamID];
-    _canUsePersonFaceWidget = _personID != null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final enteTextTheme = getEnteTextTheme(context);
+    final personId =
+        widget.contactSearchResult.params[kPersonParamID] as String?;
+    final contactUserId =
+        widget.contactSearchResult.params[kContactUserId] as int?;
+    final contactEmail =
+        widget.contactSearchResult.params[kContactEmail] as String;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
@@ -198,26 +189,12 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
                   child: SizedBox(
                     width: 67.75,
                     height: 67.75,
-                    child: _canUsePersonFaceWidget
-                        ? PersonFaceWidget(
-                            personId: _personID,
-                            onErrorCallback: () {
-                              if (mounted) {
-                                _logger.severe(
-                                  "Failed to load face for person with ID: $_personID",
-                                );
-                                setState(() {
-                                  _canUsePersonFaceWidget = false;
-                                });
-                              }
-                            },
-                          )
-                        : FirstLetterUserAvatar(
-                            User(
-                              email: widget
-                                  .contactSearchResult.params[kContactEmail],
-                            ),
-                          ),
+                    child: ContactAvatarWidget(
+                      contactUserId: contactUserId,
+                      email: contactEmail,
+                      personId: personId,
+                      size: 67.75,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10.5),

@@ -12,6 +12,7 @@
   "featureOpenSource": "Open source e\nverificato da esperti di sicurezza",
   "signUp": "Iscriviti",
   "onBoardingGetStarted": "Per iniziare",
+  "setupFirstAccount": "Configura il tuo primo account",
   "allTabEmptyHint": "Non c'è ancora nulla qui. Tocca + per aggiungere un codice o apri il Cestino per recuperarne uno.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -120,7 +121,9 @@
   "importAegisGuide": "Usa l'opzione \"Esporta la cassaforte\" nelle impostazioni di Aegis.\n\nSe la tua cassaforte è criptata, dovrai inserire la password della cassaforte per decriptarla.",
   "import2FasGuide": "Utilizza l'opzione \"Impostazioni->Backup -Export\" in 2FAS.\n\nSe il backup è crittografato, è necessario inserire la password per decriptare il backup",
   "importLastpassGuide": "Usa l'opzione \"Trasferisci account\" all'interno delle impostazioni di Lastpass Authenticator e premi \"Esporta account su file\". Importa il JSON scaricato.",
-  "importProtonAuthGuide": "Usa l'opzione \"Esporta\" nelle impostazioni di Proton Authenticator per esportare i tuoi codici.",
+  "importProtonAuthGuide": "Utilizza l'opzione “Esporta” nelle impostazioni di Proton Authenticator per esportare i tuoi codici.\n\nSe il file esportato è protetto da password, dovrai inserire la password per decriptarlo.",
+  "invalidProtonExportTitle": "Esportazione Proton non valida",
+  "invalidProtonExportMessage": "Il file selezionato non è un'esportazione valida di Proton Authenticator.",
   "exportCodes": "Esporta codici",
   "importLabel": "Importa",
   "importInstruction": "Per favore seleziona un file contenente una lista dei tuoi codici nel seguente formato",
@@ -330,7 +333,6 @@
     }
   },
   "sorry": "Scusa",
-  "importFailureDesc": "Impossibile analizzare il file selezionato.\nPer favore scrivi a support@ente.io se hai bisogno di aiuto!",
   "pendingSyncs": "Attenzione",
   "pendingSyncsWarningBody": "Non hai effettuato il backup di alcuni codici.\n\nPer favore assicurati di effettuare il backup di questi codici prima di disconnetterti.",
   "checkInboxAndSpamFolder": "Per favore, controlla la tua casella di posta (e lo spam) per completare la verifica",
@@ -343,7 +345,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -524,7 +526,7 @@
   "dropReviewAndroid": "Lascia una recensione sul Play Store",
   "supportEnte": "Supporta <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Dacci una stella su Github",
-  "free5GB": "5GB gratis su <bold-green>ente</bold-green> Foto",
+  "free10GB": "10 GB gratuiti su <bold-green>ente</bold-green> Foto",
   "loginWithAuthAccount": "Accedi con il tuo account Auth",
   "freeStorageOffer": "10% di sconto su <bold-green>ente</bold-green> Foto",
   "freeStorageOfferDescription": "Utilizzare il codice \"AUTH\" per ottenere il 10% di sconto al primo anno",
@@ -578,7 +580,7 @@
   "addNew": "Aggiungi nuovo",
   "selected": "selezionato",
   "moveMultipleToTrashMessage": "Sei sicuro di voler spostare {count} elementi nel cestino?",
-  "nSelected": "{count, plural, one {}=1{1 selezionato} other{{count} selezionati}}",
+  "nSelected": "{count, plural, one {{count} selezionato} other{{count} selezionati}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +591,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {}=1{1 elemento fissato} other{{count} elementi fissati}}",
+  "pinnedCount": "{count, plural, one {{count} elemento fissato} other{{count} elementi fissati}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +602,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 elemento sganciato} other{{count} elementi sganciati}}",
+  "unpinnedCount": "{count, plural, one{{count} elemento sganciato} other{{count} elementi sganciati}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {
@@ -620,5 +622,10 @@
   "chooseIcon": "Scegli icona",
   "customOrder": "Ordine personalizzato",
   "selectAnOption": "Seleziona un'opzione",
-  "todaysLogs": "I registri di oggi"
+  "todaysLogs": "I registri di oggi",
+  "appIcon": "Icona dell'app",
+  "importAndOTPGuide": "Esporta il backup da andOTP utilizzando l'opzione \"Backup\" nelle Impostazioni.\n\nSe il backup è crittografato, dovrai inserire la password di backup per decriptarlo.",
+  "enterPasswordToDecryptAndOTP": "Inserisci la password per decriptare il backup andOTP",
+  "failedToDecryptAndOTPBackup": "Impossibile decriptare il backup andOTP",
+  "notSupportedForHOTP": "Non supportato per HOTP"
 }

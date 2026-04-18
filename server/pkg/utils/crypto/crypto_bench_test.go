@@ -7,11 +7,6 @@ import (
 	"github.com/ente-io/museum/ente"
 )
 
-func init() {
-	// Initialize libsodium for benchmarks
-	InitSodiumForTest()
-}
-
 // Benchmark encryption operations
 
 func BenchmarkEncryptLibsodium(b *testing.B) {
@@ -38,10 +33,10 @@ func benchmarkEncrypt(b *testing.B, encryptFunc func(string, []byte) (ente.Encry
 		b.Run(size.name, func(b *testing.B) {
 			data := generateLargeText(size.size)
 			key := generateTestKey()
-			
+
 			b.SetBytes(int64(size.size))
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := encryptFunc(data, key)
 				if err != nil {
@@ -62,10 +57,10 @@ func BenchmarkDecryptNative(b *testing.B) {
 	benchmarkDecrypt(b, EncryptNative, DecryptNative)
 }
 
-func benchmarkDecrypt(b *testing.B, 
+func benchmarkDecrypt(b *testing.B,
 	encryptFunc func(string, []byte) (ente.EncryptionResult, error),
 	decryptFunc func([]byte, []byte, []byte) (string, error)) {
-	
+
 	sizes := []struct {
 		name string
 		size int
@@ -81,19 +76,19 @@ func benchmarkDecrypt(b *testing.B,
 		b.Run(size.name, func(b *testing.B) {
 			data := generateLargeText(size.size)
 			key := generateTestKey()
-			
+
 			// Encrypt once for benchmark
 			encResult, err := encryptFunc(data, key)
 			if err != nil {
 				b.Fatal(err)
 			}
-			
+
 			cipher := encResult.Cipher
 			nonce := encResult.Nonce
-			
+
 			b.SetBytes(int64(size.size))
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := decryptFunc(cipher, key, nonce)
 				if err != nil {
@@ -129,10 +124,10 @@ func benchmarkHash(b *testing.B, hashFunc func(string, []byte) (string, error)) 
 	for _, size := range sizes {
 		b.Run(size.name, func(b *testing.B) {
 			data := generateLargeText(size.size)
-			
+
 			b.SetBytes(int64(size.size))
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := hashFunc(data, nil)
 				if err != nil {
@@ -160,7 +155,7 @@ func benchmarkGetEncryptedToken(b *testing.B, tokenFunc func(string, string) (st
 		publicKey[i] = byte(i * 3)
 	}
 	publicKeyB64 := base64.StdEncoding.EncodeToString(publicKey)
-	
+
 	sizes := []struct {
 		name string
 		size int
@@ -174,10 +169,10 @@ func benchmarkGetEncryptedToken(b *testing.B, tokenFunc func(string, string) (st
 		b.Run(size.name, func(b *testing.B) {
 			tokenData := generateLargeText(size.size)
 			token := base64.URLEncoding.EncodeToString([]byte(tokenData))
-			
+
 			b.SetBytes(int64(size.size))
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := tokenFunc(token, publicKeyB64)
 				if err != nil {
@@ -201,7 +196,7 @@ func BenchmarkFullCycleNative(b *testing.B) {
 func benchmarkFullCycle(b *testing.B,
 	encryptFunc func(string, []byte) (ente.EncryptionResult, error),
 	decryptFunc func([]byte, []byte, []byte) (string, error)) {
-	
+
 	sizes := []struct {
 		name string
 		size int
@@ -216,19 +211,19 @@ func benchmarkFullCycle(b *testing.B,
 		b.Run(size.name, func(b *testing.B) {
 			data := generateLargeText(size.size)
 			key := generateTestKey()
-			
+
 			b.SetBytes(int64(size.size * 2)) // Count both encrypt and decrypt
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				encResult, err := encryptFunc(data, key)
 				if err != nil {
 					b.Fatal(err)
 				}
-				
+
 				cipher := encResult.Cipher
 				nonce := encResult.Nonce
-				
+
 				_, err = decryptFunc(cipher, key, nonce)
 				if err != nil {
 					b.Fatal(err)
@@ -244,7 +239,7 @@ func BenchmarkMemoryAllocLibsodium(b *testing.B) {
 	b.ReportAllocs()
 	data := generateLargeText(1024)
 	key := generateTestKey()
-	
+
 	for i := 0; i < b.N; i++ {
 		_, _ = Encrypt(data, key)
 	}
@@ -254,7 +249,7 @@ func BenchmarkMemoryAllocNative(b *testing.B) {
 	b.ReportAllocs()
 	data := generateLargeText(1024)
 	key := generateTestKey()
-	
+
 	for i := 0; i < b.N; i++ {
 		_, _ = EncryptNative(data, key)
 	}
@@ -265,7 +260,7 @@ func BenchmarkMemoryAllocNative(b *testing.B) {
 func BenchmarkParallelEncryptLibsodium(b *testing.B) {
 	data := generateLargeText(1024)
 	key := generateTestKey()
-	
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			_, _ = Encrypt(data, key)
@@ -276,11 +271,10 @@ func BenchmarkParallelEncryptLibsodium(b *testing.B) {
 func BenchmarkParallelEncryptNative(b *testing.B) {
 	data := generateLargeText(1024)
 	key := generateTestKey()
-	
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			_, _ = EncryptNative(data, key)
 		}
 	})
 }
-

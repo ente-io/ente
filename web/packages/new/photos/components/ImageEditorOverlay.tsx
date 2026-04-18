@@ -711,11 +711,6 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                         onClick={saveCopyToEnte}
                     />
                 </RowButtonGroup>
-                {!transformationPerformed && !coloursAdjusted && (
-                    <RowButtonGroupTitle>
-                        {t("photo_edit_required_to_save")}
-                    </RowButtonGroupTitle>
-                )}
             </SidebarDrawer>
         </Backdrop>
     );
@@ -724,9 +719,9 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
 const confirmEditorCloseDialogAttributes = (
     onConfirm: () => void,
 ): MiniDialogAttributes => ({
-    title: t("confirm_editor_close"),
-    message: t("confirm_editor_close_message"),
-    continue: { text: t("close"), color: "critical", action: onConfirm },
+    title: t("discard_changes"),
+    message: t("discard_changes_message"),
+    continue: { text: t("discard"), color: "critical", action: onConfirm },
 });
 
 /**

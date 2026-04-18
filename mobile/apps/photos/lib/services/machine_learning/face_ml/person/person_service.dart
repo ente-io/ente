@@ -3,23 +3,32 @@ import "dart:convert";
 import "dart:developer";
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/stop_watch.dart";
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
+typedef ManualPersonAssignmentResult = ({
+  PersonEntity person,
+  List<int> addedFileIds,
+  List<int> alreadyAssignedFileIds,
+});
+
 class PersonService {
+  static const Object _attributeNotProvided = Object();
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
@@ -31,6 +40,8 @@ class PersonService {
   static PersonService? _instance;
   static const kPersonIDKey = "person_id";
   static const kNameKey = "name";
+  static const double kDefaultAutoMergeThreshold = 0.24;
+  static double autoMergeThreshold = kDefaultAutoMergeThreshold;
 
   Future<List<PersonEntity>>? _cachedPersonsFuture;
   int _lastCacheRefreshTime = 0;
@@ -46,13 +57,17 @@ class PersonService {
 
   late Logger logger = Logger("PersonService");
 
-  static Future<void> init(
+  static void init(
     EntityService entityService,
     MLDataDB faceMLDataDB,
     SharedPreferences prefs,
-  ) async {
+  ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    await _instance!.refreshPersonCache();
+    final settings = LocalSettings(prefs);
+    final savedAutoMerge = settings.autoMergeThresholdOverride;
+    if (savedAutoMerge != null) {
+      autoMergeThreshold = savedAutoMerge.clamp(0.0, 1.0);
+    }
   }
 
   Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
@@ -64,10 +79,21 @@ class PersonService {
     _lastCacheRefreshTime = 0;
   }
 
-  Future<void> refreshPersonCache() async {
+  Future<void> refreshPersonCache({
+    bool notifyListeners = false,
+    String source = "",
+  }) async {
     _lastCacheRefreshTime = 0;
     // wait to ensure cache is refreshed
     final _ = await getPersons();
+    if (notifyListeners) {
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.syncDone,
+          source: source,
+        ),
+      );
+    }
   }
 
   Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
@@ -173,8 +199,44 @@ class PersonService {
       }
       final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
-      if (_shouldUpdateRemotePerson(person.data, dbPersonCluster)) {
-        final personData = person.data;
+      final personData = person.data;
+      final bool shouldUpdateAssigned =
+          _shouldUpdateRemotePerson(personData, dbPersonCluster);
+
+      bool shouldUpdateManualAssignments = false;
+      List<int>? updatedManualAssignments;
+      if (personData.manuallyAssigned.isNotEmpty) {
+        final manualFileIDs = personData.manuallyAssigned;
+        final manualFileIDSet = manualFileIDs.toSet();
+        final coveredManualFileIDs = <int>{};
+
+        outerLoop:
+        for (final faceIDs in dbPersonCluster.values) {
+          for (final faceID in faceIDs) {
+            final fileID = tryGetFileIdFromFaceId(faceID);
+            if (fileID == null || !manualFileIDSet.contains(fileID)) {
+              continue;
+            }
+            coveredManualFileIDs.add(fileID);
+            if (coveredManualFileIDs.length == manualFileIDSet.length) {
+              break outerLoop;
+            }
+          }
+        }
+
+        shouldUpdateManualAssignments = coveredManualFileIDs.isNotEmpty;
+        if (shouldUpdateManualAssignments) {
+          updatedManualAssignments = manualFileIDs
+              .where((fileID) => !coveredManualFileIDs.contains(fileID))
+              .toList();
+        }
+      }
+
+      if (!shouldUpdateAssigned && !shouldUpdateManualAssignments) {
+        continue;
+      }
+
+      if (shouldUpdateAssigned) {
         personData.assigned = dbPersonCluster.entries
             .map(
               (e) => ClusterInfo(
@@ -183,10 +245,15 @@ class PersonService {
               ),
             )
             .toList();
-        _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
-            .ignore();
-        personData.logStats();
       }
+
+      if (shouldUpdateManualAssignments) {
+        personData.manuallyAssigned = updatedManualAssignments ?? <int>[];
+      }
+
+      _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
+          .ignore();
+      personData.logStats();
     }
     if (orphanMappingsRemoved > 0) {
       logger.warning(
@@ -381,6 +448,10 @@ class PersonService {
   Future<bool> fetchRemoteClusterFeedback({
     bool skipClusterUpdateIfNoChange = true,
   }) async {
+    if (isOfflineMode) {
+      logger.finest("Skip fetching remote clusters in offline mode");
+      return false;
+    }
     final int changedEntities =
         await entityService.syncEntity(EntityType.cgroup);
     final bool changed = changedEntities > 0;
@@ -538,22 +609,23 @@ class PersonService {
     bool? isPinned,
     bool? hideFromMemories,
     int? version,
-    String? birthDate,
+    Object? birthDate = _attributeNotProvided,
     String? email,
   }) async {
     final person = (await getPerson(id))!;
-    final updatedPerson = person.copyWith(
-      data: person.data.copyWith(
-        name: name,
-        avatarFaceId: avatarFaceId,
-        isHidden: isHidden,
-        isPinned: isPinned,
-        hideFromMemories: hideFromMemories,
-        version: version,
-        birthDate: birthDate,
-        email: email,
-      ),
+    var updatedData = person.data.copyWith(
+      name: name,
+      avatarFaceId: avatarFaceId,
+      isHidden: isHidden,
+      isPinned: isPinned,
+      hideFromMemories: hideFromMemories,
+      version: version,
+      email: email,
     );
+    if (!identical(birthDate, _attributeNotProvided)) {
+      updatedData = updatedData.copyWith(birthDate: birthDate as String?);
+    }
+    final updatedPerson = person.copyWith(data: updatedData);
     await updatePerson(updatedPerson);
     await refreshPersonCache();
     if (hideFromMemories != null &&
@@ -566,6 +638,55 @@ class PersonService {
       }
     }
     return updatedPerson;
+  }
+
+  Future<ManualPersonAssignmentResult> addManualFileAssignments({
+    required String personID,
+    required Set<int> fileIDs,
+  }) async {
+    final person = await getPerson(personID);
+    if (person == null) {
+      throw Exception("Person $personID not found");
+    }
+    if (fileIDs.isEmpty) {
+      return (
+        person: person,
+        addedFileIds: const <int>[],
+        alreadyAssignedFileIds: const <int>[],
+      );
+    }
+    final existingClusterFileIds =
+        await faceMLDataDB.getFileIdToClusterIDSet(personID);
+    final manualFileIDs = person.data.manuallyAssigned.toSet();
+    final addedFileIDs = <int>[];
+    final alreadyAssigned = <int>[];
+    for (final id in fileIDs) {
+      if (existingClusterFileIds.containsKey(id) ||
+          manualFileIDs.contains(id)) {
+        alreadyAssigned.add(id);
+        continue;
+      }
+      addedFileIDs.add(id);
+    }
+    if (addedFileIDs.isEmpty) {
+      return (
+        person: person,
+        addedFileIds: const <int>[],
+        alreadyAssignedFileIds: alreadyAssigned,
+      );
+    }
+    final updatedPerson = person.copyWith(
+      data: person.data.copyWith(
+        manuallyAssigned: [...manualFileIDs, ...addedFileIDs],
+      ),
+    );
+    await updatePerson(updatedPerson);
+    await refreshPersonCache();
+    return (
+      person: updatedPerson,
+      addedFileIds: addedFileIDs,
+      alreadyAssignedFileIds: alreadyAssigned,
+    );
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {
@@ -590,6 +711,8 @@ class PersonService {
   }) async {
     final result = await entityService.addOrUpdate(type, jsonMap, id: id);
     _lastCacheRefreshTime = 0; // Invalidate cache
+    _cachedPersonsFuture =
+        null; // Force refresh even if last sync time unchanged
     return result;
   }
 

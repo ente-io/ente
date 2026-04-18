@@ -3,6 +3,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 
 class ClusterBreakupPage extends StatefulWidget {
@@ -54,17 +55,12 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
                     width: 64,
                     height: 64,
                     child: files.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: const BorderRadius.all(
-                              Radius.elliptical(16, 12),
-                            ),
+                        ? FaceThumbnailSquircleClip(
                             child: PersonFaceWidget(
                               clusterID: clusterID,
                             ),
                           )
-                        : const ClipRRect(
-                            borderRadius:
-                                BorderRadius.all(Radius.elliptical(16, 12)),
+                        : const FaceThumbnailSquircleClip(
                             child: NoThumbnailWidget(
                               addBorder: false,
                             ),

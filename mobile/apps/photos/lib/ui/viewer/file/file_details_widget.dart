@@ -8,6 +8,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/core/user_config.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -29,6 +30,7 @@ import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_info_faces_item_widget.dart";
+import "package:photos/ui/viewer/file_details/file_info_pets_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/preview_properties_item_widget.dart";
@@ -38,9 +40,11 @@ import "package:photos/utils/file_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
+  final ScrollController? scrollController;
 
   const FileDetailsWidget(
     this.file, {
+    this.scrollController,
     super.key,
   });
 
@@ -77,7 +81,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
-    _currentUserID = Configuration.instance.getUserID()!;
+    _currentUserID = Configuration.instance.getUserIDV2();
     hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
@@ -136,6 +140,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void dispose() {
     _exifNotifier.dispose();
+    hasLocationData.dispose();
     _videoMetadataNotifier.dispose();
     _peopleChangedEvent.cancel();
     super.dispose();
@@ -150,13 +155,14 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     //Make sure the bottom most tile is always the same one, that is it should
     //not be rendered only if a condition is met.
     final fileDetailsTiles = <Widget>[];
+    final bool canEditCaption = isFileOwner && !file.isTrash;
     fileDetailsTiles.add(
       !widget.file.isUploaded ||
-              (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
+              (!canEditCaption && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox(height: 16)
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 24),
-              child: isFileOwner
+              child: canEditCaption
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
@@ -295,11 +301,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (flagService.hasGrantedMLConsent) {
+    if (hasGrantedMLConsent) {
       fileDetailsTiles.addAll([
         FacesItemWidget(file),
         const FileDetailsDivider(),
       ]);
+      if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+        fileDetailsTiles.addAll([
+          PetsItemWidget(file),
+          const FileDetailsDivider(),
+        ]);
+      }
     }
 
     if (file.uploadedFileID != null && file.updationTime != null) {
@@ -310,7 +322,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ],
       );
     }
-    fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
+    if (!file.isTrash) {
+      fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
+    }
 
     return SafeArea(
       top: false,
@@ -321,6 +335,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: CustomScrollView(
+            controller: widget.scrollController,
             physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             slivers: <Widget>[
@@ -357,7 +372,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   Future<void> _updateLocationFromExif(Location? locationDataFromExif) async {
     // If the file is not uploaded or the file is not owned by the current user
     // then we don't need to update the location.
-    if (!widget.file.isUploaded || widget.file.ownerID! != _currentUserID) {
+    if (!widget.file.isUploaded || widget.file.ownerID == null) {
+      return;
+    }
+    if (widget.file.ownerID != _currentUserID) {
       return;
     }
     try {
@@ -390,10 +408,20 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).numerator /
               (exif["EXIF FNumber"]!.values.toList()[0] as Ratio).denominator;
     }
-    final imageWidth = exif["EXIF ExifImageWidth"] ?? exif["Image ImageWidth"];
-    final imageLength = exif["EXIF ExifImageLength"] ??
-        exif["Image "
-            "ImageLength"];
+    final imageWidth = _firstPositiveDimensionTag(
+      exif,
+      const [
+        "EXIF ExifImageWidth",
+        "Image ImageWidth",
+      ],
+    );
+    final imageLength = _firstPositiveDimensionTag(
+      exif,
+      const [
+        "EXIF ExifImageLength",
+        "Image ImageLength",
+      ],
+    );
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
       final double megaPixels =
@@ -454,6 +482,19 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       final reciprocal = (1 / seconds).round();
       return "1/$reciprocal";
     }
+  }
+
+  IfdTag? _firstPositiveDimensionTag(
+    Map<String, IfdTag> exif,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final tag = exif[key];
+      if (tag != null && tag.values.firstAsInt() > 0) {
+        return tag;
+      }
+    }
+    return null;
   }
 }
 

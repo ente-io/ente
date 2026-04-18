@@ -44,6 +44,94 @@ class BuildGradle {
           File(lib.path).copySync(path.join(outputDir, lib.finalFileName));
         }
       }
+
+      _copyAndroidCppRuntime(
+        environment: environment,
+        target: target,
+        outputDir: outputDir,
+      );
     }
+  }
+
+  void _copyAndroidCppRuntime({
+    required BuildEnvironment environment,
+    required Target target,
+    required String outputDir,
+  }) {
+    final libDirName = _ndkLibDirName(target);
+    if (libDirName == null) {
+      return;
+    }
+
+    final sysrootLibDir = _findNdkSysrootLibDir(environment);
+    if (sysrootLibDir == null) {
+      return;
+    }
+
+    final source = File(
+      path.join(sysrootLibDir.path, libDirName, 'libc++_shared.so'),
+    );
+    if (!source.existsSync()) {
+      log.warning(
+        'Could not find libc++_shared.so for ${target.android} at ${source.path}',
+      );
+      return;
+    }
+
+    final destination = File(path.join(outputDir, 'libc++_shared.so'));
+    if (destination.existsSync()) {
+      destination.deleteSync();
+    }
+    source.copySync(destination.path);
+  }
+
+  String? _ndkLibDirName(Target target) {
+    return switch (target.android) {
+      'armeabi-v7a' => 'arm-linux-androideabi',
+      'arm64-v8a' => 'aarch64-linux-android',
+      'x86' => 'i686-linux-android',
+      'x86_64' => 'x86_64-linux-android',
+      _ => null,
+    };
+  }
+
+  Directory? _findNdkSysrootLibDir(BuildEnvironment environment) {
+    final sdkPath = environment.androidSdkPath;
+    final ndkVersion = environment.androidNdkVersion;
+    if (sdkPath == null || ndkVersion == null) {
+      log.warning('Android SDK path or NDK version is not set.');
+      return null;
+    }
+
+    final prebuiltRoot = Directory(
+      path.join(
+        sdkPath,
+        'ndk',
+        ndkVersion,
+        'toolchains',
+        'llvm',
+        'prebuilt',
+      ),
+    );
+    if (!prebuiltRoot.existsSync()) {
+      log.warning(
+          'NDK prebuilt directory does not exist: ${prebuiltRoot.path}');
+      return null;
+    }
+
+    for (final entry in prebuiltRoot.listSync()) {
+      if (entry is! Directory) {
+        continue;
+      }
+      final sysrootLibDir = Directory(
+        path.join(entry.path, 'sysroot', 'usr', 'lib'),
+      );
+      if (sysrootLibDir.existsSync()) {
+        return sysrootLibDir;
+      }
+    }
+
+    log.warning('Could not locate NDK sysroot library directory.');
+    return null;
   }
 }

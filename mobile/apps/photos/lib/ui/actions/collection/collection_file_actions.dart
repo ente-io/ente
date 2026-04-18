@@ -165,6 +165,7 @@ extension CollectionFileActions on CollectionActions {
           await CollectionsService.instance
               .addOrCopyToCollection(collection.id, files);
         }
+        CollectionsService.instance.recordCollectionUsage(collection.id);
       } catch (e, s) {
         logger.severe("Failed to add to album", e, s);
         await dialog?.hide();

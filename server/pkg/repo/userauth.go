@@ -8,6 +8,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
+	"github.com/lib/pq"
 )
 
 // UserAuthRepository defines the methods for inserting, updating and retrieving
@@ -15,8 +16,6 @@ import (
 type UserAuthRepository struct {
 	DB *sql.DB
 }
-
-const lockerRolloutLimit = 11150
 
 // AddOTT saves the provided one time token for the specified user
 func (repo *UserAuthRepository) AddOTT(emailHash string, app ente.App, ott string, expirationTime int64) error {
@@ -182,53 +181,24 @@ func (repo *UserAuthRepository) RemoveDeletedTokens(expiryTime int64) error {
 	return stacktrace.Propagate(err, "")
 }
 
+// RemoveTokensForApps marks all tokens for the given apps as deleted for the user.
+func (repo *UserAuthRepository) RemoveTokensForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	dbApps := make([]string, 0, len(apps))
+	for _, app := range apps {
+		dbApps = append(dbApps, string(app))
+	}
+	_, err := repo.DB.Exec(`UPDATE tokens SET is_deleted = true WHERE user_id = $1 AND app = ANY($2)`,
+		userID, pq.Array(dbApps))
+	return stacktrace.Propagate(err, "")
+}
+
 // RemoveAllTokens marks the all tokens for a user as deleted
 func (repo *UserAuthRepository) RemoveAllTokens(userID int64) error {
 	_, err := repo.DB.Exec(`UPDATE tokens SET is_deleted = true WHERE user_id = $1`, userID)
 	return stacktrace.Propagate(err, "")
-}
-
-// EnsureLockerRolloutAccess allows registration for locker users if they already own a locker collection
-// or if the rollout is still under the configured limit.
-func (repo *UserAuthRepository) EnsureLockerRolloutAccess(userID int64) error {
-	var hasLockerCollection bool
-	if err := repo.DB.QueryRow(`
-		SELECT EXISTS(
-			SELECT 1 FROM collections
-			WHERE owner_id = $1 AND app = $2
-		)
-	`, userID, ente.Locker).Scan(&hasLockerCollection); err != nil {
-		return stacktrace.Propagate(err, "failed to check locker collections")
-	}
-	if hasLockerCollection {
-		return nil
-	}
-
-	var alreadyLockerUser bool
-	if err := repo.DB.QueryRow(`
-		SELECT EXISTS(
-			SELECT 1 FROM tokens
-			WHERE user_id = $1 AND app = $2
-		)
-	`, userID, ente.Locker).Scan(&alreadyLockerUser); err != nil {
-		return stacktrace.Propagate(err, "failed to check locker tokens for user")
-	}
-	if alreadyLockerUser {
-		return nil
-	}
-
-	var currentLockerUsers int
-	if err := repo.DB.QueryRow(`
-		SELECT COUNT(DISTINCT user_id)
-		FROM tokens
-		WHERE app = $1
-	`, ente.Locker).Scan(&currentLockerUsers); err != nil {
-		return stacktrace.Propagate(err, "failed to count locker users")
-	}
-	if currentLockerUsers >= lockerRolloutLimit {
-		return stacktrace.Propagate(ente.ErrLockerRollOutLimit, "locker rollout cap reached")
-	}
-	return nil
 }
 
 // GetActiveSessions returns the list of tokens that are valid for a given user

@@ -118,7 +118,7 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetUser(c *gin.Context) {
-	e := strings.ToLower(strings.TrimSpace(c.Query("email")))
+	e := emailUtil.NormalizeEmail(c.Query("email"))
 	if e == "" {
 		id, err := strconv.ParseInt(c.Query("id"), 10, 64)
 		if err != nil {
@@ -161,8 +161,7 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	email := c.Query("email")
-	email = strings.TrimSpace(email)
+	email := emailUtil.NormalizeEmail(c.Query("email"))
 	if email == "" {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "email id is missing"))
 		return
@@ -320,6 +319,37 @@ func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
 		return
 	}
 	logger.Info("Email MFA successfully updated")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) UnblockStorageWarningLogin(c *gin.Context) {
+	err := h.isFreshAdminToken(c)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	var request ente.AdminOpsForUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "unblocking storage warning login for account %d", request.UserID)
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.UserID,
+		"admin_id": adminID,
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "unblock_storage_warning_login",
+	})
+	logger.Info("Start unblock storage warning login")
+	err = h.UserController.ClearStorageWarningDeletionLoginBlock(request.UserID)
+	if err != nil {
+		logger.WithError(err).Error("Failed to unblock storage warning login")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Finished unblock storage warning login")
 	c.JSON(http.StatusOK, gin.H{})
 }
 
@@ -546,7 +576,7 @@ func (h *AdminHandler) RecoverAccount(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetEmailHash(c *gin.Context) {
-	e := c.Query("email")
+	e := emailUtil.NormalizeEmail(c.Query("email"))
 	hash, err := crypto.GetHash(e, h.HashingKey)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

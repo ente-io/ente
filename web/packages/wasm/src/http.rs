@@ -13,7 +13,7 @@ pub struct HttpError {
 
 #[wasm_bindgen]
 impl HttpError {
-    /// Error code: "network", "http", or "parse".
+    /// Error code: "invalid_url", "network", "http", or "parse".
     #[wasm_bindgen(getter)]
     pub fn code(&self) -> String {
         self.code.clone()
@@ -35,12 +35,19 @@ impl HttpError {
 impl From<CoreError> for HttpError {
     fn from(e: CoreError) -> Self {
         match e {
+            CoreError::InvalidUrl(message) => HttpError {
+                code: "invalid_url".to_string(),
+                message,
+                status: None,
+            },
             CoreError::Network(message) => HttpError {
                 code: "network".to_string(),
                 message,
                 status: None,
             },
-            CoreError::Http { status, message } => HttpError {
+            CoreError::Http {
+                status, message, ..
+            } => HttpError {
                 code: "http".to_string(),
                 message,
                 status: Some(status),
@@ -66,7 +73,7 @@ impl HttpClient {
     #[wasm_bindgen(constructor)]
     pub fn new(base_url: &str) -> Self {
         Self {
-            inner: CoreHttpClient::new(base_url),
+            inner: CoreHttpClient::new(base_url).expect("failed to build HTTP client"),
         }
     }
 

@@ -1,7 +1,8 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -12,7 +13,12 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import {
+    FileContextMenu,
+    type ContextMenuPosition,
+} from "ente-new/photos/components/FileContextMenu";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -23,7 +29,14 @@ import {
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import {
+    PseudoCollectionID,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
+import {
+    getAvailableFileActions,
+    type FileContextAction,
+} from "ente-new/photos/utils/file-actions";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
@@ -161,6 +174,10 @@ export interface FileListProps {
     /** The width we should occupy.*/
     width: number;
     /**
+     * Optional border radius to apply to the scrollable list container.
+     */
+    listBorderRadius?: string;
+    /**
      * The files to show, annotated with cached precomputed properties that are
      * frequently needed by the {@link FileList}.
      */
@@ -186,10 +203,6 @@ export interface FileListProps {
     footer?: FileListHeaderOrFooter;
     /**
      * The logged in user, if any.
-     *
-     * This is only expected to be present when the listing is shown within the
-     * photos app, where we have a logged in user. The public albums app can
-     * omit this prop.
      */
     user?: LocalUser;
     /**
@@ -214,15 +227,10 @@ export interface FileListProps {
     activePersonID?: string | undefined;
     /**
      * File IDs of all the files that the user has marked as a favorite.
-     *
-     * Not set in the context of the shared albums app.
      */
     favoriteFileIDs?: Set<number>;
     /**
      * A map from known Ente user IDs to their emails.
-     *
-     * This is only expected in the context of the photos app, and will be
-     * omitted when running in the public albums app.
      */
     emailByUserID?: Map<number, string>;
     /**
@@ -232,6 +240,46 @@ export interface FileListProps {
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
+    /**
+     * Called when the list scrolls, providing the current scroll offset.
+     */
+    onScroll?: (scrollOffset: number) => void;
+    /**
+     * Called when the visible date at the top of the viewport changes.
+     */
+    onVisibleDateChange?: (date: string | undefined) => void;
+    /**
+     * The collection summary for the current view.
+     *
+     * Used to determine available context menu actions.
+     */
+    collectionSummary?: CollectionSummary;
+    /**
+     * Called when a context menu action is triggered on a file.
+     *
+     * @param action The action that was triggered.
+     */
+    onContextMenuAction?: (
+        action: FileContextAction,
+        targetFile?: EnteFile,
+        meta?: { isEphemeralSingleSelection: boolean },
+    ) => void;
+    /**
+     * Whether to show the "Add Person" action in the context menu.
+     */
+    showAddPersonAction?: boolean;
+    /**
+     * Whether to show the "Edit Location" action in the context menu.
+     */
+    showEditLocationAction?: boolean;
+    /**
+     * Called when the context menu opens or closes.
+     */
+    onContextMenuOpenChange?: (open: boolean) => void;
+    /**
+     * Hide selection visuals/interactions while keeping selection data.
+     */
+    suppressSelectionUI?: boolean;
 }
 
 /**
@@ -240,6 +288,7 @@ export interface FileListProps {
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
+    listBorderRadius,
     mode,
     modePlus,
     header,
@@ -255,6 +304,14 @@ export const FileList: React.FC<FileListProps> = ({
     favoriteFileIDs,
     emailByUserID,
     onItemClick,
+    onScroll,
+    onVisibleDateChange,
+    collectionSummary,
+    onContextMenuAction,
+    showAddPersonAction,
+    showEditLocationAction,
+    onContextMenuOpenChange,
+    suppressSelectionUI = false,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -269,8 +326,30 @@ export const FileList: React.FC<FileListProps> = ({
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set<string>());
+    // Show back-to-top button when scrolled past threshold
+    const [showBackToTop, setShowBackToTop] = useState(false);
+
+    // Context menu state
+    const [contextMenu, setContextMenu] = useState<{
+        position: ContextMenuPosition;
+        file: EnteFile;
+        fileIndex: number;
+    } | null>(null);
+
+    // Track selection state before right-click modified it.
+    // If there are already 3 files explicitly selected via checkmarks,
+    // right-clicking an unselected item will store the previous selections
+    // in this ref and temporarily select only the right-clicked file.
+    // If no action is taken from the context menu, the previous selection
+    // is restored when the menu closes.
+    const previousSelectionRef = useRef<SelectedState | null>(null);
+    // Track whether an action was taken from the context menu.
+    // This ref works in conjunction with previousSelectionRef: if an action
+    // is taken, the previous selection is not reverted when the context menu closes.
+    const contextMenuActionTakenRef = useRef(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
+    const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
         () => computeThumbnailGridLayoutParams(width),
@@ -513,6 +592,23 @@ export const FileList: React.FC<FileListProps> = ({
         [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
+    const isSelectionContextMatching = useMemo(() => {
+        if (!mode) return selected.collectionID === activeCollectionID;
+        if (mode !== selected.context?.mode) return false;
+        if (selected.context.mode === "people") {
+            return selected.context.personID === activePersonID;
+        }
+        return selected.context.collectionID === activeCollectionID;
+    }, [activeCollectionID, activePersonID, mode, selected]);
+
+    const isFileSelected = useCallback(
+        (file: EnteFile) => {
+            if (suppressSelectionUI) return false;
+            return isSelectionContextMatching && !!selected[file.id];
+        },
+        [isSelectionContextMatching, selected, suppressSelectionUI],
+    );
+
     const handleRangeSelect = useCallback(
         (index: number) => {
             if (rangeStartIndex === undefined || rangeStartIndex == index)
@@ -565,16 +661,159 @@ export const FileList: React.FC<FileListProps> = ({
         if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
+    const selectedFavoriteCount = useMemo(() => {
+        if (!favoriteFileIDs || selected.count == 0) return 0;
+        let count = 0;
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value === "boolean" && value) {
+                if (favoriteFileIDs.has(Number(key))) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }, [favoriteFileIDs, selected]);
+
+    // Compute available context menu actions based on stable context and
+    // the favorite status of the current selection (for toggling).
+    const contextMenuActions = useMemo(() => {
+        if (!onContextMenuAction) return [];
+        const actions = getAvailableFileActions({
+            barMode: mode,
+            isInSearchMode: modePlus === "search",
+            collectionSummary,
+            showAddPerson: !!showAddPersonAction,
+            showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
+            showSendLink: selected.ownCount > 0,
+        });
+        if (!actions.includes("favorite")) return actions;
+        if (
+            selectedFavoriteCount > 0 &&
+            selectedFavoriteCount < selected.count
+        ) {
+            return actions.filter(
+                (action) => action !== "favorite" && action !== "unfavorite",
+            );
+        }
+        if (selectedFavoriteCount === selected.count && selected.count > 0) {
+            return actions.map((action) =>
+                action === "favorite" ? "unfavorite" : action,
+            );
+        }
+        return actions;
+    }, [
+        onContextMenuAction,
+        mode,
+        modePlus,
+        collectionSummary,
+        showAddPersonAction,
+        showEditLocationAction,
+        selected.ownCount,
+        selectedFavoriteCount,
+        selected.count,
+    ]);
+
+    // Handle context menu open
+    const handleContextMenu = useCallback(
+        (event: React.MouseEvent, file: EnteFile, fileIndex: number) => {
+            if (!onContextMenuAction) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Reset tracking for this menu open.
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+
+            // Handle selection behavior on right-click
+            if (!selected[file.id]) {
+                // Store current selection before replacing it
+                previousSelectionRef.current = { ...selected };
+
+                // File not selected: clear selection and select only this file
+                const isOwnFile = file.ownerID === user?.id;
+                const context =
+                    mode === "people" && activePersonID
+                        ? { mode: "people" as const, personID: activePersonID }
+                        : {
+                              mode: (mode ?? "albums") as
+                                  | "albums"
+                                  | "hidden-albums",
+                              collectionID: activeCollectionID,
+                          };
+                setSelected({
+                    [file.id]: true,
+                    ownCount: isOwnFile ? 1 : 0,
+                    count: 1,
+                    collectionID: activeCollectionID,
+                    context,
+                });
+            }
+            // If file is already selected, keep current multi-selection
+
+            setContextMenu({
+                position: { top: event.clientY, left: event.clientX },
+                file,
+                fileIndex,
+            });
+            onContextMenuOpenChange?.(true);
+        },
+        [
+            onContextMenuAction,
+            onContextMenuOpenChange,
+            selected,
+            setSelected,
+            user,
+            activeCollectionID,
+            activePersonID,
+            mode,
+        ],
+    );
+
+    // Handle context menu close
+    const handleContextMenuClose = useCallback(() => {
+        // Defer restore so a menu-item click can mark the close as action-driven.
+        void Promise.resolve().then(() => {
+            if (
+                !contextMenuActionTakenRef.current &&
+                previousSelectionRef.current
+            ) {
+                setSelected(previousSelectionRef.current);
+            }
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+        });
+
+        setContextMenu(null);
+        onContextMenuOpenChange?.(false);
+    }, [onContextMenuOpenChange, setSelected]);
+
+    const handleContextMenuActionWithTracking = useCallback(
+        (action: FileContextAction) => {
+            const isEphemeralSingleSelection =
+                selected.count === 1 &&
+                previousSelectionRef.current?.count === 0;
+            contextMenuActionTakenRef.current = true;
+            onContextMenuAction?.(action, contextMenu?.file, {
+                isEphemeralSingleSelection,
+            });
+        },
+        [onContextMenuAction, contextMenu, selected.count],
+    );
+
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
-            const haveSelection = selected.count > 0;
+            const haveSelection =
+                !!enableSelect && !suppressSelectionUI && selected.count > 0;
+            const showGroupCheckbox =
+                haveSelection && !(contextMenu && selected.count === 1);
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
                         item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
-                                {haveSelection && (
+                                {showGroupCheckbox && (
                                     <Checkbox
                                         key={date}
                                         name={date}
@@ -606,29 +845,15 @@ export const FileList: React.FC<FileListProps> = ({
                                         {...{
                                             user,
                                             emailByUserID,
-                                            enableSelect,
+                                            enableSelect:
+                                                !!enableSelect &&
+                                                !suppressSelectionUI,
                                         }}
                                         file={file}
-                                        selected={
-                                            (!mode
-                                                ? selected.collectionID ===
-                                                  activeCollectionID
-                                                : mode ==
-                                                      selected.context?.mode &&
-                                                  (selected.context.mode ==
-                                                  "people"
-                                                      ? selected.context
-                                                            .personID ==
-                                                        activePersonID
-                                                      : selected.context
-                                                            .collectionID ==
-                                                        activeCollectionID)) &&
-                                            !!selected[file.id]
-                                        }
-                                        selectOnClick={selected.count > 0}
+                                        selected={isFileSelected(file)}
+                                        selectOnClick={haveSelection}
                                         isRangeSelectActive={
-                                            isShiftKeyPressed &&
-                                            selected.count > 0
+                                            isShiftKeyPressed && haveSelection
                                         }
                                         isInSelectRange={
                                             rangeStartIndex !== undefined &&
@@ -647,6 +872,16 @@ export const FileList: React.FC<FileListProps> = ({
                                         onRangeSelect={() =>
                                             handleRangeSelect(index)
                                         }
+                                        onContextMenu={
+                                            onContextMenuAction
+                                                ? (e) =>
+                                                      handleContextMenu(
+                                                          e,
+                                                          file,
+                                                          index,
+                                                      )
+                                                : undefined
+                                        }
                                     />
                                 );
                             }),
@@ -660,20 +895,23 @@ export const FileList: React.FC<FileListProps> = ({
         },
         [
             activeCollectionID,
-            activePersonID,
             checkedTimelineDateStrings,
+            contextMenu,
             emailByUserID,
             favoriteFileIDs,
+            handleContextMenu,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
             isShiftKeyPressed,
-            mode,
+            isFileSelected,
             onChangeSelectAllCheckBox,
+            onContextMenuAction,
             onItemClick,
             rangeStartIndex,
             enableSelect,
             selected,
+            suppressSelectionUI,
             user,
         ],
     );
@@ -700,6 +938,46 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, []);
 
+    // Track the last reported date to avoid unnecessary callbacks
+    const lastVisibleDateRef = useRef<string | undefined>(undefined);
+
+    const handleScroll = useCallback(
+        ({ scrollOffset }: { scrollOffset: number }) => {
+            onScroll?.(scrollOffset);
+
+            // Show back-to-top button when scrolled past threshold
+            setShowBackToTop(scrollOffset > 500);
+
+            // Calculate which date is visible at the current scroll position
+            if (onVisibleDateChange && items.length > 0) {
+                let cumulativeHeight = 0;
+                let currentDate: string | undefined;
+
+                for (const item of items) {
+                    if (item.type === "date") {
+                        currentDate = item.groups[0]?.date;
+                    }
+                    cumulativeHeight += item.height;
+                    // Found the item that contains the scroll position
+                    if (cumulativeHeight > scrollOffset) {
+                        break;
+                    }
+                }
+
+                // Only call callback if date changed
+                if (currentDate !== lastVisibleDateRef.current) {
+                    lastVisibleDateRef.current = currentDate;
+                    onVisibleDateChange(currentDate);
+                }
+            }
+        },
+        [onScroll, onVisibleDateChange, items],
+    );
+
+    const handleScrollToTop = useCallback(() => {
+        outerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
     if (!items.length) {
         return <></>;
     }
@@ -721,16 +999,43 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <VariableSizeList
-            key={key}
-            ref={listRef}
-            {...{ width, height, itemData, itemSize, itemKey }}
-            itemCount={items.length}
-            overscanCount={3}
-            useIsScrolling
-        >
-            {FileListRow}
-        </VariableSizeList>
+        <Box sx={{ position: "relative", width, height }}>
+            <VariableSizeList
+                key={key}
+                ref={listRef}
+                outerRef={outerRef}
+                {...{ width, height, itemData, itemSize, itemKey }}
+                itemCount={items.length}
+                overscanCount={3}
+                useIsScrolling
+                onScroll={handleScroll}
+                style={
+                    listBorderRadius
+                        ? { borderRadius: listBorderRadius }
+                        : undefined
+                }
+            >
+                {FileListRow}
+            </VariableSizeList>
+            {showBackToTop && (
+                <BackToTopButton
+                    size="small"
+                    aria-label="scroll to top"
+                    onClick={handleScrollToTop}
+                >
+                    <KeyboardArrowUpIcon />
+                </BackToTopButton>
+            )}
+            {onContextMenuAction && (
+                <FileContextMenu
+                    open={contextMenu !== null}
+                    anchorPosition={contextMenu?.position}
+                    onClose={handleContextMenuClose}
+                    actions={contextMenuActions}
+                    onAction={handleContextMenuActionWithTracking}
+                />
+            )}
+        </Box>
     );
 };
 
@@ -776,6 +1081,20 @@ const NoFilesListItem = styled(FullSpanListItem)`
     min-height: 100%;
     justify-content: center;
 `;
+
+/**
+ * Floating button to scroll back to the top of the file list.
+ */
+const BackToTopButton = styled(Fab)(({ theme }) => ({
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    backgroundColor: theme.vars.palette.fill.faint,
+    color: theme.vars.palette.text.base,
+    boxShadow: "none",
+    "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
+    [theme.breakpoints.down("sm")]: { display: "none" },
+}));
 
 /**
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
@@ -881,6 +1200,8 @@ type FileThumbnailProps = {
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
+    onContextMenu?: (event: React.MouseEvent) => void;
+    style?: React.CSSProperties;
 } & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
@@ -899,6 +1220,8 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     onSelect,
     onHover,
     onRangeSelect,
+    onContextMenu,
+    style,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
@@ -909,7 +1232,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onMouseUp: () => setIsLongPressing(false),
             onMouseLeave: () => setIsLongPressing(false),
             onTouchStart: () => setIsLongPressing(true),
+            onTouchMove: () => setIsLongPressing(false),
             onTouchEnd: () => setIsLongPressing(false),
+            onTouchCancel: () => setIsLongPressing(false),
         }),
         [],
     );
@@ -973,8 +1298,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         <FileThumbnail_
             key={`thumb-${file.id}}`}
             onClick={handleClick}
+            onContextMenu={onContextMenu}
             onMouseEnter={handleHover}
             disabled={!imageURL}
+            style={style}
             {...(enableSelect && longPressHandlers)}
         >
             {enableSelect && (
@@ -1010,7 +1337,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             )}
             {isFav && (
                 <FavoriteOverlay>
-                    <FavoriteRoundedIcon />
+                    <StarIcon fontSize="small" />
                 </FavoriteOverlay>
             )}
 
@@ -1222,7 +1549,12 @@ const VideoDurationOverlay: React.FC<VideoDurationOverlayProps> = ({
 }) => (
     <FileTypeIndicatorOverlay>
         {duration ? (
-            <Typography variant="mini">{duration}</Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+                <PlayArrowRoundedIcon
+                    sx={{ fontSize: 14, display: "block", mr: 0.5 }}
+                />
+                <Typography variant="mini">{duration}</Typography>
+            </Box>
         ) : (
             <PlayCircleOutlineOutlinedIcon fontSize="small" />
         )}

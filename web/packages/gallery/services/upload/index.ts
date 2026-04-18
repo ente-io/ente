@@ -7,6 +7,7 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
+import type { ExternalParsedMetadata } from "./upload-service";
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -268,6 +269,7 @@ export interface ClusteredUploadItem {
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;
+    externalParsedMetadata?: ExternalParsedMetadata;
     // TODO: Tie this to the isLivePhoto flag using a discriminated union.
     livePhotoAssets?: LivePhotoAssets;
 }
@@ -454,7 +456,7 @@ export type UploadResult =
  * [Note: Faster uploads via workers]
  *
  * These workers were introduced as a way of make file uploads faster:
- * https://ente.io/blog/tech/making-uploads-faster/
+ * https://ente.com/blog/tech/making-uploads-faster/
  *
  * By default, that's the route we take. However, there are multiple reasons why
  * this might be disabled.

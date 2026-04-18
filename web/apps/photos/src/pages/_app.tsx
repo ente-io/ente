@@ -3,6 +3,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
+import { useDesktopAppLockRoute } from "components/utils/use-app-lock-route";
 import {
     isLocalStorageAndIndexedDBMismatch,
     savedLocalUser,
@@ -10,7 +11,7 @@ import {
 } from "ente-accounts/services/accounts-db";
 import { isDesktop, staticAppTitle } from "ente-base/app";
 import { CenteredRow } from "ente-base/components/containers";
-import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
+import { CustomHead } from "ente-base/components/Head";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
@@ -31,13 +32,19 @@ import {
     initVideoProcessing,
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
+import { AppLockReauthenticationDialog } from "ente-new/photos/components/app-lock/AppLockReauthenticationDialog";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "ente-new/photos/components/utils/download";
+import {
+    useAutoLockWhenBackgrounded,
+    useSetupAppLock,
+} from "ente-new/photos/components/utils/use-app-lock";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
+import { useAppLockSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
 import { initML, isMLSupported } from "ente-new/photos/services/ml";
@@ -53,7 +60,13 @@ import "photoswipe/dist/photoswipe.css";
 import "styles/global.css";
 import "styles/photoswipe.css";
 
-const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+type PhotosAppProps = AppProps<Record<string, unknown>>;
+
+type MainContentProps = Pick<PhotosAppProps, "Component" | "pageProps"> & {
+    isChangingRoute: boolean;
+};
+
+const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
     const isI18nReady = useSetupI18n();
@@ -181,7 +194,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     return (
         <ThemeProvider theme={photosTheme}>
-            <CustomHeadPhotosOrAlbums {...{ title }} />
+            <CustomHead {...{ title }} />
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />
@@ -190,14 +203,28 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
             <BaseContext value={baseContext}>
+                {
+                    // The web and desktop components are rendered separately
+                    // because the desktop currently supports app-lock,
+                    // for which we have certain hooks and components.
+                    // We don't want this to load in the web as well, since there
+                    // is no particular purpose it would serve.
+                }
                 <PhotosAppContext value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
+                    ) : isDesktop ? (
+                        <DesktopMainContent
+                            Component={Component}
+                            pageProps={pageProps}
+                            isChangingRoute={isChangingRoute}
+                        />
                     ) : (
-                        <>
-                            {isChangingRoute && <TranslucentLoadingOverlay />}
-                            <Component {...pageProps} />
-                        </>
+                        <WebMainContent
+                            Component={Component}
+                            pageProps={pageProps}
+                            isChangingRoute={isChangingRoute}
+                        />
                     )}
                 </PhotosAppContext>
             </BaseContext>
@@ -206,6 +233,48 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 };
 
 export default App;
+
+const WebMainContent: React.FC<MainContentProps> = ({
+    Component,
+    pageProps,
+    isChangingRoute,
+}) => (
+    <>
+        {isChangingRoute && <TranslucentLoadingOverlay />}
+        <Component {...pageProps} />
+    </>
+);
+
+const DesktopMainContent: React.FC<MainContentProps> = ({
+    Component,
+    pageProps,
+    isChangingRoute,
+}) => {
+    const isAppLockReady = useSetupAppLock();
+    const appLock = useAppLockSnapshot();
+    const { shouldBlockAppLockRouteTransition } = useDesktopAppLockRoute(
+        isAppLockReady,
+        appLock.isLocked,
+        appLock.lockScreenMode,
+    );
+
+    useAutoLockWhenBackgrounded(
+        appLock.enabled,
+        appLock.isLocked,
+        appLock.autoLockTimeMs,
+    );
+
+    if (!isAppLockReady) return <LoadingIndicator />;
+    if (shouldBlockAppLockRouteTransition) return <LoadingIndicator />;
+
+    return (
+        <>
+            {isChangingRoute && <TranslucentLoadingOverlay />}
+            <Component {...pageProps} />
+            <AppLockReauthenticationDialog />
+        </>
+    );
+};
 
 const redirectToFamilyPortal = () =>
     void getFamilyPortalRedirectURL().then((url) => {

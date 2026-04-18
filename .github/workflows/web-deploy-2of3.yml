@@ -1,0 +1,54 @@
+name: "Deploy (twoof3 web)"
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: web
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
+
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
+
+            - name: Audit dependencies
+              run: |
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
+                      echo "::error::Yarn audit found critical issues"
+                      exit 1
+                  fi
+
+            - name: Build twoof3
+              run: yarn build:twoof3
+
+            - name: Publish twoof3
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/2of3 web/apps/twoof3/out

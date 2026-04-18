@@ -1,4 +1,4 @@
-import 'package:ente_auth/ente_theme_data.dart'; 
+import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';

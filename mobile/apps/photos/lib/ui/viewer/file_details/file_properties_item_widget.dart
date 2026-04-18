@@ -1,13 +1,13 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import 'package:path/path.dart' as path;
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
-import "package:photos/utils/standalone/data.dart";
-import "package:photos/utils/standalone/date_time.dart";
 
 class FilePropertiesItemWidget extends StatefulWidget {
   final EnteFile file;
@@ -38,7 +38,8 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
           path.extension(widget.file.displayName).toUpperCase(),
       subtitleSection: _subTitleSection(),
       editOnTap: widget.file.uploadedFileID == null ||
-              widget.file.ownerID != widget.currentUserID
+              widget.file.ownerID != widget.currentUserID ||
+              widget.file.isTrash
           ? null
           : () async {
               await editFilename(context, widget.file);

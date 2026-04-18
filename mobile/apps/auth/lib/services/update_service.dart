@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/services/notification_service.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -91,7 +91,7 @@ class UpdateService {
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
     final response = await Network.instance
         .getDio()
-        .get("https://ente.io/release-info/auth-independent.json");
+        .get("https://ente.com/release-info/auth-independent.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 
@@ -136,7 +136,7 @@ class UpdateService {
   bool isIndependent() {
     return flavor == "independent" ||
         _packageInfo.packageName.endsWith("independent") ||
-        PlatformUtil.isDesktop();
+        PlatformDetector.isDesktop();
   }
 }
 

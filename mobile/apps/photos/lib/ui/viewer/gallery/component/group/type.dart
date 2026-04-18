@@ -1,9 +1,9 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/widgets.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/utils/standalone/date_time.dart";
 
 enum GroupType {
   day,
@@ -27,6 +27,23 @@ extension GroupTypeExtension on GroupType {
         return "Size";
       case GroupType.year:
         return "Year";
+      case GroupType.none:
+        return "None";
+    }
+  }
+
+  String getLocalizedName(BuildContext context) {
+    switch (this) {
+      case GroupType.day:
+        return AppLocalizations.of(context).groupByDay;
+      case GroupType.week:
+        return AppLocalizations.of(context).groupByWeek;
+      case GroupType.month:
+        return AppLocalizations.of(context).groupByMonth;
+      case GroupType.size:
+        return "Size";
+      case GroupType.year:
+        return AppLocalizations.of(context).groupByYear;
       case GroupType.none:
         return "None";
     }

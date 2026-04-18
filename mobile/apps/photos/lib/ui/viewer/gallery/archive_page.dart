@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart' show IterableExtension;
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -11,6 +12,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -78,6 +80,21 @@ class ArchivePage extends StatelessWidget {
       ),
       header: AlbumHorizontalList(
         CollectionsService.instance.getArchivedCollection,
+        onViewAllTapped: () async {
+          final collections =
+              await CollectionsService.instance.getArchivedCollection();
+          if (context.mounted) {
+            await routeToPage(
+              context,
+              CollectionListPage(
+                collections,
+                sectionType: UISectionType.archivedCollections,
+                appTitle: Text(AppLocalizations.of(context).archive),
+                tag: "archived",
+              ),
+            );
+          }
+        },
       ),
     );
     return GalleryBoundariesProvider(

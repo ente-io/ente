@@ -114,7 +114,7 @@ class CodeErrorWidget extends StatelessWidget {
                       text: context.l10n.contactSupport,
                       fontSize: 10,
                       onTap: () async {
-                        await openSupportPage(null, null);
+                        await sendEmail(context, to: "support@ente.com");
                       },
                       borderWidth: 0.6,
                       borderRadius: 6,

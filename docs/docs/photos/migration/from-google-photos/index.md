@@ -6,7 +6,8 @@ description: Migrating your existing photos from Google Photos to Ente Photos
 # Import from Google Photos
 
 Follow the following steps to recover your data from Google Photos and preserve
-it with Ente.
+it with Ente. Also, please check out our
+[Migration FAQ](/photos/faq/migration) page for common queries.
 
 ### Steps
 
@@ -38,13 +39,19 @@ it with Ente.
 
 8. Wait for Google to send you your data.
 
-9. Open [our desktop app](https://ente.io/download/desktop) and click on "Upload", then select "Google takeout".
+9. Open [our desktop app](https://ente.com/download/desktop) and click on "Upload", then select "Google takeout".
 
     ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
     You'll see two options:
-    - **Select folder** (recommended): If you have multiple ZIP files, extract them all into one folder first, then select that folder. This ensures proper metadata matching ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).
+    - **Select folder (recommended): If you have multiple ZIP files, extract
+      them all into one parent folder first, then select that parent folder.
+      Keep subfolders as-is (do not flatten everything into one giant folder).
+      This ensures proper metadata matching
+      ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).**
     - **Select zips**: Choose your ZIP files directly without extracting. Convenient but may not properly match metadata if files are split across ZIPs.
+
+        ![Google Takeout Selection](google-photos-6.webp)
 
 10. Choose where to import your photos:
 
@@ -52,6 +59,7 @@ it with Ente.
     - **Import to existing album** → Pick one of your current albums, or
     - **Create new album(s)** → Click "Create albums", then:
         - If your folder has subfolders: Choose between "Separate albums" (each folder becomes its own album) or "Single album" (everything goes into one album)
+          ![Select ZIP workflow in the Ente desktop app](google-photos-7.webp)
         - If it's a single folder: Just name your new album
 
     **If you selected ZIP files directly**:
@@ -63,8 +71,9 @@ it with Ente.
 
 In case your uploads get interrupted, just drag and drop the folder or files again. Ente will automatically ignore already backed up files and upload just the rest.
 
-If you run into any issues during this migration, please reach out to
-[support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+If you run into any issues during this migration, please check out our
+[Migration FAQ](/photos/faq/migration#importing-from-google-photos) page or reach out to
+[support@ente.com](mailto:support@ente.com) and we will be happy to help you!
 
 > [!TIP]
 >

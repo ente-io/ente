@@ -148,6 +148,7 @@ const main = () => {
             allowExternalLinks(webContents);
             handleBackOnStripeCheckout(mainWindow);
             allowAllCORSOrigins(webContents);
+            allowOpenStreetMapRequestIdentification(webContents);
 
             // Start loading the renderer.
             void mainWindow.loadURL(rendererURL);
@@ -415,22 +416,16 @@ const createMainWindow = () => {
     window.on("close", (event) => {
         if (!shouldAllowWindowClose) {
             event.preventDefault();
+            // Only hide the dock icon when we are intercepting an explicit
+            // close action. On macOS, the generic "hide" event is also emitted
+            // for occlusion changes, so reacting there causes the dock icon to
+            // disappear when the window is fully covered by another window.
+            if (shouldHideDockIcon()) {
+                app.dock?.hide();
+            }
             window.hide();
         }
         return false;
-    });
-
-    window.on("hide", () => {
-        // On macOS, when hiding the window also hide the app's icon in the dock
-        // unless the user has unchecked the Settings > Hide dock icon checkbox.
-        if (shouldHideDockIcon()) {
-            // macOS emits a window "hide" event when going fullscreen, and if
-            // we hide the dock icon there then the window disappears. So ignore
-            // this scenario.
-            if (!window.isFullScreen()) {
-                app.dock?.hide();
-            }
-        }
     });
 
     window.on("show", () => void app.dock?.show());
@@ -438,6 +433,7 @@ const createMainWindow = () => {
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
     // in turn inform the renderer process.
     window.on("focus", () => window.webContents.send("mainWindowFocus"));
+    window.on("blur", () => window.webContents.send("mainWindowBlur"));
 
     return window;
 };
@@ -675,6 +671,44 @@ const allowAllCORSOrigins = (webContents: WebContents) =>
             callback({ responseHeaders: headers });
         },
     );
+
+/**
+ * OSM services expect requests to identify the originating app. Our desktop
+ * renderer is served from the custom "ente://app" origin, so requests from the
+ * Electron session do not naturally carry an app-specific browser identity.
+ *
+ * Prefix OSM requests with a truthful desktop app User-Agent token instead of
+ * forging a web Referer. This applies to both map tiles and Nominatim lookups.
+ */
+const allowOpenStreetMapRequestIdentification = (webContents: WebContents) =>
+    webContents.session.webRequest.onBeforeSendHeaders(
+        {
+            urls: [
+                "https://tile.openstreetmap.org/*",
+                "https://nominatim.openstreetmap.org/*",
+            ],
+        },
+        ({ requestHeaders }, callback) => {
+            const existingUserAgent =
+                requestHeaders["User-Agent"] ?? requestHeaders["user-agent"];
+            delete requestHeaders["User-Agent"];
+            delete requestHeaders["user-agent"];
+            requestHeaders["User-Agent"] =
+                openStreetMapUserAgent(existingUserAgent);
+            delete requestHeaders.Referer;
+            delete requestHeaders.referer;
+            callback({ requestHeaders });
+        },
+    );
+
+const openStreetMapUserAgent = (existingUserAgent: string | undefined) => {
+    const appName = app.getName().trim() || "app";
+    const version = isDev ? "dev" : app.getVersion();
+    const appIdentifier = `${appName}-desktop/${version}`;
+    return existingUserAgent
+        ? `${appIdentifier} ${existingUserAgent}`
+        : appIdentifier;
+};
 
 /**
  * Add an icon for our app in the system tray.

@@ -13,4 +13,5 @@ __debug_bin*
 config/.env
 config/museum.yaml
 main
+museum
 credentials

@@ -3,11 +3,12 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/ente-io/museum/ente/cast"
 	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/ente-io/museum/ente/cast"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
@@ -17,9 +18,11 @@ import (
 )
 
 const (
-	PublicAccessKey   = "X-Public-Access-ID"
-	FileLinkAccessKey = "X-Public-FileLink-Access-ID"
-	CastContext       = "X-Cast-Context"
+	PublicAccessKey      = "X-Public-Access-ID"
+	PublicAnonUserKey    = "X-Public-Anon-User-ID"
+	FileLinkAccessKey    = "X-Public-FileLink-Access-ID"
+	CastContext          = "X-Cast-Context"
+	MemoryShareAccessKey = "X-Memory-Share-Access-ID"
 )
 
 // GenerateRandomBytes returns securely generated random bytes.
@@ -135,10 +138,30 @@ func MustGetPublicAccessContext(c *gin.Context) ente.PublicAccessContext {
 	return c.MustGet(PublicAccessKey).(ente.PublicAccessContext)
 }
 
+func SetPublicAnonUserID(c *gin.Context, anonID string) {
+	c.Set(PublicAnonUserKey, anonID)
+}
+
+func GetPublicAnonUserID(c *gin.Context) (*string, bool) {
+	value, ok := c.Get(PublicAnonUserKey)
+	if !ok {
+		return nil, false
+	}
+	if anonID, ok := value.(string); ok {
+		copyID := anonID
+		return &copyID, true
+	}
+	return nil, false
+}
+
 func MustGetFileLinkAccessContext(c *gin.Context) *ente.FileLinkAccessContext {
 	return c.MustGet(FileLinkAccessKey).(*ente.FileLinkAccessContext)
 }
 
 func GetCastCtx(c *gin.Context) cast.AuthContext {
 	return c.MustGet(CastContext).(cast.AuthContext)
+}
+
+func MustGetMemoryShareAccessContext(c *gin.Context) ente.MemoryShareAccessContext {
+	return c.MustGet(MemoryShareAccessKey).(ente.MemoryShareAccessContext)
 }

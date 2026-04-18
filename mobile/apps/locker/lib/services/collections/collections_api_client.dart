@@ -4,14 +4,13 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import "package:ente_events/event_bus.dart";
 import 'package:ente_network/network.dart';
 import "package:ente_sharing/collection_sharing_service.dart";
 import "package:ente_sharing/models/user.dart";
 import 'package:locker/core/errors.dart';
 import "package:locker/events/collections_updated_event.dart";
-import "package:locker/services/collections/collections_db.dart";
 import "package:locker/services/collections/collections_service.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
@@ -19,6 +18,7 @@ import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/diff.dart';
 import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/files/sync/models/file_magic.dart';
@@ -36,10 +36,10 @@ class CollectionApiClient {
   final _enteDio = Network.instance.enteDio;
   final _config = Configuration.instance;
 
-  late CollectionDB _db;
+  late LockerDB _db;
 
   Future<void> init() async {
-    _db = CollectionDB.instance;
+    _db = LockerDB.instance;
   }
 
   Future<List<Collection>> getCollections(int sinceTime) async {
@@ -540,6 +540,7 @@ class CollectionApiClient {
     await _updateCollectionInDB(collection);
     _logger.info("Firing CollectionsUpdatedEvent: share_url_created");
     Bus.instance.fire(CollectionsUpdatedEvent("share_url_created"));
+    unawaited(CollectionService.instance.sync());
   }
 
   Future<void> disableShareUrl(Collection collection) async {
@@ -548,6 +549,7 @@ class CollectionApiClient {
     await _updateCollectionInDB(collection);
     _logger.info("Firing CollectionsUpdatedEvent: share_url_disabled");
     Bus.instance.fire(CollectionsUpdatedEvent("share_url_disabled"));
+    unawaited(CollectionService.instance.sync());
   }
 
   Future<void> updateShareUrl(
@@ -566,6 +568,7 @@ class CollectionApiClient {
     await _updateCollectionInDB(collection);
     _logger.info("Firing CollectionsUpdatedEvent: share_url_updated");
     Bus.instance.fire(CollectionsUpdatedEvent("share_url_updated"));
+    unawaited(CollectionService.instance.sync());
   }
 
   Future<List<User>> share(
@@ -593,6 +596,8 @@ class CollectionApiClient {
     final collection = CollectionService.instance.getFromCache(collectionID);
     final updatedCollection = collection!.copyWith(sharees: sharees);
     await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_added"));
+    unawaited(CollectionService.instance.sync());
     return sharees;
   }
 
@@ -602,6 +607,8 @@ class CollectionApiClient {
     final collection = CollectionService.instance.getFromCache(collectionID);
     final updatedCollection = collection!.copyWith(sharees: sharees);
     await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_removed"));
+    unawaited(CollectionService.instance.sync());
     return sharees;
   }
 

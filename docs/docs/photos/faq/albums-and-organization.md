@@ -63,6 +63,7 @@ Google Takeout does not reliably export shared albums:
 - Shared albums you own may appear in Takeout and may export as a folder, but not consistently. Some photos may be missing, folders may be split, or the album might not be recreated at all.
 - Shared albums you joined (someone else owns) do not export unless you manually added each photo to your own library.
 - Shared-album names or structure are not preserved in the metadata, hence the shared album cannot be automatically reconstructed.
+- Metadata regarding who shared the photo with you will not be present.
 
 The best way to export shared albums is to manually download each shared album:
 
@@ -98,6 +99,16 @@ Photos automatically move to Uncategorized in these situations:
 **When deleting from watched folders**: On desktop, if you delete a file from a folder being watched by Ente, the corresponding photo in Ente moves to Uncategorized (it's not permanently deleted).
 
 **Note**: Photos uploaded by others (from shared albums) do not go to Uncategorized when removed.
+
+### If all my photos are in Uncategorized, how do I move them to resemble the local album structure I have on my device? {#move-uncategorized-to-albums}
+
+If your photos are in Uncategorized instead of their original albums, you can reorganize them manually:
+
+1. Open **On device**, go to an album, select all photos, and add them to the corresponding album in Ente.
+2. Repeat for each album.
+3. Open Uncategorized, tap the three dots menu, and select **Clean up Uncategorized**. This removes any photos from Uncategorized that now exist in another album.
+
+Alternatively, if you have the original photos on your device, you can delete them from Uncategorized and re-upload them via **Backup folders** on mobile.
 
 ### How do I clean up Uncategorized items? {#clean-uncategorized}
 
@@ -196,9 +207,9 @@ The Uncategorized section shows all photos that aren't in any other album you ow
 
 For detailed guides, see [Hide](/photos/features/albums-and-organization/hide) and [Archive](/photos/features/albums-and-organization/archive).
 
-### Can I hide photos that are shared with me? {#hide-shared}
+### Can I hide albums or photos that are shared with me? {#hide-shared}
 
-No, you cannot hide photos or albums that are shared with you by other users. However, you can archive shared albums to remove them from your timeline. The "Hide" feature only works on content that you own.
+You can hide an album shared with you, but you can't hide an individual photo shared with you since hiding of individual files only works for files you own.
 
 ### Do archived photos appear in search results? {#archive-search}
 
@@ -330,7 +341,7 @@ If you accidentally deleted photos, you can restore them from Trash within 30 da
 - Select the items to restore
 - Click the "Restore" button
 
-Restored photos will be moved back to their original albums.
+Restored photos will be moved to an album of choice.
 
 ### How do I permanently delete photos or empty trash? {#empty-trash}
 
@@ -392,12 +403,14 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 
 ### What happens to deleted photos in collaborative albums? {#collaborative-deletion}
 
-In collaborative albums:
+In collaborative albums, deletion permissions depend on your role:
 
+- **If you're a viewer**: You cannot delete any photos from the album.
 - **If you're a collaborator**: You can only delete photos that you uploaded. When you delete a photo you uploaded, it goes to your trash.
-- **If you're the album owner**: You can remove any photos from the album, but you can only permanently delete photos you own. Other collaborators' photos will be removed from the album but remain in their accounts.
+- **If you're an admin**: You can remove any photo from the album (including photos uploaded by others), but you can only permanently delete photos you own. Other participants' photos will be removed from the album but remain in their accounts. You can also [suggest deletion](/photos/faq/sharing-and-collaboration#suggest-deletion) for photos owned by others.
+- **If you're the album owner**: You have all admin permissions, plus you can manage link settings and delete the album.
 
-When a collaborator leaves or is removed from a shared album, any photos they uploaded are also removed from that album.
+When a participant leaves or is removed from a shared album, any photos they uploaded are also removed from that album.
 
 ### Can I recover photos after deleting my account? {#recover-after-account-deletion}
 
@@ -432,10 +445,12 @@ All selected photos will be moved to trash together.
 You may not be able to delete photos if:
 
 - They are owned by someone else who shared them with you
-- You don't have permission (you're a viewer, not a collaborator or owner)
+- You don't have permission (you're a viewer or collaborator trying to delete others' photos)
 - There's a sync issue - try refreshing or restarting the app
 
-If you still can't delete photos you own, contact [support@ente.io](mailto:support@ente.io).
+If you're an admin or owner and want to remove photos that others uploaded, you can remove them from the album or use [suggest deletion](/photos/faq/sharing-and-collaboration#suggest-deletion).
+
+If you still can't delete photos you own, contact [support@ente.com](mailto:support@ente.com).
 
 ### How is Uncategorized different from Trash? {#uncategorized-vs-trash}
 

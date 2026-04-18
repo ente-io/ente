@@ -1,10 +1,12 @@
 import 'dart:async';
+import "dart:io" show Platform;
 import "dart:typed_data" show Float32List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
     show Uint64List;
 import "package:logging/logging.dart";
 import "package:photos/models/ml/vector.dart";
+import "package:photos/service_locator.dart" show flagService, isOfflineMode;
 import "package:photos/services/machine_learning/ml_constants.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
@@ -20,6 +22,10 @@ class MLComputer extends SuperIsolate {
   final _logger = Logger('MLComputer');
 
   final _initModelLock = Lock();
+  bool _isClipTokenizerInitialized = false;
+  String? _clipTextModelPath;
+  String? _clipTextVocabPath;
+  Future<void>? _clipTextWarmupFuture;
 
   @override
   bool get isDartUiIsolate => false;
@@ -29,6 +35,8 @@ class MLComputer extends SuperIsolate {
 
   @override
   bool get shouldAutomaticDispose => false;
+
+  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
 
   // Singleton pattern
   MLComputer._privateConstructor();
@@ -71,11 +79,33 @@ class MLComputer extends SuperIsolate {
 
   Future<List<double>> runClipText(String query) async {
     try {
-      await _ensureLoadedClipTextModel();
-      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
+      final useRustMl = _shouldUseRustMl;
+      await _ensureLoadedClipTextModel(useRustMl);
+      final modelPath = _clipTextModelPath;
+      final vocabPath = _clipTextVocabPath;
+      if (useRustMl && (modelPath == null || modelPath.trim().isEmpty)) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextModelPath",
+        );
+      }
+      if (useRustMl && (vocabPath == null || vocabPath.trim().isEmpty)) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextVocabPath",
+        );
+      }
       final textEmbedding = await runInIsolate(IsolateOperation.runClipText, {
         "text": query,
-        "address": clipAddress,
+        "useRustMl": useRustMl,
+        if (useRustMl) ...{
+          "clipTextModelPath": modelPath,
+          "clipTextVocabPath": vocabPath,
+          "preferCoreml": Platform.isIOS,
+          "preferNnapi": Platform.isAndroid,
+          "preferXnnpack": Platform.isAndroid,
+          "allowCpuFallback": true,
+        } else ...{
+          "address": ClipTextEncoder.instance.sessionAddress,
+        },
       }) as List<double>;
       return textEmbedding;
     } catch (e, s) {
@@ -84,32 +114,67 @@ class MLComputer extends SuperIsolate {
     }
   }
 
-  Future<void> _ensureLoadedClipTextModel() async {
-    return _initModelLock.synchronized(() async {
-      if (ClipTextEncoder.instance.isInitialized) return;
-      try {
-        // Initialize ClipText tokenizer
-        final String tokenizerRemotePath =
-            ClipTextEncoder.instance.vocabRemotePath;
-        final String tokenizerVocabPath = await RemoteAssetsService.instance
-            .getAssetPath(tokenizerRemotePath);
-        await runInIsolate(
-          IsolateOperation.initializeClipTokenizer,
-          {'vocabPath': tokenizerVocabPath},
-        );
+  Future<void> warmUpClipTextEncoder() {
+    _clipTextWarmupFuture ??= _warmUpClipTextEncoderInternal();
+    return _clipTextWarmupFuture!;
+  }
 
-        // Load ClipText model
-        final String modelName = ClipTextEncoder.instance.modelName;
-        final String? modelPath =
+  Future<void> _warmUpClipTextEncoderInternal() async {
+    try {
+      await runClipText("warm up text encoder");
+    } catch (e, s) {
+      _clipTextWarmupFuture = null;
+      _logger.warning("Clip text warmup failed in MLComputer", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> _ensureLoadedClipTextModel(bool useRustMl) async {
+    return _initModelLock.synchronized(() async {
+      try {
+        if (_clipTextVocabPath == null) {
+          final tokenizerRemotePath = ClipTextEncoder.instance.vocabRemotePath;
+          _clipTextVocabPath = await RemoteAssetsService.instance
+              .getAssetPath(tokenizerRemotePath);
+        }
+
+        if (useRustMl &&
+            _clipTextVocabPath != null &&
+            _clipTextModelPath != null) {
+          return;
+        }
+
+        if (!useRustMl &&
+            _isClipTokenizerInitialized &&
+            ClipTextEncoder.instance.isInitialized) {
+          return;
+        }
+
+        if (!useRustMl && !_isClipTokenizerInitialized) {
+          await runInIsolate(
+            IsolateOperation.initializeClipTokenizer,
+            {'vocabPath': _clipTextVocabPath!},
+          );
+          _isClipTokenizerInitialized = true;
+        }
+
+        final String? downloadedModelPath =
             await ClipTextEncoder.instance.downloadModelSafe();
-        if (modelPath == null) {
+        if (downloadedModelPath == null) {
           throw Exception("Could not download clip text model, no wifi");
         }
+        _clipTextModelPath = downloadedModelPath;
+
+        if (useRustMl || ClipTextEncoder.instance.isInitialized) {
+          return;
+        }
+
+        final String modelName = ClipTextEncoder.instance.modelName;
         final address = await runInIsolate(
           IsolateOperation.loadModel,
           {
             'modelName': modelName,
-            'modelPath': modelPath,
+            'modelPath': downloadedModelPath,
           },
         ) as int;
         ClipTextEncoder.instance.storeSessionAddress(address);
@@ -141,13 +206,37 @@ class MLComputer extends SuperIsolate {
     }
   }
 
-  Future<void> cacheImageEmbeddings(List<EmbeddingVector> embeddings) async {
+  Future<Map<String, List<QueryResult>>> computeBulkSimilaritiesWithRust(
+    Map<String, List<double>> textQueryToEmbeddingMap,
+    Map<String, double> minimumSimilarityMap,
+  ) async {
+    try {
+      final queryToResults =
+          await runInIsolate(IsolateOperation.computeBulkSimilaritiesWithRust, {
+        "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
+        "minimumSimilarityMap": minimumSimilarityMap,
+      }) as Map<String, List<QueryResult>>;
+      return queryToResults;
+    } catch (e, s) {
+      _logger.severe(
+        "Could not bulk compare embeddings with rust inside MLComputer isolate",
+        e,
+        s,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> cacheImageEmbeddings(
+    List<EmbeddingVector> embeddings, {
+    bool cacheRustExact = false,
+  }) async {
     try {
       await runInIsolate(
-        IsolateOperation.setIsolateCache,
+        IsolateOperation.cacheImageEmbeddings,
         {
-          'key': imageEmbeddingsKey,
-          'value': embeddings,
+          'embeddings': embeddings,
+          'cacheRustExact': cacheRustExact,
         },
       ) as bool;
       _logger.info(

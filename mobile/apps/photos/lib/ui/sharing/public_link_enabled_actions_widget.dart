@@ -41,7 +41,7 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
         leadingIcon: Icons.error_outline,
         leadingIconColor: enteColorScheme.warning500,
         menuItemColor: enteColorScheme.fillFaint,
-        isBottomBorderRadiusRemoved: true,
+        singleBorderRadius: 8,
       );
     }
 
@@ -81,9 +81,8 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
           leadingIcon: Icons.adaptive.share,
           menuItemColor: enteColorScheme.fillFaint,
           onTap: () async {
-            await shareAlbumLinkWithPlaceholder(
+            await shareAlbumLink(
               context,
-              collection,
               url,
               effectiveKey,
             );
@@ -103,14 +102,13 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
           leadingIcon: Icons.qr_code_outlined,
           menuItemColor: enteColorScheme.fillFaint,
           onTap: () async {
-            final enteColorScheme = getEnteColorScheme(context);
             await showDialog<void>(
               context: context,
               builder: (BuildContext dialogContext) {
                 return QrCodeDialog(
                   data: url,
                   title: collection.displayName,
-                  accentColor: enteColorScheme.primary500,
+                  accentColor: const Color(0xFF08C225),
                   shareFileName: 'ente_qr_${collection.displayName}.png',
                   shareText:
                       'Scan this QR code to view my ${collection.displayName} album on ente',
@@ -121,7 +119,8 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
                     text: 'ente',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Montserrat',
                     ),
                   ),
                 );
@@ -129,7 +128,7 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
             );
           },
           isTopBorderRadiusRemoved: true,
-          isBottomBorderRadiusRemoved: true,
+          isBottomBorderRadiusRemoved: false,
         ),
       ],
     );

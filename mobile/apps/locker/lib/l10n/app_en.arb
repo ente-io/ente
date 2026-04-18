@@ -29,6 +29,53 @@
       }
     }
   },
+  "keepOffline": "Keep offline",
+  "cloudOnly": "Cloud only",
+  "savingOffline": "Saving offline...",
+  "filesAvailableOffline": "{count, plural, =1{1 file saved offline} other{{count} files saved offline}}",
+  "@filesAvailableOffline": {
+    "description": "Success message when files are saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "filesAvailableOfflinePartial": "{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}",
+  "@filesAvailableOfflinePartial": {
+    "description": "Partial success message for offline save",
+    "placeholders": {
+      "successCount": {
+        "type": "int",
+        "example": "2"
+      },
+      "failureCount": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "failedToSaveFilesOffline": "{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}",
+  "@failedToSaveFilesOffline": {
+    "description": "Failure message when files could not be saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "filesRemovedFromOffline": "{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}",
+  "@filesRemovedFromOffline": {
+    "description": "Success message when offline copies are removed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "downloadFailed": "Download failed",
   "failedToDownloadOrDecrypt": "Failed to download item",
   "errorOpeningFile": "Error opening item",
@@ -95,6 +142,8 @@
     }
   },
   "collectionCannotBeDeleted": "This collection cannot be deleted",
+  "collectionCannotBeEdited": "This collection cannot be edited",
+  "collectionCannotBeShared": "This collection cannot be shared",
   "deleteCollection": "Delete collection",
   "deleteCollectionConfirmation": "Are you sure you want to delete \"{collectionName}\"?",
   "@deleteCollectionConfirmation": {
@@ -196,6 +245,7 @@
   "create": "Create",
   "renameCollection": "Rename collection",
   "save": "Save",
+  "download": "Download",
   "deleteFile": "Delete item",
   "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
   "@deleteFileConfirmation": {
@@ -210,6 +260,7 @@
   "noCollectionsFound": "No collections found",
   "createYourFirstCollection": "Create your first collection to get started",
   "createCollection": "Create collection",
+  "enterCollectionName": "Enter collection name",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
   "collectionEmptyStateTitle": "Nothing to see here",
@@ -285,6 +336,7 @@
     }
   },
   "uncategorized": "Uncategorized",
+  "syncing": "Syncing...",
   "syncingTrash": "Syncing trash...",
   "restoring": "Restoring...",
   "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",
@@ -344,16 +396,27 @@
   "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
   "authToViewPasskey": "Please authenticate to view passkey",
   "theme": "Theme",
+  "appearance": "Appearance",
   "lightTheme": "Light",
   "darkTheme": "Dark",
   "systemTheme": "System",
   "settings": "Settings",
   "about": "About",
+  "aboutUs": "About us",
   "weAreOpenSource": "We are open source!",
   "privacy": "Privacy",
   "terms": "Terms",
   "termsOfServicesTitle": "Terms",
+  "checkForUpdates": "Check for updates",
+  "checkingForUpdates": "Checking for updates...",
+  "unableToCheckForUpdatesRightNow": "Unable to check for updates right now",
+  "youAreOnTheLatestVersion": "You are on the latest version",
+  "aNewVersionOfEnteLockerIsAvailable": "A new version of Ente Locker is available.",
+  "criticalUpdateAvailable": "Critical update available",
+  "updateAvailable": "Update available",
+  "downloadUpdate": "Download update",
   "support": "Support",
+  "helpAndSupport": "Help and Support",
   "contactSupport": "Contact support",
   "help": "Help",
   "suggestFeatures": "Suggest features",
@@ -442,6 +505,7 @@
   "sharedByYou": "Shared by you",
   "sharedWithYou": "Shared with you",
   "manageLink": "Manage link",
+  "linkLabel": "Link",
   "linkExpiry": "Link expiry",
   "linkNeverExpires": "Never",
   "linkExpired": "Expired",
@@ -527,7 +591,7 @@
   "youCannotShareWithYourself": "You cannot share with yourself",
   "inviteToEnte": "Invite to Ente",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download Ente\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "This is your Verification ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
   "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
@@ -536,15 +600,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verification ID",
   "verifyEmailID": "Verify {email}",
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share items.",
-  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.com verification ID: {verificationID}",
   "passwordLock": "Password lock",
   "manage": "Manage",
   "addedAs": "Added as",
@@ -605,6 +669,14 @@
   "uploadStorageLimitErrorBody": "You've run out of storage space. Free up space to continue uploading.",
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
+  },
+  "uploadSubscriptionExpiredErrorTitle": "Subscription expired",
+  "@uploadSubscriptionExpiredErrorTitle": {
+    "description": "Title shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadSubscriptionExpiredErrorBody": "Your Ente Photos subscription has expired. Renew your subscription to continue uploading.",
+  "@uploadSubscriptionExpiredErrorBody": {
+    "description": "Body shown when uploads fail because the Photos subscription is expired"
   },
   "uploadFileCountLimitErrorTitle": "File limit reached",
   "@uploadFileCountLimitErrorTitle": {
@@ -851,7 +923,182 @@
       }
     }
   },
+  "important": "Important",
+  "unimportant": "Unimportant",
+  "removingFromImportant": "Removing from important...",
+  "markingAsImportant": "Marking as important...",
+  "fileMarkedAsImportant": "Item marked as important",
+  "fileRemovedFromImportant": "Item removed from important",
+  "filesMarkedAsImportant": "{count, plural, =1{1 item marked as important} other{{count} items marked as important}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "allFilesAlreadyMarkedAsImportant": "All items are already marked as important",
+  "failedToMarkFilesAsImportant": "Failed to mark items as important: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "failedToUpdateImportantStatus": "Failed to update important status: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Sorry",
   "subscribe": "Subscribe",
-  "subscriptionRequiredForSharing": "You need a paid subscription to share links"
+  "sharedWith": "Shared with",
+  "shareCollection": "Share collection",
+  "shareLater": "Share later",
+  "enterNameOrEmailToShareWith": "Enter name or email to share with",
+  "chooseFromAnExistingContact": "Choose from an existing contact",
+  "scheduleShare": "Schedule share",
+  "addEmail": "Add email",
+  "addNewEmail": "Add new email",
+  "noSharedUsers": "Not shared with anyone yet. Share this collection by adding someone's email below.",
+  "removeAccess": "Remove access",
+  "subscriptionRequiredForSharing": "You need a paid subscription to share links",
+  "sessionExpired": "Session expired",
+  "pleaseLoginAgain": "Please login again",
+  "filters": "Filters",
+  "seeAllCollections": "All collections",
+  "clearAllFilters": "Clear all",
+  "selectLanguage": "Select language",
+  "general": "General",
+  "language": "Language",
+  "selectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "@selectedCount": {
+    "description": "Number of items selected",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "actionNotSupportedForSharedFiles": "{count, plural, =1{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}",
+  "@actionNotSupportedForSharedFiles": {
+    "description": "Message when action is not supported for shared files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addTo": "Add to",
+  "shareNotSupportedForSharedFiles": "Share is not supported for shared files",
+  "editNotSupportedForSharedFiles": "Edit is not supported for shared files",
+  "deleteNotSupportedForSharedFiles": "Delete is not supported for shared files",
+  "importantNotSupportedForSharedFiles": "Important is not supported for shared files",
+  "sharingSection": "Sharing",
+  "sharingEnabledToggle": "Sharing enabled",
+  "publicLinkSection": "Public Link",
+  "linkEnabledToggle": "Link enabled",
+  "allowUploads": "Allow uploads",
+  "collectionUpdated": "Collection updated",
+  "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album",
+  "leaveCollectionSuccessfully": "Left collection successfully",
+  "leftCollectionsSuccessfully": "{count, plural, =1{Left 1 collection successfully} other{Left {count} collections successfully}}",
+  "@leftCollectionsSuccessfully": {
+    "description": "Success message when leaving collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "removePublicLink": "Remove public link",
+  "removePublicLinkConfirmation": "This will remove the public link for accessing \"{collectionName}\".",
+  "@removePublicLinkConfirmation": {
+    "description": "Confirmation message when removing public link",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
+  "collectionsDeletedSuccessfully": "{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}",
+  "@collectionsDeletedSuccessfully": {
+    "description": "Success message when collections are deleted",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "restoreToCollection": "Restore to collection",
+  "restoringFiles": "Restoring...",
+  "filesRestoredSuccessfully": "{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}",
+  "@filesRestoredSuccessfully": {
+    "description": "Success message when items are restored from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToRestoreFiles": "Failed to restore items",
+  "permanentlyDelete": "Permanently delete",
+  "permanentlyDeleteFilesBody": "{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.",
+  "@permanentlyDeleteFilesBody": {
+    "description": "Confirmation body for permanent deletion from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDelete": "Yes, delete",
+  "deletingFiles": "Deleting...",
+  "filesDeletedPermanently": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
+  "@filesDeletedPermanently": {
+    "description": "Success message when items are permanently deleted from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToDeleteFiles": "Failed to delete items",
+  "itemsStored": "Items stored",
+  "of_": "of",
+  "usageYou": "You",
+  "usageFamily": "Family",
+  "searchSettings": "Search settings",
+  "suggestions": "Suggestions",
+  "noResultsFound": "No results found",
+  "viewActiveSessions": "View active sessions",
+  "authToViewYourActiveSessions": "Please authenticate to view your active sessions",
+  "deleteAccountFeedbackPrompt": "Something not working? Reach out at {email}, we'd love to help.",
+  "@deleteAccountFeedbackPrompt": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "sendFeedback": "Send feedback",
+  "deleteAccountPermanentWarning": "This will permanently delete your Ente Auth, Photos, and Locker data"
 }

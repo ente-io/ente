@@ -1,11 +1,11 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/contacts/contact_identity_resolver.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -74,10 +74,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     final filterSuggestedUsers = _suggestedUsers
         .where(
-          (element) =>
-              (element.displayName ?? element.email).toLowerCase().contains(
-                    _textController.text.trim().toLowerCase(),
-                  ),
+          (element) => _matchesUserQuery(
+            element,
+            _textController.text.trim().toLowerCase(),
+          ),
         )
         .toList();
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
@@ -148,9 +148,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 widget.actionTypesToShow.contains(
                                   ActionTypesToShow.addAdmin,
                                 )
-                                    ? const MenuSectionDescriptionWidget(
-                                        content:
-                                            '(i) Admins can manage photos & participants.',
+                                    ? MenuSectionDescriptionWidget(
+                                        content: AppLocalizations.of(context)
+                                            .adminsCanManagePhotosAndParticipants,
                                       )
                                     : const SizedBox.shrink(),
                               ],
@@ -158,20 +158,20 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           );
                         }
                         final currentUser = filterSuggestedUsers[index];
+                        final resolvedName = resolveDisplayName(currentUser);
                         return Column(
                           children: [
                             MenuItemWidget(
                               key: ValueKey(
-                                currentUser.displayName ?? currentUser.email,
+                                '${currentUser.email}-$resolvedName',
                               ),
                               captionedTextWidget: CaptionedTextWidget(
-                                title: currentUser.displayName ??
-                                    currentUser.email,
+                                title: resolvedName,
                               ),
                               leadingIconSize: 24.0,
                               leadingIconWidget: UserAvatarWidget(
                                 currentUser,
-                                type: AvatarType.mini,
+                                type: AvatarType.md,
                               ),
                               menuItemColor:
                                   getEnteColorScheme(context).fillFaint,
@@ -345,7 +345,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               ? ButtonType.primary
               : ButtonType.neutral,
           buttonSize: ButtonSize.large,
-          labelText: _adminActionLabel(_selectedEmails.length),
+          labelText: AppLocalizations.of(context)
+              .addAdmins(count: _selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             final results = <bool>[];
@@ -365,7 +366,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             }
 
             final successful = results.where((e) => e).length;
-            showToast(context, _adminSuccessMessage(successful));
+            showToast(
+              context,
+              AppLocalizations.of(context)
+                  .adminsSuccessfullyAdded(count: successful),
+            );
 
             if (!results.any((e) => e == false) && mounted) {
               Navigator.of(context).pop(true);
@@ -504,9 +509,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(
-        (element) => !(element.displayName ?? element.email)
-            .toLowerCase()
-            .contains(_textController.text.trim().toLowerCase()),
+        (element) => !_matchesUserQuery(
+          element,
+          _textController.text.trim().toLowerCase(),
+        ),
       );
     }
     suggestedUsers.removeWhere(
@@ -527,23 +533,17 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       case ActionTypesToShow.addCollaborator:
         return AppLocalizations.of(context).addCollaborator;
       case ActionTypesToShow.addAdmin:
-        return _adminTitle();
+        return AppLocalizations.of(context).addAdmin;
     }
   }
 
-  String _adminActionLabel(int count) => count == 1
-      ? "(i) Add admin"
-      : "(i) Add admins";
-
-  String _adminSuccessMessage(int count) {
-    if (count == 0) {
-      return "(i) No admins were added";
+  bool _matchesUserQuery(User user, String lowerCaseQuery) {
+    if (lowerCaseQuery.isEmpty) {
+      return true;
     }
-    if (count == 1) {
-      return "(i) 1 admin successfully added";
-    }
-    return "(i) $count admins successfully added";
+    final resolvedName = resolveDisplayName(user).toLowerCase();
+    final resolvedEmail = (resolveKnownEmail(user) ?? user.email).toLowerCase();
+    return resolvedName.contains(lowerCaseQuery) ||
+        resolvedEmail.contains(lowerCaseQuery);
   }
-
-  String _adminTitle() => "(i) Add admin";
 }

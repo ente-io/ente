@@ -1,10 +1,10 @@
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/main.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";

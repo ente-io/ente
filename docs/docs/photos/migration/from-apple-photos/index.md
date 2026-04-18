@@ -20,37 +20,44 @@ your iCloud library and import.
 > (Note: this is only needed during the initial import, subsequently
 > the app will automatically backup photos in the background as you take them).
 
-## Desktop
+## Importing iCloud shared albums
 
-Alternatively, or if you prefer to use the desktop app, then you can use the
-following steps:
+iCloud shared albums use reduced-quality copies of your photos and videos — they
+are **not** the same as your original files. Apple downscales photos to 2,048
+pixels on the long edge and caps videos at 720p / 15 minutes. Location data,
+captions, and original dates are also stripped.
 
-#### 1. Export your data from the Apple Photos app.
+Because of these limitations, the best approach depends on whether you have
+access to the originals.
 
-Select the files you want to export (`Command + A` to select them all), and
-click on `File` > `Export` > `Export Unmodified Originals`.
+### If you (or the album owner) still have the originals
 
-![Apple Photos - Export](export.png)
+This is the recommended path, as it preserves full quality and metadata.
 
-In the dialog that pops up, select File Name as `Sequential` and provide any
-prefix you'd like. This is to make sure that we combine the photo and video
-portions of your Live Photos correctly.
+1. Install the Ente app on your iPhone or iPad.
+2. The Ente app will directly read from your iCloud library and back up the
+   originals with full quality and metadata.
+3. Organize the photos into albums inside Ente after upload.
 
-![Apple Photos - Sequential file names](sequential.png)
+### If shared album copies are all you have
 
-Finally, choose an export directory and confirm by clicking `Export Originals`.
-You will receive a notification from the app once your export is complete.
+1. **On iPhone/iPad:** Open the shared album, select the photos, tap the share
+   button, and save them to your device library.
+2. **On iCloud.com:** Open the shared album, select up to 1,000 items, and click
+   Download.
+3. Import the saved photos into Ente using the mobile app or the desktop app.
 
-#### 2. Import into Ente
+> [!NOTE]
+>
+> Photos downloaded from iCloud shared albums will be lower quality than the
+> originals and will be missing location data and original dates. The download
+> date may replace the original capture date, causing photos to sort incorrectly.
+> After importing, you can
+> [fix dates manually](/photos/faq/metadata-and-editing#fix-incorrect-dates) in
+> Ente if needed.
 
-Now simply drag and drop the downloaded folders into
-[our desktop app](https://ente.io/download/desktop) and grab a cup of coffee (or
-a good night's sleep, depending on the size of your library) while we handle the
-rest.
-
-> Note: In case your uploads get interrupted, just drag and drop the folders
-> into the same albums again, and we will ignore already backed up files and
-> upload just the rest.
+For information regarding desktop migration, please go through this
+[FAQ](/photos/faq/migration#importing-from-apple-photos).
 
 If you run into any issues during this migration, please reach out to
-[support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+[support@ente.com](mailto:support@ente.com) and we will be happy to help you!

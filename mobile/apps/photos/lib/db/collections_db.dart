@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:sqflite/sqflite.dart';
@@ -40,6 +40,7 @@ class CollectionsDB {
   static const columnSharedMMdVersion = 'shared_mmd_ver';
 
   static const columnUpdationTime = 'updation_time';
+  static const columnSharedAt = 'shared_at';
   static const columnIsDeleted = 'is_deleted';
 
   static final intitialScript = [...createTable(table)];
@@ -52,6 +53,7 @@ class CollectionsDB {
     ...addPrivateMetadata(),
     ...addPublicMetadata(),
     ...addShareeMetadata(),
+    ...addSharedAt(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -191,6 +193,14 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addSharedAt() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnSharedAt INTEGER;
+      ''',
+    ];
+  }
+
   Future<void> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -267,6 +277,7 @@ class CollectionsDB {
     row[columnPublicURLs] =
         json.encode(collection.publicURLs.map((x) => x.toMap()).toList());
     row[columnUpdationTime] = collection.updationTime;
+    row[columnSharedAt] = collection.sharedAt;
     if (collection.isDeleted) {
       row[columnIsDeleted] = _sqlBoolTrue;
     } else {
@@ -307,6 +318,7 @@ class CollectionsDB {
                   .map((x) => PublicURL.fromMap(x)),
             ),
       int.parse(row[columnUpdationTime]),
+      sharedAt: _parseNullableInt(row[columnSharedAt]),
       // default to False is columnIsDeleted is not set
       isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,
     );
@@ -318,5 +330,18 @@ class CollectionsDB {
     result.sharedMmdVersion = row[columnSharedMMdVersion] ?? 0;
     result.sharedMmdJson = row[columnSharedMMdJson] ?? '{}';
     return result;
+  }
+
+  int? _parseNullableInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is int) {
+      return value;
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 }

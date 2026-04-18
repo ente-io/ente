@@ -1,16 +1,20 @@
 import 'package:dio/dio.dart';
-import "package:ente_configuration/base_configuration.dart";
-import "package:ente_logging/logging.dart";
-import "package:ente_strings/ente_strings.dart";
+import 'package:ente_logging/logging.dart';
+import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 
 class DeveloperSettingsPage extends StatefulWidget {
-  final BaseConfiguration config;
+  final String Function() getCurrentEndpoint;
+  final Future<void> Function(String url) setEndpoint;
 
-  const DeveloperSettingsPage(this.config, {super.key});
+  const DeveloperSettingsPage({
+    required this.getCurrentEndpoint,
+    required this.setEndpoint,
+    super.key,
+  });
 
   @override
   State<DeveloperSettingsPage> createState() => _DeveloperSettingsPageState();
@@ -19,6 +23,14 @@ class DeveloperSettingsPage extends StatefulWidget {
 class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   final _logger = Logger('DeveloperSettingsPage');
   final _urlController = TextEditingController();
+  late String _currentEndpoint;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentEndpoint = widget.getCurrentEndpoint();
+    _logger.info("Current endpoint is: $_currentEndpoint");
+  }
 
   @override
   void dispose() {
@@ -28,9 +40,6 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info(
-      "Current endpoint is: ${widget.config.getHttpEndpoint()}",
-    );
     return Scaffold(
       appBar: AppBar(
         title: Text(context.strings.developerSettings),
@@ -43,7 +52,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               controller: _urlController,
               decoration: InputDecoration(
                 labelText: context.strings.serverEndpoint,
-                hintText: widget.config.getHttpEndpoint(),
+                hintText: _currentEndpoint,
               ),
               autofocus: true,
             ),
@@ -56,8 +65,11 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   final uri = Uri.parse(url);
                   if ((uri.scheme == "http" || uri.scheme == "https")) {
                     await _ping(url);
-                    await widget.config.setHttpEndpoint(url);
-                    showToast(context, context.strings.endpointUpdatedMessage);
+                    await widget.setEndpoint(url);
+                    showToast(
+                      context,
+                      context.strings.endpointUpdatedMessage,
+                    );
                     Navigator.of(context).pop();
                   } else {
                     throw const FormatException();

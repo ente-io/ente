@@ -16,6 +16,7 @@ import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractExifDates } from "ente-gallery/services/exif";
+import { tryParseEpochMicrosecondsFromFileName } from "ente-gallery/services/upload/date";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
@@ -110,6 +111,7 @@ type FixOption =
     | "date-time-original"
     | "date-time-digitized"
     | "metadata-date"
+    | "file-name"
     | "custom";
 
 interface FormValues {
@@ -200,6 +202,11 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                             value={"metadata-date"}
                             control={<Radio size="small" />}
                             label={t("exif_metadata_date")}
+                        />
+                        <FormControlLabel
+                            value={"file-name"}
+                            control={<Radio size="small" />}
+                            label={t("file_name")}
                         />
                         <FormControlLabel
                             value={"custom"}
@@ -325,6 +332,21 @@ const updateFileDate = async (
             offset: undefined,
             timestamp: customDate!.timestamp,
         };
+    } else if (fixOption == "file-name") {
+        const editedTime = tryParseEpochMicrosecondsFromFileName(
+            fileFileName(file),
+        );
+        if (editedTime === undefined) return;
+
+        const existingDate = fileCreationPhotoDate(file);
+        if (editedTime == existingDate.getTime()) return;
+
+        await updateFilePublicMagicMetadata(file, {
+            editedTime,
+            dateTime: undefined,
+            offsetTime: undefined,
+        });
+        return;
     } else if (file.metadata.fileType == FileType.image) {
         const blob = await downloadManager.fileBlob(file);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =

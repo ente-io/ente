@@ -1,32 +1,36 @@
 name: "Lint (mobile)"
 
 on:
-    # Run on every pull request (open or push to it) that changes mobile/
+    # Run on every pull request (open or push to it) that changes the photos app,
+    # shared photos Rust, or rust core
     pull_request:
         paths:
             - "mobile/apps/photos/**"
-            - "mobile/packages/rust/**"
+            - "rust/photos/**"
             - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 
 env:
     FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.90.0"
     RUSTFLAGS: -D warnings
 
 permissions:
     contents: read
 
 jobs:
-    lint:
+    mobile-lint:
         runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: mobile/apps/photos
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Verify frozen mobile pubspecs
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
+              working-directory: ${{ github.workspace }}
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -34,6 +38,12 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt,clippy
 
             - name: Cache
               uses: actions/cache@v4
@@ -45,7 +55,7 @@ jobs:
                       mobile/apps/photos/rust/target
                   key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
 
-            - run: flutter pub get
+            - run: flutter pub get --enforce-lockfile
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen

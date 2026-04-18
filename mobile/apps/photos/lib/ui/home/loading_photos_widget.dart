@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
@@ -14,7 +15,6 @@ import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import "package:photos/utils/email_util.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
   final bool isOnboardingFlow;
@@ -31,6 +31,8 @@ class LoadingPhotosWidget extends StatefulWidget {
 }
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
+  static const int _preservedMemoriesCountInMillions = 500;
+
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   StreamSubscription<LocalImportProgressEvent>? _importProgressEvent;
   int _currentPage = 0;
@@ -261,7 +263,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                                 await sendLogs(
                                   context,
                                   AppLocalizations.of(context).contactSupport,
-                                  "support@ente.io",
+                                  "support@ente.com",
                                   postShare: () {},
                                 );
                               },
@@ -280,7 +282,11 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   void _setupLoadingMessages(BuildContext context) {
     _messages.add(AppLocalizations.of(context).loadMessage1);
-    _messages.add(AppLocalizations.of(context).loadMessage2);
+    _messages.add(
+      AppLocalizations.of(context).loadMessage2(
+        memoriesCountInMillions: _preservedMemoriesCountInMillions,
+      ),
+    );
     _messages.add(AppLocalizations.of(context).loadMessage3);
     _messages.add(AppLocalizations.of(context).loadMessage4);
     _messages.add(AppLocalizations.of(context).loadMessage5);

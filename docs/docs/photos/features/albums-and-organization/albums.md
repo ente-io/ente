@@ -72,6 +72,14 @@ Select any photo you want to use as the cover for your album.
 - Browse through your photos and tap on the image you want to set as the album cover
 - Tap **Use selected photo**
 
+### On web / desktop
+
+- Click the album you want to change
+- Click the overflow menu (three dots) in the top right corner
+- Click **Set cover**
+- Select the image you want to use as the album cover
+- Click **Confirm**
+
 ## View album photos on a map
 
 Explore your album's memories based on their location.

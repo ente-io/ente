@@ -18,9 +18,13 @@ dist
 
 # Next.js
 .next/
+.next-dev/
 .next-desktop/
 out/
 next-env.d.ts
+
+# Static export outputs
+apps/ensu/next/
 
 packages/wasm/pkg/
 packages/wasm/target/

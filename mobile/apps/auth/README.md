@@ -5,7 +5,7 @@ storing your 2FA codes with cloud backups. Works offline. You can even use it
 without signing up for an account if you don't want the cloud backups or
 multi-device sync.
 
-![App Screenshots](./screenshots/screenshots.png)
+![App Screenshots](./docs/assets/screenshots.png)
 
 ## 📲 Download
 
@@ -46,30 +46,18 @@ or managing your secrets, please use our mobile or desktop app.
 
 1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
 
-2. Pull in all submodules with `git submodule update --init --recursive`
+2. Pull in submodules with `git submodule update --init --recursive`
 
 3. Install dependencies using one of these methods:
-   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from the `mobile/` directory, run `melos bootstrap`
-   - **Using Flutter directly:** Run `flutter pub get`
+   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
+   - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
-4. For Android, [setup your
-   keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-   and run `flutter build apk --release --flavor independent`
+4. Run the app:
+   - Android: `flutter run --flavor independent`
+   - iOS: `flutter run`
+   - macOS: `flutter run -d macos`
 
-5. For iOS, run `flutter build ios`
-
-## ⚙️ Develop
-
-For Android, use
-
-```sh
-flutter run -t lib/main.dart --flavor independent
-```
-
-For iOS, use `flutter run`
-
-VSCode users might find it useful to copy [docs/vscode](docs/vscode) into a top
-level `.vscode`.
+To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
 
 If the code you're working needs to modify user facing strings, see
 [docs/localization](docs/localization.md).
@@ -77,14 +65,14 @@ If the code you're working needs to modify user facing strings, see
 ## 🔩 Architecture
 
 The architecture that powers end-to-end encrypted storage and sync of your
-tokens has been documented [here](architecture/README.md).
+tokens has been documented [here](../../../architecture/README.md#token-encryption).
 
 ## 🌍 Translate
 
 [![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app)
 
 If you're interested in helping out with translation, please visit our [Crowdin
-project](https://crowdin.com/project/ente-photos-app) to get started. Thank you
+project](https://crowdin.com/project/ente-authenticator-app) to get started. Thank you
 for your support.
 
 If your language is not listed for translation, please [create a GitHub
@@ -102,19 +90,9 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 The best way to support this project is by checking out [Ente
 Photos](../mobile/README.md) or spreading the word.
 
-For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).
-
-## Certificate Fingerprints
-
-- **SHA1**: 57:E8:C6:59:C3:AA:C9:38:B0:10:70:5E:90:85:BC:20:67:E6:8F:4B
-- **SHA256**: BA:8B:F0:32:98:62:70:05:ED:DF:F6:B1:D6:0B:3B:FA:A1:4E:E8:BD:C7:61:4F:FB:3B:B1:1C:58:8D:9E:3A:D7
-
-To verify these fingerprints, use the following command:
-```bash
-apksigner verify --print-certs <path_to_apk>
-```
+For more ways to contribute, see [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## ⭐️ About
 
 To know more about Ente and the ways to get in touch or seek help, see [our main
-README](../../../README.md) or visit [ente.io](https://ente.io).
+README](../../../README.md) or visit [ente.com](https://ente.com).

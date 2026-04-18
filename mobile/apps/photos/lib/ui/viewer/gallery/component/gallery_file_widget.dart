@@ -1,12 +1,16 @@
+import "dart:async";
+
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:media_extension/media_extension.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
@@ -17,7 +21,6 @@ import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class GalleryFileWidget extends StatefulWidget {
   final EnteFile file;
@@ -45,6 +48,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   late bool _isFileSelected;
   int? _currentPointerId;
   bool _isPointerInside = false;
+  late final StreamSubscription<FileUploadedEvent> _fileUploadedSubscription;
 
   @override
   void initState() {
@@ -52,24 +56,28 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     _isFileSelected =
         widget.selectedFiles?.isFileSelected(widget.file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
+    _fileUploadedSubscription =
+        Bus.instance.on<FileUploadedEvent>().listen((event) {
+      if (event.file.generatedID != null &&
+          event.file.generatedID == widget.file.generatedID &&
+          mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
+    _fileUploadedSubscription.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check if swipe selection should be enabled
-    final shouldEnableSwipeSelection =
-        localSettings.isSwipeToSelectEnabled && !widget.limitSelectionToOne;
-
     final Widget fileContent = _buildFileContent(context);
 
-    // Wrap with swipe selection if enabled
-    if (shouldEnableSwipeSelection) {
+    if (!widget.limitSelectionToOne) {
       return SwipeSelectableFileWidget(
         file: widget.file,
         selectedFiles: widget.selectedFiles,
@@ -270,6 +278,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         galleryFiles.indexOf(file),
         widget.tag,
         isLocalOnlyContext: isLocalOnlyContext,
+        galleryType: galleryType,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);

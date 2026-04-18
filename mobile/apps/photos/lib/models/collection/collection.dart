@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/extensions/user_extension.dart";
-import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
@@ -26,6 +26,7 @@ class Collection {
   final List<User> sharees;
   final List<PublicURL> publicURLs;
   final int updationTime;
+  final int? sharedAt;
   final bool isDeleted;
 
   // In early days before public launch, we used to store collection name
@@ -93,16 +94,31 @@ class Collection {
     this.sharees,
     this.publicURLs,
     this.updationTime, {
+    this.sharedAt,
     this.isDeleted = false,
   });
 
   bool isArchived() {
-    return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+    final userID = Configuration.instance.getUserID();
+    if (userID != null && isOwner(userID)) {
+      return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+    } else {
+      return hasShareeArchived();
+    }
   }
 
   bool hasShareeArchived() {
     return sharedMmdVersion > 0 &&
         sharedMagicMetadata.visibility == archiveVisibility;
+  }
+
+  bool hasShareeHidden() {
+    return sharedMmdVersion > 0 &&
+        sharedMagicMetadata.visibility == hiddenVisibility;
+  }
+
+  bool hasShareePinned() {
+    return (sharedMagicMetadata.order ?? 0) != 0;
   }
 
   // hasLink returns true if there's any link attached to the collection
@@ -120,7 +136,14 @@ class Collection {
     if (isDefaultHidden()) {
       return true;
     }
-    return mMdVersion > 0 && (magicMetadata.visibility == hiddenVisibility);
+    final userID = Configuration.instance.getUserID();
+    if (userID != null && isOwner(userID)) {
+      // Owner: check owner's magic metadata
+      return mMdVersion > 0 && magicMetadata.visibility == hiddenVisibility;
+    } else {
+      // Sharee: check sharee's magic metadata
+      return hasShareeHidden();
+    }
   }
 
   bool isDefaultHidden() {
@@ -142,6 +165,14 @@ class Collection {
 
   bool isAdmin(int userID) {
     return getRole(userID) == CollectionParticipantRole.admin;
+  }
+
+  bool canAdd(int userID) {
+    final participantRole = getRole(userID);
+    final canEditCollection = isOwner(userID) ||
+        participantRole == CollectionParticipantRole.collaborator ||
+        participantRole == CollectionParticipantRole.admin;
+    return canEditCollection && !isDeleted;
   }
 
   bool canAutoAdd(int userID) {
@@ -221,6 +252,7 @@ class Collection {
     List<User>? sharees,
     List<PublicURL>? publicURLs,
     int? updationTime,
+    int? sharedAt,
     bool? isDeleted,
     String? mMdEncodedJson,
     int? mMdVersion,
@@ -241,6 +273,7 @@ class Collection {
       sharees ?? this.sharees,
       publicURLs ?? this.publicURLs,
       updationTime ?? this.updationTime,
+      sharedAt: sharedAt ?? this.sharedAt,
       isDeleted: isDeleted ?? this.isDeleted,
     );
     result.mMdVersion = mMdVersion ?? this.mMdVersion;
@@ -278,8 +311,22 @@ class Collection {
       sharees,
       publicURLs,
       map['updationTime'],
+      sharedAt: _parseNullableInt(map['sharedAt']),
       isDeleted: map['isDeleted'] ?? false,
     );
+  }
+
+  static int? _parseNullableInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is int) {
+      return value;
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 }
 

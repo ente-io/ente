@@ -22,6 +22,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
@@ -60,10 +61,16 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   bool _convertToSupportedFormat = false;
+  bool _showingThumbnailFallback = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
+  StreamSubscription<dynamic>? _zoomStreamSubscription;
+
+  // Baseline PhotoView scale for the current image/controller when the image
+  // is at its contained size. ZoomTransform.scale is reported relative to this.
+  double? _initialScale;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   late final StreamSubscription<ResetZoomOfPhotoView> _resetZoomSubscription;
@@ -83,9 +90,15 @@ class _ZoomableImageState extends State<ZoomableImage> {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
-      debugPrint("isZooming = $_isZooming, currentState $value");
-      // _logger.info('is reakky zooming $_isZooming with state $value');
+      final state = InheritedDetailPageState.maybeOf(context);
+      state?.isZoomedNotifier.value = _isZooming;
+      if (!_isZooming) {
+        _initialScale = _photoViewController.scale ?? _initialScale;
+        state?.zoomTransformNotifier.value = ZoomTransform.identity;
+      }
     };
+
+    _subscribeToZoomStream();
 
     _captionUpdatedSubscription =
         Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
@@ -107,8 +120,27 @@ class _ZoomableImageState extends State<ZoomableImage> {
     });
   }
 
+  void _subscribeToZoomStream() {
+    _zoomStreamSubscription =
+        _photoViewController.outputStateStream.listen((value) {
+      final state = InheritedDetailPageState.maybeOf(context);
+      if (value.scale == null) return;
+      if (!_isZooming) {
+        _initialScale = value.scale;
+        state?.zoomTransformNotifier.value = ZoomTransform.identity;
+        return;
+      }
+      _initialScale ??= value.scale;
+      state?.zoomTransformNotifier.value = ZoomTransform(
+        scale: value.scale! / _initialScale!,
+        offset: value.position,
+      );
+    });
+  }
+
   @override
   void dispose() {
+    _zoomStreamSubscription?.cancel();
     _photoViewController.dispose();
     _scaleStateController.dispose();
     _captionUpdatedSubscription.cancel();
@@ -179,6 +211,15 @@ class _ZoomableImageState extends State<ZoomableImage> {
               ),
             );
           },
+        ),
+      );
+    } else if (_showingThumbnailFallback) {
+      content = Center(
+        child: ThumbnailWidget(
+          _photo,
+          rawThumbnail: true,
+          thumbnailSize: thumbnailLargeSize,
+          fit: BoxFit.contain,
         ),
       );
     } else {
@@ -411,18 +452,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
         imageProvider,
         context,
         onError: (exception, s) async {
-          if (exception.toString().contains(
-                    "Codec failed to produce an image, possibly due to invalid image data",
-                  ) ||
-              exception.toString().contains(
-                    "Could not decompress image.",
-                  )) {
-            unawaited(_loadInSupportedFormat(file, e));
-          } else {
-            _logger.warning(
-              "Failed to load image ${_photo.displayName} with error: $exception",
-            );
-          }
+          _logger.warning(
+            "Failed to load image ${_photo.displayName} with error: $exception, attempting fallback",
+          );
+          unawaited(_loadInSupportedFormat(file, exception));
         },
       ).then((value) {
         if (mounted && !_loadedFinalImage && !_convertToSupportedFormat) {
@@ -456,13 +489,26 @@ class _ZoomableImageState extends State<ZoomableImage> {
     if (shouldFixPosition) {
       final prevImageInfo = await getImageInfo(previewImageProvider);
       finalImageInfo = await getImageInfo(finalImageProvider);
-      final scale = _photoViewController.scale! /
+      final previousScale = _photoViewController.scale!;
+      final previousRelativeScale = _initialScale != null && _initialScale! > 0
+          ? previousScale / _initialScale!
+          : null;
+      final scale = previousScale /
           (finalImageInfo.image.width / prevImageInfo.image.width);
       final currentPosition = _photoViewController.value.position;
+      unawaited(_zoomStreamSubscription?.cancel());
       _photoViewController = PhotoViewController(
         initialPosition: currentPosition,
         initialScale: scale,
       );
+      if (previousRelativeScale != null &&
+          previousRelativeScale.isFinite &&
+          previousRelativeScale > 0) {
+        _initialScale = scale / previousRelativeScale;
+      } else {
+        _initialScale = null;
+      }
+      _subscribeToZoomStream();
       // Fix for auto-zooming when final image is loaded after double tapping
       //twice.
       _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;
@@ -476,10 +522,33 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 
+  bool _isRawFile() {
+    final extension = _photo.displayName.toLowerCase().split('.').last;
+    return isRawImageExtension(extension);
+  }
+
   Future<void> _loadInSupportedFormat(
     File file,
     Object unsupportedErr,
   ) async {
+    // Skip compression for RAW files - FlutterImageCompress cannot process them
+    // and will crash. Go directly to thumbnail fallback.
+    if (_isRawFile()) {
+      _logger.info(
+        "Skipping compression for RAW file ${_photo.displayName}, using thumbnail fallback",
+      );
+      _convertToSupportedFormat = true;
+      if (mounted) {
+        setState(() {
+          _showingThumbnailFallback = true;
+        });
+        InheritedDetailPageState.maybeOf(context)
+            ?.showingThumbnailFallbackNotifier
+            .value = detailPageFileIdentifier(_photo);
+      }
+      return;
+    }
+
     _logger.info(
       "Compressing ${_photo.displayName} to viewable format due to $unsupportedErr",
     );
@@ -523,6 +592,14 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _logger.severe(
         "Failed to compress image ${_photo.displayName} to viewable format",
       );
+      if (mounted) {
+        setState(() {
+          _showingThumbnailFallback = true;
+        });
+        InheritedDetailPageState.maybeOf(context)
+            ?.showingThumbnailFallbackNotifier
+            .value = detailPageFileIdentifier(_photo);
+      }
     }
   }
 }

@@ -17,15 +17,15 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/components/collection_popup_menu_widget.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
-import "package:locker/ui/components/popup_menu_item_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
-import 'package:locker/utils/collection_actions.dart';
+import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:logging/logging.dart";
 
 class CollectionPage extends UploaderPage {
@@ -47,9 +47,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   final _logger = Logger("CollectionPage");
   late StreamSubscription<CollectionsUpdatedEvent>
       _collectionUpdateSubscription;
-  bool _isCollectionDeleted = false;
-  bool _isDeletingCollection = false;
-  bool _ignoreCollectionUpdates = false;
 
   late Collection _collection;
   List<EnteFile> _files = [];
@@ -59,6 +56,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   bool isFavorite = false;
 
   final _selectedFiles = SelectedFiles();
+  final _scrollController = ScrollController();
 
   @override
   void onFileUploadComplete() {
@@ -103,11 +101,15 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   @override
   void dispose() {
     _collectionUpdateSubscription.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
   List<EnteFile> get _displayedFiles =>
       isSearchActive ? _filteredFiles : _files;
+
+  bool get _isSelectionEnabled =>
+      collectionViewType != CollectionViewType.quickLink;
 
   @override
   void initState() {
@@ -115,9 +117,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     _initializeData(widget.collection);
     _collectionUpdateSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
-      if (_ignoreCollectionUpdates || _isCollectionDeleted) {
-        return;
-      }
       _logger.info(
         "CollectionsUpdatedEvent received on CollectionPage (${widget.collection.id}): ${event.source}",
       );
@@ -136,7 +135,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           _logger.warning(
             'Collection ${widget.collection.id} no longer exists, navigating back',
           );
-          if (!_isCollectionDeleted && mounted) {
+          if (mounted) {
             Navigator.of(context).pop();
           }
         }
@@ -159,48 +158,12 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     setState(() {});
   }
 
-  Future<void> _deleteCollection() async {
-    if (_isDeletingCollection) {
-      return;
-    }
-    _isDeletingCollection = true;
-    _ignoreCollectionUpdates = true;
-    var didDelete = false;
-    try {
-      await CollectionActions.deleteCollection(
-        context,
-        _collection,
-        onSuccess: () {
-          didDelete = true;
-          _isCollectionDeleted = true;
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-        },
-      );
-    } finally {
-      if (!didDelete) {
-        _ignoreCollectionUpdates = false;
-      }
-      _isDeletingCollection = false;
-    }
-  }
-
-  Future<void> _editCollection() async {
-    await CollectionActions.editCollection(
-      context,
-      _collection,
-      onSuccess: () {
-        setState(() {});
-      },
-    );
-  }
-
   Future<void> _shareCollection() async {
-    final collection = widget.collection;
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
-          collectionViewType != CollectionViewType.sharedCollection &&
+          collectionViewType != CollectionViewType.sharedCollectionViewer &&
+          collectionViewType !=
+              CollectionViewType.sharedCollectionCollaborator &&
           collectionViewType != CollectionViewType.hiddenOwnedCollection &&
           collectionViewType != CollectionViewType.favorite &&
           !isQuickLink)) {
@@ -209,25 +172,14 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         );
       }
 
-      await showModalBottomSheet(
-        context: context,
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
-        isScrollControlled: true,
-        builder: (context) => ShareCollectionBottomSheet(
-          collection: collection,
-        ),
-      );
+      await showShareCollectionSheet(context, collection: _collection);
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
-  }
-
-  Future<void> _leaveCollection() async {
-    await CollectionActions.leaveCollection(
-      context,
-      _collection,
-    );
   }
 
   @override
@@ -258,12 +210,43 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           alignment: Alignment.bottomCenter,
           children: [
             _buildBody(colorScheme, textTheme),
-            // TODO(aman): Re-enable file multi-select overlay when bulk actions return.
-            // FileSelectionOverlayBar(
-            //   files: _displayedFiles,
-            //   selectedFiles: _selectedFiles,
-            // ),
+            FileSelectionOverlayBar(
+              files: _displayedFiles,
+              selectedFiles: _selectedFiles,
+              collectionViewType: collectionViewType,
+              scrollController: _scrollController,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareButton(EnteColorScheme colorScheme) {
+    if (isFavorite) {
+      return const SizedBox.shrink();
+    }
+    final canShare = collectionViewType == CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        collectionViewType == CollectionViewType.sharedCollectionViewer ||
+        collectionViewType == CollectionViewType.sharedCollectionCollaborator ||
+        isQuickLink;
+    if (!canShare) {
+      return const SizedBox.shrink();
+    }
+    return GestureDetector(
+      onTap: _shareCollection,
+      child: Container(
+        height: 44,
+        width: 44,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: colorScheme.backdropBase,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedShare08,
+          color: colorScheme.textBase,
         ),
       ),
     );
@@ -273,18 +256,21 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     if (isFavorite) {
       return SizedBox.fromSize();
     }
-    return PopupMenuButton<String>(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.strokeFaint),
-      ),
-      elevation: 15,
-      padding: const EdgeInsetsGeometry.all(0),
-      menuPadding: const EdgeInsets.all(0),
-      shadowColor: Colors.black.withValues(alpha: 0.08),
+    final canManageCollection = collectionViewType ==
+            CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        collectionViewType == CollectionViewType.sharedCollectionViewer ||
+        collectionViewType == CollectionViewType.sharedCollectionCollaborator ||
+        collectionViewType == CollectionViewType.quickLink;
+    if (!canManageCollection) {
+      return SizedBox.fromSize();
+    }
+
+    return CollectionPopupMenuWidget(
+      collection: _collection,
       child: Container(
-        height: 48,
-        width: 48,
+        height: 44,
+        width: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: colorScheme.backdropBase,
@@ -295,96 +281,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           color: colorScheme.textBase,
         ),
       ),
-      onSelected: (value) {
-        switch (value) {
-          case 'edit':
-            _editCollection();
-            break;
-          case 'delete':
-            _deleteCollection();
-            break;
-          case 'leave_collection':
-            _leaveCollection();
-            break;
-        }
-      },
-      itemBuilder: (BuildContext context) {
-        final items = <PopupMenuItem<String>>[];
-        var itemIndex = 0;
-        var totalItems = 0;
-
-        if (collectionViewType == CollectionViewType.ownedCollection ||
-            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-            collectionViewType == CollectionViewType.quickLink) {
-          totalItems = 2;
-        } else if (collectionViewType == CollectionViewType.sharedCollection) {
-          totalItems = 1;
-        }
-
-        if (collectionViewType == CollectionViewType.ownedCollection ||
-            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-            collectionViewType == CollectionViewType.quickLink) {
-          items.add(
-            PopupMenuItem<String>(
-              value: 'edit',
-              height: 0,
-              padding: EdgeInsets.zero,
-              child: PopupMenuItemWidget(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPencilEdit02,
-                  color: colorScheme.textBase,
-                  size: 20,
-                ),
-                label: context.l10n.edit,
-                isFirst: itemIndex == 0,
-                isLast: itemIndex == totalItems - 1,
-              ),
-            ),
-          );
-          itemIndex++;
-
-          items.add(
-            PopupMenuItem<String>(
-              value: 'delete',
-              padding: EdgeInsets.zero,
-              height: 0,
-              child: PopupMenuItemWidget(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.warning500,
-                  size: 20,
-                ),
-                isWarning: true,
-                label: context.l10n.delete,
-                isFirst: itemIndex == 0,
-                isLast: itemIndex == totalItems - 1,
-              ),
-            ),
-          );
-        }
-
-        if (collectionViewType == CollectionViewType.sharedCollection) {
-          items.add(
-            PopupMenuItem<String>(
-              value: 'leave_collection',
-              padding: EdgeInsets.zero,
-              height: 0,
-              child: PopupMenuItemWidget(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.textBase,
-                  size: 20,
-                ),
-                label: context.l10n.leaveCollection,
-                isFirst: true,
-                isLast: true,
-              ),
-            ),
-          );
-        }
-
-        return items;
-      },
     );
   }
 
@@ -412,6 +308,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 trailingWidgets: widget.isUncategorized
                     ? const []
                     : [
+                        _buildShareButton(colorScheme),
+                        const SizedBox(width: 12),
                         _buildMenuButton(colorScheme),
                       ],
               ),
@@ -424,7 +322,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.all(16.0),
             child: _displayedFiles.isEmpty
                 ? Center(
                     child: EmptyStateWidget(
@@ -437,9 +335,10 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 : ItemListView(
                     key: ValueKey(_displayedFiles.length),
                     files: _displayedFiles,
-                    // TODO(aman): pass selectedFiles when multi-select returns.
-                    selectedFiles: null,
+                    selectedFiles: _selectedFiles,
+                    scrollController: _scrollController,
                     physics: const BouncingScrollPhysics(),
+                    selectionEnabled: _isSelectionEnabled,
                   ),
           ),
         ),

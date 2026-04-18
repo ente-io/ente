@@ -8,9 +8,11 @@ import {
     setupTwoFactorFinish,
 } from "ente-accounts/services/user";
 import { CenteredFill } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { NavbarBase } from "ente-base/components/Navbar";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -32,7 +34,24 @@ const Page: React.FC = () => {
     };
 
     return (
-        <Stack sx={{ minHeight: "100svh" }}>
+        <Stack
+            sx={[
+                { minHeight: "100svh", bgcolor: "secondary.main" },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+        >
+            <NavbarBase
+                sx={{
+                    boxShadow: "none",
+                    borderBottom: "none",
+                    bgcolor: "transparent",
+                }}
+            >
+                <EnteLogo />
+            </NavbarBase>
             <CenteredFill>
                 <ContentsPaper>
                     <Typography variant="h5" sx={{ textAlign: "center" }}>
@@ -61,12 +80,16 @@ export default Page;
 
 const ContentsPaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
-    padding: theme.spacing(4, 2),
+    padding: theme.spacing(5, 3),
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
     // Wide enough to fit the QR code secret in one line under default settings.
-    width: "min(440px, 95vw)",
+    width: "min(440px, 85vw)",
+    minHeight: "375px",
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(4),
+    boxShadow: "none",
+    borderRadius: "20px",
 }));
 
 interface InstructionsProps {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/authenticator"
+	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/authenticator"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
@@ -15,12 +16,16 @@ import (
 
 // Controller is interface for exposing business logic related to authenticator app
 type Controller struct {
-	Repo *authenticator.Repository
+	Repo     *authenticator.Repository
+	UserRepo *repo.UserRepository
 }
 
 // CreateKey...
 func (c *Controller) CreateKey(ctx *gin.Context, req model.CreateKeyRequest) error {
 	userID := auth.GetUserID(ctx.Request.Header)
+	if _, keyErr := c.UserRepo.GetKeyAttributes(userID); keyErr != nil {
+		return stacktrace.Propagate(keyErr, "User keys setup is not completed")
+	}
 	return c.Repo.CreateKey(ctx, userID, req)
 }
 
@@ -82,6 +87,9 @@ func (c *Controller) Delete(ctx *gin.Context, entityID uuid.UUID) (bool, error) 
 
 // GetDiff...
 func (c *Controller) GetDiff(ctx *gin.Context, req model.GetEntityDiffRequest) ([]model.Entity, error) {
+	if req.Limit <= 0 || req.Limit > 5000 {
+		return nil, ente.NewBadRequestWithMessage("limit must be between 1 and 5000")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	return c.Repo.GetDiff(ctx, userID, *req.SinceTime, req.Limit)
 }

@@ -9,7 +9,7 @@
   <summary>Safe home for your photos</summary>
 
   <developer id="io.github.ente-io.ente">
-    <name>Ente.io Developers</name>
+    <name>Ente Developers</name>
   </developer>
 
   <description>
@@ -23,18 +23,19 @@
   <content_rating type="oars-1.0" />
 
   <url type="bugtracker">https://github.com/ente-io/ente/issues</url>
-  <url type="homepage">https://ente.io</url>
+  <url type="homepage">https://ente.com</url>
   <url type="vcs-browser">https://github.com/ente-io/ente</url>
 
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/ente-io/ente/main/.github/assets/photos.png</image>
+      <caption>Browse and search your encrypted photo library across desktop and mobile devices</caption>
     </screenshot>
   </screenshots>
 
   <branding>
-    <color type="primary" scheme_preference="light">#1db954</color>
-    <color type="primary" scheme_preference="dark">#1db954</color>
+    <color type="primary" scheme_preference="light">#f2f5f8</color>
+    <color type="primary" scheme_preference="dark">#1f2937</color>
   </branding>
 
   <releases>

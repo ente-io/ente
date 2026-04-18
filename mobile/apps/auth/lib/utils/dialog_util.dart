@@ -40,7 +40,11 @@ Future<ButtonResult?> showErrorDialog(
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
-          await openSupportPage(body, null);
+          await sendEmail(
+            context,
+            to: "support@ente.com",
+            body: body,
+          );
         },
       ),
       const ButtonWidget(
@@ -176,10 +180,8 @@ Future<ButtonResult?> showGenericErrorDialog({
           buttonAction: ButtonAction.third,
           isInAlert: true,
           onTap: () async {
-            PlatformUtil.openWebView(
-              context,
-              context.l10n.faq,
-              "https://ente.io/help/auth/troubleshooting/windows-login",
+            PlatformUtil.openUrlInBrowser(
+              "https://ente.com/help/auth/troubleshooting/windows-login",
             ).ignore();
           },
         ),

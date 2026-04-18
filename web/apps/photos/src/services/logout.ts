@@ -3,11 +3,13 @@ import {
     logoutClearStateAgain,
 } from "ente-accounts/services/logout";
 import log from "ente-base/log";
+import { resetSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-source";
 import { downloadManager } from "ente-gallery/services/download";
 import { clearFilesDB } from "ente-gallery/services/files-db";
 import { resetUploadState } from "ente-gallery/services/upload";
 import { resetVideoState } from "ente-gallery/services/video";
+import { logoutAppLock } from "ente-new/photos/services/app-lock";
 import exportService from "ente-new/photos/services/export";
 import { logoutML, terminateMLWorker } from "ente-new/photos/services/ml";
 import { logoutSearch } from "ente-new/photos/services/search";
@@ -82,6 +84,12 @@ export const photosLogout = async () => {
     }
 
     try {
+        resetSaveGroups();
+    } catch (e) {
+        ignoreError("Download UI", e);
+    }
+
+    try {
         logoutSearch();
     } catch (e) {
         ignoreError("Search", e);
@@ -103,6 +111,12 @@ export const photosLogout = async () => {
 
     const electron = globalThis.electron;
     if (electron) {
+        try {
+            await logoutAppLock();
+        } catch (e) {
+            ignoreError("App lock", e);
+        }
+
         try {
             await logoutML();
         } catch (e) {

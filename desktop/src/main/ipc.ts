@@ -10,12 +10,13 @@
 
 import type { FSWatcher } from "chokidar";
 import type { BrowserWindow } from "electron";
-import { ipcMain } from "electron/main";
+import { ipcMain, safeStorage } from "electron/main";
 import type {
     CollectionMapping,
     FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    PersistedAppLockConfig,
     UtilityProcessType,
     ZipItem,
 } from "../types/ipc";
@@ -27,6 +28,10 @@ import {
     updateOnNextRestart,
 } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
+import {
+    getNativeDeviceLockCapability,
+    promptDeviceLock,
+} from "./services/device-lock";
 import {
     openDirectory,
     openLogDirectory,
@@ -49,8 +54,11 @@ import {
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import {
+    appLockConfigFromSafeStorage,
+    clearAppLockConfigFromSafeStorage,
     lastShownChangelogVersion,
     masterKeyFromSafeStorage,
+    saveAppLockConfigInSafeStorage,
     saveMasterKeyInSafeStorage,
     setLastShownChangelogVersion,
 } from "./services/store";
@@ -71,6 +79,32 @@ import {
     watchUpdateSyncedFiles,
 } from "./services/watch";
 import { triggerCreateUtilityProcess } from "./services/workers";
+
+const parsePersistedAppLockConfig = (
+    config: unknown,
+): PersistedAppLockConfig => {
+    if (!config || typeof config !== "object") {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    const { enabled, lockType, autoLockTimeMs } = config as Record<
+        string,
+        unknown
+    >;
+    if (
+        typeof enabled !== "boolean" ||
+        (lockType !== "pin" &&
+            lockType !== "password" &&
+            lockType !== "device" &&
+            lockType !== "none") ||
+        typeof autoLockTimeMs !== "number" ||
+        !Number.isFinite(autoLockTimeMs)
+    ) {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    return { enabled, lockType, autoLockTimeMs };
+};
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -116,6 +150,22 @@ export const attachIPCHandlers = () => {
         saveMasterKeyInSafeStorage(masterKey),
     );
 
+    ipcMain.handle("isSafeStorageAvailable", (): boolean =>
+        safeStorage.isEncryptionAvailable(),
+    );
+
+    ipcMain.handle("appLockConfigFromSafeStorage", () =>
+        appLockConfigFromSafeStorage(),
+    );
+
+    ipcMain.handle("saveAppLockConfigInSafeStorage", (_, config: unknown) =>
+        saveAppLockConfigInSafeStorage(parsePersistedAppLockConfig(config)),
+    );
+
+    ipcMain.handle("clearAppLockConfigFromSafeStorage", () =>
+        clearAppLockConfigFromSafeStorage(),
+    );
+
     ipcMain.handle("lastShownChangelogVersion", () =>
         lastShownChangelogVersion(),
     );
@@ -127,6 +177,24 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("isAutoLaunchEnabled", () => autoLauncher.isEnabled());
 
     ipcMain.handle("toggleAutoLaunch", () => autoLauncher.toggleAutoLaunch());
+
+    // - Desktop app lock (native device authentication)
+    //
+    // These handlers are the main-process bridge for the desktop app lock flow:
+    // the renderer asks about native auth capability/support, then requests a
+    // native unlock prompt when the user needs to unlock the app.
+
+    // Returns richer capability details (for example, available prompt type)
+    // so the UI can decide which app-lock option to show.
+    ipcMain.handle("getNativeDeviceLockCapability", () =>
+        getNativeDeviceLockCapability(),
+    );
+
+    // Triggers the macOS-native Touch ID prompt and returns the auth result
+    // back to the renderer. Other platforms currently return false.
+    ipcMain.handle("promptDeviceLock", (_, reason: string) =>
+        promptDeviceLock(reason),
+    );
 
     // - App update
 

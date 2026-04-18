@@ -4,6 +4,7 @@ import 'dart:core';
 import 'dart:io';
 
 import "package:dio/dio.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +20,6 @@ import 'package:photos/models/typedefs.dart';
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/ram_check_util.dart";
-import "package:photos/utils/standalone/task_queue.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,8 +54,18 @@ extension SuperLogRecord on LogRecord {
         if (id != null) {
           msg += "\n⤷ id: $id ";
         }
-        if (e.response?.data != null) {
-          msg += "\n⤷ type: ${e.type}\n⤷ error: ${e.response?.data}";
+        final responseData = e.response?.data;
+        if (responseData != null) {
+          // Skip logging response data if it exceeds 100KB
+          final contentLength = int.tryParse(
+            e.response?.headers.value('content-length') ?? '',
+          );
+          if (contentLength != null && contentLength > 102400) {
+            msg +=
+                "\n⤷ type: ${e.type}\n⤷ error: [response too large: $contentLength bytes]";
+          } else {
+            msg += "\n⤷ type: ${e.type}\n⤷ error: $responseData";
+          }
         } else {
           msg += "\n⤷ type: ${e.type}\n⤷ error: $error";
         }
@@ -256,11 +266,46 @@ class SuperLogging {
             return event;
           };
         },
-        appRunner: () => appConfig!.body!(),
+        appRunner: () => kDebugMode
+            ? _runWithUnhandledErrorLogging(appConfig!.body!)
+            : appConfig!.body!(),
       );
     } else {
-      await appConfig.body!();
+      if (kDebugMode) {
+        // Keep debug-only until we're sure this doesn't cause regressions.
+        await _runWithUnhandledErrorLogging(appConfig.body!);
+      } else {
+        await appConfig.body!();
+      }
     }
+  }
+
+  static Future<void> _runWithUnhandledErrorLogging(
+    FutureOrVoidCallback body,
+  ) async {
+    final previousFlutterError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      previousFlutterError?.call(details);
+      $.severe(
+        "Unhandled Flutter error",
+        details.exception,
+        details.stack,
+      );
+    };
+    WidgetsBinding.instance.platformDispatcher.onError = (
+      Object error,
+      StackTrace stack,
+    ) {
+      $.severe("Unhandled platform error", error, stack);
+      return false;
+    };
+
+    await runZonedGuarded(
+      () async => body(),
+      (Object error, StackTrace stack) {
+        $.severe("Unhandled zone error", error, stack);
+      },
+    );
   }
 
   static Future<void> setUserID(String userID) async {

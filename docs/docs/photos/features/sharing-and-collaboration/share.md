@@ -36,7 +36,7 @@ They don't need an app or account.
 These links can be password protected, or set to expire after a while.
 
 You can read more about the features supported by Links
-[here](https://ente.io/blog/powerful-links/).
+[here](https://ente.com/blog/powerful-links/).
 
 ## Albums
 
@@ -83,22 +83,18 @@ sounds useful to you, please participate in
 More details, including technical aspect about how the sharing features were
 implemented, are in various blog posts announcing these features.
 
-- [Collaborative albums](https://ente.io/blog/collaborative-albums)
+- [Collaborative albums](https://ente.com/blog/collaborative-albums)
 
-- [Collect photos from people not on ente](https://ente.io/blog/collect-photos)
+- [Collect photos from people not on ente](https://ente.com/blog/collect-photos)
 
-- [Shareable links for albums](https://ente.io/blog/shareable-links),
-  [and their underlying technical implementation](https://ente.io/blog/building-shareable-links).
+- [Shareable links for albums](https://ente.com/blog/shareable-links),
+  [and their underlying technical implementation](https://ente.com/blog/building-shareable-links).
   Since then, we have also added the ability to password protect public links,
   and configure a duration after which the link will automatically expire.
 
-We are now working on the other requested features around sharing, including
-comments and reactions.
-
 ## Limitations
 
-Peer-to-peer sharing between Ente users is available on every plan, including
-the free tier. Creating public links is only available to paid customers.This limitation helps safeguard against potential platform abuse.
+Peer-to-peer sharing between Ente users and creating public links are available on every plan, including the free tier. Free plan users can create public links with a device limit of 5, while paid users can create public links with no device limit.
 
 ## Related topics
 

@@ -441,6 +441,15 @@ export interface GalleryState {
      */
     isInSearchMode: boolean;
     /**
+     * Sort order for search results.
+     *
+     * - `undefined`: No explicit sort selected, keep original order (preserves
+     *   CLIP relevance sorting for ML searches)
+     * - `true`: Ascending order (oldest first)
+     * - `false`: Descending order (newest first)
+     */
+    searchSortAsc: boolean | undefined;
+    /**
      * The files to show, uniqued and sorted appropriately.
      */
     filteredFiles: EnteFile[];
@@ -485,7 +494,8 @@ export type GalleryAction =
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "exitSearch"; shouldExitSearchMode?: boolean };
+    | { type: "exitSearch"; shouldExitSearchMode?: boolean }
+    | { type: "setSearchSortOrder"; asc: boolean | undefined };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -525,6 +535,7 @@ const initialGalleryState: GalleryState = {
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
+    searchSortAsc: undefined,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -608,7 +619,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
                 fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
                     collectionFiles,
-                    hiddenFileIDs,
+                    hiddenCollectionIDs,
                 ),
                 emailByUserID: constructUserIDToEmailMap(user, collections),
                 shareSuggestionEmails: createShareSuggestionEmails(
@@ -721,7 +732,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionNameByID: createCollectionNameByID(collections),
                 fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
                     state.collectionFiles,
-                    hiddenFileIDs,
+                    hiddenCollectionIDs,
                 ),
                 emailByUserID: constructUserIDToEmailMap(
                     state.user!,
@@ -1153,6 +1164,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     : state.isInSearchMode,
             });
         }
+
+        case "setSearchSortOrder":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                searchSortAsc: action.asc,
+            });
     }
 };
 
@@ -1286,10 +1303,10 @@ const deriveFavoriteFileIDs = (
  */
 const deriveFileNormalCollectionIDs = (
     collectionFiles: GalleryState["collectionFiles"],
-    hiddenFileIDs: GalleryState["hiddenFileIDs"],
+    hiddenCollectionIDs: GalleryState["hiddenCollectionIDs"],
 ) =>
     createFileCollectionIDs(
-        collectionFiles.filter((f) => !hiddenFileIDs.has(f.id)),
+        collectionFiles.filter((f) => !hiddenCollectionIDs.has(f.collectionID)),
     );
 
 /**
@@ -1473,11 +1490,15 @@ const createCollectionSummaries = (
             type = "sharedIncoming";
             attributes.add("shared");
             attributes.add("sharedIncoming");
+            const userRole = collection.sharees.find(
+                (s) => s.id == user.id,
+            )?.role;
             attributes.add(
-                collection.sharees.find((s) => s.id == user.id)?.role ==
-                    "COLLABORATOR"
-                    ? "sharedIncomingCollaborator"
-                    : "sharedIncomingViewer",
+                userRole == "ADMIN"
+                    ? "sharedIncomingAdmin"
+                    : userRole == "COLLABORATOR"
+                      ? "sharedIncomingCollaborator"
+                      : "sharedIncomingViewer",
             );
         } else if (collectionType == "uncategorized") {
             type = "uncategorized";
@@ -1536,6 +1557,14 @@ const createCollectionSummaries = (
             attributes.add("pinned");
             sortPriority = CollectionSummarySortPriority.pinned;
         }
+        // Check for sharee pinned (for incoming shared collections)
+        if (
+            type == "sharedIncoming" &&
+            collection.sharedMagicMetadata?.data.order == CollectionOrder.pinned
+        ) {
+            attributes.add("shareePinned");
+            sortPriority = CollectionSummarySortPriority.pinned;
+        }
 
         if (type == "sharedIncoming" && collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.
@@ -1553,6 +1582,12 @@ const createCollectionSummaries = (
         }
 
         const collectionFiles = filesByCollection.get(collection.id);
+
+        // Hide empty favorites from collection bar
+        if (type == "userFavorites" && !collectionFiles?.length) {
+            attributes.add("hideFromCollectionBar");
+        }
+
         collectionSummaries.set(collection.id, {
             id: collection.id,
             type,
@@ -1782,7 +1817,7 @@ const stateForUpdatedCollectionFiles = (
         ),
         fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
             collectionFiles,
-            hiddenFileIDs,
+            state.hiddenCollectionIDs,
         ),
         normalCollectionSummaries: deriveNormalCollectionSummaries(
             state.collections.filter(
@@ -1822,7 +1857,13 @@ const stateForUpdatedCollectionFiles = (
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
-        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        const searchFiles = state.searchResults ?? state.filteredFiles;
+        // Only apply time-based sorting if user explicitly selected a sort order.
+        // When undefined, keep original order (preserves CLIP relevance sorting).
+        const filteredFiles =
+            state.searchSortAsc !== undefined
+                ? sortFiles([...searchFiles], state.searchSortAsc)
+                : searchFiles;
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||

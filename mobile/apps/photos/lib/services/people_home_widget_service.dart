@@ -7,13 +7,13 @@ import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/app_navigation_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -155,7 +155,6 @@ class PeopleHomeWidgetService {
   Future<void> onLaunchFromWidget(
     int fileId,
     String personId,
-    BuildContext context,
   ) async {
     final file = await FilesDB.instance.getFile(fileId);
     if (file == null) {
@@ -170,32 +169,33 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    routeToPage(
-      context,
-      PeoplePage(
-        person: person,
-        searchResult: null,
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+    AppNavigationService.instance
+        .pushPage(
+          PeoplePage(
+            person: person,
+            searchResult: null,
+          ),
+          forceCustomPageRoute: true,
+        )
+        .ignore();
 
-    final clusterFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
+    final files = await SearchService.instance.getFilesForPersonID(
       personId,
+      sortOnTime: false,
     );
-    final files = clusterFiles.entries.expand((e) => e.value).toList();
 
-    routeToPage(
-      context,
-      DetailPage(
-        DetailPageConfiguration(
-          files,
-          files.indexOf(file),
-          "peoplewidget",
-        ),
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+    AppNavigationService.instance
+        .pushPage(
+          DetailPage(
+            DetailPageConfiguration(
+              files,
+              files.indexOf(file),
+              "peoplewidget",
+            ),
+          ),
+          forceCustomPageRoute: true,
+        )
+        .ignore();
     await _refreshPeopleWidget();
   }
 
@@ -232,7 +232,7 @@ class PeopleHomeWidgetService {
     }
 
     // Check ML consent
-    if (!flagService.hasGrantedMLConsent) {
+    if (isOfflineMode || !hasGrantedMLConsent) {
       return true;
     }
 
@@ -276,9 +276,10 @@ class PeopleHomeWidgetService {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
     final persons = await PersonService.instance.getCertainPersons(personIds);
     for (final person in persons) {
-      final clusterFiles = await SearchService.instance
-          .getClusterFilesForPersonID(person.remoteID);
-      final files = clusterFiles.entries.expand((e) => e.value).toList();
+      final files = await SearchService.instance.getFilesForPersonID(
+        person.remoteID,
+        sortOnTime: false,
+      );
       if (files.isEmpty) {
         _logger.warning("No files found for person: ${person.data.name}");
         continue;

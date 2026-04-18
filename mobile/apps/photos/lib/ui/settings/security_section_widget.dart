@@ -2,16 +2,18 @@ import 'dart:async';
 import "dart:typed_data";
 
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/two_factor_status_change_event.dart';
+import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/user_details.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/passkey_service.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/local_authentication_service.dart';
@@ -27,7 +29,6 @@ import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/dialog_util.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({super.key});
@@ -38,23 +39,23 @@ class SecuritySectionWidget extends StatefulWidget {
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
-  late StreamSubscription<TwoFactorStatusChangeEvent>
-      _twoFactorStatusChangeEvent;
+  late StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
   final Logger _logger = Logger('SecuritySectionWidget');
   @override
   void initState() {
     super.initState();
-    _twoFactorStatusChangeEvent =
-        Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) async {
+    _userDetailsChangedEvent =
+        Bus.instance.on<UserDetailsChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
     });
+    _refreshSecurityDetails().ignore();
   }
 
   @override
   void dispose() {
-    _twoFactorStatusChangeEvent.cancel();
+    _userDetailsChangedEvent.cancel();
     super.dispose();
   }
 
@@ -156,7 +157,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
-        surfaceExecutionStates: false,
         onTap: () async {
           if (await LocalAuthentication().isDeviceSupported()) {
             final bool result = await requestAuthentication(
@@ -215,6 +215,20 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     return Column(
       children: children,
     );
+  }
+
+  Future<void> _refreshSecurityDetails() async {
+    if (!_config.hasConfiguredAccount() || isOfflineMode) {
+      return;
+    }
+    try {
+      await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      _logger.warning("failed to refresh security details", e, s);
+    }
   }
 
   Future<void> _disableTwoFactor() async {

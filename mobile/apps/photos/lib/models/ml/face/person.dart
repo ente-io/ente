@@ -3,6 +3,8 @@
 // On the device, this information is stored as [LocalEntityData] with type person.
 import "package:flutter/foundation.dart";
 
+const Object _personDataUnchanged = Object();
+
 class PersonEntity {
   final String remoteID;
   final PersonData data;
@@ -58,6 +60,7 @@ class PersonData {
   String? avatarFaceID;
   List<ClusterInfo> assigned = List<ClusterInfo>.empty();
   List<String> rejectedFaceIDs = List<String>.empty();
+  List<int> manuallyAssigned = List<int>.empty();
 
   /// string formatted in `yyyy-MM-dd`
   final String? birthDate;
@@ -78,6 +81,7 @@ class PersonData {
     required this.name,
     this.assigned = const <ClusterInfo>[],
     this.rejectedFaceIDs = const <String>[],
+    this.manuallyAssigned = const <int>[],
     this.avatarFaceID,
     this.isHidden = false,
     this.isPinned = false,
@@ -95,10 +99,11 @@ class PersonData {
     bool? isPinned,
     bool? hideFromMemories,
     int? version,
-    String? birthDate,
+    Object? birthDate = _personDataUnchanged,
     String? email,
     int? userID,
     List<String>? rejectedFaceIDs,
+    List<int>? manuallyAssigned,
   }) {
     return PersonData(
       name: name ?? this.name,
@@ -107,11 +112,15 @@ class PersonData {
       isHidden: isHidden ?? this.isHidden,
       isPinned: isPinned ?? this.isPinned,
       hideFromMemories: hideFromMemories ?? this.hideFromMemories,
-      birthDate: birthDate ?? this.birthDate,
+      birthDate: identical(birthDate, _personDataUnchanged)
+          ? this.birthDate
+          : birthDate as String?,
       email: email ?? this.email,
       userID: userID ?? this.userID,
       rejectedFaceIDs:
           rejectedFaceIDs ?? List<String>.from(this.rejectedFaceIDs),
+      manuallyAssigned:
+          manuallyAssigned ?? List<int>.from(this.manuallyAssigned),
     );
   }
 
@@ -126,6 +135,7 @@ class PersonData {
     }
     sb.writeln('Assigned: ${assigned.length} withFaces $assignedCount');
     sb.writeln('Rejected faceIDs: ${rejectedFaceIDs.length}');
+    sb.writeln('Manual fileIDs: ${manuallyAssigned.length}');
     for (var cluster in assigned) {
       sb.writeln('Cluster: ${cluster.id} - ${cluster.faces.length}');
     }
@@ -144,6 +154,7 @@ class PersonData {
         'birthDate': birthDate,
         'email': email,
         'userID': userID,
+        'manuallyAssigned': manuallyAssigned,
       };
 
   // fromJson
@@ -164,10 +175,20 @@ class PersonData {
             : List<String>.from(
                 json['rejectedFaceIDs'],
               );
+    final manualAssignmentData = json['manuallyAssigned'];
+    final manuallyAssigned = manualAssignmentData is Iterable
+        ? List<int>.from(
+            manualAssignmentData.map<int?>((value) {
+              if (value is num) return value.toInt();
+              return int.tryParse(value.toString());
+            }).whereType<int>(),
+          )
+        : <int>[];
     return PersonData(
       name: json['name'] as String,
       assigned: assigned,
       rejectedFaceIDs: rejectedFaceIDs,
+      manuallyAssigned: manuallyAssigned,
       avatarFaceID: json['avatarFaceID'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       isPinned: json['isPinned'] as bool? ?? false,

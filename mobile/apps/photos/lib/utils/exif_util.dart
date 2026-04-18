@@ -5,14 +5,14 @@ import "package:computer/computer.dart";
 import 'package:exif_reader/exif_reader.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-// ignore: implementation_imports
-import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/utils/file_util.dart';
+import 'package:random_access_source/random_access_source.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
 const kImageDateTime = "Image DateTime";
@@ -54,16 +54,7 @@ Future<Map<String, IfdTag>?> tryExifFromFile(File originFile) async {
 }
 
 Future<Map<String, dynamic>> getXmp(File file) async {
-  return Computer.shared().compute(
-    _getXMPComputer,
-    param: {"file": file},
-    taskName: "getXMPAsync",
-  );
-}
-
-Map<String, dynamic> _getXMPComputer(Map<String, dynamic> args) {
-  final File originalFile = args["file"] as File;
-  return XMPExtractor().extract(originalFile.readAsBytesSync());
+  return extractXmp(filePath: file.path);
 }
 
 Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
@@ -184,7 +175,14 @@ Location? locationFromExif(Map<String, IfdTag> exif) {
 }
 
 Future<Map<String, IfdTag>> _readExifArgs(Map<String, dynamic> args) {
-  return readExifFromFile(args["file"]);
+  final file = args["file"] as File;
+  return FileRASource.loadFile(file).then((src) async {
+    try {
+      return _normalizeExifResult(await readExifFromSource(src));
+    } finally {
+      await src.close();
+    }
+  });
 }
 
 Future<Map<String, IfdTag>> readExifAsync(File file) async {
@@ -193,6 +191,17 @@ Future<Map<String, IfdTag>> readExifAsync(File file) async {
     param: {"file": file},
     taskName: "readExifAsync",
   );
+}
+
+Map<String, IfdTag> _normalizeExifResult(dynamic result) {
+  if (result is Map<String, IfdTag>) {
+    return result;
+  }
+  final dynamic tags = result.tags;
+  if (tags is Map<String, IfdTag>) {
+    return tags;
+  }
+  throw ArgumentError("Unsupported EXIF result type: ${result.runtimeType}");
 }
 
 GPSData gpsDataFromExif(Map<String, IfdTag> exif) {

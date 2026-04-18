@@ -1,8 +1,53 @@
 # CHANGELOG
 
-## v1.7.17 (unreleased)
+## v1.7.23 (unreleased)
 
-- .
+-
+
+## v1.7.22
+
+- App lock
+- Better people list experience (bigger view with search)
+- Various bug fixes (map view tiles, etc)
+
+## v1.7.21
+
+- Masonry layout for public albums
+- Quick links
+- Full viewer experience for single-photo/video links
+- Update album cover
+- Public album improvements
+- Catalan language support
+
+## v1.7.18
+
+- Hide shared albums
+- Watch folders will now be marked as inaccessible if they can't be accessed, instead of completely removing them from the list
+- Watch folders now support hidden albums
+- Watch folders will now skip unsupported files (zip, etc) instead of trying to upload them on every sync
+- Right-click context menu for files
+- Clean large files
+- Fix search bar losing focus on last backspace
+- Hide empty favorites album from albums bar
+- "Clean uncategorized" button
+- Hide favorites from album selector dialogs
+- Show current album in the album selector for upload flow
+- Show sort options in album selector (for upload, add, move, etc)
+- "Select all" button in the gallery and albums view
+- Edit location
+- Better sort for albums list
+- Improved UI for login, sign-up, etc, pages
+- Improved Map View Rendering Logic
+- Public album improvements
+- Upload to hidden albums
+
+## v1.7.17
+
+- Map view.
+- Manually tag people in photos.
+- Album admins can now remove photos added by collaborators.
+- Viewers and collaborators can see and copy public links.
+- Free users can now create public links (device limit of 5).
 
 ## v1.7.16
 
@@ -30,7 +75,7 @@
 - Generate streams for videos (beta)
 
     > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://ente.io/help/photos/faq/video-streaming).
+    > [video streaming FAQ](https://ente.com/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 
@@ -254,7 +299,7 @@ Other highlights:
 
 ### Photo Editor
 
-Check out our [blog](https://ente.io/blog/introducing-web-desktop-photo-editor/)
+Check out our [blog](https://ente.com/blog/introducing-web-desktop-photo-editor/)
 to know about feature and functionalities.
 
 ## v1.6.47
@@ -346,4 +391,4 @@ to know about feature and functionalities.
     We have squashed a few pesky bugs that were reported by our community
 
     If you would like to help us improve ente, come join the party @
-    ente.io/community!
+    ente.com/community!

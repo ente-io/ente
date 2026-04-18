@@ -216,6 +216,7 @@ backup password and convert them to an Ente token file.
 
 For an up-to-date guide of how to retrieve the encrypted authenticator tokens
 and decrypt them, please see
+
 - A newer, updated version of the [Authy-iOS-MiTM guide](https://github.com/AlexTech01/Authy-iOS-MiTM).
 - The [original Authy-iOS-MiTM guide](https://github.com/BrenoFariasdaSilva/Authy-iOS-MiTM). To convert the
   `decrypted_tokens.json` file from that guide into a format Ente Authenticator can recognize, use

@@ -1,7 +1,9 @@
 PODS:
-  - app_links (0.0.2):
+  - app_links (6.4.1):
     - Flutter
   - audio_session (0.0.1):
+    - Flutter
+  - backup_exclusion (1.0.0):
     - Flutter
   - battery_info (0.0.1):
     - Flutter
@@ -16,7 +18,11 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - emoji_picker_flutter (0.0.1):
+  - ente_photos_rust (0.0.1):
+    - Flutter
+  - ente_qr (0.0.1):
+    - Flutter
+  - ente_rust (0.0.1):
     - Flutter
   - ffmpeg_kit_custom (6.0.3)
   - ffmpeg_kit_flutter (6.0.3):
@@ -194,12 +200,10 @@ PODS:
     - Flutter
   - rive_native (0.0.1):
     - Flutter
-  - rust_lib_photos (0.0.1):
-    - Flutter
-  - SDWebImage (5.21.2):
-    - SDWebImage/Core (= 5.21.2)
-  - SDWebImage/Core (5.21.2)
-  - SDWebImageWebPCoder (0.14.6):
+  - SDWebImage (5.21.5):
+    - SDWebImage/Core (= 5.21.5)
+  - SDWebImage/Core (5.21.5)
+  - SDWebImageWebPCoder (0.15.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - Sentry/HybridSDK (8.46.0)
@@ -215,28 +219,31 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.50.4):
-    - sqlite3/common (= 3.50.4)
-  - sqlite3/common (3.50.4)
-  - sqlite3/dbstatvtab (3.50.4):
+  - sqlite3 (3.51.1):
+    - sqlite3/common (= 3.51.1)
+  - sqlite3/common (3.51.1)
+  - sqlite3/dbstatvtab (3.51.1):
     - sqlite3/common
-  - sqlite3/fts5 (3.50.4):
+  - sqlite3/fts5 (3.51.1):
     - sqlite3/common
-  - sqlite3/math (3.50.4):
+  - sqlite3/math (3.51.1):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.50.4):
+  - sqlite3/perf-threadsafe (3.51.1):
     - sqlite3/common
-  - sqlite3/rtree (3.50.4):
+  - sqlite3/rtree (3.51.1):
+    - sqlite3/common
+  - sqlite3/session (3.51.1):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
     - FlutterMacOS
-    - sqlite3 (~> 3.50.1)
+    - sqlite3 (~> 3.51.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
+    - sqlite3/session
   - system_info_plus (0.0.1):
     - Flutter
   - thermal (0.0.1):
@@ -244,8 +251,6 @@ PODS:
   - ua_client_hints (1.4.1):
     - Flutter
   - url_launcher_ios (0.0.1):
-    - Flutter
-  - vibration (1.7.5):
     - Flutter
   - video_player_avfoundation (0.0.1):
     - Flutter
@@ -263,13 +268,16 @@ PODS:
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - backup_exclusion (from `.symlinks/plugins/backup_exclusion/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - emoji_picker_flutter (from `.symlinks/plugins/emoji_picker_flutter/ios`)
+  - ente_photos_rust (from `.symlinks/plugins/ente_photos_rust/ios`)
+  - ente_qr (from `.symlinks/plugins/ente_qr/ios`)
+  - ente_rust (from `.symlinks/plugins/ente_rust/ios`)
   - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -310,7 +318,6 @@ DEPENDENCIES:
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - rive_native (from `.symlinks/plugins/rive_native/ios`)
-  - rust_lib_photos (from `.symlinks/plugins/rust_lib_photos/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -320,7 +327,6 @@ DEPENDENCIES:
   - thermal (from `.symlinks/plugins/thermal/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
-  - vibration (from `.symlinks/plugins/vibration/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
   - volume_controller (from `.symlinks/plugins/volume_controller/ios`)
@@ -355,6 +361,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/app_links/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  backup_exclusion:
+    :path: ".symlinks/plugins/backup_exclusion/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
   camera_avfoundation:
@@ -367,8 +375,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
-  emoji_picker_flutter:
-    :path: ".symlinks/plugins/emoji_picker_flutter/ios"
+  ente_photos_rust:
+    :path: ".symlinks/plugins/ente_photos_rust/ios"
+  ente_qr:
+    :path: ".symlinks/plugins/ente_qr/ios"
+  ente_rust:
+    :path: ".symlinks/plugins/ente_rust/ios"
   ffmpeg_kit_flutter:
     :path: ".symlinks/plugins/ffmpeg_kit_flutter/ios"
   file_saver:
@@ -449,8 +461,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
   rive_native:
     :path: ".symlinks/plugins/rive_native/ios"
-  rust_lib_photos:
-    :path: ".symlinks/plugins/rust_lib_photos/ios"
   sentry_flutter:
     :path: ".symlinks/plugins/sentry_flutter/ios"
   share_plus:
@@ -469,8 +479,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/ua_client_hints/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
-  vibration:
-    :path: ".symlinks/plugins/vibration/ios"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   video_thumbnail:
@@ -483,15 +491,18 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/workmanager_apple/ios"
 
 SPEC CHECKSUMS:
-  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
+  app_links: 3dbc685f76b1693c66a6d9dd1e9ab6f73d97dc0a
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  backup_exclusion: a855876cbfac88c9d23f25b91263acd582ce4a05
   battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
   camera_avfoundation: be3be85408cd4126f250386828e9b1dfa40ab436
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
-  emoji_picker_flutter: ed468d9746c21711e66b2788880519a9de5de211
+  ente_photos_rust: 79732f3ba67df7b0fb22089627afb80d692c2b2d
+  ente_qr: d1a6c708e9b2f8166fd20963562a89b122110d25
+  ente_rust: 9c976e3d083f0ce90f31693deb99629b28d8fe4c
   ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
   ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
@@ -509,7 +520,7 @@ SPEC CHECKSUMS:
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
-  flutter_sodium: 7e4621538491834eba53bd524547854bcbbd6987
+  flutter_sodium: e09c1b44d52949ffbd42afc22c023c13b4728223
   flutter_timezone: 7c838e17ffd4645d261e87037e5bebf6d38fe544
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
@@ -531,7 +542,7 @@ SPEC CHECKSUMS:
   motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  native_video_editor: bb979c7b6feb7013006099c8abaf0055c116aaa0
+  native_video_editor: 7f6e3d37acdae585f6c273b1e2be6ca6d6bb461e
   native_video_player: 6809dec117e8997161dbfb42a6f90d6df71a504d
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
@@ -547,27 +558,25 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
   rive_native: a57df296c558867395bfe82fafe857ec67640f58
-  rust_lib_photos: 04d3901908d2972192944083310b65abf410774c
-  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
-  SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
+  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
+  SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
-  sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
-  sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
+  sqlite3: 8d708bc63e9f4ce48f0ad9d6269e478c5ced1d9b
+  sqlite3_flutter_libs: d13b8b3003f18f596e542bcb9482d105577eff41
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
   thermal: d4c48be750d1ddbab36b0e2dcb2471531bc8df41
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  vibration: 8e2f50fc35bb736f9eecb7dd9f7047fbb6a6e888
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
   workmanager_apple: 904529ae31e97fc5be632cf628507652294a0778
 
-PODFILE CHECKSUM: cce2cd3351d3488dca65b151118552b680e23635
+PODFILE CHECKSUM: 1c99c7c32f840e3e08127181dd09d4755dbe2090
 
 COCOAPODS: 1.16.2

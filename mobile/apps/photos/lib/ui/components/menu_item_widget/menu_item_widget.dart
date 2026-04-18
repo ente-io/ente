@@ -1,10 +1,10 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.dart';
-import 'package:photos/utils/standalone/debouncer.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -88,7 +88,7 @@ class MenuItemWidget extends StatefulWidget {
     this.isTopBorderRadiusRemoved = false,
     this.isGestureDetectorDisabled = false,
     this.showOnlyLoadingState = false,
-    this.surfaceExecutionStates = true,
+    this.surfaceExecutionStates = false,
     this.alwaysShowSuccessState = false,
     this.padding,
     super.key,
@@ -103,6 +103,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   ValueNotifier<ExecutionState> executionStateNotifier = ValueNotifier(
     ExecutionState.idle,
   );
+  VoidCallback? _expandableControllerListener;
 
   Color? menuItemColor;
   late double borderRadius;
@@ -115,9 +116,10 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             ? widget.multipleBorderRadius
             : widget.singleBorderRadius;
     if (widget.expandableController != null) {
-      widget.expandableController!.addListener(() {
+      _expandableControllerListener = () {
         setState(() {});
-      });
+      };
+      widget.expandableController!.addListener(_expandableControllerListener!);
     }
     super.initState();
   }
@@ -137,8 +139,13 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   @override
   void dispose() {
     if (widget.expandableController != null) {
+      if (_expandableControllerListener != null) {
+        widget.expandableController!
+            .removeListener(_expandableControllerListener!);
+      }
       widget.expandableController!.dispose();
     }
+    _debouncer.cancelDebounceTimer();
     executionStateNotifier.dispose();
     super.dispose();
   }

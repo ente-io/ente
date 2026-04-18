@@ -28,6 +28,9 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
+		<!-- Temporary workaround for iPad iOS 26 layout issue. Remove when fixed in Flutter: https://github.com/flutter/flutter/issues/170461 -->
+		<key>UIDesignRequiresCompatibility</key>
+		<true/>
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>

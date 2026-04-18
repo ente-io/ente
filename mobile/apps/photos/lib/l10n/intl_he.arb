@@ -22,7 +22,6 @@
   "deleteReason4": "הסיבה שלי לא כלולה",
   "sendEmail": "שלח דוא\"ל",
   "deleteRequestSLAText": "הבקשה שלך תועבד תוך 72 שעות.",
-  "deleteEmailRequest": "אנא תשלח דוא\"ל ל<warning>account-deletion@ente.io</warning> מהכתובת דוא\"ל שנרשמת איתה.",
   "entePhotosPerm": "Ente <i>צריך הרשאות על מנת </i> לשמור את התמונות שלך",
   "ok": "אוקיי",
   "createAccount": "צור חשבון",
@@ -44,7 +43,6 @@
   "incorrectRecoveryKeyBody": "המפתח שחזור שהזנת שגוי",
   "forgotPassword": "שכחתי סיסמה",
   "enterYourRecoveryKey": "הזן את מפתח השחזור שלך",
-  "noRecoveryKey": "אין מפתח שחזור?",
   "sorry": "מצטער",
   "noRecoveryKeyNoDecryption": "בשל טבע הפרוטוקול של ההצפנת קצה-אל-קצה שלנו, אין אפשרות לפענח את הנתונים שלך בלי הסיסמה או מפתח השחזור שלך",
   "verifyEmail": "אימות דוא\"ל",
@@ -59,7 +57,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -111,7 +109,6 @@
   "verifyPassword": "אמת סיסמא",
   "recoveryKey": "מפתח שחזור",
   "recoveryKeyOnForgotPassword": "אם אתה שוכח את הסיסמא שלך, הדרך היחידה שתוכל לשחזר את המידע שלך היא עם המפתח הזה.",
-  "recoveryKeySaveDescription": "אנחנו לא מאחסנים את המפתח הזה, אנא שמור את המפתח 24 מילים הזה במקום בטוח.",
   "doThisLater": "מאוחר יותר",
   "saveKey": "שמור מפתח",
   "recoveryKeyCopiedToClipboard": "מפתח השחזור הועתק ללוח",
@@ -123,7 +120,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -252,18 +249,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "מזהה אימות",
   "verifyEmailID": "אמת {email}",
   "emailNoEnteAccount": "לא נמצא חשבון ente ל-{email}.\n\nשלח להם הזמנה על מנת לשתף תמונות.",
-  "shareMyVerificationID": "הנה מזהה האימות שלי: {verificationID} עבור ente.io.",
-  "shareTextConfirmOthersVerificationID": "היי, תוכל לוודא שזה מזהה האימות שלך של ente.io: {verificationID}",
   "somethingWentWrong": "משהו השתבש",
   "sendInvite": "שלח הזמנה",
-  "shareTextRecommendUsingEnte": "הורד את ente על מנת שנוכל לשתף תמונות וסרטונים באיכות המקור באופן קל\n\nhttps://ente.io",
   "done": "בוצע",
   "applyCodeTitle": "החל קוד",
   "enterCodeDescription": "הכנס את הקוד שנמסר לך מחברך בשביל לקבל מקום אחסון בחינם עבורך ועבורו",
@@ -283,11 +277,7 @@
   "claimFreeStorage": "תבע מקום אחסון בחינם",
   "inviteYourFriends": "הזמן את חברייך",
   "failedToFetchReferralDetails": "אחזור פרטי ההפניה נכשל. אנא נסה שוב מאוחר יותר.",
-  "referralStep1": "1. תמסור את הקוד הזה לחברייך",
-  "referralStep2": "2. הם נרשמים עבור תוכנית בתשלום",
-  "referralStep3": "3. שניכים מקבלים {storageInGB} GB* בחינם",
   "referralsAreCurrentlyPaused": "הפניות כרגע מושהות",
-  "youCanAtMaxDoubleYourStorage": "* אתה יכול במקסימום להכפיל את מקום האחסון שלך",
   "claimedStorageSoFar": "{isFamilyMember, select, true {קיבלת {storageAmountInGb} GB עד כה} false {קיבלת {storageAmountInGb} GB עד כה} other {קיבלת {storageAmountInGb} GB עד כה!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -465,8 +455,6 @@
   "familyPlans": "תוכניות משפחה",
   "referrals": "הפניות",
   "notifications": "התראות",
-  "sharedPhotoNotifications": "אלבומים משותפים חדשים",
-  "sharedPhotoNotificationsExplanation": "קבל התראות כשמישהו מוסיף תמונה לאלבום משותף שאתה חלק ממנו",
   "advanced": "מתקדם",
   "general": "כללי",
   "security": "אבטחה",
@@ -500,7 +488,6 @@
   "darkTheme": "כהה",
   "systemTheme": "מערכת",
   "freeTrial": "ניסיון חינמי",
-  "selectYourPlan": "בחר תוכנית",
   "enteSubscriptionShareWithFamily": "אפשר להוסיף גם את המשפחה שלך לתוכנית.",
   "currentUsageIs": "השימוש במקום האחסון כרגע הוא ",
   "@currentUsageIs": {
@@ -516,7 +503,6 @@
   "subscription": "מנוי",
   "paymentDetails": "פרטי תשלום",
   "manageFamily": "נהל משפחה",
-  "contactToManageSubscription": "אנא צור איתנו קשר ב-support@ente.io על מנת לנהל את המנוי {provider}.",
   "renewSubscription": "חדש מנוי",
   "cancelSubscription": "בטל מנוי",
   "areYouSureYouWantToRenew": "אתה בטוח שאתה רוצה לחדש?",
@@ -564,7 +550,6 @@
   "appstoreSubscription": "מנוי AppStore",
   "visitWebToManage": "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך",
   "couldNotUpdateSubscription": "לא ניתן לעדכן את המנוי",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "אנא צור קשר עם support@ente.io ואנחנו נשמח לעזור!",
   "paymentFailed": "התשלום נכשל",
   "paymentFailedTalkToProvider": "אנא דבר עם התמיכה של {providerName} אם אתה חוייבת",
   "@paymentFailedTalkToProvider": {
@@ -592,19 +577,8 @@
   "noPhotosAreBeingBackedUpRightNow": "אף תמונה אינה נמצאת בתהליך גיבוי כרגע",
   "preserveMore": "שמור עוד",
   "grantFullAccessPrompt": "נא לתת גישה לכל התמונות בתוך ההגדרות של הטלפון",
-  "openSettings": "פתח הגדרות",
   "selectMorePhotos": "בחר תמונות נוספות",
   "existingUser": "משתמש קיים",
-  "privateBackups": "גיבויים פרטיים",
-  "forYourMemories": "עבור הזכורונות שלך",
-  "endtoendEncryptedByDefault": "מוצפן מקצה אל קצה כברירת מחדל",
-  "safelyStored": "נשמר באופן בטוח",
-  "atAFalloutShelter": "במקלט גרעיני",
-  "designedToOutlive": "עוצב על מנת לשרוד",
-  "available": "זמין",
-  "everywhere": "בכל מקום",
-  "androidIosWebDesktop": "Android, iOS, דפדפן, שולחן עבודה",
-  "mobileWebDesktop": "פלאפון, דפדפן, שולחן עבודה",
   "pleaseLoginAgain": "אנא התחבר שוב",
   "yourSubscriptionHasExpired": "פג תוקף המנוי שלך",
   "storageLimitExceeded": "גבול מקום האחסון נחרג",
@@ -617,7 +591,6 @@
   "backupFailed": "הגיבוי נכשל",
   "couldNotBackUpTryLater": "לא יכולנו לגבות את המידע שלך.\nאנא נסה שוב מאוחר יותר.",
   "pleaseGrantPermissions": "נא הענק את ההרשאות",
-  "grantPermission": "הענק הרשאה",
   "privateSharing": "שיתוף פרטי",
   "shareOnlyWithThePeopleYouWant": "שתף רק אם אנשים שאתה בוחר",
   "allowPeopleToAddPhotos": "תן לאנשים להוסיף תמונות",
@@ -769,7 +742,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "הגדר רדיוס",
-  "familyPlanPortalTitle": "משפחה",
   "androidBiometricSuccess": "הצלחה",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
@@ -790,5 +762,6 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא..."
+  "hiding": "מחביא...",
+  "grantPermission": "הענק הרשאה"
 }

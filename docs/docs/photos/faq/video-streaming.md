@@ -1,17 +1,21 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Video Streaming FAQ
+description: FAQ about video streaming in Ente Photos
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
-# This Page Has Moved
+# Video Streaming FAQ
 
 The content from **Video Streaming FAQ** has been reorganized. You can find it in the following locations:
 
 ## Video Streaming
 
 - [Video streaming feature guide](/photos/features/utilities/video-streaming) - Complete guide to streaming videos in-app
-- [Video streaming FAQ](/photos/faq/advanced-features) - How it works, enabling/disabling, compatibility
+- [Video streaming FAQ](/photos/faq/advanced-features#video-streaming) - How it works, enabling/disabling, compatibility
 
 ## Troubleshooting
 

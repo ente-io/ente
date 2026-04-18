@@ -7,15 +7,16 @@ import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/cupertino.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/core/network/network.dart";
 import "package:photos/emergency/model.dart";
+import "package:photos/gateways/emergency/emergency_gateway.dart";
+import "package:photos/gateways/users/models/key_attributes.dart";
+import "package:photos/gateways/users/models/set_keys_request.dart";
+import "package:photos/gateways/users/models/srp.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/user/key_attributes.dart";
-import "package:photos/models/api/user/set_keys_request.dart";
-import "package:photos/models/api/user/srp.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/ui/common/user_dialogs.dart";
-import "package:photos/utils/dialog_util.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/utils/email_util.dart";
 import "package:pointycastle/pointycastle.dart";
 import "package:pointycastle/random/fortuna_random.dart";
@@ -26,13 +27,13 @@ import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import "package:uuid/uuid.dart";
 
 class EmergencyContactService {
-  late Dio _enteDio;
   late UserService _userService;
   late Configuration _config;
   late final Logger _logger = Logger("EmergencyContactService");
 
+  EmergencyGateway get _gateway => emergencyGateway;
+
   EmergencyContactService._privateConstructor() {
-    _enteDio = NetworkClient.instance.enteDio;
     _userService = UserService.instance;
     _config = Configuration.instance;
   }
@@ -40,19 +41,25 @@ class EmergencyContactService {
   static final EmergencyContactService instance =
       EmergencyContactService._privateConstructor();
 
-  Future<bool> addContact(BuildContext context, String email) async {
+  Future<bool> addContact(
+    BuildContext context,
+    String email, {
+    int recoveryNoticeInDays = 30,
+  }) async {
     if (!isValidEmail(email)) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).invalidEmailAddress,
-        AppLocalizations.of(context).enterValidEmail,
+        title: AppLocalizations.of(context).letsTryThatAgain,
+        message: AppLocalizations.of(context).enterValidEmail,
+        assetPath: "assets/warning-green.png",
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).youCannotShareWithYourself,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).youCannotShareWithYourself,
+        assetPath: "assets/warning-green.png",
       );
       return false;
     }
@@ -66,20 +73,17 @@ class EmergencyContactService {
       recoveryKey,
       CryptoUtil.base642bin(publicKey),
     );
-    await _enteDio.post(
-      "/emergency-contacts/add",
-      data: {
-        "email": email.trim(),
-        "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-      },
+    await _gateway.addContact(
+      email: email.trim(),
+      encryptedKey: CryptoUtil.bin2base64(encryptedKey),
+      recoveryNoticeInDays: recoveryNoticeInDays,
     );
     return true;
   }
 
   Future<EmergencyInfo> getInfo() async {
     try {
-      final response = await _enteDio.get("/emergency-contacts/info");
-      return EmergencyInfo.fromJson(response.data);
+      return await _gateway.getInfo();
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to get info', e, s);
       rethrow;
@@ -91,13 +95,10 @@ class EmergencyContactService {
     ContactState state,
   ) async {
     try {
-      await _enteDio.post(
-        "/emergency-contacts/update",
-        data: {
-          "userID": contact.user.id,
-          "emergencyContactID": contact.emergencyContact.id,
-          "state": state.stringValue,
-        },
+      await _gateway.updateState(
+        userID: contact.user.id,
+        emergencyContactID: contact.emergencyContact.id,
+        state: state.stringValue,
       );
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to update contact', e, s);
@@ -105,14 +106,36 @@ class EmergencyContactService {
     }
   }
 
+  Future<bool> updateRecoveryNotice(
+    EmergencyContact contact,
+    int recoveryNoticeInDays,
+  ) async {
+    try {
+      await _gateway.updateRecoveryNotice(
+        emergencyContactID: contact.emergencyContact.id,
+        recoveryNoticeInDays: recoveryNoticeInDays,
+      );
+      return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        final message = e.response?.data?["message"] as String?;
+        if (message != null && message.contains("active recovery session")) {
+          return false;
+        }
+      }
+      _logger.severe("failed to update recovery notice", e);
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to update recovery notice", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> startRecovery(EmergencyContact contact) async {
     try {
-      await _enteDio.post(
-        "/emergency-contacts/start-recovery",
-        data: {
-          "userID": contact.user.id,
-          "emergencyContactID": contact.emergencyContact.id,
-        },
+      await _gateway.startRecovery(
+        userID: contact.user.id,
+        emergencyContactID: contact.emergencyContact.id,
       );
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to start recovery', e, s);
@@ -122,13 +145,10 @@ class EmergencyContactService {
 
   Future<void> stopRecovery(RecoverySessions session) async {
     try {
-      await _enteDio.post(
-        "/emergency-contacts/stop-recovery",
-        data: {
-          "userID": session.user.id,
-          "emergencyContactID": session.emergencyContact.id,
-          "id": session.id,
-        },
+      await _gateway.stopRecovery(
+        userID: session.user.id,
+        emergencyContactID: session.emergencyContact.id,
+        sessionID: session.id,
       );
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to stop recovery', e, s);
@@ -138,13 +158,10 @@ class EmergencyContactService {
 
   Future<void> rejectRecovery(RecoverySessions session) async {
     try {
-      await _enteDio.post(
-        "/emergency-contacts/reject-recovery",
-        data: {
-          "userID": session.user.id,
-          "emergencyContactID": session.emergencyContact.id,
-          "id": session.id,
-        },
+      await _gateway.rejectRecovery(
+        userID: session.user.id,
+        emergencyContactID: session.emergencyContact.id,
+        sessionID: session.id,
       );
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to stop recovery', e, s);
@@ -154,13 +171,10 @@ class EmergencyContactService {
 
   Future<void> approveRecovery(RecoverySessions session) async {
     try {
-      await _enteDio.post(
-        "/emergency-contacts/approve-recovery",
-        data: {
-          "userID": session.user.id,
-          "emergencyContactID": session.emergencyContact.id,
-          "id": session.id,
-        },
+      await _gateway.approveRecovery(
+        userID: session.user.id,
+        emergencyContactID: session.emergencyContact.id,
+        sessionID: session.id,
       );
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to approve recovery', e, s);
@@ -172,18 +186,14 @@ class EmergencyContactService {
     RecoverySessions sessions,
   ) async {
     try {
-      final resp = await _enteDio.get(
-        "/emergency-contacts/recovery-info/${sessions.id}",
-      );
-      final String encryptedKey = resp.data["encryptedKey"]!;
+      final (encryptedKey, keyAttributes) =
+          await _gateway.getRecoveryInfo(sessions.id);
       final decryptedKey = CryptoUtil.openSealSync(
         CryptoUtil.base642bin(encryptedKey),
         CryptoUtil.base642bin(_config.getKeyAttributes()!.publicKey),
         _config.getSecretKey()!,
       );
       final String hexRecoveryKey = CryptoUtil.bin2hex(decryptedKey);
-      final KeyAttributes keyAttributes =
-          KeyAttributes.fromMap(resp.data['userKeyAttr']);
       return (hexRecoveryKey, keyAttributes);
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to stop recovery', e, s);
@@ -224,38 +234,22 @@ class EmergencyContactService {
         srpA: base64Encode(SRP6Util.encodeBigInt(A!)),
         isUpdate: false,
       );
-      final response = await _enteDio.post(
-        "/emergency-contacts/init-change-password",
-        data: {
-          "recoveryID": recoverySessions.id,
-          "setupSRPRequest": request.toMap(),
-        },
+      final setupSRPResponse = await _gateway.initPasswordChange(
+        recoveryID: recoverySessions.id,
+        setupSRPRequest: request,
       );
-      if (response.statusCode == 200) {
-        final SetupSRPResponse setupSRPResponse =
-            SetupSRPResponse.fromJson(response.data);
-        final serverB =
-            SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+      final serverB =
+          SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
 
-        // ignore: unused_local_variable
-        final clientS = client.calculateSecret(serverB);
-        final clientM = client.calculateClientEvidenceMessage();
-        // ignore: unused_local_variable
-        late Response srpCompleteResponse;
-        srpCompleteResponse = await _enteDio.post(
-          "/emergency-contacts/change-password",
-          data: {
-            "recoveryID": recoverySessions.id,
-            'updateSrpAndKeysRequest': {
-              'setupID': setupSRPResponse.setupID,
-              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
-              'updatedKeyAttr': setKeysRequest.toMap(),
-            },
-          },
-        );
-      } else {
-        throw Exception("register-srp action failed");
-      }
+      // ignore: unused_local_variable
+      final clientS = client.calculateSecret(serverB);
+      final clientM = client.calculateClientEvidenceMessage();
+      await _gateway.changePassword(
+        recoveryID: recoverySessions.id,
+        setupID: setupSRPResponse.setupID,
+        srpM1: base64Encode(SRP6Util.encodeBigInt(clientM!)),
+        updatedKeyAttr: setKeysRequest.toMap(),
+      );
     } catch (e, s) {
       _logger.severe("failed to change password for other", e, s);
       rethrow;

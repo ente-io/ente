@@ -23,14 +23,22 @@ pub enum HttpError {
         /// Error message.
         message: String,
     },
+    /// Invalid base URL or request path.
+    InvalidUrl {
+        /// Error message.
+        message: String,
+    },
 }
 
 impl From<CoreError> for HttpError {
     fn from(e: CoreError) -> Self {
         match e {
             CoreError::Network(message) => HttpError::Network { message },
-            CoreError::Http { status, message } => HttpError::Http { status, message },
+            CoreError::Http {
+                status, message, ..
+            } => HttpError::Http { status, message },
             CoreError::Parse(message) => HttpError::Parse { message },
+            CoreError::InvalidUrl(message) => HttpError::InvalidUrl { message },
         }
     }
 }
@@ -46,7 +54,7 @@ impl HttpClient {
     #[frb(sync)]
     pub fn new(base_url: String) -> HttpClient {
         Self {
-            inner: CoreHttpClient::new(&base_url),
+            inner: CoreHttpClient::new(&base_url).expect("failed to build HTTP client"),
         }
     }
 

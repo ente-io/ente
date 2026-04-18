@@ -7,31 +7,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 When making commits, follow these rules:
 
 - Keep messages CONCISE (no walls of text)
-- Subject line under 72 chars as a single sentence (no body text, no bullets, no lists - only Co-Authored-By line)
+- Subject line under 72 chars as a single sentence (no body text, no bullets, no lists)
 - NO emojis
-- NO promotional text or links (except Co-Authored-By line)
-- Use ONLY "Co-Authored-By: Claude <noreply@anthropic.com>" for attribution
+- NO promotional text or links
+- NO Co-Authored-By lines
 
 Example:
 
 ```
 Format markdown files with Prettier for consistent styling
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ## Repository Overview
 
-Documentation for Ente's products (Photos, Auth, self-hosting), published at [ente.io/help](https://ente.io/help). Built with VitePress.
+Documentation for Ente's products (Photos, Auth, self-hosting), published at [ente.com/help](https://ente.com/help). Built with VitePress.
 
 ## Development Commands
 
 ```bash
-yarn install       # Install dependencies
+yarn install --frozen-lockfile  # Install dependencies from the committed lockfile
 yarn dev           # Start local dev server
 yarn build         # Build for production
 yarn pretty        # Format all files with Prettier
 ```
+
+Use plain `yarn install` only when intentionally updating dependencies and
+reviewing the resulting `yarn.lock` changes.
 
 ## Critical Architecture Notes
 

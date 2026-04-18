@@ -14,7 +14,7 @@ import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:flutter/foundation.dart';
@@ -39,6 +39,8 @@ class AuthenticatorService {
   late AuthenticatorDB _db;
   late OfflineAuthenticatorDB _offlineDb;
   final String _lastEntitySyncTime = "lastEntitySyncTime";
+  Future<bool>? _onlineSyncInFlight;
+  bool _onlineSyncRerunRequested = false;
 
   AuthenticatorService._privateConstructor();
 
@@ -163,7 +165,42 @@ class AuthenticatorService {
     }
   }
 
-  Future<bool> onlineSync() async {
+  Future<bool> onlineSync() {
+    final inFlightSync = _onlineSyncInFlight;
+    if (inFlightSync != null) {
+      _onlineSyncRerunRequested = true;
+      return inFlightSync;
+    }
+
+    final completer = Completer<bool>();
+    _onlineSyncInFlight = completer.future;
+    unawaited(_runCoalescedOnlineSync(completer));
+    return completer.future;
+  }
+
+  Future<void> _runCoalescedOnlineSync(Completer<bool> completer) async {
+    bool lastResult = false;
+    try {
+      while (true) {
+        _onlineSyncRerunRequested = false;
+        lastResult = await _onlineSyncOnce();
+        if (!_onlineSyncRerunRequested) {
+          break;
+        }
+        _logger.info("Sync rerun requested while syncing; running again");
+      }
+    } catch (e, s) {
+      _logger.severe("Unexpected failure while coalescing syncs", e, s);
+      lastResult = false;
+    } finally {
+      _onlineSyncInFlight = null;
+      if (!completer.isCompleted) {
+        completer.complete(lastResult);
+      }
+    }
+  }
+
+  Future<bool> _onlineSyncOnce() async {
     try {
       if (getAccountMode().isOffline) {
         debugPrint("Skipping sync since account mode is offline");

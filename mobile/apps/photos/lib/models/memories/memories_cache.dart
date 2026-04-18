@@ -4,6 +4,8 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/clip_memory.dart";
+import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/memory_spec.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
@@ -11,7 +13,7 @@ import "package:photos/models/memories/trip_memory.dart";
 
 const kPersonShowTimeout = Duration(days: 16 * kMemoriesUpdateFrequencyDays);
 const kClipShowTimeout = Duration(days: 10 * kMemoriesUpdateFrequencyDays);
-const kTripShowTimeout = Duration(days: 50 * kMemoriesUpdateFrequencyDays);
+const kTripShowTimeout = Duration(days: 40 * kMemoriesUpdateFrequencyDays);
 
 final maxShowTimeout = [
       kPersonShowTimeout,
@@ -72,6 +74,7 @@ class MemoriesCache {
 class ToShowMemory {
   final String title;
   final List<int> fileUploadedIDs;
+  final List<int>? fileLocalIntIDs;
   final MemoryType type;
   final int firstTimeToShow;
   final int lastTimeToShow;
@@ -80,22 +83,31 @@ class ToShowMemory {
 
   final String? personID;
   final String? personName;
+  final bool? isUnnamedCluster;
   final bool? isBirthday;
   final PeopleMemoryType? peopleMemoryType;
   final ClipMemoryType? clipMemoryType;
   final Location? location;
+  final MemorySpec? spec;
 
   bool get isOld {
     final now = DateTime.now().microsecondsSinceEpoch;
     return now > lastTimeToShow;
   }
 
+  bool isRelevantAt(int timestamp) {
+    return timestamp >= firstTimeToShow && timestamp < lastTimeToShow;
+  }
+
   bool shouldShowNow() {
     final now = DateTime.now().microsecondsSinceEpoch;
-    final relevantForNow = now >= firstTimeToShow && now < lastTimeToShow;
+    final relevantForNow = isRelevantAt(now);
     final calculatedForNow = (now >= calculationTime) &&
         (now < calculationTime + kMemoriesUpdateFrequency.inMicroseconds);
-    return relevantForNow && (calculatedForNow || type == MemoryType.onThisDay);
+    return relevantForNow &&
+        (calculatedForNow ||
+            type == MemoryType.onThisDay ||
+            type == MemoryType.trips);
   }
 
   ToShowMemory(
@@ -106,14 +118,18 @@ class ToShowMemory {
     this.lastTimeToShow,
     this.id,
     this.calculationTime, {
+    this.fileLocalIntIDs,
     this.personID,
     this.personName,
+    this.isUnnamedCluster,
     this.isBirthday,
     this.peopleMemoryType,
     this.clipMemoryType,
     this.location,
+    this.spec,
   }) : assert(
-          (type == MemoryType.people &&
+          (spec != null) ||
+              (type == MemoryType.people &&
                   personID != null &&
                   peopleMemoryType != null) ||
               (type == MemoryType.trips && location != null) ||
@@ -124,9 +140,14 @@ class ToShowMemory {
           "PersonID and peopleMemoryType must be provided for people memory type, and location must be provided for trips memory type",
         );
 
-  factory ToShowMemory.fromSmartMemory(SmartMemory memory, DateTime calcTime) {
+  factory ToShowMemory.fromSmartMemory(
+    SmartMemory memory,
+    DateTime calcTime, {
+    List<int>? fileLocalIntIDs,
+  }) {
     String? personID;
     String? personName;
+    bool? isUnnamedCluster;
     bool? isBirthday;
     PeopleMemoryType? peopleMemoryType;
     ClipMemoryType? clipMemoryType;
@@ -134,6 +155,7 @@ class ToShowMemory {
     if (memory is PeopleMemory) {
       personID = memory.personID;
       personName = memory.personName;
+      isUnnamedCluster = memory.isUnnamedCluster;
       isBirthday = memory.isBirthday;
       peopleMemoryType = memory.peopleMemoryType;
     } else if (memory is TripMemory) {
@@ -141,27 +163,35 @@ class ToShowMemory {
     } else if (memory is ClipMemory) {
       clipMemoryType = memory.clipMemoryType;
     }
+    final spec = MemorySpec.fromSmartMemory(memory);
+    final fileUploadedIDs = memory.memories
+        .where((m) => m.file.uploadedFileID != null)
+        .map((m) => m.file.uploadedFileID!)
+        .toList();
     return ToShowMemory(
       memory.title,
-      memory.memories
-          .where((m) => m.file.uploadedFileID != null)
-          .map((m) => m.file.uploadedFileID!)
-          .toList(),
+      fileUploadedIDs,
       memory.type,
       memory.firstDateToShow,
       memory.lastDateToShow,
       memory.id,
       calcTime.microsecondsSinceEpoch,
+      fileLocalIntIDs: fileLocalIntIDs,
       personID: personID,
       personName: personName,
+      isUnnamedCluster: isUnnamedCluster,
       isBirthday: isBirthday,
       peopleMemoryType: peopleMemoryType,
       clipMemoryType: clipMemoryType,
       location: location,
+      spec: spec,
     );
   }
 
   factory ToShowMemory.fromJson(Map<String, dynamic> json) {
+    final spec = MemorySpec.fromJson(
+      json['spec'] != null ? Map<String, dynamic>.from(json['spec']) : null,
+    );
     return ToShowMemory(
       json['title'],
       List<int>.from(json['fileUploadedIDs']),
@@ -170,9 +200,13 @@ class ToShowMemory {
       json['lastTimeToShow'],
       json['id'] ?? newID(json['type'] as String),
       json['calculationTime'],
+      fileLocalIntIDs: json['fileLocalIntIDs'] != null
+          ? List<int>.from(json['fileLocalIntIDs'])
+          : null,
       personID: json['personID'],
       isBirthday: json['isBirthday'],
       personName: json['personName'],
+      isUnnamedCluster: json['isUnnamedCluster'],
       peopleMemoryType: json['peopleMemoryType'] != null
           ? peopleMemoryTypeFromString(json['peopleMemoryType'])
           : null,
@@ -185,6 +219,7 @@ class ToShowMemory {
               longitude: json['location']['longitude'],
             )
           : null,
+      spec: spec,
     );
   }
 
@@ -192,6 +227,7 @@ class ToShowMemory {
     return {
       'title': title,
       'fileUploadedIDs': fileUploadedIDs.toList(),
+      if (fileLocalIntIDs != null) 'fileLocalIntIDs': fileLocalIntIDs!.toList(),
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,
@@ -200,8 +236,10 @@ class ToShowMemory {
       'personID': personID,
       'isBirthday': isBirthday,
       'personName': personName,
+      'isUnnamedCluster': isUnnamedCluster,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'clipMemoryType': clipMemoryType?.toString().split('.').last,
+      if (spec != null) 'spec': spec!.toJson(),
       'location': location != null
           ? {
               'latitude': location!.latitude!,
@@ -219,6 +257,65 @@ class ToShowMemory {
   static List<ToShowMemory> decodeJsonToList(String jsonString) {
     final jsonList = jsonDecode(jsonString) as List;
     return jsonList.map((json) => ToShowMemory.fromJson(json)).toList();
+  }
+
+  bool get hasTypedSpec => spec != null;
+
+  String? get tripKey {
+    final currentSpec = spec;
+    if (currentSpec is TripMemorySpec) {
+      return currentSpec.tripKey;
+    }
+    return null;
+  }
+
+  String get tripIdentityKey {
+    final key = tripKey;
+    if (key != null && key.isNotEmpty) {
+      return "trip:$key";
+    }
+    final loc = location;
+    if (loc == null) {
+      return "legacy:$id";
+    }
+    final latitude = (loc.latitude ?? 0).toStringAsFixed(2);
+    final longitude = (loc.longitude ?? 0).toStringAsFixed(2);
+    return "legacy:$latitude:$longitude";
+  }
+
+  SmartMemory toSmartMemory(List<Memory> memories) {
+    if (spec != null) {
+      return spec!.toSmartMemory(
+        memories,
+        firstDateToShow: firstTimeToShow,
+        lastDateToShow: lastTimeToShow,
+        title: title,
+        id: id,
+      );
+    }
+
+    if (type == MemoryType.people) {
+      return PeopleMemory(
+        memories,
+        firstTimeToShow,
+        lastTimeToShow,
+        peopleMemoryType!,
+        personID!,
+        personName,
+        isUnnamedCluster: isUnnamedCluster ?? false,
+        title: title,
+        id: id,
+      );
+    }
+
+    return SmartMemory(
+      memories,
+      type,
+      title,
+      firstTimeToShow,
+      lastTimeToShow,
+      id: id,
+    );
   }
 }
 
@@ -320,10 +417,12 @@ class ClipShownLog {
 class TripsShownLog {
   final Location location;
   final int lastTimeShown;
+  final String? tripKey;
 
   TripsShownLog(
     this.location,
     this.lastTimeShown,
+    this.tripKey,
   );
 
   factory TripsShownLog.fromOldCacheMemory(ToShowMemory memory) {
@@ -331,6 +430,7 @@ class TripsShownLog {
     return TripsShownLog(
       memory.location!,
       memory.lastTimeToShow,
+      memory.tripKey,
     );
   }
 
@@ -341,6 +441,7 @@ class TripsShownLog {
         longitude: json['location']['longitude'],
       ),
       json['lastTimeShown'],
+      json['tripKey'] as String?,
     );
   }
 
@@ -351,6 +452,7 @@ class TripsShownLog {
         'longitude': location.longitude!,
       },
       'lastTimeShown': lastTimeShown,
+      'tripKey': tripKey,
     };
   }
 

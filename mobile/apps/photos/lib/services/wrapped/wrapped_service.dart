@@ -55,7 +55,7 @@ class WrappedService {
   static const int _kWrappedYear = 2025;
   static final DateTime _kAvailabilityStart = DateTime(_kWrappedYear, 12, 6);
   static final DateTime _kAvailabilityEndExclusive =
-      DateTime(_kWrappedYear + 1, 1, 7);
+      DateTime(_kWrappedYear + 1, 1, 16);
   static final DateTime _kFinalComputeCutoff =
       DateTime(_kWrappedYear + 1, 1, 1);
 
@@ -63,6 +63,7 @@ class WrappedService {
   final WrappedCacheService _cacheService;
   final Lock _computeLock;
   final ValueNotifier<WrappedEntryState> _state;
+  int _sessionGeneration = 0;
   bool _initialLoadScheduled = false;
 
   ValueListenable<WrappedEntryState> get stateListenable => _state;
@@ -86,6 +87,18 @@ class WrappedService {
   bool get shouldShowDiscoveryEntry =>
       isEnabled && state.hasResult && state.isComplete;
 
+  void resetForLogout() {
+    _logger.info("Resetting Wrapped state for logout");
+    _sessionGeneration++;
+    _initialLoadScheduled = false;
+    WrappedMediaPreloader.instance.reset();
+    _state.value = const WrappedEntryState(
+      result: null,
+      resumeIndex: 0,
+      isComplete: false,
+    );
+  }
+
   void scheduleInitialLoad() {
     if (!isEnabled) {
       return;
@@ -95,15 +108,35 @@ class WrappedService {
     }
     _initialLoadScheduled = true;
     _logger.info("Scheduling Wrapped initial load after $_kInitialDelay");
-    unawaited(Future<void>.delayed(_kInitialDelay, _bootstrap));
+    final int generation = _sessionGeneration;
+    unawaited(
+      Future<void>.delayed(
+        _kInitialDelay,
+        () async {
+          if (generation != _sessionGeneration) {
+            return;
+          }
+          await _bootstrap();
+        },
+      ),
+    );
   }
 
   Future<void> _bootstrap() async {
+    final int generation = _sessionGeneration;
     try {
       final WrappedResult? cached =
           await _cacheService.read(year: _kWrappedYear);
+      if (generation != _sessionGeneration) {
+        _logger.info("Wrapped bootstrap aborted due to session change");
+        return;
+      }
       if (cached != null) {
         await WrappedMediaPreloader.instance.prime(cached);
+        if (generation != _sessionGeneration) {
+          _logger.info("Wrapped bootstrap aborted due to session change");
+          return;
+        }
         _logger.info(
           "Loaded Wrapped cache for $_kWrappedYear with "
           "${cached.cards.length} cards",
@@ -121,6 +154,10 @@ class WrappedService {
       _logger.severe("Failed to load Wrapped cache", error, stackTrace);
     }
 
+    if (generation != _sessionGeneration) {
+      _logger.info("Wrapped bootstrap aborted due to session change");
+      return;
+    }
     if (!isEnabled) {
       _logger.info(
         "Wrapped unavailable; skipping initial compute for $_kWrappedYear",
@@ -156,6 +193,7 @@ class WrappedService {
     required String reason,
     required bool bypassFlag,
   }) async {
+    final int generation = _sessionGeneration;
     if (!bypassFlag && !isEnabled) {
       _logger.info(
         "Wrapped unavailable; skipping compute for $_kWrappedYear ($reason)",
@@ -167,8 +205,26 @@ class WrappedService {
     try {
       final WrappedResult result =
           await WrappedEngine.compute(year: _kWrappedYear);
+      if (generation != _sessionGeneration) {
+        _logger.info(
+          "Discarding Wrapped compute result ($reason) due to session change",
+        );
+        return;
+      }
       await WrappedMediaPreloader.instance.prime(result);
+      if (generation != _sessionGeneration) {
+        _logger.info(
+          "Discarding Wrapped compute result ($reason) due to session change",
+        );
+        return;
+      }
       await _cacheService.write(result: result);
+      if (generation != _sessionGeneration) {
+        _logger.info(
+          "Discarding Wrapped compute result ($reason) due to session change",
+        );
+        return;
+      }
       updateResult(result);
       _logger.info("Wrapped compute completed ($reason)");
     } catch (error, stackTrace) {

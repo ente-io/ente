@@ -10,6 +10,8 @@ class SearchableAppBar extends StatefulWidget {
   final String heroTag;
   final bool autoActivateSearch;
   final Color? backgroundColor;
+  final bool? centerTitle;
+  final EdgeInsetsGeometry searchIconPadding;
 
   const SearchableAppBar({
     super.key,
@@ -20,6 +22,8 @@ class SearchableAppBar extends StatefulWidget {
     this.heroTag = "",
     this.autoActivateSearch = false,
     this.backgroundColor,
+    this.centerTitle,
+    this.searchIconPadding = const EdgeInsets.all(12.0),
   });
 
   @override
@@ -90,6 +94,7 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: !_isSearchActive,
+      centerTitle: widget.centerTitle,
       title: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         switchInCurve: Curves.easeOut,
@@ -116,7 +121,7 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
               GestureDetector(
                 onTap: _activateSearch,
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: widget.searchIconPadding,
                   child: SizedBox(
                     height: 18,
                     width: 18,

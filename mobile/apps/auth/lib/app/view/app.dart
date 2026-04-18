@@ -201,6 +201,15 @@ class _AppState extends State<App>
   }
 
   @override
+  void onWindowFocus() {
+    // When window receives focus (e.g., reopened from app launcher while
+    // hidden to tray), ensure the taskbar icon is visible
+    if (Platform.isWindows || Platform.isLinux) {
+      windowManager.setSkipTaskbar(false);
+    }
+  }
+
+  @override
   void onTrayIconRightMouseUp() {}
 
   @override

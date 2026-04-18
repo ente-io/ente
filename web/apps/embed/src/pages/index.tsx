@@ -9,6 +9,7 @@ import { useBaseContext } from "ente-base/context";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
+    isMuseumHTTPError,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
@@ -36,6 +37,10 @@ import {
     removePublicCollectionFileData,
     verifyPublicAlbumPassword,
 } from "../services/public-collection";
+
+const isDeviceLimitExceededError = async (e: unknown) =>
+    isHTTPErrorWithStatus(e, 429) ||
+    (await isMuseumHTTPError(e, 403, "LINK_DEVICE_LIMIT_EXCEEDED"));
 
 export default function EmbedGallery() {
     const { onGenericError } = useBaseContext();
@@ -99,13 +104,14 @@ export default function EmbedGallery() {
                 }
             }
         } catch (e) {
+            const isDeviceLimitExceeded = await isDeviceLimitExceededError(e);
             if (
                 isHTTPErrorWithStatus(e, 401) ||
                 isHTTPErrorWithStatus(e, 410) ||
-                isHTTPErrorWithStatus(e, 429)
+                isDeviceLimitExceeded
             ) {
                 setErrorMessage(
-                    isHTTPErrorWithStatus(e, 429)
+                    isDeviceLimitExceeded
                         ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
@@ -131,9 +137,9 @@ export default function EmbedGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    // Only redirect to ente.io if this is NOT a custom/self-hosted instance
+                    // Only redirect to ente.com if this is NOT a custom/self-hosted instance
                     if (!isCustomAlbumsAppOrigin) {
-                        window.location.href = "https://ente.io";
+                        window.location.href = "https://ente.com";
                         redirectingToWebsite = true;
                     }
                 }

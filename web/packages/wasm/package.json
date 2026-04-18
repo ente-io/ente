@@ -6,21 +6,22 @@
         ".": {
             "types": "./pkg/ente_wasm.d.ts",
             "import": "./pkg/ente_wasm.js"
+        },
+        "./load": {
+            "types": "./load.ts",
+            "import": "./load.ts"
         }
     },
     "module": "./pkg/ente_wasm.js",
     "types": "./pkg/ente_wasm.d.ts",
-    "files": [
-        "pkg"
-    ],
     "scripts": {
         "build": "wasm-pack build --target bundler",
-        "test": "vitest"
+        "test": "vitest --run"
     },
     "devDependencies": {
         "ente-build-config": "*",
         "vite-plugin-wasm": "^3.2.4",
         "vitest": "^3.2.4",
-        "wasm-pack": "^0.13.1"
+        "wasm-pack": "^0.14.0"
     }
 }

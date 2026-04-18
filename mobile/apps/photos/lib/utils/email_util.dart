@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:email_validator/email_validator.dart';
 import "package:file_saver/file_saver.dart";
 import 'package:flutter/cupertino.dart';
@@ -15,8 +16,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import "package:photos/generated/l10n.dart";
+import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/progress_dialog.dart";
+import 'package:photos/ui/components/base_bottom_sheet.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
@@ -85,6 +89,7 @@ Future<void> sendLogs(
         buttonType: ButtonType.secondary,
         labelText: AppLocalizations.of(context).exportLogs,
         buttonAction: ButtonAction.third,
+        shouldSurfaceExecutionStates: false,
         onTap: () async {
           final zipFilePath = await getZippedLogsFile(context);
           await exportLogs(context, zipFilePath);
@@ -107,20 +112,34 @@ Future<void> _sendLogs(
   String? body,
 ) async {
   final String zipFilePath = await getZippedLogsFile(context);
-  final Email email = Email(
-    recipients: [toEmail],
-    subject: subject ?? '',
-    body: body ?? '',
-    attachmentPaths: [zipFilePath],
-    isHTML: false,
+  final didOpenComposer = await sendLogsWithSubjectAndBody(
+    context,
+    toEmail: toEmail,
+    subject: subject,
+    body: body,
+    zipFilePath: zipFilePath,
   );
-  try {
-    await FlutterEmailSender.send(email);
-  } catch (e, s) {
-    _logger.severe('email sender failed', e, s);
+  if (!didOpenComposer) {
     Navigator.of(context).pop();
     await shareLogs(context, toEmail, zipFilePath);
   }
+}
+
+Future<bool> sendLogsWithSubjectAndBody(
+  BuildContext context, {
+  required String toEmail,
+  String? subject,
+  String? body,
+  String? zipFilePath,
+}) async {
+  final effectiveZipFilePath = zipFilePath ?? await getZippedLogsFile(context);
+  return sendComposedEmail(
+    context,
+    to: toEmail,
+    subject: subject ?? '',
+    body: body ?? '',
+    attachmentPaths: [effectiveZipFilePath],
+  );
 }
 
 Future<void> triggerSendLogs(
@@ -237,93 +256,263 @@ Future<void> sendEmail(
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();
-    final EmailContent emailContent = EmailContent(
-      to: [
-        to,
-      ],
+    final didOpenComposer = await sendComposedEmail(
+      context,
+      to: to,
       subject: subject ?? '[Support]',
       body: (body ?? '') + clientDebugInfo,
     );
-    if (Platform.isAndroid) {
-      // Special handling due to issue in proton mail android client
-      // https://github.com/ente-io/photos-app/pull/253
-      final Uri params = Uri(
-        scheme: 'mailto',
-        path: to,
-        query: 'subject=${emailContent.subject}&body=${emailContent.body}',
-      );
-      if (await canLaunchUrl(params)) {
-        await launchUrl(params);
-      } else {
-        // this will trigger _showNoMailAppsDialog
-        throw Exception('Could not launch ${params.toString()}');
-      }
-    } else {
-      final OpenMailAppResult result =
-          await OpenMailApp.composeNewEmailInMailApp(
-        nativePickerTitle: 'Select emailContent app',
-        emailContent: emailContent,
-      );
-      if (!result.didOpen && !result.canOpen) {
-        _showNoMailAppsDialog(context, to);
-      } else if (!result.didOpen && result.canOpen) {
-        await showCupertinoModalPopup(
-          context: context,
-          builder: (_) => CupertinoActionSheet(
-            title: Text(AppLocalizations.of(context).selectMailApp + " \n $to"),
-            actions: [
-              for (var app in result.options)
-                CupertinoActionSheetAction(
-                  child: Text(app.name),
-                  onPressed: () {
-                    final content = emailContent;
-
-                    OpenMailApp.composeNewEmailInSpecificMailApp(
-                      mailApp: app,
-                      emailContent: content,
-                    );
-
-                    Navigator.of(context).pop();
-                  },
-                ),
-            ],
-            cancelButton: CupertinoActionSheetAction(
-              child: Text(AppLocalizations.of(context).cancel),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-        );
-      }
+    if (!didOpenComposer) {
+      await _showNoMailAppsSheet(context, to);
     }
   } catch (e) {
     _logger.severe("Failed to send emailContent to $to", e);
-    _showNoMailAppsDialog(context, to);
+    await _showNoMailAppsSheet(context, to);
   }
+}
+
+Future<void> openEmailComposer(
+  BuildContext context, {
+  required String to,
+}) async {
+  try {
+    final didOpenComposer = await sendComposedEmail(
+      context,
+      to: to,
+      subject: '',
+      body: '',
+    );
+    if (!didOpenComposer) {
+      await _showNoMailAppsSheet(context, to);
+    }
+  } catch (e, s) {
+    _logger.severe("Failed to open email composer to $to", e, s);
+    await _showNoMailAppsSheet(context, to);
+  }
+}
+
+Future<bool> sendComposedEmail(
+  BuildContext context, {
+  required String to,
+  required String subject,
+  required String body,
+  List<String>? attachmentPaths,
+}) async {
+  try {
+    final hasAttachment = attachmentPaths != null && attachmentPaths.isNotEmpty;
+    if (hasAttachment) {
+      final email = Email(
+        recipients: [to],
+        subject: subject,
+        body: body,
+        attachmentPaths: attachmentPaths,
+        isHTML: false,
+      );
+      await FlutterEmailSender.send(email);
+      return true;
+    }
+
+    final emailContent = EmailContent(
+      to: [to],
+      subject: subject,
+      body: body,
+    );
+
+    if (Platform.isAndroid) {
+      // Special handling due to issue in proton mail android client
+      // https://github.com/ente-io/photos-app/pull/253
+      final params = _buildMailtoUri(
+        to,
+        subject: subject,
+        body: body,
+      );
+      if (!await canLaunchUrl(params)) {
+        return false;
+      }
+      await launchUrl(params);
+      return true;
+    }
+
+    final result = await OpenMailApp.composeNewEmailInMailApp(
+      nativePickerTitle: AppLocalizations.of(context).selectMailApp,
+      emailContent: emailContent,
+    );
+    if (!result.didOpen && !result.canOpen) {
+      return false;
+    }
+    if (!result.didOpen && result.canOpen) {
+      await showCupertinoModalPopup(
+        context: context,
+        builder: (_) => CupertinoActionSheet(
+          title: Text(AppLocalizations.of(context).selectMailApp + " \n $to"),
+          actions: [
+            for (final app in result.options)
+              CupertinoActionSheetAction(
+                child: Text(app.name),
+                onPressed: () async {
+                  await OpenMailApp.composeNewEmailInSpecificMailApp(
+                    mailApp: app,
+                    emailContent: emailContent,
+                  );
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            child: Text(AppLocalizations.of(context).cancel),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      );
+    }
+    return true;
+  } catch (e, s) {
+    _logger.severe("Failed to send composed email to $to", e, s);
+    return false;
+  }
+}
+
+Uri _buildMailtoUri(
+  String to, {
+  String? subject,
+  String? body,
+}) {
+  final queryParameters = <String, String>{};
+  if (subject != null && subject.isNotEmpty) {
+    queryParameters["subject"] = subject;
+  }
+  if (body != null && body.isNotEmpty) {
+    queryParameters["body"] = body;
+  }
+  return Uri(
+    scheme: "mailto",
+    path: to,
+    queryParameters: queryParameters.isEmpty ? null : queryParameters,
+  );
+}
+
+Future<String> getSupportDeviceInfo() async {
+  final packageInfo = await PackageInfo.fromPlatform();
+  final platformDeviceInfo = await _getPlatformDeviceInfo();
+  final buffer = StringBuffer()
+    ..writeln(
+      "App version: ${packageInfo.version} (${packageInfo.buildNumber})",
+    )
+    ..writeln("OS version: ${platformDeviceInfo.osVersion}")
+    ..write("Device model: ${platformDeviceInfo.deviceModel}");
+  return buffer.toString();
+}
+
+String buildSupportEmailBody({
+  required String message,
+  String? deviceInfo,
+}) {
+  final trimmedMessage = message.trim();
+  final trimmedDeviceInfo = deviceInfo?.trim();
+  if (trimmedDeviceInfo == null || trimmedDeviceInfo.isEmpty) {
+    return trimmedMessage;
+  }
+  if (trimmedMessage.isEmpty) {
+    return trimmedDeviceInfo;
+  }
+  return "$trimmedMessage\n\n-------------------\n$trimmedDeviceInfo";
 }
 
 Future<String> _clientInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
+  final supportDeviceInfo = await getSupportDeviceInfo();
   final String debugInfo =
       '\n\n\n\n ------------------- \nFollowing information can '
       'help us in debugging if you are facing any issue '
       '\nRegistered email: ${Configuration.instance.getEmail()}'
       '\nClient: ${packageInfo.packageName}'
-      '\nVersion : ${packageInfo.version}';
+      '\n$supportDeviceInfo';
   return debugInfo;
 }
 
-void _showNoMailAppsDialog(BuildContext context, String toEmail) {
-  showChoiceDialog(
+Future<void> _showNoMailAppsSheet(BuildContext context, String toEmail) async {
+  if (!context.mounted) {
+    return;
+  }
+  await showBaseBottomSheet<void>(
     context,
-    icon: Icons.email_outlined,
-    title: AppLocalizations.of(context).pleaseEmailUsAt(toEmail: toEmail),
-    firstButtonLabel: AppLocalizations.of(context).copyEmailAddress,
-    secondButtonLabel: AppLocalizations.of(context).dismiss,
-    firstButtonOnTap: () async {
-      await Clipboard.setData(ClipboardData(text: toEmail));
-      showShortToast(context, 'Copied');
-    },
+    title: AppLocalizations.of(context).noEmailAppFound,
+    headerSpacing: 16,
+    child: _NoMailAppsSheet(toEmail: toEmail),
+  );
+}
+
+class _NoMailAppsSheet extends StatelessWidget {
+  final String toEmail;
+
+  const _NoMailAppsSheet({
+    required this.toEmail,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.pleaseEmailUsAt(toEmail: toEmail),
+          style: textTheme.smallMuted,
+        ),
+        const SizedBox(height: 16),
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: l10n.copyEmailAddress,
+          onTap: () async {
+            await _copyEmailAddress(context, toEmail);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> _copyEmailAddress(BuildContext context, String toEmail) async {
+  await Clipboard.setData(ClipboardData(text: toEmail));
+  if (context.mounted) {
+    showShortToast(context, AppLocalizations.of(context).copied);
+  }
+}
+
+Future<({String osVersion, String deviceModel})>
+    _getPlatformDeviceInfo() async {
+  try {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfoPlugin.androidInfo;
+      final deviceModel =
+          "${androidInfo.manufacturer} ${androidInfo.model}".trim();
+      final osVersion = "Android ${androidInfo.version.release}";
+      return (
+        osVersion: osVersion,
+        deviceModel: deviceModel.isEmpty ? "Android device" : deviceModel,
+      );
+    }
+    if (Platform.isIOS) {
+      final iosInfo = await deviceInfoPlugin.iosInfo;
+      final machine = iosInfo.utsname.machine.trim();
+      return (
+        osVersion: "iOS ${iosInfo.systemVersion}",
+        deviceModel: machine.isEmpty ? iosInfo.model : machine,
+      );
+    }
+  } catch (e, s) {
+    _logger.severe("Failed to fetch platform device info", e, s);
+  }
+  return (
+    osVersion: Platform.operatingSystem,
+    deviceModel: "Unknown device",
   );
 }

@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
@@ -12,17 +13,18 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/ui/viewer/people/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class PeopleSection extends StatefulWidget {
   final SectionType sectionType = SectionType.face;
@@ -81,6 +83,7 @@ class _PeopleSectionState extends State<PeopleSection> {
     debugPrint("Building section for ${widget.sectionType.name}");
     final shouldShowMore = _examples.length >= widget.limit - 1;
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -105,16 +108,14 @@ class _PeopleSectionState extends State<PeopleSection> {
                         style: textTheme.largeBold,
                       ),
                     ),
-                    shouldShowMore
-                        ? Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.chevron_right_outlined,
-                              color:
-                                  getEnteColorScheme(context).blurStrokePressed,
-                            ),
-                          )
-                        : const SizedBox.shrink(),
+                    if (shouldShowMore)
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.chevron_right_outlined,
+                          color: colorScheme.blurStrokePressed,
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -208,10 +209,8 @@ class PersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = 82 * (size / 102);
-
-    final bool isCluster = (searchResult.type() == ResultType.faces &&
-        int.tryParse(searchResult.name()) != null);
+    final bool isCluster = searchResult.type() == ResultType.faces &&
+        searchResult.params.containsKey(kClusterParamId);
 
     return ListenableBuilder(
       listenable: selectedPeople ?? ValueNotifier(false),
@@ -243,12 +242,7 @@ class PersonSearchExample extends StatelessWidget {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  ClipPath(
-                    clipper: ShapeBorderClipper(
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(borderRadius),
-                      ),
-                    ),
+                  FaceThumbnailSquircleClip(
                     child: Container(
                       width: size,
                       height: size,
@@ -267,7 +261,10 @@ class PersonSearchExample extends StatelessWidget {
                                 searchResult.previewThumbnail()!,
                                 shouldShowSyncStatus: false,
                               )
-                            : FaceSearchResult(searchResult);
+                            : FaceSearchResult(
+                                searchResult,
+                                displaySize: size - 2,
+                              );
                       } else {
                         child = const NoThumbnailWidget(
                           addBorder: false,
@@ -276,15 +273,7 @@ class PersonSearchExample extends StatelessWidget {
                       return SizedBox(
                         width: size - 2,
                         height: size - 2,
-                        child: ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius:
-                                  searchResult.previewThumbnail() != null
-                                      ? BorderRadius.circular(borderRadius - 1)
-                                      : BorderRadius.circular(81),
-                            ),
-                          ),
+                        child: FaceThumbnailSquircleClip(
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
@@ -320,45 +309,50 @@ class PersonSearchExample extends StatelessWidget {
                 ],
               ),
               isCluster
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () async {
-                        final result = await showAssignPersonAction(
-                          context,
-                          clusterID: searchResult.name(),
-                        );
-                        if (result != null &&
-                            result is (PersonEntity, EnteFile)) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result.$1,
-                              searchResult: null,
+                  ? isOfflineMode
+                      ? const SizedBox.shrink()
+                      : GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () async {
+                            final clusterId =
+                                searchResult.params[kClusterParamId] as String?;
+                            final result = await showAssignPersonAction(
+                              context,
+                              clusterID: clusterId ?? searchResult.name(),
+                            );
+                            if (result != null &&
+                                result is (PersonEntity, EnteFile)) {
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result.$1,
+                                  searchResult: null,
+                                ),
+                              );
+                            } else if (result != null &&
+                                result is PersonEntity) {
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result,
+                                  searchResult: null,
+                                ),
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 6, bottom: 0),
+                            child: Text(
+                              AppLocalizations.of(context).addName,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: getEnteTextTheme(context).small,
                             ),
-                          );
-                        } else if (result != null && result is PersonEntity) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result,
-                              searchResult: null,
-                            ),
-                          );
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 6, bottom: 0),
-                        child: Text(
-                          AppLocalizations.of(context).addName,
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
-                        ),
-                      ),
-                    )
+                          ),
+                        )
                   : Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 0),
                       child: SizedBox(
@@ -382,15 +376,23 @@ class PersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
+  final double displaySize;
 
-  const FaceSearchResult(this.searchResult, {super.key});
+  const FaceSearchResult(
+    this.searchResult, {
+    required this.displaySize,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
+    final int cachedPixelWidth =
+        (displaySize * MediaQuery.devicePixelRatioOf(context)).toInt();
     return PersonFaceWidget(
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
+      cachedPixelWidth: cachedPixelWidth,
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),

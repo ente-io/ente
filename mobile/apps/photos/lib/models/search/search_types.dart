@@ -1,9 +1,11 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/contacts_changed_event.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/events/magic_cache_updated_event.dart";
@@ -20,11 +22,11 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
 enum ResultType {
   collection,
+  deviceCollection,
   file,
   uploader,
   location,
@@ -38,6 +40,8 @@ enum ResultType {
   shared,
   faces,
   magic,
+  cameraMake,
+  cameraModel,
 }
 
 enum SectionType {
@@ -288,6 +292,11 @@ extension SectionTypeExtensions on SectionType {
         return [Bus.instance.on<CollectionUpdatedEvent>()];
       case SectionType.face:
         return [Bus.instance.on<PeopleChangedEvent>()];
+      case SectionType.contacts:
+        return [
+          Bus.instance.on<PeopleChangedEvent>(),
+          Bus.instance.on<ContactsChangedEvent>(),
+        ];
       default:
         return [];
     }
@@ -306,7 +315,10 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.ritual:
         return [];
       case SectionType.contacts:
-        return [Bus.instance.on<PeopleChangedEvent>()];
+        return [
+          Bus.instance.on<PeopleChangedEvent>(),
+          Bus.instance.on<ContactsChangedEvent>(),
+        ];
       default:
         return [];
     }

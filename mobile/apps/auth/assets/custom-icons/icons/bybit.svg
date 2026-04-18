@@ -1,38 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Creator: CorelDRAW X5 -->
-<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="135.467mm" height="45.1272mm" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-viewBox="0 0 13547 4513"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:svg="http://www.w3.org/2000/svg">
- <defs>
-  <style type="text/css">
-    <![CDATA[
-      .fil0 { fill: #F6A500; fill-rule: nonzero; }
-      .fil1 { fill: #15182A; fill-rule: nonzero; }
-      @media (prefers-color-scheme: dark) {
-        .fil1 { fill: #FFFFFF; }
-        svg { background-color: #15182A; }
-      }
-    ]]>
-  </style>
- </defs>
- <g id="Layer_x0020_1">
-  <metadata id="CorelCorpID_0Corel-Layer"/>
- </g>
- <g id="Layer_x0020_1_0">
-  <metadata id="CorelCorpID_1Corel-Layer"/>
-  <g id="Bybit_x0020_Logo.cdr">
-   <!-- Orange Polygon -->
-   <polygon class="fil0" points="9655,3480 9655,-1 10355,-1 10355,3480 "/>
-   <!-- Navy Path (default) -->
-   <path class="fil1" d="M1500 4514l-1500 0 0 -3481 1440 0c700,0 1107,381 1107,978 0,386 -262,636 -443,719 216,98 493,318 493,782 0,650 -458,1002 -1097,1002zm-116 -2875l0 0 -685 0 0 802 685 0c297,0 463,-161 463,-401 0,-239 -166,-401 -463,-401zm45 1413l0 0 -730 0 0 856 730 0c317,0 468,-195 468,-430 0,-235 -151,-425 -468,-425z"/>
-   <!-- Navy Polygon (default) -->
-   <polygon class="fil1" points="4732,3086 4732,4514 4037,4514 4037,3086 2960,1033 3720,1033 4389,2436 5049,1033 5809,1033 "/>
-   <!-- Navy Path (default) -->
-   <path class="fil1" d="M7793 4514l-1500 0 0 -3481 1440 0c700,0 1107,381 1107,978 0,386 -262,636 -443,719 216,98 493,318 493,782 0,650 -458,1002 -1097,1002zm-116 -2875l0 0 -685 0 0 802 685 0c297,0 463,-161 463,-401 0,-239 -166,-401 -463,-401zm45 1413l0 0 -730 0 0 856 730 0c317,0 468,-195 468,-430 0,-235 -151,-425 -468,-425z"/>
-   <!-- Navy Polygon (default) -->
-   <polygon class="fil1" points="12610,1639 12610,4514 11911,4514 11911,1639 10974,1639 10974,1033 13547,1033 13547,1639 "/>
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <path d="M356.3 295.4V167H382.2V295.4H356.3Z" fill="#F6A500"/>
+  <g style="mix-blend-mode:difference" fill="white">
+    <path d="M55.4 333.5H0V205.1H53.2C79 205.1 94 219.2 94 241.2C94 255.5 84.3 264.7 77.6 267.7C85.6 271.4 95.8 279.5 95.8 296.6C95.8 320.6 78.9 333.5 55.4 333.5ZM51.1 227.5H25.8V257.1H51.1C62 257.1 68.2 251.1 68.2 242.3C68.2 233.5 62 227.5 51.1 227.5ZM52.7 279.6H25.8V311.2H52.7C64.4 311.2 70 304 70 295.3C70 286.7 64.4 279.6 52.7 279.6Z"/>
+    <path d="M174.7 280.9V333.5H149V280.9L109.3 205.1H137.3L162 256.9L186.3 205.1H214.4L174.7 280.9Z"/>
+    <path d="M287.6 333.5H232.3V205.1H285.4C311.2 205.1 326.3 219.2 326.3 241.2C326.3 255.5 316.6 264.7 309.9 267.7C317.9 271.4 328.1 279.5 328.1 296.6C328.1 320.6 311.2 333.5 287.6 333.5ZM283.3 227.5H258.1V257.1H283.3C294.3 257.1 300.4 251.1 300.4 242.3C300.4 233.5 294.3 227.5 283.3 227.5ZM285 279.6H258.1V311.2H285C296.7 311.2 302.3 304 302.3 295.3C302.3 286.7 296.7 279.6 285 279.6Z"/>
+    <path d="M465.4 227.5V333.5H439.6V227.5H405V205.1H500V227.5H465.4Z"/>
   </g>
- </g>
 </svg>

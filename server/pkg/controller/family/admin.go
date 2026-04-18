@@ -146,6 +146,9 @@ func (c *Controller) RemoveMember(ctx context.Context, adminID int64, id uuid.UU
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	if err = c.clearFamilyCustomDomain(ctx, familyMember.MemberUserID); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	go func() {
 		notificationErr := c.sendNotification(ctx, adminID, familyMember.MemberUserID, ente.REMOVED, nil)
 		if notificationErr != nil {
@@ -289,7 +292,7 @@ func (c *Controller) sendNotification(ctx context.Context, adminUserID int64, me
 		return stacktrace.Propagate(fmt.Errorf("unsupported status %s", newStatus), "")
 	}
 	inlineImages = append(inlineImages, inlineImage)
-	err = emailUtil.SendTemplatedEmail([]string{emailTo}, "ente", "team@ente.io",
+	err = emailUtil.SendTemplatedEmail([]string{emailTo}, "ente", "team@ente.com",
 		title, templateName, templateData, inlineImages)
 	if err != nil {
 		return stacktrace.Propagate(err, "")

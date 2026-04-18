@@ -1,7 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:styled_text/tags/styled_text_tag.dart';
 import 'package:styled_text/widgets/styled_text.dart';
@@ -43,9 +43,9 @@ class BannerWidget extends StatelessWidget {
 
     switch (type) {
       case BannerType.rateUs:
-        if (PlatformUtil.isMobile()) {
+        if (PlatformDetector.isMobile()) {
           url = Uri.parse(rateUrl);
-        } else if (PlatformUtil.isDesktop()) {
+        } else if (PlatformDetector.isDesktop()) {
           url = Uri.parse(
             "https://play.google.com/store/apps/details?id=io.ente.auth",
           );

@@ -12,6 +12,7 @@
   "featureOpenSource": "Nyílt forráskódú és\nbiztonsági szakértők által auditált",
   "signUp": "Bejelentkezés",
   "onBoardingGetStarted": "Kezdjünk bele",
+  "setupFirstAccount": "Állítsd be az első fiókodat",
   "allTabEmptyHint": "Még nincs itt semmi. Koppints a + jelre kód hozzáadásához, vagy nyisd meg a Kukát egy visszaállításához.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -120,7 +121,6 @@
   "importAegisGuide": "Használd az Aegis beállításaiban található \"Export the vault\" opciót.\n\nHa a vault titkosított, akkor meg kell adni a vault jelszót a tároló visszafejtéséhez.",
   "import2FasGuide": "Használd a \"Beállítások->Biztonsági mentés - Exportálás\" opciót a 2FAS-ban.\n\nHa a biztonsági másolat titkosított, akkor meg kell adni a jelszót a biztonsági másolat visszafejtéséhez",
   "importLastpassGuide": "Használd a Lastpass Authenticator beállításaiban található \"Fiókok átvitele\" opciót, és nyomd meg a \"Fiókok exportálása fájlba\" gombot. Importáld a letöltött JSON-t.",
-  "importProtonAuthGuide": "A kódok exportálásához használd az „Exportálás” opciót a Proton Authenticator beállításaiban.",
   "exportCodes": "Kódok exportálása",
   "importLabel": "Importálás",
   "importInstruction": "Kérjük, válassz egy fájlt, amely tartalmazza a kódok listáját a következő formátumban",
@@ -330,7 +330,6 @@
     }
   },
   "sorry": "Bocsánat",
-  "importFailureDesc": "Nem sikerült elemezni a kiválasztott fájlt.\nKérjük, írj a support@ente.io címre, ha segítségre van szükséged!",
   "pendingSyncs": "Figyelmeztetés",
   "pendingSyncsWarningBody": "Néhány kódról nem készült biztonsági másolat.\n\nKérjük, győződj meg arról, hogy van biztonsági másolata ezekről a kódokról, mielőtt kijelentkezel.",
   "checkInboxAndSpamFolder": "Kérjük, ellenőrizd beérkező leveleid (spam mappát is) az ellenőrzés befejezéséhez",
@@ -343,7 +342,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -524,7 +523,7 @@
   "dropReviewAndroid": "Írj véleményt a Play Store-ban",
   "supportEnte": "Támogasd <bold-green>ente <bold-green>",
   "giveUsAStarOnGithub": "Adj nekünk egy csillagot a Githubon",
-  "free5GB": "5GB ingyen <bold-green>ente <bold-green> Photos",
+  "free10GB": "10 GB ingyen <bold-green>ente <bold-green> Photos",
   "loginWithAuthAccount": "Jelentkezz be Auth fiókoddal",
   "freeStorageOffer": "10% kedvezmény itt <bold-green>ente<bold-green> photos",
   "freeStorageOfferDescription": "Használd az \"AUTH\" kódot, hogy 10% kedvezményt kapjon az első évben",
@@ -578,7 +577,7 @@
   "addNew": "Új hozzáadása",
   "selected": "kiválasztva",
   "moveMultipleToTrashMessage": "Biztosan a kukába szeretnéd helyezni a(z) {count} elemet?",
-  "nSelected": "{count, plural, =1{1 kiválasztva} other{{count} kiválasztva}}",
+  "nSelected": "{count, plural, one {{count} kiválasztva} other{{count} kiválasztva}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1 elem rögzítve} other{{count} elem rögzítve}}",
+  "pinnedCount": "{count, plural, one{{count} elem rögzítve} other{{count} elem rögzítve}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +599,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 elem feloldva} other{{count} elem feloldva}}",
+  "unpinnedCount": "{count, plural, one{{count} elem feloldva} other{{count} elem feloldva}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {
@@ -620,5 +619,10 @@
   "chooseIcon": "Válassz ikont",
   "customOrder": "Egyéni sorrend",
   "selectAnOption": "Válassz egy lehetőséget",
-  "todaysLogs": "Mai naplók"
+  "todaysLogs": "Mai naplók",
+  "appIcon": "Alkalmazásikon",
+  "importAndOTPGuide": "Exportáld a biztonsági mentésedet az andOTP-ből a Beállítások „Biztonsági mentés” opciójával.\n\nHa a biztonsági mentés titkosítva van, akkor a visszafejtéshez meg kell adnia a biztonsági mentés jelszavát.",
+  "enterPasswordToDecryptAndOTP": "Írd be a jelszót az andOTP biztonsági mentés visszafejtéséhez",
+  "failedToDecryptAndOTPBackup": "Nem sikerült visszafejteni az andOTP biztonsági mentést",
+  "notSupportedForHOTP": "Nem támogatott HOTP esetén"
 }

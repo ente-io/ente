@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:extended_image/extended_image.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -14,7 +15,10 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/trash_file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
@@ -24,12 +28,13 @@ import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
+import "package:photos/ui/viewer/file/inline_text_detection.dart";
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
-import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
+import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
+import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/thumbnail_util.dart";
 
 enum DetailPageMode {
@@ -43,6 +48,11 @@ class DetailPageConfiguration {
   final String tagPrefix;
   final DetailPageMode mode;
   final bool isLocalOnlyContext;
+  final GalleryType? galleryType;
+
+  /// Callback invoked with the page context after the page is ready.
+  /// Useful for showing bottom sheets or dialogs after navigation completes.
+  final void Function(BuildContext context)? onPageReady;
 
   DetailPageConfiguration(
     this.files,
@@ -50,6 +60,8 @@ class DetailPageConfiguration {
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
     this.isLocalOnlyContext = false,
+    this.galleryType,
+    this.onPageReady,
   });
 
   DetailPageConfiguration copyWith({
@@ -58,12 +70,14 @@ class DetailPageConfiguration {
     int? selectedIndex,
     String? tagPrefix,
     bool? isLocalOnlyContext,
+    GalleryType? galleryType,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
       isLocalOnlyContext: isLocalOnlyContext ?? this.isLocalOnlyContext,
+      galleryType: galleryType ?? this.galleryType,
     );
   }
 }
@@ -79,10 +93,18 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
+  final _isInSharedCollectionNotifier = ValueNotifier(false);
+  final _showingThumbnailFallbackNotifier = ValueNotifier<String?>(null);
+  final _isZoomedNotifier = ValueNotifier(false);
+  final _zoomTransformNotifier = ValueNotifier(ZoomTransform.identity);
 
   @override
   void dispose() {
     _enableFullScreenNotifier.dispose();
+    _isInSharedCollectionNotifier.dispose();
+    _showingThumbnailFallbackNotifier.dispose();
+    _isZoomedNotifier.dispose();
+    _zoomTransformNotifier.dispose();
     super.dispose();
   }
 
@@ -93,6 +115,10 @@ class _DetailPageState extends State<DetailPage> {
     // when the body is rebuilt, which can reset state stored in it.
     return InheritedDetailPageState(
       enableFullScreenNotifier: _enableFullScreenNotifier,
+      isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
+      showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
+      isZoomedNotifier: _isZoomedNotifier,
+      zoomTransformNotifier: _zoomTransformNotifier,
       child: _Body(widget.config),
     );
   }
@@ -117,6 +143,7 @@ class _BodyState extends State<_Body> {
   bool isGuestView = false;
   bool swipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
+  QrCodeDetectionHelper? _qrHelper;
 
   @override
   void initState() {
@@ -132,6 +159,18 @@ class _BodyState extends State<_Body> {
         swipeLocked = event.swipeLocked;
       });
     });
+    if (flagService.qrFeatureEnabled &&
+        widget.config.mode != DetailPageMode.minimalistic) {
+      _qrHelper = QrCodeDetectionHelper();
+    }
+
+    // Update shared collection state after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
+      _evaluateQrIfEligible(_files![_selectedIndexNotifier.value]);
+      widget.config.onPageReady?.call(context);
+    });
   }
 
   @override
@@ -139,6 +178,7 @@ class _BodyState extends State<_Body> {
     _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _selectedIndexNotifier.dispose();
+    _qrHelper?.dispose();
     super.dispose();
 
     SystemChrome.setSystemUIOverlayStyle(
@@ -193,6 +233,7 @@ class _BodyState extends State<_Body> {
                 _onEditFileRequested,
                 enableFullScreenNotifier: InheritedDetailPageState.of(context)
                     .enableFullScreenNotifier,
+                galleryType: widget.config.galleryType,
                 mode: widget.config.mode,
               );
             },
@@ -225,17 +266,41 @@ class _BodyState extends State<_Body> {
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return widget.config.mode == DetailPageMode.minimalistic
-                      ? const SizedBox.shrink()
-                      : TextDetectionOverlayButton(
-                          file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
-                          isGuestView: isGuestView,
-                        );
+                  if (widget.config.mode == DetailPageMode.minimalistic) {
+                    return const SizedBox.shrink();
+                  }
+                  if (flagService.ocrOverlayEnabled) {
+                    return InlineTextDetection(
+                      file: _files![selectedIndex],
+                      enableFullScreenNotifier:
+                          InheritedDetailPageState.of(context)
+                              .enableFullScreenNotifier,
+                      isGuestView: isGuestView,
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
+              if (_qrHelper != null)
+                ValueListenableBuilder(
+                  valueListenable: _selectedIndexNotifier,
+                  builder: (BuildContext context, int selectedIndex, _) {
+                    if (widget.config.mode == DetailPageMode.minimalistic ||
+                        isGuestView ||
+                        _files![selectedIndex] is TrashFile) {
+                      return const SizedBox.shrink();
+                    }
+                    return ValueListenableBuilder(
+                      valueListenable: _qrHelper!.qrDetectionsNotifier,
+                      builder: (context, detections, _) {
+                        return QrCodeHighlightOverlay(
+                          detections: detections,
+                          file: _files![selectedIndex],
+                        );
+                      },
+                    );
+                  },
+                ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
@@ -331,6 +396,7 @@ class _BodyState extends State<_Body> {
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
+          qrDetectionsNotifier: _qrHelper?.qrDetectionsNotifier,
         );
         return GestureDetector(
           onTap: () {
@@ -354,6 +420,8 @@ class _BodyState extends State<_Body> {
           _selectedIndexNotifier.value = index;
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
+        _updateSharedCollectionState(_files![index]);
+        _evaluateQrIfEligible(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -361,6 +429,11 @@ class _BodyState extends State<_Body> {
       controller: _pageController,
       itemCount: _files!.length,
     );
+  }
+
+  void _evaluateQrIfEligible(EnteFile file) {
+    if (_qrHelper == null || isGuestView || file is TrashFile) return;
+    _qrHelper!.evaluateFile(file);
   }
 
   bool shouldAutoPlay() {
@@ -479,5 +552,27 @@ class _BodyState extends State<_Body> {
       context,
       "Please authenticate to view more photos and videos.",
     );
+  }
+
+  Future<void> _updateSharedCollectionState(EnteFile file) async {
+    final fileID = file.uploadedFileID;
+    final notifier =
+        InheritedDetailPageState.maybeOf(context)?.isInSharedCollectionNotifier;
+
+    if (notifier == null) return;
+
+    if (fileID == null) {
+      notifier.value = false;
+      return;
+    }
+
+    final isShared =
+        await CollectionsService.instance.isFileInSharedCollection(fileID);
+
+    // Guard: Only update if still showing the same file
+    // (user may have swiped to a different file while awaiting)
+    if (_files![_selectedIndexNotifier.value].uploadedFileID == fileID) {
+      notifier.value = isShared;
+    }
   }
 }

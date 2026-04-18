@@ -4,6 +4,48 @@
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
 /**
+ * Native provider used for desktop app lock authentication.
+ *
+ * `touchid` means we can use the platform-native auth prompt.
+ * `none` means no supported native provider is currently available.
+ */
+export type NativeDeviceLockProvider = "touchid" | "none";
+
+/**
+ * Why native device lock is unavailable on this machine/session.
+ */
+export type NativeDeviceLockUnavailableReason =
+    | "unsupported-platform"
+    | "touchid-not-enrolled"
+    | "touchid-temporarily-unavailable"
+    | "touchid-api-error";
+
+/**
+ * Capability metadata used by the renderer to decide whether to show and use
+ * "Device lock" as an app-lock mode.
+ */
+export interface NativeDeviceLockCapability {
+    /** True when native auth can be prompted right now. */
+    available: boolean;
+    /** Which native provider backs authentication (if available). */
+    provider: NativeDeviceLockProvider;
+    /** Present when unavailable, with a machine-readable reason. */
+    reason?: NativeDeviceLockUnavailableReason;
+}
+
+/**
+ * Persisted desktop app-lock configuration.
+ *
+ * This excludes the passphrase hash material, which continues to live in the
+ * renderer KV DB.
+ */
+export interface PersistedAppLockConfig {
+    enabled: boolean;
+    lockType: "pin" | "password" | "device" | "none";
+    autoLockTimeMs: number;
+}
+
+/**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
  *
@@ -101,6 +143,31 @@ export interface Electron {
     saveMasterKeyInSafeStorage: (masterKey: string) => Promise<void>;
 
     /**
+     * Return true when the desktop app can currently use OS safe storage.
+     */
+    isSafeStorageAvailable: () => Promise<boolean>;
+
+    /**
+     * Return the persisted desktop app-lock configuration from safe storage, if
+     * any.
+     */
+    appLockConfigFromSafeStorage: () => Promise<
+        PersistedAppLockConfig | undefined
+    >;
+
+    /**
+     * Save the given desktop app-lock configuration to safe storage.
+     */
+    saveAppLockConfigInSafeStorage: (
+        config: PersistedAppLockConfig,
+    ) => Promise<void>;
+
+    /**
+     * Remove any persisted desktop app-lock configuration from safe storage.
+     */
+    clearAppLockConfigFromSafeStorage: () => Promise<void>;
+
+    /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes
      * into the foreground. More precisely, the callback gets invoked when the
      * main window gets focus.
@@ -111,6 +178,18 @@ export interface Electron {
      * `undefined` to clear the callback.
      */
     onMainWindowFocus: (cb: (() => void) | undefined) => void;
+
+    /**
+     * Set or clear the callback {@link cb} to invoke whenever the app goes to
+     * the background. More precisely, the callback gets invoked when the main
+     * window blurs and the app is no longer focused.
+     *
+     * Setting a callback clears any previous callbacks.
+     *
+     * @param cb The function to call when the app is backgrounded. Pass
+     * `undefined` to clear the callback.
+     */
+    onMainWindowBlur: (cb: (() => void) | undefined) => void;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
@@ -157,6 +236,22 @@ export interface Electron {
      * @see {@link isAutoLaunchEnabled}
      */
     toggleAutoLaunch: () => Promise<void>;
+
+    /**
+     * Return native device lock capability details for the current machine.
+     *
+     * Includes whether native auth is available, provider metadata, and a
+     * reason when unavailable.
+     */
+    getNativeDeviceLockCapability: () => Promise<NativeDeviceLockCapability>;
+
+    /**
+     * Prompt native device lock authentication.
+     *
+     * The {@link reason} can be shown by the OS in the native auth prompt.
+     * Returns true on successful authentication.
+     */
+    promptDeviceLock: (reason: string) => Promise<boolean>;
 
     // - App update
 
@@ -727,6 +822,14 @@ export interface FolderWatch {
      * Files (paths) that should be ignored when uploading.
      */
     ignoredFiles: string[];
+    /**
+     * Whether the folder is currently accessible on disk.
+     *
+     * Folders on ejected external drives will have this set to false. This
+     * property is not persisted and is computed each time the watch list is
+     * fetched.
+     */
+    isAccessible?: boolean;
 }
 
 /**

@@ -1,15 +1,16 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/gateways/users/models/sessions.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/user/sessions.dart';
 import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/standalone/date_time.dart";
 
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});
@@ -94,7 +95,7 @@ class _SessionsPageState extends State<SessionsPage> {
                     const Padding(padding: EdgeInsets.all(8)),
                     Flexible(
                       child: Text(
-                        getFormattedTime(context, lastUsedTime),
+                        getFormattedTime(lastUsedTime, context: context),
                         style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
@@ -129,10 +130,11 @@ class _SessionsPageState extends State<SessionsPage> {
       await dialog.hide();
       _logger.severe('failed to terminate');
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }

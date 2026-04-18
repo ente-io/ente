@@ -30,7 +30,7 @@ You can choose any email address, including aliases, to create an account with E
 
 In any case, you can always change the email address your account is associated with at a later time as well.
 
-Once you submit your email address, you will be asked to verify it with a 6-digit code sent to your email. You should receive the verification code within a couple of minutes. If you don't receive it, check your spam folder. If that doesn't work, reach out to support@ente.io
+Once you submit your email address, you will be asked to verify it with a 6-digit code sent to your email. You should receive the verification code within a couple of minutes. If you don't receive it, check your spam folder. If that doesn't work, reach out to support@ente.com
 
 ### Set up a password {#setup-password}
 
@@ -58,7 +58,7 @@ Do not skip this step! Without your recovery key, losing your password means per
 
 The final step of account creation is choosing your plan. Ente offers a generous free plan with **10 GB of storage**, which is perfect for getting started.
 
-You can start with the free plan and upgrade anytime as your storage needs grow. Paid plans offer more storage and additional features like the ability to share albums with others and create family plans.
+You can start with the free plan and upgrade anytime as your storage needs to grow. Paid plans offer more storage and additional features like the ability to create public links with no device limit and create family plans.
 
 Once you've made your choice, your account setup is complete and you're ready to start backing up your photos!
 

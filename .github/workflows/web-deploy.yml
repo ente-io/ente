@@ -32,16 +32,21 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
             - name: Setup node and enable yarn caching
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
+
+            - name: Activate Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
 
             - name: Install dependencies
               run: yarn install --frozen-lockfile
@@ -65,16 +70,16 @@ jobs:
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/photos web/apps/photos/out
 
             - name: Build custom-albums
-              run: yarn build:photos
+              run: yarn build:albums
               env:
-                  NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP: 1
+                  NEXT_PUBLIC_ENTE_OFFICIAL_ALBUMS_APP: 1
 
             - name: Publish custom-albums
               uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/custom-albums web/apps/photos/out
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/custom-albums web/apps/albums/out
 
             - name: Build accounts
               run: yarn build:accounts
@@ -116,6 +121,16 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/payments web/apps/payments/dist
 
+            - name: Build locker
+              run: yarn build:locker
+
+            - name: Publish locker
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/locker web/apps/locker/out
+
             - name: Build public locker
               run: yarn build:share
 
@@ -126,6 +141,26 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/share web/apps/share/out
 
+            - name: Build memories
+              run: yarn build:memories
+
+            - name: Publish memories
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/memories web/apps/memories/out
+
+            - name: Build paste
+              run: yarn build:paste
+
+            - name: Publish paste
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/paste web/apps/paste/out
+
             - name: Build embed
               run: yarn build:embed
 
@@ -135,3 +170,13 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/embed web/apps/embed/out
+
+            - name: Build ensu
+              run: yarn build:ensu
+
+            - name: Publish ensu
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/ensu web/apps/ensu/out

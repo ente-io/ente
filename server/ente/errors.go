@@ -136,6 +136,12 @@ var ErrUserNotRegistered = &ApiError{
 	Message:        "User is not registered",
 }
 
+var ErrUserSignupIncomplete = &ApiError{
+	Code:           UserSignupIncomplete,
+	HttpStatusCode: http.StatusNotFound,
+	Message:        "User signup is incomplete",
+}
+
 var ErrCollectionNotEmpty = ApiError{
 	Code:           CollectionNotEmpty,
 	HttpStatusCode: http.StatusConflict,
@@ -158,6 +164,24 @@ var ErrPublicCollectDisabled = ApiError{
 	Code:           PublicCollectDisabled,
 	Message:        "User has not enabled public collect for this url",
 	HttpStatusCode: http.StatusMethodNotAllowed,
+}
+
+var ErrPublicCommentDisabled = ApiError{
+	Code:           PublicCommentDisabled,
+	Message:        "User has not enabled public comments for this url",
+	HttpStatusCode: http.StatusMethodNotAllowed,
+}
+
+var ErrPublicCommentTooLong = ApiError{
+	Code:           PublicCommentTooLong,
+	Message:        "Comments are limited to 280 characters",
+	HttpStatusCode: http.StatusBadRequest,
+}
+
+var ErrAnonNameTooLong = ApiError{
+	Code:           AnonNameTooLong,
+	Message:        "Anonymous names are limited to 50 characters",
+	HttpStatusCode: http.StatusBadRequest,
 }
 
 var ErrNotFoundError = ApiError{
@@ -207,6 +231,12 @@ var ErrLinkEditNotAllowed = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrFileInTrash = ApiError{
+	Code:           FileInTrash,
+	Message:        "One or more files are in trash or have been deleted, please restore them first",
+	HttpStatusCode: http.StatusConflict,
+}
+
 var ErrLockerRegistrationDisabled = &ApiError{
 	Code:           LockerRegistrationDisabled,
 	Message:        "Locker is restricted to paid users currently",
@@ -223,8 +253,9 @@ type ErrorCode string
 
 const (
 	// Standard, generic error codes
-	BadRequest ErrorCode = "BAD_REQUEST"
-	CONFLICT   ErrorCode = "CONFLICT"
+	BadRequest    ErrorCode = "BAD_REQUEST"
+	CONFLICT      ErrorCode = "CONFLICT"
+	AlreadyExists ErrorCode = "ALREADY_EXISTS"
 
 	InternalError ErrorCode = "INTERNAL_ERROR"
 
@@ -232,6 +263,9 @@ const (
 
 	// Business specific error codes
 	FamiliySizeLimitExceeded ErrorCode = "FAMILY_SIZE_LIMIT_EXCEEDED"
+
+	// UserSignupIncomplete indicates that account exists but signup is not fully completed
+	UserSignupIncomplete ErrorCode = "USER_SIGNUP_INCOMPLETE"
 
 	// Subscription Already Associted with different account
 	SubscriptionAlreadyClaimed ErrorCode = "SUBSCRIPTION_ALREADY_CLAIMED"
@@ -242,6 +276,15 @@ const (
 
 	// PublicCollectDisabled error code indicates that the user has not enabled public collect
 	PublicCollectDisabled ErrorCode = "PUBLIC_COLLECT_DISABLED"
+
+	// PublicCommentDisabled error code indicates that the user has not enabled public comments
+	PublicCommentDisabled ErrorCode = "PUBLIC_COMMENT_DISABLED"
+
+	// PublicCommentTooLong indicates that comment text exceeded allowed limit
+	PublicCommentTooLong ErrorCode = "PUBLIC_COMMENT_TOO_LONG"
+
+	// AnonNameTooLong indicates that anonymous display name exceeded allowed limit
+	AnonNameTooLong ErrorCode = "ANON_NAME_TOO_LONG"
 
 	// CollectionNotEmpty is thrown when user attempts to delete a collection but keep files but all files from that
 	// collections have been moved yet.
@@ -257,6 +300,9 @@ const (
 
 	// FileLimitReached indicates the user hit the maximum number of files allowed
 	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"
+
+	// FileInTrash indicates files are present in trash and cannot be added to collection
+	FileInTrash ErrorCode = "FILE_IN_TRASH"
 
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
 
@@ -331,6 +377,14 @@ func NewPermissionDeniedError(message string) *ApiError {
 func NewConflictError(message string) *ApiError {
 	return &ApiError{
 		Code:           CONFLICT,
+		HttpStatusCode: http.StatusConflict,
+		Message:        message,
+	}
+}
+
+func NewAlreadyExistsError(message string) *ApiError {
+	return &ApiError{
+		Code:           AlreadyExists,
 		HttpStatusCode: http.StatusConflict,
 		Message:        message,
 	}

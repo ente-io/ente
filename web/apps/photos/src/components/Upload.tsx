@@ -15,6 +15,7 @@ import {
     DialogTitle,
     Link,
     Stack,
+    styled,
     Typography,
     type DialogProps,
 } from "@mui/material";
@@ -25,14 +26,12 @@ import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconB
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { RowButton } from "ente-base/components/RowButton";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -53,18 +52,17 @@ import {
 } from "ente-gallery/services/upload/upload-service";
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
-import {
-    savedPublicCollectionUploaderName,
-    savePublicCollectionUploaderName,
-} from "ente-new/albums/services/public-albums-fdb";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     createAlbum,
+    createHiddenAlbum,
     isHiddenCollection,
+    savedAllCollections,
+    savedHiddenCollections,
     savedNormalCollections,
 } from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
@@ -81,28 +79,16 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
+import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
+import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
-    /**
-     * The logged in user, if any.
-     *
-     * This is only expected to be present when we're running it the context of
-     * the photos app, where there is a logged in user. When used by the public
-     * albums app, this prop can be omitted.
-     */
+    /** The logged in user, if any. */
     user?: LocalUser;
-    /**
-     * The {@link PublicAlbumsCredentials} to use, if any.
-     *
-     * These are expected to be set if we are in the context of the public
-     * albums app, and should be undefined when we're in the photos app context.
-     */
-    publicAlbumsCredentials?: PublicAlbumsCredentials;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     dragAndDropFiles: File[];
-    uploadCollection?: Collection;
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
     activeCollection?: Collection;
     closeUploadTypeSelector: () => void;
@@ -125,11 +111,8 @@ interface UploadProps {
      * Specifically, this is used prior to creating a new album, to obtain
      * (potential) existing albums from remote so that they can be matched by
      * name if needed.
-     *
-     * This functionality is not needed during uploads to a public album, so
-     * this property is optional; the public albums code need not provide it.
      */
-    onRemoteFilesPull?: () => Promise<void>;
+    onRemoteFilesPull: () => Promise<void>;
     /**
      * Show the collection selector with the given {@link attributes}.
      */
@@ -146,18 +129,20 @@ interface UploadProps {
      * @param file The newly uploaded file.
      */
     onUploadFile: (file: EnteFile) => void;
-    /**
-     * Called when the plan selection modal should be shown.
-     *
-     * It is optional because {@link Upload} is also used by the public albums
-     * app, where the scenario requiring this will not arise.
-     */
+    /** Called when the plan selection modal should be shown. */
     onShowPlanSelector?: () => void;
     /**
      * Called when the upload failed because the user's session has expired, and
      * the Upload component wants to prompt the user to log in again.
      */
     onShowSessionExpiredDialog: () => void;
+    /**
+     * If true, the upload is being initiated from the hidden albums section.
+     *
+     * When set, the collection selector will only show hidden albums, and any
+     * new albums created will be hidden albums.
+     */
+    isInHiddenSection?: boolean;
 }
 
 type UploadType = "files" | "folders" | "zips";
@@ -167,7 +152,6 @@ type UploadType = "files" | "folders" | "zips";
  */
 export const Upload: React.FC<UploadProps> = ({
     user,
-    publicAlbumsCredentials,
     isFirstUpload,
     dragAndDropFiles,
     onRemotePull,
@@ -183,6 +167,10 @@ export const Upload: React.FC<UploadProps> = ({
     const { showNotification, watchFolderView } = usePhotosAppContext();
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
+    const [
+        showCanvasReadbackBlockedDialog,
+        setShowCanvasReadbackBlockedDialog,
+    ] = useState(false);
     const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
@@ -197,7 +185,6 @@ export const Upload: React.FC<UploadProps> = ({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
     const [prefilledNewAlbumName, setPrefilledNewAlbumName] = useState("");
-    const [uploaderName, setUploaderName] = useState("");
 
     const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
         useState(false);
@@ -207,10 +194,6 @@ export const Upload: React.FC<UploadProps> = ({
     const {
         show: showNewAlbumNameInput,
         props: newAlbumNameInputVisibilityProps,
-    } = useModalVisibility();
-    const {
-        show: showUploaderNameInput,
-        props: uploaderNameInputVisibilityProps,
     } = useModalVisibility();
 
     /**
@@ -348,7 +331,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const electron = globalThis.electron;
 
-    const closeUploadProgress = () => setUploadProgressView(false);
+    const closeUploadProgress = () => uploadManager.hideUploadProgressDialog();
 
     const handleCollectionMappingChoiceClose = () => {
         setOpenCollectionMappingChoice(false);
@@ -356,11 +339,6 @@ export const Upload: React.FC<UploadProps> = ({
     };
 
     const handleCollectionSelectorCancel = () => {
-        uploadRunning.current = false;
-    };
-
-    const handleUploaderNameInputClose = () => {
-        uploaderNameInputVisibilityProps.onClose();
         uploadRunning.current = false;
     };
 
@@ -379,11 +357,10 @@ export const Upload: React.FC<UploadProps> = ({
                 setUploadProgressView,
             },
             onUploadFile,
-            publicAlbumsCredentials,
         );
 
         if (uploadManager.isUploadRunning()) {
-            setUploadProgressView(true);
+            uploadManager.showUploadProgressDialog();
         }
 
         if (electron) {
@@ -409,7 +386,7 @@ export const Upload: React.FC<UploadProps> = ({
                 setDesktopZipItems(zipItems);
             });
         }
-    }, [publicAlbumsCredentials]);
+    }, []);
 
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
@@ -494,6 +471,14 @@ export const Upload: React.FC<UploadProps> = ({
             }
         }
 
+        if (!electron && !hasReliableCanvasReadback()) {
+            log.warn("Canvas readback integrity check failed; blocking upload");
+            setWebFiles([]);
+            selectedUploadType.current = undefined;
+            setShowCanvasReadbackBlockedDialog(true);
+            return;
+        }
+
         uploadRunning.current = true;
         props.closeUploadTypeSelector();
         props.setLoading(true);
@@ -527,90 +512,75 @@ export const Upload: React.FC<UploadProps> = ({
         selectedUploadType.current = undefined;
         props.setLoading(false);
 
-        (async () => {
-            if (publicAlbumsCredentials) {
-                setUploaderName(
-                    (await savedPublicCollectionUploaderName(
-                        publicAlbumsCredentials.accessToken,
-                    )) ?? "",
+        if (isPendingDesktopUpload.current) {
+            isPendingDesktopUpload.current = false;
+            if (pendingDesktopUploadCollectionName.current) {
+                // Include hidden collections so watch folder syncs add
+                // files to existing hidden albums instead of creating new
+                // visible ones
+                uploadFilesToNewCollections(
+                    "root",
+                    pendingDesktopUploadCollectionName.current,
+                    true,
                 );
-                showUploaderNameInput();
-                return;
-            }
-
-            if (isPendingDesktopUpload.current) {
-                isPendingDesktopUpload.current = false;
-                if (pendingDesktopUploadCollectionName.current) {
-                    uploadFilesToNewCollections(
-                        "root",
-                        pendingDesktopUploadCollectionName.current,
-                    );
-                    pendingDesktopUploadCollectionName.current = undefined;
-                } else {
-                    uploadFilesToNewCollections("parent");
-                }
-                return;
-            }
-
-            if (electron && _selectedUploadType == "zips") {
-                uploadFilesToNewCollections("parent");
-                return;
-            }
-
-            if (isFirstUpload && !importSuggestion.rootFolderName) {
-                importSuggestion.rootFolderName = t(
-                    "autogenerated_first_album_name",
-                );
-            }
-
-            if (isDragAndDrop.current) {
-                isDragAndDrop.current = false;
-                if (
-                    props.activeCollection &&
-                    props.activeCollection.owner.id == user?.id
-                ) {
-                    uploadFilesToExistingCollection(props.activeCollection);
-                    return;
-                }
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            let showNextModal = () => {};
-            if (importSuggestion.hasNestedFolders) {
-                showNextModal = () => setOpenCollectionMappingChoice(true);
+                pendingDesktopUploadCollectionName.current = undefined;
             } else {
-                showNextModal = () => {
-                    setPrefilledNewAlbumName(importSuggestion.rootFolderName);
-                    showNewAlbumNameInput();
-                };
+                uploadFilesToNewCollections("parent", undefined, true);
             }
+            return;
+        }
 
-            onOpenCollectionSelector?.({
-                action: "upload",
-                onSelectCollection: uploadFilesToExistingCollection,
-                onCreateCollection: showNextModal,
-                onCancel: handleCollectionSelectorCancel,
-            });
-        })();
-    }, [
-        publicAlbumsCredentials,
-        webFiles,
-        desktopFiles,
-        desktopFilePaths,
-        desktopZipItems,
-    ]);
+        if (electron && _selectedUploadType == "zips") {
+            uploadFilesToNewCollections("parent");
+            return;
+        }
+
+        if (isFirstUpload && !importSuggestion.rootFolderName) {
+            importSuggestion.rootFolderName = t(
+                "autogenerated_first_album_name",
+            );
+        }
+
+        if (isDragAndDrop.current) {
+            isDragAndDrop.current = false;
+            if (
+                props.activeCollection &&
+                props.activeCollection.owner.id == user?.id
+            ) {
+                uploadFilesToExistingCollection(props.activeCollection);
+                return;
+            }
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        let showNextModal = () => {};
+        if (importSuggestion.hasNestedFolders) {
+            showNextModal = () => setOpenCollectionMappingChoice(true);
+        } else {
+            showNextModal = () => {
+                setPrefilledNewAlbumName(importSuggestion.rootFolderName);
+                showNewAlbumNameInput();
+            };
+        }
+
+        onOpenCollectionSelector?.({
+            action: "upload",
+            activeCollectionID: props.activeCollection?.id,
+            showHiddenCollections: props.isInHiddenSection,
+            onSelectCollection: uploadFilesToExistingCollection,
+            onCreateCollection: showNextModal,
+            onCancel: handleCollectionSelectorCancel,
+        });
+    }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
 
     const preCollectionCreationAction = () => {
         onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
-        setUploadProgressView(true);
+        uploadManager.showUploadProgressDialog();
     };
 
-    const uploadFilesToExistingCollection = async (
-        collection: Collection,
-        uploaderName?: string,
-    ) => {
+    const uploadFilesToExistingCollection = async (collection: Collection) => {
         preCollectionCreationAction();
         const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
             ([uploadItem, path], index) => ({
@@ -620,17 +590,17 @@ export const Upload: React.FC<UploadProps> = ({
                 collectionID: collection.id,
             }),
         );
-        await waitInQueueAndUploadFiles(
-            uploadItemsWithCollection,
-            [collection],
-            uploaderName,
-        );
+        await waitInQueueAndUploadFiles(uploadItemsWithCollection, [
+            collection,
+        ]);
         uploadItemsAndPaths.current = [];
     };
 
     const uploadFilesToNewCollections = async (
         mapping: CollectionMapping,
         collectionName?: string,
+        includeHiddenCollections?: boolean,
+        createHidden?: boolean,
     ) => {
         preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
@@ -653,8 +623,17 @@ export const Upload: React.FC<UploadProps> = ({
         }
         const collections: Collection[] = [];
         try {
-            await onRemoteFilesPull!();
-            const existingCollections = await savedNormalCollections();
+            await onRemoteFilesPull();
+            // When uploading to hidden section (createHidden), only search
+            // hidden collections. When syncing from watch folders
+            // (includeHiddenCollections), search all collections so files go
+            // to existing albums regardless of visibility. Otherwise, search
+            // only normal (visible) collections.
+            const existingCollections = createHidden
+                ? await savedHiddenCollections()
+                : includeHiddenCollections
+                  ? await savedAllCollections()
+                  : await savedNormalCollections();
             let index = 0;
             for (const [
                 collectionName,
@@ -664,6 +643,7 @@ export const Upload: React.FC<UploadProps> = ({
                     collectionName,
                     user!,
                     existingCollections,
+                    createHidden,
                 );
                 collections.push(collection);
                 uploadItemsWithCollection = [
@@ -688,16 +668,11 @@ export const Upload: React.FC<UploadProps> = ({
     const waitInQueueAndUploadFiles = async (
         uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-        uploaderName?: string,
     ) => {
         const currentPromise = currentUploadPromise.current;
         currentUploadPromise.current = (async () => {
             if (currentPromise) await currentPromise;
-            return uploadFiles(
-                uploadItemsWithCollection,
-                collections,
-                uploaderName,
-            );
+            return uploadFiles(uploadItemsWithCollection, collections);
         })();
         await currentUploadPromise.current;
     };
@@ -706,7 +681,7 @@ export const Upload: React.FC<UploadProps> = ({
         parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
     ) => {
         uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
-        setUploadProgressView(true);
+        uploadManager.showUploadProgressDialog();
         await onRemotePull({ silent: true });
     };
 
@@ -719,7 +694,6 @@ export const Upload: React.FC<UploadProps> = ({
     const uploadFiles = async (
         uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-        uploaderName?: string,
     ) => {
         try {
             preUploadAction();
@@ -739,7 +713,6 @@ export const Upload: React.FC<UploadProps> = ({
             const wereFilesProcessed = await uploadManager.uploadItems(
                 uploadItemsWithCollection,
                 collections,
-                uploaderName,
             );
             if (!wereFilesProcessed) closeUploadProgress();
             if (isDesktop) {
@@ -765,9 +738,8 @@ export const Upload: React.FC<UploadProps> = ({
             log.info("Retrying failed uploads");
             const { items, collections, parsedMetadataJSONMap } =
                 uploadManager.failedItemState();
-            const uploaderName = uploadManager.getUploaderName();
             await preUploadAction(parsedMetadataJSONMap);
-            await uploadManager.uploadItems(items, collections, uploaderName);
+            await uploadManager.uploadItems(items, collections);
         } catch (e) {
             log.error("Retrying failed uploads failed", e);
             closeUploadProgress();
@@ -810,7 +782,12 @@ export const Upload: React.FC<UploadProps> = ({
     };
 
     const uploadToSingleNewCollection = (collectionName: string) => {
-        uploadFilesToNewCollections("root", collectionName);
+        uploadFilesToNewCollections(
+            "root",
+            collectionName,
+            undefined,
+            props.isInHiddenSection,
+        );
     };
 
     const cancelUploads = () => {
@@ -819,6 +796,11 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handleUploadTypeSelect = (type: UploadType) => {
         selectedUploadType.current = type;
+        // Opening native file/folder pickers can blur the app window on
+        // desktop; suppress blur-triggered app lock for this trusted flow.
+        if (electron) {
+            suppressAutoLockOnBlurForTrustedPrompt();
+        }
         setIsInputPending(true);
         switch (type) {
             case "files":
@@ -837,25 +819,13 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
-    const handlePublicUpload = (uploaderName: string) => {
-        savePublicCollectionUploaderName(
-            publicAlbumsCredentials!.accessToken,
-            uploaderName,
-        );
-
-        // Do not keep the uploader name input dialog open while the upload is
-        // progressing (the upload progress indicator will take out now).
-        void uploadFilesToExistingCollection(
-            props.uploadCollection!,
-            uploaderName,
-        );
-    };
-
     const handleCollectionMappingSelect = (mapping: CollectionMapping) =>
         uploadFilesToNewCollections(
             mapping,
             importSuggestion.rootFolderName ||
                 t("autogenerated_default_album_name"),
+            undefined,
+            props.isInHiddenSection,
         );
 
     return (
@@ -875,7 +845,6 @@ export const Upload: React.FC<UploadProps> = ({
             <UploadTypeSelector
                 open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
-                publicAlbumsCredentials={publicAlbumsCredentials}
                 intent={props.uploadTypeSelectorIntent}
                 pendingUploadType={
                     isInputPending ? selectedUploadType.current : undefined
@@ -895,6 +864,10 @@ export const Upload: React.FC<UploadProps> = ({
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
             />
+            <CanvasReadbackBlockedDialog
+                open={showCanvasReadbackBlockedDialog}
+                onClose={() => setShowCanvasReadbackBlockedDialog(false)}
+            />
             <SingleInputDialog
                 {...newAlbumNameInputVisibilityProps}
                 title={t("new_album")}
@@ -902,13 +875,6 @@ export const Upload: React.FC<UploadProps> = ({
                 initialValue={prefilledNewAlbumName}
                 submitButtonTitle={t("create")}
                 onSubmit={uploadToSingleNewCollection}
-            />
-            <UploaderNameInput
-                open={uploaderNameInputVisibilityProps.open}
-                onClose={handleUploaderNameInputClose}
-                uploaderName={uploaderName}
-                uploadFileCount={uploadItemsAndPaths.current.length}
-                onSubmit={handlePublicUpload}
             />
         </>
     );
@@ -1044,8 +1010,13 @@ const matchExistingOrCreateAlbum = async (
     albumName: string,
     user: LocalUser,
     existingCollections: Collection[],
+    createHidden?: boolean,
 ) => {
     for (const collection of existingCollections) {
+        // When creating a hidden album, only match hidden collections.
+        // This prevents hidden uploads from going to visible albums.
+        if (createHidden && !isHiddenCollection(collection)) continue;
+
         if (
             // Name matches
             collection.name == albumName &&
@@ -1053,8 +1024,6 @@ const matchExistingOrCreateAlbum = async (
             (collection.type == "album" ||
                 collection.type == "folder" ||
                 collection.type == "uncategorized") &&
-            // Not hidden
-            !isHiddenCollection(collection) &&
             // Not a quicklink
             collection.magicMetadata?.data.subType !=
                 CollectionSubType.quicklink &&
@@ -1068,7 +1037,9 @@ const matchExistingOrCreateAlbum = async (
         }
     }
 
-    const collection = await createAlbum(albumName);
+    const collection = createHidden
+        ? await createHiddenAlbum(albumName)
+        : await createAlbum(albumName);
     log.info(`Created new album ${albumName} with id ${collection.id}`);
     return collection;
 };
@@ -1123,7 +1094,7 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
      * Called when the user selects one of the options.
      */
     onSelect: (type: UploadType) => void;
-} & Pick<UploadProps, "publicAlbumsCredentials">;
+};
 
 /**
  * Request the user to specify which type of file / folder / zip it is that they
@@ -1137,22 +1108,10 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
 const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     open,
     onClose,
-    publicAlbumsCredentials,
     intent,
     pendingUploadType,
     onSelect,
 }) => {
-    // Directly show the file selector for the public albums app on likely
-    // mobile devices.
-    const directlyShowUploadFiles = useIsTouchscreen();
-
-    useEffect(() => {
-        if (open && directlyShowUploadFiles && publicAlbumsCredentials) {
-            onSelect("files");
-            onClose();
-        }
-    }, [open, publicAlbumsCredentials]);
-
     const handleClose: DialogProps["onClose"] = () => {
         // Disable backdrop clicks and esc keypresses if a selection is pending
         // processing so that the user doesn't inadvertently close the dialog.
@@ -1170,8 +1129,17 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                     sx: (theme) => ({
                         maxWidth: "375px",
                         p: 1,
+                        borderRadius: "28px",
+                        boxShadow: "none",
+                        border: "1px solid",
+                        borderColor: "stroke.faint",
                         [theme.breakpoints.down(360)]: { p: 0 },
                     }),
+                },
+            }}
+            sx={{
+                "& .MuiBackdrop-root": {
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
                 },
             }}
         >
@@ -1253,7 +1221,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                 <DialogCloseIconButton {...{ onClose }} />
             </SpacedRow>
             <Box sx={{ p: "12px", pt: "16px" }}>
-                <Stack sx={{ gap: 0.5 }}>
+                <RoundedButtonStack>
                     {intent != "import" && (
                         <RowButton
                             startIcon={<ImageOutlinedIcon />}
@@ -1288,7 +1256,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                             onClick={() => onSelect("zips")}
                         />
                     )}
-                </Stack>
+                </RoundedButtonStack>
                 <Typography
                     sx={{
                         color: "text.muted",
@@ -1317,7 +1285,7 @@ const TakeoutOptions: React.FC<
             <DialogCloseIconButton {...{ onClose }} />
         </SpacedRow>
         <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
-            <Stack sx={{ gap: "8px" }}>
+            <Stack sx={{ gap: "8px", "& button": { borderRadius: "16px" } }}>
                 <FocusVisibleButton
                     color="accent"
                     fullWidth
@@ -1333,7 +1301,7 @@ const TakeoutOptions: React.FC<
                     {t("select_zips")}
                 </FocusVisibleButton>
                 <Link
-                    href="https://ente.io/help/photos/migration/from-google-photos/"
+                    href="https://ente.com/help/photos/migration/from-google-photos/"
                     target="_blank"
                     rel="noopener"
                 >
@@ -1348,3 +1316,12 @@ const TakeoutOptions: React.FC<
         </Stack>
     </>
 );
+
+const RoundedButtonStack = styled("div")`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    & > button {
+        border-radius: 16px;
+    }
+`;

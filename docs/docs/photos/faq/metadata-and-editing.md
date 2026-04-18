@@ -45,10 +45,10 @@ If we are unable to decipher the creation time from these 3 sources, we will set
 
 ### How do I view EXIF data for a photo? {#view-exif}
 
-**On mobile and web:**
+**On mobile, web and desktop:**
 
 1. Open the photo
-2. Tap/click the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web/desktop
 3. Scroll down to see basic metadata
 4. Tap "View all Exif data" to see complete EXIF information
 
@@ -62,7 +62,10 @@ When you export your data using Google Takeout, Google provides both your photos
 
 For example, `flower.jpeg` might be in one zip and `flower.json` in another. This prevents Ente from correctly mapping them.
 
-**Best practice**: We [recommend](/photos/migration/from-google-photos/) unzipping all of your Google Takeout zips into a single folder, then importing that folder into Ente. This way, we can always correctly map photos and their metadata.
+**Best practice**: We [recommend](/photos/migration/from-google-photos/)
+unzipping all of your Google Takeout zips into a single parent folder, keeping
+subfolders as-is (do not flatten files), then importing that parent folder into
+Ente. This way, we can always correctly map photos and their metadata.
 
 ### Why are my Google Photos dates wrong after import? {#google-photos-dates-wrong}
 
@@ -73,8 +76,9 @@ If the dates appear incorrect after importing from Google Takeout, it's usually 
 
 To fix this:
 
-1. Make sure you unzipped all Google Takeout zips into one folder
-2. Import that single folder (not individual zips)
+1. Make sure you unzipped all Google Takeout zips into one parent folder (with
+   subfolders kept as-is)
+2. Import that parent folder (not individual zips)
 3. This ensures Ente can match JSON files with their photos
 
 ## Editing Metadata
@@ -83,10 +87,10 @@ To fix this:
 
 You can add descriptions (captions) to your photos in Ente:
 
-**On mobile and web:**
+**On mobile, web and desktop:**
 
 1. Open the photo
-2. Tap/click the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web/desktop
 3. Tap/click "Add description" or the description field
 4. Type your description
 5. Save
@@ -100,7 +104,7 @@ You can add descriptions (captions) to your photos in Ente:
 Yes! You can bulk-edit creation time of photos from the desktop app:
 
 1. Multi-select the photos you want to edit (Ctrl/Cmd+click or Shift+click)
-2. Select the "Fix time" option from the action bar
+2. Select the "Edit time" option from the action bar
 3. Choose the correct date/time
 4. Apply to all selected photos
 
@@ -114,20 +118,27 @@ This is useful for:
 
 ### Can I bulk edit photo locations? {#bulk-edit-locations}
 
-Yes! You can bulk-edit location coordinates from the mobile app:
+Yes! You can bulk-edit location coordinates:
+
+**On mobile:**
 
 1. Long press to multi-select the photos you want to edit
-2. Select "Edit location" from the action bar
+2. Tap "Edit location" from the action bar
 3. Choose the correct location on the map
-4. Apply to all selected photos
+4. Tap Save
+
+**On web/desktop:**
+
+1. Click to select photos (Ctrl/Cmd+click or Shift+click for multiple)
+2. Click the edit location icon in the selection bar
+3. Click on the map to set the location, or drag the pin to adjust
+4. Click "Save location"
 
 This is useful for:
 
 - Adding location to photos without GPS data
 - Correcting wrong GPS coordinates
 - Organizing photos by location after the fact
-
-**Note**: This feature is currently only available on the mobile app.
 
 ### How do I fix incorrect photo dates? {#fix-incorrect-dates}
 
@@ -168,7 +179,7 @@ You can rename photos in Ente:
 **On mobile and web:**
 
 1. Open the photo
-2. Tap/click the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web
 3. Tap/click on the filename
 4. Enter the new name
 5. Save
@@ -182,17 +193,24 @@ Yes! You can manually add location data to any photo:
 **On mobile:**
 
 1. Select the photo(s)
-2. Choose "Edit location" from the menu
+2. Tap "Edit location" from the menu
 3. Select the location on the map
-4. Save
+4. Tap Save
+
+**On web/desktop:**
+
+1. Open the photo and click the info button (i)
+2. In the Location section, click "Add"
+3. Click on the map to set the location, or drag the pin to adjust
+4. Click "Save location"
+
+You can also add location to multiple photos at once. Learn more at [Bulk edit photo locations](#bulk-edit-locations).
 
 This adds GPS coordinates to the photo's metadata, allowing you to:
 
 - View them on the map
 - Search by location
 - Organize photos by where they were taken
-
-See [Bulk edit photo locations](#can-i-bulk-edit-photo-locations) for editing multiple photos at once.
 
 ## Exporting Metadata
 
@@ -255,6 +273,10 @@ We have considered modifying our desktop and CLI clients to write back the photo
 
 Ente is a photos app, not a file system backup app. Customers for whom the creation time of the file on disk is paramount might be better served by file backup apps.
 
+### Does the date taken of a file change when the file is downloaded or exported? {#date-taken-preservation}
+
+No, the date taken (or "date time") remains the same and is preserved in the EXIF of the file. However, the creation date and modification date are changed as stated in the above FAQ.
+
 ### Can I modify the original files during export? {#modify-originals}
 
 No. Ente guarantees that you will get back the _exact_ same original photos and videos that you imported. The modifications (e.g. date changes) you make within Ente will be written into a separate metadata JSON file during export so as to not modify the original.
@@ -279,19 +301,16 @@ When you edit metadata on one device:
 
 ### Can I edit metadata on all platforms? {#platform-support}
 
-**Available on mobile and desktop:**
+**Available on mobile, web, and desktop:**
 
 - Adding descriptions
 - Editing filenames
 - Viewing all EXIF data
+- Adding and editing locations
 
 **Desktop only:**
 
-- Bulk editing dates ("Fix time" feature)
-
-**Mobile only:**
-
-- Bulk editing locations
+- Bulk editing dates ("Edit time" feature)
 
 We're working on bringing all editing features to all platforms.
 

@@ -9,7 +9,8 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/api/collection/create_request.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/gateways/collections/models/create_request.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -157,6 +158,12 @@ class FavoritesService {
       await _collectionsService.addOrCopyToCollection(collectionID, files);
     }
     _updateFavoriteFilesCache(files, favFlag: true);
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: "favoriteAdd",
+      ),
+    );
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
@@ -184,45 +191,96 @@ class FavoritesService {
       );
     }
     _updateFavoriteFilesCache(files, favFlag: favFlag);
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: favFlag ? "favoriteAdd" : "favoriteRemove",
+      ),
+    );
+    RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
   Future<void> removeFromFavorites(
     BuildContext context,
     EnteFile file,
   ) async {
+    final EnteFile originalFile = file;
     final inUploadID = file.uploadedFileID;
     if (inUploadID == null) {
       // Do nothing, ignore
     } else {
       final Collection? favCollection = await getFavoritesCollection();
-      // The file might be part of another collection. For unfav, we need to
-      // move file from the fav collection to the .
-      if (file.ownerID != _config.getUserID() &&
-          _cachedFavFileHases.containsKey(file.hash!)) {
-        final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
-          _cachedFavFileHases[file.hash!]!,
-          favCollection!.id,
-        );
-        if (favFile != null) {
-          file = favFile;
-        }
+      if (favCollection == null) {
+        return;
       }
-      if (file.collectionID != favCollection!.id) {
-        final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
-          file.uploadedFileID!,
-          favCollection.id,
+      final EnteFile? favFile =
+          await _resolveFavoritesEntryForRemoval(file, favCollection.id);
+      if (favFile == null) {
+        throw StateError(
+          "Failed to resolve favorites entry for file ${file.uploadedFileID}",
         );
-        if (favFile != null) {
-          file = favFile;
-        }
       }
       await _collectionActions.moveFilesFromCurrentCollection(
         context,
         favCollection,
-        [file],
+        [favFile],
       );
+      file = favFile;
     }
     _updateFavoriteFilesCache([file], favFlag: false);
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        [originalFile],
+        source: "favoriteRemove",
+      ),
+    );
+    RemoteSyncService.instance.sync(silently: true).ignore();
+  }
+
+  Future<EnteFile?> _resolveFavoritesEntryForRemoval(
+    EnteFile file,
+    int favoritesCollectionID,
+  ) async {
+    if (file.collectionID == favoritesCollectionID) {
+      return file;
+    }
+
+    if (file.ownerID != _config.getUserID()) {
+      final String? hash = file.hash;
+      final int? cachedFavoriteFileID =
+          hash != null ? _cachedFavFileHases[hash] : null;
+      if (cachedFavoriteFileID != null) {
+        final EnteFile? favFile = await _filesDB.getUploadedFile(
+          cachedFavoriteFileID,
+          favoritesCollectionID,
+        );
+        if (favFile != null) {
+          return favFile;
+        }
+      }
+
+      if (hash != null) {
+        final (_, favoriteHashes) = await _filesDB.getUploadAndHash(
+          favoritesCollectionID,
+        );
+        final int? refreshedFavoriteFileID = favoriteHashes[hash];
+        if (refreshedFavoriteFileID != null) {
+          final EnteFile? favFile = await _filesDB.getUploadedFile(
+            refreshedFavoriteFileID,
+            favoritesCollectionID,
+          );
+          if (favFile != null && favFile.fileType == file.fileType) {
+            _cachedFavFileHases[hash] = refreshedFavoriteFileID;
+            return favFile;
+          }
+        }
+      }
+    }
+
+    return _filesDB.getUploadedFile(
+      file.uploadedFileID!,
+      favoritesCollectionID,
+    );
   }
 
   Future<Collection?> getFavoritesCollection() async {

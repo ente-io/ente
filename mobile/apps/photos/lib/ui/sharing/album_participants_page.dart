@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/contacts/contact_identity_resolver.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -17,7 +18,6 @@ import "package:photos/ui/sharing/add_participant_page.dart";
 import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class AlbumParticipantsPage extends StatefulWidget {
   final Collection collection;
@@ -76,15 +76,12 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   Widget build(BuildContext context) {
     final currentUserID = Configuration.instance.getUserID()!;
     final role = _collection.getRole(currentUserID);
-    final bool adminRoleEnabled = flagService.enableAdminRole;
-    final bool surfacePublicLinkEnabled = flagService.surfacePublicLink;
     final bool isOwner = role == CollectionParticipantRole.owner;
     final bool isAdmin = role == CollectionParticipantRole.admin;
-    final bool canManageParticipants = isOwner || (adminRoleEnabled && isAdmin);
+    final bool canManageParticipants = isOwner || isAdmin;
     final bool hasActivePublicLink = _collection.hasLink &&
         !(_collection.publicURLs.firstOrNull?.isExpired ?? true);
-    final bool shouldShowPublicLink =
-        !isOwner && hasActivePublicLink && surfacePublicLinkEnabled;
+    final bool shouldShowPublicLink = !isOwner && hasActivePublicLink;
     final colorScheme = getEnteColorScheme(context);
     final int participants = 1 + _collection.getSharees().length;
     final User owner = _collection.owner;
@@ -95,39 +92,27 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final List<User> admins = [];
     final List<User> collaborators = [];
     final List<User> viewers = [];
-    if (adminRoleEnabled) {
-      for (final User sharee in allSharees) {
-        if (sharee.isAdmin) {
-          admins.add(sharee);
-        } else if (sharee.isCollaborator) {
-          collaborators.add(sharee);
-        } else {
-          viewers.add(sharee);
-        }
+    for (final User sharee in allSharees) {
+      if (sharee.isAdmin) {
+        admins.add(sharee);
+      } else if (sharee.isCollaborator) {
+        collaborators.add(sharee);
+      } else {
+        viewers.add(sharee);
       }
-      admins.sort((a, b) => a.email.compareTo(b.email));
-      collaborators.sort((a, b) => a.email.compareTo(b.email));
-      viewers.sort((a, b) => a.email.compareTo(b.email));
-      if (isAdmin && !admins.any((u) => u.id == currentUserID)) {
-        admins.insert(
-          0,
-          User(
-            id: currentUserID,
-            email: Configuration.instance.getEmail() ?? "",
-            role: CollectionParticipantRole.admin.toStringVal(),
-          ),
-        );
-      }
-    } else {
-      for (final User sharee in allSharees) {
-        if (sharee.isCollaborator) {
-          collaborators.add(sharee);
-        } else {
-          viewers.add(sharee);
-        }
-      }
-      collaborators.sort((a, b) => a.email.compareTo(b.email));
-      viewers.sort((a, b) => a.email.compareTo(b.email));
+    }
+    admins.sort((a, b) => a.email.compareTo(b.email));
+    collaborators.sort((a, b) => a.email.compareTo(b.email));
+    viewers.sort((a, b) => a.email.compareTo(b.email));
+    if (isAdmin && !admins.any((u) => u.id == currentUserID)) {
+      admins.insert(
+        0,
+        User(
+          id: currentUserID,
+          email: Configuration.instance.getEmail() ?? "",
+          role: CollectionParticipantRole.admin.toStringVal(),
+        ),
+      );
     }
 
     return Scaffold(
@@ -202,7 +187,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               childCount: 1,
             ),
           ),
-          if (adminRoleEnabled && (admins.isNotEmpty || canManageParticipants))
+          if (admins.isNotEmpty || canManageParticipants)
             SliverPadding(
               padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
               sliver: SliverList(
@@ -210,8 +195,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   (context, index) {
                     if (index == 0 &&
                         (canManageParticipants || admins.isNotEmpty)) {
-                      return const MenuSectionTitle(
-                        title: '(i) Admins',
+                      return MenuSectionTitle(
+                        title: AppLocalizations.of(context).admins,
                         iconData: Icons.admin_panel_settings_outlined,
                       );
                     } else if (index > 0 && index <= admins.length) {
@@ -233,7 +218,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             leadingIconSize: 24.0,
                             leadingIconWidget: UserAvatarWidget(
                               currentUser,
-                              type: AvatarType.mini,
+                              type: AvatarType.md,
                               currentUserID: currentUserID,
                             ),
                             menuItemColor: colorScheme.fillFaint,
@@ -265,8 +250,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       return MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: admins.isNotEmpty
-                              ? '(i) Add more admins'
-                              : '(i) Add admin',
+                              ? AppLocalizations.of(context).addMoreAdmins
+                              : AppLocalizations.of(context).addAdmin,
                           makeTextBold: true,
                         ),
                         leadingIcon: Icons.add_outlined,
@@ -316,7 +301,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
-                            type: AvatarType.mini,
+                            type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: colorScheme.fillFaint,
@@ -397,7 +382,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
-                            type: AvatarType.mini,
+                            type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: colorScheme.fillFaint,
@@ -453,10 +438,6 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   }
 
   String _nameIfAvailableElseEmail(User user) {
-    final name = user.displayName;
-    if (name != null && name.isNotEmpty) {
-      return name;
-    }
-    return user.email;
+    return resolveDisplayName(user);
   }
 }

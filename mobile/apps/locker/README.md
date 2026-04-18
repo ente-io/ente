@@ -7,28 +7,24 @@ important documents in the cloud with secure sharing capabilities.
 
 1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
 
-2. Pull in all submodules with `git submodule update --init --recursive`
+2. Install dependencies using one of these methods:
+   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
+   - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
-3. Run `flutter pub get` to install dependencies, then run `flutter gen-l10n` to generate localization files
+3. Run the app:
+   - Android: `flutter run --flavor independent`
+   - iOS: `flutter run`
 
-4. For Android, [setup your
-   keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-   and run `flutter build apk --release --flavor independent`
+To build a release APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`. For iOS, use `flutter build ios`.
 
-5. For iOS, run `flutter build ios`
+## 🌍 Translate
 
-## ⚙️ Develop
+[![Crowdin](https://badges.crowdin.net/ente-locker/localized.svg)](https://crowdin.com/project/ente-locker)
 
-For Android, use
+If you're interested in helping out with translation, please visit our [Crowdin
+project](https://crowdin.com/project/ente-locker) to get started. Thank you for
+your support.
 
-```sh
-flutter run -t lib/main.dart --flavor independent
-```
-
-For iOS, use `flutter run`
-
-## TODOs
-
-Refactor and merge
-- [ ] Verify correctness for `PackageInfoUtil.getPackageName()` on Linux and Windows
-- [ ] Update `file_url.dart` to download only via CF worker when necessary
+If your language is not listed for translation, please [create a GitHub
+issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+to have it added.

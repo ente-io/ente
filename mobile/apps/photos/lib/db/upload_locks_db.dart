@@ -203,8 +203,8 @@ class UploadLocksDB {
     final time =
         int.tryParse(row[_uploadLocksTable.columnTime].toString()) ?? 0;
     final owner = row[_uploadLocksTable.columnOwner] as String;
-    final duration = DateTime.now().millisecondsSinceEpoch - time;
-    return "Lock for $id acquired by $owner since ${Duration(milliseconds: duration)}";
+    final duration = DateTime.now().microsecondsSinceEpoch - time;
+    return "Lock for $id acquired by $owner since ${Duration(microseconds: duration)}";
   }
 
   Future<bool> isLocked(String id, String owner) async {

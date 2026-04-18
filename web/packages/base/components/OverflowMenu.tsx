@@ -110,6 +110,18 @@ interface OverflowMenuOptionProps {
      * An optional icon to show at the trailing edge of the menu option.
      */
     endIcon?: React.ReactNode;
+    /**
+     * If true, the menu option will be styled as selected with a hover effect.
+     */
+    selected?: boolean;
+    /**
+     * If true, reduce spacing and sizing for dense menus.
+     */
+    compact?: boolean;
+    /**
+     * If true, the option is shown disabled and cannot be selected.
+     */
+    disabled?: boolean;
 }
 
 /**
@@ -117,7 +129,16 @@ interface OverflowMenuOptionProps {
  */
 export const OverflowMenuOption: React.FC<
     React.PropsWithChildren<OverflowMenuOptionProps>
-> = ({ onClick, color = "primary", startIcon, endIcon, children }) => {
+> = ({
+    onClick,
+    color = "primary",
+    startIcon,
+    endIcon,
+    selected,
+    compact,
+    disabled,
+    children,
+}) => {
     const menuContext = useContext(OverflowMenuContext);
 
     const handleClick = () => {
@@ -133,27 +154,42 @@ export const OverflowMenuOption: React.FC<
     return (
         <MenuItem
             onClick={handleClick}
+            selected={selected}
+            disabled={disabled}
             sx={(theme) => ({
-                minWidth: 220,
-                color: theme.vars.palette[color].main,
+                minWidth: compact ? 176 : 220,
+                color: disabled
+                    ? theme.vars.palette.text.muted
+                    : theme.vars.palette[color].main,
+
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
-                "& .MuiSvgIcon-root": { fontSize: "20px" },
+                "& .MuiSvgIcon-root": { fontSize: compact ? "18px" : "20px" },
+                ...(selected && {
+                    backgroundColor: "rgba(255, 255, 255, 0.08)",
+                    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.12)" },
+                }),
             })}
         >
             <Stack
                 direction="row"
                 sx={{
-                    gap: 1.5,
+                    gap: compact ? 1 : 1.5,
                     alignItems: "center",
                     // Fill our container.
                     width: "100%",
                     // MUI has responsive padding, use a static value instead.
-                    py: 1,
+                    py: compact ? 0.5 : 1,
                 }}
             >
                 {startIcon}
-                <Typography sx={{ flex: 1, fontWeight: "medium" }}>
+                <Typography
+                    sx={{
+                        flex: 1,
+                        fontWeight: "medium",
+                        fontSize: compact ? "0.9rem" : undefined,
+                    }}
+                >
                     {children}
                 </Typography>
                 {endIcon}

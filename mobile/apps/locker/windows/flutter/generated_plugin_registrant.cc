@@ -8,7 +8,6 @@
 
 #include <app_links/app_links_plugin_c_api.h>
 #include <file_saver/file_saver_plugin.h>
-#include <flutter_inappwebview_windows/flutter_inappwebview_windows_plugin_c_api.h>
 #include <flutter_local_authentication/flutter_local_authentication_plugin_c_api.h>
 #include <flutter_secure_storage_windows/flutter_secure_storage_windows_plugin.h>
 #include <local_auth_windows/local_auth_plugin.h>
@@ -25,8 +24,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("AppLinksPluginCApi"));
   FileSaverPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FileSaverPlugin"));
-  FlutterInappwebviewWindowsPluginCApiRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("FlutterInappwebviewWindowsPluginCApi"));
   FlutterLocalAuthenticationPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterLocalAuthenticationPluginCApi"));
   FlutterSecureStorageWindowsPluginRegisterWithRegistrar(

@@ -68,7 +68,9 @@ import type {
     CollectionMapping,
     FFmpegCommand,
     FolderWatch,
+    NativeDeviceLockCapability,
     PendingUploads,
+    PersistedAppLockConfig,
     UtilityProcessType,
     ZipItem,
 } from "./types/ipc";
@@ -119,6 +121,19 @@ const masterKeyFromSafeStorage = () =>
 const saveMasterKeyInSafeStorage = (masterKey: string) =>
     ipcRenderer.invoke("saveMasterKeyInSafeStorage", masterKey);
 
+const isSafeStorageAvailable = (): Promise<boolean> =>
+    ipcRenderer.invoke("isSafeStorageAvailable");
+
+const appLockConfigFromSafeStorage = (): Promise<
+    PersistedAppLockConfig | undefined
+> => ipcRenderer.invoke("appLockConfigFromSafeStorage");
+
+const saveAppLockConfigInSafeStorage = (config: PersistedAppLockConfig) =>
+    ipcRenderer.invoke("saveAppLockConfigInSafeStorage", config);
+
+const clearAppLockConfigFromSafeStorage = () =>
+    ipcRenderer.invoke("clearAppLockConfigFromSafeStorage");
+
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
 
@@ -129,9 +144,34 @@ const isAutoLaunchEnabled = () => ipcRenderer.invoke("isAutoLaunchEnabled");
 
 const toggleAutoLaunch = () => ipcRenderer.invoke("toggleAutoLaunch");
 
+const getNativeDeviceLockCapability = (): Promise<NativeDeviceLockCapability> =>
+    ipcRenderer.invoke("getNativeDeviceLockCapability");
+
+const minDeviceLockPromptIntervalMs = 1_500;
+let lastDeviceLockPromptTimeMs = 0;
+
+const promptDeviceLock = async (reason: string) => {
+    const now = Date.now();
+    if (now - lastDeviceLockPromptTimeMs < minDeviceLockPromptIntervalMs) {
+        return false;
+    }
+
+    lastDeviceLockPromptTimeMs = now;
+    const result: unknown = await ipcRenderer.invoke(
+        "promptDeviceLock",
+        reason,
+    );
+    return result === true;
+};
+
 const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
+};
+
+const onMainWindowBlur = (cb: (() => void) | undefined) => {
+    ipcRenderer.removeAllListeners("mainWindowBlur");
+    if (cb) ipcRenderer.on("mainWindowBlur", cb);
 };
 
 const onOpenEnteURL = (cb: ((url: string) => void) | undefined) => {
@@ -361,11 +401,18 @@ contextBridge.exposeInMainWorld("electron", {
     logout,
     masterKeyFromSafeStorage,
     saveMasterKeyInSafeStorage,
+    isSafeStorageAvailable,
+    appLockConfigFromSafeStorage,
+    saveAppLockConfigInSafeStorage,
+    clearAppLockConfigFromSafeStorage,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     isAutoLaunchEnabled,
     toggleAutoLaunch,
+    getNativeDeviceLockCapability,
+    promptDeviceLock,
     onMainWindowFocus,
+    onMainWindowBlur,
     onOpenEnteURL,
 
     // - App update

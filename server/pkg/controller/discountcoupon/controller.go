@@ -22,11 +22,11 @@ const MaxSendCount = 10
 // AllowedProviders is a set of valid provider names for discount coupons.
 // While adding new providers, consider adding customized templates in email package.
 var AllowedProviders = map[string]bool{
-	"Kagi": true,
-	"Tuta": true,
-	"Notesnook": true,
+	"Kagi":       true,
+	"Tuta":       true,
+	"Notesnook":  true,
 	"Windscribe": true,
-	"Test": true,
+	"Test":       true,
 }
 
 type Controller struct {
@@ -56,7 +56,7 @@ func (c *Controller) ClaimCoupon(ctx *gin.Context, req ClaimCouponRequest) error
 }
 
 func (c *Controller) processClaimRequest(ctx *gin.Context, req ClaimCouponRequest) {
-	sanitizedEmail := strings.ToLower(strings.TrimSpace(req.Email))
+	sanitizedEmail := emailUtil.NormalizeEmail(req.Email)
 	logger :=
 		log.WithField("provider", req.ProviderName).
 			WithField("email", sanitizedEmail).
@@ -163,7 +163,7 @@ func (c *Controller) sendCouponEmail(ctx context.Context, user ente.User, coupon
 		subject = fmt.Sprintf("Your %s Discount Code", providerName)
 		templateName = "discount_coupon.html"
 	}
-	return emailUtil.SendTemplatedEmailV2([]string{user.Email}, "Ente", "team@ente.io", subject, "base.html", templateName, templateData, nil)
+	return emailUtil.SendTemplatedEmailV2([]string{user.Email}, "Ente", "team@ente.com", subject, "base.html", templateName, templateData, nil)
 }
 
 func (c *Controller) alertCouponsDepletedDiscord(providerName string) {

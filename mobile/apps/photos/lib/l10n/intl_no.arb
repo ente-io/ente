@@ -26,7 +26,6 @@
   "deleteReason4": "Årsaken min er ikke oppført",
   "sendEmail": "Send e-post",
   "deleteRequestSLAText": "Forespørselen din vil bli behandlet innen 72 timer.",
-  "deleteEmailRequest": "Vennligst send en e-post til <warning>account-deletion@ente.io</warning> fra din registrerte e-postadresse.",
   "entePhotosPerm": "Ente <i>trenger tillatelse</i> for å bevare bildene dine",
   "ok": "Ok",
   "createAccount": "Opprett konto",
@@ -48,7 +47,6 @@
   "incorrectRecoveryKeyBody": "Gjennopprettingsnøkkelen du skrev inn er feil",
   "forgotPassword": "Glemt passord",
   "enterYourRecoveryKey": "Skriv inn din gjenopprettingsnøkkel",
-  "noRecoveryKey": "Ingen gjenopprettingsnøkkel?",
   "sorry": "Beklager",
   "noRecoveryKeyNoDecryption": "Grunnet vår type ente-til-ende-krypteringsprotokoll kan ikke dine data dekrypteres uten passordet ditt eller gjenopprettingsnøkkelen din",
   "verifyEmail": "Bekreft e-postadresse",
@@ -63,7 +61,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -115,7 +113,6 @@
   "verifyPassword": "Bekreft passord",
   "recoveryKey": "Gjenopprettingsnøkkel",
   "recoveryKeyOnForgotPassword": "Hvis du glemmer passordet ditt er den eneste måten du kan gjenopprette dataene dine på med denne nøkkelen.",
-  "recoveryKeySaveDescription": "Vi lagrer ikke denne nøkkelen, vennligst lagre denne 24-ords nøkkelen på et trygt sted.",
   "doThisLater": "Gjør dette senere",
   "saveKey": "Lagre nøkkel",
   "recoveryKeyCopiedToClipboard": "Gjenopprettingsnøkkel kopiert til utklippstavlen",
@@ -127,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -259,18 +256,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verifiserings-ID",
   "verifyEmailID": "Verifiser {email}",
   "emailNoEnteAccount": "{email} har ikke en Ente-konto.\n\nsender dem en invitasjon til å dele bilder.",
-  "shareMyVerificationID": "Her er min verifiserings-ID: {verificationID} for ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hei, kan du bekrefte at dette er din ente.io verifiserings-ID: {verificationID}",
   "somethingWentWrong": "Noe gikk galt",
   "sendInvite": "Send invitasjon",
-  "shareTextRecommendUsingEnte": "Last ned Ente slik at vi lett kan dele bilder og videoer av original kvalitet\n\nhttps://ente.io",
   "done": "Ferdig",
   "applyCodeTitle": "Bruk kode",
   "enterCodeDescription": "Angi koden fra vennen din for å få gratis lagringsplass for dere begge",
@@ -278,7 +272,6 @@
   "failedToApplyCode": "Kunne ikke bruke koden",
   "enterReferralCode": "Angi vervekode",
   "codeAppliedPageTitle": "Kode brukt",
-  "changeYourReferralCode": "Endre din vervekode",
   "change": "Endre",
   "unavailableReferralCode": "Beklager, denne koden er utilgjengelig.",
   "codeChangeLimitReached": "Beklager, du har nådd grensen for kodeendringer.",
@@ -292,15 +285,10 @@
   "claimMore": "Løs inn mer!",
   "theyAlsoGetXGb": "De får også {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB hver gang noen melder seg på en betalt plan og bruker koden din",
-  "shareTextReferralCode": "Gi vervekode: {referralCode} \n\nBruk den i Innstillinger → General → Verving for å få {referralStorageInGB} GB gratis etter at du har registrert deg for en betalt plan\n\nhttps://ente.io",
   "claimFreeStorage": "Få gratis lagring",
   "inviteYourFriends": "Inviter vennene dine",
   "failedToFetchReferralDetails": "Kan ikke hente vervedetaljer. Prøv igjen senere.",
-  "referralStep1": "1. Gi denne koden til vennene dine",
-  "referralStep2": "De registrerer seg for en betalt plan",
-  "referralStep3": "3. Begge dere får {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Vervinger er for øyeblikket satt på pause",
-  "youCanAtMaxDoubleYourStorage": "* Du kan maksimalt doble lagringsplassen din",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Familien din har gjort krav på {storageAmountInGb} GB så langt} false {Du har gjort krav på {storageAmountInGb} GB så langt} other {Du har gjort krav på {storageAmountInGb} GB så langt!}}\n",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -445,7 +433,6 @@
   "discover_sunset": "Solnedgang",
   "discover_hills": "Åser",
   "discover_greenery": "Grøntområder",
-  "mlIndexingDescription": "Vær oppmerksom på at maskinlæring vil resultere i høyere båndbredde og batteribruk inntil alle elementer er indeksert. Vurder å bruke skrivebordsappen for raskere indeksering, alle resultater vil bli synkronisert automatisk.",
   "loadingModel": "Laster ned modeller...",
   "waitingForWifi": "Venter på WiFi...",
   "status": "Status",
@@ -517,7 +504,6 @@
   "backedUpFolders": "Sikkerhetskopierte mapper",
   "backup": "Sikkerhetskopi",
   "freeUpDeviceSpace": "Frigjør plass på enheten",
-  "freeUpDeviceSpaceDesc": "Spar plass på enheten ved å fjerne filer som allerede er sikkerhetskopiert.",
   "allClear": "✨ Alt klart",
   "noDeviceThatCanBeDeleted": "Du har ingen filer i dette albumet som kan bli slettet",
   "removeDuplicates": "Fjern duplikater",
@@ -560,8 +546,6 @@
   "familyPlans": "Familieabonnementer",
   "referrals": "Vervinger",
   "notifications": "Varslinger",
-  "sharedPhotoNotifications": "Nye delte bilder",
-  "sharedPhotoNotificationsExplanation": "Motta varsler når noen legger til et bilde i et delt album som du er en del av",
   "advanced": "Avansert",
   "general": "Generelt",
   "security": "Sikkerhet",
@@ -595,7 +579,6 @@
   "darkTheme": "Mørk",
   "systemTheme": "System",
   "freeTrial": "Gratis prøveversjon",
-  "selectYourPlan": "Velg abonnementet ditt",
   "enteSubscriptionPitch": "Ente bevarer minnene dine, slik at de er alltid tilgjengelig for deg, selv om du mister enheten.",
   "enteSubscriptionShareWithFamily": "Familien din kan også legges til abonnementet ditt.",
   "currentUsageIs": "Nåværende bruk er ",
@@ -616,7 +599,6 @@
   "subscription": "Abonnement",
   "paymentDetails": "Betalingsinformasjon",
   "manageFamily": "Administrer familie",
-  "contactToManageSubscription": "Kontakt oss på support@ente.io for å administrere ditt {provider} abonnement.",
   "renewSubscription": "Forny abonnement",
   "cancelSubscription": "Avslutt abonnement",
   "areYouSureYouWantToRenew": "Er du sikker på at du vil fornye?",
@@ -665,7 +647,6 @@
   "subAlreadyLinkedErrMessage": "Din {id} er allerede koblet til en annen Ente-konto.\nHvis du ønsker å bruke din {id} med denne kontoen, vennligst kontakt vår brukerstøtte''",
   "visitWebToManage": "Vennligst besøk web.ente.io for å administrere abonnementet",
   "couldNotUpdateSubscription": "Kunne ikke oppdatere abonnement",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vennligst kontakt support@ente.io og vi vil gjerne hjelpe!",
   "paymentFailed": "Betaling feilet",
   "paymentFailedTalkToProvider": "Snakk med {providerName} kundestøtte hvis du ble belastet",
   "@paymentFailedTalkToProvider": {
@@ -696,19 +677,8 @@
   "grantFullAccessPrompt": "Vennligst gi tilgang til alle bilder i Innstillinger-appen",
   "allowPermTitle": "Gi tilgang til bilder",
   "allowPermBody": "Vennligst gi tilgang til bildene dine i Innstillinger, slik at Ente kan vise og sikkerhetskopiere biblioteket.",
-  "openSettings": "Åpne innstillinger",
   "selectMorePhotos": "Velg flere bilder",
   "existingUser": "Eksisterende bruker",
-  "privateBackups": "Private sikkerhetskopier",
-  "forYourMemories": "for dine minner",
-  "endtoendEncryptedByDefault": "Ende-til-ende kryptert som standard",
-  "safelyStored": "Trygt lagret",
-  "atAFalloutShelter": "i en bunker",
-  "designedToOutlive": "Laget for å vare lenger enn",
-  "available": "Tilgjengelig",
-  "everywhere": "Overalt",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobil, Web, Datamaskin",
   "newToEnte": "Ny til Ente",
   "pleaseLoginAgain": "Vennligst logg inn igjen",
   "autoLogoutMessage": "Du har blitt logget ut på grunn av en teknisk feil. Vi beklager ulempen.",
@@ -725,7 +695,6 @@
   "couldNotBackUpTryLater": "Vi kunne ikke sikkerhetskopiere dine data.\nVi vil prøve på nytt senere.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kan bare kryptere og bevare filer hvis du gir tilgang til dem",
   "pleaseGrantPermissions": "Vennligst gi tillatelser",
-  "grantPermission": "Gi tillatelse",
   "privateSharing": "Privat deling",
   "shareOnlyWithThePeopleYouWant": "Del bare med de du vil",
   "usePublicLinksForPeopleNotOnEnte": "Bruk offentlige lenker for folk som ikke bruker Ente",
@@ -1030,7 +999,6 @@
   "didYouKnow": "Visste du at?",
   "loadingMessage": "Laster bildene dine...",
   "loadMessage1": "Du kan dele abonnementet med familien din",
-  "loadMessage2": "Vi har bevart over 200 millioner minner så langt",
   "loadMessage3": "Vi beholder 3 kopier av dine data, en i en underjordisk bunker",
   "loadMessage4": "Alle våre apper har åpen kildekode",
   "loadMessage5": "Vår kildekode og kryptografi har blitt revidert eksternt",
@@ -1042,7 +1010,6 @@
   "fileTypesAndNames": "Filtyper og navn",
   "location": "Plassering",
   "moments": "Øyeblikk",
-  "searchFaceEmptySection": "Folk vil vises her når indeksering er gjort",
   "searchDatesEmptySection": "Søk etter dato, måned eller år",
   "searchLocationEmptySection": "Gruppebilder som er tatt innenfor noen radius av et bilde",
   "searchPeopleEmptySection": "Inviter folk, og du vil se alle bilder som deles av dem her",
@@ -1098,7 +1065,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} ledig",
-  "appVersion": "Versjon: {versionValue}",
   "verifyIDLabel": "Bekreft",
   "fileInfoAddDescHint": "Legg til en beskrivelse...",
   "editLocationTagTitle": "Rediger plassering",
@@ -1107,8 +1073,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Angi radius",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Legg til 5 familiemedlemmer til det eksisterende abonnementet uten å betale ekstra.\n\nHvert medlem får sitt eget private område, og kan ikke se hverandres filer med mindre de er delt.\n\nFamilieabonnement er tilgjengelige for kunder som har et betalt Ente-abonnement.\n\nAbonner nå for å komme i gang!",
   "androidBiometricHint": "Verifiser identitet",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1197,7 +1161,6 @@
   "moveToHiddenAlbum": "Flytt til skjult album",
   "fileTypes": "Filtyper",
   "deleteConfirmDialogBody": "Denne kontoen er knyttet til andre Ente-apper, hvis du bruker noen. De opplastede dataene, i alle Ente-apper, vil bli planlagt slettet, og kontoen din vil bli slettet permanent.",
-  "hearUsWhereTitle": "Hvordan fikk du høre om Ente? (valgfritt)",
   "hearUsExplanation": "Vi sporer ikke app-installasjoner. Det hadde vært til hjelp om du fortalte oss hvor du fant oss!",
   "viewAddOnButton": "Vis tillegg",
   "addOns": "Tillegg",
@@ -1388,7 +1351,6 @@
   },
   "extraPhotosFound": "Ekstra bilder funnet",
   "configuration": "Konfigurasjon",
-  "localIndexing": "Lokal indeksering",
   "processed": "Behandlet",
   "resetPerson": "Fjern",
   "areYouSureYouWantToResetThisPerson": "Er du sikker på at du vil tilbakestille denne personen?",
@@ -1533,7 +1495,6 @@
   "legacyPageDesc2": "Betrodde kontakter kan starte gjenoppretting av kontoen, og hvis de ikke blir blokkert innen 30 dager, tilbakestille passordet ditt og få tilgang til kontoen din.",
   "legacyAccounts": "Eldre kontoer",
   "trustedContacts": "Betrodde kontakter",
-  "addTrustedContact": "Legg til betrodd kontakt",
   "removeInvite": "Fjern invitasjon",
   "recoveryWarning": "En betrodd kontakt prøver å få tilgang til kontoen din",
   "rejectRecovery": "Avslå gjenoppretting",
@@ -1727,9 +1688,7 @@
   "curatedMemories": "Kuraterte minner",
   "widgets": "Moduler",
   "memories": "Minner",
-  "peopleWidgetDesc": "Velg folkene du ønsker å se på din hjemskjerm.",
-  "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
-  "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
-  "pastYearsMemories": "Tidligere års minner"
+  "pastYearsMemories": "Tidligere års minner",
+  "grantPermission": "Gi tillatelse"
 }

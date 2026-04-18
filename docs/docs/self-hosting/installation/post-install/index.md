@@ -93,7 +93,8 @@ docker compose down && docker compose up -d
 
 ## Step 3: Configure application endpoints
 
-You may wish to access some of the applications such as Auth, Albums, Cast via
+You may wish to access some of the applications such as Albums, Share, Paste,
+Cast, Accounts via
 your instance's endpoints through the application instead of our production
 instances.
 
@@ -104,9 +105,17 @@ endpoints of the corresponding web applications.
 # Replace yourdomain.tld with actual domain
 apps:
     public-albums: https://albums.ente.yourdomain.tld
+    public-locker: https://share.ente.yourdomain.tld
+    public-paste: https://paste.ente.yourdomain.tld
     cast: https://cast.ente.yourdomain.tld
-    auth: https://auth.ente.yourdomain.tld
+    embed-albums: https://embed.ente.yourdomain.tld
+    accounts: https://accounts.ente.yourdomain.tld
 ```
+
+If you are using quickstart, note that only Photos and Albums are exposed by
+default in `compose.yaml`. Uncomment the Share / Paste port mappings there, or
+deploy them separately, before pointing `apps.public-locker` /
+`apps.public-paste` to those URLs.
 
 ## Step 4: Make it publicly accessible
 
@@ -123,9 +132,18 @@ though this poses challenges with respect to object storage (details below).
 
 ### Understanding IP address challenges with object storage
 
-When accessing Ente using an IP address instead of a domain name, you may encounter issues with file uploads and downloads due to **CORS (Cross-Origin Resource Sharing)** browser security policies.
+When accessing Ente using an IP address instead of a domain name, you may encounter two distinct issues with file uploads and downloads.
 
-**The issue:** Your browser treats requests between different ports on the same IP as cross-origin requests. For example:
+**Issue 1: S3 endpoint reachability.** Museum embeds the bucket `endpoint`
+value into the pre-signed URLs it hands to clients. The quickstart ships with
+`endpoint: localhost:3200`, which only resolves to MinIO from within the
+server. Uploads from the mobile app or another machine then silently fail
+(museum logs `OBJECT_SIZE_FETCH_FAILED: dial tcp …: i/o timeout`). Set
+`endpoint` in `museum.yaml` to an address reachable from both museum and the
+clients — typically the server's LAN IP or a hostname. Learn more in
+[Configuring Object Storage](/self-hosting/administration/object-storage#using-the-mobile-app-or-another-device).
+
+**Issue 2: CORS (Cross-Origin Resource Sharing).** Your browser treats requests between different ports on the same IP as cross-origin requests. For example:
 
 - Ente web app runs on `http://192.168.1.100:3000`
 - MinIO object storage runs on `http://192.168.1.100:3200`

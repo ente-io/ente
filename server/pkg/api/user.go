@@ -10,12 +10,12 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/controller/user"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -35,7 +35,7 @@ func (h *UserHandler) SendOTT(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	email := strings.ToLower(request.Email)
+	email := emailUtil.NormalizeEmail(request.Email)
 	if len(email) == 0 {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Email id is missing"))
 		return
@@ -72,6 +72,18 @@ func (h *UserHandler) GetDetailsV2(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, details)
+}
+
+// GetLockerUsage returns locker usage details for the requesting user.
+func (h *UserHandler) GetLockerUsage(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+
+	lockerUsage, err := h.UserController.GetLockerUsage(c, userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, lockerUsage)
 }
 
 // SetAttributes sets the attributes for a user
@@ -127,7 +139,7 @@ func (h *UserHandler) SetRecoveryKey(c *gin.Context) {
 
 // GetPublicKey returns the public key of a user
 func (h *UserHandler) GetPublicKey(c *gin.Context) {
-	email := strings.ToLower(c.Query("email"))
+	email := emailUtil.NormalizeEmail(c.Query("email"))
 	publicKey, err := h.UserController.GetPublicKey(email)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

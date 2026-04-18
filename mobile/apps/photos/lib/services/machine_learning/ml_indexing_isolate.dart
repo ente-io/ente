@@ -1,11 +1,15 @@
 import "dart:async";
+import "dart:io" show Platform;
 
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
+import "package:photos/service_locator.dart"
+    show flagService, isOfflineMode, localSettings;
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import "package:photos/services/machine_learning/ml_models_overview.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/machine_learning/pet_ml/pet_model_services.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
@@ -21,7 +25,7 @@ class MLIndexingIsolate extends SuperIsolate {
   final _logger = Logger("MLIndexingIsolate");
 
   @override
-  bool get isDartUiIsolate => true;
+  bool get isDartUiIsolate => !_shouldUseRustMl;
 
   @override
   String get isolateName => "MLIndexingIsolate";
@@ -29,16 +33,21 @@ class MLIndexingIsolate extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => true;
 
+  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
+
   int _loadedModelsCount = 0;
   int _deloadedModelsCount = 0;
 
   final _initModelLock = Lock();
   final _downloadModelLock = Lock();
+  final _rustRuntimeLock = Lock();
 
   bool areModelsDownloaded = false;
+  Map<String, dynamic>? _cachedRustRuntimeArgs;
 
   @override
   Future<void> onDispose() async {
+    await releaseRustRuntime();
     await _releaseModels();
   }
 
@@ -66,12 +75,23 @@ class MLIndexingIsolate extends SuperIsolate {
     late MLResult result;
 
     try {
+      final useRustMl = _shouldUseRustMl;
+      final rustRuntimeArgs = useRustMl
+          ? await _getCachedRustRuntimeArgs()
+          : const <String, dynamic>{};
+      _logger.info(
+        "Analyzing image ${instruction.fileKey} via rust or legacy: ${useRustMl ? "RUST" : "LEGACY"}",
+      );
+
       final resultJsonString =
           await runInIsolate(IsolateOperation.analyzeImage, {
-        "enteFileID": instruction.file.uploadedFileID ?? -1,
+        "enteFileID": instruction.fileKey,
         "filePath": filePath,
+        "useRustMl": useRustMl,
         "runFaces": instruction.shouldRunFaces,
         "runClip": instruction.shouldRunClip,
+        "runPets": useRustMl && instruction.shouldRunPets,
+        ...rustRuntimeArgs,
         "faceDetectionAddress": FaceDetectionService.instance.sessionAddress,
         "faceEmbeddingAddress": FaceEmbeddingService.instance.sessionAddress,
         "clipImageAddress": ClipImageEncoder.instance.sessionAddress,
@@ -83,19 +103,72 @@ class MLIndexingIsolate extends SuperIsolate {
         return null;
       }
       result = MLResult.fromJsonString(resultJsonString);
+      result.usedRustMl = useRustMl;
     } catch (e, s) {
+      if (isExpectedMlSkipError(e)) {
+        rethrow;
+      }
       _logger.severe(
-        "Could not analyze image with ID ${instruction.file.uploadedFileID} \n",
+        "Could not analyze image with ID ${instruction.fileKey} \n",
         e,
         s,
       );
       debugPrint(
-        "This image with fileID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
+        "This image with fileID ${instruction.fileKey} has name ${instruction.file.displayName}.",
       );
       rethrow;
     }
 
     return result;
+  }
+
+  Future<void> prepareRustRuntime() async {
+    if (!_shouldUseRustMl) {
+      return;
+    }
+    return _rustRuntimeLock.synchronized(() async {
+      final rustRuntimeArgs = await _buildRustRuntimeArgs();
+      final frozenRuntimeArgs =
+          Map<String, dynamic>.unmodifiable(rustRuntimeArgs);
+      await runInIsolate(
+        IsolateOperation.prepareRustMlRuntime,
+        frozenRuntimeArgs,
+      );
+      _cachedRustRuntimeArgs = frozenRuntimeArgs;
+    });
+  }
+
+  /// Invalidate the download cache so the next indexing run re-enters
+  /// [ensureDownloadedModels], which checks bandwidth and downloads any
+  /// newly required models (e.g. pet models after toggling pet recognition).
+  void invalidateModelDownloadCache() {
+    areModelsDownloaded = false;
+  }
+
+  Future<void> releaseRustRuntime() async {
+    final cachedRustRuntimeArgs = _cachedRustRuntimeArgs;
+    if (cachedRustRuntimeArgs == null) {
+      return;
+    }
+    if (!isIsolateSpawned) {
+      _cachedRustRuntimeArgs = null;
+      return;
+    }
+    return _rustRuntimeLock.synchronized(() async {
+      if (_cachedRustRuntimeArgs == null) {
+        return;
+      }
+      if (!isIsolateSpawned) {
+        _cachedRustRuntimeArgs = null;
+        return;
+      }
+      try {
+        await runInIsolate(IsolateOperation.releaseRustMlRuntime, {});
+        _cachedRustRuntimeArgs = null;
+      } catch (e, s) {
+        _logger.warning("Could not release rust runtime in isolate", e, s);
+      }
+    });
   }
 
   void triggerModelsDownload() {
@@ -114,25 +187,43 @@ class MLIndexingIsolate extends SuperIsolate {
       if (areModelsDownloaded) {
         return;
       }
-      final goodInternet = await canUseHighBandwidth();
+      final goodInternet = isOfflineMode || await canUseHighBandwidth();
       if (!goodInternet) {
         _logger.info(
-          "Cannot download models because user is not connected to wifi",
+          "Cannot download models because user is not connected to wifi and is in online mode",
         );
         return;
       }
       _logger.info('Downloading models');
-      await Future.wait([
+      final modelsToDownload = <Future<void>>[
         FaceDetectionService.instance.downloadModel(forceRefresh),
         FaceEmbeddingService.instance.downloadModel(forceRefresh),
         ClipImageEncoder.instance.downloadModel(forceRefresh),
-      ]);
+      ];
+
+      if (flagService.petEnabled &&
+          localSettings.petRecognitionEnabled &&
+          _shouldUseRustMl) {
+        modelsToDownload.addAll([
+          PetFaceDetectionService.instance.downloadModel(forceRefresh),
+          PetFaceEmbeddingDogService.instance.downloadModel(forceRefresh),
+          PetFaceEmbeddingCatService.instance.downloadModel(forceRefresh),
+          PetBodyDetectionService.instance.downloadModel(forceRefresh),
+          PetBodyEmbeddingDogService.instance.downloadModel(forceRefresh),
+          PetBodyEmbeddingCatService.instance.downloadModel(forceRefresh),
+        ]);
+      }
+
+      await Future.wait(modelsToDownload);
       areModelsDownloaded = true;
       _logger.info('Downloaded models');
     });
   }
 
   Future<void> ensureLoadedModels(FileMLInstruction instruction) async {
+    if (_shouldUseRustMl) {
+      return;
+    }
     return _initModelLock.synchronized(() async {
       final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
       final faceEmbeddingLoaded = FaceEmbeddingService.instance.isInitialized;
@@ -203,6 +294,10 @@ class MLIndexingIsolate extends SuperIsolate {
 
   /// WARNING: This method is only for debugging purposes. It should not be used in production.
   Future<void> debugLoadSingleModel(MLModels model) {
+    if (_shouldUseRustMl) {
+      _logger.severe("Can't use legacy ML models when using rust");
+      return Future.value();
+    }
     return _initModelLock.synchronized(() async {
       final modelInstance = model.model;
       if (modelInstance.isInitialized) {
@@ -225,6 +320,7 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> cleanupLocalIndexingModels({bool delete = false}) async {
+    await releaseRustRuntime();
     if (!areModelsDownloaded) return;
     await _releaseModels();
 
@@ -244,6 +340,10 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> _releaseModels() async {
+    if (_shouldUseRustMl) {
+      _logger.severe("Can't release legacy ML models when using rust");
+      return Future.value();
+    }
     final List<String> modelNames = [];
     final List<int> modelAddresses = [];
     final List<MLModels> models = [];
@@ -275,5 +375,62 @@ class MLIndexingIsolate extends SuperIsolate {
       _logger.severe("Could not release models in MLIndexingIsolate", e, s);
       rethrow;
     }
+  }
+
+  Future<Map<String, dynamic>> _buildRustRuntimeArgs() async {
+    final faceDetection =
+        await FaceDetectionService.instance.getModelNameAndPath();
+    final faceEmbedding =
+        await FaceEmbeddingService.instance.getModelNameAndPath();
+    final clipImage = await ClipImageEncoder.instance.getModelNameAndPath();
+
+    String petFaceDetectionPath = "";
+    String petFaceEmbeddingDogPath = "";
+    String petFaceEmbeddingCatPath = "";
+    String petBodyDetectionPath = "";
+    String petBodyEmbeddingDogPath = "";
+    String petBodyEmbeddingCatPath = "";
+
+    if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+      petFaceDetectionPath =
+          (await PetFaceDetectionService.instance.getModelNameAndPath()).$2;
+      petFaceEmbeddingDogPath =
+          (await PetFaceEmbeddingDogService.instance.getModelNameAndPath()).$2;
+      petFaceEmbeddingCatPath =
+          (await PetFaceEmbeddingCatService.instance.getModelNameAndPath()).$2;
+      petBodyDetectionPath =
+          (await PetBodyDetectionService.instance.getModelNameAndPath()).$2;
+      petBodyEmbeddingDogPath =
+          (await PetBodyEmbeddingDogService.instance.getModelNameAndPath()).$2;
+      petBodyEmbeddingCatPath =
+          (await PetBodyEmbeddingCatService.instance.getModelNameAndPath()).$2;
+    }
+
+    return {
+      "faceDetectionModelPath": faceDetection.$2,
+      "faceEmbeddingModelPath": faceEmbedding.$2,
+      "clipImageModelPath": clipImage.$2,
+      "petFaceDetectionModelPath": petFaceDetectionPath,
+      "petFaceEmbeddingDogModelPath": petFaceEmbeddingDogPath,
+      "petFaceEmbeddingCatModelPath": petFaceEmbeddingCatPath,
+      "petBodyDetectionModelPath": petBodyDetectionPath,
+      "petBodyEmbeddingDogModelPath": petBodyEmbeddingDogPath,
+      "petBodyEmbeddingCatModelPath": petBodyEmbeddingCatPath,
+      "preferCoreml": Platform.isIOS,
+      "preferNnapi": Platform.isAndroid,
+      "preferXnnpack": Platform.isAndroid,
+      "allowCpuFallback": true,
+    };
+  }
+
+  Future<Map<String, dynamic>> _getCachedRustRuntimeArgs() async {
+    final cachedArgs = _cachedRustRuntimeArgs;
+    if (cachedArgs != null) {
+      return cachedArgs;
+    }
+    final rustRuntimeArgs = await _buildRustRuntimeArgs();
+    final frozenArgs = Map<String, dynamic>.unmodifiable(rustRuntimeArgs);
+    _cachedRustRuntimeArgs ??= frozenArgs;
+    return _cachedRustRuntimeArgs!;
   }
 }

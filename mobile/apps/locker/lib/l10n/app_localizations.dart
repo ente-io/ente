@@ -5,7 +5,30 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_cs.dart';
+import 'app_localizations_da.dart';
+import 'app_localizations_de.dart';
+import 'app_localizations_el.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fi.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_hu.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
+import 'app_localizations_nl.dart';
+import 'app_localizations_pl.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ro.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_sv.dart';
+import 'app_localizations_tr.dart';
+import 'app_localizations_uk.dart';
+import 'app_localizations_vi.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +115,34 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('cs'),
+    Locale('da'),
+    Locale('de'),
+    Locale('el'),
+    Locale('en'),
+    Locale('es'),
+    Locale('fi'),
+    Locale('fr'),
+    Locale('hi'),
+    Locale('hu'),
+    Locale('it'),
+    Locale('ja'),
+    Locale('ko'),
+    Locale('nl'),
+    Locale('pl'),
+    Locale('pt'),
+    Locale('ro'),
+    Locale('ru'),
+    Locale('sv'),
+    Locale('tr'),
+    Locale('uk'),
+    Locale('vi'),
+    Locale('zh'),
+    Locale('zh', 'CN'),
+    Locale('zh', 'TW')
+  ];
 
   /// No description provided for @onBoardingBody.
   ///
@@ -220,6 +270,48 @@ abstract class AppLocalizations {
   /// **'Downloading... {percentage}%'**
   String downloadingProgress(int percentage);
 
+  /// No description provided for @keepOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep offline'**
+  String get keepOffline;
+
+  /// No description provided for @cloudOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud only'**
+  String get cloudOnly;
+
+  /// No description provided for @savingOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving offline...'**
+  String get savingOffline;
+
+  /// Success message when files are saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file saved offline} other{{count} files saved offline}}'**
+  String filesAvailableOffline(int count);
+
+  /// Partial success message for offline save
+  ///
+  /// In en, this message translates to:
+  /// **'{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}'**
+  String filesAvailableOfflinePartial(int successCount, int failureCount);
+
+  /// Failure message when files could not be saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}'**
+  String failedToSaveFilesOffline(int count);
+
+  /// Success message when offline copies are removed
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}'**
+  String filesRemovedFromOffline(int count);
+
   /// No description provided for @downloadFailed.
   ///
   /// In en, this message translates to:
@@ -291,6 +383,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This collection cannot be deleted'**
   String get collectionCannotBeDeleted;
+
+  /// No description provided for @collectionCannotBeEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection cannot be edited'**
+  String get collectionCannotBeEdited;
+
+  /// No description provided for @collectionCannotBeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection cannot be shared'**
+  String get collectionCannotBeShared;
 
   /// No description provided for @deleteCollection.
   ///
@@ -442,6 +546,12 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get save;
 
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
   /// No description provided for @deleteFile.
   ///
   /// In en, this message translates to:
@@ -471,6 +581,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create collection'**
   String get createCollection;
+
+  /// No description provided for @enterCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter collection name'**
+  String get enterCollectionName;
 
   /// No description provided for @nothingYet.
   ///
@@ -651,6 +767,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Uncategorized'**
   String get uncategorized;
+
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing...'**
+  String get syncing;
 
   /// No description provided for @syncingTrash.
   ///
@@ -928,6 +1050,12 @@ abstract class AppLocalizations {
   /// **'Theme'**
   String get theme;
 
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
   /// No description provided for @lightTheme.
   ///
   /// In en, this message translates to:
@@ -958,6 +1086,12 @@ abstract class AppLocalizations {
   /// **'About'**
   String get about;
 
+  /// No description provided for @aboutUs.
+  ///
+  /// In en, this message translates to:
+  /// **'About us'**
+  String get aboutUs;
+
   /// No description provided for @weAreOpenSource.
   ///
   /// In en, this message translates to:
@@ -982,11 +1116,65 @@ abstract class AppLocalizations {
   /// **'Terms'**
   String get termsOfServicesTitle;
 
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get checkForUpdates;
+
+  /// No description provided for @checkingForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates...'**
+  String get checkingForUpdates;
+
+  /// No description provided for @unableToCheckForUpdatesRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to check for updates right now'**
+  String get unableToCheckForUpdatesRightNow;
+
+  /// No description provided for @youAreOnTheLatestVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on the latest version'**
+  String get youAreOnTheLatestVersion;
+
+  /// No description provided for @aNewVersionOfEnteLockerIsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of Ente Locker is available.'**
+  String get aNewVersionOfEnteLockerIsAvailable;
+
+  /// No description provided for @criticalUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical update available'**
+  String get criticalUpdateAvailable;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateAvailable;
+
+  /// No description provided for @downloadUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Download update'**
+  String get downloadUpdate;
+
   /// No description provided for @support.
   ///
   /// In en, this message translates to:
   /// **'Support'**
   String get support;
+
+  /// No description provided for @helpAndSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and Support'**
+  String get helpAndSupport;
 
   /// No description provided for @contactSupport.
   ///
@@ -1444,6 +1632,12 @@ abstract class AppLocalizations {
   /// **'Manage link'**
   String get manageLink;
 
+  /// No description provided for @linkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get linkLabel;
+
   /// No description provided for @linkExpiry.
   ///
   /// In en, this message translates to:
@@ -1801,7 +1995,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTextRecommendUsingEnte.
   ///
   /// In en, this message translates to:
-  /// **'Download Ente\n\nhttps://ente.io'**
+  /// **'Download Ente\n\nhttps://ente.com'**
   String get shareTextRecommendUsingEnte;
 
   /// No description provided for @thisIsYourVerificationId.
@@ -1849,13 +2043,13 @@ abstract class AppLocalizations {
   /// No description provided for @shareMyVerificationID.
   ///
   /// In en, this message translates to:
-  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  /// **'Here\'s my verification ID: {verificationID} for ente.com.'**
   String shareMyVerificationID(Object verificationID);
 
   /// No description provided for @shareTextConfirmOthersVerificationID.
   ///
   /// In en, this message translates to:
-  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  /// **'Hey, can you confirm that this is your ente.com verification ID: {verificationID}'**
   String shareTextConfirmOthersVerificationID(Object verificationID);
 
   /// No description provided for @passwordLock.
@@ -2031,6 +2225,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve run out of storage space. Free up space to continue uploading.'**
   String get uploadStorageLimitErrorBody;
+
+  /// Title shown when uploads fail because the Photos subscription is expired
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription expired'**
+  String get uploadSubscriptionExpiredErrorTitle;
+
+  /// Body shown when uploads fail because the Photos subscription is expired
+  ///
+  /// In en, this message translates to:
+  /// **'Your Ente Photos subscription has expired. Renew your subscription to continue uploading.'**
+  String get uploadSubscriptionExpiredErrorBody;
 
   /// Title shown when uploads fail because the locker already has the maximum file count
   ///
@@ -2518,6 +2724,66 @@ abstract class AppLocalizations {
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
 
+  /// No description provided for @important.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get important;
+
+  /// No description provided for @unimportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Unimportant'**
+  String get unimportant;
+
+  /// No description provided for @removingFromImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing from important...'**
+  String get removingFromImportant;
+
+  /// No description provided for @markingAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking as important...'**
+  String get markingAsImportant;
+
+  /// No description provided for @fileMarkedAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Item marked as important'**
+  String get fileMarkedAsImportant;
+
+  /// No description provided for @fileRemovedFromImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed from important'**
+  String get fileRemovedFromImportant;
+
+  /// Success message when items are marked as important
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item marked as important} other{{count} items marked as important}}'**
+  String filesMarkedAsImportant(int count);
+
+  /// No description provided for @allFilesAlreadyMarkedAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'All items are already marked as important'**
+  String get allFilesAlreadyMarkedAsImportant;
+
+  /// Error message when marking items as important fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to mark items as important: {error}'**
+  String failedToMarkFilesAsImportant(String error);
+
+  /// Error message when updating important status fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update important status: {error}'**
+  String failedToUpdateImportantStatus(String error);
+
   /// No description provided for @sorry.
   ///
   /// In en, this message translates to:
@@ -2530,11 +2796,365 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get subscribe;
 
+  /// No description provided for @sharedWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with'**
+  String get sharedWith;
+
+  /// No description provided for @shareCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Share collection'**
+  String get shareCollection;
+
+  /// No description provided for @shareLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Share later'**
+  String get shareLater;
+
+  /// No description provided for @enterNameOrEmailToShareWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name or email to share with'**
+  String get enterNameOrEmailToShareWith;
+
+  /// No description provided for @chooseFromAnExistingContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from an existing contact'**
+  String get chooseFromAnExistingContact;
+
+  /// No description provided for @scheduleShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule share'**
+  String get scheduleShare;
+
+  /// No description provided for @addEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get addEmail;
+
+  /// No description provided for @addNewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new email'**
+  String get addNewEmail;
+
+  /// No description provided for @noSharedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Not shared with anyone yet. Share this collection by adding someone\'s email below.'**
+  String get noSharedUsers;
+
+  /// No description provided for @removeAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove access'**
+  String get removeAccess;
+
   /// No description provided for @subscriptionRequiredForSharing.
   ///
   /// In en, this message translates to:
   /// **'You need a paid subscription to share links'**
   String get subscriptionRequiredForSharing;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get sessionExpired;
+
+  /// No description provided for @pleaseLoginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login again'**
+  String get pleaseLoginAgain;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @seeAllCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'All collections'**
+  String get seeAllCollections;
+
+  /// No description provided for @clearAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get clearAllFilters;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select language'**
+  String get selectLanguage;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// Number of items selected
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
+  String selectedCount(int count);
+
+  /// Message when action is not supported for shared files
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}'**
+  String actionNotSupportedForSharedFiles(int count);
+
+  /// No description provided for @addTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to'**
+  String get addTo;
+
+  /// No description provided for @shareNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Share is not supported for shared files'**
+  String get shareNotSupportedForSharedFiles;
+
+  /// No description provided for @editNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit is not supported for shared files'**
+  String get editNotSupportedForSharedFiles;
+
+  /// No description provided for @deleteNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete is not supported for shared files'**
+  String get deleteNotSupportedForSharedFiles;
+
+  /// No description provided for @importantNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Important is not supported for shared files'**
+  String get importantNotSupportedForSharedFiles;
+
+  /// No description provided for @sharingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing'**
+  String get sharingSection;
+
+  /// No description provided for @sharingEnabledToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing enabled'**
+  String get sharingEnabledToggle;
+
+  /// No description provided for @publicLinkSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Link'**
+  String get publicLinkSection;
+
+  /// No description provided for @linkEnabledToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link enabled'**
+  String get linkEnabledToggle;
+
+  /// No description provided for @allowUploads.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow uploads'**
+  String get allowUploads;
+
+  /// No description provided for @collectionUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection updated'**
+  String get collectionUpdated;
+
+  /// No description provided for @actionNotSupportedOnFavouritesAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Action not supported on Favourites album'**
+  String get actionNotSupportedOnFavouritesAlbum;
+
+  /// No description provided for @leaveCollectionSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Left collection successfully'**
+  String get leaveCollectionSuccessfully;
+
+  /// Success message when leaving collections
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Left 1 collection successfully} other{Left {count} collections successfully}}'**
+  String leftCollectionsSuccessfully(int count);
+
+  /// No description provided for @removePublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove public link'**
+  String get removePublicLink;
+
+  /// Confirmation message when removing public link
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the public link for accessing \"{collectionName}\".'**
+  String removePublicLinkConfirmation(String collectionName);
+
+  /// Success message when collections are deleted
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}'**
+  String collectionsDeletedSuccessfully(int count);
+
+  /// No description provided for @restoreToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore to collection'**
+  String get restoreToCollection;
+
+  /// No description provided for @restoringFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring...'**
+  String get restoringFiles;
+
+  /// Success message when items are restored from trash
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}'**
+  String filesRestoredSuccessfully(int count);
+
+  /// No description provided for @failedToRestoreFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore items'**
+  String get failedToRestoreFiles;
+
+  /// No description provided for @permanentlyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete'**
+  String get permanentlyDelete;
+
+  /// Confirmation body for permanent deletion from trash
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.'**
+  String permanentlyDeleteFilesBody(int count);
+
+  /// No description provided for @yesDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get yesDelete;
+
+  /// No description provided for @deletingFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting...'**
+  String get deletingFiles;
+
+  /// Success message when items are permanently deleted from trash
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}'**
+  String filesDeletedPermanently(int count);
+
+  /// No description provided for @failedToDeleteFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete items'**
+  String get failedToDeleteFiles;
+
+  /// No description provided for @itemsStored.
+  ///
+  /// In en, this message translates to:
+  /// **'Items stored'**
+  String get itemsStored;
+
+  /// No description provided for @of_.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get of_;
+
+  /// No description provided for @usageYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get usageYou;
+
+  /// No description provided for @usageFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get usageFamily;
+
+  /// No description provided for @searchSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get searchSettings;
+
+  /// No description provided for @suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get suggestions;
+
+  /// No description provided for @noResultsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResultsFound;
+
+  /// No description provided for @viewActiveSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'View active sessions'**
+  String get viewActiveSessions;
+
+  /// No description provided for @authToViewYourActiveSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to view your active sessions'**
+  String get authToViewYourActiveSessions;
+
+  /// No description provided for @deleteAccountFeedbackPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Something not working? Reach out at {email}, we\'d love to help.'**
+  String deleteAccountFeedbackPrompt(String email);
+
+  /// No description provided for @sendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get sendFeedback;
+
+  /// No description provided for @deleteAccountPermanentWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your Ente Auth, Photos, and Locker data'**
+  String get deleteAccountPermanentWarning;
 }
 
 class _AppLocalizationsDelegate
@@ -2547,18 +3167,102 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+        'ar',
+        'cs',
+        'da',
+        'de',
+        'el',
+        'en',
+        'es',
+        'fi',
+        'fr',
+        'hi',
+        'hu',
+        'it',
+        'ja',
+        'ko',
+        'nl',
+        'pl',
+        'pt',
+        'ro',
+        'ru',
+        'sv',
+        'tr',
+        'uk',
+        'vi',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'zh':
+      {
+        switch (locale.countryCode) {
+          case 'CN':
+            return AppLocalizationsZhCn();
+          case 'TW':
+            return AppLocalizationsZhTw();
+        }
+        break;
+      }
+  }
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'cs':
+      return AppLocalizationsCs();
+    case 'da':
+      return AppLocalizationsDa();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'el':
+      return AppLocalizationsEl();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fi':
+      return AppLocalizationsFi();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'hu':
+      return AppLocalizationsHu();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'nl':
+      return AppLocalizationsNl();
+    case 'pl':
+      return AppLocalizationsPl();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ro':
+      return AppLocalizationsRo();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'sv':
+      return AppLocalizationsSv();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'uk':
+      return AppLocalizationsUk();
+    case 'vi':
+      return AppLocalizationsVi();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

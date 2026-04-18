@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_sharing/errors.dart';
 import 'package:ente_sharing/models/user.dart';
@@ -121,6 +121,10 @@ class CollectionSharingService {
     } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
+      }
+      if (e.response?.statusCode == 403 &&
+          e.response?.data?['code'] == 'LINK_EDIT_NOT_ALLOWED') {
+        throw LinkEditNotAllowedError();
       }
       rethrow;
     } catch (e, s) {

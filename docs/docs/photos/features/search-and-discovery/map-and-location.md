@@ -28,7 +28,7 @@ The map feature can be enabled or disabled in your app settings.
 
 **On mobile:**
 
-Open `Settings > General > Advanced` and use the toggle switch to turn the map feature on or off.
+Open `Settings` and use the toggle switch to turn the map feature on or off.
 
 **On desktop:**
 
@@ -41,6 +41,11 @@ Open `Settings > Preferences > Advanced > Map` and toggle the map settings on or
 1. Tap the search icon at the bottom right
 2. Tap the globe icon (Your map) in the location section
 3. Explore your photos on the map
+
+**On web/desktop**
+
+1. Click the globe icon in the top right of the header
+2. Browse your photos on the map
 
 **View a specific album on the map:**
 
@@ -97,7 +102,7 @@ Location tags are custom labels you create to organize photos by location. Unlik
 **From a photo:**
 
 1. Open a photo
-2. Click **Info** (i)
+2. Tap the overflow menu (⋮) and select **Info**
 3. Select **Add Location**
 4. Enter the location name and define a radius
 

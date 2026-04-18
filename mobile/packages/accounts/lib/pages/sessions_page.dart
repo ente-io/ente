@@ -1,12 +1,15 @@
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_strings/ente_strings.dart';
+import 'package:ente_ui/components/base_bottom_sheet.dart';
+import 'package:ente_ui/components/buttons/button_widget.dart';
+import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/centered_constrained_widget.dart';
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
-import 'package:ente_utils/date_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -154,68 +157,50 @@ class _SessionsPageState extends State<SessionsPage> {
   void _showSessionTerminationDialog(Session session) {
     final isLoggingOutFromThisDevice =
         session.token == widget.config.getToken();
-    Widget text;
-    if (isLoggingOutFromThisDevice) {
-      text = Text(
-        context.strings.thisWillLogYouOutOfThisDevice,
-      );
-    } else {
-      text = SingleChildScrollView(
-        child: Column(
-          children: [
+    final textTheme = getEnteTextTheme(context);
+
+    showBaseBottomSheet(
+      context,
+      title: context.strings.terminateSession,
+      headerSpacing: 20,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isLoggingOutFromThisDevice)
+            Text(
+              context.strings.thisWillLogYouOutOfThisDevice,
+              style: textTheme.body,
+            )
+          else ...[
             Text(
               context.strings.thisWillLogYouOutOfTheFollowingDevice,
+              style: textTheme.body,
             ),
-            const Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(height: 8),
             Text(
               session.ua,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: textTheme.small,
             ),
           ],
-        ),
-      );
-    }
-    final AlertDialog alert = AlertDialog(
-      title: Text(context.strings.terminateSession),
-      content: text,
-      actions: [
-        TextButton(
-          child: Text(
-            context.strings.terminate,
-            style: const TextStyle(
-              color: Colors.red,
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ButtonWidget(
+              buttonType: ButtonType.critical,
+              labelText: context.strings.terminate,
+              onTap: () async {
+                Navigator.of(context).pop();
+                if (isLoggingOutFromThisDevice) {
+                  await UserService.instance.logout(context);
+                } else {
+                  await _terminateSession(session);
+                }
+              },
             ),
           ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            if (isLoggingOutFromThisDevice) {
-              await UserService.instance.logout(context);
-            } else {
-              await _terminateSession(session);
-            }
-          },
-        ),
-        TextButton(
-          child: Text(
-            context.strings.cancel,
-            style: TextStyle(
-              color: isLoggingOutFromThisDevice
-                  ? getEnteColorScheme(context).alternativeColor
-                  : getEnteColorScheme(context).textBase,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
+        ],
+      ),
     );
   }
 

@@ -1,9 +1,9 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::{decrypt_file_data, secret_box_open};
 use crate::models::file::RemoteFile;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
+use ente_core::crypto;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::collections::HashMap;
 use std::io::Cursor;
@@ -270,12 +270,12 @@ impl DownloadManager {
         let file_key = {
             let key_bytes = BASE64.decode(&file.encrypted_key)?;
             let nonce = BASE64.decode(&file.key_decryption_nonce)?;
-            secret_box_open(&key_bytes, &nonce, collection_key)?
+            crypto::secretbox::decrypt(&key_bytes, &nonce, collection_key)?
         };
 
         // Decrypt file data using file key (Streaming XChaCha20-Poly1305)
         let file_nonce = BASE64.decode(&file.file.decryption_header)?;
-        let decrypted = decrypt_file_data(encrypted_data, &file_nonce, &file_key)?;
+        let decrypted = crypto::stream::decrypt_file_data(encrypted_data, &file_nonce, &file_key)?;
 
         Ok(decrypted)
     }

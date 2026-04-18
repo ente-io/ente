@@ -1,3 +1,5 @@
+import { Navigation03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -26,7 +28,7 @@ import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useInterval, useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
@@ -46,6 +48,15 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "ente-new/photos/components/ImageEditorOverlay";
+import { getCollectionByID } from "ente-new/photos/services/collection";
+import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+import { type Comment } from "ente-new/photos/services/comment";
+import { addReaction, deleteReaction } from "ente-new/photos/services/reaction";
+import {
+    getAnonProfiles,
+    getUnifiedSocialDiff,
+    type UnifiedReaction,
+} from "ente-new/photos/services/social";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -54,11 +65,14 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { CommentsSidebar } from "./CommentsSidebar";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
     type ItemData,
 } from "./data-source";
+import { LikeAlbumSelectorModal } from "./LikeAlbumSelectorModal";
+import { LikesSidebar } from "./LikesSidebar";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -66,6 +80,21 @@ import {
     resetMoreMenuButtonOnMenuClose,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
+
+const fileViewerBackStateKey = "__enteFileViewerBackState";
+
+const addFileViewerBackStateMarker = (state: unknown, marker: string) =>
+    state && typeof state == "object"
+        ? {
+              ...(state as Record<string, unknown>),
+              [fileViewerBackStateKey]: marker,
+          }
+        : { [fileViewerBackStateKey]: marker };
+
+const hasFileViewerBackStateMarker = (state: unknown, marker: string) =>
+    !!state &&
+    typeof state == "object" &&
+    (state as Record<string, unknown>)[fileViewerBackStateKey] == marker;
 
 /**
  * Derived data for a file that is needed to display the file viewer controls
@@ -124,6 +153,9 @@ export interface FileViewerAnnotatedFile {
     itemData: ItemData;
 }
 
+/** The type of sidebar to open initially in the file viewer. */
+export type FileViewerInitialSidebar = "likes" | "comments";
+
 export type FileViewerProps = ModalVisibilityProps & {
     /**
      * The currently logged in user, if any.
@@ -131,8 +163,8 @@ export type FileViewerProps = ModalVisibilityProps & {
      * - If we're running in the context of the photos app, then this should be
      *   set to the currently logged in user.
      *
-     * - If we're running in the context of the public albums app, then this
-     *   should not be set.
+     * - If we're running in a viewer without account context, then this should
+     *   not be set.
      *
      * See: [Note: Gallery children can assume user]
      */
@@ -157,6 +189,15 @@ export type FileViewerProps = ModalVisibilityProps & {
      * provided within the file viewer itself.
      */
     initialIndex: number;
+    /**
+     * If set, the specified sidebar will be opened when the file viewer opens.
+     */
+    initialSidebar?: FileViewerInitialSidebar;
+    /**
+     * If set, the comments sidebar will scroll to and highlight this comment.
+     * Only used when initialSidebar is "comments".
+     */
+    highlightCommentID?: string;
     /**
      * If true then the viewer does not show controls for downloading the file.
      */
@@ -203,6 +244,10 @@ export type FileViewerProps = ModalVisibilityProps & {
      * that they are a part of.
      */
     fileNormalCollectionIDs?: FileInfoProps["fileCollectionIDs"];
+    /**
+     * Collection summaries indexed by their IDs.
+     */
+    collectionSummaries?: CollectionSummaries;
     /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to pull the latest updates with remote.
@@ -266,6 +311,12 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onDownload?: (file: EnteFile) => void;
     /**
+     * Called when the given {@link file} should be shared via quick link.
+     *
+     * If this is not provided then the send link action will not be shown.
+     */
+    onSendLink?: (file: EnteFile) => void;
+    /**
      * Called when the given {@link file} should be deleted.
      *
      * If this is not provided then the delete action will not be shown.
@@ -290,6 +341,29 @@ export type FileViewerProps = ModalVisibilityProps & {
      * The ID of the currently active collection, if any (e.g., when viewing an album).
      */
     activeCollectionID?: number;
+    /**
+     * If set, overrides whether browser back should be consumed to close the
+     * viewer.
+     *
+     * By default this is disabled.
+     */
+    shouldCloseOnBrowserBack?: boolean;
+    /**
+     * If `true`, disables closing the viewer with the Escape key.
+     */
+    disableEscapeClose?: boolean;
+    /**
+     * `true` if comments and reactions are enabled.
+     * Defaults to `true`.
+     */
+    enableComment?: boolean;
+    /**
+     * `true` if the comments and reactions feature is enabled for the user.
+     *
+     * When `false`, the like and comment buttons will be hidden for logged-in
+     * users. Defaults to `true`.
+     */
+    isCommentsFeatureEnabled?: boolean;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -304,6 +378,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     user,
     files,
     initialIndex,
+    initialSidebar,
+    highlightCommentID,
     disableDownload,
     showFullscreenButton,
     isInIncomingSharedCollection,
@@ -313,6 +389,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     pendingFavoriteUpdates,
     pendingVisibilityUpdates,
     fileNormalCollectionIDs,
+    collectionSummaries,
     collectionNameByID,
     onTriggerRemotePull,
     onRemoteFilesPull,
@@ -320,14 +397,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onToggleFavorite,
     onFileVisibilityUpdate,
     onDownload,
+    onSendLink,
     onDelete,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
     onAddFileToCollection,
     activeCollectionID,
+    shouldCloseOnBrowserBack: shouldCloseOnBrowserBackOverride,
+    disableEscapeClose = false,
+    enableComment = true,
+    isCommentsFeatureEnabled = true,
 }) => {
     const { onGenericError } = useBaseContext();
+    const shouldCloseOnBrowserBack = shouldCloseOnBrowserBackOverride ?? false;
 
     // There are 3 things involved in this dance:
     //
@@ -349,6 +432,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // We also need to maintain a ref to the currently displayed dialog since we
     // might need to ask it to refresh its contents.
     const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
+    const handleCloseRef = useRef<() => void>(() => undefined);
+    const browserBackStateRef = useRef<string | undefined>(undefined);
 
     // Whenever we get a callback from our custom PhotoSwipe instance, we also
     // get the active file on which that action was performed as an argument. We
@@ -369,6 +454,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     const [openFileInfo, setOpenFileInfo] = useState(false);
+    const [openComments, setOpenComments] = useState(false);
+    const [openLikes, setOpenLikes] = useState(false);
+    const [openLikeAlbumSelector, setOpenLikeAlbumSelector] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
@@ -376,6 +464,120 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openShortcuts, setOpenShortcuts] = useState(false);
 
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Map of file ID to map of collection ID to array of comments.
+    // For gallery view, we fetch comments from all collections.
+    // For collection view, we only fetch comments from that collection.
+    const [fileComments, setFileComments] = useState<
+        Map<number, Map<number, Comment[]>>
+    >(new Map());
+
+    // Map of file ID to map of collection ID to array of all reactions.
+    // Includes both file reactions and comment reactions.
+    const [allReactions, setAllReactions] = useState<
+        Map<number, Map<number, UnifiedReaction[]>>
+    >(new Map());
+
+    // Map of user ID to email for displaying reaction/comment authors.
+    // Built from collection owner and sharees when fetching social data.
+    const [userIDToEmail, setUserIDToEmail] = useState<Map<number, string>>(
+        new Map(),
+    );
+
+    // Map of anon user ID to decrypted user name for anonymous users.
+    const [anonUserNames, setAnonUserNames] = useState<Map<string, string>>(
+        new Map(),
+    );
+
+    // Ref for fileComments to use in callbacks
+    const fileCommentsRef = useRef(fileComments);
+    useEffect(() => {
+        fileCommentsRef.current = fileComments;
+    }, [fileComments]);
+
+    // Ref for allReactions to use in callbacks
+    const allReactionsRef = useRef(allReactions);
+    useEffect(() => {
+        allReactionsRef.current = allReactions;
+    }, [allReactions]);
+
+    // Ref for collectionSummaries to use in callbacks without causing recreations
+    const collectionSummariesRef = useRef(collectionSummaries);
+    useEffect(() => {
+        collectionSummariesRef.current = collectionSummaries;
+    }, [collectionSummaries]);
+
+    // Ref for fileNormalCollectionIDs to use in callbacks without causing recreations
+    const fileNormalCollectionIDsRef = useRef(fileNormalCollectionIDs);
+    useEffect(() => {
+        fileNormalCollectionIDsRef.current = fileNormalCollectionIDs;
+    }, [fileNormalCollectionIDs]);
+
+    // Cache for collection keys to avoid refetching during polling
+    const collectionCacheRef = useRef<
+        Map<
+            number,
+            {
+                key: string;
+                ownerID: number;
+                ownerEmail?: string;
+                sharees: { id: number; email?: string }[];
+                hasPublicURLs: boolean;
+            }
+        >
+    >(new Map());
+
+    // Track whether we've already opened the initial sidebar for this open
+    const hasOpenedInitialSidebarRef = useRef(false);
+
+    // Open the initial sidebar when the file viewer opens with initialSidebar set
+    useEffect(() => {
+        if (open && initialSidebar && !hasOpenedInitialSidebarRef.current) {
+            hasOpenedInitialSidebarRef.current = true;
+            if (initialSidebar === "comments") {
+                setOpenComments(true);
+            } else {
+                setOpenLikes(true);
+            }
+        }
+        // Reset the flag when the viewer closes
+        if (!open) {
+            hasOpenedInitialSidebarRef.current = false;
+        }
+    }, [open, initialSidebar]);
+
+    // Helper to get current user's file reactions from allReactions
+    const getUserFileReactions = useCallback(
+        (fileId: number): { collectionId: number; reactionId: string }[] => {
+            if (!user?.id) return [];
+            const fileReactionsMap = allReactionsRef.current.get(fileId);
+            if (!fileReactionsMap) return [];
+
+            const userReactions: {
+                collectionId: number;
+                reactionId: string;
+            }[] = [];
+            for (const [collectionId, reactions] of fileReactionsMap) {
+                const userFileReaction = reactions.find((r) => {
+                    if (
+                        r.commentID ||
+                        r.fileID !== fileId ||
+                        r.reactionType !== "green_heart"
+                    )
+                        return false;
+                    return r.userID === user.id;
+                });
+                if (userFileReaction) {
+                    userReactions.push({
+                        collectionId,
+                        reactionId: userFileReaction.id,
+                    });
+                }
+            }
+            return userReactions;
+        },
+        [user?.id],
+    );
 
     // If `true`, then we need to trigger a pull from remote when we close.
     const [, setNeedsRemotePull] = useState(false);
@@ -386,19 +588,28 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleClose = useCallback(() => {
+        if (document.fullscreenElement) void document.exitFullscreen();
         setNeedsRemotePull((needsPull) => {
             if (needsPull) onTriggerRemotePull?.();
             return false;
         });
         setOpenFileInfo(false);
+        setOpenComments(false);
+        setOpenLikes(false);
+        setOpenLikeAlbumSelector(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
         setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
+        setIsFullscreen(false);
         onClose();
     }, [onTriggerRemotePull, onClose]);
+
+    // Keep the latest close callback available to non-react event handlers
+    // without forcing effects that register handlers to re-run.
+    handleCloseRef.current = handleClose;
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -413,6 +624,466 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
+
+    const handleViewComments = useCallback(() => setOpenComments(true), []);
+
+    const handleCommentsClose = useCallback(() => setOpenComments(false), []);
+
+    // Handle a new comment being added
+    const handleCommentAdded = useCallback((comment: Comment) => {
+        const fileID = comment.fileID;
+        if (!fileID) return;
+
+        setFileComments((prev) => {
+            const next = new Map(prev);
+            const fileCommentsMap = new Map<number, Comment[]>(
+                prev.get(fileID) ?? new Map(),
+            );
+            const collectionComments =
+                fileCommentsMap.get(comment.collectionID) ?? [];
+            fileCommentsMap.set(comment.collectionID, [
+                ...collectionComments,
+                comment,
+            ]);
+            next.set(fileID, fileCommentsMap);
+            return next;
+        });
+    }, []);
+
+    // Handle a comment being deleted
+    const handleCommentDeleted = useCallback(
+        (collectionID: number, commentID: string) => {
+            const fileID = activeAnnotatedFile?.file.id;
+            if (!fileID) return;
+
+            setFileComments((prev) => {
+                const next = new Map(prev);
+                const fileCommentsMap = prev.get(fileID);
+                if (fileCommentsMap) {
+                    const updatedMap = new Map(fileCommentsMap);
+                    const collectionComments =
+                        updatedMap.get(collectionID) ?? [];
+                    updatedMap.set(
+                        collectionID,
+                        collectionComments.map((c) =>
+                            c.id === commentID ? { ...c, isDeleted: true } : c,
+                        ),
+                    );
+                    next.set(fileID, updatedMap);
+                }
+                return next;
+            });
+        },
+        [activeAnnotatedFile],
+    );
+
+    // Handle a comment reaction being added
+    const handleCommentReactionAdded = useCallback(
+        (reaction: UnifiedReaction) => {
+            const fileID = activeAnnotatedFile?.file.id;
+            if (!fileID) return;
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                const fileReactionsMap = new Map<number, UnifiedReaction[]>(
+                    prev.get(fileID) ?? new Map(),
+                );
+                const collectionReactions =
+                    fileReactionsMap.get(reaction.collectionID) ?? [];
+                fileReactionsMap.set(reaction.collectionID, [
+                    ...collectionReactions,
+                    reaction,
+                ]);
+                next.set(fileID, fileReactionsMap);
+                return next;
+            });
+        },
+        [activeAnnotatedFile],
+    );
+
+    // Handle a comment reaction being deleted
+    const handleCommentReactionDeleted = useCallback(
+        (collectionID: number, reactionID: string) => {
+            const fileID = activeAnnotatedFile?.file.id;
+            if (!fileID) return;
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                const fileReactionsMap = prev.get(fileID);
+                if (fileReactionsMap) {
+                    const updatedMap = new Map(fileReactionsMap);
+                    const collectionReactions =
+                        updatedMap.get(collectionID) ?? [];
+                    updatedMap.set(
+                        collectionID,
+                        collectionReactions.filter((r) => r.id !== reactionID),
+                    );
+                    next.set(fileID, updatedMap);
+                }
+                return next;
+            });
+        },
+        [activeAnnotatedFile],
+    );
+
+    const handleViewLikes = useCallback(() => setOpenLikes(true), []);
+
+    const handleLikesClose = useCallback(() => setOpenLikes(false), []);
+
+    // Refs to access current state without causing re-renders
+    // when used in callbacks that are dependencies of the PhotoSwipe effect.
+    const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
+    activeAnnotatedFileRef.current = activeAnnotatedFile;
+
+    // Called when the like button (heart) is clicked.
+    // - If gallery view: show album selector (like) OR unlike selector/direct delete
+    // - If collection view: toggle like in that collection
+    const handleLikeClick = useCallback(() => {
+        if (!user?.id) {
+            return;
+        }
+
+        const file = activeAnnotatedFileRef.current?.file;
+        if (!file) return;
+
+        const fileId = file.id;
+        const reactions = getUserFileReactions(fileId);
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+
+        if (isGalleryView) {
+            // Gallery view - only consider shared collections
+            const allCollectionIDs =
+                fileNormalCollectionIDsRef.current?.get(fileId) ?? [];
+            const collectionIDs = allCollectionIDs.filter((id) =>
+                collectionSummariesRef.current
+                    ?.get(id)
+                    ?.attributes.has("shared"),
+            );
+
+            if (reactions.length === 0) {
+                // Not liked in any collection
+                if (collectionIDs.length === 1) {
+                    // Single album - like directly without showing modal
+                    const collectionId = collectionIDs[0]!;
+                    void (async () => {
+                        try {
+                            const collection =
+                                await getCollectionByID(collectionId);
+                            const reactionId = await addReaction(
+                                collectionId,
+                                fileId,
+                                "green_heart",
+                                collection.key,
+                            );
+                            setAllReactions((prev) => {
+                                const next = new Map(prev);
+                                const fileReactionsMap = new Map<
+                                    number,
+                                    UnifiedReaction[]
+                                >(prev.get(fileId) ?? new Map());
+                                const collectionReactions =
+                                    fileReactionsMap.get(collectionId) ?? [];
+                                fileReactionsMap.set(collectionId, [
+                                    ...collectionReactions,
+                                    {
+                                        id: reactionId,
+                                        collectionID: collectionId,
+                                        fileID: fileId,
+                                        reactionType: "green_heart",
+                                        userID: user.id,
+                                        isDeleted: false,
+                                        createdAt: Date.now() * 1000,
+                                        updatedAt: Date.now() * 1000,
+                                    },
+                                ]);
+                                next.set(fileId, fileReactionsMap);
+                                return next;
+                            });
+                        } catch (e) {
+                            log.error("Failed to add reaction", e);
+                        }
+                    })();
+                } else {
+                    // Multiple albums - show album selector
+                    setOpenLikeAlbumSelector(true);
+                }
+            } else {
+                // Liked in one or more collections - unlike from all
+                void (async () => {
+                    try {
+                        const deletedReactionIds = new Set<string>();
+                        for (const reaction of reactions) {
+                            await deleteReaction(reaction.reactionId);
+                            deletedReactionIds.add(reaction.reactionId);
+                        }
+                        setAllReactions((prev) => {
+                            const next = new Map(prev);
+                            const fileReactionsMap = prev.get(fileId);
+                            if (fileReactionsMap) {
+                                const updatedMap = new Map(fileReactionsMap);
+                                for (const [
+                                    collectionId,
+                                    collectionReactions,
+                                ] of updatedMap) {
+                                    updatedMap.set(
+                                        collectionId,
+                                        collectionReactions.filter(
+                                            (r) =>
+                                                !deletedReactionIds.has(r.id),
+                                        ),
+                                    );
+                                }
+                                next.set(fileId, updatedMap);
+                            }
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to delete reactions", e);
+                    }
+                })();
+            }
+        } else {
+            // Collection view - toggle like in this specific collection
+            const existingReaction = reactions.find(
+                (r) => r.collectionId === activeCollectionID,
+            );
+
+            if (existingReaction) {
+                // Already liked in this collection - delete
+                void (async () => {
+                    try {
+                        await deleteReaction(existingReaction.reactionId);
+                        setAllReactions((prev) => {
+                            const next = new Map(prev);
+                            const fileReactionsMap = prev.get(fileId);
+                            if (fileReactionsMap) {
+                                const updatedMap = new Map(fileReactionsMap);
+                                const collectionReactions =
+                                    updatedMap.get(activeCollectionID) ?? [];
+                                updatedMap.set(
+                                    activeCollectionID,
+                                    collectionReactions.filter(
+                                        (r) =>
+                                            r.id !==
+                                            existingReaction.reactionId,
+                                    ),
+                                );
+                                next.set(fileId, updatedMap);
+                            }
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to delete reaction", e);
+                    }
+                })();
+            } else {
+                // Not liked in this collection - add
+                void (async () => {
+                    try {
+                        const collection =
+                            await getCollectionByID(activeCollectionID);
+                        const reactionId = await addReaction(
+                            activeCollectionID,
+                            fileId,
+                            "green_heart",
+                            collection.key,
+                        );
+                        setAllReactions((prev) => {
+                            const next = new Map(prev);
+                            const fileReactionsMap = new Map<
+                                number,
+                                UnifiedReaction[]
+                            >(prev.get(fileId) ?? new Map());
+                            const collectionReactions =
+                                fileReactionsMap.get(activeCollectionID) ?? [];
+                            fileReactionsMap.set(activeCollectionID, [
+                                ...collectionReactions,
+                                {
+                                    id: reactionId,
+                                    collectionID: activeCollectionID,
+                                    fileID: fileId,
+                                    reactionType: "green_heart",
+                                    userID: user.id,
+                                    isDeleted: false,
+                                    createdAt: Date.now() * 1000,
+                                    updatedAt: Date.now() * 1000,
+                                },
+                            ]);
+                            next.set(fileId, fileReactionsMap);
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to add reaction", e);
+                    }
+                })();
+            }
+        }
+    }, [activeCollectionID, getUserFileReactions, user?.id]);
+
+    const handleLikeAlbumSelectorClose = useCallback(
+        () => setOpenLikeAlbumSelector(false),
+        [],
+    );
+
+    const handleToggleAlbumLike = useCallback(
+        (albumId: number, isCurrentlyLiked: boolean) => {
+            const file = activeAnnotatedFileRef.current?.file;
+            if (!file) return;
+
+            const fileId = file.id;
+
+            if (isCurrentlyLiked) {
+                // Unlike - delete the reaction
+                const reactions = getUserFileReactions(fileId);
+                const reactionToDelete = reactions.find(
+                    (r) => r.collectionId === albumId,
+                );
+
+                if (reactionToDelete) {
+                    void (async () => {
+                        try {
+                            await deleteReaction(reactionToDelete.reactionId);
+                            setAllReactions((prev) => {
+                                const next = new Map(prev);
+                                const fileReactionsMap = prev.get(fileId);
+                                if (fileReactionsMap) {
+                                    const updatedMap = new Map(
+                                        fileReactionsMap,
+                                    );
+                                    const collectionReactions =
+                                        updatedMap.get(albumId) ?? [];
+                                    updatedMap.set(
+                                        albumId,
+                                        collectionReactions.filter(
+                                            (r) =>
+                                                r.id !==
+                                                reactionToDelete.reactionId,
+                                        ),
+                                    );
+                                    next.set(fileId, updatedMap);
+                                }
+                                return next;
+                            });
+                        } catch (e) {
+                            log.error("Failed to delete reaction", e);
+                        }
+                    })();
+                }
+            } else {
+                // Like - add a reaction
+                void (async () => {
+                    try {
+                        const collection = await getCollectionByID(albumId);
+                        const reactionId = await addReaction(
+                            albumId,
+                            fileId,
+                            "green_heart",
+                            collection.key,
+                        );
+                        setAllReactions((prev) => {
+                            const next = new Map(prev);
+                            const fileReactionsMap = new Map<
+                                number,
+                                UnifiedReaction[]
+                            >(prev.get(fileId) ?? new Map());
+                            const collectionReactions =
+                                fileReactionsMap.get(albumId) ?? [];
+                            fileReactionsMap.set(albumId, [
+                                ...collectionReactions,
+                                {
+                                    id: reactionId,
+                                    collectionID: albumId,
+                                    fileID: fileId,
+                                    reactionType: "green_heart",
+                                    userID: user?.id ?? 0,
+                                    isDeleted: false,
+                                    createdAt: Date.now() * 1000,
+                                    updatedAt: Date.now() * 1000,
+                                },
+                            ]);
+                            next.set(fileId, fileReactionsMap);
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to add reaction", e);
+                    }
+                })();
+            }
+            // Don't close - user might want to toggle more albums
+        },
+        [getUserFileReactions, user?.id],
+    );
+
+    const handleLikeAll = useCallback(() => {
+        const file = activeAnnotatedFileRef.current?.file;
+        if (!file) return;
+
+        const fileId = file.id;
+        const collectionIDs = fileNormalCollectionIDs?.get(fileId) ?? [];
+        const existingReactions = getUserFileReactions(fileId);
+        const likedCollectionIDs = new Set(
+            existingReactions.map((r) => r.collectionId),
+        );
+
+        // Filter to only shared collections not already liked
+        const collectionsToLike = collectionIDs.filter(
+            (id) =>
+                !likedCollectionIDs.has(id) &&
+                collectionSummaries?.get(id)?.attributes.has("shared"),
+        );
+
+        void (async () => {
+            try {
+                const newReactions: {
+                    collectionId: number;
+                    reactionId: string;
+                }[] = [];
+                for (const collectionId of collectionsToLike) {
+                    const collection = await getCollectionByID(collectionId);
+                    const reactionId = await addReaction(
+                        collectionId,
+                        fileId,
+                        "green_heart",
+                        collection.key,
+                    );
+                    newReactions.push({ collectionId, reactionId });
+                }
+                setAllReactions((prev) => {
+                    const next = new Map(prev);
+                    const fileReactionsMap = new Map<number, UnifiedReaction[]>(
+                        prev.get(fileId) ?? new Map(),
+                    );
+                    for (const { collectionId, reactionId } of newReactions) {
+                        const collectionReactions =
+                            fileReactionsMap.get(collectionId) ?? [];
+                        fileReactionsMap.set(collectionId, [
+                            ...collectionReactions,
+                            {
+                                id: reactionId,
+                                collectionID: collectionId,
+                                fileID: fileId,
+                                reactionType: "green_heart",
+                                userID: user?.id ?? 0,
+                                isDeleted: false,
+                                createdAt: Date.now() * 1000,
+                                updatedAt: Date.now() * 1000,
+                            },
+                        ]);
+                    }
+                    next.set(fileId, fileReactionsMap);
+                    return next;
+                });
+            } catch (e) {
+                log.error("Failed to add reactions", e);
+            }
+        })();
+        setOpenLikeAlbumSelector(false);
+    }, [
+        fileNormalCollectionIDs,
+        getUserFileReactions,
+        user?.id,
+        collectionSummaries,
+    ]);
 
     // Callback invoked when the download action is triggered by activating the
     // download button in the PhotoSwipe bar.
@@ -430,6 +1101,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleDownloadMenuAction = () => {
         handleMoreMenuCloseIfNeeded();
         onDownload!(activeAnnotatedFile!.file);
+    };
+
+    // Callback invoked when the send link action is triggered by activating the
+    // send link menu item in the more menu.
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleSendLinkMenuAction = () => {
+        handleMoreMenuCloseIfNeeded();
+        onSendLink!(activeAnnotatedFile!.file);
     };
 
     const handleMore = useCallback(
@@ -468,14 +1148,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
-        const imageURL = activeAnnotatedFile?.itemData.imageURL;
+        if (!activeAnnotatedFile) return;
+        const { imageURL } = activeAnnotatedFile.itemData;
+        if (!imageURL) return;
         // Safari does not copy if we do not call `navigator.clipboard.write`
         // synchronously within the click event handler, but it does supports
         // passing a promise in lieu of the blob.
         void window.navigator.clipboard
             .write([
                 new ClipboardItem({
-                    "image/png": createImagePNGBlob(imageURL!),
+                    "image/png": createImagePNGBlob(imageURL),
                 }),
             ])
             .catch(onGenericError);
@@ -553,8 +1235,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // Logged in users see the download option in the more menu.
                     return "menu";
                 } else {
-                    // In public albums, the download option is shown in the bar
-                    // buttons, in lieu of the favorite option.
+                    // Guest viewers show download in the bar buttons, in lieu
+                    // of the favorite option.
                     return "bar";
                 }
             })();
@@ -617,6 +1299,112 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const haveUser = !!user;
 
+    // Determine if social buttons (like, comment) should be shown.
+    const showSocialButtons = useMemo(() => {
+        if (!haveUser) return false;
+        if (!enableComment) return false;
+        // For logged-in users, check if the comments feature is enabled.
+        if (!isCommentsFeatureEnabled) return false;
+        // In collection view: check if that specific collection is shared.
+        if (
+            activeCollectionID &&
+            activeCollectionID !== 0 &&
+            collectionSummaries
+        ) {
+            const collectionSummary =
+                collectionSummaries.get(activeCollectionID);
+            if (collectionSummary?.attributes.has("shared")) return true;
+        }
+        return false;
+    }, [
+        haveUser,
+        enableComment,
+        isCommentsFeatureEnabled,
+        activeCollectionID,
+        collectionSummaries,
+    ]);
+
+    // Check if a file belongs to any shared collection (for gallery view).
+    const isFileInSharedCollection = useCallback(
+        (fileID: number): boolean => {
+            if (!collectionSummaries || !fileNormalCollectionIDs) return false;
+            const collectionIDs = fileNormalCollectionIDs.get(fileID) ?? [];
+            return collectionIDs.some((collectionID) => {
+                const summary = collectionSummaries.get(collectionID);
+                return summary?.attributes.has("shared");
+            });
+        },
+        [collectionSummaries, fileNormalCollectionIDs],
+    );
+
+    // Delegate callback to check if social buttons should be shown for a file.
+    const shouldShowSocialButtons_ = useCallback(
+        ({ file }: FileViewerAnnotatedFile): boolean => {
+            // If showSocialButtons is already true in collection view, this
+            // won't be called. This callback is only for gallery view where we
+            // need to check per-file.
+            if (!isCommentsFeatureEnabled) return false;
+            //
+            // If we're in a specific collection context (not gallery view),
+            // return false - the collection's shared status is what matters,
+            // not whether the file happens to be in some other shared album.
+            const isGalleryView =
+                !activeCollectionID || activeCollectionID === 0;
+            if (!isGalleryView) return false;
+
+            return isFileInSharedCollection(file.id);
+        },
+        [
+            isCommentsFeatureEnabled,
+            isFileInSharedCollection,
+            activeCollectionID,
+        ],
+    );
+
+    // Compute shared albums the file belongs to and which are liked for the modal
+    const { allAlbumsForFile, likedAlbumIDs } = useMemo(() => {
+        const file = activeAnnotatedFile?.file;
+        if (!file)
+            return { allAlbumsForFile: [], likedAlbumIDs: new Set<number>() };
+
+        // Get all collections the file belongs to, filtered to only shared ones
+        const collectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
+        const allAlbumsForFile = collectionIDs
+            .filter((id) =>
+                collectionSummaries?.get(id)?.attributes.has("shared"),
+            )
+            .map((id) => ({
+                id,
+                name: collectionNameByID?.get(id) ?? `Album ${id}`,
+            }));
+
+        // Get the set of liked album IDs from allReactions
+        const fileReactionsMap = allReactions.get(file.id);
+        const likedAlbumIDs = new Set<number>();
+
+        if (fileReactionsMap) {
+            for (const [collectionId, reactions] of fileReactionsMap) {
+                const hasUserLike = reactions.some((r) => {
+                    if (r.commentID || r.reactionType !== "green_heart")
+                        return false;
+                    return r.userID === user?.id;
+                });
+                if (hasUserLike) {
+                    likedAlbumIDs.add(collectionId);
+                }
+            }
+        }
+
+        return { allAlbumsForFile, likedAlbumIDs };
+    }, [
+        activeAnnotatedFile,
+        collectionNameByID,
+        collectionSummaries,
+        fileNormalCollectionIDs,
+        allReactions,
+        user?.id,
+    ]);
+
     const getFiles = useCallback(() => files, [files]);
 
     const isFavorite = useCallback(
@@ -648,6 +1436,49 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [onToggleFavorite, onGenericError, handleNeedsRemotePull],
     );
 
+    const isLiked = useCallback(
+        ({ file }: FileViewerAnnotatedFile) => {
+            const fileReactionsMap = allReactions.get(file.id);
+            if (!fileReactionsMap) return false;
+
+            // Check if user has liked this file in any collection
+            for (const reactions of fileReactionsMap.values()) {
+                const hasUserLike = reactions.some((r) => {
+                    if (r.commentID || r.reactionType !== "green_heart")
+                        return false;
+                    return r.userID === user?.id;
+                });
+                if (hasUserLike) return true;
+            }
+            return false;
+        },
+        [allReactions, user?.id],
+    );
+
+    const getCommentCount = useCallback(
+        ({ file }: FileViewerAnnotatedFile) => {
+            const commentsMap = fileComments.get(file.id);
+            if (!commentsMap) return 0;
+
+            const isGalleryView =
+                !activeCollectionID || activeCollectionID === 0;
+            if (isGalleryView) {
+                // Return the count from the collection with most comments
+                let maxCount = 0;
+                for (const comments of commentsMap.values()) {
+                    const count = comments.filter((c) => !c.isDeleted).length;
+                    if (count > maxCount) maxCount = count;
+                }
+                return maxCount;
+            } else {
+                // Return count from the active collection
+                const comments = commentsMap.get(activeCollectionID);
+                return comments?.filter((c) => !c.isDeleted).length ?? 0;
+            }
+        },
+        [fileComments, activeCollectionID],
+    );
+
     const updateFullscreenStatus = useCallback(() => {
         setIsFullscreen(!!document.fullscreenElement);
     }, []);
@@ -658,7 +1489,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             document.fullscreenElement
                 ? document.exitFullscreen()
                 : document.body.requestFullscreen()
-        ).then(updateFullscreenStatus);
+        ).then(() => setTimeout(updateFullscreenStatus, 200));
     }, [handleMoreMenuCloseIfNeeded, updateFullscreenStatus]);
 
     const handleShortcuts = useCallback(() => {
@@ -672,6 +1503,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // Don't handle keydowns if any of the viewer's own modals are open.
         if (
             openFileInfo ||
+            openComments ||
+            openLikes ||
+            openLikeAlbumSelector ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
@@ -701,6 +1535,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         return false;
     }, [
         openFileInfo,
+        openComments,
+        openLikes,
+        openLikeAlbumSelector,
         moreMenuAnchorEl,
         openImageEditor,
         openConfirmDelete,
@@ -710,7 +1547,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const canCopyImage = useCallback(
         () =>
             activeAnnotatedFile?.annotation.showCopyImage &&
-            activeAnnotatedFile.itemData.imageURL,
+            !!activeAnnotatedFile.itemData.imageURL,
         [activeAnnotatedFile],
     );
 
@@ -813,6 +1650,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             isFavorite,
             isFavoritePending,
             toggleFavorite,
+            isLiked,
+            getCommentCount,
+            shouldShowSocialButtons: shouldShowSocialButtons_,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
         };
@@ -825,6 +1665,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegate.isFavorite = isFavorite;
         delegate.isFavoritePending = isFavoritePending;
         delegate.toggleFavorite = toggleFavorite;
+        delegate.isLiked = isLiked;
+        delegate.getCommentCount = getCommentCount;
+        delegate.shouldShowSocialButtons = shouldShowSocialButtons_;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
@@ -832,6 +1675,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         isFavorite,
         isFavoritePending,
         toggleFavorite,
+        isLiked,
+        getCommentCount,
+        shouldShowSocialButtons_,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
     ]);
@@ -865,6 +1711,254 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         }
     }, [favoriteFileIDs, pendingFavoriteUpdates, files, open]);
 
+    // Refresh like button when allReactions changes.
+    useEffect(() => {
+        if (open && files.length) {
+            psRef.current?.refreshCurrentSlideLikeButtonIfNeeded();
+        }
+    }, [allReactions, files, open]);
+
+    // Fetch comments and reactions for the current file (only for shared albums).
+    const activeFileID = activeAnnotatedFile?.file.id;
+    useEffect(() => {
+        if (!open || !activeFileID) return;
+
+        // Only fetch social data if social buttons should be shown.
+        // In collection view, use showSocialButtons (based on that collection).
+        // In gallery view, check if the file is in any shared collection.
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+        const shouldFetch =
+            showSocialButtons ||
+            (isCommentsFeatureEnabled &&
+                isGalleryView &&
+                isFileInSharedCollection(activeFileID));
+        if (!shouldFetch) return;
+
+        void (async () => {
+            try {
+                const commentsMap = new Map<number, Comment[]>();
+                const reactionsMap = new Map<number, UnifiedReaction[]>();
+                const newUserIDToEmail = new Map<number, string>();
+                const newAnonUserNames = new Map<string, string>();
+
+                const collectionIDs = isGalleryView
+                    ? (fileNormalCollectionIDs?.get(activeFileID) ?? [])
+                    : [activeCollectionID];
+
+                for (const collectionId of collectionIDs) {
+                    try {
+                        const collection =
+                            await getCollectionByID(collectionId);
+
+                        // Cache collection data for polling refresh
+                        collectionCacheRef.current.set(collectionId, {
+                            key: collection.key,
+                            ownerID: collection.owner.id,
+                            ownerEmail: collection.owner.email,
+                            sharees: collection.sharees.map((s) => ({
+                                id: s.id,
+                                email: s.email,
+                            })),
+                            hasPublicURLs: collection.publicURLs.length > 0,
+                        });
+
+                        // Build user ID to email map from collection owner and sharees
+                        if (collection.owner.email) {
+                            newUserIDToEmail.set(
+                                collection.owner.id,
+                                collection.owner.email,
+                            );
+                        }
+                        for (const sharee of collection.sharees) {
+                            if (sharee.email) {
+                                newUserIDToEmail.set(sharee.id, sharee.email);
+                            }
+                        }
+
+                        const { comments, reactions } =
+                            await getUnifiedSocialDiff(
+                                collectionId,
+                                activeFileID,
+                                collection.key,
+                            );
+
+                        commentsMap.set(collectionId, comments);
+                        reactionsMap.set(collectionId, reactions);
+
+                        // Fetch anonymous user profiles only if collection has public links
+                        if (collection.publicURLs.length > 0) {
+                            try {
+                                const anonProfiles = await getAnonProfiles(
+                                    collectionId,
+                                    collection.key,
+                                );
+                                for (const [
+                                    anonUserID,
+                                    userName,
+                                ] of anonProfiles) {
+                                    newAnonUserNames.set(anonUserID, userName);
+                                }
+                            } catch {
+                                // Ignore anon profiles fetch failures
+                            }
+                        }
+                    } catch {
+                        // Skip collections that fail to fetch
+                    }
+                }
+
+                setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(activeFileID, commentsMap);
+                    return next;
+                });
+
+                setAllReactions((prev) => {
+                    const next = new Map(prev);
+                    next.set(activeFileID, reactionsMap);
+                    return next;
+                });
+
+                setUserIDToEmail((prev) => {
+                    const next = new Map(prev);
+                    for (const [id, email] of newUserIDToEmail) {
+                        next.set(id, email);
+                    }
+                    return next;
+                });
+
+                setAnonUserNames((prev) => {
+                    const next = new Map(prev);
+                    for (const [id, name] of newAnonUserNames) {
+                        next.set(id, name);
+                    }
+                    return next;
+                });
+            } catch (e) {
+                log.error("Failed to fetch social data", e);
+                setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.delete(activeFileID);
+                    return next;
+                });
+                setAllReactions((prev) => {
+                    const next = new Map(prev);
+                    next.delete(activeFileID);
+                    return next;
+                });
+            }
+        })();
+    }, [
+        open,
+        activeFileID,
+        activeCollectionID,
+        fileNormalCollectionIDs,
+        showSocialButtons,
+        isFileInSharedCollection,
+        isCommentsFeatureEnabled,
+    ]);
+
+    // Refresh comment count when fileComments changes.
+    useEffect(() => {
+        if (open && files.length) {
+            psRef.current?.refreshCurrentSlideCommentCountIfNeeded();
+        }
+    }, [fileComments, files, open]);
+
+    // Polling interval for refreshing social data (5 seconds)
+    const SOCIAL_REFRESH_INTERVAL_MS = 5_000;
+
+    // Refresh social data for logged-in users (uses cached collection keys)
+    const refreshSocialData = useCallback(async () => {
+        if (!activeFileID) return;
+
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+        const shouldFetch =
+            showSocialButtons ||
+            (isCommentsFeatureEnabled &&
+                isGalleryView &&
+                isFileInSharedCollection(activeFileID));
+        if (!shouldFetch) return;
+
+        try {
+            const commentsMap = new Map<number, Comment[]>();
+            const reactionsMap = new Map<number, UnifiedReaction[]>();
+            const newAnonUserNames = new Map<string, string>();
+
+            const collectionIDs = isGalleryView
+                ? (fileNormalCollectionIDs?.get(activeFileID) ?? [])
+                : [activeCollectionID];
+
+            for (const collectionId of collectionIDs) {
+                // Use cached collection data (populated during initial fetch)
+                const cached = collectionCacheRef.current.get(collectionId);
+                if (!cached) continue; // Skip if not in cache
+
+                try {
+                    const { comments, reactions } = await getUnifiedSocialDiff(
+                        collectionId,
+                        activeFileID,
+                        cached.key,
+                    );
+
+                    commentsMap.set(collectionId, comments);
+                    reactionsMap.set(collectionId, reactions);
+
+                    if (cached.hasPublicURLs) {
+                        try {
+                            const anonProfiles = await getAnonProfiles(
+                                collectionId,
+                                cached.key,
+                            );
+                            for (const [anonUserID, userName] of anonProfiles) {
+                                newAnonUserNames.set(anonUserID, userName);
+                            }
+                        } catch {
+                            // Ignore
+                        }
+                    }
+                } catch {
+                    // Skip failed collections
+                }
+            }
+
+            setFileComments((prev) => {
+                const next = new Map(prev);
+                next.set(activeFileID, commentsMap);
+                return next;
+            });
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                next.set(activeFileID, reactionsMap);
+                return next;
+            });
+
+            setAnonUserNames((prev) => {
+                const next = new Map(prev);
+                for (const [id, name] of newAnonUserNames) {
+                    next.set(id, name);
+                }
+                return next;
+            });
+        } catch (e) {
+            log.error("Failed to refresh social data", e);
+        }
+    }, [
+        activeFileID,
+        activeCollectionID,
+        fileNormalCollectionIDs,
+        showSocialButtons,
+        isFileInSharedCollection,
+        isCommentsFeatureEnabled,
+    ]);
+
+    // Poll for social data when comments or likes sidebar is open.
+    useInterval(
+        refreshSocialData,
+        openComments || openLikes ? SOCIAL_REFRESH_INTERVAL_MS : null,
+    );
+
     useEffect(() => {
         if (open) {
             // We're open. Create psRef. This will show the file viewer dialog.
@@ -873,13 +1967,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
+                showSocialButtons,
+                enableComment,
                 showFullscreenButton,
+                disableEscapeClose,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
                 },
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
+                onViewComments: handleViewComments,
+                onViewLikes: handleViewLikes,
+                onLikeClick: handleLikeClick,
                 onDownload: handleDownloadBarAction,
                 onMore: handleMore,
             });
@@ -894,24 +1994,70 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         } else {
             return undefined;
         }
-    }, [
         // Be careful with adding new dependencies here, or changing the source
         // of existing ones. If any of these dependencies change unnecessarily,
         // then the file viewer will start getting reloaded even when it is
         // already open.
+        //
+        // Note: showSocialButtons and enableComment are intentionally NOT included
+        // here even though they're passed to the constructor. The delegate's
+        // shouldShowSocialButtons handles dynamic visibility, and these values only
+        // change based on collectionSummaries which we don't want to trigger a full
+        // recreation.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
         open,
         onClose,
         user,
         initialIndex,
         disableDownload,
         showFullscreenButton,
+        disableEscapeClose,
         haveUser,
         handleClose,
         handleAnnotate,
         handleViewInfo,
+        handleViewComments,
+        handleViewLikes,
+        handleLikeClick,
         handleDownloadBarAction,
         handleMore,
     ]);
+
+    useEffect(() => {
+        if (!open || !shouldCloseOnBrowserBack) return;
+
+        // Consume one browser-back action to close the viewer overlay instead
+        // of navigating away immediately.
+        const stateMarker = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        browserBackStateRef.current = stateMarker;
+
+        const currentState: unknown = window.history.state;
+        const viewerState = addFileViewerBackStateMarker(
+            currentState,
+            stateMarker,
+        );
+        window.history.pushState(viewerState, "", window.location.href);
+
+        const handlePopState = () => {
+            if (browserBackStateRef.current != stateMarker) return;
+            browserBackStateRef.current = undefined;
+            handleCloseRef.current();
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+            if (browserBackStateRef.current != stateMarker) return;
+            browserBackStateRef.current = undefined;
+
+            const latestHistoryState: unknown = window.history.state;
+            if (hasFileViewerBackStateMarker(latestHistoryState, stateMarker)) {
+                window.history.back();
+            }
+        };
+    }, [open, shouldCloseOnBrowserBack]);
 
     const handleFileMetadataUpdate = useMemo(() => {
         return onRemoteFilesPull
@@ -955,11 +2101,56 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onSelectPerson={handleSelectPerson}
                 {...{ collectionNameByID }}
             />
+            <CommentsSidebar
+                open={openComments}
+                onClose={handleCommentsClose}
+                file={activeAnnotatedFile.file}
+                activeCollectionID={activeCollectionID}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionSummaries={collectionSummaries}
+                currentUserID={user?.id}
+                prefetchedComments={fileComments.get(
+                    activeAnnotatedFile.file.id,
+                )}
+                prefetchedReactions={allReactions.get(
+                    activeAnnotatedFile.file.id,
+                )}
+                prefetchedUserIDToEmail={userIDToEmail}
+                onCommentAdded={handleCommentAdded}
+                onCommentDeleted={handleCommentDeleted}
+                onCommentReactionAdded={handleCommentReactionAdded}
+                onCommentReactionDeleted={handleCommentReactionDeleted}
+                highlightCommentID={highlightCommentID}
+                anonUserNames={anonUserNames}
+            />
+            <LikesSidebar
+                open={openLikes}
+                onClose={handleLikesClose}
+                file={activeAnnotatedFile.file}
+                activeCollectionID={activeCollectionID}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionSummaries={collectionSummaries}
+                currentUserID={user?.id}
+                prefetchedReactions={allReactions.get(
+                    activeAnnotatedFile.file.id,
+                )}
+                prefetchedUserIDToEmail={userIDToEmail}
+                anonUserNames={anonUserNames}
+            />
+            <LikeAlbumSelectorModal
+                open={openLikeAlbumSelector}
+                onClose={handleLikeAlbumSelectorClose}
+                albums={allAlbumsForFile}
+                likedAlbumIDs={likedAlbumIDs}
+                onToggleAlbum={handleToggleAlbumLike}
+                onLikeAll={handleLikeAll}
+            />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
                 onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
+                disableAutoFocusItem
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
@@ -968,6 +2159,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
+                {activeAnnotatedFile.annotation.isOwnFile &&
+                    !isInTrashSection &&
+                    onSendLink && (
+                        <MoreMenuItem onClick={handleSendLinkMenuAction}>
+                            <MoreMenuItemTitle>Send link</MoreMenuItemTitle>
+                            <HugeiconsIcon icon={Navigation03Icon} size={20} />
+                        </MoreMenuItem>
+                    )}
                 {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>

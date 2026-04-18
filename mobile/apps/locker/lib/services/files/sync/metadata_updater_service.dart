@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_network/network.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';

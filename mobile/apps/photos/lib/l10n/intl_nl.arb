@@ -26,7 +26,6 @@
   "deleteReason4": "Mijn reden wordt niet vermeld",
   "sendEmail": "E-mail versturen",
   "deleteRequestSLAText": "Je verzoek wordt binnen 72 uur verwerkt.",
-  "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.io</warning> vanaf het door jou geregistreerde e-mailadres.",
   "entePhotosPerm": "Ente <i>heeft toestemming nodig om</i> je foto's te bewaren",
   "ok": "Oké",
   "createAccount": "Maak account",
@@ -58,7 +57,6 @@
   "incorrectRecoveryKeyBody": "De ingevoerde herstelsleutel is onjuist",
   "forgotPassword": "Wachtwoord vergeten",
   "enterYourRecoveryKey": "Voer je herstelcode in",
-  "noRecoveryKey": "Geen herstelcode?",
   "sorry": "Sorry",
   "noRecoveryKeyNoDecryption": "Door de aard van ons end-to-end encryptieprotocol kunnen je gegevens niet worden ontsleuteld zonder je wachtwoord of herstelsleutel",
   "verifyEmail": "Bevestig e-mail",
@@ -73,7 +71,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -125,7 +123,6 @@
   "verifyPassword": "Bevestig wachtwoord",
   "recoveryKey": "Herstelsleutel",
   "recoveryKeyOnForgotPassword": "Als je je wachtwoord vergeet, kun je alleen met deze sleutel je gegevens herstellen.",
-  "recoveryKeySaveDescription": "We slaan deze sleutel niet op, bewaar deze 24 woorden sleutel op een veilige plaats.",
   "doThisLater": "Doe dit later",
   "saveKey": "Bewaar sleutel",
   "recoveryKeyCopiedToClipboard": "Herstelsleutel gekopieerd naar klembord",
@@ -137,7 +134,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -277,18 +274,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verificatie ID",
   "verifyEmailID": "Verifieer {email}",
   "emailNoEnteAccount": "{email} heeft geen Ente account.\n\nStuur ze een uitnodiging om foto's te delen.",
-  "shareMyVerificationID": "Hier is mijn verificatie-ID: {verificationID} voor ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, kunt u bevestigen dat dit uw ente.io verificatie-ID is: {verificationID}",
   "somethingWentWrong": "Er ging iets mis",
   "sendInvite": "Stuur een uitnodiging",
-  "shareTextRecommendUsingEnte": "Download Ente zodat we gemakkelijk foto's en video's in originele kwaliteit kunnen delen\n\nhttps://ente.io",
   "done": "Voltooid",
   "applyCodeTitle": "Code toepassen",
   "enterCodeDescription": "Voer de code van de vriend in om gratis opslag voor jullie beiden te claimen",
@@ -296,7 +290,6 @@
   "failedToApplyCode": "Code toepassen mislukt",
   "enterReferralCode": "Voer verwijzingscode in",
   "codeAppliedPageTitle": "Code toegepast",
-  "changeYourReferralCode": "Wijzig uw verwijzingscode",
   "change": "Wijzigen",
   "unavailableReferralCode": "Deze code is helaas niet beschikbaar.",
   "codeChangeLimitReached": "Sorry, u heeft de limiet van het aantal codewijzigingen bereikt.",
@@ -310,15 +303,10 @@
   "claimMore": "Claim meer!",
   "theyAlsoGetXGb": "Zij krijgen ook {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB telkens als iemand zich aanmeldt voor een betaald abonnement en je code toepast",
-  "shareTextReferralCode": "Ente verwijzingscode: {referralCode} \n\nPas het toe bij Instellingen → Algemeen → Verwijzingen om {referralStorageInGB} GB gratis te krijgen nadat je je hebt aangemeld voor een betaald abonnement\n\nhttps://ente.io",
   "claimFreeStorage": "Claim gratis opslag",
   "inviteYourFriends": "Vrienden uitnodigen",
   "failedToFetchReferralDetails": "Kan geen verwijzingsgegevens ophalen. Probeer het later nog eens.",
-  "referralStep1": "1. Geef deze code aan je vrienden",
-  "referralStep2": "2. Ze registreren voor een betaald plan",
-  "referralStep3": "Jullie krijgen allebei {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Verwijzingen zijn momenteel gepauzeerd",
-  "youCanAtMaxDoubleYourStorage": "* Je kunt maximaal je opslag verdubbelen",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jouw familie heeft {storageAmountInGb} GB geclaimd tot nu toe} false {Je hebt {storageAmountInGb} GB geclaimd tot nu toe} other {Je hebt {storageAmountInGb} GB geclaimd tot nu toe!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -463,7 +451,6 @@
   "discover_sunset": "Zonsondergang",
   "discover_hills": "Heuvels",
   "discover_greenery": "Natuur",
-  "mlIndexingDescription": "Houd er rekening mee dat machine learning zal leiden tot hoger bandbreedte- en batterijgebruik totdat alle items geïndexeerd zijn. Overweeg het gebruik van de desktop app voor snellere indexering. Alle resultaten worden automatisch gesynchroniseerd.",
   "loadingModel": "Modellen downloaden...",
   "waitingForWifi": "Wachten op WiFi...",
   "status": "Status",
@@ -535,7 +522,6 @@
   "backedUpFolders": "Back-up mappen",
   "backup": "Back-up",
   "freeUpDeviceSpace": "Apparaatruimte vrijmaken",
-  "freeUpDeviceSpaceDesc": "Bespaar ruimte op je apparaat door bestanden die al geback-upt zijn te wissen.",
   "allClear": "✨ Alles in orde",
   "noDeviceThatCanBeDeleted": "Je hebt geen bestanden op dit apparaat die verwijderd kunnen worden",
   "removeDuplicates": "Duplicaten verwijderen",
@@ -578,8 +564,6 @@
   "familyPlans": "Familie abonnement",
   "referrals": "Referenties",
   "notifications": "Meldingen",
-  "sharedPhotoNotifications": "Nieuwe gedeelde foto's",
-  "sharedPhotoNotificationsExplanation": "Ontvang meldingen wanneer iemand een foto toevoegt aan een gedeeld album waar je deel van uitmaakt",
   "advanced": "Geavanceerd",
   "general": "Algemeen",
   "security": "Beveiliging",
@@ -613,7 +597,6 @@
   "darkTheme": "Donker",
   "systemTheme": "Systeem",
   "freeTrial": "Gratis proefversie",
-  "selectYourPlan": "Kies uw abonnement",
   "enteSubscriptionPitch": "Ente bewaart uw herinneringen, zodat ze altijd beschikbaar voor u zijn, zelfs als u uw apparaat verliest.",
   "enteSubscriptionShareWithFamily": "Je familie kan ook aan je abonnement worden toegevoegd.",
   "currentUsageIs": "Huidig gebruik is ",
@@ -634,7 +617,6 @@
   "subscription": "Abonnement",
   "paymentDetails": "Betaalgegevens",
   "manageFamily": "Familie abonnement beheren",
-  "contactToManageSubscription": "Neem contact met ons op via support@ente.io om uw {provider} abonnement te beheren.",
   "renewSubscription": "Abonnement verlengen",
   "cancelSubscription": "Abonnement opzeggen",
   "areYouSureYouWantToRenew": "Weet u zeker dat u wilt verlengen?",
@@ -683,7 +665,6 @@
   "subAlreadyLinkedErrMessage": "Jouw {id} is al aan een ander Ente account gekoppeld.\nAls je jouw {id} wilt gebruiken met dit account, neem dan contact op met onze klantenservice",
   "visitWebToManage": "Bezoek alstublieft web.ente.io om uw abonnement te beheren",
   "couldNotUpdateSubscription": "Kon abonnement niet wijzigen",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Neem alstublieft contact op met support@ente.io en we helpen u graag!",
   "paymentFailed": "Betaling mislukt",
   "paymentFailedTalkToProvider": "Praat met {providerName} klantenservice als u in rekening bent gebracht",
   "@paymentFailedTalkToProvider": {
@@ -714,19 +695,8 @@
   "grantFullAccessPrompt": "Geef toegang tot alle foto's in de Instellingen app",
   "allowPermTitle": "Toegang tot foto's toestaan",
   "allowPermBody": "Geef toegang tot je foto's vanuit Instellingen zodat Ente je bibliotheek kan weergeven en back-uppen.",
-  "openSettings": "Instellingen openen",
   "selectMorePhotos": "Selecteer meer foto's",
   "existingUser": "Bestaande gebruiker",
-  "privateBackups": "Privé back-ups",
-  "forYourMemories": "voor uw herinneringen",
-  "endtoendEncryptedByDefault": "Standaard end-to-end versleuteld",
-  "safelyStored": "Veilig opgeslagen",
-  "atAFalloutShelter": "in een kernbunker",
-  "designedToOutlive": "Ontworpen om levenslang mee te gaan",
-  "available": "Beschikbaar",
-  "everywhere": "overal",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobiel, Web, Desktop",
   "newToEnte": "Nieuw bij Ente",
   "pleaseLoginAgain": "Log opnieuw in",
   "autoLogoutMessage": "Door een technische storing bent u uitgelogd. Onze excuses voor het ongemak.",
@@ -743,7 +713,6 @@
   "couldNotBackUpTryLater": "We konden uw gegevens niet back-uppen.\nWe zullen het later opnieuw proberen.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kan bestanden alleen versleutelen en bewaren als u toegang tot ze geeft",
   "pleaseGrantPermissions": "Geef alstublieft toestemming",
-  "grantPermission": "Toestemming verlenen",
   "privateSharing": "Privé delen",
   "shareOnlyWithThePeopleYouWant": "Deel alleen met de mensen die u wilt",
   "usePublicLinksForPeopleNotOnEnte": "Gebruik publieke links voor mensen die geen Ente account hebben",
@@ -1048,7 +1017,6 @@
   "didYouKnow": "Wist u dat?",
   "loadingMessage": "Uw foto's laden...",
   "loadMessage1": "U kunt uw abonnement met uw familie delen",
-  "loadMessage2": "We hebben tot nu toe meer dan 200 miljoen herinneringen bewaard",
   "loadMessage3": "We bewaren 3 kopieën van uw bestanden, één in een ondergrondse kernbunker",
   "loadMessage4": "Al onze apps zijn open source",
   "loadMessage5": "Onze broncode en cryptografie zijn extern gecontroleerd en geverifieerd",
@@ -1060,7 +1028,6 @@
   "fileTypesAndNames": "Bestandstypen en namen",
   "location": "Locatie",
   "moments": "Momenten",
-  "searchFaceEmptySection": "Mensen worden hier getoond als het indexeren klaar is",
   "searchDatesEmptySection": "Zoeken op een datum, maand of jaar",
   "searchLocationEmptySection": "Foto's groeperen die in een bepaalde straal van een foto worden genomen",
   "searchPeopleEmptySection": "Nodig mensen uit, en je ziet alle foto's die door hen worden gedeeld hier",
@@ -1116,7 +1083,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} vrij",
-  "appVersion": "Versie: {versionValue}",
   "verifyIDLabel": "Verifiëren",
   "fileInfoAddDescHint": "Voeg een beschrijving toe...",
   "editLocationTagTitle": "Locatie bewerken",
@@ -1125,8 +1091,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Radius instellen",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Voeg 5 gezinsleden toe aan je bestaande abonnement zonder extra te betalen.\n\nElk lid krijgt zijn eigen privé ruimte en kan elkaars bestanden niet zien tenzij ze zijn gedeeld.\n\nFamilieplannen zijn beschikbaar voor klanten die een betaald Ente abonnement hebben.\n\nAbonneer nu om aan de slag te gaan!",
   "androidBiometricHint": "Identiteit verifiëren",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1216,7 +1180,6 @@
   "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
   "fileTypes": "Bestandstype",
   "deleteConfirmDialogBody": "Dit account is gekoppeld aan andere Ente apps, als je er gebruik van maakt. Je geüploade gegevens worden in alle Ente apps gepland voor verwijdering, en je account wordt permanent verwijderd voor alle Ente diensten.",
-  "hearUsWhereTitle": "Hoe hoorde je over Ente? (optioneel)",
   "hearUsExplanation": "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!",
   "viewAddOnButton": "Add-ons bekijken",
   "addOns": "Add-ons",
@@ -1407,7 +1370,6 @@
   },
   "extraPhotosFound": "Extra foto's gevonden",
   "configuration": "Configuratie",
-  "localIndexing": "Lokaal indexeren",
   "processed": "Verwerkt",
   "resetPerson": "Verwijderen",
   "areYouSureYouWantToResetThisPerson": "Weet u zeker dat u deze persoon wilt resetten?",
@@ -1552,7 +1514,6 @@
   "legacyPageDesc2": "Vertrouwde contacten kunnen accountherstel starten, en indien deze niet binnen 30 dagen wordt geblokkeerd, je wachtwoord resetten en toegang krijgen tot je account.",
   "legacyAccounts": "Legacy accounts",
   "trustedContacts": "Vertrouwde contacten",
-  "addTrustedContact": "Vertrouwd contact toevoegen",
   "removeInvite": "Verwijder uitnodiging",
   "recoveryWarning": "Een vertrouwd contact probeert toegang te krijgen tot je account",
   "rejectRecovery": "Herstel weigeren",
@@ -1746,9 +1707,6 @@
   "curatedMemories": "Samengestelde herinneringen",
   "widgets": "Widgets",
   "memories": "Herinneringen",
-  "peopleWidgetDesc": "Selecteer de mensen die je wilt zien op je beginscherm.",
-  "albumsWidgetDesc": "Selecteer de albums die je wilt zien op je beginscherm.",
-  "memoriesWidgetDesc": "Selecteer het soort herinneringen dat je wilt zien op je beginscherm.",
   "smartMemories": "Slimme herinneringen",
   "pastYearsMemories": "Afgelopen jaren",
   "deleteMultipleAlbumDialog": "Verwijder de foto's (en video's) van deze {count} albums ook uit <bold>alle</bold> andere albums waar deze deel van uitmaken?",
@@ -1762,9 +1720,6 @@
   "sorryWeHadToPauseYourBackups": "Sorry, we moesten je back-ups pauzeren",
   "clickToInstallOurBestVersionYet": "Klik om onze beste versie tot nu toe te installeren",
   "onThisDayNotificationExplanation": "Ontvang meldingen over herinneringen op deze dag door de jaren heen.",
-  "addMemoriesWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
-  "addAlbumWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
-  "addPeopleWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
   "birthdayNotifications": "Meldingen over verjaardagen",
   "receiveRemindersOnBirthdays": "Ontvang herinneringen wanneer iemand jarig is. Als je op de melding drukt, krijg je foto's van de jarige.",
   "happyBirthday": "Fijne verjaardag! 🥳",
@@ -1775,7 +1730,6 @@
   "areThey": "Is dit ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Opslaan als ander persoon",
-  "showLessFaces": "Minder gezichten weergeven",
   "showMoreFaces": "Minder gezichten weergeven",
   "ignore": "Negeren",
   "merge": "Samenvoegen",
@@ -1790,7 +1744,6 @@
   "same": "Zelfde",
   "different": "Andere",
   "sameperson": "Zelfde persoon?",
-  "indexingPausedStatusDescription": "Indexeren is gepauzeerd. Het zal automatisch verdergaan wanneer het apparaat er klaar voor is. Het apparaat is er klaar voor wanneer batterijniveau, batterijgezondheid, en thermische status binnen het gezonde bereik liggen.",
   "thisWeek": "Deze week",
   "lastWeek": "Afgelopen week",
   "thisMonth": "Deze maand",
@@ -1824,7 +1777,7 @@
   "font": "Lettertype",
   "background": "Achtergrond",
   "align": "Uitlijnen",
-  "addedToAlbums": "{count, plural, one {}=1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
+  "addedToAlbums": "{count, plural, =1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -1931,7 +1884,6 @@
   "hoorayyyy": "Hoeraaaa!",
   "nothingToTidyUpHere": "Niks op te schonen hier",
   "deletingDash": "Verwijderen - ",
-  "cLTitle3": "Nieuwe herinneringen",
   "closeBy": "Nauw verwant",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -1958,5 +1910,6 @@
   "streetFood": "Street food bites",
   "riverCruises": "Uitzichten vanaf de cruise",
   "playfulKids": "Spelende kinderen",
-  "coastalCliffs": "Kliffen bij de zee"
+  "coastalCliffs": "Kliffen bij de zee",
+  "grantPermission": "Toestemming verlenen"
 }

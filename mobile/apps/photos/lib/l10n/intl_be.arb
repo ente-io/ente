@@ -27,7 +27,6 @@
   "deleteReason4": "Прычына адсутнічае ў спісе",
   "sendEmail": "Адправіць ліст",
   "deleteRequestSLAText": "Ваш запыт будзе апрацаваны цягам 72 гадзін.",
-  "deleteEmailRequest": "Адпраўце ліст на <warning>account-deletion@ente.io</warning> з вашага зарэгістраванага адраса электроннай пошты.",
   "entePhotosPerm": "Праграме <i>неабходны доступ</i> для захавання вашых фатаграфій",
   "ok": "OK",
   "createAccount": "Стварыць уліковы запіс",
@@ -59,7 +58,6 @@
   "incorrectRecoveryKeyBody": "Вы ўвялі памылковы ключ аднаўлення",
   "forgotPassword": "Нагадаць пароль",
   "enterYourRecoveryKey": "Увядзіце свой ключ аднаўлення",
-  "noRecoveryKey": "Няма ключа аднаўлення?",
   "sorry": "Прабачце",
   "noRecoveryKeyNoDecryption": "З прычыны архітэктуры нашага пратакола скразнога шыфравання немагчыма расшыфраваць вашы даныя без пароля або ключа аднаўлення",
   "verifyEmail": "Спраўдзіць электронную пошту",
@@ -74,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -130,7 +128,6 @@
   "verifyPassword": "Праверыць пароль",
   "recoveryKey": "Ключ аднаўлення",
   "recoveryKeyOnForgotPassword": "Адзіным спосабам аднавіць вашы даныя з'яўляецца гэты ключ, калі вы забылі свой пароль.",
-  "recoveryKeySaveDescription": "Захавайце гэты ключ, які складаецца з 24 слоў, у наедзеным месцы. Ён не захоўваецца на нашым серверы.",
   "doThisLater": "Зрабіць гэта пазней",
   "saveKey": "Захаваць ключ",
   "recoveryKeyCopiedToClipboard": "Ключ аднаўлення скапіяваны ў буфер абмену",
@@ -142,7 +139,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -283,18 +280,15 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ідэнтыфікатар спраўджання",
   "verifyEmailID": "Спраўджанне {email}",
   "emailNoEnteAccount": "У {email} адсутнічае ўліковы запіс Ente.\n\nАдпраўце запрашэнне карыстальніку, каб абагуліць фатаграфіі.",
-  "shareMyVerificationID": "Вось мой ідэнтыфікатар спраўджання: {verificationID} для ente.io.",
-  "shareTextConfirmOthersVerificationID": "Здароў! Можаш пацвердзіць, што гэта твой ідэнтыфікатар спраўджання ente.io: {verificationID}",
   "somethingWentWrong": "Нешта пайшло не так",
   "sendInvite": "Адправіць запрашэнне",
-  "shareTextRecommendUsingEnte": "Спампуйце Ente для таго, каб мы маглі лёгка змаглі абагуляць фатаграфіі ў зыходнай якасці і відэа\n\nhttps://ente.io",
   "done": "Гатова",
   "applyCodeTitle": "Ужыць код",
   "enterCodeDescription": "Увядзіце код, атрыманы ад вашага сябра, каб вы абодва змаглі атрымаць бясплатнае сховішча",
@@ -302,7 +296,6 @@
   "failedToApplyCode": "Не ўдалося ўжыць код",
   "enterReferralCode": "Увядзіце рэферальны код",
   "codeAppliedPageTitle": "Код ужыты",
-  "changeYourReferralCode": "Змяніць свой рэферальны код",
   "change": "Змяніць",
   "unavailableReferralCode": "На жаль, гэты код ужо недаступны.",
   "codeChangeLimitReached": "На жаль, вы дасягнулі абмежавання па колькасці змяненняў кода.",
@@ -316,15 +309,10 @@
   "claimMore": "Атрымайце больш!",
   "theyAlsoGetXGb": "Яны таксама атрымаць {storageAmountInGB} ГБ",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ кожны раз, калі нехта стварае падпіску на платны тарыфны план і ўжывае ваш код",
-  "shareTextReferralCode": "Рэферальны код Ente: {referralCode}\n\nУжыць яго можна ў раздзеле Налады → Агульныя → Рэфералы, каб атрымаць {referralStorageInGB} ГБ бясплатнай прасторы пасля пераходу на платны тарыфны план",
   "claimFreeStorage": "Атрымаць бясплатнае сховішча",
   "inviteYourFriends": "Запрасіце сваіх сяброў",
   "failedToFetchReferralDetails": "Немагчыма атрымаць падрабязнасці аб рэфералах. Паспрабуйце яшчэ раз пазней.",
-  "referralStep1": "1. Перадайце гэты код сваім сябрам",
-  "referralStep2": "2. Яны падпісваюцца на платны тарыфны план",
-  "referralStep3": "3. Вы абодва атрымаеце {storageInGB} ГБ* бясплатнага сховішча",
   "referralsAreCurrentlyPaused": "Рэфералы ў цяперашні момант прыпынены",
-  "youCanAtMaxDoubleYourStorage": "* Вы можаце павялічыць сховішча максімум у два разы",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сям'я атрымала {storageAmountInGb} ГБ} false {Вы атрымалі {storageAmountInGb} ГБ} other {У дадзены момант вы атрымалі {storageAmountInGb} ГБ!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -357,6 +345,7 @@
   "sorryCouldNotAddToFavorites": "Немагчыма дадаць у абраныя!",
   "sorryCouldNotRemoveFromFavorites": "Немагчыма выдаліць з абраных!",
   "subscribeToEnableSharing": "У вас павінна быць актыўная платная падпіска, каб уключыць абагульванне.",
+  "subscribeToChangeLinkSetting": "Каб змяніць гэты параметр спасылкі, вам патрэбна платная падпіска.",
   "subscribe": "Падпісацца",
   "canOnlyRemoveFilesOwnedByYou": "Можна выдаляць толькі файлы, якія належаць вам",
   "deleteSharedAlbum": "Выдаліць абагулены альбом?",
@@ -470,7 +459,6 @@
   "discover_sunset": "Захад сонца",
   "discover_hills": "Узгоркі",
   "discover_greenery": "Зеляніна",
-  "mlIndexingDescription": "Звярніце ўвагу, што гэта камп'ютарнае навучанне павялічыць спажыванне трафіку і акумулятара, пакуль усе элементы не будуць праіндэксаваны. Разгледзьце магчымасць зрабіць гэту задачу на камп'ютары. Усе вынікі будуць сінхранізаваны аўтаматычна.",
   "loadingModel": "Спампоўванне мадэляў...",
   "waitingForWifi": "Чаканне Wi-Fi...",
   "status": "Стан",
@@ -542,7 +530,6 @@
   "backedUpFolders": "Папкі з рэзервовым капіяваннем",
   "backup": "Рэзервовая копія",
   "freeUpDeviceSpace": "Вызваленне прасторы на прыладзе",
-  "freeUpDeviceSpaceDesc": "Вызваліце месца на сваёй прыладзе ачысціўшы файлы, якія ўжо зарэзерваваны.",
   "allClear": "✨ Усё лаканічна",
   "noDeviceThatCanBeDeleted": "На гэтай прыладзе няма файлаў для выдалення",
   "removeDuplicates": "Выдаліць дублікаты",
@@ -585,8 +572,6 @@
   "familyPlans": "Сямейныя тарыфныя планы",
   "referrals": "Рэфералы",
   "notifications": "Апавяшчэнні",
-  "sharedPhotoNotifications": "Новыя абагульненыя фатаграфіі",
-  "sharedPhotoNotificationsExplanation": "Атрымлівайце апавяшчэнні, калі нехта дадае фатаграфію ў абагульнены альбом, да якога вы належыце",
   "advanced": "Дадаткова",
   "general": "Асноўныя",
   "security": "Бяспека",
@@ -620,7 +605,6 @@
   "darkTheme": "Цёмная",
   "systemTheme": "Сістэма",
   "freeTrial": "Бясплатная пробны перыяд",
-  "selectYourPlan": "Выберыце тарыфны план",
   "enteSubscriptionPitch": "Ente захоўвае вашы ўспаміны, таму яны заўсёды даступны вам, нават калі вы згубіце прыладу.",
   "enteSubscriptionShareWithFamily": "Ваша сям'я можа быць уключана ў ваш тарыфны план.",
   "currentUsageIs": "Выкарыстана сховішча: ",
@@ -641,7 +625,6 @@
   "subscription": "Падпіска",
   "paymentDetails": "Падрабязнасці плацяжу",
   "manageFamily": "Кіраванне сям'ёй",
-  "contactToManageSubscription": "Адпраўце ліст на паштовы адрас support@ente.io, каб кіраваць сваёй падпіскай {provider}.",
   "renewSubscription": "Падоўжыць падпіску",
   "cancelSubscription": "Скасаваць падпіску",
   "areYouSureYouWantToRenew": "Вы сапраўды хочаце падоўжыць?",
@@ -690,7 +673,6 @@
   "subAlreadyLinkedErrMessage": "Ваш {id} ужо звязаны з іншым уліковым запісам Ente.\nКалі вы хочаце выкарыстоўваць ваш {id} з гэтым уліковым запісам, звярніцеся ў нашу службу падтрымкі",
   "visitWebToManage": "Наведайце web.ente.io, каб кіраваць сваёй падпіскай",
   "couldNotUpdateSubscription": "Не ўдалося абнавіць падпіску",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Адпраўце ліст на паштовы адрас support@ente.io і мы будзем рады дапамагчы!",
   "paymentFailed": "Збой плацяжу",
   "paymentFailedTalkToProvider": "Звярніцеся ў падтрымку {providerName}, калі з вас спагналі грашовыя сродкі",
   "@paymentFailedTalkToProvider": {
@@ -721,19 +703,8 @@
   "grantFullAccessPrompt": "Дазвольце доступ да ўсіх фатаграфій у наладах праграмы",
   "allowPermTitle": "Дазволіць доступ да фатаграфій",
   "allowPermBody": "Дазвольце доступ да сваіх фатаграфій з налад, каб Ente мог адлюстраваць і зарэзерваваць вашу бібліятэку.",
-  "openSettings": "Акдкрыць налады",
   "selectMorePhotos": "Выберыце больш фатаграфій",
   "existingUser": "Бягучы карыстальнік",
-  "privateBackups": "Прыватныя рэзервовыя копіі",
-  "forYourMemories": "для вашых успамінаў",
-  "endtoendEncryptedByDefault": "Прадвызначанае скразное шыфраванне",
-  "safelyStored": "Бяспечна захоўваюцца",
-  "atAFalloutShelter": "ў бамбасховішчы",
-  "designedToOutlive": "Распрацавана на стагоддзі",
-  "available": "Даступна",
-  "everywhere": "усюды",
-  "androidIosWebDesktop": "Android, iOS, вэб-праграма, праграма для камп'ютара",
-  "mobileWebDesktop": "Праграма для смартфона, вэб-праграма, праграма для камп'ютара",
   "newToEnte": "Упершыню ў Ente",
   "pleaseLoginAgain": "Аўтарызуйцеся яшчэ раз",
   "autoLogoutMessage": "З прычыны тэхнічнага збою ваш сеанс у сістэме быў завершаны. Прыносім прабачэнні за нязручнасці.",
@@ -750,7 +721,6 @@
   "couldNotBackUpTryLater": "Не ўдалося зарэзерваваць вашы даныя.\nПаўторная спроба будзе зроблена пазней.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente можа зашыфраваць і захаваць файлы толькі ў тым выпадку, калі будзе прадстаўлены доступ да іх",
   "pleaseGrantPermissions": "Дайце дазволы",
-  "grantPermission": "Даць дазволы",
   "privateSharing": "Прыватнае абагульванне",
   "shareOnlyWithThePeopleYouWant": "Вы самі выбіраеце людзей з якімі хочаце абагуліць свае даныя",
   "usePublicLinksForPeopleNotOnEnte": "Выкарыстоўваць публічныя спасылкі для людзей, якія не карыстаюцца Ente",
@@ -1055,7 +1025,6 @@
   "didYouKnow": "Ці ведалі вы што?",
   "loadingMessage": "Загрузка вашых фатаграфій...",
   "loadMessage1": "У вас ёсць магчымасць абагуліць падпіску з вашай сям'ёй",
-  "loadMessage2": "У цяперашні час на нашых серверах захоўваецца больш за 200 мільёнаў успамінаў",
   "loadMessage3": "У нас захоўваецца 3 копіі вашых даных і адна з іх захоўваецца ў бамбасховішчы",
   "loadMessage4": "Усе нашы праграмы маюць адкрыты зыходны код",
   "loadMessage5": "Наш зыходны код і крыптаграфія правераны незалежнымі экспертамі",
@@ -1067,7 +1036,6 @@
   "fileTypesAndNames": "Тыпы файлаў і назвы",
   "location": "Месцазнаходжанне",
   "moments": "Моманты",
-  "searchFaceEmptySection": "Людзі будуць паказаны тут пасля завяршэння індэксацыі",
   "searchDatesEmptySection": "Пошук па даце, месяцу або году",
   "searchLocationEmptySection": "Групуйце фатаграфіі, якія зроблены ў пэўным радыусе ад фатаграфіі",
   "searchPeopleEmptySection": "Запрашайце людзей, і вы ўбачыце ўсе фатаграфіі, якія яны абагулілі",
@@ -1123,7 +1091,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "Вольна {freeAmount} {storageUnit}",
-  "appVersion": "Версія: {versionValue}",
   "verifyIDLabel": "Спраўдзіць",
   "fileInfoAddDescHint": "Дадаць апісанне...",
   "editLocationTagTitle": "Змяніць месцазнаходжанне",
@@ -1132,8 +1099,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Задаць радыус",
-  "familyPlanPortalTitle": "Сямейны",
-  "familyPlanOverview": "Дадайце 5 членаў сям'і да бягучага тарыфнага плана без дадатковай платы.\n\nКожны член атрымае сваю ўласную прыватную прастору і не зможа бачыць файлы іншых, пакуль яны не будуць абагулены.\n\nСямейныя тарыфныя планы даступны для кліентаў з платнай падпіскай Ente.\n\nПадпішыцеся, каб скарыстацца прапановай!",
   "androidBiometricHint": "Спраўдзіць ідэнтычнасць",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1206,10 +1171,13 @@
   "unpinAlbum": "Адмацаваць альбом",
   "pinAlbum": "Замацаваць альбом",
   "pin": "Замацаваць",
+  "pinPerson": "Замацаваць асобу",
   "pinToTop": "Замацаваць уверсе",
   "unpin": "Адмацаваць",
+  "unpinPerson": "Адмацаваць асобу",
   "visibility": "Бачнасць",
   "hideFromMemories": "Схаваць ад успамінаў",
+  "showInMemories": "Паказаць ва ўспамінах",
   "create": "Стварыць",
   "viewAll": "Паглядзець усе",
   "nothingSharedWithYouYet": "Пакуль з вамі нічога не абагулена",
@@ -1228,7 +1196,6 @@
   "moveToHiddenAlbum": "Перамясціць у схаваны альбом",
   "fileTypes": "Тыпы файлаў",
   "deleteConfirmDialogBody": "Гэты ўліковы запіс звязаны з іншымі праграмамі Ente, калі вы імі карыстаецеся. Запампаваныя вамі даныя будуць запланаваны да выдалення ва ўсіх праграмах Ente, а ваш уліковы запіс будзе незваротна выдалены.",
-  "hearUsWhereTitle": "Адкуль вы пачулі пра Ente? (неабавязкова)",
   "hearUsExplanation": "Наша каманда не збірае статыстыку ўсталяванняў. Нам вельмі дапаможа, калі вы абагуліце інфармацыю, дзе вы знайшлі нашу праграму!",
   "viewAddOnButton": "Паглядзець дадаткі",
   "addOns": "Дадаткі",
@@ -1321,6 +1288,8 @@
   "enterDateOfBirth": "Дзень нараджэння (неабавязкова)",
   "birthday": "Дзень нараджэння",
   "removePersonLabel": "Выдаліць метку асобы",
+  "removePersonTag": "Выдаліць тэг асобы",
+  "areYouSureRemoveThisPersonTag": "Вы ўпэўненыя, што хочаце выдаліць гэты тэг чалавека?",
   "autoPairDesc": "Аўтаспалучэнне працуе толькі з прыладамі, якія падтрымліваюць Chromecast.",
   "manualPairDesc": "Спалучэнне з PIN працуе з любым экранам, на якім вы хочаце паглядзець альбом.",
   "connectToDevice": "Падключыцца да прылады",
@@ -1421,7 +1390,6 @@
   },
   "extraPhotosFound": "Знойдзены дадатковыя фатаграфіі",
   "configuration": "Канфігурацыя",
-  "localIndexing": "Лакальная індэксацыя",
   "processed": "Апрацавана",
   "resetPerson": "Выдаліць",
   "areYouSureYouWantToResetThisPerson": "Вы сапраўды хочаце скінуць даныя гэтай асобы?",
@@ -1566,7 +1534,6 @@
   "legacyPageDesc2": "Давераныя кантакты могуць ініцыяваць аднаўленне ўліковага запісу, і калі яно не будзе заблакіравана цягам 30 дзён, то яны змогуць скінуць пароль і атрымаць доступ да яго.",
   "legacyAccounts": "Уліковыя запісы «Спадчына»",
   "trustedContacts": "Давераныя кантакты",
-  "addTrustedContact": "Дадаць давераны кантакт",
   "removeInvite": "Выдаліць запрашэнне",
   "recoveryWarning": "Давераны кантакт спрабуе атрымаць доступ да вашага ўліковага запісу",
   "rejectRecovery": "Адхіліць аднаўленне",
@@ -1618,7 +1585,6 @@
   "legacyInvite": "{email} запрасіў вас стаць давераным кантактам",
   "authToManageLegacy": "Прайдзіце аўтэнтыфікацыю, каб кіраваць сваімі даверанымі кантактамі",
   "hideSharedItemsFromHomeGallery": "Схаваць абагуленыя элементы з асноўнай галерэі",
-  "swipeToSelect": "Правядзіце пальцам, каб выбраць",
   "gallery": "Галерэя",
   "joinAlbum": "Далучыцца да альбома",
   "joinAlbumSubtext": "каб праглядаць і дадаваць свае фатаграфіі",
@@ -1761,9 +1727,6 @@
   "curatedMemories": "Абраныя ўспаміны",
   "widgets": "Віджэты",
   "memories": "Успаміны",
-  "peopleWidgetDesc": "Выберыце людзей, якіх вы хочаце бачыць на галоўным экране.",
-  "albumsWidgetDesc": "Выберыце альбомы, якія вы хочаце бачыць на галоўным экране.",
-  "memoriesWidgetDesc": "Выберыце, якія ўспаміны вы хочаце бачыць на галоўным экране.",
   "smartMemories": "Інтэлектуальныя ўспаміны",
   "pastYearsMemories": "Успаміны мінулых гадоў",
   "deleteMultipleAlbumDialog": "Таксама выдаліць фатаграфіі (разам з відэа), якія знаходзяцца ў гэтых {count} альбомах, з <bold>усіх</bold> іншых альбомаў, часткай якіх яны з'яўляюцца?",
@@ -1777,9 +1740,6 @@
   "sorryWeHadToPauseYourBackups": "Прабачце, але давялося прыпыніць ваша рэзервовае капіяванне",
   "clickToInstallOurBestVersionYet": "Націсніце, каб усталяваць нашу лепшую версію",
   "onThisDayNotificationExplanation": "Атрымлівайце напаміны аб успамінах з гэтага дня ў мінулыя гады.",
-  "addMemoriesWidgetPrompt": "Дадайце віджэт успамін на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
-  "addAlbumWidgetPrompt": "Дадайце віджэт альбома на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
-  "addPeopleWidgetPrompt": "Дадайце віджэт людзей на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
   "birthdayNotifications": "Апавяшчэнні аб днях нараджэння",
   "receiveRemindersOnBirthdays": "Атрымлівайце напаміны, калі ў некага дзень нараджэння. Націск на апавяшчэнне перанясе вас да фатаграфій імянінніка.",
   "happyBirthday": "З днём нараджэння! 🥳",
@@ -1790,7 +1750,6 @@
   "areThey": "Яны ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Захаваць як іншую асобу",
-  "showLessFaces": "Паказаць менш твараў",
   "showMoreFaces": "Паказаць больш твараў",
   "ignore": "Ігнараваць",
   "merge": "Аб'яднаць",
@@ -1805,7 +1764,6 @@
   "same": "Пакінуць папярэдні",
   "different": "Розныя",
   "sameperson": "Тая ж асоба?",
-  "indexingPausedStatusDescription": "Індэксаванне прыпынена. Яно аўтаматычна будзе ўзноўлена, калі прылада будзе гатова. Прылада лічыцца гатовай, калі ўзровень зараду акумулятара, стан акумулятара і цеплавы статус знаходзяцца ў межах нармальнага дыяпазону.",
   "thisWeek": "На гэтым тыдні",
   "lastWeek": "На мінулым тыдні",
   "thisMonth": "У гэтым месяцы",
@@ -1972,14 +1930,6 @@
   "hoorayyyy": "Ураааа!",
   "nothingToTidyUpHere": "Адсутнічаюць элементы для ўпарадкавання",
   "deletingDash": "Выдаленне - ",
-  "cLTitle1": "Перайсці да даты",
-  "cLDesc1": "На панэлі інфармацыі аб файле выберыце параметр «Перайсці да даты», каб паглядзець усе фатаграфіі побач з датай файла.",
-  "cLTitle2": "Больш хуткі рэдактар відэа",
-  "cLDesc2": "Рэдактар відэа быў падноўлены, што надзвычайна палепшыла яго хуткасць пры рэдагаванні вялікіх відэа, а таксама абнавіла UX.",
-  "cLTitle3": "Новыя ўспаміны",
-  "cLDesc3": "«Гуллівыя дзеці», «Зімовыя прыгоды», «Неонавыя ночы» і многае іншае.",
-  "cLTitle4": "Галерэя пейзажаў і іншае",
-  "cLDesc4": "Падтрымка альбомнай арыентацыі ў галоўнай галерэі праграмы. Паказваць людзей без звязаных з імі фатаграфій замест іх фільтрацыі. Палепшана выяўленне аспекту відэа пры абмене са знешнімі праграмамі.",
   "closeBy": "Закрыць",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2015,13 +1965,9 @@
   "artisticPortraits": "Майстэрскі партрэт",
   "streetFood": "Вулічна ежа",
   "riverCruises": "Від на раку",
-  "facesTimelineBannerTitle": "Алея ўспамінаў",
-  "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
-  },
   "facesTimelineBannerSubtitle": "Глядзіце фатаграфіі карыстальніка {name} за розныя гады",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,7 +2025,7 @@
   },
   "facesTimelineUnavailable": "Храналогія твараў рыхтуецца...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Гарэзлівыя дзеці",
   "coastalCliffs": "Скалы ля мора",
@@ -2104,5 +2050,47 @@
   },
   "ritualCaptureAtLeastOne": "Спачатку зрабіце хаця б адну фатаграфію.",
   "ritualAlbumMissing": "Адсутнічае альбом рытуалаў. Адрэдагуйце рытуал, каб усталяваць альбом.",
-  "ritualAddedToAlbum": "Дададзена ў альбом"
+  "ritualAddedToAlbum": "Дададзена ў альбом",
+  "ritualAddedToAlbumWithName": "Дададзена ў {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Не атрымалася дадаць фатаграфію ў альбом: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Вернуцца да рытуалаў",
+  "ritualNoPhotosYet": "Фатаграфій пакуль няма",
+  "ritualSetAlbumToLaunchCamera": "Усталюйце альбом для гэтага рытуалу, каб запусціць камеру.",
+  "ritualDefaultCameraTitle": "Зрабіць фота",
+  "ritualBadgeMessage7": "7 дзён прайшло! Паслядоўнасць табе пасуе. Працягвай!",
+  "ritualBadgeMessage14": "14 дзён прайшло! Ваш рытуал становіцца звычкай. Неверагодна!",
+  "ritualBadgeMessage30": "30 дзён запар! Легендарная паслядоўнасць. Пакланіцеся!",
+  "ritualBadgeMessageDefault": "У цябе ўсё атрымліваецца!",
+  "ritualBadgeNewTitle": "Новае дасягненне",
+  "ritualBadgePreparing": "Падрыхтоўка...",
+  "ritualStreaksLabel": "Палоскі",
+  "ritualCreateYourOwn": "Стварыце свой уласны рытуал",
+  "ritualGetDailyReminders": "Атрымлівайце штодзённыя напаміны",
+  "ritualAlbumNotSet": "Альбом не ўсталяваны",
+  "ritualOpenCameraTooltip": "Адкрыць рытуальную камеру",
+  "ritualEditorLabel": "Рэдактар ​​рытуалаў",
+  "ritualEdit": "Рэдагаваць рытуал",
+  "ritualEnterPrompt": "Увядзіце свой рытуал",
+  "ritualEnterDescription": "Калі ласка, увядзіце апісанне",
+  "ritualDayLabel": "Дзень",
+  "ritualNotificationsOffHint": "Апавяшчэнні выключаны. Націсніце на дзень, каб уключыць іх.",
+  "ritualTimeLabel": "Час",
+  "ritualAlbumLabel": "Альбом",
+  "grantPermission": "Даць дазволы"
 }

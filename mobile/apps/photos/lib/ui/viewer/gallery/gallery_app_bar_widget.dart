@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -17,14 +18,14 @@ import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/magic_sort_change_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
-import "package:photos/gateways/cast_gw.dart";
+import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/models/backup_status.dart';
 import "package:photos/models/button_result.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/file.dart";
+import 'package:photos/models/freeable_space_info.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
@@ -60,8 +61,6 @@ import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
-import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/standalone/data.dart';
 import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {
@@ -95,6 +94,7 @@ enum AlbumPopupAction {
   ownedArchive,
   sharedArchive,
   ownedHide,
+  sharedHide,
   playOnTv,
   autoAddPhotos,
   sort,
@@ -103,6 +103,7 @@ enum AlbumPopupAction {
   setCover,
   addPhotos,
   pinAlbum,
+  shareePinAlbum,
   removeLink,
   cleanUncategorized,
   downloadAlbum,
@@ -123,6 +124,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   bool isQuickLink = false;
   late GalleryType galleryType;
 
+  bool _isICloudSharedAlbum = false;
   final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
 
   @override
@@ -148,6 +150,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     _appBarTitle = widget.title;
     galleryType = widget.type;
+    _checkIfICloudSharedAlbum();
+  }
+
+  Future<void> _checkIfICloudSharedAlbum() async {
+    if (!Platform.isIOS ||
+        widget.type != GalleryType.localFolder ||
+        widget.deviceCollection == null) {
+      return;
+    }
+    final sharedPathIDs =
+        await FilesService.instance.getICloudSharedAlbumPathIDs();
+    if (mounted && sharedPathIDs.contains(widget.deviceCollection!.id)) {
+      setState(() {
+        _isICloudSharedAlbum = true;
+      });
+    }
   }
 
   @override
@@ -322,10 +340,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog =
         createProgressDialog(context, AppLocalizations.of(context).calculating);
     await dialog.show();
-    BackupStatus status;
+    FreeableSpaceInfo status;
     try {
       status = await FilesService.instance
-          .getBackupStatus(pathID: widget.deviceCollection!.id);
+          .getFreeableSpaceInfo(pathID: widget.deviceCollection!.id);
     } catch (e) {
       await dialog.hide();
       unawaited(showGenericErrorDialog(context: context, error: e));
@@ -350,7 +368,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
-  void _showSpaceFreedDialog(BackupStatus status) {
+  void _showSpaceFreedDialog(FreeableSpaceInfo status) {
     showChoiceDialog(
       context,
       title: AppLocalizations.of(context).success,
@@ -571,7 +589,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           context.l10n.playOnTv,
           icon: Icons.tv_outlined,
         ),
-      if (flagService.hasGrantedMLConsent &&
+      if (hasGrantedMLConsent &&
           (widget.collection?.canAutoAdd(userId) ?? false))
         EntePopupMenuItemAsync(
           (value) => (value?[widget.collection!.id]?.personIDs.isEmpty ?? true)
@@ -601,6 +619,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
+          widget.collection!.hasShareePinned()
+              ? AppLocalizations.of(context).unpinAlbum
+              : AppLocalizations.of(context).pinAlbum,
+          value: AlbumPopupAction.shareePinAlbum,
+          iconWidget: widget.collection!.hasShareePinned()
+              ? const Icon(CupertinoIcons.pin_slash)
+              : Transform.rotate(
+                  angle: 45 * math.pi / 180,
+                  child: const Icon(CupertinoIcons.pin),
+                ),
+        ),
+      if (galleryType == GalleryType.sharedCollection)
+        EntePopupMenuItem(
           widget.collection!.hasShareeArchived()
               ? AppLocalizations.of(context).unarchiveAlbum
               : AppLocalizations.of(context).archiveAlbum,
@@ -611,11 +642,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
+          widget.collection!.hasShareeHidden()
+              ? AppLocalizations.of(context).unhide
+              : AppLocalizations.of(context).hide,
+          value: AlbumPopupAction.sharedHide,
+          icon: widget.collection!.hasShareeHidden()
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+        ),
+      if (galleryType == GalleryType.sharedCollection)
+        EntePopupMenuItem(
           AppLocalizations.of(context).leaveAlbum,
           value: AlbumPopupAction.leave,
           icon: Icons.logout,
         ),
-      if (galleryType == GalleryType.localFolder)
+      if (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum)
         EntePopupMenuItem(
           AppLocalizations.of(context).freeUpDeviceSpace,
           value: AlbumPopupAction.freeUpSpace,
@@ -649,6 +690,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               context,
               widget.collection!,
               widget.collection!.isPinned ? 0 : 1,
+            );
+            if (mounted) setState(() {});
+          } else if (value == AlbumPopupAction.shareePinAlbum) {
+            await updateShareeOrder(
+              context,
+              widget.collection!,
+              widget.collection!.hasShareePinned() ? 0 : 1,
             );
             if (mounted) setState(() {});
           } else if (value == AlbumPopupAction.ownedArchive) {
@@ -694,6 +742,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             if (mounted) {
               setState(() {});
             }
+          } else if (value == AlbumPopupAction.sharedHide) {
+            final hasShareeHidden = widget.collection!.hasShareeHidden();
+            final int prevVisiblity =
+                hasShareeHidden ? hiddenVisibility : visibleVisibility;
+            final int newVisiblity =
+                hasShareeHidden ? visibleVisibility : hiddenVisibility;
+
+            await changeCollectionVisibility(
+              context,
+              collection: widget.collection!,
+              newVisibility: newVisiblity,
+              prevVisibility: prevVisiblity,
+              isOwner: false,
+            );
+            if (mounted) {
+              setState(() {});
+            }
           } else if (value == AlbumPopupAction.map) {
             await showOnMap();
           } else if (value == AlbumPopupAction.cleanUncategorized) {
@@ -720,6 +785,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (files == null || files.isEmpty) {
       return;
     }
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles(
+          files,
+          persistToFilesDB: false,
+        );
+      } catch (e, s) {
+        _logger.severe("Failed to download album", e, s);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final totalFiles = files.length;
     final dialog = createProgressDialog(
       context,
@@ -730,7 +808,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     try {
       for (var i = 0; i < files.length; i++) {
-        await downloadToGallery(files[i]);
+        await downloadToGallery(files[i], persistToFilesDB: false);
         dialog.update(message: "Downloading... ${i + 1}/$totalFiles");
       }
     } catch (e, s) {
@@ -787,9 +865,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> showOnMap() async {
-    if (!flagService.mapEnabled) {
+    if (!mapEnabled) {
       try {
-        await flagService.setMapEnabled(true);
+        await setMapEnabled(true);
       } catch (e) {
         showShortToast(
           context,
@@ -905,10 +983,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
       final int? userID = Configuration.instance.getUserID();
       final bool isOwner = userID == collection.owner.id;
-      final bool enableAdminRole = flagService.enableAdminRole;
       final CollectionParticipantRole role = collection.getRole(userID ?? -1);
-      final bool isAdmin =
-          enableAdminRole && role == CollectionParticipantRole.admin;
+      final bool isAdmin = role == CollectionParticipantRole.admin;
       final bool canManageParticipants = isOwner || isAdmin;
       if (canManageParticipants) {
         final bool shouldOpenManageLink =
@@ -1171,6 +1247,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           collectionFiles,
           0,
           "guest_view",
+          galleryType: galleryType,
         ),
       );
       await localSettings.setOnGuestView(true);

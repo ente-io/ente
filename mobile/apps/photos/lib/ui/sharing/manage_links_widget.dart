@@ -2,29 +2,34 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
+import "package:photos/core/errors.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/collection/public_url.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/public_link_layout_util.dart';
 import "package:photos/utils/share_util.dart";
-import 'package:photos/utils/standalone/date_time.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -46,16 +51,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     super.initState();
   }
 
-  String _getLayoutDisplayName(String layout, BuildContext context) {
-    switch (layout.toLowerCase()) {
-      case 'grouped':
-        return AppLocalizations.of(context).layoutGrouped;
-      case 'continuous':
-        return AppLocalizations.of(context).layoutContinuous;
+  String _getLayoutDisplayName(String? layout, BuildContext context) {
+    final normalizedLayout = normalizePublicLinkLayout(layout);
+    switch (normalizedLayout) {
+      case 'masonry':
+        return AppLocalizations.of(context).layoutMasonry;
       case 'trip':
         return AppLocalizations.of(context).layoutTrip;
-      default:
+      case 'grouped':
         return AppLocalizations.of(context).layoutGrouped;
+      default:
+        return AppLocalizations.of(context).layoutMasonry;
     }
   }
 
@@ -69,6 +75,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final isJoinEnabled =
         widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
+    final enableComment =
+        widget.collection!.publicURLs.firstOrNull?.enableComment ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue = CollectionsService.instance.getPublicUrl(
@@ -93,13 +101,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).albumLayout,
                       subTitle: _getLayoutDisplayName(
-                        widget.collection!.pubMagicMetadata.layout ?? "grouped",
+                        widget.collection!.pubMagicMetadata.layout ?? "masonry",
                         context,
                       ),
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
-                    surfaceExecutionStates: false,
                     onTap: () async {
                       // ignore: unawaited_futures
                       routeToPage(
@@ -117,12 +124,34 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       title: AppLocalizations.of(context).allowAddingPhotos,
                     ),
                     alignCaptionedTextToLeft: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    isBottomBorderRadiusRemoved: true,
+                    menuItemColor: enteColorScheme.fillFaint,
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isCollectEnabled,
                       onChanged: () async {
                         await _updateUrlSettings(context, {
                           'enableCollect': !isCollectEnabled,
+                        });
+                      },
+                    ),
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: enteColorScheme.fillFaint,
+                  ),
+                  MenuItemWidget(
+                    key: ValueKey("Enable comment $enableComment"),
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: AppLocalizations.of(context).enableComment,
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => enableComment,
+                      onChanged: () async {
+                        await _updateUrlSettings(context, {
+                          'enableComment': !enableComment,
                         });
                       },
                     ),
@@ -141,7 +170,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
-                    surfaceExecutionStates: false,
                     onTap: () async {
                       // ignore: unawaited_futures
                       routeToPage(
@@ -158,10 +186,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               ? AppLocalizations.of(context).expiredLinkInfo
                               : AppLocalizations.of(context).linkExpiresOn(
                                   expiryTime: getFormattedTime(
-                                    context,
                                     DateTime.fromMicrosecondsSinceEpoch(
                                       url.validTill,
                                     ),
+                                    context: context,
                                   ),
                                 ),
                         )
@@ -187,7 +215,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         setState(() {});
                       });
                     },
-                    surfaceExecutionStates: false,
                   ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
@@ -303,7 +330,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.error_outline,
                       leadingIconColor: getEnteColorScheme(context).warning500,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      isBottomBorderRadiusRemoved: true,
+                      singleBorderRadius: 8,
                     ),
                   if (!url.isExpired)
                     MenuItemWidget(
@@ -337,7 +364,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.code,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       showOnlyLoadingState: false,
-                      surfaceExecutionStates: false,
                       onTap: () async {
                         final embedHtml = CollectionsService.instance
                             .getEmbedHtml(widget.collection!);
@@ -365,10 +391,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.adaptive.share,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        // ignore: unawaited_futures
-                        await shareAlbumLinkWithPlaceholder(
+                        await shareAlbumLink(
                           context,
-                          widget.collection!,
                           urlValue,
                           sendLinkButtonKey,
                         );
@@ -396,7 +420,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             return QrCodeDialog(
                               data: urlValue,
                               title: widget.collection!.displayName,
-                              accentColor: enteColorScheme.primary500,
+                              accentColor: const Color(0xFF08C225),
                               shareFileName:
                                   'ente_qr_${widget.collection!.displayName}.png',
                               shareText:
@@ -409,7 +433,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                 text: 'ente',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Montserrat',
                                 ),
                               ),
                             );
@@ -428,7 +453,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     leadingIcon: Icons.remove_circle_outline,
                     leadingIconColor: warning500,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    surfaceExecutionStates: false,
                     onTap: () async {
                       final bool result = await sharingActions.disableUrl(
                         context,
@@ -487,8 +511,45 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       }
     } catch (e) {
       await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      if (e is LinkEditNotAllowedError) {
+        await _showLinkEditNotAllowedDialog(context);
+      } else {
+        await showGenericErrorDialog(context: context, error: e);
+      }
       rethrow;
+    }
+  }
+
+  Future<void> _showLinkEditNotAllowedDialog(BuildContext context) async {
+    final buttonResult = await showDialogWidget(
+      context: context,
+      title: AppLocalizations.of(context).sorry,
+      body: AppLocalizations.of(context).subscribeToChangeLinkSetting,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          labelText: AppLocalizations.of(context).subscribe,
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: AppLocalizations.of(context).ok,
+        ),
+      ],
+    );
+    if (buttonResult?.action == ButtonAction.first) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return getSubscriptionPage();
+          },
+        ),
+      );
     }
   }
 }

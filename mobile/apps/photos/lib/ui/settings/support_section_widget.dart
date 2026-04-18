@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
@@ -25,8 +23,6 @@ class SupportSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final String bugsEmail =
-        Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
         sectionOptionSpacing,
@@ -44,7 +40,7 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         AboutMenuItemWidget(
           title: AppLocalizations.of(context).help,
-          url: "https://ente.io/help",
+          url: "https://ente.com/help",
         ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -74,12 +70,12 @@ class SupportSectionWidget extends StatelessWidget {
             await sendLogs(
               context,
               AppLocalizations.of(context).reportBug,
-              bugsEmail,
+              supportEmail,
             );
           },
           onLongPress: () async {
             final zipFilePath = await getZippedLogsFile(context);
-            await shareLogs(context, bugsEmail, zipFilePath);
+            await shareLogs(context, supportEmail, zipFilePath);
           },
         ),
         sectionOptionSpacing,

@@ -134,9 +134,6 @@
   "thankYou": "Spas",
   "leave": "Derkeve",
   "rateTheApp": "Sepanê binirxîne",
-  "everywhere": "her der",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobile, Web, Desktop",
   "newToEnte": "Nû li Ente",
   "newest": "Herî nû",
   "invite": "Vexwîne",
@@ -164,7 +161,6 @@
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
-  "familyPlanPortalTitle": "Malbat",
   "androidBiometricSuccess": "Serkeftin",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
