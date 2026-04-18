@@ -111,7 +111,7 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "codegen"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "camino",
  "uniffi_bindgen",
