@@ -1,11 +1,7 @@
 //! Shared error types for account flows.
 
 use base64::DecodeError;
-use ente_core::{
-    auth::AuthError,
-    crypto::CryptoError,
-    http::Error as HttpError,
-};
+use ente_core::{auth::AuthError, crypto::CryptoError, http::Error as HttpError};
 use thiserror::Error;
 
 /// Result alias for the shared account crate.

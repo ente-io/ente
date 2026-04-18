@@ -7,7 +7,6 @@ use ente_core::{
     http::{Error as HttpError, HttpClient},
 };
 use std::time::Duration;
-use tokio::time::sleep;
 
 use crate::{
     error::{Error, Result},
@@ -21,7 +20,7 @@ use crate::{
         TwoFactorStatusResponse, TwoFactorType, UpdateSrpAndKeysRequest, UpdateSrpAndKeysResponse,
         VerifyEmailRequest, VerifySrpSessionRequest, VerifyTotpRequest,
     },
-    types::AccountsClientConfig,
+    types::{AccountsClientConfig, SleepFn},
 };
 
 const SRP_A_LEN: usize = 512;
@@ -57,16 +56,19 @@ fn require_srp_m2(auth_response: &AuthResponse) -> Result<&str> {
 pub struct AccountsClient {
     http: HttpClient,
     client_package: String,
+    sleep_fn: SleepFn,
 }
 
 impl AccountsClient {
     /// Construct a client from a config.
     pub fn new(config: AccountsClientConfig) -> Result<Self> {
         let client_package = config.client_package.clone();
+        let sleep_fn = config.sleep_fn();
         let http = HttpClient::new_with_config(config.into())?;
         Ok(Self {
             http,
             client_package,
+            sleep_fn,
         })
     }
 
@@ -78,6 +80,10 @@ impl AccountsClient {
     /// Return the client package associated with this client.
     pub fn client_package(&self) -> &str {
         &self.client_package
+    }
+
+    async fn sleep(&self, duration: Duration) {
+        (self.sleep_fn)(duration).await;
     }
 
     fn should_retry(error: &HttpError, policy: RetryPolicy) -> bool {
@@ -114,7 +120,7 @@ impl AccountsClient {
                         attempt,
                         MAX_RETRIES
                     );
-                    sleep(delay).await;
+                    self.sleep(delay).await;
                     delay = delay
                         .saturating_mul(2)
                         .min(Duration::from_millis(MAX_RETRY_DELAY_MS));
@@ -161,7 +167,7 @@ impl AccountsClient {
             .create_srp_session(&srp_attrs.srp_user_id, &a_pub)
             .await?;
 
-        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        self.sleep(Duration::from_millis(100)).await;
 
         let server_b = STANDARD.decode(&session.srp_b)?;
         let proof = srp_session.compute_m1(&server_b)?;
@@ -218,8 +224,10 @@ impl AccountsClient {
             email: email.to_string(),
             purpose: purpose.to_string(),
         };
-        self.execute(RetryPolicy::Default, || self.http.post_empty("/users/ott", &request))
-            .await
+        self.execute(RetryPolicy::Default, || {
+            self.http.post_empty("/users/ott", &request)
+        })
+        .await
     }
 
     /// Verify email ownership with an OTT.
@@ -312,8 +320,10 @@ impl AccountsClient {
     /// Logout the current authenticated session.
     pub async fn logout(&self) -> Result<()> {
         let body = serde_json::json!({});
-        self.execute(RetryPolicy::Default, || self.http.post_empty("/users/logout", &body))
-            .await
+        self.execute(RetryPolicy::Default, || {
+            self.http.post_empty("/users/logout", &body)
+        })
+        .await
     }
 
     /// Return whether two-factor is enabled.
@@ -398,9 +408,7 @@ impl AccountsClient {
     }
 
     /// Get passkey recovery status.
-    pub async fn get_two_factor_recovery_status(
-        &self,
-    ) -> Result<TwoFactorRecoveryStatusResponse> {
+    pub async fn get_two_factor_recovery_status(&self) -> Result<TwoFactorRecoveryStatusResponse> {
         self.execute(RetryPolicy::Default, || {
             self.http.get_json("/users/two-factor/recovery-status", &[])
         })
@@ -443,6 +451,10 @@ mod tests {
     use super::*;
     use crate::types::AccountsClientConfig;
     use mockito::Server;
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
 
     fn make_client(base_url: String) -> AccountsClient {
         AccountsClient::new(
@@ -473,6 +485,47 @@ mod tests {
         let client = make_client(server.url());
         client.send_otp("user@example.org", "login").await.unwrap();
 
+        first.assert_async().await;
+        second.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn send_otp_uses_configured_sleep_fn_for_retry() {
+        let mut server = Server::new_async().await;
+        let first = server
+            .mock("POST", "/users/ott")
+            .with_status(500)
+            .with_body("temporary failure")
+            .expect(1)
+            .create_async()
+            .await;
+        let second = server
+            .mock("POST", "/users/ott")
+            .with_status(200)
+            .expect(1)
+            .create_async()
+            .await;
+
+        let sleep_calls = Arc::new(AtomicUsize::new(0));
+        let client = AccountsClient::new(
+            AccountsClientConfig::new("io.ente.photos")
+                .with_base_url(server.url())
+                .with_user_agent("ente-accounts-test")
+                .with_sleep_fn({
+                    let sleep_calls = Arc::clone(&sleep_calls);
+                    move |_| {
+                        let sleep_calls = Arc::clone(&sleep_calls);
+                        async move {
+                            sleep_calls.fetch_add(1, Ordering::SeqCst);
+                        }
+                    }
+                }),
+        )
+        .unwrap();
+
+        client.send_otp("user@example.org", "login").await.unwrap();
+
+        assert_eq!(sleep_calls.load(Ordering::SeqCst), 1);
         first.assert_async().await;
         second.assert_async().await;
     }

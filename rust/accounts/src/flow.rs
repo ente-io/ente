@@ -26,7 +26,7 @@ use crate::{
         AuthResponse, ConfigurePasskeyRecoveryRequest, EnableTwoFactorRequest, KeyAttributes,
         RemoveTwoFactorRequest, SetRecoveryKeyRequest, SetupSrpRequest, SrpAttributes,
         TwoFactorAuthorizationResponse, TwoFactorRecoveryResponse, TwoFactorType,
-        UpdatedKeyAttr, UpdateSrpAndKeysRequest,
+        UpdateSrpAndKeysRequest, UpdatedKeyAttr,
     },
     types::{AccountSecrets, DEFAULT_ACCOUNTS_URL},
 };
@@ -843,7 +843,10 @@ where
 
         let srp_b = STANDARD.decode(&response.srp_b)?;
         let srp_m1 = STANDARD.encode(srp_session.compute_m1(&srp_b)?);
-        let complete = self.client.complete_srp_setup(&response.setup_id, &srp_m1).await?;
+        let complete = self
+            .client
+            .complete_srp_setup(&response.setup_id, &srp_m1)
+            .await?;
         let srp_m2 = STANDARD.decode(&complete.srp_m2)?;
         srp_session.verify_m2(&srp_m2).map_err(Error::from)?;
         Ok(())
@@ -1251,8 +1254,7 @@ mod tests {
             .mock("GET", Matcher::Any)
             .match_request(|request| {
                 request.path() == "/users/srp/attributes"
-                    && request.path_and_query()
-                        == "/users/srp/attributes?email=user%40example.org"
+                    && request.path_and_query() == "/users/srp/attributes?email=user%40example.org"
             })
             .with_status(200)
             .with_body(
@@ -1343,8 +1345,7 @@ mod tests {
             .mock("GET", Matcher::Any)
             .match_request(|request| {
                 request.path() == "/users/srp/attributes"
-                    && request.path_and_query()
-                        == "/users/srp/attributes?email=user%40example.org"
+                    && request.path_and_query() == "/users/srp/attributes?email=user%40example.org"
             })
             .with_status(200)
             .with_body(
@@ -1422,8 +1423,7 @@ mod tests {
             .mock("GET", Matcher::Any)
             .match_request(|request| {
                 request.path() == "/users/srp/attributes"
-                    && request.path_and_query()
-                        == "/users/srp/attributes?email=user%40example.org"
+                    && request.path_and_query() == "/users/srp/attributes?email=user%40example.org"
             })
             .with_status(200)
             .with_body(
@@ -1511,8 +1511,7 @@ mod tests {
             .mock("GET", Matcher::Any)
             .match_request(|request| {
                 request.path() == "/users/srp/attributes"
-                    && request.path_and_query()
-                        == "/users/srp/attributes?email=user%40example.org"
+                    && request.path_and_query() == "/users/srp/attributes?email=user%40example.org"
             })
             .with_status(200)
             .with_body(
@@ -1570,7 +1569,10 @@ mod tests {
 
         match error {
             Error::AuthenticationFailed(message) => {
-                assert_eq!(message, "Too many incorrect TOTP attempts. Please restart login.");
+                assert_eq!(
+                    message,
+                    "Too many incorrect TOTP attempts. Please restart login."
+                );
             }
             other => panic!("unexpected error: {other:?}"),
         }
@@ -1662,7 +1664,8 @@ mod tests {
                 let payload: ConfigurePasskeyRecoveryPayload = parse_request_body(request);
                 let cipher = crypto::decode_b64(&payload.user_secret_cipher).unwrap();
                 let nonce = crypto::decode_b64(&payload.user_secret_nonce).unwrap();
-                let decrypted = secretbox::decrypt(&cipher, &nonce, &expected_recovery_key).unwrap();
+                let decrypted =
+                    secretbox::decrypt(&cipher, &nonce, &expected_recovery_key).unwrap();
                 assert_eq!(payload.secret, "reset-secret");
                 assert_eq!(String::from_utf8(decrypted).unwrap(), "reset-secret");
                 Vec::new()
@@ -1700,8 +1703,7 @@ mod tests {
             .mock("GET", Matcher::Any)
             .match_request(|request| {
                 request.path() == "/users/srp/attributes"
-                    && request.path_and_query()
-                        == "/users/srp/attributes?email=user%40example.org"
+                    && request.path_and_query() == "/users/srp/attributes?email=user%40example.org"
             })
             .with_status(200)
             .with_body(
@@ -2074,15 +2076,22 @@ mod tests {
             .with_body_from_request(move |request| {
                 let payload: UpdateSrpPayload = parse_request_body(request);
                 let state = &mut *state_for_update.lock().unwrap();
-                assert_eq!(payload.setup_id, state.pending_setup_id.unwrap().to_string());
-                assert_eq!(STANDARD.decode(&payload.srp_m1).unwrap(), state.pending_client_proof.as_ref().unwrap().clone());
+                assert_eq!(
+                    payload.setup_id,
+                    state.pending_setup_id.unwrap().to_string()
+                );
+                assert_eq!(
+                    STANDARD.decode(&payload.srp_m1).unwrap(),
+                    state.pending_client_proof.as_ref().unwrap().clone()
+                );
                 assert!(payload.log_out_other_devices);
-                state.remote_srp_attributes = state.remote_srp_attributes.clone().map(|mut attrs| {
-                    attrs.mem_limit = payload.updated_key_attr.mem_limit;
-                    attrs.ops_limit = payload.updated_key_attr.ops_limit;
-                    attrs.kek_salt = payload.updated_key_attr.kek_salt.clone();
-                    attrs
-                });
+                state.remote_srp_attributes =
+                    state.remote_srp_attributes.clone().map(|mut attrs| {
+                        attrs.mem_limit = payload.updated_key_attr.mem_limit;
+                        attrs.ops_limit = payload.updated_key_attr.ops_limit;
+                        attrs.kek_salt = payload.updated_key_attr.kek_salt.clone();
+                        attrs
+                    });
                 serde_json::json!({
                     "setupID": payload.setup_id,
                     "srpM2": STANDARD.encode(state.pending_server_proof.as_ref().unwrap()),
@@ -2096,7 +2105,10 @@ mod tests {
         let state_for_attrs = Arc::clone(&state);
         let get_srp_attributes = server
             .mock("GET", "/users/srp/attributes")
-            .match_query(Matcher::UrlEncoded("email".into(), "user@example.org".into()))
+            .match_query(Matcher::UrlEncoded(
+                "email".into(),
+                "user@example.org".into(),
+            ))
             .with_status(200)
             .with_body_from_request(move |_| {
                 let state = state_for_attrs.lock().unwrap();
