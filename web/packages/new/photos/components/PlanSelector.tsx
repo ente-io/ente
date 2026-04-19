@@ -521,7 +521,7 @@ const Plans: React.FC<PlansProps> = ({
                     onPlanSelect={onPlanSelect}
                 />
             ))}
-        {!(subscription && isSubscriptionActivePaid(subscription)) &&
+        {(!subscription || isSubscriptionFree(subscription)) &&
             !hasAddOnBonus &&
             plansData?.freePlan && (
                 <FreePlanRow
