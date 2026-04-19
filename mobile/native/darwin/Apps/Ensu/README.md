@@ -45,14 +45,14 @@ Create a release archive:
 ```sh
 xcodebuild archive -scheme Ensu \
   -destination 'generic/platform=iOS' \
-  -archivePath build/Archive/Ensu.xcarchive
+  -archivePath build/Ensu.xcarchive
 ```
 
 Export an IPA from the archive:
 
 ```sh
 xcodebuild -exportArchive \
-  -archivePath build/Archive/Ensu.xcarchive \
+  -archivePath build/Ensu.xcarchive \
   -exportPath build/Export \
   -exportOptionsPlist ExportOptions-AppStore.plist
 ```
