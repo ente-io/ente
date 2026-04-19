@@ -18,6 +18,50 @@ REPO_ROOT="$(cd "${SRCROOT}/../../../../.." && pwd)"
 OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
 GENERATED_DIR="${SRCROOT}/Ensu/Generated"
 
+CARGO_BIN_DIR="${CARGO_HOME:-${HOME}/.cargo}/bin"
+if [ -d "${CARGO_BIN_DIR}" ]; then
+  export PATH="${CARGO_BIN_DIR}:${PATH}"
+fi
+
+find_tool() {
+  tool_name="$1"
+  shift
+
+  tool_path="$(command -v "${tool_name}" 2>/dev/null || true)"
+  if [ -n "${tool_path}" ]; then
+    printf '%s\n' "${tool_path}"
+    return 0
+  fi
+
+  for candidate in "$@"; do
+    if [ -x "${candidate}" ]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+CARGO_BIN="$(find_tool cargo "${CARGO_BIN_DIR}/cargo" || true)"
+RUSTUP_BIN="$(find_tool rustup "${CARGO_BIN_DIR}/rustup" || true)"
+CMAKE_BIN="$(find_tool cmake /opt/homebrew/bin/cmake /usr/local/bin/cmake /Applications/CMake.app/Contents/bin/cmake || true)"
+
+if [ -z "${CARGO_BIN}" ] || [ -z "${RUSTUP_BIN}" ]; then
+  echo "Rust tools not found in PATH for Xcode." >&2
+  echo "Expected to find cargo and rustup, usually under ${CARGO_BIN_DIR}." >&2
+  exit 1
+fi
+
+if [ -z "${CMAKE_BIN}" ]; then
+  echo "cmake not found for Xcode." >&2
+  echo "Expected to find cmake on PATH or at /opt/homebrew/bin/cmake, /usr/local/bin/cmake, or /Applications/CMake.app/Contents/bin/cmake." >&2
+  exit 1
+fi
+
+export CMAKE="${CMAKE_BIN}"
+export PATH="$(dirname "${CMAKE_BIN}"):${PATH}"
+
 mkdir -p "${OUT_DIR}"
 mkdir -p "${GENERATED_DIR}"
 
@@ -79,82 +123,15 @@ bindings_missing() {
   return 1
 }
 
-generate_swift_binding() {
-  crate_dir="$1"
-  dylib_name="$2"
-
-  (
-    cd "${crate_dir}"
-    cargo build --locked --release
-    uniffi-bindgen generate "target/release/${dylib_name}" --language swift --out-dir "${GENERATED_DIR}"
-  )
-}
-
-sanitize_generated_swift_bindings() {
-  swift_file="$1"
-
-  if [ ! -f "${swift_file}" ]; then
-    return
-  fi
-
-  perl -0pi -e 's@try! rustCall \{ (uniffi_(?:db|sync)_fn_free_[^(]+\([^)]*\)) \}@// Avoid aborting the host app if Rust-side teardown fails during process shutdown.\n        try? rustCall { $1 }@g' "${swift_file}"
-}
-
 ensure_generated_bindings() {
   if ! bindings_missing; then
     return
   fi
 
-  if ! command -v uniffi-bindgen >/dev/null 2>&1; then
-    echo "Missing generated UniFFI Swift bindings in ${GENERATED_DIR}." >&2
-    echo "Install uniffi-bindgen and retry the build." >&2
-    exit 1
-  fi
-
-  echo "Generating missing UniFFI Swift bindings..."
-  mkdir -p "${GENERATED_DIR}"
-  generate_swift_binding "${REPO_ROOT}/rust/uniffi/core" "libcore.dylib"
-  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.dylib"
-  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
-  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/inference" "libinference.dylib"
-  sanitize_generated_swift_bindings "${GENERATED_DIR}/db.swift"
-  sanitize_generated_swift_bindings "${GENERATED_DIR}/sync.swift"
-}
-
-HOST_LIB_EXT="dylib"
-
-ensure_uniffi_bindgen() {
-  if command -v uniffi-bindgen >/dev/null 2>&1; then
-    version="$(uniffi-bindgen --version 2>/dev/null || true)"
-    if printf "%s" "${version}" | grep -q "0.31."; then
-      return
-    fi
-    echo "Found incompatible ${version}, installing uniffi-bindgen 0.31.x"
-  fi
-
-  cargo install --locked --version 0.31.0 uniffi --features cli --bin uniffi-bindgen
-}
-
-generate_swift_bindings() {
-  crate_name="$1"      # e.g. core
-  crate_dir="$2"       # absolute path
-  lib_stem="$3"        # e.g. core
-
-  echo "🧩 Generating Swift bindings for ${crate_name}"
-  rm -f "${GENERATED_DIR}/${crate_name}.swift" \
-        "${GENERATED_DIR}/${crate_name}FFI.h" \
-        "${GENERATED_DIR}/${crate_name}FFI.modulemap"
-
-  (cd "${crate_dir}" && cargo build ${CARGO_FLAGS})
-
-  host_lib_path="${crate_dir}/target/${PROFILE}/lib${lib_stem}.${HOST_LIB_EXT}"
-  if [ ! -f "${host_lib_path}" ]; then
-    echo "Expected host library not found: ${host_lib_path}" >&2
-    exit 1
-  fi
-
-  (cd "${crate_dir}" && uniffi-bindgen generate "${host_lib_path}" --language swift --out-dir "${GENERATED_DIR}" --crate "${crate_name}")
-  sanitize_generated_swift_bindings "${GENERATED_DIR}/${crate_name}.swift"
+  echo "Missing generated UniFFI Swift bindings in ${GENERATED_DIR}." >&2
+  echo "Run the repo-local codegen step first:" >&2
+  echo "  cd \"${REPO_ROOT}/rust\" && cargo codegen ensu-ios" >&2
+  exit 1
 }
 
 # Map Xcode platform+arch to Rust target triple.
@@ -214,13 +191,8 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 # Ensure host builds (build scripts) use the macOS SDK.
 export SDKROOT="${HOST_SDKROOT}"
 
-ensure_uniffi_bindgen
 ensure_generated_bindings
 write_endpoint_config
-generate_swift_bindings "core" "${REPO_ROOT}/rust/uniffi/core" "core"
-generate_swift_bindings "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "db"
-generate_swift_bindings "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "sync"
-generate_swift_bindings "inference" "${REPO_ROOT}/rust/uniffi/ensu/inference" "inference"
 
 build_crate_universal() {
   crate_name="$1"           # e.g. core
@@ -238,9 +210,9 @@ build_crate_universal() {
       continue
     fi
 
-    if ! rustup target list --installed | grep -q "^${target}$"; then
+    if ! "${RUSTUP_BIN}" target list --installed | grep -q "^${target}$"; then
       echo "Installing Rust target ${target}..."
-      rustup target add "${target}"
+      "${RUSTUP_BIN}" target add "${target}"
     fi
 
     target_env="$(echo "${target}" | tr '[:lower:]-' '[:upper:]_')"
@@ -261,7 +233,7 @@ build_crate_universal() {
     fi
 
     echo "Building ${crate_name} for ${PLATFORM_NAME} ${arch} (${target}) [${PROFILE}]"
-    (cd "${crate_dir}" && RUSTFLAGS="${RUSTFLAGS_TARGET}" cargo build ${CARGO_FLAGS} --target "${target}")
+    (cd "${crate_dir}" && RUSTFLAGS="${RUSTFLAGS_TARGET}" "${CARGO_BIN}" build ${CARGO_FLAGS} --target "${target}")
 
     lib_path="${crate_dir}/target/${target}/${PROFILE}/${lib_name}"
     if [ ! -f "${lib_path}" ]; then
