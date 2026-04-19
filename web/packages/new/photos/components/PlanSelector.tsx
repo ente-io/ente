@@ -19,6 +19,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
     errorDialogAttributes,
@@ -320,7 +321,10 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Typography variant="h3">{t("choose_plan")}</Typography>
+        <SpacedRow sx={{ alignItems: "flex-start" }}>
+            <Typography variant="h3">{t("choose_plan")}</Typography>
+            <DialogCloseIconButton {...{ onClose }} />
+        </SpacedRow>
         <Stack sx={{ gap: 3 }}>
             <Box>
                 <PeriodToggler
