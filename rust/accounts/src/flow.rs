@@ -304,6 +304,30 @@ where
             .await
     }
 
+    /// Create a new account after the caller has already sent and collected a signup OTP.
+    pub async fn create_account_with_otp(
+        &mut self,
+        params: CreateAccountParams,
+        otp: &str,
+    ) -> Result<AuthenticatedAccount> {
+        crypto::init()?;
+
+        let email = params.email;
+        let password = params.password;
+        let verification = self
+            .client
+            .verify_email(&email, otp, params.source.as_deref())
+            .await?;
+
+        self.finish_verified_signup(
+            email,
+            password,
+            verification,
+            KeyDerivationStrength::Sensitive,
+        )
+        .await
+    }
+
     /// Login to an existing account.
     pub async fn login(&mut self, params: LoginParams) -> Result<AuthenticatedAccount> {
         crypto::init()?;
@@ -643,6 +667,17 @@ where
             .verify_email_otp(&email, OtpPurpose::Signup, params.source.as_deref())
             .await?;
 
+        self.finish_verified_signup(email, password, verification, key_derivation_strength)
+            .await
+    }
+
+    async fn finish_verified_signup(
+        &self,
+        email: String,
+        password: Zeroizing<String>,
+        verification: AuthResponse,
+        key_derivation_strength: KeyDerivationStrength,
+    ) -> Result<AuthenticatedAccount> {
         let token = verification.token.clone().ok_or_else(|| {
             Error::AuthenticationFailed("Signup verification did not return a session token".into())
         })?;
