@@ -237,18 +237,7 @@
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libinference.a",
-				"$(SRCROOT)/Ensu/Generated/core.swift",
-				"$(SRCROOT)/Ensu/Generated/coreFFI.h",
-				"$(SRCROOT)/Ensu/Generated/coreFFI.modulemap",
-				"$(SRCROOT)/Ensu/Generated/db.swift",
-				"$(SRCROOT)/Ensu/Generated/dbFFI.h",
-				"$(SRCROOT)/Ensu/Generated/dbFFI.modulemap",
-				"$(SRCROOT)/Ensu/Generated/sync.swift",
-				"$(SRCROOT)/Ensu/Generated/syncFFI.h",
-				"$(SRCROOT)/Ensu/Generated/syncFFI.modulemap",
-				"$(SRCROOT)/Ensu/Generated/inference.swift",
-				"$(SRCROOT)/Ensu/Generated/inferenceFFI.h",
-				"$(SRCROOT)/Ensu/Generated/inferenceFFI.modulemap",
+				"$(SRCROOT)/Ensu/Generated/EndpointConfig.swift",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

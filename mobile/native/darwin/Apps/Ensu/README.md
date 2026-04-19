@@ -1,102 +1,66 @@
-# Ensu Apple Platforms
+# Ensu for iOS
 
-## Build (Terminal)
+Source code for the Ensu iOS app.
 
-All commands below assume you run them from `darwin/Apps/Ensu`.
+To know more about Ente, see [our main README](../../../../../README.md) or
+visit [ente.com](https://ente.com).
 
-## Quick scripts
+## Building from source
 
-```bash
-./setup-mac.sh             # Check prerequisites and resolve packages
-./build.sh                 # Debug build for iOS simulator (prefers booted iPhone)
-./build.sh device          # Debug build for connected iOS device
-./build.sh archive         # Release archive (.xcarchive)
-./build.sh ipa             # Release IPA export (uses ExportOptions-AppStore.plist)
-./run.sh                   # Build + install + launch on iOS simulator (prefers booted iPhone)
-```
+1. Install [Xcode](https://developer.apple.com/xcode/),
+[Rust](https://www.rust-lang.org/tools/install), and CMake (e.g.
+`brew install cmake`).
 
-Helpful flags:
+2. Generate the Rust bindings:
 
-- `--destination-id <id>` to force a specific simulator/device
-- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
-- `--archive-path`, `--export-path`, `--export-options-plist` for release flows
-- `--skip-build` for `run.sh`
+    ```sh
+    cd rust
+    cargo codegen ensu-ios
+    ```
 
-Run `./build.sh --help` or `./run.sh --help` for full options.
+3. Open `Ensu.xcodeproj` in Xcode and run the `Ensu` scheme.
 
-The helper scripts default release outputs to `build/Archive/Ensu.xcarchive` and `build/Export/`
-unless you override them.
+That's it. From here on it's a normal iOS project.
 
-cmake is a prerequisite (e.g. `brew install cmake`).
+> [!NOTE]
+>
+> Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/uniffi` changes.
 
-## Generated bindings & dependencies
+#### Custom API endpoint
 
-- On a fresh checkout, from the repo root run the repo-local codegen step before any Xcode build:
+To connect to a custom endpoint, define
+`ENTE_API_ENDPOINT` either via `xcodebuild ENTE_API_ENDPOINT=http://localhost:8080 ...` or by editing the user-defined `ENTE_API_ENDPOINT` build setting in the
+`Ensu` target.
 
-```bash
-cd rust
-cargo codegen ensu-ios
-```
+## Terminal builds
 
-- SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
-- UniFFI Swift bindings are generated locally and gitignored:
-  - `Ensu/Generated/core*`, `Ensu/Generated/db*`, `Ensu/Generated/sync*`, `Ensu/Generated/inference*`
+If you want to build from the terminal instead of Xcode,
 
-The Xcode build script (`scripts/build-rust.sh`) builds the Rust static libs directly into
-`$(TARGET_TEMP_DIR)/ensu_rust` and consumes the generated `core`, `db`, `sync`, and `inference`
-Swift bindings from `Ensu/Generated/`. It does not generate bindings or install tools.
-
-### Debug Build (Simulator)
-```bash
-cd darwin/Apps/Ensu
+```sh
 xcodebuild \
   -scheme Ensu \
   -configuration Debug \
   -sdk iphonesimulator \
-  -destination 'platform=iOS Simulator,name=iPhone 17'
-```
-
-## Tests
-
-Run the app-hosted inference integration test from Terminal with `TEST_RUNNER_...` environment
-variables so they reach the XCTest runner process:
-
-```bash
-cd darwin/Apps/Ensu
-TEST_RUNNER_ENSU_TEST_MODEL=/path/to/model.gguf \
-TEST_RUNNER_ENSU_TEST_MMPROJ=/path/to/mmproj.gguf \
-TEST_RUNNER_ENSU_TEST_IMAGE=/path/to/image.png \
-xcodebuild test \
-  -scheme Ensu \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
   SWIFT_ENABLE_EXPLICIT_MODULES=NO
 ```
 
-### Debug Build (Device)
-```bash
-cd darwin/Apps/Ensu
-xcodebuild \
-  -scheme Ensu \
-  -configuration Debug \
-  -sdk iphoneos \
-  -destination 'generic/platform=iOS'
-```
+Release archive:
 
-### Release Build (Archive)
-```bash
-cd darwin/Apps/Ensu
+```sh
 xcodebuild \
   -scheme Ensu \
   -configuration Release \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
   -archivePath build/Archive/Ensu.xcarchive \
-  archive
+  archive \
+  SWIFT_ENABLE_EXPLICIT_MODULES=NO
 ```
 
-### Release IPA (App Store)
-```bash
-cd darwin/Apps/Ensu
+Export an IPA from the archive:
+
+```sh
 xcodebuild \
   -exportArchive \
   -archivePath build/Archive/Ensu.xcarchive \
@@ -104,37 +68,16 @@ xcodebuild \
   -exportOptionsPlist ExportOptions-AppStore.plist
 ```
 
-## Installation (Terminal)
+### Tests
 
-### Debug (Simulator)
-```bash
-cd darwin/Apps/Ensu
-./run.sh
-```
+Run the app-hosted inference integration test with these environment variables:
 
-### Debug (Physical Device)
-```bash
-cd darwin/Apps/Ensu
-./build.sh device --destination-id <DEVICE_UDID>
-```
-
-Install the built app from Xcode or `devicectl` using the product under Xcode `DerivedData`.
-
-### Release (IPA)
-Install the exported IPA via Apple Configurator or TestFlight after `xcodebuild -exportArchive`.
-
-Note: App Store IPA export requires valid distribution signing certificate/profile on this machine.
-
-## Custom API Endpoint
-
-Set the endpoint at build time using `ENTE_API_ENDPOINT`. If it is not set, the app defaults to `https://api.ente.io`.
-
-```bash
-cd darwin/Apps/Ensu
-ENTE_API_ENDPOINT="https://your-endpoint.example" \
-  xcodebuild \
+```sh
+TEST_RUNNER_ENSU_TEST_MODEL=/path/to/model.gguf \
+TEST_RUNNER_ENSU_TEST_MMPROJ=/path/to/mmproj.gguf \
+TEST_RUNNER_ENSU_TEST_IMAGE=/path/to/image.png \
+xcodebuild test \
   -scheme Ensu \
-  -configuration Debug \
-  -sdk iphonesimulator \
-  -destination 'platform=iOS Simulator,name=iPhone 17'
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  SWIFT_ENABLE_EXPLICIT_MODULES=NO
 ```
