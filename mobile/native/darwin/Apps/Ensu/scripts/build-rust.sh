@@ -23,14 +23,44 @@ if [ -d "${CARGO_BIN_DIR}" ]; then
   export PATH="${CARGO_BIN_DIR}:${PATH}"
 fi
 
-CARGO_BIN="$(command -v cargo || true)"
-RUSTUP_BIN="$(command -v rustup || true)"
+find_tool() {
+  tool_name="$1"
+  shift
+
+  tool_path="$(command -v "${tool_name}" 2>/dev/null || true)"
+  if [ -n "${tool_path}" ]; then
+    printf '%s\n' "${tool_path}"
+    return 0
+  fi
+
+  for candidate in "$@"; do
+    if [ -x "${candidate}" ]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+CARGO_BIN="$(find_tool cargo "${CARGO_BIN_DIR}/cargo" || true)"
+RUSTUP_BIN="$(find_tool rustup "${CARGO_BIN_DIR}/rustup" || true)"
+CMAKE_BIN="$(find_tool cmake /opt/homebrew/bin/cmake /usr/local/bin/cmake /Applications/CMake.app/Contents/bin/cmake || true)"
 
 if [ -z "${CARGO_BIN}" ] || [ -z "${RUSTUP_BIN}" ]; then
   echo "Rust tools not found in PATH for Xcode." >&2
   echo "Expected to find cargo and rustup, usually under ${CARGO_BIN_DIR}." >&2
   exit 1
 fi
+
+if [ -z "${CMAKE_BIN}" ]; then
+  echo "cmake not found for Xcode." >&2
+  echo "Expected to find cmake on PATH or at /opt/homebrew/bin/cmake, /usr/local/bin/cmake, or /Applications/CMake.app/Contents/bin/cmake." >&2
+  exit 1
+fi
+
+export CMAKE="${CMAKE_BIN}"
+export PATH="$(dirname "${CMAKE_BIN}"):${PATH}"
 
 mkdir -p "${OUT_DIR}"
 mkdir -p "${GENERATED_DIR}"
