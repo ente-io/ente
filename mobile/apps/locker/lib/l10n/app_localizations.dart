@@ -279,7 +279,7 @@ abstract class AppLocalizations {
   /// No description provided for @cloudOnly.
   ///
   /// In en, this message translates to:
-  /// **'Cloud only'**
+  /// **'Remove offline'**
   String get cloudOnly;
 
   /// No description provided for @savingOffline.
