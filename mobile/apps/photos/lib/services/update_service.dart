@@ -22,7 +22,7 @@ enum ChangeLogAction {
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 49;
+  static const currentChangeLogVersion = 50;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
