@@ -1529,6 +1529,7 @@ export class FileViewerPhotoSwipe {
                 appendTo: "root",
                 html: bottomRightControlsHTML(),
                 onInit: (element, pswp) => {
+                    element.classList.add("pswp__hide-on-close");
                     const captionEl =
                         element.querySelector<HTMLElement>(".pswp__caption")!;
                     // Get the action buttons container.
@@ -1703,8 +1704,11 @@ export class FileViewerPhotoSwipe {
 
         // Toggle controls infrastructure
 
-        const handleToggleUIControls = () =>
-            pswp.element!.classList.toggle("pswp--ui-visible");
+        const areUIControlsVisible = () =>
+            pswp.element?.classList.contains("pswp--ui-visible") ?? false;
+        const setUIControlsVisible = (visible: boolean) => {
+            pswp.element?.classList.toggle("pswp--ui-visible", visible);
+        };
 
         // Return true if the current keyboard focus is on any of the UI
         // controls (e.g. as a result of user tabbing through them).
@@ -1748,6 +1752,7 @@ export class FileViewerPhotoSwipe {
 
         // Timer for controlling inactivity. User activity clears and resets it.
         let idleTimer: ReturnType<typeof setTimeout> | undefined;
+        let isUIAutoHidden = false;
 
         const clearIdleTimer = () => {
             if (idleTimer) {
@@ -1755,35 +1760,68 @@ export class FileViewerPhotoSwipe {
                 idleTimer = undefined;
             }
         };
-        const clearIdleState = () => {
+        const clearIdleAutoHideState = () => {
             clearIdleTimer();
-            pswp.element?.classList.remove("pswp--idle");
+            isUIAutoHidden = false;
+        };
+        const scheduleUIControlsAutoHide = () => {
+            if (!isIdleAutoHideEnabled() || !areUIControlsVisible()) return;
+
+            clearIdleTimer();
+            idleTimer = setTimeout(() => {
+                // Keep the controls visible while keyboard focus is still on
+                // one of the auto-hidden bars.
+                if (
+                    isIdleAutoHideEnabled() &&
+                    areUIControlsVisible() &&
+                    !isFocusVisibledOnAutoHideableUIControl()
+                ) {
+                    setUIControlsVisible(false);
+                    isUIAutoHidden = true;
+                }
+                idleTimer = undefined;
+            }, 3000);
         };
 
         // Any user activity should bring the viewer back out of the idle state.
         const handleViewerActivity = () => {
             // Idle auto-hide is only enabled for the fullscreen viewer UI.
             if (!isIdleAutoHideEnabled()) {
-                clearIdleState();
+                clearIdleTimer();
+                if (isUIAutoHidden) {
+                    setUIControlsVisible(true);
+                    isUIAutoHidden = false;
+                }
                 return;
             }
 
-            // Clearing the timer and removing the idle class,
-            // if it was already in an idle state.
-            clearIdleState();
+            if (isUIAutoHidden) {
+                setUIControlsVisible(true);
+                isUIAutoHidden = false;
+            }
 
-            // Setting the timer to add the idle class after 3000ms
-            idleTimer = setTimeout(() => {
-                // Keep the controls visible while keyboard focus is still on
-                // one of the auto-hidden bars.
-                if (
-                    isIdleAutoHideEnabled() &&
-                    !isFocusVisibledOnAutoHideableUIControl()
-                ) {
-                    pswp.element?.classList.add("pswp--idle");
-                }
-                idleTimer = undefined;
-            }, 3000);
+            if (areUIControlsVisible()) {
+                scheduleUIControlsAutoHide();
+            } else {
+                clearIdleTimer();
+            }
+        };
+        const handleViewerClick = (e: MouseEvent) => {
+            if (isIdleAutoHideEnabled() && isUIAutoHidden) {
+                handleViewerActivity();
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+
+            handleViewerActivity();
+        };
+
+        const handleToggleUIControls = () => {
+            const willBeVisible = !areUIControlsVisible();
+            clearIdleAutoHideState();
+            setUIControlsVisible(willBeVisible);
+            if (willBeVisible) scheduleUIControlsAutoHide();
         };
 
         // Some actions routed via the delegate
@@ -1801,8 +1839,6 @@ export class FileViewerPhotoSwipe {
         const handleHelp = () => delegate.performKeyAction("help");
 
         pswp.on("keydown", (pswpEvent) => {
-            handleViewerActivity();
-
             // Ignore keyboard events when one of our sub-dialogs are open.
             if (delegate.shouldIgnoreKeyboardEvent()) {
                 pswpEvent.preventDefault();
@@ -1814,6 +1850,14 @@ export class FileViewerPhotoSwipe {
             const key = e.key;
             // Even though we ignore shift, Caps lock might still be on.
             const lkey = e.key.toLowerCase();
+
+            if (isUIAutoHidden && lkey == "h") {
+                handleViewerActivity();
+                pswpEvent.preventDefault();
+                return;
+            }
+
+            handleViewerActivity();
 
             // When one of the controls on the screen has a visible focus
             // indicator, we want the Escape key to blur its focus instead of
@@ -1960,7 +2004,9 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("initialLayout", () => {
             pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
-            pswp.element!.addEventListener("mousedown", handleViewerActivity);
+            pswp.element!.addEventListener("click", handleViewerClick, {
+                capture: true,
+            });
             pswp.element!.addEventListener("mousemove", handleViewerActivity);
             pswp.element!.addEventListener("wheel", handleViewerActivity);
             document.addEventListener(
@@ -1977,7 +2023,9 @@ export class FileViewerPhotoSwipe {
                 "mousedown",
                 blurMediaChromeFocus,
             );
-            pswp.element?.removeEventListener("mousedown", handleViewerActivity);
+            pswp.element?.removeEventListener("click", handleViewerClick, {
+                capture: true,
+            });
             pswp.element?.removeEventListener("mousemove", handleViewerActivity);
             pswp.element?.removeEventListener("wheel", handleViewerActivity);
             document.removeEventListener(
@@ -1991,7 +2039,7 @@ export class FileViewerPhotoSwipe {
             if (hideControlsTimer) {
                 clearTimeout(hideControlsTimer);
             }
-            clearIdleState();
+            clearIdleAutoHideState();
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
