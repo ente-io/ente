@@ -837,6 +837,7 @@ export class FileViewerPhotoSwipe {
                     handleMouseMoveInFullscreen,
                 );
             }
+            handleViewerActivity();
         };
 
         /**
@@ -1771,9 +1772,12 @@ export class FileViewerPhotoSwipe {
             typeof window != "undefined" &&
             "matchMedia" in window &&
             window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+        const isIdleAutoHideEnabled = () =>
+            shouldAutoHideViewerUI &&
+            !!document.fullscreenElement &&
+            !pswp.element?.classList.contains("pswp--video-fullscreen");
 
-        // Timer for controling the inactivity. On each mouse movement
-        // this timer is cleared by the handleIdleMouse.
+        // Timer for controlling inactivity. User activity clears and resets it.
         let idleTimer: ReturnType<typeof setTimeout> | undefined;
 
         const clearIdleTimer = () => {
@@ -1782,23 +1786,31 @@ export class FileViewerPhotoSwipe {
                 idleTimer = undefined;
             }
         };
-
-        // This function is trigged on each mouse movement,
-        // we have added a eventListener mousedown for the same.
-        const handleIdleMouseMove = () => {
-            // Checking if any of the controls have mouse focus.
-            if (!shouldAutoHideViewerUI) return;
-
-            // Clearning the timer and removing the idle class,
-            // If it was already on a idle state.
+        const clearIdleState = () => {
             clearIdleTimer();
             pswp.element?.classList.remove("pswp--idle");
+        };
+
+        // Any user activity should bring the viewer back out of the idle state.
+        const handleViewerActivity = () => {
+            // Idle auto-hide is only enabled for the fullscreen viewer UI.
+            if (!isIdleAutoHideEnabled()) {
+                clearIdleState();
+                return;
+            }
+
+            // Clearing the timer and removing the idle class,
+            // if it was already in an idle state.
+            clearIdleState();
 
             // Setting the timer to add the idle class after 2000ms
             idleTimer = setTimeout(() => {
                 // Keep the controls visible while keyboard focus is still on
                 // one of the auto-hidden bars.
-                if (!isFocusVisibledOnAutoHideableUIControl()) {
+                if (
+                    isIdleAutoHideEnabled() &&
+                    !isFocusVisibledOnAutoHideableUIControl()
+                ) {
                     pswp.element?.classList.add("pswp--idle");
                 }
                 idleTimer = undefined;
@@ -1820,6 +1832,8 @@ export class FileViewerPhotoSwipe {
         const handleHelp = () => delegate.performKeyAction("help");
 
         pswp.on("keydown", (pswpEvent) => {
+            handleViewerActivity();
+
             // Ignore keyboard events when one of our sub-dialogs are open.
             if (delegate.shouldIgnoreKeyboardEvent()) {
                 pswpEvent.preventDefault();
@@ -1977,12 +1991,14 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("initialLayout", () => {
             pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
-            pswp.element!.addEventListener("mousemove", handleIdleMouseMove);
+            pswp.element!.addEventListener("mousedown", handleViewerActivity);
+            pswp.element!.addEventListener("mousemove", handleViewerActivity);
+            pswp.element!.addEventListener("wheel", handleViewerActivity);
             document.addEventListener(
                 "fullscreenchange",
                 handleFullscreenChange,
             );
-            handleIdleMouseMove();
+            handleViewerActivity();
         });
 
         // The PhotoSwipe dialog has being closed and the animations have
@@ -1992,7 +2008,9 @@ export class FileViewerPhotoSwipe {
                 "mousedown",
                 blurMediaChromeFocus,
             );
-            pswp.element?.removeEventListener("mousemove", handleIdleMouseMove);
+            pswp.element?.removeEventListener("mousedown", handleViewerActivity);
+            pswp.element?.removeEventListener("mousemove", handleViewerActivity);
+            pswp.element?.removeEventListener("wheel", handleViewerActivity);
             document.removeEventListener(
                 "fullscreenchange",
                 handleFullscreenChange,
@@ -2004,7 +2022,7 @@ export class FileViewerPhotoSwipe {
             if (hideControlsTimer) {
                 clearTimeout(hideControlsTimer);
             }
-            clearIdleTimer();
+            clearIdleState();
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
