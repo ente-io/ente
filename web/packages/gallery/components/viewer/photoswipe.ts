@@ -807,6 +807,7 @@ export class FileViewerPhotoSwipe {
                     "mousemove",
                     handleMouseMoveInFullscreen,
                 );
+                handleFullscreenControlsActivity();
             }
         };
 
@@ -822,6 +823,11 @@ export class FileViewerPhotoSwipe {
                     "mousemove",
                     handleMouseMoveInFullscreen,
                 );
+                clearFullscreenControlsTimer();
+            } else if (
+                pswp.element?.classList.contains("pswp--video-fullscreen")
+            ) {
+                handleFullscreenControlsActivity();
             }
             handleViewerActivity();
         };
@@ -831,23 +837,61 @@ export class FileViewerPhotoSwipe {
          */
         let hideControlsTimer: ReturnType<typeof setTimeout> | undefined;
 
-        /**
-         * Show video controls on mouse movement, hide after inactivity.
-         */
-        const handleMouseMoveInFullscreen = () => {
-            pswp.element?.classList.add("pswp--controls-visible");
-
-            // Clear any pending hide timer
+        const clearFullscreenControlsTimer = () => {
             if (hideControlsTimer) {
                 clearTimeout(hideControlsTimer);
+                hideControlsTimer = undefined;
+            }
+        };
+
+        const isFocusWithinFullscreenControls = () => {
+            const focusedElement =
+                document.querySelector(":focus-visible") ??
+                document.querySelector(":focus");
+            return (
+                focusedElement instanceof Node &&
+                !!mediaControlsContainerElement?.contains(focusedElement)
+            );
+        };
+
+        const scheduleFullscreenControlsAutoHide = () => {
+            if (!document.fullscreenElement) {
+                clearFullscreenControlsTimer();
+                return;
             }
 
-            // Hide controls after inactivity
+            clearFullscreenControlsTimer();
             hideControlsTimer = setTimeout(() => {
+                if (!document.fullscreenElement) {
+                    hideControlsTimer = undefined;
+                    return;
+                }
+
+                if (isFocusWithinFullscreenControls()) {
+                    scheduleFullscreenControlsAutoHide();
+                    return;
+                }
+
                 pswp.element?.classList.remove("pswp--controls-visible");
                 hideControlsTimer = undefined;
             }, 3000);
         };
+
+        const handleFullscreenControlsActivity = () => {
+            if (!document.fullscreenElement) {
+                clearFullscreenControlsTimer();
+                return;
+            }
+
+            pswp.element?.classList.add("pswp--controls-visible");
+            scheduleFullscreenControlsAutoHide();
+        };
+
+        /**
+         * Show video controls on mouse movement, hide after inactivity.
+         */
+        const handleMouseMoveInFullscreen = () =>
+            handleFullscreenControlsActivity();
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
@@ -1851,6 +1895,10 @@ export class FileViewerPhotoSwipe {
             // Even though we ignore shift, Caps lock might still be on.
             const lkey = e.key.toLowerCase();
 
+            if (pswp.element?.classList.contains("pswp--video-fullscreen")) {
+                handleFullscreenControlsActivity();
+            }
+
             if (isUIAutoHidden && lkey == "h") {
                 handleViewerActivity();
                 pswpEvent.preventDefault();
@@ -2036,9 +2084,7 @@ export class FileViewerPhotoSwipe {
                 "mousemove",
                 handleMouseMoveInFullscreen,
             );
-            if (hideControlsTimer) {
-                clearTimeout(hideControlsTimer);
-            }
+            clearFullscreenControlsTimer();
             clearIdleAutoHideState();
             fileViewerDidClose();
             // Let our parent know that we have been closed.
