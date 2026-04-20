@@ -100,7 +100,11 @@ class UpdateService {
     if (!_isInitialized) {
       return false;
     }
-    final lastShownVersion = _prefs!.getInt(kChangeLogShownVersionKey) ?? 0;
+    final lastShownVersion = _prefs!.getInt(kChangeLogShownVersionKey);
+    if (lastShownVersion == null) {
+      await markChangeLogShown();
+      return false;
+    }
     return lastShownVersion < currentChangeLogVersion;
   }
 

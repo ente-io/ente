@@ -30,7 +30,7 @@
     }
   },
   "keepOffline": "Keep offline",
-  "cloudOnly": "Cloud only",
+  "cloudOnly": "Remove offline",
   "savingOffline": "Saving offline...",
   "filesAvailableOffline": "{count, plural, =1{1 file saved offline} other{{count} files saved offline}}",
   "@filesAvailableOffline": {
