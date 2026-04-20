@@ -16,6 +16,7 @@ import 'package:photos/services/app_navigation_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
+import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -329,11 +330,24 @@ class AlbumHomeWidgetService {
     final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     final albumsWithFiles = <int, (String, List<EnteFile>)>{};
 
+    final hiddenFiles = await SearchService.instance.getHiddenFiles();
+    final hiddenUploadIDs = <int>{};
+    for (final file in hiddenFiles) {
+      final uploadedID = file.uploadedFileID;
+      if (uploadedID != null) {
+        hiddenUploadIDs.add(uploadedID);
+      }
+    }
+
     for (final albumId in selectedAlbumIds) {
       final collection = CollectionsService.instance.getCollectionByID(albumId);
       if (collection != null) {
-        final files =
+        final allFiles =
             await FilesDB.instance.getAllFilesCollection(collection.id);
+        final files = allFiles.where((file) {
+          final uploadedID = file.uploadedFileID;
+          return uploadedID == null || !hiddenUploadIDs.contains(uploadedID);
+        }).toList();
         if (files.isNotEmpty) {
           albumsWithFiles[collection.id] =
               (collection.decryptedName ?? "Album", files);
