@@ -860,7 +860,7 @@ export class FileViewerPhotoSwipe {
             hideControlsTimer = setTimeout(() => {
                 pswp.element?.classList.remove("pswp--controls-visible");
                 hideControlsTimer = undefined;
-            }, 2000);
+            }, 3000);
         };
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
@@ -1803,7 +1803,7 @@ export class FileViewerPhotoSwipe {
             // if it was already in an idle state.
             clearIdleState();
 
-            // Setting the timer to add the idle class after 2000ms
+            // Setting the timer to add the idle class after 3000ms
             idleTimer = setTimeout(() => {
                 // Keep the controls visible while keyboard focus is still on
                 // one of the auto-hidden bars.
@@ -1814,7 +1814,7 @@ export class FileViewerPhotoSwipe {
                     pswp.element?.classList.add("pswp--idle");
                 }
                 idleTimer = undefined;
-            }, 2000);
+            }, 3000);
         };
 
         // Some actions routed via the delegate
