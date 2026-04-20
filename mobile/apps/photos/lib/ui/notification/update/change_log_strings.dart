@@ -71,140 +71,90 @@ class ChangeLogStrings {
       title1: 'Memories Improvements',
       desc1:
           'We have shipped a bunch of improvements in our memories system, including surfacing better memories with other people, detecting your past trips, and surfacing recent photos from last week and last month.',
-      title2: 'View Other Family Members',
-      desc2: 'Family members can now view other members on their family plans.',
     ),
     'cs': ChangeLogStrings(
       title1: 'Vylepšení vzpomínek',
       desc1:
           'Přinášíme řadu vylepšení systému vzpomínek, včetně lepšího zobrazování společných momentů s blízkými, rozpoznávání vašich minulých cest a zobrazování nedávných fotek z minulého týdne a minulého měsíce.',
-      title2: 'Zobrazit ostatní členy rodiny',
-      desc2:
-          'Členové rodiny nyní mohou zobrazit ostatní členy ve svých rodinných plánech.',
     ),
     'de': ChangeLogStrings(
       title1: 'Verbesserungen bei Erinnerungen',
       desc1:
           'Wir haben eine Reihe von Verbesserungen an unserem Erinnerungssystem veröffentlicht, darunter bessere Erinnerungen mit anderen Personen, das Erkennen Ihrer vergangenen Reisen sowie aktuelle Fotos von letzter Woche und letztem Monat.',
-      title2: 'Andere Familienmitglieder ansehen',
-      desc2:
-          'Familienmitglieder können jetzt andere Mitglieder in ihren Familienplänen ansehen.',
     ),
     'es': ChangeLogStrings(
       title1: 'Mejoras en Recuerdos',
       desc1:
           'Hemos lanzado varias mejoras en nuestro sistema de recuerdos, incluyendo mejores recuerdos con otras personas, la detección de tus viajes pasados y la aparición de fotos recientes de la semana pasada y del mes pasado.',
-      title2: 'Ver a otros miembros de la familia',
-      desc2:
-          'Los miembros de la familia ahora pueden ver a otros miembros de sus planes familiares.',
     ),
     'fr': ChangeLogStrings(
       title1: 'Améliorations des souvenirs',
       desc1:
           'Nous avons déployé de nombreuses améliorations de notre système de souvenirs, notamment de meilleurs souvenirs avec d\'autres personnes, la détection de vos voyages passés et l\'affichage de photos récentes de la semaine dernière et du mois dernier.',
-      title2: 'Voir les autres membres de la famille',
-      desc2:
-          'Les membres de la famille peuvent désormais voir les autres membres de leur abonnement familial.',
     ),
     'it': ChangeLogStrings(
       title1: 'Miglioramenti ai ricordi',
       desc1:
           'Abbiamo introdotto diversi miglioramenti al nostro sistema dei ricordi, tra cui la possibilità di rivivere momenti condivisi con altre persone, il rilevamento dei tuoi viaggi passati e la comparsa di foto recenti della scorsa settimana e del mese scorso.',
-      title2: 'Visualizza gli altri membri della famiglia',
-      desc2:
-          'I membri della famiglia ora possono visualizzare gli altri membri del proprio piano familiare.',
     ),
     'ja': ChangeLogStrings(
       title1: '思い出の改善',
       desc1:
           '思い出機能に多数の改善を加えました。他の人と一緒の思い出をより良く表示し、過去の旅行を検出し、先週や先月の最近の写真も表示します。',
-      title2: 'ほかの家族メンバーを表示',
-      desc2: 'ファミリープランのメンバーは、ほかのメンバーを表示できるようになりました。',
     ),
     'nl': ChangeLogStrings(
       title1: 'Verbeteringen aan Herinneringen',
       desc1:
           'We hebben een aantal verbeteringen doorgevoerd in ons herinneringssysteem, waaronder betere herinneringen met andere mensen, het herkennen van je eerdere reizen en het tonen van recente foto\'s van vorige week en vorige maand.',
-      title2: 'Andere gezinsleden bekijken',
-      desc2:
-          'Gezinsleden kunnen nu andere leden in hun gezinsabonnement bekijken.',
     ),
     'no': ChangeLogStrings(
       title1: 'Forbedringer i minner',
       desc1:
           'Vi har lansert en rekke forbedringer i minnene våre, blant annet bedre minner med andre personer, gjenkjenning av tidligere reiser og visning av nylige bilder fra forrige uke og forrige måned.',
-      title2: 'Se andre familiemedlemmer',
-      desc2:
-          'Familiemedlemmer kan nå se andre medlemmer i familieabonnementet sitt.',
     ),
     'pl': ChangeLogStrings(
       title1: 'Ulepszenia wspomnień',
       desc1:
           'Wprowadziliśmy szereg ulepszeń w systemie wspomnień, w tym lepsze wspomnienia z innymi osobami, wykrywanie Twoich dawnych podróży oraz wyświetlanie ostatnich zdjęć z zeszłego tygodnia i zeszłego miesiąca.',
-      title2: 'Wyświetl innych członków rodziny',
-      desc2:
-          'Członkowie rodziny mogą teraz wyświetlać innych członków w swoich planach rodzinnych.',
     ),
     'pt_BR': ChangeLogStrings(
       title1: 'Melhorias nas memórias',
       desc1:
           'Lançamos várias melhorias no nosso sistema de memórias, incluindo melhores momentos compartilhados com outras pessoas, detecção das suas viagens passadas e exibição de fotos recentes da semana passada e do mês passado.',
-      title2: 'Ver outros membros da família',
-      desc2:
-          'Os membros da família agora podem ver outros membros em seus planos familiares.',
     ),
     'pt_PT': ChangeLogStrings(
       title1: 'Melhorias nas memórias',
       desc1:
           'Lançámos várias melhorias no nosso sistema de memórias, incluindo melhores memórias com outras pessoas, deteção das suas viagens passadas e apresentação de fotografias recentes da semana passada e do mês passado.',
-      title2: 'Ver outros membros da família',
-      desc2:
-          'Os membros da família podem agora ver outros membros nos seus planos familiares.',
     ),
     'ro': ChangeLogStrings(
       title1: 'Îmbunătățiri ale amintirilor',
       desc1:
           'Am lansat o serie de îmbunătățiri pentru sistemul nostru de amintiri, inclusiv amintiri mai bune cu alte persoane, detectarea călătoriilor tale din trecut și afișarea fotografiilor recente din săptămâna trecută și luna trecută.',
-      title2: 'Vezi alți membri ai familiei',
-      desc2:
-          'Membrii familiei pot acum vedea ceilalți membri din planurile lor de familie.',
     ),
     'ru': ChangeLogStrings(
       title1: 'Улучшения воспоминаний',
       desc1:
           'Мы выпустили множество улучшений в системе воспоминаний: теперь лучше подбираются совместные моменты с близкими, распознаются ваши прошлые поездки и показываются недавние фотографии за прошлую неделю и месяц.',
-      title2: 'Просмотр других членов семьи',
-      desc2:
-          'Теперь участники семейных планов могут просматривать других участников.',
     ),
     'tr': ChangeLogStrings(
       title1: 'Anılar için iyileştirmeler',
       desc1:
           'Anılar sistemimizde birçok iyileştirme yayınladık. Artık başkalarıyla paylaştığınız anları daha iyi bir şekilde öne çıkarıyor, geçmiş seyahatlerinizi algılıyor ve geçen hafta ile geçen aydan son fotoğraflarınızı gösteriyoruz.',
-      title2: 'Diğer aile üyelerini görüntüleyin',
-      desc2:
-          'Aile üyeleri artık aile planlarındaki diğer üyeleri görüntüleyebilir.',
     ),
     'uk': ChangeLogStrings(
       title1: 'Покращення спогадів',
       desc1:
           'Ми випустили низку покращень у нашій системі спогадів, зокрема кращі спогади з іншими людьми, розпізнавання ваших минулих подорожей і показ недавніх фотографій за минулий тиждень і минулий місяць.',
-      title2: 'Перегляд інших членів сімʼї',
-      desc2: 'Тепер члени сімейних планів можуть переглядати інших учасників.',
     ),
     'vi': ChangeLogStrings(
       title1: 'Cải thiện Kỷ niệm',
       desc1:
           'Chúng tôi đã phát hành nhiều cải tiến cho hệ thống kỷ niệm, bao gồm hiển thị những kỷ niệm tốt hơn với người khác, nhận diện các chuyến đi trước đây của bạn và hiển thị các ảnh gần đây từ tuần trước và tháng trước.',
-      title2: 'Xem các thành viên khác trong gia đình',
-      desc2:
-          'Các thành viên gia đình giờ đây có thể xem những thành viên khác trong gói gia đình của mình.',
     ),
     'zh_CN': ChangeLogStrings(
       title1: '回忆改进',
       desc1: '我们对回忆系统进行了多项改进，包括展示与他人相关的更好回忆、识别你过去的旅行，以及展示上周和上个月的近期照片。',
-      title2: '查看其他家庭成员',
-      desc2: '家庭成员现在可以查看其家庭计划中的其他成员。',
     ),
   };
 
