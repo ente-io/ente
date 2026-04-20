@@ -116,8 +116,9 @@ class MemoriesCacheService {
             .map((e) => e.generatedID!)
             .toSet();
         for (final memory in _cachedMemories!) {
-          memory.memories
-              .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
+          memory.memories.removeWhere(
+            (m) => generatedIDs.contains(m.file.generatedID),
+          );
         }
       }
     });
@@ -174,9 +175,7 @@ class MemoriesCacheService {
     await _prefs.setBool(_showAnyMemoryKey, value);
     Bus.instance.fire(MemoriesSettingChanged());
     if (!value) {
-      await Future.wait([
-        _clearAllScheduledOnThisDayNotifications(),
-      ]);
+      await Future.wait([_clearAllScheduledOnThisDayNotifications()]);
     } else {
       queueUpdateCache();
     }
@@ -227,8 +226,9 @@ class MemoriesCacheService {
       if (localId != null && localId.isNotEmpty) {
         seenTimeKey = _localIdToIntIdCache[localId];
         if (seenTimeKey == null) {
-          seenTimeKey =
-              await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+          seenTimeKey = await OfflineFilesDB.instance.getOrCreateLocalIntId(
+            localId,
+          );
           _localIdToIntIdCache[localId] = seenTimeKey;
         }
       }
@@ -364,9 +364,7 @@ class MemoriesCacheService {
               );
             }
           } else if (memory.type == MemoryType.clip && memory.shouldShowNow()) {
-            activeRemovedClipLogs.add(
-              ClipShownLog.fromOldCacheMemory(memory),
-            );
+            activeRemovedClipLogs.add(ClipShownLog.fromOldCacheMemory(memory));
           }
         }
 
@@ -433,9 +431,7 @@ class MemoriesCacheService {
           (memory) =>
               memory.type == MemoryType.people && memory.personID == personID,
         );
-        cache.peopleShownLogs.removeWhere(
-          (log) => log.personID == personID,
-        );
+        cache.peopleShownLogs.removeWhere((log) => log.personID == personID);
         final shouldWriteCache =
             cache.toShowMemories.length != originalToShowLength ||
                 cache.peopleShownLogs.length != originalLogLength;
@@ -516,9 +512,9 @@ class MemoriesCacheService {
               );
             } else {
               unawaited(
-                updateCache(forced: true).whenComplete(
-                  () => Bus.instance.fire(MemoriesChangedEvent()),
-                ),
+                updateCache(
+                  forced: true,
+                ).whenComplete(() => Bus.instance.fire(MemoriesChangedEvent())),
               );
             }
             return _cachedMemories!;
@@ -531,8 +527,9 @@ class MemoriesCacheService {
           _logger.info("Found memories in cache");
         }
         if (_cachedMemories == null || _cachedMemories!.isEmpty) {
-          _logger
-              .severe("No memories found in (computed) cache, getting fillers");
+          _logger.severe(
+            "No memories found in (computed) cache, getting fillers",
+          );
           await _calculateRegularFillers();
         }
         return _cachedMemories!;
@@ -630,23 +627,18 @@ class MemoriesCacheService {
                     ? true
                     : uploadedIdToFile.containsKey(fileID),
               )
-              .map(
-                (fileID) {
-                  final file = useLocalIntIds
-                      ? _fileFromLocalIntId(
-                          fileID,
-                          localIdToFile,
-                        )
-                      : uploadedIdToFile[fileID];
-                  return file == null
-                      ? null
-                      : Memory.fromFile(
-                          file,
-                          seenTimes,
-                          seenTimeKey: useLocalIntIds ? fileID : null,
-                        );
-                },
-              )
+              .map((fileID) {
+                final file = useLocalIntIds
+                    ? _fileFromLocalIntId(fileID, localIdToFile)
+                    : uploadedIdToFile[fileID];
+                return file == null
+                    ? null
+                    : Memory.fromFile(
+                        file,
+                        seenTimes,
+                        seenTimeKey: useLocalIntIds ? fileID : null,
+                      );
+              })
               .whereType<Memory>()
               .toList();
           final smartMemory = memory.toSmartMemory(hydratedMemories);
@@ -721,9 +713,9 @@ class MemoriesCacheService {
           newCache.toShowMemories,
         );
         newCache.toShowMemories.addAll(
-          nowResult.memories
-              .whereType<TripMemory>()
-              .map((memory) => ToShowMemory.fromSmartMemory(memory, now)),
+          nowResult.memories.whereType<TripMemory>().map(
+                (memory) => ToShowMemory.fromSmartMemory(memory, now),
+              ),
         );
         final nextResult = await smartMemoriesService.calcSmartMemories(
           next,
@@ -731,21 +723,40 @@ class MemoriesCacheService {
           mlEnabled: mlReady,
         );
         w?.log("calculated new memories");
+        final localIdToIntId = isOfflineMode
+            ? await _buildLocalIntIdMapForMemories([
+                ...nowResult.memories,
+                ...nextResult.memories,
+              ])
+            : <String, int>{};
+        final nowEntries = nowResult.memories
+            .map((memory) => _toCacheMemory(memory, now, localIdToIntId))
+            .toList();
+        // Splice carried-forward trip entries into the natural trip slot so
+        // the UI keeps showing trips in their usual position (after
+        // onThisDay/people) instead of jumping to the front of the row.
+        int tripInsertIdx = nowEntries.indexWhere(
+          (e) => e.type == MemoryType.trips,
+        );
+        if (tripInsertIdx < 0) {
+          tripInsertIdx = nowEntries.indexWhere(
+            (e) =>
+                e.type != MemoryType.onThisDay &&
+                e.type != MemoryType.people,
+          );
+          if (tripInsertIdx < 0) {
+            tripInsertIdx = nowEntries.length;
+          }
+        }
         newCache.toShowMemories
           ..clear()
-          ..addAll(carriedForwardTripEntries);
-        final localIdToIntId = isOfflineMode
-            ? await _buildLocalIntIdMapForMemories(
-                [...nowResult.memories, ...nextResult.memories],
-              )
-            : <String, int>{};
-        for (final nowMemory in nowResult.memories) {
-          newCache.toShowMemories
-              .add(_toCacheMemory(nowMemory, now, localIdToIntId));
-        }
+          ..addAll(nowEntries.sublist(0, tripInsertIdx))
+          ..addAll(carriedForwardTripEntries)
+          ..addAll(nowEntries.sublist(tripInsertIdx));
         for (final nextMemory in nextResult.memories) {
-          newCache.toShowMemories
-              .add(_toCacheMemory(nextMemory, next, localIdToIntId));
+          newCache.toShowMemories.add(
+            _toCacheMemory(nextMemory, next, localIdToIntId),
+          );
         }
         final nowMicros = now.microsecondsSinceEpoch;
         final dedupedMemories = _dedupeTripCacheEntriesInOrder(
@@ -758,9 +769,10 @@ class MemoriesCacheService {
         newCache.baseLocations.addAll(nowResult.baseLocations);
         w?.log("added memories to cache");
         _cachedMemories = await fromCacheToMemories(newCache);
-        await _scheduleMemoryNotifications(
-          [...nowResult.memories, ...nextResult.memories],
-        );
+        await _scheduleMemoryNotifications([
+          ...nowResult.memories,
+          ...nextResult.memories,
+        ]);
         locationService.baseLocations = newCache.baseLocations;
         await writeToJsonFile<MemoriesCache>(
           await _getCachePath(),
@@ -873,11 +885,7 @@ class MemoriesCacheService {
       final identityKey = memory.tripIdentityKey;
       final existing = preferredEntries[identityKey];
       if (existing == null ||
-          _shouldPreferTripCacheEntry(
-            memory,
-            existing,
-            nowMicros: nowMicros,
-          )) {
+          _shouldPreferTripCacheEntry(memory, existing, nowMicros: nowMicros)) {
         preferredEntries[identityKey] = memory;
       }
     }
@@ -969,9 +977,7 @@ class MemoriesCacheService {
   ///
   /// Computes the full smart memories set with debug surfacing enabled without
   /// mutating the persisted memories cache.
-  Future<List<SmartMemory>> debugGetAllMemories({
-    DateTime? calcTime,
-  }) async {
+  Future<List<SmartMemory>> debugGetAllMemories({DateTime? calcTime}) async {
     return _memoriesUpdateLock.synchronized(() async {
       final mlReady = await _isMlReady();
       final result = await smartMemoriesService.calcSmartMemories(
@@ -1067,9 +1073,7 @@ class MemoriesCacheService {
     required bool hasAnyWidgets,
   }) async {
     if (!onThisDay && !pastYears && !smart) {
-      _logger.info(
-        'No memories requested, returning empty list',
-      );
+      _logger.info('No memories requested, returning empty list');
       return [];
     }
     final allMemories = await getMemories(onlyUseCache: !hasAnyWidgets);
@@ -1145,9 +1149,7 @@ class MemoriesCacheService {
       memoryIdx++;
     }
     if (!found) {
-      _logger.warning(
-        "Could not find onThisDay memory",
-      );
+      _logger.warning("Could not find onThisDay memory");
       return;
     }
     await _routeToPage(
@@ -1203,10 +1205,7 @@ class MemoriesCacheService {
         return;
       }
       await _routeToPage(
-        PeoplePage(
-          person: person,
-          searchResult: null,
-        ),
+        PeoplePage(person: person, searchResult: null),
         context: context,
         forceCustomPageRoute: true,
       );
@@ -1281,8 +1280,9 @@ class MemoriesCacheService {
     List<SmartMemory> allMemories,
   ) async {
     if (!localSettings.isOnThisDayNotificationsEnabled) {
-      _logger
-          .info("On this day notifications are disabled, skipping scheduling");
+      _logger.info(
+        "On this day notifications are disabled, skipping scheduling",
+      );
       return;
     }
     await _clearAllScheduledOnThisDayNotifications();
@@ -1293,8 +1293,9 @@ class MemoriesCacheService {
       }
       final numberOfMemories = memory.memories.length;
       if (numberOfMemories < 5) continue;
-      final firstDateToShow =
-          DateTime.fromMicrosecondsSinceEpoch(memory.firstDateToShow);
+      final firstDateToShow = DateTime.fromMicrosecondsSinceEpoch(
+        memory.firstDateToShow,
+      );
       final scheduleTime = DateTime(
         firstDateToShow.year,
         firstDateToShow.month,
@@ -1366,8 +1367,9 @@ class MemoriesCacheService {
       }
     }
     for (final memory in toSchedule) {
-      final firstDateToShow =
-          DateTime.fromMicrosecondsSinceEpoch(memory.firstDateToShow);
+      final firstDateToShow = DateTime.fromMicrosecondsSinceEpoch(
+        memory.firstDateToShow,
+      );
       final scheduleTime = DateTime(
         firstDateToShow.year,
         firstDateToShow.month,
@@ -1408,13 +1410,15 @@ class MemoriesCacheService {
 
   Future<void> _clearAllScheduledOnThisDayNotifications() async {
     _logger.info('Clearing all scheduled On This Day notifications');
-    await NotificationService.instance
-        .clearAllScheduledNotifications(containingPayload: "onThisDay");
+    await NotificationService.instance.clearAllScheduledNotifications(
+      containingPayload: "onThisDay",
+    );
   }
 
   Future<void> _clearAllScheduledBirthdayNotifications() async {
     _logger.info('Clearing all scheduled birthday notifications');
-    await NotificationService.instance
-        .clearAllScheduledNotifications(containingPayload: "birthday");
+    await NotificationService.instance.clearAllScheduledNotifications(
+      containingPayload: "birthday",
+    );
   }
 }
