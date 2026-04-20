@@ -549,6 +549,29 @@ interface CollectionFileItem {
     keyDecryptionNonce: string;
 }
 
+const CopyFilesResponse = z.object({
+    oldToNewFileIDMap: z.record(z.string(), z.number()),
+});
+
+const currentUserRoleInCollection = (collection: Collection) => {
+    const userID = ensureLocalUser().id;
+    if (collection.owner.id == userID) return "OWNER";
+    return collection.sharees.find((sharee) => sharee.id == userID)?.role;
+};
+
+export const canAddFilesToCollection = (collection: Collection) => {
+    const role = currentUserRoleInCollection(collection);
+    return (
+        role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR"
+    );
+};
+
+export const canUploadToCollection = (collection: Collection) =>
+    canAddFilesToCollection(collection);
+
+export const canDirectlyUploadToCollection = (collection: Collection) =>
+    collection.owner.id == ensureLocalUser().id;
+
 /**
  * Make a remote request to add the given {@link files} to the given
  * {@link collection}.
@@ -653,6 +676,221 @@ export const moveFromCollection = async (
             }),
         );
     });
+
+const uniqueFilesByID = (files: EnteFile[]) => {
+    const seen = new Set<number>();
+    const uniqueFiles: EnteFile[] = [];
+
+    for (const file of files) {
+        if (seen.has(file.id)) continue;
+        seen.add(file.id);
+        uniqueFiles.push(file);
+    }
+
+    return uniqueFiles;
+};
+
+const fileIDsInCollection = (
+    collectionID: number,
+    collectionFiles: EnteFile[],
+): Set<number> =>
+    new Set(
+        collectionFiles
+            .filter((file) => file.collectionID == collectionID)
+            .map((file) => file.id),
+    );
+
+const hashAndTypeKey = (file: EnteFile) => {
+    const hash = metadataHash(file.metadata);
+    if (!hash) return undefined;
+    return `${hash}:${file.metadata.fileType}`;
+};
+
+const userOwnedEquivalentFilesByHashAndType = (
+    files: EnteFile[],
+    currentUserID: number,
+) => {
+    const equivalents = new Map<string, EnteFile>();
+
+    for (const file of files) {
+        if (file.ownerID != currentUserID) continue;
+
+        const key = hashAndTypeKey(file);
+        if (!key || equivalents.has(key)) continue;
+        equivalents.set(key, file);
+    }
+
+    return equivalents;
+};
+
+export const copyFiles = async (
+    dstCollection: Collection,
+    files: EnteFile[],
+): Promise<EnteFile[]> => {
+    if (!files.length) return [];
+
+    const currentUserID = ensureLocalUser().id;
+    if (dstCollection.owner.id != currentUserID) {
+        throw new Error("Destination collection must be owned by the actor");
+    }
+
+    const uniqueFiles = uniqueFilesByID(files);
+    const copiedFiles: EnteFile[] = [];
+
+    for (const [srcCollectionID, sourceFiles] of groupFilesByCollectionID(
+        uniqueFiles,
+    ).entries()) {
+        await batched(sourceFiles, async (batchFiles) => {
+            if (
+                batchFiles.some(
+                    (file) =>
+                        file.ownerID == currentUserID ||
+                        file.collectionID != srcCollectionID,
+                )
+            ) {
+                throw new Error(
+                    "Can only copy files owned by other users from the source collection",
+                );
+            }
+
+            const encryptedFileKeys = await encryptWithCollectionKey(
+                dstCollection,
+                batchFiles,
+            );
+            const res = await fetch(await apiURL("/files/copy"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    dstCollectionID: dstCollection.id,
+                    srcCollectionID,
+                    files: encryptedFileKeys,
+                }),
+            });
+            ensureOk(res);
+
+            const { oldToNewFileIDMap } = CopyFilesResponse.parse(
+                await res.json(),
+            );
+
+            for (const file of batchFiles) {
+                const copiedFileID = oldToNewFileIDMap[file.id.toString()];
+                if (!copiedFileID) {
+                    throw new Error(`Failed to copy file ${file.id}`);
+                }
+
+                copiedFiles.push({
+                    ...file,
+                    id: copiedFileID,
+                    ownerID: currentUserID,
+                    collectionID: dstCollection.id,
+                });
+            }
+        });
+    }
+
+    return copiedFiles;
+};
+
+export const savedUserUncategorizedCollection = async () => {
+    const userID = ensureLocalUser().id;
+    return (await savedCollections()).find(
+        (collection) =>
+            collection.type == "uncategorized" && collection.owner.id == userID,
+    );
+};
+
+export const savedOrCreateUserUncategorizedCollection = async () =>
+    (await savedUserUncategorizedCollection()) ??
+    createUncategorizedCollection();
+
+export const addOrCopyToCollection = async (
+    dstCollection: Collection,
+    files: EnteFile[],
+) => {
+    if (!files.length) return;
+    if (!canAddFilesToCollection(dstCollection)) {
+        throw new Error("Current user cannot add files to this collection");
+    }
+
+    const currentUserID = ensureLocalUser().id;
+    const collectionFiles = await savedCollectionFiles();
+    const destinationFileIDs = fileIDsInCollection(
+        dstCollection.id,
+        collectionFiles,
+    );
+    const filesMissingFromDestination = uniqueFilesByID(files).filter(
+        (file) => !destinationFileIDs.has(file.id),
+    );
+
+    if (!filesMissingFromDestination.length) return;
+
+    const [ownedFiles, otherOwnedFiles] = splitByPredicate(
+        filesMissingFromDestination,
+        (file) => file.ownerID == currentUserID,
+    );
+
+    if (ownedFiles.length) {
+        await addToCollection(dstCollection, ownedFiles);
+        ownedFiles.forEach((file) => destinationFileIDs.add(file.id));
+    }
+
+    if (!otherOwnedFiles.length) return;
+
+    const userOwnedFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
+        collectionFiles,
+        currentUserID,
+    );
+
+    const filesToAdd: EnteFile[] = [];
+    const filesToCopy: EnteFile[] = [];
+    const seenAddFileIDs = new Set<number>();
+    const seenCopyFileIDs = new Set<number>();
+
+    for (const file of otherOwnedFiles) {
+        const fileHashAndTypeKey = hashAndTypeKey(file);
+        const userOwnedEquivalent = fileHashAndTypeKey
+            ? userOwnedFilesByHashAndType.get(fileHashAndTypeKey)
+            : undefined;
+        const shouldAddOwnedEquivalent = !!userOwnedEquivalent;
+
+        if (shouldAddOwnedEquivalent) {
+            if (!seenAddFileIDs.has(userOwnedEquivalent.id)) {
+                seenAddFileIDs.add(userOwnedEquivalent.id);
+                filesToAdd.push(userOwnedEquivalent);
+            }
+        } else if (!seenCopyFileIDs.has(file.id)) {
+            seenCopyFileIDs.add(file.id);
+            filesToCopy.push(file);
+        }
+    }
+
+    const reusableOwnedFiles = uniqueFilesByID(filesToAdd).filter(
+        (file) => !destinationFileIDs.has(file.id),
+    );
+    if (reusableOwnedFiles.length) {
+        await addToCollection(dstCollection, reusableOwnedFiles);
+        reusableOwnedFiles.forEach((file) => destinationFileIDs.add(file.id));
+    }
+
+    if (!filesToCopy.length) return;
+
+    const copyDestination = canDirectlyUploadToCollection(dstCollection)
+        ? dstCollection
+        : await savedOrCreateUserUncategorizedCollection();
+    const copiedFiles = await copyFiles(copyDestination, filesToCopy);
+
+    if (copyDestination.id != dstCollection.id) {
+        const filesToAddAfterCopy = uniqueFilesByID(copiedFiles).filter(
+            (file) => !destinationFileIDs.has(file.id),
+        );
+        if (filesToAddAfterCopy.length) {
+            await addToCollection(dstCollection, filesToAddAfterCopy);
+            filesToAddAfterCopy.forEach((file) =>
+                destinationFileIDs.add(file.id),
+            );
+        }
+    }
+};
 
 /**
  * Return an array of {@link CollectionFileItem}s, one for each file in

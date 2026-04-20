@@ -12,6 +12,7 @@ import {
 import type { EnteFile } from "ente-media/file";
 import {
     isArchivedFile,
+    metadataHash,
     type FilePrivateMagicMetadataData,
 } from "ente-media/file-metadata";
 import type { MagicMetadata } from "ente-media/magic-metadata";
@@ -1858,12 +1859,17 @@ const stateForUpdatedCollectionFiles = (
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
         const searchFiles = state.searchResults ?? state.filteredFiles;
+        const visibleSearchFiles = suppressSharedFilesSavedByUser(
+            searchFiles,
+            state.user?.id,
+            state.view?.type == "albums" ? state.view.activeCollection : undefined,
+        );
         // Only apply time-based sorting if user explicitly selected a sort order.
         // When undefined, keep original order (preserves CLIP relevance sorting).
         const filteredFiles =
             state.searchSortAsc !== undefined
-                ? sortFiles([...searchFiles], state.searchSortAsc)
-                : searchFiles;
+                ? sortFiles([...visibleSearchFiles], state.searchSortAsc)
+                : visibleSearchFiles;
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||
@@ -1879,6 +1885,7 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
             state.tempDeletedFileIDs,
             state.tempHiddenFileIDs,
             state.view,
+            state.user?.id,
         );
         return { ...state, filteredFiles };
     } else if (state.view?.type == "people") {
@@ -1886,6 +1893,7 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
             state.collectionFiles,
             state.hiddenFileIDs,
             state.view,
+            state.user?.id,
         );
         return { ...state, filteredFiles };
     } else {
@@ -1907,6 +1915,7 @@ const deriveAlbumsOrHiddenAlbumsFilteredFiles = (
     tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
     tempHiddenFileIDs: GalleryState["tempHiddenFileIDs"],
     view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
+    currentUserID: number | undefined,
 ) => {
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
@@ -1980,7 +1989,11 @@ const deriveAlbumsOrHiddenAlbumsFilteredFiles = (
         return activeCollectionSummaryID == file.collectionID;
     });
 
-    return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
+    return sortAndUniqueFilteredFiles(
+        filteredFiles,
+        view.activeCollection,
+        currentUserID,
+    );
 };
 
 /**
@@ -1994,10 +2007,40 @@ const deriveAlbumsOrHiddenAlbumsFilteredFiles = (
 const sortAndUniqueFilteredFiles = (
     files: EnteFile[],
     activeCollection: Collection | undefined,
+    currentUserID: number | undefined,
 ) => {
-    const uniqueFiles = uniqueFilesByID(files);
+    const uniqueFiles = uniqueFilesByID(
+        suppressSharedFilesSavedByUser(files, currentUserID, activeCollection),
+    );
     const sortAsc = activeCollection?.pubMagicMetadata?.data.asc ?? false;
     return sortAsc ? sortFiles(uniqueFiles, true) : uniqueFiles;
+};
+
+const suppressSharedFilesSavedByUser = (
+    files: EnteFile[],
+    currentUserID: number | undefined,
+    activeCollection: Collection | undefined,
+) => {
+    if (!currentUserID || activeCollection) return files;
+
+    const ownedFileKeys = new Set<string>();
+    for (const file of files) {
+        if (file.ownerID != currentUserID) continue;
+        const hash = metadataHash(file.metadata);
+        if (!hash) continue;
+        ownedFileKeys.add(`${hash}:${file.metadata.fileType}`);
+    }
+
+    if (!ownedFileKeys.size) return files;
+
+    return files.filter((file) => {
+        if (file.ownerID == currentUserID) return true;
+
+        const hash = metadataHash(file.metadata);
+        if (!hash) return true;
+
+        return !ownedFileKeys.has(`${hash}:${file.metadata.fileType}`);
+    });
 };
 
 /**
@@ -2008,14 +2051,19 @@ const derivePeopleFilteredFiles = (
     collectionFiles: GalleryState["collectionFiles"],
     hiddenFileIDs: GalleryState["hiddenFileIDs"],
     view: Extract<GalleryView, { type: "people" }>,
+    currentUserID: number | undefined,
 ) => {
     const pfSet = new Set(view.activePerson?.fileIDs ?? []);
     return uniqueFilesByID(
-        collectionFiles.filter((f) => {
-            if (!pfSet.has(f.id)) return false;
-            if (hiddenFileIDs.has(f.id)) return false;
-            return true;
-        }),
+        suppressSharedFilesSavedByUser(
+            collectionFiles.filter((f) => {
+                if (!pfSet.has(f.id)) return false;
+                if (hiddenFileIDs.has(f.id)) return false;
+                return true;
+            }),
+            currentUserID,
+            undefined,
+        ),
     );
 };
 

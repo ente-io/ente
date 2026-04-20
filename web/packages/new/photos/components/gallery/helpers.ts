@@ -16,7 +16,7 @@ import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
-    addToCollection,
+    addOrCopyToCollection,
     moveFromCollection,
     moveToCollection,
     restoreToCollection,
@@ -75,9 +75,8 @@ export const findCollectionCreatingUncategorizedIfNeeded = async (
  * @param selectedCollection The existing or new collection selected by the
  * user. This serves as the target of the operation.
  *
- * @param selectedUserFiles The files selected by the user, on which the
- * operation should be performed. Currently these need to all belong to the
- * user.
+ * @param selectedFiles The files selected by the user, on which the operation
+ * should be performed.
  *
  * @param sourceCollectionID In the case of a "move", the operation is always
  * expected to happen in the context of an existing collection, which serves as
@@ -87,38 +86,40 @@ export const findCollectionCreatingUncategorizedIfNeeded = async (
  *
  * [Note: Add and move of non-user files]
  *
- * Currently, all {@link selectedUserFiles} need to belong to the user. This is
- * because adds and move cannot be performed on remote across ownership
- * boundaries directly.
+ * Adds can now operate on both owned and non-owned files using the same parity
+ * semantics as mobile:
  *
- * Enhancement: The mobile client has support for adding and moving such files.
- * It does so by creating a copy, but using hash checks to avoid a copy if not
- * needed. Implement these. This is a bit non-trivial since the mobile client
- * then also adds various heuristics to omit the display of the "doubled" files
- * in the all section etc.
+ * - current-user-owned files are added directly,
+ * - other-owned files reuse a same-hash owned file when available,
+ * - otherwise they are copied directly or via uncategorized depending on the
+ *   destination ownership.
+ *
+ * Move semantics remain owner-only. Remote does not support cross-ownership
+ * moves, and mobile also models shared-album contributor flows as adds, not
+ * moves.
  */
 export const performCollectionOp = async (
     op: CollectionOp,
     selectedCollection: Collection,
-    selectedUserFiles: EnteFile[],
+    selectedFiles: EnteFile[],
     sourceCollectionID: number | undefined,
 ): Promise<void> => {
     switch (op) {
         case "add":
-            await addToCollection(selectedCollection, selectedUserFiles);
+            await addOrCopyToCollection(selectedCollection, selectedFiles);
             break;
         case "move":
             await moveFromCollection(
                 sourceCollectionID!,
                 selectedCollection,
-                selectedUserFiles,
+                selectedFiles,
             );
             break;
         case "restore":
-            await restoreToCollection(selectedCollection, selectedUserFiles);
+            await restoreToCollection(selectedCollection, selectedFiles);
             break;
         case "unhide":
-            await moveToCollection(selectedCollection, selectedUserFiles);
+            await moveToCollection(selectedCollection, selectedFiles);
             break;
     }
 };

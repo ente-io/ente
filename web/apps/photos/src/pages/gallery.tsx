@@ -971,17 +971,21 @@ const Page: React.FC = () => {
                         // If a selection is happening, there must be a user.
                         (f) => f.ownerID == user!.id,
                     );
+                    const filesToProcess =
+                        op == "add" ? selectedFiles : userFiles;
                     const sourceCollectionID = selected.collectionID;
-                    if (userFiles.length > 0) {
+                    if (filesToProcess.length > 0) {
                         await performCollectionOp(
                             op,
                             selectedCollection,
-                            userFiles,
+                            filesToProcess,
                             sourceCollectionID,
                         );
                     }
-                    // See: [Note: Add and move of non-user files]
-                    if (userFiles.length != selectedFiles.length) {
+                    if (
+                        op != "add" &&
+                        userFiles.length != selectedFiles.length
+                    ) {
                         showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
@@ -1006,13 +1010,14 @@ const Page: React.FC = () => {
         async (name: string) => {
             try {
                 const collection = await createAlbum(name);
+                const pendingSingleFile = pendingSingleFileAdd.current;
 
-                if (pendingSingleFileAdd.current) {
+                if (pendingSingleFile) {
                     await performCollectionOp(
                         "add",
                         collection,
-                        [pendingSingleFileAdd.current.file],
-                        pendingSingleFileAdd.current.sourceCollectionSummaryID,
+                        [pendingSingleFile.file],
+                        pendingSingleFile.sourceCollectionSummaryID,
                     );
 
                     await remotePull({ silent: true });
@@ -1023,6 +1028,8 @@ const Page: React.FC = () => {
                         albumId: collection.id,
                         albumName: collection.name,
                     });
+                    setPostCreateAlbumOp(undefined);
+                    return;
                 }
 
                 setPostCreateAlbumOp((postCreateAlbumOp) => {

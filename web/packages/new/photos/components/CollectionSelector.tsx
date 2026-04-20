@@ -29,6 +29,7 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
+    canUploadToCollection,
     collectionsSortBy,
     sortCollectionSummaries,
     type CollectionsSortBy,
@@ -167,7 +168,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
-                        (canMoveToCollection(cs) ||
+                        (canUploadToCollection(cs) ||
                             cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );
@@ -265,7 +266,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         <Stack sx={{ flex: 1 }}>
                             <Box>
                                 <Typography variant="h5">
-                                    {titleForAction(action)}
+                                    {titleForAction(action)}dd
                                 </Typography>
                                 <Typography
                                     variant="small"

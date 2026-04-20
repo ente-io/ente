@@ -224,6 +224,9 @@ export const haveOnlySystemCollections = (
 export const canAddToCollection = ({ attributes }: CollectionSummary) =>
     !attributes.has("system") && !attributes.has("sharedIncomingViewer");
 
+export const canUploadToCollection = (summary: CollectionSummary) =>
+    canAddToCollection(summary);
+
 export const canMoveToCollection = ({ attributes }: CollectionSummary) =>
     !attributes.has("system") && !attributes.has("sharedIncoming");
 
