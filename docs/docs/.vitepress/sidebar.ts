@@ -235,6 +235,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/detect-text",
                             },
                             {
+                                text: "QR codes in photos",
+                                link: "/photos/features/utilities/qr-codes-in-photos",
+                            },
+                            {
                                 text: "Home Widgets",
                                 link: "/photos/features/utilities/home-widgets",
                             },
