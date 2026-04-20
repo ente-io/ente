@@ -1573,7 +1573,6 @@ export class FileViewerPhotoSwipe {
                 appendTo: "root",
                 html: bottomRightControlsHTML(),
                 onInit: (element, pswp) => {
-                    element.classList.add("pswp__hide-on-close");
                     const captionEl =
                         element.querySelector<HTMLElement>(".pswp__caption")!;
                     // Get the action buttons container.
