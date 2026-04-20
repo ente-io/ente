@@ -1,6 +1,8 @@
+import 'package:ente_icons/ente_icons.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -12,6 +14,7 @@ import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -26,8 +29,9 @@ class AlbumRowItemWidget extends StatelessWidget {
   final void Function(Collection)? onLongPressCallback;
   final SelectedAlbums? selectedAlbums;
   static const _borderWidth = 1.0;
-  static const _cornerRadius = 12.0;
+  static const _cornerRadius = 20.0;
   static const _cornerSmoothing = 0.6;
+  static const _overlayPadding = 8.0;
 
   const AlbumRowItemWidget(
     this.c,
@@ -50,9 +54,16 @@ class AlbumRowItemWidget extends StatelessWidget {
         c.id.toString();
     final enteTextTheme = getEnteTextTheme(context);
     final Widget? linkIcon = c.hasLink && isOwner
-        ? Icon(
-            Icons.link,
-            color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
+        ? Padding(
+            padding: const EdgeInsetsGeometry.symmetric(
+              vertical: 3,
+            ),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedLink02,
+              color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
+              size: 10,
+              strokeWidth: 2.5,
+            ),
           )
         : null;
 
@@ -104,17 +115,10 @@ class AlbumRowItemWidget extends StatelessWidget {
                               final bool isSelected =
                                   selectedAlbums?.isAlbumSelected(c) ?? false;
                               final String heroTag = tagPrefix + thumbnail.tag;
-                              // Show pin icon for owner's pinned albums OR sharee's pinned albums
-                              final bool showPin =
-                                  isOwner ? c.isPinned : c.hasShareePinned();
                               final thumbnailWidget = ThumbnailWidget(
                                 thumbnail,
-                                shouldShowArchiveStatus: isOwner
-                                    ? c.isArchived()
-                                    : c.hasShareeArchived(),
-                                showFavForAlbumOnly: true,
+                                shouldShowFavoriteIcon: false,
                                 shouldShowSyncStatus: false,
-                                shouldShowPinIcon: showPin,
                                 key: Key(heroTag),
                               );
                               return Hero(
@@ -139,7 +143,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                               return Container(
                                 color: getEnteColorScheme(context).backdropBase,
                                 child: const NoThumbnailWidget(
-                                  borderRadius: 12,
+                                  borderRadius: _cornerRadius,
                                   addBorder: false,
                                 ),
                               );
@@ -153,16 +157,19 @@ class AlbumRowItemWidget extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.topLeft,
                               child: AlbumSharesIcons(
-                                padding: const EdgeInsets.only(left: 4, top: 4),
+                                padding: const EdgeInsets.only(
+                                  left: _overlayPadding,
+                                  top: _overlayPadding,
+                                ),
                                 sharees: c.getSharees(),
-                                type: AvatarType.md,
+                                type: AvatarType.small,
                                 trailingWidget: linkIcon,
                               ),
                             ),
                           ),
                         Positioned(
-                          top: 5,
-                          right: 5,
+                          top: _overlayPadding,
+                          right: _overlayPadding,
                           child: Hero(
                             tag: tagPrefix + "_album_selection",
                             transitionOnUserGestures: true,
@@ -189,20 +196,24 @@ class AlbumRowItemWidget extends StatelessWidget {
                           ),
                         ),
                         if (!isOwner)
-                          Align(
-                            alignment: Alignment.topLeft,
+                          Positioned(
+                            right: _overlayPadding,
+                            bottom: _overlayPadding,
                             child: Hero(
                               tag: tagPrefix + "_owner_other",
                               transitionOnUserGestures: true,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 4, top: 4),
-                                child: UserAvatarWidget(
-                                  c.owner,
-                                  thumbnailView: true,
-                                ),
+                              child: UserAvatarWidget(
+                                c.owner,
+                                thumbnailView: true,
+                                type: AvatarType.small,
                               ),
                             ),
                           ),
+                        Positioned(
+                          left: _overlayPadding,
+                          bottom: _overlayPadding,
+                          child: _buildAlbumStatusChips(isOwner: isOwner),
+                        ),
                       ],
                     ),
                   ),
@@ -292,6 +303,52 @@ class AlbumRowItemWidget extends StatelessWidget {
           onLongPressCallback!(c);
         }
       },
+    );
+  }
+
+  Widget _buildAlbumStatusChips({required bool isOwner}) {
+    final bool isFavoriteAlbum = c.type == CollectionType.favorites;
+    final bool showPin = isOwner ? c.isPinned : c.hasShareePinned();
+    final bool showArchive = isOwner ? c.isArchived() : c.hasShareeArchived();
+
+    final chips = <Widget>[
+      if (isFavoriteAlbum)
+        const ThumbnailStatusChip(
+          child: Icon(
+            EnteIcons.favoriteFilled,
+            size: ThumbnailStatusChip.iconSize,
+            color: Colors.white,
+          ),
+        ),
+      if (showPin)
+        const ThumbnailStatusChip(
+          child: HugeIcon(
+            icon: HugeIcons.strokeRoundedPin,
+            size: ThumbnailStatusChip.iconSize,
+            color: Colors.white,
+            strokeWidth: 2.0,
+          ),
+        ),
+      if (showArchive)
+        const ThumbnailStatusChip(
+          child: Icon(
+            Icons.archive_outlined,
+            size: ThumbnailStatusChip.iconSize,
+            color: Colors.white,
+          ),
+        ),
+    ];
+
+    if (chips.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (int i = 0; i < chips.length; i++) ...[
+          if (i > 0) const SizedBox(width: 2),
+          chips[i],
+        ],
+      ],
     );
   }
 }

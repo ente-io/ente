@@ -13,6 +13,33 @@ import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
+/// A small circular chip used as a status overlay on thumbnails,
+/// e.g. favorite / pin / archive badges on album covers.
+///
+/// Position is controlled by the caller (wrap in [Positioned] or [Align]).
+class ThumbnailStatusChip extends StatelessWidget {
+  static const double chipSize = 16;
+  static const double iconSize = 8;
+  static const Color backgroundColor = Color.fromRGBO(0, 0, 0, 0.4);
+
+  final Widget child;
+
+  const ThumbnailStatusChip({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: chipSize,
+      height: chipSize,
+      decoration: const BoxDecoration(
+        color: backgroundColor,
+        shape: BoxShape.circle,
+      ),
+      child: Center(child: child),
+    );
+  }
+}
+
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({super.key});
 
@@ -210,7 +237,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
         padding: const EdgeInsets.only(right: 4, top: 4),
         child: UserAvatarWidget(
           user,
-          type: AvatarType.sm,
+          type: AvatarType.small,
           thumbnailView: true,
         ),
       ),
