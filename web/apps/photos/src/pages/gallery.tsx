@@ -971,6 +971,12 @@ const Page: React.FC = () => {
                         // If a selection is happening, there must be a user.
                         (f) => f.ownerID == user!.id,
                     );
+                    /**
+                     * Basically earlier we used userFiles to performCollectionOp earlier
+                     * irrespective of the op, and userFiles only have files of which the current
+                     * user is the owner. Now as we support upload from shared albums also, in case
+                     * it's an upload(add) using selectedFiles instead of userFiles
+                     */
                     const filesToProcess =
                         op == "add" ? selectedFiles : userFiles;
                     const sourceCollectionID = selected.collectionID;
@@ -1010,14 +1016,13 @@ const Page: React.FC = () => {
         async (name: string) => {
             try {
                 const collection = await createAlbum(name);
-                const pendingSingleFile = pendingSingleFileAdd.current;
 
-                if (pendingSingleFile) {
+                if (pendingSingleFileAdd.current) {
                     await performCollectionOp(
                         "add",
                         collection,
-                        [pendingSingleFile.file],
-                        pendingSingleFile.sourceCollectionSummaryID,
+                        [pendingSingleFileAdd.current.file],
+                        pendingSingleFileAdd.current.sourceCollectionSummaryID,
                     );
 
                     await remotePull({ silent: true });
@@ -1028,8 +1033,6 @@ const Page: React.FC = () => {
                         albumId: collection.id,
                         albumName: collection.name,
                     });
-                    setPostCreateAlbumOp(undefined);
-                    return;
                 }
 
                 setPostCreateAlbumOp((postCreateAlbumOp) => {
@@ -1132,6 +1135,7 @@ const Page: React.FC = () => {
                             },
                         );
                     }
+
                     // Apart from download, the other operations currently only work
                     // on the user's own files.
                     //
