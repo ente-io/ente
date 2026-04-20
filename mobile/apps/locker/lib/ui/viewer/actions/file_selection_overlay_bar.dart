@@ -62,9 +62,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   List<EnteFile> _getOwnedFiles(List<EnteFile> files) {
     final currentUserID = Configuration.instance.getUserID();
-    final ownedFiles = files
-        .where((file) => file.ownerID == currentUserID)
-        .toList();
+    final ownedFiles =
+        files.where((file) => file.ownerID == currentUserID).toList();
 
     final sharedCount = files.length - ownedFiles.length;
     if (sharedCount > 0 && mounted) {
@@ -183,9 +182,10 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                         widget.selectedFiles.files;
                                     final isAllSelected =
                                         widget.files.isNotEmpty &&
-                                        widget.files.every(
-                                          (file) => selectedSet.contains(file),
-                                        );
+                                            widget.files.every(
+                                              (file) =>
+                                                  selectedSet.contains(file),
+                                            );
                                     final buttonText = isAllSelected
                                         ? context.l10n.deselectAll
                                         : context.l10n.selectAll;
@@ -239,8 +239,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                   listenable: widget.selectedFiles,
                                   builder: (context, child) {
                                     final count = widget.selectedFiles.count;
-                                    final countText = context.l10n
-                                        .selectedCount(count);
+                                    final countText =
+                                        context.l10n.selectedCount(count);
 
                                     return InkWell(
                                       onTap: () {
@@ -342,8 +342,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final file = isSingleSelection ? files.first : null;
     final viewType = widget.collectionViewType;
 
-    final isImportant =
-        isSingleSelection &&
+    final isImportant = isSingleSelection &&
         file != null &&
         FavoritesService.instance.isFavoriteCache(file);
 
@@ -357,8 +356,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final actions = <Widget>[];
 
     if (showOffline && eligibleOfflineFiles.isNotEmpty) {
-      final shouldRemoveOffline =
-          isSingleSelection &&
+      final shouldRemoveOffline = isSingleSelection &&
           eligibleOfflineFiles.length == 1 &&
           LockerDB.instance.isFileMarkedOffline(eligibleOfflineFiles.first);
 
@@ -366,10 +364,10 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         SelectionActionButton(
           hugeIcon: SvgPicture.asset(
             shouldRemoveOffline
-                ? "assets/svg/cloud-download-cancel.svg"
-                : "assets/svg/cloud-download.svg",
-            width: 24,
-            height: 24,
+                ? "assets/svg/cloud_only.svg"
+                : "assets/svg/keep_offline.svg",
+            width: 22,
+            height: 22,
             colorFilter: ColorFilter.mode(
               colorScheme.textBase,
               BlendMode.srcIn,
@@ -397,9 +395,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                   icon: HugeIcons.strokeRoundedStar,
                   color: colorScheme.textBase,
                 ),
-          label: isImportant
-              ? context.l10n.unimportant
-              : context.l10n.important,
+          label:
+              isImportant ? context.l10n.unimportant : context.l10n.important,
           onTap: () => isSingleSelection
               ? _markImportant(context, file!)
               : _markMultipleImportant(context, files),
@@ -620,8 +617,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       'Opening add-to dialog for ${ownedFiles.length} file(s); fetching collections.',
     );
 
-    final allCollections = await CollectionService.instance
-        .getCollectionsForUI();
+    final allCollections =
+        await CollectionService.instance.getCollectionsForUI();
     final dedupedCollections = uniqueCollectionsById(allCollections);
     _logger.info(
       'Presenting ${dedupedCollections.length} unique collection option(s) '
@@ -656,8 +653,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           );
           List<Collection> currentCollections;
           try {
-            currentCollections = await CollectionService.instance
-                .getCollectionsForFile(file);
+            currentCollections =
+                await CollectionService.instance.getCollectionsForFile(file);
           } catch (_) {
             _logger.warning(
               'Failed to fetch existing collections for file ${file.uploadedFileID}',
@@ -665,9 +662,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             currentCollections = <Collection>[];
           }
 
-          final currentCollectionIds = currentCollections
-              .map((collection) => collection.id)
-              .toSet();
+          final currentCollectionIds =
+              currentCollections.map((collection) => collection.id).toSet();
 
           final collectionsToAdd = result.selectedCollections.where(
             (collection) => !currentCollectionIds.contains(collection.id),
@@ -761,8 +757,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       await dialog.show();
 
       for (final file in ownedFiles) {
-        final collections = await CollectionService.instance
-            .getCollectionsForFile(file);
+        final collections =
+            await CollectionService.instance.getCollectionsForFile(file);
 
         if (collections.isNotEmpty) {
           await CollectionService.instance.trashFile(file, collections.first);
@@ -827,8 +823,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _restoreFiles(BuildContext context, List<EnteFile> files) async {
     _logger.info('Opening restore dialog for ${files.length} file(s)');
 
-    final allCollections = await CollectionService.instance
-        .getCollectionsForUI();
+    final allCollections =
+        await CollectionService.instance.getCollectionsForUI();
     final dedupedCollections = uniqueCollectionsById(allCollections);
 
     final result = await showAddToCollectionSheet(
