@@ -1755,11 +1755,25 @@ export class FileViewerPhotoSwipe {
             return false;
         };
 
+        // Returns true if a keyboard focus is present on any of the actions
+        // controls which is going to be hidden.
+        const isFocusVisibledOnAutoHideableUIControl = () => {
+            const fv = document.querySelector(":focus-visible");
+            return (
+                fv instanceof HTMLElement &&
+                !!fv.closest(".pswp__top-bar, .pswp__bottom-right-controls")
+            );
+        };
+
+        // The gradient on the top and bottom will only hide if it's on a
+        // desktop or web interface with a proper hover-capable pointer.
         const shouldAutoHideViewerUI =
             typeof window != "undefined" &&
             "matchMedia" in window &&
             window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
+        // Timer for controling the inactivity. On each mouse movement
+        // this timer is cleared by the handleIdleMouse.
         let idleTimer: ReturnType<typeof setTimeout> | undefined;
 
         const clearIdleTimer = () => {
@@ -1769,13 +1783,24 @@ export class FileViewerPhotoSwipe {
             }
         };
 
+        // This function is trigged on each mouse movement,
+        // we have added a eventListener mousedown for the same.
         const handleIdleMouseMove = () => {
+            // Checking if any of the controls have mouse focus.
             if (!shouldAutoHideViewerUI) return;
 
+            // Clearning the timer and removing the idle class,
+            // If it was already on a idle state.
             clearIdleTimer();
             pswp.element?.classList.remove("pswp--idle");
+
+            // Setting the timer to add the idle class after 2000ms
             idleTimer = setTimeout(() => {
-                pswp.element?.classList.add("pswp--idle");
+                // Keep the controls visible while keyboard focus is still on
+                // one of the auto-hidden bars.
+                if (!isFocusVisibledOnAutoHideableUIControl()) {
+                    pswp.element?.classList.add("pswp--idle");
+                }
                 idleTimer = undefined;
             }, 2000);
         };
