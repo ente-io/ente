@@ -323,7 +323,9 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     <>
         <SpacedRow sx={{ alignItems: "flex-start" }}>
             <Typography variant="h3">{t("choose_plan")}</Typography>
-            <DialogCloseIconButton {...{ onClose }} />
+            {subscription && !isSubscriptionFree(subscription) && (
+                <DialogCloseIconButton {...{ onClose }} />
+            )}
         </SpacedRow>
         <Stack sx={{ gap: 3 }}>
             <Box>
