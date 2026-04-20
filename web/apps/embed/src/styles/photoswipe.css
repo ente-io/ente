@@ -486,8 +486,7 @@ body:has(
 }
 
 /* When the viewer is idle, and not in video fullscreen, show the top bar and bottom-right controls if the user tabs into one of those controls */
-.pswp-ente.pswp--idle:not(.pswp--video-fullscreen)
-    .pswp__top-bar:focus-within,
+.pswp-ente.pswp--idle:not(.pswp--video-fullscreen) .pswp__top-bar:focus-within,
 .pswp-ente.pswp--idle:not(.pswp--video-fullscreen)
     .pswp__bottom-right-controls:focus-within {
     opacity: 1;
