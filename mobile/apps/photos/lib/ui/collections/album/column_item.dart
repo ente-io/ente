@@ -86,7 +86,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           top: 4,
                           child: UserAvatarWidget(
                             collection.owner,
-                            type: AvatarType.sm,
+                            type: AvatarType.small,
                             thumbnailView: true,
                           ),
                         ),

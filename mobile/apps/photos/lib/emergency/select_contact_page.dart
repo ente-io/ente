@@ -129,7 +129,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
                           titleColor: colorScheme.textMuted,
                           leadingIconWidget: UserAvatarWidget(
                             user,
-                            type: AvatarType.md,
+                            type: AvatarType.medium,
                             currentUserID: Configuration.instance.getUserID()!,
                           ),
                           leadingIconSize: 24,

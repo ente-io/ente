@@ -741,8 +741,7 @@ class MemoriesCacheService {
         if (tripInsertIdx < 0) {
           tripInsertIdx = nowEntries.indexWhere(
             (e) =>
-                e.type != MemoryType.onThisDay &&
-                e.type != MemoryType.people,
+                e.type != MemoryType.onThisDay && e.type != MemoryType.people,
           );
           if (tripInsertIdx < 0) {
             tripInsertIdx = nowEntries.length;

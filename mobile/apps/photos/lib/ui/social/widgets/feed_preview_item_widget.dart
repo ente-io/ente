@@ -145,7 +145,7 @@ class _PreviewAvatarStack extends StatelessWidget {
         child: ClipOval(
           child: UserAvatarWidget(
             user,
-            type: AvatarType.xl,
+            type: AvatarType.large,
             currentUserID: currentUserID,
             addStroke: false,
           ),

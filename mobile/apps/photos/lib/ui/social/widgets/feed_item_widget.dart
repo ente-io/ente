@@ -388,51 +388,51 @@ class _StackedAvatars extends StatelessWidget {
     // Stacked avatars with overlap
     return _wrapActorTap(
       SizedBox(
-      width: 28 + 21, // First avatar + second avatar offset
-      height: 28,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // First (front) avatar
-          Positioned(
-            left: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.backgroundBase,
-                  width: 1.167,
+        width: 28 + 21, // First avatar + second avatar offset
+        height: 28,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // First (front) avatar
+            Positioned(
+              left: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.backgroundBase,
+                    width: 1.167,
+                  ),
+                ),
+                child: UserAvatarWidget(
+                  actors.first,
+                  type: AvatarType.large,
+                  currentUserID: currentUserID,
+                  addStroke: false,
                 ),
               ),
-              child: UserAvatarWidget(
-                actors.first,
-                type: AvatarType.lg,
-                currentUserID: currentUserID,
-                addStroke: false,
-              ),
             ),
-          ),
-          // Second (back) avatar
-          Positioned(
-            left: 21, // Overlap by 7px (28 - 21 = 7)
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.backgroundBase,
-                  width: 1.167,
+            // Second (back) avatar
+            Positioned(
+              left: 21, // Overlap by 7px (28 - 21 = 7)
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.backgroundBase,
+                    width: 1.167,
+                  ),
+                ),
+                child: UserAvatarWidget(
+                  actors[1],
+                  type: AvatarType.large,
+                  currentUserID: currentUserID,
+                  addStroke: false,
                 ),
               ),
-              child: UserAvatarWidget(
-                actors[1],
-                type: AvatarType.lg,
-                currentUserID: currentUserID,
-                addStroke: false,
-              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
       actors.first,
     );
@@ -449,7 +449,7 @@ class _StackedAvatars extends StatelessWidget {
       ),
       child: UserAvatarWidget(
         user,
-        type: AvatarType.lg,
+        type: AvatarType.large,
         currentUserID: currentUserID,
         addStroke: false,
       ),

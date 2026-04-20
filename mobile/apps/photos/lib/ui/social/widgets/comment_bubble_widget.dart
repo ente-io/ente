@@ -897,7 +897,7 @@ class _Header extends StatelessWidget {
           UserAvatarWidget(
             user,
             currentUserID: currentUserID,
-            type: AvatarType.lg,
+            type: AvatarType.large,
             thumbnailView: true,
             addStroke: false,
           ),
@@ -909,7 +909,7 @@ class _Header extends StatelessWidget {
           UserAvatarWidget(
             user,
             currentUserID: currentUserID,
-            type: AvatarType.lg,
+            type: AvatarType.large,
             thumbnailView: true,
             addStroke: false,
           ),

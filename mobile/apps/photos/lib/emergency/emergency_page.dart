@@ -127,7 +127,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                         leadingIconSize: 24,
                         leadingIconWidget: UserAvatarWidget(
                           emergencyUser,
-                          type: AvatarType.md,
+                          type: AvatarType.medium,
                           currentUserID: currentUserID,
                         ),
                         menuItemColor: colorScheme.fillFaint,
@@ -178,7 +178,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           leadingIconSize: 24,
                           leadingIconWidget: UserAvatarWidget(
                             emergencyUser,
-                            type: AvatarType.md,
+                            type: AvatarType.medium,
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: colorScheme.fillFaint,
@@ -288,7 +288,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           leadingIconSize: 24,
                           leadingIconWidget: UserAvatarWidget(
                             emergencyUser,
-                            type: AvatarType.md,
+                            type: AvatarType.medium,
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: colorScheme.fillFaint,
