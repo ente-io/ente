@@ -9,7 +9,7 @@ Ente lets you share your photos via links that anyone can access without an app 
 
 ## Creating public links
 
-You can create public links in three ways: from an existing album, by selecting specific photos, or by sharing an individual Memory Lane.
+You can create public links in two ways: from an existing album, or by selecting specific photos.
 
 ### From an album
 
@@ -57,24 +57,6 @@ You can create a quick link in any of these ways:
 - View all quick links in the Sharing tab under "Quick links"
 - Quick links can be converted to regular albums if needed
 - Removing a link doesn't delete the photos
-
-### Memory Lane link
-
-Share an individual person's Memory Lane as a link:
-
-**On mobile:**
-
-1. Open **Search**.
-2. Open **People** and select a person.
-3. Tap the **Memory lane** banner.
-4. Tap the share action.
-5. Create the link, then copy or share it.
-
-**Managing Memory Lane links:**
-
-- View them in the Sharing tab under **Memory links**
-- Copy, share, or delete them later without reopening the Memory Lane
-- Removing the link does not remove the underlying photos from your library
 
 ## Link features
 
@@ -226,7 +208,7 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 **On mobile:**
 
 - Go to the Sharing tab (bottom navigation)
-- See "Shared albums", "Quick links", and "Memory links" sections
+- See "Shared albums" and "Quick links" sections
 
 **On web/desktop:**
 
@@ -251,8 +233,6 @@ Changes apply immediately - anyone accessing the link will see the updated setti
 4. Confirm deletion
 
 Deleting a link makes it immediately inaccessible. The photos in the album remain in your account.
-
-For Memory Lane links, deleting the link only removes access to that shared lane. It does not delete the person, the timeline, or any of the photos in your library.
 
 ### Convert quick link to regular album
 
@@ -311,7 +291,6 @@ Public links (including collect links and quick links) are available on all plan
 - [Collaboration](/photos/features/sharing-and-collaboration/collaboration) - Collaborate with Ente users or collect photos from anyone
 - [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for public links
 - [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods explained
-- [Memory Lane](/photos/features/search-and-discovery/memory-lane) - Share a person's timeline as an individual link
 
 ## Related FAQs
 

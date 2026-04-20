@@ -1,11 +1,11 @@
 ---
 title: Memory Lane
-description: Rediscover a person's photos across the years and share an individual Memory Lane as a link
+description: Rediscover a person's photos across the years and share that timeline as a public link
 ---
 
 # Memory Lane
 
-Memory Lane creates a timeline for a person using photos of them from different years. It helps you rediscover how someone has changed over time, and you can share an individual Memory Lane as a link.
+Memory Lane creates a timeline for a person using photos of them from different years. It helps you rediscover how someone has changed over time, and you can share that timeline as a public link.
 
 > **Note**: Memory Lane is currently available in the mobile apps.
 
@@ -32,17 +32,16 @@ Because the timeline depends on people recognition, hidden or ignored faces may 
 
 If the banner does not appear yet, Ente may still be preparing the timeline or the person may not have enough eligible photos.
 
-## Share an individual Memory Lane link
+## Share a Memory Lane link
 
-You can share a specific Memory Lane as a link so others can view that person's timeline in a browser.
+You can share a Memory Lane as a public link so others can view that person's timeline in a browser.
 
 **On mobile:**
 
 1. Open a person's **Memory lane**.
 2. Tap the share action.
-3. Create the link if it has not been created already.
-4. Copy the link or share it directly.
-5. To manage or remove it later, go to the **Sharing** tab and look under **Memory links**.
+3. Create or copy the link.
+4. Share the link with anyone you want.
 
 Recipients can open the link without an Ente account.
 
@@ -70,4 +69,3 @@ If the link expires or is removed, it will stop working.
 - [Face recognition](/photos/features/search-and-discovery/face-recognition)
 - [Machine learning overview](/photos/features/search-and-discovery/machine-learning)
 - [Public links](/photos/features/sharing-and-collaboration/public-links)
-- [Sharing overview](/photos/features/sharing-and-collaboration/share)
