@@ -56,6 +56,69 @@ This is the recommended path, as it preserves full quality and metadata.
 > [fix dates manually](/photos/faq/metadata-and-editing#fix-incorrect-dates) in
 > Ente if needed.
 
+## Importing iCloud Shared Photo Library
+
+iCloud Shared Photo Library lets one organiser share a photo library with up to
+five other people. Ente does not have an exact equivalent — instead, Ente
+supports shared and collaborative albums on a per-album basis.
+
+On iPhone or iPad running iOS 16.1 or later, Shared Library photos are available
+through the system Photos library alongside your Personal Library. If Ente has
+full access to your photo library, it can back up Shared Library photos as well.
+
+> [!IMPORTANT]
+>
+> Before starting, make sure iCloud Photos has fully synced on the device. If
+> originals have not fully downloaded yet, complete the sync first or use
+> Apple's "Download and Keep Originals" option when needed.
+
+### Import into Ente
+
+1. Install the Ente app on your iPhone or iPad.
+2. Sign in and grant Ente full access to your photos when prompted.
+3. Ente will then read and back up photos from your device's photo library,
+   including Shared Library items visible there.
+
+### Optional: leave the Shared Library after migrating
+
+If you want to stop using Apple's Shared Library after your Ente backup is
+complete, you can leave it at any time.
+
+1. Open `Settings > Apps > Photos > Shared Library` on your iPhone or iPad.
+2. Tap **Leave Shared Library**. If you are the organiser, you may instead see
+   **Delete Shared Library**.
+3. Choose whether to keep everything from the Shared Library or only the items
+   you contributed.
+
+> [!NOTE]
+>
+> If you have been in the Shared Library for less than seven days, Apple only
+> lets you keep the items you contributed.
+
+### What about metadata?
+
+- **EXIF data** (dates, location, camera info) embedded in photo files is
+  preserved during import.
+- **Favorites, album membership, and People tags** are stored only inside Apple
+  Photos and are not embedded in exported files.
+
+### Mac alternative
+
+You can also migrate from a Mac:
+
+1. Open the Photos app.
+2. Switch the library view to **Shared Library** or **Both Libraries**.
+3. Select the items you want.
+4. Choose **File > Export > Export Unmodified Original**.
+5. Import those files into Ente from the desktop or web app.
+
+> [!NOTE]
+>
+> Older devices running iOS 16.0 or earlier and iCloud for Windows cannot see
+> Shared Library content. If migrating from one of these, use the Mac
+> alternative above from a Mac running macOS Ventura or later, or consolidate
+> your libraries first on a supported iPhone or iPad.
+
 For information regarding desktop migration, please go through this
 [FAQ](/photos/faq/migration#importing-from-apple-photos).
 
