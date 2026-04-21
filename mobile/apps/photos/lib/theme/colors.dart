@@ -84,6 +84,7 @@ class EnteColorScheme {
   final Color greenDark;
   final Color greenDarker;
   final Color greenLight;
+  final Color greenStroke;
 
   final Color redBase;
   final Color redDark;
@@ -137,6 +138,7 @@ class EnteColorScheme {
     this.greenDark,
     this.greenDarker,
     this.greenLight,
+    this.greenStroke,
     this.redBase,
     this.redDark,
     this.redDarker,
@@ -202,6 +204,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   greenDark,
   greenDarker,
   greenLightLight,
+  greenStrokeLight,
   red,
   redDark,
   redDarker,
@@ -255,6 +258,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   greenDark,
   greenDarker,
   greenLightDark,
+  greenStrokeDark,
   red,
   redDark,
   redDarker,
@@ -415,6 +419,8 @@ const Color greenLightLight = Color.fromRGBO(231, 246, 233, 1);
 const Color greenLightDark = Color.fromRGBO(33, 33, 33, 1);
 const Color greenDark = Color.fromRGBO(6, 157, 30, 1);
 const Color greenDarker = Color.fromRGBO(5, 124, 24, 1);
+const Color greenStrokeLight = Color.fromRGBO(186, 236, 194, 1);
+const Color greenStrokeDark = Color.fromRGBO(28, 65, 34, 1);
 
 // Red Colors
 const Color red = Color.fromRGBO(246, 58, 58, 1);
