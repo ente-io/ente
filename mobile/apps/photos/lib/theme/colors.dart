@@ -76,7 +76,7 @@ class EnteColorScheme {
   final Color contentReverse;
 
   final Color strokeSolid;
-  final Color strokeSolidDark;
+  final Color strokeDark;
 
   final Color backgroundColour;
 
@@ -132,7 +132,7 @@ class EnteColorScheme {
     this.contentLightest,
     this.contentReverse,
     this.strokeSolid,
-    this.strokeSolidDark,
+    this.strokeDark,
     this.backgroundColour,
     this.greenBase,
     this.greenDark,
