@@ -32,8 +32,6 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
   final List<Collection>? collections;
-  // At max how many albums to display
-  final int displayLimitCount;
 
   // If true, the GridView will shrink-wrap its contents.
   final bool shrinkWrap;
@@ -49,7 +47,6 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
-    this.displayLimitCount = 9,
     this.shrinkWrap = false,
     this.tag = "",
     this.enableSelectionMode = false,
@@ -155,8 +152,7 @@ class _CollectionsFlexiGridViewWidgetState
 
     final int totalCollections = widget.collections!.length;
     final bool showCreateAlbum = widget.shouldShowCreateAlbum;
-    final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
-    final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
+    final int displayItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
 
     return SliverPadding(
       key: key,
@@ -214,8 +210,7 @@ class _CollectionsFlexiGridViewWidgetState
     final int totalCollections = widget.collections?.length ?? 0;
     final bool showCreateAlbum =
         widget.shouldShowCreateAlbum && !isAnyAlbumSelected;
-    final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
-    final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
+    final int displayItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
     if (displayItemCount == 0) {
       return SliverToBoxAdapter(key: key, child: const SizedBox.shrink());
     }

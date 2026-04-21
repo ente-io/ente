@@ -87,8 +87,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final displayLimitCount = (collections?.length ?? 0) +
-        (widget.tag.isEmpty && _searchQuery.isEmpty ? 1 : 0);
     final bool enableSelectionMode =
         widget.sectionType == UISectionType.homeCollections ||
             widget.sectionType == UISectionType.outgoingCollections ||
@@ -125,7 +123,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                   ),
                   CollectionsFlexiGridViewWidget(
                     collections,
-                    displayLimitCount: displayLimitCount,
                     tag: widget.tag,
                     enableSelectionMode: enableSelectionMode,
                     albumViewType: albumViewType ?? AlbumViewType.grid,
