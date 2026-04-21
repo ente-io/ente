@@ -1,4 +1,4 @@
-# Updating the app icon
+# Updating the iOS app icon
 
 The iOS app icon is based on a 1024×1024 transparent foreground image centered on a square canvas. From this we create three assets with differing backgrounds and add them to `AppIcon.appiconset`.
 

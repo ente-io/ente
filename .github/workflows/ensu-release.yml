@@ -9,7 +9,7 @@ on:
     workflow_dispatch:
 
 env:
-    NDK_VERSION: "27.0.12077973"
+    NDK_VERSION: "27.3.13750724"
 
 permissions:
     contents: write
@@ -259,19 +259,11 @@ jobs:
 
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
-              with:
-                  targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
-            - name: Install cargo-ndk
-              run: cargo install cargo-ndk
-
-            - name: Build Rust libraries
+            - name: Generate Android bindings
               run: |
-                  cd ../../packages/rust/tool
-                  ./build_android.sh
-              env:
-                  ANDROID_HOME: ${{ env.ANDROID_HOME }}
-                  NDK_VERSION: ${{ env.NDK_VERSION }}
+                  cd ../../../../../rust
+                  cargo codegen ensu-android
 
             - name: Print Android release capabilities
               run: |
