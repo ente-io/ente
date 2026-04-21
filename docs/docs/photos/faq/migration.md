@@ -171,7 +171,7 @@ rest.
 
 ### I have photos on my phone and also photos autosynced from my phone to a cloud storage. How do I upload all these photos to Ente without duplicates? {#prevent-duplicates-cloud-sync}
 
-Ente detects duplicates by identical hash, file name and creation time. If your
+Ente detects duplicates by identical hash and file name. If your
 previous cloud service modified your photos in any way (re-compressed them,
 stripped or altered EXIF metadata, converted formats, etc.), the hashes won't
 match and duplicates may occur.
