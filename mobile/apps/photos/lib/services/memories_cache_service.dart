@@ -37,6 +37,7 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/cache_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -1249,6 +1250,24 @@ class MemoriesCacheService {
     if (!found) {
       _logger.warning(
         "Could not find memory with generatedFileID: $generatedFileID",
+      );
+      final file = await FilesDB.instance.getFile(generatedFileID);
+      if (file == null) {
+        _logger.warning(
+          "Could not find file with generatedFileID fallback: $generatedFileID",
+        );
+        return;
+      }
+      await _routeToPage(
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "memorywidget-fallback",
+          ),
+        ),
+        context: context,
+        forceCustomPageRoute: true,
       );
       return;
     }
