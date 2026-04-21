@@ -117,7 +117,8 @@ You can also migrate from a Mac:
 > Older devices running iOS 16.0 or earlier and iCloud for Windows cannot see
 > Shared Library content. If migrating from one of these, use the Mac
 > alternative above from a Mac running macOS Ventura or later, or consolidate
-> your libraries first on a supported iPhone or iPad.
+> your libraries first on a supported iPhone or iPad by following the steps
+> above in "Optional: leave the Shared Library after migrating".
 
 For information regarding desktop migration, please go through this
 [FAQ](/photos/faq/migration#importing-from-apple-photos).
