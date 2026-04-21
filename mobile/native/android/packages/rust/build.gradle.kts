@@ -57,11 +57,14 @@ val buildRustJni by tasks.registering {
     inputs.files(fileTree(file("../../../../../rust")) { exclude("**/target/**") })
     inputs.file(file("scripts/build-rust.sh"))
     inputs.property("abis", abis)
-    inputs.property("ndk", providers.provider { android.ndkDirectory.absolutePath })
+    inputs.property("ndk", providers.provider { android.ndkVersion })
     outputs.dir(generatedJniLibsDir)
 
     doLast {
-        val ndkDir = android.ndkDirectory
+        val version = android.ndkVersion
+        val ndkDir = runCatching { android.ndkDirectory }.getOrElse {
+            error("NDK $version is not installed. Run: sdkmanager \"ndk;$version\"")
+        }
         val toolchain = ndkToolchain(ndkDir)
 
         // Wipe every known ABI so a debug ↔ release switch doesn't leave stale
@@ -88,6 +91,10 @@ val buildRustJni by tasks.registering {
 android {
     namespace = "io.ente.ensu.rust"
     compileSdk = 34
+    // Pin the NDK instead of relying on AGP defaults. GitHub-hosted Ubuntu
+    // runners already ship 27.3.13750724, so this keeps CI lean while making
+    // the requirement explicit for local builds too.
+    ndkVersion = "27.3.13750724"
 
     defaultConfig {
         minSdk = 24

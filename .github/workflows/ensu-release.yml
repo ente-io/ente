@@ -9,7 +9,7 @@ on:
     workflow_dispatch:
 
 env:
-    NDK_VERSION: "27.0.12077973"
+    NDK_VERSION: "27.3.13750724"
 
 permissions:
     contents: write
