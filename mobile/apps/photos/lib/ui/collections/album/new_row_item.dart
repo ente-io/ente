@@ -1,6 +1,7 @@
 import "package:dotted_border/dotted_border.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -11,6 +12,8 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class NewAlbumRowItemWidget extends StatelessWidget {
+  static const _cornerRadius = 20.0;
+  static const _iconSize = 18.0;
   final Color? color;
   final double height;
   final double width;
@@ -69,7 +72,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(_cornerRadius),
             child: Container(
               height: height,
               width: width,
@@ -80,13 +83,18 @@ class NewAlbumRowItemWidget extends StatelessWidget {
                 borderType: BorderType.RRect,
                 strokeWidth: 1.75,
                 dashPattern: const [3.75, 3.75],
-                radius: const Radius.circular(12),
+                radius: const Radius.circular(_cornerRadius),
                 padding: EdgeInsets.zero,
-                color: colorScheme.strokeFaint,
+                color: colorScheme.strokeDark,
                 child: Center(
-                  child: Icon(
-                    Icons.add,
-                    color: colorScheme.strokeFaint,
+                  child: SizedBox.square(
+                    dimension: _iconSize,
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedAdd01,
+                      size: _iconSize,
+                      strokeWidth: 1.5,
+                      color: colorScheme.contentLight,
+                    ),
                   ),
                 ),
               ),
