@@ -566,7 +566,7 @@ const currentUserRoleInCollection = (collection: Collection) => {
  * only the OWNER, ADMIN and COLLABORATOR can actually add
  * file to a collection
  */
-export const canAddFilesToCollection = (collection: Collection) => {
+const canAddFilesToCollection = (collection: Collection) => {
     const role = currentUserRoleInCollection(collection);
     return role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR";
 };
@@ -804,7 +804,7 @@ export const copyFiles = async (
     return copiedFiles;
 };
 
-export const savedUserUncategorizedCollection = async () => {
+const savedUserUncategorizedCollection = async () => {
     const userID = ensureLocalUser().id;
     return (await savedCollections()).find(
         (collection) =>

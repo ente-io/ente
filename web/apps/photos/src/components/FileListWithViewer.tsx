@@ -16,23 +16,14 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
-import {
-    addOrCopyToCollection,
-    canDirectlyUploadToCollection,
-    canUploadToCollection,
-    moveToTrash,
-    savedOrCreateUserUncategorizedCollection,
-} from "ente-new/photos/services/collection";
+import { moveToTrash } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {
-    successfulFilesFromUploadBatchResult,
-    uploadManager,
-} from "services/upload-manager";
+import { uploadManager } from "services/upload-manager";
 import {
     FileList,
     type FileListAnnotatedFile,
@@ -280,60 +271,16 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 
     const handleSaveEditedImageCopy = useMemo(() => {
         if (!enableImageEditing) return undefined;
-        return async (
+        return (
             editedFile: File,
             collection: Collection,
             enteFile: EnteFile,
         ) => {
-            let processedAny = false;
-            try {
-                await uploadManager.waitUntilIdle();
-                await onRemotePull();
-                uploadManager.prepareForNewUpload();
-                uploadManager.showUploadProgressDialog();
-
-                const uploadCollection = canDirectlyUploadToCollection(
-                    collection,
-                )
-                    ? collection
-                    : canUploadToCollection(collection)
-                      ? await savedOrCreateUserUncategorizedCollection()
-                      : undefined;
-
-                if (!uploadCollection) {
-                    throw new Error(
-                        "Upload not allowed for the selected collection",
-                    );
-                }
-
-                const batchResult = await uploadManager.uploadFile(
-                    editedFile,
-                    uploadCollection,
-                    enteFile,
-                );
-                processedAny = batchResult.processedAny;
-                if (!processedAny) {
-                    uploadManager.hideUploadProgressDialog();
-                    return;
-                }
-
-                if (uploadCollection.id != collection.id) {
-                    const uploadedFiles =
-                        successfulFilesFromUploadBatchResult(batchResult);
-                    if (uploadedFiles.length) {
-                        await addOrCopyToCollection(collection, uploadedFiles);
-                    }
-                }
-                await onRemotePull();
-            } catch (e) {
-                if (processedAny) {
-                    await onRemotePull().catch(() => undefined);
-                }
-                uploadManager.hideUploadProgressDialog();
-                onGenericError(e);
-            }
+            uploadManager.prepareForNewUpload();
+            uploadManager.showUploadProgressDialog();
+            void uploadManager.uploadFile(editedFile, collection, enteFile);
         };
-    }, [enableImageEditing, onGenericError, onRemotePull]);
+    }, [enableImageEditing]);
 
     const shouldShowMapButton =
         modePlus !== "search" &&

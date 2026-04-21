@@ -640,10 +640,6 @@ class UploadManager {
         };
     }
 
-    public waitUntilIdle = async () => {
-        while (this.isUploadInProgress()) await wait(100);
-    };
-
     private updateExistingFiles(file: EnteFile) {
         this.existingFiles.push(file);
         this.onUploadFile!(file);

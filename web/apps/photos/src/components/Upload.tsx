@@ -278,6 +278,11 @@ export const Upload: React.FC<UploadProps> = ({
     const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
     const isDragAndDrop = useRef(false);
+
+    /**
+     * Used to remember a deferred "real destination" collectionf or the current upload flow.
+     * So this ref remembers the original shared album target across failed uploads.
+     */
     const retrySharedAlbumUploadTarget = useRef<Collection | undefined>(
         undefined,
     );
@@ -717,10 +722,14 @@ export const Upload: React.FC<UploadProps> = ({
             onGenericError(e);
             return;
         }
-        await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections, {
-            persistPendingUploads: true,
-            postUploadTargetCollection: undefined,
-        });
+        await waitInQueueAndUploadFiles(
+            uploadItemsWithCollection,
+            collections,
+            {
+                persistPendingUploads: true,
+                postUploadTargetCollection: undefined,
+            },
+        );
         uploadItemsAndPaths.current = [];
     };
 
