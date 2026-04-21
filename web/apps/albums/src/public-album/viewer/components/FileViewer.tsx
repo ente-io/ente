@@ -93,6 +93,7 @@ export type FileViewerProps = ModalVisibilityProps & {
     initialIndex: number;
     initialSidebar?: FileViewerInitialSidebar;
     highlightCommentID?: string;
+    initialAnonUserNames?: Map<string, string>;
     disableDownload?: boolean;
     showFullscreenButton?: boolean;
     onDownload?: (file: EnteFile) => void;
@@ -100,6 +101,11 @@ export type FileViewerProps = ModalVisibilityProps & {
     publicAlbumsCredentials?: PublicAlbumsCredentials;
     shouldCloseOnBrowserBack?: boolean;
     disableEscapeClose?: boolean;
+    /**
+     * Disable PhotoSwipe's gesture-driven dismissals, such as pinch-to-close
+     * and vertical drag close.
+     */
+    disableGestureClose?: boolean;
     collectionKey?: string;
     onJoinAlbum?: () => void;
     enableComment?: boolean;
@@ -116,6 +122,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     initialIndex,
     initialSidebar,
     highlightCommentID,
+    initialAnonUserNames,
     disableDownload,
     showFullscreenButton,
     onDownload,
@@ -123,6 +130,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     publicAlbumsCredentials,
     shouldCloseOnBrowserBack: shouldCloseOnBrowserBackOverride,
     disableEscapeClose = false,
+    disableGestureClose = false,
     collectionKey,
     onJoinAlbum,
     enableComment = true,
@@ -204,8 +212,28 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     // Map of anon user ID to decrypted user name for anonymous users.
     const [anonUserNames, setAnonUserNames] = useState<Map<string, string>>(
-        new Map(),
+        () =>
+            initialAnonUserNames ? new Map(initialAnonUserNames) : new Map(),
     );
+    const [publicSocialDataStatusByFileID, setPublicSocialDataStatusByFileID] =
+        useState<Map<number, "loading" | "ready">>(new Map());
+
+    useEffect(() => {
+        if (!initialAnonUserNames?.size) return;
+
+        setAnonUserNames((prev) => {
+            let didChange = false;
+            const next = new Map(prev);
+
+            for (const [anonUserID, userName] of initialAnonUserNames) {
+                if (next.get(anonUserID) === userName) continue;
+                next.set(anonUserID, userName);
+                didChange = true;
+            }
+
+            return didChange ? next : prev;
+        });
+    }, [initialAnonUserNames]);
 
     // Ref for allReactions to use in callbacks
     const allReactionsRef = useRef(allReactions);
@@ -884,6 +912,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [allReactions, files, open]);
 
     const activeFileID = activeAnnotatedFile?.file.id;
+    const shouldFetchPublicSocialData =
+        !!open &&
+        enableComment &&
+        !!activeFileID &&
+        !!publicAlbumsCredentials &&
+        !!collectionKey;
+    const isInitialPublicSocialDataLoading =
+        !!activeFileID &&
+        shouldFetchPublicSocialData &&
+        publicSocialDataStatusByFileID.get(activeFileID) !== "ready";
 
     // Fetch social data (comments + reactions) for public albums (when viewing as anonymous user).
     useEffect(() => {
@@ -898,6 +936,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         const file = files.find((f) => f.id === activeFileID);
         if (!file) return;
+
+        setPublicSocialDataStatusByFileID((prev) => {
+            if (prev.get(activeFileID) === "ready") return prev;
+
+            const next = new Map(prev);
+            next.set(activeFileID, "loading");
+            return next;
+        });
 
         void (async () => {
             try {
@@ -991,6 +1037,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 }
             } catch (e) {
                 log.error("Failed to fetch public social data", e);
+            } finally {
+                setPublicSocialDataStatusByFileID((prev) => {
+                    if (prev.get(activeFileID) === "ready") return prev;
+
+                    const next = new Map(prev);
+                    next.set(activeFileID, "ready");
+                    return next;
+                });
             }
         })();
     }, [
@@ -1125,6 +1179,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 enableComment,
                 showFullscreenButton,
                 disableEscapeClose,
+                disableGestureClose,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -1165,6 +1220,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         disableDownload,
         showFullscreenButton,
         disableEscapeClose,
+        disableGestureClose,
         handleClose,
         handleAnnotate,
         handleViewInfo,
@@ -1229,6 +1285,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleCommentsClose}
                 file={activeAnnotatedFile.file}
                 activeCollectionID={activeCollectionID}
+                isSocialDataLoading={isInitialPublicSocialDataLoading}
                 prefetchedComments={fileComments.get(
                     activeAnnotatedFile.file.id,
                 )}
@@ -1252,6 +1309,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleLikesClose}
                 file={activeAnnotatedFile.file}
                 activeCollectionID={activeCollectionID}
+                isSocialDataLoading={isInitialPublicSocialDataLoading}
                 prefetchedReactions={allReactions.get(
                     activeAnnotatedFile.file.id,
                 )}

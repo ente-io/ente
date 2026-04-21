@@ -1073,8 +1073,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Angi radius",
-  "familyPlanPortalTitle": "Familie",
-  "familyPlanOverview": "Legg til 5 familiemedlemmer til det eksisterende abonnementet uten å betale ekstra.\n\nHvert medlem får sitt eget private område, og kan ikke se hverandres filer med mindre de er delt.\n\nFamilieabonnement er tilgjengelige for kunder som har et betalt Ente-abonnement.\n\nAbonner nå for å komme i gang!",
   "androidBiometricHint": "Verifiser identitet",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

@@ -323,6 +323,7 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	c.touchContactsAfterEmailUpdate(ctx, userID)
 	_ = emailUtil.SendTemplatedEmail([]string{user.Email}, "ente", "team@ente.com",
 		ente.EmailChangedSubject, ente.EmailChangedTemplate, map[string]interface{}{
 			"NewEmail": email,
@@ -359,6 +360,20 @@ func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email strin
 	}()
 
 	return nil
+}
+
+func (c *UserController) touchContactsAfterEmailUpdate(ctx *gin.Context, userID int64) {
+	if c.ContactRepo == nil {
+		return
+	}
+	if touchErr := c.ContactRepo.TouchContactsForContactUser(ctx, userID); touchErr != nil {
+		log.WithError(touchErr).
+			WithFields(log.Fields{
+				"req_id":  requestid.Get(ctx),
+				"user_id": userID,
+			}).
+			Error("failed to touch contacts after email update")
+	}
 }
 
 // Logout removes the token from the cache and database.
@@ -438,9 +453,28 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 			log.WithError(userErr).Error("Failed to get user")
 			return
 		}
-		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
+		templateData := map[string]interface{}{
 			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
-		}, nil)
+		}
+		if strings.HasSuffix(emailUtil.NormalizeEmail(user.Email), "@ente.io") {
+			appDisplayNames := map[ente.App]string{
+				ente.Photos: "Ente Photos",
+				ente.Auth:   "Ente Auth",
+				ente.Locker: "Ente Locker",
+			}
+			appName, ok := appDisplayNames[app]
+			if !ok {
+				appName = "Ente"
+			}
+			device := "Unknown Device"
+			if strings.TrimSpace(userAgent) != "" {
+				device = network.GetPrettyUA(userAgent)
+			}
+			templateData["App"] = appName
+			templateData["Device"] = device
+			templateData["IP"] = ip
+		}
+		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, templateData, nil)
 		if emailSendErr != nil {
 			log.WithError(emailSendErr).Error("Failed to send email")
 		}

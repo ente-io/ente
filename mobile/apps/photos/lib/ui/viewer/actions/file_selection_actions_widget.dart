@@ -820,6 +820,7 @@ class _FileSelectionActionsWidgetState
           selectedFiles,
           0,
           "guest_view",
+          galleryType: widget.type,
         ),
       );
       await localSettings.setOnGuestView(true);
@@ -1127,8 +1128,10 @@ class _FileSelectionActionsWidgetState
     if (filesToDownload.isNotEmpty) {
       if (flagService.internalUser) {
         try {
-          final enqueueResult =
-              await galleryDownloadQueueService.enqueueFiles(filesToDownload);
+          final enqueueResult = await galleryDownloadQueueService.enqueueFiles(
+            filesToDownload,
+            persistToFilesDB: widget.type != GalleryType.sharedPublicCollection,
+          );
           addedToQueueCount = enqueueResult.addedCount;
         } catch (e) {
           _logger.warning("Failed to enqueue files for download", e);
@@ -1152,7 +1155,11 @@ class _FileSelectionActionsWidgetState
           for (final file in filesToDownload) {
             futures.add(
               taskQueue.add(() async {
-                await downloadToGallery(file);
+                await downloadToGallery(
+                  file,
+                  persistToFilesDB:
+                      widget.type != GalleryType.sharedPublicCollection,
+                );
                 downloadedFiles++;
                 dialog.update(
                   message: AppLocalizations.of(context).downloading +

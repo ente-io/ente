@@ -14,6 +14,10 @@ import {
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
+import {
+    useResolvedContactAvatar,
+    useResolvedContactDisplay,
+} from "ente-contacts-web";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
@@ -225,6 +229,9 @@ interface CommentHeaderProps {
     isMaskedEmail?: boolean;
     /** Key used for computing avatar color (e.g., anonUserID for anonymous users). */
     avatarColorKey?: string;
+    userID?: number;
+    email?: string;
+    useContactDisplay?: boolean;
 }
 
 /**
@@ -237,24 +244,46 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
     avatarSize = 32,
     isMaskedEmail,
     avatarColorKey,
-}) => (
-    <CommentHeaderContainer>
-        <Avatar
-            sx={{
-                width: avatarSize,
-                height: avatarSize,
-                fontSize: 14,
-                bgcolor: getAvatarColor(avatarColorKey ?? userName),
-                color: "#fff",
-            }}
-        >
-            {isMaskedEmail ? <PersonIcon /> : userName[0]?.toUpperCase()}
-        </Avatar>
-        <UserName>{userName}</UserName>
-        <Separator>•</Separator>
-        <Timestamp>{formatTimeAgo(timestamp)}</Timestamp>
-    </CommentHeaderContainer>
-);
+    userID,
+    email,
+    useContactDisplay,
+}) => {
+    const resolved = useResolvedContactAvatar({
+        userID: useContactDisplay ? userID : undefined,
+        email: useContactDisplay ? email : undefined,
+    });
+    const displayName = useContactDisplay
+        ? resolved.primaryLabel || userName
+        : userName;
+
+    return (
+        <CommentHeaderContainer>
+            <Avatar
+                sx={{
+                    width: avatarSize,
+                    height: avatarSize,
+                    fontSize: 14,
+                    bgcolor: getAvatarColor(
+                        avatarColorKey ?? email ?? userName,
+                    ),
+                    color: "#fff",
+                }}
+                src={useContactDisplay ? resolved.avatarURL : undefined}
+            >
+                {isMaskedEmail ? (
+                    <PersonIcon />
+                ) : useContactDisplay && resolved.source === "contact" ? (
+                    resolved.initial
+                ) : (
+                    userName[0]?.toUpperCase()
+                )}
+            </Avatar>
+            <UserName>{displayName}</UserName>
+            <Separator>•</Separator>
+            <Timestamp>{formatTimeAgo(timestamp)}</Timestamp>
+        </CommentHeaderContainer>
+    );
+};
 
 interface QuotedReplyProps {
     parentComment: Comment;
@@ -276,6 +305,18 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     anonUserNames,
     currentAnonUserID,
 }) => {
+    const parentEmail = userIDToEmail?.get(parentComment.userID);
+    const shouldResolveParent =
+        currentUserID !== undefined &&
+        parentComment.userID > 0 &&
+        !parentComment.anonUserID &&
+        !!parentEmail &&
+        !parentEmail.startsWith("*");
+    const resolvedParent = useResolvedContactDisplay({
+        userID: shouldResolveParent ? parentComment.userID : undefined,
+        email: shouldResolveParent ? parentEmail : undefined,
+    });
+
     // Get the author name
     const getAuthorName = (): string => {
         // Check if this is the current user (logged in or anonymous)
@@ -298,8 +339,9 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
         }
 
         // For registered users, look up email
-        const email = userIDToEmail?.get(parentComment.userID);
-        return email ?? t("user");
+        return shouldResolveParent
+            ? resolvedParent.primaryLabel || parentEmail || t("user")
+            : (parentEmail ?? t("user"));
     };
 
     return (
@@ -1305,6 +1347,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 name: string;
                                 avatarColorKey: string;
                                 isMaskedEmail: boolean;
+                                email?: string;
+                                userID?: number;
+                                useContactDisplay: boolean;
                             } => {
                                 // If anonymous user, check anonUserNames map
                                 if (comment.anonUserID) {
@@ -1318,6 +1363,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         // Use name for avatar color (varying length like mobile emails)
                                         avatarColorKey: anonName,
                                         isMaskedEmail: false,
+                                        useContactDisplay: false,
                                     };
                                 }
                                 // For registered users, use email
@@ -1333,6 +1379,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         ? emailFromMap
                                         : String(comment.userID),
                                     isMaskedEmail: email.startsWith("*"),
+                                    email: emailFromMap,
+                                    userID: comment.userID,
+                                    useContactDisplay:
+                                        currentUserID !== undefined &&
+                                        !email.startsWith("*"),
                                 };
                             };
 
@@ -1349,6 +1400,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                             }
                                             avatarColorKey={
                                                 authorInfo.avatarColorKey
+                                            }
+                                            email={authorInfo.email}
+                                            userID={authorInfo.userID}
+                                            useContactDisplay={
+                                                authorInfo.useContactDisplay
                                             }
                                         />
                                     )}

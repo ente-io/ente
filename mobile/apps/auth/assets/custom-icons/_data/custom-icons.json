@@ -46,6 +46,10 @@
       "hex": "0000ff"
     },
     {
+      "title":"Ahrefs",
+      "slug":"ahrefs"
+    },
+    {
       "title": "Airtable"
     },
     {
@@ -385,7 +389,6 @@
     {
       "title": "Capcom",
       "slug": "capcom",
-      "hex": "0D4DA2",
       "altNames": [
         "Capcom Co., Ltd."
       ]
@@ -722,6 +725,13 @@
       "title": "Esketit"
     },
     {
+      "title": "ESL",
+      "slug": "esl",
+      "altNames": [
+        "ESL Gaming"
+      ]
+    },
+    {
       "title": "Estateguru"
     },
     {
@@ -796,7 +806,10 @@
     },
     {
       "title": "Firefox",
-      "slug": "mozilla"
+      "slug": "firefoxbrowser",
+      "altNames": [
+        "Firefox Browser"
+      ]
     },
     {
       "title": "fortrabbit"
@@ -1000,6 +1013,13 @@
     },
     {
       "title": "INWX"
+    },
+    {
+      "title": "IPQualityScore",
+      "slug": "ipqualityscore",
+      "altNames": [
+        "IPQS"
+      ]
     },
     {
       "title": "IRCTC",
@@ -1278,6 +1298,14 @@
       "title": "MEXC"
     },
     {
+      "title": "MyFigureCollection",
+      "slug": "mfc",
+      "altNames": [
+        "MyFigureCollection.net",
+        "MFC"
+      ]
+    },    
+    {
       "title": "microsoft"
     },
     {
@@ -1313,7 +1341,15 @@
       ]
     },
     {
-      "title": "Mozilla"
+      "title": "MozillaOld",
+      "slug": "mozilla_old"
+    },
+    {
+      "title": "Mozilla",
+      "slug": "mozilla",
+      "altNames": [
+        "Mozilla Account"
+      ]
     },
     {
       "title": "MyFRITZ!Net",
@@ -1412,6 +1448,7 @@
     },
     {
       "title": "nintendo",
+      "hex": "ffffff",
       "altNames": [
         "任天堂",
         "Nintendo Account"
@@ -1586,6 +1623,10 @@
       "slug": "pionex"
     },
     {
+      "title": "PSNProfiles",
+      "slug": "psnprofiles"
+    },
+    {
       "title": "Plus Crypto",
       "slug": "plus_crypto"
     },
@@ -1753,6 +1794,10 @@
       "title": "reMarkable"
     },
     {
+      "title": "Reolink",
+      "slug": "reolink"
+    },
+    {
       "title": "Restorecord"
     },
     {
@@ -1797,7 +1842,10 @@
       "hex": "000000"
     },
     {
-      "title": "Samsung"
+      "title": "Samsung",
+      "altNames": [
+        "Samsung Account"
+      ]
     },
     {
       "title": "SBI",
@@ -1874,6 +1922,10 @@
     },
     {
       "title": "SpaceHey"
+    },
+    {
+      "title": "Square Enix",
+      "slug": "square_enix"
     },
     {
       "title": "Standard Notes",
@@ -2339,6 +2391,10 @@
     },
     {
       "title": "Zoom"
+    },
+    {
+      "title": "DLsite",
+      "slug": "dlsite"
     }
   ]
 }

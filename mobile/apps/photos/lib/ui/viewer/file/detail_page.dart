@@ -16,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -47,6 +48,7 @@ class DetailPageConfiguration {
   final String tagPrefix;
   final DetailPageMode mode;
   final bool isLocalOnlyContext;
+  final GalleryType? galleryType;
 
   /// Callback invoked with the page context after the page is ready.
   /// Useful for showing bottom sheets or dialogs after navigation completes.
@@ -58,6 +60,7 @@ class DetailPageConfiguration {
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
     this.isLocalOnlyContext = false,
+    this.galleryType,
     this.onPageReady,
   });
 
@@ -67,12 +70,14 @@ class DetailPageConfiguration {
     int? selectedIndex,
     String? tagPrefix,
     bool? isLocalOnlyContext,
+    GalleryType? galleryType,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
       isLocalOnlyContext: isLocalOnlyContext ?? this.isLocalOnlyContext,
+      galleryType: galleryType ?? this.galleryType,
     );
   }
 }
@@ -91,6 +96,7 @@ class _DetailPageState extends State<DetailPage> {
   final _isInSharedCollectionNotifier = ValueNotifier(false);
   final _showingThumbnailFallbackNotifier = ValueNotifier<String?>(null);
   final _isZoomedNotifier = ValueNotifier(false);
+  final _zoomTransformNotifier = ValueNotifier(ZoomTransform.identity);
 
   @override
   void dispose() {
@@ -98,6 +104,7 @@ class _DetailPageState extends State<DetailPage> {
     _isInSharedCollectionNotifier.dispose();
     _showingThumbnailFallbackNotifier.dispose();
     _isZoomedNotifier.dispose();
+    _zoomTransformNotifier.dispose();
     super.dispose();
   }
 
@@ -111,6 +118,7 @@ class _DetailPageState extends State<DetailPage> {
       isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
       showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
       isZoomedNotifier: _isZoomedNotifier,
+      zoomTransformNotifier: _zoomTransformNotifier,
       child: _Body(widget.config),
     );
   }
@@ -225,6 +233,7 @@ class _BodyState extends State<_Body> {
                 _onEditFileRequested,
                 enableFullScreenNotifier: InheritedDetailPageState.of(context)
                     .enableFullScreenNotifier,
+                galleryType: widget.config.galleryType,
                 mode: widget.config.mode,
               );
             },

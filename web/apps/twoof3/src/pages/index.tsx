@@ -39,7 +39,7 @@ import {
     useState,
 } from "react";
 
-const APP_LINK = "2of3.ente.io";
+const APP_LINK = "2of3.ente.com";
 const MAX_CARD_TITLE_LENGTH = 80;
 const CARD_LABEL_FALLBACK = "Today";
 const textEncoder = new TextEncoder();
@@ -145,7 +145,7 @@ const HELP_FAQS = [
         answer: "No. Your secret is split and recovered in your browser. The downloaded recovery page also works fully offline.",
     },
     {
-        question: "What if 2of3.ente.io is unavailable?",
+        question: "What if 2of3.ente.com is unavailable?",
         answer: (
             <>
                 A fully offline HTML recovery page is included when you use{" "}
@@ -156,7 +156,7 @@ const HELP_FAQS = [
                     component="a"
                     href="https://github.com/ente-io/ente"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener"
                     sx={{
                         color: "inherit",
                         textDecorationColor: "currentColor",
@@ -195,7 +195,7 @@ const HELP_FAQS = [
                     component="a"
                     href="https://github.com/ente-io/ente"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener"
                     sx={{
                         color: "inherit",
                         textDecorationColor: "currentColor",
@@ -1112,7 +1112,7 @@ const Page = () => {
                                     component="a"
                                     href="https://ente.com"
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener"
                                     sx={{
                                         color: "var(--ink)",
                                         fontWeight: 700,
@@ -2216,7 +2216,7 @@ const Page = () => {
                                     component="a"
                                     href="https://ente.com"
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener"
                                     sx={{
                                         color: "var(--ink)",
                                         fontWeight: 500,
@@ -2285,7 +2285,7 @@ const Page = () => {
                                     component="a"
                                     href="https://github.com/ente-io/ente"
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener"
                                     aria-label="View source on GitHub"
                                     sx={{
                                         color: "var(--ink)",

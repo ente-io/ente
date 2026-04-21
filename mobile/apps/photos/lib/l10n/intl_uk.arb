@@ -1061,8 +1061,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "Встановити радіус",
-  "familyPlanPortalTitle": "Сім'я",
-  "familyPlanOverview": "Додайте 5 членів сім'ї до чинного тарифу без додаткової плати.\n\nКожен член сім'ї отримає власний приватний простір і не зможе бачити файли інших, доки обидва не нададуть до них спільний доступ.\n\nСімейні плани доступні клієнтам, які мають платну підписку на Ente.\n\nПідпишіться зараз, щоби розпочати!",
   "androidBiometricHint": "Підтвердження особистості",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1724,7 +1722,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, =1{1 альбом} one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
+  "albumsCount": "{count, plural, one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -1741,7 +1739,7 @@
   "@deletedComment": {
     "description": "Label for deleted comments"
   },
-  "commentsCount": "{count, plural, =0{Немає коментарів} =1{1 коментар} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
+  "commentsCount": "{count, plural, =0{Немає коментарів} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

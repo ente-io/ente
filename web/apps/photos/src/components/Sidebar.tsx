@@ -6,7 +6,6 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
@@ -122,6 +121,7 @@ import {
     pullUserDetails,
     redirectToCustomerPortal,
     userDetailsAddOnBonuses,
+    userDetailsSnapshot,
     type UserDetails,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -205,6 +205,7 @@ type SidebarProps = ModalVisibilityProps & {
 
 type AccountAction = Extract<
     SidebarActionID,
+    | "account.subscription"
     | "account.recoveryKey"
     | "account.twoFactor"
     | "account.twoFactor.reconfigure"
@@ -409,6 +410,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {...{
                         onShowExport: handleShowExport,
                         onAuthenticateUser,
+                        onShowPlanSelector,
                         showAccount,
                         accountVisibilityProps,
                         showPreferences,
@@ -445,6 +447,35 @@ const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
 interface SectionProps {
     onCloseSidebar: SidebarProps["onClose"];
 }
+
+const openManageSubscription = ({
+    userDetails,
+    showManageMemberSubscription,
+    onShowPlanSelector,
+}: {
+    userDetails: UserDetails | undefined;
+    showManageMemberSubscription: () => void;
+    onShowPlanSelector: () => void;
+}) => {
+    if (
+        userDetails &&
+        isPartOfFamily(userDetails) &&
+        !isFamilyAdmin(userDetails)
+    ) {
+        showManageMemberSubscription();
+    } else if (
+        userDetails &&
+        isSubscriptionStripe(userDetails.subscription) &&
+        isSubscriptionPastDue(userDetails.subscription)
+    ) {
+        // TODO: This makes an API request, so the UI should indicate the await.
+        //
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        redirectToCustomerPortal();
+    } else {
+        onShowPlanSelector();
+    }
+};
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
     <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
@@ -487,25 +518,12 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         [userDetails],
     );
 
-    const handleSubscriptionCardClick = () => {
-        if (isNonAdminFamilyMember) {
-            showManageMemberSubscription();
-        } else {
-            if (
-                userDetails &&
-                isSubscriptionStripe(userDetails.subscription) &&
-                isSubscriptionPastDue(userDetails.subscription)
-            ) {
-                // TODO: This makes an API request, so the UI should indicate
-                // the await.
-                //
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                redirectToCustomerPortal();
-            } else {
-                onShowPlanSelector();
-            }
-        }
-    };
+    const handleSubscriptionCardClick = () =>
+        openManageSubscription({
+            userDetails,
+            showManageMemberSubscription,
+            onShowPlanSelector,
+        });
 
     return (
         <>
@@ -589,12 +607,10 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     const hasAddOnBonus = userDetailsAddOnBonuses(userDetails).length > 0;
 
     let message: React.ReactNode;
-    let showUpgradeText = false;
     if (!hasAddOnBonus) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isSubscriptionFree(userDetails.subscription)) {
                 message = t("subscription_info_free");
-                showUpgradeText = true;
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
                     date: userDetails.subscription.expiryTime,
@@ -623,39 +639,13 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 
     return (
         <Box sx={{ px: 1, pt: 0.5 }}>
-            <Stack
-                direction="row"
-                sx={{ alignItems: "center", justifyContent: "space-between" }}
+            <Typography
+                variant="small"
+                onClick={handleClick}
+                sx={{ color: "text.muted" }}
             >
-                <Typography
-                    variant="small"
-                    onClick={handleClick}
-                    sx={{ color: "text.muted" }}
-                >
-                    {message}
-                </Typography>
-                {showUpgradeText && (
-                    <Stack
-                        direction="row"
-                        onClick={onShowPlanSelector}
-                        sx={{
-                            alignItems: "center",
-                            cursor: "pointer",
-                            "&:hover": { opacity: 0.8 },
-                        }}
-                    >
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.base", fontWeight: "medium" }}
-                        >
-                            {t("upgrade")}
-                        </Typography>
-                        <ChevronRightIcon
-                            sx={{ fontSize: "18px", color: "text.muted" }}
-                        />
-                    </Stack>
-                )}
-            </Stack>
+                {message}
+            </Typography>
         </Box>
     );
 };
@@ -816,7 +806,10 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 };
 
 type UtilitySectionProps = SectionProps &
-    Pick<SidebarProps, "onShowExport" | "onAuthenticateUser"> & {
+    Pick<
+        SidebarProps,
+        "onShowExport" | "onAuthenticateUser" | "onShowPlanSelector"
+    > & {
         showAccount: () => void;
         accountVisibilityProps: ModalVisibilityProps;
         showPreferences: () => void;
@@ -842,6 +835,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     onCloseSidebar,
     onShowExport,
     onAuthenticateUser,
+    onShowPlanSelector,
     showAccount,
     accountVisibilityProps,
     showPreferences,
@@ -918,13 +912,14 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 onRootClose={onCloseSidebar}
                 pendingAction={pendingAccountAction}
                 onActionHandled={onAccountActionHandled}
-                {...{ onAuthenticateUser }}
+                {...{ onAuthenticateUser, onShowPlanSelector }}
             />
             <Preferences
                 {...preferencesVisibilityProps}
                 onRootClose={onCloseSidebar}
                 pendingAction={pendingPreferencesAction}
                 onActionHandled={onPreferencesActionHandled}
+                onAuthenticateUser={onAuthenticateUser}
             />
             <FreeUpSpace
                 {...freeUpSpaceVisibilityProps}
@@ -975,7 +970,7 @@ const InfoSection: React.FC = () => {
 };
 
 type AccountProps = NestedSidebarDrawerVisibilityProps &
-    Pick<SidebarProps, "onAuthenticateUser"> & {
+    Pick<SidebarProps, "onAuthenticateUser" | "onShowPlanSelector"> & {
         pendingAction?: AccountAction;
         onActionHandled?: (action?: AccountAction) => void;
     };
@@ -985,13 +980,19 @@ const Account: React.FC<AccountProps> = ({
     onClose,
     onRootClose,
     onAuthenticateUser,
+    onShowPlanSelector,
     pendingAction,
     onActionHandled,
 }) => {
     const { showMiniDialog } = useBaseContext();
+    const userDetails = useUserDetailsSnapshot();
 
     const router = useRouter();
 
+    const {
+        show: showManageMemberSubscription,
+        props: manageMemberSubscriptionVisibilityProps,
+    } = useModalVisibility();
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
     const { show: showTwoFactor, props: twoFactorVisibilityProps } =
@@ -1000,6 +1001,14 @@ const Account: React.FC<AccountProps> = ({
         useModalVisibility();
     const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
         useModalVisibility();
+
+    const isNonAdminFamilyMember = useMemo(
+        () =>
+            userDetails &&
+            isPartOfFamily(userDetails) &&
+            !isFamilyAdmin(userDetails),
+        [userDetails],
+    );
 
     const handleRootClose = () => {
         onClose();
@@ -1012,6 +1021,23 @@ const Account: React.FC<AccountProps> = ({
     const handleChangeEmail = useCallback(() => {
         void router.push("/change-email");
     }, [router]);
+
+    const handleManageSubscription = useCallback(() => {
+        void (async () => {
+            if (!userDetails) {
+                await pullUserDetails();
+            }
+
+            const resolvedUserDetails = userDetails ?? userDetailsSnapshot();
+            if (!resolvedUserDetails) return;
+
+            openManageSubscription({
+                userDetails: resolvedUserDetails,
+                showManageMemberSubscription,
+                onShowPlanSelector,
+            });
+        })();
+    }, [onShowPlanSelector, showManageMemberSubscription, userDetails]);
 
     const handleRecoveryKey = useCallback(async () => {
         if (isDesktop) {
@@ -1046,6 +1072,9 @@ const Account: React.FC<AccountProps> = ({
     useEffect(() => {
         if (!open || !pendingAction) return;
         switch (pendingAction) {
+            case "account.subscription":
+                handleManageSubscription();
+                break;
             case "account.recoveryKey":
                 void handleRecoveryKey();
                 break;
@@ -1071,6 +1100,7 @@ const Account: React.FC<AccountProps> = ({
         }
         onActionHandled?.();
     }, [
+        handleManageSubscription,
         handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
@@ -1092,11 +1122,12 @@ const Account: React.FC<AccountProps> = ({
             <Stack sx={{ px: 2, py: 1, gap: 3 }}>
                 <RowButtonGroup>
                     <RowButton
-                        endIcon={
-                            <HealthAndSafetyIcon
-                                sx={{ color: "accent.main" }}
-                            />
-                        }
+                        label={t("manage_plan")}
+                        onClick={handleManageSubscription}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
                         label={t("recovery_key")}
                         onClick={() => void handleRecoveryKey()}
                     />
@@ -1114,12 +1145,6 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
-                {isDesktop && (
-                    <DesktopAppLockSettings
-                        onAuthenticateUser={onAuthenticateUser}
-                        onRootClose={onRootClose}
-                    />
-                )}
                 <RowButtonGroup>
                     <RowButton
                         label={t("change_password")}
@@ -1143,6 +1168,12 @@ const Account: React.FC<AccountProps> = ({
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
             />
+            {isNonAdminFamilyMember && userDetails && (
+                <ManageMemberSubscription
+                    {...manageMemberSubscriptionVisibilityProps}
+                    {...{ userDetails }}
+                />
+            )}
             <TwoFactorSettings
                 {...twoFactorVisibilityProps}
                 onRootClose={onRootClose}
@@ -1160,7 +1191,8 @@ const Account: React.FC<AccountProps> = ({
 };
 
 const DesktopAppLockSettings: React.FC<
-    Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
+    Pick<SidebarProps, "onAuthenticateUser"> &
+        Pick<NestedSidebarDrawerVisibilityProps, "onRootClose">
 > = ({ onAuthenticateUser, onRootClose }) => {
     const appLock = useAppLockSnapshot();
     const { show, props } = useModalVisibility();
@@ -1196,15 +1228,17 @@ const DesktopAppLockSettings: React.FC<
     );
 };
 
-type PreferencesProps = NestedSidebarDrawerVisibilityProps & {
-    pendingAction?: PreferencesAction;
-    onActionHandled?: (action?: PreferencesAction) => void;
-};
+type PreferencesProps = NestedSidebarDrawerVisibilityProps &
+    Pick<SidebarProps, "onAuthenticateUser"> & {
+        pendingAction?: PreferencesAction;
+        onActionHandled?: (action?: PreferencesAction) => void;
+    };
 
 const Preferences: React.FC<PreferencesProps> = ({
     open,
     onClose,
     onRootClose,
+    onAuthenticateUser,
     pendingAction,
     onActionHandled,
 }) => {
@@ -1298,6 +1332,12 @@ const Preferences: React.FC<PreferencesProps> = ({
                     label={t("advanced")}
                     onClick={showAdvancedSettings}
                 />
+                {isDesktop && (
+                    <DesktopAppLockSettings
+                        onAuthenticateUser={onAuthenticateUser}
+                        onRootClose={onRootClose}
+                    />
+                )}
                 {isHLSGenerationSupported && (
                     <RowButtonGroup>
                         <RowSwitch

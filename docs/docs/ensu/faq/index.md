@@ -225,6 +225,10 @@ Try:
 If the problem persists, export your logs from the app settings and share them
 with us at [team@ente.com](mailto:team@ente.com).
 
+### How do I remove downloaded models and local data? {#uninstall}
+
+Learn more at [Uninstall Ensu](/ensu/faq/uninstall).
+
 ## Feedback and Support
 
 ### How can I give feedback? {#feedback}

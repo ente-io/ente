@@ -103,6 +103,7 @@ class MLIndexingIsolate extends SuperIsolate {
         return null;
       }
       result = MLResult.fromJsonString(resultJsonString);
+      result.usedRustMl = useRustMl;
     } catch (e, s) {
       if (isExpectedMlSkipError(e)) {
         rethrow;

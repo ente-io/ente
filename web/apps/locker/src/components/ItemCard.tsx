@@ -62,7 +62,7 @@ interface ItemCardProps {
  * A file/item row matching the Figma design:
  * Light rounded card background — colored icon (in rounded square) — title — actions
  */
-export const ItemCard: React.FC<ItemCardProps> = ({
+export const ItemCard: React.FC<ItemCardProps> = React.memo(function ItemCard({
     item,
     masterKey,
     onClick,
@@ -79,7 +79,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     selected,
     onToggleSelection,
     onLongPressSelect,
-}) => {
+}) {
     const [downloadError, setDownloadError] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState<number | null>(
@@ -367,7 +367,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             />
         </>
     );
-};
+});
 
 // ---------------------------------------------------------------------------
 // Overflow menu for item actions

@@ -11,8 +11,6 @@ NEW_PATH=`echo $PATH | tr ":" "\n" | grep -v "Contents/Developer/" | tr "\n" ":"
 
 export PATH=${NEW_PATH%?} # remove trailing :
 
-env
-
 # Platform name (macosx, iphoneos, iphonesimulator)
 export CARGOKIT_DARWIN_PLATFORM_NAME=$PLATFORM_NAME
 
@@ -53,10 +51,12 @@ if [[ -n "$PODS_ROOT" ]] && [[ -d "$PODS_ROOT/onnxruntime-c/onnxruntime.xcframew
     ORT_ARCHIVE_ARCH="arm64"
   elif [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]]; then
     ORT_ARCHIVE_SOURCE="$ORT_XCFWK_LOCATION/ios-arm64_x86_64-simulator/onnxruntime.framework/onnxruntime"
-    if [[ "$CARGOKIT_DARWIN_ARCHS" == "x86_64" ]]; then
-      ORT_ARCHIVE_ARCH="x86_64"
-    elif [[ "$CARGOKIT_DARWIN_ARCHS" == "arm64" ]]; then
-      ORT_ARCHIVE_ARCH="arm64"
+    if [[ "$CARGOKIT_DARWIN_ARCHS" == *" "* ]]; then
+      # Xcode can request a universal simulator pod build (ARCHS="arm64 x86_64")
+      # even though cargokit compiles Rust for the active simulator target only.
+      ORT_ARCHIVE_ARCH="$NATIVE_ARCH_ACTUAL"
+    else
+      ORT_ARCHIVE_ARCH="$CARGOKIT_DARWIN_ARCHS"
     fi
   fi
 

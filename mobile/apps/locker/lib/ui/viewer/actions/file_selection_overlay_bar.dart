@@ -14,7 +14,9 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/favorites_service.dart";
+import "package:locker/services/files/offline/offline_files_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/add_to_collection_sheet.dart";
@@ -444,17 +446,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
-        children: _buildActionRow(actions),
+        children: _buildActionRow(actions, spacing: 0),
       ),
     );
   }
 
-  List<Widget> _buildActionRow(List<Widget> actions) {
+  List<Widget> _buildActionRow(List<Widget> actions, {double spacing = 12}) {
     final children = <Widget>[];
     for (var i = 0; i < actions.length; i++) {
       children.add(Expanded(child: actions[i]));
-      if (i != actions.length - 1) {
-        children.add(const SizedBox(width: 12));
+      if (i != actions.length - 1 && spacing > 0) {
+        children.add(SizedBox(width: spacing));
       }
     }
     return children;
@@ -465,11 +467,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final file = isSingleSelection ? selectedFiles.first : null;
     final files = selectedFiles.toList();
     final viewType = widget.collectionViewType;
+    final colorScheme = getEnteColorScheme(context);
     final actions = <Widget>[];
+    final eligibleOfflineFiles =
+        OfflineFilesService.instance.getEligibleFiles(files);
 
     final showEdit = viewType?.showEditOption ?? true;
     final showShare = viewType?.showShareOption ?? true;
     final showAddTo = viewType?.showAddToCollectionOption ?? true;
+    final showOffline = viewType?.showOfflineOption ?? true;
 
     if (isSingleSelection && showEdit) {
       actions.add(
@@ -507,7 +513,54 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
+    if (showOffline) {
+      if (eligibleOfflineFiles.isEmpty) {
+        return actions;
+      }
+
+      final shouldRemoveOffline = isSingleSelection &&
+          eligibleOfflineFiles.length == 1 &&
+          LockerDB.instance.isFileMarkedOffline(eligibleOfflineFiles.first);
+
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedBookmark02,
+            color: colorScheme.textBase,
+          ),
+          label: shouldRemoveOffline
+              ? context.l10n.unsave
+              : context.l10n.saveOffline,
+          onTap: () => _toggleOfflineAvailability(
+            context,
+            files,
+            shouldRemoveOffline: shouldRemoveOffline,
+          ),
+        ),
+      );
+    }
+
     return actions;
+  }
+
+  Future<void> _toggleOfflineAvailability(
+    BuildContext context,
+    List<EnteFile> files, {
+    required bool shouldRemoveOffline,
+  }) async {
+    final success = shouldRemoveOffline
+        ? await OfflineFilesService.instance.unmarkFilesOffline(
+            context,
+            files,
+          )
+        : await OfflineFilesService.instance.markFilesOffline(
+            context,
+            files,
+          );
+
+    if (success) {
+      widget.selectedFiles.clearAll();
+    }
   }
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {
@@ -761,7 +814,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (!context.mounted) {
         return;
       }
-      await showGenericErrorDialog(
+      await showGenericErrorBottomSheet(
         context: context,
         error: e,
       );

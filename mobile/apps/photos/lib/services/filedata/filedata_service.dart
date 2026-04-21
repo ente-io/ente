@@ -22,6 +22,7 @@ class FileDataService {
   final SharedPreferences _prefs;
   final FileDataGateway _gateway;
   late Map<int, PreviewInfo> previewIds;
+  Future<void>? _syncFDStatusFuture;
 
   FileDataService(this._prefs, this._gateway) {
     _logger.info("FileDataService constructor called");
@@ -116,7 +117,22 @@ class FileDataService {
     );
   }
 
-  Future<void> syncFDStatus() async {
+  Future<void> syncFDStatus() {
+    final existing = _syncFDStatusFuture;
+    if (existing != null) {
+      _logger.info("syncFDStatus already running, joining existing run");
+      return existing;
+    }
+    final future = _syncFDStatusInternal();
+    _syncFDStatusFuture = future;
+    return future.whenComplete(() {
+      if (identical(_syncFDStatusFuture, future)) {
+        _syncFDStatusFuture = null;
+      }
+    });
+  }
+
+  Future<void> _syncFDStatusInternal() async {
     if (isOfflineMode) {
       _logger.fine("Skipping file data sync in offline mode");
       return;

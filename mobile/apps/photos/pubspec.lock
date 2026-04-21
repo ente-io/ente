@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: adaptive_theme
-      sha256: "41b8af1bb5f3fb87db1aed8c8a2dc3eab79116d20793b5c9b6d2e8809402de9a"
+      sha256: "5caccff82e40ef6d3ebb28caaa091ab1865b0e35bd2ab2ddccf49cd336331012"
       url: "https://pub.dev"
     source: hosted
-    version: "3.7.1+2"
+    version: "3.7.2"
   analyzer:
     dependency: transitive
     description:
@@ -140,7 +140,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "95c7a9f"
+      ref: "95c7a9f0400b968b3bfdc98c8c10a07fb4a62ea2"
       resolved-ref: "95c7a9f0400b968b3bfdc98c8c10a07fb4a62ea2"
       url: "https://github.com/ente-io/battery_info"
     source: git
@@ -309,7 +309,7 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: multicast_version
+      ref: af6378574352884beab6cddec462c7fdfc9a8c35
       resolved-ref: af6378574352884beab6cddec462c7fdfc9a8c35
       url: "https://github.com/guyluz11/flutter_cast.git"
     source: git
@@ -382,7 +382,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "82e365fed8a1a76f6eea0220de98389eed7b0445"
       resolved-ref: "82e365fed8a1a76f6eea0220de98389eed7b0445"
       url: "https://github.com/ente-io/computer.git"
     source: git
@@ -420,13 +420,13 @@ packages:
     source: hosted
     version: "1.15.0"
   cronet_http:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: cronet_http
-      sha256: "1b99ad5ae81aa9d2f12900e5f17d3681f3828629bb7f7fe7ad88076a34209840"
+      sha256: "07bfb4c6158aef72f8004631826abaeecdeaa2b6042f5f8916b8db20e1d01b4a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.6.0"
   cross_file:
     dependency: transitive
     description:
@@ -439,10 +439,10 @@ packages:
     dependency: "direct main"
     description:
       name: crypto
-      sha256: "1e445881f28f22d6140f181e07737b22f1e099a5e1ff94b0af2f9e4a463f4855"
+      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6"
+    version: "3.0.7"
   csslib:
     dependency: transitive
     description:
@@ -586,6 +586,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_contacts:
+    dependency: "direct main"
+    description:
+      path: "../../packages/contacts"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_crypto:
     dependency: "direct main"
     description:
@@ -734,7 +741,7 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: "16kb-fix"
+      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
@@ -743,7 +750,7 @@ packages:
     dependency: transitive
     description:
       path: "flutter/flutter_platform_interface"
-      ref: "16kb-fix"
+      ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       resolved-ref: b5d560ca9417ee92cd04546c651dcf2889a817d6
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
@@ -1119,8 +1126,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "16kb-fix"
-      resolved-ref: "1eb375e639dc86df69b544642b177a710ae43db0"
+      ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
+      resolved-ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
       url: "https://github.com/ente-io/flutter_sodium"
     source: git
     version: "0.2.0"
@@ -1144,10 +1151,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_svg
-      sha256: b9c2ad5872518a27507ab432d1fb97e8813b05f0fc693f9d40fad06d073e0678
+      sha256: "87fbd7c534435b6c5d9d98b01e1fd527812b82e68ddd8bd35fc45ed0fa8f0a95"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1"
+    version: "2.2.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -1271,10 +1278,10 @@ packages:
     dependency: "direct main"
     description:
       name: http
-      sha256: bb2ce4590bc2667c96f318d68cac1b5a7987ec819351d32b1c987239a815e007
+      sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.6.0"
   http_client_helper:
     dependency: transitive
     description:
@@ -1311,10 +1318,10 @@ packages:
     dependency: "direct main"
     description:
       name: hugeicons
-      sha256: "7118b52d96466cdc3394e549ff18e7ff1a92938982777f8feb09e20dca6f6521"
+      sha256: d19c0e2b57ccf455dd8ef08b84da40ae6dbba898c92960a0a0ada77df7865b8a
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.5"
   image:
     dependency: "direct main"
     description:
@@ -1595,7 +1602,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "324f8fbdbc7ae6d326a6d541751b7a895a249089"
       resolved-ref: "324f8fbdbc7ae6d326a6d541751b7a895a249089"
       url: "https://github.com/ente-io/media_extension.git"
     source: git
@@ -1604,7 +1611,7 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit
-      ref: HEAD
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
       resolved-ref: c9617f570b8c0ba02857e721997f78c053a856c1
       url: "https://github.com/media-kit/media-kit"
     source: git
@@ -1621,7 +1628,7 @@ packages:
     dependency: "direct main"
     description:
       path: "libs/ios/media_kit_libs_ios_video"
-      ref: HEAD
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
       resolved-ref: c9617f570b8c0ba02857e721997f78c053a856c1
       url: "https://github.com/media-kit/media-kit"
     source: git
@@ -1646,7 +1653,7 @@ packages:
     dependency: "direct main"
     description:
       path: "libs/universal/media_kit_libs_video"
-      ref: HEAD
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
       resolved-ref: c9617f570b8c0ba02857e721997f78c053a856c1
       url: "https://github.com/media-kit/media-kit"
     source: git
@@ -1663,7 +1670,7 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit_video
-      ref: HEAD
+      ref: c9617f570b8c0ba02857e721997f78c053a856c1
       resolved-ref: c9617f570b8c0ba02857e721997f78c053a856c1
       url: "https://github.com/media-kit/media-kit"
     source: git
@@ -1712,8 +1719,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
-      resolved-ref: e5edc649e79c822369c87fd8ea8d1db2e5419124
+      ref: bd1cce917e914690c00cc138b000b728742dde2b
+      resolved-ref: bd1cce917e914690c00cc138b000b728742dde2b
       url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"
@@ -1746,7 +1753,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "64e47a446bf3b64f012f2076481cebea51ca27cf"
       resolved-ref: "64e47a446bf3b64f012f2076481cebea51ca27cf"
       url: "https://github.com/ente-io/motionphoto.git"
     source: git
@@ -1755,7 +1762,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: v2-only
+      ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
       resolved-ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
       url: "https://github.com/ente-io/move_to_background.git"
     source: git
@@ -1858,7 +1865,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: ios_only
+      ref: "212b2cab85647c6d2ffee213dc3b875ef2bf6504"
       resolved-ref: "212b2cab85647c6d2ffee213dc3b875ef2bf6504"
       url: "https://github.com/ente-io/onnxruntime.git"
     source: git
@@ -1867,7 +1874,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: v2-only
+      ref: "13c0244db82b386ad1a53b2451bdfda8d2687cb6"
       resolved-ref: "13c0244db82b386ad1a53b2451bdfda8d2687cb6"
       url: "https://github.com/ente-io/open-mail-app-flutter.git"
     source: git
@@ -1900,7 +1907,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: blur
+      ref: d7bf958d045ce5c06080aaa39074546f46f064d1
       resolved-ref: d7bf958d045ce5c06080aaa39074546f46f064d1
       url: "https://github.com/ente-io/panorama_blur.git"
     source: git
@@ -2125,8 +2132,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "912bf168492c90ee2a20b2997926372eb18adb0f"
+      ref: "80ebafb9c99ac22520092b008579013d2fcffbe1"
+      resolved-ref: "80ebafb9c99ac22520092b008579013d2fcffbe1"
       url: "https://github.com/ente-io/flutter_pretty_qr_fork"
     source: git
     version: "3.5.0"
@@ -2134,7 +2141,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: v2-only
+      ref: "2389eaa88f07724a38b9dcab49fef8e96c723921"
       resolved-ref: "2389eaa88f07724a38b9dcab49fef8e96c723921"
       url: "https://github.com/ente-io/privacy_screen.git"
     source: git
@@ -2223,7 +2230,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "2cea396"
+      ref: "2cea396843cd3ab1b5ec4334be4233864637874e"
       resolved-ref: "2cea396843cd3ab1b5ec4334be4233864637874e"
       url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
     source: git
@@ -2488,7 +2495,15 @@ packages:
       sha256: "6ef422a4525ecc601db6c0a2233ff448c731307906e92cabc9ba292afaae16a6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.6"
+    version: "2.5.5"
+  sqflite_common_ffi:
+    dependency: transitive
+    description:
+      name: sqflite_common_ffi
+      sha256: "9faa2fedc5385ef238ce772589f7718c24cdddd27419b609bb9c6f703ea27988"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
   sqflite_darwin:
     dependency: transitive
     description:
@@ -2821,10 +2836,10 @@ packages:
     dependency: "direct main"
     description:
       name: uuid
-      sha256: a5be9ef6618a7ac1e964353ef476418026db906c4facdedaa299b7a2e71690ff
+      sha256: a11b666489b1954e01d992f3d601b1804a33937b5a8fe677bd26b8a9f96f96e8
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.1"
+    version: "4.5.2"
   vector_graphics:
     dependency: transitive
     description:
@@ -2861,7 +2876,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
+      ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
       resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
       url: "https://github.com/ente-io/video_editor_fork.git"
     source: git

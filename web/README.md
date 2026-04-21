@@ -7,6 +7,7 @@ Live versions are at:
 - Ente Photos: [web.ente.io](https://web.ente.io)
 - Ente Albums: [albums.ente.io](https://albums.ente.io)
 - Ente Auth: [auth.ente.io](https://auth.ente.io)
+- Ente Locker: [locker.ente.io](https://locker.ente.io)
 
 To know more about Ente, see [our main README](../README.md) or visit
 [ente.com](https://ente.com).
@@ -18,8 +19,11 @@ Install [node](https://nodejs.org) and [Rust](https://www.rust-lang.org/tools/in
 Install dependencies
 
 ```sh
-yarn install
+yarn install --frozen-lockfile
 ```
+
+Use plain `yarn install` only when you are intentionally updating dependencies
+and reviewing the resulting `yarn.lock` changes.
 
 Start a local development server
 
@@ -94,6 +98,6 @@ If your language is not listed for translation, please
 [create a GitHub issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
 to have it added.
 
-## Contribute
+## 💚 Contribute
 
-For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
+For more ways to contribute, see [CONTRIBUTING.md](../CONTRIBUTING.md).

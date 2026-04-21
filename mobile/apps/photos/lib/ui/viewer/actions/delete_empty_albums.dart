@@ -52,88 +52,85 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
       future: _showDeleteButton(),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data!) {
-          return _buildDeleteButton();
+          final colorScheme = getEnteColorScheme(context);
+          final textTheme = getEnteTextTheme(context);
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(8.5, 4, 8, 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.fillFaint,
+                    borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 12,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.delete_sweep_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          AppLocalizations.of(context).deleteEmptyAlbums,
+                          style: textTheme.smallBold,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                onTap: () async {
+                  await showActionSheet(
+                    context: context,
+                    isDismissible: true,
+                    buttons: [
+                      ButtonWidget(
+                        labelText: AppLocalizations.of(context).yes,
+                        buttonType: ButtonType.neutral,
+                        buttonSize: ButtonSize.large,
+                        shouldStickToDarkTheme: true,
+                        shouldSurfaceExecutionStates: true,
+                        isInAlert: true,
+                        progressStatus: _deleteProgress,
+                        onTap: () async {
+                          await _deleteEmptyAlbums();
+                          Bus.instance.fire(
+                            CollectionUpdatedEvent(
+                              0,
+                              <EnteFile>[],
+                              "empty_albums_deleted",
+                            ),
+                          );
+                          CollectionsService.instance.sync().ignore();
+                          _isCancelled = false;
+                        },
+                      ),
+                      ButtonWidget(
+                        labelText: AppLocalizations.of(context).cancel,
+                        buttonType: ButtonType.secondary,
+                        buttonSize: ButtonSize.large,
+                        shouldStickToDarkTheme: true,
+                        isInAlert: true,
+                        onTap: () async {
+                          _isCancelled = true;
+                        },
+                      ),
+                    ],
+                    title: AppLocalizations.of(context)
+                        .deleteEmptyAlbumsWithQuestionMark,
+                    body: AppLocalizations.of(context).deleteAlbumsDialogBody,
+                    actionSheetType: ActionSheetType.defaultActionSheet,
+                  );
+                },
+              ),
+            ),
+          );
         }
         return const SizedBox.shrink();
       },
-    );
-  }
-
-  Widget _buildDeleteButton() {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8.5, 4, 8, 12),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: GestureDetector(
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.delete_sweep_outlined, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppLocalizations.of(context).deleteEmptyAlbums,
-                    style: textTheme.smallBold,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          onTap: () async {
-            await showActionSheet(
-              context: context,
-              isDismissible: true,
-              buttons: [
-                ButtonWidget(
-                  labelText: AppLocalizations.of(context).yes,
-                  buttonType: ButtonType.neutral,
-                  buttonSize: ButtonSize.large,
-                  shouldStickToDarkTheme: true,
-                  shouldSurfaceExecutionStates: true,
-                  progressStatus: _deleteProgress,
-                  onTap: () async {
-                    await _deleteEmptyAlbums();
-                    if (!_isCancelled) {
-                      Navigator.of(context).pop();
-                    }
-                    Bus.instance.fire(
-                      CollectionUpdatedEvent(
-                        0,
-                        <EnteFile>[],
-                        "empty_albums_deleted",
-                      ),
-                    );
-                    CollectionsService.instance.sync().ignore();
-                    _isCancelled = false;
-                  },
-                ),
-                ButtonWidget(
-                  labelText: AppLocalizations.of(context).cancel,
-                  buttonType: ButtonType.secondary,
-                  buttonSize: ButtonSize.large,
-                  shouldStickToDarkTheme: true,
-                  onTap: () async {
-                    _isCancelled = true;
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-              title: AppLocalizations.of(context)
-                  .deleteEmptyAlbumsWithQuestionMark,
-              body: AppLocalizations.of(context).deleteAlbumsDialogBody,
-              actionSheetType: ActionSheetType.defaultActionSheet,
-            );
-          },
-        ),
-      ),
     );
   }
 

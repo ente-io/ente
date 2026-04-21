@@ -34,6 +34,7 @@ import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
     fileCreationTime,
+    fileLocation,
     type ParsedMetadata,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -412,20 +413,30 @@ class UploadManager {
         const timestamp = fileCreationTime(sourceEnteFile);
         const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
         const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
+        const location = fileLocation(sourceEnteFile);
 
         const creationDate: ParsedMetadata["creationDate"] = dateTime
             ? { timestamp, dateTime, offset }
             : undefined;
 
-        // Fallback to the timestamp if a creationDate could not be constructed.
-        const creationTime = creationDate ? undefined : timestamp;
+        // Canvas exports do not retain the original file's embedded metadata, so
+        // preserve the metadata Ente already knows about the source file.
+        //
+        // Preserve the richer creationDate when available so the edited copy
+        // retains the original photo's local capture date/time semantics (and
+        // optional offset), not just the raw UTC timestamp.
+        const externalParsedMetadata = {
+            creationDate,
+            creationTime: creationDate ? undefined : timestamp,
+            location,
+        };
 
         const item = {
             uploadItem: file,
             pathPrefix: undefined,
             localID: 1,
             collectionID: collection.id,
-            externalParsedMetadata: { creationDate, creationTime },
+            externalParsedMetadata,
         };
 
         return this.uploadItems([item], [collection]);
@@ -696,6 +707,7 @@ const clusterLivePhotos = async (
     type ItemAsset = PotentialLivePhotoAsset & {
         localID: number;
         isLivePhoto?: boolean;
+        externalParsedMetadata?: UploadItemWithCollectionIDAndName["externalParsedMetadata"];
     };
     const items: ItemAsset[] = _items.map((item) => ({
         localID: item.localID,
@@ -705,6 +717,7 @@ const clusterLivePhotos = async (
         collectionID: item.collectionID,
         uploadItem: item.uploadItem!,
         pathPrefix: item.pathPrefix,
+        externalParsedMetadata: item.externalParsedMetadata,
     }));
     items
         .sort((f, g) => {
@@ -727,6 +740,7 @@ const clusterLivePhotos = async (
                 fileName: image.fileName,
                 isLivePhoto: true,
                 pathPrefix: image.pathPrefix,
+                externalParsedMetadata: image.externalParsedMetadata,
                 livePhotoAssets: {
                     image: image.uploadItem,
                     video: video.uploadItem,

@@ -16,6 +16,7 @@ import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import 'package:locker/services/contacts_display_service.dart';
 import "package:locker/services/update_service.dart";
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/onboarding_page.dart';
@@ -68,13 +69,19 @@ class _AppState extends State<App>
     initTrayManager();
     WidgetsBinding.instance.addObserver(this);
 
+    if (Configuration.instance.hasConfiguredAccount()) {
+      LockerContactsDisplayService.scheduleEnsureReady();
+    }
+
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
+      LockerContactsDisplayService.scheduleResetLocalState();
       if (mounted) {
         setState(() {});
       }
     });
     _signedInEvent = Bus.instance.on<SignedInEvent>().listen((event) {
       UserService.instance.getUserDetailsV2().ignore();
+      LockerContactsDisplayService.scheduleEnsureReady();
       if (mounted) {
         setState(() {});
       }

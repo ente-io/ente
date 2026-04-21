@@ -16,6 +16,25 @@ import type {
     LockerInfo,
 } from "../types/file-share";
 
+const deviceLimitExceededMessage =
+    "This link has been viewed on too many devices. Please contact the owner.";
+
+const isDeviceLimitExceededResponse = async (response: Response) => {
+    if (response.status === 429) {
+        return true;
+    }
+    if (response.status !== 403) {
+        return false;
+    }
+
+    try {
+        const payload = (await response.clone().json()) as { code?: string };
+        return payload.code === "LINK_DEVICE_LIMIT_EXCEEDED";
+    } catch {
+        return false;
+    }
+};
+
 /**
  * Extract file key from URL hash (similar to extractCollectionKeyFromShareURL)
  */
@@ -58,6 +77,9 @@ export const fetchFileInfo = async (
     });
 
     if (!response.ok) {
+        if (await isDeviceLimitExceededResponse(response)) {
+            throw new Error(deviceLimitExceededMessage);
+        }
         throw new Error(`Failed to fetch file`);
     }
 
@@ -126,6 +148,26 @@ const decryptPubMagicMetadata = async (
     }
 };
 
+const normalizeLockerInfoType = (
+    type: string | undefined,
+): string | undefined => {
+    switch (type) {
+        case "note":
+            return "note";
+        case "physical-record":
+        case "physicalRecord":
+            return "physicalRecord";
+        case "account-credential":
+        case "accountCredential":
+            return "accountCredential";
+        case "emergency-contact":
+        case "emergencyContact":
+            return "emergencyContact";
+        default:
+            return undefined;
+    }
+};
+
 /**
  * Parse locker info from pubMagicMetadata
  */
@@ -134,15 +176,22 @@ const parseLockerInfo = (
 ): LockerInfo | undefined => {
     if (!rawInfo) return undefined;
 
-    if (typeof rawInfo === "string") {
-        try {
-            return JSON.parse(rawInfo) as LockerInfo;
-        } catch {
-            return undefined;
-        }
+    const parsedInfo =
+        typeof rawInfo === "string"
+            ? (() => {
+                  try {
+                      return JSON.parse(rawInfo) as LockerInfo;
+                  } catch {
+                      return undefined;
+                  }
+              })()
+            : rawInfo;
+
+    if (!parsedInfo) {
+        return undefined;
     }
 
-    return rawInfo;
+    return { ...parsedInfo, type: normalizeLockerInfoType(parsedInfo.type) };
 };
 
 /**
@@ -366,6 +415,9 @@ export const downloadFile = async (
     });
 
     if (!response.ok) {
+        if (await isDeviceLimitExceededResponse(response)) {
+            throw new Error(deviceLimitExceededMessage);
+        }
         throw new Error(`Failed to download file: ${response.statusText}`);
     }
 

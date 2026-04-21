@@ -206,6 +206,22 @@ If you've granted permission but Ente still can't access photos, try:
 - Revoking and re-granting the permission
 - Reinstalling the app (your backed-up photos are safe in the cloud)
 
+### Why is the app looping saying it is preserving one memory when all memories seem to be backed up? {#app-looping-preserving-one-memory}
+
+If the app shows it is preserving one photo or memory but never completes, the file is likely stuck in a retry loop.
+
+Share debug logs with [support@ente.io](mailto:support@ente.io) so we can identify the specific file. Open `Settings > Help & Support > Export logs` and attach to email.
+
+A common cause on iOS is that "Optimize iPhone Storage" is enabled and the original file has not been downloaded from iCloud to your device.
+
+To fix this:
+
+1. Open your iOS Photos app and find the stuck photo or video.
+2. Open it and let it fully load (or play, if it is a Live Photo or video). This forces iOS to download the original from iCloud.
+3. Once fully loaded, open Ente and keep it in the foreground on WiFi. The upload should complete shortly.
+
+If the photo won't load in your Photos app either, the file may be corrupted or inaccessible on iCloud's end.
+
 ## Desktop App Issues
 
 ### Why does my desktop app crash during large uploads? {#desktop-large-uploads}
@@ -477,6 +493,12 @@ Mobile browsers on web.ente.io are not supported. Use native apps for the best e
 - ✅ Mobile apps: Full features including ML, search, video streaming
 - ✅ Desktop/laptop web: Most features (no ML)
 - ❌ Mobile web browsers: Not supported
+
+### Why can I see my photos in the app but not in the browser? {#photos-visible-app-not-browser}
+
+If photos appear in the mobile or desktop app but not on web.ente.io, try logging out and logging back in on the browser. This clears any stale session data and refreshes your library view.
+
+You can also try opening web.ente.io in an incognito or private window to rule out browser caching issues.
 
 ### How do I identify which files failed to upload? {#identify-failed-uploads}
 

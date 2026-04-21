@@ -1035,8 +1035,6 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "setRadius": "半径の設定",
-  "familyPlanPortalTitle": "ファミリー",
-  "familyPlanOverview": "5人までの家族をファミリープランに追加しましょう(追加料金無し)\n\n一人ひとりがプライベートなストレージを持ち、共有されない限りお互いに見ることはありません。\n\nファミリープランはEnteサブスクリプションに登録した人が利用できます。\n\nさっそく登録しましょう！",
   "androidBiometricHint": "本人確認を行う",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."

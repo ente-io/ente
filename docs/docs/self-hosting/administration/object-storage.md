@@ -16,6 +16,30 @@ Compose for quick testing.
 This document outlines configuration of S3 buckets and enabling replication for
 further usage.
 
+## Architecture
+
+![Client, Museum, S3](/client-museum-s3.png)
+
+There are three components involved in uploading a file:
+
+1.  The client (e.g. the web app or the mobile app)
+2.  Ente's server (museum)
+3.  The S3-compatible object storage (e.g. MinIO in the default quickstart)
+
+A file upload flows as follows:
+
+1.  The client asks museum where it should upload the file to.
+2.  Museum creates pre-signed URLs for the configured S3 bucket and returns them.
+3.  The client uploads directly to the S3 bucket using those URLs.
+4.  The client informs museum that the upload is complete, and museum verifies
+    the object via a `HeadObject` call.
+
+The important consequence is that **both the client and museum must be able to
+reach your S3 bucket at the same address**. Museum embeds the bucket's
+`endpoint` value into every pre-signed URL, so an address that only resolves
+inside the server (for example `localhost:3200`) will fail when handed to a
+phone or another machine on the LAN.
+
 ## Museum
 
 The S3-compatible buckets have to be configured in `museum.yaml` file.
@@ -88,6 +112,31 @@ b2-eu-cen:
     region: eu-central-2
     bucket: b2-eu-cen
 ```
+
+### Using the mobile app or another device
+
+The quickstart's sample sets `endpoint: localhost:3200`. This works for the
+museum container itself (thanks to the `socat` service in `compose.yaml`), but
+museum also hands this address back to clients as part of pre-signed upload
+URLs. On a phone or any machine other than the server, `localhost` resolves to
+the device itself, so uploads never reach MinIO and fail silently. Museum logs
+`OBJECT_SIZE_FETCH_FAILED: dial tcp …: i/o timeout` on commit.
+
+Set `endpoint` to an address that is reachable **both** from the museum
+container and from your clients. On a LAN, the server's IP works:
+
+```yaml
+b2-eu-cen:
+    key: <key>
+    secret: <secret>
+    endpoint: 192.168.1.100:3200
+    region: eu-central-2
+    bucket: b2-eu-cen
+```
+
+With a reverse proxy, use the external hostname (e.g. `s3.example.com`). The
+`socat` service in `compose.yaml` is only needed when `endpoint` remains
+`localhost:3200`; once you switch to a LAN IP or domain, you can remove it.
 
 ## CORS (Cross-Origin Resource Sharing)
 

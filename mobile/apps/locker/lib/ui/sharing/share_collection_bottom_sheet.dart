@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
@@ -6,15 +7,18 @@ import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/sharing/add_email_bottom_sheet.dart";
+import "package:locker/ui/sharing/manage_links_widget.dart";
 import "package:locker/utils/collection_actions.dart";
 
 Future<void> showShareCollectionSheet(
@@ -23,7 +27,7 @@ Future<void> showShareCollectionSheet(
 }) {
   return showBaseBottomSheet<void>(
     context,
-    title: context.l10n.sharedWith,
+    title: context.l10n.shareCollection,
     headerSpacing: 20,
     child: ShareCollectionSheet(collection: collection),
   );
@@ -68,35 +72,29 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final shouldShowSharedWithLabel = !_isOwner || _sharees.isNotEmpty;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildShareesList(colorScheme, textTheme),
         if (_isOwner) ...[
+          _buildOwnerActions(colorScheme, textTheme),
           const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: GradientButton(
-              text: context.l10n.addEmail,
-              onTap: () async {
-                await showAddEmailSheet(
-                  context,
-                  collection: widget.collection,
-                  onShareAdded: () {
-                    if (mounted) {
-                      setState(() {});
-                    }
-                  },
-                );
-              },
-            ),
-          ),
         ],
+        if (shouldShowSharedWithLabel) ...[
+          Text(
+            context.l10n.sharedWith,
+            style: textTheme.small.copyWith(color: colorScheme.textMuted),
+          ),
+          const SizedBox(height: 8),
+        ],
+        _buildShareesList(colorScheme, textTheme),
       ],
     );
   }
+
+  bool get _hasPublicLink => widget.collection.publicURLs.isNotEmpty;
 
   Widget _buildShareesList(colorScheme, textTheme) {
     final currentUserId = Configuration.instance.getUserID() ?? -1;
@@ -112,10 +110,7 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
     allUsers.addAll(_sharees);
 
     if (allUsers.isEmpty) {
-      return Text(
-        context.l10n.noSharedUsers,
-        style: textTheme.small.copyWith(color: colorScheme.textMuted),
-      );
+      return const SizedBox.shrink();
     }
 
     const double maxVisibleHeight = 244.0;
@@ -184,6 +179,62 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         ],
       ],
     );
+  }
+
+  Widget _buildOwnerActions(colorScheme, textTheme) {
+    return Row(
+      children: [
+        _ShareActionOption(
+          icon: HugeIcons.strokeRoundedAdd01,
+          label: context.l10n.addEmail,
+          onTap: () async {
+            await showAddEmailSheet(
+              context,
+              collection: widget.collection,
+              onShareAdded: () {
+                if (mounted) {
+                  setState(() {});
+                }
+              },
+            );
+          },
+        ),
+        const SizedBox(width: 16),
+        _ShareActionOption(
+          icon: HugeIcons.strokeRoundedLink02,
+          label:
+              _hasPublicLink ? context.l10n.manageLink : context.l10n.linkLabel,
+          onTap: () async {
+            if (!_hasPublicLink) {
+              await _createAndSharePublicLink();
+              return;
+            }
+
+            await routeToPage(
+              context,
+              ManageSharedLinkWidget(collection: widget.collection),
+            );
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _createAndSharePublicLink() async {
+    final result = await CollectionActions.enableUrl(
+      context,
+      widget.collection,
+    );
+    if (result && mounted) {
+      setState(() {});
+      if (_hasPublicLink) {
+        final url = CollectionService.instance.getPublicUrl(widget.collection);
+        await shareText(url, context: context);
+      }
+    }
   }
 
   Widget _buildCustomScrollbar(
@@ -419,5 +470,56 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         setState(() {});
       }
     }
+  }
+}
+
+class _ShareActionOption extends StatelessWidget {
+  final List<List<dynamic>> icon;
+  final String label;
+  final Future<void> Function() onTap;
+
+  const _ShareActionOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () async {
+          await onTap();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.fillFaint,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              HugeIcon(
+                icon: icon,
+                color: colorScheme.textBase,
+                size: 24,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: textTheme.small.copyWith(color: colorScheme.textBase),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

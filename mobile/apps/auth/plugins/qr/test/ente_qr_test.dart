@@ -1,6 +1,6 @@
-import 'package:ente_qr/ente_qr.dart';
-import 'package:ente_qr/ente_qr_method_channel.dart';
-import 'package:ente_qr/ente_qr_platform_interface.dart';
+import 'package:ente_auth_qr/ente_qr.dart';
+import 'package:ente_auth_qr/ente_qr_method_channel.dart';
+import 'package:ente_auth_qr/ente_qr_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 

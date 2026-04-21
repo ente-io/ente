@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/contacts_changed_event.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/events/magic_cache_updated_event.dart";
@@ -292,7 +293,10 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return [Bus.instance.on<PeopleChangedEvent>()];
       case SectionType.contacts:
-        return [Bus.instance.on<PeopleChangedEvent>()];
+        return [
+          Bus.instance.on<PeopleChangedEvent>(),
+          Bus.instance.on<ContactsChangedEvent>(),
+        ];
       default:
         return [];
     }
@@ -311,7 +315,10 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.ritual:
         return [];
       case SectionType.contacts:
-        return [Bus.instance.on<PeopleChangedEvent>()];
+        return [
+          Bus.instance.on<PeopleChangedEvent>(),
+          Bus.instance.on<ContactsChangedEvent>(),
+        ];
       default:
         return [];
     }

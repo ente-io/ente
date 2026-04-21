@@ -3,7 +3,7 @@
 If you just want to run the Ente Photos desktop app locally or develop it, you
 can do:
 
-    yarn install
+    yarn install --frozen-lockfile
     yarn dev
 
 The docs in this directory provide more details that some developers might find

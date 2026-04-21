@@ -130,6 +130,20 @@ Open `Settings > Preferences > Machine learning` and toggle ON face recognition 
 - ✅ ML only works on desktop and mobile apps
 - Initial indexing can take time depending on library size
 
+### Why aren't faces appearing on mobile even though ML is fully indexed on desktop? {#faces-not-syncing-to-mobile}
+
+If ML indexing shows 100% on desktop but faces aren't showing up on your mobile app, try clearing the app's cache and storage, then log back in and allow a few minutes for the face data to sync.
+
+**On Android:**
+
+Open device `Settings > Apps > Ente Photos > Storage`, then tap **Clear cache** and **Clear storage**. Log back in and wait a few minutes.
+
+**On iOS:**
+
+Delete and reinstall the app, then log back in and wait a few minutes.
+
+Faces should start appearing shortly after logging back in.
+
 ### Why is the People section empty even though Machine Learning shows 100%? {#people-section-empty}
 
 If Machine Learning shows 100% on both Android and Desktop, the People

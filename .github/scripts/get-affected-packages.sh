@@ -156,8 +156,9 @@ main() {
 
     for file in "${changed_files[@]}"; do
         if [[ "$file" == *".github/workflows/mobile-packages-lint.yml"* ]] || \
+           [[ "$file" == *".github/scripts/get-affected-packages.sh"* ]] || \
            [[ "$file" == *"mobile/analysis_options.yaml"* ]] || \
-           [[ "$file" == *"pubspec.yaml"* ]]; then
+           [[ "$file" =~ (^|/)pubspec(\.lock|(_overrides)?\.yaml)$ ]]; then
             lint_all="true"
             break
         fi

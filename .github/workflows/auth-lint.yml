@@ -25,6 +25,10 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Verify frozen mobile pubspecs
+              run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/auth
+              working-directory: ${{ github.workspace }}
+
             - name: Verify custom icons are lowercase including optional understores, and end with .svg
               run: |
                   find assets/custom-icons -type f -name "*.svg" | while read -r file; do
@@ -72,6 +76,6 @@ jobs:
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
 
-            - run: flutter pub get
+            - run: flutter pub get --enforce-lockfile
 
             - run: flutter analyze --no-fatal-infos
