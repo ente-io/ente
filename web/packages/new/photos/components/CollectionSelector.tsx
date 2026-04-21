@@ -167,6 +167,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 } else if (attributes.action == "add") {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
+                    // Use upload eligibility (not move eligibility) so shared incoming
+                    // albums are available as upload targets. Viewer-only shared incoming
+                    // albums are still excluded by `canUploadToCollection`.
                     return (
                         (canUploadToCollection(cs) ||
                             cs.type == "uncategorized") &&
@@ -266,7 +269,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         <Stack sx={{ flex: 1 }}>
                             <Box>
                                 <Typography variant="h5">
-                                    {titleForAction(action)}dd
+                                    {titleForAction(action)}
                                 </Typography>
                                 <Typography
                                     variant="small"
