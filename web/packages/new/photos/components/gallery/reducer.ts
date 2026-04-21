@@ -1862,7 +1862,9 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
         const visibleSearchFiles = suppressSharedFilesSavedByUser(
             searchFiles,
             state.user?.id,
-            state.view?.type == "albums" ? state.view.activeCollection : undefined,
+            state.view?.type == "albums"
+                ? state.view.activeCollection
+                : undefined,
         );
         // Only apply time-based sorting if user explicitly selected a sort order.
         // When undefined, keep original order (preserves CLIP relevance sorting).
@@ -2021,8 +2023,12 @@ const suppressSharedFilesSavedByUser = (
     currentUserID: number | undefined,
     activeCollection: Collection | undefined,
 ) => {
+    // If there is no logged-in user, or if we are inside an active album
+    // (this suppression is only needed in non-album views), return the
+    // files unchanged.
     if (!currentUserID || activeCollection) return files;
 
+    // Collect the hash+type keys for files owned by the current user.
     const ownedFileKeys = new Set<string>();
     for (const file of files) {
         if (file.ownerID != currentUserID) continue;
@@ -2034,11 +2040,15 @@ const suppressSharedFilesSavedByUser = (
     if (!ownedFileKeys.size) return files;
 
     return files.filter((file) => {
+        // Always keep files owned by the current user.
         if (file.ownerID == currentUserID) return true;
 
+        // Keep files whose metadata does not yield a hash.
         const hash = metadataHash(file.metadata);
         if (!hash) return true;
 
+        // Drop a non-owned file if the user already owns a file with the same
+        // hash+type key.
         return !ownedFileKeys.has(`${hash}:${file.metadata.fileType}`);
     });
 };
