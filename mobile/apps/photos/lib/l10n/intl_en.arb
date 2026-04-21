@@ -2422,6 +2422,7 @@
   "addMemoriesWidgetPrompt": "Add a memories widget to your home screen to customize it here.",
   "addAlbumWidgetPrompt": "Add an album widget to your home screen to customize it here.",
   "addPeopleWidgetPrompt": "Add a people widget to your home screen to customize it here.",
+  "showTextOnWidget": "Show text on widget",
   "birthdayNotifications": "Birthday notifications",
   "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
   "happyBirthday": "Happy birthday! 🥳",

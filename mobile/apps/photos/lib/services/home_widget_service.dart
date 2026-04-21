@@ -49,6 +49,7 @@ class HomeWidgetService {
   // Widget data keys
   static const String DATA_SUFFIX = '_data';
   static const String UPLOADED_FILE_ID_KEY = 'uploadedFileID';
+  static const String WIDGET_HIDE_TITLE_FLAGS_KEY = 'widgetHideTitleFlags';
 
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
@@ -238,6 +239,10 @@ class HomeWidgetService {
       AlbumHomeWidgetService.instance.clearWidget(),
       PeopleHomeWidgetService.instance.clearWidget(),
       MemoryHomeWidgetService.instance.clearWidget(),
+      hw.HomeWidget.saveWidgetData<int?>(
+        WIDGET_HIDE_TITLE_FLAGS_KEY,
+        null,
+      ),
     ]);
 
     try {
