@@ -106,43 +106,32 @@ if [[ ${#ABIS[@]} -eq 0 ]]; then
   exit 1
 fi
 
-rust_target_for_abi() {
-  case "$1" in
-    arm64-v8a) echo aarch64-linux-android ;;
-    armeabi-v7a) echo armv7-linux-androideabi ;;
-    x86_64) echo x86_64-linux-android ;;
-    *) return 1 ;;
-  esac
-}
-
-toolchain_for_abi() {
-  case "$1" in
-    arm64-v8a) echo aarch64-linux-android23 ;;
-    armeabi-v7a) echo armv7a-linux-androideabi23 ;;
-    x86_64) echo x86_64-linux-android23 ;;
-    *) return 1 ;;
-  esac
-}
-
-libcxx_dir_for_abi() {
-  case "$1" in
-    arm64-v8a) echo aarch64-linux-android ;;
-    armeabi-v7a) echo arm-linux-androideabi ;;
-    x86_64) echo x86_64-linux-android ;;
-    *) return 1 ;;
-  esac
-}
-
 build_abi() {
   local abi="$1"
   local target clang_triple libcxx_dir linker clangxx suffix
 
-  target=$(rust_target_for_abi "$abi") || {
-    echo "Unsupported Android ABI: $abi" >&2
-    exit 1
-  }
-  clang_triple=$(toolchain_for_abi "$abi")
-  libcxx_dir=$(libcxx_dir_for_abi "$abi")
+  case "$abi" in
+    arm64-v8a)
+      target=aarch64-linux-android
+      clang_triple=aarch64-linux-android24
+      libcxx_dir=aarch64-linux-android
+      ;;
+    armeabi-v7a)
+      target=armv7-linux-androideabi
+      clang_triple=armv7a-linux-androideabi24
+      libcxx_dir=arm-linux-androideabi
+      ;;
+    x86_64)
+      target=x86_64-linux-android
+      clang_triple=x86_64-linux-android24
+      libcxx_dir=x86_64-linux-android
+      ;;
+    *)
+      echo "Unsupported Android ABI: $abi" >&2
+      exit 1
+      ;;
+  esac
+
   linker="$TOOLCHAIN_BIN/$clang_triple-clang"
   clangxx="$TOOLCHAIN_BIN/$clang_triple-clang++"
   suffix=$(echo "$target" | tr '[:lower:]-' '[:upper:]_')
