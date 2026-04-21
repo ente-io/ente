@@ -64,7 +64,7 @@ For more check: [Troubleshooting](https://ente.com/help/photos/faq/troubleshooti
 
 ### How do I prevent duplicates while migrating from Google Photos? {#prevent-duplicates-migration}
 
-Ente detects duplicates by identical hash, file name and creation time.
+Ente detects duplicates by identical hash and file name.
 
 Duplicates can occur:
 
