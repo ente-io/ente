@@ -48,6 +48,7 @@ class HomeWidgetService {
 
   // Widget data keys
   static const String DATA_SUFFIX = '_data';
+  static const String UPLOADED_FILE_ID_KEY = 'uploadedFileID';
 
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
@@ -104,9 +105,16 @@ class HomeWidgetService {
     EnteFile file,
     String key,
     String title,
-    String? mainKey,
-  ) async {
-    final result = await _captureFileLegacy(file, key, title, mainKey);
+    String? mainKey, {
+    int? uploadedFileID,
+  }) async {
+    final result = await _captureFileLegacy(
+      file,
+      key,
+      title,
+      mainKey,
+      uploadedFileID,
+    );
     if (!result) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
@@ -140,6 +148,7 @@ class HomeWidgetService {
     String key,
     String title,
     String? mainKey,
+    int? uploadedFileID,
   ) async {
     try {
       // Get thumbnail data
@@ -175,6 +184,7 @@ class HomeWidgetService {
         "subText": subText,
         "generatedId": file.generatedID!,
         if (mainKey != null) "mainKey": mainKey,
+        if (uploadedFileID != null) UPLOADED_FILE_ID_KEY: uploadedFileID,
       };
 
       // Save metadata in platform-specific format

@@ -23,7 +23,8 @@ data class AlbumsFileData(
         val title: String?,
         val subText: String?,
         val generatedId: Int?,
-        val mainKey: String?
+        val mainKey: String?,
+        val uploadedFileID: Int? = null
 )
 
 class EnteAlbumsWidgetProvider : HomeWidgetProvider() {

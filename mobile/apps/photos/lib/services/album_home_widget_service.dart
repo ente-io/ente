@@ -7,7 +7,11 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -36,11 +40,41 @@ class AlbumHomeWidgetService {
   // Singleton pattern
   static final AlbumHomeWidgetService instance =
       AlbumHomeWidgetService._privateConstructor();
-  AlbumHomeWidgetService._privateConstructor();
+  AlbumHomeWidgetService._privateConstructor() {
+    _listenToLocalPhotoUpdates();
+  }
 
   // Properties
   final Logger _logger = Logger((AlbumHomeWidgetService).toString());
   SharedPreferences get _prefs => ServiceLocator.instance.prefs;
+
+  void _listenToLocalPhotoUpdates() {
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
+      if (event.type != EventType.hide ||
+          isOfflineMode ||
+          !Configuration.instance.hasConfiguredAccount()) {
+        return;
+      }
+
+      final hiddenUploadedIDs = event.updatedFiles
+          .map((file) => file.uploadedFileID)
+          .whereType<int>()
+          .toSet();
+      if (hiddenUploadedIDs.isEmpty) {
+        return;
+      }
+
+      if (!await _hasCachedHiddenWidgetFile(hiddenUploadedIDs)) {
+        return;
+      }
+
+      _logger.info(
+        "Hidden file intersects with album widget cache, recomputing widget",
+      );
+      await setSelectionChange(true);
+      await initAlbumHomeWidget(false);
+    });
+  }
 
   // Public methods
   List<int>? getSelectedAlbumIds() {
@@ -249,6 +283,78 @@ class AlbumHomeWidgetService {
     return false;
   }
 
+  Future<bool> _hasCachedHiddenWidgetFile(Set<int> hiddenUploadedIDs) async {
+    if (await countHomeWidgets() == 0 ||
+        getAlbumsStatus() == WidgetStatus.syncedEmpty) {
+      return false;
+    }
+
+    final totalAlbums = await HomeWidgetService.instance.getData<int>(
+      TOTAL_ALBUMS_KEY,
+    );
+    if (totalAlbums == null || totalAlbums < 0) {
+      return false;
+    }
+
+    bool foundLegacyMetadata = false;
+    for (int index = 0; index <= totalAlbums; index++) {
+      final metadata = await _getWidgetEntryMetadata(index);
+      if (metadata == null) {
+        continue;
+      }
+
+      if (!metadata.containsKey(HomeWidgetService.UPLOADED_FILE_ID_KEY)) {
+        foundLegacyMetadata = true;
+        continue;
+      }
+
+      final rawUploadedFileID =
+          metadata[HomeWidgetService.UPLOADED_FILE_ID_KEY];
+      final uploadedFileID =
+          rawUploadedFileID is num ? rawUploadedFileID.toInt() : null;
+      if (uploadedFileID != null &&
+          hiddenUploadedIDs.contains(uploadedFileID)) {
+        return true;
+      }
+    }
+
+    return foundLegacyMetadata;
+  }
+
+  Future<Map<String, dynamic>?> _getWidgetEntryMetadata(int index) async {
+    final data = await HomeWidgetService.instance.getData<dynamic>(
+      "albums_widget_$index${HomeWidgetService.DATA_SUFFIX}",
+    );
+    if (data == null) {
+      return null;
+    }
+
+    if (data is String) {
+      final decoded = jsonDecode(data);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      if (decoded is Map) {
+        return decoded.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+      }
+      return null;
+    }
+
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+
+    if (data is Map) {
+      return data.map(
+        (key, value) => MapEntry(key.toString(), value),
+      );
+    }
+
+    return null;
+  }
+
   Future<void> _refreshAlbumsWidget() async {
     // only refresh if widget was synced without issues
     if (await countHomeWidgets() == 0) return;
@@ -441,6 +547,7 @@ class AlbumHomeWidgetService {
         "albums_widget_$renderedCount",
         albumName,
         albumId.toString(),
+        uploadedFileID: randomAlbumFile.uploadedFileID,
       )
           .catchError((e, stackTrace) {
         _logger.severe("Error rendering widget", e, stackTrace);
