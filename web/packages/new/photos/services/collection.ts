@@ -559,11 +559,16 @@ const currentUserRoleInCollection = (collection: Collection) => {
     return collection.sharees.find((sharee) => sharee.id == userID)?.role;
 };
 
+/**
+ *
+ * @param collection
+ * @returns true if the user can add files to a collection,
+ * only the OWNER, ADMIN and COLLABORATOR can actually add
+ * file to a collection
+ */
 export const canAddFilesToCollection = (collection: Collection) => {
     const role = currentUserRoleInCollection(collection);
-    return (
-        role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR"
-    );
+    return role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR";
 };
 
 export const canUploadToCollection = (collection: Collection) =>
@@ -690,6 +695,14 @@ const uniqueFilesByID = (files: EnteFile[]) => {
     return uniqueFiles;
 };
 
+/**
+ *
+ * @param collectionID
+ * @param collectionFiles
+ * @returns Filters the collectionFiles and create a
+ * new set with the fileIds of files which belong
+ * to the collection having it's id collectionID.
+ */
 const fileIDsInCollection = (
     collectionID: number,
     collectionFiles: EnteFile[],
@@ -807,17 +820,26 @@ export const addOrCopyToCollection = async (
     dstCollection: Collection,
     files: EnteFile[],
 ) => {
+    // If there is no files to add then returning
     if (!files.length) return;
+
+    // If the current user doesn't have the required previlages to add/copy
+    // to a collection then throwing error.
     if (!canAddFilesToCollection(dstCollection)) {
         throw new Error("Current user cannot add files to this collection");
     }
 
+    // Getting the ID of the currently logged-in user, collection files.
     const currentUserID = ensureLocalUser().id;
     const collectionFiles = await savedCollectionFiles();
+
+    // Stores all the filesIDs which belong to the collection with
+    // collectionID dstCollection.id
     const destinationFileIDs = fileIDsInCollection(
         dstCollection.id,
         collectionFiles,
     );
+
     const filesMissingFromDestination = uniqueFilesByID(files).filter(
         (file) => !destinationFileIDs.has(file.id),
     );
