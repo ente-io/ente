@@ -6,47 +6,24 @@
 - JDK 17
 - Android SDK with API level 35 (install in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT`)
 - Android NDK (install via `sdkmanager "ndk;<version>"`; optionally set `NDK_VERSION` to select a specific version)
-- Rust toolchain and `cargo-ndk` (`cargo install cargo-ndk`)
-
-## Quick scripts
-
-From `mobile/native/android/apps/ensu`:
-
-```bash
-./build.sh                 # builds Rust + debug APK
-./build.sh apk             # builds Rust + release APK
-./build.sh aab             # builds Rust + release AAB (app bundle)
-./run.sh                   # builds + installs + launches on connected adb device
-```
-
-Helpful flags:
-
-- `--skip-rust` to skip Rust/jni rebuild
-- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
-- `--device <serial>` for `run.sh`
-- legacy aliases still supported: `release`/`release-apk` and `bundle`/`release-aab`
-
-Run `./build.sh --help` or `./run.sh --help` for full options.
+- Rust toolchain
 
 ## Building
 
-### 1. Build Rust Libraries
+### 1. Generate Kotlin bindings
 
-Before building the Android app, compile the Rust native libraries. Ensure the SDK is installed in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT` to the SDK containing an NDK. Optionally set `NDK_VERSION` to select a specific version.
+Before building the Android app, generate the UniFFI Kotlin bindings:
 
 ```bash
-cd mobile/native/android/packages/rust/tool
-./build_android.sh
+cd rust
+cargo codegen ensu-android
 ```
 
-This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/` (including `libcore.so`, `libinference.so`, `libdb.so`, and `libsync.so`).
-It also generates the UniFFI Kotlin bindings into:
+This refreshes the generated Kotlin sources in:
 - `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core.kt`
 - `android/packages/rust/src/main/kotlin/io/ente/labs/ensu_db/db.kt`
 - `android/packages/rust/src/main/kotlin/io/ente/labs/ensu_sync/sync.kt`
 - `android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference.kt`
-
-These generated files are gitignored and are refreshed each time `build_android.sh` runs.
 
 ### 2. Build Debug APK
 
@@ -54,6 +31,8 @@ These generated files are gitignored and are refreshed each time `build_android.
 cd mobile/native/android/apps/ensu
 ./gradlew :app-ui:assembleDebug
 ```
+
+Gradle builds the Rust JNI libraries automatically for the relevant ABI.
 
 Output: `app-ui/build/outputs/apk/debug/app-ui-debug.apk`
 
@@ -63,7 +42,17 @@ Output: `app-ui/build/outputs/apk/debug/app-ui-debug.apk`
 ./gradlew :app-ui:assembleRelease
 ```
 
+Release builds include the full shipped ABI set.
+
 Output: `app-ui/build/outputs/apk/release/app-ui-release.apk`
+
+### 4. Build Release AAB
+
+```bash
+./gradlew :app-ui:bundleRelease
+```
+
+Output: `app-ui/build/outputs/bundle/release/app-ui-release.aab`
 
 Note: Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app-ui/build.gradle.kts`.
 
@@ -81,11 +70,19 @@ Or via adb:
 adb install -r app-ui/build/outputs/apk/debug/app-ui-debug.apk
 ```
 
+Launch the app:
+
+```bash
+adb shell am start -n io.ente.ensu/.MainActivity
+```
+
 ### Install Release Build
 
 ```bash
 adb install -r app-ui/build/outputs/apk/release/app-ui-release.apk
 ```
+
+To target a specific device, prefix the `adb` commands with `-s <serial>`.
 
 Note: If upgrading from a differently signed build, uninstall first:
 

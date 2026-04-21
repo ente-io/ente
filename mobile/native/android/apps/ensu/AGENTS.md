@@ -10,7 +10,10 @@
 
 ## Build, Test, and Development Commands
 Run commands from `android/apps/ensu`.
-- `./gradlew assembleDebug`: Build a debug APK.
+- Re-run `cd ../../../../../rust && cargo codegen ensu-android` whenever the UniFFI interfaces under `rust/uniffi` change.
+- `./gradlew :app-ui:assembleDebug`: Build a debug APK.
+- `./gradlew :app-ui:assembleRelease`: Build a release APK.
+- `./gradlew :app-ui:bundleRelease`: Build a release AAB.
 - `./gradlew test`: Run unit tests for modules that include tests.
 - `./gradlew lint`: Run Android lint checks (if configured).
 
