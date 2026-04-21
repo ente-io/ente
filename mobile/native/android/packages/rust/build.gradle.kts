@@ -5,60 +5,57 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-val generatedJniLibsDir = layout.buildDirectory.dir("generated/jniLibs")
+val knownAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 
-val buildRustJni by tasks.registering {
-    val knownAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+val debugJniLibsDir = layout.buildDirectory.dir("generated/jniLibs/debug")
+val releaseJniLibsDir = layout.buildDirectory.dir("generated/jniLibs/release")
 
-    fun capture(vararg cmd: String): String? = runCatching {
-        val out = ByteArrayOutputStream()
-        exec {
-            commandLine(*cmd)
-            standardOutput = out
-            errorOutput = ByteArrayOutputStream()
-        }
-        out.toString().trim()
-    }.getOrNull()
-
-    fun connectedDeviceAbi(): String? {
-        val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-        val adb = sdkRoot?.let { "$it/platform-tools/adb" } ?: "adb"
-        val serial = System.getenv("ANDROID_SERIAL")?.takeIf { it.isNotBlank() }
-            ?: capture(adb, "devices")?.lines()?.drop(1)
-                ?.mapNotNull { l -> l.trim().takeIf { it.endsWith("\tdevice") }?.substringBefore('\t') }
-                ?.singleOrNull()
-            ?: return null
-        return capture(adb, "-s", serial, "shell", "getprop", "ro.product.cpu.abi")
-            ?.takeIf { it in knownAbis }
+fun capture(vararg cmd: String): String? = runCatching {
+    val out = ByteArrayOutputStream()
+    exec {
+        commandLine(*cmd)
+        standardOutput = out
+        errorOutput = ByteArrayOutputStream()
     }
+    out.toString().trim()
+}.getOrNull()
 
-    fun hostAbi(): String = when (System.getProperty("os.arch")) {
-        "aarch64", "arm64" -> "arm64-v8a"
-        "x86_64", "amd64" -> "x86_64"
-        else -> error("Unsupported host architecture: ${System.getProperty("os.arch")}")
-    }
-
-    fun requestedAbis(): List<String> {
-        val isRelease = gradle.startParameter.taskNames.any {
-            it.contains("Release") || it.contains("bundle", ignoreCase = true)
-        }
-        return if (isRelease) knownAbis
-        else listOf(connectedDeviceAbi() ?: hostAbi())
-    }
-
-    fun ndkToolchain(ndkDir: java.io.File): java.io.File =
-        ndkDir.resolve("toolchains/llvm/prebuilt")
-            .listFiles { f -> f.isDirectory }
+fun connectedDeviceAbi(): String? {
+    val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+    val adb = sdkRoot?.let { "$it/platform-tools/adb" } ?: "adb"
+    val serial = System.getenv("ANDROID_SERIAL")?.takeIf { it.isNotBlank() }
+        ?: capture(adb, "devices")?.lines()?.drop(1)
+            ?.mapNotNull { l -> l.trim().takeIf { it.endsWith("\tdevice") }?.substringBefore('\t') }
             ?.singleOrNull()
-            ?: error("Expected exactly one NDK host toolchain in $ndkDir/toolchains/llvm/prebuilt")
+        ?: return null
+    return capture(adb, "-s", serial, "shell", "getprop", "ro.product.cpu.abi")
+        ?.takeIf { it in knownAbis }
+}
 
-    val abis = requestedAbis()
+fun hostAbi(): String = when (System.getProperty("os.arch")) {
+    "aarch64", "arm64" -> "arm64-v8a"
+    "x86_64", "amd64" -> "x86_64"
+    else -> error("Unsupported host architecture: ${System.getProperty("os.arch")}")
+}
+
+fun ndkToolchain(ndkDir: java.io.File): java.io.File =
+    ndkDir.resolve("toolchains/llvm/prebuilt")
+        .listFiles { f -> f.isDirectory }
+        ?.singleOrNull()
+        ?: error("Expected exactly one NDK host toolchain in $ndkDir/toolchains/llvm/prebuilt")
+
+fun registerBuildRustJni(
+    taskName: String,
+    outputDir: Provider<Directory>,
+    resolveAbis: () -> List<String>,
+) = tasks.register(taskName) {
+    val abis = resolveAbis()
 
     inputs.files(fileTree(file("../../../../../rust")) { exclude("**/target/**") })
     inputs.file(file("scripts/build-rust.sh"))
     inputs.property("abis", abis)
     inputs.property("ndk", providers.provider { android.ndkVersion })
-    outputs.dir(generatedJniLibsDir)
+    outputs.dir(outputDir)
 
     doLast {
         val version = android.ndkVersion
@@ -67,10 +64,9 @@ val buildRustJni by tasks.registering {
         }
         val toolchain = ndkToolchain(ndkDir)
 
-        // Wipe every known ABI so a debug ↔ release switch doesn't leave stale
-        // architectures from a previous build sitting in the APK.
-        val outDir = generatedJniLibsDir.get().asFile
-        knownAbis.forEach { outDir.resolve(it).deleteRecursively() }
+        val outDir = outputDir.get().asFile
+        outDir.deleteRecursively()
+        outDir.mkdirs()
 
         exec {
             workingDir = file("scripts")
@@ -78,7 +74,7 @@ val buildRustJni by tasks.registering {
                 "bash",
                 "./build-rust.sh",
                 "--toolchain", toolchain.absolutePath,
-                "--out-dir", generatedJniLibsDir.get().asFile.absolutePath,
+                "--out-dir", outDir.absolutePath,
                 *abis.toTypedArray(),
             )
             environment("ANDROID_NDK", ndkDir.absolutePath)
@@ -87,6 +83,18 @@ val buildRustJni by tasks.registering {
         }
     }
 }
+
+val buildRustJniDebug = registerBuildRustJni(
+    taskName = "buildRustJniDebug",
+    outputDir = debugJniLibsDir,
+    resolveAbis = { listOf(connectedDeviceAbi() ?: hostAbi()) },
+)
+
+val buildRustJniRelease = registerBuildRustJni(
+    taskName = "buildRustJniRelease",
+    outputDir = releaseJniLibsDir,
+    resolveAbis = { knownAbis },
+)
 
 android {
     namespace = "io.ente.ensu.rust"
@@ -100,7 +108,8 @@ android {
         minSdk = 24
     }
 
-    sourceSets["main"].jniLibs.setSrcDirs(listOf(generatedJniLibsDir))
+    sourceSets["debug"].jniLibs.setSrcDirs(listOf(debugJniLibsDir))
+    sourceSets["release"].jniLibs.setSrcDirs(listOf(releaseJniLibsDir))
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -112,8 +121,11 @@ android {
     }
 }
 
-tasks.matching { it.name.startsWith("pre") && it.name.endsWith("Build") }.configureEach {
-    dependsOn(buildRustJni)
+tasks.matching { it.name == "preDebugBuild" }.configureEach {
+    dependsOn(buildRustJniDebug)
+}
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    dependsOn(buildRustJniRelease)
 }
 
 dependencies {
