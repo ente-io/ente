@@ -7,85 +7,80 @@ plugins {
 
 val generatedJniLibsDir = layout.buildDirectory.dir("generated/jniLibs")
 
-fun captureOrNull(vararg command: String): String? {
-    val stdout = ByteArrayOutputStream()
-    return try {
+val buildRustJni by tasks.registering {
+    val knownAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+
+    fun capture(vararg cmd: String): String? = runCatching {
+        val out = ByteArrayOutputStream()
         exec {
-            commandLine(*command)
-            standardOutput = stdout
+            commandLine(*cmd)
+            standardOutput = out
             errorOutput = ByteArrayOutputStream()
         }
-        stdout.toString().trim()
-    } catch (_: Exception) {
-        null
-    }
-}
+        out.toString().trim()
+    }.getOrNull()
 
-fun adbCommand(): List<String> {
-    val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-    val sdkAdb = sdkRoot?.let { file("$it/platform-tools/adb") }
-    return when {
-        sdkAdb?.canExecute() == true -> listOf(sdkAdb.absolutePath)
-        else -> listOf("adb")
-    }
-}
-
-fun connectedDeviceAbiOrNull(): String? {
-    val adb = adbCommand()
-    val serial = System.getenv("ANDROID_SERIAL")?.trim().orEmpty().ifBlank {
-        val devices = captureOrNull(*(adb + listOf("devices")).toTypedArray())
-            ?.lineSequence()
-            ?.drop(1)
-            ?.map(String::trim)
-            ?.filter { it.endsWith("\tdevice") }
-            ?.map { it.substringBefore('\t') }
-            ?.toList()
-            .orEmpty()
-        if (devices.size == 1) devices[0] else ""
+    fun connectedDeviceAbi(): String? {
+        val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+        val adb = sdkRoot?.let { "$it/platform-tools/adb" } ?: "adb"
+        val serial = System.getenv("ANDROID_SERIAL")?.takeIf { it.isNotBlank() }
+            ?: capture(adb, "devices")?.lines()?.drop(1)
+                ?.mapNotNull { l -> l.trim().takeIf { it.endsWith("\tdevice") }?.substringBefore('\t') }
+                ?.singleOrNull()
+            ?: return null
+        return capture(adb, "-s", serial, "shell", "getprop", "ro.product.cpu.abi")
+            ?.takeIf { it in knownAbis }
     }
 
-    if (serial.isBlank()) return null
-
-    return captureOrNull(*(adb + listOf("-s", serial, "shell", "getprop", "ro.product.cpu.abi")).toTypedArray())
-        ?.trim()
-        ?.takeIf { it in setOf("arm64-v8a", "armeabi-v7a", "x86_64") }
-}
-
-fun defaultLocalAbi(): String =
-    when (System.getProperty("os.arch")) {
+    fun hostAbi(): String = when (System.getProperty("os.arch")) {
         "aarch64", "arm64" -> "arm64-v8a"
         "x86_64", "amd64" -> "x86_64"
         else -> error("Unsupported host architecture: ${System.getProperty("os.arch")}")
     }
 
-fun requestedRustAbis(): List<String> {
-    val taskNames = gradle.startParameter.taskNames
-    val isReleaseBuild = taskNames.any {
-        it.contains("Release") || it.contains("bundle", ignoreCase = true)
+    fun requestedAbis(): List<String> {
+        val isRelease = gradle.startParameter.taskNames.any {
+            it.contains("Release") || it.contains("bundle", ignoreCase = true)
+        }
+        return if (isRelease) knownAbis
+        else listOf(connectedDeviceAbi() ?: hostAbi())
     }
 
-    return if (isReleaseBuild) {
-        listOf("arm64-v8a", "armeabi-v7a", "x86_64")
-    } else {
-        listOf(connectedDeviceAbiOrNull() ?: defaultLocalAbi())
-    }
-}
+    fun ndkToolchain(ndkDir: java.io.File): java.io.File =
+        ndkDir.resolve("toolchains/llvm/prebuilt")
+            .listFiles { f -> f.isDirectory }
+            ?.singleOrNull()
+            ?: error("Expected exactly one NDK host toolchain in $ndkDir/toolchains/llvm/prebuilt")
 
-val buildRustJni by tasks.registering {
+    val abis = requestedAbis()
+
+    inputs.files(fileTree(file("../../../../../rust")) { exclude("**/target/**") })
+    inputs.file(file("scripts/build-rust.sh"))
+    inputs.property("abis", abis)
+    inputs.property("ndk", providers.provider { android.ndkDirectory.absolutePath })
     outputs.dir(generatedJniLibsDir)
-    outputs.upToDateWhen { false }
 
     doLast {
-        val abis = requestedRustAbis()
+        val ndkDir = android.ndkDirectory
+        val toolchain = ndkToolchain(ndkDir)
+
+        // Wipe every known ABI so a debug ↔ release switch doesn't leave stale
+        // architectures from a previous build sitting in the APK.
+        val outDir = generatedJniLibsDir.get().asFile
+        knownAbis.forEach { outDir.resolve(it).deleteRecursively() }
+
         exec {
-            workingDir = file("tool")
+            workingDir = file("scripts")
             commandLine(
                 "bash",
-                "./build_android.sh",
-                "--out-dir",
-                generatedJniLibsDir.get().asFile.absolutePath,
+                "./build-rust.sh",
+                "--toolchain", toolchain.absolutePath,
+                "--out-dir", generatedJniLibsDir.get().asFile.absolutePath,
                 *abis.toTypedArray(),
             )
+            environment("ANDROID_NDK", ndkDir.absolutePath)
+            environment("ANDROID_NDK_ROOT", ndkDir.absolutePath)
+            environment("NDK_ROOT", ndkDir.absolutePath)
         }
     }
 }
@@ -98,7 +93,7 @@ android {
         minSdk = 24
     }
 
-    sourceSets["main"].jniLibs.setSrcDirs(listOf("build/generated/jniLibs"))
+    sourceSets["main"].jniLibs.setSrcDirs(listOf(generatedJniLibsDir))
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
