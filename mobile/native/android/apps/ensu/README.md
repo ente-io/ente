@@ -32,6 +32,8 @@ A custom endpoint can be baked into the build via `./gradlew :app-ui:installDebu
 > [!NOTE]
 >
 > If you'd rather not open Android Studio, this section is for you.
+>
+> To skip the Android Studio install entirely, see [photos/docs/android-cli.md](../../../../apps/photos/docs/android-cli.md).
 
 Build and install a debug APK on a connected device or emulator:
 
