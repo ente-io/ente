@@ -566,13 +566,10 @@ const currentUserRoleInCollection = (collection: Collection) => {
  * only the OWNER, ADMIN and COLLABORATOR can actually add
  * file to a collection
  */
-const canAddFilesToCollection = (collection: Collection) => {
+export const canAddFilesToCollection = (collection: Collection) => {
     const role = currentUserRoleInCollection(collection);
     return role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR";
 };
-
-export const canUploadToCollection = (collection: Collection) =>
-    canAddFilesToCollection(collection);
 
 export const canDirectlyUploadToCollection = (collection: Collection) =>
     collection.owner.id == ensureLocalUser().id;
@@ -713,12 +710,28 @@ const fileIDsInCollection = (
             .map((file) => file.id),
     );
 
+/**
+ *
+ * @param file
+ * @returns A unique hash for each of the file.
+ */
 const hashAndTypeKey = (file: EnteFile) => {
     const hash = metadataHash(file.metadata);
     if (!hash) return undefined;
     return `${hash}:${file.metadata.fileType}`;
 };
 
+/**
+ *
+ * @param files
+ * @param currentUserID
+ * @returns A Mapping which has a unique ${hash}:${file.metadata.fileType} key
+ * for each of the file which is owned by the current user.
+ *
+ * This map is currently
+ * used in the upload to shared album flow where we check if the current user
+ * by any chance have a copy of the file which is being added.
+ */
 const userOwnedEquivalentFilesByHashAndType = (
     files: EnteFile[],
     currentUserID: number,
@@ -820,11 +833,15 @@ export const addOrCopyToCollection = async (
     dstCollection: Collection,
     files: EnteFile[],
 ) => {
-    // If there is no files to add then returning
     if (!files.length) return;
 
-    // If the current user doesn't have the required previlages to add/copy
-    // to a collection then throwing error.
+    /**
+     * The user who is added the files to the dstCollection must be
+     * either the OWNER, ADMIN or atleast a COLLABORATOR to add the file
+     * to the album.
+     *
+     * Therefore checking before proceeding and if not then throwing error.
+     */
     if (!canAddFilesToCollection(dstCollection)) {
         throw new Error("Current user cannot add files to this collection");
     }
@@ -833,48 +850,94 @@ export const addOrCopyToCollection = async (
     const currentUserID = ensureLocalUser().id;
     const collectionFiles = await savedCollectionFiles();
 
-    // Stores all the filesIDs which belong to the collection with
-    // collectionID dstCollection.id
+    /**
+     * Now since we have the files across all the collections and the
+     * id of the collection to which we want to upload the files to
+     *
+     * Getting the file IDs which are present in the dstCollection
+     */
     const destinationFileIDs = fileIDsInCollection(
         dstCollection.id,
         collectionFiles,
     );
-
+    /**
+     * Getting the list of the files which aren't actually already present
+     * in the destination. We don't want to upload files which already exist
+     * in the destination therefore this check.
+     *
+     * Here files indiciate the files which the user wants to add to the album
+     */
     const filesMissingFromDestination = uniqueFilesByID(files).filter(
         (file) => !destinationFileIDs.has(file.id),
     );
 
+    // If all the files which were to uploaded, already exists then,
+    // we have nothing pending to upload so returning.
     if (!filesMissingFromDestination.length) return;
 
+    /**
+     * Files which are owned by the current user and not owned
+     * both have different upload process therefore this filtering.
+     */
     const [ownedFiles, otherOwnedFiles] = splitByPredicate(
         filesMissingFromDestination,
         (file) => file.ownerID == currentUserID,
     );
 
+    /**
+     * For files already owned by the current user, we only link existing files
+     * to the destination collection. No content upload, no new file IDs, and no
+     * removal from current collections—just membership entries on the server.
+     *
+     * It's a far more straightforward process compared to the upload of
+     * non-owned files.
+     */
     if (ownedFiles.length) {
         await addToCollection(dstCollection, ownedFiles);
         ownedFiles.forEach((file) => destinationFileIDs.add(file.id));
     }
 
+    // If there are no files which are owned but by others
+    // then skipping the rest of the process.
     if (!otherOwnedFiles.length) return;
 
+    /**
+     * Say if user A uploaded a file X to a shared album and you
+     * also have a copy of the same file let it be Y. Then when you try to
+     * add the file X to a shared album instead of X it's Y being added.
+     *
+     * It's done by checking the metadatahash and fileType to see if the
+     * user who is initating the action has a copy of the same file.
+     */
     const userOwnedFilesByHashAndType = userOwnedEquivalentFilesByHashAndType(
         collectionFiles,
         currentUserID,
     );
 
+    // Storing the user owned files which can be directly added
     const filesToAdd: EnteFile[] = [];
+    // Storing other owned-files without an user-owned equivalent
     const filesToCopy: EnteFile[] = [];
+    /**
+     * Both the below Set(s) are for preventing duplication. Assume there are
+     * two shared files X1 and X2 and then if both of them match the same owned
+     * file Y then we need to prevent Y from being pushed to filesToAdd twice.
+     * similarly for the filesToCopy as well
+     */
     const seenAddFileIDs = new Set<number>();
     const seenCopyFileIDs = new Set<number>();
 
     for (const file of otherOwnedFiles) {
         const fileHashAndTypeKey = hashAndTypeKey(file);
+
+        // Checking if the user has a file with matching hash
         const userOwnedEquivalent = fileHashAndTypeKey
             ? userOwnedFilesByHashAndType.get(fileHashAndTypeKey)
             : undefined;
         const shouldAddOwnedEquivalent = !!userOwnedEquivalent;
 
+        // If the file needs to be added or copied then pushing
+        // the file ID into corresponding variables.
         if (shouldAddOwnedEquivalent) {
             if (!seenAddFileIDs.has(userOwnedEquivalent.id)) {
                 seenAddFileIDs.add(userOwnedEquivalent.id);

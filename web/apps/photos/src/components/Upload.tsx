@@ -59,8 +59,8 @@ import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/do
 import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     addOrCopyToCollection,
+    canAddFilesToCollection,
     canDirectlyUploadToCollection,
-    canUploadToCollection,
     createAlbum,
     createHiddenAlbum,
     isHiddenCollection,
@@ -562,7 +562,7 @@ export const Upload: React.FC<UploadProps> = ({
             isDragAndDrop.current = false;
             if (
                 props.activeCollection &&
-                canUploadToCollection(props.activeCollection)
+                canAddFilesToCollection(props.activeCollection)
             ) {
                 uploadFilesToExistingCollection(props.activeCollection);
                 return;
@@ -619,7 +619,7 @@ export const Upload: React.FC<UploadProps> = ({
         try {
             const uploadCollection = canDirectlyUploadToCollection(collection)
                 ? collection
-                : canUploadToCollection(collection)
+                : canAddFilesToCollection(collection)
                   ? await savedOrCreateUserUncategorizedCollection()
                   : undefined;
 
