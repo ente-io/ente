@@ -37,7 +37,7 @@ class FileUtil {
     if (file.localPath != null) {
       final localFile = File(file.localPath!);
       if (await localFile.exists()) {
-        await _launchFile(context, localFile);
+        await _launchFile(context, localFile, displayName: file.displayName);
         return;
       }
     }
@@ -424,6 +424,7 @@ class FileUtil {
         }
       }
 
+      _logger.info('Opening file from path: ${fileToOpen.path}');
       final result = await OpenFile.open(fileToOpen.path);
       if (result.type != ResultType.done) {
         throw Exception(result.message);
@@ -433,12 +434,6 @@ class FileUtil {
         context: context,
         error: e,
       );
-    } finally {
-      if (fileToOpen.path != file.path) {
-        try {
-          await fileToOpen.delete();
-        } catch (_) {}
-      }
     }
   }
 }
