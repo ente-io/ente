@@ -41,7 +41,16 @@ When you create a public link:
 
 ## Deleting a link
 
+### For an item
+
 1. Long press on the item
+2. Tap the share button
+3. Tap **Delete link**
+4. Confirm deletion
+
+### For a collection
+
+1. Open the collection
 2. Tap the share button
 3. Tap **Delete link**
 4. Confirm deletion

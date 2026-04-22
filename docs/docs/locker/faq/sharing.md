@@ -22,15 +22,22 @@ Your family member will receive the shared collection in their Locker app.
 
 ### Can I share with non-Ente users? {#locker-share-non-users}
 
-Yes, using public links for individual items. Create a public link that can be
-opened in any web browser:
+Yes, using public links for individual items or collections. Create a public
+link that can be opened in any web browser:
+
+### For an item
 
 1. Long press on the item
 2. Tap the share button
 3. Tap **Share link**
 4. Copy and share the link
 
-Note: Collections cannot be shared via public links - only with other Ente users.
+### For a collection
+
+1. Open the collection
+2. Tap the share button
+3. Tap **Share link**
+4. Copy and share the link
 
 Learn more about [Public links](/locker/features/sharing/public-links).
 
