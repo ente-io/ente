@@ -2,9 +2,9 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 
-import "package:computer/computer.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
@@ -22,7 +22,6 @@ import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/cache_util.dart";
@@ -228,7 +227,7 @@ GenericSearchResult? toGenericSearchResult(
 
 class MagicCacheService {
   static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
-  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v3.json";
+  static const _kPromptsAssetPath = "assets/discover.json";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
@@ -281,11 +280,7 @@ class MagicCacheService {
     if (!enableDiscover) {
       return;
     }
-    final updatedJSONFile = await RemoteAssetsService.instance
-        .getAssetIfUpdated(_kMagicPromptsDataUrl);
-    if (updatedJSONFile != null) {
-      queueUpdate("Prompts data updated");
-    } else if (lastMagicCacheUpdateTime <
+    if (lastMagicCacheUpdateTime <
         DateTime.now()
             .subtract(const Duration(hours: 12))
             .millisecondsSinceEpoch) {
@@ -346,7 +341,7 @@ class MagicCacheService {
       return;
     }
     try {
-      final prompts = await _readPromptFromDiskOrNetwork();
+      final prompts = await _readPromptsFromAssets();
       final magicCaches = await _readResultFromDisk();
       _promptFuture = Future.value(prompts);
       _magicCacheFuture = Future.value(magicCaches);
@@ -360,7 +355,7 @@ class MagicCacheService {
     if (_promptFuture != null) {
       return _promptFuture!;
     }
-    _promptFuture = _readPromptFromDiskOrNetwork();
+    _promptFuture = _readPromptsFromAssets();
     return _promptFuture!;
   }
 
@@ -372,15 +367,13 @@ class MagicCacheService {
     return _magicCacheFuture!;
   }
 
-  Future<List<Prompt>> _readPromptFromDiskOrNetwork() async {
-    final String path =
-        await RemoteAssetsService.instance.getAssetPath(_kMagicPromptsDataUrl);
-    return Computer.shared().compute(
-      _loadMagicPrompts,
-      param: <String, dynamic>{
-        "path": path,
-      },
-    );
+  Future<List<Prompt>> _readPromptsFromAssets() async {
+    final String contents = await rootBundle.loadString(_kPromptsAssetPath);
+    final Map<String, dynamic> promptsJson = jsonDecode(contents);
+    final List<dynamic> promptData = promptsJson['prompts'];
+    return promptData
+        .map<Prompt>((jsonItem) => Prompt.fromJson(jsonItem))
+        .toList();
   }
 
   Future<List<MagicCache>> _readResultFromDisk() async {
@@ -527,19 +520,6 @@ class MagicCacheService {
       _logger.info("Error getting magic generic search result", e, s);
       return [];
     }
-  }
-
-  static Future<List<Prompt>> _loadMagicPrompts(
-    Map<String, dynamic> args,
-  ) async {
-    final String path = args["path"] as String;
-    final File file = File(path);
-    final String contents = await file.readAsString();
-    final Map<String, dynamic> promptsJson = jsonDecode(contents);
-    final List<dynamic> promptData = promptsJson['prompts'];
-    return promptData
-        .map<Prompt>((jsonItem) => Prompt.fromJson(jsonItem))
-        .toList();
   }
 
   ///Returns non-empty magic results from magicPromptsData
