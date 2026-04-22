@@ -1,10 +1,12 @@
 import { LazyNotification } from "@/app/lazy/global-ui";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
-import { FeedIcon } from "@/public-album/social/components/FeedIcon";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import {
+    AddPhotosIcon,
+    DownloadIcon,
+    FeedIcon,
+    ShareIcon,
+} from "@/public-album/components/ActionIcons";
 import CheckIcon from "@mui/icons-material/Check";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
@@ -22,6 +24,7 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
     enableDownload,
     onShowFeed,
 }) => {
+    const iconStrokeWidth = 1.8;
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
     const handleShare = () => {
@@ -36,26 +39,27 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
         <>
             <ButtonContainer>
                 <NavButton onClick={handleShare}>
-                    <ShareIcon sx={{ fontSize: "20px" }} />
+                    <ShareIcon size={24} strokeWidth={iconStrokeWidth} />
                 </NavButton>
 
                 {onShowFeed && (
                     <NavButton onClick={onShowFeed}>
-                        <FeedIcon />
+                        <FeedIcon size={24} strokeWidth={iconStrokeWidth} />
                     </NavButton>
                 )}
 
                 {onAddPhotos && (
                     <NavButton onClick={onAddPhotos}>
-                        <AddPhotoAlternateOutlinedIcon
-                            sx={{ fontSize: "22px" }}
+                        <AddPhotosIcon
+                            size={24}
+                            strokeWidth={iconStrokeWidth}
                         />
                     </NavButton>
                 )}
 
                 {enableDownload && (
                     <NavButton onClick={downloadAllFiles}>
-                        <FileDownloadOutlinedIcon sx={{ fontSize: "23px" }} />
+                        <DownloadIcon size={24} strokeWidth={iconStrokeWidth} />
                     </NavButton>
                 )}
 

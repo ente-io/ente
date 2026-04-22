@@ -1,10 +1,12 @@
 import { LazyNotification } from "@/app/lazy/global-ui";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
-import { FeedIcon } from "@/public-album/social/components/FeedIcon";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import {
+    AddPhotosIcon,
+    DownloadIcon,
+    FeedIcon,
+    ShareIcon,
+} from "@/public-album/components/ActionIcons";
 import CheckIcon from "@mui/icons-material/Check";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { t } from "i18next";
@@ -25,6 +27,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     onShowFeed,
     collectionTitle,
 }) => {
+    const iconStrokeWidth = 1.8;
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
     const handleShare = async () => {
@@ -57,38 +60,29 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
                 <ButtonGroup>
                     <MobileNavButton onClick={handleShare}>
-                        <ShareIcon sx={{ fontSize: "15px" }} />
+                        <ShareIcon size={16} strokeWidth={iconStrokeWidth} />
                     </MobileNavButton>
 
                     {onShowFeed && (
                         <MobileNavButton onClick={onShowFeed}>
-                            <Box
-                                sx={{
-                                    width: 16,
-                                    height: 16,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    "& svg": { width: "100%", height: "100%" },
-                                }}
-                            >
-                                <FeedIcon />
-                            </Box>
+                            <FeedIcon size={16} strokeWidth={iconStrokeWidth} />
                         </MobileNavButton>
                     )}
 
                     {onAddPhotos && (
                         <MobileNavButton onClick={onAddPhotos}>
-                            <AddPhotoAlternateOutlinedIcon
-                                sx={{ fontSize: "16px" }}
+                            <AddPhotosIcon
+                                size={16}
+                                strokeWidth={iconStrokeWidth}
                             />
                         </MobileNavButton>
                     )}
 
                     {enableDownload && (
                         <MobileNavButton onClick={downloadAllFiles}>
-                            <FileDownloadOutlinedIcon
-                                sx={{ fontSize: "18px" }}
+                            <DownloadIcon
+                                size={16}
+                                strokeWidth={iconStrokeWidth}
                             />
                         </MobileNavButton>
                     )}

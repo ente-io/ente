@@ -7,6 +7,12 @@ import {
     type PasswordUnlockScreenProps,
 } from "@/public-album/access/components/PasswordUnlockScreen";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
+import {
+    AddPhotosIcon,
+    DownloadIcon,
+    FeedIcon,
+    ShareIcon,
+} from "@/public-album/components/ActionIcons";
 import { type FileListHeaderOrFooter } from "@/public-album/components/FileList";
 import { FileListWithViewer } from "@/public-album/components/FileListWithViewer";
 import type { TripLayoutProps } from "@/public-album/components/TripLayout";
@@ -14,7 +20,6 @@ import { setPublicAlbumsCredentials } from "@/public-album/data/auth/public-link
 import { quickLinkDateRangeForFiles } from "@/public-album/data/utils/quick-link";
 import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
 import { sortFiles } from "@/public-album/media/utils/sort-files";
-import { FeedIcon } from "@/public-album/social/components/FeedIcon";
 import type { FullScreenDropZoneProps } from "@/public-album/upload/components/CollectDropZone";
 import type { UploadProps } from "@/public-album/upload/components/Upload";
 import {
@@ -33,12 +38,6 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/shared/ui/gallery/GalleryItemsHeader";
-import {
-    Download01Icon,
-    ImageAdd02Icon,
-    Share08Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -963,7 +962,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 onClick={downloadFilesHelper}
                 sx={{ flexShrink: 0, mr: "-15px" }}
             >
-                <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
+                <DownloadIcon size={24} />
             </IconButton>
         </Tooltip>
     </Stack>
@@ -1113,17 +1112,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                                 onClick={onShowFeed}
                                 disabled={hasSelection}
                             >
-                                <Box
-                                    sx={{
-                                        width: 24,
-                                        height: 24,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <FeedIcon />
-                                </Box>
+                                <FeedIcon size={24} />
                             </IconButton>
                         )}
                         {downloadEnabled && (
@@ -1131,10 +1120,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                                 onClick={downloadAllFiles}
                                 disabled={hasSelection}
                             >
-                                <HugeiconsIcon
-                                    icon={Download01Icon}
-                                    strokeWidth={1.6}
-                                />
+                                <DownloadIcon size={24} />
                             </IconButton>
                         )}
                         {onAddPhotos && (
@@ -1142,20 +1128,14 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                                 onClick={onAddPhotos}
                                 disabled={addPhotosDisabled || hasSelection}
                             >
-                                <HugeiconsIcon
-                                    icon={ImageAdd02Icon}
-                                    strokeWidth={1.8}
-                                />
+                                <AddPhotosIcon size={24} />
                             </IconButton>
                         )}
                         <IconButton
                             onClick={handleShare}
                             disabled={hasSelection}
                         >
-                            <HugeiconsIcon
-                                icon={Share08Icon}
-                                strokeWidth={1.6}
-                            />
+                            <ShareIcon size={24} />
                         </IconButton>
                     </Stack>
                 </SpacedRow>
