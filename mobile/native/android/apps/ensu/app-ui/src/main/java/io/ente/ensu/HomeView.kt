@@ -174,14 +174,18 @@ fun HomeView(
         }
     }
 
-    BackHandler(enabled = isShowingAuth) {
-        isShowingAuth = false
-    }
-
     BackHandler(enabled = !isChatRoute) {
         if (!navController.popBackStack()) {
             navController.navigate(HomeRoute.Chat) { launchSingleTop = true }
         }
+    }
+
+    BackHandler(enabled = drawerState.currentValue == DrawerValue.Open) {
+        scope.launch { drawerState.close() }
+    }
+
+    BackHandler(enabled = isShowingAuth) {
+        isShowingAuth = false
     }
 
     DisposableEffect(lifecycleOwner) {
