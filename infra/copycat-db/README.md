@@ -35,7 +35,33 @@ The name copycat-db is a riff on "copycat", which is what we call our museum
 instance that does the object replication. This one replicates the DB, so,
 copycat-db.
 
+## Backup Mode
+
+Copycat DB requires an explicit `BACKUP_MODE`:
+
+- `scw-export`: take a Scaleway-managed backup directly from `SCW_RDB_INSTANCE_ID`
+- `snapshot-scw-export`: restore the latest snapshot into `copycat-db-temp`, take
+  a Scaleway-managed backup from that temporary instance, then delete it
+- `snapshot-pgdump`: restore the latest snapshot into `copycat-db-temp`, attach
+  it to `SCW_PRIVATE_NETWORK_ID`, run `pg_dump` over the private endpoint,
+  package the dump, then delete the temporary instance
+
+To use a snapshot-backed mode in production, set `BACKUP_MODE` accordingly in
+`/root/copycat-db.env` and then start the service or let the timer run it.
+
+This path is intentionally conservative about cleanup. If something fails before
+the final explicit delete, the script leaves the temporary instance behind
+instead of attempting automatic cleanup during error handling. This is done to
+avoid accidental deletions if the script ends up in an unexpected state.
+
+If that happens, clean it up manually in the Scaleway dashboard by deleting the DB instance named `copycat-db-temp`.
+
 ## Required environment variables
+
+##### BACKUP_MODE
+
+Required. See the **Backup Mode** section above for the available values and
+their behaviour.
 
 ##### SCW_CONFIG_PATH
 
@@ -52,23 +78,25 @@ on a shell prompt in the container (using `./test.sh sh`)
 
 ##### SCW_RDB_INSTANCE_ID
 
-The UUID of the Scalway RDB instance that we wish to backup. If this is missing,
-then the Docker image falls back to using `pg_dump` (as outlined next).
+The UUID of the Scalway RDB instance that we wish to backup.
 
-##### SCW_RDB_USE_SNAPSHOT_BACKUP
+##### SCW_PRIVATE_NETWORK_ID
 
-Optional. Set this to `true` to make copycat-db restore the latest existing
-Scaleway snapshot into a temporary single-node instance named
-`copycat-db-temp`, take the backup from that temporary instance, and delete it
-after the backup has been downloaded. See the **Snapshot Mode** section below for more details.
+Required when `BACKUP_MODE=snapshot-pgdump`.
 
-##### PGUSER, PGPASSWORD, PGHOST
+This is the UUID of the Private Network that copycat-db should attach to the
+temporary restored Database Instance before running `pg_dump`.
+
+The compute instance running copycat-db must also be attached to this Private
+Network.
+
+##### PGUSER, PGPASSWORD
 
 Not needed in production when taking a backup (since we use the Scaleway CLI to
 take backups in production).
 
-These are used when testing a backup using `pg_dump`, and when restoring
-backups.
+These are used when taking a `snapshot-pgdump` backup, and when restoring
+backups. The host and port are resolved by the scripts.
 
 ##### RCLONE_CONFIG
 
@@ -108,28 +136,6 @@ remote that the crypt remote wraps.
 
 The service logs to its standard out/error. The systemd unit is configured to
 route these to `/var/logs/copycat-db.log`.
-
-## Snapshot Mode
-
-By default, copycat-db keeps the old behaviour and backs up the instance
-specified by `SCW_RDB_INSTANCE_ID` directly.
-
-If `SCW_RDB_USE_SNAPSHOT_BACKUP=true`, it instead:
-
-1. Finds the latest existing Scaleway snapshot for `SCW_RDB_INSTANCE_ID`.
-2. Restores it into a temporary non-HA instance named `copycat-db-temp`.
-3. Takes the backup from that restored instance.
-4. Deletes that temporary instance after the backup has been downloaded.
-
-To trigger this path in production, set `SCW_RDB_USE_SNAPSHOT_BACKUP=true` in
-`/root/copycat-db.env` and then start the service or let the timer run it.
-
-This path is intentionally conservative about cleanup. If something fails before
-the final explicit delete, the script leaves the temporary instance behind
-instead of attempting automatic cleanup during error handling. This is done to
-avoid accidental deletions if the script ends up in an unexpected state.
-
-If that happens, clean it up manually in the Scaleway dashboard by deleting the DB instance named  `copycat-db-temp`.
 
 ## Local testing
 
