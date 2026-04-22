@@ -29,14 +29,13 @@ class QuickLinkAlbumItem extends StatelessWidget {
     return AnimatedContainer(
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
+        color: colorScheme.fill,
         border: Border.all(
-          color:
-              isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
+          color: isSelected ? colorScheme.strokeMuted : colorScheme.fill,
         ),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(6),
-        ),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,8 +45,8 @@ class QuickLinkAlbumItem extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 60,
-                  height: 60,
+                  width: 52,
+                  height: 52,
                   child: FutureBuilder<EnteFile?>(
                     future: CollectionsService.instance.getCover(c),
                     builder: (context, snapshot) {
@@ -57,7 +56,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
                         return Hero(
                           tag: heroTag,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(12),
                             child: ThumbnailWidget(
                               snapshot.data!,
                               key: ValueKey(heroTag),

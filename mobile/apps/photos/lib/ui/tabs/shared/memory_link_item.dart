@@ -33,11 +33,11 @@ class MemoryLinkAlbumItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        border: Border.all(color: colorScheme.strokeFainter),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(6),
-        ),
+        color: colorScheme.fill,
+        border: Border.all(color: colorScheme.fill),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,8 +47,8 @@ class MemoryLinkAlbumItem extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 60,
-                  height: 60,
+                  width: 52,
+                  height: 52,
                   child: FutureBuilder<EnteFile?>(
                     future: _loadPreviewFile(),
                     builder: (context, snapshot) {
@@ -58,7 +58,7 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                         return Hero(
                           tag: heroTag,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(12),
                             child: ThumbnailWidget(
                               snapshot.data!,
                               key: ValueKey(heroTag),
