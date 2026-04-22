@@ -48,7 +48,8 @@ dependencies:
   dart_ui_isolate: 1.1.1
   defer_pointer: 0.0.2
   device_info_plus: 11.3.0
-  dio: 5.8.0+1
+  dio: 5.9.2
+  dio_http2_adapter: 2.7.0
   dots_indicator: 4.0.1
   dotted_border: 2.1.0
   dropdown_button2: 2.3.9
@@ -185,7 +186,6 @@ dependencies:
       url: https://github.com/ente-io/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   nanoid: 1.0.0
-  native_dio_adapter: 1.4.0
   native_video_editor:
     path: ../../packages/native_video_editor
   native_video_player: 4.0.0
