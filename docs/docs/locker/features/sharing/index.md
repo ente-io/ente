@@ -18,6 +18,14 @@ notifications and can access shared collections from their Locker app.
 Learn more about
 [Sharing collections with users](/locker/features/sharing/share-with-users).
 
+### Share collections via public links
+
+You can also create public links for collections so anyone with the link can
+open them in a browser, even without an Ente account.
+
+Use collection links when you want to share a group of items without requiring
+recipients to sign in.
+
 ### Share items via public links
 
 Create shareable links for individual items that anyone can access in a web
@@ -38,13 +46,13 @@ Learn more about [Ente Paste](/locker/features/sharing/ente-paste).
 
 | Content     | Share with Ente users | Share via public link | Share via Ente Paste |
 | ----------- | --------------------- | --------------------- | -------------------- |
-| Collections | Yes                   | No                    | No                   |
+| Collections | Yes                   | Yes                   | No                   |
 | Items       | No                    | Yes                   | No                   |
 | Text        | No                    | No                    | Yes                  |
 
 To share with other Ente users, organize items into a collection and share the
-collection. To share individual items with anyone (including non-Ente users),
-create a public link.
+collection. To share items or collections with anyone (including non-Ente
+users), create a public link.
 
 ## Security considerations
 
@@ -56,7 +64,8 @@ specifically for their account. Only they can decrypt and view the content.
 ### Public links
 
 Public links embed the decryption key in the URL. Anyone with the link can view
-the content. Delete links when no longer needed.
+the content. Locker supports public links for both individual items and
+collections. Delete links when no longer needed.
 
 ## Related FAQs
 
