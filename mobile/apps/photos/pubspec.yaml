@@ -185,7 +185,6 @@ dependencies:
       url: https://github.com/ente-io/move_to_background.git
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   nanoid: 1.0.0
-  native_dio_adapter: 1.4.0
   native_video_editor:
     path: ../../packages/native_video_editor
   native_video_player: 4.0.0

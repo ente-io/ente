@@ -2,7 +2,6 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import "package:native_dio_adapter/native_dio_adapter.dart";
 import 'package:package_info_plus/package_info_plus.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -40,13 +39,6 @@ class NetworkClient {
         },
       ),
     );
-
-    // Only use NativeAdapter on iOS. On Android, Cronet (used by NativeAdapter)
-    // doesn't work in background tasks on Android 15, causing CronetException
-    // during background sync. Use default adapter on Android instead.
-    if (Platform.isIOS) {
-      _enteDio.httpClientAdapter = NativeAdapter();
-    }
 
     _setupInterceptors(endpoint);
 

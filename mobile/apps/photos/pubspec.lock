@@ -459,14 +459,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
-  cupertino_http:
-    dependency: transitive
-    description:
-      name: cupertino_http
-      sha256: "8fb9e2c36d0732d9d96abd76683406b57e78a2514e27c962e0c603dbe6f2e3f8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -1879,14 +1871,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  native_dio_adapter:
-    dependency: "direct main"
-    description:
-      name: native_dio_adapter
-      sha256: "7420bc9517b2abe09810199a19924617b45690a44ecfb0616ac9babc11875c03"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.0"
   native_video_editor:
     dependency: "direct main"
     description:
@@ -1926,14 +1910,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  objective_c:
-    dependency: transitive
-    description:
-      name: objective_c
-      sha256: "9f034ba1eeca53ddb339bc8f4813cb07336a849cd735559b60cdc068ecce2dc7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.0"
   octo_image:
     dependency: transitive
     description:
