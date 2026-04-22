@@ -170,7 +170,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     // albums are available as upload targets. Viewer-only shared incoming
                     // albums are still excluded by `canAddToCollection`.
                     return (
-                        (canAddToCollection(cs) || cs.type == "uncategorized") &&
+                        (canAddToCollection(cs) ||
+                            cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );
                 } else if (attributes.action == "restore") {
