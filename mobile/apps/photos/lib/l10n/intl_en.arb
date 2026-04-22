@@ -513,6 +513,7 @@
   },
   "discover_identity": "Identity",
   "discover_screenshots": "Screenshots",
+  "discover_qr_codes": "QR Codes",
   "discover_receipts": "Receipts",
   "discover_notes": "Notes",
   "discover_memes": "Memes",
