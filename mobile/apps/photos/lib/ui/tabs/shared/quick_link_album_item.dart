@@ -80,9 +80,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
                           c.displayName,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(
-                          height: 2,
-                        ),
+                        const SizedBox(height: 4),
                         FutureBuilder<int>(
                           future: CollectionsService.instance.getFileCount(c),
                           builder: (context, snapshot) {
