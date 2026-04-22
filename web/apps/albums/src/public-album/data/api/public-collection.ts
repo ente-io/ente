@@ -1,7 +1,10 @@
 import { deriveKey } from "ente-base/crypto";
 import {
+    authenticatedPublicAlbumsDeviceLimitRequestHeaders,
+    authenticatedPublicAlbumsInfoRequestHeaders,
     authenticatedPublicAlbumsRequestHeaders,
     ensureOk,
+    linkDeviceTokenFromResponse,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
@@ -97,11 +100,15 @@ export const verifyPublicAlbumPassword = async (
  * secrets that are not sent by the browser to the server).
  */
 export const pullCollection = async (
-    accessToken: string,
+    credentials: PublicAlbumsCredentials,
     collectionKey: string,
-): Promise<{ collection: Collection; referralCode: string }> => {
-    const { collection: remoteCollection, referralCode } =
-        await getPublicCollectionInfo(accessToken);
+): Promise<{
+    collection: Collection;
+    referralCode: string;
+    linkDeviceToken?: string;
+}> => {
+    const { collection: remoteCollection, referralCode, linkDeviceToken } =
+        await getPublicCollectionInfo(credentials);
 
     const collection = await decryptRemoteCollection(
         remoteCollection,
@@ -111,7 +118,7 @@ export const pullCollection = async (
     await savePublicCollection(collection);
     await saveLastPublicCollectionReferralCode(referralCode);
 
-    return { collection, referralCode };
+    return { collection, referralCode, linkDeviceToken };
 };
 
 const PublicCollectionInfo = z.object({
@@ -135,12 +142,16 @@ const PublicCollectionInfo = z.object({
  *
  * @param accessToken A public collection access key.
  */
-const getPublicCollectionInfo = async (accessToken: string) => {
+const getPublicCollectionInfo = async (credentials: PublicAlbumsCredentials) => {
     const res = await fetch(await apiURL("/public-collection/info"), {
-        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        headers: authenticatedPublicAlbumsInfoRequestHeaders(credentials),
     });
     ensureOk(res);
-    return PublicCollectionInfo.parse(await res.json());
+    const info = PublicCollectionInfo.parse(await res.json());
+    return {
+        ...info,
+        linkDeviceToken: linkDeviceTokenFromResponse(res),
+    };
 };
 
 /**
@@ -244,7 +255,10 @@ const getPublicCollectionDiff = async (
 ) => {
     const res = await fetch(
         await apiURL("/public-collection/diff", { sinceTime }),
-        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+        {
+            headers:
+                authenticatedPublicAlbumsDeviceLimitRequestHeaders(credentials),
+        },
     );
     ensureOk(res);
     return FileDiffResponse.parse(await res.json());

@@ -1,5 +1,9 @@
 import bs58 from "bs58";
 import {
+    linkDeviceTokenFromResponse,
+    linkDeviceTokenRequestHeader,
+} from "ente-base/http";
+import {
     decryptBoxBytes,
     decryptMetadataJSON,
     decryptStreamBytes,
@@ -69,11 +73,17 @@ export const extractFileKeyFromURL = async (
  */
 export const fetchFileInfo = async (
     accessToken: string,
-): Promise<FileLinkInfo> => {
+    linkDeviceToken?: string,
+): Promise<{ fileLinkInfo: FileLinkInfo; linkDeviceToken?: string }> => {
     const url = `${await apiOrigin()}/file-link/info`;
 
     const response = await fetch(url, {
-        headers: { "X-Auth-Access-Token": accessToken },
+        headers: {
+            "X-Auth-Access-Token": accessToken,
+            ...(linkDeviceToken && {
+                [linkDeviceTokenRequestHeader]: linkDeviceToken,
+            }),
+        },
         cache: "no-store",
     });
 
@@ -85,7 +95,10 @@ export const fetchFileInfo = async (
     }
 
     const data = (await response.json()) as FileLinkInfo;
-    return data;
+    return {
+        fileLinkInfo: data,
+        linkDeviceToken: linkDeviceTokenFromResponse(response),
+    };
 };
 
 /**

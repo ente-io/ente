@@ -110,10 +110,16 @@ func (h *PublicCollectionHandler) GetCollection(c *gin.Context) {
 		return
 	}
 	referralCode, _ := h.StorageBonusController.GetOrCreateReferralCode(c, collection.Owner.ID)
-	c.JSON(http.StatusOK, gin.H{
+	response := gin.H{
 		"collection":   collection,
 		"referralCode": referralCode,
-	})
+	}
+	if linkDeviceToken, ok := c.Get(auth.LinkDeviceTokenResponseKey); ok {
+		if token, ok := linkDeviceToken.(string); ok && token != "" {
+			c.Header(auth.LinkDeviceTokenResponseHeader, token)
+		}
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 // GetUploadUrls returns upload Urls where files can be uploaded

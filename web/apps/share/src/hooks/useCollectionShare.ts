@@ -4,6 +4,7 @@ import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
 } from "ente-base/http";
+import { apiOrigin } from "ente-base/origins";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import type { PublicURL } from "ente-media/collection";
 import type { NotificationAttributes } from "ente-new/photos/components/Notification";
@@ -90,6 +91,23 @@ const saveAccessTokenJWT = (accessToken: string, accessTokenJWT: string) => {
 
 const removeAccessTokenJWT = (accessToken: string) =>
     removeLocalStorageItem(accessTokenJWTStorageKey(accessToken));
+
+const linkDeviceTokenStorageKey = (apiOrigin: string, accessToken: string) =>
+    `share-collection-link-device-token:${apiOrigin}:${accessToken}`;
+
+const savedLinkDeviceToken = (apiOrigin: string, accessToken: string) =>
+    readLocalStorageItem(linkDeviceTokenStorageKey(apiOrigin, accessToken));
+
+const saveLinkDeviceToken = (
+    apiOrigin: string,
+    accessToken: string,
+    linkDeviceToken: string,
+) => {
+    writeLocalStorageItem(
+        linkDeviceTokenStorageKey(apiOrigin, accessToken),
+        linkDeviceToken,
+    );
+};
 
 const collectionShareLoadError = async (
     err: unknown,
@@ -250,17 +268,35 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 }
 
                 const storedAccessTokenJWT = savedAccessTokenJWT(token);
+                const currentAPIOrigin = await apiOrigin();
+                const storedLinkDeviceToken = savedLinkDeviceToken(
+                    currentAPIOrigin,
+                    token,
+                );
                 const resolvedAccessTokenJWT =
                     opts?.accessTokenJWT ?? storedAccessTokenJWT ?? undefined;
+                const resolvedLinkDeviceToken =
+                    storedLinkDeviceToken ?? undefined;
 
                 setAccessToken(token);
                 setCollectionKey(resolvedCollectionKey);
                 setAccessTokenJWT(resolvedAccessTokenJWT ?? null);
 
                 const metadata = await fetchPublicCollectionShareMetadata(
-                    token,
+                    {
+                        accessToken: token,
+                        accessTokenJWT: resolvedAccessTokenJWT,
+                        linkDeviceToken: resolvedLinkDeviceToken,
+                    },
                     resolvedCollectionKey,
                 );
+                if (metadata.linkDeviceToken) {
+                    saveLinkDeviceToken(
+                        currentAPIOrigin,
+                        token,
+                        metadata.linkDeviceToken,
+                    );
+                }
                 if (!metadata.passwordEnabled && resolvedAccessTokenJWT) {
                     removeAccessTokenJWT(token);
                     setAccessTokenJWT(null);
@@ -283,6 +319,9 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                         {
                             accessToken: token,
                             accessTokenJWT: activeAccessTokenJWT,
+                            linkDeviceToken:
+                                metadata.linkDeviceToken ??
+                                resolvedLinkDeviceToken,
                         },
                         metadata,
                     );
@@ -448,7 +487,10 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         setDownloadProgress(null);
         try {
             await downloadPublicCollectionFile(
-                { accessToken, accessTokenJWT: accessTokenJWT ?? undefined },
+                {
+                    accessToken,
+                    accessTokenJWT: accessTokenJWT ?? undefined,
+                },
                 item.id,
                 fileKey,
                 item.fileName,
