@@ -64,7 +64,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     leading: true,
   );
 
-  static const int _kOnEnteItemLimitCount = 12;
   @override
   void initState() {
     super.initState();
@@ -281,7 +280,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 : Configuration.instance.hasConfiguredAccount()
                     ? CollectionsFlexiGridViewWidget(
                         collections,
-                        displayLimitCount: _kOnEnteItemLimitCount,
                         selectedAlbums: widget.selectedAlbums,
                         shrinkWrap: true,
                         shouldShowCreateAlbum: true,
