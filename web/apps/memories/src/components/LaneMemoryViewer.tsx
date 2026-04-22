@@ -691,7 +691,7 @@ export function LaneMemoryViewer({
                             rel="noopener"
                             sx={laneHeaderJoinNowButtonSx}
                         >
-                            Try Ente
+                            Get Ente Photos
                         </JoinNowButton>
                     </LaneTopActionSection>
                 </LaneTopBar>

@@ -710,7 +710,7 @@ export function MemoryViewer({
                             target="_blank"
                             rel="noopener"
                         >
-                            Try Ente
+                            Get Ente Photos
                         </MobileJoinNowButton>
                     </MobileTopActions>
                 ) : (
@@ -743,7 +743,7 @@ export function MemoryViewer({
                                         : undefined
                                 }
                             >
-                                Try Ente
+                                Get Ente Photos
                             </JoinNowButton>
                         </TopRightActions>
                     </TopControls>

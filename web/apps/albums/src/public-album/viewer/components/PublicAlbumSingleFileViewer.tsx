@@ -480,7 +480,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
         ).catch(onGenericError);
     }, [handleMenuClose, onGenericError]);
 
-    const handleTryEnte = useCallback(() => {
+    const handleGetEntePhotos = useCallback(() => {
         window.location.href = getEnteURL();
     }, []);
 
@@ -713,7 +713,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
                             >
                                 <Button
                                     variant="contained"
-                                    onClick={handleTryEnte}
+                                    onClick={handleGetEntePhotos}
                                     sx={{
                                         borderRadius: "16px",
                                         paddingBlock: "11px",
@@ -729,7 +729,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                         },
                                     }}
                                 >
-                                    {t("try_ente")}
+                                    {t("get_ente_photos")}
                                 </Button>
                                 <IconButton
                                     onClick={(event) =>
