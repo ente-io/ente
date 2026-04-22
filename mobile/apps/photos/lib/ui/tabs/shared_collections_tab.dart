@@ -11,7 +11,6 @@ import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
-import "package:photos/events/memory_share_updated_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -20,7 +19,6 @@ import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/photos_contacts_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -29,16 +27,10 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/banners/shared_empty_offline_state_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/ui/social/widgets/feed_preview_widget.dart";
 import "package:photos/ui/tabs/section_title.dart";
-import "package:photos/ui/tabs/shared/all_memory_links_page.dart";
-import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
-import "package:photos/ui/tabs/shared/memory_link_item.dart";
-import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
-import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search_tab/contacts_section.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
@@ -57,7 +49,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
-  late StreamSubscription<MemoryShareUpdatedEvent> _memoryShareUpdatedEvent;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   final _debouncer = Debouncer(
@@ -65,7 +56,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     executionInterval: const Duration(seconds: 5),
     leading: true,
   );
-  static const heroTagPrefix = "outgoing_collection";
   late StreamSubscription<TabChangedEvent> _tabChangeEvent;
 
   // This can be used to defer loading of widgets in this tab until the tab is
@@ -108,12 +98,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     });
     _albumSortOrderChangeEvent =
         Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-    _memoryShareUpdatedEvent =
-        Bus.instance.on<MemoryShareUpdatedEvent>().listen((event) {
       if (mounted) {
         setState(() {});
       }
@@ -267,17 +251,12 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     SharedCollections collections,
     List<MemoryShare> memoryLinks,
   ) {
-    const maxQuickLinks = 4;
-    const maxMemoryLinks = 4;
-    final numberOfQuickLinks = collections.quickLinks.length;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final int albumsCountInRow = max(screenWidth ~/ maxThumbnailWidth, 3);
     final totalHorizontalPadding = (albumsCountInRow - 1) * crossAxisSpacing;
     final sideOfThumbnail =
         (screenWidth - totalHorizontalPadding - horizontalPadding) /
             albumsCountInRow;
-    const quickLinkTitleHeroTag = "quick_link_title";
-    const memoryLinkTitleHeroTag = "memory_link_title";
     final SectionTitle sharedWithYou =
         SectionTitle(title: AppLocalizations.of(context).sharedWithYou);
     final SectionTitle sharedByYou =
@@ -465,148 +444,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     : const OutgoingAlbumEmptyState(),
               ],
             ),
-            numberOfQuickLinks > 0
-                ? Column(
-                    children: [
-                      SectionOptions(
-                        onTap: numberOfQuickLinks > maxQuickLinks
-                            ? () {
-                                unawaited(
-                                  routeToPage(
-                                    context,
-                                    AllQuickLinksPage(
-                                      titleHeroTag: quickLinkTitleHeroTag,
-                                      quickLinks: collections.quickLinks,
-                                    ),
-                                  ),
-                                );
-                              }
-                            : null,
-                        Hero(
-                          tag: quickLinkTitleHeroTag,
-                          child: SectionTitle(
-                            title: AppLocalizations.of(context).quickLinks,
-                          ),
-                        ),
-                        trailingWidget: numberOfQuickLinks > maxQuickLinks
-                            ? IconButtonWidget(
-                                icon: Icons.chevron_right,
-                                iconButtonType: IconButtonType.secondary,
-                                iconColor: colorTheme.blurStrokePressed,
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 2),
-                      if (numberOfQuickLinks > 0)
-                        ListView.separated(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.only(
-                            bottom: 12,
-                            left: 12,
-                            right: 12,
-                          ),
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () async {
-                                final thumbnail = await CollectionsService
-                                    .instance
-                                    .getCover(collections.quickLinks[index]);
-                                final page = CollectionPage(
-                                  CollectionWithThumbnail(
-                                    collections.quickLinks[index],
-                                    thumbnail,
-                                  ),
-                                  tagPrefix: heroTagPrefix,
-                                );
-                                // ignore: unawaited_futures
-                                routeToPage(context, page);
-                              },
-                              child: QuickLinkAlbumItem(
-                                c: collections.quickLinks[index],
-                              ),
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return const SizedBox(height: 4);
-                          },
-                          itemCount: min(numberOfQuickLinks, maxQuickLinks),
-                        ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
-            memoryLinks.isNotEmpty
-                ? Column(
-                    children: [
-                      SectionOptions(
-                        onTap: memoryLinks.length > maxMemoryLinks
-                            ? () {
-                                unawaited(
-                                  routeToPage(
-                                    context,
-                                    AllMemoryLinksPage(
-                                      titleHeroTag: memoryLinkTitleHeroTag,
-                                      memoryShares: memoryLinks,
-                                    ),
-                                  ),
-                                );
-                              }
-                            : null,
-                        Hero(
-                          tag: memoryLinkTitleHeroTag,
-                          child: SectionTitle(
-                            title: AppLocalizations.of(context).memoryLinks,
-                          ),
-                        ),
-                        trailingWidget: memoryLinks.length > maxMemoryLinks
-                            ? IconButtonWidget(
-                                icon: Icons.chevron_right,
-                                iconButtonType: IconButtonType.secondary,
-                                iconColor: colorTheme.blurStrokePressed,
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 2),
-                      ListView.separated(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.only(
-                          bottom: 12,
-                          left: 12,
-                          right: 12,
-                        ),
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final share = memoryLinks[index];
-                          final title = MemoryShareService.instance
-                                  .getMemoryShareTitle(share) ??
-                              "Memory link";
-                          return GestureDetector(
-                            onTap: () async {
-                              final deleted = await showMemoryLinkDetailsSheet(
-                                context,
-                                shareUrl: share.url,
-                                shareId: share.id,
-                              );
-                              if (deleted == true && mounted) {
-                                setState(() {});
-                              }
-                            },
-                            child: MemoryLinkAlbumItem(
-                              title: title,
-                              fileCount: share.fileCount,
-                              previewUploadedFileID:
-                                  share.previewUploadedFileID,
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(height: 4);
-                        },
-                        itemCount: min(memoryLinks.length, maxMemoryLinks),
-                      ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
             const SizedBox(height: 2),
             ValueListenableBuilder(
               valueListenable: _canLoadDeferredWidgets,
@@ -648,7 +485,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _albumSortOrderChangeEvent.cancel();
-    _memoryShareUpdatedEvent.cancel();
     _loggedOutEvent.cancel();
     _appModeChangedEvent.cancel();
     _debouncer.cancelDebounceTimer();
