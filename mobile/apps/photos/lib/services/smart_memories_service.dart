@@ -1225,7 +1225,46 @@ class SmartMemoriesService {
     List<Memory> memories,
     List<City> cities, {
     bool base = false,
+    Set<String> excludedCountryNames = const {},
   }) {
+    final locationContext = _getLocationNameContext(memories, cities);
+    if (locationContext == null) return null;
+
+    final files = locationContext.files;
+    final results = locationContext.results;
+    final biggestPlace = locationContext.biggestPlace;
+
+    if (results[biggestPlace]!.length > files.length / 2) {
+      return biggestPlace.city;
+    }
+    if (results.length > 2 &&
+        results.keys.map((city) => city.country).toSet().length == 1 &&
+        !base &&
+        !_isExcludedCountryName(
+          biggestPlace.country,
+          excludedCountryNames,
+        )) {
+      return biggestPlace.country;
+    }
+    return null;
+  }
+
+  static String? _tryFindCountryName(
+    List<Memory> memories,
+    List<City> cities,
+  ) {
+    final locationContext = _getLocationNameContext(memories, cities);
+    return locationContext?.biggestPlace.country;
+  }
+
+  static ({
+    List<EnteFile> files,
+    Map<City, List<EnteFile>> results,
+    City biggestPlace,
+  })? _getLocationNameContext(
+    List<Memory> memories,
+    List<City> cities,
+  ) {
     final files = Memory.filesFromMemories(memories);
     final results = getCityResults({
       "query": '',
@@ -1235,16 +1274,25 @@ class SmartMemoriesService {
     final List<City> sortedByResultCount = results.keys.toList()
       ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
     if (sortedByResultCount.isEmpty) return null;
-    final biggestPlace = sortedByResultCount.first;
-    if (results[biggestPlace]!.length > files.length / 2) {
-      return biggestPlace.city;
-    }
-    if (results.length > 2 &&
-        results.keys.map((city) => city.country).toSet().length == 1 &&
-        !base) {
-      return biggestPlace.country;
-    }
-    return null;
+
+    return (
+      files: files,
+      results: results,
+      biggestPlace: sortedByResultCount.first,
+    );
+  }
+
+  static bool _isExcludedCountryName(
+    String countryName,
+    Set<String> excludedCountryNames,
+  ) {
+    final normalizedCountry = _normalizePlaceName(countryName);
+    return normalizedCountry.isNotEmpty &&
+        excludedCountryNames.contains(normalizedCountry);
+  }
+
+  static String _normalizePlaceName(String placeName) {
+    return placeName.trim().toLowerCase();
   }
 
   static Future<List<Memory>> _bestSelectionPeople(

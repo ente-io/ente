@@ -160,6 +160,12 @@ class TripMemoriesCalculatorV2 {
       allFiles,
       isOfflineMode: isOfflineMode,
     );
+    final baseCountriesToExclude = _baseCountriesToExcludeFromTripTitles(
+      baseLocations,
+      allFileIdsToFile,
+      cities,
+      seenTimes,
+    );
 
     // ── Phase 2: Trip detection ──
 
@@ -235,6 +241,7 @@ class TripMemoriesCalculatorV2 {
         baseLocations,
         validTrips,
         allFileIdsToFile,
+        baseCountriesToExclude,
         nowInMicroseconds,
         windowEnd,
         seenTimes: seenTimes,
@@ -255,6 +262,7 @@ class TripMemoriesCalculatorV2 {
       currentTime,
       nowInMicroseconds,
       shownTrips,
+      baseCountriesToExclude: baseCountriesToExclude,
       cachedTripMemories: cachedTripMemories,
       isOfflineMode: isOfflineMode,
       mlEnabled: mlEnabled,
@@ -859,6 +867,7 @@ class TripMemoriesCalculatorV2 {
     List<BaseLocation> baseLocations,
     List<TripMemory> validTrips,
     Map<int, EnteFile> allFileIdsToFile,
+    Set<String> baseCountriesToExclude,
     int nowInMicroseconds,
     int windowEnd, {
     required Map<int, int> seenTimes,
@@ -901,6 +910,7 @@ class TripMemoriesCalculatorV2 {
       final String? locationName = SmartMemoriesService._tryFindLocationName(
         trip.memories,
         cities,
+        excludedCountryNames: baseCountriesToExclude,
       );
       final photoSelection = await SmartMemoriesService._bestSelection(
         trip.memories,
@@ -933,6 +943,7 @@ class TripMemoriesCalculatorV2 {
     DateTime currentTime,
     int nowInMicroseconds,
     List<TripsShownLog> shownTrips, {
+    required Set<String> baseCountriesToExclude,
     required Iterable<ToShowMemory> cachedTripMemories,
     required bool isOfflineMode,
     required bool mlEnabled,
@@ -1041,6 +1052,7 @@ class TripMemoriesCalculatorV2 {
       final String? locationName = SmartMemoriesService._tryFindLocationName(
         trip.memories,
         cities,
+        excludedCountryNames: baseCountriesToExclude,
       );
       final photoSelection = await SmartMemoriesService._bestSelection(
         trip.memories,
@@ -1062,5 +1074,38 @@ class TripMemoriesCalculatorV2 {
       );
     }
     return (memoryResults, baseLocations);
+  }
+
+  static Set<String> _baseCountriesToExcludeFromTripTitles(
+    List<BaseLocation> baseLocations,
+    Map<int, EnteFile> allFileIdsToFile,
+    List<City> cities,
+    Map<int, int> seenTimes,
+  ) {
+    final excludedCountries = <String>{};
+    for (final baseLocation in baseLocations) {
+      final files = baseLocation.fileIDs
+          .map((fileID) => allFileIdsToFile[fileID])
+          .whereType<EnteFile>()
+          .toList();
+      if (files.isEmpty) {
+        continue;
+      }
+
+      final countryName = SmartMemoriesService._tryFindCountryName(
+        Memory.fromFiles(files, seenTimes),
+        cities,
+      );
+      if (countryName == null) {
+        continue;
+      }
+
+      final normalizedCountry =
+          SmartMemoriesService._normalizePlaceName(countryName);
+      if (normalizedCountry.isNotEmpty) {
+        excludedCountries.add(normalizedCountry);
+      }
+    }
+    return excludedCountries;
   }
 }
