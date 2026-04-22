@@ -424,7 +424,6 @@ class FileUtil {
         }
       }
 
-      _logger.info('Opening file from path: ${fileToOpen.path}');
       final result = await OpenFile.open(fileToOpen.path);
       if (result.type != ResultType.done) {
         throw Exception(result.message);
