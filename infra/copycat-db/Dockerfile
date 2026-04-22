@@ -1,7 +1,6 @@
 FROM ubuntu:latest
 
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
     curl \
     jq \
     postgresql-common \
@@ -9,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     zstd
 
-# Install Postgres client 15 (needed for restores, and for local testing)
+# Install Postgres client 15
 # https://www.postgresql.org/download/linux/ubuntu/
 RUN /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
 RUN apt-get update && apt-get install -y postgresql-client-15
