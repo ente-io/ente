@@ -480,7 +480,7 @@ class _NoMailAppsSheet extends StatelessWidget {
 }
 
 Future<void> _copyEmailAddress(BuildContext context, String toEmail) async {
-  await Clipboard.setData(ClipboardData(text: toEmail));
+  await Clipboard.setData(ClipboardData(text: "To: $toEmail"));
   if (context.mounted) {
     showShortToast(context, AppLocalizations.of(context).copied);
   }
