@@ -29,6 +29,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/memories/photo_selector.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/smart_memories_service.dart";
@@ -36,6 +37,7 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/cache_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -88,39 +90,9 @@ class MemoriesCacheService {
     });
 
     Bus.instance.on<FilesUpdatedEvent>().where((event) {
-      return event.type == EventType.deletedFromEverywhere;
+      return _shouldInvalidateForDeletedFiles(event.type);
     }).listen((event) async {
-      if (_cachedMemories == null) return;
-      if (isOfflineMode) {
-        final localIds = event.updatedFiles
-            .map((file) => file.localID)
-            .whereType<String>()
-            .where((id) => id.isNotEmpty)
-            .toSet();
-        if (localIds.isEmpty) return;
-        final localIdToIntId =
-            await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
-        _localIdToIntIdCache.addAll(localIdToIntId);
-        final localIntIds = localIdToIntId.values.toSet();
-        for (final memory in _cachedMemories!) {
-          memory.memories.removeWhere((mem) {
-            final localId = mem.file.localID;
-            if (localId == null || localId.isEmpty) return false;
-            final localIntId = _localIdToIntIdCache[localId];
-            return localIntId != null && localIntIds.contains(localIntId);
-          });
-        }
-      } else {
-        final generatedIDs = event.updatedFiles
-            .where((element) => element.generatedID != null)
-            .map((e) => e.generatedID!)
-            .toSet();
-        for (final memory in _cachedMemories!) {
-          memory.memories.removeWhere(
-            (m) => generatedIDs.contains(m.file.generatedID),
-          );
-        }
-      }
+      await _invalidateDeletedFiles(event.updatedFiles);
     });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -218,6 +190,18 @@ class MemoriesCacheService {
             .microsecondsSinceEpoch;
   }
 
+  bool _shouldInvalidateForDeletedFiles(EventType type) {
+    if (type == EventType.deletedFromEverywhere) {
+      return true;
+    }
+
+    if (isOfflineMode) {
+      return type == EventType.deletedFromDevice;
+    }
+
+    return type == EventType.deletedFromRemote;
+  }
+
   Future markMemoryAsSeen(Memory memory, bool lastInList) async {
     memory.markSeen();
     int? seenTimeKey;
@@ -285,6 +269,154 @@ class MemoriesCacheService {
   void queueUpdateCache() {
     _shouldUpdate = true;
     unawaited(_prefs.setBool(_shouldUpdateKey, true));
+  }
+
+  Future<void> _invalidateDeletedFiles(List<EnteFile> deletedFiles) async {
+    final deletedMemoryFileIds = await _deletedMemoryFileIds(deletedFiles);
+    if (deletedMemoryFileIds.isEmpty) {
+      return;
+    }
+
+    await _memoriesUpdateLock.synchronized(() async {
+      bool cacheChanged = false;
+
+      if (_cachedMemories != null) {
+        final filteredMemories = <SmartMemory>[];
+        for (final memory in _cachedMemories!) {
+          final memoryChanged = _removeDeletedFilesFromSmartMemory(
+            memory,
+            deletedMemoryFileIds,
+          );
+          if (memory.memories.isNotEmpty) {
+            filteredMemories.add(memory);
+          }
+          cacheChanged = cacheChanged || memoryChanged;
+        }
+        if (filteredMemories.length != _cachedMemories!.length) {
+          cacheChanged = true;
+        }
+        _cachedMemories = filteredMemories;
+      }
+
+      if (await _removeDeletedFilesFromDiskCache(deletedMemoryFileIds)) {
+        cacheChanged = true;
+      }
+
+      if (!cacheChanged) {
+        return;
+      }
+
+      queueUpdateCache();
+      Bus.instance.fire(MemoriesChangedEvent());
+    });
+  }
+
+  Future<Set<int>> _deletedMemoryFileIds(List<EnteFile> deletedFiles) async {
+    if (isOfflineMode) {
+      final localIds = deletedFiles
+          .map((file) => file.localID)
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toSet();
+      if (localIds.isEmpty) {
+        return {};
+      }
+      final localIdToIntId =
+          await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+      _localIdToIntIdCache.addAll(localIdToIntId);
+      return localIdToIntId.values.toSet();
+    }
+
+    return deletedFiles
+        .map(
+          (file) => PhotoSelector.memoryFileId(file, isOfflineMode: false),
+        )
+        .whereType<int>()
+        .toSet();
+  }
+
+  bool _removeDeletedFilesFromSmartMemory(
+    SmartMemory memory,
+    Set<int> deletedMemoryFileIds,
+  ) {
+    final originalLength = memory.memories.length;
+    memory.memories.removeWhere((mem) {
+      if (isOfflineMode) {
+        final localId = mem.file.localID;
+        if (localId == null || localId.isEmpty) {
+          return false;
+        }
+        final localIntId = _localIdToIntIdCache[localId];
+        return localIntId != null && deletedMemoryFileIds.contains(localIntId);
+      }
+
+      final uploadedFileId =
+          PhotoSelector.memoryFileIdFromMemory(mem, isOfflineMode: false);
+      return uploadedFileId != null &&
+          deletedMemoryFileIds.contains(uploadedFileId);
+    });
+    return memory.memories.length != originalLength;
+  }
+
+  Future<bool> _removeDeletedFilesFromDiskCache(
+    Set<int> deletedMemoryFileIds,
+  ) async {
+    final cache = await _readCacheFromDisk();
+    if (cache == null) {
+      return false;
+    }
+
+    bool cacheChanged = false;
+    final filteredToShowMemories = <ToShowMemory>[];
+    for (final memory in cache.toShowMemories) {
+      final memoryChanged = _removeDeletedFilesFromCacheMemory(
+        memory,
+        deletedMemoryFileIds,
+      );
+      if (_cacheMemoryHasFiles(memory)) {
+        filteredToShowMemories.add(memory);
+      }
+      cacheChanged = cacheChanged || memoryChanged;
+    }
+
+    if (filteredToShowMemories.length != cache.toShowMemories.length) {
+      cacheChanged = true;
+    }
+    if (!cacheChanged) {
+      return false;
+    }
+
+    cache.toShowMemories
+      ..clear()
+      ..addAll(filteredToShowMemories);
+    await writeToJsonFile<MemoriesCache>(
+      await _getCachePath(),
+      cache,
+      MemoriesCache.encodeToJsonString,
+    );
+    return true;
+  }
+
+  bool _removeDeletedFilesFromCacheMemory(
+    ToShowMemory memory,
+    Set<int> deletedMemoryFileIds,
+  ) {
+    if (isOfflineMode && memory.fileLocalIntIDs != null) {
+      final originalLength = memory.fileLocalIntIDs!.length;
+      memory.fileLocalIntIDs!.removeWhere(deletedMemoryFileIds.contains);
+      return memory.fileLocalIntIDs!.length != originalLength;
+    }
+
+    final originalLength = memory.fileUploadedIDs.length;
+    memory.fileUploadedIDs.removeWhere(deletedMemoryFileIds.contains);
+    return memory.fileUploadedIDs.length != originalLength;
+  }
+
+  bool _cacheMemoryHasFiles(ToShowMemory memory) {
+    if (isOfflineMode && memory.fileLocalIntIDs != null) {
+      return memory.fileLocalIntIDs!.isNotEmpty;
+    }
+    return memory.fileUploadedIDs.isNotEmpty;
   }
 
   bool _shouldDeferInitialOfflineCacheUpgrade() {
@@ -741,8 +873,7 @@ class MemoriesCacheService {
         if (tripInsertIdx < 0) {
           tripInsertIdx = nowEntries.indexWhere(
             (e) =>
-                e.type != MemoryType.onThisDay &&
-                e.type != MemoryType.people,
+                e.type != MemoryType.onThisDay && e.type != MemoryType.people,
           );
           if (tripInsertIdx < 0) {
             tripInsertIdx = nowEntries.length;
@@ -1119,6 +1250,24 @@ class MemoriesCacheService {
     if (!found) {
       _logger.warning(
         "Could not find memory with generatedFileID: $generatedFileID",
+      );
+      final file = await FilesDB.instance.getFile(generatedFileID);
+      if (file == null) {
+        _logger.warning(
+          "Could not find file with generatedFileID fallback: $generatedFileID",
+        );
+        return;
+      }
+      await _routeToPage(
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "memorywidget-fallback",
+          ),
+        ),
+        context: context,
+        forceCustomPageRoute: true,
       );
       return;
     }
