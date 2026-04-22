@@ -7,6 +7,15 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.3.36 (mobile) - Apr 2026
+
+- Memories improvements
+- View other family members
+- Better OCR selection
+- Fix dedupe cleanup progress percentage display
+- Fix app going blank on iOS after deleting all empty albums
+- Home gallery bug fixes
+
 ## v1.3.32 (mobile) - Apr 2026
 
 - Memory Lane
