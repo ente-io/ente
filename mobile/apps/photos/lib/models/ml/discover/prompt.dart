@@ -1,4 +1,4 @@
-// https://discover.ente.io/v1.json
+// https://discover.ente.io/v3.json
 class Prompt {
   final String id;
   final int position;

@@ -87,6 +87,8 @@ String getLocalizedTitle(BuildContext context, String title) {
       return context.l10n.discover_identity;
     case 'Screenshots':
       return context.l10n.discover_screenshots;
+    case 'QR Codes':
+      return context.l10n.discover_qr_codes;
     case 'Receipts':
       return context.l10n.discover_receipts;
     case 'Notes':
@@ -226,7 +228,7 @@ GenericSearchResult? toGenericSearchResult(
 
 class MagicCacheService {
   static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
-  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v2.json";
+  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v3.json";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
