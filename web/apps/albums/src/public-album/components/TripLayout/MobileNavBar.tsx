@@ -1,5 +1,4 @@
 import { LazyNotification } from "@/app/lazy/global-ui";
-import { useJoinAlbum } from "@/public-album/access/hooks/useJoinAlbum";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
 import { FeedIcon } from "@/public-album/social/components/FeedIcon";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
@@ -8,8 +7,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import type { PublicAlbumsCredentials } from "ente-base/http";
-import type { Collection } from "ente-media/collection";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -19,10 +16,6 @@ interface MobileNavBarProps {
     enableDownload?: boolean;
     onShowFeed?: () => void;
     collectionTitle?: string;
-    publicCollection?: Collection;
-    accessToken?: string;
-    collectionKey?: string;
-    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
 export const MobileNavBar: React.FC<MobileNavBarProps> = ({
@@ -31,20 +24,8 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     enableDownload,
     onShowFeed,
     collectionTitle,
-    publicCollection,
-    accessToken,
-    collectionKey,
-    credentials,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-
-    const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
-    const { handleJoinAlbum } = useJoinAlbum({
-        publicCollection,
-        accessToken,
-        collectionKey,
-        credentials,
-    });
 
     const handleShare = async () => {
         if (typeof window !== "undefined") {
@@ -113,15 +94,11 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
                     )}
 
                     <MobileSignUpButton
-                        onClick={
-                            enableJoin
-                                ? handleJoinAlbum
-                                : () => {
-                                      window.location.href = getEnteURL();
-                                  }
-                        }
+                        onClick={() => {
+                            window.location.href = getEnteURL();
+                        }}
                     >
-                        {enableJoin ? t("join_album") : t("get_ente_photos")}
+                        {t("get_ente_photos")}
                     </MobileSignUpButton>
                 </ButtonGroup>
             </MobileNavContainer>

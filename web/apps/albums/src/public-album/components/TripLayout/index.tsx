@@ -360,10 +360,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         enableDownload={enableDownload}
                         onShowFeed={enableComment ? showPublicFeed : undefined}
                         collectionTitle={collectionTitle}
-                        publicCollection={collection}
-                        accessToken={accessToken}
-                        collectionKey={collectionKey}
-                        credentials={credentials}
                     />
                 ) : (
                     <TopNavButtons
@@ -371,10 +367,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
                         onShowFeed={enableComment ? showPublicFeed : undefined}
-                        publicCollection={collection}
-                        accessToken={accessToken}
-                        collectionKey={collectionKey}
-                        credentials={credentials}
                     />
                 ))}
             {/* Mobile Layout */}

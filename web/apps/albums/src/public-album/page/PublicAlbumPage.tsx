@@ -57,10 +57,8 @@ import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
 } from "ente-base/components/loaders";
-import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "ente-base/components/Navbar";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -577,7 +575,6 @@ export default function PublicAlbumPage() {
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
     const joinEnabled = publicCollection?.publicURLs[0]?.enableJoin ?? false;
-    const addPhotosEnabled = collectEnabled;
     const handleDrop = useCallback((files: FileWithPath[]) => {
         setShouldRenderUpload(true);
         setDragAndDropFiles(files);
@@ -733,17 +730,10 @@ export default function PublicAlbumPage() {
                                 </EnteLogoLink>
                                 <Stack direction="row" spacing={2}>
                                     <SecondaryActionButton
-                                        onAddPhotos={onAddPhotos}
-                                        addPhotosDisabled={isUploadInProgress}
                                         enableJoin={joinEnabled}
                                         onJoinAlbum={handleJoinAlbum}
                                     />
-                                    <PrimaryActionButton
-                                        showJoinAsPrimary={
-                                            addPhotosEnabled && joinEnabled
-                                        }
-                                        onJoinAlbum={handleJoinAlbum}
-                                    />
+                                    <PrimaryActionButton />
                                 </Stack>
                             </SpacedRow>
                         )}
@@ -894,52 +884,7 @@ const GreenButton = styled(Button)(() => ({
 
 const navbarActionButtonSx = { borderRadius: "16px", paddingBlock: "11px" };
 
-type AddPhotosButtonProps = ButtonishProps & { disabled?: boolean };
-
-const AddPhotosButton: React.FC<AddPhotosButtonProps> = ({
-    onClick,
-    disabled,
-}) => {
-    const isSmallWidth = useIsSmallWidth();
-
-    return (
-        <FocusVisibleButton
-            color="secondary"
-            startIcon={
-                isSmallWidth ? undefined : (
-                    <HugeiconsIcon
-                        icon={ImageAdd02Icon}
-                        size={20}
-                        strokeWidth={1.8}
-                    />
-                )
-            }
-            sx={navbarActionButtonSx}
-            {...{ onClick, disabled }}
-        >
-            {t("add_photos")}
-        </FocusVisibleButton>
-    );
-};
-
-interface PrimaryActionButtonProps {
-    /** If true, shows "Join Album" as the primary action */
-    showJoinAsPrimary?: boolean;
-    onJoinAlbum?: () => void;
-}
-
-const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
-    showJoinAsPrimary,
-    onJoinAlbum,
-}) => {
-    if (showJoinAsPrimary) {
-        return (
-            <GreenButton color="accent" onClick={onJoinAlbum}>
-                {t("join_album")}
-            </GreenButton>
-        );
-    }
-
+const PrimaryActionButton: React.FC = () => {
     const handleGetEnte = () => {
         window.location.href = getEnteURL();
     };
@@ -952,27 +897,14 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 };
 
 interface SecondaryActionButtonProps {
-    onAddPhotos?: () => void;
-    addPhotosDisabled?: boolean;
     enableJoin?: boolean;
     onJoinAlbum?: () => void;
 }
 
 const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
-    onAddPhotos,
-    addPhotosDisabled,
     enableJoin,
     onJoinAlbum,
 }) => {
-    if (onAddPhotos) {
-        return (
-            <AddPhotosButton
-                onClick={onAddPhotos}
-                disabled={addPhotosDisabled}
-            />
-        );
-    }
-
     if (enableJoin) {
         return (
             <FocusVisibleButton
