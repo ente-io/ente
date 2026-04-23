@@ -101,14 +101,14 @@ const handlePOSTOrPUT = async (request: Request) => {
             response = await fetch(uploadURL, {
                 method: request.method,
                 body: request.body,
-                headers: forwardHeaders,
+                ...(forwardHeaders ? { headers: forwardHeaders } : {}),
             });
             break;
         case "/multipart-upload":
             response = await fetch(uploadURL, {
                 method: request.method,
                 body: request.body,
-                headers: forwardHeaders,
+                ...(forwardHeaders ? { headers: forwardHeaders } : {}),
             });
             if (response.ok) {
                 const etag = response.headers.get("etag");

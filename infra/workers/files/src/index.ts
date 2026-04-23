@@ -76,7 +76,7 @@ const handleGET = async (request: Request) => {
         "X-Client-Package": request.headers.get("X-Client-Package") ?? "",
         "X-Client-Version": request.headers.get("X-Client-Version") ?? "",
         "User-Agent": request.headers.get("User-Agent") ?? "",
-        "Range": request.headers.get("Range") ?? "",
+        Range: request.headers.get("Range") ?? "",
         "X-Forwarded-For": request.headers.get("CF-Connecting-IP") ?? "",
         "CF-IPCountry": request.headers.get("CF-IPCountry") ?? "",
     };
