@@ -6,6 +6,7 @@ import {
     type PublicFeedComment,
     type PublicFeedReaction,
 } from "@/public-album/social/api/public-reaction";
+import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -170,6 +171,10 @@ export interface PublicFeedSidebarProps extends ModalVisibilityProps {
      * Called when a feed item is clicked for navigation.
      */
     onItemClick?: (info: PublicFeedItemClickInfo) => void;
+    /**
+     * Called after the drawer finishes its close transition.
+     */
+    onExited?: () => void;
 }
 
 /** A user who performed an action in the feed. */
@@ -638,7 +643,14 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     credentials,
     collectionKey,
     onItemClick,
+    onExited,
 }) => {
+    const { clearBrowserBackState } = useBrowserBackClose({
+        open,
+        onClose,
+        stateKey: "__entePublicFeedSidebarBackState",
+    });
+
     const [thumbnailCache, setThumbnailCache] = useState<ThumbnailCache>(
         new Map(),
     );
@@ -675,12 +687,14 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
 
     // Build file type cache from files
     useEffect(() => {
+        if (!open) return;
+
         const cache = new Map<number, number>();
         for (const file of files) {
             cache.set(file.id, file.metadata.fileType);
         }
         setFileTypeCache(cache);
-    }, [files]);
+    }, [open, files]);
 
     // Load thumbnails for active feed items in parallel and show each one as
     // soon as it is ready instead of waiting for the entire batch to finish.
@@ -810,7 +824,12 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     );
 
     return (
-        <SidebarDrawer open={open} onClose={onClose} anchor="right">
+        <SidebarDrawer
+            open={open}
+            onClose={onClose}
+            anchor="right"
+            slotProps={{ transition: { onExited } }}
+        >
             <DrawerContentWrapper>
                 <Header>
                     <Typography
@@ -842,12 +861,13 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                                 onClick={
                                     onItemClick
                                         ? () => {
-                                              onItemClick(
-                                                  getFeedItemClickInfo(
-                                                      item,
-                                                      anonUserNames,
-                                                  ),
+                                              const info = getFeedItemClickInfo(
+                                                  item,
+                                                  anonUserNames,
                                               );
+                                              void clearBrowserBackState(
+                                                  "back",
+                                              ).then(() => onItemClick(info));
                                           }
                                         : undefined
                                 }
