@@ -79,7 +79,7 @@ const handleGET = async (request: Request) => {
     };
 
     let response = await fetch(
-        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`,
+        `https://api.ente.com/public-collection/files${pathname}${fileID}?${params.toString()}`,
         { headers },
     );
 
