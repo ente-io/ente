@@ -572,6 +572,13 @@ export default function PublicAlbumPage() {
             setUploadTypeSelectorView(true);
         };
     }, [collectEnabled]);
+    const emptyStateAction = useMemo(
+        () =>
+            onAddPhotos && !isUploadInProgress
+                ? { label: t("add_photos"), onClick: onAddPhotos }
+                : undefined,
+        [onAddPhotos, isUploadInProgress],
+    );
 
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
@@ -772,6 +779,7 @@ export default function PublicAlbumPage() {
                         selected={selected}
                         setSelected={setSelected}
                         activeCollectionID={publicAlbumAllFilesCollectionID}
+                        emptyStateAction={emptyStateAction}
                         onAddSaveGroup={onAddSaveGroup}
                         publicAlbumsCredentials={credentials.current}
                         collectionKey={collectionKey.current}
