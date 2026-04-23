@@ -17,11 +17,11 @@ pub fn encrypt_root_contact_key(
 }
 
 pub fn decrypt_root_contact_key(
-    wrapped_root_key: &WrappedRootContactKey,
+    wrapped_root_contact_key: &WrappedRootContactKey,
     master_key: &[u8],
 ) -> Result<Vec<u8>> {
-    let encrypted_key = crypto::decode_b64(&wrapped_root_key.encrypted_key)?;
-    let header = crypto::decode_b64(&wrapped_root_key.header)?;
+    let encrypted_key = crypto::decode_b64(&wrapped_root_contact_key.encrypted_key)?;
+    let header = crypto::decode_b64(&wrapped_root_contact_key.header)?;
     Ok(secretbox::decrypt(&encrypted_key, &header, master_key)?)
 }
 

@@ -4,14 +4,17 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/utils/local_settings.dart";
 
 class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});
@@ -26,6 +29,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   bool? isYearlyMemoriesEnabled = true;
   bool? isSmartMemoriesEnabled = false;
   bool? isOnThisDayMemoriesEnabled = false;
+  late bool _showText;
 
   late final bool isMLEnabled;
 
@@ -35,6 +39,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   void initState() {
     super.initState();
 
+    _showText = !localSettings.isWidgetTextHidden(WidgetHideTextFlag.memory);
     initVariables();
     checkIfAnyWidgetInstalled();
   }
@@ -97,10 +102,12 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
     final colorScheme = getEnteColorScheme(context);
 
     return Scaffold(
+      backgroundColor: colorScheme.backgroundColour,
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
+            backgroundColor: colorScheme.backgroundColour,
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: AppLocalizations.of(context).memories,
             ),
@@ -150,6 +157,27 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 18),
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).showTextOnWidget,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => _showText,
+                            onChanged: () async {
+                              final next = !_showText;
+                              setState(() => _showText = next);
+                              await localSettings.setWidgetTextHidden(
+                                WidgetHideTextFlag.memory,
+                                !next,
+                              );
+                              await HomeWidgetService.instance.updateWidget(
+                                androidClass:
+                                    MemoryHomeWidgetService.ANDROID_CLASS_NAME,
+                                iOSClass:
+                                    MemoryHomeWidgetService.IOS_CLASS_NAME,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title:

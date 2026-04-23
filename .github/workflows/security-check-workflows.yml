@@ -16,7 +16,7 @@ jobs:
       # This requires admin approval in repository settings
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 

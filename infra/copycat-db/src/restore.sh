@@ -1,21 +1,38 @@
 #!/bin/bash
 
 set -o errexit
+set -o pipefail
 set -o xtrace
 
 if test -z "$1"; then
     # Find the name of the latest backup.
     #
     # The backup file name contains the epoch, so we can just sort.
-    BACKUP_FILE=$(rclone lsf --include 'db-*.custom' --files-only $RCLONE_DESTINATION | sort | tail -1)
+    BACKUP_FILE=$(
+        rclone lsf --files-only $RCLONE_DESTINATION \
+            | awk '/^db-.*(\.custom|\.dumpdir\.tar\.zst)$/' \
+            | sort \
+            | tail -1
+    )
 else
     # If a CLI argument is provided, use that as the name of the backup file to
     # restore.
     BACKUP_FILE="$1"
 fi
 
+if test -z "$BACKUP_FILE"; then
+    echo "copycat-db: no backup found"
+    exit 1
+fi
+
 # Download it
 rclone copy --log-level INFO "${RCLONE_DESTINATION}${BACKUP_FILE}" .
+
+# Unpack directory-format backups so pg_restore can read BACKUP_FILE directly.
+if test "${BACKUP_FILE%.custom}" = "$BACKUP_FILE"; then
+    zstd -dc "$BACKUP_FILE" | tar -xf -
+    BACKUP_FILE="${BACKUP_FILE%.tar.zst}"
+fi
 
 # Restore from it
 #

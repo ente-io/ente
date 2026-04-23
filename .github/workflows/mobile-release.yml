@@ -24,10 +24,8 @@ jobs:
                 working-directory: mobile/apps/photos
 
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Free up disk space
               run: |

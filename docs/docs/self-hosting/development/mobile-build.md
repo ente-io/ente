@@ -22,7 +22,6 @@ As a short summary, you can install Flutter and build the Photos app this way:
 
 ```sh
 cd ente/mobile
-git submodule update --init --recursive
 flutter pub get
 # Android
 flutter run --dart-define=endpoint=http://localhost:8080 --flavor independent --debug -t lib/main.dart

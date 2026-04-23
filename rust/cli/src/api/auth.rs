@@ -1,40 +1,31 @@
-use crate::api::client::ApiClient;
-use crate::api::models::{
-    AuthResponse, CompleteSrpSetupRequest, CompleteSrpSetupResponse, CreateSrpSessionRequest,
-    CreateSrpSessionResponse, EnableTwoFactorRequest, GetSrpAttributesResponse, SendOtpRequest,
-    SessionValidityResponse, SetUserAttributesRequest, SetupSrpRequest, SetupSrpResponse,
-    SrpAttributes, TwoFactorSecret, VerifyEmailRequest, VerifySrpSessionRequest, VerifyTotpRequest,
+use crate::{
+    api::{ApiClient, models::*},
+    models::error::{Error, Result},
 };
-use crate::models::error::Result;
-use base64::{Engine, engine::general_purpose::STANDARD};
+use ente_accounts::{AccountsClient, AccountsClientConfig};
+use ente_core::crypto::SecretVec;
+use serde::{Serialize, de::DeserializeOwned};
 use uuid::Uuid;
 
-use ente_core::auth::{SrpAttributes as CoreSrpAttributes, SrpSession};
-use ente_core::crypto::SecretVec;
+fn convert<T, U>(value: T) -> Result<U>
+where
+    T: Serialize,
+    U: DeserializeOwned,
+{
+    serde_json::from_value(serde_json::to_value(value)?).map_err(Error::from)
+}
 
-const SRP_A_LEN: usize = 512; // 4096-bit group
-
-fn pad_left(data: &[u8], len: usize) -> Vec<u8> {
-    if data.len() >= len {
-        return data.to_vec();
+fn shared_client(api: &ApiClient, account_id: Option<&str>) -> Result<AccountsClient> {
+    let mut config = AccountsClientConfig::new(api.client_package())
+        .with_base_url(api.base_url().to_string())
+        .with_user_agent(format!("ente-rs/{}", env!("CARGO_PKG_VERSION")));
+    if let Some(token) = account_id.and_then(|id| api.get_token(id)) {
+        config = config.with_auth_token(token);
     }
-
-    let mut padded = vec![0u8; len - data.len()];
-    padded.extend_from_slice(data);
-    padded
+    AccountsClient::new(config).map_err(Error::from)
 }
 
-fn require_srp_m2(auth_response: &AuthResponse) -> Result<&str> {
-    auth_response
-        .srp_m2
-        .as_deref()
-        .filter(|srp_m2| !srp_m2.is_empty())
-        .ok_or_else(|| {
-            crate::models::error::Error::AuthenticationFailed("Missing server proof".to_string())
-        })
-}
-
-/// SRP authentication implementation for Ente API
+/// Compatibility wrapper over `ente_accounts::AccountsClient`.
 pub struct AuthClient<'a> {
     api: &'a ApiClient,
 }
@@ -44,275 +35,134 @@ impl<'a> AuthClient<'a> {
         Self { api }
     }
 
-    /// Get SRP attributes for a user by email
     pub async fn get_srp_attributes(&self, email: &str) -> Result<SrpAttributes> {
-        let url = format!("/users/srp/attributes?email={}", urlencoding::encode(email));
-        let response: GetSrpAttributesResponse = self.api.get(&url, None).await?;
-        Ok(response.attributes)
+        let client = shared_client(self.api, None)?;
+        convert(client.get_srp_attributes(email).await?)
     }
 
-    /// Create SRP session - first step of SRP authentication
     pub async fn create_srp_session(
         &self,
         srp_user_id: &Uuid,
         client_public: &[u8],
     ) -> Result<CreateSrpSessionResponse> {
-        let request = CreateSrpSessionRequest {
-            srp_user_id: srp_user_id.to_string(),
-            srp_a: STANDARD.encode(client_public),
-        };
-
-        self.api
-            .post("/users/srp/create-session", &request, None)
-            .await
+        let client = shared_client(self.api, None)?;
+        convert(
+            client
+                .create_srp_session(srp_user_id, client_public)
+                .await?,
+        )
     }
 
-    /// Verify SRP session - final step of SRP authentication
     pub async fn verify_srp_session(
         &self,
         srp_user_id: &Uuid,
         session_id: &Uuid,
         client_proof: &[u8],
     ) -> Result<AuthResponse> {
-        let request = VerifySrpSessionRequest {
-            srp_user_id: srp_user_id.to_string(),
-            session_id: session_id.to_string(),
-            srp_m1: STANDARD.encode(client_proof),
-        };
-
-        log::debug!(
-            "Sending verify-session request for session_id: {}",
-            request.session_id
-        );
-
-        self.api
-            .post("/users/srp/verify-session", &request, None)
-            .await
+        let client = shared_client(self.api, None)?;
+        convert(
+            client
+                .verify_srp_session(srp_user_id, session_id, client_proof)
+                .await?,
+        )
     }
 
-    /// Complete SRP authentication flow
     pub async fn login_with_srp(
         &self,
         email: &str,
         password: &str,
     ) -> Result<(AuthResponse, SecretVec)> {
-        // Step 1: Get SRP attributes
-        let srp_attrs = self.get_srp_attributes(email).await?;
-
-        let core_attrs = CoreSrpAttributes {
-            srp_user_id: srp_attrs.srp_user_id.to_string(),
-            srp_salt: srp_attrs.srp_salt.clone(),
-            mem_limit: srp_attrs.mem_limit as u32,
-            ops_limit: srp_attrs.ops_limit as u32,
-            kek_salt: srp_attrs.kek_salt.clone(),
-            is_email_mfa_enabled: srp_attrs.is_email_mfa_enabled,
-        };
-
-        // Step 2: Derive SRP credentials
-        let creds = ente_core::auth::derive_srp_credentials(password, &core_attrs)?;
-
-        // Step 3: Start SRP session
-        let srp_salt = STANDARD.decode(&srp_attrs.srp_salt)?;
-        let mut srp_session =
-            SrpSession::new(&core_attrs.srp_user_id, &srp_salt, &creds.login_key)?;
-        let a_pub = pad_left(&srp_session.public_a(), SRP_A_LEN);
-
-        // Step 4: Create SRP session
-        log::debug!("Creating SRP session...");
-        let session = self
-            .create_srp_session(&srp_attrs.srp_user_id, &a_pub)
-            .await?;
-        log::debug!("Session created successfully: {}", session.session_id);
-
-        // Add a small delay to avoid potential rate limiting
-        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-
-        // Step 5: Compute and send proof
-        let server_b = STANDARD.decode(&session.srp_b)?;
-        let proof = srp_session.compute_m1(&server_b)?;
-
-        let auth_response = self
-            .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, &proof)
-            .await?;
-
-        let srp_m2 = require_srp_m2(&auth_response)?;
-        let server_proof = STANDARD.decode(srp_m2)?;
-        srp_session.verify_m2(&server_proof).map_err(|_| {
-            crate::models::error::Error::AuthenticationFailed(
-                "Server proof verification failed".to_string(),
-            )
-        })?;
-
-        Ok((auth_response, creds.kek))
+        let client = shared_client(self.api, None)?;
+        let (response, kek) = client.login_with_srp(email, password).await?;
+        Ok((convert(response)?, kek))
     }
 
-    /// Send OTP for email verification
     pub async fn send_otp(&self, email: &str, purpose: &str) -> Result<()> {
-        let request = SendOtpRequest {
-            email: email.to_string(),
-            purpose: purpose.to_string(),
-        };
-
-        self.api.post_empty("/users/ott", &request, None).await
+        let client = shared_client(self.api, None)?;
+        client.send_otp(email, purpose).await.map_err(Error::from)
     }
 
-    /// Verify email with OTP
     pub async fn verify_email(
         &self,
         email: &str,
         otp: &str,
         source: Option<&str>,
     ) -> Result<AuthResponse> {
-        let request = VerifyEmailRequest {
-            email: email.to_string(),
-            ott: otp.to_string(),
-            source: source.map(str::to_string),
-        };
-
-        self.api.post("/users/verify-email", &request, None).await
+        let client = shared_client(self.api, None)?;
+        convert(client.verify_email(email, otp, source).await?)
     }
 
-    /// Upload key attributes for the authenticated user
     pub async fn set_user_key_attributes(
         &self,
         account_id: &str,
-        key_attributes: crate::api::models::KeyAttributes,
+        key_attributes: KeyAttributes,
     ) -> Result<()> {
-        let request = SetUserAttributesRequest { key_attributes };
-        self.api
-            .put_empty("/users/attributes", &request, Some(account_id))
+        let client = shared_client(self.api, Some(account_id))?;
+        client
+            .set_user_key_attributes(convert(key_attributes)?)
             .await
+            .map_err(Error::from)
     }
 
-    /// Start SRP setup for the authenticated user
     pub async fn setup_srp(
         &self,
         account_id: &str,
         request: &SetupSrpRequest,
     ) -> Result<SetupSrpResponse> {
-        self.api
-            .post("/users/srp/setup", request, Some(account_id))
-            .await
+        let client = shared_client(self.api, Some(account_id))?;
+        let request = ente_accounts::models::SetupSrpRequest {
+            srp_user_id: request.srp_user_id.clone(),
+            srp_salt: request.srp_salt.clone(),
+            srp_verifier: request.srp_verifier.clone(),
+            srp_a: request.srp_a.clone(),
+        };
+        convert(client.setup_srp(&request).await?)
     }
 
-    /// Complete SRP setup for the authenticated user
     pub async fn complete_srp_setup(
         &self,
         account_id: &str,
         setup_id: &Uuid,
         srp_m1: &str,
     ) -> Result<CompleteSrpSetupResponse> {
-        let request = CompleteSrpSetupRequest {
-            setup_id: setup_id.to_string(),
-            srp_m1: srp_m1.to_string(),
-        };
-        self.api
-            .post("/users/srp/complete", &request, Some(account_id))
-            .await
+        let client = shared_client(self.api, Some(account_id))?;
+        convert(client.complete_srp_setup(setup_id, srp_m1).await?)
     }
 
-    /// Verify TOTP for two-factor authentication
     pub async fn verify_totp(&self, session_id: &str, code: &str) -> Result<AuthResponse> {
-        let request = VerifyTotpRequest {
-            session_id: session_id.to_string(),
-            code: code.to_string(),
-        };
-
-        self.api
-            .post("/users/two-factor/verify", &request, None)
-            .await
+        let client = shared_client(self.api, None)?;
+        convert(client.verify_totp(session_id, code).await?)
     }
 
-    /// Check passkey verification status
     pub async fn check_passkey_status(&self, session_id: &str) -> Result<AuthResponse> {
-        let url = format!("/users/two-factor/passkeys/get-token?sessionID={session_id}");
-        self.api.get(&url, None).await
+        let client = shared_client(self.api, None)?;
+        convert(client.check_passkey_status(session_id).await?)
     }
 
-    /// Read the current user's key attributes if already configured
     pub async fn get_session_validity(&self, account_id: &str) -> Result<SessionValidityResponse> {
-        self.api
-            .get("/users/session-validity/v2", Some(account_id))
-            .await
+        let client = shared_client(self.api, Some(account_id))?;
+        convert(client.get_session_validity().await?)
     }
 
-    /// Start TOTP setup and receive the secret and QR code
     pub async fn setup_two_factor(&self, account_id: &str) -> Result<TwoFactorSecret> {
-        let request = serde_json::json!({});
-        self.api
-            .post("/users/two-factor/setup", &request, Some(account_id))
-            .await
+        let client = shared_client(self.api, Some(account_id))?;
+        convert(client.setup_two_factor().await?)
     }
 
-    /// Enable TOTP with the encrypted recovery secret
     pub async fn enable_two_factor(
         &self,
         account_id: &str,
         request: &EnableTwoFactorRequest,
     ) -> Result<()> {
-        self.api
-            .post_empty("/users/two-factor/enable", request, Some(account_id))
-            .await
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_derive_srp_credentials() {
-        ente_core::crypto::init().unwrap();
-
-        let password = "test_password";
-
-        let srp_attrs = CoreSrpAttributes {
-            srp_user_id: "test-user".to_string(),
-            srp_salt: STANDARD.encode([0u8; 16]),
-            mem_limit: 67108864, // Interactive
-            ops_limit: 2,
-            kek_salt: STANDARD.encode(b"test_salt_16byte"),
-            is_email_mfa_enabled: false,
+        let client = shared_client(self.api, Some(account_id))?;
+        let request = ente_accounts::models::EnableTwoFactorRequest {
+            code: request.code.clone(),
+            encrypted_two_factor_secret: request.encrypted_two_factor_secret.clone(),
+            two_factor_secret_decryption_nonce: request.two_factor_secret_decryption_nonce.clone(),
         };
-
-        let creds = ente_core::auth::derive_srp_credentials(password, &srp_attrs).unwrap();
-        let srp_salt = STANDARD.decode(&srp_attrs.srp_salt).unwrap();
-        let session = SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &creds.login_key).unwrap();
-
-        assert_eq!(creds.kek.len(), 32);
-        assert_eq!(creds.login_key.len(), 16);
-        assert!(!session.public_a().is_empty());
-    }
-
-    fn sample_auth_response(srp_m2: Option<&str>) -> AuthResponse {
-        AuthResponse {
-            id: 1,
-            key_attributes: None,
-            encrypted_token: None,
-            token: None,
-            two_factor_session_id: None,
-            two_factor_session_id_v2: None,
-            passkey_session_id: None,
-            srp_m2: srp_m2.map(str::to_string),
-            accounts_url: None,
-        }
-    }
-
-    #[test]
-    fn test_require_srp_m2_rejects_missing_server_proof() {
-        let err = require_srp_m2(&sample_auth_response(None)).unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "Authentication failed: Missing server proof"
-        );
-    }
-
-    #[test]
-    fn test_require_srp_m2_rejects_empty_server_proof() {
-        let err = require_srp_m2(&sample_auth_response(Some(""))).unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "Authentication failed: Missing server proof"
-        );
+        client
+            .enable_two_factor(&request)
+            .await
+            .map_err(Error::from)
     }
 }

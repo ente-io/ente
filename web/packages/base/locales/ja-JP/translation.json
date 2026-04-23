@@ -242,7 +242,7 @@
     "leave": "離脱",
     "leave_family_plan_confirm": "本当にファミリープランを退会しますか？",
     "choose_plan": "プランを選択",
-    "manage_plan": "サブスクリプションの管理",
+    "manage_plan": "",
     "current_usage": "現在の使用量は <strong>{{usage}}</strong>",
     "two_months_free": "年次プランでは2ヶ月分無料",
     "free_plan_option": "無料プランを継続する",
@@ -834,9 +834,6 @@
     "confirm_pin": "",
     "confirm": "",
     "incorrect_pin_or_password": "",
-    "too_many_attempts": "",
-    "try_again_in": "",
-    "too_many_wrong_attempts": "",
     "app_lock_disable_confirm": "",
     "lock_type": "",
     "auto_lock": "",
@@ -848,7 +845,6 @@
     "app_lock_confirm_password": "",
     "app_lock_set_password": "",
     "app_lock_password_mismatch": "",
-    "app_lock_incorrect": "",
     "app_lock_enter_pin_to_unlock": "",
     "app_lock_pin_digit_label": "",
     "app_lock_please_try_again_in": "",
@@ -871,7 +867,5 @@
     "auto_lock_5_minutes": "",
     "auto_lock_30_minutes": "",
     "wrong_unlock_code_one": "",
-    "wrong_unlock_code_other": "",
-    "one_more_wrong_attempt_logout": "",
-    "next_wrong_attempt_wait": ""
+    "wrong_unlock_code_other": ""
 }

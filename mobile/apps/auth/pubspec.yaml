@@ -7,8 +7,8 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
-  adaptive_theme: 3.7.0
-  app_links: 6.4.0
+  adaptive_theme: 3.7.2
+  app_links: 6.4.1
   archive: 4.0.7
   auto_size_text: 3.0.0
   backup_exclusion:
@@ -21,13 +21,15 @@ dependencies:
   connectivity_plus: 6.1.4
   convert: 3.1.2
   device_info_plus: 11.5.0
-  dio: 5.8.0+1
+  dio: 5.9.0
   dots_indicator: 3.1.0
   dotted_border: 3.1.0
   dropdown_button2: 2.3.9
   email_validator: 3.0.0
   ente_accounts:
     path: ../../packages/accounts
+  ente_auth_qr:
+    path: plugins/qr
   ente_base:
     path: ../../packages/base
   ente_configuration:
@@ -46,8 +48,6 @@ dependencies:
     path: ../../packages/network
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
-  ente_qr:
-    path: plugins/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -59,7 +59,7 @@ dependencies:
   expansion_tile_card: 3.0.0
   ffi: 2.1.4
   figma_squircle: 0.6.3
-  file_picker: 10.3.2
+  file_picker: 10.3.10
   file_saver: 0.3.1
   fixnum: 1.1.1
   fk_user_agent: # no package updates on pub.dev
@@ -72,9 +72,6 @@ dependencies:
   flutter_context_menu: 0.2.4
   flutter_displaymode: 0.6.0
   flutter_email_sender: 7.0.0
-  # revert to pub.dev when merged
-  # https://github.com/pichillilorenzo/flutter_inappwebview/pull/2548
-  flutter_inappwebview: 6.1.5
   flutter_launcher_icons: 0.14.4
   flutter_local_authentication: # linux fprintd fix is not published on pub.dev
     git:
@@ -93,12 +90,12 @@ dependencies:
   flutter_secure_storage: 9.0.0
   flutter_speed_dial: 7.0.0
   flutter_staggered_grid_view: 0.7.0
-  flutter_svg: 2.2.0
-  fluttertoast: 8.2.12
+  flutter_svg: 2.2.3
+  fluttertoast: 8.2.14
   google_nav_bar: 5.0.7 #supported
   gradient_borders: 1.0.1
   http: 1.6.0
-  hugeicons: 1.1.1
+  hugeicons: 1.1.5
   image: 4.5.4
   intl: 0.20.2
   io: 1.0.5
@@ -115,11 +112,11 @@ dependencies:
       ref: 0cdfeed654d79636eff0c57110f3f6ad5801ba2f
   native_dio_adapter: 1.4.0
   otp: 3.1.4
-  package_info_plus: 8.3.0
+  package_info_plus: 8.3.1
   password_strength: 0.2.0
   path: 1.9.1
   path_provider: 2.1.5
-  pinput: 5.0.1
+  pinput: 5.0.2
   pointycastle: 3.9.1
   privacy_screen: 0.0.8
   protobuf: 4.1.0
@@ -128,13 +125,13 @@ dependencies:
       url: https://github.com/juliuscanute/qr_code_scanner
       ref: a2d31633d4744f72ada87cfa85d221358ab082af
   qr_flutter: 4.1.0
-  saf_stream: 0.12.3
-  saf_util: 0.11.0
+  saf_stream: 2.0.0
+  saf_util: 2.0.0
   scoped_dir_access:
     path: ../../packages/scoped_dir_access
   sentry: 8.14.2
   sentry_flutter: 8.14.2
-  share_plus: 11.0.0
+  share_plus: 11.1.0
   shared_preferences: 2.5.3
   sqflite: 2.4.2
   sqflite_common_ffi: 2.3.6
@@ -143,13 +140,13 @@ dependencies:
   steam_totp: 0.0.2
   step_progress_indicator: 1.0.2
   styled_text: 8.1.0
-  tray_manager: 0.5.0
+  tray_manager: 0.5.2
   tuple: 2.0.2
   url_launcher: 6.3.2
-  url_launcher_ios: 6.3.3
-  uuid: 4.5.1
+  url_launcher_ios: 6.3.4
+  uuid: 4.5.2
   win32: 5.13.0
-  window_manager: 0.5.0
+  window_manager: 0.5.1
   xdg_directories: 1.1.0
 
 dev_dependencies:
@@ -209,11 +206,6 @@ flutter_launcher_icons:
     image_path: "assets/generation-icons/icon-macos.png"
 
   windows:
-    generate: true
-    image_path: "assets/generation-icons/icon-windows-linux.png"
-    icon_size: 256
-
-  linux:
     generate: true
     image_path: "assets/generation-icons/icon-windows-linux.png"
     icon_size: 256

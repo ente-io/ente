@@ -28,6 +28,8 @@ extension CollectionViewTypeActions on CollectionViewType {
 
   bool get showAddToCollectionOption => !isIncomingShare;
 
+  bool get showOfflineOption => !isIncomingShare;
+
   bool get showMarkImportantOption => !isIncomingShare;
 }
 

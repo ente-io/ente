@@ -115,6 +115,11 @@ export interface LikesSidebarProps extends ModalVisibilityProps {
      */
     file?: EnteFile;
     /**
+     * True while the parent is fetching the initial social payload for the
+     * current file.
+     */
+    isSocialDataLoading?: boolean;
+    /**
      * The currently active collection ID (when viewing from within a collection).
      */
     activeCollectionID?: number;
@@ -143,6 +148,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     open,
     onClose,
     file,
+    isSocialDataLoading = false,
     activeCollectionID,
     currentUserID,
     prefetchedReactions,
@@ -151,6 +157,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
 }) => {
     const [loading, setLoading] = useState(false);
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
+    const showLoading = loading || isSocialDataLoading;
 
     // Reactions grouped by collection: collectionID -> reactions
     const [reactionsByCollection, setReactionsByCollection] = useState<
@@ -433,7 +440,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                 ...theme.applyStyles("dark", { color: "#fff" }),
                             })}
                         >
-                            {loading
+                            {showLoading
                                 ? t("loading")
                                 : t("like_count", { count: likers.length })}
                         </Typography>
@@ -541,7 +548,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                 ...theme.applyStyles("dark", { color: "#fff" }),
                             })}
                         >
-                            {loading
+                            {showLoading
                                 ? t("loading")
                                 : t("like_count", { count: likers.length })}
                         </Typography>
@@ -552,9 +559,9 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                 </Header>
 
                 <LikersContainer>
-                    {loading ? (
+                    {showLoading ? (
                         <LoadingContainer>
-                            <CircularProgress size={32} />
+                            <CircularProgress size={24} />
                         </LoadingContainer>
                     ) : likers.length === 0 ? (
                         <EmptyMessage>{t("no_likes_yet")}</EmptyMessage>

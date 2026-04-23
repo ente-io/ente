@@ -7,11 +7,28 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v1.3.32 (mobile) - Apr 2026
+
+- Memory Lane
+- Share any memory or Memory Lane as a link
+- Long press to detect QR codes in photos
+- Long press to select text in photos
+- Bug fixes and performance improvements
+
 ## v1.7.22 (desktop) - Mar 2026
 
 - App lock
 - Better people list experience (bigger view with search)
 - Various bug fixes (map view tiles, etc)
+
+## v1.3.28 (mobile) - Mar 2026
+
+- Fix app getting stuck on splash screen
+- Bug fixes and performance improvements
+
+## v1.3.24 (mobile) - Mar 2026
+
+- Fix app getting stuck on splash screen
 
 ## v1.3.22 (mobile) - Mar 2026
 

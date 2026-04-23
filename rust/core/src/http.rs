@@ -1,5 +1,7 @@
 //! HTTP client for communicating with the Ente API.
 
+use std::error::Error as StdError;
+use std::fmt::Write as _;
 use std::sync::RwLock;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
@@ -27,6 +29,8 @@ pub enum Error {
     /// Server returned an HTTP error status.
     #[error("HTTP {status}: {message}")]
     Http {
+        /// Optional structured server error code.
+        code: Option<String>,
         /// Error message or response body.
         message: String,
         /// HTTP status code.
@@ -42,22 +46,173 @@ pub enum Error {
     InvalidUrl(String),
 }
 
+impl Error {
+    /// Return the HTTP status code if this is an HTTP error.
+    pub fn status_code(&self) -> Option<u16> {
+        match self {
+            Error::Http { status, .. } => Some(*status),
+            _ => None,
+        }
+    }
+
+    /// Return the structured server error code when available.
+    pub fn api_code(&self) -> Option<&str> {
+        match self {
+            Error::Http { code, .. } => code.as_deref(),
+            _ => None,
+        }
+    }
+
+    /// Return the server message when available.
+    pub fn api_message(&self) -> Option<&str> {
+        match self {
+            Error::Http { message, .. } => Some(message.as_str()),
+            _ => None,
+        }
+    }
+
+    fn with_request_context(self, request_context: &str) -> Self {
+        fn append_context(message: String, request_context: &str) -> String {
+            if message.contains("[request:") {
+                message
+            } else {
+                format!("{message} {request_context}")
+            }
+        }
+
+        match self {
+            Error::Network(message) => Error::Network(append_context(message, request_context)),
+            Error::Http {
+                status,
+                code,
+                message,
+            } => Error::Http {
+                status,
+                code,
+                message: append_context(message, request_context),
+            },
+            Error::Parse(message) => Error::Parse(append_context(message, request_context)),
+            Error::InvalidUrl(message) => {
+                Error::InvalidUrl(append_context(message, request_context))
+            }
+        }
+    }
+}
+
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
+        let message = format_reqwest_error(&e);
         if let Some(status) = e.status() {
             Error::Http {
                 status: status.as_u16(),
-                message: e.to_string(),
+                code: None,
+                message,
             }
         } else {
-            Error::Network(e.to_string())
+            Error::Network(message)
         }
     }
+}
+
+#[derive(Deserialize)]
+struct ApiErrorBody {
+    code: Option<String>,
+    message: Option<String>,
+}
+
+fn parse_api_error_body(body: &str) -> (Option<String>, String) {
+    if let Ok(error_body) = serde_json::from_str::<ApiErrorBody>(body) {
+        let message = error_body
+            .message
+            .clone()
+            .or_else(|| error_body.code.clone())
+            .unwrap_or_else(|| body.to_string());
+        return (error_body.code, message);
+    }
+
+    (None, body.to_string())
 }
 
 impl From<serde_json::Error> for Error {
     fn from(e: serde_json::Error) -> Self {
         Error::Parse(e.to_string())
+    }
+}
+
+fn format_reqwest_error(error: &reqwest::Error) -> String {
+    let mut message = error.to_string();
+
+    let mut kinds = Vec::new();
+    if error.is_timeout() {
+        kinds.push("timeout");
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if error.is_connect() {
+        kinds.push("connect");
+    }
+    if error.is_request() {
+        kinds.push("request");
+    }
+    if error.is_body() {
+        kinds.push("body");
+    }
+    if error.is_decode() {
+        kinds.push("decode");
+    }
+    if error.is_redirect() {
+        kinds.push("redirect");
+    }
+    if !kinds.is_empty() {
+        let _ = write!(message, " [kind: {}]", kinds.join(","));
+    }
+
+    let mut source_chain = Vec::new();
+    let mut source = StdError::source(error);
+    while let Some(cause) = source {
+        source_chain.push(cause.to_string());
+        source = cause.source();
+    }
+    if !source_chain.is_empty() {
+        let _ = write!(message, " [caused by: {}]", source_chain.join(" -> "));
+    }
+
+    message
+}
+
+fn request_context(method: &str, url: &str) -> String {
+    format!("[request: {method} {}]", request_target(url))
+}
+
+fn request_context_with_query(method: &str, url: &str, query: &[(&str, String)]) -> String {
+    if query.is_empty() {
+        return request_context(method, url);
+    }
+
+    let Ok(mut parsed_url) = Url::parse(url) else {
+        return request_context(method, url);
+    };
+
+    {
+        let mut query_pairs = parsed_url.query_pairs_mut();
+        for (key, value) in query {
+            query_pairs.append_pair(key, value);
+        }
+    }
+
+    format!(
+        "[request: {method} {}]",
+        request_target(parsed_url.as_ref())
+    )
+}
+
+fn request_target(url: &str) -> String {
+    let Ok(parsed_url) = Url::parse(url) else {
+        return url.to_string();
+    };
+
+    match parsed_url.query() {
+        Some(query) => format!("{}?{query}", parsed_url.path()),
+        None => parsed_url.path().to_string(),
     }
 }
 
@@ -193,13 +348,18 @@ impl HttpClient {
     /// after basic validation, so attacker-controlled paths must not be passed.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context("GET", &url);
         let response = self
             .client
             .get(&url)
             .headers(self.build_headers()?)
             .send()
-            .await?;
-        parse_text_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_text_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// GET request returning JSON.
@@ -209,14 +369,19 @@ impl HttpClient {
         query: &[(&str, String)],
     ) -> Result<T, Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context_with_query("GET", &url, query);
         let response = self
             .client
             .get(&url)
             .headers(self.build_headers()?)
             .query(query)
             .send()
-            .await?;
-        parse_json_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_json_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// GET request returning `None` for 404.
@@ -226,17 +391,23 @@ impl HttpClient {
         query: &[(&str, String)],
     ) -> Result<Option<T>, Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context_with_query("GET", &url, query);
         let response = self
             .client
             .get(&url)
             .headers(self.build_headers()?)
             .query(query)
             .send()
-            .await?;
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
         if response.status().as_u16() == 404 {
             return Ok(None);
         }
-        parse_json_response(response).await.map(Some)
+        parse_json_response(response)
+            .await
+            .map(Some)
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// POST JSON request.
@@ -246,14 +417,19 @@ impl HttpClient {
         body: &B,
     ) -> Result<T, Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context("POST", &url);
         let response = self
             .client
             .post(&url)
             .headers(self.build_headers()?)
             .json(body)
             .send()
-            .await?;
-        parse_json_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_json_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// POST JSON request expecting an empty response body.
@@ -263,14 +439,19 @@ impl HttpClient {
         body: &B,
     ) -> Result<(), Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context("POST", &url);
         let response = self
             .client
             .post(&url)
             .headers(self.build_headers()?)
             .json(body)
             .send()
-            .await?;
-        parse_empty_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_empty_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// PUT JSON request.
@@ -280,14 +461,19 @@ impl HttpClient {
         body: &B,
     ) -> Result<T, Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context("PUT", &url);
         let response = self
             .client
             .put(&url)
             .headers(self.build_headers()?)
             .json(body)
             .send()
-            .await?;
-        parse_json_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_json_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// PUT JSON request expecting an empty response body.
@@ -297,27 +483,37 @@ impl HttpClient {
         body: &B,
     ) -> Result<(), Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context("PUT", &url);
         let response = self
             .client
             .put(&url)
             .headers(self.build_headers()?)
             .json(body)
             .send()
-            .await?;
-        parse_empty_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_empty_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// DELETE request expecting an empty response body.
     pub async fn delete_empty(&self, path: &str, query: &[(&str, String)]) -> Result<(), Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context_with_query("DELETE", &url, query);
         let response = self
             .client
             .delete(&url)
             .headers(self.build_headers()?)
             .query(query)
             .send()
-            .await?;
-        parse_empty_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_empty_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// DELETE request returning JSON.
@@ -327,14 +523,19 @@ impl HttpClient {
         query: &[(&str, String)],
     ) -> Result<T, Error> {
         let url = self.request_url(path)?;
+        let request_context = request_context_with_query("DELETE", &url, query);
         let response = self
             .client
             .delete(&url)
             .headers(self.build_headers()?)
             .query(query)
             .send()
-            .await?;
-        parse_json_response(response).await
+            .await
+            .map_err(Error::from)
+            .map_err(|error| error.with_request_context(&request_context))?;
+        parse_json_response(response)
+            .await
+            .map_err(|error| error.with_request_context(&request_context))
     }
 
     /// Download bytes from a URL, following redirects safely.
@@ -481,6 +682,7 @@ impl HttpClient {
 
     fn build_public_headers(&self) -> Result<HeaderMap, Error> {
         let mut headers = HeaderMap::new();
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(user_agent) = &self.user_agent {
             let value =
                 HeaderValue::from_str(user_agent).map_err(|e| Error::Parse(e.to_string()))?;
@@ -599,11 +801,16 @@ fn resolve_redirect(current_url: &Url, location: &HeaderValue) -> Result<Url, Er
 async fn parse_text_response(response: Response) -> Result<String, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     response.text().await.map_err(Into::into)
 }
@@ -616,11 +823,16 @@ async fn parse_json_response<T: DeserializeOwned>(response: Response) -> Result<
 async fn parse_empty_response(response: Response) -> Result<(), Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     Ok(())
 }
@@ -628,11 +840,16 @@ async fn parse_empty_response(response: Response) -> Result<(), Error> {
 async fn parse_bytes_response(response: Response) -> Result<Vec<u8>, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     response
         .bytes()
@@ -677,6 +894,21 @@ mod tests {
         let bad_json = "not json";
         let err: Result<PingResponse, Error> = serde_json::from_str(bad_json).map_err(|e| e.into());
         assert!(matches!(err, Err(Error::Parse(_))))
+    }
+
+    #[test]
+    fn test_parse_api_error_body_prefers_message_and_preserves_code() {
+        let (code, message) =
+            parse_api_error_body(r#"{"code":"TOO_MANY_WRONG_ATTEMPTS","message":"wait"}"#);
+        assert_eq!(code.as_deref(), Some("TOO_MANY_WRONG_ATTEMPTS"));
+        assert_eq!(message, "wait");
+    }
+
+    #[test]
+    fn test_parse_api_error_body_falls_back_to_code_when_message_missing() {
+        let (code, message) = parse_api_error_body(r#"{"code":"SESSION_EXPIRED"}"#);
+        assert_eq!(code.as_deref(), Some("SESSION_EXPIRED"));
+        assert_eq!(message, "SESSION_EXPIRED");
     }
 
     #[test]

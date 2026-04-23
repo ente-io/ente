@@ -107,10 +107,10 @@
          </FileRef>
       </Group>
       <Group
-         location = "group:ensu"
-         name = "ensu">
+         location = "group:Ensu"
+         name = "Ensu">
          <FileRef
-            location = "group:ensu.xcodeproj">
+            location = "group:Ensu.xcodeproj">
          </FileRef>
       </Group>
    </Group>

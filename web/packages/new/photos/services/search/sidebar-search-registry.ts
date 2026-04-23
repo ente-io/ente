@@ -54,15 +54,9 @@ const sidebarActions = (): SidebarAction[] => {
     return [
         {
             id: "account.subscription",
-            label: t("subscription"),
-            path: [accountCategory, t("subscription")],
-            keywords: [
-                "subscription",
-                "plan",
-                "upgrade",
-                "billing",
-                "pricings",
-            ],
+            label: t("manage_plan"),
+            path: [accountCategory, t("manage_plan")],
+            keywords: ["subscription", "plan", "upgrade", "billing", "pricing"],
         },
         {
             id: "shortcuts.uncategorized",
@@ -205,6 +199,13 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("theme"),
             path: [preferencesCategory, t("theme")],
             keywords: ["appearance", "dark mode", "light mode"],
+        },
+        {
+            id: "preferences.appLock",
+            label: t("app_lock"),
+            path: [preferencesCategory, t("app_lock")],
+            keywords: ["lock", "pin", "password", "biometric", "privacy"],
+            available: () => isDesktop,
         },
         {
             id: "preferences.customDomains",
@@ -380,6 +381,7 @@ export const performSidebarAction = async (
             ctx.onLogout();
             return Promise.resolve();
 
+        case "account.subscription":
         case "account.recoveryKey":
         case "account.twoFactor":
         case "account.twoFactor.reconfigure":
@@ -391,13 +393,10 @@ export const performSidebarAction = async (
             ctx.setPendingAccountAction(actionID);
             ctx.showAccount();
             return Promise.resolve();
-        case "account.subscription":
-            ctx.onClose();
-            ctx.onShowPlanSelector();
-            return Promise.resolve();
 
         case "preferences.language":
         case "preferences.theme":
+        case "preferences.appLock":
         case "preferences.customDomains":
         case "preferences.map":
         case "preferences.advanced":

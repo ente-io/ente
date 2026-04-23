@@ -1,6 +1,7 @@
 import "dart:io";
 
 import 'package:flutter/foundation.dart';
+import 'package:home_widget/home_widget.dart' as hw;
 import 'package:photos/app_mode.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
@@ -29,12 +30,20 @@ enum PeopleSortKey {
   lastUpdated,
 }
 
+/// Bit positions for per-widget-type "hide text" flags stored as a single
+/// integer. The same integer is mirrored to the home_widget plugin's data
+/// store so the native (Android/iOS) widget providers can read it directly.
+/// IMPORTANT: Never reorder or remove values. Only append new values at the end.
+enum WidgetHideTextFlag { memory, album, people }
+
 /// Bit positions for offline-related boolean flags stored as a single integer.
 /// IMPORTANT: Never reorder or remove values. Only append new values at the end.
 enum OfflineFlag {
   mlConsent,
   mapEnabled,
-  getStartedBannerDismissed,
+  // Reserved: previously getStartedBannerDismissed. Kept to preserve bit
+  // positions of subsequent flags in the stored bitmap.
+  reservedGetStartedBannerDismissed,
   facesBannerDismissed,
   nameFaceBannerDismissed,
   seenMLEnablingBanner,
@@ -93,8 +102,18 @@ class LocalSettings {
   static const _kAppMode = "ls.app_mode";
   static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
 
+  static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
+
+  /// Key used by the native (Android/iOS) widget providers to read the
+  /// mirrored copy of the widget hide-text bitmask from the home_widget
+  /// data store. Must stay in sync with the native code.
+  static const _kWidgetHideTextFlagsNativeKey = "widgetHideTitleFlags";
+
   static const _kOfflineFlags = "ls.offline_flags";
   static const _kOfflineMapEnabled = "ls.offline_map_enabled";
+  static const _kOfflineGetStartedBannerDismissedAt =
+      "ls.offline_get_started_banner_dismissed_at";
+  static const _kOfflineGetStartedBannerDismissDuration = Duration(days: 7);
 
   final SharedPreferences _prefs;
 
@@ -115,6 +134,28 @@ class LocalSettings {
       bitmap &= ~(1 << flag.index);
     }
     return _prefs.setInt(_kOfflineFlags, bitmap);
+  }
+
+  bool isWidgetTextHidden(WidgetHideTextFlag flag) {
+    final bitmap = _prefs.getInt(_kWidgetHideTextFlags) ?? 0;
+    return (bitmap & (1 << flag.index)) != 0;
+  }
+
+  Future<void> setWidgetTextHidden(WidgetHideTextFlag flag, bool value) async {
+    var bitmap = _prefs.getInt(_kWidgetHideTextFlags) ?? 0;
+    if (value) {
+      bitmap |= (1 << flag.index);
+    } else {
+      bitmap &= ~(1 << flag.index);
+    }
+    await _prefs.setInt(_kWidgetHideTextFlags, bitmap);
+    // Mirror into the home_widget data store so the native Android/iOS
+    // widget providers can read the flag directly from their sandboxed
+    // storage (widget SharedPreferences file / app-group UserDefaults).
+    await hw.HomeWidget.saveWidgetData<int>(
+      _kWidgetHideTextFlagsNativeKey,
+      bitmap,
+    );
   }
 
   AlbumSortKey albumSortKey() {
@@ -524,11 +565,24 @@ class LocalSettings {
     await _prefs.setBool(_kShowOfflineModeOption, value);
   }
 
-  bool get isOfflineGetStartedBannerDismissed =>
-      _getFlag(OfflineFlag.getStartedBannerDismissed);
+  bool get isOfflineGetStartedBannerDismissed {
+    final dismissedAtMs =
+        _prefs.getInt(_kOfflineGetStartedBannerDismissedAt) ?? 0;
+    if (dismissedAtMs == 0) return false;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - dismissedAtMs;
+    return elapsed >= 0 &&
+        elapsed < _kOfflineGetStartedBannerDismissDuration.inMilliseconds;
+  }
 
-  Future<void> setOfflineGetStartedBannerDismissed(bool value) =>
-      _setFlag(OfflineFlag.getStartedBannerDismissed, value);
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) {
+    if (value) {
+      return _prefs.setInt(
+        _kOfflineGetStartedBannerDismissedAt,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    }
+    return _prefs.remove(_kOfflineGetStartedBannerDismissedAt);
+  }
 
   bool get isMLProgressBannerDismissed =>
       _getFlag(OfflineFlag.mlProgressBannerDismissed);

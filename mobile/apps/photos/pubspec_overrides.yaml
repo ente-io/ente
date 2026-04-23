@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils
+# melos_managed_dependency_overrides: ente_cast,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust,ente_pure_utils,backup_exclusion,ente_contacts,ente_qr
 dependency_overrides:
   cronet_http: 1.6.0
   ente_cast:
@@ -13,7 +13,7 @@ dependency_overrides:
   flutter_sodium:
     git:
       url: https://github.com/ente-io/flutter_sodium
-      ref: 1eb375e639dc86df69b544642b177a710ae43db0
+      ref: a05d5b1bfdce64a387f8f5970160b22ce7b88282
   intl: 0.20.2
   js: 0.6.7
   media_kit:
@@ -51,3 +51,9 @@ dependency_overrides:
     path: ../../packages/rust
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
+  backup_exclusion:
+    path: ../../packages/backup_exclusion
+  ente_contacts:
+    path: ../../packages/contacts
+  ente_qr:
+    path: plugins/ente_qr

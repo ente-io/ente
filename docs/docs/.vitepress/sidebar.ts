@@ -201,6 +201,10 @@ export const sidebar = [
                                 link: "/photos/features/search-and-discovery/face-recognition",
                             },
                             {
+                                text: "Memory Lane",
+                                link: "/photos/features/search-and-discovery/memory-lane",
+                            },
+                            {
                                 text: "Map and location",
                                 link: "/photos/features/search-and-discovery/map-and-location",
                             },
@@ -229,6 +233,10 @@ export const sidebar = [
                             {
                                 text: "Detect Text (OCR)",
                                 link: "/photos/features/utilities/detect-text",
+                            },
+                            {
+                                text: "QR codes in photos",
+                                link: "/photos/features/utilities/qr-codes-in-photos",
                             },
                             {
                                 text: "Home Widgets",

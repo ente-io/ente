@@ -24,6 +24,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/face_crop_util.dart";
 import "package:photos/utils/share_util.dart";
 
 class MemoryLanePage extends StatefulWidget {
@@ -362,6 +363,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     EnteFile? effectiveFile = file;
     effectiveFile ??= await FilesDB.instance.getAnyUploadedFile(entry.fileId);
     MemoryImage? image;
+    double? cropAspectRatio;
     Uint8List? bytes;
     if (effectiveFile != null) {
       final List<Face>? faces;
@@ -374,6 +376,23 @@ class _MemoryLanePageState extends State<MemoryLanePage>
         (element) => element.faceID == entry.faceId,
       );
       if (face != null) {
+        final paddedFaceCropBox = computePaddedFaceCropBox(face.detection.box);
+        final int detectedImageWidth = face.fileInfo?.imageWidth ?? 0;
+        final int detectedImageHeight = face.fileInfo?.imageHeight ?? 0;
+        final int imageWidth =
+            detectedImageWidth > 0 ? detectedImageWidth : effectiveFile.width;
+        final int imageHeight = detectedImageHeight > 0
+            ? detectedImageHeight
+            : effectiveFile.height;
+        if (paddedFaceCropBox.width > 0 && paddedFaceCropBox.height > 0) {
+          if (imageWidth > 0 && imageHeight > 0) {
+            cropAspectRatio = (paddedFaceCropBox.width * imageWidth) /
+                (paddedFaceCropBox.height * imageHeight);
+          } else {
+            cropAspectRatio =
+                paddedFaceCropBox.width / paddedFaceCropBox.height;
+          }
+        }
         try {
           final cropMap = await getCachedFaceCrops(
             effectiveFile,
@@ -427,6 +446,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
       creationDate: creationDate,
       captionType: captionType,
       captionValue: captionValue,
+      cropAspectRatio: cropAspectRatio,
     );
     return timelineFrame;
   }
@@ -703,15 +723,18 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: ValueListenableBuilder<double>(
-                                          valueListenable:
-                                              _stackProgressNotifier,
-                                          builder: (context, stackProgress, _) {
-                                            return _buildFrameView(
-                                              context,
-                                              stackProgress,
-                                            );
-                                          },
+                                        child: RepaintBoundary(
+                                          child: ValueListenableBuilder<double>(
+                                            valueListenable:
+                                                _stackProgressNotifier,
+                                            builder:
+                                                (context, stackProgress, _) {
+                                              return _buildFrameView(
+                                                context,
+                                                stackProgress,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -805,6 +828,9 @@ class _MemoryLanePageState extends State<MemoryLanePage>
         heightFactor: _frameHeightFactor,
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final cardWidth = constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : constraints.biggest.width;
             final cardHeight = constraints.hasBoundedHeight
                 ? constraints.maxHeight
                 : constraints.biggest.height;
@@ -825,6 +851,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                       distance: 0,
                       isDarkMode: isDark,
                       colorScheme: colorScheme,
+                      cardWidth: cardWidth,
                       cardHeight: cardHeight,
                       blurEnabled: !_isScrubbing,
                     ),
@@ -837,6 +864,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                         distance: slice.distance,
                         isDarkMode: isDark,
                         colorScheme: colorScheme,
+                        cardWidth: cardWidth,
                         cardHeight: cardHeight,
                         blurEnabled: !_isScrubbing,
                       ),
@@ -1191,6 +1219,8 @@ class _TimelineFrame {
   final DateTime creationDate;
   final _CaptionType captionType;
   final int captionValue;
+  final double? cropAspectRatio;
+  final Map<int?, ImageProvider<Object>> _resizedImageCache = {};
 
   _TimelineFrame({
     required this.entry,
@@ -1198,7 +1228,25 @@ class _TimelineFrame {
     required this.creationDate,
     required this.captionType,
     required this.captionValue,
+    required this.cropAspectRatio,
   });
+
+  ImageProvider<Object>? resizedImage({
+    int? cacheWidth,
+  }) {
+    final baseImage = image;
+    if (baseImage == null) {
+      return null;
+    }
+    return _resizedImageCache.putIfAbsent(
+      cacheWidth,
+      () {
+        // Decode face crops with width only so BoxFit.cover can crop them
+        // naturally without forcing the crop to the card's aspect ratio.
+        return ResizeImage.resizeIfNeeded(cacheWidth, null, baseImage);
+      },
+    );
+  }
 }
 
 class _CardSlice {
@@ -1213,11 +1261,15 @@ class _CardSlice {
 
 class _MemoryLaneCard extends StatelessWidget {
   static const double _cardRadius = 28;
+  // Keep in sync with the maximum value returned by [_calculateScale].
+  static const double _maxCardScale = 1.02;
+  static const double _cacheDecodeSafetyMargin = 1.15;
 
   final _TimelineFrame frame;
   final double distance;
   final bool isDarkMode;
   final EnteColorScheme colorScheme;
+  final double cardWidth;
   final double cardHeight;
   final bool blurEnabled;
 
@@ -1226,6 +1278,7 @@ class _MemoryLaneCard extends StatelessWidget {
     required this.distance,
     required this.isDarkMode,
     required this.colorScheme,
+    required this.cardWidth,
     required this.cardHeight,
     required this.blurEnabled,
     super.key,
@@ -1236,9 +1289,15 @@ class _MemoryLaneCard extends StatelessWidget {
     final scale = _calculateScale(distance);
     final yOffset = _calculateYOffset(distance);
     final opacity = _calculateOpacity(distance);
-    final blurSigma = blurEnabled ? _calculateBlur(distance) : 0.0;
+    // Skip the expensive ImageFiltered blur for distant cards where the
+    // combination of low opacity and dark overlay already obscures detail.
+    final blurSigma =
+        blurEnabled && distance < 3.0 ? _calculateBlur(distance) : 0.0;
     final rotation = _calculateRotation(distance);
     final overlayOpacity = _calculateOverlayOpacity(distance);
+    final double dpr = MediaQuery.devicePixelRatioOf(context);
+    final int? imageCacheWidth =
+        _cacheDimensionFor(_coveringDecodeWidth(frame.cropAspectRatio), dpr);
 
     final cardShadow = _shadowForCard(distance);
     // Emphasize the active card by delaying the date reveal until the card is
@@ -1264,7 +1323,7 @@ class _MemoryLaneCard extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _buildImage(blurSigma),
+          _buildImage(blurSigma, imageCacheWidth),
           if (overlayOpacity > 0)
             Container(
               color:
@@ -1323,25 +1382,24 @@ class _MemoryLaneCard extends StatelessWidget {
       ),
     );
 
+    final transform = Matrix4.identity()
+      ..translate(0.0, yOffset)
+      ..rotateZ(rotation)
+      ..scale(scale, scale);
+
     return Positioned.fill(
       child: IgnorePointer(
         child: Opacity(
           opacity: opacity,
-          child: Transform.translate(
-            offset: Offset(0, yOffset),
-            child: Transform.rotate(
-              angle: rotation,
-              child: Transform.scale(
-                scale: scale,
-                alignment: Alignment.center,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(_cardRadius),
-                    boxShadow: cardShadow,
-                  ),
-                  child: cardContent,
-                ),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: transform,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_cardRadius),
+                boxShadow: cardShadow,
               ),
+              child: cardContent,
             ),
           ),
         ),
@@ -1349,10 +1407,13 @@ class _MemoryLaneCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(double blurSigma) {
-    final Widget base = frame.image != null
+  Widget _buildImage(double blurSigma, int? cacheWidth) {
+    final resizedImage = frame.resizedImage(
+      cacheWidth: cacheWidth,
+    );
+    final Widget base = resizedImage != null
         ? Image(
-            image: frame.image!,
+            image: resizedImage,
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -1371,6 +1432,29 @@ class _MemoryLaneCard extends StatelessWidget {
       ),
       child: base,
     );
+  }
+
+  double _coveringDecodeWidth(double? imageAspectRatio) {
+    if (imageAspectRatio == null ||
+        !imageAspectRatio.isFinite ||
+        imageAspectRatio <= 0) {
+      return cardWidth;
+    }
+    // BoxFit.cover needs enough decoded height for tall portrait cards.
+    return math.max(cardWidth, cardHeight * imageAspectRatio);
+  }
+
+  static int? _cacheDimensionFor(double logicalDimension, double dpr) {
+    if (!logicalDimension.isFinite ||
+        logicalDimension <= 0 ||
+        !dpr.isFinite ||
+        dpr <= 0) {
+      return null;
+    }
+    final int rawCacheDimension =
+        (logicalDimension * dpr * _maxCardScale * _cacheDecodeSafetyMargin)
+            .ceil();
+    return rawCacheDimension > 0 ? rawCacheDimension : null;
   }
 
   List<BoxShadow> _shadowForCard(double distance) {

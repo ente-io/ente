@@ -9,6 +9,7 @@
         "debounce": "^2.2.0",
         "ente-accounts": "*",
         "ente-base": "*",
+        "ente-contacts-web": "*",
         "ente-gallery": "*",
         "ente-media": "*",
         "ente-new": "*",

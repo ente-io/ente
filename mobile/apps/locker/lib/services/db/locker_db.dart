@@ -22,20 +22,27 @@ class LockerDB extends EnteBaseDatabase {
   Database? _database;
   int _collectionSyncTime = 0;
   final Map<int, int> _collectionSyncTimesCache = {};
+  final Set<int> _offlineMarkedFileIDsCache = {};
 
   static const String databaseName = 'locker.db';
   static const String _collectionsTable = 'collections';
   static const String _filesTable = 'files';
   static const String trashTable = 'trash_files';
   static const String _collectionFilesTable = 'collection_files';
+  static const String _offlineFilesTable = 'offline_marks';
   static const String _syncTimesTable = 'sync_times';
   static const int _collectionPayloadVersion = 1;
   static const int _filePayloadVersion = 1;
   static const int _trashPayloadVersion = 1;
+  static const int _databaseVersion = 2;
+
+  static final List<Future<void> Function(DatabaseExecutor)> _migrationScripts =
+      [
+    _createOfflineFilesTable,
+  ];
 
   Future<void> init() async {
     _database = await _initDatabase();
-    await _createTables(_db, 1);
     await _loadCaches();
   }
 
@@ -57,6 +64,19 @@ class LockerDB extends EnteBaseDatabase {
 
     final globalSyncTime = await getSyncTimeAsync();
     _collectionSyncTime = globalSyncTime;
+    await _populateOfflineMarkedFileIDsCache();
+  }
+
+  Future<void> _populateOfflineMarkedFileIDsCache() async {
+    final offlineMarkedRows = await _db.query(
+      _offlineFilesTable,
+      columns: ['uploaded_file_id'],
+    );
+    _offlineMarkedFileIDsCache
+      ..clear()
+      ..addAll(
+        offlineMarkedRows.map((row) => row['uploaded_file_id'] as int),
+      );
   }
 
   Future<Database> _initDatabase() async {
@@ -69,12 +89,25 @@ class LockerDB extends EnteBaseDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
-      onCreate: _createTables,
+      version: _databaseVersion,
+      onCreate: (db, _) => _createTables(db),
+      onUpgrade: _onUpgrade,
     );
   }
 
-  Future<void> _createTables(Database db, int version) async {
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion >= newVersion) {
+      return;
+    }
+
+    await db.transaction((txn) async {
+      for (var index = oldVersion - 1; index < newVersion - 1; index++) {
+        await _migrationScripts[index](txn);
+      }
+    });
+  }
+
+  Future<void> _createTables(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $_collectionsTable (
         id INTEGER PRIMARY KEY,
@@ -92,6 +125,7 @@ class LockerDB extends EnteBaseDatabase {
 
     await _createFilesTable(db);
     await _createTrashTable(db);
+    await _createOfflineFilesTable(db);
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $_collectionFilesTable (
@@ -141,6 +175,14 @@ class LockerDB extends EnteBaseDatabase {
         payload_encrypted_data TEXT NOT NULL,
         payload_decryption_header TEXT NOT NULL,
         payload_version INTEGER DEFAULT $_filePayloadVersion
+      )
+    ''');
+  }
+
+  static Future<void> _createOfflineFilesTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $_offlineFilesTable (
+        uploaded_file_id INTEGER PRIMARY KEY
       )
     ''');
   }
@@ -538,6 +580,83 @@ class LockerDB extends EnteBaseDatabase {
     await batch.commit();
   }
 
+  bool isFileMarkedOfflineById(int? uploadedFileID) {
+    return uploadedFileID != null &&
+        _offlineMarkedFileIDsCache.contains(uploadedFileID);
+  }
+
+  bool isFileMarkedOffline(EnteFile file) {
+    return isFileMarkedOfflineById(file.uploadedFileID);
+  }
+
+  Future<void> setFilesMarkedOffline(
+    Iterable<int> uploadedFileIDs,
+    bool isMarkedOffline,
+  ) async {
+    final ids = uploadedFileIDs.toSet();
+    if (ids.isEmpty) {
+      return;
+    }
+
+    final batch = _db.batch();
+    for (final uploadedFileID in ids) {
+      if (isMarkedOffline) {
+        batch.insert(
+          _offlineFilesTable,
+          {'uploaded_file_id': uploadedFileID},
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      } else {
+        batch.delete(
+          _offlineFilesTable,
+          where: 'uploaded_file_id = ?',
+          whereArgs: [uploadedFileID],
+        );
+      }
+    }
+    await batch.commit();
+    if (isMarkedOffline) {
+      _offlineMarkedFileIDsCache.addAll(ids);
+    } else {
+      _offlineMarkedFileIDsCache.removeAll(ids);
+    }
+  }
+
+  Future<bool> hasActiveFile(int uploadedFileID) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT 1
+      FROM $_collectionFilesTable cf
+      INNER JOIN $_collectionsTable c
+        ON c.id = cf.collection_id
+      WHERE c.is_deleted = 0
+        AND cf.uploaded_file_id = ?
+      LIMIT 1
+      ''',
+      [uploadedFileID],
+    );
+    return rows.isNotEmpty;
+  }
+
+  Future<List<int>> getStaleOfflineMarkedFileIDs() async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT om.uploaded_file_id
+      FROM $_offlineFilesTable om
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM $_collectionFilesTable cf
+        INNER JOIN $_collectionsTable c
+          ON c.id = cf.collection_id
+        WHERE cf.uploaded_file_id = om.uploaded_file_id
+          AND c.is_deleted = 0
+      )
+      ''',
+    );
+
+    return rows.map((row) => row['uploaded_file_id'] as int).toList();
+  }
+
   Map<String, dynamic> _collectionToMap(Collection collection) {
     final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
     final encryptedPayload = CryptoUtil.encryptSync(
@@ -852,8 +971,10 @@ class LockerDB extends EnteBaseDatabase {
     await _database?.delete(_filesTable);
     await _database?.delete(LockerDB.trashTable);
     await _database?.delete(_collectionFilesTable);
+    await _database?.delete(_offlineFilesTable);
     await _database?.delete(_syncTimesTable);
     _collectionSyncTimesCache.clear();
+    _offlineMarkedFileIDsCache.clear();
     _collectionSyncTime = 0;
   }
 }

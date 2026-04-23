@@ -54,6 +54,9 @@ fn make_api_error(method: &str, path: &str, status: StatusCode, body: String) ->
 
     Error::ApiError {
         status: status.as_u16(),
+        code: serde_json::from_str::<ApiError>(&body)
+            .ok()
+            .and_then(|e| e.code),
         message,
     }
 }
@@ -121,6 +124,16 @@ impl ApiClient {
     /// Set retry configuration
     pub fn set_retry_config(&mut self, config: RetryConfig) {
         self.retry_config = config;
+    }
+
+    /// Return the configured base URL.
+    pub fn base_url(&self) -> &str {
+        &self.base_url
+    }
+
+    /// Return the configured client package.
+    pub fn client_package(&self) -> &str {
+        &self.client_package
     }
 
     /// Build a request with common headers

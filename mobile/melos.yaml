@@ -8,12 +8,16 @@ packages:
   - packages/*
   - apps/photos/plugins/*
 
+command:
+  bootstrap:
+    enforceLockfile: true
+
 # Scripts that can be run with `melos run <script_name>`
 scripts:
   # The very first command you should run. It links all your local packages
-  # together and runs `flutter pub get` everywhere.
+  # together and runs `flutter pub get --enforce-lockfile` everywhere.
   bootstrap:
-    run: melos bootstrap
+    run: dart run melos bootstrap
     description: Bootstrap the workspace, linking local packages.
 
   # --- RUST CODEGEN COMMANDS ---
@@ -26,35 +30,35 @@ scripts:
 
       # Generate Rust bindings for packages/rust
       echo "Generating flutter_rust_bridge bindings for packages/rust..."
-      (cd packages/rust && flutter pub get && flutter_rust_bridge_codegen generate)
+      (cd packages/rust && flutter pub get --enforce-lockfile && flutter_rust_bridge_codegen generate)
 
       # Generate Rust bindings for apps/photos
       echo "Generating flutter_rust_bridge bindings for apps/photos..."
-      (cd apps/photos && flutter pub get && flutter_rust_bridge_codegen generate)
+      (cd apps/photos && flutter pub get --enforce-lockfile && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for all packages using flutter_rust_bridge.
 
   codegen:rust:packages:
     run: |
       cargo install flutter_rust_bridge_codegen 2>/dev/null || true
       echo "Generating flutter_rust_bridge bindings for packages/rust..."
-      (cd packages/rust && flutter pub get && flutter_rust_bridge_codegen generate)
+      (cd packages/rust && flutter pub get --enforce-lockfile && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for packages/rust only.
 
   codegen:rust:photos:
     run: |
       cargo install flutter_rust_bridge_codegen 2>/dev/null || true
       echo "Generating flutter_rust_bridge bindings for apps/photos..."
-      (cd apps/photos && flutter pub get && flutter_rust_bridge_codegen generate)
+      (cd apps/photos && flutter pub get --enforce-lockfile && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for apps/photos only.
 
   # --- GLOBAL COMMANDS (run on all apps & packages) ---
 
   get:all:
-    run: melos exec -- "flutter pub get"
-    description: Run "flutter pub get" in all projects.
+    run: dart run melos exec -- "flutter pub get --enforce-lockfile"
+    description: Run "flutter pub get --enforce-lockfile" in all projects.
 
   clean:all:
-    run: melos exec -- "flutter clean"
+    run: dart run melos exec -- "flutter clean"
     description: Run "flutter clean" in all projects.
 
   # --- APP-SPECIFIC CLEAN COMMANDS ---
@@ -63,49 +67,49 @@ scripts:
   # field in that app's `pubspec.yaml` file.
 
   clean:photos:
-    run: melos exec --scope="photos" -- "flutter clean"
+    run: dart run melos exec --scope="photos" -- "flutter clean"
     description: Clean the 'photos' app.
 
   clean:auth:
-    run: melos exec --scope="auth" -- "flutter clean"
+    run: dart run melos exec --scope="auth" -- "flutter clean"
     description: Clean the 'auth' app.
 
   clean:locker:
-    run: melos exec --scope="locker" -- "flutter clean"
+    run: dart run melos exec --scope="locker" -- "flutter clean"
     description: Clean the 'locker' app.
 
 
   run:photos:apk:
-    run: melos exec --scope="photos" -- "flutter run -t lib/main.dart --flavor independent"
+    run: dart run melos exec --scope="photos" -- "flutter run --flavor independent"
     description: Run the 'photos' app in independent mode.
 
   run:auth:apk:
-    run: melos exec --scope="auth" -- "flutter run -t lib/main.dart --flavor independent"
+    run: dart run melos exec --scope="auth" -- "flutter run --flavor independent"
     description: Run the 'auth' app in independent mode.
 
   run:locker:apk:
-    run: melos exec --scope="locker" -- "flutter run -t lib/main.dart --flavor independent"
+    run: dart run melos exec --scope="locker" -- "flutter run --flavor independent"
     description: Run the 'locker' app in independent mode.
 
  # --- APP-SPECIFIC BUILD COMMANDS ---
 
   build:photos:apk:
-    run: melos exec --scope="photos" -- "flutter build apk --release"
+    run: dart run melos exec --scope="photos" -- "flutter build apk --release"
     description: Build a release APK for the 'photos' app.
 
   build:auth:appbundle:
-    run: melos exec --scope="auth" -- "flutter build appbundle --release"
+    run: dart run melos exec --scope="auth" -- "flutter build appbundle --release"
     description: Build a release AppBundle for the 'auth' app.
 
   build:locker:ios:
-    run: melos exec --scope="locker" -- "flutter build ios --release"
+    run: dart run melos exec --scope="locker" -- "flutter build ios --release"
     description: Build a release iOS archive for the 'locker' app.
 
   # --- PLUGIN-SPECIFIC COMMANDS ---
   get:plugins:
-    run: melos exec --depends-on="flutter" --scope="ente_*" -- "flutter pub get"
-    description: Run "flutter pub get" in all plugin packages.
+    run: dart run melos exec --depends-on="flutter" --scope="ente_*" -- "flutter pub get --enforce-lockfile"
+    description: Run "flutter pub get --enforce-lockfile" in all plugin packages.
 
   clean:plugins:
-    run: melos exec --depends-on="flutter" --scope="ente_*" -- "flutter clean"
+    run: dart run melos exec --depends-on="flutter" --scope="ente_*" -- "flutter clean"
     description: Clean all plugin packages.

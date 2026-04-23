@@ -16,6 +16,25 @@ import type {
     LockerInfo,
 } from "../types/file-share";
 
+const deviceLimitExceededMessage =
+    "This link has been viewed on too many devices. Please contact the owner.";
+
+const isDeviceLimitExceededResponse = async (response: Response) => {
+    if (response.status === 429) {
+        return true;
+    }
+    if (response.status !== 403) {
+        return false;
+    }
+
+    try {
+        const payload = (await response.clone().json()) as { code?: string };
+        return payload.code === "LINK_DEVICE_LIMIT_EXCEEDED";
+    } catch {
+        return false;
+    }
+};
+
 /**
  * Extract file key from URL hash (similar to extractCollectionKeyFromShareURL)
  */
@@ -55,9 +74,13 @@ export const fetchFileInfo = async (
 
     const response = await fetch(url, {
         headers: { "X-Auth-Access-Token": accessToken },
+        cache: "no-store",
     });
 
     if (!response.ok) {
+        if (await isDeviceLimitExceededResponse(response)) {
+            throw new Error(deviceLimitExceededMessage);
+        }
         throw new Error(`Failed to fetch file`);
     }
 
@@ -393,6 +416,9 @@ export const downloadFile = async (
     });
 
     if (!response.ok) {
+        if (await isDeviceLimitExceededResponse(response)) {
+            throw new Error(deviceLimitExceededMessage);
+        }
         throw new Error(`Failed to download file: ${response.statusText}`);
     }
 

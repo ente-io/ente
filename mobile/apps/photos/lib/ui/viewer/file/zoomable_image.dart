@@ -15,6 +15,7 @@ import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
+import "package:photos/events/retry_failed_image_load_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/src/rust/api/image_processing_api.dart' as rust_image;
@@ -61,15 +62,26 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadedLargeThumbnail = false;
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
+  // Set when a retry event arrives mid-flight. Since getFileFromServer
+  // can't be cancelled, we record intent and trigger the retry from
+  // _onFinalImageFetchFailed once the stale request finally resolves.
+  bool _pendingFinalImageRetry = false;
   bool _convertToSupportedFormat = false;
   bool _showingThumbnailFallback = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
+  StreamSubscription<dynamic>? _zoomStreamSubscription;
+
+  // Baseline PhotoView scale for the current image/controller when the image
+  // is at its contained size. ZoomTransform.scale is reported relative to this.
+  double? _initialScale;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   late final StreamSubscription<ResetZoomOfPhotoView> _resetZoomSubscription;
+  late final StreamSubscription<RetryFailedImageLoadEvent>
+      _retryFailedLoadSubscription;
 
   // This is to prevent the app from crashing when loading 200MP images
   // https://github.com/flutter/flutter/issues/110331
@@ -86,12 +98,15 @@ class _ZoomableImageState extends State<ZoomableImage> {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
-      InheritedDetailPageState.maybeOf(context)
-          ?.isZoomedNotifier
-          .value = _isZooming;
-      debugPrint("isZooming = $_isZooming, currentState $value");
-      // _logger.info('is reakky zooming $_isZooming with state $value');
+      final state = InheritedDetailPageState.maybeOf(context);
+      state?.isZoomedNotifier.value = _isZooming;
+      if (!_isZooming) {
+        _initialScale = _photoViewController.scale ?? _initialScale;
+        state?.zoomTransformNotifier.value = ZoomTransform.identity;
+      }
     };
+
+    _subscribeToZoomStream();
 
     _captionUpdatedSubscription =
         Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
@@ -111,14 +126,48 @@ class _ZoomableImageState extends State<ZoomableImage> {
         _scaleStateController.scaleState = PhotoViewScaleState.initial;
       }
     });
+
+    _retryFailedLoadSubscription =
+        Bus.instance.on<RetryFailedImageLoadEvent>().listen((_) {
+      if (!mounted || _loadedFinalImage) return;
+      if (!_loadedSmallThumbnail && _photo.isRemoteFile) {
+        // Evict the stale in-flight thumbnail so the rebuild's
+        // getThumbnailFromServer doesn't dedupe against the dead completer.
+        removePendingGetThumbnailRequestIfAny(_photo);
+      }
+      if (_loadingFinalImage) {
+        _pendingFinalImageRetry = true;
+      }
+      setState(() {});
+    });
+  }
+
+  void _subscribeToZoomStream() {
+    _zoomStreamSubscription =
+        _photoViewController.outputStateStream.listen((value) {
+      final state = InheritedDetailPageState.maybeOf(context);
+      if (value.scale == null) return;
+      if (!_isZooming) {
+        _initialScale = value.scale;
+        state?.zoomTransformNotifier.value = ZoomTransform.identity;
+        return;
+      }
+      _initialScale ??= value.scale;
+      state?.zoomTransformNotifier.value = ZoomTransform(
+        scale: value.scale! / _initialScale!,
+        offset: value.position,
+      );
+    });
   }
 
   @override
   void dispose() {
+    _zoomStreamSubscription?.cancel();
     _photoViewController.dispose();
     _scaleStateController.dispose();
     _captionUpdatedSubscription.cancel();
     _resetZoomSubscription.cancel();
+    _retryFailedLoadSubscription.cancel();
     super.dispose();
   }
 
@@ -308,6 +357,12 @@ class _ZoomableImageState extends State<ZoomableImage> {
               _loadedSmallThumbnail = true;
             });
           }
+        }).catchError((e, s) {
+          _logger.warning(
+            "Failed to fetch thumbnail from server for ${_photo.tag}",
+            e,
+            s,
+          );
         });
       }
     }
@@ -319,8 +374,19 @@ class _ZoomableImageState extends State<ZoomableImage> {
             file,
           );
         } else {
-          _loadingFinalImage = false;
+          // getFileFromServer resolves null (not throw) on most network
+          // failures because downloadAndDecrypt is called with
+          // throwOnFailure=false here — route through the same helper as
+          // catchError below.
+          _onFinalImageFetchFailed();
         }
+      }).catchError((e, s) {
+        _logger.warning(
+          "Failed to fetch final image from server for ${_photo.tag}",
+          e,
+          s,
+        );
+        _onFinalImageFetchFailed();
       });
     }
   }
@@ -454,6 +520,14 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
   }
 
+  void _onFinalImageFetchFailed() {
+    _loadingFinalImage = false;
+    if (_pendingFinalImageRetry && mounted && !_loadedFinalImage) {
+      _pendingFinalImageRetry = false;
+      setState(() {});
+    }
+  }
+
   Future<void> _loadHeicWithRust(File file) async {
     try {
       final rustBytes = await rust_image.decodeToJpeg(
@@ -507,13 +581,26 @@ class _ZoomableImageState extends State<ZoomableImage> {
     if (shouldFixPosition) {
       final prevImageInfo = await getImageInfo(previewImageProvider);
       finalImageInfo = await getImageInfo(finalImageProvider);
-      final scale = _photoViewController.scale! /
+      final previousScale = _photoViewController.scale!;
+      final previousRelativeScale = _initialScale != null && _initialScale! > 0
+          ? previousScale / _initialScale!
+          : null;
+      final scale = previousScale /
           (finalImageInfo.image.width / prevImageInfo.image.width);
       final currentPosition = _photoViewController.value.position;
+      unawaited(_zoomStreamSubscription?.cancel());
       _photoViewController = PhotoViewController(
         initialPosition: currentPosition,
         initialScale: scale,
       );
+      if (previousRelativeScale != null &&
+          previousRelativeScale.isFinite &&
+          previousRelativeScale > 0) {
+        _initialScale = scale / previousRelativeScale;
+      } else {
+        _initialScale = null;
+      }
+      _subscribeToZoomStream();
       // Fix for auto-zooming when final image is loaded after double tapping
       //twice.
       _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;

@@ -312,7 +312,7 @@ class _CollectionSelectionOverlayBarState
       await CollectionActions.editCollection(context, collection);
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
     widget.selectedCollections.clearAll();
   }
@@ -328,7 +328,7 @@ class _CollectionSelectionOverlayBarState
       await CollectionActions.deleteCollection(context, collection);
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
     widget.selectedCollections.clearAll();
   }
@@ -347,7 +347,7 @@ class _CollectionSelectionOverlayBarState
       );
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
     widget.selectedCollections.clearAll();
   }
@@ -369,7 +369,7 @@ class _CollectionSelectionOverlayBarState
       await showShareCollectionSheet(context, collection: collection);
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
     widget.selectedCollections.clearAll();
   }
@@ -394,7 +394,7 @@ class _CollectionSelectionOverlayBarState
       }
     } catch (e, s) {
       _logger.severe(e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
     widget.selectedCollections.clearAll();
   }

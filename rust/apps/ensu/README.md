@@ -2,6 +2,8 @@
 
 This wraps the **Ensu web app** in a Tauri shell for maximum component reuse.
 
+Requires cmake (e.g. `brew install cmake`).
+
 ## Dev
 
 ```bash

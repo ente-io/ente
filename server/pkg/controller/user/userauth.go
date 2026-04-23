@@ -453,9 +453,28 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 			log.WithError(userErr).Error("Failed to get user")
 			return
 		}
-		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
+		templateData := map[string]interface{}{
 			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
-		}, nil)
+		}
+		if strings.HasSuffix(emailUtil.NormalizeEmail(user.Email), "@ente.io") {
+			appDisplayNames := map[ente.App]string{
+				ente.Photos: "Ente Photos",
+				ente.Auth:   "Ente Auth",
+				ente.Locker: "Ente Locker",
+			}
+			appName, ok := appDisplayNames[app]
+			if !ok {
+				appName = "Ente"
+			}
+			device := "Unknown Device"
+			if strings.TrimSpace(userAgent) != "" {
+				device = network.GetPrettyUA(userAgent)
+			}
+			templateData["App"] = appName
+			templateData["Device"] = device
+			templateData["IP"] = ip
+		}
+		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.com", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, templateData, nil)
 		if emailSendErr != nil {
 			log.WithError(emailSendErr).Error("Failed to send email")
 		}
