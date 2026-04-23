@@ -13,7 +13,7 @@ import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Import extracted components
 import { MobileCover } from "./MobileCover";
@@ -84,6 +84,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     const { onAddSaveGroup } = useSaveGroupsActions();
     const { show: showPublicFeed, props: publicFeedVisibilityProps } =
         useModalVisibility();
+    const [keepPublicFeedSidebarMounted, setKeepPublicFeedSidebarMounted] =
+        useState(false);
+    const publicFeedSidebarOpenRef = useRef(publicFeedVisibilityProps.open);
 
     // Navigation state for feed item clicks
     const [initialSidebar, setInitialSidebar] = useState<
@@ -112,6 +115,19 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         collectionKey,
         credentials,
     });
+
+    useEffect(() => {
+        publicFeedSidebarOpenRef.current = publicFeedVisibilityProps.open;
+        if (publicFeedVisibilityProps.open) {
+            setKeepPublicFeedSidebarMounted(true);
+        }
+    }, [publicFeedVisibilityProps.open]);
+
+    const handlePublicFeedSidebarExited = useCallback(() => {
+        if (!publicFeedSidebarOpenRef.current) {
+            setKeepPublicFeedSidebarMounted(false);
+        }
+    }, []);
 
     /**
      * Handle clicks on feed items to navigate to the file and open sidebar.
@@ -608,15 +624,19 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
 
             {/* Public feed sidebar */}
-            {collection && credentials?.current && collectionKey && (
-                <LazyPublicFeedSidebar
-                    {...publicFeedVisibilityProps}
-                    files={files}
-                    credentials={credentials.current}
-                    collectionKey={collectionKey}
-                    onItemClick={handleFeedItemClick}
-                />
-            )}
+            {(publicFeedVisibilityProps.open || keepPublicFeedSidebarMounted) &&
+                collection &&
+                credentials?.current &&
+                collectionKey && (
+                    <LazyPublicFeedSidebar
+                        {...publicFeedVisibilityProps}
+                        files={files}
+                        credentials={credentials.current}
+                        collectionKey={collectionKey}
+                        onItemClick={handleFeedItemClick}
+                        onExited={handlePublicFeedSidebarExited}
+                    />
+                )}
         </TripLayoutContainer>
     );
 };

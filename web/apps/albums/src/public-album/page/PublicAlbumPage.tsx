@@ -175,6 +175,9 @@ export default function PublicAlbumPage() {
     const { onAddSaveGroup } = useSaveGroupsActions();
     const { show: showPublicFeed, props: publicFeedVisibilityProps } =
         useModalVisibility();
+    const [keepPublicFeedSidebarMounted, setKeepPublicFeedSidebarMounted] =
+        useState(false);
+    const publicFeedSidebarOpenRef = useRef(publicFeedVisibilityProps.open);
 
     // Pending navigation from feed item click
     const [pendingFileNavigation, setPendingFileNavigation] = useState<{
@@ -183,6 +186,19 @@ export default function PublicAlbumPage() {
         commentID?: string;
         anonUserNames?: Map<string, string>;
     }>();
+
+    useEffect(() => {
+        publicFeedSidebarOpenRef.current = publicFeedVisibilityProps.open;
+        if (publicFeedVisibilityProps.open) {
+            setKeepPublicFeedSidebarMounted(true);
+        }
+    }, [publicFeedVisibilityProps.open]);
+
+    const handlePublicFeedSidebarExited = useCallback(() => {
+        if (!publicFeedSidebarOpenRef.current) {
+            setKeepPublicFeedSidebarMounted(false);
+        }
+    }, []);
 
     /**
      * Handle clicks on feed items to navigate to the file and open sidebar.
@@ -817,15 +833,18 @@ export default function PublicAlbumPage() {
                 />
             )}
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
-            {publicCollection && collectionKey.current && (
-                <LazyPublicFeedSidebar
-                    {...publicFeedVisibilityProps}
-                    files={publicFiles}
-                    credentials={credentials.current}
-                    collectionKey={collectionKey.current}
-                    onItemClick={handleFeedItemClick}
-                />
-            )}
+            {(publicFeedVisibilityProps.open || keepPublicFeedSidebarMounted) &&
+                publicCollection &&
+                collectionKey.current && (
+                    <LazyPublicFeedSidebar
+                        {...publicFeedVisibilityProps}
+                        files={publicFiles}
+                        credentials={credentials.current}
+                        collectionKey={collectionKey.current}
+                        onItemClick={handleFeedItemClick}
+                        onExited={handlePublicFeedSidebarExited}
+                    />
+                )}
         </>
     );
 
