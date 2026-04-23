@@ -154,6 +154,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get noAppToOpenFileDownloadInstead =>
+      'No app is available to preview this file. You can download it and open it with another app.';
+
+  @override
   String minutesAgo(int minutes) {
     return '${minutes}m ago';
   }
