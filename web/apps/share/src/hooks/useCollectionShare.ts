@@ -487,10 +487,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         setDownloadProgress(null);
         try {
             await downloadPublicCollectionFile(
-                {
-                    accessToken,
-                    accessTokenJWT: accessTokenJWT ?? undefined,
-                },
+                { accessToken, accessTokenJWT: accessTokenJWT ?? undefined },
                 item.id,
                 fileKey,
                 item.fileName,

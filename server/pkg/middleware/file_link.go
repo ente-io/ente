@@ -45,7 +45,7 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		clientIP := network.GetClientIP(c)
 		userAgent := c.GetHeader("User-Agent")
 		reqPath := urlSanitizer(c)
-		shouldCheckDeviceLimit := reqPath == "/file-link/info"
+		shouldCheckDeviceLimit := shouldCheckFileLinkDeviceLimit(reqPath)
 		passwordValidated := false
 
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
@@ -148,6 +148,12 @@ func (m *FileLinkMiddleware) checkDeviceLimit(c *gin.Context, accessToken string
 	}
 	token, _, err := publicCtrl.NewLinkDeviceToken(m.FileLinkCtrl.JwtSecret, publicCtrl.LinkDeviceScopeFile, fileLinkRow.LinkID, accessToken, fileLinkRow.ValidTill)
 	return token, false, stacktrace.Propagate(err, "")
+}
+
+func shouldCheckFileLinkDeviceLimit(reqPath string) bool {
+	// File-link admission is currently anchored to /file-link/info, which is the
+	// discovery endpoint clients call before fetching the actual blob.
+	return reqPath == "/file-link/info"
 }
 
 func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,

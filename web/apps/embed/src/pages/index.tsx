@@ -27,9 +27,9 @@ import { EmbedPasswordForm } from "../components/EmbedPasswordForm";
 import {
     removePublicCollectionByKey,
     savedPublicCollectionAccessTokenJWT,
-    savedPublicCollectionLinkDeviceToken,
     savedPublicCollectionByKey,
     savedPublicCollectionFiles,
+    savedPublicCollectionLinkDeviceToken,
     savePublicCollectionAccessTokenJWT,
     savePublicCollectionLinkDeviceToken,
 } from "../services/public-albums-storage";

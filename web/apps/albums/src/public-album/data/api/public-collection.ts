@@ -107,8 +107,11 @@ export const pullCollection = async (
     referralCode: string;
     linkDeviceToken?: string;
 }> => {
-    const { collection: remoteCollection, referralCode, linkDeviceToken } =
-        await getPublicCollectionInfo(credentials);
+    const {
+        collection: remoteCollection,
+        referralCode,
+        linkDeviceToken,
+    } = await getPublicCollectionInfo(credentials);
 
     const collection = await decryptRemoteCollection(
         remoteCollection,
@@ -142,16 +145,15 @@ const PublicCollectionInfo = z.object({
  *
  * @param accessToken A public collection access key.
  */
-const getPublicCollectionInfo = async (credentials: PublicAlbumsCredentials) => {
+const getPublicCollectionInfo = async (
+    credentials: PublicAlbumsCredentials,
+) => {
     const res = await fetch(await apiURL("/public-collection/info"), {
         headers: authenticatedPublicAlbumsInfoRequestHeaders(credentials),
     });
     ensureOk(res);
     const info = PublicCollectionInfo.parse(await res.json());
-    return {
-        ...info,
-        linkDeviceToken: linkDeviceTokenFromResponse(res),
-    };
+    return { ...info, linkDeviceToken: linkDeviceTokenFromResponse(res) };
 };
 
 /**

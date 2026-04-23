@@ -303,9 +303,7 @@ export const fetchPublicCollectionShareMetadata = async (
     });
     ensureOk(res);
 
-    const data = (await res.json()) as {
-        collection: unknown;
-    };
+    const data = (await res.json()) as { collection: unknown };
     const remoteCollection = RemoteCollection.parse(data.collection);
     const collection = await decryptRemoteCollection(
         remoteCollection,

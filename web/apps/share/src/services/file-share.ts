@@ -1,9 +1,5 @@
 import bs58 from "bs58";
 import {
-    linkDeviceTokenFromResponse,
-    linkDeviceTokenRequestHeader,
-} from "ente-base/http";
-import {
     decryptBoxBytes,
     decryptMetadataJSON,
     decryptStreamBytes,
@@ -11,6 +7,10 @@ import {
     fromHex,
     toB64,
 } from "ente-base/crypto";
+import {
+    linkDeviceTokenFromResponse,
+    linkDeviceTokenRequestHeader,
+} from "ente-base/http";
 import { apiOrigin } from "ente-base/origins";
 import type {
     DecryptedFileInfo,
