@@ -32,7 +32,7 @@ Copycat DB requires an explicit `BACKUP_MODE`:
 
 - `scw-export`: take a Scaleway-managed backup directly from `SCW_RDB_INSTANCE_ID`
 - `snapshot-scw-export`: restore the latest snapshot into `copycat-db-temp`, take a Scaleway-managed backup from that temporary instance, then delete it
-- `snapshot-pgdump`: restore the latest snapshot into `copycat-db-temp`, attach it to `SCW_PRIVATE_NETWORK_ID`, run `pg_dump` over the private endpoint, package the dump, then delete the temporary instance
+- `snapshot-pgdump`: restore the latest snapshot into `copycat-db-temp`, attach it to `SCW_PRIVATE_NETWORK_ID`, run `pg_dump` over the private endpoint, delete the temporary instance, then package the dump
 
 To use a snapshot-backed mode in production, set `BACKUP_MODE` accordingly in `/root/copycat-db.env` and then start the service or let the timer run it.
 
@@ -69,11 +69,13 @@ This is the UUID of the Private Network that copycat-db should attach to the tem
 
 The compute instance running copycat-db must also be attached to this Private Network.
 
-##### PGUSER, PGPASSWORD
+##### PGUSER, PGPASSWORD, PGHOST, PGPORT
 
 Not needed in production when taking a backup (since we use the Scaleway CLI to take backups in production).
 
-These are used when taking a `snapshot-pgdump` backup, and when restoring backups. The host and port are resolved by the scripts.
+`PGUSER` and `PGPASSWORD` are used when taking a `snapshot-pgdump` backup, and when restoring backups.
+
+For `snapshot-pgdump` backups, the host and port are resolved by the script. For restores, provide `PGHOST` and `PGPORT`.
 
 ##### RCLONE_CONFIG
 
