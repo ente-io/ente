@@ -2384,7 +2384,15 @@ class CollectionsService {
     final collectionData =
         await collectionsGateway.createCollection(createRequest);
     final collection = await _fromRemoteCollection(collectionData);
-    return _cacheLocalPathAndCollection(collection);
+    final cachedCollection = _cacheLocalPathAndCollection(collection);
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        cachedCollection.id,
+        List<EnteFile>.empty(),
+        "createCollection",
+      ),
+    );
+    return cachedCollection;
   }
 
   @Deprecated("Use _cacheLocalPathAndCollection instead")

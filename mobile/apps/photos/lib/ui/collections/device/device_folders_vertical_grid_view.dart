@@ -60,7 +60,7 @@ class _DeviceFolderVerticalGridViewState
               }
             },
           ),
-          _DeviceFolderVerticalGridViewBody(
+          DeviceFolderVerticalGridSliver(
             searchQuery: _searchQuery,
           ),
         ],
@@ -69,17 +69,17 @@ class _DeviceFolderVerticalGridViewState
   }
 }
 
-class _DeviceFolderVerticalGridViewBody extends StatefulWidget {
+class DeviceFolderVerticalGridSliver extends StatefulWidget {
   final String searchQuery;
-  const _DeviceFolderVerticalGridViewBody({required this.searchQuery});
+  const DeviceFolderVerticalGridSliver({required this.searchQuery, super.key});
 
   @override
-  State<_DeviceFolderVerticalGridViewBody> createState() =>
+  State<DeviceFolderVerticalGridSliver> createState() =>
       _DeviceFolderVerticalGridViewBodyState();
 }
 
 class _DeviceFolderVerticalGridViewBodyState
-    extends State<_DeviceFolderVerticalGridViewBody> {
+    extends State<DeviceFolderVerticalGridSliver> {
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
@@ -120,7 +120,7 @@ class _DeviceFolderVerticalGridViewBodyState
   @override
   Widget build(BuildContext context) {
     debugPrint(
-      "${(_DeviceFolderVerticalGridViewBody).toString()} - $_loadReason",
+      "${(DeviceFolderVerticalGridSliver).toString()} - $_loadReason",
     );
     return FutureBuilder<List<DeviceCollection>>(
       future:

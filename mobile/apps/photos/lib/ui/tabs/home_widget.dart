@@ -81,8 +81,8 @@ import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/social/feed_screen.dart";
+import "package:photos/ui/tabs/albums_tab.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
-import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -968,7 +968,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                             headerWidget: HeaderWidget(),
                           )
                         : child!,
-                    UserCollectionsTab(selectedAlbums: _selectedAlbums),
+                    AlbumsTab(selectedAlbums: _selectedAlbums),
                     _sharedCollectionTab,
                     _searchTab,
                   ],
