@@ -67,11 +67,24 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
 
   @override
   Widget build(BuildContext context) {
-    // For very large memories, hide the tick bar (it would render as pixel-thin
-    // slivers). The animation controller keeps running so auto-advance still
-    // fires via onComplete.
+    // For very large memories, a per-file tick bar would render as pixel-thin
+    // slivers. Show a single continuous bar instead, combining completed-file
+    // progress with the current file's in-flight animation.
     if (widget.totalSteps >= kMemoryProgressTickCutoff) {
-      return const SizedBox.shrink();
+      return AnimatedBuilder(
+        animation: _animation,
+        builder: (context, _) {
+          final progress =
+              (widget.currentIndex + _animation.value) / widget.totalSteps;
+          return LinearProgressIndicator(
+            value: progress.clamp(0.0, 1.0),
+            backgroundColor: widget.unselectedColor,
+            valueColor: AlwaysStoppedAnimation<Color>(widget.selectedColor),
+            minHeight: widget.height,
+            borderRadius: BorderRadius.circular(12),
+          );
+        },
+      );
     }
     return Row(
       children: List.generate(widget.totalSteps, (index) {
