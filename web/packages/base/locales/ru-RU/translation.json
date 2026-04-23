@@ -297,7 +297,7 @@
     "keep_photos": "Оставить фото",
     "share_album": "Поделиться альбомом",
     "share_action": "Поделиться",
-    "feed": "Лента",
+    "activity": "",
     "sharing_with_self": "Вы не можете поделиться с самим собой",
     "sharing_already_shared": "Вы уже поделились этим с {{email}}",
     "sharing_album_not_allowed": "Делиться альбомом запрещено",

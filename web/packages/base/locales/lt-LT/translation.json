@@ -297,7 +297,7 @@
     "keep_photos": "Laikyti nuotraukas",
     "share_album": "Bendrinti albumą",
     "share_action": "",
-    "feed": "Srautas",
+    "activity": "",
     "sharing_with_self": "Negalite bendrinti su savimi.",
     "sharing_already_shared": "Jūs jau bendrinate tai su {{email}}.",
     "sharing_album_not_allowed": "Neleidžiama bendrinti albumo.",

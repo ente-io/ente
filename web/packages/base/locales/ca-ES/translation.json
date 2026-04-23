@@ -297,7 +297,7 @@
     "keep_photos": "Mantingues les fotos",
     "share_album": "Comparteix l'àlbum",
     "share_action": "Comparteix",
-    "feed": "Feed",
+    "activity": "",
     "sharing_with_self": "No ho pots compartir amb tu mateix",
     "sharing_already_shared": "Ja estàs compartint això amb {{email}}",
     "sharing_album_not_allowed": "No es permet compartir l'àlbum",

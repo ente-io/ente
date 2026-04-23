@@ -297,7 +297,7 @@
     "keep_photos": "الاحتفاظ بالصور",
     "share_album": "مشاركة الألبوم",
     "share_action": "",
-    "feed": "",
+    "activity": "",
     "sharing_with_self": "لا يمكنك المشاركة مع نفسك",
     "sharing_already_shared": "أنت تشارك هذا بالفعل مع {{email}}",
     "sharing_album_not_allowed": "لا يسمح بمشاركة الألبوم",

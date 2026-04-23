@@ -297,7 +297,7 @@
     "keep_photos": "Conserver des photos",
     "share_album": "Partager l'album",
     "share_action": "Partager",
-    "feed": "Fil",
+    "activity": "",
     "sharing_with_self": "Vous ne pouvez pas partager avec vous-même",
     "sharing_already_shared": "Vous partagez déjà ceci avec {{email}}",
     "sharing_album_not_allowed": "Partage d'album non autorisé",
