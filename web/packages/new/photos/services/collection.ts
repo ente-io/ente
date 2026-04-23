@@ -730,7 +730,9 @@ const fileIDsInCollection = (
 /**
  *
  * @param file
- * @returns A unique hash for each of the file.
+ * @returns A composite key of the form `${metadataHash}:${fileType}`, used to
+ * detect content-equivalent files. Returns undefined if the file has no
+ * metadata hash.
  */
 const hashAndTypeKey = (file: EnteFile) => {
     const hash = metadataHash(file.metadata);
@@ -795,14 +797,10 @@ export const copyFiles = async (
     const copiedFiles: EnteFile[] = [];
 
     /**
-     * For context, since i got confused what the uniqueFiles were actually,
-     * here uniqueFiles refer to those files which are uploaded to Ente by
-     * not actually owned by the currentUser who actually wanted to upload
-     * them to the dstCollection.
-     *
-     * And since these files were already uploaded to Ente, they will belong
-     * to some collection in Ente. So mapping each file with their corresponding
-     * collectionId and then looping through the same.
+     * Callers are expected to pass only files which aren't owned by the
+     * currentUser (the batch validation below enforces this). Since these files
+     * are already uploaded to Ente, they will belong to some source collection,
+     * so we group them by their source collectionID and iterate per-group.
      */
     for (const [srcCollectionID, sourceFiles] of groupFilesByCollectionID(
         uniqueFiles,
@@ -825,7 +823,7 @@ export const copyFiles = async (
                 );
             }
 
-            // Encrypting thef iles with the dstCollection Key
+            // Encrypting the files with the dstCollection Key
             const encryptedFileKeys = await encryptWithCollectionKey(
                 dstCollection,
                 batchFiles,
@@ -892,8 +890,8 @@ const savedUserUncategorizedCollection = async () => {
  * if so then returning the reference to that else creating the same
  * and then returning the instance of the newly created collection.
  *
- * @returns the uncategorized collection of the currentUser if it already exists
- * else undefined
+ * @returns the uncategorized collection of the currentUser if it already
+ * exists, otherwise the newly created uncategorized collection.
  */
 export const savedOrCreateUserUncategorizedCollection = async () =>
     (await savedUserUncategorizedCollection()) ??
@@ -1040,7 +1038,7 @@ export const addOrCopyToCollection = async (
     /**
      * If you are wondering why we need this check again because we did it
      * once at the filesMissingFromDestination. the filesToAdd might have
-     * different or new IDs which wheren't there in the files earlier.
+     * different or new IDs which weren't there in the files earlier.
      *
      * For otherOwnedFiles, the code may replace thesource file X
      * with a different user owned equivalent Y.
