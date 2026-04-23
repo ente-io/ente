@@ -706,7 +706,7 @@ export function MemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="http://ente.com/try"
+                            href="https://ente.com/try"
                             target="_blank"
                             rel="noopener"
                         >
@@ -734,7 +734,7 @@ export function MemoryViewer({
                                 variant="contained"
                                 color="accent"
                                 disableElevation
-                                href="http://ente.com/try"
+                                href="https://ente.com/try"
                                 target="_blank"
                                 rel="noopener"
                                 sx={
