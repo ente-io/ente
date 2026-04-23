@@ -2,6 +2,8 @@
 
 Create a PR to bump up the version in `pubspec.yaml`.
 
+On minor or major bumps, also add a new `<release>` entry to the Flathub metadata in [`linux/packaging/enteauth.appdata.xml`](../linux/packaging/enteauth.appdata.xml).
+
 > [!NOTE]
 >
 > Use [semver](https://semver.org/) for the tags, with `auth-` as a prefix.

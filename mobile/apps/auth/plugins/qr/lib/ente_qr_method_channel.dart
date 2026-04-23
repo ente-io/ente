@@ -1,4 +1,4 @@
-import 'package:ente_qr/ente_qr_platform_interface.dart';
+import 'package:ente_auth_qr/ente_qr_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 

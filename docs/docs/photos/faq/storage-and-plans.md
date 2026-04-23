@@ -173,7 +173,7 @@ No. Storage from different accounts does not stack.
 
 When you create a family and add members, everyone in the family shares the storage of the admin's subscription.
 
-(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant— they will use the shared family storage instead.)
+(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant - they will use the shared family storage instead.)
 
 Family plans are designed to allow multiple people to use a single subscription, not to combine multiple plans into a larger pool.
 
@@ -256,6 +256,14 @@ Common reasons and solutions:
 
 - Family plans may have limited functionality for App Store purchases
 - Consider managing your subscription through [web.ente.io](https://web.ente.io) instead
+
+### How do I add a family member who already has a paid subscription? {#add-family-member-existing-subscriber}
+
+1. Subscribe to a paid plan on your account if you have not already.
+2. Ask your family member to cancel their existing subscription, then contact [support@ente.com](mailto:support@ente.com) so we can switch their account to the free plan.
+3. Once their account is on the free plan, add them via `Settings > Storage/Subscription > Manage subscription > Manage family`, or via `Settings > Account > Manage subscription`.
+
+> **Note**: Each family member gets their own private space. Members cannot see each other's files unless explicitly shared. Family plans are for sharing storage, not for sharing photos automatically.
 
 ### How do I remove someone from my family plan? {#remove-family-member}
 

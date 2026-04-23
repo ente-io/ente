@@ -17,6 +17,7 @@ import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/social/social_actor_contact_navigation.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
@@ -33,6 +34,7 @@ Future<void> showFileCommentsBottomSheet(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => _DraggableCommentsSheet(
+      launchContext: context,
       collectionID: collectionID,
       fileID: fileID,
       highlightCommentID: highlightCommentID,
@@ -41,11 +43,13 @@ Future<void> showFileCommentsBottomSheet(
 }
 
 class _DraggableCommentsSheet extends StatefulWidget {
+  final BuildContext launchContext;
   final int collectionID;
   final int fileID;
   final String? highlightCommentID;
 
   const _DraggableCommentsSheet({
+    required this.launchContext,
     required this.collectionID,
     required this.fileID,
     this.highlightCommentID,
@@ -77,6 +81,7 @@ class _DraggableCommentsSheetState extends State<_DraggableCommentsSheet> {
       snapSizes: isKeyboardOpen ? null : const [0.6],
       expand: false,
       builder: (context, scrollController) => FileCommentsBottomSheet(
+        launchContext: widget.launchContext,
         collectionID: widget.collectionID,
         fileID: widget.fileID,
         highlightCommentID: widget.highlightCommentID,
@@ -88,6 +93,7 @@ class _DraggableCommentsSheetState extends State<_DraggableCommentsSheet> {
 }
 
 class FileCommentsBottomSheet extends StatefulWidget {
+  final BuildContext launchContext;
   final int collectionID;
   final int fileID;
 
@@ -101,6 +107,7 @@ class FileCommentsBottomSheet extends StatefulWidget {
   final DraggableScrollableController sheetController;
 
   const FileCommentsBottomSheet({
+    required this.launchContext,
     required this.collectionID,
     required this.fileID,
     required this.dragController,
@@ -740,6 +747,14 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                                         comment.parentCommentID!,
                                       )
                                   : null,
+                              onAuthorTap: () =>
+                                  openSocialActorContactDestination(
+                                context,
+                                _getUserForComment(comment),
+                                currentUserID: _currentUserID,
+                                navigationContext: widget.launchContext,
+                                dismissCurrentRoute: true,
+                              ),
                             );
                           },
                         ),

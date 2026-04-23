@@ -45,7 +45,9 @@ impl From<CoreError> for HttpError {
                 message,
                 status: None,
             },
-            CoreError::Http { status, message } => HttpError {
+            CoreError::Http {
+                status, message, ..
+            } => HttpError {
                 code: "http".to_string(),
                 message,
                 status: Some(status),
@@ -71,7 +73,7 @@ impl HttpClient {
     #[wasm_bindgen(constructor)]
     pub fn new(base_url: &str) -> Self {
         Self {
-            inner: CoreHttpClient::new(base_url),
+            inner: CoreHttpClient::new(base_url).expect("failed to build HTTP client"),
         }
     }
 

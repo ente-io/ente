@@ -276,6 +276,10 @@ class PeopleHomeWidgetService {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
     final persons = await PersonService.instance.getCertainPersons(personIds);
     for (final person in persons) {
+      if (person.data.isIgnored) {
+        _logger.info("Skipping ignored person: ${person.data.name}");
+        continue;
+      }
       final files = await SearchService.instance.getFilesForPersonID(
         person.remoteID,
         sortOnTime: false,

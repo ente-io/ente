@@ -1,15 +1,17 @@
 Latest changes:
+- Neeraj: Add HTTP/2 support with HTTP/1.1 fallback for Photos API requests
+- Amrithesh: Improve zoomed OCR selection UX in the photo viewer
+- Neeraj: Fix dedupe cleanup progress percentage display
+- Neeraj: Fix Added by visibility in file details
+- Neeraj: Contacts
+- Neeraj: Fix grey screen when collections search result is empty
+- Ashil: Fix app going blank on iOS on deleting all empty albums
+- Ashil: Show family dashboard for family non-admin members too
+- Ashil: Updated 'ente' branding
 - Ashil, Laurens: Fix file download not working for files with stale localID references
 - Ashil: Bug fixes and improvements on Gallery
-- Laurens: Make asset downloads (ML models) resumable (internal + offline)
-- Neeraj: Fix startup auto-logout cleanup
-- Neeraj: Refresh storage card on quota updates
-- Neeraj: Guard shared favorites removal resolution
-- Neeraj: Handle incomplete signup login errors with localized error copy
-- Neeraj: Improve motion photo video detection in rust layer
-- Amrithesh: OCR inline text detection
-- Ashil, Setal: Native family management screens
-- Prateek: 16 KB page size fix
+- Manav: Update flutter_sodium to reproducible libsodium 1.0.21 Android/iOS binaries
+
 
 Still behind internal flag:
 - Amrithesh: (I) ML/Pet recognition [Indexing]

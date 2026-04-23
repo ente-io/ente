@@ -362,6 +362,11 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      */
     file?: EnteFile;
     /**
+     * True while the parent is fetching the initial social payload for the
+     * current file.
+     */
+    isSocialDataLoading?: boolean;
+    /**
      * The currently active collection ID (when viewing from within a collection).
      */
     activeCollectionID?: number;
@@ -447,6 +452,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     open,
     onClose,
     file,
+    isSocialDataLoading = false,
     activeCollectionID,
     currentUserID,
     prefetchedComments,
@@ -486,6 +492,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const commentsContainerRef = useRef<HTMLDivElement>(null);
     // Ref to preserve isLiked state during context menu close animation
     const contextMenuIsLikedRef = useRef(false);
+    const showLoading = loading || isSocialDataLoading;
 
     // Comments grouped by collection: collectionID -> comments
     const [commentsByCollection, setCommentsByCollection] = useState<
@@ -537,7 +544,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             !highlightCommentID ||
             hasScrolledToHighlightRef.current ||
             !commentsContainerRef.current ||
-            loading ||
+            showLoading ||
             comments.length === 0
         ) {
             return;
@@ -616,7 +623,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             if (cleanupTimeout) clearTimeout(cleanupTimeout);
             if (blinkInterval) clearInterval(blinkInterval);
         };
-    }, [open, highlightCommentID, loading, comments]);
+    }, [open, highlightCommentID, showLoading, comments]);
 
     // Reset state when the file changes to avoid showing stale data
     useEffect(() => {
@@ -1332,7 +1339,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 ...theme.applyStyles("dark", { color: "#fff" }),
                             })}
                         >
-                            {loading
+                            {showLoading
                                 ? "Loading..."
                                 : `${sortedComments.length} ${t("comments")}`}
                         </Typography>
@@ -1441,7 +1448,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 ...theme.applyStyles("dark", { color: "#fff" }),
                             })}
                         >
-                            {loading
+                            {showLoading
                                 ? "Loading..."
                                 : `${sortedComments.length} ${t("comments")}`}
                         </Typography>
@@ -1452,9 +1459,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 </Header>
 
                 <CommentsContainer ref={commentsContainerRef}>
-                    {loading ? (
+                    {showLoading ? (
                         <LoadingContainer>
-                            <CircularProgress size={32} />
+                            <CircularProgress size={24} />
                         </LoadingContainer>
                     ) : sortedComments.length === 0 ? (
                         <EmptyMessage>{t("no_comments_yet")}</EmptyMessage>
@@ -1989,6 +1996,7 @@ const LoadingContainer = styled(Box)(() => ({
     justifyContent: "center",
     alignItems: "center",
     height: "100%",
+    paddingRight: 24,
     // Offset for header (marginBottom: 48) + padding diff (32-24=8) = 56, halved
     marginTop: -28,
 }));
@@ -1998,6 +2006,7 @@ const EmptyMessage = styled(Typography)(({ theme }) => ({
     justifyContent: "center",
     alignItems: "center",
     height: "100%",
+    paddingRight: 24,
     // Offset for header (marginBottom: 48) + padding diff (32-24=8) = 56, halved
     marginTop: -28,
     color: "#666",
@@ -2097,6 +2106,7 @@ const OwnTimestamp = styled(Typography)(({ theme }) => ({
     textAlign: "right",
     marginBottom: 4,
     paddingRight: 52,
+    "@media (max-width: 450px)": { paddingRight: 40 },
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
@@ -2121,6 +2131,7 @@ const CommentBubbleWrapper = styled(Box, {
     paddingLeft: isOwn ? 0 : 28,
     position: "relative",
     zIndex: isHighlighted ? 11 : "auto",
+    "@media (max-width: 450px)": { paddingRight: isOwn ? 40 : 0 },
 }));
 
 const CommentBubbleInner = styled(Box)(() => ({

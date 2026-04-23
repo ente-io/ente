@@ -2,6 +2,8 @@ import "package:dio/dio.dart";
 import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 
+const _linkDeviceLimitExceededCode = "LINK_DEVICE_LIMIT_EXCEEDED";
+
 /// Gateway for collection sharing API endpoints.
 ///
 /// Handles sharing collections with other users and managing public links.
@@ -162,6 +164,14 @@ class CollectionShareGateway {
           throw PublicCollectionInfoUnauthorizedException();
         case 410:
           throw PublicCollectionInfoExpiredException();
+        case 403:
+          if (_hasErrorCode(
+            e.response?.data,
+            _linkDeviceLimitExceededCode,
+          )) {
+            throw PublicCollectionDeviceLimitExceededException();
+          }
+          rethrow;
         case 429:
           final errorMessage = _extractErrorMessage(e.response?.data);
           if (errorMessage?.toLowerCase().contains("device limit") ?? false) {
@@ -221,6 +231,16 @@ String? _extractErrorMessage(dynamic data) {
     return data["error"]?.toString();
   }
   return null;
+}
+
+bool _hasErrorCode(dynamic data, String code) {
+  if (data is Map<String, dynamic>) {
+    return data["code"] == code;
+  }
+  if (data is Map) {
+    return data["code"] == code;
+  }
+  return false;
 }
 
 class PublicCollectionInfoUnauthorizedException implements Exception {}

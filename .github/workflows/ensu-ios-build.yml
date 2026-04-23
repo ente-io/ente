@@ -1,0 +1,40 @@
+name: "Build (Ensu iOS)"
+
+on:
+    pull_request:
+        paths:
+            - "mobile/native/darwin/Apps/Ensu/**"
+            - "mobile/native/darwin/Packages/**"
+            - "rust/apps/codegen/**"
+            - "rust/core/**"
+            - "rust/ensu/**"
+            - "rust/uniffi/**"
+            - "rust/.cargo/config.toml"
+            - "rust/Cargo.toml"
+            - "rust/Cargo.lock"
+            - ".github/workflows/ensu-ios-build.yml"
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build-and-test:
+        runs-on: macos-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Generate UniFFI Swift bindings
+              working-directory: rust
+              run: cargo codegen ensu-ios
+
+            # This pull_request workflow does not provide the inference fixtures,
+            # so this step is only a build + startup smoke test.
+            - name: Build and test Ensu
+              working-directory: mobile/native/darwin/Apps/Ensu
+              run: xcodebuild test -scheme Ensu -destination 'platform=iOS Simulator,name=iPhone 17'

@@ -167,6 +167,14 @@ class Collection {
     return getRole(userID) == CollectionParticipantRole.admin;
   }
 
+  bool canAdd(int userID) {
+    final participantRole = getRole(userID);
+    final canEditCollection = isOwner(userID) ||
+        participantRole == CollectionParticipantRole.collaborator ||
+        participantRole == CollectionParticipantRole.admin;
+    return canEditCollection && !isDeleted;
+  }
+
   bool canAutoAdd(int userID) {
     final participantRole = getRole(userID);
     final canEditCollection = isOwner(userID) ||

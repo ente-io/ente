@@ -174,11 +174,14 @@ class FileActions {
         }
       }
 
-      showToast(context, context.l10n.fileUpdatedSuccessfully);
-
       await CollectionService.instance.sync();
-
       await dialog.hide();
+
+      if (!context.mounted) {
+        return;
+      }
+
+      showToast(context, context.l10n.fileUpdatedSuccessfully);
 
       onSuccess?.call();
     } catch (e) {
@@ -408,7 +411,7 @@ class FileActions {
       if (!context.mounted) {
         return;
       }
-      await showGenericErrorDialog(
+      await showGenericErrorBottomSheet(
         context: context,
         error: e,
       );

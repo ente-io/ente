@@ -19,8 +19,6 @@ Format markdown files with Prettier for consistent styling
 
 ## Commands
 
-### Development
-
 ```bash
 # Install dependencies from the committed lockfile (uses Yarn classic 1.22.22)
 yarn install --frozen-lockfile
@@ -51,46 +49,15 @@ yarn lint-fix         # Auto-fix linting and formatting issues
 Use plain `yarn install` only when intentionally updating dependencies and
 reviewing the resulting `yarn.lock` changes.
 
-## Architecture
+## Structure
 
-This is a **monorepo** containing multiple Ente web applications using **Yarn workspaces**.
+This is a monorepo containing multiple Ente web applications using Yarn workspaces.
 
-### Technology Stack
-
-- **Next.js** for static site generation (all apps except payments)
-- **React** with TypeScript
-- **Material-UI (MUI)** with Emotion for styling
-
-### Repository Structure
-
-```
-web/
-├── apps/              # Individual applications
-│   ├── photos/        # Main photo management app
-│   ├── albums/        # Public albums app for shared album and file links
-│   ├── auth/          # 2FA authentication app
-│   ├── embed/         # Embeddable photo viewer (iframe-friendly)
-│   ├── accounts/      # Passkey support
-│   ├── cast/          # Chromecast/browser casting
-│   ├── share/         # Document storage
-│   └── payments/      # Subscription management
-│
-├── packages/          # Shared code between apps
-│   ├── base/          # Core UI components, crypto, i18n
-│   ├── gallery/       # Photo gallery components
-│   ├── accounts/      # Account management
-│   ├── media/         # Media processing (FFmpeg, image conversion)
-│   ├── utils/         # General utilities
-│   ├── new/           # A temporary place for code shared by photos and albums
-│   └── build-config/  # Shared build configuration
-│
-└── docs/          # Development documentation
-```
+Shared code goes in `packages/`. All apps use Next.js for static export except `payments`. Run `ls apps/` and `ls packages/` to see the full list.
 
 ## Important Notes
 
 - Always run `yarn lint` when explicitly requested or before committing (but not after file modifications)
 - Use Yarn (not npm) for package management
-- Respect the monorepo structure - shared code goes in packages/
 - Follow existing Material-UI theming patterns
 - Maintain TypeScript strict mode compliance

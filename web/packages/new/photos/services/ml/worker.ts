@@ -605,14 +605,17 @@ const index = async (
         };
 
         // Perform an "upsert" by using the existing raw data we got from the
-        // remote as the base, and inserting or overwriting any newly indexed
-        // parts. See: [Note: Preserve unknown ML data fields].
+        // remote as the base, and inserting or overwriting only the parts we
+        // actually (re)indexed. Preserving the raw entry for a kept
+        // face/clip retains any inner keys that the current client's Zod
+        // schema doesn't know about (e.g. a `flags` bitmask set by a
+        // different client). See: [Note: Preserve unknown ML data fields].
 
         const existingRawMLData = remoteMLData?.raw ?? {};
         const rawMLData: RawRemoteMLData = {
             ...existingRawMLData,
-            face: remoteFaceIndex,
-            clip: remoteCLIPIndex,
+            ...(existingFaceIndex ? {} : { face: remoteFaceIndex }),
+            ...(existingCLIPIndex ? {} : { clip: remoteCLIPIndex }),
         };
 
         log.debug(() => ["Uploading ML data", rawMLData]);

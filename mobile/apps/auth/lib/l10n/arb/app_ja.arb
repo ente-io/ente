@@ -561,7 +561,7 @@
   "addNew": "新規追加",
   "selected": "選択済み",
   "moveMultipleToTrashMessage": "{count} アイテムをゴミ箱に移動してもよろしいですか？",
-  "nSelected": "{count, plural, =1{1 個選択} other{{count} 個選択}}",
+  "nSelected": "{count, plural, one {{count} 個選択} other{{count} 個選択}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -572,7 +572,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural,=1 {1 個の項目を固定} other {{count} 個の項目を固定}}",
+  "pinnedCount": "{count, plural, one {{count} 個の項目を固定} other {{count} 個の項目を固定}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {

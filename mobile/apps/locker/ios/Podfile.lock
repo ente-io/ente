@@ -37,6 +37,8 @@ PODS:
   - DKPhotoGallery/Resource (0.0.19):
     - SDWebImage
     - SwiftyGif
+  - ente_rust (0.0.1):
+    - Flutter
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
@@ -45,13 +47,6 @@ PODS:
   - Flutter (1.0.0)
   - flutter_email_sender (0.0.1):
     - Flutter
-  - flutter_inappwebview_ios (0.0.1):
-    - Flutter
-    - flutter_inappwebview_ios/Core (= 0.0.1)
-    - OrderedSet (~> 6.0.3)
-  - flutter_inappwebview_ios/Core (0.0.1):
-    - Flutter
-    - OrderedSet (~> 6.0.3)
   - flutter_local_authentication (1.2.0):
     - Flutter
   - flutter_native_splash (2.4.3):
@@ -69,7 +64,6 @@ PODS:
     - Flutter
   - open_file_ios (1.0.3):
     - Flutter
-  - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -106,11 +100,11 @@ DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - ente_rust (from `.symlinks/plugins/ente_rust/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
-  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_local_authentication (from `.symlinks/plugins/flutter_local_authentication/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
@@ -134,7 +128,6 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
-    - OrderedSet
     - SDWebImage
     - Sentry
     - SwiftyGif
@@ -146,6 +139,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cupertino_http/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
+  ente_rust:
+    :path: ".symlinks/plugins/ente_rust/ios"
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
   file_saver:
@@ -154,8 +149,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
-  flutter_inappwebview_ios:
-    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_local_authentication:
     :path: ".symlinks/plugins/flutter_local_authentication/ios"
   flutter_native_splash:
@@ -199,11 +192,11 @@ SPEC CHECKSUMS:
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
+  ente_rust: 9c976e3d083f0ce90f31693deb99629b28d8fe4c
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
-  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_local_authentication: 989278c681612f1ee0e36019e149137f114b9d7f
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
@@ -212,7 +205,6 @@ SPEC CHECKSUMS:
   local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   open_file_ios: 46184d802ee7959203f6392abcfa0dd49fdb5be0
-  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4

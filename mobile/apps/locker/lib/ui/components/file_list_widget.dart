@@ -2,12 +2,15 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
+import "package:locker/services/trash/models/trash_file.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
@@ -45,25 +48,26 @@ class FileListWidget extends StatelessWidget {
     final bool hasSharees = sharees.isNotEmpty;
     final bool isOutgoing = isOwner && hasSharees;
     final bool isIncoming = collection != null && !isOwner;
-    final bool showSharingIndicator = isOutgoing || isIncoming;
+    final bool isTrashFile = file is TrashFile;
+    final bool showSharingIndicator =
+        !isTrashFile && (isOutgoing || isIncoming);
+    final isMarkedOffline = LockerDB.instance.isFileMarkedOffline(file);
 
     final fileRowWidget = Flexible(
       flex: 6,
       child: Row(
         children: [
           SizedBox(
-            height: 60,
-            width: 60,
+            height: 40,
+            width: 40,
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: _buildFileIcon(),
-                ),
+                _buildFileIcon(),
                 if (showSharingIndicator)
                   Positioned(
-                    right: 1,
-                    bottom: 10,
+                    right: -4,
+                    bottom: -4,
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -122,6 +126,7 @@ class FileListWidget extends StatelessWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border.all(
                 color: isSelected
@@ -133,39 +138,33 @@ class FileListWidget extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 fileRowWidget,
-                Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: SizedBox(
-                    width: 44,
-                    height: 24,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
-                          alignment: Alignment.centerRight,
-                          children: [
-                            ...previousChildren,
-                            if (currentChild != null) currentChild,
-                          ],
-                        );
-                      },
-                      child: isSelected
-                          ? Icon(
-                              key: const ValueKey("selected"),
-                              Icons.check_circle_rounded,
-                              color: colorScheme.primary700,
-                              size: 24,
-                            )
-                          : isIncoming
-                              ? _buildOwnerAvatar(collection.owner)
-                              : const SizedBox(
-                                  key: ValueKey("unselected"),
-                                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    layoutBuilder: (currentChild, previousChildren) {
+                      return Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    child: _buildTrailingIndicator(
+                      color: isSelected
+                          ? colorScheme.primary700
+                          : colorScheme.textMuted,
+                      isSelected: isSelected,
+                      isIncoming: isIncoming,
+                      isMarkedOffline: !isTrashFile && isMarkedOffline,
+                      owner: collection?.owner,
                     ),
                   ),
                 ),
@@ -205,5 +204,38 @@ class FileListWidget extends StatelessWidget {
         config: Configuration.instance,
       ),
     );
+  }
+
+  Widget _buildTrailingIndicator({
+    required Color color,
+    required bool isSelected,
+    required bool isIncoming,
+    required bool isMarkedOffline,
+    required User? owner,
+  }) {
+    if (isSelected) {
+      return Icon(
+        key: const ValueKey("selected"),
+        Icons.check_circle_rounded,
+        color: color,
+        size: 24,
+      );
+    }
+
+    if (isMarkedOffline) {
+      return SvgPicture.asset(
+        "assets/svg/keep_offline.svg",
+        key: const ValueKey("offline"),
+        width: 20.0,
+        height: 20.0,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      );
+    }
+
+    if (isIncoming && owner != null) {
+      return _buildOwnerAvatar(owner);
+    }
+
+    return const SizedBox(key: ValueKey("unselected"));
   }
 }

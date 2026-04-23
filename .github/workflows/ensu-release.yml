@@ -9,7 +9,7 @@ on:
     workflow_dispatch:
 
 env:
-    NDK_VERSION: "27.0.12077973"
+    NDK_VERSION: "27.3.13750724"
 
 permissions:
     contents: write
@@ -50,10 +50,10 @@ jobs:
                   echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22
                   cache: "yarn"
@@ -70,12 +70,6 @@ jobs:
               uses: dtolnay/rust-toolchain@1.93.0
               with:
                   targets: ${{ matrix.platform.rust-target }}
-
-            - name: Set macOS deployment target
-              if: matrix.platform.os == 'macos-latest'
-              run: |
-                  echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
-                  echo "CMAKE_OSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
 
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
@@ -108,10 +102,6 @@ jobs:
               shell: bash
               working-directory: rust/apps/ensu/src-tauri
               run: cargo fetch
-
-            - name: Patch llama.cpp mtmd sources
-              shell: bash
-              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
             - name: Install trusted-signing-cli (Windows only)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
@@ -203,8 +193,6 @@ jobs:
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   TAURI_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
                   TAURI_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
-                  CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
                   APPLE_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}
                   APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
                   APPLE_SIGNING_IDENTITY: "Developer ID Application"
@@ -242,10 +230,8 @@ jobs:
                 working-directory: mobile/native/android/apps/ensu
 
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+            - name: Checkout code
+              uses: actions/checkout@v6
 
             - name: Set release tag
               shell: bash
@@ -273,19 +259,11 @@ jobs:
 
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
-              with:
-                  targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
-            - name: Install cargo-ndk
-              run: cargo install cargo-ndk
-
-            - name: Build Rust libraries
+            - name: Generate Android bindings
               run: |
-                  cd ../../packages/rust/tool
-                  ./build_android.sh
-              env:
-                  ANDROID_HOME: ${{ env.ANDROID_HOME }}
-                  NDK_VERSION: ${{ env.NDK_VERSION }}
+                  cd ../../../../../rust
+                  cargo codegen ensu-android
 
             - name: Print Android release capabilities
               run: |

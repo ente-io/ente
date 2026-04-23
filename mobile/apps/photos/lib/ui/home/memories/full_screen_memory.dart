@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 import "dart:ui";
 
+import "package:connectivity_plus/connectivity_plus.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -14,6 +15,7 @@ import "package:photos/events/details_sheet_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/events/resume_video_event.dart";
+import "package:photos/events/retry_failed_image_load_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file_type.dart";
@@ -35,6 +37,7 @@ import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 
 //There are two states of variables that FullScreenMemory depends on:
 //1. The list of memories
@@ -73,6 +76,11 @@ class FullScreenMemoryDataUpdater extends StatefulWidget {
 class _FullScreenMemoryDataUpdaterState
     extends State<FullScreenMemoryDataUpdater> {
   late ValueNotifier<int> indexNotifier;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  // Seeded from checkConnectivity() before the listener attaches, so a real
+  // offline→online recovery (fire retry) is distinguishable from a WiFi↔
+  // cellular handoff where the old requests are still healthy.
+  bool _wasConnected = false;
 
   @override
   void initState() {
@@ -82,10 +90,70 @@ class _FullScreenMemoryDataUpdaterState
       widget.memories[widget.initialIndex],
       widget.memories.length == widget.initialIndex + 1,
     );
+    _preloadAllThumbnails();
+    unawaited(_setupConnectivityListener());
+  }
+
+  Future<void> _setupConnectivityListener() async {
+    try {
+      final initialResults = await Connectivity().checkConnectivity();
+      _wasConnected =
+          initialResults.any((result) => result != ConnectivityResult.none);
+    } catch (_) {
+      // Prefer a spurious retry over a missed one if the check fails.
+      _wasConnected = false;
+    }
+    if (!mounted) return;
+    _connectivitySubscription =
+        Connectivity().onConnectivityChanged.listen((results) {
+      final hasConnection =
+          results.any((result) => result != ConnectivityResult.none);
+      if (!hasConnection) {
+        _wasConnected = false;
+        return;
+      }
+      if (!_wasConnected) {
+        _wasConnected = true;
+        // Release all refs we bumped so that ZoomableImage's handler can
+        // decrement to 0 and cancel. Current file has 2 refs (bulk preload +
+        // ZoomableImage); next file also has 2 (bulk preload + per-index
+        // preloadThumbnail(nextFile) in the ValueListenableBuilder), so an
+        // extra release is needed for it too or its stale completer survives.
+        for (final memory in widget.memories) {
+          removePendingGetThumbnailRequestIfAny(memory.file);
+        }
+        final nextIndex = indexNotifier.value + 1;
+        if (nextIndex < widget.memories.length) {
+          removePendingGetThumbnailRequestIfAny(
+            widget.memories[nextIndex].file,
+          );
+        }
+        Bus.instance.fire(RetryFailedImageLoadEvent());
+        // Re-kick on a microtask so the event handler runs first and clears
+        // the stale map entries; a synchronous call would re-bump the
+        // refcounts before the cancellation.
+        scheduleMicrotask(_preloadAllThumbnails);
+      }
+    });
+  }
+
+  // The process-wide thumbnail queue in thumbnail_util.dart has 500 slots
+  // and evicts oldest when full. Swipes past this window rely on the
+  // per-index preload in the ValueListenableBuilder.
+  static const _bulkThumbnailPreloadCap = 100;
+
+  void _preloadAllThumbnails() {
+    for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
+      preloadThumbnail(memory.file);
+    }
   }
 
   @override
   void dispose() {
+    _connectivitySubscription?.cancel();
+    for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
+      removePendingGetThumbnailRequestIfAny(memory.file);
+    }
     indexNotifier.dispose();
     super.dispose();
   }

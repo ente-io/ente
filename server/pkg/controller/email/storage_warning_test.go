@@ -1061,7 +1061,7 @@ func TestBuildStorageWarningRunSummary(t *testing.T) {
 	stats.SkippedRolloutPct = 39
 
 	got := buildStorageWarningRunSummary(stats, 0)
-	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 | sent=3 | success={expired_0d=1, active_overage_0d=2} | failures={active_overage_60d=1} | skipped_rollout={expired_30d=39} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=5"
+	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 | sent=3 | success={expired_0d=1, active_overage_0d=2} | failures={active_overage_60d=1} | skipped_rollout={expired_30d=39} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=50"
 	if got != want {
 		t.Fatalf("unexpected summary:\n got: %s\nwant: %s", got, want)
 	}

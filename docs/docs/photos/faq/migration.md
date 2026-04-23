@@ -9,7 +9,7 @@ description: Frequently asked questions about migrating to Ente Photos from othe
 
 ### How much Ente storage do I need when importing my Google Photos Takeout? {#google-takeout-storage}
 
-When importing your Google Photos Takeout into Ente, your storage usage is based on your actual Google Photos library size — not the (much larger) Takeout ZIP size.
+When importing your Google Photos Takeout into Ente, your storage usage is based on your actual Google Photos library size - not the (much larger) Takeout ZIP size.
 
 For example, if Google Photos reports 30 GB used, but your Takeout export is 100 GB, you will need around 30 GB of Ente storage.
 
@@ -64,7 +64,7 @@ For more check: [Troubleshooting](https://ente.com/help/photos/faq/troubleshooti
 
 ### How do I prevent duplicates while migrating from Google Photos? {#prevent-duplicates-migration}
 
-Ente detects duplicates by identical hash, file name and creation time.
+Ente detects duplicates by identical hash and file name.
 
 Duplicates can occur:
 
@@ -122,7 +122,7 @@ Google Photos Partner Sharing automatically shares one person's entire library (
 
 Each partner should export their own library via [Google Takeout](/photos/migration/from-google-photos/) and import it into their own Ente account.
 
-> **Note**: Photos only visible to you through Partner Sharing (not saved to your library) are **not** included in your Takeout. Only the partner who originally took those photos will have them in their export. There is also no built-in filter to remove partner-shared photos from a Takeout import — so duplicates may occur if both partners import and then share entire libraries on Ente.
+> **Note**: Photos only visible to you through Partner Sharing (not saved to your library) are **not** included in your Takeout. Only the partner who originally took those photos will have them in their export. There is also no built-in filter to remove partner-shared photos from a Takeout import - so duplicates may occur if both partners import and then share entire libraries on Ente.
 
 #### 2. Set up sharing on Ente
 
@@ -176,7 +176,7 @@ It is highly recommended to import from Apple Photos via mobile rather than desk
 
 Some photos may not have EXIF metadata embedded directly within the image file. In these cases, Apple Photos exports metadata into separate `.XMP` sidecar files instead of writing it into the photo itself.
 
-Currently, the desktop app does not read metadata from separate XMP sidecar files — it can only recognize metadata that is embedded within the file.
+Currently, the desktop app does not read metadata from separate XMP sidecar files - it can only recognize metadata that is embedded within the file.
 
 We recommend to upload the photos using the iPhone app as iOS exports typically include embedded metadata, which ensures dates and other details are preserved correctly.
 
@@ -204,3 +204,31 @@ rest.
 > Note: In case your uploads get interrupted, just drag and drop the folders
 > into the same albums again, and we will ignore already backed up files and
 > upload just the rest.
+
+## Importing from other cloud services
+
+### I have photos on my phone and also photos autosynced from my phone to a cloud storage. How do I upload all these photos to Ente without duplicates? {#prevent-duplicates-cloud-sync}
+
+Ente detects duplicates by identical hash and file name. If your
+previous cloud service modified your photos in any way (re-compressed them,
+stripped or altered EXIF metadata, converted formats, etc.), the hashes won't
+match and duplicates may occur.
+
+**Recommended workflow:**
+
+1. Turn off auto-upload in your current cloud app.
+2. Download all your photos and videos from your current cloud service to your
+   computer.
+3. Upload them to Ente via the desktop app or web. The desktop app handles large
+   uploads more reliably.
+4. Sign into Ente on your phone and let the app fully sync.
+5. Enable
+   [automatic backups](/photos/getting-started/daily-use#select-albums-folders-to-back-up).
+   If duplicates are a concern, enable the "Back up only new photos" toggle
+   (`Settings > Back up > Back up settings > Back up only new photos`), which
+   skips existing photos on your phone and backs up only new ones.
+
+**If duplicates still arise after migration and upload:**
+
+- Use the [Remove duplicates](/photos/features/albums-and-organization/storage-optimization#remove-exact-duplicates) option.
+- Use the [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) option. (Ensure Machine Learning is enabled in Settings for similar-image detection)

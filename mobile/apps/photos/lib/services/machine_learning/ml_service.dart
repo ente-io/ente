@@ -741,6 +741,10 @@ class MLService {
       actuallyRanML = result.ranML;
       if (!actuallyRanML) return actuallyRanML;
       final bool isOffline = instruction.isOffline;
+      // Bitmask describing properties of this index (e.g. which runtime
+      // produced it), so remote indexes stay distinguishable between rust
+      // and legacy during and after the rust ML rollout.
+      final int remoteFlags = result.usedRustMl ? mlIndexFlagRuntimeRust : 0;
       // Prepare storing data on remote (online mode only)
       final FileDataEntity? dataEntity = isOffline
           ? null
@@ -774,6 +778,7 @@ class MLService {
               client: client,
               height: result.decodedImageSize.height,
               width: result.decodedImageSize.width,
+              flags: remoteFlags,
             ),
           );
         }
@@ -786,6 +791,7 @@ class MLService {
               result.clip!.embedding,
               version: clipMlVersion,
               client: client,
+              flags: remoteFlags,
             ),
           );
         }

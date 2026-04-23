@@ -16,6 +16,8 @@ class FlagService {
   static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
+  static const int _rustMlRolloutPercent = 10;
+  static const String _userIdKey = "user_id";
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
@@ -56,6 +58,8 @@ class FlagService {
   bool get betaUser => flags.betaUser;
 
   bool get internalOrBetaUser => internalUser || betaUser;
+
+  bool get enableContact => internalUser;
 
   bool get enableStripe => Platform.isIOS ? false : flags.enableStripe;
 
@@ -104,9 +108,11 @@ class FlagService {
 
   bool get enableMemoryShareLink => true;
 
-  bool get useRustForML => internalUser;
+  bool get useRustForML =>
+      internalUser || _isInUserRollout(_rustMlRolloutPercent);
 
-  bool get enableMLInBackground => internalUser;
+  bool get enableMLInBackground =>
+      internalUser || _isInUserRollout(_rustMlRolloutPercent);
 
   bool get useRustForFaceThumbnails => internalUser;
 
@@ -119,6 +125,8 @@ class FlagService {
   bool get enableBgLocalUploadPriority => internalUser;
 
   bool get syncRecoveryDiagnostics => internalUser;
+
+  bool get mLHydrationStaleFileRecovery => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {
@@ -195,4 +203,15 @@ class FlagService {
 
   bool _isServerFlagEnabled(int flagBit) =>
       (flags.serverApiFlag & flagBit) != 0;
+
+  bool _isInUserRollout(int percent) {
+    final userId = _prefs.getInt(_userIdKey);
+    if (userId == null || userId <= 0 || percent <= 0) {
+      return false;
+    }
+    if (percent >= 100) {
+      return true;
+    }
+    return (userId % 100) < percent;
+  }
 }

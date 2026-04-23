@@ -39,6 +39,7 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
+import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/memory_share_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
@@ -618,7 +619,9 @@ class CollectionsService {
       return SharedCollectionsAndMemoryLinks(collections, memoryLinks);
     } catch (e, s) {
       _logger.severe("failed to load memory links", e, s);
-      return SharedCollectionsAndMemoryLinks(collections, []);
+      final localMemoryLinks =
+          await MemoryShareService.instance.getLocalMemoryShares();
+      return SharedCollectionsAndMemoryLinks(collections, localMemoryLinks);
     }
   }
 
@@ -1822,33 +1825,74 @@ class CollectionsService {
         await _addToCollection(dstCollectionID, filesToAdd);
       }
 
-      // group files by collectionID
-      final Map<int, List<EnteFile>> filesByCollection = {};
-      final Map<int, Set<int>> fileSeenByCollection = {};
-      for (final file in filesToCopy) {
-        fileSeenByCollection.putIfAbsent(file.collectionID!, () => <int>{});
-        if (fileSeenByCollection[file.collectionID]!
-            .contains(file.uploadedFileID)) {
-          _logger.warning(
-            "skip copy, duplicate ID: ${file.uploadedFileID} in collection "
-            "${file.collectionID}",
-          );
-          continue;
+      if (filesToCopy.isNotEmpty) {
+        final dstCollection = _collectionIDToCollections[dstCollectionID];
+        final currentUserID = _config.getUserID()!;
+        final shouldCopyViaUncategorized = dstCollection != null &&
+            !dstCollection.isOwner(currentUserID) &&
+            dstCollection.canAdd(currentUserID);
+
+        final int copyDestinationCollectionID;
+        if (shouldCopyViaUncategorized) {
+          final uncategorizedCollection =
+              await CollectionsService.instance.getUncategorizedCollection();
+          copyDestinationCollectionID = uncategorizedCollection.id;
+        } else {
+          copyDestinationCollectionID = dstCollectionID;
         }
-        filesByCollection
-            .putIfAbsent(file.collectionID!, () => [])
-            .add(file.copyWith());
-      }
-      for (final entry in filesByCollection.entries) {
-        final srcCollectionID = entry.key;
-        final files = entry.value;
-        await _copyToCollection(
-          files,
-          dstCollectionID: dstCollectionID,
-          srcCollectionID: srcCollectionID,
+
+        final copiedFiles = await _copyFilesToCollection(
+          filesToCopy,
+          dstCollectionID: copyDestinationCollectionID,
         );
+
+        if (shouldCopyViaUncategorized) {
+          await _addToCollection(
+            dstCollectionID,
+            copiedFiles,
+          );
+        }
       }
     }
+  }
+
+  Future<List<EnteFile>> _copyFilesToCollection(
+    List<EnteFile> filesToCopy, {
+    required int dstCollectionID,
+  }) async {
+    final copiedFiles = <EnteFile>[];
+    final filesByCollection = <int, List<EnteFile>>{};
+    final fileSeenByCollection = <int, Set<int>>{};
+
+    for (final file in filesToCopy) {
+      fileSeenByCollection.putIfAbsent(file.collectionID!, () => <int>{});
+      if (fileSeenByCollection[file.collectionID]!
+          .contains(file.uploadedFileID)) {
+        _logger.warning(
+          "skip copy, duplicate ID: ${file.uploadedFileID} in collection "
+          "${file.collectionID}",
+        );
+        continue;
+      }
+      final copiedFile = file.copyWith();
+      filesByCollection
+          .putIfAbsent(file.collectionID!, () => [])
+          .add(copiedFile);
+      fileSeenByCollection[file.collectionID]!.add(file.uploadedFileID!);
+      copiedFiles.add(copiedFile);
+    }
+
+    for (final entry in filesByCollection.entries) {
+      final srcCollectionID = entry.key;
+      final files = entry.value;
+      await _copyToCollection(
+        files,
+        dstCollectionID: dstCollectionID,
+        srcCollectionID: srcCollectionID,
+      );
+    }
+
+    return copiedFiles;
   }
 
   Future<void> _addToCollection(int collectionID, List<EnteFile> files) async {
