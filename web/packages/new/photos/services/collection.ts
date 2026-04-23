@@ -571,6 +571,15 @@ export const canAddFilesToCollection = (collection: Collection) => {
     return role == "OWNER" || role == "ADMIN" || role == "COLLABORATOR";
 };
 
+/**
+ *
+ * @param collection
+ * @returns whether the current user can directly
+ * upload to the collection.
+ *
+ * A user can directly upload to a collection if he/she
+ * is the owner of that particular collection.
+ */
 export const canDirectlyUploadToCollection = (collection: Collection) =>
     collection.owner.id == ensureLocalUser().id;
 
@@ -817,6 +826,14 @@ export const copyFiles = async (
     return copiedFiles;
 };
 
+/**
+ * This function is currenly used in the upload to shared album flow.
+ * For uploading a file to a shared-album for which the currentUser
+ * doesn't have an equivalent copy, the file first has to be uploaded to the
+ * user's uncategorized so the user now owns a copy of the file.
+ *
+ * @returns the uncategorized album of the currentUser.
+ */
 const savedUserUncategorizedCollection = async () => {
     const userID = ensureLocalUser().id;
     return (await savedCollections()).find(
@@ -825,10 +842,37 @@ const savedUserUncategorizedCollection = async () => {
     );
 };
 
+/**
+ *
+ * Checking whether the currentUser already has a uncategorized Collection,
+ * if so then returning the reference to that else creating the same
+ * and then returning the instance of the newly created collection.
+ *
+ * @returns the uncategorized collection of the currentUser if it already exists
+ * else undefined
+ */
 export const savedOrCreateUserUncategorizedCollection = async () =>
     (await savedUserUncategorizedCollection()) ??
     createUncategorizedCollection();
 
+/**
+ *
+ * @param dstCollection
+ * @param files
+ *
+ * This function classified the files which are to be added to the
+ * dstCollection based on the ownership of each of the files.
+ *
+ * The filesToAdd() list is for files in otherOwnedFiles whose content can be
+ * represented by an equivalent file already owned by the current user. If the
+ * code finds a user-owned equivalent with the same metadata hash and file type,
+ * it reuses that file and links it to the dstCollection.
+ *
+ * The filesToCopy() are for files owned by someone else for which
+ * the current user has no equivalent copy. Those cannot be directly reused.
+ * So a copy of them is created for the current user and then linked
+ * with the dstCollection.
+ */
 export const addOrCopyToCollection = async (
     dstCollection: Collection,
     files: EnteFile[],
@@ -836,7 +880,7 @@ export const addOrCopyToCollection = async (
     if (!files.length) return;
 
     /**
-     * The user who is added the files to the dstCollection must be
+     * The user who is adding the files to the dstCollection must be
      * either the OWNER, ADMIN or atleast a COLLABORATOR to add the file
      * to the album.
      *
@@ -854,7 +898,7 @@ export const addOrCopyToCollection = async (
      * Now since we have the files across all the collections and the
      * id of the collection to which we want to upload the files to
      *
-     * Getting the file IDs which are present in the dstCollection
+     * Getting the file IDs which are already present in the dstCollection
      */
     const destinationFileIDs = fileIDsInCollection(
         dstCollection.id,
@@ -871,8 +915,8 @@ export const addOrCopyToCollection = async (
         (file) => !destinationFileIDs.has(file.id),
     );
 
-    // If all the files which were to uploaded, already exists then,
-    // we have nothing pending to upload so returning.
+    // If all the files, already exists then,
+    // we have nothing pending so returning.
     if (!filesMissingFromDestination.length) return;
 
     /**
@@ -949,9 +993,23 @@ export const addOrCopyToCollection = async (
         }
     }
 
+    /**
+     * If you are wondering why we need this check again because we did it
+     * once at the filesMissingFromDestination. the filesToAdd might have
+     * different or new IDs which wheren't there in the files earlier.
+     *
+     * For otherOwnedFiles, the code may replace thesource file X
+     * with a different user owned equivalent Y.
+     */
     const reusableOwnedFiles = uniqueFilesByID(filesToAdd).filter(
         (file) => !destinationFileIDs.has(file.id),
     );
+
+    /**
+     * Adding the files to the dstCollection.
+     * fyi: these are the files for which the currentUser
+     * had a equivalent copy with a matching metadata + fileType.
+     */
     if (reusableOwnedFiles.length) {
         await addToCollection(dstCollection, reusableOwnedFiles);
         reusableOwnedFiles.forEach((file) => destinationFileIDs.add(file.id));
@@ -959,12 +1017,28 @@ export const addOrCopyToCollection = async (
 
     if (!filesToCopy.length) return;
 
+    /**
+     * To directly upload to a collection, the currentUser must be the
+     * the owner of the same, checking that and if not then,
+     */
     const copyDestination = canDirectlyUploadToCollection(dstCollection)
         ? dstCollection
         : await savedOrCreateUserUncategorizedCollection();
+
+    /**
+     * If the user owns the dstCollection then copyDestination will have reference
+     * of that collection in it else, it will be having the reference for the uncategorized
+     * collection to which the files is copied to.
+     */
     const copiedFiles = await copyFiles(copyDestination, filesToCopy);
 
     if (copyDestination.id != dstCollection.id) {
+        /**
+         * The copiedFiles variable have the reference of the files which are
+         * uploaded to the uncatgroized and now these files have a proper EnteFile
+         * schema, therefore now we can add these files to the dstCollection after checking
+         * the fileIds doesn't already exist there.
+         */
         const filesToAddAfterCopy = uniqueFilesByID(copiedFiles).filter(
             (file) => !destinationFileIDs.has(file.id),
         );
