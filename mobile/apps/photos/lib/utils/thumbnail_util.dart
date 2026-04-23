@@ -201,7 +201,10 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   if (!_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
     return;
   }
-  final thumbnailDecryptionKey = await getFileKeyUsingBgWorker(file);
+  final thumbnailDecryptionKey =
+      CollectionsService.instance.isSharedPublicLink(file.collectionID!)
+          ? await getPublicFileKeyUsingBgWorker(file)
+          : await getFileKeyUsingBgWorker(file);
   Uint8List data;
   try {
     data = await CryptoUtil.decryptChaCha(

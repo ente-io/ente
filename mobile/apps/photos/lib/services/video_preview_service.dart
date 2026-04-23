@@ -1018,7 +1018,10 @@ class VideoPreviewService {
         type: "vid_preview",
       );
     }
-    final encryptionKey = getFileKey(file);
+    final encryptionKey =
+        collectionsService.isSharedPublicLink(file.collectionID!)
+            ? getPublicFileKey(file)
+            : getFileKey(file);
     final playlistData = await decryptAndUnzipJson(
       encryptionKey,
       encryptedData: fetchResult.encryptedData,
