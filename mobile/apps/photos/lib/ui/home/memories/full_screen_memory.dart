@@ -116,17 +116,17 @@ class _FullScreenMemoryDataUpdaterState
         _wasConnected = true;
         // Release all refs we bumped so that ZoomableImage's handler can
         // decrement to 0 and cancel. Current file has 2 refs (bulk preload +
-        // ZoomableImage); next file also has 2 (bulk preload + per-index
-        // preloadThumbnail(nextFile) in the ValueListenableBuilder), so an
-        // extra release is needed for it too or its stale completer survives.
+        // ZoomableImage); each lookahead file also has 2 (bulk preload +
+        // per-index preloadThumbnail in the ValueListenableBuilder), so an
+        // extra release is needed for each or its stale completer survives.
         for (final memory in widget.memories) {
           removePendingGetThumbnailRequestIfAny(memory.file);
         }
-        final nextIndex = indexNotifier.value + 1;
-        if (nextIndex < widget.memories.length) {
-          removePendingGetThumbnailRequestIfAny(
-            widget.memories[nextIndex].file,
-          );
+        final currentIndex = indexNotifier.value;
+        for (var i = 1; i <= _lookaheadCap; i++) {
+          final j = currentIndex + i;
+          if (j >= widget.memories.length) break;
+          removePendingGetThumbnailRequestIfAny(widget.memories[j].file);
         }
         Bus.instance.fire(RetryFailedImageLoadEvent());
         // Re-kick on a microtask so the event handler runs first and clears
@@ -141,6 +141,12 @@ class _FullScreenMemoryDataUpdaterState
   // and evicts oldest when full. Swipes past this window rely on the
   // per-index preload in the ValueListenableBuilder.
   static const _bulkThumbnailPreloadCap = 100;
+
+  // How many files ahead of the current index to keep warming (thumbnail +
+  // original). The per-file 5s slideshow cadence can't outpace multi-second
+  // original downloads on a one-deep pipeline, so we keep several in flight.
+  // preloadFile no-ops for videos, so this stays thumbnail-only for those.
+  static const _lookaheadCap = 3;
 
   void _preloadAllThumbnails() {
     for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
@@ -523,10 +529,14 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   ValueListenableBuilder<int>(
                     valueListenable: inheritedData.indexNotifier,
                     builder: (context, index, _) {
-                      if (index < inheritedData.memories.length - 1) {
-                        final nextFile = inheritedData.memories[index + 1].file;
-                        preloadThumbnail(nextFile);
-                        preloadFile(nextFile);
+                      for (var i = 1;
+                          i <= _FullScreenMemoryDataUpdaterState._lookaheadCap;
+                          i++) {
+                        final j = index + i;
+                        if (j >= inheritedData.memories.length) break;
+                        final file = inheritedData.memories[j].file;
+                        preloadThumbnail(file);
+                        preloadFile(file);
                       }
                       final currentMemory = inheritedData.memories[index];
                       final isVideo =
