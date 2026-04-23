@@ -28,6 +28,8 @@ class DiffFetcher {
       final sharedFiles = <EnteFile>[];
       final headers =
           CollectionsService.instance.publicCollectionHeaders(collectionID);
+      final collectionKey =
+          CollectionsService.instance.getPublicCollectionKey(collectionID);
       int sinceTime = 0;
 
       do {
@@ -60,7 +62,7 @@ class DiffFetcher {
           if (item["info"] != null) {
             file.fileSize = item["info"]["fileSize"];
           }
-          final fileKey = getFileKey(file);
+          final fileKey = getFileKeyWithCollectionKey(file, collectionKey);
           final encodedMetadata = await CryptoUtil.decryptChaCha(
             CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
             fileKey,

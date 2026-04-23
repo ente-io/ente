@@ -133,7 +133,7 @@ Future<File?> downloadAndDecryptPublicFile(
         encryptedFilePath,
         decryptedFilePath,
         CryptoUtil.base642bin(file.fileDecryptionHeader!),
-        getFileKey(file),
+        getPublicFileKey(file),
       );
       fakeProgress?.stop();
       _logger.info('$logPrefix file saved at $decryptedFilePath');
