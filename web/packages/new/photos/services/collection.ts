@@ -687,7 +687,15 @@ export const moveFromCollection = async (
             }),
         );
     });
-
+/**
+ *
+ * @param files
+ * @returns list of unique files from the files argument.
+ *
+ * This function just iterates through the files and then
+ * stores the file.id and skips any files for which the
+ * file.id has been already been seen to prevent duplicates.
+ */
 const uniqueFilesByID = (files: EnteFile[]) => {
     const seen = new Set<number>();
     const uniqueFiles: EnteFile[] = [];
@@ -757,25 +765,54 @@ const userOwnedEquivalentFilesByHashAndType = (
 
     return equivalents;
 };
-
+/**
+ *
+ * @param dstCollection
+ * @param files
+ * @returns a new List with each file having their id, ownerID and collectionId
+ * updated. the fileId points to the id of the newly created file,
+ * the ownerId points to the id of the currentUser and collectionId points to the
+ * dstCollection.id
+ */
 export const copyFiles = async (
     dstCollection: Collection,
     files: EnteFile[],
 ): Promise<EnteFile[]> => {
     if (!files.length) return [];
 
+    /**
+     * Getting the currentUserId and then ensuring that the
+     * dstCollection is indeed owned by that person. We only support
+     * uploading to owned collection so hence this verification.
+     */
     const currentUserID = ensureLocalUser().id;
     if (dstCollection.owner.id != currentUserID) {
         throw new Error("Destination collection must be owned by the actor");
     }
 
+    // Filtering out any duplicates from the list of files to be copied
     const uniqueFiles = uniqueFilesByID(files);
     const copiedFiles: EnteFile[] = [];
 
+    /**
+     * For context, since i got confused what the uniqueFiles were actually,
+     * here uniqueFiles refer to those files which are uploaded to Ente by
+     * not actually owned by the currentUser who actually wanted to upload
+     * them to the dstCollection.
+     *
+     * And since these files were already uploaded to Ente, they will belong
+     * to some collection in Ente. So mapping each file with their corresponding
+     * collectionId and then looping through the same.
+     */
     for (const [srcCollectionID, sourceFiles] of groupFilesByCollectionID(
         uniqueFiles,
     ).entries()) {
         await batched(sourceFiles, async (batchFiles) => {
+            /**
+             * As said earlier this is strictly for files which aren't owned
+             * by the currentUser and only such files can be copied so thus
+             * doing a final validation.
+             */
             if (
                 batchFiles.some(
                     (file) =>
@@ -788,10 +825,12 @@ export const copyFiles = async (
                 );
             }
 
+            // Encrypting thef iles with the dstCollection Key
             const encryptedFileKeys = await encryptWithCollectionKey(
                 dstCollection,
                 batchFiles,
             );
+
             const res = await fetch(await apiURL("/files/copy"), {
                 method: "POST",
                 headers: await authenticatedRequestHeaders(),
@@ -803,16 +842,21 @@ export const copyFiles = async (
             });
             ensureOk(res);
 
+            // This is just the server responding back with,
+            // the old file with ID X is now a new file with ID Y.
             const { oldToNewFileIDMap } = CopyFilesResponse.parse(
                 await res.json(),
             );
 
+            // Iterating through files and checking if they exist
+            // in the mapping, which indicates the file was copied successfully.
             for (const file of batchFiles) {
                 const copiedFileID = oldToNewFileIDMap[file.id.toString()];
                 if (!copiedFileID) {
                     throw new Error(`Failed to copy file ${file.id}`);
                 }
 
+                // If success then updating the copiedFiles array.
                 copiedFiles.push({
                     ...file,
                     id: copiedFileID,
