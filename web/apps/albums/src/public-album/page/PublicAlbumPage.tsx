@@ -1624,7 +1624,6 @@ const MobileMasonryCover = styled(Box, {
 
 const MobileMasonryCoverPreviewImage = styled("img")({
     filter: "blur(3px) saturate(1.08) brightness(0.94)",
-    transform: "scale(1.03)",
 });
 
 const MobileMasonryCoverFullImage = styled("img")({
