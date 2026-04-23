@@ -638,13 +638,19 @@ export default function PublicAlbumPage() {
         ],
     );
 
+    const fileListFooterHeightForViewport = showMobileMasonryCover
+        ? mobileMasonryFileListFooterHeight
+        : fileListFooterHeight;
+
     const fileListFooter = useMemo<FileListHeaderOrFooter>(
         () => ({
-            component: <FileListFooter />,
-            height: fileListFooterHeight,
+            component: (
+                <FileListFooter height={fileListFooterHeightForViewport} />
+            ),
+            height: fileListFooterHeightForViewport,
             extendToInlineEdges: true,
         }),
-        [],
+        [fileListFooterHeightForViewport],
     );
 
     if (loading && (!publicFiles || !credentials.current)) {
@@ -1421,8 +1427,11 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
         };
     }, [coverFile]);
 
+    const isPlaceholder =
+        !coverFile || coverFile.metadata.hasStaticThumbnail || !imageURL;
+
     return (
-        <MobileMasonryCover>
+        <MobileMasonryCover $isPlaceholder={isPlaceholder}>
             {coverFile?.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={coverFile.metadata.fileType} />
             ) : imageURL ? (
@@ -1430,7 +1439,7 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
             ) : (
                 <LoadingThumbnail />
             )}
-            <MobileMasonryCoverGradient />
+            <MobileMasonryCoverGradient $isPlaceholder={isPlaceholder} />
             <MobileMasonryCoverContent>
                 <MobileMasonryCoverTitle>{title}</MobileMasonryCoverTitle>
                 <Typography
@@ -1446,20 +1455,14 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
                         minWidth: 0,
                     }}
                 >
-                    <Box
-                        component="span"
-                        sx={{
-                            color: "rgba(255, 255, 255, 0.72)",
-                            flexShrink: 0,
-                        }}
-                    >
+                    <Box component="span" sx={{ opacity: 0.72, flexShrink: 0 }}>
                         {t("photos_count", { count: fileCount })}
                     </Box>
                     {dateRange && (
                         <Box
                             component="span"
                             sx={{
-                                color: "rgba(255, 255, 255, 0.72)",
+                                opacity: 0.72,
                                 display: "inline-flex",
                                 alignItems: "center",
                                 minWidth: 0,
@@ -1491,12 +1494,20 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
     );
 };
 
-const MobileMasonryCover = styled(Box)({
+const mobileMasonryCoverImageGradient =
+    "linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.18) 42%, rgba(0, 0, 0, 0.74) 100%)";
+
+const mobileMasonryCoverPlaceholderGradient =
+    "linear-gradient(to bottom, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.42) 100%)";
+
+const MobileMasonryCover = styled(Box, {
+    shouldForwardProp: (prop) => prop !== "$isPlaceholder",
+})<{ $isPlaceholder: boolean }>(({ theme, $isPlaceholder }) => ({
     position: "relative",
     overflow: "hidden",
     borderRadius: "4px",
     aspectRatio: "3 / 4",
-    backgroundColor: "#1b1b1b",
+    backgroundColor: $isPlaceholder ? "#F4F4F4" : "#1b1b1b",
     "& > img": {
         position: "absolute",
         inset: 0,
@@ -1504,14 +1515,21 @@ const MobileMasonryCover = styled(Box)({
         height: "100%",
         objectFit: "cover",
     },
-});
+    ...theme.applyStyles("dark", { backgroundColor: "#1b1b1b" }),
+}));
 
-const MobileMasonryCoverGradient = styled(Box)({
+const MobileMasonryCoverGradient = styled(Box, {
+    shouldForwardProp: (prop) => prop !== "$isPlaceholder",
+})<{ $isPlaceholder: boolean }>(({ theme, $isPlaceholder }) => ({
     position: "absolute",
     inset: 0,
-    background:
-        "linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.18) 42%, rgba(0, 0, 0, 0.74) 100%)",
-});
+    background: $isPlaceholder
+        ? mobileMasonryCoverPlaceholderGradient
+        : mobileMasonryCoverImageGradient,
+    ...theme.applyStyles("dark", {
+        background: mobileMasonryCoverImageGradient,
+    }),
+}));
 
 const MobileMasonryCoverContent = styled(Box)({
     position: "absolute",
@@ -1538,16 +1556,21 @@ const MobileMasonryCoverTitle = styled(Typography)({
 });
 
 /**
- * The fixed height (in px) of {@link FileListFooter}.
+ * The default height (in px) of {@link FileListFooter}.
  */
 const fileListFooterHeight = 24;
 
 /**
+ * The compact trailing gap used after the final photo in the mobile masonry
+ * cover layout.
+ */
+const mobileMasonryFileListFooterHeight = thumbnailGap;
+
+/**
  * A footer shown after the listing of files.
  *
- * It scrolls along with the content. It has a fixed height,
- * {@link fileListFooterHeight}.
+ * It scrolls along with the content.
  */
-const FileListFooter: React.FC = () => (
-    <Box sx={{ height: fileListFooterHeight }} />
+const FileListFooter: React.FC<{ height: number }> = ({ height }) => (
+    <Box sx={{ height }} />
 );
