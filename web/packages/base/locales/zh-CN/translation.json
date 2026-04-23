@@ -297,7 +297,7 @@
     "keep_photos": "保留照片",
     "share_album": "共享相册",
     "share_action": "",
-    "feed": "",
+    "activity": "",
     "sharing_with_self": "您不能与自己共享",
     "sharing_already_shared": "您已经与 {{email}} 共享了",
     "sharing_album_not_allowed": "不允许分享相册",

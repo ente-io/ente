@@ -820,7 +820,7 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                             ...theme.applyStyles("dark", { color: "#fff" }),
                         })}
                     >
-                        {t("feed")}
+                        {t("activity")}
                     </Typography>
                     <CloseButton onClick={onClose}>
                         <CloseIcon sx={{ fontSize: 22 }} />
