@@ -18,7 +18,7 @@ import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/events/retry_failed_image_load_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import 'package:photos/src/rust/api/image_processing_api.dart' as rust_image;
+import "package:photos/src/rust/api/image_processing_api.dart" as rust_image;
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -469,8 +469,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     // Exception: very large images (>100MP) skip Rust to avoid OOM — the Rust
     // decoder loads the full image into memory, while the platform decoder
     // respects cacheWidth/cacheHeight and decodes at reduced resolution.
-    if (Platform.isAndroid && _isHeic() && !isTooLargeImage) {
-      _logger.info("Using Rust HEIC decoder for ${_photo.generatedID}");
+    if (_shouldUseRustHeicDecoder()) {
       unawaited(_loadHeicWithRust(file));
       return;
     }
@@ -529,32 +528,25 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   Future<void> _loadHeicWithRust(File file) async {
-    try {
-      final rustBytes = await rust_image.decodeToJpeg(
-        imagePath: file.path,
+    final imageProvider = await _tryDecodeHeicWithRust(
+      file,
+    );
+    if (imageProvider != null) {
+      await _tryDisplayRustDecodedImage(
+        file,
+        imageProvider,
+        fallbackToSupportedFormatOnFailure: true,
       );
-      _logger.info(
-        "Rust HEIC decode succeeded for ${_photo.generatedID}",
-      );
-      final imageProvider = MemoryImage(rustBytes);
-      if (mounted) {
-        await precacheImage(imageProvider, context);
-        if (mounted && !_loadedFinalImage) {
-          await _updateViewWithFinalImage(imageProvider);
-        }
-      }
-    } catch (e) {
-      _logger.warning(
-        "Rust HEIC decode failed for ${_photo.generatedID}: $e",
-      );
-      unawaited(
-        _loadInSupportedFormat(
-          file,
-          e,
-          skipRustDecoder: true,
-        ),
-      );
+      return;
     }
+
+    unawaited(
+      _loadInSupportedFormat(
+        file,
+        "Rust HEIC decode failed",
+        skipRustDecoder: true,
+      ),
+    );
   }
 
   Future<void> _updateViewWithFinalImage(ImageProvider imageProvider) async {
@@ -614,6 +606,66 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 
+  bool get _isKnownTooLargeImage => _photo.hasDimensions && isTooLargeImage;
+
+  bool _shouldUseRustHeicDecoder() =>
+      Platform.isAndroid && _isHeic() && !_isKnownTooLargeImage;
+
+  Future<ImageProvider<Object>?> _tryDecodeHeicWithRust(
+    File file, {
+    int? quality,
+  }) async {
+    if (!_shouldUseRustHeicDecoder()) {
+      return null;
+    }
+
+    try {
+      _logger.info("Using Rust HEIC decoder for ${_photo.generatedID}");
+      final Uint8List rustBytes = await rust_image.decodeToJpeg(
+        imagePath: file.path,
+        quality: quality,
+      );
+      final MemoryImage imageProvider = MemoryImage(rustBytes);
+      _logger.info("Rust HEIC decode succeeded for ${_photo.generatedID}");
+      return imageProvider;
+    } catch (e) {
+      _logger.warning("Rust HEIC decode failed for ${_photo.generatedID}: $e");
+      return null;
+    }
+  }
+
+  Future<bool> _tryDisplayRustDecodedImage(
+    File file,
+    ImageProvider<Object> imageProvider, {
+    required bool fallbackToSupportedFormatOnFailure,
+  }) async {
+    try {
+      if (!mounted) {
+        return false;
+      }
+
+      await precacheImage(imageProvider, context);
+      if (mounted && !_loadedFinalImage) {
+        await _updateViewWithFinalImage(imageProvider);
+      }
+      return true;
+    } catch (e) {
+      _logger.warning(
+        "Flutter failed to decode Rust JPEG bytes for ${_photo.generatedID}: $e",
+      );
+      if (fallbackToSupportedFormatOnFailure) {
+        unawaited(
+          _loadInSupportedFormat(
+            file,
+            e,
+            skipRustDecoder: true,
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
   bool _isHeic() {
     final ext = _photo.displayName.toLowerCase().split('.').last;
     return ext == 'heic' || ext == 'heif';
@@ -652,26 +704,18 @@ class _ZoomableImageState extends State<ZoomableImage> {
     );
     _convertToSupportedFormat = true;
 
-    if (!skipRustDecoder && Platform.isAndroid && _isHeic()) {
-      try {
-        final rustBytes = await rust_image.decodeToJpeg(
-          imagePath: file.path,
-          quality: isTooLargeImage ? 85 : null,
-        );
-        _logger.info("Rust fallback succeeded for ${_photo.generatedID}");
-        final imageProvider = MemoryImage(rustBytes);
-        unawaited(
-          precacheImage(imageProvider, context).then((value) {
-            if (mounted) {
-              _updateViewWithFinalImage(imageProvider);
-            }
-          }),
-        );
+    if (!skipRustDecoder) {
+      final imageProvider = await _tryDecodeHeicWithRust(
+        file,
+      );
+      final didDisplayRustImage = imageProvider != null &&
+          await _tryDisplayRustDecodedImage(
+            file,
+            imageProvider,
+            fallbackToSupportedFormatOnFailure: false,
+          );
+      if (didDisplayRustImage) {
         return;
-      } catch (e) {
-        _logger.warning(
-          "Rust fallback failed for ${_photo.generatedID}: $e",
-        );
       }
     }
 
