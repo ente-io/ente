@@ -608,18 +608,15 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
 
             {/* Public feed sidebar */}
-            {publicFeedVisibilityProps.open &&
-                collection &&
-                credentials?.current &&
-                collectionKey && (
-                    <LazyPublicFeedSidebar
-                        {...publicFeedVisibilityProps}
-                        files={files}
-                        credentials={credentials.current}
-                        collectionKey={collectionKey}
-                        onItemClick={handleFeedItemClick}
-                    />
-                )}
+            {collection && credentials?.current && collectionKey && (
+                <LazyPublicFeedSidebar
+                    {...publicFeedVisibilityProps}
+                    files={files}
+                    credentials={credentials.current}
+                    collectionKey={collectionKey}
+                    onItemClick={handleFeedItemClick}
+                />
+            )}
         </TripLayoutContainer>
     );
 };

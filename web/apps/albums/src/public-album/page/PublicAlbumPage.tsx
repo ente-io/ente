@@ -809,17 +809,15 @@ export default function PublicAlbumPage() {
                 />
             )}
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
-            {publicFeedVisibilityProps.open &&
-                publicCollection &&
-                collectionKey.current && (
-                    <LazyPublicFeedSidebar
-                        {...publicFeedVisibilityProps}
-                        files={publicFiles}
-                        credentials={credentials.current}
-                        collectionKey={collectionKey.current}
-                        onItemClick={handleFeedItemClick}
-                    />
-                )}
+            {publicCollection && collectionKey.current && (
+                <LazyPublicFeedSidebar
+                    {...publicFeedVisibilityProps}
+                    files={publicFiles}
+                    credentials={credentials.current}
+                    collectionKey={collectionKey.current}
+                    onItemClick={handleFeedItemClick}
+                />
+            )}
         </>
     );
 

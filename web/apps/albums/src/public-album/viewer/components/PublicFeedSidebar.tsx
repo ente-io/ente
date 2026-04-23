@@ -6,6 +6,7 @@ import {
     type PublicFeedComment,
     type PublicFeedReaction,
 } from "@/public-album/social/api/public-reaction";
+import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -639,6 +640,12 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     collectionKey,
     onItemClick,
 }) => {
+    const { clearBrowserBackState } = useBrowserBackClose({
+        open,
+        onClose,
+        stateKey: "__entePublicFeedSidebarBackState",
+    });
+
     const [thumbnailCache, setThumbnailCache] = useState<ThumbnailCache>(
         new Map(),
     );
@@ -842,12 +849,13 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                                 onClick={
                                     onItemClick
                                         ? () => {
-                                              onItemClick(
-                                                  getFeedItemClickInfo(
-                                                      item,
-                                                      anonUserNames,
-                                                  ),
+                                              const info = getFeedItemClickInfo(
+                                                  item,
+                                                  anonUserNames,
                                               );
+                                              void clearBrowserBackState(
+                                                  "back",
+                                              ).then(() => onItemClick(info));
                                           }
                                         : undefined
                                 }

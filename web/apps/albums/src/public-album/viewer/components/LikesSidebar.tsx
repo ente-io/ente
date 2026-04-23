@@ -1,5 +1,6 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
 import { getStoredAnonIdentity } from "@/public-album/social/api/public-reaction";
+import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -155,6 +156,12 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     prefetchedUserIDToEmail,
     anonUserNames,
 }) => {
+    useBrowserBackClose({
+        open,
+        onClose,
+        stateKey: "__enteLikesSidebarBackState",
+    });
+
     const [loading, setLoading] = useState(false);
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
     const showLoading = loading || isSocialDataLoading;
