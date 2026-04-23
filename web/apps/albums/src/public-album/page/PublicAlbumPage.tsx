@@ -19,6 +19,7 @@ import type { TripLayoutProps } from "@/public-album/components/TripLayout";
 import { setPublicAlbumsCredentials } from "@/public-album/data/auth/public-link-credentials";
 import { quickLinkDateRangeForFiles } from "@/public-album/data/utils/quick-link";
 import { ActiveDownloadStatusNotifications } from "@/public-album/download/components/ActiveDownloadStatusNotifications";
+import { downloadManager } from "@/public-album/download/services/download-manager";
 import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
 import { sortFiles } from "@/public-album/media/utils/sort-files";
 import type { FullScreenDropZoneProps } from "@/public-album/upload/components/CollectDropZone";
@@ -1412,36 +1413,81 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
     dateRange,
     actions,
 }) => {
-    const [imageURL, setImageURL] = useState<string | undefined>(undefined);
+    const [thumbnailURL, setThumbnailURL] = useState<string | undefined>();
+    const [fullImageURL, setFullImageURL] = useState<string | undefined>();
     const coverRequestIDRef = useRef(0);
 
     useEffect(() => {
         const requestID = ++coverRequestIDRef.current;
 
-        setImageURL(undefined);
+        setThumbnailURL(undefined);
+        setFullImageURL(undefined);
 
         if (!coverFile || coverFile.metadata.hasStaticThumbnail) {
             return undefined;
         }
 
         const loadThumbnail = async () => {
+            const setThumbnailURLIfCurrent = (url: string | undefined) => {
+                if (requestID === coverRequestIDRef.current && url) {
+                    setThumbnailURL(url);
+                    return true;
+                }
+                return false;
+            };
+
+            let didSetThumbnail = false;
             try {
                 const cachedURL = await thumbnailManager.renderableThumbnailURL(
                     coverFile,
                     true,
                 );
-                if (requestID !== coverRequestIDRef.current) return;
-                if (cachedURL) {
-                    setImageURL(cachedURL);
+                didSetThumbnail = setThumbnailURLIfCurrent(cachedURL);
+                if (
+                    !didSetThumbnail &&
+                    requestID !== coverRequestIDRef.current
+                ) {
                     return;
                 }
 
-                const remoteURL =
-                    await thumbnailManager.renderableThumbnailURL(coverFile);
-                if (requestID !== coverRequestIDRef.current) return;
-                setImageURL(remoteURL);
+                if (!didSetThumbnail) {
+                    const remoteURL =
+                        await thumbnailManager.renderableThumbnailURL(
+                            coverFile,
+                        );
+                    didSetThumbnail = setThumbnailURLIfCurrent(remoteURL);
+                }
             } catch (e) {
                 log.warn("Failed to fetch public album cover thumbnail", e);
+                return;
+            }
+
+            if (
+                !didSetThumbnail ||
+                !isFullQualityCoverSourceSupported(coverFile)
+            ) {
+                return;
+            }
+
+            try {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(coverFile);
+                const sourceURL =
+                    sourceURLs.type === "image"
+                        ? sourceURLs.imageURL
+                        : sourceURLs.type === "livePhoto"
+                          ? await sourceURLs.imageURL()
+                          : undefined;
+                if (!sourceURL || requestID !== coverRequestIDRef.current) {
+                    return;
+                }
+
+                await preloadImage(sourceURL);
+                if (requestID === coverRequestIDRef.current) {
+                    setFullImageURL(sourceURL);
+                }
+            } catch (e) {
+                log.warn("Failed to fetch full quality public album cover", e);
             }
         };
 
@@ -1453,14 +1499,31 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
     }, [coverFile]);
 
     const isPlaceholder =
-        !coverFile || coverFile.metadata.hasStaticThumbnail || !imageURL;
+        !coverFile || coverFile.metadata.hasStaticThumbnail || !thumbnailURL;
 
     return (
         <MobileMasonryCover $isPlaceholder={isPlaceholder}>
             {coverFile?.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={coverFile.metadata.fileType} />
-            ) : imageURL ? (
-                <img src={imageURL} alt={title} />
+            ) : thumbnailURL ? (
+                <>
+                    <MobileMasonryCoverPreviewImage
+                        src={thumbnailURL}
+                        alt={title}
+                        decoding="async"
+                        loading="eager"
+                        fetchPriority="high"
+                    />
+                    {fullImageURL && fullImageURL !== thumbnailURL && (
+                        <MobileMasonryCoverFullImage
+                            src={fullImageURL}
+                            alt=""
+                            aria-hidden
+                            decoding="async"
+                            loading="eager"
+                        />
+                    )}
+                </>
             ) : (
                 <LoadingThumbnail />
             )}
@@ -1519,6 +1582,22 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
     );
 };
 
+const isFullQualityCoverSourceSupported = (file: EnteFile) =>
+    file.metadata.fileType === FileType.image ||
+    file.metadata.fileType === FileType.livePhoto;
+
+const preloadImage = async (url: string) => {
+    const image = new Image();
+    image.decoding = "async";
+    const loadPromise = new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = reject;
+    });
+    image.src = url;
+    await loadPromise;
+    await image.decode().catch(() => undefined);
+};
+
 const mobileMasonryCoverImageGradient =
     "linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.18) 42%, rgba(0, 0, 0, 0.74) 100%)";
 
@@ -1542,6 +1621,19 @@ const MobileMasonryCover = styled(Box, {
     },
     ...theme.applyStyles("dark", { backgroundColor: "#1b1b1b" }),
 }));
+
+const MobileMasonryCoverPreviewImage = styled("img")({
+    filter: "blur(3px) saturate(1.08) brightness(0.94)",
+    transform: "scale(1.03)",
+});
+
+const MobileMasonryCoverFullImage = styled("img")({
+    animation: "mobile-masonry-cover-reveal 420ms ease-out both",
+    "@keyframes mobile-masonry-cover-reveal": {
+        from: { opacity: 0 },
+        to: { opacity: 1 },
+    },
+});
 
 const MobileMasonryCoverGradient = styled(Box, {
     shouldForwardProp: (prop) => prop !== "$isPlaceholder",
