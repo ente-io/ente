@@ -117,7 +117,7 @@ class HelpSupportPage extends StatelessWidget {
                           );
                         },
                       ),
-                      if (flagService.internalUser && kDebugMode) ...[
+                      if (flagService.internalUser || kDebugMode) ...[
                         const SizedBox(height: 8),
                         MenuItemWidgetNew(
                           title: l10n.viewLogs,
