@@ -310,7 +310,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
-    final showStepProgressIndicator = inheritedData.memories.length < 60;
+    final showStepProgressIndicator =
+        inheritedData.memories.length < kMemoryProgressTickCutoff;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -343,28 +344,26 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 32),
-                        showStepProgressIndicator
-                            ? ValueListenableBuilder<Duration>(
-                                valueListenable: durationNotifier,
-                                builder: (context, duration, _) {
-                                  return MemoryProgressIndicator(
-                                    totalSteps: inheritedData.memories.length,
-                                    currentIndex: value,
-                                    selectedColor: Colors.white,
-                                    unselectedColor: Colors.white.withValues(
-                                      alpha: 0.4,
-                                    ),
-                                    duration: duration,
-                                    animationController: (controller) {
-                                      _progressAnimationController = controller;
-                                    },
-                                    onComplete: () {
-                                      _goToNext(inheritedData);
-                                    },
-                                  );
-                                },
-                              )
-                            : const SizedBox.shrink(),
+                        ValueListenableBuilder<Duration>(
+                          valueListenable: durationNotifier,
+                          builder: (context, duration, _) {
+                            return MemoryProgressIndicator(
+                              totalSteps: inheritedData.memories.length,
+                              currentIndex: value,
+                              selectedColor: Colors.white,
+                              unselectedColor: Colors.white.withValues(
+                                alpha: 0.4,
+                              ),
+                              duration: duration,
+                              animationController: (controller) {
+                                _progressAnimationController = controller;
+                              },
+                              onComplete: () {
+                                _goToNext(inheritedData);
+                              },
+                            );
+                          },
+                        ),
                         const SizedBox(height: 6),
                         Row(
                           children: [

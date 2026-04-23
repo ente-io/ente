@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 
+const int kMemoryProgressTickCutoff = 60;
+
 class MemoryProgressIndicator extends StatefulWidget {
   final int totalSteps;
   final int currentIndex;
@@ -65,6 +67,12 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
 
   @override
   Widget build(BuildContext context) {
+    // For very large memories, hide the tick bar (it would render as pixel-thin
+    // slivers). The animation controller keeps running so auto-advance still
+    // fires via onComplete.
+    if (widget.totalSteps >= kMemoryProgressTickCutoff) {
+      return const SizedBox.shrink();
+    }
     return Row(
       children: List.generate(widget.totalSteps, (index) {
         return Expanded(
