@@ -43,6 +43,7 @@ import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/shared/ui/media/PlaceholderThumbnails";
+import { thumbnailGap } from "@/shared/utils/thumbnail-grid-layout";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -868,20 +869,13 @@ const useViewportWidth = () => {
 };
 
 const mobileMasonryFileListHeaderHeight = (viewportWidth: number | undefined) =>
-    Math.round(
-        mobileMasonryCoverHeight(viewportWidth) +
-            mobileMasonryActionsHeight +
-            mobileMasonryHeaderSpacing,
-    );
+    Math.round(mobileMasonryCoverHeight(viewportWidth) + thumbnailGap);
 
 const mobileMasonryCoverHeight = (viewportWidth: number | undefined) => {
     const width = Math.max(320, Math.min(viewportWidth ?? 390, 719));
     const coverWidth = width - 2 * 4;
     return coverWidth * (4 / 3);
 };
-
-const mobileMasonryActionsHeight = 48;
-const mobileMasonryHeaderSpacing = 40;
 
 const publicAlbumCoverFile = (
     collection: Collection,
@@ -1178,21 +1172,35 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         />
     );
 
+    const coverActions = (
+        <FileListHeaderActions
+            onShowFeed={onShowFeed}
+            downloadEnabled={downloadEnabled}
+            onDownloadAll={downloadAllFiles}
+            onAddPhotos={onAddPhotos}
+            addPhotosDisabled={addPhotosDisabled}
+            hasSelection={hasSelection}
+            onShare={handleShare}
+            align="center"
+            variant="cover"
+        />
+    );
+
     return (
         <>
             {showMobileMasonryCover ? (
-                <GalleryItemsHeaderAdapter sx={{ pt: 0 }}>
-                    <Stack sx={{ gap: 1.5 }}>
-                        <PublicAlbumCoverHero
-                            coverFile={coverFile}
-                            title={publicCollection.name}
-                            fileCount={publicFiles.length}
-                            dateRange={
-                                isQuickLinkAlbum ? undefined : memoriesDateRange
-                            }
-                        />
-                        {actions}
-                    </Stack>
+                <GalleryItemsHeaderAdapter
+                    sx={{ pt: 0, mb: `${thumbnailGap}px` }}
+                >
+                    <PublicAlbumCoverHero
+                        coverFile={coverFile}
+                        title={publicCollection.name}
+                        fileCount={publicFiles.length}
+                        dateRange={
+                            isQuickLinkAlbum ? undefined : memoriesDateRange
+                        }
+                        actions={coverActions}
+                    />
                 </GalleryItemsHeaderAdapter>
             ) : (
                 <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
@@ -1269,7 +1277,8 @@ interface FileListHeaderActionsProps {
     addPhotosDisabled: boolean;
     hasSelection: boolean;
     onShare: () => void;
-    align: "start" | "end";
+    align: "start" | "end" | "center";
+    variant?: "default" | "cover";
 }
 
 const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
@@ -1281,25 +1290,44 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
     hasSelection,
     onShare,
     align,
+    variant = "default",
 }) => (
     <Stack
         direction="row"
         spacing={0}
         sx={{
-            width: align === "start" ? "100%" : "auto",
+            width: align === "end" ? "auto" : "100%",
             alignItems: "center",
-            justifyContent: align === "start" ? "flex-start" : "flex-end",
-            "@media (width > 720px)": align === "end" ? { mr: -1.5 } : {},
-            "@media (width < 720px)": { ml: -1.5 },
+            justifyContent:
+                align === "start"
+                    ? "flex-start"
+                    : align === "center"
+                      ? "center"
+                      : "flex-end",
+            ...(variant === "default"
+                ? {
+                      "@media (width > 720px)":
+                          align === "end" ? { mr: -1.5 } : {},
+                      "@media (width < 720px)": { ml: -1.5 },
+                  }
+                : { gap: 0.75, flexWrap: "wrap" }),
         }}
     >
         {onShowFeed && (
-            <IconButton onClick={onShowFeed} disabled={hasSelection}>
+            <IconButton
+                onClick={onShowFeed}
+                disabled={hasSelection}
+                sx={actionButtonSx(variant)}
+            >
                 <FeedIcon size={24} />
             </IconButton>
         )}
         {downloadEnabled && (
-            <IconButton onClick={onDownloadAll} disabled={hasSelection}>
+            <IconButton
+                onClick={onDownloadAll}
+                disabled={hasSelection}
+                sx={actionButtonSx(variant)}
+            >
                 <DownloadIcon size={24} />
             </IconButton>
         )}
@@ -1307,21 +1335,43 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
             <IconButton
                 onClick={onAddPhotos}
                 disabled={addPhotosDisabled || hasSelection}
+                sx={actionButtonSx(variant)}
             >
                 <AddPhotosIcon size={24} />
             </IconButton>
         )}
-        <IconButton onClick={onShare} disabled={hasSelection}>
+        <IconButton
+            onClick={onShare}
+            disabled={hasSelection}
+            sx={actionButtonSx(variant)}
+        >
             <ShareIcon size={24} />
         </IconButton>
     </Stack>
 );
+
+const actionButtonSx = (variant: "default" | "cover") =>
+    variant === "cover"
+        ? {
+              width: 46,
+              height: 46,
+              color: "common.white",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              "& svg": { color: "inherit" },
+              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+              "&.Mui-disabled": {
+                  color: "rgba(255, 255, 255, 0.38)",
+                  backgroundColor: "rgba(0, 0, 0, 0.28)",
+              },
+          }
+        : undefined;
 
 interface PublicAlbumCoverHeroProps {
     coverFile: EnteFile | undefined;
     title: string;
     fileCount: number;
     dateRange?: string;
+    actions?: React.ReactNode;
 }
 
 const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
@@ -1329,6 +1379,7 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
     title,
     fileCount,
     dateRange,
+    actions,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const coverRequestIDRef = useRef(0);
@@ -1387,7 +1438,11 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
                     sx={{
                         display: "flex",
                         alignItems: "center",
+                        justifyContent: "center",
+                        flexWrap: "wrap",
                         gap: "6px",
+                        fontSize: "16px",
+                        lineHeight: 1.2,
                         minWidth: 0,
                     }}
                 >
@@ -1430,6 +1485,7 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
                         </Box>
                     )}
                 </Typography>
+                {actions}
             </MobileMasonryCoverContent>
         </MobileMasonryCover>
     );
@@ -1463,20 +1519,22 @@ const MobileMasonryCoverContent = styled(Box)({
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-end",
-    gap: "4px",
-    padding: "18px 18px 14px 14px",
+    alignItems: "center",
+    textAlign: "center",
+    gap: "14px",
+    padding: "18px 18px 32px",
     color: "white",
 });
 
 const MobileMasonryCoverTitle = styled(Typography)({
-    fontSize: "32px",
-    fontWeight: 700,
-    lineHeight: 1.24,
+    fontSize: "36px",
+    fontWeight: 600,
+    lineHeight: 1.1,
     letterSpacing: "-0.03em",
-    display: "-webkit-box",
-    overflow: "hidden",
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: "vertical",
+    textAlign: "center",
+    width: "100%",
+    maxWidth: "100%",
+    overflowWrap: "anywhere",
 });
 
 /**
