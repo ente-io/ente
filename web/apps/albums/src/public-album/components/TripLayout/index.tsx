@@ -71,7 +71,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     collectionKey,
     credentials,
     enableComment = true,
-    enableJoin = true,
+    enableJoin = false,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
@@ -360,6 +360,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         enableDownload={enableDownload}
                         onShowFeed={enableComment ? showPublicFeed : undefined}
                         collectionTitle={collectionTitle}
+                        enableJoin={enableJoin}
+                        onJoinAlbum={handleJoinAlbum}
                     />
                 ) : (
                     <TopNavButtons
@@ -367,6 +369,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
                         onShowFeed={enableComment ? showPublicFeed : undefined}
+                        enableJoin={enableJoin}
+                        onJoinAlbum={handleJoinAlbum}
                     />
                 ))}
             {/* Mobile Layout */}

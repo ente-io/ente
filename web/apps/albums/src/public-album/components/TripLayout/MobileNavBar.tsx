@@ -18,6 +18,8 @@ interface MobileNavBarProps {
     enableDownload?: boolean;
     onShowFeed?: () => void;
     collectionTitle?: string;
+    enableJoin?: boolean;
+    onJoinAlbum?: () => void;
 }
 
 export const MobileNavBar: React.FC<MobileNavBarProps> = ({
@@ -26,6 +28,8 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     enableDownload,
     onShowFeed,
     collectionTitle,
+    enableJoin,
+    onJoinAlbum,
 }) => {
     const iconStrokeWidth = 1.8;
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -89,10 +93,14 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
                     <MobileSignUpButton
                         onClick={() => {
-                            window.location.href = getEnteURL();
+                            if (enableJoin) {
+                                onJoinAlbum?.();
+                            } else {
+                                window.location.href = getEnteURL();
+                            }
                         }}
                     >
-                        {t("get_ente_photos")}
+                        {enableJoin ? t("join_album") : t("get_ente_photos")}
                     </MobileSignUpButton>
                 </ButtonGroup>
             </MobileNavContainer>
