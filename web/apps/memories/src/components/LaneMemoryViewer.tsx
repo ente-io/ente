@@ -686,12 +686,12 @@ export function LaneMemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.com/get"
+                            href="https://ente.com/try"
                             target="_blank"
                             rel="noopener"
                             sx={laneHeaderJoinNowButtonSx}
                         >
-                            Try Ente
+                            Get Ente Photos
                         </JoinNowButton>
                     </LaneTopActionSection>
                 </LaneTopBar>

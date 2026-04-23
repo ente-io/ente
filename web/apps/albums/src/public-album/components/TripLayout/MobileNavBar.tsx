@@ -1,15 +1,14 @@
 import { LazyNotification } from "@/app/lazy/global-ui";
-import { useJoinAlbum } from "@/public-album/access/hooks/useJoinAlbum";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
-import { FeedIcon } from "@/public-album/social/components/FeedIcon";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import {
+    AddPhotosIcon,
+    DownloadIcon,
+    FeedIcon,
+    ShareIcon,
+} from "@/public-album/components/ActionIcons";
 import CheckIcon from "@mui/icons-material/Check";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import type { PublicAlbumsCredentials } from "ente-base/http";
-import type { Collection } from "ente-media/collection";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -19,10 +18,8 @@ interface MobileNavBarProps {
     enableDownload?: boolean;
     onShowFeed?: () => void;
     collectionTitle?: string;
-    publicCollection?: Collection;
-    accessToken?: string;
-    collectionKey?: string;
-    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+    enableJoin?: boolean;
+    onJoinAlbum?: () => void;
 }
 
 export const MobileNavBar: React.FC<MobileNavBarProps> = ({
@@ -31,20 +28,11 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     enableDownload,
     onShowFeed,
     collectionTitle,
-    publicCollection,
-    accessToken,
-    collectionKey,
-    credentials,
+    enableJoin,
+    onJoinAlbum,
 }) => {
+    const iconStrokeWidth = 1.8;
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-
-    const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
-    const { handleJoinAlbum } = useJoinAlbum({
-        publicCollection,
-        accessToken,
-        collectionKey,
-        credentials,
-    });
 
     const handleShare = async () => {
         if (typeof window !== "undefined") {
@@ -76,52 +64,43 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
                 <ButtonGroup>
                     <MobileNavButton onClick={handleShare}>
-                        <ShareIcon sx={{ fontSize: "15px" }} />
+                        <ShareIcon size={16} strokeWidth={iconStrokeWidth} />
                     </MobileNavButton>
 
                     {onShowFeed && (
                         <MobileNavButton onClick={onShowFeed}>
-                            <Box
-                                sx={{
-                                    width: 16,
-                                    height: 16,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    "& svg": { width: "100%", height: "100%" },
-                                }}
-                            >
-                                <FeedIcon />
-                            </Box>
+                            <FeedIcon size={16} strokeWidth={iconStrokeWidth} />
                         </MobileNavButton>
                     )}
 
                     {onAddPhotos && (
                         <MobileNavButton onClick={onAddPhotos}>
-                            <AddPhotoAlternateOutlinedIcon
-                                sx={{ fontSize: "16px" }}
+                            <AddPhotosIcon
+                                size={16}
+                                strokeWidth={iconStrokeWidth}
                             />
                         </MobileNavButton>
                     )}
 
                     {enableDownload && (
                         <MobileNavButton onClick={downloadAllFiles}>
-                            <FileDownloadOutlinedIcon
-                                sx={{ fontSize: "18px" }}
+                            <DownloadIcon
+                                size={16}
+                                strokeWidth={iconStrokeWidth}
                             />
                         </MobileNavButton>
                     )}
 
                     <MobileSignUpButton
-                        onClick={
-                            enableJoin
-                                ? handleJoinAlbum
-                                : () => {
-                                      window.location.href = getEnteURL();
-                                  }
-                        }
+                        onClick={() => {
+                            if (enableJoin) {
+                                onJoinAlbum?.();
+                            } else {
+                                window.location.href = getEnteURL();
+                            }
+                        }}
                     >
-                        {enableJoin ? t("join_album") : t("try_ente")}
+                        {enableJoin ? t("join_album") : t("get_ente_photos")}
                     </MobileSignUpButton>
                 </ButtonGroup>
             </MobileNavContainer>

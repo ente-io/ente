@@ -1585,10 +1585,10 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
 
         void (async () => {
             try {
-                const publicURL = await createPublicURL(
-                    collection.id,
-                    attributes,
-                );
+                const publicURL = await createPublicURL(collection.id, {
+                    enableJoin: false,
+                    ...attributes,
+                });
                 setPending("");
                 setPublicURL(publicURL);
                 onLinkCreated();

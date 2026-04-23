@@ -94,7 +94,7 @@ class CollectionShareGateway {
   Future<PublicURL> createShareUrl({
     required int collectionID,
     bool enableCollect = false,
-    bool enableJoin = true,
+    bool enableJoin = false,
     bool enableComment = true,
   }) async {
     final response = await _enteDio.post(

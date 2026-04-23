@@ -1348,7 +1348,7 @@ class CollectionsService {
   Future<void> createShareUrl(
     Collection collection, {
     bool enableCollect = false,
-    bool enableJoin = true,
+    bool enableJoin = false,
   }) async {
     try {
       final publicUrl = await collectionShareGateway.createShareUrl(
