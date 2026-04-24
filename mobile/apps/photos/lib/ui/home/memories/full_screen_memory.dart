@@ -287,6 +287,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   // slower/cinematic for auto-advance. Set at the call site before the
   // index bump so AnimatedSwitcher reads the right duration on rebuild.
   bool _autoAdvanceTransition = false;
+  // One-shot "curtain rises" fade on the first photo of a memory.
+  // AnimatedSwitcher doesn't animate its initial child, so we wrap it
+  // in an AnimatedOpacity that ramps 0→1 after the first frame.
+  double _firstPhotoOpacity = 0;
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
@@ -299,6 +303,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _firstPhotoOpacity = 1);
+    });
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) _showTitle.value = false;
     });
@@ -620,44 +627,52 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           }
                         },
                         hasPointerNotifier: hasPointerOnScreenNotifier,
-                        child: AnimatedSwitcher(
-                          duration: _autoAdvanceTransition
-                              ? const Duration(milliseconds: 600)
-                              : const Duration(milliseconds: 200),
-                          switchInCurve: Curves.easeOut,
-                          switchOutCurve: Curves.easeIn,
-                          layoutBuilder: (currentChild, previousChildren) {
-                            return Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                ...previousChildren,
-                                if (currentChild != null) currentChild,
-                              ],
-                            );
-                          },
-                          child: MemoriesZoomWidget(
-                            key: ValueKey(
-                              currentFile.uploadedFileID ?? currentFile.localID,
-                            ),
-                            scaleController: (controller) {
-                              _zoomAnimationController = controller;
+                        child: AnimatedOpacity(
+                          opacity: _firstPhotoOpacity,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                          child: AnimatedSwitcher(
+                            duration: _autoAdvanceTransition
+                                ? const Duration(milliseconds: 600)
+                                : const Duration(milliseconds: 200),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            layoutBuilder: (currentChild, previousChildren) {
+                              return Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  ...previousChildren,
+                                  if (currentChild != null) currentChild,
+                                ],
+                              );
                             },
-                            zoomIn: index % 2 == 0,
-                            isVideo: isVideo,
-                            child: FileWidget(
-                              currentFile,
-                              autoPlay: false,
-                              tagPrefix: "memories",
-                              backgroundDecoration: const BoxDecoration(
-                                color: Colors.transparent,
+                            child: MemoriesZoomWidget(
+                              key: ValueKey(
+                                currentFile.uploadedFileID ??
+                                    currentFile.localID,
                               ),
-                              isFromMemories: true,
-                              playbackCallback: (shouldEnable, _) {
-                                _toggleAnimation(pause: !shouldEnable);
+                              scaleController: (controller) {
+                                _zoomAnimationController = controller;
                               },
-                              onFinalFileLoad: ({required int memoryDuration}) {
-                                onFinalFileLoad(memoryDuration);
-                              },
+                              zoomIn: index % 2 == 0,
+                              isVideo: isVideo,
+                              child: FileWidget(
+                                currentFile,
+                                autoPlay: false,
+                                tagPrefix: "memories",
+                                backgroundDecoration: const BoxDecoration(
+                                  color: Colors.transparent,
+                                ),
+                                isFromMemories: true,
+                                playbackCallback: (shouldEnable, _) {
+                                  _toggleAnimation(pause: !shouldEnable);
+                                },
+                                onFinalFileLoad: ({
+                                  required int memoryDuration,
+                                }) {
+                                  onFinalFileLoad(memoryDuration);
+                                },
+                              ),
                             ),
                           ),
                         ),
