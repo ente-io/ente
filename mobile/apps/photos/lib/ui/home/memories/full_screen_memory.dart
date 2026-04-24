@@ -292,12 +292,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   // in an AnimatedOpacity that ramps 0→1 after the first frame.
   double _firstPhotoOpacity = 0;
   // Photo crossfade durations for auto vs manual advance.
-  static const _autoCrossfadeDuration = Duration(milliseconds: 800);
+  static const _autoCrossfadeDuration = Duration(milliseconds: 600);
   static const _manualCrossfadeDuration = Duration(milliseconds: 200);
   // How long to hold the incoming photo's Ken Burns still. Intentionally
   // shorter than _autoCrossfadeDuration so motion picks up as the photo
   // is still settling in, rather than after a visible beat of stillness.
-  static const _kenBurnsFreezeDuration = Duration(milliseconds: 500);
+  static const _kenBurnsFreezeDuration = Duration(milliseconds: 300);
   // Tokenises a pending zoom-start so a newer onFinalFileLoad cleanly
   // invalidates the prior delayed forward.
   Object? _kenBurnsStartToken;
