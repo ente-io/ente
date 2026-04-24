@@ -476,7 +476,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
         "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to ${_maxImagePixels ~/ 1000000}MP to prevent crash",
       );
       final aspectRatio = _photo.width / _photo.height;
-      final targetHeight = sqrt(_maxImagePixels / aspectRatio);
+      final maxPixels = min(50000000, _maxImagePixels);
+      final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
 
       imageProvider = Image.file(
@@ -613,7 +614,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
         "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively down to ${_maxImagePixels ~/ 1000000}MP",
       );
       final aspectRatio = _photo.width / _photo.height;
-      final targetHeight = sqrt(_maxImagePixels / aspectRatio);
+      final maxPixels = min(50000000, _maxImagePixels);
+      final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
 
       compressedFile = await FlutterImageCompress.compressWithFile(
