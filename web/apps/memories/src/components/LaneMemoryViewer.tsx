@@ -108,6 +108,9 @@ export function LaneMemoryViewer({
     const [displayIndex, setDisplayIndex] = useState(currentIndex);
     const [isScrubbing, setIsScrubbing] = useState(false);
     const [isAnimatingStack, setIsAnimatingStack] = useState(false);
+    const [activeMediaAspectRatio, setActiveMediaAspectRatio] = useState<
+        number | undefined
+    >(undefined);
     const [mediaAspectRatios, setMediaAspectRatios] = useState<
         Record<number, number>
     >({});
@@ -214,6 +217,7 @@ export function LaneMemoryViewer({
             setPreviousCaptionValue(previousModel.value ?? nextModel.value);
             setFileLoaded(false);
             setVideoDurationKnown(false);
+            setActiveMediaAspectRatio(undefined);
             setDisplayIndex(nextIndex);
         },
         [laneFrames, memoryMetadata, memoryName],
@@ -428,6 +432,16 @@ export function LaneMemoryViewer({
 
                 return { ...previousAspectRatios, [fileID]: nextAspectRatio };
             });
+        },
+        [],
+    );
+
+    const handleActiveAspectRatio = useCallback(
+        (width: number, height: number) => {
+            if (width <= 0 || height <= 0) {
+                return;
+            }
+            setActiveMediaAspectRatio(width / height);
         },
         [],
     );
@@ -775,9 +789,15 @@ export function LaneMemoryViewer({
                                         FileType.video
                                             ? isDisplayCard
                                             : Math.abs(slice.distance) < 1.1;
-                                    const mediaAspectRatio =
-                                        mediaAspectRatios[file.id] ??
+                                    const fallbackMediaAspectRatio =
                                         getFileAspectRatio(file);
+                                    const mediaAspectRatio =
+                                        file.metadata.fileType ===
+                                            FileType.video && isDisplayCard
+                                            ? (activeMediaAspectRatio ??
+                                              fallbackMediaAspectRatio)
+                                            : (mediaAspectRatios[file.id] ??
+                                              fallbackMediaAspectRatio);
 
                                     return (
                                         <LaneStackSlice
@@ -832,15 +852,8 @@ export function LaneMemoryViewer({
                                                             onPlaybackBlocked={
                                                                 handleVideoPlaybackBlocked
                                                             }
-                                                            onAspectRatio={(
-                                                                width,
-                                                                height,
-                                                            ) =>
-                                                                handleMediaAspectRatio(
-                                                                    file.id,
-                                                                    width,
-                                                                    height,
-                                                                )
+                                                            onAspectRatio={
+                                                                handleActiveAspectRatio
                                                             }
                                                         />
                                                     ) : (
