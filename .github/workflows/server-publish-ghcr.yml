@@ -17,7 +17,7 @@ jobs:
         steps:
             - name: Determine commit from prod museum
               run: |
-                  echo "museum_commit=$(curl -s https://api.ente.io/ping | jq -r .id)" >> $GITHUB_ENV
+                  echo "museum_commit=$(curl -s https://api.ente.com/ping | jq -r .id)" >> $GITHUB_ENV
 
             - name: Checkout code
               uses: actions/checkout@v6
