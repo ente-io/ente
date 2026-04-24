@@ -90,7 +90,7 @@ class _FullScreenMemoryDataUpdaterState
       widget.memories[widget.initialIndex],
       widget.memories.length == widget.initialIndex + 1,
     );
-    _preloadAllThumbnails();
+    _warmThumbnailWindow(widget.initialIndex);
     unawaited(_setupConnectivityListener());
   }
 
@@ -114,16 +114,16 @@ class _FullScreenMemoryDataUpdaterState
       }
       if (!_wasConnected) {
         _wasConnected = true;
-        // Release all refs we bumped so that ZoomableImage's handler can
-        // decrement to 0 and cancel. Current file has 2 refs (bulk preload +
-        // ZoomableImage); each lookahead file also has 2 (bulk preload +
-        // per-index preloadThumbnail in the ValueListenableBuilder), so an
-        // extra release is needed for each or its stale completer survives.
-        for (final memory in widget.memories) {
-          removePendingGetThumbnailRequestIfAny(memory.file);
-        }
+        // Scoped to the warmed range so we don't touch refs owned by
+        // widgets outside this route. In-window lookahead items hold two
+        // of our refs (initial warm + per-index), so the second loop
+        // releases the second ref.
         final currentIndex = indexNotifier.value;
-        for (var i = 1; i <= _lookaheadCap; i++) {
+        final end = _warmedRangeEndExclusive();
+        for (var i = 0; i < end; i++) {
+          removePendingGetThumbnailRequestIfAny(widget.memories[i].file);
+        }
+        for (var i = 1; i <= _thumbnailLookaheadCap; i++) {
           final j = currentIndex + i;
           if (j >= widget.memories.length) break;
           removePendingGetThumbnailRequestIfAny(widget.memories[j].file);
@@ -132,33 +132,37 @@ class _FullScreenMemoryDataUpdaterState
         // Re-kick on a microtask so the event handler runs first and clears
         // the stale map entries; a synchronous call would re-bump the
         // refcounts before the cancellation.
-        scheduleMicrotask(_preloadAllThumbnails);
+        scheduleMicrotask(() => _warmThumbnailWindow(currentIndex));
       }
     });
   }
 
-  // The process-wide thumbnail queue in thumbnail_util.dart has 500 slots
-  // and evicts oldest when full. Swipes past this window rely on the
-  // per-index preload in the ValueListenableBuilder.
-  static const _bulkThumbnailPreloadCap = 100;
+  // Wide rolling window; thumbnails are tiny and gate the auto-advance timer.
+  static const _thumbnailLookaheadCap = 20;
 
-  // How many files ahead of the current index to keep warming (thumbnail +
-  // original). The per-file 5s slideshow cadence can't outpace multi-second
-  // original downloads on a one-deep pipeline, so we keep several in flight.
-  // preloadFile no-ops for videos, so this stays thumbnail-only for those.
-  static const _lookaheadCap = 3;
+  // Narrow; originals are MBs each, this bounds concurrent bandwidth.
+  static const _fileLookaheadCap = 3;
 
-  void _preloadAllThumbnails() {
-    for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
-      preloadThumbnail(memory.file);
+  void _warmThumbnailWindow(int fromIndex) {
+    final end =
+        (fromIndex + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
+    for (var i = fromIndex; i < end; i++) {
+      preloadThumbnail(widget.memories[i].file);
     }
+  }
+
+  // max() so back-nav below initialIndex still covers the initial warm.
+  int _warmedRangeEndExclusive() {
+    final maxIndex = max(widget.initialIndex, indexNotifier.value);
+    return (maxIndex + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
   }
 
   @override
   void dispose() {
     _connectivitySubscription?.cancel();
-    for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
-      removePendingGetThumbnailRequestIfAny(memory.file);
+    final end = _warmedRangeEndExclusive();
+    for (var i = 0; i < end; i++) {
+      removePendingGetThumbnailRequestIfAny(widget.memories[i].file);
     }
     indexNotifier.dispose();
     super.dispose();
@@ -530,13 +534,22 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     valueListenable: inheritedData.indexNotifier,
                     builder: (context, index, _) {
                       for (var i = 1;
-                          i <= _FullScreenMemoryDataUpdaterState._lookaheadCap;
+                          i <=
+                              _FullScreenMemoryDataUpdaterState
+                                  ._thumbnailLookaheadCap;
                           i++) {
                         final j = index + i;
                         if (j >= inheritedData.memories.length) break;
-                        final file = inheritedData.memories[j].file;
-                        preloadThumbnail(file);
-                        preloadFile(file);
+                        preloadThumbnail(inheritedData.memories[j].file);
+                      }
+                      for (var i = 1;
+                          i <=
+                              _FullScreenMemoryDataUpdaterState
+                                  ._fileLookaheadCap;
+                          i++) {
+                        final j = index + i;
+                        if (j >= inheritedData.memories.length) break;
+                        preloadFile(inheritedData.memories[j].file);
                       }
                       final currentMemory = inheritedData.memories[index];
                       final isVideo =
