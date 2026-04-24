@@ -16,7 +16,7 @@ use super::srp::SrpSession;
 #[cfg(feature = "srp")]
 use sha2::Sha256;
 #[cfg(feature = "srp")]
-use srp::{client::SrpClient as SrpClientInner, groups::G_4096};
+use srp::ClientG4096;
 
 /// Credentials derived from password for SRP authentication.
 pub struct SrpCredentials {
@@ -208,7 +208,7 @@ pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
 pub fn generate_srp_setup(kek: &[u8], srp_user_id: &str) -> Result<GeneratedSrpSetup> {
     let login_sub_key = kdf::derive_login_key_secure(kek)?;
     let srp_salt = keys::generate_salt();
-    let client = SrpClientInner::<Sha256>::new(&G_4096);
+    let client = ClientG4096::<Sha256>::new();
     let srp_verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_sub_key, &srp_salt);
 
     Ok(GeneratedSrpSetup {
