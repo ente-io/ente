@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use ente_core::urls::PRODUCTION_API_BASE_URL;
 use reqwest::Url;
 use reqwest::blocking::{Client, Response};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
@@ -10,7 +11,7 @@ use uuid::Uuid;
 
 use crate::errors::SyncError;
 
-const DEFAULT_BASE_URL: &str = "https://api.ente.io";
+const DEFAULT_BASE_URL: &str = PRODUCTION_API_BASE_URL;
 
 #[derive(Debug, Clone)]
 pub struct HttpConfig {

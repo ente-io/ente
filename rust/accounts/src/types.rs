@@ -1,13 +1,13 @@
 //! Shared reusable types for account clients.
 
-use ente_core::http::HttpConfig;
+use ente_core::{http::HttpConfig, urls::PRODUCTION_API_BASE_URL};
 use futures_timer::Delay;
 use serde::{Deserialize, Serialize};
 use std::{future::Future, pin::Pin, sync::Arc, time::Duration};
 use zeroize::Zeroize;
 
 /// Default base URL for Ente's public API.
-pub const DEFAULT_API_BASE_URL: &str = "https://api.ente.io";
+pub const DEFAULT_API_BASE_URL: &str = PRODUCTION_API_BASE_URL;
 
 /// Default base URL for Ente's accounts broker.
 pub const DEFAULT_ACCOUNTS_URL: &str = "https://accounts.ente.io";
