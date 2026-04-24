@@ -1,8 +1,8 @@
 mod support;
 
+use ente_accounts::Error as CliError;
 use ente_contacts::legacy_models::{LegacyContactState, LegacyRecoveryStatus};
 use ente_contacts::models::ContactData;
-use ente_accounts::Error as CliError;
 use ente_core::http::Error as CoreHttpError;
 
 use support::{auth, contacts, legacy};

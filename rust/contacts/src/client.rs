@@ -870,13 +870,11 @@ fn with_http_context(context: &'static str, error: ContactsError) -> ContactsErr
             status,
             code,
             message,
-        }) => {
-            ContactsError::Http(HttpError::Http {
-                status,
-                code,
-                message: format!("{context}: {message}"),
-            })
-        }
+        }) => ContactsError::Http(HttpError::Http {
+            status,
+            code,
+            message: format!("{context}: {message}"),
+        }),
         ContactsError::Http(HttpError::Parse(message)) => {
             ContactsError::Http(HttpError::Parse(format!("{context}: {message}")))
         }

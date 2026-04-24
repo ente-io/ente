@@ -6,7 +6,6 @@
 
 use crate::crypto::SecretVec;
 use sha2::{Digest, Sha256};
-use sha2_011::Sha256 as SrpSha256;
 use srp::ClientG4096;
 use subtle::ConstantTimeEq;
 use zeroize::Zeroize;
@@ -21,7 +20,7 @@ use super::{AuthError, Result};
 /// 3. Call `compute_m1(server_b)` to get the client proof
 /// 4. Optionally verify server proof with `verify_m2(server_m2)`
 pub struct SrpSession {
-    inner: ClientG4096<SrpSha256>,
+    inner: ClientG4096<Sha256>,
     identity: Vec<u8>,
     login_key: SecretVec,
     salt: Vec<u8>,
@@ -58,7 +57,7 @@ impl SrpSession {
             )));
         }
 
-        let client = ClientG4096::<SrpSha256>::new();
+        let client = ClientG4096::<Sha256>::new();
 
         // Generate random ephemeral private key (64 bytes)
         let mut a_private = vec![0u8; 64];
@@ -207,7 +206,7 @@ mod tests {
     fn test_public_a_padding() {
         let a_public = vec![0xAB, 0xCD];
         let session = SrpSession {
-            inner: ClientG4096::<SrpSha256>::new(),
+            inner: ClientG4096::<Sha256>::new(),
             identity: b"test-user".to_vec(),
             login_key: SecretVec::new(vec![0u8; 16]),
             salt: vec![0u8; 16],
@@ -238,10 +237,10 @@ mod tests {
         let srp_salt = [0x22u8; 16];
         let login_key = [0x11u8; 16];
 
-        let client = ClientG4096::<SrpSha256>::new();
+        let client = ClientG4096::<Sha256>::new();
         let verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_key, &srp_salt);
 
-        let server = ServerG4096::<SrpSha256>::new();
+        let server = ServerG4096::<Sha256>::new();
         let b_private = [0x33u8; 64];
         let b_pub = server.compute_public_ephemeral(&b_private, &verifier);
 
@@ -249,7 +248,7 @@ mod tests {
         let a_public = client.compute_public_ephemeral(&a_private);
 
         let mut session = SrpSession {
-            inner: ClientG4096::<SrpSha256>::new(),
+            inner: ClientG4096::<Sha256>::new(),
             identity: srp_user_id.as_bytes().to_vec(),
             login_key: SecretVec::new(login_key.to_vec()),
             salt: srp_salt.to_vec(),
@@ -261,7 +260,7 @@ mod tests {
 
         let m1 = session.compute_m1(&b_pub).unwrap();
 
-        let verifier_client = ClientG4096::<SrpSha256>::new();
+        let verifier_client = ClientG4096::<Sha256>::new();
         let verifier = verifier_client
             .process_reply(
                 &a_private,
@@ -318,10 +317,10 @@ mod tests {
         let srp_salt = [0u8; 16];
         let login_key = [0x11u8; 16];
 
-        let client = ClientG4096::<SrpSha256>::new();
+        let client = ClientG4096::<Sha256>::new();
         let verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_key, &srp_salt);
 
-        let server = ServerG4096::<SrpSha256>::new();
+        let server = ServerG4096::<Sha256>::new();
         let mut b = [0u8; 64];
         rand_core::OsRng.fill_bytes(&mut b);
         let b_pub = server.compute_public_ephemeral(&b, &verifier);
@@ -345,10 +344,10 @@ mod tests {
         let srp_salt = [0u8; 16];
         let login_key = [0x11u8; 16];
 
-        let client = ClientG4096::<SrpSha256>::new();
+        let client = ClientG4096::<Sha256>::new();
         let verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_key, &srp_salt);
 
-        let server = ServerG4096::<SrpSha256>::new();
+        let server = ServerG4096::<Sha256>::new();
         let mut b = [0u8; 64];
         rand_core::OsRng.fill_bytes(&mut b);
         let b_pub = server.compute_public_ephemeral(&b, &verifier);
@@ -423,9 +422,9 @@ mod tests {
         .unwrap();
         let b_private = [0x42u8; 64];
 
-        let client = ClientG4096::<SrpSha256>::new();
+        let client = ClientG4096::<Sha256>::new();
         let verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_key, &srp_salt);
-        let server = srp::ServerG4096::<SrpSha256>::new();
+        let server = srp::ServerG4096::<Sha256>::new();
         let server_b = server.compute_public_ephemeral(&b_private, &verifier);
 
         let a_public = client.compute_public_ephemeral(&a_private);
@@ -433,7 +432,7 @@ mod tests {
 
         let a_private_for_session = a_private.clone();
         let mut session = SrpSession {
-            inner: ClientG4096::<SrpSha256>::new(),
+            inner: ClientG4096::<Sha256>::new(),
             identity: srp_user_id.as_bytes().to_vec(),
             login_key: SecretVec::new(login_key.to_vec()),
             salt: srp_salt.to_vec(),
@@ -452,11 +451,11 @@ mod tests {
         // Contrast with legacy u=H(A|B) behavior (pre-fix): compute it
         // explicitly and verify it diverges from the Go server vector.
         let g = G4096::generator();
-        let legacy_k = srp::utils::compute_k::<SrpSha256>(&g);
+        let legacy_k = srp::utils::compute_k::<Sha256>(&g);
         let identity_hash =
-            ClientG4096::<SrpSha256>::compute_identity_hash(srp_user_id.as_bytes(), &login_key);
-        let legacy_x = ClientG4096::<SrpSha256>::compute_x(identity_hash.as_slice(), &srp_salt);
-        let legacy_u = srp::utils::compute_u::<SrpSha256>(&session.a_public, &server_b);
+            ClientG4096::<Sha256>::compute_identity_hash(srp_user_id.as_bytes(), &login_key);
+        let legacy_x = ClientG4096::<Sha256>::compute_x(identity_hash.as_slice(), &srp_salt);
+        let legacy_u = srp::utils::compute_u::<Sha256>(&session.a_public, &server_b);
         let legacy_s = client.compute_premaster_secret(
             &BoxedUint::from_be_slice_vartime(&server_b),
             &legacy_k,

@@ -532,10 +532,10 @@ name = "ente-contacts"
 version = "0.0.1"
 dependencies = [
  "ente-core",
- "md-5",
+ "md-5 0.11.0",
  "serde",
  "serde_json",
- "sha2 0.10.9",
+ "sha2",
  "thiserror",
  "uuid",
 ]
@@ -551,14 +551,13 @@ dependencies = [
  "crypto_secretstream",
  "getrandom 0.2.16",
  "hex",
- "md-5",
+ "md-5 0.11.0",
  "rand_core 0.6.4",
  "reqwest",
  "salsa20",
  "serde",
  "serde_json",
- "sha2 0.10.9",
- "sha2 0.11.0",
+ "sha2",
  "srp",
  "subtle",
  "thiserror",
@@ -640,7 +639,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b5ce32f35f710ced8c5aa557f023f1a624e737b5460cee2b70fcd3a8df09e1b"
 dependencies = [
  "hex",
- "md-5",
+ "md-5 0.10.6",
  "proc-macro2",
  "quote",
  "syn",
@@ -1208,6 +1207,16 @@ checksum = "d89e7ee0cfbedfc4da3340218492196241d89eefb6dab27de5df917a6d2e78cf"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
+]
+
+[[package]]
+name = "md-5"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69b6441f590336821bb897fb28fc622898ccceb1d6cea3fde5ea86b090c4de98"
+dependencies = [
+ "cfg-if",
+ "digest 0.11.2",
 ]
 
 [[package]]
@@ -1805,17 +1814,6 @@ checksum = "9af4a3e75ebd5599b30d4de5768e00b5095d518a79fefc3ecbaf77e665d1ec06"
 dependencies = [
  "base16ct",
  "serde",
-]
-
-[[package]]
-name = "sha2"
-version = "0.10.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
-dependencies = [
- "cfg-if",
- "cpufeatures 0.2.17",
- "digest 0.10.7",
 ]
 
 [[package]]

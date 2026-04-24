@@ -307,7 +307,6 @@ mod tests {
     use mockito::{Matcher, Server};
     use serde::{Deserialize, de::DeserializeOwned};
     use sha2::{Digest, Sha256};
-    use sha2_011::Sha256 as SrpSha256;
     use srp::ServerG4096;
     use std::{
         collections::VecDeque,
@@ -517,7 +516,7 @@ mod tests {
                 let srp_a = base64::engine::general_purpose::STANDARD
                     .decode(&payload.srp_a)
                     .unwrap();
-                let server = ServerG4096::<SrpSha256>::new();
+                let server = ServerG4096::<Sha256>::new();
                 let b_private = [0x33u8; 64];
                 let srp_b = pad_left(
                     &server.compute_public_ephemeral(&b_private, &srp_verifier),

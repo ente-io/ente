@@ -1,8 +1,8 @@
+use ente_accounts::KeyAttributes as ApiKeyAttributes;
 use ente_contacts::{
     client::{ContactsCtx, OpenContactsCtxInput},
     legacy_models::{LegacyContactRecord, LegacyInfo, LegacyRecoverySession},
 };
-use ente_accounts::KeyAttributes as ApiKeyAttributes;
 use ente_core::auth::KeyAttributes as CoreKeyAttributes;
 use ente_rs::models::account::App;
 
