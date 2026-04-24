@@ -283,6 +283,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final ValueNotifier<Duration> durationNotifier = ValueNotifier(
     const Duration(seconds: 5),
   );
+  // Differentiates the photo crossfade tempo: snappy for manual taps,
+  // slower/cinematic for auto-advance. Set at the call site before the
+  // index bump so AnimatedSwitcher reads the right duration on rebuild.
+  bool _autoAdvanceTransition = false;
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
@@ -480,6 +484,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 _progressAnimationController = controller;
                               },
                               onComplete: () {
+                                _autoAdvanceTransition = true;
                                 _goToNext(inheritedData);
                               },
                             );
@@ -603,6 +608,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
                       return MemoriesPointerGestureListener(
                         onTap: (PointerEvent event) {
+                          _autoAdvanceTransition = false;
                           HapticFeedback.selectionClick();
                           final screenWidth = MediaQuery.sizeOf(context).width;
                           final goToPreviousTapAreaWidth = screenWidth * 0.20;
@@ -615,7 +621,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         },
                         hasPointerNotifier: hasPointerOnScreenNotifier,
                         child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
+                          duration: _autoAdvanceTransition
+                              ? const Duration(milliseconds: 600)
+                              : const Duration(milliseconds: 200),
                           switchInCurve: Curves.easeOut,
                           switchOutCurve: Curves.easeIn,
                           layoutBuilder: (currentChild, previousChildren) {
