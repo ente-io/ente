@@ -589,7 +589,7 @@ If you need to contact support, debug logs help us diagnose issues faster.
 
 **On mobile:**
 
-Open `Settings > Support > Report a Bug`. This will open your email client with logs attached.
+Open `Settings > Help & Support > Export logs`. This will download logs which you can then email to support@ente.com.
 
 **On desktop:**
 
