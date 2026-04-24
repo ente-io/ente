@@ -7,6 +7,7 @@ import "package:connectivity_plus/connectivity_plus.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
@@ -602,6 +603,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
                       return MemoriesPointerGestureListener(
                         onTap: (PointerEvent event) {
+                          HapticFeedback.selectionClick();
                           final screenWidth = MediaQuery.sizeOf(context).width;
                           final goToPreviousTapAreaWidth = screenWidth * 0.20;
                           if (event.localPosition.dx <
@@ -612,29 +614,43 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           }
                         },
                         hasPointerNotifier: hasPointerOnScreenNotifier,
-                        child: MemoriesZoomWidget(
-                          key: ValueKey(
-                            currentFile.uploadedFileID ?? currentFile.localID,
-                          ),
-                          scaleController: (controller) {
-                            _zoomAnimationController = controller;
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          switchInCurve: Curves.easeOut,
+                          switchOutCurve: Curves.easeIn,
+                          layoutBuilder: (currentChild, previousChildren) {
+                            return Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ...previousChildren,
+                                if (currentChild != null) currentChild,
+                              ],
+                            );
                           },
-                          zoomIn: index % 2 == 0,
-                          isVideo: isVideo,
-                          child: FileWidget(
-                            currentFile,
-                            autoPlay: false,
-                            tagPrefix: "memories",
-                            backgroundDecoration: const BoxDecoration(
-                              color: Colors.transparent,
+                          child: MemoriesZoomWidget(
+                            key: ValueKey(
+                              currentFile.uploadedFileID ?? currentFile.localID,
                             ),
-                            isFromMemories: true,
-                            playbackCallback: (shouldEnable, _) {
-                              _toggleAnimation(pause: !shouldEnable);
+                            scaleController: (controller) {
+                              _zoomAnimationController = controller;
                             },
-                            onFinalFileLoad: ({required int memoryDuration}) {
-                              onFinalFileLoad(memoryDuration);
-                            },
+                            zoomIn: index % 2 == 0,
+                            isVideo: isVideo,
+                            child: FileWidget(
+                              currentFile,
+                              autoPlay: false,
+                              tagPrefix: "memories",
+                              backgroundDecoration: const BoxDecoration(
+                                color: Colors.transparent,
+                              ),
+                              isFromMemories: true,
+                              playbackCallback: (shouldEnable, _) {
+                                _toggleAnimation(pause: !shouldEnable);
+                              },
+                              onFinalFileLoad: ({required int memoryDuration}) {
+                                onFinalFileLoad(memoryDuration);
+                              },
+                            ),
                           ),
                         ),
                       );
