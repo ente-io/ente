@@ -21,8 +21,12 @@ subtle = "2"
 md-5 = "0.10"
 
 # SRP authentication (optional; enable via the `srp` feature)
-srp = { version = "0.6", optional = true }
+# Pinned to upstream commit that includes the padded-u interop fix for
+# leading-zero A/B wire values (fixes sporadic SRP verify-session failures
+# against our Go SRP server path): https://github.com/RustCrypto/PAKEs/pull/285
+srp = { git = "https://github.com/RustCrypto/PAKEs", package = "srp", rev = "5b3bd1f3a9d51121a698ffe5d6ecc33cafcd6413", default-features = false, optional = true }
 sha2 = { version = "0.10", optional = true }
+sha2_011 = { package = "sha2", version = "0.11", optional = true }
 
 # Randomness
 #
@@ -43,7 +47,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 mockito = "1.6"
 
 # Keep SRP deps available for unit tests (the SRP module is compiled under cfg(test))
-srp = "0.6"
+srp = { git = "https://github.com/RustCrypto/PAKEs", package = "srp", rev = "5b3bd1f3a9d51121a698ffe5d6ecc33cafcd6413", default-features = false }
 sha2 = "0.10"
 getrandom = "0.2"
 
@@ -57,7 +61,7 @@ default = ["blob-require-final-tag"]
 #
 # Example:
 # ente-core = { version = "0.0.1", features = ["srp"] }
-srp = ["dep:srp", "dep:sha2"]
+srp = ["dep:srp", "dep:sha2", "dep:sha2_011"]
 
 # Enforce TAG_FINAL on blob decrypt (reject non-final chunks).
 blob-require-final-tag = []

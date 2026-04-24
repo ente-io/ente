@@ -47,6 +47,10 @@ zip = "2.2"
 hmac = "0.12"
 mockito = "1.6"
 sha2 = "0.10"
-srp = "0.6"
+sha2_011 = { package = "sha2", version = "0.11" }
+# Pinned to upstream commit that includes the padded-u interop fix for
+# leading-zero A/B wire values (matches our Go SRP server behavior):
+# https://github.com/RustCrypto/PAKEs/pull/285
+srp = { git = "https://github.com/RustCrypto/PAKEs", package = "srp", rev = "5b3bd1f3a9d51121a698ffe5d6ecc33cafcd6413", default-features = false }
 sha1 = "0.10"
 tempdir = "0.3"
