@@ -193,6 +193,10 @@ const parseIssuer = (url: URL, path: string): string => {
     let issuer = url.searchParams.get("issuer");
     if (issuer) {
         // This is to handle bug in old versions of Ente Auth app.
+        const periodIndex = issuer.indexOf("period=");
+        if (periodIndex >= 0) {
+            issuer = issuer.substring(0, periodIndex);
+        }
         if (issuer.endsWith("period")) {
             issuer = issuer.substring(0, issuer.length - 6);
         }
