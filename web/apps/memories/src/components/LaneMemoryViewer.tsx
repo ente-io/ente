@@ -69,6 +69,7 @@ const LANE_GRID_DISPLACEMENT_SCALE = 9;
 const LANE_VERTICAL_STACK_GAP_PX = 32;
 const LANE_CARD_TO_CONTROLS_GAP_PX = 52;
 const LANE_CARD_SIZE_SCALE = 0.94;
+const LANE_MEDIA_ASPECT_RATIO_CHANGE_EPSILON = 0.00001;
 
 function calculateLaneXOffset(
     distance: number,
@@ -107,9 +108,9 @@ export function LaneMemoryViewer({
     const [displayIndex, setDisplayIndex] = useState(currentIndex);
     const [isScrubbing, setIsScrubbing] = useState(false);
     const [isAnimatingStack, setIsAnimatingStack] = useState(false);
-    const [activeMediaAspectRatio, setActiveMediaAspectRatio] = useState<
-        number | undefined
-    >(undefined);
+    const [mediaAspectRatios, setMediaAspectRatios] = useState<
+        Record<number, number>
+    >({});
     const [previousCaptionValue, setPreviousCaptionValue] = useState<
         number | undefined
     >(() => {
@@ -213,7 +214,6 @@ export function LaneMemoryViewer({
             setPreviousCaptionValue(previousModel.value ?? nextModel.value);
             setFileLoaded(false);
             setVideoDurationKnown(false);
-            setActiveMediaAspectRatio(undefined);
             setDisplayIndex(nextIndex);
         },
         [laneFrames, memoryMetadata, memoryName],
@@ -409,12 +409,25 @@ export function LaneMemoryViewer({
         })();
     }, [displayIndex, fileLoaded, files]);
 
-    const handleActiveAspectRatio = useCallback(
-        (width: number, height: number) => {
+    const handleMediaAspectRatio = useCallback(
+        (fileID: number, width: number, height: number) => {
             if (width <= 0 || height <= 0) {
                 return;
             }
-            setActiveMediaAspectRatio(width / height);
+
+            const nextAspectRatio = width / height;
+            setMediaAspectRatios((previousAspectRatios) => {
+                const previousAspectRatio = previousAspectRatios[fileID];
+                if (
+                    typeof previousAspectRatio === "number" &&
+                    Math.abs(previousAspectRatio - nextAspectRatio) <
+                        LANE_MEDIA_ASPECT_RATIO_CHANGE_EPSILON
+                ) {
+                    return previousAspectRatios;
+                }
+
+                return { ...previousAspectRatios, [fileID]: nextAspectRatio };
+            });
         },
         [],
     );
@@ -762,10 +775,9 @@ export function LaneMemoryViewer({
                                         FileType.video
                                             ? isDisplayCard
                                             : Math.abs(slice.distance) < 1.1;
-                                    const mediaAspectRatio = isDisplayCard
-                                        ? (activeMediaAspectRatio ??
-                                          getFileAspectRatio(file))
-                                        : getFileAspectRatio(file);
+                                    const mediaAspectRatio =
+                                        mediaAspectRatios[file.id] ??
+                                        getFileAspectRatio(file);
 
                                     return (
                                         <LaneStackSlice
@@ -820,8 +832,15 @@ export function LaneMemoryViewer({
                                                             onPlaybackBlocked={
                                                                 handleVideoPlaybackBlocked
                                                             }
-                                                            onAspectRatio={
-                                                                handleActiveAspectRatio
+                                                            onAspectRatio={(
+                                                                width,
+                                                                height,
+                                                            ) =>
+                                                                handleMediaAspectRatio(
+                                                                    file.id,
+                                                                    width,
+                                                                    height,
+                                                                )
                                                             }
                                                         />
                                                     ) : (
@@ -841,10 +860,15 @@ export function LaneMemoryViewer({
                                                                     ? handleFullLoad
                                                                     : undefined
                                                             }
-                                                            onAspectRatio={
-                                                                isDisplayCard
-                                                                    ? handleActiveAspectRatio
-                                                                    : undefined
+                                                            onAspectRatio={(
+                                                                width,
+                                                                height,
+                                                            ) =>
+                                                                handleMediaAspectRatio(
+                                                                    file.id,
+                                                                    width,
+                                                                    height,
+                                                                )
                                                             }
                                                             showLoadingOverlay={
                                                                 false
