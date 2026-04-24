@@ -553,6 +553,14 @@ const CopyFilesResponse = z.object({
     oldToNewFileIDMap: z.record(z.string(), z.number()),
 });
 
+/**
+ *
+ * @param collection
+ * @returns the current role of the user in the collection.
+ * if the currentUser is the owner then OWNER, else if
+ * it was shared then checks the sharees list to find the role
+ * which could be either VIEWER or COLLABORATOR.
+ */
 const currentUserRoleInCollection = (collection: Collection) => {
     const userID = ensureLocalUser().id;
     if (collection.owner.id == userID) return "OWNER";
@@ -564,7 +572,7 @@ const currentUserRoleInCollection = (collection: Collection) => {
  * @param collection
  * @returns true if the user can add files to a collection,
  * only the OWNER, ADMIN and COLLABORATOR can actually add
- * file to a collection
+ * file to a collection.
  */
 export const canAddFilesToCollection = (collection: Collection) => {
     const role = currentUserRoleInCollection(collection);
