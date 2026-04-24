@@ -4,6 +4,7 @@ use crate::api::models::{
     GetThumbnailUrlResponse, UserDetails,
 };
 use crate::models::error::Result;
+use ente_core::urls::file_download_url;
 
 /// API methods for interacting with Ente services
 pub struct ApiMethods<'a> {
@@ -102,16 +103,7 @@ impl<'a> ApiMethods<'a> {
 
     /// Get download URL for a file
     pub async fn get_file_url(&self, _account_id: &str, file_id: i64) -> Result<String> {
-        // Check if we're using the default API endpoint
-        let base_url = &self.api.base_url;
-        if base_url == "https://api.ente.io" {
-            // Use the CDN URL for production
-            Ok(format!("https://files.ente.io/?fileID={file_id}"))
-        } else {
-            // For custom/dev environments, use direct download URL
-            // The Go implementation shows this is the pattern
-            Ok(format!("{base_url}/files/download/{file_id}"))
-        }
+        Ok(file_download_url(&self.api.base_url, file_id))
     }
 
     /// Get thumbnail URL for a file

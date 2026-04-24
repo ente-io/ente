@@ -885,8 +885,8 @@ mod tests {
 
     #[test]
     fn test_client_creation() {
-        let client = test_client("https://api.ente.io/");
-        assert_eq!(client.base_url, "https://api.ente.io");
+        let client = test_client("https://api.ente.com/");
+        assert_eq!(client.base_url, "https://api.ente.com");
     }
 
     #[test]
@@ -913,16 +913,16 @@ mod tests {
 
     #[test]
     fn test_request_url_uses_string_join() {
-        let client = test_client("https://api.ente.io/v1");
+        let client = test_client("https://api.ente.com/v1");
         let url = client.request_url("/ping").unwrap();
-        assert_eq!(url, "https://api.ente.io/v1/ping");
+        assert_eq!(url, "https://api.ente.com/v1/ping");
     }
 
     #[test]
     fn test_request_url_preserves_query_and_special_bytes() {
-        let client = test_client("https://api.ente.io/v1");
+        let client = test_client("https://api.ente.com/v1");
         let url = client.request_url("/%2e%2e%5cadmin?fresh=true").unwrap();
-        assert_eq!(url, "https://api.ente.io/v1/%2e%2e%5cadmin?fresh=true");
+        assert_eq!(url, "https://api.ente.com/v1/%2e%2e%5cadmin?fresh=true");
     }
 
     #[test]
@@ -935,7 +935,7 @@ mod tests {
 
     #[test]
     fn test_request_url_rejects_missing_leading_slash() {
-        let client = test_client("https://api.ente.io");
+        let client = test_client("https://api.ente.com");
         let err = client.request_url("ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
@@ -949,21 +949,21 @@ mod tests {
 
     #[test]
     fn test_request_url_rejects_base_url_with_query() {
-        let client = test_client("https://api.ente.io/v1?stale=true");
+        let client = test_client("https://api.ente.com/v1?stale=true");
         let err = client.request_url("/ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
     fn test_request_url_rejects_base_url_with_fragment() {
-        let client = test_client("https://api.ente.io/v1#old");
+        let client = test_client("https://api.ente.com/v1#old");
         let err = client.request_url("/ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
     fn test_set_auth_token_replaces_token() {
-        let client = test_client("https://api.ente.io");
+        let client = test_client("https://api.ente.com");
         client.set_auth_token(Some("token-1".to_string()));
         assert_eq!(
             client

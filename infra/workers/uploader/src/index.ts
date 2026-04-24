@@ -8,7 +8,7 @@ export default {
     async fetch(request: Request) {
         switch (request.method) {
             case "OPTIONS":
-                return handleOPTIONS(request);
+                return handleOPTIONS();
             case "POST":
                 return handlePOSTOrPUT(request);
             case "PUT":
@@ -41,10 +41,8 @@ const isAllowedUploadURL = (uploadURL: string) => {
     }
 };
 
-const handleOPTIONS = (request: Request) => {
-    const origin = request.headers.get("Origin");
-    if (!isAllowedOrigin(origin)) console.warn("Unknown origin", origin);
-    return new Response("", {
+const handleOPTIONS = () =>
+    new Response("", {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
@@ -54,24 +52,6 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Max-Age": "86400",
         },
     });
-};
-
-const isAllowedOrigin = (origin: string | null) => {
-    if (!origin) return false;
-    try {
-        const url = new URL(origin);
-        const hostname = url.hostname;
-        return (
-            origin == "ente://app" /* desktop app */ ||
-            hostname.endsWith("ente.io") ||
-            hostname.endsWith("ente.sh") ||
-            hostname == "localhost"
-        );
-    } catch {
-        // `origin` is likely an invalid URL.
-        return false;
-    }
-};
 
 const handlePOSTOrPUT = async (request: Request) => {
     const url = new URL(request.url);
