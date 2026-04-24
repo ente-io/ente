@@ -31,7 +31,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   // generation counter makes any stale timer's eventual fire a no-op.
   Timer? _warmTimer;
   int _warmGeneration = 0;
-  List<SmartMemory>? _lastWarmedData;
+  String? _lastWarmSignature;
 
   @override
   void initState() {
@@ -98,7 +98,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           return const SizedBox.shrink();
         }
         final collated = _collateForStrip(snapshot.data!);
-        _scheduleWarmCovers(snapshot.data!, collated);
+        _scheduleWarmCovers(collated);
         return Column(
           key: ValueKey(identityHashCode(snapshot.data)),
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,12 +135,10 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     return collated;
   }
 
-  void _scheduleWarmCovers(
-    List<SmartMemory> data,
-    List<(List<Memory>, String)> collated,
-  ) {
-    if (identical(data, _lastWarmedData)) return;
-    _lastWarmedData = data;
+  void _scheduleWarmCovers(List<(List<Memory>, String)> collated) {
+    final warmSignature = _warmSignature(collated);
+    if (warmSignature == _lastWarmSignature) return;
+    _lastWarmSignature = warmSignature;
     _warmGeneration++;
     final gen = _warmGeneration;
     _warmTimer?.cancel();
@@ -155,6 +153,20 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     });
   }
 
+  String _warmSignature(List<(List<Memory>, String)> collated) {
+    return collated
+        .map((e) => e.$1)
+        .take(kMemoryCoverWarmCap)
+        .where((memories) => memories.isNotEmpty)
+        .map((memories) {
+      final file = memories[getNextMemoryIndex(memories)].file;
+      return '${file.uploadedFileID ?? ""}|'
+          '${file.generatedID ?? ""}|'
+          '${file.localID ?? ""}|'
+          '${file.fileType.name}';
+    }).join(',');
+  }
+
   // Kill any pending or in-flight warm pass: cancels the delay timer, bumps
   // the generation so a running warmMemoryCovers loop exits at its next
   // stillActive check, and clears the last-warmed marker so a subsequent
@@ -163,7 +175,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     _warmTimer?.cancel();
     _warmTimer = null;
     _warmGeneration++;
-    _lastWarmedData = null;
+    _lastWarmSignature = null;
   }
 
   Widget _buildMemories(List<(List<Memory>, String)> collated) {
