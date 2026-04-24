@@ -35,9 +35,7 @@ const isAllowedOrigin = (origin: string | null) => {
         const hostname = url.hostname;
         return (
             origin == "ente://app" /* desktop app */ ||
-            hostname.endsWith("ente.com") ||
-            hostname.endsWith("ente.io") ||
-            hostname.endsWith("ente.sh") ||
+            isEnteHostname(hostname) ||
             hostname == "localhost"
         );
     } catch {
@@ -45,6 +43,11 @@ const isAllowedOrigin = (origin: string | null) => {
         return false;
     }
 };
+
+const isEnteHostname = (hostname: string) =>
+    hostname.endsWith(".ente.com") ||
+    hostname.endsWith(".ente.io") ||
+    hostname.endsWith(".ente.sh");
 
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
