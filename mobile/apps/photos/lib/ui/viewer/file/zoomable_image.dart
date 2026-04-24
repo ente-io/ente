@@ -199,7 +199,12 @@ class _ZoomableImageState extends State<ZoomableImage> {
       content = PhotoViewGestureDetectorScope(
         axis: Axis.vertical,
         child: PhotoView(
-          key: ValueKey(_loadedFinalImage),
+          // Toggling ValueKey on _loadedFinalImage tears down PhotoView when
+          // the full file replaces the thumbnail, briefly exposing the layer
+          // underneath (the memory blur backdrop). Only needed for the
+          // gallery's zoom+late-load scale fix; in memory playback we never
+          // zoom, so keep a stable key and let gaplessPlayback swap in place.
+          key: widget.isFromMemories ? null : ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
           controller: _photoViewController,
           filterQuality: FilterQuality.high,

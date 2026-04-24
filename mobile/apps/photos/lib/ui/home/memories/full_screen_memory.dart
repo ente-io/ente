@@ -291,6 +291,17 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   // AnimatedSwitcher doesn't animate its initial child, so we wrap it
   // in an AnimatedOpacity that ramps 0→1 after the first frame.
   double _firstPhotoOpacity = 0;
+  // Photo crossfade durations for auto vs manual advance.
+  static const _autoCrossfadeDuration = Duration(milliseconds: 800);
+  static const _manualCrossfadeDuration = Duration(milliseconds: 200);
+  // How long to hold the incoming photo's Ken Burns still. Intentionally
+  // shorter than _autoCrossfadeDuration so motion picks up as the photo
+  // is still settling in, rather than after a visible beat of stillness.
+  static const _kenBurnsFreezeDuration = Duration(milliseconds: 500);
+  // Tokenises a pending zoom-start so a newer onFinalFileLoad cleanly
+  // invalidates the prior delayed forward.
+  Object? _kenBurnsStartToken;
+  bool _isAnimationPaused = false;
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
@@ -360,13 +371,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _toggleAnimation({required bool pause}) {
+    _isAnimationPaused = pause;
     if (pause) {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
     } else {
       if (hasFinalFileLoaded || isAtFirstOrLastFile) {
         _progressAnimationController?.forward();
-        _zoomAnimationController?.forward();
+        if (_kenBurnsStartToken == null) {
+          _zoomAnimationController?.forward();
+        }
       }
     }
   }
@@ -394,8 +408,25 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       ..forward();
     _zoomAnimationController
       ?..stop()
-      ..reset()
-      ..forward();
+      ..reset();
+    if (_autoAdvanceTransition) {
+      // Hold Ken Burns still during the incoming fade so its motion
+      // doesn't compete with the outgoing photo's motion mid-overlap.
+      final token = Object();
+      _kenBurnsStartToken = token;
+      final controller = _zoomAnimationController;
+      Future.delayed(_kenBurnsFreezeDuration, () {
+        if (!mounted) return;
+        if (_kenBurnsStartToken != token) return;
+        if (_zoomAnimationController != controller) return;
+        _kenBurnsStartToken = null;
+        if (_isAnimationPaused) return;
+        controller?.forward();
+      });
+    } else {
+      _kenBurnsStartToken = null;
+      _zoomAnimationController?.forward();
+    }
   }
 
   void _goToNext(FullScreenMemoryData inheritedData) {
@@ -633,8 +664,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           curve: Curves.easeOut,
                           child: AnimatedSwitcher(
                             duration: _autoAdvanceTransition
-                                ? const Duration(milliseconds: 800)
-                                : const Duration(milliseconds: 200),
+                                ? _autoCrossfadeDuration
+                                : _manualCrossfadeDuration,
                             switchInCurve: Curves.easeOut,
                             switchOutCurve: Curves.easeIn,
                             layoutBuilder: (currentChild, previousChildren) {
@@ -652,6 +683,14 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                     currentFile.localID,
                               ),
                               scaleController: (controller) {
+                                // Freeze the outgoing photo's Ken Burns at
+                                // its current transform on auto-advance so
+                                // the crossfade is a dissolve between two
+                                // still images, not between a still and a
+                                // moving one.
+                                if (_autoAdvanceTransition) {
+                                  _zoomAnimationController?.stop();
+                                }
                                 _zoomAnimationController = controller;
                               },
                               zoomIn: index % 2 == 0,
