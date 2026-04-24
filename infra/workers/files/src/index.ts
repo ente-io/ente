@@ -35,6 +35,7 @@ const isAllowedOrigin = (origin: string | null) => {
         const hostname = url.hostname;
         return (
             origin == "ente://app" /* desktop app */ ||
+            hostname.endsWith("ente.com") ||
             hostname.endsWith("ente.io") ||
             hostname.endsWith("ente.sh") ||
             hostname == "localhost"

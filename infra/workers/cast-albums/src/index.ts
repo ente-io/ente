@@ -29,7 +29,12 @@ const handleOPTIONS = (request: Request) => {
 };
 
 const isAllowedOrigin = (origin: string | null) => {
-    const allowed = ["cast.ente.io", "cast.ente.sh", "localhost"];
+    const allowed = [
+        "cast.ente.com",
+        "cast.ente.io",
+        "cast.ente.sh",
+        "localhost",
+    ];
 
     if (!origin) return false;
     try {
