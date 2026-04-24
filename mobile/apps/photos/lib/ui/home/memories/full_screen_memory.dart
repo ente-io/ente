@@ -18,6 +18,7 @@ import "package:photos/events/resume_video_event.dart";
 import "package:photos/events/retry_failed_image_load_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -77,6 +78,8 @@ class _FullScreenMemoryDataUpdaterState
     extends State<FullScreenMemoryDataUpdater> {
   late ValueNotifier<int> indexNotifier;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  final _ownedThumbnailRefs = <int, ({EnteFile file, Object token})>{};
+  final _pendingThumbnailRefIDs = <int>{};
   // Seeded from checkConnectivity() before the listener attaches, so a real
   // offline→online recovery (fire retry) is distinguishable from a WiFi↔
   // cellular handoff where the old requests are still healthy.
@@ -114,25 +117,15 @@ class _FullScreenMemoryDataUpdaterState
       }
       if (!_wasConnected) {
         _wasConnected = true;
-        // Scoped to the warmed range so we don't touch refs owned by
-        // widgets outside this route. In-window lookahead items hold two
-        // of our refs (initial warm + per-index), so the second loop
-        // releases the second ref.
         final currentIndex = indexNotifier.value;
-        final end = _warmedRangeEndExclusive();
-        for (var i = 0; i < end; i++) {
-          removePendingGetThumbnailRequestIfAny(widget.memories[i].file);
-        }
-        for (var i = 1; i <= _thumbnailLookaheadCap; i++) {
-          final j = currentIndex + i;
-          if (j >= widget.memories.length) break;
-          removePendingGetThumbnailRequestIfAny(widget.memories[j].file);
-        }
+        _releaseOwnedThumbnailRefs();
         Bus.instance.fire(RetryFailedImageLoadEvent());
         // Re-kick on a microtask so the event handler runs first and clears
         // the stale map entries; a synchronous call would re-bump the
         // refcounts before the cancellation.
-        scheduleMicrotask(() => _warmThumbnailWindow(currentIndex));
+        scheduleMicrotask(() {
+          if (mounted) _warmThumbnailWindow(currentIndex);
+        });
       }
     });
   }
@@ -147,23 +140,69 @@ class _FullScreenMemoryDataUpdaterState
     final end =
         (fromIndex + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
     for (var i = fromIndex; i < end; i++) {
-      preloadThumbnail(widget.memories[i].file);
+      _preloadThumbnailOwned(widget.memories[i].file);
     }
   }
 
-  // max() so back-nav below initialIndex still covers the initial warm.
-  int _warmedRangeEndExclusive() {
-    final maxIndex = max(widget.initialIndex, indexNotifier.value);
-    return (maxIndex + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
+  void _preloadThumbnailOwned(EnteFile file) {
+    if (!file.isRemoteFile) {
+      preloadThumbnail(file);
+      return;
+    }
+    final uploadedFileID = file.uploadedFileID;
+    if (uploadedFileID == null) {
+      preloadThumbnail(file);
+      return;
+    }
+    if (_ownedThumbnailRefs.containsKey(uploadedFileID) ||
+        _pendingThumbnailRefIDs.contains(uploadedFileID)) {
+      return;
+    }
+    _pendingThumbnailRefIDs.add(uploadedFileID);
+    unawaited(_preloadRemoteThumbnailOwned(file, uploadedFileID));
+  }
+
+  Future<void> _preloadRemoteThumbnailOwned(
+    EnteFile file,
+    int uploadedFileID,
+  ) async {
+    try {
+      final request = await preloadThumbnailWithPendingRequestRef(file);
+      if (!request.acquiredPendingRequestRef) {
+        return;
+      }
+      if (!mounted) {
+        removePendingGetThumbnailRequestIfAny(file);
+        return;
+      }
+      final token = Object();
+      _ownedThumbnailRefs[uploadedFileID] = (file: file, token: token);
+      unawaited(
+        request.pendingRequest.whenComplete(() {
+          final ref = _ownedThumbnailRefs[uploadedFileID];
+          if (ref?.token == token) {
+            _ownedThumbnailRefs.remove(uploadedFileID);
+          }
+        }),
+      );
+    } catch (_) {
+      // Best-effort warmup; visible widgets perform their own load/error path.
+    } finally {
+      _pendingThumbnailRefIDs.remove(uploadedFileID);
+    }
+  }
+
+  void _releaseOwnedThumbnailRefs() {
+    for (final ref in _ownedThumbnailRefs.values) {
+      removePendingGetThumbnailRequestIfAny(ref.file);
+    }
+    _ownedThumbnailRefs.clear();
   }
 
   @override
   void dispose() {
     _connectivitySubscription?.cancel();
-    final end = _warmedRangeEndExclusive();
-    for (var i = 0; i < end; i++) {
-      removePendingGetThumbnailRequestIfAny(widget.memories[i].file);
-    }
+    _releaseOwnedThumbnailRefs();
     indexNotifier.dispose();
     super.dispose();
   }
@@ -185,6 +224,7 @@ class _FullScreenMemoryDataUpdaterState
       memories: widget.memories,
       indexNotifier: indexNotifier,
       removeCurrentMemory: removeCurrentMemory,
+      preloadThumbnail: _preloadThumbnailOwned,
       child: widget.child,
     );
   }
@@ -194,11 +234,13 @@ class FullScreenMemoryData extends InheritedWidget {
   final List<Memory> memories;
   final ValueNotifier<int> indexNotifier;
   final VoidCallback removeCurrentMemory;
+  final void Function(EnteFile file) preloadThumbnail;
 
   const FullScreenMemoryData({
     required this.memories,
     required this.indexNotifier,
     required this.removeCurrentMemory,
+    required this.preloadThumbnail,
     required super.child,
     super.key,
   });
@@ -540,7 +582,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           i++) {
                         final j = index + i;
                         if (j >= inheritedData.memories.length) break;
-                        preloadThumbnail(inheritedData.memories[j].file);
+                        inheritedData.preloadThumbnail(
+                          inheritedData.memories[j].file,
+                        );
                       }
                       for (var i = 1;
                           i <=
