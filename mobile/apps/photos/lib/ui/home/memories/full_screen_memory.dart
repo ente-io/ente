@@ -633,7 +633,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           curve: Curves.easeOut,
                           child: AnimatedSwitcher(
                             duration: _autoAdvanceTransition
-                                ? const Duration(milliseconds: 600)
+                                ? const Duration(milliseconds: 800)
                                 : const Duration(milliseconds: 200),
                             switchInCurve: Curves.easeOut,
                             switchOutCurve: Curves.easeIn,
