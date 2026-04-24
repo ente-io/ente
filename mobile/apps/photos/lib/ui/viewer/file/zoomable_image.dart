@@ -35,6 +35,7 @@ class ZoomableImage extends StatefulWidget {
   final Decoration? backgroundDecoration;
   final bool shouldCover;
   final bool isGuestView;
+  final bool isFromMemories;
   final Function({required int memoryDuration})? onFinalFileLoad;
 
   const ZoomableImage(
@@ -45,6 +46,7 @@ class ZoomableImage extends StatefulWidget {
     this.backgroundDecoration,
     this.shouldCover = false,
     this.isGuestView = false,
+    this.isFromMemories = false,
     this.onFinalFileLoad,
   });
 
@@ -96,6 +98,16 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
+    // Render a cached thumbnail on first paint so prefetched files never
+    // flash the spinner while the async load resolves.
+    final cachedThumbnail =
+        ThumbnailInMemoryLruCache.get(_photo, thumbnailLargeSize) ??
+            ThumbnailInMemoryLruCache.get(_photo, thumbnailSmallSize);
+    if (cachedThumbnail != null) {
+      _imageProvider = Image.memory(cachedThumbnail).image;
+      _loadedSmallThumbnail = true;
+      _notifyReadyOnce();
+    }
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
@@ -230,9 +242,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
                 height: screenRelativeImageHeight,
                 child: Hero(
                   tag: widget.tagPrefix! + _photo.tag,
-                  child: const EnteLoadingWidget(
-                    color: Colors.white,
-                  ),
+                  child: widget.isFromMemories
+                      ? const _DelayedLoadingIndicator()
+                      : const EnteLoadingWidget(
+                          color: Colors.white,
+                        ),
                 ),
               ),
             );
@@ -249,9 +263,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
         ),
       );
     } else {
-      content = const EnteLoadingWidget(
-        color: Colors.white,
-      );
+      content = widget.isFromMemories
+          ? const _DelayedLoadingIndicator()
+          : const EnteLoadingWidget(
+              color: Colors.white,
+            );
     }
 
     final GestureDragUpdateCallback? verticalDragCallback =
@@ -670,5 +686,41 @@ class _ZoomableImageState extends State<ZoomableImage> {
         _notifyReadyOnce();
       }
     }
+  }
+}
+
+// Suppresses the spinner for a short window so fast loads (common in the
+// memory viewer thanks to prefetch) never paint a flash between advances.
+class _DelayedLoadingIndicator extends StatefulWidget {
+  const _DelayedLoadingIndicator();
+
+  @override
+  State<_DelayedLoadingIndicator> createState() =>
+      _DelayedLoadingIndicatorState();
+}
+
+class _DelayedLoadingIndicatorState extends State<_DelayedLoadingIndicator> {
+  static const Duration _delay = Duration(milliseconds: 400);
+  Timer? _timer;
+  bool _showSpinner = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(_delay, () {
+      if (mounted) setState(() => _showSpinner = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_showSpinner) return const SizedBox.expand();
+    return const EnteLoadingWidget(color: Colors.white);
   }
 }
