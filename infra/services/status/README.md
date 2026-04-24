@@ -1,6 +1,6 @@
 # Status
 
-Our status page ([status.ente.io](https://status.ente.io)) is a self-hosted
+Our status page ([status.ente.com](https://status.ente.com)) is a self-hosted
 [Uptime Kuma](https://github.com/louislam/uptime-kuma).
 
 ## Installing
@@ -40,4 +40,4 @@ sudo systemctl reload nginx
 
 ## Administration
 
-Login into the [dashboard](https://status.ente.io/dashboard) for administration.
+Login into the [dashboard](https://status.ente.com/dashboard) for administration.
