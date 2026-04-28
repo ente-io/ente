@@ -31,14 +31,14 @@ export const DEFAULT_MODEL: ModelInfo = {
 };
 
 const DESKTOP_DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-4b-q4km",
-    name: "Qwen 3.5 4B (Q4_K_M)",
-    url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+    id: "gemma-4-e4b-q4km",
+    name: "Gemma 4 E4B (Q4_K_M)",
+    url: "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf?download=true",
     mmprojUrl:
-        "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-    sizeBytes: 2_740_937_888,
-    mmprojSizeBytes: 672_423_616,
-    sizeHuman: "3.63 GB",
+        "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/mmproj-F16.gguf",
+    sizeBytes: 4_977_169_088,
+    mmprojSizeBytes: 990_372_800,
+    sizeHuman: "5.97 GB",
 };
 
 interface TauriEnsuModelPreset {
@@ -83,6 +83,11 @@ export const FALLBACK_MOBILE_MODEL_PRESETS: ResolvedModelPreset[] = [
 ];
 
 export const FALLBACK_DESKTOP_MODEL_PRESETS: ResolvedModelPreset[] = [
+    {
+        name: "Qwen 3.5 4B (Q4_K_M)",
+        url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+        mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+    },
     {
         name: "LFM 2.5 VL 1.6B (Q4_0)",
         url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
