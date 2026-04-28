@@ -10,7 +10,8 @@ rustflags = ["--cfg", "chacha20_force_neon"]
 rustflags = ["--cfg", "chacha20_force_neon", "-C", "link-arg=-Wl,-z,max-page-size=16384"]
 
 [target.armv7-linux-androideabi]
-rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
+# llama-cpp-sys-2 expects Cargo to provide CARGO_CFG_TARGET_FEATURE; armv7 Android has none by default.
+rustflags = ["--cfg", "target_feature=\"\"", "-C", "link-arg=-Wl,-z,max-page-size=16384"]
 
 [target.x86_64-linux-android]
 rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
