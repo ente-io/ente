@@ -11,10 +11,10 @@ import "package:photos/utils/network_util.dart";
 const int kMemoryVideoLookaheadCap = 20;
 const int kMemoryVideoMaxConcurrentPrefetches = 1;
 
-const int kMemoryVideoPreviewMaxBytes = 25 * 1024 * 1024;
-const int kMemoryVideoOriginalMaxBytes = 25 * 1024 * 1024;
+const int kMemoryVideoPreviewMaxBytes = 50 * 1024 * 1024;
+const int kMemoryVideoOriginalMaxBytes = 50 * 1024 * 1024;
 const int kMemoryVideoOriginalMaxDurationSeconds = 30;
-const int kMemoryVideoSessionBudgetBytes = 100 * 1024 * 1024;
+const int kMemoryVideoSessionBudgetBytes = 200 * 1024 * 1024;
 
 class MemoryVideoPrefetcher {
   final Queue<({EnteFile file, bool Function()? stillActive})> _queue =
