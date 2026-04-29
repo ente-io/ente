@@ -44,6 +44,27 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
   }
 }
 
+Future<({bool acquiredPendingRequestRef, Future<void> pendingRequest})>
+    preloadThumbnailWithPendingRequestRef(EnteFile file) async {
+  if (!file.isRemoteFile) {
+    unawaited(getThumbnailFromLocal(file));
+    return (
+      acquiredPendingRequestRef: false,
+      pendingRequest: Future<void>.value(),
+    );
+  }
+  final request = await _getThumbnailFromServerRequest(file);
+  final pendingRequest = request.future.then<void>(
+    (_) {},
+    onError: (_, __) {},
+  );
+  unawaited(pendingRequest);
+  return (
+    acquiredPendingRequestRef: request.acquiredPendingRequestRef,
+    pendingRequest: pendingRequest,
+  );
+}
+
 // Note: This method should only be called for files that have been uploaded
 // since cachedThumbnailPath depends on the file's uploadedID
 Future<File?> getThumbnailForUploadedFile(EnteFile file) async {
@@ -66,11 +87,20 @@ Future<File?> getThumbnailForUploadedFile(EnteFile file) async {
 }
 
 Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
+  final request = await _getThumbnailFromServerRequest(file);
+  return request.future;
+}
+
+Future<({Future<Uint8List> future, bool acquiredPendingRequestRef})>
+    _getThumbnailFromServerRequest(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {
     final data = await cachedThumbnail.readAsBytes();
     ThumbnailInMemoryLruCache.put(file, data);
-    return data;
+    return (
+      future: Future<Uint8List>.value(data),
+      acquiredPendingRequestRef: false,
+    );
   }
   // Check if there's already in flight request for fetching thumbnail from the
   // server
@@ -86,10 +116,16 @@ Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
     }
     _downloadQueue.add(file.uploadedFileID!);
     _downloadItem(item);
-    return item.completer.future;
+    return (
+      future: item.completer.future,
+      acquiredPendingRequestRef: true,
+    );
   } else {
     _uploadIDToDownloadItem[file.uploadedFileID]!.counter++;
-    return _uploadIDToDownloadItem[file.uploadedFileID]!.completer.future;
+    return (
+      future: _uploadIDToDownloadItem[file.uploadedFileID]!.completer.future,
+      acquiredPendingRequestRef: true,
+    );
   }
 }
 
