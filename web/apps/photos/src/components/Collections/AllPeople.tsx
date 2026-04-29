@@ -62,7 +62,7 @@ import memoize from "memoize-one";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
-    FixedSizeList,
+    VariableSizeList,
     areEqual,
     type ListChildComponentProps,
 } from "react-window";
@@ -146,10 +146,11 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
         return sortPeople(extra, peopleSortBy);
     }, [people, peopleSortBy, peopleState]);
 
-    // If either the showAllPeople is enabled
-    // or if the gallery gave an empty array for
-    // people then showing the full cluster, else visible ones.
-    const displayPeople = useMemo(
+    const handleToggleShowingAllPeople = () => {
+        setShowingAllPeople((value) => !value);
+    };
+
+    const searchablePeople = useMemo(
         () =>
             showingAllPeople || people.length == 0
                 ? sortPeople(people.concat(extraPeople), peopleSortBy)
@@ -157,20 +158,30 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
         [extraPeople, people, peopleSortBy, showingAllPeople],
     );
 
-    const handleToggleShowingAllPeople = () => {
-        setShowingAllPeople((value) => !value);
-    };
-
-    const filteredPeople = useMemo(() => {
+    const filteredSearchPeople = useMemo(() => {
         if (!searchTerm.trim()) {
-            return displayPeople;
+            return searchablePeople;
         }
 
         const searchLower = searchTerm.toLowerCase();
-        return displayPeople.filter((person) =>
+        return searchablePeople.filter((person) =>
             person.name?.toLowerCase().includes(searchLower),
         );
-    }, [searchTerm, displayPeople]);
+    }, [searchTerm, searchablePeople]);
+
+    const primaryPeople = hasSearchQuery
+        ? filteredSearchPeople
+        : people.length == 0
+          ? extraPeople
+          : people;
+    const expandedPeople =
+        !hasSearchQuery && showingAllPeople && people.length > 0
+            ? extraPeople
+            : [];
+    const visiblePeopleCount = primaryPeople.length + expandedPeople.length;
+    const totalPeopleCount = hasSearchQuery
+        ? searchablePeople.length
+        : visiblePeopleCount;
 
     return (
         <>
@@ -182,8 +193,8 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
             >
                 <Title
                     onClose={onClose}
-                    peopleCount={filteredPeople.length}
-                    totalCount={displayPeople.length}
+                    peopleCount={visiblePeopleCount}
+                    totalCount={totalPeopleCount}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     peopleSortBy={peopleSortBy}
@@ -191,7 +202,8 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                 />
                 <Divider />
                 <AllPeopleContent
-                    people={filteredPeople}
+                    primaryPeople={primaryPeople}
+                    expandedPeople={expandedPeople}
                     hasSearchQuery={hasSearchQuery}
                     showMoreFacesButton={
                         people.length > 0 && extraPeople.length > 0
@@ -229,6 +241,11 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
 
 const Column3To2Breakpoint = 559;
 const PeopleRowItemSize = 154;
+const ShowMoreFacesButtonHeight = 56;
+const ShowMoreFacesButtonVerticalGap = 12;
+const ShowMoreFacesRowItemSize =
+    ShowMoreFacesButtonHeight + 2 * ShowMoreFacesButtonVerticalGap;
+const ExpandedPeopleTopSpacingItemSize = 16;
 const PeopleListTopSpacing = 16;
 const personCardShellClassName = "all-people-person-card";
 
@@ -413,7 +430,8 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
 };
 
 interface AllPeopleContentProps {
-    people: Person[];
+    primaryPeople: Person[];
+    expandedPeople: Person[];
     hasSearchQuery: boolean;
     showMoreFacesButton: boolean;
     showingAllPeople: boolean;
@@ -425,25 +443,39 @@ interface AllPeopleContentProps {
     onIgnorePerson: (person: ClusterPerson) => void;
 }
 
-interface ItemData {
-    personRows: Person[][];
-    onSelectPerson: (id: string) => void;
-    onRenamePerson: (person: CGroupPerson) => void;
-    onPinPerson: (person: CGroupPerson) => void | Promise<void>;
-    onAddName: (person: ClusterPerson) => void;
-    onIgnorePerson: (person: ClusterPerson) => void;
+type PeopleListItem =
+    | { type: "people"; people: Person[] }
+    | { type: "showMoreButton" }
+    | { type: "spacer" };
+
+interface ItemData
+    extends Pick<
+        AllPeopleContentProps,
+        | "showingAllPeople"
+        | "onToggleShowingAllPeople"
+        | "onSelectPerson"
+        | "onRenamePerson"
+        | "onPinPerson"
+        | "onAddName"
+        | "onIgnorePerson"
+    > {
+    items: PeopleListItem[];
 }
 
 const createItemData = memoize(
     (
-        personRows: Person[][],
+        items: PeopleListItem[],
+        showingAllPeople: boolean,
+        onToggleShowingAllPeople: () => void,
         onSelectPerson: (id: string) => void,
         onRenamePerson: (person: CGroupPerson) => void,
         onPinPerson: (person: CGroupPerson) => void | Promise<void>,
         onAddName: (person: ClusterPerson) => void,
         onIgnorePerson: (person: ClusterPerson) => void,
     ) => ({
-        personRows,
+        items,
+        showingAllPeople,
+        onToggleShowingAllPeople,
         onSelectPerson,
         onRenamePerson,
         onPinPerson,
@@ -452,17 +484,59 @@ const createItemData = memoize(
     }),
 );
 
+const peopleListItems = (
+    people: Person[],
+    columns: number,
+): PeopleListItem[] => {
+    const items: PeopleListItem[] = [];
+    for (let index = 0; index < people.length; index += columns) {
+        items.push({
+            type: "people",
+            people: people.slice(index, index + columns),
+        });
+    }
+    return items;
+};
+
+const peopleListItemSize = (item: PeopleListItem | undefined) => {
+    switch (item?.type) {
+        case "showMoreButton":
+            return ShowMoreFacesRowItemSize;
+        case "spacer":
+            return ExpandedPeopleTopSpacingItemSize;
+        default:
+            return PeopleRowItemSize;
+    }
+};
+
 const PeopleRow = React.memo(
     ({ data, index, style }: ListChildComponentProps<ItemData>) => {
         const {
-            personRows,
+            items,
+            showingAllPeople,
+            onToggleShowingAllPeople,
             onSelectPerson,
             onRenamePerson,
             onPinPerson,
             onAddName,
             onIgnorePerson,
         } = data;
-        const peopleRow = personRows[index]!;
+        const item = items[index]!;
+
+        if (item.type == "showMoreButton") {
+            return (
+                <div style={peopleRowStyle(style)}>
+                    <ShowMoreFacesButton
+                        showingAllPeople={showingAllPeople}
+                        onClick={onToggleShowingAllPeople}
+                    />
+                </div>
+            );
+        }
+
+        if (item.type == "spacer") {
+            return <div style={peopleRowStyle(style)} />;
+        }
 
         return (
             <div style={peopleRowStyle(style)}>
@@ -476,7 +550,7 @@ const PeopleRow = React.memo(
                         gap: 0.5,
                     }}
                 >
-                    {peopleRow.map((person) => (
+                    {item.people.map((person) => (
                         <PersonCard
                             key={person.id}
                             person={person}
@@ -495,7 +569,8 @@ const PeopleRow = React.memo(
 );
 
 const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
-    people,
+    primaryPeople,
+    expandedPeople,
     hasSearchQuery,
     showMoreFacesButton,
     showingAllPeople,
@@ -508,17 +583,51 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
 }) => {
     const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
     const columns = isTwoColumn ? 2 : 3;
+    const listOuterRef = useRef<HTMLDivElement>(null);
 
-    const personRows = useMemo(() => {
-        const rows: Person[][] = [];
-        for (let index = 0; index < people.length; index += columns) {
-            rows.push(people.slice(index, index + columns));
+    const shouldShowMoreFacesButton = showMoreFacesButton && !hasSearchQuery;
+    const shouldShowExpandedPeople =
+        showingAllPeople && expandedPeople.length > 0;
+
+    const items = useMemo(() => {
+        const items = peopleListItems(primaryPeople, columns);
+
+        if (shouldShowMoreFacesButton) {
+            items.push({ type: "showMoreButton" });
         }
-        return rows;
-    }, [people, columns]);
+
+        if (shouldShowMoreFacesButton && shouldShowExpandedPeople) {
+            items.push({ type: "spacer" });
+            items.push(...peopleListItems(expandedPeople, columns));
+        }
+
+        return items;
+    }, [
+        columns,
+        expandedPeople,
+        primaryPeople,
+        shouldShowExpandedPeople,
+        shouldShowMoreFacesButton,
+    ]);
+
+    const handleToggleShowingAllPeople = () => {
+        onToggleShowingAllPeople();
+        if (!showingAllPeople && shouldShowMoreFacesButton) {
+            window.requestAnimationFrame(() => {
+                listOuterRef.current?.scrollBy({
+                    top:
+                        ShowMoreFacesRowItemSize +
+                        ExpandedPeopleTopSpacingItemSize,
+                    behavior: "smooth",
+                });
+            });
+        }
+    };
 
     const itemData = createItemData(
-        personRows,
+        items,
+        showingAllPeople,
+        handleToggleShowingAllPeople,
         onSelectPerson,
         onRenamePerson,
         onPinPerson,
@@ -526,7 +635,7 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         onIgnorePerson,
     );
 
-    if (hasSearchQuery && people.length === 0) {
+    if (hasSearchQuery && primaryPeople.length === 0) {
         return (
             <DialogContent sx={{ height: "80svh" }}>
                 <CenteredMessage>
@@ -538,11 +647,18 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         );
     }
 
+    const itemSize = (index: number) => peopleListItemSize(items[index]);
+    const listContentHeight =
+        PeopleListTopSpacing +
+        items.reduce((height, item) => height + peopleListItemSize(item), 0);
+    const primaryRowCount = Math.ceil(primaryPeople.length / columns);
+    const listKey = `${columns}-${shouldShowMoreFacesButton ? "with-button" : "no-button"}-${primaryRowCount}`;
+
     return (
         <DialogContent
             sx={{
                 "&&": { padding: 0 },
-                height: "80svh",
+                height: `min(80svh, ${listContentHeight}px)`,
                 display: "flex",
                 flexDirection: "column",
             }}
@@ -550,24 +666,20 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
             <Box sx={{ flex: 1, minHeight: 0 }}>
                 <AutoSizer>
                     {({ width, height }) => (
-                        <FixedSizeList
+                        <VariableSizeList
                             {...{ width, height }}
-                            itemCount={personRows.length}
-                            itemSize={PeopleRowItemSize}
+                            outerRef={listOuterRef}
+                            key={listKey}
+                            itemCount={items.length}
+                            itemSize={itemSize}
                             itemData={itemData}
                             innerElementType={PeopleListInner}
                         >
                             {PeopleRow}
-                        </FixedSizeList>
+                        </VariableSizeList>
                     )}
                 </AutoSizer>
             </Box>
-            {showMoreFacesButton && !hasSearchQuery && (
-                <ShowMoreFacesButton
-                    showingAllPeople={showingAllPeople}
-                    onClick={onToggleShowingAllPeople}
-                />
-            )}
         </DialogContent>
     );
 };
@@ -581,7 +693,7 @@ const ShowMoreFacesButton: React.FC<ShowMoreFacesButtonProps> = ({
     showingAllPeople,
     onClick,
 }) => (
-    <Box sx={{ px: 2, pt: 1, pb: 2 }}>
+    <Box sx={{ px: 2, py: `${ShowMoreFacesButtonVerticalGap}px` }}>
         <Button
             fullWidth
             variant="text"
@@ -590,6 +702,8 @@ const ShowMoreFacesButton: React.FC<ShowMoreFacesButtonProps> = ({
                 color: "text.base",
                 backgroundColor: "fill.faint",
                 border: 0,
+                height: `${ShowMoreFacesButtonHeight}px`,
+                minHeight: `${ShowMoreFacesButtonHeight}px`,
                 "&:hover": { backgroundColor: "fill.muted" },
             }}
         >
