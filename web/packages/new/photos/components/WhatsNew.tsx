@@ -79,11 +79,11 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut("App Lock and Better People Search ")}
+                {ut("Public Albums, People Section and Memories Improvements")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "App Lock for enhanced security. Better people list experience with search.",
+                    "Memories and Memory Lane links. Faster public albums. View less prominent faces in All People dialog. Lots of Improvements (Public albums, file viewer, metadata preservation on editing, and more)",
                 )}
             </Typography>
         </Stack>
