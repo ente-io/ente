@@ -54,7 +54,7 @@ class FaceRecognitionService {
       return;
     }
     if (isLocalGalleryMode) {
-      _logger.finest("Skipping person feedback sync in offline mode");
+      _logger.finest("Skipping person feedback sync in local gallery mode");
       return;
     }
     _isSyncing = true;

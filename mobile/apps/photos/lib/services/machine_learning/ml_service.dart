@@ -66,10 +66,10 @@ class MLService {
       _isRunningML || memoriesCacheService.isUpdatingMemories;
 
   static const _kForceClusteringFaceCount = 8000;
-  static const _kForceClusteringFaceCountOffline = 100;
+  static const _kForceClusteringFaceCountLocalGallery = 100;
   int _forceClusteringFaceCountForMode(MLMode mode) {
     return mode == MLMode.localGallery
-        ? _kForceClusteringFaceCountOffline
+        ? _kForceClusteringFaceCountLocalGallery
         : _kForceClusteringFaceCount;
   }
 
@@ -560,14 +560,14 @@ class MLService {
         }
       }
     } else {
-      _logger.info("Skipping person metadata in offline mode");
+      _logger.info("Skipping person metadata in local gallery mode");
     }
 
     try {
       // Get a sense of the total number of faces in the database
       final int totalFaces = await _mlDataDB.getTotalFaceCount();
       final fileIDToCreationTime = isLocalGalleryMode
-          ? await _getOfflineFileIdToCreationTime()
+          ? await _getLocalGalleryFileIdToCreationTime()
           : await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
@@ -976,7 +976,7 @@ class MLService {
     return true;
   }
 
-  Future<Map<int, int>> _getOfflineFileIdToCreationTime() async {
+  Future<Map<int, int>> _getLocalGalleryFileIdToCreationTime() async {
     final files = await SearchService.instance.getAllFilesForSearch();
     final localIdToCreation = <String, int>{};
     for (final file in files) {

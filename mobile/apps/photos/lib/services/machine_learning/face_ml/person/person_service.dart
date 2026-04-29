@@ -434,7 +434,7 @@ class PersonService {
     bool skipClusterUpdateIfNoChange = true,
   }) async {
     if (isLocalGalleryMode) {
-      logger.finest("Skip fetching remote clusters in offline mode");
+      logger.finest("Skip fetching remote clusters in local gallery mode");
       return false;
     }
     final int changedEntities = await entityService.syncEntity(

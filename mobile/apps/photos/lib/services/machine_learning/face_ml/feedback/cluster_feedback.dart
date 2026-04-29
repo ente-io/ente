@@ -49,8 +49,8 @@ class ClusterFeedbackService<T> {
 
   ClusterFeedbackService._privateConstructor();
   late final mlDataDB = MLDataDB.instance;
-  // Person entities and person suggestions are online-only; keep all
-  // suggestion centroid mapping/vector access pinned to the online DB.
+  // Person entities and person suggestions require an Ente account; keep all
+  // suggestion centroid mapping/vector access pinned to the Ente account DB.
   MLDataDB get _mlDataDBForCentroidVectorDb => MLDataDB.instance;
   ClusterCentroidVectorDB get _clusterCentroidVectorDB =>
       ClusterCentroidVectorDB.instance;
@@ -75,11 +75,11 @@ class ClusterFeedbackService<T> {
   }) async {
     assert(
       !isLocalGalleryMode,
-      "Person suggestions are online-only and should not run in offline mode.",
+      "Person suggestions require an Ente account and should not run in local gallery mode.",
     );
     if (isLocalGalleryMode) {
       _logger.info(
-        "Skipping getSuggestionForPerson in offline mode because person suggestions are online-only",
+        "Skipping getSuggestionForPerson in local gallery mode because person suggestions require an Ente account",
       );
       return [];
     }
@@ -1709,11 +1709,11 @@ class ClusterFeedbackService<T> {
   }) async {
     assert(
       !isLocalGalleryMode,
-      "Fast person suggestions are online-only and should not run in offline mode.",
+      "Fast person suggestions require an Ente account and should not run in local gallery mode.",
     );
     if (isLocalGalleryMode) {
       _logger.info(
-        "Skipping _getFastSuggestions in offline mode because person suggestions are online-only",
+        "Skipping _getFastSuggestions in local gallery mode because person suggestions require an Ente account",
       );
       return [];
     }

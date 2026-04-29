@@ -68,8 +68,8 @@ class LocalSyncService {
           Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
         _registerChangeCallback();
         if (isLocalGalleryMode) {
-          // Offline onboarding grants permission without explicitly invoking
-          // SyncService, so trigger local import right away.
+          // Local gallery onboarding grants permission without explicitly
+          // invoking SyncService, so trigger local import right away.
           unawaited(checkAndSync());
         }
       });

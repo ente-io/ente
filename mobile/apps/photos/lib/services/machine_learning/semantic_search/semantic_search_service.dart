@@ -43,7 +43,7 @@ class SemanticSearchService {
 
   final _cacheLock = Lock();
   bool _imageEmbeddingsAreCached = false;
-  bool? _cachedEmbeddingsOffline;
+  bool? _cachedEmbeddingsLocalGallery;
   Timer? _embeddingsCacheTimer;
   final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
   static const Duration _vectorDbMigrationDelay = Duration(seconds: 10);
@@ -175,10 +175,10 @@ class SemanticSearchService {
     return _cacheLock.synchronized(() async {
       _resetInactivityTimer();
       if (_imageEmbeddingsAreCached) {
-        if (_cachedEmbeddingsOffline != isLocalGalleryMode) {
+        if (_cachedEmbeddingsLocalGallery != isLocalGalleryMode) {
           await MLComputer.instance.clearImageEmbeddingsCache();
           _imageEmbeddingsAreCached = false;
-          _cachedEmbeddingsOffline = null;
+          _cachedEmbeddingsLocalGallery = null;
         } else {
           return;
         }
@@ -196,7 +196,7 @@ class SemanticSearchService {
         cacheRustExact: _shouldUseRustExactSearch,
       );
       _imageEmbeddingsAreCached = true;
-      _cachedEmbeddingsOffline = isLocalGalleryMode;
+      _cachedEmbeddingsLocalGallery = isLocalGalleryMode;
       return;
     });
   }
@@ -238,7 +238,7 @@ class SemanticSearchService {
     }
 
     if (isLocalGalleryMode) {
-      return _getOfflineMatchingFiles(
+      return _getLocalGalleryMatchingFiles(
         queryResults,
         fileIDToScoreMap,
         showThreshold,
@@ -279,7 +279,7 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<List<EnteFile>> _getOfflineMatchingFiles(
+  Future<List<EnteFile>> _getLocalGalleryMatchingFiles(
     List<QueryResult> queryResults,
     Map<int, double> fileIDToScoreMap,
     bool showThreshold,

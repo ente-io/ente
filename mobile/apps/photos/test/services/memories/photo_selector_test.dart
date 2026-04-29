@@ -100,7 +100,8 @@ FaceWithoutEmbedding _face(String faceID, int fileID) {
 
 void main() {
   group('PhotoSelector utilities', () {
-    test('memoryFileId returns uploadedFileID when not offline', () {
+    test('memoryFileId returns uploadedFileID when not in local gallery mode',
+        () {
       final f = _file(uploadedFileID: 42, creationTime: _baseTime);
       expect(
         PhotoSelector.memoryFileId(f, isLocalGalleryMode: false),
@@ -108,7 +109,7 @@ void main() {
       );
     });
 
-    test('memoryFileId returns generatedID when offline', () {
+    test('memoryFileId returns generatedID when in local gallery mode', () {
       final f = _file(
         uploadedFileID: 42,
         creationTime: _baseTime,

@@ -202,7 +202,7 @@ class SyncService {
         );
       }
       _logger.info(
-        "[SYNC] Offline mode${Platform.isAndroid ? '' : ' (non-Android, no metadata processing)'}, skipping remote sync",
+        "[SYNC] Local gallery mode${Platform.isAndroid ? '' : ' (non-Android, no metadata processing)'}, skipping remote sync",
       );
       return;
     }

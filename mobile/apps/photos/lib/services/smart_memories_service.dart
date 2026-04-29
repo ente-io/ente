@@ -275,7 +275,7 @@ class SmartMemoriesService {
 
       if (isLocalGalleryMode && memoriesResult.isEmpty) {
         _logger.severe(
-          "Smart memories returned empty in offline mode, falling back to simple memories",
+          "Smart memories returned empty in local gallery mode, falling back to simple memories",
         );
         final fallbackMemories = await calcSimpleMemories();
         return MemoriesResult(fallbackMemories, <BaseLocation>[]);
@@ -291,7 +291,7 @@ class SmartMemoriesService {
       if (isLocalGalleryMode) {
         try {
           _logger.warning(
-            "Falling back to simple memories after smart memories failure in offline mode",
+            "Falling back to simple memories after smart memories failure in local gallery mode",
           );
           final fallbackMemories = await calcSimpleMemories();
           return MemoriesResult(fallbackMemories, <BaseLocation>[]);

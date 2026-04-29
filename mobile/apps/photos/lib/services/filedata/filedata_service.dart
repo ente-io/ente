@@ -131,7 +131,7 @@ class FileDataService {
 
   Future<void> _syncFDStatusInternal() async {
     if (isLocalGalleryMode) {
-      _logger.fine("Skipping file data sync in offline mode");
+      _logger.fine("Skipping file data sync in local gallery mode");
       return;
     }
     try {
