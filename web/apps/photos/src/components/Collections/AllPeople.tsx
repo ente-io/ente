@@ -152,9 +152,9 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
     const displayPeople = useMemo(
         () =>
             showingAllPeople || people.length == 0
-                ? people.concat(extraPeople)
+                ? sortPeople(people.concat(extraPeople), peopleSortBy)
                 : people,
-        [extraPeople, people, showingAllPeople],
+        [extraPeople, people, peopleSortBy, showingAllPeople],
     );
 
     const handleToggleShowingAllPeople = () => {
