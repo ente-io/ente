@@ -250,7 +250,6 @@ const ShowMoreFacesButtonVerticalGap = 16;
 const ShowMoreFacesRowItemSize =
     ShowMoreFacesButtonHeight + 2 * ShowMoreFacesButtonVerticalGap;
 const ExpandedPeopleTopSpacing = ShowMoreFacesButtonVerticalGap - 3;
-const ShowMoreFacesCollapseDelay = 300;
 const PeopleListTopSpacing = 16;
 const personCardShellClassName = "all-people-person-card";
 
@@ -615,73 +614,16 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         shouldShowMoreFacesButton,
     ]);
 
-    const primaryRowCount = Math.ceil(primaryPeople.length / columns);
-    const collapsedListContentHeight =
-        PeopleListTopSpacing +
-        primaryRowCount * PeopleRowItemSize +
-        (shouldShowMoreFacesButton ? ShowMoreFacesRowItemSize : 0);
-
     const handleToggleShowingAllPeople = () => {
+        onToggleShowingAllPeople();
         if (!showingAllPeople && shouldShowMoreFacesButton) {
-            onToggleShowingAllPeople();
             window.requestAnimationFrame(() => {
                 listOuterRef.current?.scrollBy({
                     top: ShowMoreFacesRowItemSize,
                     behavior: "smooth",
                 });
             });
-            return;
         }
-
-        if (showingAllPeople && shouldShowExpandedPeople) {
-            const listOuterElement = listOuterRef.current;
-
-            if (!listOuterElement) {
-                onToggleShowingAllPeople();
-                return;
-            }
-
-            const collapsedMaxScrollTop = Math.max(
-                0,
-                collapsedListContentHeight - listOuterElement.clientHeight,
-            );
-            const targetScrollTop = Math.max(
-                0,
-                Math.min(
-                    listOuterElement.scrollTop - ShowMoreFacesRowItemSize,
-                    collapsedMaxScrollTop,
-                ),
-            );
-
-            if (Math.abs(listOuterElement.scrollTop - targetScrollTop) < 1) {
-                onToggleShowingAllPeople();
-                return;
-            }
-
-            const finishCollapse = () => {
-                listOuterElement.removeEventListener(
-                    "scrollend",
-                    finishCollapse,
-                );
-                window.clearTimeout(collapseTimeoutID);
-                onToggleShowingAllPeople();
-            };
-
-            listOuterElement.addEventListener("scrollend", finishCollapse, {
-                once: true,
-            });
-            const collapseTimeoutID = window.setTimeout(
-                finishCollapse,
-                ShowMoreFacesCollapseDelay,
-            );
-            listOuterElement.scrollTo({
-                top: targetScrollTop,
-                behavior: "smooth",
-            });
-            return;
-        }
-
-        onToggleShowingAllPeople();
     };
 
     const itemData = createItemData(
@@ -711,6 +653,7 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
     const listContentHeight =
         PeopleListTopSpacing +
         items.reduce((height, item) => height + peopleListItemSize(item), 0);
+    const primaryRowCount = Math.ceil(primaryPeople.length / columns);
     const listKey = `${columns}-${shouldShowMoreFacesButton ? "with-button" : "no-button"}-${primaryRowCount}`;
 
     return (
