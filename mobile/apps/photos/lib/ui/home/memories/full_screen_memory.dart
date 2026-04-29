@@ -32,6 +32,7 @@ import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
+import "package:photos/ui/home/memories/memory_video_prefetcher.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -81,6 +82,7 @@ class _FullScreenMemoryDataUpdaterState
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final _ownedThumbnailRefs = <int, ({EnteFile file, Object token})>{};
   final _pendingThumbnailRefIDs = <int>{};
+  final _videoPrefetcher = MemoryVideoPrefetcher();
   // Seeded from checkConnectivity() before the listener attaches, so a real
   // offline→online recovery (fire retry) is distinguishable from a WiFi↔
   // cellular handoff where the old requests are still healthy.
@@ -95,6 +97,7 @@ class _FullScreenMemoryDataUpdaterState
       widget.memories.length == widget.initialIndex + 1,
     );
     _warmThumbnailWindow(widget.initialIndex);
+    _warmVideoWindow(widget.initialIndex + 1);
     unawaited(_setupConnectivityListener());
   }
 
@@ -125,7 +128,9 @@ class _FullScreenMemoryDataUpdaterState
         // the stale map entries; a synchronous call would re-bump the
         // refcounts before the cancellation.
         scheduleMicrotask(() {
-          if (mounted) _warmThumbnailWindow(currentIndex);
+          if (!mounted) return;
+          _warmThumbnailWindow(currentIndex);
+          _warmVideoWindow(currentIndex + 1);
         });
       }
     });
@@ -143,6 +148,20 @@ class _FullScreenMemoryDataUpdaterState
     for (var i = fromIndex; i < end; i++) {
       _preloadThumbnailOwned(widget.memories[i].file);
     }
+  }
+
+  void _warmVideoWindow(int fromIndex) {
+    final start = fromIndex.clamp(0, widget.memories.length).toInt();
+    final end = (start + kMemoryVideoLookaheadCap)
+        .clamp(
+          0,
+          widget.memories.length,
+        )
+        .toInt();
+    _videoPrefetcher.prefetchFiles(
+      widget.memories.sublist(start, end).map((memory) => memory.file),
+      replacePending: true,
+    );
   }
 
   void _preloadThumbnailOwned(EnteFile file) {
@@ -204,6 +223,7 @@ class _FullScreenMemoryDataUpdaterState
   void dispose() {
     _connectivitySubscription?.cancel();
     _releaseOwnedThumbnailRefs();
+    _videoPrefetcher.dispose();
     indexNotifier.dispose();
     super.dispose();
   }
@@ -226,6 +246,7 @@ class _FullScreenMemoryDataUpdaterState
       indexNotifier: indexNotifier,
       removeCurrentMemory: removeCurrentMemory,
       preloadThumbnail: _preloadThumbnailOwned,
+      preloadVideos: _warmVideoWindow,
       child: widget.child,
     );
   }
@@ -236,12 +257,14 @@ class FullScreenMemoryData extends InheritedWidget {
   final ValueNotifier<int> indexNotifier;
   final VoidCallback removeCurrentMemory;
   final void Function(EnteFile file) preloadThumbnail;
+  final void Function(int fromIndex) preloadVideos;
 
   const FullScreenMemoryData({
     required this.memories,
     required this.indexNotifier,
     required this.removeCurrentMemory,
     required this.preloadThumbnail,
+    required this.preloadVideos,
     required super.child,
     super.key,
   });
@@ -639,6 +662,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         if (j >= inheritedData.memories.length) break;
                         preloadFile(inheritedData.memories[j].file);
                       }
+                      inheritedData.preloadVideos(index + 1);
                       final currentMemory = inheritedData.memories[index];
                       final isVideo =
                           currentMemory.file.fileType == FileType.video;

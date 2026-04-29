@@ -11,6 +11,7 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/home/memories/memory_cover_util.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
+import "package:photos/ui/home/memories/memory_video_prefetcher.dart";
 
 class MemoriesWidget extends StatefulWidget {
   const MemoriesWidget({super.key});
@@ -32,6 +33,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   Timer? _warmTimer;
   int _warmGeneration = 0;
   String? _lastWarmSignature;
+  final _videoPrefetcher = MemoryVideoPrefetcher();
 
   @override
   void initState() {
@@ -72,6 +74,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     _memoriesChangedSubscription.cancel();
     _memorySeenSubscription.cancel();
     _warmTimer?.cancel();
+    _videoPrefetcher.dispose();
     super.dispose();
   }
 
@@ -144,9 +147,18 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     _warmTimer?.cancel();
     _warmTimer = Timer(const Duration(seconds: 5), () {
       if (!mounted || gen != _warmGeneration) return;
+      final memoryLists = collated.map((e) => e.$1).toList(growable: false);
+      _videoPrefetcher.prefetchFiles(
+        memoryLists
+            .take(kMemoryCoverWarmCap)
+            .where((memories) => memories.isNotEmpty)
+            .map((memories) => memories[getNextMemoryIndex(memories)].file),
+        stillActive: () => mounted && gen == _warmGeneration,
+        replacePending: true,
+      );
       unawaited(
         warmMemoryCovers(
-          collated.map((e) => e.$1).toList(growable: false),
+          memoryLists,
           stillActive: () => mounted && gen == _warmGeneration,
         ),
       );
@@ -169,13 +181,15 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   // Kill any pending or in-flight warm pass: cancels the delay timer, bumps
   // the generation so a running warmMemoryCovers loop exits at its next
-  // stillActive check, and clears the last-warmed marker so a subsequent
-  // dataset re-schedules even if it's the same reference as before.
+  // stillActive check, clears pending video work, and clears the last-warmed
+  // marker so a subsequent dataset re-schedules even if it's the same
+  // reference as before.
   void _cancelPendingWarm() {
     _warmTimer?.cancel();
     _warmTimer = null;
     _warmGeneration++;
     _lastWarmSignature = null;
+    _videoPrefetcher.clearPending();
   }
 
   Widget _buildMemories(List<(List<Memory>, String)> collated) {

@@ -26,6 +26,7 @@ import "package:photos/gateways/files/file_data_gateway.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/metadata/file_magic.dart";
@@ -892,7 +893,64 @@ class VideoPreviewService {
     return await _getPlaylist(file);
   }
 
-  Future<PlaylistData?> _getPlaylist(EnteFile file) async {
+  Future<bool> prefetchExistingPreview(
+    EnteFile file, {
+    required int maxPreviewSizeBytes,
+    bool Function(int bytes)? tryReserveBytes,
+  }) async {
+    if (file.fileType != FileType.video || file.uploadedFileID == null) {
+      return false;
+    }
+    try {
+      await _ensurePreviewIdsInitialized();
+      Future<bool> isPreviewCached(PreviewInfo previewInfo) async {
+        final cachedPreview = await videoCacheManager.getFileFromCache(
+          _getVideoPreviewKey(previewInfo.objectId),
+        );
+        return cachedPreview != null;
+      }
+
+      final previewInfo = fileDataService.previewIds[file.uploadedFileID!];
+      if (previewInfo != null) {
+        if (await isPreviewCached(previewInfo)) {
+          return true;
+        }
+        if (previewInfo.objectSize > maxPreviewSizeBytes) {
+          return false;
+        }
+      }
+      if (previewInfo == null && file.isOwner) {
+        return false;
+      }
+      final playlist = await _getPlaylist(
+        file,
+        awaitPreviewCache: true,
+        maxPreviewSizeBytes: maxPreviewSizeBytes,
+        tryReserveBytes: tryReserveBytes,
+      );
+      if (playlist == null) {
+        return false;
+      }
+      final warmedPreviewInfo =
+          fileDataService.previewIds[file.uploadedFileID!];
+      return warmedPreviewInfo != null &&
+          await isPreviewCached(warmedPreviewInfo);
+    } catch (e, s) {
+      _logger.fine(
+        "Failed to prefetch preview video for ${file.uploadedFileID}",
+        e,
+        s,
+      );
+      return false;
+    }
+  }
+
+  Future<PlaylistData?> _getPlaylist(
+    EnteFile file, {
+    bool awaitPreviewCache = false,
+    int? maxPreviewSizeBytes,
+    bool Function(int bytes)? tryReserveBytes,
+  }) async {
     _logger.fine("Getting playlist for $file");
     int? width, height, size;
 
@@ -955,20 +1013,42 @@ class VideoPreviewService {
         _getVideoPreviewKey(objectID),
       ))
           ?.file;
+      final effectiveSize = size ?? previewInfo?.objectSize;
+      final maxPreviewCacheSize =
+          maxPreviewSizeBytes ?? _maxPreviewSizeLimitForCache;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        if (size != null && size < _maxPreviewSizeLimitForCache) {
-          unawaited(
-            videoCacheManager.downloadFile(
+        final canCachePreview = effectiveSize != null &&
+            effectiveSize <= maxPreviewCacheSize &&
+            (tryReserveBytes == null || tryReserveBytes(effectiveSize));
+        if (canCachePreview) {
+          if (awaitPreviewCache) {
+            final previewFile = await videoCacheManager.downloadFile(
               previewURLResult.$1,
               key: _getVideoPreviewKey(objectID),
-            ),
+            );
+            finalPlaylist = finalPlaylist.replaceAll(
+              '\noutput.ts',
+              '\n${previewFile.file.path}',
+            );
+          } else {
+            unawaited(
+              videoCacheManager.downloadFile(
+                previewURLResult.$1,
+                key: _getVideoPreviewKey(objectID),
+              ),
+            );
+            finalPlaylist = finalPlaylist.replaceAll(
+              '\noutput.ts',
+              '\n${previewURLResult.$1}',
+            );
+          }
+        } else {
+          finalPlaylist = finalPlaylist.replaceAll(
+            '\noutput.ts',
+            '\n${previewURLResult.$1}',
           );
         }
-        finalPlaylist = finalPlaylist.replaceAll(
-          '\noutput.ts',
-          '\n${previewURLResult.$1}',
-        );
       } else {
         finalPlaylist = finalPlaylist.replaceAll(
           '\noutput.ts',
@@ -990,7 +1070,7 @@ class VideoPreviewService {
         preview: playlistFile,
         width: width,
         height: height,
-        size: size,
+        size: effectiveSize,
         durationInSeconds: parseDurationFromHLS(finalPlaylist),
       );
       if (shouldAppendPreview) {
