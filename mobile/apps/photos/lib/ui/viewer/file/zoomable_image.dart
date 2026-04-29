@@ -18,6 +18,7 @@ import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/events/retry_failed_image_load_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/service_locator.dart" show flagService;
 import "package:photos/src/rust/api/image_processing_api.dart" as rust_image;
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
@@ -465,15 +466,26 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   void _onFileLoaded(File file) {
     // On Android, the platform HEIC decoder can silently produce glitched
-    // output without throwing an error. Bypass it entirely using Rust.
-    // Exception: very large images (>100MP) skip Rust to avoid OOM — the Rust
-    // decoder loads the full image into memory, while the platform decoder
-    // respects cacheWidth/cacheHeight and decodes at reduced resolution.
-    if (_shouldUseRustHeicDecoder()) {
-      unawaited(_loadHeicWithRust(file));
+    // output without throwing an error. Use Rust when dimensions are known
+    // and safely under the large-image guard.
+
+    if (_isAndroidHeic()) {
+      unawaited(_loadAndroidHeic(file));
       return;
     }
 
+    _loadWithPlatformDecoder(file);
+  }
+
+  Future<void> _loadAndroidHeic(File file) async {
+    if (_shouldUseRustHeicDecoder()) {
+      await _loadHeicWithRust(file);
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
     _loadWithPlatformDecoder(file);
   }
 
@@ -606,10 +618,24 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 
-  bool get _isKnownTooLargeImage => _photo.hasDimensions && isTooLargeImage;
+  bool _isAndroidHeic() => Platform.isAndroid && _isHeic();
 
-  bool _shouldUseRustHeicDecoder() =>
-      Platform.isAndroid && _isHeic() && !_isKnownTooLargeImage;
+  bool _shouldUseRustHeicDecoder() {
+    if (!_isAndroidHeic()) {
+      return false;
+    }
+    if (!flagService.useRustForHeicDecoder) {
+      return false;
+    }
+    if (!_photo.hasDimensions) {
+      return false;
+    }
+    if (isTooLargeImage) {
+      return false;
+    }
+
+    return true;
+  }
 
   Future<ImageProvider<Object>?> _tryDecodeHeicWithRust(
     File file, {

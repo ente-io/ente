@@ -116,6 +116,8 @@ class FlagService {
 
   bool get useRustForFaceThumbnails => internalUser;
 
+  bool get useRustForHeicDecoder => internalUser;
+
   bool get petEnabled => internalUser;
 
   bool get qrFeatureEnabled => true;
