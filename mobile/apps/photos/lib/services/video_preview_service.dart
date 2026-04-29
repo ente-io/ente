@@ -901,48 +901,38 @@ class VideoPreviewService {
     if (file.fileType != FileType.video || file.uploadedFileID == null) {
       return false;
     }
-    try {
-      await _ensurePreviewIdsInitialized();
-      Future<bool> isPreviewCached(PreviewInfo previewInfo) async {
-        final cachedPreview = await videoCacheManager.getFileFromCache(
-          _getVideoPreviewKey(previewInfo.objectId),
-        );
-        return cachedPreview != null;
-      }
+    await _ensurePreviewIdsInitialized();
+    Future<bool> isPreviewCached(PreviewInfo previewInfo) async {
+      final cachedPreview = await videoCacheManager.getFileFromCache(
+        _getVideoPreviewKey(previewInfo.objectId),
+      );
+      return cachedPreview != null;
+    }
 
-      final previewInfo = fileDataService.previewIds[file.uploadedFileID!];
-      if (previewInfo != null) {
-        if (await isPreviewCached(previewInfo)) {
-          return true;
-        }
-        if (previewInfo.objectSize > maxPreviewSizeBytes) {
-          return false;
-        }
+    final previewInfo = fileDataService.previewIds[file.uploadedFileID!];
+    if (previewInfo != null) {
+      if (await isPreviewCached(previewInfo)) {
+        return true;
       }
-      if (previewInfo == null && file.isOwner) {
+      if (previewInfo.objectSize > maxPreviewSizeBytes) {
         return false;
       }
-      final playlist = await _getPlaylist(
-        file,
-        awaitPreviewCache: true,
-        maxPreviewSizeBytes: maxPreviewSizeBytes,
-        tryReserveBytes: tryReserveBytes,
-      );
-      if (playlist == null) {
-        return false;
-      }
-      final warmedPreviewInfo =
-          fileDataService.previewIds[file.uploadedFileID!];
-      return warmedPreviewInfo != null &&
-          await isPreviewCached(warmedPreviewInfo);
-    } catch (e, s) {
-      _logger.fine(
-        "Failed to prefetch preview video for ${file.uploadedFileID}",
-        e,
-        s,
-      );
+    }
+    if (previewInfo == null && file.isOwner) {
       return false;
     }
+    final playlist = await _getPlaylist(
+      file,
+      awaitPreviewCache: true,
+      maxPreviewSizeBytes: maxPreviewSizeBytes,
+      tryReserveBytes: tryReserveBytes,
+    );
+    if (playlist == null) {
+      return false;
+    }
+    final warmedPreviewInfo = fileDataService.previewIds[file.uploadedFileID!];
+    return warmedPreviewInfo != null &&
+        await isPreviewCached(warmedPreviewInfo);
   }
 
   Future<PlaylistData?> _getPlaylist(

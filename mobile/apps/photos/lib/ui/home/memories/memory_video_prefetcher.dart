@@ -16,11 +16,14 @@ const int kMemoryVideoOriginalMaxBytes = 50 * 1024 * 1024;
 const int kMemoryVideoOriginalMaxDurationSeconds = 30;
 const int kMemoryVideoSessionBudgetBytes = 200 * 1024 * 1024;
 
+enum _OriginalPrefetchResult { warmed, ineligible, failed }
+
 class MemoryVideoPrefetcher {
   final Queue<({EnteFile file, bool Function()? stillActive})> _queue =
       Queue<({EnteFile file, bool Function()? stillActive})>();
   final Set<int> _queuedIDs = <int>{};
   final Set<int> _attemptedIDs = <int>{};
+  final Map<int, int> _reservedDownloadBytesByID = <int, int>{};
 
   int _activeCount = 0;
   int _reservedDownloadBytes = 0;
@@ -92,11 +95,19 @@ class MemoryVideoPrefetcher {
         (stillActive == null || stillActive());
   }
 
-  bool _tryReserveDownloadBytes(int bytes) {
-    if (_reservedDownloadBytes + bytes > kMemoryVideoSessionBudgetBytes) {
+  bool _tryReserveDownloadBytes(int uploadedFileID, int bytes) {
+    final existingReservation = _reservedDownloadBytesByID[uploadedFileID];
+    final additionalBytes =
+        existingReservation == null ? bytes : bytes - existingReservation;
+    if (additionalBytes <= 0) {
+      return true;
+    }
+    if (_reservedDownloadBytes + additionalBytes >
+        kMemoryVideoSessionBudgetBytes) {
       return false;
     }
-    _reservedDownloadBytes += bytes;
+    _reservedDownloadBytes += additionalBytes;
+    _reservedDownloadBytesByID[uploadedFileID] = bytes;
     return true;
   }
 
@@ -115,23 +126,31 @@ class MemoryVideoPrefetcher {
         file,
         maxPreviewSizeBytes: kMemoryVideoPreviewMaxBytes,
         tryReserveBytes: (bytes) {
-          return _isActive(stillActive) && _tryReserveDownloadBytes(bytes);
+          return _isActive(stillActive) &&
+              _tryReserveDownloadBytes(uploadedFileID, bytes);
         },
       );
       if (!_isActive(stillActive)) return;
       if (!didWarmPreview) {
-        await _prefetchSmallOriginal(file, stillActive: stillActive);
+        final originalResult = await _prefetchSmallOriginal(
+          file,
+          uploadedFileID: uploadedFileID,
+          stillActive: stillActive,
+        );
+        if (originalResult == _OriginalPrefetchResult.failed) {
+          return;
+        }
       }
       if (!_isActive(stillActive)) return;
       _attemptedIDs.add(uploadedFileID);
     } catch (_) {
-      if (!_isActive(stillActive)) return;
-      _attemptedIDs.add(uploadedFileID);
+      // Transient prefetch failures should be retryable on a later warm pass.
     }
   }
 
-  Future<bool> _prefetchSmallOriginal(
+  Future<_OriginalPrefetchResult> _prefetchSmallOriginal(
     EnteFile file, {
+    required int uploadedFileID,
     bool Function()? stillActive,
   }) async {
     final fileSize = file.fileSize;
@@ -142,18 +161,20 @@ class MemoryVideoPrefetcher {
         duration == null ||
         duration <= 0 ||
         duration > kMemoryVideoOriginalMaxDurationSeconds) {
-      return false;
+      return _OriginalPrefetchResult.ineligible;
     }
     if (await isFileCached(file)) {
-      return true;
+      return _OriginalPrefetchResult.warmed;
     }
     if (!_isActive(stillActive)) {
-      return false;
+      return _OriginalPrefetchResult.failed;
     }
-    if (!_tryReserveDownloadBytes(fileSize)) {
-      return false;
+    if (!_tryReserveDownloadBytes(uploadedFileID, fileSize)) {
+      return _OriginalPrefetchResult.ineligible;
     }
     final prefetchedFile = await getFileFromServer(file);
-    return prefetchedFile != null;
+    return prefetchedFile != null
+        ? _OriginalPrefetchResult.warmed
+        : _OriginalPrefetchResult.failed;
   }
 }
