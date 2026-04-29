@@ -76,6 +76,7 @@ import {
 import log from "ente-base/log";
 import {
     albumsAppOrigin,
+    apiOrigin,
     isCustomAlbumsAppOrigin,
     isOfficialAlbumsApp,
     photosAppOrigin,
@@ -290,6 +291,7 @@ export default function PublicAlbumPage() {
                 const [
                     { extractCollectionKeyFromShareURL },
                     {
+                        savedPublicCollectionLinkDeviceToken,
                         savedPublicCollectionAccessTokenJWT,
                         savedPublicCollectionByKey,
                         savedPublicCollectionFiles,
@@ -312,7 +314,13 @@ export default function PublicAlbumPage() {
                 collectionKey.current = ck;
                 const collection = await savedPublicCollectionByKey(ck);
                 const accessToken = t;
+                const currentAPIOrigin = await apiOrigin();
                 let accessTokenJWT: string | undefined;
+                const linkDeviceToken =
+                    await savedPublicCollectionLinkDeviceToken(
+                        currentAPIOrigin,
+                        accessToken,
+                    );
                 if (collection) {
                     setPublicCollection(collection);
                     setIsPasswordProtected(
@@ -327,7 +335,11 @@ export default function PublicAlbumPage() {
                     accessTokenJWT =
                         await savedPublicCollectionAccessTokenJWT(accessToken);
                 }
-                credentials.current = { accessToken, accessTokenJWT };
+                credentials.current = {
+                    accessToken,
+                    accessTokenJWT,
+                    linkDeviceToken,
+                };
                 setPublicAlbumsCredentials(credentials.current);
                 await publicAlbumsRemotePull();
             } finally {
@@ -382,15 +394,27 @@ export default function PublicAlbumPage() {
                     pullPublicCollectionFiles,
                     removePublicCollectionFileData,
                 },
-                { removePublicCollectionAccessTokenJWT },
+                {
+                    removePublicCollectionAccessTokenJWT,
+                    savePublicCollectionLinkDeviceToken,
+                },
             ] = await Promise.all([
                 loadPublicCollectionService(),
                 loadPublicAlbumsFDB(),
             ]);
-            const { collection } = await pullCollection(
-                accessToken,
+            const { collection, linkDeviceToken } = await pullCollection(
+                credentials.current!,
                 collectionKey.current!,
             );
+            if (linkDeviceToken) {
+                credentials.current!.linkDeviceToken = linkDeviceToken;
+                setPublicAlbumsCredentials(credentials.current);
+                await savePublicCollectionLinkDeviceToken(
+                    await apiOrigin(),
+                    accessToken,
+                    linkDeviceToken,
+                );
+            }
 
             if (checkAndRedirectForTripAlbum(collection)) {
                 return;
