@@ -867,5 +867,9 @@
     "auto_lock_5_minutes": "",
     "auto_lock_30_minutes": "",
     "wrong_unlock_code_one": "",
-    "wrong_unlock_code_other": ""
+    "wrong_unlock_code_other": "",
+    "all_time": "全部时间",
+    "last_7_days": "最近 7 天",
+    "last_30_days": "最近 30 天",
+    "this_year": "今年"
 }

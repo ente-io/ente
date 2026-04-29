@@ -5,9 +5,18 @@
 import { Upload01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Link, Stack, Typography } from "@mui/material";
+import {
+    IconButton,
+    Link,
+    Menu,
+    MenuItem,
+    Stack,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
 import { AlbumAddedNotification } from "components/AlbumAddedNotification";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -58,7 +67,10 @@ import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
+import {
+    fileCreationTime,
+    ItemVisibility,
+} from "ente-media/file-metadata";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
     CollectionSelector,
@@ -252,6 +264,11 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
+    const [timeFilterAnchorEl, setTimeFilterAnchorEl] = useState<
+        HTMLElement | undefined
+    >(undefined);
+
     const { customDomain } = useSettingsSnapshot();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
@@ -441,11 +458,41 @@ const Page: React.FC = () => {
         );
     }, [isInSearchMode, activeCollection, activeCollectionSummary, user]);
 
+    const timeFilteredFiles = useMemo(() => {
+        if (timeFilter === "all") return filteredFiles;
+
+        const nowMs = Date.now();
+        const nowUs = nowMs * 1000;
+
+        let cutoffUs: number;
+
+        switch (timeFilter) {
+            case "7days":
+                cutoffUs = nowUs - 7 * 24 * 60 * 60 * 1000 * 1000;
+                break;
+            case "30days":
+                cutoffUs = nowUs - 30 * 24 * 60 * 60 * 1000 * 1000;
+                break;
+            case "thisYear":
+                const thisYear = new Date().getFullYear();
+                const startOfYearMs = new Date(thisYear, 0, 1).getTime();
+                cutoffUs = startOfYearMs * 1000;
+                break;
+            default:
+                return filteredFiles;
+        }
+
+        return filteredFiles.filter((file) => {
+            const fileTimeUs = fileCreationTime(file);
+            return fileTimeUs >= cutoffUs;
+        });
+    }, [filteredFiles, timeFilter]);
+
     const activeCollectionFiles = useMemo(() => {
         if (!activeCollection) return [];
-        if (barMode == "hidden-albums") return filteredFiles;
+        if (barMode == "hidden-albums") return timeFilteredFiles;
 
-        return filteredFiles.filter(({ id, magicMetadata }) => {
+        return timeFilteredFiles.filter(({ id, magicMetadata }) => {
             const visibility = magicMetadata?.data.visibility;
             const isVisible =
                 visibility === undefined ||
@@ -461,18 +508,18 @@ const Page: React.FC = () => {
     }, [
         activeCollection,
         barMode,
-        filteredFiles,
+        timeFilteredFiles,
         hiddenFileIDs,
         tempDeletedFileIDs,
         tempHiddenFileIDs,
     ]);
     const selectedFilesInView = useMemo(
-        () => getSelectedFiles(selected, filteredFiles),
-        [selected, filteredFiles],
+        () => getSelectedFiles(selected, timeFilteredFiles),
+        [selected, timeFilteredFiles],
     );
     const isAllSelectedInView =
-        filteredFiles.length > 0 &&
-        selectedFilesInView.length === filteredFiles.length;
+        timeFilteredFiles.length > 0 &&
+        selectedFilesInView.length === timeFilteredFiles.length;
 
     // TODO: Move into reducer
     const barCollectionSummaries = useMemo(
@@ -715,7 +762,7 @@ const Page: React.FC = () => {
             // - We haven't fetched the user yet;
             !user ||
             // - There is nothing to select;
-            !filteredFiles.length ||
+            !timeFilteredFiles.length ||
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
@@ -745,7 +792,7 @@ const Page: React.FC = () => {
                       },
         };
 
-        filteredFiles.forEach((item) => {
+        timeFilteredFiles.forEach((item) => {
             if (item.ownerID === user.id) {
                 selected.ownCount++;
             }
@@ -757,7 +804,7 @@ const Page: React.FC = () => {
     };
 
     const handleSelectAll = () => {
-        if (!user || !filteredFiles.length) return;
+        if (!user || !timeFilteredFiles.length) return;
 
         const selected = {
             ownCount: 0,
@@ -772,7 +819,7 @@ const Page: React.FC = () => {
                       },
         };
 
-        filteredFiles.forEach((item) => {
+        timeFilteredFiles.forEach((item) => {
             if (item.ownerID === user.id) {
                 selected.ownCount++;
             }
@@ -1893,6 +1940,14 @@ const Page: React.FC = () => {
                         onSelectSearchOption={handleSelectSearchOption}
                         onSelectPeople={() => dispatch({ type: "showPeople" })}
                         onSelectPerson={handleSelectPerson}
+                        timeFilterProps={{
+                            timeFilter,
+                            anchorEl: timeFilterAnchorEl,
+                            onOpen: (event: React.MouseEvent<HTMLElement>) =>
+                                setTimeFilterAnchorEl(event.currentTarget),
+                            onClose: () => setTimeFilterAnchorEl(undefined),
+                            onSelect: setTimeFilter,
+                        }}
                     />
                 )}
             </NavbarBase>
@@ -1908,7 +1963,7 @@ const Page: React.FC = () => {
                     activeCollectionID: activeCollectionID!,
                     files: activeCollection
                         ? activeCollectionFiles
-                        : filteredFiles,
+                        : timeFilteredFiles,
                     activePerson,
                     setFileListHeader,
                     saveGroups,
@@ -2007,7 +2062,7 @@ const Page: React.FC = () => {
                     header={fileListHeader}
                     footer={fileListFooter}
                     user={user}
-                    files={filteredFiles}
+                    files={timeFilteredFiles}
                     enableDownload={true}
                     disableGrouping={state.searchSuggestion?.type == "clip"}
                     enableSelect={true}
@@ -2148,6 +2203,110 @@ const preloadImage = (imgBasePath: string) => {
     new Image().srcset = srcset.join(",");
 };
 
+type TimeFilter = "all" | "7days" | "30days" | "thisYear";
+
+interface TimeFilterButtonProps {
+    timeFilter: TimeFilter;
+    anchorEl: HTMLElement | undefined;
+    onOpen: (event: React.MouseEvent<HTMLElement>) => void;
+    onClose: () => void;
+    onSelect: (filter: TimeFilter) => void;
+}
+
+const TimeFilterButton: React.FC<TimeFilterButtonProps> = ({
+    timeFilter,
+    anchorEl,
+    onOpen,
+    onClose,
+    onSelect,
+}) => {
+    const isSmallWidth = useIsSmallWidth();
+
+    const getFilterLabel = (filter: TimeFilter) => {
+        switch (filter) {
+            case "all":
+                return t("all_time");
+            case "7days":
+                return t("last_7_days");
+            case "30days":
+                return t("last_30_days");
+            case "thisYear":
+                return t("this_year");
+            default:
+                return t("all_time");
+        }
+    };
+
+    const icon = <CalendarIcon />;
+
+    return (
+        <>
+            {isSmallWidth ? (
+                <IconButton onClick={onOpen}>{icon}</IconButton>
+            ) : (
+                <FocusVisibleButton
+                    color="secondary"
+                    startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
+                    onClick={onOpen}
+                >
+                    {getFilterLabel(timeFilter)}
+                </FocusVisibleButton>
+            )}
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={onClose}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                }}
+            >
+                <MenuItem
+                    selected={timeFilter === "all"}
+                    onClick={() => {
+                        onSelect("all");
+                        onClose();
+                    }}
+                >
+                    {t("all_time")}
+                </MenuItem>
+                <MenuItem
+                    selected={timeFilter === "7days"}
+                    onClick={() => {
+                        onSelect("7days");
+                        onClose();
+                    }}
+                >
+                    {t("last_7_days")}
+                </MenuItem>
+                <MenuItem
+                    selected={timeFilter === "30days"}
+                    onClick={() => {
+                        onSelect("30days");
+                        onClose();
+                    }}
+                >
+                    {t("last_30_days")}
+                </MenuItem>
+                <MenuItem
+                    selected={timeFilter === "thisYear"}
+                    onClick={() => {
+                        onSelect("thisYear");
+                        onClose();
+                    }}
+                >
+                    {t("this_year")}
+                </MenuItem>
+            </Menu>
+        </>
+    );
+};
+
 type NormalNavbarContentsProps = SearchBarProps & {
     /**
      * Called when the user activates the sidebar icon.
@@ -2157,16 +2316,24 @@ type NormalNavbarContentsProps = SearchBarProps & {
      * Called when the user activates the upload button.
      */
     onUpload: () => void;
+    /**
+     * Time filter button props.
+     */
+    timeFilterProps: TimeFilterButtonProps;
 };
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     onSidebar,
     onUpload,
+    timeFilterProps,
     ...props
 }) => (
     <>
         {!props.isInSearchMode && <SidebarButton onClick={onSidebar} />}
         <SearchBar {...props} />
+        {!props.isInSearchMode && (
+            <TimeFilterButton {...timeFilterProps} />
+        )}
         {!props.isInSearchMode && <UploadButton onClick={onUpload} />}
     </>
 );
