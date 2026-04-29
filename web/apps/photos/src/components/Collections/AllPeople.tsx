@@ -249,7 +249,7 @@ const ShowMoreFacesButtonHeight = 56;
 const ShowMoreFacesButtonVerticalGap = 16;
 const ShowMoreFacesRowItemSize =
     ShowMoreFacesButtonHeight + 2 * ShowMoreFacesButtonVerticalGap;
-const ExpandedPeopleTopSpacing = ShowMoreFacesButtonVerticalGap - 3;
+const ExpandedPeopleTopSpacing = 4;
 const PeopleListTopSpacing = 16;
 const personCardShellClassName = "all-people-person-card";
 
