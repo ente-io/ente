@@ -41,10 +41,11 @@ class _NameFaceBannerState extends State<NameFaceBanner> {
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-    if (!(isOfflineMode && !Configuration.instance.hasConfiguredAccount())) {
+    if (!(isLocalGalleryMode &&
+        !Configuration.instance.hasConfiguredAccount())) {
       return const SizedBox.shrink();
     }
-    if (localSettings.isOfflineNameFaceBannerDismissed) {
+    if (localSettings.isLocalGalleryNameFaceBannerDismissed) {
       return const SizedBox.shrink();
     }
 
@@ -138,6 +139,6 @@ class _NameFaceBannerState extends State<NameFaceBanner> {
     setState(() {
       _dismissed = true;
     });
-    localSettings.setOfflineNameFaceBannerDismissed(true);
+    localSettings.setLocalGalleryNameFaceBannerDismissed(true);
   }
 }

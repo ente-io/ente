@@ -97,17 +97,20 @@ class _FullScreenMemoryDataUpdaterState
   Future<void> _setupConnectivityListener() async {
     try {
       final initialResults = await Connectivity().checkConnectivity();
-      _wasConnected =
-          initialResults.any((result) => result != ConnectivityResult.none);
+      _wasConnected = initialResults.any(
+        (result) => result != ConnectivityResult.none,
+      );
     } catch (_) {
       // Prefer a spurious retry over a missed one if the check fails.
       _wasConnected = false;
     }
     if (!mounted) return;
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen((results) {
-      final hasConnection =
-          results.any((result) => result != ConnectivityResult.none);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final hasConnection = results.any(
+        (result) => result != ConnectivityResult.none,
+      );
       if (!hasConnection) {
         _wasConnected = false;
         return;
@@ -683,7 +686,7 @@ class BottomIcons extends StatelessWidget {
               },
             ),
           ]);
-          if (!isOfflineMode) {
+          if (!isLocalGalleryMode) {
             rowChildren.add(
               SizedBox(height: 32, child: FavoriteWidget(currentFile)),
             );
@@ -697,11 +700,7 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await _shareMemory(
-                context,
-                inheritedData,
-                memoryTitle,
-              );
+              await _shareMemory(context, inheritedData, memoryTitle);
               fullScreenState?._toggleAnimation(pause: false);
             },
           ),
@@ -908,7 +907,7 @@ Future<void> _shareMemory(
       ? _titleCase(l10n.videoSmallCase)
       : _titleCase(l10n.photoSmallCase);
   final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
-      !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
+      !(isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount());
   final shouldShareLink = await showBaseBottomSheet<bool>(
     context,
     title: l10n.shareMemories,
@@ -1043,11 +1042,7 @@ class _MemoryShareOption extends StatelessWidget {
                   ),
                 )
               else
-                HugeIcon(
-                  icon: icon,
-                  color: colorScheme.textBase,
-                  size: 24,
-                ),
+                HugeIcon(icon: icon, color: colorScheme.textBase, size: 24),
               const SizedBox(height: 8),
               Text(
                 label,

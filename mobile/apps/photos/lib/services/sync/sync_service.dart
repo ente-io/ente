@@ -42,9 +42,9 @@ class SyncService {
       sync();
     });
 
-    Connectivity()
-        .onConnectivityChanged
-        .listen((List<ConnectivityResult> result) {
+    Connectivity().onConnectivityChanged.listen((
+      List<ConnectivityResult> result,
+    ) {
       _logger.info("Connectivity change detected " + result.toString());
       if (Configuration.instance.hasConfiguredAccount()) {
         sync();
@@ -103,18 +103,12 @@ class SyncService {
       );
     } on NoActiveSubscriptionError {
       Bus.instance.fire(
-        SyncStatusUpdate(
-          SyncStatus.error,
-          error: NoActiveSubscriptionError(),
-        ),
+        SyncStatusUpdate(SyncStatus.error, error: NoActiveSubscriptionError()),
       );
     } on StorageLimitExceededError {
       _showStorageLimitExceededNotification();
       Bus.instance.fire(
-        SyncStatusUpdate(
-          SyncStatus.error,
-          error: StorageLimitExceededError(),
-        ),
+        SyncStatusUpdate(SyncStatus.error, error: StorageLimitExceededError()),
       );
     } on UnauthorizedError {
       _logger.info("Logging user out");
@@ -122,10 +116,7 @@ class SyncService {
     } on NoMediaLocationAccessError {
       _logger.severe("Not uploading due to no media location access");
       Bus.instance.fire(
-        SyncStatusUpdate(
-          SyncStatus.error,
-          error: NoMediaLocationAccessError(),
-        ),
+        SyncStatusUpdate(SyncStatus.error, error: NoMediaLocationAccessError()),
       );
     } catch (e) {
       if (e is DioException) {
@@ -198,7 +189,7 @@ class SyncService {
   Future<void> _doSync() async {
     _logger.info("[SYNC] Starting local sync");
     await _localSyncService.sync();
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       await _localSyncService.syncAll();
       if (Platform.isAndroid) {
         unawaited(
@@ -217,7 +208,8 @@ class SyncService {
     }
 
     final bool allowRemoteSync =
-        _localSyncService.hasCompletedFirstImportOrBypassed() && !isOfflineMode;
+        _localSyncService.hasCompletedFirstImportOrBypassed() &&
+            !isLocalGalleryMode;
 
     if (allowRemoteSync) {
       _logger.info("[SYNC] Starting remote sync");

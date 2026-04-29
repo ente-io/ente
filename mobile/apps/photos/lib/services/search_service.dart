@@ -192,12 +192,7 @@ class SearchService {
     }
 
     _cachedFilesForSearch = _cachedFilesFuture!.then((files) {
-      return applyDBFilters(
-        files,
-        DBFilterOptions(
-          dedupeUploadID: true,
-        ),
-      );
+      return applyDBFilters(files, DBFilterOptions(dedupeUploadID: true));
     });
 
     return _cachedFilesForSearch!;
@@ -220,10 +215,7 @@ class SearchService {
     _cachedFilesForHierarchicalSearch = _cachedFilesFuture!.then((files) {
       return applyDBFilters(
         files,
-        DBFilterOptions(
-          dedupeUploadID: false,
-          onlyUploadedFiles: true,
-        ),
+        DBFilterOptions(dedupeUploadID: false, onlyUploadedFiles: true),
       );
     });
 
@@ -290,8 +282,9 @@ class SearchService {
     _logger.info("Reading hidden files from db");
     final hiddenCollections =
         CollectionsService.instance.getHiddenCollectionIds();
-    _cachedHiddenFilesFuture =
-        FilesDB.instance.getAllFilesFromCollections(hiddenCollections);
+    _cachedHiddenFilesFuture = FilesDB.instance.getAllFilesFromCollections(
+      hiddenCollections,
+    );
     return _cachedHiddenFilesFuture!;
   }
 
@@ -310,7 +303,7 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return <AlbumSearchResult>[];
     }
     final List<Collection> collections = _collectionService.getCollectionsForUI(
@@ -326,12 +319,11 @@ class SearchService {
 
       if (!c.isHidden() &&
           c.type != CollectionType.uncategorized &&
-          c.displayName.toLowerCase().contains(
-                query.toLowerCase(),
-              )) {
+          c.displayName.toLowerCase().contains(query.toLowerCase())) {
         final EnteFile? thumbnail = await _collectionService.getCover(c);
-        collectionSearchResults
-            .add(AlbumSearchResult(CollectionWithThumbnail(c, thumbnail)));
+        collectionSearchResults.add(
+          AlbumSearchResult(CollectionWithThumbnail(c, thumbnail)),
+        );
       }
     }
 
@@ -342,13 +334,11 @@ class SearchService {
     int? limit,
   ) async {
     try {
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         return <AlbumSearchResult>[];
       }
       final List<Collection> collections =
-          _collectionService.getCollectionsForUI(
-        includedShared: true,
-      );
+          _collectionService.getCollectionsForUI(includedShared: true);
 
       final List<AlbumSearchResult> collectionSearchResults = [];
 
@@ -359,8 +349,9 @@ class SearchService {
 
         if (!c.isHidden() && c.type != CollectionType.uncategorized) {
           final EnteFile? thumbnail = await _collectionService.getCover(c);
-          collectionSearchResults
-              .add(AlbumSearchResult(CollectionWithThumbnail(c, thumbnail)));
+          collectionSearchResults.add(
+            AlbumSearchResult(CollectionWithThumbnail(c, thumbnail)),
+          );
         }
       }
 
@@ -375,10 +366,8 @@ class SearchService {
     String query,
   ) async {
     try {
-      final List<DeviceCollection> deviceCollections =
-          await FilesDB.instance.getDeviceCollections(
-        includeCoverThumbnail: true,
-      );
+      final List<DeviceCollection> deviceCollections = await FilesDB.instance
+          .getDeviceCollections(includeCoverThumbnail: true);
 
       final List<DeviceAlbumSearchResult> results = [];
 
@@ -405,8 +394,9 @@ class SearchService {
     final List<GenericSearchResult> searchResults = [];
     for (var yearData in YearsData.instance.yearsData) {
       if (yearData.year.startsWith(yearFromQuery)) {
-        final List<EnteFile> filesInYear =
-            await _getFilesInYear(yearData.duration);
+        final List<EnteFile> filesInYear = await _getFilesInYear(
+          yearData.duration,
+        );
         if (filesInYear.isNotEmpty) {
           searchResults.add(
             GenericSearchResult(
@@ -484,7 +474,10 @@ class SearchService {
       if (holiday.name.toLowerCase().contains(query.toLowerCase())) {
         final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
-          _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
+          _getDurationsForCalendarDateInEveryYear(
+            holiday.day,
+            holiday.month,
+          ),
           ignoreCollections(),
           order: 'DESC',
         );
@@ -908,10 +901,7 @@ class SearchService {
             onResultTap: (ctx) {
               routeToPage(
                 ctx,
-                LocationScreenStateProvider(
-                  entry.key,
-                  const LocationScreen(),
-                ),
+                LocationScreenStateProvider(entry.key, const LocationScreen()),
               );
             },
             hierarchicalSearchFilter: LocationFilter(
@@ -1046,7 +1036,7 @@ class SearchService {
     bool showIgnoredOnly = false,
   }) async {
     try {
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final effectiveMinClusterSize = minClusterSize > 1 ? 1 : minClusterSize;
         if (showIgnoredOnly) {
           return [];
@@ -1059,8 +1049,9 @@ class SearchService {
           return [];
         }
         final localIntIds = fileIdToClusterID.keys.toSet();
-        final localIdMap =
-            await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+        final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
+          localIntIds,
+        );
         final allFiles = await getAllFilesForSearch();
         final localIdToFile = <String, EnteFile>{};
         for (final file in allFiles) {
@@ -1082,9 +1073,9 @@ class SearchService {
         final List<GenericSearchResult> facesResult = [];
         final sortedClusterIds = clusterIdToFiles.keys.toList()
           ..sort(
-            (a, b) => clusterIdToFiles[b]!
-                .length
-                .compareTo(clusterIdToFiles[a]!.length),
+            (a, b) => clusterIdToFiles[b]!.length.compareTo(
+                  clusterIdToFiles[a]!.length,
+                ),
           );
         for (final clusterId in sortedClusterIds) {
           final files = clusterIdToFiles[clusterId]!;
@@ -1094,9 +1085,7 @@ class SearchService {
               ResultType.faces,
               "",
               files,
-              params: {
-                kClusterParamId: clusterId,
-              },
+              params: {kClusterParamId: clusterId},
               onResultTap: (ctx) {
                 routeToPage(
                   ctx,
@@ -1164,11 +1153,15 @@ class SearchService {
           final PersonEntity? p =
               personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
           if (p != null) {
-            final filesForPerson =
-                personIdToFiles.putIfAbsent(p.remoteID, () => []);
+            final filesForPerson = personIdToFiles.putIfAbsent(
+              p.remoteID,
+              () => [],
+            );
             filesForPerson.add(file);
-            final fileIdsForPerson =
-                personIdToFileIds.putIfAbsent(p.remoteID, () => <int>{});
+            final fileIdsForPerson = personIdToFileIds.putIfAbsent(
+              p.remoteID,
+              () => <int>{},
+            );
             fileIdsForPerson.add(entry.key);
           } else {
             if (clusterIdToFiles.containsKey(cluster)) {
@@ -1185,8 +1178,10 @@ class SearchService {
         final manualIDs = entry.value.data.manuallyAssigned.toSet();
         if (manualIDs.isEmpty) continue;
 
-        final filesForPerson =
-            personIdToFiles.putIfAbsent(personID, () => <EnteFile>[]);
+        final filesForPerson = personIdToFiles.putIfAbsent(
+          personID,
+          () => <EnteFile>[],
+        );
         final idSet = personIdToFileIds.putIfAbsent(personID, () => <int>{});
 
         for (final manualID in manualIDs) {
@@ -1204,9 +1199,8 @@ class SearchService {
       // get sorted personId by files count
       final sortedPersonIds = personIdToFiles.keys.toList()
         ..sort(
-          (a, b) => personIdToFiles[b]!.length.compareTo(
-                personIdToFiles[a]!.length,
-              ),
+          (a, b) =>
+              personIdToFiles[b]!.length.compareTo(personIdToFiles[a]!.length),
         );
       final pinnedPersonIds = <String>[];
       final unpinnedPersonIds = <String>[];
@@ -1278,9 +1272,9 @@ class SearchService {
       }
       final sortedClusterIds = clusterIdToFiles.keys.toList()
         ..sort(
-          (a, b) => clusterIdToFiles[b]!
-              .length
-              .compareTo(clusterIdToFiles[a]!.length),
+          (a, b) => clusterIdToFiles[b]!.length.compareTo(
+                clusterIdToFiles[a]!.length,
+              ),
         );
 
       if (!showIgnoredOnly) {
@@ -1468,8 +1462,10 @@ class SearchService {
       // }
 
       if (limit == null || tagSearchResults.length < limit) {
-        final results =
-            await locationService.getFilesInCity(filesWithNoLocTag, '');
+        final results = await locationService.getFilesInCity(
+          filesWithNoLocTag,
+          '',
+        );
         final List<City> sortedByResultCount = results.keys.toList()
           ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
         for (final city in sortedByResultCount) {
@@ -1494,8 +1490,10 @@ class SearchService {
                 locationTag: LocationTag(
                   name: city.city,
                   radius: defaultCityRadius,
-                  centerPoint:
-                      Location(latitude: city.lat, longitude: city.lng),
+                  centerPoint: Location(
+                    latitude: city.lat,
+                    longitude: city.lng,
+                  ),
                   aSquare: a * a,
                   bSquare: b * b,
                 ),
@@ -1676,8 +1674,9 @@ class SearchService {
       );
       locationService.baseLocations = memoriesResult.baseLocations;
       for (final nowMemory in memoriesResult.memories) {
-        cache.toShowMemories
-            .add(ToShowMemory.fromSmartMemory(nowMemory, calcTime));
+        cache.toShowMemories.add(
+          ToShowMemory.fromSmartMemory(nowMemory, calcTime),
+        );
       }
       cache.baseLocations.addAll(memoriesResult.baseLocations);
       // memories = memoriesResult.memories;
@@ -1688,20 +1687,14 @@ class SearchService {
         cache,
         MemoriesCache.encodeToJsonString,
       );
-      _logger.info(
-        "Smart memories cache written to $tempCachePath",
-      );
+      _logger.info("Smart memories cache written to $tempCachePath");
       final decodedCache = await decodeJsonFile(
         tempCachePath,
         MemoriesCache.decodeFromJsonString,
       );
-      _logger.info(
-        "Smart memories cache decoded from $tempCachePath",
-      );
+      _logger.info("Smart memories cache decoded from $tempCachePath");
       memories = await MemoriesCacheService.fromCacheToMemories(decodedCache!);
-      _logger.info(
-        "Smart memories cache converted to memories",
-      );
+      _logger.info("Smart memories cache converted to memories");
     }
     final searchResults = <GenericSearchResult>[];
     for (final memory in memories) {
@@ -1727,7 +1720,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return <GenericSearchResult>[];
     }
     await _warmContactsCacheIfNeeded();
@@ -1746,8 +1739,10 @@ class SearchService {
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
 
-      final fileOwner = CollectionsService.instance
-          .getFileOwner(file.ownerID!, file.collectionID);
+      final fileOwner = CollectionsService.instance.getFileOwner(
+        file.ownerID!,
+        file.collectionID,
+      );
 
       if (matchesResolvedContactQuery(fileOwner, lowerCaseQuery)) {
         if (peopleToSharedFiles.containsKey(fileOwner)) {
@@ -1838,8 +1833,10 @@ class SearchService {
       for (EnteFile file in allFiles) {
         if (file.isOwner) continue;
 
-        final fileOwner = CollectionsService.instance
-            .getFileOwner(file.ownerID!, file.collectionID);
+        final fileOwner = CollectionsService.instance.getFileOwner(
+          file.ownerID!,
+          file.collectionID,
+        );
         if (peopleToSharedFiles.containsKey(fileOwner)) {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {

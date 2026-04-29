@@ -7,7 +7,8 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
-import "package:photos/service_locator.dart" show flagService, isOfflineMode;
+import "package:photos/service_locator.dart"
+    show flagService, isLocalGalleryMode;
 import "package:synchronized/synchronized.dart";
 
 class RemoteAssetsService {
@@ -189,7 +190,7 @@ class RemoteAssetsService {
   Dio get _dio => NetworkClient.instance.getDio();
 
   bool get _resumableDownloadsEnabled =>
-      isOfflineMode || flagService.internalUser;
+      isLocalGalleryMode || flagService.internalUser;
 
   Lock _lockFor(String remotePath) =>
       _assetLocks.putIfAbsent(remotePath, Lock.new);
@@ -212,10 +213,7 @@ class RemoteAssetsService {
 
     try {
       final response = await _dio.head<void>(url);
-      final probe = _RemoteAssetProbe.fromHeaders(
-        url,
-        response.headers,
-      );
+      final probe = _RemoteAssetProbe.fromHeaders(url, response.headers);
       if (probe == null && _shouldLogProbeDiagnosticsFor(url)) {
         final contentLength =
             response.headers.value(HttpHeaders.contentLengthHeader) ??
@@ -250,10 +248,7 @@ class RemoteAssetsService {
     _RemoteAssetProbe probe,
   ) async {
     final tempFile = File(savePath);
-    final existingBytes = await _prepareTempFileForResume(
-      tempFile,
-      probe,
-    );
+    final existingBytes = await _prepareTempFileForResume(tempFile, probe);
     if (existingBytes > 0 && _shouldLogProbeDiagnosticsFor(url)) {
       _logger.info(
         "Resuming download for $url from $existingBytes / ${probe.totalBytes} bytes",
@@ -518,10 +513,7 @@ class _RemoteAssetProbe {
     required this.etag,
   });
 
-  static _RemoteAssetProbe? fromHeaders(
-    String url,
-    Headers headers,
-  ) {
+  static _RemoteAssetProbe? fromHeaders(String url, Headers headers) {
     final contentLength = headers.value(HttpHeaders.contentLengthHeader);
     final totalBytes = int.tryParse(contentLength ?? "");
     if (totalBytes == null || totalBytes <= 0) {
@@ -556,11 +548,7 @@ class _RemoteAssetProbe {
   bool get canResume => acceptsRanges && ifRangeValidator != null;
 
   Map<String, dynamic> toJson() {
-    return {
-      "url": url,
-      "totalBytes": totalBytes,
-      "etag": etag,
-    };
+    return {"url": url, "totalBytes": totalBytes, "etag": etag};
   }
 
   bool matches(_RemoteAssetProbe other) {

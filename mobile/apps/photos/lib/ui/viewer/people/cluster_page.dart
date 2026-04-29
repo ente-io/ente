@@ -15,7 +15,7 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -62,9 +62,7 @@ class ClusterPage extends StatefulWidget {
   State<ClusterPage> createState() => _ClusterPageState();
 }
 
-enum ClusterPageResult {
-  ignoredPerson,
-}
+enum ClusterPageResult { ignoredPerson }
 
 class _ClusterPageState extends State<ClusterPage> {
   final _selectedFiles = SelectedFiles();
@@ -74,18 +72,17 @@ class _ClusterPageState extends State<ClusterPage> {
   late final StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   bool _isNamingBannerDismissed = false;
   bool get _offlineUiMode =>
-      isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+      isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
 
   @override
   void initState() {
     super.initState();
     ClusterFeedbackService.setLastViewedClusterID(widget.clusterID);
     files = List<EnteFile>.from(widget.searchResult)
-      ..sort(
-        (a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0),
-      );
-    _filesUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      ..sort((a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0));
+    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
+      event,
+    ) {
       if (event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
           event.type == EventType.hide) {
@@ -154,10 +151,7 @@ class _ClusterPageState extends State<ClusterPage> {
         final person = result is (PersonEntity, EnteFile) ? result.$1 : result;
         routeToPage(
           context,
-          PeoplePage(
-            person: person,
-            searchResult: null,
-          ),
+          PeoplePage(person: person, searchResult: null),
         ).ignore();
       }
     } else {
@@ -197,10 +191,7 @@ class _ClusterPageState extends State<ClusterPage> {
     Navigator.pop(context);
     routeToPage(
       context,
-      PeoplePage(
-        person: person,
-        searchResult: null,
-      ),
+      PeoplePage(person: person, searchResult: null),
     ).ignore();
   }
 
@@ -216,10 +207,7 @@ class _ClusterPageState extends State<ClusterPage> {
             )
             .toList();
         return Future.value(
-          FileLoadResult(
-            result,
-            result.length < files.length,
-          ),
+          FileLoadResult(result, result.length < files.length),
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -240,9 +228,7 @@ class _ClusterPageState extends State<ClusterPage> {
           ? _offlineUiMode
               ? const NameFaceBanner()
               : SavePersonBanner(
-                  faceWidget: PersonFaceWidget(
-                    clusterID: widget.clusterID,
-                  ),
+                  faceWidget: PersonFaceWidget(clusterID: widget.clusterID),
                   text: AppLocalizations.of(context).savePerson,
                   subText: AppLocalizations.of(context).findThemQuickly,
                   primaryActionLabel: AppLocalizations.of(context).save,
@@ -321,9 +307,6 @@ class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
     with BoundaryReporter {
   @override
   Widget build(BuildContext context) {
-    return boundaryWidget(
-      position: BoundaryPosition.top,
-      child: widget.child,
-    );
+    return boundaryWidget(position: BoundaryPosition.top, child: widget.child);
   }
 }

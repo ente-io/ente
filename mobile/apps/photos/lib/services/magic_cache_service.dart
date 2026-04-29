@@ -34,11 +34,7 @@ class MagicCache {
   final List<int>? fileLocalIntIDs;
   Map<int, int>? _fileIdToPositionMap;
 
-  MagicCache(
-    this.title,
-    this.fileUploadedIDs, {
-    this.fileLocalIntIDs,
-  });
+  MagicCache(this.title, this.fileUploadedIDs, {this.fileLocalIntIDs});
 
   // Get map of uploadID to index in fileUploadedIDs
   Map<int, int> get fileIdToPositionMap {
@@ -87,7 +83,7 @@ String getLocalizedTitle(BuildContext context, String title) {
     case 'Screenshots':
       return context.l10n.discover_screenshots;
     case 'QR Codes':
-      return context.l10n.discover_qr_codes;
+      return title;
     case 'Receipts':
       return context.l10n.discover_receipts;
     case 'Notes':
@@ -251,7 +247,7 @@ class MagicCacheService {
     });
   }
 
-  String get _lastMagicCacheUpdateKey => isOfflineMode
+  String get _lastMagicCacheUpdateKey => isLocalGalleryMode
       ? "${_lastMagicCacheUpdateTime}_offline"
       : _lastMagicCacheUpdateTime;
 
@@ -289,7 +285,7 @@ class MagicCacheService {
   }
 
   Future<String> _getCachePath() async {
-    final suffix = isOfflineMode ? "_offline" : "";
+    final suffix = isLocalGalleryMode ? "_offline" : "";
     return (await getApplicationSupportDirectory()).path +
         "/cache/magic_cache$suffix";
   }
@@ -314,8 +310,9 @@ class MagicCacheService {
       w?.start();
       final magicPromptsData = await getPrompts();
       w?.log("loadedPrompts");
-      final List<MagicCache> magicCaches =
-          await _nonEmptyMagicResults(magicPromptsData);
+      final List<MagicCache> magicCaches = await _nonEmptyMagicResults(
+        magicPromptsData,
+      );
       w?.log("resultComputed");
       _magicCacheFuture = Future.value(magicCaches);
       await writeToJsonFile<List<MagicCache>>(
@@ -415,7 +412,7 @@ class MagicCacheService {
       final List<EnteFile> files =
           await SearchService.instance.getAllFilesForSearch();
 
-      if (!isOfflineMode) {
+      if (!isLocalGalleryMode) {
         final Map<String, List<EnteFile>> magicIdToFiles = {};
         final Map<String, Map<int, int>> promptFileOrder = {};
         for (final cache in magicCaches) {
@@ -458,8 +455,9 @@ class MagicCacheService {
           }
         }
         if (localIntIds.isNotEmpty) {
-          final localIdMap =
-              await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+          final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
+            localIntIds,
+          );
           final localIdToIntId = <String, int>{};
           for (final entry in localIdMap.entries) {
             localIdToIntId[entry.value] = entry.key;
@@ -543,8 +541,8 @@ class MagicCacheService {
         results.add(
           MagicCache(
             prompt.title,
-            isOfflineMode ? const <int>[] : matchedIds,
-            fileLocalIntIDs: isOfflineMode ? matchedIds : null,
+            isLocalGalleryMode ? const <int>[] : matchedIds,
+            fileLocalIntIDs: isLocalGalleryMode ? matchedIds : null,
           ),
         );
       }

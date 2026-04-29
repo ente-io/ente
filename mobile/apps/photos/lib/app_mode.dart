@@ -1,4 +1,1 @@
-enum AppMode {
-  online,
-  offline,
-}
+enum AppMode { enteGallery, localGallery }

@@ -34,10 +34,7 @@ class FileDataService {
   /// preview ids
   void appendPreview(int id, String objectId, int objectSize) {
     if (previewIds.containsKey(id)) return;
-    previewIds[id] = PreviewInfo(
-      objectId: objectId,
-      objectSize: objectSize,
-    );
+    previewIds[id] = PreviewInfo(objectId: objectId, objectSize: objectSize);
   }
 
   Future<void> putFileData(EnteFile file, FileDataEntity data) async {
@@ -81,8 +78,9 @@ class FileDataService {
       return FileDataResponse(
         fileIdToDataMap,
         fetchErrorFileIDs: Set<int>.from(errFileIds.map((x) => x as int)),
-        pendingIndexFileIDs:
-            Set<int>.from(pendingIndexFiles.map((x) => x as int)),
+        pendingIndexFileIDs: Set<int>.from(
+          pendingIndexFiles.map((x) => x as int),
+        ),
       );
     } catch (e, s) {
       _logger.severe("Failed to get embeddings", e, s);
@@ -98,8 +96,9 @@ class FileDataService {
       return result;
     }
     final inputs = <_DecoderInput>[];
-    final fileMap = await FilesDB.instance
-        .getFileIDToFileFromIDs(remoteData.map((e) => e.fileID).toList());
+    final fileMap = await FilesDB.instance.getFileIDToFileFromIDs(
+      remoteData.map((e) => e.fileID).toList(),
+    );
     for (final data in remoteData) {
       final file = fileMap[data.fileID];
       if (file == null) {
@@ -111,9 +110,7 @@ class FileDataService {
     }
     return _computer.compute<Map<String, dynamic>, Map<int, FileDataEntity>>(
       _decryptFileDataComputer,
-      param: {
-        "inputs": inputs,
-      },
+      param: {"inputs": inputs},
     );
   }
 
@@ -133,7 +130,7 @@ class FileDataService {
   }
 
   Future<void> _syncFDStatusInternal() async {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       _logger.fine("Skipping file data sync in offline mode");
       return;
     }

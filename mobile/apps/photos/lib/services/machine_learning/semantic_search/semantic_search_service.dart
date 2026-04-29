@@ -33,9 +33,9 @@ class SemanticSearchService {
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
   MLDataDB get _mlDataDB =>
-      isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
   ClipVectorDB get _vectorDB =>
-      isOfflineMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
+      isLocalGalleryMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
@@ -174,7 +174,7 @@ class SemanticSearchService {
     return _cacheLock.synchronized(() async {
       _resetInactivityTimer();
       if (_imageEmbeddingsAreCached) {
-        if (_cachedEmbeddingsOffline != isOfflineMode) {
+        if (_cachedEmbeddingsOffline != isLocalGalleryMode) {
           await MLComputer.instance.clearImageEmbeddingsCache();
           _imageEmbeddingsAreCached = false;
           _cachedEmbeddingsOffline = null;
@@ -195,7 +195,7 @@ class SemanticSearchService {
         cacheRustExact: _shouldUseRustExactSearch,
       );
       _imageEmbeddingsAreCached = true;
-      _cachedEmbeddingsOffline = isOfflineMode;
+      _cachedEmbeddingsOffline = isLocalGalleryMode;
       return;
     });
   }
@@ -236,7 +236,7 @@ class SemanticSearchService {
       fileIDToScoreMap[result.id] = result.score;
     }
 
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return _getOfflineMatchingFiles(
         queryResults,
         fileIDToScoreMap,
@@ -244,8 +244,9 @@ class SemanticSearchService {
       );
     }
 
-    final filesMap = await FilesDB.instance
-        .getFileIDToFileFromIDs(queryResults.map((e) => e.id).toList());
+    final filesMap = await FilesDB.instance.getFileIDToFileFromIDs(
+      queryResults.map((e) => e.id).toList(),
+    );
 
     final ignoredCollections =
         CollectionsService.instance.getHiddenCollectionIds();
@@ -333,8 +334,9 @@ class SemanticSearchService {
       final query = entry.key;
       final score = entry.value;
       // Use cache service instead of _getTextEmbedding
-      final textEmbedding =
-          await textEmbeddingsCacheService.getEmbedding(query);
+      final textEmbedding = await textEmbeddingsCacheService.getEmbedding(
+        query,
+      );
       textEmbeddings[query] = textEmbedding;
       minimumSimilarityMap[query] = score;
     }
@@ -461,11 +463,9 @@ class SemanticSearchService {
     }
 
     final startTime = DateTime.now();
-    final Map<String, List<QueryResult>> queryResults =
-        await MLComputer.instance.computeBulkSimilarities(
-      textQueryToEmbeddingMap,
-      minimumSimilarityMap,
-    );
+    final Map<String, List<QueryResult>> queryResults = await MLComputer
+        .instance
+        .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
     final endTime = DateTime.now();
     _logger.info(
       "computingSimilarities (dot-product) took for ${textQueryToEmbeddingMap.length} queries " +

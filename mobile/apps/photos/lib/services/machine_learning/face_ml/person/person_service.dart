@@ -88,23 +88,19 @@ class PersonService {
     final _ = await getPersons();
     if (notifyListeners) {
       Bus.instance.fire(
-        PeopleChangedEvent(
-          type: PeopleEventType.syncDone,
-          source: source,
-        ),
+        PeopleChangedEvent(type: PeopleEventType.syncDone, source: source),
       );
     }
   }
 
   Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
-    final entities =
-        await entityService.getCertainEntities(EntityType.cgroup, ids);
+    final entities = await entityService.getCertainEntities(
+      EntityType.cgroup,
+      ids,
+    );
     return entities
         .map(
-          (e) => PersonEntity(
-            e.id,
-            PersonData.fromJson(json.decode(e.data)),
-          ),
+          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
         )
         .toList();
   }
@@ -143,16 +139,11 @@ class PersonService {
     return persons;
   }
 
-  static List<PersonEntity> _decodePersonEntities(
-    Map<String, dynamic> param,
-  ) {
+  static List<PersonEntity> _decodePersonEntities(Map<String, dynamic> param) {
     final entities = param["entity"] as List<LocalEntityData>;
     return entities
         .map(
-          (e) => PersonEntity(
-            e.id,
-            PersonData.fromJson(json.decode(e.data)),
-          ),
+          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
         )
         .toList();
   }
@@ -162,10 +153,7 @@ class PersonService {
       if (e == null) {
         return null;
       }
-      return PersonEntity(
-        e.id,
-        PersonData.fromJson(json.decode(e.data)),
-      );
+      return PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
     });
   }
 
@@ -200,8 +188,10 @@ class PersonService {
       final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
       final personData = person.data;
-      final bool shouldUpdateAssigned =
-          _shouldUpdateRemotePerson(personData, dbPersonCluster);
+      final bool shouldUpdateAssigned = _shouldUpdateRemotePerson(
+        personData,
+        dbPersonCluster,
+      );
 
       bool shouldUpdateManualAssignments = false;
       List<int>? updatedManualAssignments;
@@ -238,12 +228,7 @@ class PersonService {
 
       if (shouldUpdateAssigned) {
         personData.assigned = dbPersonCluster.entries
-            .map(
-              (e) => ClusterInfo(
-                id: e.key,
-                faces: e.value,
-              ),
-            )
+            .map((e) => ClusterInfo(id: e.key, faces: e.value))
             .toList();
       }
 
@@ -251,8 +236,11 @@ class PersonService {
         personData.manuallyAssigned = updatedManualAssignments ?? <int>[];
       }
 
-      _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
-          .ignore();
+      _addOrUpdateEntity(
+        EntityType.cgroup,
+        personData.toJson(),
+        id: personID,
+      ).ignore();
       personData.logStats();
     }
     if (orphanMappingsRemoved > 0) {
@@ -317,10 +305,7 @@ class PersonService {
     final data = PersonData(
       name: name,
       assigned: <ClusterInfo>[
-        ClusterInfo(
-          id: clusterID,
-          faces: faceIds.toSet(),
-        ),
+        ClusterInfo(id: clusterID, faces: faceIds.toSet()),
       ],
       isHidden: isHidden,
       isPinned: isPinned,
@@ -328,10 +313,7 @@ class PersonService {
       birthDate: birthdate,
       email: email,
     );
-    final result = await _addOrUpdateEntity(
-      EntityType.cgroup,
-      data.toJson(),
-    );
+    final result = await _addOrUpdateEntity(EntityType.cgroup, data.toJson());
     await faceMLDataDB.assignClusterToPerson(
       personID: result.id,
       clusterID: clusterID,
@@ -391,8 +373,9 @@ class PersonService {
 
     // Safety check to make sure we haven't created an empty cluster now, if so delete it
     for (final emptyClusterID in emptiedClusters) {
-      personData.assigned
-          .removeWhere((element) => element.id == emptyClusterID);
+      personData.assigned.removeWhere(
+        (element) => element.id == emptyClusterID,
+      );
       await faceMLDataDB.removeClusterToPerson(
         personID: person.remoteID,
         clusterID: emptyClusterID,
@@ -416,8 +399,10 @@ class PersonService {
       if (entity == null) {
         return;
       }
-      final PersonEntity justName =
-          PersonEntity(personID, PersonData(name: entity.data.name));
+      final PersonEntity justName = PersonEntity(
+        personID,
+        PersonData(name: entity.data.name),
+      );
       await _addOrUpdateEntity(
         EntityType.cgroup,
         justName.data.toJson(),
@@ -448,12 +433,13 @@ class PersonService {
   Future<bool> fetchRemoteClusterFeedback({
     bool skipClusterUpdateIfNoChange = true,
   }) async {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       logger.finest("Skip fetching remote clusters in offline mode");
       return false;
     }
-    final int changedEntities =
-        await entityService.syncEntity(EntityType.cgroup);
+    final int changedEntities = await entityService.syncEntity(
+      EntityType.cgroup,
+    );
     final bool changed = changedEntities > 0;
     if (changed == false && skipClusterUpdateIfNoChange) {
       return false;
@@ -537,8 +523,9 @@ class PersonService {
           final personFaceIDs =
               personClustersToFaceIDs.values.expand((e) => e).toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
-          final assignedAndRejectedFaceIDs =
-              rejectedFaceIDsSet.intersection(personFaceIDs);
+          final assignedAndRejectedFaceIDs = rejectedFaceIDsSet.intersection(
+            personFaceIDs,
+          );
 
           if (assignedAndRejectedFaceIDs.isNotEmpty) {
             // Check that we don't have any empty clusters now
@@ -632,9 +619,7 @@ class PersonService {
         hideFromMemories != person.data.hideFromMemories) {
       memoriesCacheService.queueUpdateCache();
       if (hideFromMemories) {
-        unawaited(
-          memoriesCacheService.purgePersonFromMemoriesCache(id),
-        );
+        unawaited(memoriesCacheService.purgePersonFromMemoriesCache(id));
       }
     }
     return updatedPerson;
@@ -655,8 +640,9 @@ class PersonService {
         alreadyAssignedFileIds: const <int>[],
       );
     }
-    final existingClusterFileIds =
-        await faceMLDataDB.getFileIdToClusterIDSet(personID);
+    final existingClusterFileIds = await faceMLDataDB.getFileIdToClusterIDSet(
+      personID,
+    );
     final manualFileIDs = person.data.manuallyAssigned.toSet();
     final addedFileIDs = <int>[];
     final alreadyAssigned = <int>[];

@@ -67,7 +67,7 @@ class LocalSyncService {
       _permissionGrantedSubscription =
           Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
         _registerChangeCallback();
-        if (isOfflineMode) {
+        if (isLocalGalleryMode) {
           // Offline onboarding grants permission without explicitly invoking
           // SyncService, so trigger local import right away.
           unawaited(checkAndSync());
@@ -117,8 +117,9 @@ class LocalSyncService {
         );
       } else {
         // Load from 0 - 01.01.2010
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
+        Bus.instance.fire(
+          SyncStatusUpdate(SyncStatus.startedFirstGalleryImport),
+        );
         var startTime = 0;
         var toYear = 2010;
         var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -145,8 +146,9 @@ class LocalSyncService {
         }
         await _refreshDeviceFolderCountAndCover(isFirstSync: true);
         _logger.info("first gallery import finished");
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
+        Bus.instance.fire(
+          SyncStatusUpdate(SyncStatus.completedFirstGalleryImport),
+        );
       }
       final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
@@ -176,15 +178,16 @@ class LocalSyncService {
 
   Future<bool> syncAll() async {
     if (!Configuration.instance.isLoggedIn()) {
-      if (!isOfflineMode) {
+      if (!isLocalGalleryMode) {
         _logger.warning("syncAll called when user is not logged in");
         return false;
       }
     }
     final stopwatch = EnteWatch("localSyncAll")..start();
 
-    final localAssets =
-        await getAllLocalAssets(needsTitle: isOfflineMode ? true : null);
+    final localAssets = await getAllLocalAssets(
+      needsTitle: isLocalGalleryMode ? true : null,
+    );
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
     );
@@ -204,13 +207,15 @@ class LocalSyncService {
     );
     bool hasAnyMappingChanged = false;
     if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
-      await _db
-          .insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs!);
+      await _db.insertPathIDToLocalIDMapping(
+        localDiffResult.newPathToLocalIDs!,
+      );
       hasAnyMappingChanged = true;
     }
     if (localDiffResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
-      await _db
-          .deletePathIDToLocalIDMapping(localDiffResult.deletePathToLocalIDs!);
+      await _db.deletePathIDToLocalIDMapping(
+        localDiffResult.deletePathToLocalIDs!,
+      );
       hasAnyMappingChanged = true;
     }
     final bool hasUnsyncedFiles =
@@ -429,8 +434,9 @@ class LocalSyncService {
 
     if (updatedLocalIDs.isNotEmpty) {
       final int updateCount = updatedLocalIDs.length;
-      updatedLocalIDs
-          .removeWhere((x) => trackOriginFetchForUploadOrML.get(x) ?? false);
+      updatedLocalIDs.removeWhere(
+        (x) => trackOriginFetchForUploadOrML.get(x) ?? false,
+      );
       _logger.info(
         "track ${updatedLocalIDs.length}/ $updateCount files due to modification change",
       );

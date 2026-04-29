@@ -107,11 +107,12 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                         },
                       ),
                       if (!widget.fromGalleryLayoutSettingsCTA &&
-                          !isOfflineMode) ...[
+                          !isLocalGalleryMode) ...[
                         const SizedBox(height: 8),
                         MenuItemWidgetNew(
-                          title: AppLocalizations.of(context)
-                              .hideSharedItemsFromHomeGallery,
+                          title: AppLocalizations.of(
+                            context,
+                          ).hideSharedItemsFromHomeGallery,
                           trailingWidget: ToggleSwitchWidget(
                             value: () =>
                                 localSettings.hideSharedItemsFromHomeGallery,

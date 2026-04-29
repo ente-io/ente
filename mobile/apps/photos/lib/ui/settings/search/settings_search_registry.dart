@@ -27,7 +27,7 @@ class SettingsSearchRegistry {
   static List<SettingsSearchItem> getSearchableItems(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final hasLoggedIn = Configuration.instance.isLoggedIn();
-    final isOffline = isOfflineMode;
+    final isOffline = isLocalGalleryMode;
     final items = <SettingsSearchItem>[];
 
     // Account settings
@@ -327,9 +327,8 @@ class SettingsSearchRegistry {
         subtitle: l10n.appearance,
         sectionPath: "${l10n.appearance} > ${l10n.gallery}",
         icon: HugeIcons.strokeRoundedDashboardSquare02,
-        routeBuilder: (_) => const GallerySettingsScreen(
-          fromGalleryLayoutSettingsCTA: false,
-        ),
+        routeBuilder: (_) =>
+            const GallerySettingsScreen(fromGalleryLayoutSettingsCTA: false),
         isSubPage: true,
         keywords: ["grid size", "group by", "layout"],
       ),
@@ -342,9 +341,8 @@ class SettingsSearchRegistry {
         subtitle: l10n.gallery,
         sectionPath: "${l10n.appearance} > ${l10n.gallery}",
         icon: HugeIcons.strokeRoundedDashboardSquare02,
-        routeBuilder: (_) => const GallerySettingsScreen(
-          fromGalleryLayoutSettingsCTA: false,
-        ),
+        routeBuilder: (_) =>
+            const GallerySettingsScreen(fromGalleryLayoutSettingsCTA: false),
         isSubPage: true,
         keywords: ["grid", "size", "columns", "thumbnail"],
       ),
@@ -357,9 +355,8 @@ class SettingsSearchRegistry {
         subtitle: l10n.gallery,
         sectionPath: "${l10n.appearance} > ${l10n.gallery}",
         icon: HugeIcons.strokeRoundedDashboardSquare02,
-        routeBuilder: (_) => const GallerySettingsScreen(
-          fromGalleryLayoutSettingsCTA: false,
-        ),
+        routeBuilder: (_) =>
+            const GallerySettingsScreen(fromGalleryLayoutSettingsCTA: false),
         isSubPage: true,
         keywords: ["group", "day", "month", "year"],
       ),
@@ -372,9 +369,8 @@ class SettingsSearchRegistry {
           subtitle: l10n.gallery,
           sectionPath: "${l10n.appearance} > ${l10n.gallery}",
           icon: HugeIcons.strokeRoundedImage01,
-          routeBuilder: (_) => const GallerySettingsScreen(
-            fromGalleryLayoutSettingsCTA: false,
-          ),
+          routeBuilder: (_) =>
+              const GallerySettingsScreen(fromGalleryLayoutSettingsCTA: false),
           isSubPage: true,
           keywords: ["shared", "hide", "home gallery"],
         ),
@@ -566,14 +562,7 @@ class SettingsSearchRegistry {
           sectionPath: l10n.freeUpSpace,
           icon: HugeIcons.strokeRoundedRocket01,
           routeBuilder: (_) => const FreeUpSpaceOptionsScreen(),
-          keywords: [
-            "storage",
-            "space",
-            "clean",
-            "delete",
-            "local",
-            "device",
-          ],
+          keywords: ["storage", "space", "clean", "delete", "local", "device"],
         ),
       );
 
@@ -611,12 +600,7 @@ class SettingsSearchRegistry {
             icon: HugeIcons.strokeRoundedRocket01,
             routeBuilder: (_) => const FreeUpSpaceOptionsScreen(),
             isSubPage: true,
-            keywords: [
-              "similar",
-              "alike",
-              "resembling",
-              "cleanup",
-            ],
+            keywords: ["similar", "alike", "resembling", "cleanup"],
           ),
         SettingsSearchItem(
           title: l10n.viewLargeFiles,
@@ -777,16 +761,15 @@ class SettingsSearchRegistry {
   ) {
     final l10n = AppLocalizations.of(context);
     final hasLoggedIn = Configuration.instance.isLoggedIn();
-    final isOffline = isOfflineMode;
+    final isOffline = isLocalGalleryMode;
 
     return [
       // Gallery suggestion
       SettingsSearchSuggestion(
         title: l10n.gallery,
         onTap: () => onNavigate(
-          (_) => const GallerySettingsScreen(
-            fromGalleryLayoutSettingsCTA: false,
-          ),
+          (_) =>
+              const GallerySettingsScreen(fromGalleryLayoutSettingsCTA: false),
         ),
       ),
       // App lock suggestion

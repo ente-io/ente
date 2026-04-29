@@ -91,33 +91,33 @@ LocalSettings get localSettings {
   return _localSettings!;
 }
 
-bool get isOfflineMode => localSettings.appMode == AppMode.offline;
+bool get isLocalGalleryMode => localSettings.appMode == AppMode.localGallery;
 
 bool get hasGrantedMLConsent {
-  if (isOfflineMode) {
-    return localSettings.offlineMLConsent;
+  if (isLocalGalleryMode) {
+    return localSettings.localGalleryMLConsent;
   }
   return flagService.hasGrantedMLConsent;
 }
 
 Future<void> setMLConsent(bool enabled) async {
-  if (isOfflineMode) {
-    await localSettings.setOfflineMLConsent(enabled);
+  if (isLocalGalleryMode) {
+    await localSettings.setLocalGalleryMLConsent(enabled);
     return;
   }
   await flagService.setMLConsent(enabled);
 }
 
 bool get mapEnabled {
-  if (isOfflineMode) {
-    return localSettings.offlineMapEnabled;
+  if (isLocalGalleryMode) {
+    return localSettings.localGalleryMapEnabled;
   }
   return flagService.mapEnabled;
 }
 
 Future<void> setMapEnabled(bool enabled) async {
-  if (isOfflineMode) {
-    await localSettings.setOfflineMapEnabled(enabled);
+  if (isLocalGalleryMode) {
+    await localSettings.setLocalGalleryMapEnabled(enabled);
     return;
   }
   await flagService.setMapEnabled(enabled);
@@ -178,17 +178,13 @@ LocationService get locationService {
 
 MagicCacheService? _magicCacheService;
 MagicCacheService get magicCacheService {
-  _magicCacheService ??= MagicCacheService(
-    ServiceLocator.instance.prefs,
-  );
+  _magicCacheService ??= MagicCacheService(ServiceLocator.instance.prefs);
   return _magicCacheService!;
 }
 
 MemoriesCacheService? _memoriesCacheService;
 MemoriesCacheService get memoriesCacheService {
-  _memoriesCacheService ??= MemoriesCacheService(
-    ServiceLocator.instance.prefs,
-  );
+  _memoriesCacheService ??= MemoriesCacheService(ServiceLocator.instance.prefs);
   return _memoriesCacheService!;
 }
 
@@ -239,9 +235,7 @@ FileDataService get fileDataService {
 
 DownloadManager? _downloadManager;
 DownloadManager get downloadManager {
-  _downloadManager ??= DownloadManager(
-    ServiceLocator.instance.nonEnteDio,
-  );
+  _downloadManager ??= DownloadManager(ServiceLocator.instance.nonEnteDio);
   return _downloadManager!;
 }
 
@@ -332,15 +326,17 @@ TrashGateway get trashGateway {
 
 CollectionFilesGateway? _collectionFilesGateway;
 CollectionFilesGateway get collectionFilesGateway {
-  _collectionFilesGateway ??=
-      CollectionFilesGateway(ServiceLocator.instance.enteDio);
+  _collectionFilesGateway ??= CollectionFilesGateway(
+    ServiceLocator.instance.enteDio,
+  );
   return _collectionFilesGateway!;
 }
 
 CollectionShareGateway? _collectionShareGateway;
 CollectionShareGateway get collectionShareGateway {
-  _collectionShareGateway ??=
-      CollectionShareGateway(ServiceLocator.instance.enteDio);
+  _collectionShareGateway ??= CollectionShareGateway(
+    ServiceLocator.instance.enteDio,
+  );
   return _collectionShareGateway!;
 }
 
