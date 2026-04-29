@@ -358,6 +358,10 @@ export const sidebar = [
                         link: "/auth/migration/steam/",
                     },
                     {
+                        text: "From Others",
+                        link: "/auth/migration/import",
+                    },
+                    {
                         text: "Export",
                         link: "/auth/migration/export",
                     },
