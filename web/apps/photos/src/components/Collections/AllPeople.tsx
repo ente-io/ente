@@ -8,6 +8,7 @@ import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
+    Button,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -29,7 +30,10 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useBaseContext } from "ente-base/context";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
-import type { PeopleSortBy } from "ente-new/photos/components/people-sort";
+import {
+    sortPeople,
+    type PeopleSortBy,
+} from "ente-new/photos/components/people-sort";
 import { PeopleSortOptions } from "ente-new/photos/components/PeopleSortOptions";
 import {
     ItemCard,
@@ -37,6 +41,7 @@ import {
     LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
+import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "ente-new/photos/components/utils/use-wrap-async";
 import {
     addCGroup,
@@ -81,12 +86,17 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
 }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
     const { showMiniDialog } = useBaseContext();
+    // Getting the full people snapshot for showing
+    // If the user clicks the "Show more faces"
+    const peopleState = usePeopleStateSnapshot();
     const [searchTerm, setSearchTerm] = useState("");
+    const [showingAllPeople, setShowingAllPeople] = useState(false);
     const [personToRename, setPersonToRename] = useState<CGroupPerson>();
     const [clusterToName, setClusterToName] = useState<ClusterPerson>();
 
     const handleExited = () => {
         setSearchTerm("");
+        setShowingAllPeople(false);
     };
 
     const handleSelectPerson = (personID: string) => {
@@ -119,16 +129,42 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
         });
     };
 
+    const hasSearchQuery = !!searchTerm.trim();
+    const extraPeople = useMemo(() => {
+        const visiblePersonIDs = new Set(people.map(({ id }) => id));
+        const extra = (peopleState?.people ?? []).filter(
+            (person) =>
+                !visiblePersonIDs.has(person.id) &&
+                !(person.type == "cgroup" && person.isHidden),
+        );
+        return sortPeople(extra, peopleSortBy);
+    }, [people, peopleSortBy, peopleState]);
+
+    // If either the showAllPeople is enabled
+    // or if the gallery gave an empty array for
+    // people then showing the full cluster, else visible ones.
+    const displayPeople = useMemo(
+        () =>
+            showingAllPeople || people.length == 0
+                ? people.concat(extraPeople)
+                : people,
+        [extraPeople, people, showingAllPeople],
+    );
+
+    const handleToggleShowingAllPeople = () => {
+        setShowingAllPeople((value) => !value);
+    };
+
     const filteredPeople = useMemo(() => {
         if (!searchTerm.trim()) {
-            return people;
+            return displayPeople;
         }
 
         const searchLower = searchTerm.toLowerCase();
-        return people.filter((person) =>
+        return displayPeople.filter((person) =>
             person.name?.toLowerCase().includes(searchLower),
         );
-    }, [searchTerm, people]);
+    }, [searchTerm, displayPeople]);
 
     return (
         <>
@@ -141,7 +177,7 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                 <Title
                     onClose={onClose}
                     peopleCount={filteredPeople.length}
-                    totalCount={people.length}
+                    totalCount={displayPeople.length}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     peopleSortBy={peopleSortBy}
@@ -150,7 +186,12 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
                 <Divider />
                 <AllPeopleContent
                     people={filteredPeople}
-                    hasSearchQuery={!!searchTerm.trim()}
+                    hasSearchQuery={hasSearchQuery}
+                    showMoreFacesButton={
+                        people.length > 0 && extraPeople.length > 0
+                    }
+                    showingAllPeople={showingAllPeople}
+                    onToggleShowingAllPeople={handleToggleShowingAllPeople}
                     onSelectPerson={handleSelectPerson}
                     onRenamePerson={setPersonToRename}
                     onPinPerson={handlePinPerson}
@@ -368,6 +409,9 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
 interface AllPeopleContentProps {
     people: Person[];
     hasSearchQuery: boolean;
+    showMoreFacesButton: boolean;
+    showingAllPeople: boolean;
+    onToggleShowingAllPeople: () => void;
     onSelectPerson: (id: string) => void;
     onRenamePerson: (person: CGroupPerson) => void;
     onPinPerson: (person: CGroupPerson) => void | Promise<void>;
@@ -447,6 +491,9 @@ const PeopleRow = React.memo(
 const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
     people,
     hasSearchQuery,
+    showMoreFacesButton,
+    showingAllPeople,
+    onToggleShowingAllPeople,
     onSelectPerson,
     onRenamePerson,
     onPinPerson,
@@ -486,23 +533,66 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
     }
 
     return (
-        <DialogContent sx={{ "&&": { padding: 0 }, height: "80svh" }}>
-            <AutoSizer>
-                {({ width, height }) => (
-                    <FixedSizeList
-                        {...{ width, height }}
-                        itemCount={personRows.length}
-                        itemSize={PeopleRowItemSize}
-                        itemData={itemData}
-                        innerElementType={PeopleListInner}
-                    >
-                        {PeopleRow}
-                    </FixedSizeList>
-                )}
-            </AutoSizer>
+        <DialogContent
+            sx={{
+                "&&": { padding: 0 },
+                height: "80svh",
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+                <AutoSizer>
+                    {({ width, height }) => (
+                        <FixedSizeList
+                            {...{ width, height }}
+                            itemCount={personRows.length}
+                            itemSize={PeopleRowItemSize}
+                            itemData={itemData}
+                            innerElementType={PeopleListInner}
+                        >
+                            {PeopleRow}
+                        </FixedSizeList>
+                    )}
+                </AutoSizer>
+            </Box>
+            {showMoreFacesButton && !hasSearchQuery && (
+                <ShowMoreFacesButton
+                    showingAllPeople={showingAllPeople}
+                    onClick={onToggleShowingAllPeople}
+                />
+            )}
         </DialogContent>
     );
 };
+
+interface ShowMoreFacesButtonProps {
+    showingAllPeople: boolean;
+    onClick: () => void;
+}
+
+const ShowMoreFacesButton: React.FC<ShowMoreFacesButtonProps> = ({
+    showingAllPeople,
+    onClick,
+}) => (
+    <Box sx={{ px: 2, pt: 1, pb: 2 }}>
+        <Button
+            fullWidth
+            variant="text"
+            onClick={onClick}
+            sx={{
+                color: "text.base",
+                backgroundColor: "fill.faint",
+                border: 0,
+                "&:hover": { backgroundColor: "fill.muted" },
+            }}
+        >
+            {showingAllPeople
+                ? t("show_less_faces", { defaultValue: "Show fewer faces" })
+                : t("show_more_faces", { defaultValue: "Show more faces" })}
+        </Button>
+    </Box>
+);
 
 const CenteredMessage = styled(Box)({
     display: "flex",
@@ -536,22 +626,23 @@ const PersonCard: React.FC<PersonCardProps> = ({
             onClick={() => onSelectPerson(person.id)}
         >
             <LargeTileTextOverlay>
-                <Tooltip title={person.name ?? t("unnamed_person")} arrow>
-                    <Typography
-                        variant={person.name ? "body" : "small"}
-                        sx={{
-                            maxWidth: "118px",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: person.name ? 2 : 1,
-                            WebkitBoxOrient: "vertical",
-                            fontSize: person.name ? undefined : "0.8rem",
-                        }}
-                    >
-                        {person.name ?? t("unnamed_person")}
-                    </Typography>
-                </Tooltip>
+                {person.name && (
+                    <Tooltip title={person.name} arrow>
+                        <Typography
+                            variant="body"
+                            sx={{
+                                maxWidth: "118px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                            }}
+                        >
+                            {person.name}
+                        </Typography>
+                    </Tooltip>
+                )}
                 <Typography variant="small" sx={{ opacity: 0.7 }}>
                     {t("photos_count", { count: person.fileIDs.length })}
                 </Typography>
