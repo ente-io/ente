@@ -35,7 +35,7 @@ pub fn generate_face_thumbnails(
 /// bypassing the platform's potentially broken image decoder.
 pub fn decode_to_jpeg(image_path: String, quality: Option<u8>) -> Result<Vec<u8>, String> {
     let decoded = decode_image_from_path(&image_path).map_err(|e| e.to_string())?;
-    let quality = quality.unwrap_or(85);
+    let quality = quality.unwrap_or(95);
     encode_rgb(
         &decoded.rgb,
         decoded.dimensions.width,
