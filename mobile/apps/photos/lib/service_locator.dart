@@ -91,6 +91,10 @@ LocalSettings get localSettings {
   return _localSettings!;
 }
 
+/// Whether the app is currently showing the no-account local gallery experience.
+///
+/// This does not mean the device is offline. It means the active gallery mode is
+/// local-device focused rather than Ente-account focused.
 bool get isLocalGalleryMode => localSettings.appMode == AppMode.localGallery;
 
 bool get hasGrantedMLConsent {
