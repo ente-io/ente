@@ -452,9 +452,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Future<_FaceDataResult> _fetchFaceData() async {
-    final bool isOffline = isLocalGalleryMode;
+    final bool isLocalGallery = isLocalGalleryMode;
     int? fileKey;
-    if (isOffline) {
+    if (isLocalGallery) {
       final localId = widget.file.localID;
       if (localId == null || localId.isEmpty) {
         return _FaceDataResult(
@@ -479,15 +479,16 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
     // Fetch persons map early so we can check for manual assignments
     // even when no faces are detected
-    final persons = isOffline
+    final persons = isLocalGallery
         ? <String, PersonEntity>{}
         : await PersonService.instance.getPersonsMap();
 
-    final mlDataDB = isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final mlDataDB =
+        isLocalGallery ? MLDataDB.localGalleryInstance : MLDataDB.instance;
     final faces = await mlDataDB.getFacesForGivenFileID(fileKey);
 
     if (faces == null) {
-      final manualPersons = isOffline
+      final manualPersons = isLocalGallery
           ? const <PersonEntity>[]
           : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
@@ -503,7 +504,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
       faces.map((face) => face.faceID).toList(),
     );
-    final clusterIDToPerson = isOffline
+    final clusterIDToPerson = isLocalGallery
         ? <String, String>{}
         : await mlDataDB.getClusterIDToPersonID();
     final faceCrops = await getCachedFaceCrops(
@@ -532,7 +533,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       }
     }
     if (defaultFaces.isEmpty && remainingFaces.isEmpty) {
-      final manualPersons = isOffline
+      final manualPersons = isLocalGallery
           ? const <PersonEntity>[]
           : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
@@ -544,7 +545,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
 
     if (faceCrops == null) {
-      final manualPersons = isOffline
+      final manualPersons = isLocalGallery
           ? const <PersonEntity>[]
           : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(

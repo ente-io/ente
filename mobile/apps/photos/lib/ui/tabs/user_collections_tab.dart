@@ -120,17 +120,17 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   Widget build(BuildContext context) {
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
-    final bool offlineUiMode =
+    final bool localGalleryUiMode =
         isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<List<Collection>>(
-      future: offlineUiMode
+      future: localGalleryUiMode
           ? Future.value(<Collection>[])
           : CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getCollectionsGalleryWidget(
             snapshot.data!,
-            offlineUiMode: offlineUiMode,
+            localGalleryUiMode: localGalleryUiMode,
           );
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
@@ -143,7 +143,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
 
   Widget _getCollectionsGalleryWidget(
     List<Collection> collections, {
-    required bool offlineUiMode,
+    required bool localGalleryUiMode,
   }) {
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
@@ -222,7 +222,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
             SliverToBoxAdapter(
               child: SectionOptions(
-                onTap: offlineUiMode
+                onTap: localGalleryUiMode
                     ? null
                     : () {
                         unawaited(
@@ -239,7 +239,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         );
                       },
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: offlineUiMode
+                trailingWidget: localGalleryUiMode
                     ? null
                     : Row(
                         mainAxisSize: MainAxisSize.min,
@@ -274,7 +274,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
-            offlineUiMode
+            localGalleryUiMode
                 ? const SliverToBoxAdapter(child: EmptyOnEnteSection())
                 : Configuration.instance.hasConfiguredAccount()
                     ? CollectionsFlexiGridViewWidget(
@@ -286,7 +286,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         enableSelectionMode: true,
                       )
                     : const SliverToBoxAdapter(child: EmptyState()),
-            if (!offlineUiMode) ...[
+            if (!localGalleryUiMode) ...[
               SliverToBoxAdapter(
                 child: Divider(color: colorScheme.strokeFaint),
               ),

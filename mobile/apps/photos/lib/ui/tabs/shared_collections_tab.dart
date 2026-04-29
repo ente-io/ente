@@ -223,16 +223,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final bool offlineUiMode =
+    final bool localGalleryUiMode =
         isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<SharedCollectionsAndMemoryLinks>(
-      future: offlineUiMode
+      future: localGalleryUiMode
           ? Future.value(SharedCollectionsAndMemoryLinks.empty())
           : CollectionsService.instance.getSharedCollectionsAndMemoryLinks(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data!;
-          if (offlineUiMode) {
+          if (localGalleryUiMode) {
             return const SafeArea(child: SharedEmptyOfflineStateWidget());
           }
           if (data.collections.incoming.isEmpty &&

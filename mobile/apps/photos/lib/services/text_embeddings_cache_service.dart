@@ -11,7 +11,7 @@ class TextEmbeddingsCacheService {
 
   Future<List<double>> getEmbedding(String query) async {
     final mlDataDB =
-        isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+        isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
     // 1. Check database cache
     final dbResult = await mlDataDB.getRepeatedTextEmbeddingCache(query);
     if (dbResult != null) {

@@ -27,11 +27,11 @@ class SettingsSearchRegistry {
   static List<SettingsSearchItem> getSearchableItems(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final hasLoggedIn = Configuration.instance.isLoggedIn();
-    final isOffline = isLocalGalleryMode;
+    final isLocalGallery = isLocalGalleryMode;
     final items = <SettingsSearchItem>[];
 
     // Account settings
-    if (hasLoggedIn && !isOffline) {
+    if (hasLoggedIn && !isLocalGallery) {
       items.add(
         SettingsSearchItem(
           title: l10n.account,
@@ -101,7 +101,7 @@ class SettingsSearchRegistry {
     }
 
     // Backup settings
-    if (hasLoggedIn && !isOffline) {
+    if (hasLoggedIn && !isLocalGallery) {
       items.add(
         SettingsSearchItem(
           title: l10n.backup,
@@ -214,7 +214,7 @@ class SettingsSearchRegistry {
     );
 
     items.addAll([
-      if (Configuration.instance.hasConfiguredAccount() && !isOffline)
+      if (Configuration.instance.hasConfiguredAccount() && !isLocalGallery)
         SettingsSearchItem(
           title: l10n.twofactor,
           subtitle: l10n.security,
@@ -224,7 +224,7 @@ class SettingsSearchRegistry {
           isSubPage: true,
           keywords: ["2fa", "two factor", "authenticator", "otp"],
         ),
-      if (Configuration.instance.hasConfiguredAccount() && !isOffline)
+      if (Configuration.instance.hasConfiguredAccount() && !isLocalGallery)
         SettingsSearchItem(
           title: l10n.emailVerificationToggle,
           subtitle: l10n.security,
@@ -234,7 +234,7 @@ class SettingsSearchRegistry {
           isSubPage: true,
           keywords: ["email", "verification", "mfa"],
         ),
-      if (Configuration.instance.hasConfiguredAccount() && !isOffline)
+      if (Configuration.instance.hasConfiguredAccount() && !isLocalGallery)
         SettingsSearchItem(
           title: context.l10n.passkey,
           subtitle: l10n.security,
@@ -262,7 +262,7 @@ class SettingsSearchRegistry {
         isSubPage: true,
         keywords: ["lock", "pin", "biometric", "face id", "fingerprint"],
       ),
-      if (Configuration.instance.hasConfiguredAccount() && !isOffline)
+      if (Configuration.instance.hasConfiguredAccount() && !isLocalGallery)
         SettingsSearchItem(
           title: l10n.activeSessions,
           subtitle: l10n.security,
@@ -362,7 +362,7 @@ class SettingsSearchRegistry {
       ),
     );
 
-    if (!isOffline) {
+    if (!isLocalGallery) {
       items.add(
         SettingsSearchItem(
           title: l10n.hideSharedItemsFromHomeGallery,
@@ -378,7 +378,7 @@ class SettingsSearchRegistry {
     }
 
     // Machine Learning settings
-    if (hasLoggedIn || isOffline) {
+    if (hasLoggedIn || isLocalGallery) {
       items.add(
         SettingsSearchItem(
           title: l10n.machineLearning,
@@ -410,7 +410,7 @@ class SettingsSearchRegistry {
       );
     }
 
-    if (hasLoggedIn || isOffline) {
+    if (hasLoggedIn || isLocalGallery) {
       items.addAll([
         SettingsSearchItem(
           title: l10n.memories,
@@ -441,7 +441,7 @@ class SettingsSearchRegistry {
       ]);
     }
 
-    if (hasLoggedIn && !isOffline) {
+    if (hasLoggedIn && !isLocalGallery) {
       items.addAll([
         SettingsSearchItem(
           title: l10n.notifications,
@@ -555,7 +555,7 @@ class SettingsSearchRegistry {
     }
 
     // Free up space
-    if (hasLoggedIn && !isOffline) {
+    if (hasLoggedIn && !isLocalGallery) {
       items.add(
         SettingsSearchItem(
           title: l10n.freeUpSpace,
@@ -761,7 +761,7 @@ class SettingsSearchRegistry {
   ) {
     final l10n = AppLocalizations.of(context);
     final hasLoggedIn = Configuration.instance.isLoggedIn();
-    final isOffline = isLocalGalleryMode;
+    final isLocalGallery = isLocalGalleryMode;
 
     return [
       // Gallery suggestion
@@ -778,13 +778,13 @@ class SettingsSearchRegistry {
         onTap: () => onNavigate((_) => const SecuritySettingsPage()),
       ),
       // Free up device space suggestion
-      if (hasLoggedIn && !isOffline)
+      if (hasLoggedIn && !isLocalGallery)
         SettingsSearchSuggestion(
           title: l10n.freeUpDeviceSpace,
           onTap: () => onNavigate((_) => const FreeUpSpaceOptionsScreen()),
         ),
       // Backup settings suggestion
-      if (hasLoggedIn && !isOffline)
+      if (hasLoggedIn && !isLocalGallery)
         SettingsSearchSuggestion(
           title: l10n.backupSettings,
           onTap: () => onNavigate((_) => const BackupSettingsPage()),

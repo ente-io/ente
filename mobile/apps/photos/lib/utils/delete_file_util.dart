@@ -766,17 +766,17 @@ Future<void> showDeleteSheet(
     return;
   }
   if (isLocalGalleryMode) {
-    final offlineDeletableFiles =
+    final localGalleryDeletableFiles =
         deletableFiles.where((file) => file.localID != null).toList();
-    if (offlineDeletableFiles.isEmpty) {
+    if (localGalleryDeletableFiles.isEmpty) {
       showShortToast(
         context,
         AppLocalizations.of(context).noDeviceThatCanBeDeleted,
       );
       return;
     }
-    await deleteFilesOnDeviceOnly(context, offlineDeletableFiles);
-    selectedFiles.unSelectAll(offlineDeletableFiles.toSet());
+    await deleteFilesOnDeviceOnly(context, localGalleryDeletableFiles);
+    selectedFiles.unSelectAll(localGalleryDeletableFiles.toSet());
     return;
   }
   final containsUploadedFile = deletableFiles.any((f) => f.isUploaded);

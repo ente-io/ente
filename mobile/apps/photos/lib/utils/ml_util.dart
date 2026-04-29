@@ -55,7 +55,7 @@ class IndexStatus {
 class FileMLInstruction {
   final EnteFile file;
   final MLMode mode;
-  final int? offlineFileKey;
+  final int? localGalleryFileKey;
   bool shouldRunFaces;
   bool shouldRunClip;
   bool shouldRunPets;
@@ -64,14 +64,15 @@ class FileMLInstruction {
   FileMLInstruction({
     required this.file,
     required this.mode,
-    this.offlineFileKey,
+    this.localGalleryFileKey,
     required this.shouldRunFaces,
     required this.shouldRunClip,
     this.shouldRunPets = false,
   });
   bool get pendingML => shouldRunFaces || shouldRunClip || shouldRunPets;
   bool get isLocalGallery => mode == MLMode.localGallery;
-  int get fileKey => isLocalGallery ? offlineFileKey! : file.uploadedFileID!;
+  int get fileKey =>
+      isLocalGallery ? localGalleryFileKey! : file.uploadedFileID!;
 }
 
 class RemoteMLHydrationSummary {
@@ -105,7 +106,7 @@ Future<IndexStatus> getIndexStatus() async {
     final MLMode mode =
         isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery;
     final mlDataDB = mode == MLMode.localGallery
-        ? MLDataDB.offlineInstance
+        ? MLDataDB.localGalleryInstance
         : MLDataDB.instance;
     final int indexableFiles = await _getIndexableFileCount(mode: mode);
     final int facesIndexedFiles = await mlDataDB.getFaceIndexedFileCount();
@@ -285,9 +286,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return [...candidateSplit.matched, ...candidateSplit.unmatched];
 }
 
-Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
-  _logger.info('getOfflineFilesForMlIndexing called');
-  final mlDataDB = MLDataDB.offlineInstance;
+Future<List<FileMLInstruction>> getLocalGalleryFilesForMlIndexing() async {
+  _logger.info('getLocalGalleryFilesForMlIndexing called');
+  final mlDataDB = MLDataDB.localGalleryInstance;
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
@@ -353,7 +354,7 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
       FileMLInstruction(
         file: enteFile,
         mode: MLMode.localGallery,
-        offlineFileKey: localIntId,
+        localGalleryFileKey: localIntId,
         shouldRunFaces: shouldRunFaces,
         shouldRunClip: shouldRunClip,
         shouldRunPets: shouldRunPets,
@@ -372,7 +373,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
 }) async* {
   if (mode == MLMode.localGallery) {
     final List<FileMLInstruction> filesToIndex =
-        await getOfflineFilesForMlIndexing();
+        await getLocalGalleryFilesForMlIndexing();
     final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(yieldSize);
     for (final batch in chunks) {
       yield batch;

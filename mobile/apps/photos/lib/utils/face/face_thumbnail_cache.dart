@@ -61,7 +61,7 @@ Future<String?> checkUsedFaceIDForPersonOrClusterId(
   );
   if (cachedFaceID != null) return cachedFaceID;
   final mlDataDB =
-      isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
   final String? faceIDFromDB = await mlDataDB.getFaceIdUsedForPersonOrCluster(
     personOrClusterID,
   );
@@ -76,7 +76,7 @@ Future<void> putFaceIdCachedForPersonOrCluster(
   String faceID,
 ) async {
   final mlDataDB =
-      isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
   await mlDataDB.putFaceIdCachedForPersonOrCluster(personOrClusterID, faceID);
   _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
 }
@@ -96,7 +96,7 @@ Future<void> checkRemoveCachedFaceIDForPersonOrClusterId(
   String personOrClusterID,
 ) async {
   final mlDataDB =
-      isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
   final String? cachedFaceID = await mlDataDB.getFaceIdUsedForPersonOrCluster(
     personOrClusterID,
   );

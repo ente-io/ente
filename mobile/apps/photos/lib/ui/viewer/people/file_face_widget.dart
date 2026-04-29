@@ -115,8 +115,9 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
       return widget.faceCrop;
     }
     try {
-      final mlDataDB =
-          isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
       int? recentFileID;
       if (isLocalGalleryMode) {
         final localId = widget.file.localID;

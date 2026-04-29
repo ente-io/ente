@@ -59,8 +59,9 @@ class MemoriesResult {
 
 class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
-  MemoriesDB get _memoriesDB =>
-      isLocalGalleryMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
+  MemoriesDB get _memoriesDB => isLocalGalleryMode
+      ? MemoriesDB.localGalleryInstance
+      : MemoriesDB.instance;
 
   static const _clipSimilarImageThreshold =
       PhotoSelector.clipSimilarImageThreshold;
@@ -151,8 +152,9 @@ class SmartMemoriesService {
       final seenTimes = await _memoriesDB.getSeenTimes();
       _logger.info('seenTimes has ${seenTimes.length} entries $t');
 
-      final mlDataDB =
-          isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
       final allPersons = (!mlEnabled || isLocalGalleryMode)
           ? const <PersonEntity>[]
           : await PersonService.instance.getPersons();

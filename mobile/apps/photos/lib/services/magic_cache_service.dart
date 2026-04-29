@@ -119,7 +119,7 @@ int? _magicFileId(EnteFile file) {
   return file.uploadedFileID ?? file.generatedID;
 }
 
-int _compareOfflineMagicFilesByRelevantPosition(
+int _compareLocalGalleryMagicFilesByRelevantPosition(
   EnteFile a,
   EnteFile b,
   Map<int, int> fileIdToPositionMap,
@@ -135,7 +135,7 @@ int _compareOfflineMagicFilesByRelevantPosition(
   return posA.compareTo(posB);
 }
 
-void sortOfflineMagicFilesByCreationTime(
+void sortLocalGalleryMagicFilesByCreationTime(
   List<EnteFile> files,
   Map<int, int> fileIdToPositionMap,
   Map<String, int> localIdToIntId,
@@ -145,7 +145,7 @@ void sortOfflineMagicFilesByCreationTime(
     if (timeCompare != 0) {
       return timeCompare;
     }
-    return _compareOfflineMagicFilesByRelevantPosition(
+    return _compareLocalGalleryMagicFilesByRelevantPosition(
       a,
       b,
       fileIdToPositionMap,
@@ -493,7 +493,7 @@ class MagicCacheService {
               }
             }
             if (p.recentFirst && filesForPrompt.length > 1) {
-              sortOfflineMagicFilesByCreationTime(
+              sortLocalGalleryMagicFilesByCreationTime(
                 filesForPrompt,
                 fileIdToPosMap,
                 localIdToIntId,

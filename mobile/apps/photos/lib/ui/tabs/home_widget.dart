@@ -1074,7 +1074,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     try {
       final action = await updateService.getChangeLogAction(
         locale: Localizations.localeOf(context),
-        isOffline: isLocalGalleryMode,
+        isLocalGallery: isLocalGalleryMode,
         isSignedIn: Configuration.instance.isLoggedIn(),
       );
       if (!mounted || action == ChangeLogAction.skip) {

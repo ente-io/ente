@@ -93,7 +93,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final strings = ChangeLogStrings.maybeForLocale(
       Localizations.localeOf(context),
-      isOffline: isLocalGalleryMode,
+      isLocalGallery: isLocalGalleryMode,
     );
     if (strings == null) {
       return const SizedBox.shrink();

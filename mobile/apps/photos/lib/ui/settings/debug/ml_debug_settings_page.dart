@@ -377,10 +377,10 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Future<({bool clipDone, bool clusterCentroidDone})>
       _getVectorDbMigrationStatus() async {
     final clipVectorDB = isLocalGalleryMode
-        ? ClipVectorDB.offlineInstance
+        ? ClipVectorDB.localGalleryInstance
         : ClipVectorDB.instance;
     final clusterCentroidVectorDB = isLocalGalleryMode
-        ? ClusterCentroidVectorDB.offlineInstance
+        ? ClusterCentroidVectorDB.localGalleryInstance
         : ClusterCentroidVectorDB.instance;
     final migrationStatus = await Future.wait<bool>([
       clipVectorDB.checkIfMigrationDone(),
@@ -958,7 +958,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       firstButtonOnTap: () async {
         try {
           final vectorDB = isLocalGalleryMode
-              ? ClipVectorDB.offlineInstance
+              ? ClipVectorDB.localGalleryInstance
               : ClipVectorDB.instance;
           await vectorDB.deleteIndexFile();
           showShortToast(context, "Done");

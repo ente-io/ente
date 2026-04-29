@@ -162,7 +162,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
   Future<void> _routeToPersonOrClusterPage() async {
     final mlDataDB =
-        isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+        isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
     if (!isLocalGalleryMode && widget.person != null) {
       await Navigator.of(context).push(
         MaterialPageRoute(

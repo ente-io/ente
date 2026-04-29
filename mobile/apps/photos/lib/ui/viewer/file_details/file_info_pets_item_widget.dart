@@ -41,9 +41,9 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
 
   Future<void> _loadPetFaces() async {
     try {
-      final bool isOffline = isLocalGalleryMode;
+      final bool isLocalGallery = isLocalGalleryMode;
       int? fileKey;
-      if (isOffline) {
+      if (isLocalGallery) {
         final localId = widget.file.localID;
         if (localId == null || localId.isEmpty) {
           if (mounted) setState(() => _isLoading = false);
@@ -58,7 +58,8 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
         }
       }
 
-      final mlDataDB = isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB =
+          isLocalGallery ? MLDataDB.localGalleryInstance : MLDataDB.instance;
       final dbPetFaces = await mlDataDB.getPetFacesForFileID(fileKey);
       if (dbPetFaces == null || dbPetFaces.isEmpty) {
         if (mounted) setState(() => _isLoading = false);

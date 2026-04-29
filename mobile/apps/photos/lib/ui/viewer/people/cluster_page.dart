@@ -71,7 +71,7 @@ class _ClusterPageState extends State<ClusterPage> {
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
   late final StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   bool _isNamingBannerDismissed = false;
-  bool get _offlineUiMode =>
+  bool get _localGalleryUiMode =>
       isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
 
   @override
@@ -134,7 +134,7 @@ class _ClusterPageState extends State<ClusterPage> {
   }
 
   Future<void> _handleSavePerson() async {
-    if (_offlineUiMode) {
+    if (_localGalleryUiMode) {
       return;
     }
     if (widget.personID == null) {
@@ -160,7 +160,7 @@ class _ClusterPageState extends State<ClusterPage> {
   }
 
   Future<void> _handleMergePerson() async {
-    if (_offlineUiMode) {
+    if (_localGalleryUiMode) {
       return;
     }
     final selection = await showMergeClustersToPersonPage(
@@ -222,10 +222,10 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: files,
-      header: (_offlineUiMode || widget.showNamingBanner) &&
+      header: (_localGalleryUiMode || widget.showNamingBanner) &&
               files.isNotEmpty &&
               !_isNamingBannerDismissed
-          ? _offlineUiMode
+          ? _localGalleryUiMode
               ? const NameFaceBanner()
               : SavePersonBanner(
                   faceWidget: PersonFaceWidget(clusterID: widget.clusterID),

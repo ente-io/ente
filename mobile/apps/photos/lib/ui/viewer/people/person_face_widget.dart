@@ -212,8 +212,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       if (tryInMemoryCachedCrop != null) return tryInMemoryCachedCrop;
       String? fixedFaceID;
       PersonEntity? personEntity;
-      final mlDataDB =
-          isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
       if (isPerson && !isLocalGalleryMode) {
         personEntity = await PersonService.instance.getPerson(widget.personId!);
         if (personEntity == null) {

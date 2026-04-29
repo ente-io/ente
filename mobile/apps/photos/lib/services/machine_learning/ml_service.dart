@@ -74,11 +74,11 @@ class MLService {
   }
 
   MLDataDB get _mlDataDB =>
-      isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
 
   MLDataDB _dbForMode(MLMode mode) {
     return mode == MLMode.localGallery
-        ? MLDataDB.offlineInstance
+        ? MLDataDB.localGalleryInstance
         : MLDataDB.instance;
   }
 
@@ -753,13 +753,13 @@ class MLService {
       // Check anything actually ran
       actuallyRanML = result.ranML;
       if (!actuallyRanML) return actuallyRanML;
-      final bool isOffline = instruction.isLocalGallery;
+      final bool isLocalGallery = instruction.isLocalGallery;
       // Bitmask describing properties of this index (e.g. which runtime
       // produced it), so remote indexes stay distinguishable between rust
       // and legacy during and after the rust ML rollout.
       final int remoteFlags = result.usedRustMl ? mlIndexFlagRuntimeRust : 0;
       // Prepare storing data on remote (online mode only)
-      final FileDataEntity? dataEntity = isOffline
+      final FileDataEntity? dataEntity = isLocalGallery
           ? null
           : (instruction.existingRemoteFileML ??
               FileDataEntity.empty(
@@ -783,7 +783,7 @@ class MLService {
             );
           }
         }
-        if (!isOffline) {
+        if (!isLocalGallery) {
           dataEntity!.putFace(
             RemoteFaceEmbedding(
               faces,
@@ -798,7 +798,7 @@ class MLService {
       }
       // Clip results
       if (result.clipRan) {
-        if (!isOffline) {
+        if (!isLocalGallery) {
           dataEntity!.putClip(
             RemoteClipEmbedding(
               result.clip!.embedding,
@@ -809,14 +809,14 @@ class MLService {
           );
         }
       }
-      if (!isOffline && (result.facesRan || result.clipRan)) {
+      if (!isLocalGallery && (result.facesRan || result.clipRan)) {
         // Storing results on remote
         await fileDataService.putFileData(instruction.file, dataEntity!);
       }
       // Storing results locally
       if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
-        if (isOffline) {
+        if (isLocalGallery) {
           await mlDataDB.putClip([
             ClipEmbedding(
               fileID: result.fileId,

@@ -56,8 +56,9 @@ class MemoriesCacheService {
   final SharedPreferences _prefs;
   static final Logger _logger = Logger("MemoriesCacheService");
 
-  MemoriesDB get _memoriesDB =>
-      isLocalGalleryMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
+  MemoriesDB get _memoriesDB => isLocalGalleryMode
+      ? MemoriesDB.localGalleryInstance
+      : MemoriesDB.instance;
 
   List<SmartMemory>? _cachedMemories;
   List<SmartMemory>? get currentMemoriesSync => _cachedMemories;
@@ -163,8 +164,9 @@ class MemoriesCacheService {
   Future<bool> _isMlReady() async {
     if (!_mlEnabled) return false;
     try {
-      final mlDataDB =
-          isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
       final clipIndexed = await mlDataDB.getClipIndexedFileCount();
       return clipIndexed >= SmartMemoriesService.minimumMemoryLength;
     } catch (e, s) {
@@ -709,7 +711,7 @@ class MemoriesCacheService {
       final List<SmartMemory> memories = [];
       final List<(ToShowMemory, SmartMemory)> typedMemories = [];
       final seenTimes = await (isLocalGalleryMode
-              ? MemoriesDB.offlineInstance
+              ? MemoriesDB.localGalleryInstance
               : MemoriesDB.instance)
           .getSeenTimes();
       final minimalUploadedIDs = <int>{};

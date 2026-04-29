@@ -1041,10 +1041,10 @@ class SearchService {
         if (showIgnoredOnly) {
           return [];
         }
-        debugPrint("getting faces (offline)");
-        final offlineMlDb = MLDataDB.offlineInstance;
+        debugPrint("getting faces (localGallery)");
+        final localGalleryMlDb = MLDataDB.localGalleryInstance;
         final Map<int, Set<String>> fileIdToClusterID =
-            await offlineMlDb.getFileIdToClusterIds();
+            await localGalleryMlDb.getFileIdToClusterIds();
         if (fileIdToClusterID.isEmpty) {
           return [];
         }

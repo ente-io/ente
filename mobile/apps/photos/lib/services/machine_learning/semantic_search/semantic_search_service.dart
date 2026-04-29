@@ -33,9 +33,10 @@ class SemanticSearchService {
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
   MLDataDB get _mlDataDB =>
-      isLocalGalleryMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-  ClipVectorDB get _vectorDB =>
-      isLocalGalleryMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
+      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+  ClipVectorDB get _vectorDB => isLocalGalleryMode
+      ? ClipVectorDB.localGalleryInstance
+      : ClipVectorDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;

@@ -49,20 +49,20 @@ class UpdateService {
 
   Future<ChangeLogAction> getChangeLogAction({
     required Locale locale,
-    required bool isOffline,
+    required bool isLocalGallery,
     required bool isSignedIn,
   }) async {
     if (!await shouldShowChangeLog()) {
       return ChangeLogAction.skip;
     }
 
-    if (!(isOffline || isSignedIn)) {
+    if (!(isLocalGallery || isSignedIn)) {
       return ChangeLogAction.skip;
     }
 
     return ChangeLogStrings.hasContentForLocale(
       locale,
-      isOffline: isOffline,
+      isLocalGallery: isLocalGallery,
     )
         ? ChangeLogAction.show
         : ChangeLogAction.consumeWithoutShowing;
