@@ -120,6 +120,19 @@ pub async fn create_account(endpoint: &str, email: String, password: String) -> 
     test_account_from_authenticated(email, password, authenticated)
 }
 
+pub async fn create_account_strict(
+    endpoint: &str,
+    email_prefix: &str,
+    password_prefix: &str,
+) -> TestAccount {
+    create_account(
+        endpoint,
+        crate::support::unique_test_email(email_prefix),
+        crate::support::unique_password(password_prefix),
+    )
+    .await
+}
+
 pub async fn login_without_totp(
     endpoint: &str,
     email: &str,
