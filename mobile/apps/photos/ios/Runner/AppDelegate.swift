@@ -99,7 +99,8 @@ import workmanager_apple
   ) {
     let content = notification.request.content
     // iOS suppresses foreground notification presentation unless the delegate
-    // opts in, so explicitly allow only our internal Workmanager debug thread.
+    // opts in. Workmanager debug notifications are silent (banner only); all
+    // other notifications get the standard banner + sound + badge.
     if content.threadIdentifier == Self.workmanagerDebugThreadIdentifier {
       if #available(iOS 14.0, *) {
         completionHandler([.list, .banner])
@@ -109,6 +110,10 @@ import workmanager_apple
       return
     }
 
-    completionHandler([])
+    if #available(iOS 14.0, *) {
+      completionHandler([.list, .banner, .sound, .badge])
+    } else {
+      completionHandler([.alert, .sound, .badge])
+    }
   }
 }
