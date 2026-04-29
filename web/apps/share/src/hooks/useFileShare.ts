@@ -1,3 +1,4 @@
+import { apiOrigin } from "ente-base/origins";
 import type { NotificationAttributes } from "ente-new/photos/components/Notification";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,6 +9,34 @@ import {
     fetchFileInfo,
 } from "../services/file-share";
 import type { DecryptedFileInfo } from "../types/file-share";
+
+const linkDeviceTokenStorageKey = (apiOrigin: string, accessToken: string) =>
+    `share-file-link-device-token:${apiOrigin}:${accessToken}`;
+
+const savedLinkDeviceToken = (apiOrigin: string, accessToken: string) => {
+    try {
+        return window.localStorage.getItem(
+            linkDeviceTokenStorageKey(apiOrigin, accessToken),
+        );
+    } catch {
+        return null;
+    }
+};
+
+const saveLinkDeviceToken = (
+    apiOrigin: string,
+    accessToken: string,
+    linkDeviceToken: string,
+) => {
+    try {
+        window.localStorage.setItem(
+            linkDeviceTokenStorageKey(apiOrigin, accessToken),
+            linkDeviceToken,
+        );
+    } catch {
+        // Ignore storage failures and continue with in-memory state.
+    }
+};
 
 interface UseFileShareResult {
     loading: boolean;
@@ -56,7 +85,23 @@ export const useFileShare = (): UseFileShareResult => {
 
                 setAccessToken(token);
 
-                const encryptedInfo = await fetchFileInfo(token);
+                const currentAPIOrigin = await apiOrigin();
+                const storedLinkDeviceToken = savedLinkDeviceToken(
+                    currentAPIOrigin,
+                    token,
+                );
+                const { fileLinkInfo: encryptedInfo, linkDeviceToken } =
+                    await fetchFileInfo(
+                        token,
+                        storedLinkDeviceToken ?? undefined,
+                    );
+                if (linkDeviceToken) {
+                    saveLinkDeviceToken(
+                        currentAPIOrigin,
+                        token,
+                        linkDeviceToken,
+                    );
+                }
                 const decryptedInfo = await decryptFileInfo(
                     encryptedInfo,
                     keyMaterial,
