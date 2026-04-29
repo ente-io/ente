@@ -27,8 +27,8 @@ class OfflineFilesService {
   final Logger _logger = Logger('OfflineFilesService');
 
   Future<void> init() async {
-    _logger.fine('Cleaning up stale offline working files');
-    await cleanupOfflineWorkingFiles(
+    _logger.fine('Cleaning up stale offline file copies');
+    await cleanupStaleOfflineFileCopies(
       olderThan: _cachedFileCleanupAge,
     );
   }
@@ -74,7 +74,9 @@ class OfflineFilesService {
     final total = eligibleFiles.length;
     final dialog = createProgressDialog(
       context,
-      total == 1 ? context.l10n.savingOffline : '${context.l10n.savingOffline} 0/$total',
+      total == 1
+          ? context.l10n.savingOffline
+          : '${context.l10n.savingOffline} 0/$total',
       isDismissible: false,
     );
 
