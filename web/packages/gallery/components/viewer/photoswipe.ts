@@ -1772,13 +1772,15 @@ export class FileViewerPhotoSwipe {
             return false;
         };
 
-        // Returns true if a keyboard focus is present on any of the actions
-        // controls which is going to be hidden.
+        // Returns true if keyboard focus is present on any action control that
+        // is going to be hidden.
         const isFocusVisibledOnAutoHideableUIControl = () => {
             const fv = document.querySelector(":focus-visible");
             return (
                 fv instanceof HTMLElement &&
-                !!fv.closest(".pswp__top-bar, .pswp__bottom-right-controls")
+                !!fv.closest(
+                    ".pswp__top-bar, .pswp__bottom-right-controls, .pswp__button--arrow",
+                )
             );
         };
 
@@ -1813,7 +1815,7 @@ export class FileViewerPhotoSwipe {
             clearIdleTimer();
             idleTimer = setTimeout(() => {
                 // Keep the controls visible while keyboard focus is still on
-                // one of the auto-hidden bars.
+                // one of the auto-hidden controls.
                 if (
                     isIdleAutoHideEnabled() &&
                     areUIControlsVisible() &&
