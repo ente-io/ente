@@ -88,6 +88,10 @@ export type GalleryView =
            */
           visiblePeople: Person[];
           /**
+           * The full list of people, with temporary hide/delete state applied.
+           */
+          people: Person[];
+          /**
            * The currently selected person in the gallery bar, if any.
            *
            * It is guaranteed that when it is set, {@link activePerson} will be
@@ -1773,6 +1777,7 @@ const derivePeopleView = (
 
     const view = {
         type: "people" as const,
+        people,
         visiblePeople: extraVisiblePerson
             ? visiblePeople.concat([extraVisiblePerson])
             : visiblePeople,
