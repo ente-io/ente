@@ -1,3 +1,8 @@
+import {
+    ArrowDownDoubleIcon,
+    ArrowUpDoubleIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -41,7 +46,6 @@ import {
     LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
-import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { useWrapAsyncOperation } from "ente-new/photos/components/utils/use-wrap-async";
 import {
     addCGroup,
@@ -71,6 +75,7 @@ interface AllPeopleProps {
     open: boolean;
     onClose: () => void;
     people: Person[];
+    allPeople: Person[];
     onSelectPerson: (id: string) => void;
     peopleSortBy: PeopleSortBy;
     onChangePeopleSortBy: (by: PeopleSortBy) => void;
@@ -80,15 +85,13 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
     open,
     onClose,
     people,
+    allPeople,
     onSelectPerson,
     peopleSortBy,
     onChangePeopleSortBy,
 }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
     const { showMiniDialog } = useBaseContext();
-    // Getting the full people snapshot for showing
-    // If the user clicks the "Show more faces"
-    const peopleState = usePeopleStateSnapshot();
     const [searchTerm, setSearchTerm] = useState("");
     const [showingAllPeople, setShowingAllPeople] = useState(false);
     const [personToRename, setPersonToRename] = useState<CGroupPerson>();
@@ -138,13 +141,13 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
      */
     const extraPeople = useMemo(() => {
         const visiblePersonIDs = new Set(people.map(({ id }) => id));
-        const extra = (peopleState?.people ?? []).filter(
+        const extra = allPeople.filter(
             (person) =>
                 !visiblePersonIDs.has(person.id) &&
                 !(person.type == "cgroup" && person.isHidden),
         );
         return sortPeople(extra, peopleSortBy);
-    }, [people, peopleSortBy, peopleState]);
+    }, [allPeople, people, peopleSortBy]);
 
     const handleToggleShowingAllPeople = () => {
         setShowingAllPeople((value) => !value);
@@ -178,6 +181,7 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
         !hasSearchQuery && showingAllPeople && people.length > 0
             ? extraPeople
             : [];
+
     const visiblePeopleCount = primaryPeople.length + expandedPeople.length;
     const totalPeopleCount = hasSearchQuery
         ? searchablePeople.length
@@ -242,10 +246,11 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
 const Column3To2Breakpoint = 559;
 const PeopleRowItemSize = 154;
 const ShowMoreFacesButtonHeight = 56;
-const ShowMoreFacesButtonVerticalGap = 12;
+const ShowMoreFacesButtonVerticalGap = 16;
 const ShowMoreFacesRowItemSize =
     ShowMoreFacesButtonHeight + 2 * ShowMoreFacesButtonVerticalGap;
-const ExpandedPeopleTopSpacingItemSize = 16;
+const ExpandedPeopleTopSpacing = ShowMoreFacesButtonVerticalGap - 3;
+const ShowMoreFacesCollapseDelay = 300;
 const PeopleListTopSpacing = 16;
 const personCardShellClassName = "all-people-person-card";
 
@@ -444,9 +449,8 @@ interface AllPeopleContentProps {
 }
 
 type PeopleListItem =
-    | { type: "people"; people: Person[] }
-    | { type: "showMoreButton" }
-    | { type: "spacer" };
+    | { type: "people"; people: Person[]; topSpacing?: boolean }
+    | { type: "showMoreButton" };
 
 interface ItemData
     extends Pick<
@@ -487,12 +491,14 @@ const createItemData = memoize(
 const peopleListItems = (
     people: Person[],
     columns: number,
+    firstRowTopSpacing = false,
 ): PeopleListItem[] => {
     const items: PeopleListItem[] = [];
     for (let index = 0; index < people.length; index += columns) {
         items.push({
             type: "people",
             people: people.slice(index, index + columns),
+            topSpacing: firstRowTopSpacing && index == 0,
         });
     }
     return items;
@@ -502,10 +508,11 @@ const peopleListItemSize = (item: PeopleListItem | undefined) => {
     switch (item?.type) {
         case "showMoreButton":
             return ShowMoreFacesRowItemSize;
-        case "spacer":
-            return ExpandedPeopleTopSpacingItemSize;
         default:
-            return PeopleRowItemSize;
+            return (
+                PeopleRowItemSize +
+                (item?.topSpacing ? ExpandedPeopleTopSpacing : 0)
+            );
     }
 };
 
@@ -534,10 +541,6 @@ const PeopleRow = React.memo(
             );
         }
 
-        if (item.type == "spacer") {
-            return <div style={peopleRowStyle(style)} />;
-        }
-
         return (
             <div style={peopleRowStyle(style)}>
                 <Stack
@@ -546,6 +549,9 @@ const PeopleRow = React.memo(
                         boxSizing: "border-box",
                         height: "100%",
                         px: 2,
+                        pt: item.topSpacing
+                            ? `${ExpandedPeopleTopSpacing}px`
+                            : 0,
                         pb: 0.5,
                         gap: 0.5,
                     }}
@@ -597,8 +603,7 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         }
 
         if (shouldShowMoreFacesButton && shouldShowExpandedPeople) {
-            items.push({ type: "spacer" });
-            items.push(...peopleListItems(expandedPeople, columns));
+            items.push(...peopleListItems(expandedPeople, columns, true));
         }
 
         return items;
@@ -610,18 +615,73 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
         shouldShowMoreFacesButton,
     ]);
 
+    const primaryRowCount = Math.ceil(primaryPeople.length / columns);
+    const collapsedListContentHeight =
+        PeopleListTopSpacing +
+        primaryRowCount * PeopleRowItemSize +
+        (shouldShowMoreFacesButton ? ShowMoreFacesRowItemSize : 0);
+
     const handleToggleShowingAllPeople = () => {
-        onToggleShowingAllPeople();
         if (!showingAllPeople && shouldShowMoreFacesButton) {
+            onToggleShowingAllPeople();
             window.requestAnimationFrame(() => {
                 listOuterRef.current?.scrollBy({
-                    top:
-                        ShowMoreFacesRowItemSize +
-                        ExpandedPeopleTopSpacingItemSize,
+                    top: ShowMoreFacesRowItemSize,
                     behavior: "smooth",
                 });
             });
+            return;
         }
+
+        if (showingAllPeople && shouldShowExpandedPeople) {
+            const listOuterElement = listOuterRef.current;
+
+            if (!listOuterElement) {
+                onToggleShowingAllPeople();
+                return;
+            }
+
+            const collapsedMaxScrollTop = Math.max(
+                0,
+                collapsedListContentHeight - listOuterElement.clientHeight,
+            );
+            const targetScrollTop = Math.max(
+                0,
+                Math.min(
+                    listOuterElement.scrollTop - ShowMoreFacesRowItemSize,
+                    collapsedMaxScrollTop,
+                ),
+            );
+
+            if (Math.abs(listOuterElement.scrollTop - targetScrollTop) < 1) {
+                onToggleShowingAllPeople();
+                return;
+            }
+
+            const finishCollapse = () => {
+                listOuterElement.removeEventListener(
+                    "scrollend",
+                    finishCollapse,
+                );
+                window.clearTimeout(collapseTimeoutID);
+                onToggleShowingAllPeople();
+            };
+
+            listOuterElement.addEventListener("scrollend", finishCollapse, {
+                once: true,
+            });
+            const collapseTimeoutID = window.setTimeout(
+                finishCollapse,
+                ShowMoreFacesCollapseDelay,
+            );
+            listOuterElement.scrollTo({
+                top: targetScrollTop,
+                behavior: "smooth",
+            });
+            return;
+        }
+
+        onToggleShowingAllPeople();
     };
 
     const itemData = createItemData(
@@ -651,14 +711,15 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
     const listContentHeight =
         PeopleListTopSpacing +
         items.reduce((height, item) => height + peopleListItemSize(item), 0);
-    const primaryRowCount = Math.ceil(primaryPeople.length / columns);
     const listKey = `${columns}-${shouldShowMoreFacesButton ? "with-button" : "no-button"}-${primaryRowCount}`;
 
     return (
         <DialogContent
             sx={{
                 "&&": { padding: 0 },
-                height: `min(80svh, ${listContentHeight}px)`,
+                height: hasSearchQuery
+                    ? "80svh"
+                    : `min(80svh, ${listContentHeight}px)`,
                 display: "flex",
                 flexDirection: "column",
             }}
@@ -698,6 +759,17 @@ const ShowMoreFacesButton: React.FC<ShowMoreFacesButtonProps> = ({
             fullWidth
             variant="text"
             onClick={onClick}
+            startIcon={
+                <HugeiconsIcon
+                    icon={
+                        showingAllPeople
+                            ? ArrowUpDoubleIcon
+                            : ArrowDownDoubleIcon
+                    }
+                    size={20}
+                    strokeWidth={1.5}
+                />
+            }
             sx={{
                 color: "text.base",
                 backgroundColor: "fill.faint",
