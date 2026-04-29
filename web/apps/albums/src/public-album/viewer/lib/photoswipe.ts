@@ -2104,7 +2104,10 @@ export class FileViewerPhotoSwipe {
             pswp.element?.removeEventListener("click", handleViewerClick, {
                 capture: true,
             });
-            pswp.element?.removeEventListener("mousemove", handleViewerActivity);
+            pswp.element?.removeEventListener(
+                "mousemove",
+                handleViewerActivity,
+            );
             pswp.element?.removeEventListener("wheel", handleViewerActivity);
             document.removeEventListener(
                 "fullscreenchange",
