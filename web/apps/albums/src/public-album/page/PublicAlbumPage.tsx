@@ -1687,7 +1687,7 @@ const MobileMasonryCoverContent = styled(Box)({
 const MobileMasonryCoverTitle = styled(Typography)({
     fontSize: "36px",
     fontWeight: 600,
-    lineHeight: 1.1,
+    lineHeight: 1.2,
     letterSpacing: "-0.03em",
     textAlign: "center",
     width: "100%",
