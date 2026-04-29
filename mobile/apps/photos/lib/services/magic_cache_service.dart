@@ -83,7 +83,7 @@ String getLocalizedTitle(BuildContext context, String title) {
     case 'Screenshots':
       return context.l10n.discover_screenshots;
     case 'QR Codes':
-      return title;
+      return context.l10n.discover_qr_codes;
     case 'Receipts':
       return context.l10n.discover_receipts;
     case 'Notes':
