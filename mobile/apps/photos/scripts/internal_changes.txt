@@ -1,4 +1,5 @@
 Latest changes:
+- Ashil: Fix social notifications not working on iOS
 - Neeraj: Add HTTP/2 support with HTTP/1.1 fallback for Photos API requests
 - Amrithesh: Improve zoomed OCR selection UX in the photo viewer
 - Neeraj: Fix dedupe cleanup progress percentage display
