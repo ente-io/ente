@@ -76,7 +76,6 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
 
   void _refreshFromCache() {
     _userDetails = UserService.instance.getCachedUserDetails();
-    _isCached = true;
     if (mounted) {
       setState(() {});
     }
