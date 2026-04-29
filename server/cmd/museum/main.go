@@ -22,7 +22,9 @@ import (
 	"github.com/ente-io/museum/pkg/controller/emergency"
 	"github.com/ente-io/museum/pkg/controller/file_copy"
 	"github.com/ente-io/museum/pkg/controller/filedata"
+	legacykitctrl "github.com/ente-io/museum/pkg/controller/legacy_kit"
 	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
+	legacykitrepo "github.com/ente-io/museum/pkg/repo/legacy_kit"
 
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
@@ -173,6 +175,7 @@ func main() {
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
 	emergencyContactRepository := &emergencyRepo.Repository{DB: db}
+	legacyKitRepository := &legacykitrepo.Repository{DB: db}
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
@@ -458,6 +461,12 @@ func main() {
 	passkeyCtrl := &controller.PasskeyController{
 		Repo:     passkeysRepo,
 		UserRepo: userRepo,
+	}
+	legacyKitController := &legacykitctrl.Controller{
+		Repo:              legacyKitRepository,
+		UserRepo:          userRepo,
+		UserCtrl:          userController,
+		PasskeyController: passkeyCtrl,
 	}
 
 	authMiddleware := middleware.AuthMiddleware{UserAuthRepo: userAuthRepo, Cache: authCache, UserController: userController}
@@ -844,6 +853,9 @@ func main() {
 	emergencyHandler := &api.EmergencyHandler{
 		Controller: emergencyCtrl,
 	}
+	legacyKitHandler := &api.LegacyKitHandler{
+		Controller: legacyKitController,
+	}
 
 	privateAPI.POST("/emergency-contacts/add", emergencyHandler.AddContact)
 	privateAPI.GET("/emergency-contacts/info", emergencyHandler.GetInfo)
@@ -856,6 +868,20 @@ func main() {
 	privateAPI.GET("/emergency-contacts/recovery-info/:id", emergencyHandler.GetRecoveryInfo)
 	privateAPI.POST("/emergency-contacts/init-change-password", emergencyHandler.InitChangePassword)
 	privateAPI.POST("/emergency-contacts/change-password", emergencyHandler.ChangePassword)
+	privateAPI.POST("/legacy-kits", legacyKitHandler.Create)
+	privateAPI.GET("/legacy-kits", legacyKitHandler.List)
+	privateAPI.GET("/legacy-kits/:id/download", legacyKitHandler.DownloadContent)
+	privateAPI.GET("/legacy-kits/:id/download-content", legacyKitHandler.DownloadContent)
+	privateAPI.GET("/legacy-kits/:id/recovery-session", legacyKitHandler.OwnerRecoverySession)
+	privateAPI.POST("/legacy-kits/update-recovery-notice", legacyKitHandler.UpdateRecoveryNotice)
+	privateAPI.POST("/legacy-kits/block-recovery", legacyKitHandler.BlockRecovery)
+	privateAPI.DELETE("/legacy-kits/:id", legacyKitHandler.Delete)
+	publicAPI.POST("/legacy-kits/recovery/challenge", legacyKitHandler.CreateChallenge)
+	publicAPI.POST("/legacy-kits/recovery/open", legacyKitHandler.OpenRecovery)
+	publicAPI.POST("/legacy-kits/recovery/session", legacyKitHandler.Session)
+	publicAPI.POST("/legacy-kits/recovery/info", legacyKitHandler.RecoveryInfo)
+	publicAPI.POST("/legacy-kits/recovery/init-change-password", legacyKitHandler.InitChangePassword)
+	publicAPI.POST("/legacy-kits/recovery/change-password", legacyKitHandler.ChangePassword)
 	billingHandler := &api.BillingHandler{
 		Controller:          billingController,
 		AppStoreController:  appStoreController,
