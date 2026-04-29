@@ -893,6 +893,26 @@ class VideoPreviewService {
     return await _getPlaylist(file);
   }
 
+  Future<void> _downloadVideoPreviewForCache(
+    String previewUrl,
+    String objectID,
+    EnteFile file,
+  ) async {
+    try {
+      await videoCacheManager.downloadFile(
+        previewUrl,
+        key: _getVideoPreviewKey(objectID),
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to warm video preview cache for fileID "
+        "${file.uploadedFileID}",
+        e,
+        s,
+      );
+    }
+  }
+
   Future<bool> prefetchExistingPreview(
     EnteFile file, {
     required int maxPreviewSizeBytes,
@@ -1023,9 +1043,10 @@ class VideoPreviewService {
             );
           } else {
             unawaited(
-              videoCacheManager.downloadFile(
+              _downloadVideoPreviewForCache(
                 previewURLResult.$1,
-                key: _getVideoPreviewKey(objectID),
+                objectID,
+                file,
               ),
             );
             finalPlaylist = finalPlaylist.replaceAll(
@@ -1067,7 +1088,12 @@ class VideoPreviewService {
         fileDataService.appendPreview(file.uploadedFileID!, objectID, size!);
       }
       return data;
-    } catch (_) {
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to get video playlist for fileID ${file.uploadedFileID}",
+        e,
+        s,
+      );
       rethrow;
     }
   }

@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:collection";
 
+import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
@@ -19,6 +20,7 @@ const int kMemoryVideoSessionBudgetBytes = 200 * 1024 * 1024;
 enum _OriginalPrefetchResult { warmed, ineligible, failed }
 
 class MemoryVideoPrefetcher {
+  final _logger = Logger("MemoryVideoPrefetcher");
   final Queue<({EnteFile file, bool Function()? stillActive})> _queue =
       Queue<({EnteFile file, bool Function()? stillActive})>();
   final Set<int> _queuedIDs = <int>{};
@@ -143,7 +145,12 @@ class MemoryVideoPrefetcher {
       }
       if (!_isActive(stillActive)) return;
       _attemptedIDs.add(uploadedFileID);
-    } catch (_) {
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to prefetch memory video for fileID $uploadedFileID",
+        e,
+        s,
+      );
       // Transient prefetch failures should be retryable on a later warm pass.
     }
   }
@@ -173,8 +180,13 @@ class MemoryVideoPrefetcher {
       return _OriginalPrefetchResult.ineligible;
     }
     final prefetchedFile = await getFileFromServer(file);
-    return prefetchedFile != null
-        ? _OriginalPrefetchResult.warmed
-        : _OriginalPrefetchResult.failed;
+    if (prefetchedFile != null) {
+      return _OriginalPrefetchResult.warmed;
+    }
+    _logger.info(
+      "Memory video original prefetch returned no file for fileID "
+      "$uploadedFileID",
+    );
+    return _OriginalPrefetchResult.failed;
   }
 }
