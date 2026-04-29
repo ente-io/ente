@@ -1,4 +1,5 @@
 Latest changes:
+- Ashil: Fix social notifications not working on iOS
 - Laurens: Improved memories loading
 - Laurens: Add "QR Codes" discovery item
 - Laurens: Fixes to widget, most importantly to hidden files and showing album title
