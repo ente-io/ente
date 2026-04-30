@@ -62,7 +62,7 @@ above and `ENTE_S3_B2_EU_CEN_ENDPOINT` overrides `s3.b2-eu-cen.endpoint`.
 
 ### App Endpoints
 
-The web apps for Ente (Accounts, Cast, Albums, Share, Paste, Embed) use
+The web apps for Ente (Accounts, Cast, Albums, Share, Paste, Embed, Memories) use
 different endpoints.
 
 These endpoints are configurable in `museum.yaml` under the apps.\* section.
@@ -71,14 +71,15 @@ Upon configuration, the application will start utilizing the specified endpoints
 instead of Ente's production instances or local endpoints (overridden values
 used for Compose and quickstart for ease of use.)
 
-| Variable             | Description                                             | Default                    |
-| -------------------- | ------------------------------------------------------- | -------------------------- |
-| `apps.public-albums` | Albums app base endpoint for public sharing             | `https://albums.ente.io`   |
-| `apps.public-locker` | Public Locker (share) app base endpoint                 | `https://share.ente.io`    |
-| `apps.public-paste`  | Ente Paste app base endpoint                            | `https://paste.ente.com`   |
-| `apps.cast`          | Cast app base endpoint                                  | `https://cast.ente.io`     |
-| `apps.embed-albums`  | Embed app base endpoint for embedded sharing            | `https://embed.ente.io`    |
-| `apps.accounts`      | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.io` |
+| Variable               | Description                                             | Default                    |
+| ---------------------- | ------------------------------------------------------- | -------------------------- |
+| `apps.public-albums`   | Albums app base endpoint for public sharing             | `https://albums.ente.io`   |
+| `apps.public-locker`   | Public Locker (share) app base endpoint                 | `https://share.ente.io`    |
+| `apps.public-paste`    | Ente Paste app base endpoint                            | `https://paste.ente.com`   |
+| `apps.public-memories` | Memories app base endpoint for public memory shares     | `https://memories.ente.io` |
+| `apps.cast`            | Cast app base endpoint                                  | `https://cast.ente.io`     |
+| `apps.embed-albums`    | Embed app base endpoint for embedded sharing            | `https://embed.ente.io`    |
+| `apps.accounts`        | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.io` |
 
 ### Database
 
