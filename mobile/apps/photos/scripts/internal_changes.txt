@@ -8,6 +8,7 @@ Latest changes:
 
 Still behind internal flag:
 - Amrithesh: (I) ML/Pet recognition [Indexing]
+- Aman: (I) Use Rust HEIC decoder for Android photo viewer when dimensions are known
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
