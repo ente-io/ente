@@ -119,7 +119,7 @@ class RemoteAssetsService {
         "Retrying $url with single-shot download after disabling resumable mode",
       );
     }
-    final probe = await _probeRemoteAsset(url);
+    final probe = await _probeRemoteAsset(url, savePath);
     final useResumable = allowResume && _shouldUseResumableDownload(probe);
     if (probe != null &&
         probe.totalBytes > _resumableThresholdBytes &&
@@ -206,7 +206,10 @@ class RemoteAssetsService {
     return probe.totalBytes > _resumableThresholdBytes && probe.canResume;
   }
 
-  Future<_RemoteAssetProbe?> _probeRemoteAsset(String url) async {
+  Future<_RemoteAssetProbe?> _probeRemoteAsset(
+    String url,
+    String savePath,
+  ) async {
     if (!_resumableDownloadsEnabled) {
       return null;
     }
@@ -214,24 +217,51 @@ class RemoteAssetsService {
     try {
       final response = await _dio.head<void>(url);
       final probe = _RemoteAssetProbe.fromHeaders(url, response.headers);
-      if (probe == null && _shouldLogProbeDiagnosticsFor(url)) {
+      if (_shouldLogProbeDiagnosticsFor(url)) {
         final contentLength =
             response.headers.value(HttpHeaders.contentLengthHeader) ??
                 "missing";
         final acceptRanges =
             response.headers.value("accept-ranges")?.trim() ?? "missing";
         final etag = response.headers.value(HttpHeaders.etagHeader)?.trim();
-        _logger.info(
-          "HEAD probe did not qualify $url for resumable download "
-          "(contentLength: $contentLength, acceptRanges: $acceptRanges, "
-          "strongEtag: ${_strongETag(etag) != null})",
-        );
+        if (probe == null) {
+          _logger.info(
+            "HEAD probe did not qualify $url for resumable download "
+            "(contentLength: $contentLength, acceptRanges: $acceptRanges, "
+            "strongEtag: ${_strongETag(etag) != null})",
+          );
+        } else {
+          _logger.info(
+            "HEAD probe succeeded for $url "
+            "(contentLength: ${probe.totalBytes}, "
+            "acceptsRanges: ${probe.acceptsRanges}, "
+            "strongEtag: ${probe.ifRangeValidator != null})",
+          );
+        }
       }
       return probe;
     } catch (e, s) {
+      final hasResumeArtifacts = await _hasCompleteResumeArtifacts(savePath);
+      if (_isConnectionFailure(e) && hasResumeArtifacts) {
+        if (_shouldLogProbeDiagnosticsFor(url)) {
+          _logger.warning(
+            "HEAD probe connection failed for $url, preserving resume "
+            "artifacts for retry "
+            "(tempBytes: ${await _safeFileLength(savePath)}, "
+            "metadataExists: ${await _resumeMetadataExists(savePath)})",
+            e,
+            s,
+          );
+        }
+        Error.throwWithStackTrace(e, s);
+      }
       if (_shouldLogProbeDiagnosticsFor(url)) {
         _logger.warning(
-          "HEAD probe failed for $url, falling back to single-shot download",
+          _isConnectionFailure(e)
+              ? "HEAD probe connection failed for $url without complete "
+                  "resume artifacts, falling back to single-shot download"
+              : "HEAD probe failed for $url, falling back to single-shot "
+                  "download",
           e,
           s,
         );
@@ -276,7 +306,10 @@ class RemoteAssetsService {
       }
       if (_shouldLogProbeDiagnosticsFor(url)) {
         _logger.severe(
-          "Resumable download failed for $url at $existingBytes / ${probe.totalBytes} bytes",
+          "Resumable download failed for $url "
+          "(startBytes: $existingBytes, "
+          "tempBytes: ${await _safeFileLength(savePath)}, "
+          "expectedBytes: ${probe.totalBytes})",
           e,
           s,
         );
@@ -464,6 +497,46 @@ class RemoteAssetsService {
   Future<void> _clearResumeArtifacts(String tempPath) async {
     await _deleteFileIfExists(File(tempPath));
     await _deleteResumeMetadata(tempPath);
+  }
+
+  Future<bool> _hasCompleteResumeArtifacts(String tempPath) async {
+    return await File(tempPath).exists() &&
+        await File(_resumeMetadataPath(tempPath)).exists();
+  }
+
+  Future<bool> _resumeMetadataExists(String tempPath) async {
+    return File(_resumeMetadataPath(tempPath)).exists();
+  }
+
+  Future<int> _safeFileLength(String path) async {
+    try {
+      final file = File(path);
+      if (!await file.exists()) {
+        return 0;
+      }
+      return await file.length();
+    } catch (_) {
+      return -1;
+    }
+  }
+
+  bool _isConnectionFailure(Object error) {
+    if (error is SocketException || error is TimeoutException) {
+      return true;
+    }
+    if (error is DioException) {
+      if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.receiveTimeout) {
+        return true;
+      }
+      final innerError = error.error;
+      if (innerError != null && !identical(innerError, error)) {
+        return _isConnectionFailure(innerError);
+      }
+    }
+    return false;
   }
 
   Future<void> _replaceFile(File source, File target) async {
