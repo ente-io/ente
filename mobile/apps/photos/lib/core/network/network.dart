@@ -15,6 +15,7 @@ import "package:ua_client_hints/ua_client_hints.dart";
 
 class NetworkClient {
   final _logger = Logger("NetworkClient");
+  final _http2FallbackPolicy = _Http2FallbackPolicy();
   late Dio _dio;
   late Dio _enteDio;
   StreamSubscription<EndpointUpdatedEvent>? _endpointUpdatedSubscription;
@@ -69,15 +70,18 @@ class NetworkClient {
 
   HttpClientAdapter _newAdaptiveHttpClientAdapter(Duration connectTimeout) {
     final fallbackAdapter = IOHttpClientAdapter();
+    final fallbackPolicy = _http2FallbackPolicy;
     final http2Adapter = Http2Adapter(
       ConnectionManager(
         handshakeTimout: connectTimeout,
       ),
       fallbackAdapter: fallbackAdapter,
       onNotSupported: (options, requestStream, cancelFuture, exception) {
-        _logger.info(
-          "HTTP/2 not supported for ${options.method} "
-          "${_uriOrigin(options.uri)}; falling back to IO adapter",
+        _logHttp2UnsupportedOriginOnce(
+          logger: _logger,
+          fallbackPolicy: fallbackPolicy,
+          uri: exception.uri,
+          reason: "HTTP/2 not supported for ${options.method}",
         );
         return fallbackAdapter.fetch(options, requestStream, cancelFuture);
       },
@@ -86,12 +90,8 @@ class NetworkClient {
       http2Adapter: http2Adapter,
       fallbackAdapter: fallbackAdapter,
       logger: _logger,
+      fallbackPolicy: fallbackPolicy,
     );
-  }
-
-  String _uriOrigin(Uri uri) {
-    final port = uri.hasPort ? ":${uri.port}" : "";
-    return "${uri.scheme}://${uri.host}$port";
   }
 
   NetworkClient._privateConstructor();
@@ -108,21 +108,27 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
     required HttpClientAdapter http2Adapter,
     required HttpClientAdapter fallbackAdapter,
     required Logger logger,
+    required _Http2FallbackPolicy fallbackPolicy,
   })  : _http2Adapter = http2Adapter,
         _fallbackAdapter = fallbackAdapter,
-        _logger = logger;
+        _logger = logger,
+        _fallbackPolicy = fallbackPolicy;
 
   final HttpClientAdapter _http2Adapter;
   final HttpClientAdapter _fallbackAdapter;
   final Logger _logger;
+  final _Http2FallbackPolicy _fallbackPolicy;
 
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
-  ) {
+  ) async {
     if (options.uri.scheme != "https") {
+      return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
+    }
+    if (_fallbackPolicy.isUnsupported(options.uri)) {
       return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
     }
     // Keep explicit body send-timeout behavior on Dio's IO adapter. The app
@@ -138,25 +144,27 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
       return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
     }
 
-    return _http2Adapter.fetch(options, requestStream, cancelFuture).catchError(
-      (Object e, StackTrace s) {
-        if (e is TimeoutException) {
-          throw DioException.connectionTimeout(
-            requestOptions: options,
-            timeout: options.connectTimeout ?? Duration.zero,
-            error: e,
-          );
-        }
-        if (_isFallbackHandshakeError(e)) {
-          _logger.info(
-            "HTTP/2 TLS negotiation failed for ${options.method} "
-            "${_uriOrigin(options.uri)}; falling back to IO adapter",
-          );
-          return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
-        }
-        Error.throwWithStackTrace(e, s);
-      },
-    );
+    try {
+      return await _http2Adapter.fetch(options, requestStream, cancelFuture);
+    } catch (e, s) {
+      if (e is TimeoutException) {
+        throw DioException.connectionTimeout(
+          requestOptions: options,
+          timeout: options.connectTimeout ?? Duration.zero,
+          error: e,
+        );
+      }
+      if (_isFallbackHandshakeError(e)) {
+        _logHttp2UnsupportedOriginOnce(
+          logger: _logger,
+          fallbackPolicy: _fallbackPolicy,
+          uri: options.uri,
+          reason: "HTTP/2 TLS negotiation failed for ${options.method}",
+        );
+        return _fallbackAdapter.fetch(options, requestStream, cancelFuture);
+      }
+      Error.throwWithStackTrace(e, s);
+    }
   }
 
   @override
@@ -195,9 +203,64 @@ class _AdaptiveHttpClientAdapter implements HttpClientAdapter {
   ) {
     return requestStream != null && cancelFuture != null;
   }
+}
 
-  String _uriOrigin(Uri uri) {
-    final port = uri.hasPort ? ":${uri.port}" : "";
-    return "${uri.scheme}://${uri.host}$port";
+class _Http2FallbackPolicy {
+  final _unsupportedOriginKeys = <String>{};
+
+  bool isUnsupported(Uri uri) {
+    return _unsupportedOriginKeys.contains(_originKey(uri));
+  }
+
+  bool markUnsupported(Uri uri) {
+    return _unsupportedOriginKeys.add(_originKey(uri));
+  }
+
+  String originForLog(Uri uri) {
+    final scheme = uri.scheme.toLowerCase();
+    final port =
+        uri.hasPort && !_isDefaultPort(scheme, uri.port) ? ":${uri.port}" : "";
+    return "$scheme://${_formatHost(uri.host)}$port";
+  }
+
+  String _originKey(Uri uri) {
+    final scheme = uri.scheme.toLowerCase();
+    return "$scheme://${uri.host.toLowerCase()}:${_effectivePort(uri, scheme)}";
+  }
+
+  int _effectivePort(Uri uri, String scheme) {
+    if (uri.hasPort) {
+      return uri.port;
+    }
+    if (scheme == "https") {
+      return 443;
+    }
+    if (scheme == "http") {
+      return 80;
+    }
+    return uri.port;
+  }
+
+  bool _isDefaultPort(String scheme, int port) {
+    return (scheme == "https" && port == 443) ||
+        (scheme == "http" && port == 80);
+  }
+
+  String _formatHost(String host) {
+    return host.contains(":") ? "[$host]" : host;
+  }
+}
+
+void _logHttp2UnsupportedOriginOnce({
+  required Logger logger,
+  required _Http2FallbackPolicy fallbackPolicy,
+  required Uri uri,
+  required String reason,
+}) {
+  if (fallbackPolicy.markUnsupported(uri)) {
+    logger.info(
+      "$reason ${fallbackPolicy.originForLog(uri)}; "
+      "using IO adapter for this app session",
+    );
   }
 }
