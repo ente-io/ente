@@ -28,6 +28,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
+import "package:photos/utils/ram_check_util.dart";
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
@@ -37,6 +38,7 @@ class ZoomableImage extends StatefulWidget {
   final Decoration? backgroundDecoration;
   final bool shouldCover;
   final bool isGuestView;
+  final bool isFromMemories;
   final Function({required int memoryDuration})? onFinalFileLoad;
 
   const ZoomableImage(
@@ -47,6 +49,7 @@ class ZoomableImage extends StatefulWidget {
     this.backgroundDecoration,
     this.shouldCover = false,
     this.isGuestView = false,
+    this.isFromMemories = false,
     this.onFinalFileLoad,
   });
 
@@ -69,6 +72,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _pendingFinalImageRetry = false;
   bool _convertToSupportedFormat = false;
   bool _showingThumbnailFallback = false;
+  // onFinalFileLoad drives memory-slideshow auto-advance; fire it once as
+  // soon as any presentable frame lands (small/large thumb or final), so
+  // the timer isn't gated on the full original download.
+  bool _firedOnReady = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
@@ -86,7 +93,13 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   // This is to prevent the app from crashing when loading 200MP images
   // https://github.com/flutter/flutter/issues/110331
-  bool get isTooLargeImage => _photo.width * _photo.height > 100000000; //100MP
+  static const int _defaultMaxPixels = 100000000; // 100MP
+  static const int _lowRamMaxPixels = 24000000; // 24MP
+
+  int get _maxImagePixels =>
+      hasLessThan5GBRAM ? _lowRamMaxPixels : _defaultMaxPixels;
+
+  bool get isTooLargeImage => _photo.width * _photo.height > _maxImagePixels;
 
   @override
   void initState() {
@@ -94,6 +107,16 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
+    // Render a cached thumbnail on first paint so prefetched files never
+    // flash the spinner while the async load resolves.
+    final cachedThumbnail =
+        ThumbnailInMemoryLruCache.get(_photo, thumbnailLargeSize) ??
+            ThumbnailInMemoryLruCache.get(_photo, thumbnailSmallSize);
+    if (cachedThumbnail != null) {
+      _imageProvider = Image.memory(cachedThumbnail).image;
+      _loadedSmallThumbnail = true;
+      _notifyReadyOnce();
+    }
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
@@ -185,7 +208,12 @@ class _ZoomableImageState extends State<ZoomableImage> {
       content = PhotoViewGestureDetectorScope(
         axis: Axis.vertical,
         child: PhotoView(
-          key: ValueKey(_loadedFinalImage),
+          // Toggling ValueKey on _loadedFinalImage tears down PhotoView when
+          // the full file replaces the thumbnail, briefly exposing the layer
+          // underneath (the memory blur backdrop). Only needed for the
+          // gallery's zoom+late-load scale fix; in memory playback we never
+          // zoom, so keep a stable key and let gaplessPlayback swap in place.
+          key: widget.isFromMemories ? null : ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
           controller: _photoViewController,
           filterQuality: FilterQuality.high,
@@ -228,9 +256,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
                 height: screenRelativeImageHeight,
                 child: Hero(
                   tag: widget.tagPrefix! + _photo.tag,
-                  child: const EnteLoadingWidget(
-                    color: Colors.white,
-                  ),
+                  child: widget.isFromMemories
+                      ? const _DelayedLoadingIndicator()
+                      : const EnteLoadingWidget(
+                          color: Colors.white,
+                        ),
                 ),
               ),
             );
@@ -247,9 +277,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
         ),
       );
     } else {
-      content = const EnteLoadingWidget(
-        color: Colors.white,
-      );
+      content = widget.isFromMemories
+          ? const _DelayedLoadingIndicator()
+          : const EnteLoadingWidget(
+              color: Colors.white,
+            );
     }
 
     final GestureDragUpdateCallback? verticalDragCallback =
@@ -336,12 +368,25 @@ class _ZoomableImageState extends State<ZoomableImage> {
     );
   }
 
+  // Deferred via microtask so synchronous callers inside build() (the
+  // cached-thumbnail branches of _loadNetworkImage / _loadLocalImage) don't
+  // mutate parent state during the current build phase.
+  void _notifyReadyOnce() {
+    if (_firedOnReady) return;
+    _firedOnReady = true;
+    scheduleMicrotask(() {
+      if (!mounted) return;
+      widget.onFinalFileLoad?.call(memoryDuration: 5);
+    });
+  }
+
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
       final cachedThumbnail = ThumbnailInMemoryLruCache.get(_photo);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
+        _notifyReadyOnce();
       } else {
         getThumbnailFromServer(_photo).then((file) {
           final imageProvider = Image.memory(file).image;
@@ -352,6 +397,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
                   _imageProvider = imageProvider;
                   _loadedSmallThumbnail = true;
                 });
+                _notifyReadyOnce();
               }
             }).catchError((e) {
               _logger.severe("Could not load image " + _photo.toString());
@@ -401,6 +447,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
+        _notifyReadyOnce();
       }
     }
 
@@ -459,6 +506,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
             _imageProvider = imageProvider;
             _loadedLargeThumbnail = true;
           });
+          _notifyReadyOnce();
         }
       });
     }
@@ -493,10 +541,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
     ImageProvider imageProvider;
     if (isTooLargeImage) {
       _logger.info(
-        "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to 50MP to prevent crash",
+        "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to ${_maxImagePixels ~/ 1000000}MP to prevent crash",
       );
       final aspectRatio = _photo.width / _photo.height;
-      const maxPixels = 50000000;
+      final maxPixels = min(50000000, _maxImagePixels);
       final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
 
@@ -571,7 +619,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _loadedFinalImage = true;
       _logger.info("Final image loaded");
     });
-    widget.onFinalFileLoad?.call(memoryDuration: 5);
+    _notifyReadyOnce();
   }
 
   Future<void> _updatePhotoViewController({
@@ -721,6 +769,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         InheritedDetailPageState.maybeOf(context)
             ?.showingThumbnailFallbackNotifier
             .value = detailPageFileIdentifier(_photo);
+        _notifyReadyOnce();
       }
       return;
     }
@@ -749,10 +798,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
     Uint8List? compressedFile;
     if (isTooLargeImage) {
       _logger.info(
-        "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively down to 50MP",
+        "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively down to ${_maxImagePixels ~/ 1000000}MP",
       );
       final aspectRatio = _photo.width / _photo.height;
-      const maxPixels = 50000000;
+      final maxPixels = min(50000000, _maxImagePixels);
       final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
 
@@ -791,7 +840,44 @@ class _ZoomableImageState extends State<ZoomableImage> {
         InheritedDetailPageState.maybeOf(context)
             ?.showingThumbnailFallbackNotifier
             .value = detailPageFileIdentifier(_photo);
+        _notifyReadyOnce();
       }
     }
+  }
+}
+
+// Suppresses the spinner for a short window so fast loads (common in the
+// memory viewer thanks to prefetch) never paint a flash between advances.
+class _DelayedLoadingIndicator extends StatefulWidget {
+  const _DelayedLoadingIndicator();
+
+  @override
+  State<_DelayedLoadingIndicator> createState() =>
+      _DelayedLoadingIndicatorState();
+}
+
+class _DelayedLoadingIndicatorState extends State<_DelayedLoadingIndicator> {
+  static const Duration _delay = Duration(milliseconds: 400);
+  Timer? _timer;
+  bool _showSpinner = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(_delay, () {
+      if (mounted) setState(() => _showSpinner = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_showSpinner) return const SizedBox.expand();
+    return const EnteLoadingWidget(color: Colors.white);
   }
 }

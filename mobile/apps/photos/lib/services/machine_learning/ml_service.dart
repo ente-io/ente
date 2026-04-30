@@ -66,24 +66,25 @@ class MLService {
       _isRunningML || memoriesCacheService.isUpdatingMemories;
 
   static const _kForceClusteringFaceCount = 8000;
-  static const _kForceClusteringFaceCountOffline = 100;
+  static const _kForceClusteringFaceCountLocalGallery = 100;
   int _forceClusteringFaceCountForMode(MLMode mode) {
-    return mode == MLMode.offline
-        ? _kForceClusteringFaceCountOffline
+    return mode == MLMode.localGallery
+        ? _kForceClusteringFaceCountLocalGallery
         : _kForceClusteringFaceCount;
   }
 
   MLDataDB get _mlDataDB =>
-      isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
 
   MLDataDB _dbForMode(MLMode mode) {
-    return mode == MLMode.offline
-        ? MLDataDB.offlineInstance
+    return mode == MLMode.localGallery
+        ? MLDataDB.localGalleryInstance
         : MLDataDB.instance;
   }
 
   bool _hasModeChanged(MLMode mode) {
-    return (isOfflineMode ? MLMode.offline : MLMode.online) != mode;
+    return (isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery) !=
+        mode;
   }
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
@@ -183,7 +184,7 @@ class MLService {
     if (_hasScheduledStartupOwnedRemoteHydration ||
         isProcessBg ||
         !hasGrantedMLConsent ||
-        isOfflineMode ||
+        isLocalGalleryMode ||
         !localSettings.remoteFetchEnabled) {
       return;
     }
@@ -192,7 +193,7 @@ class MLService {
   }
 
   Future<void> _runStartupOwnedRemoteHydration() async {
-    if (!hasGrantedMLConsent || isOfflineMode) {
+    if (!hasGrantedMLConsent || isLocalGalleryMode) {
       return;
     }
     try {
@@ -225,7 +226,7 @@ class MLService {
     int? skipHydrationIfCandidateFileCountAtMost,
   }) async {
     if (isProcessBg ||
-        isOfflineMode ||
+        isLocalGalleryMode ||
         !hasGrantedMLConsent ||
         !localSettings.remoteFetchEnabled) {
       return;
@@ -351,7 +352,8 @@ class MLService {
       return;
     }
     try {
-      final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
+      final MLMode mode =
+          isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery;
       final mlDataDB = _dbForMode(mode);
       if (force) {
         _mlControllerStatus = true;
@@ -442,7 +444,7 @@ class MLService {
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
     if (!_canRunMLFunction(function: "Indexing")) return;
-    if (mode == MLMode.online && !isOfflineMode) {
+    if (mode == MLMode.enteGallery && !isLocalGalleryMode) {
       await _waitForOwnedRemoteHydrationIfRunning();
     }
     if (!_canRunMLFunction(function: "Indexing")) return;
@@ -462,7 +464,8 @@ class MLService {
 
       stream:
       await for (final chunk in instructionStream) {
-        if ((isOfflineMode ? MLMode.offline : MLMode.online) != mode) {
+        if ((isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery) !=
+            mode) {
           _logger.info(
             "App mode changed during indexing, stopping current ML run",
           );
@@ -475,14 +478,14 @@ class MLService {
           }
           await MLIndexingIsolate.instance.cleanupLocalIndexingModels();
           continue;
-        } else if (!(isOfflineMode || await canUseHighBandwidth())) {
+        } else if (!(isLocalGalleryMode || await canUseHighBandwidth())) {
           _logger.info(
             'stopping indexing because user is not connected to wifi and in online mode',
           );
           break stream;
         } else {
           await MLIndexingIsolate.instance.ensureDownloadedModels();
-          if ((flagService.useRustForML || isOfflineMode) &&
+          if ((flagService.useRustForML || isLocalGalleryMode) &&
               !rustRuntimePrepared) {
             await MLIndexingIsolate.instance.prepareRustRuntime();
             rustRuntimePrepared = true;
@@ -490,7 +493,8 @@ class MLService {
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
-          if ((isOfflineMode ? MLMode.offline : MLMode.online) != mode) {
+          if ((isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery) !=
+              mode) {
             _logger.info(
               "App mode changed during indexing, stopping current ML run",
             );
@@ -543,7 +547,7 @@ class MLService {
     final clusterAllImagesTime = DateTime.now();
 
     final faceIdNotToCluster = <String, List<String>>{};
-    if (!isOfflineMode) {
+    if (!isLocalGalleryMode) {
       _logger.info('Pulling remote feedback before actually clustering');
       await PersonService.instance.fetchRemoteClusterFeedback();
       final persons = await PersonService.instance.getPersons();
@@ -556,14 +560,14 @@ class MLService {
         }
       }
     } else {
-      _logger.info("Skipping person metadata in offline mode");
+      _logger.info("Skipping person metadata in local gallery mode");
     }
 
     try {
       // Get a sense of the total number of faces in the database
       final int totalFaces = await _mlDataDB.getTotalFaceCount();
-      final fileIDToCreationTime = isOfflineMode
-          ? await _getOfflineFileIdToCreationTime()
+      final fileIDToCreationTime = isLocalGalleryMode
+          ? await _getLocalGalleryFileIdToCreationTime()
           : await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
@@ -584,8 +588,9 @@ class MLService {
       }
       // sort the embeddings based on file creation time, newest first
       allFaceInfoForClustering.sort((b, a) {
-        return fileIDToCreationTime[a.fileID]!
-            .compareTo(fileIDToCreationTime[b.fileID]!);
+        return fileIDToCreationTime[a.fileID]!.compareTo(
+          fileIDToCreationTime[b.fileID]!,
+        );
       });
       _logger.info(
         'Getting and sorting embeddings took ${DateTime.now().difference(startEmbeddingFetch).inMilliseconds} ms for ${allFaceInfoForClustering.length} embeddings'
@@ -653,10 +658,12 @@ class MLService {
             return;
           }
 
-          await _mlDataDB
-              .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-          await _mlDataDB
-              .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
+          await _mlDataDB.updateFaceIdToClusterId(
+            clusteringResult.newFaceIdToCluster,
+          );
+          await _mlDataDB.clusterSummaryUpdate(
+            clusteringResult.newClusterSummaries,
+          );
           Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
             faceInfo.clusterId ??=
@@ -698,16 +705,22 @@ class MLService {
         _logger.info(
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await _mlDataDB
-            .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-        await _mlDataDB
-            .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
+        await _mlDataDB.updateFaceIdToClusterId(
+          clusteringResult.newFaceIdToCluster,
+        );
+        await _mlDataDB.clusterSummaryUpdate(
+          clusteringResult.newClusterSummaries,
+        );
         Bus.instance.fire(PeopleChangedEvent());
-        _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
-            '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
+        _logger.info(
+          'Done updating FaceIDs with clusterIDs in the DB, in '
+          '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds',
+        );
       }
-      _logger.info('clusterAllImages() finished, in '
-          '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
+      _logger.info(
+        'clusterAllImages() finished, in '
+        '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds',
+      );
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     } finally {
@@ -740,13 +753,13 @@ class MLService {
       // Check anything actually ran
       actuallyRanML = result.ranML;
       if (!actuallyRanML) return actuallyRanML;
-      final bool isOffline = instruction.isOffline;
+      final bool isLocalGallery = instruction.isLocalGallery;
       // Bitmask describing properties of this index (e.g. which runtime
       // produced it), so remote indexes stay distinguishable between rust
       // and legacy during and after the rust ML rollout.
       final int remoteFlags = result.usedRustMl ? mlIndexFlagRuntimeRust : 0;
       // Prepare storing data on remote (online mode only)
-      final FileDataEntity? dataEntity = isOffline
+      final FileDataEntity? dataEntity = isLocalGallery
           ? null
           : (instruction.existingRemoteFileML ??
               FileDataEntity.empty(
@@ -770,7 +783,7 @@ class MLService {
             );
           }
         }
-        if (!isOffline) {
+        if (!isLocalGallery) {
           dataEntity!.putFace(
             RemoteFaceEmbedding(
               faces,
@@ -785,7 +798,7 @@ class MLService {
       }
       // Clip results
       if (result.clipRan) {
-        if (!isOffline) {
+        if (!isLocalGallery) {
           dataEntity!.putClip(
             RemoteClipEmbedding(
               result.clip!.embedding,
@@ -796,17 +809,14 @@ class MLService {
           );
         }
       }
-      if (!isOffline && (result.facesRan || result.clipRan)) {
+      if (!isLocalGallery && (result.facesRan || result.clipRan)) {
         // Storing results on remote
-        await fileDataService.putFileData(
-          instruction.file,
-          dataEntity!,
-        );
+        await fileDataService.putFileData(instruction.file, dataEntity!);
       }
       // Storing results locally
       if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
-        if (isOffline) {
+        if (isLocalGallery) {
           await mlDataDB.putClip([
             ClipEmbedding(
               fileID: result.fileId,
@@ -841,10 +851,7 @@ class MLService {
             );
           }).toList();
           await mlDataDB.bulkInsertPetFaces(dbPetFaces);
-          await mlDataDB.storePetFaceEmbeddings(
-            dbPetFaces,
-            result.petFaces!,
-          );
+          await mlDataDB.storePetFaceEmbeddings(dbPetFaces, result.petFaces!);
         } else if (instruction.shouldRunPets) {
           // No pet faces detected; insert empty marker so the file is
           // considered pet-indexed (mirrors Face.empty for human faces).
@@ -876,10 +883,7 @@ class MLService {
             );
           }).toList();
           await mlDataDB.bulkInsertPetBodies(dbPetBodies);
-          await mlDataDB.storePetBodyEmbeddings(
-            dbPetBodies,
-            result.petBodies!,
-          );
+          await mlDataDB.storePetBodyEmbeddings(dbPetBodies, result.petBodies!);
         }
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
@@ -895,13 +899,13 @@ class MLService {
         );
         final storedMarkers = <String>[];
         if (instruction.shouldRunFaces) {
-          await mlDataDB.bulkInsertFaces(
-            [Face.empty(instruction.fileKey, error: true)],
-          );
+          await mlDataDB.bulkInsertFaces([
+            Face.empty(instruction.fileKey, error: true),
+          ]);
           storedMarkers.add("faces");
         }
         if (instruction.shouldRunClip) {
-          if (instruction.isOffline) {
+          if (instruction.isLocalGallery) {
             await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
           } else {
             await SemanticSearchService.instance.storeEmptyClipImageResult(
@@ -912,9 +916,9 @@ class MLService {
         }
         if (instruction.shouldRunPets) {
           await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
-          await mlDataDB.bulkInsertPetFaces(
-            [DBPetFace.empty(instruction.fileKey, error: true)],
-          );
+          await mlDataDB.bulkInsertPetFaces([
+            DBPetFace.empty(instruction.fileKey, error: true),
+          ]);
           storedMarkers.add("pets");
         }
         _logger.info(
@@ -972,7 +976,7 @@ class MLService {
     return true;
   }
 
-  Future<Map<int, int>> _getOfflineFileIdToCreationTime() async {
+  Future<Map<int, int>> _getLocalGalleryFileIdToCreationTime() async {
     final files = await SearchService.instance.getAllFilesForSearch();
     final localIdToCreation = <String, int>{};
     for (final file in files) {
@@ -983,10 +987,8 @@ class MLService {
       }
     }
     if (localIdToCreation.isEmpty) return {};
-    final localIdToIntId =
-        await OfflineFilesDB.instance.getLocalIntIdsForLocalIds(
-      localIdToCreation.keys,
-    );
+    final localIdToIntId = await OfflineFilesDB.instance
+        .getLocalIntIdsForLocalIds(localIdToCreation.keys);
     final map = <int, int>{};
     localIdToIntId.forEach((localId, localIntId) {
       final creationTime = localIdToCreation[localId];

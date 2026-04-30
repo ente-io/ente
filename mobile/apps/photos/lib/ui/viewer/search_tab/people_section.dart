@@ -13,7 +13,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -31,11 +31,7 @@ class PeopleSection extends StatefulWidget {
   final List<GenericSearchResult> examples;
   final int limit;
 
-  const PeopleSection({
-    super.key,
-    required this.examples,
-    this.limit = 7,
-  });
+  const PeopleSection({super.key, required this.examples, this.limit = 7});
 
   @override
   State<PeopleSection> createState() => _PeopleSectionState();
@@ -89,10 +85,7 @@ class _PeopleSectionState extends State<PeopleSection> {
             behavior: HitTestBehavior.opaque,
             onTap: () {
               if (shouldShowMore) {
-                routeToPage(
-                  context,
-                  const PeopleSectionAllPage(),
-                );
+                routeToPage(context, const PeopleSectionAllPage());
               }
             },
             child: Column(
@@ -126,10 +119,7 @@ class _PeopleSectionState extends State<PeopleSection> {
         : GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              routeToPage(
-                context,
-                const MachineLearningSettingsPage(),
-              );
+              routeToPage(context, const MachineLearningSettingsPage());
             },
             child: Padding(
               padding: const EdgeInsets.only(left: 16, right: 8),
@@ -203,8 +193,9 @@ class PersonSearchExample extends StatelessWidget {
   });
 
   void toggleSelection() {
-    selectedPeople
-        ?.toggleSelection(searchResult.params[kPersonParamID]! as String);
+    selectedPeople?.toggleSelection(
+      searchResult.params[kPersonParamID]! as String,
+    );
   }
 
   @override
@@ -227,10 +218,7 @@ class PersonSearchExample extends StatelessWidget {
                   if (searchResult.onResultTap != null) {
                     searchResult.onResultTap!(context);
                   } else {
-                    routeToPage(
-                      context,
-                      SearchResultPage(searchResult),
-                    );
+                    routeToPage(context, SearchResultPage(searchResult));
                   }
                 },
           child: Column(
@@ -266,9 +254,7 @@ class PersonSearchExample extends StatelessWidget {
                                 displaySize: size - 2,
                               );
                       } else {
-                        child = const NoThumbnailWidget(
-                          addBorder: false,
-                        );
+                        child = const NoThumbnailWidget(addBorder: false);
                       }
                       return SizedBox(
                         width: size - 2,
@@ -309,7 +295,7 @@ class PersonSearchExample extends StatelessWidget {
                 ],
               ),
               isCluster
-                  ? isOfflineMode
+                  ? isLocalGalleryMode
                       ? const SizedBox.shrink()
                       : GestureDetector(
                           behavior: HitTestBehavior.translucent,

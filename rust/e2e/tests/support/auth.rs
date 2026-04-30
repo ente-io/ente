@@ -8,7 +8,7 @@ use ente_accounts::{
 };
 use ente_core::crypto::SecretVec;
 use ente_rs::models::account::App;
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use sha1::Sha1;
 use zeroize::Zeroizing;
 
@@ -183,10 +183,7 @@ pub async fn fetch_two_factor_status(endpoint: &str, account: &TestAccount) -> C
     fetch_two_factor_status_with_token(endpoint, &account.auth_token).await
 }
 
-async fn fetch_two_factor_status_with_token(
-    endpoint: &str,
-    auth_token: &str,
-) -> CliResult<bool> {
+async fn fetch_two_factor_status_with_token(endpoint: &str, auth_token: &str) -> CliResult<bool> {
     let client = accounts_client(endpoint)?;
     client.set_auth_token(Some(auth_token.to_string()));
     client.get_two_factor_status().await

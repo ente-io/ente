@@ -342,6 +342,12 @@ abstract class AppLocalizations {
   /// **'Could not open item: {error}'**
   String couldNotOpenFile(String error);
 
+  /// Message shown when Android cannot find an app to open or preview a file
+  ///
+  /// In en, this message translates to:
+  /// **'No app is available to preview this file. You can download it and open it with another app.'**
+  String get noAppToOpenFileDownloadInstead;
+
   /// Time format for minutes ago
   ///
   /// In en, this message translates to:

@@ -1,3 +1,4 @@
+import { AddPhotosIcon } from "@/public-album/components/ActionIcons";
 import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
 import { type SelectedState } from "@/public-album/utils/file";
 import {
@@ -16,7 +17,7 @@ import {
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Typography, styled } from "@mui/material";
+import { Box, Button, Checkbox, Typography, styled } from "@mui/material";
 import { Overlay } from "ente-base/components/containers";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
@@ -194,6 +195,8 @@ export interface FileListProps {
     selected: SelectedState;
     /** A stable key used to reset the virtualized list when the file set changes. */
     activeCollectionID: number;
+    /** Optional action shown below the empty list message. */
+    emptyStateAction?: { label: string; onClick: () => void };
     /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
@@ -217,6 +220,7 @@ export const FileList: React.FC<FileListProps> = ({
     selected,
     setSelected,
     activeCollectionID,
+    emptyStateAction,
     onItemClick,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
@@ -347,14 +351,10 @@ export const FileList: React.FC<FileListProps> = ({
 
         if (!annotatedFiles.length) {
             items.push({
-                height: height - 48,
+                height: emptyStateHeightForViewport(height, header, footer),
                 type: "span",
                 component: (
-                    <NoFilesListItem>
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("nothing_here")}
-                        </Typography>
-                    </NoFilesListItem>
+                    <FileListEmptyState emptyStateAction={emptyStateAction} />
                 ),
             });
         }
@@ -383,6 +383,7 @@ export const FileList: React.FC<FileListProps> = ({
         annotatedFiles,
         shouldUseMasonry,
         layoutParams,
+        emptyStateAction,
     ]);
 
     useEffect(() => {
@@ -914,11 +915,16 @@ export const FileList: React.FC<FileListProps> = ({
                             </Box>
                         </Box>
                     ) : (
-                        <NoFilesListItem sx={{ minHeight: "100%" }}>
-                            <Typography sx={{ color: "text.faint" }}>
-                                {t("nothing_here")}
-                            </Typography>
-                        </NoFilesListItem>
+                        <FileListEmptyState
+                            emptyStateAction={emptyStateAction}
+                            sx={{
+                                minHeight: `${emptyStateHeightForViewport(
+                                    height,
+                                    header,
+                                    footer,
+                                )}px`,
+                            }}
+                        />
                     )}
                     {footer && (
                         <Box
@@ -1095,8 +1101,60 @@ const FullSpanListItem = styled("div")`
 
 const NoFilesListItem = styled(FullSpanListItem)`
     min-height: 100%;
+    flex-direction: column;
+    gap: 8px;
     justify-content: center;
 `;
+
+const minEmptyStateHeight = 96;
+
+const emptyStateHeightForViewport = (
+    height: number,
+    header?: FileListHeaderOrFooter,
+    footer?: FileListHeaderOrFooter,
+) =>
+    Math.max(
+        minEmptyStateHeight,
+        height - (header?.height ?? 0) - (footer?.height ?? 0),
+    );
+
+interface FileListEmptyStateProps {
+    emptyStateAction?: FileListProps["emptyStateAction"];
+    sx?: React.ComponentProps<typeof Box>["sx"];
+}
+
+const FileListEmptyState: React.FC<FileListEmptyStateProps> = ({
+    emptyStateAction,
+    sx,
+}) => (
+    <NoFilesListItem sx={sx}>
+        {emptyStateAction ? (
+            <EmptyStateActionButton
+                type="button"
+                onClick={emptyStateAction.onClick}
+                startIcon={<AddPhotosIcon size={20} />}
+            >
+                {emptyStateAction.label}
+            </EmptyStateActionButton>
+        ) : (
+            <Typography sx={{ color: "text.faint" }}>
+                {t("nothing_here")}
+            </Typography>
+        )}
+    </NoFilesListItem>
+);
+
+const EmptyStateActionButton = styled(Button)(({ theme }) => ({
+    borderRadius: "16px",
+    paddingBlock: "11px",
+    paddingInline: "14px",
+    backgroundColor: theme.vars.palette.secondary.main,
+    color: theme.vars.palette.text.base,
+    fontWeight: 600,
+    "&:hover": { backgroundColor: theme.vars.palette.secondary.dark },
+    "& .MuiButton-startIcon": { marginInlineStart: 0 },
+    "& svg": { color: "inherit" },
+}));
 
 /**
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}

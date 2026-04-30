@@ -11,10 +11,7 @@ import "package:photos/ui/components/banners/banner_action_button.dart";
 class OfflineSettingsBanner extends StatefulWidget {
   final VoidCallback onGetStarted;
 
-  const OfflineSettingsBanner({
-    super.key,
-    required this.onGetStarted,
-  });
+  const OfflineSettingsBanner({super.key, required this.onGetStarted});
 
   @override
   State<OfflineSettingsBanner> createState() => _OfflineSettingsBannerState();
@@ -26,7 +23,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-    if (localSettings.isOfflineSettingsBannerDismissed) {
+    if (localSettings.isLocalGallerySettingsBannerDismissed) {
       return const SizedBox.shrink();
     }
 
@@ -59,11 +56,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
         ),
         child: Stack(
           children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _DotsPainter(),
-              ),
-            ),
+            Positioned.fill(child: CustomPaint(painter: _DotsPainter())),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -141,7 +134,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
     setState(() {
       _dismissed = true;
     });
-    unawaited(localSettings.setOfflineSettingsBannerDismissed(true));
+    unawaited(localSettings.setLocalGallerySettingsBannerDismissed(true));
   }
 }
 

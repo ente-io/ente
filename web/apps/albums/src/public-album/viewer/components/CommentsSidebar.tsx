@@ -9,6 +9,7 @@ import {
     deletePublicReaction,
     getStoredAnonIdentity,
 } from "@/public-album/social/api/public-reaction";
+import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -469,6 +470,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     onJoinAlbum,
     enableJoin = true,
 }) => {
+    useBrowserBackClose({
+        open,
+        onClose,
+        stateKey: "__enteCommentsSidebarBackState",
+    });
+
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(

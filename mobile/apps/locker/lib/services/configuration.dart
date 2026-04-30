@@ -19,8 +19,7 @@ class Configuration extends BaseConfiguration {
   Future<void> logout({bool autoLogout = false}) async {
     CollectionService.instance.clearCache();
     FavoritesService.instance.clearCache();
-
-    await super.logout(autoLogout: autoLogout);
     await clearAllOfflineFileCopies();
+    await super.logout(autoLogout: autoLogout);
   }
 }

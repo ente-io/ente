@@ -38,8 +38,9 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
   @override
   void initState() {
     super.initState();
-    _tabChangedSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
+    _tabChangedSubscription = Bus.instance.on<TabChangedEvent>().listen((
+      event,
+    ) {
       final wasOnSearchTab = _isOnSearchTab;
       _isOnSearchTab = event.selectedIndex == _searchTabIndex;
       if (_isOnSearchTab && !wasOnSearchTab) {
@@ -54,8 +55,9 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
       _indexingComplete = false;
       _ensurePolling();
     });
-    _notificationSubscription =
-        Bus.instance.on<NotificationEvent>().listen((_) {
+    _notificationSubscription = Bus.instance.on<NotificationEvent>().listen((
+      _,
+    ) {
       _indexingComplete = false;
       _ensurePolling();
     });
@@ -90,7 +92,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
       !_dismissed &&
       hasGrantedMLConsent &&
       !localSettings.isMLProgressBannerDismissed &&
-      !(isOfflineMode && !localSettings.isMLLocalIndexingEnabled) &&
+      !(isLocalGalleryMode && !localSettings.isMLLocalIndexingEnabled) &&
       !_indexingComplete;
 
   Future<void> _fetchStatus() async {
@@ -124,7 +126,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     if (localSettings.isMLProgressBannerDismissed) {
       return const SizedBox.shrink();
     }
-    if (isOfflineMode && !localSettings.isMLLocalIndexingEnabled) {
+    if (isLocalGalleryMode && !localSettings.isMLLocalIndexingEnabled) {
       return const SizedBox.shrink();
     }
 
@@ -170,10 +172,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    l10n.mlProgressBannerTitle,
-                    style: titleStyle,
-                  ),
+                  Text(l10n.mlProgressBannerTitle, style: titleStyle),
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,

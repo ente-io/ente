@@ -30,8 +30,10 @@ rclone copy --log-level INFO "${RCLONE_DESTINATION}${BACKUP_FILE}" .
 
 # Unpack directory-format backups so pg_restore can read BACKUP_FILE directly.
 if test "${BACKUP_FILE%.custom}" = "$BACKUP_FILE"; then
+    ARCHIVE_FILE=$BACKUP_FILE
     zstd -dc "$BACKUP_FILE" | tar -xf -
     BACKUP_FILE="${BACKUP_FILE%.tar.zst}"
+    rm "$ARCHIVE_FILE"
 fi
 
 # Restore from it

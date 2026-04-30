@@ -54,6 +54,7 @@ class CollectionsService {
 
   static const int kMaximumWriteAttempts = 5;
   static const int _maxSocialCleanupRetries = 3;
+  static const int _collectionKeyLength = 32;
 
   final _logger = Logger("CollectionsService");
 
@@ -78,6 +79,7 @@ class CollectionsService {
   final _cachedPublicAlbumJWT = <int, String>{};
   final _cachedPublicCollectionID = <int>[];
   final _cachedPublicAlbumKey = <int, String>{};
+  final _cachedPublicCollectionKeys = <int, Uint8List>{};
 
   // In-memory list of recently used collection IDs for add/move actions
   // Most recently used is at the front
@@ -214,6 +216,7 @@ class CollectionsService {
     _cachedPublicCollectionID.clear();
     _cachedKeys.clear();
     _cachedPublicAlbumKey.clear();
+    _cachedPublicCollectionKeys.clear();
   }
 
   Future<Map<int, int>> getCollectionIDsToBeSynced() async {
@@ -1025,6 +1028,14 @@ class CollectionsService {
     return _cachedKeys[collectionID]!;
   }
 
+  Uint8List getPublicCollectionKey(int collectionID) {
+    final collectionKey = _cachedPublicCollectionKeys[collectionID];
+    if (collectionKey == null) {
+      throw StateError("public collection key $collectionID is not cached");
+    }
+    return collectionKey;
+  }
+
   String getPublicUrl(Collection c) {
     final PublicURL url = c.publicURLs.firstOrNull!;
     Uri publicUrl = Uri.parse(url.url);
@@ -1348,7 +1359,7 @@ class CollectionsService {
   Future<void> createShareUrl(
     Collection collection, {
     bool enableCollect = false,
-    bool enableJoin = true,
+    bool enableJoin = false,
   }) async {
     try {
       final publicUrl = await collectionShareGateway.createShareUrl(
@@ -1508,6 +1519,48 @@ class CollectionsService {
     }
   }
 
+  Uint8List _decodePublicCollectionKey(String albumKey) {
+    if (albumKey.isEmpty) {
+      throw const FormatException("Missing public collection key");
+    }
+    final collectionKey = Uint8List.fromList(Base58Decode(albumKey));
+    if (collectionKey.length != _collectionKeyLength) {
+      throw const FormatException("Invalid public collection key length");
+    }
+    return collectionKey;
+  }
+
+  Future<void> _decryptPublicCollectionFields(
+    Collection collection,
+    Map<String, dynamic> collectionData,
+    Uint8List collectionKey,
+  ) async {
+    collection.setName(_decryptCollectionNameWithKey(collection, collectionKey));
+    if (collectionData['pubMagicMetadata'] != null) {
+      final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+        CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
+        collectionKey,
+        CryptoUtil.base642bin(
+          collectionData['pubMagicMetadata']['header'],
+        ),
+      );
+      collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
+      collection.mMbPubVersion = collectionData['pubMagicMetadata']['version'];
+      collection.pubMagicMetadata =
+          CollectionPubMagicMetadata.fromEncodedJson(
+        collection.mMdPubEncodedJson ?? '{}',
+      );
+    }
+  }
+
+  void _clearPublicCollectionState(int collectionID) {
+    _cachedPublicAlbumToken.remove(collectionID);
+    _cachedPublicAlbumJWT.remove(collectionID);
+    _cachedPublicCollectionID.removeWhere((id) => id == collectionID);
+    _cachedPublicAlbumKey.remove(collectionID);
+    _cachedPublicCollectionKeys.remove(collectionID);
+  }
+
   Future<Collection?> getCollectionFromPublicLink(
     BuildContext context,
     Uri uri,
@@ -1520,32 +1573,41 @@ class CollectionsService {
 
       final collectionData = responseData["collection"];
       final Collection collection = Collection.fromMap(collectionData);
-      final Uint8List collectionKey =
-          Uint8List.fromList(Base58Decode(albumKey));
+      final existingCollection = getCollectionByID(collection.id);
+      final currentUserID = _config.getUserID() ?? -1;
+      final shouldUseAuthenticatedKey = collection.isOwner(currentUserID) ||
+          (existingCollection != null && !existingCollection.isDeleted);
 
-      _cachedKeys[collection.id] = collectionKey;
-      _cachedPublicAlbumToken[collection.id] = authToken;
-      _cachedPublicCollectionID.add(collection.id);
-      _cachedPublicAlbumKey[collection.id] = albumKey;
-
-      if (collectionData['pubMagicMetadata'] != null) {
-        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
+      if (shouldUseAuthenticatedKey) {
+        _clearPublicCollectionState(collection.id);
+        final keySourceCollection =
+            existingCollection != null && !existingCollection.isDeleted
+                ? existingCollection
+                : collection;
+        final collectionKey = _getAndCacheDecryptedKey(
+          keySourceCollection,
+          source: "publicLinkExistingCollection",
+        );
+        await _decryptPublicCollectionFields(
+          collection,
+          collectionData,
           collectionKey,
-          CryptoUtil.base642bin(
-            collectionData['pubMagicMetadata']['header'],
-          ),
         );
-        collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
-        collection.mMbPubVersion =
-            collectionData['pubMagicMetadata']['version'];
-        collection.pubMagicMetadata =
-            CollectionPubMagicMetadata.fromEncodedJson(
-          collection.mMdPubEncodedJson ?? '{}',
-        );
+        return collection;
       }
 
-      collection.setName(_getDecryptedCollectionName(collection));
+      final collectionKey = _decodePublicCollectionKey(albumKey);
+      await _decryptPublicCollectionFields(
+        collection,
+        collectionData,
+        collectionKey,
+      );
+      _cachedPublicCollectionKeys[collection.id] = collectionKey;
+      _cachedPublicAlbumToken[collection.id] = authToken;
+      _cachedPublicCollectionID.removeWhere((id) => id == collection.id);
+      _cachedPublicCollectionID.add(collection.id);
+      _cachedPublicAlbumKey[collection.id] = albumKey;
+      _cachedPublicAlbumJWT.remove(collection.id);
       return collection;
     } on PublicCollectionInfoExpiredException catch (e, s) {
       _logger.warning("Public collection link expired", e, s);
@@ -1620,12 +1682,13 @@ class CollectionsService {
     BuildContext context,
     int collectionID,
   ) async {
-    final key = getSharedPublicAlbumKey(collectionID);
-    if (key.isEmpty) {
+    final albumKey = getSharedPublicAlbumKey(collectionID);
+    if (albumKey.isEmpty) {
       throw Exception("Collection key not found");
     }
+    final collectionKey = getPublicCollectionKey(collectionID);
     final encryptedKey = CryptoUtil.sealSync(
-      getCollectionKey(collectionID),
+      collectionKey,
       CryptoUtil.base642bin(
         Configuration.instance.getKeyAttributes()!.publicKey,
       ),
@@ -2439,6 +2502,25 @@ class CollectionsService {
     return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
+  String _decryptCollectionNameWithKey(
+    Collection collection,
+    Uint8List collectionKey,
+  ) {
+    if (collection.isDeleted) {
+      return "Deleted Album";
+    }
+    if (collection.encryptedName != null &&
+        collection.encryptedName!.isNotEmpty) {
+      final result = CryptoUtil.decryptSync(
+        CryptoUtil.base642bin(collection.encryptedName!),
+        collectionKey,
+        CryptoUtil.base642bin(collection.nameDecryptionNonce!),
+      );
+      return utf8.decode(result);
+    }
+    return collection.displayName;
+  }
+
   String _getDecryptedCollectionName(Collection collection) {
     if (collection.isDeleted) {
       return "Deleted Album";
@@ -2450,12 +2532,7 @@ class CollectionsService {
           collection,
           source: "Name",
         );
-        final result = CryptoUtil.decryptSync(
-          CryptoUtil.base642bin(collection.encryptedName!),
-          collectionKey,
-          CryptoUtil.base642bin(collection.nameDecryptionNonce!),
-        );
-        return utf8.decode(result);
+        return _decryptCollectionNameWithKey(collection, collectionKey);
       } catch (e, s) {
         _logger.severe(
           "failed to decrypt collection name: ${collection.id}",

@@ -84,7 +84,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         final ownerID = Configuration.instance.getUserIDV2();
         final hasSelectedAllForBackup =
             backupPreferenceService.hasSelectedAllFoldersForBackup ||
-                isOfflineMode;
+                isLocalGalleryMode;
         final collectionsToHide =
             CollectionsService.instance.archivedOrHiddenCollectionIds();
         FileLoadResult result;

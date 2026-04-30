@@ -7,6 +7,7 @@ import "package:connectivity_plus/connectivity_plus.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
@@ -18,6 +19,7 @@ import "package:photos/events/resume_video_event.dart";
 import "package:photos/events/retry_failed_image_load_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -30,6 +32,7 @@ import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
+import "package:photos/ui/home/memories/memory_video_prefetcher.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -77,6 +80,9 @@ class _FullScreenMemoryDataUpdaterState
     extends State<FullScreenMemoryDataUpdater> {
   late ValueNotifier<int> indexNotifier;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  final _ownedThumbnailRefs = <int, ({EnteFile file, Object token})>{};
+  final _pendingThumbnailRefIDs = <int>{};
+  final _videoPrefetcher = MemoryVideoPrefetcher();
   // Seeded from checkConnectivity() before the listener attaches, so a real
   // offline→online recovery (fire retry) is distinguishable from a WiFi↔
   // cellular handoff where the old requests are still healthy.
@@ -90,70 +96,137 @@ class _FullScreenMemoryDataUpdaterState
       widget.memories[widget.initialIndex],
       widget.memories.length == widget.initialIndex + 1,
     );
-    _preloadAllThumbnails();
+    _warmThumbnailWindow(widget.initialIndex);
+    _warmVideoWindow(widget.initialIndex + 1);
     unawaited(_setupConnectivityListener());
   }
 
   Future<void> _setupConnectivityListener() async {
     try {
       final initialResults = await Connectivity().checkConnectivity();
-      _wasConnected =
-          initialResults.any((result) => result != ConnectivityResult.none);
+      _wasConnected = initialResults.any(
+        (result) => result != ConnectivityResult.none,
+      );
     } catch (_) {
       // Prefer a spurious retry over a missed one if the check fails.
       _wasConnected = false;
     }
     if (!mounted) return;
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen((results) {
-      final hasConnection =
-          results.any((result) => result != ConnectivityResult.none);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final hasConnection = results.any(
+        (result) => result != ConnectivityResult.none,
+      );
       if (!hasConnection) {
         _wasConnected = false;
         return;
       }
       if (!_wasConnected) {
         _wasConnected = true;
-        // Release all refs we bumped so that ZoomableImage's handler can
-        // decrement to 0 and cancel. Current file has 2 refs (bulk preload +
-        // ZoomableImage); next file also has 2 (bulk preload + per-index
-        // preloadThumbnail(nextFile) in the ValueListenableBuilder), so an
-        // extra release is needed for it too or its stale completer survives.
-        for (final memory in widget.memories) {
-          removePendingGetThumbnailRequestIfAny(memory.file);
-        }
-        final nextIndex = indexNotifier.value + 1;
-        if (nextIndex < widget.memories.length) {
-          removePendingGetThumbnailRequestIfAny(
-            widget.memories[nextIndex].file,
-          );
-        }
+        final currentIndex = indexNotifier.value;
+        _releaseOwnedThumbnailRefs();
         Bus.instance.fire(RetryFailedImageLoadEvent());
         // Re-kick on a microtask so the event handler runs first and clears
         // the stale map entries; a synchronous call would re-bump the
         // refcounts before the cancellation.
-        scheduleMicrotask(_preloadAllThumbnails);
+        scheduleMicrotask(() {
+          if (!mounted) return;
+          _warmThumbnailWindow(currentIndex);
+          _warmVideoWindow(currentIndex + 1);
+        });
       }
     });
   }
 
-  // The process-wide thumbnail queue in thumbnail_util.dart has 500 slots
-  // and evicts oldest when full. Swipes past this window rely on the
-  // per-index preload in the ValueListenableBuilder.
-  static const _bulkThumbnailPreloadCap = 100;
+  // Wide rolling window; thumbnails are tiny and gate the auto-advance timer.
+  static const _thumbnailLookaheadCap = 20;
 
-  void _preloadAllThumbnails() {
-    for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
-      preloadThumbnail(memory.file);
+  // Narrow; originals are MBs each, this bounds concurrent bandwidth.
+  static const _fileLookaheadCap = 3;
+
+  void _warmThumbnailWindow(int fromIndex) {
+    final end =
+        (fromIndex + _thumbnailLookaheadCap).clamp(0, widget.memories.length);
+    for (var i = fromIndex; i < end; i++) {
+      _preloadThumbnailOwned(widget.memories[i].file);
     }
+  }
+
+  void _warmVideoWindow(int fromIndex) {
+    final start = fromIndex.clamp(0, widget.memories.length).toInt();
+    final end = (start + kMemoryVideoLookaheadCap)
+        .clamp(
+          0,
+          widget.memories.length,
+        )
+        .toInt();
+    _videoPrefetcher.prefetchFiles(
+      widget.memories.sublist(start, end).map((memory) => memory.file),
+      replacePending: true,
+    );
+  }
+
+  void _preloadThumbnailOwned(EnteFile file) {
+    if (!file.isRemoteFile) {
+      preloadThumbnail(file);
+      return;
+    }
+    final uploadedFileID = file.uploadedFileID;
+    if (uploadedFileID == null) {
+      preloadThumbnail(file);
+      return;
+    }
+    if (_ownedThumbnailRefs.containsKey(uploadedFileID) ||
+        _pendingThumbnailRefIDs.contains(uploadedFileID)) {
+      return;
+    }
+    _pendingThumbnailRefIDs.add(uploadedFileID);
+    unawaited(_preloadRemoteThumbnailOwned(file, uploadedFileID));
+  }
+
+  Future<void> _preloadRemoteThumbnailOwned(
+    EnteFile file,
+    int uploadedFileID,
+  ) async {
+    try {
+      final request = await preloadThumbnailWithPendingRequestRef(file);
+      if (!request.acquiredPendingRequestRef) {
+        return;
+      }
+      if (!mounted) {
+        removePendingGetThumbnailRequestIfAny(file);
+        return;
+      }
+      final token = Object();
+      _ownedThumbnailRefs[uploadedFileID] = (file: file, token: token);
+      unawaited(
+        request.pendingRequest.whenComplete(() {
+          final ref = _ownedThumbnailRefs[uploadedFileID];
+          if (ref?.token == token) {
+            _ownedThumbnailRefs.remove(uploadedFileID);
+          }
+        }),
+      );
+    } catch (_) {
+      // Best-effort warmup; visible widgets perform their own load/error path.
+    } finally {
+      _pendingThumbnailRefIDs.remove(uploadedFileID);
+    }
+  }
+
+  void _releaseOwnedThumbnailRefs() {
+    for (final ref in _ownedThumbnailRefs.values) {
+      removePendingGetThumbnailRequestIfAny(ref.file);
+    }
+    _ownedThumbnailRefs.clear();
   }
 
   @override
   void dispose() {
     _connectivitySubscription?.cancel();
-    for (final memory in widget.memories.take(_bulkThumbnailPreloadCap)) {
-      removePendingGetThumbnailRequestIfAny(memory.file);
-    }
+    _releaseOwnedThumbnailRefs();
+    _videoPrefetcher.dispose();
     indexNotifier.dispose();
     super.dispose();
   }
@@ -175,6 +248,8 @@ class _FullScreenMemoryDataUpdaterState
       memories: widget.memories,
       indexNotifier: indexNotifier,
       removeCurrentMemory: removeCurrentMemory,
+      preloadThumbnail: _preloadThumbnailOwned,
+      preloadVideos: _warmVideoWindow,
       child: widget.child,
     );
   }
@@ -184,11 +259,15 @@ class FullScreenMemoryData extends InheritedWidget {
   final List<Memory> memories;
   final ValueNotifier<int> indexNotifier;
   final VoidCallback removeCurrentMemory;
+  final void Function(EnteFile file) preloadThumbnail;
+  final void Function(int fromIndex) preloadVideos;
 
   const FullScreenMemoryData({
     required this.memories,
     required this.indexNotifier,
     required this.removeCurrentMemory,
+    required this.preloadThumbnail,
+    required this.preloadVideos,
     required super.child,
     super.key,
   });
@@ -230,6 +309,25 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final ValueNotifier<Duration> durationNotifier = ValueNotifier(
     const Duration(seconds: 5),
   );
+  // Differentiates the photo crossfade tempo: snappy for manual taps,
+  // slower/cinematic for auto-advance. Set at the call site before the
+  // index bump so AnimatedSwitcher reads the right duration on rebuild.
+  bool _autoAdvanceTransition = false;
+  // One-shot "curtain rises" fade on the first photo of a memory.
+  // AnimatedSwitcher doesn't animate its initial child, so we wrap it
+  // in an AnimatedOpacity that ramps 0→1 after the first frame.
+  double _firstPhotoOpacity = 0;
+  // Photo crossfade durations for auto vs manual advance.
+  static const _autoCrossfadeDuration = Duration(milliseconds: 600);
+  static const _manualCrossfadeDuration = Duration(milliseconds: 200);
+  // How long to hold the incoming photo's Ken Burns still. Intentionally
+  // shorter than _autoCrossfadeDuration so motion picks up as the photo
+  // is still settling in, rather than after a visible beat of stillness.
+  static const _kenBurnsFreezeDuration = Duration(milliseconds: 300);
+  // Tokenises a pending zoom-start so a newer onFinalFileLoad cleanly
+  // invalidates the prior delayed forward.
+  Object? _kenBurnsStartToken;
+  bool _isAnimationPaused = false;
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
@@ -242,6 +340,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _firstPhotoOpacity = 1);
+    });
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) _showTitle.value = false;
     });
@@ -296,13 +397,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _toggleAnimation({required bool pause}) {
+    _isAnimationPaused = pause;
     if (pause) {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
     } else {
       if (hasFinalFileLoaded || isAtFirstOrLastFile) {
         _progressAnimationController?.forward();
-        _zoomAnimationController?.forward();
+        if (_kenBurnsStartToken == null) {
+          _zoomAnimationController?.forward();
+        }
       }
     }
   }
@@ -330,8 +434,25 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       ..forward();
     _zoomAnimationController
       ?..stop()
-      ..reset()
-      ..forward();
+      ..reset();
+    if (_autoAdvanceTransition) {
+      // Hold Ken Burns still during the incoming fade so its motion
+      // doesn't compete with the outgoing photo's motion mid-overlap.
+      final token = Object();
+      _kenBurnsStartToken = token;
+      final controller = _zoomAnimationController;
+      Future.delayed(_kenBurnsFreezeDuration, () {
+        if (!mounted) return;
+        if (_kenBurnsStartToken != token) return;
+        if (_zoomAnimationController != controller) return;
+        _kenBurnsStartToken = null;
+        if (_isAnimationPaused) return;
+        controller?.forward();
+      });
+    } else {
+      _kenBurnsStartToken = null;
+      _zoomAnimationController?.forward();
+    }
   }
 
   void _goToNext(FullScreenMemoryData inheritedData) {
@@ -378,7 +499,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
-    final showStepProgressIndicator = inheritedData.memories.length < 60;
+    final showStepProgressIndicator =
+        inheritedData.memories.length < kMemoryProgressTickCutoff;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -411,28 +533,27 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 32),
-                        showStepProgressIndicator
-                            ? ValueListenableBuilder<Duration>(
-                                valueListenable: durationNotifier,
-                                builder: (context, duration, _) {
-                                  return MemoryProgressIndicator(
-                                    totalSteps: inheritedData.memories.length,
-                                    currentIndex: value,
-                                    selectedColor: Colors.white,
-                                    unselectedColor: Colors.white.withValues(
-                                      alpha: 0.4,
-                                    ),
-                                    duration: duration,
-                                    animationController: (controller) {
-                                      _progressAnimationController = controller;
-                                    },
-                                    onComplete: () {
-                                      _goToNext(inheritedData);
-                                    },
-                                  );
-                                },
-                              )
-                            : const SizedBox.shrink(),
+                        ValueListenableBuilder<Duration>(
+                          valueListenable: durationNotifier,
+                          builder: (context, duration, _) {
+                            return MemoryProgressIndicator(
+                              totalSteps: inheritedData.memories.length,
+                              currentIndex: value,
+                              selectedColor: Colors.white,
+                              unselectedColor: Colors.white.withValues(
+                                alpha: 0.4,
+                              ),
+                              duration: duration,
+                              animationController: (controller) {
+                                _progressAnimationController = controller;
+                              },
+                              onComplete: () {
+                                _autoAdvanceTransition = true;
+                                _goToNext(inheritedData);
+                              },
+                            );
+                          },
+                        ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
@@ -524,11 +645,27 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   ValueListenableBuilder<int>(
                     valueListenable: inheritedData.indexNotifier,
                     builder: (context, index, _) {
-                      if (index < inheritedData.memories.length - 1) {
-                        final nextFile = inheritedData.memories[index + 1].file;
-                        preloadThumbnail(nextFile);
-                        preloadFile(nextFile);
+                      for (var i = 1;
+                          i <=
+                              _FullScreenMemoryDataUpdaterState
+                                  ._thumbnailLookaheadCap;
+                          i++) {
+                        final j = index + i;
+                        if (j >= inheritedData.memories.length) break;
+                        inheritedData.preloadThumbnail(
+                          inheritedData.memories[j].file,
+                        );
                       }
+                      for (var i = 1;
+                          i <=
+                              _FullScreenMemoryDataUpdaterState
+                                  ._fileLookaheadCap;
+                          i++) {
+                        final j = index + i;
+                        if (j >= inheritedData.memories.length) break;
+                        preloadFile(inheritedData.memories[j].file);
+                      }
+                      inheritedData.preloadVideos(index + 1);
                       final currentMemory = inheritedData.memories[index];
                       final isVideo =
                           currentMemory.file.fileType == FileType.video;
@@ -536,6 +673,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
                       return MemoriesPointerGestureListener(
                         onTap: (PointerEvent event) {
+                          _autoAdvanceTransition = false;
+                          HapticFeedback.selectionClick();
                           final screenWidth = MediaQuery.sizeOf(context).width;
                           final goToPreviousTapAreaWidth = screenWidth * 0.20;
                           if (event.localPosition.dx <
@@ -546,29 +685,61 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           }
                         },
                         hasPointerNotifier: hasPointerOnScreenNotifier,
-                        child: MemoriesZoomWidget(
-                          key: ValueKey(
-                            currentFile.uploadedFileID ?? currentFile.localID,
-                          ),
-                          scaleController: (controller) {
-                            _zoomAnimationController = controller;
-                          },
-                          zoomIn: index % 2 == 0,
-                          isVideo: isVideo,
-                          child: FileWidget(
-                            currentFile,
-                            autoPlay: false,
-                            tagPrefix: "memories",
-                            backgroundDecoration: const BoxDecoration(
-                              color: Colors.transparent,
+                        child: AnimatedOpacity(
+                          opacity: _firstPhotoOpacity,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                          child: AnimatedSwitcher(
+                            duration: _autoAdvanceTransition
+                                ? _autoCrossfadeDuration
+                                : _manualCrossfadeDuration,
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            layoutBuilder: (currentChild, previousChildren) {
+                              return Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  ...previousChildren,
+                                  if (currentChild != null) currentChild,
+                                ],
+                              );
+                            },
+                            child: MemoriesZoomWidget(
+                              key: ValueKey(
+                                currentFile.uploadedFileID ??
+                                    currentFile.localID,
+                              ),
+                              scaleController: (controller) {
+                                // Freeze the outgoing photo's Ken Burns at
+                                // its current transform on auto-advance so
+                                // the crossfade is a dissolve between two
+                                // still images, not between a still and a
+                                // moving one.
+                                if (_autoAdvanceTransition) {
+                                  _zoomAnimationController?.stop();
+                                }
+                                _zoomAnimationController = controller;
+                              },
+                              zoomIn: index % 2 == 0,
+                              isVideo: isVideo,
+                              child: FileWidget(
+                                currentFile,
+                                autoPlay: false,
+                                tagPrefix: "memories",
+                                backgroundDecoration: const BoxDecoration(
+                                  color: Colors.transparent,
+                                ),
+                                isFromMemories: true,
+                                playbackCallback: (shouldEnable, _) {
+                                  _toggleAnimation(pause: !shouldEnable);
+                                },
+                                onFinalFileLoad: ({
+                                  required int memoryDuration,
+                                }) {
+                                  onFinalFileLoad(memoryDuration);
+                                },
+                              ),
                             ),
-                            isFromMemories: true,
-                            playbackCallback: (shouldEnable, _) {
-                              _toggleAnimation(pause: !shouldEnable);
-                            },
-                            onFinalFileLoad: ({required int memoryDuration}) {
-                              onFinalFileLoad(memoryDuration);
-                            },
                           ),
                         ),
                       );
@@ -683,7 +854,7 @@ class BottomIcons extends StatelessWidget {
               },
             ),
           ]);
-          if (!isOfflineMode) {
+          if (!isLocalGalleryMode) {
             rowChildren.add(
               SizedBox(height: 32, child: FavoriteWidget(currentFile)),
             );
@@ -697,11 +868,7 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await _shareMemory(
-                context,
-                inheritedData,
-                memoryTitle,
-              );
+              await _shareMemory(context, inheritedData, memoryTitle);
               fullScreenState?._toggleAnimation(pause: false);
             },
           ),
@@ -908,7 +1075,7 @@ Future<void> _shareMemory(
       ? _titleCase(l10n.videoSmallCase)
       : _titleCase(l10n.photoSmallCase);
   final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
-      !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
+      !(isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount());
   final shouldShareLink = await showBaseBottomSheet<bool>(
     context,
     title: l10n.shareMemories,
@@ -1043,11 +1210,7 @@ class _MemoryShareOption extends StatelessWidget {
                   ),
                 )
               else
-                HugeIcon(
-                  icon: icon,
-                  color: colorScheme.textBase,
-                  size: 24,
-                ),
+                HugeIcon(icon: icon, color: colorScheme.textBase, size: 24),
               const SizedBox(height: 8),
               Text(
                 label,

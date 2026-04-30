@@ -307,7 +307,7 @@ mod tests {
     use mockito::{Matcher, Server};
     use serde::{Deserialize, de::DeserializeOwned};
     use sha2::{Digest, Sha256};
-    use srp::{groups::G_4096, server::SrpServer};
+    use srp::ServerG4096;
     use std::{
         collections::VecDeque,
         sync::{Arc, Mutex},
@@ -507,20 +507,29 @@ mod tests {
             .with_body_from_request(move |request| {
                 let payload: SetupSrpPayload = parse_request_body(request);
                 let srp_user_id = Uuid::parse_str(&payload.srp_user_id).unwrap();
+                let srp_salt = base64::engine::general_purpose::STANDARD
+                    .decode(&payload.srp_salt)
+                    .unwrap();
                 let srp_verifier = base64::engine::general_purpose::STANDARD
                     .decode(&payload.srp_verifier)
                     .unwrap();
                 let srp_a = base64::engine::general_purpose::STANDARD
                     .decode(&payload.srp_a)
                     .unwrap();
-                let server = SrpServer::<Sha256>::new(&G_4096);
+                let server = ServerG4096::<Sha256>::new();
                 let b_private = [0x33u8; 64];
                 let srp_b = pad_left(
                     &server.compute_public_ephemeral(&b_private, &srp_verifier),
                     SRP_A_LEN,
                 );
                 let verifier = server
-                    .process_reply(&b_private, &srp_verifier, &srp_a)
+                    .process_reply(
+                        payload.srp_user_id.as_bytes(),
+                        &srp_salt,
+                        &b_private,
+                        &srp_verifier,
+                        &srp_a,
+                    )
                     .unwrap();
                 let setup_id = Uuid::new_v4();
                 let srp_a = pad_left(&srp_a, SRP_A_LEN);

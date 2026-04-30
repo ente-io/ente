@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
@@ -32,6 +33,8 @@ Future<void> showNoMailAppSheet(
 }
 
 class NoMailAppSheet extends StatelessWidget {
+  static const _toFieldLabel = "To";
+
   final String toEmail;
   final String subject;
   final String message;
@@ -145,6 +148,7 @@ class NoMailAppSheet extends StatelessWidget {
         logsLabel != null &&
         logsLabel!.trim().isNotEmpty;
     final items = <String>[
+      "$_toFieldLabel: $supportEmail",
       "${l10n.subject}: $subject",
       "${l10n.message}: $message",
       if (deviceInfo != null && deviceInfo!.trim().isNotEmpty)
