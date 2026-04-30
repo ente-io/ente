@@ -123,7 +123,7 @@ class MLModelDownloadService {
       if (!onlyIndexingModels) {
         _areNonIndexingModelsDownloaded = true;
       }
-      await _cancelModelDownloadRetry();
+      await _cancelModelDownloadRetryIfComplete();
       _logger.info(
         onlyIndexingModels
             ? "Downloaded indexing ML models"
@@ -231,5 +231,14 @@ class MLModelDownloadService {
     _modelDownloadRetrySubscription = null;
     _retryOnlyIndexingModels = true;
     await subscription.cancel();
+  }
+
+  Future<void> _cancelModelDownloadRetryIfComplete() async {
+    if (_modelDownloadRetrySubscription == null) {
+      return;
+    }
+    if (areModelsDownloaded(onlyIndexingModels: _retryOnlyIndexingModels)) {
+      await _cancelModelDownloadRetry();
+    }
   }
 }
