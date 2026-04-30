@@ -250,11 +250,21 @@ class AlbumListItemWidget extends StatelessWidget {
     final double slotOverlap = getOverlapPadding(AvatarType.medium);
 
     if (isSelected) {
-      return HugeIcon(
+      return Container(
         key: const ValueKey("selected"),
-        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-        size: 24,
-        color: colorScheme.greenBase,
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          color: colorScheme.primary700,
+          shape: BoxShape.circle,
+        ),
+        padding: const EdgeInsets.all(2),
+        child: const HugeIcon(
+          icon: HugeIcons.strokeRoundedTick02,
+          size: 12,
+          color: Colors.white,
+          strokeWidth: 2.0,
+        ),
       );
     }
     if (!isOwner) {

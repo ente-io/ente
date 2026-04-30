@@ -163,10 +163,22 @@ class AlbumRowItemWidget extends StatelessWidget {
                                         switchInCurve: Curves.easeOut,
                                         switchOutCurve: Curves.easeIn,
                                         child: isSelected
-                                            ? const Icon(
-                                                Icons.check_circle_rounded,
-                                                color: Colors.white,
-                                                size: 22,
+                                            ? Container(
+                                                width: 18,
+                                                height: 18,
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme.primary700,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.all(2),
+                                                child: const HugeIcon(
+                                                  strokeWidth: 2.0,
+                                                  size: 12,
+                                                  icon: HugeIcons
+                                                      .strokeRoundedTick02,
+                                                  color: Colors.white,
+                                                ),
                                               )
                                             : null,
                                       );

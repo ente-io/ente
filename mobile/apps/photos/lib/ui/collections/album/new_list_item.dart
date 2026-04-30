@@ -95,8 +95,6 @@ class NewAlbumListItemWidget extends StatelessWidget {
                   "assets/new_album_icon.png",
                   width: 20,
                   height: 20,
-                  color: colorScheme.contentLight,
-                  colorBlendMode: BlendMode.srcIn,
                 ),
               ),
             ),
