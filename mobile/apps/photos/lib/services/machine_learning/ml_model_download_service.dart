@@ -138,9 +138,8 @@ class MLModelDownloadService {
 
   List<Future<void>> _indexingModelDownloads(bool forceRefresh) {
     final models = <MLModels>[
-      for (final model in MLModels.values)
-        if (model.isIndexingModel && !_isPetModel(model)) model,
-      if (_shouldDownloadPetModels) ..._petModels,
+      ...coreIndexingModels,
+      if (_shouldDownloadPetModels) ...petIndexingModels,
     ];
     return [
       for (final model in models) model.model.downloadModel(forceRefresh),
@@ -149,8 +148,8 @@ class MLModelDownloadService {
 
   List<Future<void>> _nonIndexingModelDownloads(bool forceRefresh) {
     return [
-      for (final model in MLModels.values)
-        if (!model.isIndexingModel) model.model.downloadModel(forceRefresh),
+      for (final model in nonIndexingModels)
+        model.model.downloadModel(forceRefresh),
       RemoteAssetsService.instance.getAssetPath(
         ClipTextEncoder.instance.vocabRemotePath,
         refetch: forceRefresh,
@@ -162,10 +161,6 @@ class MLModelDownloadService {
     return flagService.petEnabled &&
         localSettings.petRecognitionEnabled &&
         (flagService.useRustForML || isLocalGalleryMode);
-  }
-
-  bool _isPetModel(MLModels model) {
-    return _petModels.contains(model);
   }
 
   void _listenForHighBandwidthModelDownloadRetry({
@@ -242,12 +237,3 @@ class MLModelDownloadService {
     await subscription.cancel();
   }
 }
-
-const _petModels = <MLModels>[
-  MLModels.petFaceDetection,
-  MLModels.petFaceEmbeddingDog,
-  MLModels.petFaceEmbeddingCat,
-  MLModels.petBodyDetection,
-  MLModels.petBodyEmbeddingDog,
-  MLModels.petBodyEmbeddingCat,
-];
