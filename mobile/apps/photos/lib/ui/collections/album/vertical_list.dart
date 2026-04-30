@@ -284,13 +284,11 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     setState(() {});
   }
 
-  GestureDetector _getNewAlbumWidget(BuildContext context, int filesCount) {
-    return GestureDetector(
-      onTap: () async {
+  Widget _getNewAlbumWidget(BuildContext context, int filesCount) {
+    return NewAlbumListItemWidget(
+      onTap: (context) async {
         await _createNewAlbumOnTap(context, filesCount);
       },
-      behavior: HitTestBehavior.opaque,
-      child: const NewAlbumListItemWidget(),
     );
   }
 

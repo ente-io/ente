@@ -4,11 +4,9 @@ import 'dart:math';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
-import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_album_selections_event.dart";
-import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/selected_albums.dart";
@@ -19,7 +17,6 @@ import "package:photos/ui/collections/album/new_row_item.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
@@ -239,54 +236,7 @@ class _CollectionsFlexiGridViewWidgetState
             Widget item;
 
             if (showCreateAlbum && index == 0) {
-              item = GestureDetector(
-                onTap: () async {
-                  GestureDetector(
-                    onTap: () async {
-                      final result = await showTextInputDialog(
-                        context,
-                        title: AppLocalizations.of(context).newAlbum,
-                        submitButtonLabel: AppLocalizations.of(context).create,
-                        hintText: AppLocalizations.of(context).enterAlbumName,
-                        alwaysShowSuccessState: false,
-                        initialValue: "",
-                        textCapitalization: TextCapitalization.words,
-                        popnavAfterSubmission: false,
-                        onSubmit: (String text) async {
-                          if (text.trim() == "") {
-                            return;
-                          }
-
-                          try {
-                            final Collection c = await CollectionsService
-                                .instance
-                                .createAlbum(text);
-                            // ignore: unawaited_futures
-                            await routeToPage(
-                              context,
-                              CollectionPage(CollectionWithThumbnail(c, null)),
-                            );
-                            Navigator.of(context).pop();
-                          } catch (e, s) {
-                            Logger("CreateNewAlbumIcon")
-                                .severe("Failed to rename album", e, s);
-                            rethrow;
-                          }
-                        },
-                      );
-
-                      if (result is Exception) {
-                        await showGenericErrorDialog(
-                          context: context,
-                          error: result,
-                        );
-                      }
-                    },
-                    child: const NewAlbumListItemWidget(),
-                  );
-                },
-                child: const NewAlbumListItemWidget(),
-              );
+              item = const NewAlbumListItemWidget();
             } else {
               final collectionIndex = showCreateAlbum ? index - 1 : index;
 
