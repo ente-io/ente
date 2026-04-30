@@ -81,7 +81,7 @@ class MLModelDownloadService {
       final goodInternet = isLocalGalleryMode || await canUseHighBandwidth();
       if (!goodInternet) {
         _logger.info(
-          "Cannot download models because user is not connected to wifi and is in enteGallery mode",
+          "Skipping ML model download because high bandwidth connectivity is unavailable",
         );
         return;
       }
@@ -162,10 +162,10 @@ class MLModelDownloadService {
   void _listenForHighBandwidthModelDownloadRetry({
     required bool onlyIndexingModels,
   }) {
-    if (!onlyIndexingModels) {
-      _retryOnlyIndexingModels = false;
-    }
     if (_modelDownloadRetrySubscription != null) {
+      if (!onlyIndexingModels) {
+        _retryOnlyIndexingModels = false;
+      }
       return;
     }
     _retryOnlyIndexingModels = onlyIndexingModels;
