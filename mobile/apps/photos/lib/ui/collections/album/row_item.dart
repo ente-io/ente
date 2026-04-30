@@ -1,3 +1,5 @@
+import "dart:math";
+
 import 'package:ente_icons/ente_icons.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:figma_squircle/figma_squircle.dart";
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -13,6 +16,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/sharing/album_share_info_widget.dart";
+import "package:photos/ui/sharing/more_count_badge.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
@@ -28,10 +32,13 @@ class AlbumRowItemWidget extends StatelessWidget {
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
   final SelectedAlbums? selectedAlbums;
-  static const _borderWidth = 1.0;
   static const _cornerRadius = 20.0;
   static const _cornerSmoothing = 0.6;
   static const _overlayPadding = 8.0;
+  static const _sharePillTopOffset = -12.0;
+  static const _sharePillLeftOffset = 0.0;
+  static const _sharePillPadding = EdgeInsets.all(4);
+  static const _sharedAvatarStrokeWidth = 2.0;
 
   const AlbumRowItemWidget(
     this.c,
@@ -52,18 +59,16 @@ class AlbumRowItemWidget extends StatelessWidget {
         tag +
         "_" +
         c.id.toString();
+    final colorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
     final Widget? linkIcon = c.hasLink && isOwner
-        ? Padding(
-            padding: const EdgeInsetsGeometry.symmetric(
-              vertical: 3,
-            ),
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedLink02,
-              color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
-              size: 10,
-              strokeWidth: 2.5,
-            ),
+        ? HugeIcon(
+            icon: HugeIcons.strokeRoundedLink02,
+            color: c.publicURLs.first.isExpired
+                ? warning500
+                : colorScheme.textBase,
+            size: 10,
+            strokeWidth: 1.5,
           )
         : null;
 
@@ -80,23 +85,12 @@ class AlbumRowItemWidget extends StatelessWidget {
               children: [
                 ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _cornerRadius + _borderWidth,
-                    cornerSmoothing: _cornerSmoothing,
-                  ),
-                  child: Container(
-                    color: getEnteColorScheme(context).strokeFaint,
-                    width: sideOfThumbnail,
-                    height: sideOfThumbnail,
-                  ),
-                ),
-                ClipSmoothRect(
-                  radius: SmoothBorderRadius(
                     cornerRadius: _cornerRadius,
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: SizedBox(
-                    height: sideOfThumbnail - _borderWidth * 2,
-                    width: sideOfThumbnail - _borderWidth * 2,
+                    height: sideOfThumbnail,
+                    width: sideOfThumbnail,
                     child: Stack(
                       children: [
                         FutureBuilder<EnteFile?>(
@@ -141,7 +135,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                               );
                             } else {
                               return Container(
-                                color: getEnteColorScheme(context).backdropBase,
+                                color: colorScheme.backdropBase,
                                 child: const NoThumbnailWidget(
                                   borderRadius: _cornerRadius,
                                   addBorder: false,
@@ -150,50 +144,35 @@ class AlbumRowItemWidget extends StatelessWidget {
                             }
                           },
                         ),
-                        if (isOwner && (c.hasSharees || c.hasLink))
-                          Hero(
-                            tag: tagPrefix + "_sharees",
-                            transitionOnUserGestures: true,
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: AlbumSharesIcons(
-                                padding: const EdgeInsets.only(
-                                  left: _overlayPadding,
-                                  top: _overlayPadding,
-                                ),
-                                sharees: c.getSharees(),
-                                type: AvatarType.small,
-                                trailingWidget: linkIcon,
-                              ),
-                            ),
-                          ),
                         Positioned(
                           top: _overlayPadding,
                           right: _overlayPadding,
-                          child: Hero(
-                            tag: tagPrefix + "_album_selection",
-                            transitionOnUserGestures: true,
-                            child: ListenableBuilder(
-                              listenable:
-                                  selectedAlbums ?? ValueNotifier(false),
-                              builder: (context, _) {
-                                final bool isSelected =
-                                    selectedAlbums?.isAlbumSelected(c) ?? false;
-                                return AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  switchInCurve: Curves.easeOut,
-                                  switchOutCurve: Curves.easeIn,
-                                  child: isSelected
-                                      ? const Icon(
-                                          Icons.check_circle_rounded,
-                                          color: Colors.white,
-                                          size: 22,
-                                        )
-                                      : null,
-                                );
-                              },
-                            ),
-                          ),
+                          child: selectedAlbums == null
+                              ? const SizedBox.shrink()
+                              : Hero(
+                                  tag: tagPrefix + "_album_selection",
+                                  transitionOnUserGestures: true,
+                                  child: ListenableBuilder(
+                                    listenable: selectedAlbums!,
+                                    builder: (context, _) {
+                                      final bool isSelected =
+                                          selectedAlbums!.isAlbumSelected(c);
+                                      return AnimatedSwitcher(
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        switchInCurve: Curves.easeOut,
+                                        switchOutCurve: Curves.easeIn,
+                                        child: isSelected
+                                            ? const Icon(
+                                                Icons.check_circle_rounded,
+                                                color: Colors.white,
+                                                size: 22,
+                                              )
+                                            : null,
+                                      );
+                                    },
+                                  ),
+                                ),
                         ),
                         if (!isOwner)
                           Positioned(
@@ -202,10 +181,32 @@ class AlbumRowItemWidget extends StatelessWidget {
                             child: Hero(
                               tag: tagPrefix + "_owner_other",
                               transitionOnUserGestures: true,
-                              child: UserAvatarWidget(
-                                c.owner,
-                                thumbnailView: true,
-                                type: AvatarType.small,
+                              child: SizedBox.square(
+                                dimension: getAvatarSize(AvatarType.small) +
+                                    _sharedAvatarStrokeWidth * 2,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    UserAvatarWidget(
+                                      c.owner,
+                                      thumbnailView: true,
+                                      type: AvatarType.small,
+                                    ),
+                                    Positioned.fill(
+                                      child: IgnorePointer(
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: _sharedAvatarStrokeWidth,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -218,6 +219,29 @@ class AlbumRowItemWidget extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (isOwner && (c.hasSharees || c.hasLink))
+                  Positioned(
+                    top: _sharePillTopOffset,
+                    left: _sharePillLeftOffset,
+                    child: Hero(
+                      tag: tagPrefix + "_sharees",
+                      transitionOnUserGestures: true,
+                      child: Container(
+                        padding: _sharePillPadding,
+                        decoration: BoxDecoration(
+                          color: colorScheme.backgroundElevated,
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: SizedBox(
+                          height: getAvatarSize(AvatarType.small),
+                          child: _AlbumRowSharePillContent(
+                            sharees: c.getSharees(),
+                            trailingWidget: linkIcon,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -227,57 +251,51 @@ class AlbumRowItemWidget extends StatelessWidget {
             transitionOnUserGestures: true,
             child: SizedBox(
               width: sideOfThumbnail,
-              child: FutureBuilder<int>(
-                future: showFileCount
-                    ? CollectionsService.instance.getFileCount(c)
-                    : Future.value(0),
-                builder: (context, snapshot) {
-                  int? cachedCount;
-                  if (showFileCount) {
-                    if (snapshot.hasData) {
-                      cachedCount = snapshot.data;
-                    } else {
-                      //Need to use cached count so that the hero
-                      //animation works as expected without flickering.
-                      cachedCount =
-                          CollectionsService.instance.getCachedFileCount(c);
-                    }
-                  }
-                  if (cachedCount != null && cachedCount > 0) {
-                    final String textCount = NumberFormat().format(cachedCount);
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          constraints: BoxConstraints(
-                            maxWidth: sideOfThumbnail,
-                          ),
-                          child: Text(
+              child: showFileCount
+                  ? FutureBuilder<int>(
+                      future: CollectionsService.instance.getFileCount(c),
+                      builder: (context, snapshot) {
+                        int? cachedCount;
+                        if (snapshot.hasData) {
+                          cachedCount = snapshot.data;
+                        } else {
+                          //Need to use cached count so that the hero
+                          //animation works as expected without flickering.
+                          cachedCount =
+                              CollectionsService.instance.getCachedFileCount(c);
+                        }
+                        if (cachedCount != null && cachedCount > 0) {
+                          final String textCount =
+                              NumberFormat().format(cachedCount);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                c.displayName,
+                                style: enteTextTheme.small,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                textCount,
+                                style: enteTextTheme.miniMuted,
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Text(
                             c.displayName,
                             style: enteTextTheme.small,
                             overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        RichText(
-                          text: TextSpan(
-                            style: enteTextTheme.miniMuted,
-                            children: [
-                              TextSpan(text: textCount),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return Text(
+                          );
+                        }
+                      },
+                    )
+                  : Text(
                       c.displayName,
                       style: enteTextTheme.small,
                       overflow: TextOverflow.ellipsis,
-                    );
-                  }
-                },
-              ),
+                    ),
             ),
           ),
         ],
@@ -349,6 +367,85 @@ class AlbumRowItemWidget extends StatelessWidget {
           chips[i],
         ],
       ],
+    );
+  }
+}
+
+class _AlbumRowSharePillContent extends StatelessWidget {
+  static const _trailingGap = 2.0;
+  static const _limitCountTo = 2;
+
+  final List<User> sharees;
+  final Widget? trailingWidget;
+
+  const _AlbumRowSharePillContent({
+    required this.sharees,
+    this.trailingWidget,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final displayCount = min(sharees.length, _limitCountTo);
+    final hasMore = sharees.length > _limitCountTo;
+    const type = AvatarType.small;
+    final double avatarSize = getAvatarSize(type);
+    final double overlapPadding = getOverlapPadding(type);
+    final trailingWidgetWidth = trailingWidget == null ? 0.0 : avatarSize;
+    final visibleAvatarCount = displayCount + (hasMore ? 1 : 0);
+    final visibleAvatarsWidth = visibleAvatarCount == 0
+        ? 0.0
+        : avatarSize + (visibleAvatarCount - 1) * overlapPadding;
+    final trailingGap =
+        visibleAvatarCount > 0 && trailingWidget != null ? _trailingGap : 0.0;
+    final contentWidth =
+        visibleAvatarsWidth + trailingGap + trailingWidgetWidth;
+
+    final widgets = List<Widget>.generate(
+      displayCount,
+      (index) => Positioned(
+        left: overlapPadding * index,
+        child: UserAvatarWidget(
+          sharees[index],
+          thumbnailView: true,
+          type: type,
+        ),
+      ),
+    );
+
+    if (hasMore) {
+      widgets.add(
+        Positioned(
+          left: overlapPadding * displayCount,
+          child: MoreCountWidget(
+            sharees.length - displayCount,
+            type: moreCountTypeFromAvatarType(type),
+            thumbnailView: true,
+          ),
+        ),
+      );
+    }
+
+    if (trailingWidget != null) {
+      widgets.add(
+        Positioned(
+          left: visibleAvatarsWidth + trailingGap,
+          child: SizedBox.square(
+            dimension: avatarSize,
+            child: Center(
+              child: trailingWidget!,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: contentWidth,
+      height: avatarSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: widgets,
+      ),
     );
   }
 }

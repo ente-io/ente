@@ -18,9 +18,9 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 ///
 /// Position is controlled by the caller (wrap in [Positioned] or [Align]).
 class ThumbnailStatusChip extends StatelessWidget {
-  static const double chipSize = 16;
-  static const double iconSize = 8;
-  static const Color backgroundColor = Color.fromRGBO(0, 0, 0, 0.4);
+  static const double chipSize = 20;
+  static const double iconSize = 12;
+  static const Color backgroundColor = Color.fromRGBO(255, 255, 255, 0.14);
 
   final Widget child;
 
