@@ -172,13 +172,13 @@ class MLService {
       return;
     }
     if (MLModelDownloadService.instance.areModelsDownloaded(
-      onlyIndexingModels: true,
+      onlyIndexingModels: false,
     )) {
       return;
     }
     try {
       await MLModelDownloadService.instance.ensureModelsDownloaded(
-        onlyIndexingModels: true,
+        onlyIndexingModels: false,
       );
     } catch (e, s) {
       _logger.warning("Failed to predownload local ML models", e, s);
