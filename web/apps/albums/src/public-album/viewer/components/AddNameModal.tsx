@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
     Button,
+    CircularProgress,
     Dialog,
     IconButton,
     styled,
@@ -10,7 +11,7 @@ import {
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 // =============================================================================
 // Icons
@@ -154,10 +155,6 @@ const CommentIllustration: React.FC = () => (
     </svg>
 );
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface AddNameModalProps extends ModalVisibilityProps {
     /**
      * Called when user submits their name.
@@ -185,25 +182,43 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
     onExited,
 }) => {
     const [name, setName] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const isSubmittingRef = useRef(false);
     const isComment = actionType === "comment";
 
     const handleSubmit = () => {
-        if (name.trim()) {
-            onSubmit(name.trim());
-            setName("");
-        }
+        const trimmedName = name.trim();
+        if (!trimmedName || isSubmittingRef.current) return;
+
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        onSubmit(trimmedName);
     };
 
     const handleClose = () => {
-        setName("");
+        if (isSubmittingRef.current) return;
         onClose();
+    };
+
+    const keepInputFocusedOnSubmitButtonMouseDown = (
+        e: React.MouseEvent<HTMLButtonElement>,
+    ) => {
+        e.preventDefault();
+    };
+
+    const handleExited = () => {
+        setName("");
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+        onExited?.();
     };
 
     return (
         <StyledDialog
             open={open}
             onClose={handleClose}
-            slotProps={{ transition: { onExited } }}
+            disableEscapeKeyDown={isSubmitting}
+            slotProps={{ transition: { onExited: handleExited } }}
         >
             <DialogWrapper>
                 <CloseButton onClick={handleClose}>
@@ -229,6 +244,7 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                         placeholder={t("name_placeholder")}
                         variant="standard"
                         value={name}
+                        className={isSubmitting ? "is-submitting" : undefined}
                         onChange={(e) => setName(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
@@ -237,16 +253,37 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                             }
                         }}
                         autoFocus
-                        slotProps={{ htmlInput: { maxLength: 50 } }}
+                        slotProps={{
+                            htmlInput: {
+                                maxLength: 50,
+                                readOnly: isSubmitting,
+                                "aria-readonly": isSubmitting,
+                            },
+                        }}
                     />
 
                     <SubmitButton
                         variant="contained"
                         fullWidth
                         onClick={handleSubmit}
+                        onMouseDown={keepInputFocusedOnSubmitButtonMouseDown}
                         hasName={!!name.trim()}
+                        disabled={isSubmitting || !name.trim()}
+                        aria-busy={isSubmitting}
+                        aria-label={
+                            isComment ? t("set_name") : t("set_name_and_like")
+                        }
                     >
-                        {isComment ? t("set_name") : t("set_name_and_like")}
+                        {isSubmitting ? (
+                            <CircularProgress
+                                size={18}
+                                sx={{ color: "inherit" }}
+                            />
+                        ) : isComment ? (
+                            t("set_name")
+                        ) : (
+                            t("set_name_and_like")
+                        )}
                     </SubmitButton>
                 </ContentContainer>
             </DialogWrapper>
@@ -349,6 +386,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
             borderBottom: "1px solid #BDBDBD",
         },
     },
+    "&.is-submitting .MuiInput-root::after": { transform: "scaleX(1)" },
     "& .MuiInputBase-input": {
         padding: "0 16px",
         height: "100%",
@@ -376,6 +414,7 @@ const SubmitButton = styled(Button)<{ hasName: boolean }>(
     ({ hasName, theme }) => ({
         display: "flex",
         padding: "20px 16px",
+        minHeight: 64,
         justifyContent: "center",
         alignItems: "center",
         gap: 8,
@@ -384,12 +423,17 @@ const SubmitButton = styled(Button)<{ hasName: boolean }>(
         backgroundColor: hasName ? "#08C225" : "rgba(0, 0, 0, 0.04)",
         fontSize: 16,
         fontWeight: 500,
+        lineHeight: "24px",
         textTransform: "none",
         color: hasName ? "#fff" : "#999",
         boxShadow: "none",
         "&:hover": {
             backgroundColor: hasName ? "#07A820" : "rgba(0, 0, 0, 0.08)",
             boxShadow: "none",
+        },
+        "&.Mui-disabled": {
+            backgroundColor: hasName ? "#08C225" : "rgba(0, 0, 0, 0.04)",
+            color: hasName ? "#fff" : "#999",
         },
         ...theme.applyStyles("dark", {
             backgroundColor: hasName ? "#08C225" : "rgba(255, 255, 255, 0.08)",
@@ -398,6 +442,12 @@ const SubmitButton = styled(Button)<{ hasName: boolean }>(
                 backgroundColor: hasName
                     ? "#07A820"
                     : "rgba(255, 255, 255, 0.12)",
+            },
+            "&.Mui-disabled": {
+                backgroundColor: hasName
+                    ? "#08C225"
+                    : "rgba(255, 255, 255, 0.08)",
+                color: hasName ? "#fff" : "rgba(255, 255, 255, 0.5)",
             },
         }),
     }),
