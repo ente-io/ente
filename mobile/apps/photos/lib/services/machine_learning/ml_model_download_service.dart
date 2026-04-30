@@ -61,10 +61,6 @@ class MLModelDownloadService {
     required bool onlyIndexingModels,
     bool forceRefresh = false,
   }) async {
-    if (_downloadModelLock.locked) {
-      _logger.info("Download models already in progress");
-      return;
-    }
     return _downloadModelLock.synchronized(() async {
       if (!forceRefresh &&
           areModelsDownloaded(onlyIndexingModels: onlyIndexingModels)) {
