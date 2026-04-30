@@ -44,13 +44,7 @@ class MLModelDownloadService {
   }
 
   void triggerModelsDownload({required bool onlyIndexingModels}) {
-    if (!areModelsDownloaded(onlyIndexingModels: onlyIndexingModels) &&
-        !_downloadModelLock.locked) {
-      _logger.info(
-        onlyIndexingModels
-            ? "Indexing models not downloaded, starting download"
-            : "ML models not downloaded, starting download",
-      );
+    if (!areModelsDownloaded(onlyIndexingModels: onlyIndexingModels)) {
       unawaited(
         ensureModelsDownloaded(onlyIndexingModels: onlyIndexingModels),
       );
