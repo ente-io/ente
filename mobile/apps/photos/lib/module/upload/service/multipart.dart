@@ -76,8 +76,8 @@ class MultiPartUploader {
 
   bool get _shouldUseCFUploadProxy =>
       !_featureFlagService.disableCFWorker &&
-      _featureFlagService.cloudflareUploadWorker &&
-      localSettings.isCFUploadProxyEnabled &&
+      (localSettings.cfUploadProxyEnabled ??
+          _featureFlagService.cloudflareUploadWorker) &&
       Configuration.instance.isEnteProduction();
 
   int calculatePartCount(int fileSize) {

@@ -1488,8 +1488,8 @@ class FileUploader {
 
   bool get _shouldUseCFUploadProxy =>
       !flagService.disableCFWorker &&
-      flagService.cloudflareUploadWorker &&
-      localSettings.isCFUploadProxyEnabled &&
+      (localSettings.cfUploadProxyEnabled ??
+          flagService.cloudflareUploadWorker) &&
       Configuration.instance.isEnteProduction();
 
   void _onStorageLimitExceeded() {
