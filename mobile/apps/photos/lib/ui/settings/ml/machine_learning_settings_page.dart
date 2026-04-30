@@ -388,7 +388,7 @@ class _MachineLearningSettingsPageState
         ),
         const SizedBox(height: 12),
         MLModelDownloadService.instance.areModelsDownloaded(
-                  onlyIndexingModels: false,
+                  onlyIndexingModels: true,
                 ) ||
                 !localSettings.isMLLocalIndexingEnabled
             ? const MLStatusWidget()
