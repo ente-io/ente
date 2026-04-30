@@ -190,11 +190,13 @@ Values you used for `database name` and `username` correspond to the values you 
     export NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080
     # Replace this with actual endpoint for Albums
     export NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002
+    # Replace this with actual endpoint for Memories
+    export NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT=http://localhost:3010
     # Replace this with actual endpoint for Photos
     export NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=http://localhost:3000
     ```
 3. Build the needed applications (Photos, Albums, Accounts, Auth, Cast, Public
-   Locker, Embed) as per your needs:
+   Locker, Embed, Memories) as per your needs:
 
     ```shell
     # These commands are executed inside web directory
@@ -218,6 +220,9 @@ Values you used for `database name` and `username` correspond to the values you 
 
     # Build embed. Build output to be served is present at apps/embed/out
     yarn build:embed
+
+    # Build memories. Build output to be served is present at apps/memories/out
+    yarn build:memories
     ```
 
 4. Copy the output files to `/var/www/ente/apps` for easier management.
@@ -239,6 +244,8 @@ Values you used for `database name` and `username` correspond to the values you 
     sudo cp -r apps/share/out /var/www/ente/apps/share
     # Embed
     sudo cp -r apps/embed/out /var/www/ente/apps/embed
+    # Memories
+    sudo cp -r apps/memories/out /var/www/ente/apps/memories
     ```
 
 5. Set up file server using Caddy by editing `Caddyfile`, present at
@@ -284,6 +291,12 @@ Values you used for `database name` and `username` correspond to the values you 
 
     :3006 {
         root * /var/www/ente/apps/embed
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+
+    :3010 {
+        root * /var/www/ente/apps/memories
         file_server
         try_files {path} {path}.html /index.html
     }

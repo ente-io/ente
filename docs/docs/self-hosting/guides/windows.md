@@ -119,6 +119,9 @@ apps:
   public-albums: http://localhost:3002
   # public-albums: http://192.168.1.42:3002
   # public-albums: https://albums.mydomain.com
+  public-memories: http://localhost:3010
+  # public-memories: http://192.168.1.42:3010
+  # public-memories: https://memories.mydomain.com
   cast: http://localhost:3004
   # cast: http://192.168.1.42:3004
   # cast: https://cast.mydomain.com
@@ -180,6 +183,7 @@ services:
       - 3005:3005  # Share
       - 3006:3006  # Embed
       - 3008:3008  # Paste
+      - 3010:3010  # Memories
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
       # ENTE_API_ORIGIN: http://192.168.1.42:8080
@@ -187,6 +191,9 @@ services:
       ENTE_ALBUMS_ORIGIN: http://localhost:3002
       # ENTE_ALBUMS_ORIGIN: http://192.168.1.42:3002
       # ENTE_ALBUMS_ORIGIN: https://albums.mydomain.com
+      ENTE_MEMORIES_ORIGIN: http://localhost:3010
+      # ENTE_MEMORIES_ORIGIN: http://192.168.1.42:3010
+      # ENTE_MEMORIES_ORIGIN: https://memories.mydomain.com
       ENTE_PHOTOS_ORIGIN: http://localhost:3000
       # ENTE_PHOTOS_ORIGIN: http://192.168.1.42:3000
       # ENTE_PHOTOS_ORIGIN: https://photos.mydomain.com
