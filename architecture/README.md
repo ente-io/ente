@@ -97,6 +97,12 @@ unencrypted.
 - Each `collectionKey` is then encrypted with your `masterKey`.
 - All of the above mentioned encrypted data is then pushed to the server for
   storage.
+- Before encryption, the client also computes a content hash of the original
+  file using `BLAKE2b-512` (libsodium's `crypto_generichash`, 64-byte output)
+  and stores it base64-encoded in the file's (encrypted) metadata as a `hash`
+  field. This lets clients verify integrity of decrypted content end-to-end
+  without involving the server, and supports content-based deduplication
+  during re-uploads.
 
 <img src="assets/file-encryption.svg" class="architecture-svg" title="File
 encryption" />
