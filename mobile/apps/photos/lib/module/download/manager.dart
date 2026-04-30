@@ -206,6 +206,7 @@ class DownloadManager {
       _logger.info(
         'Resuming download for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
       );
+      String? downloadUrl;
       for (int i = 0; i < totalChunks; i++) {
         if (existingChunks[i]) {
           continue;
@@ -214,7 +215,15 @@ class DownloadManager {
           _logger.info('Download cancelled for ${task.filename}');
           break;
         }
-        await _downloadChunk(task, basePath, i, totalChunks, cancelToken);
+        downloadUrl ??= await _resolveDownloadRedirect(task.id, cancelToken);
+        await _downloadChunk(
+          task,
+          basePath,
+          i,
+          totalChunks,
+          cancelToken,
+          downloadUrl,
+        );
         existingChunks[i] = true;
       }
 
@@ -319,6 +328,7 @@ class DownloadManager {
     int chunkIndex,
     int totalChunks,
     CancelToken cancelToken,
+    String downloadUrl,
   ) async {
     final chunkPath = _getChunkPath(basePath, chunkIndex + 1);
     final startByte = chunkIndex * downloadChunkSize;
@@ -326,7 +336,6 @@ class DownloadManager {
         ? task.totalBytes - 1
         : (startByte + downloadChunkSize) - 1;
     _logger.info('Downloading chunk ${chunkIndex + 1}/$totalChunks');
-    final downloadUrl = await _resolveDownloadRedirect(task.id, cancelToken);
     await _dio.download(
       downloadUrl,
       chunkPath,
