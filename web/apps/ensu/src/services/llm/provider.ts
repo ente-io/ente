@@ -14,7 +14,7 @@ const DEFAULT_TAURI_CONTEXT_SIZE = 12000;
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
-const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
+const MIN_DESKTOP_DEFAULT_MEMORY_BYTES = 16 * 1024 * 1024 * 1024;
 
 // These fallback values must stay in sync with rust/ensu/inference/src/defaults.rs.
 // When running inside Tauri, resolveDefaultModelForDevice() overwrites them with
@@ -448,12 +448,8 @@ export class LlmProvider {
             const platform = info.platform?.toLowerCase();
             const totalMemoryBytes = info.totalMemoryBytes ?? 0;
 
-            const isMacPlatform =
-                platform === "macos" ||
-                platform === "darwin" ||
-                platform === "mac";
             this.useDesktopRustDefaults =
-                isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES;
+                totalMemoryBytes >= MIN_DESKTOP_DEFAULT_MEMORY_BYTES;
 
             if (this.useDesktopRustDefaults) {
                 this.defaultModel = DESKTOP_DEFAULT_MODEL;
