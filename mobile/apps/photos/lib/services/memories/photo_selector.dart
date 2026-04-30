@@ -52,7 +52,7 @@ enum SelectionSort {
 /// All the parameters that control how [PhotoSelector.select] works.
 class SelectionConfig {
   final int targetSize;
-  final bool isOfflineMode;
+  final bool isLocalGalleryMode;
   final Map<int, EmbeddingVector> fileIDToImageEmbedding;
 
   /// Pre-computed score per file-ID. Higher = better.
@@ -76,7 +76,7 @@ class SelectionConfig {
 
   const SelectionConfig({
     required this.targetSize,
-    required this.isOfflineMode,
+    required this.isLocalGalleryMode,
     required this.fileIDToImageEmbedding,
     required this.scores,
     required this.distribution,
@@ -138,10 +138,14 @@ class PhotoSelector {
     final fileCount = memories.length;
     // Sort by score descending.
     memories.sort((a, b) {
-      final aID =
-          memoryFileIdFromMemory(a, isOfflineMode: config.isOfflineMode);
-      final bID =
-          memoryFileIdFromMemory(b, isOfflineMode: config.isOfflineMode);
+      final aID = memoryFileIdFromMemory(
+        a,
+        isLocalGalleryMode: config.isLocalGalleryMode,
+      );
+      final bID = memoryFileIdFromMemory(
+        b,
+        isLocalGalleryMode: config.isLocalGalleryMode,
+      );
       return (config.scores[bID] ?? 0.0).compareTo(config.scores[aID] ?? 0.0);
     });
 
@@ -197,13 +201,17 @@ class PhotoSelector {
     // photos.
     final int numBuckets = config.targetSize;
     final int totalRange = maxCreationTime - minCreationTime + 1;
-    final List<List<Memory>> buckets =
-        List.generate(numBuckets, (_) => <Memory>[]);
+    final List<List<Memory>> buckets = List.generate(
+      numBuckets,
+      (_) => <Memory>[],
+    );
     for (final mem in sorted) {
       final creationTime = mem.file.creationTime!;
       final bucketIndex =
-          ((creationTime - minCreationTime) * numBuckets ~/ totalRange)
-              .clamp(0, numBuckets - 1);
+          ((creationTime - minCreationTime) * numBuckets ~/ totalRange).clamp(
+        0,
+        numBuckets - 1,
+      );
       buckets[bucketIndex].add(mem);
     }
 
@@ -212,29 +220,39 @@ class PhotoSelector {
       // Score within bucket.
       final bucketFileIDs = bucket
           .map(
-            (m) =>
-                memoryFileIdFromMemory(m, isOfflineMode: config.isOfflineMode),
+            (m) => memoryFileIdFromMemory(
+              m,
+              isLocalGalleryMode: config.isLocalGalleryMode,
+            ),
           )
           .whereType<int>()
           .toSet();
-      final bucketVectors =
-          getEmbeddingsForFileIDs(config.fileIDToImageEmbedding, bucketFileIDs);
+      final bucketVectors = getEmbeddingsForFileIDs(
+        config.fileIDToImageEmbedding,
+        bucketFileIDs,
+      );
       final bool littleEmbeddings = bucketVectors.length < bucket.length * 0.5;
 
       // Sort bucket by score descending.
       bucket.sort((a, b) {
-        final aID =
-            memoryFileIdFromMemory(a, isOfflineMode: config.isOfflineMode);
-        final bID =
-            memoryFileIdFromMemory(b, isOfflineMode: config.isOfflineMode);
+        final aID = memoryFileIdFromMemory(
+          a,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
+        final bID = memoryFileIdFromMemory(
+          b,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
         return (config.scores[bID] ?? 0.0).compareTo(config.scores[aID] ?? 0.0);
       });
 
       // Optionally narrow to top N%.
       List<Memory> candidates;
       if (!littleEmbeddings && config.preNarrowTopPercent != null) {
-        final keep =
-            max(bucket.length * config.preNarrowTopPercent!, 1).toInt();
+        final keep = max(
+          bucket.length * config.preNarrowTopPercent!,
+          1,
+        ).toInt();
         candidates = bucket.take(keep).toList();
       } else {
         candidates = bucket;
@@ -251,7 +269,7 @@ class PhotoSelector {
           candidates,
           finalSelection,
           config.fileIDToImageEmbedding,
-          isOfflineMode: config.isOfflineMode,
+          isLocalGalleryMode: config.isLocalGalleryMode,
         );
         if (filteredCandidates.isNotEmpty) {
           candidates = filteredCandidates;
@@ -271,22 +289,32 @@ class PhotoSelector {
 
     final selectedFileIDs = finalSelection
         .map(
-          (mem) =>
-              memoryFileIdFromMemory(mem, isOfflineMode: config.isOfflineMode),
+          (mem) => memoryFileIdFromMemory(
+            mem,
+            isLocalGalleryMode: config.isLocalGalleryMode,
+          ),
         )
         .whereType<int>()
         .toSet();
     final remaining = sorted.where((mem) {
-      final fileID =
-          memoryFileIdFromMemory(mem, isOfflineMode: config.isOfflineMode);
+      final fileID = memoryFileIdFromMemory(
+        mem,
+        isLocalGalleryMode: config.isLocalGalleryMode,
+      );
       return fileID == null || !selectedFileIDs.contains(fileID);
     }).toList()
       ..sort((a, b) {
-        final aID =
-            memoryFileIdFromMemory(a, isOfflineMode: config.isOfflineMode);
-        final bID =
-            memoryFileIdFromMemory(b, isOfflineMode: config.isOfflineMode);
-        return (config.scores[bID] ?? 0.0).compareTo(config.scores[aID] ?? 0.0);
+        final aID = memoryFileIdFromMemory(
+          a,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
+        final bID = memoryFileIdFromMemory(
+          b,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
+        return (config.scores[bID] ?? 0.0).compareTo(
+          config.scores[aID] ?? 0.0,
+        );
       });
 
     for (final candidate in remaining) {
@@ -295,7 +323,7 @@ class PhotoSelector {
         [candidate],
         finalSelection,
         config.fileIDToImageEmbedding,
-        isOfflineMode: config.isOfflineMode,
+        isLocalGalleryMode: config.isLocalGalleryMode,
       );
       if (filteredCandidates.isEmpty) continue;
       final timeFiltered = excludeTooCloseInTime(
@@ -320,18 +348,23 @@ class PhotoSelector {
     // Group by year.
     final yearToFiles = <int, List<Memory>>{};
     for (final mem in memories) {
-      final year =
-          DateTime.fromMicrosecondsSinceEpoch(mem.file.creationTime!).year;
+      final year = DateTime.fromMicrosecondsSinceEpoch(
+        mem.file.creationTime!,
+      ).year;
       yearToFiles.putIfAbsent(year, () => []).add(mem);
     }
 
     // Sort each year's list by score descending.
     for (final yearFiles in yearToFiles.values) {
       yearFiles.sort((a, b) {
-        final aID =
-            memoryFileIdFromMemory(a, isOfflineMode: config.isOfflineMode);
-        final bID =
-            memoryFileIdFromMemory(b, isOfflineMode: config.isOfflineMode);
+        final aID = memoryFileIdFromMemory(
+          a,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
+        final bID = memoryFileIdFromMemory(
+          b,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
         return (config.scores[bID] ?? 0.0).compareTo(config.scores[aID] ?? 0.0);
       });
     }
@@ -363,7 +396,7 @@ class PhotoSelector {
         if (checkDuplicates && (fileCount - skipped) > config.targetSize) {
           final candID = memoryFileIdFromMemory(
             candidate,
-            isOfflineMode: config.isOfflineMode,
+            isLocalGalleryMode: config.isLocalGalleryMode,
           );
           final clip =
               candID == null ? null : config.fileIDToImageEmbedding[candID];
@@ -372,7 +405,7 @@ class PhotoSelector {
             for (final sel in selected) {
               final selID = memoryFileIdFromMemory(
                 sel,
-                isOfflineMode: config.isOfflineMode,
+                isLocalGalleryMode: config.isLocalGalleryMode,
               );
               final selClip =
                   selID == null ? null : config.fileIDToImageEmbedding[selID];
@@ -431,8 +464,10 @@ class PhotoSelector {
             if (selected.file.location == null || mem.file.location == null) {
               continue;
             }
-            final distance =
-                calculateDistance(mem.file.location!, selected.file.location!);
+            final distance = calculateDistance(
+              mem.file.location!,
+              selected.file.location!,
+            );
             if (distance < minDistance) {
               minDistance = distance;
             }
@@ -463,14 +498,18 @@ class PhotoSelector {
     if (isTooCloseInTime(creationTime, selectedCreationTimes)) {
       return false;
     }
-    final memFileID =
-        memoryFileIdFromMemory(mem, isOfflineMode: config.isOfflineMode);
+    final memFileID = memoryFileIdFromMemory(
+      mem,
+      isLocalGalleryMode: config.isLocalGalleryMode,
+    );
     final clip =
         memFileID == null ? null : config.fileIDToImageEmbedding[memFileID];
     if (clip != null && (fileCount - skipped) > config.targetSize) {
       for (final selMem in selected) {
-        final selID =
-            memoryFileIdFromMemory(selMem, isOfflineMode: config.isOfflineMode);
+        final selID = memoryFileIdFromMemory(
+          selMem,
+          isLocalGalleryMode: config.isLocalGalleryMode,
+        );
         final selClip =
             selID == null ? null : config.fileIDToImageEmbedding[selID];
         if (selClip == null) continue;
@@ -504,7 +543,7 @@ class PhotoSelector {
   static Future<List<Memory>> bestSelectionPeople(
     List<Memory> memories, {
     int? prefferedSize,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
   }) async {
@@ -518,7 +557,7 @@ class PhotoSelector {
       for (final mem in memories) {
         final fileID = memoryFileIdFromMemory(
           mem,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         );
         if (fileID == null) continue;
 
@@ -532,7 +571,7 @@ class PhotoSelector {
         memories,
         SelectionConfig(
           targetSize: targetSize,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
           scores: scores,
           distribution: SelectionDistribution.timeBuckets,
@@ -563,7 +602,7 @@ class PhotoSelector {
     List<Memory> memories, {
     int? prefferedSize,
     SelectionDistribution? distributionOverride,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool mlEnabled,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -578,7 +617,7 @@ class PhotoSelector {
       return _bestSelectionNoMl(
         memories,
         targetSize: targetSize,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
         distributionOverride: distributionOverride,
       );
     }
@@ -588,7 +627,10 @@ class PhotoSelector {
     // CLIP secondary) as a single numeric score.
     final Map<int, double> scores = {};
     for (final mem in memories) {
-      final fileID = memoryFileIdFromMemory(mem, isOfflineMode: isOfflineMode);
+      final fileID = memoryFileIdFromMemory(
+        mem,
+        isLocalGalleryMode: isLocalGalleryMode,
+      );
       if (fileID == null) continue;
 
       // CLIP score
@@ -618,7 +660,7 @@ class PhotoSelector {
         memories,
         SelectionConfig(
           targetSize: targetSize,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
           scores: scores,
           distribution: distributionOverride,
@@ -637,7 +679,7 @@ class PhotoSelector {
         memories,
         SelectionConfig(
           targetSize: targetSize,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
           scores: scores,
           distribution: SelectionDistribution.none,
@@ -656,7 +698,7 @@ class PhotoSelector {
         memories,
         SelectionConfig(
           targetSize: targetSize,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
           scores: scores,
           distribution: SelectionDistribution.yearRoundRobin,
@@ -680,7 +722,7 @@ class PhotoSelector {
   static List<Memory> _bestSelectionNoMl(
     List<Memory> memories, {
     required int targetSize,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     SelectionDistribution? distributionOverride,
   }) {
     final withCreationTime =
@@ -721,8 +763,9 @@ class PhotoSelector {
     // year's list with fresh randomness.
     final yearToFiles = <int, List<Memory>>{};
     for (final mem in withCreationTime) {
-      final year =
-          DateTime.fromMicrosecondsSinceEpoch(mem.file.creationTime!).year;
+      final year = DateTime.fromMicrosecondsSinceEpoch(
+        mem.file.creationTime!,
+      ).year;
       yearToFiles.putIfAbsent(year, () => []).add(mem);
     }
     for (final yearFiles in yearToFiles.values) {
@@ -755,8 +798,9 @@ class PhotoSelector {
       }
     }
 
-    selected
-        .sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
+    selected.sort(
+      (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+    );
     return selected;
   }
 
@@ -775,13 +819,17 @@ class PhotoSelector {
     }
     final int numBuckets = targetSize;
     final int totalRange = maxCreationTime - minCreationTime + 1;
-    final List<List<Memory>> buckets =
-        List.generate(numBuckets, (_) => <Memory>[]);
+    final List<List<Memory>> buckets = List.generate(
+      numBuckets,
+      (_) => <Memory>[],
+    );
     for (final mem in sorted) {
       final creationTime = mem.file.creationTime!;
       final bucketIndex =
-          ((creationTime - minCreationTime) * numBuckets ~/ totalRange)
-              .clamp(0, numBuckets - 1);
+          ((creationTime - minCreationTime) * numBuckets ~/ totalRange).clamp(
+        0,
+        numBuckets - 1,
+      );
       buckets[bucketIndex].add(mem);
     }
 
@@ -820,8 +868,9 @@ class PhotoSelector {
       }
     }
 
-    selected
-        .sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
+    selected.sort(
+      (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+    );
     return selected;
   }
 
@@ -860,18 +909,15 @@ class PhotoSelector {
     return false;
   }
 
-  static int? memoryFileId(
-    EnteFile file, {
-    required bool isOfflineMode,
-  }) {
-    return isOfflineMode ? file.generatedID : file.uploadedFileID;
+  static int? memoryFileId(EnteFile file, {required bool isLocalGalleryMode}) {
+    return isLocalGalleryMode ? file.generatedID : file.uploadedFileID;
   }
 
   static int? memoryFileIdFromMemory(
     Memory memory, {
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
   }) {
-    return memoryFileId(memory.file, isOfflineMode: isOfflineMode);
+    return memoryFileId(memory.file, isLocalGalleryMode: isLocalGalleryMode);
   }
 
   static bool isTooCloseInTime(
@@ -893,7 +939,7 @@ class PhotoSelector {
     List<Memory> memories,
     Map<int, EmbeddingVector> fileIDToImageEmbedding, {
     int? minKeep,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     double similarityThreshold = clipSimilarImageThreshold,
   }) {
     if (memories.length < 2) return memories;
@@ -904,7 +950,7 @@ class PhotoSelector {
     for (final mem in memories) {
       final fileID = memoryFileIdFromMemory(
         mem,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
       );
       final bool shouldSkip = fileID != null &&
           isNearDuplicate(
@@ -930,7 +976,7 @@ class PhotoSelector {
     List<Memory> candidates,
     List<Memory> selected,
     Map<int, EmbeddingVector> fileIDToImageEmbedding, {
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     double similarityThreshold = clipSimilarImageThreshold,
   }) {
     if (selected.isEmpty || candidates.isEmpty) return candidates;
@@ -938,7 +984,7 @@ class PhotoSelector {
         .map(
           (mem) => memoryFileIdFromMemory(
             mem,
-            isOfflineMode: isOfflineMode,
+            isLocalGalleryMode: isLocalGalleryMode,
           ),
         )
         .whereType<int>()
@@ -948,7 +994,7 @@ class PhotoSelector {
     for (final candidate in candidates) {
       final fileID = memoryFileIdFromMemory(
         candidate,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
       );
       if (fileID == null ||
           !isNearDuplicate(
