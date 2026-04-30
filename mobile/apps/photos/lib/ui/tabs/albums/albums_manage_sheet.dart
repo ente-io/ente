@@ -32,7 +32,6 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
           label: strings.trash,
           icon: HugeIcons.strokeRoundedDelete02,
           iconColor: const Color(0xFFE3505A),
-          iconBgColor: const Color(0xFFFAEBEB),
           onTap: () async {
             final ok = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -49,7 +48,6 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
           label: strings.archive,
           icon: HugeIcons.strokeRoundedArchive,
           iconColor: const Color(0xFF08C225),
-          iconBgColor: const Color(0xFFE7F6E9),
           onTap: () async {
             Navigator.of(context).pop();
             unawaited(routeToPage(context, ArchivePage()));
@@ -60,7 +58,6 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
           label: strings.hidden,
           icon: HugeIcons.strokeRoundedViewOffSlash,
           iconColor: const Color(0xFFE19714),
-          iconBgColor: const Color(0xFFFAF4EB),
           onTap: () async {
             final ok = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -77,7 +74,6 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
           label: strings.uncategorized,
           icon: HugeIcons.strokeRoundedHelpCircle,
           iconColor: colorScheme.textMuted,
-          iconBgColor: colorScheme.fillFaint,
           onTap: () async {
             Collection? collection = CollectionsService.instance
                 .getActiveCollections()
@@ -96,7 +92,6 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
           label: strings.links,
           icon: HugeIcons.strokeRoundedLink02,
           iconColor: const Color(0xFF4080DA),
-          iconBgColor: const Color(0xFFE7EFFA),
           onTap: () async {
             final data = await CollectionsService.instance
                 .getSharedCollectionsAndMemoryLinks();
@@ -123,22 +118,18 @@ Widget _manageItem({
   required String label,
   required List<List<dynamic>> icon,
   required Color iconColor,
-  required Color iconBgColor,
   required Future<void> Function() onTap,
 }) {
   return MenuItemWidgetNew(
     title: label,
     padding: const EdgeInsets.all(12),
     leadingIconSize: 34,
-    leadingIconWidget: Container(
+    leadingIconWidget: SizedBox(
       width: 34,
       height: 34,
-      decoration: BoxDecoration(
-        color: iconBgColor,
-        borderRadius: BorderRadius.circular(12),
+      child: Center(
+        child: HugeIcon(icon: icon, size: 18, color: iconColor),
       ),
-      alignment: Alignment.center,
-      child: HugeIcon(icon: icon, size: 18, color: iconColor),
     ),
     trailingIcon: Icons.chevron_right_rounded,
     onTap: onTap,
