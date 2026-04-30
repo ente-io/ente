@@ -322,15 +322,13 @@ class DownloadManager {
         ? task.totalBytes - 1
         : (startByte + downloadChunkSize) - 1;
     _logger.info('Downloading chunk ${chunkIndex + 1}/$totalChunks');
+    final downloadUrl = await _resolveDownloadRedirect(task.id, cancelToken);
     await _dio.download(
-      FileUrl.getUrl(task.id, FileUrlType.directDownload),
+      downloadUrl,
       chunkPath,
-      queryParameters: {
-        "token": Configuration.instance.getToken(),
-      },
       options: Options(
         headers: {
-          "Range": "bytes=$startByte-$endByte",
+          HttpHeaders.rangeHeader: "bytes=$startByte-$endByte",
         },
       ),
       cancelToken: cancelToken,
@@ -347,6 +345,36 @@ class DownloadManager {
       bytesDownloaded: (chunkIndex) * downloadChunkSize + chunkFileSize,
     );
     _updateTask(task);
+  }
+
+  Future<String> _resolveDownloadRedirect(
+    int fileID,
+    CancelToken cancelToken,
+  ) async {
+    final response = await _dio.get<void>(
+      FileUrl.getUrl(fileID, FileUrlType.directDownload),
+      options: Options(
+        followRedirects: false,
+        receiveDataWhenStatusError: false,
+        headers: {
+          "X-Auth-Token": Configuration.instance.getToken(),
+        },
+        validateStatus: (status) {
+          return status != null &&
+              status >= HttpStatus.multipleChoices &&
+              status < HttpStatus.badRequest;
+        },
+      ),
+      cancelToken: cancelToken,
+    );
+    final location = response.headers.value(HttpHeaders.locationHeader);
+    if (location == null || location.isEmpty) {
+      throw StateError(
+        'Missing redirect location for file $fileID '
+        '(status ${response.statusCode})',
+      );
+    }
+    return location;
   }
 
   Future<String> _combineChunks(String basePath, int totalChunks) async {
