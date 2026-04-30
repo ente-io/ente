@@ -9,7 +9,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import 'package:photos/services/search_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -54,8 +54,9 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
   void initState() {
     super.initState();
     files = [];
-    _filesUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
+      event,
+    ) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
@@ -74,7 +75,7 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
   Future<void> _loadFiles() async {
     final startTime = DateTime.now();
     final onlyUploadedFiles =
-        !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
+        !(isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount());
     final allFiles = await SearchService.instance.getAllFilesForGenericGallery(
       onlyUploadedFiles: onlyUploadedFiles,
     );

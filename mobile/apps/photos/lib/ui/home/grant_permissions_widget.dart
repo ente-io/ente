@@ -25,10 +25,7 @@ import "package:photos/utils/dialog_util.dart";
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
-  const GrantPermissionsWidget({
-    super.key,
-    this.startWithoutAccount = false,
-  });
+  const GrantPermissionsWidget({super.key, this.startWithoutAccount = false});
 
   final bool startWithoutAccount;
 
@@ -73,10 +70,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         title: SvgPicture.asset(
           "assets/ente-branding.svg",
           height: 15,
-          colorFilter: ColorFilter.mode(
-            colorScheme.content,
-            BlendMode.srcIn,
-          ),
+          colorFilter: ColorFilter.mode(colorScheme.content, BlendMode.srcIn),
         ),
       ),
       body: SafeArea(
@@ -84,9 +78,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         child: CustomScrollView(
           slivers: [
             const SliverPadding(padding: EdgeInsets.only(top: 24)),
-            SliverToBoxAdapter(
-              child: _buildHeaderContent(context),
-            ),
+            SliverToBoxAdapter(child: _buildHeaderContent(context)),
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
@@ -115,10 +107,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         Center(
           child: Padding(
             padding: const EdgeInsets.only(top: 28),
-            child: Image.asset(
-              "assets/photo_backup.png",
-              height: 252,
-            ),
+            child: Image.asset("assets/photo_backup.png", height: 252),
           ),
         ),
         const SizedBox(height: 22),
@@ -158,10 +147,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
         await backupPreferenceService.setOnlyNewSinceSevenDaysAgo();
-        await onPermissionGranted(
-          state,
-          shouldMarkLimitedFolders: false,
-        );
+        await onPermissionGranted(state, shouldMarkLimitedFolders: false);
         if (mounted) {
           showToast(context, context.l10n.backingUpLastSevenDaysPhotos);
         }
@@ -169,10 +155,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         await _showPermissionDeniedDialog();
       }
     } catch (e) {
-      _logger.severe(
-        "Failed to request permission: ${e.toString()}",
-        e,
-      );
+      _logger.severe("Failed to request permission: ${e.toString()}", e);
       showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
@@ -188,10 +171,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         await _showPermissionDeniedDialog();
       }
     } catch (e) {
-      _logger.severe(
-        "Failed to request permission: ${e.toString()}",
-        e,
-      );
+      _logger.severe("Failed to request permission: ${e.toString()}", e);
       showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
@@ -202,7 +182,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       _logger.info("Offline permission state: $state");
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
-        await localSettings.setAppMode(AppMode.offline);
+        await localSettings.setAppMode(AppMode.localGallery);
         Bus.instance.fire(AppModeChangedEvent());
         await permissionService.onUpdatePermission(state);
         SyncService.instance.onPermissionGranted().ignore();
@@ -219,10 +199,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         await _showPermissionDeniedDialog();
       }
     } catch (e) {
-      _logger.severe(
-        "Failed to request permission: ${e.toString()}",
-        e,
-      );
+      _logger.severe("Failed to request permission: ${e.toString()}", e);
     }
   }
 
@@ -384,8 +361,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          AppLocalizations.of(context)
-                              .grantGalleryPermissionDesc,
+                          AppLocalizations.of(
+                            context,
+                          ).grantGalleryPermissionDesc,
                           textAlign: TextAlign.center,
                           style: textTheme.body.copyWith(
                             color: colorScheme.textMuted,
@@ -394,8 +372,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                         const SizedBox(height: 20),
                         ButtonWidgetV2(
                           buttonType: ButtonTypeV2.neutral,
-                          labelText:
-                              AppLocalizations.of(context).grantPermission,
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).grantPermission,
                           onTap: _onTapOfflineGrantPermission,
                         ),
                         const SizedBox(height: 20),

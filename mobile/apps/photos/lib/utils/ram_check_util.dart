@@ -9,7 +9,7 @@ bool get enoughRamForLocalIndexing =>
 bool get hasLessThan5GBRAM =>
     deviceTotalRAM != null && deviceTotalRAM! < 5 * 1024;
 
-bool get enoughRamForOfflineLocalIndexing =>
+bool get enoughRamForLocalGalleryLocalIndexing =>
     deviceTotalRAM == null || deviceTotalRAM! > 3 * 1024;
 
 /// Return the total amount of RAM in the device in MB

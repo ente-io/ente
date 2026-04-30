@@ -4,7 +4,7 @@ import "dart:io" show Platform;
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
 import "package:photos/service_locator.dart"
-    show flagService, isOfflineMode, localSettings;
+    show flagService, isLocalGalleryMode, localSettings;
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import "package:photos/services/machine_learning/ml_models_overview.dart";
@@ -33,7 +33,7 @@ class MLIndexingIsolate extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => true;
 
-  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
+  bool get _shouldUseRustMl => flagService.useRustForML || isLocalGalleryMode;
 
   int _loadedModelsCount = 0;
   int _deloadedModelsCount = 0;
@@ -128,8 +128,9 @@ class MLIndexingIsolate extends SuperIsolate {
     }
     return _rustRuntimeLock.synchronized(() async {
       final rustRuntimeArgs = await _buildRustRuntimeArgs();
-      final frozenRuntimeArgs =
-          Map<String, dynamic>.unmodifiable(rustRuntimeArgs);
+      final frozenRuntimeArgs = Map<String, dynamic>.unmodifiable(
+        rustRuntimeArgs,
+      );
       await runInIsolate(
         IsolateOperation.prepareRustMlRuntime,
         frozenRuntimeArgs,
@@ -187,7 +188,7 @@ class MLIndexingIsolate extends SuperIsolate {
       if (areModelsDownloaded) {
         return;
       }
-      final goodInternet = isOfflineMode || await canUseHighBandwidth();
+      final goodInternet = isLocalGalleryMode || await canUseHighBandwidth();
       if (!goodInternet) {
         _logger.info(
           "Cannot download models because user is not connected to wifi and is in online mode",
@@ -243,8 +244,10 @@ class MLIndexingIsolate extends SuperIsolate {
       _logger.info(
         "Loaded models count: $_loadedModelsCount, deloaded models count: $_deloadedModelsCount",
       );
-      await MLIndexingIsolate.instance
-          ._loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
+      await MLIndexingIsolate.instance._loadModels(
+        loadFaces: shouldLoadFaces,
+        loadClip: shouldLoadClip,
+      );
       _logger.info('Models loaded');
     });
   }
@@ -307,8 +310,9 @@ class MLIndexingIsolate extends SuperIsolate {
       final modelName = modelInstance.modelName;
       final modelPath = await modelInstance.downloadModelSafe();
       if (modelPath == null) {
-        _logger
-            .warning("Could not download model '$modelName': WiFi unavailable");
+        _logger.warning(
+          "Could not download model '$modelName': WiFi unavailable",
+        );
         return;
       }
       final address = await runInIsolate(IsolateOperation.loadModel, {
@@ -332,8 +336,9 @@ class MLIndexingIsolate extends SuperIsolate {
         final mlModel = model.model;
         remoteModelPaths.add(mlModel.modelRemotePath);
       }
-      await RemoteAssetsService.instance
-          .cleanupSelectedModels(remoteModelPaths);
+      await RemoteAssetsService.instance.cleanupSelectedModels(
+        remoteModelPaths,
+      );
 
       areModelsDownloaded = false;
     }

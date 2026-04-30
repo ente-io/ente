@@ -70,10 +70,7 @@ class _SearchTabState extends State<SearchTab> {
       children: [
         ColoredBox(
           color: headerColor,
-          child: const SafeArea(
-            bottom: false,
-            child: SearchWidget(),
-          ),
+          child: const SafeArea(bottom: false, child: SearchWidget()),
         ),
         Expanded(
           child: AllSectionsExamplesProvider(
@@ -113,13 +110,14 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
       child: Stack(
         children: [
           FutureBuilder<List<List<SearchResult>>>(
-            future: InheritedAllSectionsExamples.of(context)
-                .allSectionsExamplesFuture,
+            future: InheritedAllSectionsExamples.of(
+              context,
+            ).allSectionsExamplesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 // In offline mode, skip the empty state check since DeviceAlbumsSection
                 // fetches its own data and may have albums to show
-                if (!isOfflineMode &&
+                if (!isLocalGalleryMode &&
                     snapshot.data!.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
@@ -138,7 +136,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   );
                 }
                 final faceSectionIndex = searchTypes.indexOf(SectionType.face);
-                final hasSurfacedOfflineFaces = isOfflineMode &&
+                final hasSurfacedOfflineFaces = isLocalGalleryMode &&
                     faceSectionIndex >= 0 &&
                     faceSectionIndex < snapshot.data!.length &&
                     snapshot.data!.elementAt(faceSectionIndex).isNotEmpty;
@@ -148,7 +146,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemCount: searchTypes.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      if (!isOfflineMode) return const SizedBox.shrink();
+                      if (!isLocalGalleryMode) {
+                        return const SizedBox.shrink();
+                      }
                       if (hasSurfacedOfflineFaces) {
                         return const SizedBox.shrink();
                       }
@@ -166,7 +166,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
-                        if (isOfflineMode) {
+                        if (isLocalGalleryMode) {
                           return const DeviceAlbumsSection();
                         }
                         return AlbumsSection(
@@ -174,7 +174,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.ritual:
-                        if (isOfflineMode) {
+                        if (isLocalGalleryMode) {
                           return const SizedBox.shrink();
                         }
                         return const _RitualsDiscoverySection();
@@ -189,7 +189,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                             if (!wrappedService.shouldShowDiscoveryEntry) {
                               return const SizedBox.shrink();
                             }
-                            return WrappedDiscoverySection(state: state);
+                            return WrappedDiscoverySection(
+                              state: state,
+                            );
                           },
                         );
                       case SectionType.location:
@@ -212,9 +214,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     }
                   },
                 )
-                    .animate(
-                      delay: const Duration(milliseconds: 150),
-                    )
+                    .animate(delay: const Duration(milliseconds: 150))
                     .slide(
                       begin: const Offset(0, -0.015),
                       end: const Offset(0, 0),

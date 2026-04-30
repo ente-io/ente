@@ -99,6 +99,10 @@
       }
     }
   },
+  "noAppToOpenFileDownloadInstead": "No app is available to preview this file. You can download it and open it with another app.",
+  "@noAppToOpenFileDownloadInstead": {
+    "description": "Message shown when Android cannot find an app to open or preview a file"
+  },
   "minutesAgo": "{minutes}m ago",
   "@minutesAgo": {
     "description": "Time format for minutes ago",

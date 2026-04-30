@@ -72,83 +72,78 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
-      children.addAll(
-        [
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: AppLocalizations.of(context).twofactor,
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => UserService.instance.hasEnabledTwoFactor(),
-              onChanged: () async {
-                final hasAuthenticated = await LocalAuthenticationService
-                    .instance
-                    .requestLocalAuthentication(
-                  context,
-                  AppLocalizations.of(context)
-                      .authToConfigureTwofactorAuthentication,
-                );
-                final isTwoFactorEnabled =
-                    UserService.instance.hasEnabledTwoFactor();
-                if (hasAuthenticated) {
-                  if (isTwoFactorEnabled) {
-                    await _disableTwoFactor();
-                    completer.isCompleted ? null : completer.complete();
-                  } else {
-                    await UserService.instance
-                        .setupTwoFactor(context, completer);
-                  }
-                  return completer.future;
-                }
-              },
-            ),
+      children.addAll([
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).twofactor,
           ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: AppLocalizations.of(context).emailVerificationToggle,
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => UserService.instance.hasEmailMFAEnabled(),
-              onChanged: () async {
-                final hasAuthenticated = await LocalAuthenticationService
-                    .instance
-                    .requestLocalAuthentication(
-                  context,
-                  AppLocalizations.of(context)
-                      .authToChangeEmailVerificationSetting,
-                );
-                final isEmailMFAEnabled =
-                    UserService.instance.hasEmailMFAEnabled();
-                if (hasAuthenticated) {
-                  await updateEmailMFA(!isEmailMFAEnabled);
-                }
-              },
-            ),
-          ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.passkey,
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async {
+          trailingWidget: ToggleSwitchWidget(
+            value: () => UserService.instance.hasEnabledTwoFactor(),
+            onChanged: () async {
               final hasAuthenticated = await LocalAuthenticationService.instance
                   .requestLocalAuthentication(
                 context,
-                AppLocalizations.of(context).authToViewPasskey,
+                AppLocalizations.of(
+                  context,
+                ).authToConfigureTwofactorAuthentication,
               );
+              final isTwoFactorEnabled =
+                  UserService.instance.hasEnabledTwoFactor();
               if (hasAuthenticated) {
-                await onPasskeyClick(context);
+                if (isTwoFactorEnabled) {
+                  await _disableTwoFactor();
+                  completer.isCompleted ? null : completer.complete();
+                } else {
+                  await UserService.instance.setupTwoFactor(context, completer);
+                }
+                return completer.future;
               }
             },
           ),
-          sectionOptionSpacing,
-        ],
-      );
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).emailVerificationToggle,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => UserService.instance.hasEmailMFAEnabled(),
+            onChanged: () async {
+              final hasAuthenticated = await LocalAuthenticationService.instance
+                  .requestLocalAuthentication(
+                context,
+                AppLocalizations.of(
+                  context,
+                ).authToChangeEmailVerificationSetting,
+              );
+              final isEmailMFAEnabled =
+                  UserService.instance.hasEmailMFAEnabled();
+              if (hasAuthenticated) {
+                await updateEmailMFA(!isEmailMFAEnabled);
+              }
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(title: context.l10n.passkey),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              AppLocalizations.of(context).authToViewPasskey,
+            );
+            if (hasAuthenticated) {
+              await onPasskeyClick(context);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+      ]);
     }
     children.addAll([
       MenuItemWidget(
@@ -176,8 +171,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             await showErrorDialog(
               context,
               AppLocalizations.of(context).noSystemLockFound,
-              AppLocalizations.of(context)
-                  .toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+              AppLocalizations.of(
+                context,
+              ).toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
             );
           }
         },
@@ -212,13 +208,11 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       ),
       sectionOptionSpacing,
     ]);
-    return Column(
-      children: children,
-    );
+    return Column(children: children);
   }
 
   Future<void> _refreshSecurityDetails() async {
-    if (!_config.hasConfiguredAccount() || isOfflineMode) {
+    if (!_config.hasConfiguredAccount() || isLocalGalleryMode) {
       return;
     }
     try {
@@ -234,9 +228,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   Future<void> _disableTwoFactor() async {
     final AlertDialog alert = AlertDialog(
       title: Text(AppLocalizations.of(context).disableTwofactor),
-      content: Text(
-        AppLocalizations.of(context).confirm2FADisable,
-      ),
+      content: Text(AppLocalizations.of(context).confirm2FADisable),
       actions: [
         TextButton(
           child: Text(
@@ -252,9 +244,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         TextButton(
           child: Text(
             AppLocalizations.of(context).yes,
-            style: const TextStyle(
-              color: Colors.red,
-            ),
+            style: const TextStyle(color: Colors.red),
           ),
           onPressed: () async {
             await UserService.instance.disableTwoFactor(context);
@@ -282,10 +272,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             await UserService.instance.getOrCreateRecoveryKey(context);
         final resetKey = CryptoUtil.generateKey();
         final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
-        final encryptionResult = CryptoUtil.encryptSync(
-          resetKey,
-          recoveryKey,
-        );
+        final encryptionResult = CryptoUtil.encryptSync(resetKey, recoveryKey);
         await PasskeyService.instance.configurePasskeyRecovery(
           resetKeyBase64,
           CryptoUtil.bin2base64(encryptionResult.encryptedData!),
@@ -301,15 +288,17 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<void> updateEmailMFA(bool isEnabled) async {
     try {
-      final UserDetails details =
-          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      final UserDetails details = await UserService.instance.getUserDetailsV2(
+        memoryCount: false,
+      );
       if ((details.profileData?.canDisableEmailMFA ?? false) == false) {
         await routeToPage(
           context,
           RequestPasswordVerificationPage(
             onPasswordVerified: (Uint8List keyEncryptionKey) async {
-              final Uint8List loginKey =
-                  await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+              final Uint8List loginKey = await CryptoUtil.deriveLoginKey(
+                keyEncryptionKey,
+              );
               await UserService.instance.registerOrUpdateSrp(loginKey);
             },
           ),

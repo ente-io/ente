@@ -56,8 +56,9 @@ class MemoriesCacheService {
   final SharedPreferences _prefs;
   static final Logger _logger = Logger("MemoriesCacheService");
 
-  MemoriesDB get _memoriesDB =>
-      isOfflineMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
+  MemoriesDB get _memoriesDB => isLocalGalleryMode
+      ? MemoriesDB.localGalleryInstance
+      : MemoriesDB.instance;
 
   List<SmartMemory>? _cachedMemories;
   List<SmartMemory>? get currentMemoriesSync => _cachedMemories;
@@ -97,7 +98,7 @@ class MemoriesCacheService {
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (_pendingInitialOfflineCacheUpgrade &&
-          isOfflineMode &&
+          isLocalGalleryMode &&
           event.source == "offlineImportMetadata" &&
           LocalSyncService.instance.hasCompletedFirstImport()) {
         unawaited(
@@ -127,11 +128,11 @@ class MemoriesCacheService {
     });
   }
 
-  String get _lastCacheUpdateKey => isOfflineMode
+  String get _lastCacheUpdateKey => isLocalGalleryMode
       ? "${_lastMemoriesCacheUpdateTimeKey}_offline"
       : _lastMemoriesCacheUpdateTimeKey;
 
-  String get _shouldUpdateKey => isOfflineMode
+  String get _shouldUpdateKey => isLocalGalleryMode
       ? "${_shouldUpdateCacheKey}_offline"
       : _shouldUpdateCacheKey;
 
@@ -163,8 +164,9 @@ class MemoriesCacheService {
   Future<bool> _isMlReady() async {
     if (!_mlEnabled) return false;
     try {
-      final mlDataDB =
-          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
       final clipIndexed = await mlDataDB.getClipIndexedFileCount();
       return clipIndexed >= SmartMemoriesService.minimumMemoryLength;
     } catch (e, s) {
@@ -195,7 +197,7 @@ class MemoriesCacheService {
       return true;
     }
 
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return type == EventType.deletedFromDevice;
     }
 
@@ -205,7 +207,7 @@ class MemoriesCacheService {
   Future markMemoryAsSeen(Memory memory, bool lastInList) async {
     memory.markSeen();
     int? seenTimeKey;
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       final localId = memory.file.localID;
       if (localId != null && localId.isNotEmpty) {
         seenTimeKey = _localIdToIntIdCache[localId];
@@ -223,7 +225,7 @@ class MemoriesCacheService {
       seenTimeKey: seenTimeKey,
     );
     if (_cachedMemories != null) {
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final localId = memory.file.localID;
         if (localId != null && localId.isNotEmpty) {
           final localIntId = _localIdToIntIdCache[localId] ??
@@ -312,7 +314,7 @@ class MemoriesCacheService {
   }
 
   Future<Set<int>> _deletedMemoryFileIds(List<EnteFile> deletedFiles) async {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       final localIds = deletedFiles
           .map((file) => file.localID)
           .whereType<String>()
@@ -321,15 +323,16 @@ class MemoriesCacheService {
       if (localIds.isEmpty) {
         return {};
       }
-      final localIdToIntId =
-          await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+      final localIdToIntId = await OfflineFilesDB.instance.ensureLocalIntIds(
+        localIds,
+      );
       _localIdToIntIdCache.addAll(localIdToIntId);
       return localIdToIntId.values.toSet();
     }
 
     return deletedFiles
         .map(
-          (file) => PhotoSelector.memoryFileId(file, isOfflineMode: false),
+          (file) => PhotoSelector.memoryFileId(file, isLocalGalleryMode: false),
         )
         .whereType<int>()
         .toSet();
@@ -341,7 +344,7 @@ class MemoriesCacheService {
   ) {
     final originalLength = memory.memories.length;
     memory.memories.removeWhere((mem) {
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final localId = mem.file.localID;
         if (localId == null || localId.isEmpty) {
           return false;
@@ -350,8 +353,10 @@ class MemoriesCacheService {
         return localIntId != null && deletedMemoryFileIds.contains(localIntId);
       }
 
-      final uploadedFileId =
-          PhotoSelector.memoryFileIdFromMemory(mem, isOfflineMode: false);
+      final uploadedFileId = PhotoSelector.memoryFileIdFromMemory(
+        mem,
+        isLocalGalleryMode: false,
+      );
       return uploadedFileId != null &&
           deletedMemoryFileIds.contains(uploadedFileId);
     });
@@ -401,7 +406,7 @@ class MemoriesCacheService {
     ToShowMemory memory,
     Set<int> deletedMemoryFileIds,
   ) {
-    if (isOfflineMode && memory.fileLocalIntIDs != null) {
+    if (isLocalGalleryMode && memory.fileLocalIntIDs != null) {
       final originalLength = memory.fileLocalIntIDs!.length;
       memory.fileLocalIntIDs!.removeWhere(deletedMemoryFileIds.contains);
       return memory.fileLocalIntIDs!.length != originalLength;
@@ -413,14 +418,14 @@ class MemoriesCacheService {
   }
 
   bool _cacheMemoryHasFiles(ToShowMemory memory) {
-    if (isOfflineMode && memory.fileLocalIntIDs != null) {
+    if (isLocalGalleryMode && memory.fileLocalIntIDs != null) {
       return memory.fileLocalIntIDs!.isNotEmpty;
     }
     return memory.fileUploadedIDs.isNotEmpty;
   }
 
   bool _shouldDeferInitialOfflineCacheUpgrade() {
-    return isOfflineMode &&
+    return isLocalGalleryMode &&
         !LocalSyncService.instance.hasCompletedFirstImport();
   }
 
@@ -429,7 +434,7 @@ class MemoriesCacheService {
   }) async {
     if (!_pendingInitialOfflineCacheUpgrade ||
         _isRunningDeferredInitialOfflineCacheUpgrade ||
-        !isOfflineMode) {
+        !isLocalGalleryMode) {
       return;
     }
 
@@ -705,8 +710,8 @@ class MemoriesCacheService {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
       final List<(ToShowMemory, SmartMemory)> typedMemories = [];
-      final seenTimes = await (isOfflineMode
-              ? MemoriesDB.offlineInstance
+      final seenTimes = await (isLocalGalleryMode
+              ? MemoriesDB.localGalleryInstance
               : MemoriesDB.instance)
           .getSeenTimes();
       final minimalUploadedIDs = <int>{};
@@ -855,7 +860,7 @@ class MemoriesCacheService {
           mlEnabled: mlReady,
         );
         w?.log("calculated new memories");
-        final localIdToIntId = isOfflineMode
+        final localIdToIntId = isLocalGalleryMode
             ? await _buildLocalIntIdMapForMemories([
                 ...nowResult.memories,
                 ...nextResult.memories,
@@ -1078,7 +1083,7 @@ class MemoriesCacheService {
   }
 
   Future<String> _getCachePath() async {
-    final suffix = isOfflineMode ? "_offline" : "";
+    final suffix = isLocalGalleryMode ? "_offline" : "";
     return (await getApplicationSupportDirectory()).path +
         "/cache/memories_cache$suffix";
   }
@@ -1259,13 +1264,7 @@ class MemoriesCacheService {
         return;
       }
       await _routeToPage(
-        DetailPage(
-          DetailPageConfiguration(
-            [file],
-            0,
-            "memorywidget-fallback",
-          ),
-        ),
+        DetailPage(DetailPageConfiguration([file], 0, "memorywidget-fallback")),
         context: context,
         forceCustomPageRoute: true,
       );
