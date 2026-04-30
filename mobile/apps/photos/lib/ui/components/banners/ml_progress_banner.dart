@@ -10,7 +10,7 @@ import "package:photos/events/notification_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/utils/ml_util.dart";
@@ -235,7 +235,9 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     if (!localSettings.isMLLocalIndexingEnabled) return false;
     if (status.indexedItems > 0) return false;
     if (status.pendingItems <= 0) return false;
-    return !MLIndexingIsolate.instance.areModelsDownloaded;
+    return !MLModelDownloadService.instance.areModelsDownloaded(
+      onlyIndexingModels: true,
+    );
   }
 
   void _onDismiss() {
