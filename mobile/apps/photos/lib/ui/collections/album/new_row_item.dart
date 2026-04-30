@@ -1,7 +1,5 @@
-import "package:dotted_border/dotted_border.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -13,12 +11,11 @@ import "package:photos/utils/dialog_util.dart";
 
 class NewAlbumRowItemWidget extends StatelessWidget {
   static const _cornerRadius = 20.0;
-  static const _iconSize = 18.0;
-  final Color? color;
+
   final double height;
   final double width;
+
   const NewAlbumRowItemWidget({
-    this.color,
     super.key,
     required this.height,
     required this.width,
@@ -76,26 +73,12 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             child: Container(
               height: height,
               width: width,
-              color: Theme.of(context).brightness == Brightness.light
-                  ? colorScheme.backdropBase
-                  : colorScheme.backdropFaint,
-              child: DottedBorder(
-                borderType: BorderType.RRect,
-                strokeWidth: 1.75,
-                dashPattern: const [3.75, 3.75],
-                radius: const Radius.circular(_cornerRadius),
-                padding: EdgeInsets.zero,
-                color: colorScheme.strokeDark,
-                child: Center(
-                  child: SizedBox.square(
-                    dimension: _iconSize,
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedAdd01,
-                      size: _iconSize,
-                      strokeWidth: 1.5,
-                      color: colorScheme.contentLight,
-                    ),
-                  ),
+              color: colorScheme.fill,
+              child: Center(
+                child: Image.asset(
+                  "assets/new_album_icon.png",
+                  width: 34,
+                  height: 34,
                 ),
               ),
             ),
