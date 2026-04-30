@@ -286,7 +286,11 @@ class DownloadManager {
           'but got $actualSize bytes',
         );
         existingChunks[i] = false;
-        // await chunkFile.delete(); // Remove corrupted chunk
+        try {
+          await chunkFile.delete();
+        } catch (e) {
+          _logger.warning('Failed to delete corrupted chunk ${i + 1}', e);
+        }
       }
     }
 
