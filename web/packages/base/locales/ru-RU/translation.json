@@ -543,6 +543,7 @@
     "password_lock": "Блокировка паролем",
     "lock": "Замок",
     "file": "Файл",
+    "files": "",
     "folder": "Папка",
     "google_takeout": "Загрузить из Google",
     "free_up_space": "Освободить место",

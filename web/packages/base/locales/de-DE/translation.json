@@ -543,6 +543,7 @@
     "password_lock": "Passwort Sperre",
     "lock": "Sperren",
     "file": "Datei",
+    "files": "",
     "folder": "Ordner",
     "google_takeout": "Google Takeout",
     "free_up_space": "",
