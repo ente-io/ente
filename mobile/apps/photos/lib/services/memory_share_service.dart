@@ -35,6 +35,19 @@ class MemoryShareService {
   static const int _maxMemoryShareFiles = 30;
   static final RegExp _base62SecretPattern = RegExp(r'^[0-9A-Za-z]{12}$');
 
+  static List<EnteFile> uniqueUploadedFiles(List<EnteFile> files) {
+    final seenFileIDs = <int>{};
+    final uniqueFiles = <EnteFile>[];
+    for (final file in files) {
+      final fileID = file.uploadedFileID;
+      if (fileID == null || !seenFileIDs.add(fileID)) {
+        continue;
+      }
+      uniqueFiles.add(file);
+    }
+    return uniqueFiles;
+  }
+
   late final Dio _enteDio;
   late final MemorySharesDB _db;
   final Map<String, MemoryShare> _memoryShareByHashCache = {};
@@ -56,7 +69,7 @@ class MemoryShareService {
   }) async {
     List<EnteFile> uploadedFiles = const [];
     try {
-      uploadedFiles = files.where((f) => f.uploadedFileID != null).toList();
+      uploadedFiles = uniqueUploadedFiles(files);
 
       if (uploadedFiles.isEmpty) {
         throw Exception("No uploaded files to share");
@@ -85,7 +98,6 @@ class MemoryShareService {
           'keyDecryptionNonce': CryptoUtil.bin2base64(reEncryptedKey.nonce!),
         });
       }
-
       final requestData = {
         'type': MemoryShareType.share.name,
         'metadataCipher':
@@ -123,10 +135,11 @@ class MemoryShareService {
     required Map<String, dynamic> metadata,
     String? memoryHash,
   }) async {
-    List<_MemoryLaneShareItem> uploadedItems = const [];
+    List<EnteFile> uploadedFiles = const [];
     try {
-      uploadedItems =
-          laneItems.where((item) => item.file.uploadedFileID != null).toList();
+      uploadedFiles = uniqueUploadedFiles(
+        laneItems.map((item) => item.file).toList(),
+      );
       final resolvedMemoryHash = memoryHash ?? _getMemoryLaneHash(metadata);
       final secretPayload = await _prepareShareSecret();
       final shareKey = secretPayload.shareKey;
@@ -141,9 +154,8 @@ class MemoryShareService {
       );
 
       final fileItems = <Map<String, dynamic>>[];
-      for (var i = 0; i < uploadedItems.length; i++) {
-        final item = uploadedItems[i];
-        final file = item.file;
+      for (var i = 0; i < uploadedFiles.length; i++) {
+        final file = uploadedFiles[i];
         final fileKey = getFileKey(file);
         final reEncryptedKey = CryptoUtil.encryptSync(fileKey, shareKey);
         fileItems.add({
@@ -153,7 +165,6 @@ class MemoryShareService {
           'keyDecryptionNonce': CryptoUtil.bin2base64(reEncryptedKey.nonce!),
         });
       }
-
       final requestData = {
         'type': MemoryShareType.lane.name,
         'metadataCipher':
@@ -168,16 +179,11 @@ class MemoryShareService {
       final memoryShare = MemoryShare.fromJson(response.data['memoryShare']);
 
       final shareUrl = "${memoryShare.url}#${secretPayload.secret}";
-      final uniqueUploadedFileCount = uploadedItems
-          .map((item) => item.file.uploadedFileID)
-          .whereType<int>()
-          .toSet()
-          .length;
       final localShare = memoryShare.copyWith(
         url: shareUrl,
         memoryHash: resolvedMemoryHash,
-        previewUploadedFileID: uploadedItems.first.file.uploadedFileID,
-        fileCount: uniqueUploadedFileCount,
+        previewUploadedFileID: uploadedFiles.first.uploadedFileID,
+        fileCount: uploadedFiles.length,
       );
       await _db.upsert(localShare);
       _updateMemoryShareCache(localShare);
@@ -586,7 +592,7 @@ class MemoryShareService {
     required String title,
   }) async {
     try {
-      final files = Memory.filesFromMemories(memories);
+      final files = uniqueUploadedFiles(Memory.filesFromMemories(memories));
       final filesForShare = files.take(_maxMemoryShareFiles).toList();
       final memoryHash = _getMemoryHash(filesForShare);
       final existingShare = await _findMemoryShareByHash(memoryHash);
@@ -621,9 +627,13 @@ class MemoryShareService {
       final filesByID =
           await FilesDB.instance.getFileIDToFileFromIDs(uniqueFileIDs);
       final laneItems = <_MemoryLaneShareItem>[];
+      final seenUploadedFileIDs = <int>{};
       for (final entry in entries) {
         final file = filesByID[entry.fileId];
-        if (file == null || file.uploadedFileID == null) {
+        final uploadedFileID = file?.uploadedFileID;
+        if (file == null ||
+            uploadedFileID == null ||
+            !seenUploadedFileIDs.add(uploadedFileID)) {
           continue;
         }
         laneItems.add(_MemoryLaneShareItem(file: file, entry: entry));
