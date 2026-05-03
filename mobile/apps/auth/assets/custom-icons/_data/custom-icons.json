@@ -113,6 +113,13 @@
       ]
     },
     {
+      "title": "Art Fight",
+      "slug": "art_fight",
+      "altNames": [
+        "ArtFight"
+      ]
+    },
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -1909,6 +1916,13 @@
     {
       "title": "Skyscanner",
       "hex": "0770E3"
+    },
+    {
+      "title": "Smogon",
+      "slug": "smogon",
+      "altNames": [
+        "Smogon University"
+      ]
     },
     {
       "title": "SMSPool",
