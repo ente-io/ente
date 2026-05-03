@@ -543,6 +543,7 @@
     "password_lock": "Blocca con password",
     "lock": "Blocca",
     "file": "File",
+    "files": "",
     "folder": "Cartella",
     "google_takeout": "Google takeout",
     "free_up_space": "",
