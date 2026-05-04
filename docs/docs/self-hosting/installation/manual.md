@@ -190,8 +190,6 @@ Values you used for `database name` and `username` correspond to the values you 
     export NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080
     # Replace this with actual endpoint for Albums
     export NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002
-    # Replace this with actual endpoint for Memories
-    export NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT=http://localhost:3010
     # Replace this with actual endpoint for Photos
     export NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=http://localhost:3000
     ```
