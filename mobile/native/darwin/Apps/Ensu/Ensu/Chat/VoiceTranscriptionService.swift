@@ -86,7 +86,6 @@ final class VoiceTranscriptionService {
     typealias TranscriptHandler = @MainActor @Sendable (String) -> Void
 
     private let modelsDir: URL
-    private let vadCacheDir: URL
     private var transcriptionTask: Task<Void, Never>?
 
     #if os(iOS)
@@ -95,9 +94,7 @@ final class VoiceTranscriptionService {
 
     init(baseDir: URL) {
         self.modelsDir = baseDir.appendingPathComponent("transcription", isDirectory: true)
-        self.vadCacheDir = baseDir.appendingPathComponent("transcription_vad", isDirectory: true)
         try? FileManager.default.createDirectory(at: modelsDir, withIntermediateDirectories: true, attributes: nil)
-        try? FileManager.default.createDirectory(at: vadCacheDir, withIntermediateDirectories: true, attributes: nil)
     }
 
     func startRecording(onState: @escaping StateHandler) {
@@ -146,7 +143,6 @@ final class VoiceTranscriptionService {
 
         transcriptionTask?.cancel()
         let modelsDirPath = modelsDir.path
-        let vadCacheDirPath = vadCacheDir.path
         let sampleRate = recording.sampleRate
         let pcm = recording.pcm
 
@@ -186,7 +182,7 @@ final class VoiceTranscriptionService {
                 }
                 let transcript = try transcribePcm16(
                     modelsDir: modelsDirPath,
-                    vadCacheDir: vadCacheDirPath,
+                    vadCacheDir: modelsDirPath,
                     inputSampleRate: sampleRate,
                     pcmLe: pcm
                 )

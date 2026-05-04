@@ -5,7 +5,7 @@ use transcribe_rs::onnx::Quantization;
 use transcribe_rs::onnx::parakeet::{ParakeetModel, ParakeetParams, TimestampGranularity};
 
 use crate::audio::extract_speech_from_pcm16;
-use crate::model::model_path;
+use crate::model::{model_path, vad_model_path};
 use crate::text::filter_transcription_output;
 use crate::{Result, error};
 
@@ -27,7 +27,7 @@ impl TranscriptionManager {
     fn transcribe(
         &mut self,
         models_dir: impl AsRef<Path>,
-        vad_cache_dir: impl AsRef<Path>,
+        _vad_cache_dir: impl AsRef<Path>,
         input_sample_rate: u32,
         pcm_le: Vec<u8>,
     ) -> Result<String> {
@@ -35,14 +35,19 @@ impl TranscriptionManager {
             return Ok(String::new());
         }
 
+        let models_dir = models_dir.as_ref();
         let model_dir = model_path(models_dir);
         if !model_dir.is_dir() {
             return Err(error("Transcription model is not downloaded"));
         }
+        let vad_model_path = vad_model_path(models_dir);
+        if !vad_model_path.is_file() {
+            return Err(error("Voice activity model is not downloaded"));
+        }
 
         self.ensure_loaded(&model_dir)?;
 
-        let speech = extract_speech_from_pcm16(vad_cache_dir, input_sample_rate, &pcm_le)?;
+        let speech = extract_speech_from_pcm16(&vad_model_path, input_sample_rate, &pcm_le)?;
         if speech.is_empty() {
             return Ok(String::new());
         }

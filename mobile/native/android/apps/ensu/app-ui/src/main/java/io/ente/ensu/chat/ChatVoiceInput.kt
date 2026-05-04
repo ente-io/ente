@@ -102,7 +102,6 @@ internal class VoiceTranscriptionController(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val bufferLock = Any()
     private val modelsDir = appContext.getDir("ensu_transcription_models", Context.MODE_PRIVATE)
-    private val vadCacheDir = appContext.getDir("ensu_transcription_vad", Context.MODE_PRIVATE)
 
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
@@ -273,7 +272,7 @@ internal class VoiceTranscriptionController(
                 }
                 transcribePcm16(
                     modelsDir.absolutePath,
-                    vadCacheDir.absolutePath,
+                    modelsDir.absolutePath,
                     sampleRate.toUInt(),
                     pcm
                 )

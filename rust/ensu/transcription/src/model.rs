@@ -13,7 +13,9 @@ use crate::{Result, error};
 
 const MODEL_URL: &str = "https://models.ente.io/parakeet-v3-int8.tar.gz";
 const MODEL_DIR_NAME: &str = "parakeet-tdt-0.6b-v3-int8";
-const MODEL_SIZE_MB: u64 = 478;
+const MODEL_SIZE_MB: u64 = 480;
+const VAD_MODEL_URL: &str = "https://models.ente.io/silero_vad_v4.onnx";
+const VAD_MODEL_FILE_NAME: &str = "silero_vad_v4.onnx";
 
 #[derive(Debug, Clone)]
 pub enum ModelEvent {
@@ -31,11 +33,16 @@ pub enum ModelEvent {
 }
 
 pub fn is_model_downloaded(models_dir: impl AsRef<Path>) -> bool {
-    model_path(models_dir).is_dir()
+    let models_dir = models_dir.as_ref();
+    model_path(models_dir).is_dir() && is_file_present(vad_model_path(models_dir))
 }
 
 pub fn model_path(models_dir: impl AsRef<Path>) -> PathBuf {
     models_dir.as_ref().join(MODEL_DIR_NAME)
+}
+
+pub(crate) fn vad_model_path(models_dir: impl AsRef<Path>) -> PathBuf {
+    models_dir.as_ref().join(VAD_MODEL_FILE_NAME)
 }
 
 pub fn model_size_mb() -> u64 {
@@ -50,11 +57,27 @@ pub fn download_model(
     fs::create_dir_all(models_dir)?;
 
     let final_model_dir = model_path(models_dir);
+    let vad_path = vad_model_path(models_dir);
     let partial_path = models_dir.join(format!("{MODEL_DIR_NAME}.partial"));
     let extracting_path = models_dir.join(format!("{MODEL_DIR_NAME}.extracting"));
 
+    if final_model_dir.is_dir() && is_file_present(&vad_path) {
+        let _ = fs::remove_file(&partial_path);
+        on_event(ModelEvent::DownloadComplete);
+        return Ok(final_model_dir);
+    }
+
+    let client = Client::builder().build()?;
+
     if final_model_dir.is_dir() {
         let _ = fs::remove_file(&partial_path);
+        ensure_vad_model(&client, models_dir).map_err(|err| {
+            let message = err.to_string();
+            on_event(ModelEvent::DownloadError {
+                message: message.clone(),
+            });
+            error(message)
+        })?;
         on_event(ModelEvent::DownloadComplete);
         return Ok(final_model_dir);
     }
@@ -63,7 +86,6 @@ pub fn download_model(
         let _ = fs::remove_dir_all(&extracting_path);
     }
 
-    let client = Client::builder().build()?;
     let mut resume_from = partial_path.metadata().map(|m| m.len()).unwrap_or(0);
     let mut response = request_model(&client, resume_from)?;
 
@@ -151,6 +173,13 @@ pub fn download_model(
 
     let _ = fs::remove_file(&partial_path);
     on_event(ModelEvent::ExtractionCompleted);
+    ensure_vad_model(&client, models_dir).map_err(|err| {
+        let message = err.to_string();
+        on_event(ModelEvent::DownloadError {
+            message: message.clone(),
+        });
+        error(message)
+    })?;
     on_event(ModelEvent::DownloadComplete);
 
     Ok(final_model_dir)
@@ -165,6 +194,55 @@ fn request_model(
         request = request.header(RANGE, format!("bytes={resume_from}-"));
     }
     request.send()
+}
+
+fn ensure_vad_model(client: &Client, models_dir: &Path) -> Result<()> {
+    let final_path = vad_model_path(models_dir);
+    if is_file_present(&final_path) {
+        return Ok(());
+    }
+
+    let partial_path = models_dir.join(format!("{VAD_MODEL_FILE_NAME}.partial"));
+    let result = download_vad_model(client, &partial_path, &final_path);
+    if result.is_err() {
+        let _ = fs::remove_file(&partial_path);
+    }
+    result
+}
+
+fn download_vad_model(client: &Client, partial_path: &Path, final_path: &Path) -> Result<()> {
+    let mut response = client.get(VAD_MODEL_URL).send()?;
+    if !response.status().is_success() {
+        return Err(error(format!(
+            "Failed to download voice activity model: HTTP {}",
+            response.status()
+        )));
+    }
+
+    let mut file = File::create(partial_path)?;
+    let total = response.content_length().unwrap_or(0);
+    let mut downloaded = 0;
+    let mut buffer = [0u8; 128 * 1024];
+    loop {
+        let read = response.read(&mut buffer)?;
+        if read == 0 {
+            break;
+        }
+        file.write_all(&buffer[..read])?;
+        downloaded += read as u64;
+    }
+    file.flush()?;
+    drop(file);
+
+    if total > 0 && downloaded != total {
+        let _ = fs::remove_file(partial_path);
+        return Err(error(format!(
+            "Voice activity model download incomplete: expected {total} bytes, got {downloaded}"
+        )));
+    }
+
+    fs::rename(partial_path, final_path)?;
+    Ok(())
 }
 
 fn extract_archive(
@@ -204,6 +282,13 @@ fn extract_archive(
     }
 
     Ok(())
+}
+
+fn is_file_present(path: impl AsRef<Path>) -> bool {
+    path.as_ref()
+        .metadata()
+        .map(|metadata| metadata.is_file() && metadata.len() > 0)
+        .unwrap_or(false)
 }
 
 fn percentage(downloaded: u64, total: u64) -> f64 {

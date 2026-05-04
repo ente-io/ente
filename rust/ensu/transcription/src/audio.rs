@@ -1,5 +1,4 @@
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::Duration;
 
 use rubato::{FftFixedIn, Resampler};
@@ -7,8 +6,6 @@ use transcribe_rs::vad::{SileroVad, SmoothedVad, Vad};
 
 use crate::{Result, error};
 
-const SILERO_VAD_BYTES: &[u8] = include_bytes!("../assets/silero_vad_v4.onnx");
-const SILERO_VAD_FILE_NAME: &str = "silero_vad_v4.onnx";
 const TARGET_SAMPLE_RATE: usize = 16_000;
 const RESAMPLER_CHUNK_SIZE: usize = 1024;
 const VAD_THRESHOLD: f32 = 0.5;
@@ -17,7 +14,7 @@ const VAD_HANGOVER_FRAMES: usize = 10;
 const VAD_ONSET_FRAMES: usize = 2;
 
 pub fn extract_speech_from_pcm16(
-    cache_dir: impl AsRef<Path>,
+    vad_model_path: impl AsRef<Path>,
     input_sample_rate: u32,
     pcm_le: &[u8],
 ) -> Result<Vec<f32>> {
@@ -33,11 +30,11 @@ pub fn extract_speech_from_pcm16(
         .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]) as f32 / 32768.0)
         .collect::<Vec<_>>();
 
-    extract_speech(cache_dir, input_sample_rate, &samples)
+    extract_speech(vad_model_path, input_sample_rate, &samples)
 }
 
 fn extract_speech(
-    cache_dir: impl AsRef<Path>,
+    vad_model_path: impl AsRef<Path>,
     input_sample_rate: u32,
     samples: &[f32],
 ) -> Result<Vec<f32>> {
@@ -45,8 +42,11 @@ fn extract_speech(
         return Ok(Vec::new());
     }
 
-    let vad_model_path = ensure_vad_model(cache_dir)?;
-    let silero = SileroVad::new(&vad_model_path, VAD_THRESHOLD)?;
+    let vad_model_path = vad_model_path.as_ref();
+    if !vad_model_path.is_file() {
+        return Err(error("Voice activity model is not downloaded"));
+    }
+    let silero = SileroVad::new(vad_model_path, VAD_THRESHOLD)?;
     let mut vad = SmoothedVad::new(
         Box::new(silero),
         VAD_PREFILL_FRAMES,
@@ -87,20 +87,6 @@ fn extract_speech(
     }
 
     Ok(speech)
-}
-
-fn ensure_vad_model(cache_dir: impl AsRef<Path>) -> Result<PathBuf> {
-    let cache_dir = cache_dir.as_ref();
-    fs::create_dir_all(cache_dir)?;
-    let path = cache_dir.join(SILERO_VAD_FILE_NAME);
-    let should_write = match fs::metadata(&path) {
-        Ok(metadata) => metadata.len() != SILERO_VAD_BYTES.len() as u64,
-        Err(_) => true,
-    };
-    if should_write {
-        fs::write(&path, SILERO_VAD_BYTES)?;
-    }
-    Ok(path)
 }
 
 struct FrameResampler {
