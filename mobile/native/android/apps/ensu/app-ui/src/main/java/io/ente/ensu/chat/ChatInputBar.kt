@@ -23,13 +23,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -39,7 +44,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
@@ -73,6 +80,8 @@ internal fun MessageInput(
     onAttachmentSelected: (AttachmentType) -> Unit,
     onRemoveAttachment: (Attachment) -> Unit,
     onCancelEdit: () -> Unit,
+    voiceInputState: VoiceInputState,
+    onVoiceInput: () -> Unit,
     focusRequestId: Int
 ) {
     val haptic = rememberEnsuHaptics()
@@ -85,6 +94,24 @@ internal fun MessageInput(
     }
 
     val focusRequester = remember { FocusRequester() }
+    var fieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = messageText,
+                selection = TextRange(messageText.length)
+            )
+        )
+    }
+
+    LaunchedEffect(messageText) {
+        if (messageText != fieldValue.text) {
+            fieldValue = TextFieldValue(
+                text = messageText,
+                selection = TextRange(messageText.length)
+            )
+        }
+    }
+
     LaunchedEffect(focusRequestId) {
         if (focusRequestId > 0) {
             // Give the screen a moment to settle so IME shows reliably.
@@ -140,6 +167,48 @@ internal fun MessageInput(
             }
         }
 
+        voiceInputState.statusText()?.let { status ->
+            Row(
+                modifier = Modifier.padding(horizontal = EnsuSpacing.pageHorizontal.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                when (voiceInputState) {
+                    is VoiceInputState.Downloading,
+                    VoiceInputState.Transcribing -> {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    }
+                    VoiceInputState.Recording -> {
+                        Icon(
+                            painter = painterResource(HugeIcons.Voice01Icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = EnsuColor.stopButton
+                        )
+                    }
+                    is VoiceInputState.Error -> {
+                        Icon(
+                            imageVector = Icons.Rounded.ErrorOutline,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = EnsuColor.stopButton
+                        )
+                    }
+                    VoiceInputState.Idle,
+                    VoiceInputState.Unsupported -> Unit
+                }
+                Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
+                Text(
+                    text = status,
+                    style = EnsuTypography.small,
+                    color = if (voiceInputState is VoiceInputState.Error) {
+                        EnsuColor.stopButton
+                    } else {
+                        EnsuColor.textMuted()
+                    }
+                )
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -156,8 +225,11 @@ internal fun MessageInput(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 BasicTextField(
-                    value = messageText,
-                    onValueChange = onMessageChange,
+                    value = fieldValue,
+                    onValueChange = { newValue ->
+                        fieldValue = newValue
+                        onMessageChange(newValue.text)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .focusRequester(focusRequester)
@@ -169,7 +241,7 @@ internal fun MessageInput(
                     cursorBrush = SolidColor(EnsuColor.accent())
                 ) { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        if (messageText.isBlank()) {
+                        if (fieldValue.text.isBlank()) {
                             Text(
                                 text = placeholder,
                                 style = EnsuTypography.message,
@@ -196,6 +268,48 @@ internal fun MessageInput(
                             contentDescription = "Attach",
                             modifier = Modifier.size(18.dp)
                         )
+                    }
+                }
+
+                if (voiceInputState != VoiceInputState.Unsupported && editingMessage == null) {
+                    val isVoiceBusy = voiceInputState is VoiceInputState.Downloading ||
+                        voiceInputState is VoiceInputState.Transcribing
+                    val canUseVoice = voiceInputState.isRecording ||
+                        (!isGenerating &&
+                            !isDownloading &&
+                            !isAttachmentDownloadBlocked &&
+                            !isVoiceBusy)
+
+                    IconButton(
+                        onClick = {
+                            haptic.perform(
+                                if (voiceInputState.isRecording) {
+                                    HapticFeedbackType.LongPress
+                                } else {
+                                    HapticFeedbackType.TextHandleMove
+                                }
+                            )
+                            onVoiceInput()
+                        },
+                        enabled = canUseVoice,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        if (isVoiceBusy) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        } else if (voiceInputState.isRecording) {
+                            Icon(
+                                painter = painterResource(HugeIcons.StopIcon),
+                                contentDescription = "Stop dictation",
+                                modifier = Modifier.size(18.dp),
+                                tint = EnsuColor.stopButton
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(HugeIcons.Voice01Icon),
+                                contentDescription = "Dictate",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
 

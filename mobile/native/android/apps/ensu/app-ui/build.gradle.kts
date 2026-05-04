@@ -57,6 +57,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
         }
@@ -118,6 +122,7 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(project(":crypto-auth-core"))
+    implementation(project(":rust"))
 
     implementation("com.github.gregcockroft:AndroidMath:v1.1.0") {
         exclude(group = "com.google.guava", module = "listenablefuture")
