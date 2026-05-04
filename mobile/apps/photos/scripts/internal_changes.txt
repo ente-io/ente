@@ -1,4 +1,5 @@
 Latest changes:
+- Ashil: Fix some popup menus auto closing immediately after opening on iPads
 - Ashil: Fix social notifications not working on iOS
 - Laurens: Improved memories loading
 - Laurens: Add "QR Codes" discovery item
