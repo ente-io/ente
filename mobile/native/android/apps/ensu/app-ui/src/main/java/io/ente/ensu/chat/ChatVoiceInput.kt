@@ -14,6 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import io.ente.labs.ensu_transcription.TranscriptionException
 import io.ente.labs.ensu_transcription.TranscriptionModelEvent
 import io.ente.labs.ensu_transcription.TranscriptionModelEventCallback
@@ -71,8 +74,20 @@ internal fun rememberVoiceTranscriptionController(
     onTranscript: (String) -> Unit
 ): VoiceTranscriptionController {
     val context = LocalContext.current.applicationContext
+    val lifecycleOwner = LocalLifecycleOwner.current
     val controller = remember(context) {
         VoiceTranscriptionController(context, onTranscript)
+    }
+    DisposableEffect(controller, lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                controller.cancelActiveVoiceInput()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
     DisposableEffect(controller) {
         onDispose { controller.dispose() }
@@ -186,6 +201,20 @@ internal class VoiceTranscriptionController(
         }
     }
 
+    fun cancelActiveVoiceInput() {
+        if (state !is VoiceInputState.Recording) {
+            return
+        }
+
+        state = VoiceInputState.Idle
+        recordingJob?.cancel()
+        recordingJob = null
+        stopActiveRecorder()
+        synchronized(bufferLock) {
+            recordedPcm.reset()
+        }
+    }
+
     fun dispose() {
         transientErrorJob?.cancel()
         scope.cancel()
@@ -271,6 +300,15 @@ internal class VoiceTranscriptionController(
                 error
             )
             state = VoiceInputState.Error(transcriptionErrorMessage(error.message))
+        }
+    }
+
+    private fun stopActiveRecorder() {
+        val recorder = audioRecord ?: return
+        runCatching {
+            if (recorder.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                recorder.stop()
+            }
         }
     }
 
