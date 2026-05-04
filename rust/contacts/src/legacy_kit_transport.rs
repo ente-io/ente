@@ -51,6 +51,14 @@ pub struct LegacyKitOwnerActionRequest {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct LegacyKitUpdateRecoveryNoticeRequest {
+    #[serde(rename = "kitID")]
+    pub kit_id: String,
+    pub notice_period_in_hours: i32,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LegacyKitChallengeRequest {
     #[serde(rename = "kitID")]
     pub kit_id: String,

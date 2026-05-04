@@ -64,13 +64,13 @@ impl SrpSession {
 // High-level API (recommended for applications)
 #[cfg(feature = "srp")]
 pub use api::GeneratedSrpSetup;
-#[cfg(feature = "srp")]
-pub use api::generate_srp_setup;
 pub use api::{DecryptedSecrets, GeneratedKek, SrpCredentials};
 pub use api::{
     decrypt_keys_only, decrypt_secrets, derive_kek, derive_srp_credentials,
     generate_interactive_kek, generate_sensitive_kek,
 };
+#[cfg(feature = "srp")]
+pub use api::{generate_srp_setup, generate_srp_setup_with_login_key};
 
 // Key generation (for signup)
 pub use key_gen::{

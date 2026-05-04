@@ -10,13 +10,15 @@ use crate::crypto as contacts_crypto;
 use crate::error::{ContactsError, Result};
 use crate::legacy_kit::{
     create_legacy_kit_request, decode_download_content, decode_legacy_kit_record,
+    validate_notice_period,
 };
 use crate::legacy_kit_models::{
     LegacyKit, LegacyKitCreateResult, LegacyKitOwnerRecoverySession, LegacyKitShare,
 };
 use crate::legacy_kit_transport::{
     LegacyKitDownloadContentResponse, LegacyKitOwnerActionRequest,
-    LegacyKitOwnerRecoverySessionResponse, LegacyKitRecordResponse, ListLegacyKitsResponse,
+    LegacyKitOwnerRecoverySessionResponse, LegacyKitRecordResponse,
+    LegacyKitUpdateRecoveryNoticeRequest, ListLegacyKitsResponse,
 };
 use crate::legacy_models::{LegacyContactState, LegacyInfo, LegacyRecoveryBundle};
 use crate::legacy_transport::{
@@ -598,14 +600,14 @@ impl ContactsCtx {
             &bundle.user_key_attributes,
             &bundle.recovery_key,
         )?;
-        let (updated_key_attrs, _) = auth::generate_key_attributes_for_new_password(
+        let (updated_key_attrs, login_key) = auth::generate_key_attributes_for_new_password(
             &target_master_key,
             &bundle.user_key_attributes,
             new_password,
         )?;
         let srp_user_id = Uuid::new_v4().to_string();
         let (mut srp_session, setup_request) =
-            password_reset_setup_request(&srp_user_id, new_password, &updated_key_attrs)?;
+            password_reset_setup_request(&srp_user_id, &login_key)?;
         let init_response = self
             .http
             .post_json::<LegacySetupSrpResponse, _>(
@@ -674,15 +676,16 @@ impl ContactsCtx {
         part_names: [String; 3],
         notice_period_in_hours: i32,
     ) -> Result<LegacyKitCreateResult> {
-        let recovery_key = self.current_recovery_key(current_user_key_attrs)?;
-        let master_key = self.master_key.read().expect("master key lock poisoned");
-        let (request, shares) = create_legacy_kit_request(
-            &recovery_key,
-            &master_key,
-            part_names,
-            notice_period_in_hours,
-        )?;
-        drop(master_key);
+        let (request, shares) = {
+            let recovery_key = self.current_recovery_key(current_user_key_attrs)?;
+            let master_key = self.master_key.read().expect("master key lock poisoned");
+            create_legacy_kit_request(
+                &recovery_key,
+                &master_key,
+                part_names,
+                notice_period_in_hours,
+            )?
+        };
 
         let response = self
             .http
@@ -725,6 +728,25 @@ impl ContactsCtx {
                 with_http_context("legacy kit recovery session fetch failed", error)
             })?;
         Ok(response.into())
+    }
+
+    pub async fn legacy_kit_update_recovery_notice(
+        &self,
+        kit_id: &str,
+        notice_period_in_hours: i32,
+    ) -> Result<()> {
+        validate_notice_period(notice_period_in_hours)?;
+        self.http
+            .post_empty(
+                "/legacy-kits/update-recovery-notice",
+                &LegacyKitUpdateRecoveryNoticeRequest {
+                    kit_id: kit_id.to_string(),
+                    notice_period_in_hours,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit recovery notice update failed", error))
     }
 
     pub async fn legacy_kit_block_recovery(&self, kit_id: &str) -> Result<()> {
@@ -1020,22 +1042,9 @@ fn decrypt_master_key_with_recovery_key(
 
 fn password_reset_setup_request(
     srp_user_id: &str,
-    new_password: &str,
-    updated_key_attrs: &KeyAttributes,
+    login_key: &[u8],
 ) -> Result<(SrpSession, LegacySetupSrpRequest)> {
-    let mem_limit = updated_key_attrs.mem_limit.ok_or_else(|| {
-        ContactsError::InvalidInput("updated key attributes missing memLimit".into())
-    })?;
-    let ops_limit = updated_key_attrs.ops_limit.ok_or_else(|| {
-        ContactsError::InvalidInput("updated key attributes missing opsLimit".into())
-    })?;
-    let kek = auth::derive_kek(
-        new_password,
-        &updated_key_attrs.kek_salt,
-        mem_limit,
-        ops_limit,
-    )?;
-    let generated_srp = auth::generate_srp_setup(&kek, srp_user_id)?;
+    let generated_srp = auth::generate_srp_setup_with_login_key(login_key, srp_user_id)?;
     let srp_session = SrpSession::new(
         srp_user_id,
         &generated_srp.srp_salt,

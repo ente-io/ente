@@ -135,12 +135,26 @@ pub struct LegacyKitRecoveryHandle {
 
 impl LegacyKitRecoveryClient {
     pub fn new(base_url: impl Into<String>) -> Result<Self> {
+        Self::new_with_headers(
+            base_url,
+            None,
+            None,
+            Some("ente-rust-legacy-kit".to_string()),
+        )
+    }
+
+    pub fn new_with_headers(
+        base_url: impl Into<String>,
+        client_package: Option<String>,
+        client_version: Option<String>,
+        user_agent: Option<String>,
+    ) -> Result<Self> {
         let http = HttpClient::new_with_config(HttpConfig {
             base_url: base_url.into(),
             auth_token: None,
-            user_agent: Some("ente-rust-legacy-kit".to_string()),
-            client_package: None,
-            client_version: None,
+            user_agent,
+            client_package,
+            client_version,
             timeout_secs: Some(30),
         })?;
         Ok(Self {
@@ -241,14 +255,14 @@ impl LegacyKitRecoveryHandle {
             &bundle.user_key_attributes,
             &bundle.recovery_key,
         )?;
-        let (updated_key_attrs, _) = auth::generate_key_attributes_for_new_password(
+        let (updated_key_attrs, login_key) = auth::generate_key_attributes_for_new_password(
             &target_master_key,
             &bundle.user_key_attributes,
             new_password,
         )?;
         let srp_user_id = Uuid::new_v4().to_string();
         let (mut srp_session, setup_request) =
-            password_reset_setup_request(&srp_user_id, new_password, &updated_key_attrs)?;
+            password_reset_setup_request(&srp_user_id, &login_key)?;
         let init_response = self
             .http
             .post_json::<LegacyKitSetupSrpResponse, _>(
@@ -328,7 +342,7 @@ impl LegacyKitRecoveryClient {
     }
 }
 
-fn validate_notice_period(hours: i32) -> Result<()> {
+pub(crate) fn validate_notice_period(hours: i32) -> Result<()> {
     if LEGACY_KIT_NOTICE_OPTIONS.contains(&hours) {
         Ok(())
     } else {
@@ -391,22 +405,9 @@ fn decrypt_master_key_with_recovery_key(
 
 fn password_reset_setup_request(
     srp_user_id: &str,
-    new_password: &str,
-    updated_key_attrs: &KeyAttributes,
+    login_key: &[u8],
 ) -> Result<(SrpSession, LegacyKitSetupSrpRequest)> {
-    let mem_limit = updated_key_attrs.mem_limit.ok_or_else(|| {
-        ContactsError::InvalidInput("updated key attributes missing memLimit".into())
-    })?;
-    let ops_limit = updated_key_attrs.ops_limit.ok_or_else(|| {
-        ContactsError::InvalidInput("updated key attributes missing opsLimit".into())
-    })?;
-    let kek = auth::derive_kek(
-        new_password,
-        &updated_key_attrs.kek_salt,
-        mem_limit,
-        ops_limit,
-    )?;
-    let generated_srp = auth::generate_srp_setup(&kek, srp_user_id)?;
+    let generated_srp = auth::generate_srp_setup_with_login_key(login_key, srp_user_id)?;
     let srp_session = SrpSession::new(
         srp_user_id,
         &generated_srp.srp_salt,
