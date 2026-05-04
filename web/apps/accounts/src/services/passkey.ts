@@ -379,6 +379,7 @@ export const shouldRestrictToWhitelistedRedirect = () => {
 
 const _isWhitelistedRedirect = (redirectURL: URL) =>
     (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
+    redirectURL.host.endsWith(".ente.com") ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh");
 

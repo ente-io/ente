@@ -16,17 +16,16 @@ Cloudflare Pages using GitHub workflows.
 Here is a list of all the deployments, whether or not they are production
 deployments, and the action that triggers them:
 
-| URL                                          | Type       | Deployment action                           |
-| -------------------------------------------- | ---------- | ------------------------------------------- |
-| [web.ente.io](https://web.ente.io)           | Production | Daily deploy of `main`                      |
-| [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io) |
-| [albums.ente.io](https://albums.ente.io)     | Production | Daily deploy of `main`                      |
-| [auth.ente.io](https://auth.ente.io)         | Production | Daily deploy of `main`                      |
-| [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                      |
-| [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                      |
-| [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
-| [ente.com/help](https://ente.com/help)       | Production | Changes in `docs/` on push to `main`        |
-| [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
+| URL                                            | Type       | Deployment action                          |
+| ---------------------------------------------- | ---------- | ------------------------------------------ |
+| [photos.ente.com](https://photos.ente.com)     | Production | Daily deploy of `main`                     |
+| [albums.ente.com](https://albums.ente.com)     | Production | Daily deploy of `main`                     |
+| [auth.ente.com](https://auth.ente.com)         | Production | Daily deploy of `main`                     |
+| [accounts.ente.io](https://accounts.ente.io)   | Production | Daily deploy of `main`                     |
+| [cast.ente.com](https://cast.ente.com)         | Production | Daily deploy of `main`                     |
+| [payments.ente.com](https://payments.ente.com) | Production | Daily deploy of `main`                     |
+| [ente.com/help](https://ente.com/help)         | Production | Changes in `docs/` on push to `main`       |
+| [staff.ente.sh](https://staff.ente.sh)         | Production | Changes in `infra/staff` on push to `main` |
 
 ### Other subdomains
 

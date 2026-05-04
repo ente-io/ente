@@ -280,7 +280,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                     components={{
                                         cta: (
                                             <Link
-                                                href="https://web.ente.io"
+                                                href="https://photos.ente.com"
                                                 target="_blank"
                                                 rel="noopener"
                                                 underline="always"

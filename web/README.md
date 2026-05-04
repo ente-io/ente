@@ -4,10 +4,10 @@ Source code for Ente's various web apps and supporting websites.
 
 Live versions are at:
 
-- Ente Photos: [web.ente.io](https://web.ente.io)
-- Ente Albums: [albums.ente.io](https://albums.ente.io)
-- Ente Auth: [auth.ente.io](https://auth.ente.io)
-- Ente Locker: [locker.ente.io](https://locker.ente.io)
+- Ente Photos: [photos.ente.com](https://photos.ente.com)
+- Ente Albums: [albums.ente.com](https://albums.ente.com)
+- Ente Auth: [auth.ente.com](https://auth.ente.com)
+- Ente Locker: [locker.ente.com](https://locker.ente.com)
 
 To know more about Ente, see [our main README](../README.md) or visit
 [ente.com](https://ente.com).

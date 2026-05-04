@@ -1802,7 +1802,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     const embedURL = resolvedURL
         ? resolvedURL.replace(
               new URL(resolvedURL).origin,
-              embedBaseURL || "https://embed.ente.io",
+              embedBaseURL || "https://embed.ente.com",
           )
         : undefined;
     const iframeHTML = embedURL
