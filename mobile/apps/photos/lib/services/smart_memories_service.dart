@@ -51,10 +51,16 @@ part "smart_memories_trip_calculator_v2.dart";
 class MemoriesResult {
   final List<SmartMemory> memories;
   final List<BaseLocation> baseLocations;
+  final bool failed;
 
-  MemoriesResult(this.memories, this.baseLocations);
+  MemoriesResult(this.memories, this.baseLocations, {this.failed = false});
 
-  get isEmpty => memories.isEmpty;
+  MemoriesResult.failed()
+      : memories = const <SmartMemory>[],
+        baseLocations = const <BaseLocation>[],
+        failed = true;
+
+  bool get isEmpty => memories.isEmpty;
 }
 
 class SmartMemoriesService {
@@ -281,6 +287,10 @@ class SmartMemoriesService {
         return MemoriesResult(fallbackMemories, <BaseLocation>[]);
       }
 
+      if (memoriesResult.failed) {
+        return memoriesResult;
+      }
+
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
@@ -303,7 +313,7 @@ class SmartMemoriesService {
           );
         }
       }
-      return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
+      return MemoriesResult.failed();
     }
   }
 
@@ -880,7 +890,7 @@ class SmartMemoriesService {
       return MemoriesResult(memories, bases);
     } catch (e, s) {
       dev.log("Error in _allMemoriesCalculations \n Error:$e \n Stacktrace:$s");
-      return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
+      return MemoriesResult.failed();
     }
   }
 
