@@ -187,6 +187,18 @@ func isPublicCollectionUploadURLPath(reqPath string) bool {
 		reqPath == "/public-collection/multipart-upload-url"
 }
 
+// isAuthenticatedUploadURLPath matches the authenticated presign endpoints.
+// Each request to /files/upload-urls can mint up to 50 URLs and reserve
+// MinIO multipart slots, so an unbounded loop by a logged-in user can
+// exhaust the bucket's pending-upload capacity. Cap at 250 req/min/user —
+// 12500 URLs/min, far above any human upload pattern.
+func isAuthenticatedUploadURLPath(reqPath string) bool {
+	return reqPath == "/files/upload-urls" ||
+		reqPath == "/files/upload-url" ||
+		reqPath == "/files/multipart-upload-urls" ||
+		reqPath == "/files/multipart-upload-url"
+}
+
 // getLimiter, based on reqPath & reqMethod, return instance of limiter.Limiter which needs to
 // be applied for a request. It returns nil if the request is not rate limited
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
@@ -227,6 +239,9 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		return r.limit200ReqPerMin
 	}
 	if isPublicCollectionUploadURLPath(reqPath) {
+		return r.limit250ReqPerMin
+	}
+	if isAuthenticatedUploadURLPath(reqPath) {
 		return r.limit250ReqPerMin
 	}
 	return nil
