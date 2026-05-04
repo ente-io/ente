@@ -354,6 +354,10 @@ export const sidebar = [
                         link: "/auth/migration/authy/",
                     },
                     {
+                        text: "From Microsoft Authenticator",
+                        link: "/auth/migration/microsoft-authenticator/",
+                    },
+                    {
                         text: "From Steam",
                         link: "/auth/migration/steam/",
                     },
