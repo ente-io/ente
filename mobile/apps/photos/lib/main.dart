@@ -243,6 +243,13 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await initializeDateFormatting(locale?.languageCode ?? "en");
     // only runs for android
     _logger.info("[BG TASK] home widget sync");
+    if (!isLocalGalleryMode &&
+        hasGrantedMLConsent &&
+        localSettings.isMLLocalIndexingEnabled) {
+      PersonService.init(entityService, MLDataDB.instance, prefs);
+      _logger
+          .info("[BG TASK] person service initialized for memories recompute");
+    }
     await _homeWidgetSync(true);
 
     if ((isLocalGalleryMode || flagService.enableMLInBackground) &&
