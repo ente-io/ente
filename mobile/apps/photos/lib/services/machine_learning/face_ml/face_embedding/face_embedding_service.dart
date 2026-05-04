@@ -9,6 +9,8 @@ import "package:photos/utils/ml_util.dart";
 class MobileFaceNetInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face embedding model (MobileFaceNet) on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingService.instance].
+///
+/// Model size: ~5.3 MB.
 class FaceEmbeddingService extends MlModel {
   static const kRemoteBucketModelPath = "mobilefacenet_opset15.onnx";
   static const String _modelName = "MobileFaceNet";

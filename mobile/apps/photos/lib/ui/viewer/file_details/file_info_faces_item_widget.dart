@@ -507,11 +507,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final clusterIDToPerson = isLocalGallery
         ? <String, String>{}
         : await mlDataDB.getClusterIDToPersonID();
-    final faceCrops = await getCachedFaceCrops(
-      widget.file,
-      faces,
-      useTempCache: true,
-    );
     final defaultFaces = <Face>[];
     final remainingFaces = <Face>[];
 
@@ -543,6 +538,13 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         errorReason: manualPersons.isEmpty ? NoFacesReason.noFacesFound : null,
       );
     }
+
+    final facesToRender = [...defaultFaces, ...remainingFaces];
+    final faceCrops = await getCachedFaceCrops(
+      widget.file,
+      facesToRender,
+      useTempCache: true,
+    );
 
     if (faceCrops == null) {
       final manualPersons = isLocalGallery
