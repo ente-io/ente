@@ -32,7 +32,7 @@ import "package:photos/utils/local_settings.dart";
 
 enum _AlbumsFilter { ente, onDevice, shared }
 
-enum _AlbumsMenuAction { toggleView, name, created, updated }
+enum _AlbumsMenuAction { toggleView, name, newest, updated }
 
 class AlbumsTab extends StatefulWidget {
   const AlbumsTab({super.key, this.selectedAlbums});
@@ -222,21 +222,22 @@ class _AlbumsTabState extends State<AlbumsTab>
 
   Widget _buildAlbumsMenuRow({
     required String label,
-    required TextStyle labelStyle,
-    required TextStyle secondaryStyle,
-    required Color indicatorColor,
     String? secondaryLabel,
     bool isActive = false,
+    bool reserveIndicatorSpace = false,
+    Widget? trailingWidget,
   }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final Widget title = secondaryLabel == null
-        ? Text(label, style: labelStyle)
+        ? Text(label, style: textTheme.mini)
         : Row(
             children: [
-              Text(label, style: labelStyle),
+              Text(label, style: textTheme.mini),
               const SizedBox(width: 6),
-              Text("•", style: secondaryStyle),
+              Text("•", style: textTheme.miniMuted),
               const SizedBox(width: 6),
-              Text(secondaryLabel, style: secondaryStyle),
+              Text(secondaryLabel, style: textTheme.miniMuted),
             ],
           );
 
@@ -244,21 +245,25 @@ class _AlbumsTabState extends State<AlbumsTab>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         title,
-        if (isActive)
+        if (trailingWidget != null)
+          trailingWidget
+        else if (isActive)
           HugeIcon(
             icon: _sortDirection.value == AlbumSortDirection.ascending
                 ? HugeIcons.strokeRoundedArrowUp02
                 : HugeIcons.strokeRoundedArrowDown02,
             size: 12,
-            color: indicatorColor,
-          ),
+            strokeWidth: 3,
+            color: colorScheme.textMuted,
+          )
+        else if (reserveIndicatorSpace)
+          const SizedBox(width: 12),
       ],
     );
   }
 
   Future<void> _showAlbumsMenu(TapDownDetails details) async {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final strings = AppLocalizations.of(context);
     final overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox?;
@@ -271,6 +276,8 @@ class _AlbumsTabState extends State<AlbumsTab>
     );
     final isListView = _viewType.value == AlbumViewType.list;
     final currentSortKey = _sortKey.value;
+    final nameSortDirection =
+        currentSortKey == AlbumSortKey.albumName ? _sortDirection.value : null;
 
     PopupMenuItem<_AlbumsMenuAction> item({
       required _AlbumsMenuAction value,
@@ -316,34 +323,33 @@ class _AlbumsTabState extends State<AlbumsTab>
           value: _AlbumsMenuAction.toggleView,
           child: _buildAlbumsMenuRow(
             label: isListView ? strings.grid : strings.list,
-            labelStyle: textTheme.mini,
-            secondaryStyle: textTheme.miniMuted,
-            indicatorColor: colorScheme.textMuted,
+            trailingWidget: HugeIcon(
+              icon: isListView
+                  ? HugeIcons.strokeRoundedGridView
+                  : HugeIcons.strokeRoundedMenu01,
+              size: 12,
+              strokeWidth: 3,
+              color: colorScheme.contentLight,
+            ),
           ),
         ),
         item(
           value: _AlbumsMenuAction.name,
           child: _buildAlbumsMenuRow(
             label: strings.name,
-            secondaryLabel: currentSortKey == AlbumSortKey.albumName
-                ? (_sortDirection.value == AlbumSortDirection.ascending
-                    ? strings.sortAToZ
-                    : strings.sortZToA)
-                : null,
+            secondaryLabel: nameSortDirection != AlbumSortDirection.descending
+                ? strings.sortAToZ
+                : strings.sortZToA,
             isActive: currentSortKey == AlbumSortKey.albumName,
-            labelStyle: textTheme.mini,
-            secondaryStyle: textTheme.miniMuted,
-            indicatorColor: colorScheme.textMuted,
+            reserveIndicatorSpace: true,
           ),
         ),
         item(
-          value: _AlbumsMenuAction.created,
+          value: _AlbumsMenuAction.newest,
           child: _buildAlbumsMenuRow(
-            label: strings.created,
+            label: strings.newest,
             isActive: currentSortKey == AlbumSortKey.newestPhoto,
-            labelStyle: textTheme.mini,
-            secondaryStyle: textTheme.miniMuted,
-            indicatorColor: colorScheme.textMuted,
+            reserveIndicatorSpace: true,
           ),
         ),
         item(
@@ -352,9 +358,7 @@ class _AlbumsTabState extends State<AlbumsTab>
           child: _buildAlbumsMenuRow(
             label: strings.updated,
             isActive: currentSortKey == AlbumSortKey.lastUpdated,
-            labelStyle: textTheme.mini,
-            secondaryStyle: textTheme.miniMuted,
-            indicatorColor: colorScheme.textMuted,
+            reserveIndicatorSpace: true,
           ),
         ),
       ],
@@ -367,7 +371,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       case _AlbumsMenuAction.name:
         await _setSortMode(AlbumSortKey.albumName);
         break;
-      case _AlbumsMenuAction.created:
+      case _AlbumsMenuAction.newest:
         await _setSortMode(AlbumSortKey.newestPhoto);
         break;
       case _AlbumsMenuAction.updated:
