@@ -5,12 +5,15 @@
   "accountWelcomeBack": "Boas-vindas de volta!",
   "emailAlreadyRegistered": "E-mail já em utilização.",
   "emailNotRegistered": "E-mail não em utilização.",
+  "accountSetupIncompleteCreateAccount": "Configuração de conta incompleta. Crie conta para acabar a configuração.",
   "email": "E-mail",
   "cancel": "Cancelar",
   "verify": "Verificar",
   "invalidEmailAddress": "E-mail inválido",
+  "validEmailAddress": "Endereço eletrónico inválido",
   "enterValidEmail": "Favor, introduz um e-mail válido.",
   "deleteAccount": "Eliminar conta",
+  "deleteAccountWarning": "Isto apagará a sua conta de Ente Auth, Ente Photos, e Ente Locker.",
   "askDeleteReason": "Por que quer eliminar a sua conta?",
   "deleteAccountFeedbackPrompt": "Lamentável a sua ida. Favor, partilhe o seu comentário para ajudar-nos a aprimorar.",
   "feedback": "Comentário",
@@ -26,13 +29,25 @@
   "deleteReason4": "A razão não está listada",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "O pedido será revisto dentre 72 horas.",
+  "deleteEmailRequest": "Por favor, envie um email para <warning>account-deletion@ente.com</warning> com o seu endereço registado.",
   "entePhotosPerm": "Ente <i>precisa da permissão para</i> preservar as suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
+  "createAccountTitle": "Criar conta",
   "createNewAccount": "Criar conta nova",
   "password": "Palavra-passe",
   "confirmPassword": "Confirmar palavra-passe",
   "activeSessions": "Sessões ativas",
+  "ocrProcessingOverlayMessage": "A detetar texto...",
+  "ocrLoadingIndicatorLabel": "A detetar texto",
+  "ocrSelectionHint": "Deslize ou toque duas vezes para selecionar só o que precisa",
+  "ocrNoTextDetected": "Nenhum texto detetado",
+  "ocrRetryButtonLabel": "Tente novamente",
+  "ocrModelsNetworkRequiredError": "Conexão de rede necessária para transferir modelos OCR no primeiro uso",
+  "ocrModelsPrepareFailed": "Não possível preparar os modelos OCR",
+  "ocrImageNotFoundError": "Imagem não encontrada",
+  "ocrImageDecodeFailedError": "Não foi possível ler ficheiro de imagem",
+  "ocrGenericDetectError": "Não foi possível ler texto na imagem",
   "oops": "Ops",
   "somethingWentWrongPleaseTryAgain": "Algo correu mal. Favor, tentar de novo",
   "thisWillLogYouOutOfThisDevice": "Isto desconectará-vos deste aparelho!",
@@ -47,6 +62,7 @@
   "incorrectRecoveryKeyBody": "A chave de recuperação introduzida está incorreta",
   "forgotPassword": "Não recordo a palavra-passe",
   "enterYourRecoveryKey": "Introduz a sua chave de recuperação",
+  "noRecoveryKey": "Esqueceu a chave de recuperação?",
   "sorry": "Desculpe",
   "noRecoveryKeyNoDecryption": "Por conta da natureza do nosso protocolo de encriptação, os seus dados não podem ser desencriptados sem a sua palavra-passe ou chave de recuperação.",
   "verifyEmail": "Verificar e-mail",
@@ -54,9 +70,21 @@
   "checkInboxAndSpamFolder": "Revê a sua caixa de entrada (e de spam) para concluir a verificação",
   "tapToEnterCode": "Tocar para introduzir código",
   "resendEmail": "Reenviar e-mail",
+  "resendCode": "Reenviar código",
   "weHaveSendEmailTo": "Enviamos um e-mail para <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.com"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Mandámos um código para {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
     "placeholders": {
       "email": {
         "description": "The email address of the user",
@@ -75,6 +103,10 @@
   "weakStrength": "Fraca",
   "strongStrength": "Forte",
   "moderateStrength": "Moderada",
+  "strongPassword": "Palavra-passe robusta",
+  "passwordRequirements": "Use 9+ carateres, uma maiúscula, e um carácter especial",
+  "passwordsMatch": "Palavras-passe correspondem",
+  "passwordsDontMatch": "Palavras-passe não correspondem",
   "passwordStrength": "Força da palavra-passe: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -91,6 +123,7 @@
   "generatingEncryptionKeys": "Gerando chaves de encriptação...",
   "pleaseWait": "Por favor, aguarde ...",
   "continueLabel": "Continuar",
+  "continueInMailApp": "Continuar na aplicação do mail",
   "insecureDevice": "Dispositivo inseguro",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Desculpe, não foi possível gerar chaves seguras neste dispositivo.\n\npor favor iniciar sessão com um dispositivo diferente.",
   "howItWorks": "Como funciona",
@@ -104,7 +137,13 @@
   "changeEmail": "Alterar e-mail",
   "enterYourPassword": "Introduza a sua palavra-passe",
   "welcomeBack": "Bem-vindo(a) de volta!",
+  "readyToBackupTitle": "Pronto para cópia de segurança",
+  "readyToBackupSubtitle": "As suas fotos sincronizaram no fundo. A primeira cópia de segurança poderá levar algum tempo.",
   "contactSupport": "Contactar o suporte",
+  "locationPickerTip": "Pode também adicionar uma localização centrada numa foto, pelo ecrã de info da foto.",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Palavra-passe incorreta",
   "pleaseTryAgain": "Por favor, tente novamente",
   "recreatePasswordTitle": "Recriar palavra-passe",
@@ -113,8 +152,10 @@
   "verifyPassword": "Verificar palavra-passe",
   "recoveryKey": "Chave de recuperação",
   "recoveryKeyOnForgotPassword": "Se esquecer sua palavra-passe, a única maneira de recuperar os seus dados é com esta chave.",
+  "recoveryKeySaveDescription": "Por favor, guarde esta chave num lugar seguro.",
   "doThisLater": "Fazer isto mais tarde",
   "saveKey": "Guardar chave",
+  "shareKey": "Partilhar chave",
   "recoveryKeyCopiedToClipboard": "Chave de recuperação copiada para a área de transferência",
   "recoverAccount": "Recuperar conta",
   "recover": "Recuperar",
@@ -135,6 +176,7 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Copie e cole este código\nno seu aplicativo de autenticação",
   "tapToCopy": "toque para copiar",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Leia este código com a sua aplicação dois fatores.",
+  "twoFAVerification": "Autenticação 2FA",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Introduzir o código de 6 dígitos da\nsua aplicação de autenticação",
   "confirm": "Confirmar",
   "setupComplete": "Configuração concluída",
@@ -154,6 +196,11 @@
   "confirmYourRecoveryKey": "Confirmar chave de recuperação",
   "addViewer": "Adicionar visualizador",
   "addCollaborator": "Adicionar colaborador",
+  "admin": "Administrador",
+  "admins": "Administradores",
+  "addAdmin": "Adicionar administrador",
+  "addMoreAdmins": "Adicionar mais administradores",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Admins e colaboradores podem adicionar fotos. Admins podem também gerir fotos e participantes.",
   "addANewEmail": "Adicionar um novo e-mail",
   "orPickAnExistingOne": "Ou escolha um já existente",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Os colaboradores podem adicionar fotos e vídeos ao álbum compartilhado.",
@@ -183,7 +230,9 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Permitir juntar-se ao álbum",
   "allowAddPhotosDescription": "Permitir que pessoas com o link também adicionem fotos ao álbum compartilhado.",
+  "enableComment": "Comentários e reações",
   "passwordLock": "Bloqueio da palavra-passe",
   "canNotOpenTitle": "Não pôde abrir este álbum",
   "canNotOpenBody": "Perdão, portanto o álbum não pode ser aberto na aplicação.",
@@ -195,6 +244,9 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "layoutGrouped": "Agrupados",
+  "layoutContinuous": "Contínuo",
+  "preview": "Pré-visualização",
   "linkExpiry": "Link expirado",
   "linkExpired": "Expirado",
   "linkEnabled": "Ativado",
@@ -234,12 +286,16 @@
   "shareWithNonenteUsers": "Compartilhar com usuários que não usam Ente",
   "createPublicLink": "Criar link público",
   "sendLink": "Enviar link",
+  "qrCode": "Código QR",
+  "sendQrCode": "Partilhar Código QR",
   "copyLink": "Copiar link",
+  "copyEmbedHtml": "Copiar HTML incorporado",
   "linkHasExpired": "O link expirou",
+  "linkRequestLimitExceeded": "Este álbum já foi visto em demasiados dispositivos",
   "publicLinkEnabled": "Link público ativado",
   "shareALink": "Partilhar um link",
   "sharedAlbumSectionDescription": "Criar álbuns compartilhados e colaborativos com outros usuários da Ente, incluindo usuários em planos gratuitos.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -263,16 +319,23 @@
   "verificationId": "ID de Verificação",
   "verifyEmailID": "Verificar e-mail",
   "emailNoEnteAccount": "{email} não possui uma conta Ente.\n\nEnvie um convite para compartilhar fotos.",
+  "shareMyVerificationID": "Aqui está o meu ID de verificação: {verificationID} para ente.com",
   "somethingWentWrong": "Ocorreu um erro",
   "sendInvite": "Enviar convite",
+  "shareTextRecommendUsingEnte": "Transfira Ente para podermos partilhar facilmente fotos e vídeos com qualidade original\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Transfira Ente para poder adicioná-lo ao meu plano de família\n\nhttps://ente.com",
   "done": "Concluído",
   "applyCodeTitle": "Aplicar código",
   "enterCodeDescription": "Introduza o código fornecido pelo seu amigo para obter armazenamento gratuito para ambos",
   "apply": "Aplicar",
   "failedToApplyCode": "Falha ao aplicar código",
+  "invalidReferralCode": "Código inválido",
   "enterReferralCode": "Insira o código de referência",
   "codeAppliedPageTitle": "Código aplicado",
+  "changeYourReferralCode": "Altere o seu código",
   "change": "Alterar",
+  "saveCode": "Guardar código",
+  "referralCodeHint": "Pode personalizar este código até 3 vezes",
   "unavailableReferralCode": "Desculpe, este código não está disponível.",
   "codeChangeLimitReached": "Desculpe, você atingiu o limite de alterações de código.",
   "onlyFamilyAdminCanChangeCode": "Entre em contato com {familyAdminEmail} para alterar o seu código.",
@@ -281,14 +344,23 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB reivindicados!",
   "details": "Detalhes",
   "claimMore": "Reclamar mais!",
+  "earnMoreSpace": "Ganhe mais espaço!",
   "theyAlsoGetXGb": "Eles também recebem {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB sempre que alguém se inscreve num plano pago e aplica o seu código",
   "claimFreeStorage": "Solicitar armazenamento gratuito",
   "inviteYourFriends": "Convide os seus amigos",
+  "earnFreeStorage": "Adquira armazenamento gratuito",
+  "shareCodeEarnStorage": "Partilhe o código, receba armazenamento",
+  "youBothGet": "Ambos adquirem",
+  "free": "gratuito",
   "failedToFetchReferralDetails": "Não foi possível obter detalhes de indicação. Por favor, tente novamente mais tarde.",
+  "referralStep1": "1. Personalize e partilhe o seu código",
+  "referralStep2": "2. Criam uma conta Ente usando o seu código",
   "referralsAreCurrentlyPaused": "As referências estão atualmente em pausa",
+  "youCanAtMaxDoubleYourStorage": "Pode no máximo duplicar o seu armazenamento",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Sua família reinvidicou {storageAmountInGb} GB até então}false {Você reinvindicou {storageAmountInGb} GB até então}other {Você reinvindicou {storageAmountInGb} GB até então!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -312,16 +384,24 @@
   "freeStorageClaimed": "Armazenamento gratuito reclamado",
   "freeStorageUsable": "Armazenamento livre utilizável",
   "usableReferralStorageInfo": "O armazenamento disponível é limitado pelo seu plano atual. O excesso de armazenamento reivindicado tornará automaticamente útil quando você atualizar seu plano.",
+  "usedYourCode": "Usou o seu código",
+  "claimedByYou": "Reivindicado por si",
+  "earned": "Recebido",
+  "usable": "Usável",
   "removeFromAlbumTitle": "Remover do álbum",
   "removeFromAlbum": "Remover do álbum",
   "itemsWillBeRemovedFromAlbum": "Os itens selecionados serão removidos deste álbum",
+  "removeShareItemsWarning": "Fotos selecionadas não serão acessíveis para qualquer visualizador deste álbum, exceto os seus donos.",
   "addingToFavorites": "Adicionando aos favoritos...",
   "removingFromFavorites": "Removendo dos favoritos...",
   "sorryCouldNotAddToFavorites": "Desculpe, não foi possível adicionar aos favoritos!",
   "sorryCouldNotRemoveFromFavorites": "Desculpe, não foi possível remover dos favoritos!",
   "subscribeToEnableSharing": "Você precisa de uma assinatura paga ativa para ativar o compartilhamento.",
+  "subscribeToChangeLinkSetting": "É necessária uma subscrição paga para alterar esta definição.",
   "subscribe": "Subscrever",
   "canOnlyRemoveFilesOwnedByYou": "",
+  "cannotMoveToSharedAlbums": "Não é possível mover para álbuns partilhados",
+  "cannotMoveToSharedAlbumsMessage": "Itens podem apenas ser adicionados a álbuns partilhados, não movidos. Deseja adicionar?",
   "deleteSharedAlbum": "Excluir álbum compartilhado?",
   "deleteAlbum": "Apagar álbum",
   "deleteAlbumDialog": "Eliminar também as fotos (e vídeos) presentes neste álbum de <bold>all</bold>  os outros álbuns de que fazem parte?",
@@ -414,6 +494,10 @@
   "mlConsentPrivacy": "Por favor, clique aqui para mais detalhes sobre este recurso na nossa política de privacidade",
   "mlConsentConfirmation": "Eu entendo, e desejo ativar a aprendizagem automática",
   "magicSearch": "Pesquisa mágica",
+  "magic": "Magia",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Descobrir",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -440,10 +524,29 @@
   "pendingItems": "Itens pendentes",
   "clearIndexes": "Limpar índices",
   "selectFoldersForBackup": "Selecionar pastas para cópia de segurança",
+  "selectFolders": "Selecione pastas",
+  "selectAlbumsToBackUpToEnte": " ",
   "selectedFoldersWillBeEncryptedAndBackedUp": "As pastas selecionadas serão encriptadas e guardadas como cópia de segurança",
   "unselectAll": "Desmarcar tudo",
   "selectAll": "Selecionar tudo",
   "skip": "Pular",
+  "startWithLatestPhotos": "Comece pelas fotos recentes",
+  "backingUpLastSevenDaysPhotos": "Executando cópia de segurança das fotos dos últimos 7 dias",
+  "backupOnlyNewPhotos": "Fazer cópia de segurança de apenas novas fotos.",
+  "backupOnlyNewPhotosAllFoldersSelected": "Todas as pastas estão de momento selecionadas para a cópia de segurança.\n\nPode continuar, ou modificar as pastas selecionadas.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Nenhuma pasta está selecionada para a cópia de segurança.\n\nPode continuar, ou modificar as pastas selecionadas.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Nenhuma pasta está selecionada para a cópia de segurança.\n\nPor favor, selecione pastas para continuar.",
+  "backupOnlyNewPhotosWarningBody": "Está a executar uma cópia de segurança de fotos de {formattedDate}. Por favor, atualize as suas definições para fazê-lo para todas as fotos.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Atualizar definições",
   "updatingFolderSelection": "Atualizando seleção de pasta...",
   "itemCount": "{count, plural, one{{count} item} other{{count} itens}}",
   "deleteItemCount": "{count, plural, =1 {Apagar {count} item} other {Apagar {count} itens}}",
@@ -510,6 +613,8 @@
   "removeDuplicatesDesc": "Rever e remover ficheiros que sejam duplicados exatos.",
   "viewLargeFiles": "Ficheiros grandes",
   "viewLargeFilesDesc": "Ver os ficheiros que estão a consumir a maior quantidade de armazenamento.",
+  "deleteSuggestions": "Apagar sugestões",
+  "rejectSuggestions": "Rejeitar sugestões",
   "noDuplicates": "✨ Sem duplicados",
   "youveNoDuplicateFilesThatCanBeCleared": "Não tem nenhum ficheiro duplicado que possa ser eliminado",
   "success": "Sucesso",
@@ -544,6 +649,51 @@
     }
   },
   "familyPlans": "Planos familiares",
+  "family": "Família",
+  "designedForFamilies": "Feito para famílias",
+  "shareYourSubscription": "Partilhe a sua subscrição para entes queridos",
+  "shareStorageWith5Members": "Partilhe armazenamento com 5 membros",
+  "plansStartAt": "Planos começam a partir de {price}/mês",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Ver planos",
+  "bringYourFamilyAlong": "Traga a sua família consigo",
+  "yourPlanSupportsFamily": "O seu plano já permite uma família",
+  "addUpTo5MembersFree": "Adicione até 5 membros gratuitamente",
+  "addFamilyMember": "Adicionar membro de família",
+  "addMember": "Adicionar membro",
+  "inviteMembers": "Convidar membros",
+  "enterEmailAddresses": "Introduza os endereços eletrónicos. Precisam duma conta Ente.",
+  "inviteLimitReached": "Adicionou 5 convites. Remova um para adicionar outro",
+  "emailAddress": "Correio eletrónico",
+  "sendInvites": "Partilhar convites",
+  "sendCountInvites": "{count, plural, =0 {Partilhar convites} =1 {Partilhar 1 convite} other {Partilhar {count} convites}}",
+  "@sendCountInvites": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterAnEmailAddress": "Introduza um endereço eletrónico",
+  "enterAValidEmailAddress": "Introduza um endereço eletrónico válido",
+  "thisUserIsNotOnEnte": "Este utilizador não está em Ente",
+  "emailNeedsEnteAccountForFamily": "{email} não possui conta Ente.\n\nConvide-os para adicionar à sua família assim que criarem uma conta em Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
   "referrals": "Referências",
   "notifications": "Notificações",
   "advanced": "Avançado",
@@ -867,7 +1017,7 @@
   "authToViewYourMemories": "Por favor, autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Libertar espaço",
-  "freeUpSpaceSaving": "{count, plural, =1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} neste álbum teve um backup seguro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1672,7 +1822,6 @@
   "spotlightOnThem": "A dar destaque em {name}",
   "personIsAge": "{name} tem {age} anos!",
   "personTurningAge": "{name} fará {age} anos em breve",
-  "lastTimeWithThem": "Últimos momentos com {name}",
   "tripToLocation": "Viagem para {location}",
   "tripInYear": "Viajem em {year}",
   "lastYearsTrip": "Viagem do ano passado",

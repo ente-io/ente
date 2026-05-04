@@ -837,7 +837,6 @@
   "spotlightOnYourself": "Сва светла на теби",
   "spotlightOnThem": "Сва светла на {name}",
   "personTurningAge": "{name} ускоро навршава {age}",
-  "lastTimeWithThem": "Последњи пут са {name}",
   "tripToLocation": "Пут у {location}",
   "tripInYear": "Пут из {year}",
   "lastYearsTrip": "Прошлогодишње путовање",

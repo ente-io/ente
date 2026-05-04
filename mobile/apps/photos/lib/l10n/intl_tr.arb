@@ -1983,7 +1983,6 @@
   "spotlightOnThem": "Sahne {name}'in",
   "personIsAge": "{name} {age} yaşında!",
   "personTurningAge": "{name} yakında {age} yaşına giriyor",
-  "lastTimeWithThem": "{name} ile son an",
   "tripToLocation": "{location}'a gezi",
   "tripInYear": "{year} yılındaki gezi",
   "lastYearsTrip": "Geçen yılki gezi",
