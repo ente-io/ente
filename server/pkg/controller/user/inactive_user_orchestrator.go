@@ -467,12 +467,6 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		"deletion_date": deletionDate,
 	}).Info("Sent inactive user email")
 
-	if config.IsFinal {
-		c.DiscordController.NotifyAdminAction(
-			fmt.Sprintf("Inactive user %d (%s) reached 13 months inactivity and account deletion was initiated",
-				user.ID, user.Email))
-	}
-
 	return stage, true, false, false, nil
 }
 
