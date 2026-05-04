@@ -80,7 +80,7 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     const [browserCanCast, setBrowserCanCast] = useState(false);
 
     // The link to the cast app is to the full URL, but in the link text only
-    // show the host (e.g. for "https://cast.ente.io", show "cast.ente.io").
+    // show the host (e.g. for "https://cast.ente.com", show "cast.ente.com").
     const castHost = new URL(castURL).host;
 
     useEffect(() => {

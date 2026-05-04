@@ -35,10 +35,6 @@ These images accept four environment variables to allow you to customize them:
   hosted. This is used for features like join album links. Default:
   "http://localhost:3000".
 
-- `ENTE_MEMORIES_ORIGIN` - The externally visible origin where the memories app
-  is hosted. This is used for public memory share links and memories app
-  redirects. Default: "http://localhost:3010".
-
 For example, if your API server is running at `https://api.example.org`, you can
 configure your Docker image to connect to it:
 

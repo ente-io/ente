@@ -16,7 +16,6 @@ WORKDIR /build/web
 
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=ENTE_API_ORIGIN_PLACEHOLDER
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=ENTE_ALBUMS_ORIGIN_PLACEHOLDER
-ENV NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT=ENTE_MEMORIES_ORIGIN_PLACEHOLDER
 ENV NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=ENTE_PHOTOS_ORIGIN_PLACEHOLDER
 
 # `yarn install` is flaky on the GitHub arm64 runners otherwise.
@@ -99,7 +98,6 @@ EXPOSE 3010
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
 ENV ENTE_ALBUMS_ORIGIN=http://localhost:3002
-ENV ENTE_MEMORIES_ORIGIN=http://localhost:3010
 ENV ENTE_PHOTOS_ORIGIN=http://localhost:3000
 
 COPY <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
@@ -113,8 +111,6 @@ find /out/photos -name '*.js' |
     xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
 find /out/albums -name '*.js' |
     xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
-find /out/memories -name '*.js' |
-    xargs sed -i'' "s#ENTE_MEMORIES_ORIGIN_PLACEHOLDER#\$ENTE_MEMORIES_ORIGIN#g"
 EOF
 
 RUN chmod +x /docker-entrypoint.d/90-replace-ente-env.sh

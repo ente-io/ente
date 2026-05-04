@@ -24,7 +24,6 @@ Here's the list of environment variables that is used by the cluster:
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
 | `web`      | `ENTE_API_ORIGIN`      | Alias for `NEXT_PUBLIC_ENTE_ENDPOINT`. API Endpoint for Ente's API (Museum).                                       | http://localhost:8080           |
 | `web`      | `ENTE_ALBUMS_ORIGIN`   | Alias for `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`. Base URL for the Ente Albums app, used for public sharing.           | http://localhost:3002           |
-| `web`      | `ENTE_MEMORIES_ORIGIN` | Alias for `NEXT_PUBLIC_ENTE_MEMORIES_ENDPOINT`. Base URL for the Ente Memories app, used for public memory shares. | http://localhost:3010           |
 | `web`      | `ENTE_PHOTOS_ORIGIN`   | Alias for `NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT`. Base URL for Ente Photos web app.                                    | http://localhost:3000           |
 | `postgres` | `POSTGRES_USER`        | Username for PostgreSQL database                                                                                   | `pguser`                        |
 | `postgres` | `POSTGRES_DB`          | Name of database for use with Ente                                                                                 | `ente_db`                       |

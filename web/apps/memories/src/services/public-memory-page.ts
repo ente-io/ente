@@ -1,6 +1,5 @@
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { memoriesAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { alignLaneFilesWithMetadata } from "../utils/lane";
 import {
@@ -38,7 +37,7 @@ export const loadPublicMemoryPage = async (
         const accessToken = extractAccessTokenFromURL(currentURL);
 
         if (!accessToken) {
-            return { kind: "redirect", redirectURL: memoriesAppOrigin() };
+            return { kind: "redirect", redirectURL: "https://ente.com" };
         }
 
         const shareKey = await extractMemoryShareKeyFromURL(currentURL);

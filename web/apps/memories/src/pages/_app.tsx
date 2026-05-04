@@ -13,7 +13,7 @@ const memoriesAppStyle = { "--font-itim": "'Itim'" } as React.CSSProperties;
 const memoriesAppTitle = "Ente Memories";
 
 function MemoriesAppHead() {
-    const previewImage = "https://memories.ente.io/images/memories-meta.png";
+    const previewImage = "https://memories.ente.com/images/memories-meta.png";
 
     return (
         <>

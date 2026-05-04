@@ -164,6 +164,6 @@ mod tests {
         // For production endpoint, should use CDN
         let url = methods.get_file_url("test", 12345).await;
         assert!(url.is_ok());
-        assert!(url.unwrap().contains("files.ente.io"));
+        assert!(url.unwrap().contains("files.ente.com"));
     }
 }
