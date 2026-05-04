@@ -115,7 +115,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: colorTheme.backgroundBase,
+                        color: colorTheme.backgroundColour,
                       ),
                     ),
                   ),

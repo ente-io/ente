@@ -514,14 +514,15 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? null : const Color(0xFFFAFAFA),
+      backgroundColor: isDark ? null : colorScheme.backgroundColour,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: isDark ? null : const Color(0xFFFAFAFA),
+        backgroundColor: isDark ? null : colorScheme.backgroundColour,
         elevation: 0,
         centerTitle: false,
         leading: IconButtonWidget(

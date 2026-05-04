@@ -400,7 +400,7 @@ class _StackedAvatars extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: colorScheme.backgroundBase,
+                    color: colorScheme.backgroundColour,
                     width: 1.167,
                   ),
                 ),
@@ -419,7 +419,7 @@ class _StackedAvatars extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: colorScheme.backgroundBase,
+                    color: colorScheme.backgroundColour,
                     width: 1.167,
                   ),
                 ),
@@ -443,7 +443,7 @@ class _StackedAvatars extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: colorScheme.backgroundBase,
+          color: colorScheme.backgroundColour,
           width: 1.167,
         ),
       ),

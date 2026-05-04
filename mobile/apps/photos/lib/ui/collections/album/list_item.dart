@@ -1,7 +1,6 @@
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
@@ -132,9 +131,8 @@ class AlbumListItemWidget extends StatelessWidget {
                   builder: (context, snapshot) {
                     String countText = "";
                     if (snapshot.hasData) {
-                      countText = AppLocalizations.of(context).memoryCount(
+                      countText = AppLocalizations.of(context).itemCount(
                         count: snapshot.data!,
-                        formattedCount: NumberFormat().format(snapshot.data!),
                       );
                     } else if (snapshot.hasError) {
                       Logger("AlbumListItemWidget").severe(

@@ -1274,7 +1274,7 @@ class _MemoryLaneCard extends StatelessWidget {
           if (overlayOpacity > 0)
             Container(
               color:
-                  colorScheme.backgroundBase.withValues(alpha: overlayOpacity),
+                  colorScheme.backgroundColour.withValues(alpha: overlayOpacity),
             ),
           if (frame.image == null)
             Center(
@@ -1299,10 +1299,10 @@ class _MemoryLaneCard extends StatelessWidget {
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          colorScheme.backgroundBase.withValues(
+                          colorScheme.backgroundColour.withValues(
                             alpha: gradientAlpha,
                           ),
-                          colorScheme.backgroundBase.withValues(alpha: 0.0),
+                          colorScheme.backgroundColour.withValues(alpha: 0.0),
                         ],
                       ),
                     ),

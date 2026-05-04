@@ -222,7 +222,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: getEnteColorScheme(context).backgroundBase,
+                  color: getEnteColorScheme(context).backgroundColour,
                 ),
                 child: Column(
                   children: [

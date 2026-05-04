@@ -113,7 +113,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: colorScheme.backgroundColour,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),

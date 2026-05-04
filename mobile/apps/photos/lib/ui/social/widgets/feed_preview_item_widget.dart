@@ -134,7 +134,7 @@ class _PreviewAvatarStack extends StatelessWidget {
         shape: BoxShape.circle,
         border: showBorder
             ? Border.all(
-                color: colorScheme.backgroundBase,
+                color: colorScheme.backgroundColour,
                 width: 1.5,
               )
             : null,

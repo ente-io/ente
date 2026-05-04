@@ -62,10 +62,10 @@ class _SearchTabState extends State<SearchTab> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final resultsBackground = EnteTheme.isDark(context)
-        ? const Color.fromRGBO(22, 22, 22, 1)
+        ? colorScheme.backgroundColour
         : colorScheme.backgroundElevated2;
     final headerColor =
-        index == 1 ? resultsBackground : colorScheme.backgroundBase;
+        index == 1 ? resultsBackground : colorScheme.backgroundColour;
     return Column(
       children: [
         ColoredBox(

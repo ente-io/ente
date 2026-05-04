@@ -192,7 +192,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: colorTheme.backgroundBase,
+                        color: colorTheme.backgroundColour,
                       ),
                     ),
                   ),

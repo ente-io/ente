@@ -25,14 +25,11 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
     final cardColor =
         isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
+      backgroundColor: colorScheme.backgroundColour,
       body: SafeArea(
         child: FutureBuilder<BonusDetails>(
           future: storageBonusService.getBonusDetails(),

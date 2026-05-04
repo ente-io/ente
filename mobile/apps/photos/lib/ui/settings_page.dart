@@ -68,16 +68,12 @@ class _SettingsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
     final showLoginEntry = isOfflineMode && !hasConfiguredAccount;
 
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
     return Container(
-      color: pageBackgroundColor,
+      color: colorScheme.backgroundColour,
       child: SafeArea(
         bottom: false,
         child: SingleChildScrollView(

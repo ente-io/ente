@@ -27,7 +27,7 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
     final colorScheme = getEnteColorScheme(context);
 
     return Scaffold(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: VideoEditorAppBar(
         onCancel: () {
           widget.controller.updateTrim(minTrim, maxTrim);

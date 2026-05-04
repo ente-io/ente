@@ -14,7 +14,7 @@ final lightThemeData = ThemeData(
   colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
-    surface: Colors.white,
+    surface: backgroundColorLight,
     surfaceTint: Colors.transparent,
   ),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
@@ -28,9 +28,9 @@ final lightThemeData = ThemeData(
     primary: const Color.fromRGBO(0, 0, 0, 1),
   ),
   switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
-  scaffoldBackgroundColor: const Color.fromRGBO(255, 255, 255, 1),
+  scaffoldBackgroundColor: backgroundColorLight,
   appBarTheme: const AppBarTheme().copyWith(
-    backgroundColor: Colors.white,
+    backgroundColor: backgroundColorLight,
     foregroundColor: Colors.black,
     iconTheme: const IconThemeData(color: Colors.black),
     elevation: 0,
@@ -94,7 +94,7 @@ final darkThemeData = ThemeData(
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
   colorScheme: const ColorScheme.dark(
     primary: Colors.white,
-    surface: Color.fromRGBO(0, 0, 0, 1),
+    surface: backgroundColorDark,
     secondary: Color.fromARGB(255, 163, 163, 163),
     surfaceTint: Colors.transparent,
   ),
@@ -113,9 +113,9 @@ final darkThemeData = ThemeData(
     onPrimary: const Color.fromRGBO(0, 0, 0, 1),
     primary: const Color.fromRGBO(255, 255, 255, 1),
   ),
-  scaffoldBackgroundColor: const Color.fromRGBO(0, 0, 0, 1),
+  scaffoldBackgroundColor: backgroundColorDark,
   appBarTheme: const AppBarTheme().copyWith(
-    color: Colors.black,
+    backgroundColor: backgroundColorDark,
     elevation: 0,
   ),
   cardColor: const Color.fromRGBO(10, 15, 15, 1.0),
@@ -239,11 +239,13 @@ extension CustomColorScheme on ColorScheme {
       ? const Color(0xFFF5F5F5)
       : const Color(0xFF252525);
 
-  Color get defaultBackgroundColor =>
-      brightness == Brightness.light ? backgroundBaseLight : backgroundBaseDark;
+  Color get defaultBackgroundColor => brightness == Brightness.light
+      ? backgroundColorLight
+      : backgroundColorDark;
 
-  Color get inverseBackgroundColor =>
-      brightness != Brightness.light ? backgroundBaseLight : backgroundBaseDark;
+  Color get inverseBackgroundColor => brightness != Brightness.light
+      ? backgroundColorLight
+      : backgroundColorDark;
 
   Color get defaultTextColor =>
       brightness == Brightness.light ? textBaseLight : textBaseDark;

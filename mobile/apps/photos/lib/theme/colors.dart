@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class EnteColorScheme {
   // Background Colors
-  final Color backgroundBase;
+  final Color backgroundColour;
   final Color backgroundElevated;
   final Color backgroundElevated2;
 
@@ -78,8 +78,6 @@ class EnteColorScheme {
   final Color strokeSolid;
   final Color strokeDark;
 
-  final Color backgroundColour;
-
   final Color greenBase;
   final Color greenDark;
   final Color greenDarker;
@@ -92,7 +90,7 @@ class EnteColorScheme {
   final Color redLight;
 
   const EnteColorScheme(
-    this.backgroundBase,
+    this.backgroundColour,
     this.backgroundElevated,
     this.backgroundElevated2,
     this.backdropBase,
@@ -133,7 +131,6 @@ class EnteColorScheme {
     this.contentReverse,
     this.strokeSolid,
     this.strokeDark,
-    this.backgroundColour,
     this.greenBase,
     this.greenDark,
     this.greenDarker,
@@ -158,7 +155,7 @@ class EnteColorScheme {
 }
 
 const EnteColorScheme lightScheme = EnteColorScheme(
-  backgroundBaseLight,
+  backgroundColorLight,
   backgroundElevatedLight,
   backgroundElevated2Light,
   backdropBaseLight,
@@ -199,7 +196,6 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   contentReverseLight,
   strokeLight,
   strokeDarkLight,
-  backgroundColourLight,
   green,
   greenDark,
   greenDarker,
@@ -212,7 +208,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
-  backgroundBaseDark,
+  backgroundColorDark,
   backgroundElevatedDark,
   backgroundElevated2Dark,
   backdropBaseDark,
@@ -253,7 +249,6 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   contentReverseDark,
   strokeDark,
   strokeDarkDark,
-  backgroundColourDark,
   green,
   greenDark,
   greenDarker,
@@ -265,12 +260,13 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   redLightDark,
 );
 
-// Background Colors
-const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
+// Background
+const Color backgroundColorLight = Color.fromRGBO(250, 250, 250, 1);
+const Color backgroundColorDark = Color.fromRGBO(22, 22, 22, 1);
+
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevated2Light = Color.fromRGBO(251, 251, 251, 1);
 
-const Color backgroundBaseDark = Color.fromRGBO(0, 0, 0, 1);
 const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
 const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
@@ -473,7 +469,3 @@ const Color strokeDark = Color.fromRGBO(20, 20, 20, 1);
 
 const Color strokeDarkLight = Color.fromRGBO(224, 224, 224, 1);
 const Color strokeDarkDark = Color.fromRGBO(62, 62, 62, 1);
-
-// Background
-const Color backgroundColourLight = Color.fromRGBO(250, 250, 250, 1);
-const Color backgroundColourDark = Color.fromRGBO(22, 22, 22, 1);

@@ -857,7 +857,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         builder: (context, _) {
                           final colorScheme = getEnteColorScheme(context);
                           final resultsBackground = EnteTheme.isDark(context)
-                              ? const Color.fromRGBO(22, 22, 22, 1)
+                              ? colorScheme.backgroundColour
                               : colorScheme.backgroundElevated2;
                           final isSearchResults = isOnSearchTab &&
                               IndexOfStackNotifier().index == 1;
@@ -876,7 +876,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                     ? resultsBackground
                                     : isOnOnlineGrantPermissionScreen
                                         ? colorScheme.backgroundColour
-                                        : colorScheme.backgroundBase,
+                                        : colorScheme.backgroundColour,
                           );
                         },
                       );
