@@ -100,7 +100,7 @@ struct MessageInputView: View {
                             ProgressView()
                                 .scaleEffect(0.8)
                         case .recording:
-                            Image("Voice01Icon")
+                            Image("Mic02Icon")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 14, height: 14)
@@ -159,6 +159,7 @@ struct MessageInputView: View {
                         #endif
 
                     if EnsuFeatureFlags.enableImageUploads && editingMessage == nil {
+                        let canUseAttachment = !isGenerating && !isDownloading && !isAttachmentDownloadBlocked
                         PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                             Image("Upload01Icon")
                                 .resizable()
@@ -166,8 +167,8 @@ struct MessageInputView: View {
                                 .frame(width: attachmentIconSize, height: attachmentIconSize)
                                 .frame(width: 32, height: 32, alignment: .center)
                         }
-                        .disabled(isGenerating || isDownloading || isAttachmentDownloadBlocked)
-                        .foregroundStyle(EnsuColor.textMuted)
+                        .disabled(!canUseAttachment)
+                        .foregroundStyle(canUseAttachment ? EnsuColor.textPrimary : EnsuColor.textMuted)
                         .simultaneousGesture(TapGesture().onEnded {
                             hapticTap()
                         })
@@ -217,7 +218,7 @@ struct MessageInputView: View {
                                     .foregroundStyle(EnsuColor.stopButton)
                                     .frame(width: 32, height: 32)
                             } else {
-                                Image("Voice01Icon")
+                                Image("Mic02Icon")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: attachmentIconSize, height: attachmentIconSize)
