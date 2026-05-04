@@ -5,6 +5,24 @@ description: Frequently asked questions about Ente Auth
 
 # Frequently Asked Questions
 
+### How do I add a code to Ente Auth? {#add-code}
+
+**If a service shows a QR code:**
+
+1. Open Ente Auth.
+2. Tap the add button.
+3. Select "Scan a QR code".
+4. Scan the QR code shown by the service.
+5. Enter the generated code to verify setup.
+
+**If a service shows a setup key:**
+
+1. Open Ente Auth.
+2. Tap the add button.
+3. Choose manual entry.
+4. Enter the account name, issuer, and setup key.
+5. Save and verify the generated code.
+
 ### How secure is Ente Auth?
 
 All codes you backup via Ente is stored with end-to-end encryption. This means
