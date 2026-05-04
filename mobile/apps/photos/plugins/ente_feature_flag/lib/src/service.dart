@@ -12,7 +12,6 @@ import "package:shared_preferences/shared_preferences.dart";
 import "model.dart";
 
 class FlagService {
-  static const int _uploadV2Flag = 1 << 0;
   static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
@@ -72,8 +71,6 @@ class FlagService {
   bool get hasGrantedMLConsent => flags.faceSearchEnabled;
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
-
-  bool get enableUploadV2 => _isServerFlagEnabled(_uploadV2Flag);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
