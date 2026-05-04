@@ -1,4 +1,5 @@
 import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
@@ -157,27 +158,30 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 18),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).showTextOnWidget,
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () => _showText,
-                            onChanged: () async {
-                              final next = !_showText;
-                              setState(() => _showText = next);
-                              await localSettings.setWidgetTextHidden(
-                                WidgetHideTextFlag.memory,
-                                !next,
-                              );
-                              await HomeWidgetService.instance.updateWidget(
-                                androidClass:
-                                    MemoryHomeWidgetService.ANDROID_CLASS_NAME,
-                                iOSClass:
-                                    MemoryHomeWidgetService.IOS_CLASS_NAME,
-                              );
-                            },
+                        if (kDebugMode) ...[
+                          MenuItemWidgetNew(
+                            title:
+                                AppLocalizations.of(context).showTextOnWidget,
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () => _showText,
+                              onChanged: () async {
+                                final next = !_showText;
+                                setState(() => _showText = next);
+                                await localSettings.setWidgetTextHidden(
+                                  WidgetHideTextFlag.memory,
+                                  !next,
+                                );
+                                await HomeWidgetService.instance.updateWidget(
+                                  androidClass: MemoryHomeWidgetService
+                                      .ANDROID_CLASS_NAME,
+                                  iOSClass:
+                                      MemoryHomeWidgetService.IOS_CLASS_NAME,
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
+                          const SizedBox(height: 8),
+                        ],
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title:

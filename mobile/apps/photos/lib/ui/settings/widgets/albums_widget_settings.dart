@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -169,30 +170,31 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                 ),
               )
             else ...[
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 18, 6, 8),
-                  child: MenuItemWidgetNew(
-                    title: AppLocalizations.of(context).showTextOnWidget,
-                    trailingWidget: ToggleSwitchWidget(
-                      value: () => _showText,
-                      onChanged: () async {
-                        final next = !_showText;
-                        setState(() => _showText = next);
-                        await localSettings.setWidgetTextHidden(
-                          WidgetHideTextFlag.album,
-                          !next,
-                        );
-                        await HomeWidgetService.instance.updateWidget(
-                          androidClass:
-                              AlbumHomeWidgetService.ANDROID_CLASS_NAME,
-                          iOSClass: AlbumHomeWidgetService.IOS_CLASS_NAME,
-                        );
-                      },
+              if (kDebugMode)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 18, 6, 8),
+                    child: MenuItemWidgetNew(
+                      title: AppLocalizations.of(context).showTextOnWidget,
+                      trailingWidget: ToggleSwitchWidget(
+                        value: () => _showText,
+                        onChanged: () async {
+                          final next = !_showText;
+                          setState(() => _showText = next);
+                          await localSettings.setWidgetTextHidden(
+                            WidgetHideTextFlag.album,
+                            !next,
+                          );
+                          await HomeWidgetService.instance.updateWidget(
+                            androidClass:
+                                AlbumHomeWidgetService.ANDROID_CLASS_NAME,
+                            iOSClass: AlbumHomeWidgetService.IOS_CLASS_NAME,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
               FutureBuilder<List<Collection>>(
                 future: CollectionsService.instance
                     .getCollectionForWidgetSelection(),
