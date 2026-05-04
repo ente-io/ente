@@ -23,6 +23,7 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
   final colorScheme = getEnteColorScheme(context);
   return showBaseBottomSheet<void>(
     backgroundColor: colorScheme.backgroundColour,
+    closeButtonBackgroundColor: colorScheme.fill,
     context,
     title: strings.manage,
     child: Column(
@@ -30,7 +31,7 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
       children: [
         _manageItem(
           label: strings.trash,
-          icon: HugeIcons.strokeRoundedDelete02,
+          icon: HugeIcons.strokeRoundedDelete01,
           iconColor: const Color(0xFFE3505A),
           onTap: () async {
             final ok = await LocalAuthenticationService.instance
@@ -46,7 +47,7 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
         const SizedBox(height: 8),
         _manageItem(
           label: strings.archive,
-          icon: HugeIcons.strokeRoundedArchive,
+          icon: HugeIcons.strokeRoundedArchive03,
           iconColor: const Color(0xFF08C225),
           onTap: () async {
             Navigator.of(context).pop();
@@ -56,8 +57,8 @@ Future<void> showAlbumsManageSheet(BuildContext context) {
         const SizedBox(height: 8),
         _manageItem(
           label: strings.hidden,
-          icon: HugeIcons.strokeRoundedViewOffSlash,
-          iconColor: const Color(0xFFE19714),
+          icon: HugeIcons.strokeRoundedViewOff,
+          iconColor: const Color.fromRGBO(255, 169, 57, 1),
           onTap: () async {
             final ok = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
