@@ -605,6 +605,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                           case _AlbumsFilter.onDevice:
                             return DeviceFolderVerticalGridSliver(
                               searchQuery: _searchQuery,
+                              albumViewType: _viewType.value,
                             );
                         }
                         if (collections == null) {

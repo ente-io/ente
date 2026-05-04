@@ -8,8 +8,8 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/collection_share_badge.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -92,25 +92,7 @@ class AlbumListItemWidget extends StatelessWidget {
                   Positioned(
                     right: -4,
                     bottom: -4,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.fill,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.greenBase,
-                          width: 1.25,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(3),
-                      child: HugeIcon(
-                        icon: isOutgoing
-                            ? HugeIcons.strokeRoundedArrowUpRight01
-                            : HugeIcons.strokeRoundedArrowDownLeft01,
-                        strokeWidth: 3.0,
-                        color: colorScheme.greenBase,
-                        size: 10.0,
-                      ),
-                    ),
+                    child: CollectionShareBadge(isOutgoing: isOutgoing),
                   ),
               ],
             ),
@@ -194,7 +176,7 @@ class AlbumListItemWidget extends StatelessWidget {
             height: _rowHeight,
             padding: const EdgeInsets.all(_padding),
             decoration: BoxDecoration(
-              color: isSelected ? colorScheme.greenLight : colorScheme.fill,
+              color: colorScheme.fill,
               borderRadius:
                   const BorderRadius.all(Radius.circular(_cardRadius)),
               border: Border.all(
@@ -226,7 +208,6 @@ class AlbumListItemWidget extends StatelessWidget {
                       child: _buildTrailingIndicator(
                         isSelected: isSelected,
                         isOwner: isOwner,
-                        colorScheme: colorScheme,
                       ),
                     ),
                   ),
@@ -242,27 +223,13 @@ class AlbumListItemWidget extends StatelessWidget {
   Widget _buildTrailingIndicator({
     required bool isSelected,
     required bool isOwner,
-    required EnteColorScheme colorScheme,
   }) {
     final double avatarSize = getAvatarSize(AvatarType.medium);
     final double slotOverlap = getOverlapPadding(AvatarType.medium);
 
     if (isSelected) {
-      return Container(
-        key: const ValueKey("selected"),
-        width: 18,
-        height: 18,
-        decoration: BoxDecoration(
-          color: colorScheme.primary700,
-          shape: BoxShape.circle,
-        ),
-        padding: const EdgeInsets.all(2),
-        child: const HugeIcon(
-          icon: HugeIcons.strokeRoundedTick02,
-          size: 12,
-          color: Colors.white,
-          strokeWidth: 2.0,
-        ),
+      return const CollectionSelectedBadge(
+        key: ValueKey("selected"),
       );
     }
     if (!isOwner) {

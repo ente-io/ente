@@ -1,6 +1,5 @@
 import "dart:math";
 
-import 'package:ente_icons/ente_icons.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
@@ -15,10 +14,10 @@ import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/collection_share_badge.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/more_count_badge.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
-import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -163,23 +162,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                         switchInCurve: Curves.easeOut,
                                         switchOutCurve: Curves.easeIn,
                                         child: isSelected
-                                            ? Container(
-                                                width: 18,
-                                                height: 18,
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme.primary700,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.all(2),
-                                                child: const HugeIcon(
-                                                  strokeWidth: 2.0,
-                                                  size: 12,
-                                                  icon: HugeIcons
-                                                      .strokeRoundedTick02,
-                                                  color: Colors.white,
-                                                ),
-                                              )
+                                            ? const CollectionSelectedBadge()
                                             : null,
                                       );
                                     },
@@ -344,31 +327,9 @@ class AlbumRowItemWidget extends StatelessWidget {
     final bool showArchive = isOwner ? c.isArchived() : c.hasShareeArchived();
 
     final chips = <Widget>[
-      if (isFavoriteAlbum)
-        const ThumbnailStatusChip(
-          child: Icon(
-            EnteIcons.favoriteFilled,
-            size: ThumbnailStatusChip.iconSize,
-            color: Colors.white,
-          ),
-        ),
-      if (showPin)
-        const ThumbnailStatusChip(
-          child: HugeIcon(
-            icon: HugeIcons.strokeRoundedPin,
-            size: ThumbnailStatusChip.iconSize,
-            color: Colors.white,
-            strokeWidth: 2.0,
-          ),
-        ),
-      if (showArchive)
-        const ThumbnailStatusChip(
-          child: Icon(
-            Icons.archive_outlined,
-            size: ThumbnailStatusChip.iconSize,
-            color: Colors.white,
-          ),
-        ),
+      if (isFavoriteAlbum) const CollectionFavoriteBadge(),
+      if (showPin) const CollectionPinnedBadge(),
+      if (showArchive) const CollectionArchivedBadge(),
     ];
 
     if (chips.isEmpty) return const SizedBox.shrink();
