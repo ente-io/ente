@@ -846,6 +846,12 @@ class MemoriesCacheService {
           newCache,
           mlEnabled: mlReady,
         );
+        if (nowResult.failed) {
+          _logger.warning(
+            "Skipping memories cache update because current calculation failed",
+          );
+          return;
+        }
         final carriedForwardTripEntries = List<ToShowMemory>.from(
           newCache.toShowMemories,
         );
@@ -859,6 +865,12 @@ class MemoriesCacheService {
           newCache,
           mlEnabled: mlReady,
         );
+        if (nextResult.failed) {
+          _logger.warning(
+            "Skipping memories cache update because next calculation failed",
+          );
+          return;
+        }
         w?.log("calculated new memories");
         final localIdToIntId = isLocalGalleryMode
             ? await _buildLocalIntIdMapForMemories([
