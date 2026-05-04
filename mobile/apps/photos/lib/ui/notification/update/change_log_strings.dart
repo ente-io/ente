@@ -68,236 +68,146 @@ class ChangeLogStrings {
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Memories Improvements',
+      title1: 'Photos experience',
       desc1:
-          'We have shipped a bunch of improvements in our memories system, including surfacing better memories with other people, detecting your past trips, and surfacing recent photos from last week and last month.',
+          'Photos and videos now download faster, making the app feel quicker overall.',
+      title2: 'Memories load faster',
+      desc2:
+          'Rediscovering old memories should now feel smoother thanks to under-the-hood performance improvements.',
     ),
     'cs': ChangeLogStrings(
-      title1: 'Vylepšení vzpomínek',
+      title1: 'Prohlížení fotek',
       desc1:
-          'Přinášíme řadu vylepšení systému vzpomínek, včetně lepšího zobrazování společných momentů s blízkými, rozpoznávání vašich minulých cest a zobrazování nedávných fotek z minulého týdne a minulého měsíce.',
+          'Fotky a videa se teď stahují rychleji, takže celá aplikace působí svižněji.',
+      title2: 'Vzpomínky se načítají rychleji',
+      desc2:
+          'Znovuobjevování starých vzpomínek by teď mělo být plynulejší díky vylepšením výkonu na pozadí.',
     ),
     'de': ChangeLogStrings(
-      title1: 'Verbesserungen bei Erinnerungen',
+      title1: 'Fotoerlebnis',
       desc1:
-          'Wir haben eine Reihe von Verbesserungen an unserem Erinnerungssystem veröffentlicht, darunter bessere Erinnerungen mit anderen Personen, das Erkennen Ihrer vergangenen Reisen sowie aktuelle Fotos von letzter Woche und letztem Monat.',
+          'Fotos und Videos werden jetzt schneller heruntergeladen, sodass sich die App insgesamt schneller anfühlt.',
+      title2: 'Erinnerungen laden schneller',
+      desc2:
+          'Das Wiederentdecken alter Erinnerungen sollte sich dank Leistungsverbesserungen im Hintergrund jetzt flüssiger anfühlen.',
     ),
     'es': ChangeLogStrings(
-      title1: 'Mejoras en Recuerdos',
+      title1: 'Experiencia con fotos',
       desc1:
-          'Hemos lanzado varias mejoras en nuestro sistema de recuerdos, incluyendo mejores recuerdos con otras personas, la detección de tus viajes pasados y la aparición de fotos recientes de la semana pasada y del mes pasado.',
+          'Las fotos y los videos ahora se descargan más rápido, haciendo que la app se sienta más ágil en general.',
+      title2: 'Los recuerdos cargan más rápido',
+      desc2:
+          'Redescubrir recuerdos antiguos ahora debería sentirse más fluido gracias a mejoras de rendimiento internas.',
     ),
     'fr': ChangeLogStrings(
-      title1: 'Améliorations des souvenirs',
+      title1: 'Expérience photos',
       desc1:
-          'Nous avons déployé de nombreuses améliorations de notre système de souvenirs, notamment de meilleurs souvenirs avec d\'autres personnes, la détection de vos voyages passés et l\'affichage de photos récentes de la semaine dernière et du mois dernier.',
+          'Les photos et vidéos se téléchargent désormais plus vite, ce qui rend l\'application globalement plus réactive.',
+      title2: 'Les souvenirs se chargent plus vite',
+      desc2:
+          'Redécouvrir d\'anciens souvenirs devrait maintenant être plus fluide grâce à des améliorations de performance en coulisses.',
     ),
     'it': ChangeLogStrings(
-      title1: 'Miglioramenti ai ricordi',
+      title1: 'Esperienza foto',
       desc1:
-          'Abbiamo introdotto diversi miglioramenti al nostro sistema dei ricordi, tra cui la possibilità di rivivere momenti condivisi con altre persone, il rilevamento dei tuoi viaggi passati e la comparsa di foto recenti della scorsa settimana e del mese scorso.',
+          'Foto e video ora vengono scaricati più velocemente, rendendo l\'app complessivamente più rapida.',
+      title2: 'I ricordi si caricano più velocemente',
+      desc2:
+          'Riscoprire vecchi ricordi dovrebbe ora risultare più fluido grazie a miglioramenti delle prestazioni dietro le quinte.',
     ),
     'ja': ChangeLogStrings(
-      title1: '思い出の改善',
-      desc1:
-          '思い出機能に多数の改善を加えました。他の人と一緒の思い出をより良く表示し、過去の旅行を検出し、先週や先月の最近の写真も表示します。',
+      title1: '写真体験',
+      desc1: '写真や動画のダウンロードがより速くなり、アプリ全体がより軽快に感じられるようになりました。',
+      title2: '思い出の読み込みが高速化',
+      desc2: '内部のパフォーマンス改善により、昔の思い出をよりスムーズに振り返れるようになりました。',
     ),
     'nl': ChangeLogStrings(
-      title1: 'Verbeteringen aan Herinneringen',
+      title1: 'Foto-ervaring',
       desc1:
-          'We hebben een aantal verbeteringen doorgevoerd in ons herinneringssysteem, waaronder betere herinneringen met andere mensen, het herkennen van je eerdere reizen en het tonen van recente foto\'s van vorige week en vorige maand.',
+          'Foto\'s en video\'s worden nu sneller gedownload, waardoor de app in het algemeen sneller aanvoelt.',
+      title2: 'Herinneringen laden sneller',
+      desc2:
+          'Oude herinneringen herontdekken zou nu soepeler moeten aanvoelen dankzij prestatieverbeteringen achter de schermen.',
     ),
     'no': ChangeLogStrings(
-      title1: 'Forbedringer i minner',
+      title1: 'Fotoopplevelse',
       desc1:
-          'Vi har lansert en rekke forbedringer i minnene våre, blant annet bedre minner med andre personer, gjenkjenning av tidligere reiser og visning av nylige bilder fra forrige uke og forrige måned.',
+          'Bilder og videoer lastes nå ned raskere, slik at appen føles raskere totalt sett.',
+      title2: 'Minner lastes raskere',
+      desc2:
+          'Det skal nå føles jevnere å gjenoppdage gamle minner takket være ytelsesforbedringer under panseret.',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Ulepszenia wspomnień',
+      title1: 'Korzystanie ze zdjęć',
       desc1:
-          'Wprowadziliśmy szereg ulepszeń w systemie wspomnień, w tym lepsze wspomnienia z innymi osobami, wykrywanie Twoich dawnych podróży oraz wyświetlanie ostatnich zdjęć z zeszłego tygodnia i zeszłego miesiąca.',
+          'Zdjęcia i filmy pobierają się teraz szybciej, dzięki czemu cała aplikacja działa sprawniej.',
+      title2: 'Wspomnienia ładują się szybciej',
+      desc2:
+          'Ponowne odkrywanie dawnych wspomnień powinno być teraz płynniejsze dzięki wewnętrznym usprawnieniom wydajności.',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Melhorias nas memórias',
+      title1: 'Experiência com fotos',
       desc1:
-          'Lançamos várias melhorias no nosso sistema de memórias, incluindo melhores momentos compartilhados com outras pessoas, detecção das suas viagens passadas e exibição de fotos recentes da semana passada e do mês passado.',
+          'Fotos e vídeos agora baixam mais rápido, deixando o app mais ágil como um todo.',
+      title2: 'Memórias carregam mais rápido',
+      desc2:
+          'Redescobrir memórias antigas agora deve ser mais fluido graças a melhorias internas de desempenho.',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Melhorias nas memórias',
+      title1: 'Experiência de fotografias',
       desc1:
-          'Lançámos várias melhorias no nosso sistema de memórias, incluindo melhores memórias com outras pessoas, deteção das suas viagens passadas e apresentação de fotografias recentes da semana passada e do mês passado.',
+          'As fotografias e os vídeos são agora transferidos mais rapidamente, tornando a aplicação mais ágil no geral.',
+      title2: 'As memórias carregam mais depressa',
+      desc2:
+          'Redescobrir memórias antigas deverá agora ser mais fluido graças a melhorias internas de desempenho.',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Îmbunătățiri ale amintirilor',
+      title1: 'Experiența cu fotografii',
       desc1:
-          'Am lansat o serie de îmbunătățiri pentru sistemul nostru de amintiri, inclusiv amintiri mai bune cu alte persoane, detectarea călătoriilor tale din trecut și afișarea fotografiilor recente din săptămâna trecută și luna trecută.',
+          'Fotografiile și videoclipurile se descarcă acum mai rapid, făcând aplicația să pară mai rapidă în ansamblu.',
+      title2: 'Amintirile se încarcă mai repede',
+      desc2:
+          'Redescoperirea amintirilor vechi ar trebui să fie acum mai fluidă datorită îmbunătățirilor de performanță din culise.',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Улучшения воспоминаний',
+      title1: 'Работа с фото',
       desc1:
-          'Мы выпустили множество улучшений в системе воспоминаний: теперь лучше подбираются совместные моменты с близкими, распознаются ваши прошлые поездки и показываются недавние фотографии за прошлую неделю и месяц.',
+          'Фотографии и видео теперь загружаются быстрее, поэтому приложение в целом ощущается более быстрым.',
+      title2: 'Воспоминания загружаются быстрее',
+      desc2:
+          'Возвращаться к старым воспоминаниям теперь должно быть плавнее благодаря внутренним улучшениям производительности.',
     ),
     'tr': ChangeLogStrings(
-      title1: 'Anılar için iyileştirmeler',
+      title1: 'Fotoğraf deneyimi',
       desc1:
-          'Anılar sistemimizde birçok iyileştirme yayınladık. Artık başkalarıyla paylaştığınız anları daha iyi bir şekilde öne çıkarıyor, geçmiş seyahatlerinizi algılıyor ve geçen hafta ile geçen aydan son fotoğraflarınızı gösteriyoruz.',
+          'Fotoğraflar ve videolar artık daha hızlı indiriliyor, böylece uygulama genel olarak daha hızlı hissettiriyor.',
+      title2: 'Anılar daha hızlı yükleniyor',
+      desc2:
+          'Arka plandaki performans iyileştirmeleri sayesinde eski anıları yeniden keşfetmek artık daha akıcı olmalı.',
     ),
     'uk': ChangeLogStrings(
-      title1: 'Покращення спогадів',
+      title1: 'Робота з фото',
       desc1:
-          'Ми випустили низку покращень у нашій системі спогадів, зокрема кращі спогади з іншими людьми, розпізнавання ваших минулих подорожей і показ недавніх фотографій за минулий тиждень і минулий місяць.',
+          'Фотографії та відео тепер завантажуються швидше, тож застосунок загалом відчувається швидшим.',
+      title2: 'Спогади завантажуються швидше',
+      desc2:
+          'Повертатися до старих спогадів тепер має бути плавніше завдяки внутрішнім покращенням продуктивності.',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Cải thiện Kỷ niệm',
+      title1: 'Trải nghiệm ảnh',
       desc1:
-          'Chúng tôi đã phát hành nhiều cải tiến cho hệ thống kỷ niệm, bao gồm hiển thị những kỷ niệm tốt hơn với người khác, nhận diện các chuyến đi trước đây của bạn và hiển thị các ảnh gần đây từ tuần trước và tháng trước.',
+          'Ảnh và video giờ tải xuống nhanh hơn, giúp toàn bộ ứng dụng có cảm giác nhanh hơn.',
+      title2: 'Kỷ niệm tải nhanh hơn',
+      desc2:
+          'Việc khám phá lại các kỷ niệm cũ giờ sẽ mượt mà hơn nhờ những cải thiện hiệu năng bên trong.',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '回忆改进',
-      desc1: '我们对回忆系统进行了多项改进，包括展示与他人相关的更好回忆、识别你过去的旅行，以及展示上周和上个月的近期照片。',
+      title1: '照片体验',
+      desc1: '照片和视频现在下载更快，让整个应用用起来更加流畅。',
+      title2: '回忆加载更快',
+      desc2: '得益于底层性能改进，重温旧回忆现在应该会更加顺畅。',
     ),
   };
 
-  static const Map<String, ChangeLogStrings> _offlineTranslations = {
-    'en': ChangeLogStrings(
-      title1: 'QR Code Detection',
-      desc1:
-          'Long-press any photo containing a QR code to instantly reveal and share the content behind it.',
-      title2: 'New Text Selection',
-      desc2:
-          'That same long-press gesture works for text too - use it to detect and select text in any photo.',
-    ),
-    'cs': ChangeLogStrings(
-      title1: 'Detekce QR kódů',
-      desc1:
-          'Dlouhým stisknutím na jakékoli fotce s QR kódem okamžitě zobrazíte a sdílíte obsah za ním.',
-      title2: 'Nový výběr textu',
-      desc2:
-          'Stejné gesto dlouhého stisknutí funguje i pro text – použijte ho k detekci a výběru textu na jakékoli fotce.',
-    ),
-    'de': ChangeLogStrings(
-      title1: 'QR-Code-Erkennung',
-      desc1:
-          'Drücken Sie lange auf ein Foto mit einem QR-Code, um den Inhalt dahinter sofort anzuzeigen und zu teilen.',
-      title2: 'Neue Textauswahl',
-      desc2:
-          'Die gleiche Geste des langen Drückens funktioniert auch für Text – erkennen und markieren Sie Text in jedem Foto.',
-    ),
-    'es': ChangeLogStrings(
-      title1: 'Detección de códigos QR',
-      desc1:
-          'Mantén pulsada cualquier foto que contenga un código QR para revelar y compartir instantáneamente el contenido detrás de él.',
-      title2: 'Nueva selección de texto',
-      desc2:
-          'El mismo gesto de pulsación larga también funciona para texto: úsalo para detectar y seleccionar texto en cualquier foto.',
-    ),
-    'fr': ChangeLogStrings(
-      title1: 'Détection de codes QR',
-      desc1:
-          'Appuyez longuement sur n\'importe quelle photo contenant un code QR pour révéler et partager instantanément le contenu qu\'il renferme.',
-      title2: 'Nouvelle sélection de texte',
-      desc2:
-          'Le même geste d\'appui long fonctionne aussi pour le texte – utilisez-le pour détecter et sélectionner du texte dans n\'importe quelle photo.',
-    ),
-    'it': ChangeLogStrings(
-      title1: 'Rilevamento codici QR',
-      desc1:
-          'Tieni premuto su qualsiasi foto contenente un codice QR per rivelare e condividere istantaneamente il contenuto dietro di esso.',
-      title2: 'Nuova selezione del testo',
-      desc2:
-          'Lo stesso gesto di pressione prolungata funziona anche per il testo: usalo per rilevare e selezionare testo in qualsiasi foto.',
-    ),
-    'ja': ChangeLogStrings(
-      title1: 'QRコード検出',
-      desc1: 'QRコードが含まれる写真を長押しすると、その内容を即座に表示・共有できます。',
-      title2: '新しいテキスト選択',
-      desc2: '同じ長押しジェスチャーはテキストにも対応しています。写真内のテキストを検出・選択できます。',
-    ),
-    'nl': ChangeLogStrings(
-      title1: 'QR-codedetectie',
-      desc1:
-          'Houd een foto met een QR-code lang ingedrukt om de inhoud erachter direct te onthullen en te delen.',
-      title2: 'Nieuwe tekstselectie',
-      desc2:
-          'Hetzelfde gebaar van lang indrukken werkt ook voor tekst – gebruik het om tekst in elke foto te detecteren en te selecteren.',
-    ),
-    'no': ChangeLogStrings(
-      title1: 'QR-kodegjenkjenning',
-      desc1:
-          'Trykk og hold på et bilde som inneholder en QR-kode for å umiddelbart vise og dele innholdet bak den.',
-      title2: 'Ny tekstvelging',
-      desc2:
-          'Den samme langtrykk-bevegelsen fungerer også for tekst – bruk den til å oppdage og velge tekst i et hvilket som helst bilde.',
-    ),
-    'pl': ChangeLogStrings(
-      title1: 'Wykrywanie kodów QR',
-      desc1:
-          'Przytrzymaj dowolne zdjęcie zawierające kod QR, aby natychmiast wyświetlić i udostępnić ukrytą treść.',
-      title2: 'Nowe zaznaczanie tekstu',
-      desc2:
-          'Ten sam gest przytrzymania działa również dla tekstu – użyj go do wykrywania i zaznaczania tekstu na dowolnym zdjęciu.',
-    ),
-    'pt_BR': ChangeLogStrings(
-      title1: 'Detecção de código QR',
-      desc1:
-          'Pressione e segure qualquer foto contendo um código QR para revelar e compartilhar instantaneamente o conteúdo por trás dele.',
-      title2: 'Nova seleção de texto',
-      desc2:
-          'O mesmo gesto de pressionar e segurar também funciona para texto – use-o para detectar e selecionar texto em qualquer foto.',
-    ),
-    'pt_PT': ChangeLogStrings(
-      title1: 'Deteção de código QR',
-      desc1:
-          'Prima longamente qualquer fotografia que contenha um código QR para revelar e partilhar instantaneamente o conteúdo por detrás dele.',
-      title2: 'Nova seleção de texto',
-      desc2:
-          'O mesmo gesto de pressão longa também funciona para texto – utilize-o para detetar e selecionar texto em qualquer fotografia.',
-    ),
-    'ro': ChangeLogStrings(
-      title1: 'Detectare coduri QR',
-      desc1:
-          'Apasă lung pe orice fotografie care conține un cod QR pentru a dezvălui și partaja instantaneu conținutul din spatele acestuia.',
-      title2: 'Nouă selecție de text',
-      desc2:
-          'Același gest de apăsare lungă funcționează și pentru text – folosește-l pentru a detecta și selecta text din orice fotografie.',
-    ),
-    'ru': ChangeLogStrings(
-      title1: 'Распознавание QR-кодов',
-      desc1:
-          'Нажмите и удерживайте любое фото с QR-кодом, чтобы мгновенно просмотреть и поделиться содержимым за ним.',
-      title2: 'Новое выделение текста',
-      desc2:
-          'Тот же жест долгого нажатия работает и для текста — используйте его для распознавания и выделения текста на любом фото.',
-    ),
-    'tr': ChangeLogStrings(
-      title1: 'QR Kod Algılama',
-      desc1:
-          'QR kod içeren herhangi bir fotoğrafa uzun basarak arkasındaki içeriği anında görüntüleyin ve paylaşın.',
-      title2: 'Yeni Metin Seçimi',
-      desc2:
-          'Aynı uzun basma hareketi metin için de çalışır – herhangi bir fotoğraftaki metni algılamak ve seçmek için kullanın.',
-    ),
-    'uk': ChangeLogStrings(
-      title1: 'Розпізнавання QR-кодів',
-      desc1:
-          'Натисніть і утримуйте будь-яке фото з QR-кодом, щоб миттєво переглянути та поділитися вмістом за ним.',
-      title2: 'Нове виділення тексту',
-      desc2:
-          'Той самий жест довгого натискання працює і для тексту – використовуйте його для розпізнавання та виділення тексту на будь-якому фото.',
-    ),
-    'vi': ChangeLogStrings(
-      title1: 'Nhận diện mã QR',
-      desc1:
-          'Nhấn giữ bất kỳ ảnh nào chứa mã QR để hiển thị và chia sẻ ngay nội dung đằng sau nó.',
-      title2: 'Chọn văn bản mới',
-      desc2:
-          'Cử chỉ nhấn giữ tương tự cũng hoạt động với văn bản – sử dụng nó để phát hiện và chọn văn bản trong bất kỳ ảnh nào.',
-    ),
-    'zh_CN': ChangeLogStrings(
-      title1: '二维码检测',
-      desc1: '长按任何包含二维码的照片，即可立即查看和分享其背后的内容。',
-      title2: '全新文字选择',
-      desc2: '同样的长按手势也适用于文字——用它来检测和选择任何照片中的文字。',
-    ),
-  };
+  static const Map<String, ChangeLogStrings> _offlineTranslations = {};
 }
