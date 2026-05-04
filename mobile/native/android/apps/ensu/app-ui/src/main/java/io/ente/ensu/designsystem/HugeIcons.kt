@@ -25,7 +25,7 @@ object HugeIcons {
     val StopIcon = R.drawable.hugeicon_stop
     val Upload01Icon = R.drawable.hugeicon_upload01
     val Navigation06Icon = R.drawable.hugeicon_navigation06
-    val Voice01Icon = R.drawable.hugeicon_voice01
+    val Mic02Icon = R.drawable.hugeicon_mic02
     val ViewIcon = R.drawable.hugeicon_view
     val ViewOffSlashIcon = R.drawable.hugeicon_view_off_slash
 }

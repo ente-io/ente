@@ -179,7 +179,7 @@ internal fun MessageInput(
                     }
                     VoiceInputState.Recording -> {
                         Icon(
-                            painter = painterResource(HugeIcons.Voice01Icon),
+                            painter = painterResource(HugeIcons.Mic02Icon),
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
                             tint = EnsuColor.stopButton
@@ -305,7 +305,7 @@ internal fun MessageInput(
                             )
                         } else {
                             Icon(
-                                painter = painterResource(HugeIcons.Voice01Icon),
+                                painter = painterResource(HugeIcons.Mic02Icon),
                                 contentDescription = "Dictate",
                                 modifier = Modifier.size(18.dp)
                             )
