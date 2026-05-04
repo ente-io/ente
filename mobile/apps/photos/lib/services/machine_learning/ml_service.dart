@@ -24,6 +24,7 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
@@ -170,11 +171,15 @@ class MLService {
       );
       return;
     }
-    if (MLIndexingIsolate.instance.areModelsDownloaded) {
+    if (MLModelDownloadService.instance.areModelsDownloaded(
+      onlyIndexingModels: false,
+    )) {
       return;
     }
     try {
-      await MLIndexingIsolate.instance.ensureDownloadedModels();
+      await MLModelDownloadService.instance.ensureModelsDownloaded(
+        onlyIndexingModels: false,
+      );
     } catch (e, s) {
       _logger.warning("Failed to predownload local ML models", e, s);
     }
@@ -454,7 +459,9 @@ class MLService {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
       if (localSettings.isMLLocalIndexingEnabled) {
-        await MLIndexingIsolate.instance.ensureDownloadedModels();
+        await MLModelDownloadService.instance.ensureModelsDownloaded(
+          onlyIndexingModels: true,
+        );
       }
       final Stream<List<FileMLInstruction>> instructionStream =
           fetchEmbeddingsAndInstructions(fileDownloadMlLimit, mode: mode);
@@ -484,7 +491,9 @@ class MLService {
           );
           break stream;
         } else {
-          await MLIndexingIsolate.instance.ensureDownloadedModels();
+          await MLModelDownloadService.instance.ensureModelsDownloaded(
+            onlyIndexingModels: true,
+          );
           if ((flagService.useRustForML || isLocalGalleryMode) &&
               !rustRuntimePrepared) {
             await MLIndexingIsolate.instance.prepareRustRuntime();
@@ -525,7 +534,7 @@ class MLService {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
       await MLIndexingIsolate.instance.releaseRustRuntime();
-      MLIndexingIsolate.instance.invalidateModelDownloadCache();
+      MLModelDownloadService.instance.invalidateModelDownloadCache();
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
     }

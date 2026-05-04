@@ -14,6 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -732,7 +733,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       // Invalidate cached runtime args so pet model paths are rebuilt
       // with the new toggle state on the next indexing run.
       await MLIndexingIsolate.instance.releaseRustRuntime();
-      MLIndexingIsolate.instance.invalidateModelDownloadCache();
+      MLModelDownloadService.instance.invalidateModelDownloadCache();
       logger.info(
         'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
       );

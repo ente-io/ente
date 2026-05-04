@@ -8,6 +8,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -50,7 +51,9 @@ class _MachineLearningSettingsPageState
       wakeLockFor: WakeLockFor.machineLearningSettingsScreen,
     );
     computeController.forceOverrideML(turnOn: true);
-    if (!MLIndexingIsolate.instance.areModelsDownloaded) {
+    if (!MLModelDownloadService.instance.areModelsDownloaded(
+      onlyIndexingModels: false,
+    )) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         if (mounted) {
           setState(() {});
@@ -384,7 +387,9 @@ class _MachineLearningSettingsPageState
           ),
         ),
         const SizedBox(height: 12),
-        MLIndexingIsolate.instance.areModelsDownloaded ||
+        MLModelDownloadService.instance.areModelsDownloaded(
+                  onlyIndexingModels: true,
+                ) ||
                 !localSettings.isMLLocalIndexingEnabled
             ? const MLStatusWidget()
             : const ModelLoadingState(),
@@ -453,7 +458,9 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
             String title = "";
             if (snapshot.hasData) {
               if (snapshot.data!) {
-                MLIndexingIsolate.instance.triggerModelsDownload();
+                MLModelDownloadService.instance.triggerModelsDownload(
+                  onlyIndexingModels: false,
+                );
                 title = AppLocalizations.of(context).checkingModels;
               } else {
                 title = AppLocalizations.of(context).waitingForWifi;
