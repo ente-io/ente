@@ -53,7 +53,7 @@ making it easy to categorize information in ways that work for you.
 ### Secure sharing
 
 Share collections with other Ente users, or create public links for individual
-items that anyone can view in a browser.
+items and collections that anyone can view in a browser.
 
 ### Open source
 
