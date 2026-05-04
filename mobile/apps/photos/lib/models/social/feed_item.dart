@@ -58,6 +58,11 @@ class FeedItem {
   /// Populated for [FeedItemType.sharedPhoto] and [FeedItemType.sharedCollection].
   final String? collectionName;
 
+  /// Whether the target file is a video.
+  /// Only meaningful for types whose copy varies by photo vs video
+  /// ([FeedItemType.photoLike] and [FeedItemType.comment]).
+  final bool isVideo;
+
   const FeedItem({
     required this.type,
     required this.collectionID,
@@ -69,6 +74,7 @@ class FeedItem {
     required this.isOwnedByCurrentUser,
     this.sharedFileIDs,
     this.collectionName,
+    this.isVideo = false,
   });
 
   /// Number of users who performed this action.
@@ -126,6 +132,7 @@ class FeedItem {
     bool? isOwnedByCurrentUser,
     List<int>? sharedFileIDs,
     String? collectionName,
+    bool? isVideo,
   }) {
     return FeedItem(
       type: type ?? this.type,
@@ -138,6 +145,7 @@ class FeedItem {
       isOwnedByCurrentUser: isOwnedByCurrentUser ?? this.isOwnedByCurrentUser,
       sharedFileIDs: sharedFileIDs ?? this.sharedFileIDs,
       collectionName: collectionName ?? this.collectionName,
+      isVideo: isVideo ?? this.isVideo,
     );
   }
 }

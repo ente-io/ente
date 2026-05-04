@@ -2851,6 +2851,10 @@
   "@likedYourVideo": {
     "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
   },
+  "likedAVideo": "liked a video",
+  "@likedAVideo": {
+    "description": "Social action text shown after a person's name, for example 'John liked a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
   "commentedOnYourPhoto": "commented on your photo",
   "@commentedOnYourPhoto": {
     "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
