@@ -480,8 +480,10 @@ class LocalSettings {
     await _prefs.setBool(_kBGDebugNotificationsEnabled, value);
   }
 
-  bool get isCFUploadProxyEnabled =>
-      _prefs.getBool(_kCFUploadProxyEnabled) ?? true;
+  /// User's explicit override for the Cloudflare upload proxy toggle.
+  /// `null` means the user has not chosen — callers should fall back to
+  /// `flagService.cloudflareUploadWorker` (the rollout default).
+  bool? get cfUploadProxyEnabled => _prefs.getBool(_kCFUploadProxyEnabled);
 
   Future<void> setCFUploadProxyEnabled(bool value) async {
     await _prefs.setBool(_kCFUploadProxyEnabled, value);
