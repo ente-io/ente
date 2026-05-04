@@ -29,13 +29,18 @@ type FileRepository struct {
 	UsageRepo         *UsageRepository
 }
 
-// Create creates an entry in the database for the given file
+// Create creates an entry in the database for the given file. file.OwnerID
+// must already equal collectionOwnerID — the controller is responsible for
+// pinning the file's owner to the album owner before this point. The actor
+// who actually performed the upload (which may differ from the album owner
+// for collaborator uploads) is recorded as added_by_user_id.
 func (repo *FileRepository) Create(
 	file ente.File,
 	fileSize int64,
 	thumbnailSize int64,
 	usageDiff int64,
 	collectionOwnerID int64,
+	addedByUserID int64,
 	app ente.App,
 ) (ente.File, int64, error) {
 	hotDC := repo.S3Config.GetHotDataCenter()
@@ -65,9 +70,9 @@ func (repo *FileRepository) Create(
 	}
 	file.ID = fileID
 	_, err = tx.ExecContext(ctx, `INSERT INTO collection_files
-			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, file.CollectionID, file.ID,
-		file.EncryptedKey, file.KeyDecryptionNonce, false, file.UpdationTime, file.OwnerID, collectionOwnerID)
+			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id, added_by_user_id)
+			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)`, file.CollectionID, file.ID,
+		file.EncryptedKey, file.KeyDecryptionNonce, false, file.UpdationTime, file.OwnerID, collectionOwnerID, addedByUserID)
 	if err != nil {
 		tx.Rollback()
 		return file, -1, stacktrace.Propagate(err, "")

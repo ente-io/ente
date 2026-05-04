@@ -1889,32 +1889,10 @@ class CollectionsService {
       }
 
       if (filesToCopy.isNotEmpty) {
-        final dstCollection = _collectionIDToCollections[dstCollectionID];
-        final currentUserID = _config.getUserID()!;
-        final shouldCopyViaUncategorized = dstCollection != null &&
-            !dstCollection.isOwner(currentUserID) &&
-            dstCollection.canAdd(currentUserID);
-
-        final int copyDestinationCollectionID;
-        if (shouldCopyViaUncategorized) {
-          final uncategorizedCollection =
-              await CollectionsService.instance.getUncategorizedCollection();
-          copyDestinationCollectionID = uncategorizedCollection.id;
-        } else {
-          copyDestinationCollectionID = dstCollectionID;
-        }
-
-        final copiedFiles = await _copyFilesToCollection(
+        await _copyFilesToCollection(
           filesToCopy,
-          dstCollectionID: copyDestinationCollectionID,
+          dstCollectionID: dstCollectionID,
         );
-
-        if (shouldCopyViaUncategorized) {
-          await _addToCollection(
-            dstCollectionID,
-            copiedFiles,
-          );
-        }
       }
     }
   }

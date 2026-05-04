@@ -110,6 +110,37 @@ func (repo *CollectionRepository) VerifyAllFileIDsExistsInCollection(ctx context
 	return nil
 }
 
+// GetAddedByMapForCollection returns a map of fileID -> effective uploader.
+// added_by_user_id is preferred; for legacy rows where it is NULL we fall
+// back to f_owner_id (which used to equal the uploader before the
+// collaborator-upload work decoupled file ownership from authorship).
+func (repo *CollectionRepository) GetAddedByMapForCollection(ctx context.Context, cID int64, fileIDs []int64) (map[int64]int64, error) {
+	result := make(map[int64]int64, len(fileIDs))
+	if len(fileIDs) == 0 {
+		return result, nil
+	}
+	rows, err := repo.DB.QueryContext(ctx,
+		`SELECT file_id, COALESCE(added_by_user_id, f_owner_id)
+		   FROM collection_files
+		  WHERE collection_id = $1 AND file_id = ANY ($2)`,
+		cID, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var fileID, addedBy int64
+		if err := rows.Scan(&fileID, &addedBy); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result[fileID] = addedBy
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return result, nil
+}
+
 // FilterActiveFileIDsInCollection returns the fileIDs still active in the collection
 // (not deleted and not marked for owner removal).
 // If any fileID was never in the collection, it returns an error.

@@ -166,8 +166,13 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 } else if (attributes.action == "add") {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
+                    // Use canAddToCollection (not canMoveToCollection) so that
+                    // collections shared with the user as a COLLABORATOR are
+                    // listed as upload destinations. canMoveToCollection
+                    // excludes all sharedIncoming, which hides collaborator
+                    // albums; canAddToCollection only excludes viewer shares.
                     return (
-                        (canMoveToCollection(cs) ||
+                        (canAddToCollection(cs) ||
                             cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );

@@ -163,13 +163,17 @@ func (c *CollectionController) MoveFiles(ctx *gin.Context, req ente.MoveFilesReq
 
 // RemoveFilesV3 enforces all removal rules for shared collections:
 //  1. accessCtrl must confirm the actor participates in the collection;
-//  2. collaborators/viewers may only remove the files they added themselves;
-//  3. the collection owner may remove files added by others but never their own;
-//  4. admins can remove anyone's files, but a collection owner's files are only
-//     queued for removal (REMOVE action + pending collection_action entry) so
-//     the owner can act on them;
-//  5. once the validations pass, non-owner files are deleted immediately via
-//     CollectionRepo.RemoveFilesV3.
+//  2. collaborators/viewers may only remove files they themselves added
+//     (added_by_user_id == actor) — note this is decoupled from file
+//     ownership: a collaborator-uploaded file is owned by the album owner
+//     but added_by remains the collaborator;
+//  3. the collection owner may remove files added by others but never the
+//     ones they added themselves (those go through Trash);
+//  4. admins can remove anyone's files; files originally added by the
+//     collection owner are queued for removal (REMOVE action + pending
+//     collection_action entry) so the owner can act on them;
+//  5. once the validations pass, non-owner-uploaded files are detached
+//     immediately via CollectionRepo.RemoveFilesV3.
 func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, actorUserID int64, req ente.RemoveFilesV3Request) error {
 	accessResp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: req.CollectionID,
@@ -192,49 +196,56 @@ func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, actorUserID int64
 	}
 	req.FileIDs = fileIDsToRemove
 
-	// Partition fileIDs by owner
-	ownerToFilesMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
+	// Partition fileIDs by uploader (added_by_user_id, with NULL fallback to f_owner_id).
+	addedByMap, err := c.CollectionRepo.GetAddedByMapForCollection(ctx, req.CollectionID, req.FileIDs)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to get owner to fileIDs map")
+		return stacktrace.Propagate(err, "failed to get added_by map")
 	}
-	if err := c.isRemoveAllowed(ctx, actorUserID, collectionOwnerID, role, ownerToFilesMap); err != nil {
-		return stacktrace.Propagate(err, "file removal check failed for others")
-	}
-	filesOwnedByCollectionOwner := ownerToFilesMap[collectionOwnerID]
-
-	// Files owned by others (excluding owner)
-	ownerFilesSet := make(map[int64]struct{}, len(filesOwnedByCollectionOwner))
-	for _, fid := range filesOwnedByCollectionOwner {
-		ownerFilesSet[fid] = struct{}{}
-	}
-	others := make([]int64, 0, len(req.FileIDs)-len(filesOwnedByCollectionOwner))
+	ownerUploaded := make([]int64, 0)
+	otherUploaded := make([]int64, 0)
+	actorUploaded := make([]int64, 0)
 	for _, fid := range req.FileIDs {
-		if _, found := ownerFilesSet[fid]; !found {
-			others = append(others, fid)
+		addedBy, ok := addedByMap[fid]
+		if !ok {
+			return stacktrace.NewError(fmt.Sprintf("missing added_by for file %d in collection %d", fid, req.CollectionID))
+		}
+		switch addedBy {
+		case actorUserID:
+			actorUploaded = append(actorUploaded, fid)
+		case collectionOwnerID:
+			ownerUploaded = append(ownerUploaded, fid)
+		default:
+			otherUploaded = append(otherUploaded, fid)
 		}
 	}
+	if err := c.isRemoveAllowedByUploader(actorUserID, collectionOwnerID, role, actorUploaded, ownerUploaded, otherUploaded); err != nil {
+		return stacktrace.Propagate(err, "file removal check failed")
+	}
 
-	// If admin is trying to remove owner's files
-	if len(filesOwnedByCollectionOwner) > 0 {
+	// ADMIN suggesting removal of owner-uploaded files: queue suggest-action
+	// rather than detach immediately.
+	if len(ownerUploaded) > 0 {
 		if role != nil && *role == ente.ADMIN && actorUserID != collectionOwnerID {
-			// Populate collection_files with action for owner's files
-			if err := c.CollectionRepo.SuggestAction(ctx, req.CollectionID, actorUserID, filesOwnedByCollectionOwner, ente.ActionRemove); err != nil {
+			if err := c.CollectionRepo.SuggestAction(ctx, req.CollectionID, actorUserID, ownerUploaded, ente.ActionRemove); err != nil {
 				return stacktrace.Propagate(err, "failed to set remove action for owner's files")
 			}
-			if err := c.CollectionActionsRepo.CreateBulk(ctx, collectionOwnerID, actorUserID, req.CollectionID, filesOwnedByCollectionOwner, nil, ente.ActionRemove, true); err != nil {
+			if err := c.CollectionActionsRepo.CreateBulk(ctx, collectionOwnerID, actorUserID, req.CollectionID, ownerUploaded, nil, ente.ActionRemove, true); err != nil {
 				return stacktrace.Propagate(err, "failed to create collection action REMOVE")
 			}
 		} else {
-			// unless client is buggy, we should never reach here.
-			return stacktrace.NewError(fmt.Sprintf("actor %d with role %s is not allowed to remove files owned by collectionOwner %d", actorUserID, *role, collectionOwnerID))
+			// Should be unreachable when isRemoveAllowedByUploader passed.
+			return stacktrace.NewError(fmt.Sprintf("actor %d with role %v is not allowed to remove files added by collection owner %d", actorUserID, role, collectionOwnerID))
 		}
 	}
-	// Remove files owned by others if allowed
-	if len(others) > 0 {
-		if err := c.CollectionRepo.RemoveFilesV3(ctx, req.CollectionID, collectionOwnerID, others); err != nil {
+
+	// Files added by actor (collaborator/admin removing their own contributions)
+	// or by other non-owner participants (owner/admin removing them) are
+	// detached immediately.
+	immediate := append(actorUploaded, otherUploaded...)
+	if len(immediate) > 0 {
+		if err := c.CollectionRepo.RemoveFilesV3(ctx, req.CollectionID, collectionOwnerID, immediate); err != nil {
 			return stacktrace.Propagate(err, "failed to remove files")
 		}
-
 	}
 	return nil
 }
@@ -292,37 +303,38 @@ func (c *CollectionController) SuggestDeleteInSharedCollection(ctx *gin.Context,
 	return nil
 }
 
-// isRemoveAllowed verifies that given set of files can be removed from the collection or not
-func (c *CollectionController) isRemoveAllowed(ctx *gin.Context,
+// isRemoveAllowedByUploader checks the partition built from added_by_user_id:
+//   - actorUploaded — files the actor added themselves
+//   - ownerUploaded — files the collection owner added (only when actor != owner)
+//   - otherUploaded — files added by some third participant (not actor, not owner)
+//
+// Rules:
+//   - The collection owner cannot remove their own contributions via this
+//     path — they must use Trash, which deletes the file globally.
+//   - ADMIN can remove anything. Owner-uploaded files are routed through a
+//     suggest-action queue by the caller, but pass the permission check here.
+//   - The collection owner can remove anything they did not upload.
+//   - COLLABORATOR / VIEWER can only remove files they themselves added.
+func (c *CollectionController) isRemoveAllowedByUploader(
 	actorUserID int64,
 	collectionOwnerID int64,
 	role *ente.CollectionParticipantRole,
-	ownerToFilesMap map[int64][]int64) error {
+	actorUploaded []int64,
+	ownerUploaded []int64,
+	otherUploaded []int64) error {
 
-	// verify that none of the file belongs to the collection owner
-	if _, ok := ownerToFilesMap[collectionOwnerID]; ok {
-		if collectionOwnerID == actorUserID {
-			return stacktrace.Propagate(ente.NewBadRequestWithMessage("can not remove files owned collection owner, admins can perform remove suggestion"), "")
-		} else if role == nil || *role != ente.ADMIN {
-			return stacktrace.Propagate(ente.NewBadRequestWithMessage("can not remove files owned by album owner"), fmt.Sprintf("role %s", *role))
-		}
+	if actorUserID == collectionOwnerID && len(actorUploaded) > 0 {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("can not remove files added by collection owner via remove; use trash"), "")
 	}
-	// allow collection owner to remove files added by others
-	if collectionOwnerID == actorUserID {
-		return nil
-	}
-	// allow admins to remove files added by anyone else.
 	if role != nil && *role == ente.ADMIN {
 		return nil
 	}
-	// for collaborators and viewers, they should be only removing files added by themselfs.
-	// verify that user is only trying to remove files owned by them
-	if len(ownerToFilesMap) > 1 {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files owned by others")
+	if actorUserID == collectionOwnerID {
+		return nil
 	}
-	// verify that user is only trying to remove files owned by them
-	if _, ok := ownerToFilesMap[actorUserID]; !ok {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files owned by others")
+	// COLLABORATOR / VIEWER: only files they added themselves.
+	if len(ownerUploaded) > 0 || len(otherUploaded) > 0 {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files added by others")
 	}
 	return nil
 }
@@ -336,14 +348,19 @@ func (c *CollectionController) IsCopyAllowed(ctx *gin.Context, actorUserID int64
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to verify srcCollection access")
 	}
-	// verify that dstCollectionID is owned by actorUserID
+	// Verify that the actor has CanAdd on the destination collection. Mirrors
+	// the loosening applied to POST /files: a collaborator may copy into a
+	// shared album whose owner pays the storage. file ownership and quota
+	// are pinned to the album owner inside FileController.Create.
 	dstCollection, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: req.DstCollection,
 		ActorUserID:  actorUserID,
-		VerifyOwner:  true,
 	})
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to ownership of the dstCollection access")
+		return stacktrace.Propagate(err, "failed to verify dstCollection access")
+	}
+	if !dstCollection.Role.CanAdd() {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, fmt.Sprintf("user %d cannot add files to dst collection %d", actorUserID, req.DstCollection))
 	}
 	if srcCollection.Collection.App != dstCollection.Collection.App {
 		return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("copy across app not supported %s to %s", srcCollection.Collection.App, dstCollection.Collection.App))

@@ -98,28 +98,33 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	if file.UpdationTime == 0 {
 		return stacktrace.Propagate(ente.ErrBadRequest, "UpdationTime is required")
 	}
-	if isCreateFileReq {
-		collection, err := c.CollectionRepo.Get(file.CollectionID)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-		if ente.App(collection.App) != app {
-			return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("ctx app is different from collection app=%s collectionApp=%s", app, collection.App))
-		}
-		// Verify that user owns the collection.
-		// Warning: Do not remove this check
-		if collection.Owner.ID != userID {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "collection doesn't belong to user")
-		}
-		if collection.IsDeleted {
-			return stacktrace.Propagate(ente.ErrCollectionDeleted, "collection has been deleted")
-		}
-		if file.OwnerID != userID {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "file ownerID doesn't match with userID")
-		}
-	}
-
+	// Note: per-collection access checks happen in validateCreateAccess for
+	// create requests, and via FileRepo.GetOwnerID in Update. We deliberately
+	// no longer enforce file.OwnerID == userID on create; the album owner is
+	// resolved server-side and pinned onto the file (see Create).
 	return nil
+}
+
+// validateCreateAccess confirms the actor has CanAdd role on the destination
+// collection and returns the album-owner ID. Files uploaded to a shared album
+// are owned by the album owner (who pays storage). The actor's identity is
+// preserved separately on the collection_files row via added_by_user_id.
+func (c *FileController) validateCreateAccess(ctx *gin.Context, actorUserID int64, collectionID int64, app ente.App) (int64, error) {
+	resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+		CollectionID:   collectionID,
+		ActorUserID:    actorUserID,
+		IncludeDeleted: false,
+	})
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
+	if ente.App(resp.Collection.App) != app {
+		return 0, stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("ctx app=%s collectionApp=%s", app, resp.Collection.App))
+	}
+	if !resp.Role.CanAdd() {
+		return 0, stacktrace.Propagate(ente.ErrPermissionDenied, fmt.Sprintf("user %d with role %v can not add files to collection %d", actorUserID, resp.Role, collectionID))
+	}
+	return resp.Collection.Owner.ID, nil
 }
 
 type sizeResult struct {
@@ -143,6 +148,14 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 	if err != nil {
 		return file, stacktrace.Propagate(err, "")
 	}
+	collectionOwnerID, err := c.validateCreateAccess(ctx, userID, file.CollectionID, app)
+	if err != nil {
+		return file, stacktrace.Propagate(err, "")
+	}
+	// Pin file ownership to the album owner regardless of what the client sent.
+	// For collaborator uploads this re-attributes the file to the album owner;
+	// the actor (userID) is preserved separately as added_by_user_id.
+	file.OwnerID = collectionOwnerID
 	// Receive results from both operations
 	fileResult := <-fileChan
 	thumbResult := <-thumbChan
@@ -176,7 +189,10 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 	}
 	file.Thumbnail.Size = thumbnailSize
 	var totalUploadSize = fileSize + thumbnailSize
-	err = c.UsageCtrl.CanUploadFile(ctx, userID, &totalUploadSize, app)
+	// Quota is charged to the album owner (= file.OwnerID), not the actor. A
+	// collaborator at 100% quota can still upload to a shared album whose
+	// owner has space.
+	err = c.UsageCtrl.CanUploadFile(ctx, collectionOwnerID, &totalUploadSize, app)
 	if err != nil {
 		return file, stacktrace.Propagate(err, "")
 	}
@@ -188,7 +204,7 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 
 	// all iz well
 	var usage int64
-	file, usage, err = c.FileRepo.Create(file, fileSize, thumbnailSize, fileSize+thumbnailSize, userID, app)
+	file, usage, err = c.FileRepo.Create(file, fileSize, thumbnailSize, fileSize+thumbnailSize, collectionOwnerID, userID, app)
 	if err != nil {
 		if err == ente.ErrDuplicateFileObjectFound || err == ente.ErrDuplicateThumbnailObjectFound {
 			var existing ente.File
