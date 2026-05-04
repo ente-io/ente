@@ -76,6 +76,8 @@ class FileAppBarState extends State<FileAppBar> {
   bool _reloadActions = false;
   bool _isMenuOpen = false;
   bool _pendingActionsReload = false;
+  ValueNotifier<bool>? _isInSharedCollectionNotifier;
+  ValueNotifier<String?>? _showingThumbnailFallbackNotifier;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -96,19 +98,18 @@ class FileAppBarState extends State<FileAppBar> {
         isGuestView = event.isGuestView;
       });
     });
+  }
 
-    // Listen to shared collection and thumbnail fallback changes to rebuild actions
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final sharedNotifier = InheritedDetailPageState.maybeOf(
-        context,
-      )?.isInSharedCollectionNotifier;
-      sharedNotifier?.addListener(_onSharedCollectionChanged);
-
-      final fallbackNotifier = InheritedDetailPageState.maybeOf(
-        context,
-      )?.showingThumbnailFallbackNotifier;
-      fallbackNotifier?.addListener(_onThumbnailFallbackChanged);
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final detailPageState = InheritedDetailPageState.maybeOf(context);
+    _updateIsInSharedCollectionNotifier(
+      detailPageState?.isInSharedCollectionNotifier,
+    );
+    _updateShowingThumbnailFallbackNotifier(
+      detailPageState?.showingThumbnailFallbackNotifier,
+    );
   }
 
   void _onSharedCollectionChanged() {
@@ -119,14 +120,36 @@ class FileAppBarState extends State<FileAppBar> {
     _requestActionsReload();
   }
 
+  void _updateIsInSharedCollectionNotifier(ValueNotifier<bool>? notifier) {
+    if (_isInSharedCollectionNotifier == notifier) {
+      return;
+    }
+    _isInSharedCollectionNotifier?.removeListener(_onSharedCollectionChanged);
+    _isInSharedCollectionNotifier = notifier;
+    _isInSharedCollectionNotifier?.addListener(_onSharedCollectionChanged);
+  }
+
+  void _updateShowingThumbnailFallbackNotifier(
+    ValueNotifier<String?>? notifier,
+  ) {
+    if (_showingThumbnailFallbackNotifier == notifier) {
+      return;
+    }
+    _showingThumbnailFallbackNotifier?.removeListener(
+      _onThumbnailFallbackChanged,
+    );
+    _showingThumbnailFallbackNotifier = notifier;
+    _showingThumbnailFallbackNotifier?.addListener(
+      _onThumbnailFallbackChanged,
+    );
+  }
+
   @override
   void dispose() {
-    InheritedDetailPageState.maybeOf(
-      context,
-    )?.isInSharedCollectionNotifier.removeListener(_onSharedCollectionChanged);
-    InheritedDetailPageState.maybeOf(context)
-        ?.showingThumbnailFallbackNotifier
-        .removeListener(_onThumbnailFallbackChanged);
+    _isInSharedCollectionNotifier?.removeListener(_onSharedCollectionChanged);
+    _showingThumbnailFallbackNotifier?.removeListener(
+      _onThumbnailFallbackChanged,
+    );
     _guestViewEventSubscription.cancel();
     super.dispose();
   }
