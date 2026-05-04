@@ -22,7 +22,7 @@ type MemoryShareRepository struct {
 func NewMemoryShareRepository(db *sql.DB) *MemoryShareRepository {
 	memoryHost := viper.GetString("apps.public-memories")
 	if memoryHost == "" {
-		memoryHost = "https://memories.ente.io"
+		memoryHost = "https://memories.ente.com"
 	}
 	return &MemoryShareRepository{
 		DB:         db,
