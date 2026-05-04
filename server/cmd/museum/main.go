@@ -569,6 +569,7 @@ func main() {
 		FileUrlCtrl:  fileLinkCtrl,
 	}
 	pasteHandler := &api.PasteHandler{Controller: pasteCtrl}
+	privateAPI.GET("/files/upload-eligibility", fileHandler.ValidateUploadEligibility)
 	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
 	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
 	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
