@@ -140,7 +140,8 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 
 	userID := auth.GetUserID(c.Request.Header)
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.Controller.GetUploadURLs(c, userID, count, enteApp, false)
+	collectionID, _ := strconv.ParseInt(c.Query("collectionID"), 10, 64)
+	urls, err := h.Controller.GetUploadURLs(c, userID, count, enteApp, false, collectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -184,7 +185,8 @@ func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 
 	userID := auth.GetUserID(c.Request.Header)
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.Controller.GetMultipartUploadURLs(c, userID, count, enteApp)
+	collectionID, _ := strconv.ParseInt(c.Query("collectionID"), 10, 64)
+	urls, err := h.Controller.GetMultipartUploadURLs(c, userID, count, enteApp, collectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

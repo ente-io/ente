@@ -133,7 +133,7 @@ func (h *PublicCollectionHandler) GetUploadUrls(c *gin.Context) {
 	}
 	userID := collection.Owner.ID
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.FileCtrl.GetUploadURLs(c, userID, count, enteApp, false)
+	urls, err := h.FileCtrl.GetUploadURLs(c, userID, count, enteApp, false, 0)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -175,7 +175,7 @@ func (h *PublicCollectionHandler) GetMultipartUploadURLs(c *gin.Context) {
 	}
 	userID := collection.Owner.ID
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.FileCtrl.GetMultipartUploadURLs(c, userID, count, enteApp)
+	urls, err := h.FileCtrl.GetMultipartUploadURLs(c, userID, count, enteApp, 0)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

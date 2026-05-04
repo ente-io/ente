@@ -161,10 +161,13 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    async getUploadURL(metadata?: {
-        contentLength: number;
-        contentMd5: string;
-    }) {
+    async getUploadURL(
+        metadata?: {
+            contentLength: number;
+            contentMd5: string;
+        },
+        collectionID?: number,
+    ) {
         if (this.publicAlbumsCredentials) {
             if (
                 metadata &&
@@ -184,20 +187,20 @@ class UploadService {
             metadata.contentLength >= 0 &&
             metadata.contentMd5
         ) {
-            return fetchUploadURLWithMetadata(metadata);
+            return fetchUploadURLWithMetadata({ ...metadata, collectionID });
         }
         if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
-            await this.refillUploadURLs();
+            await this.refillUploadURLs(collectionID);
         }
         const url = this.uploadURLs.pop();
         if (!url) throw new Error("Failed to obtain upload URL");
         return url;
     }
 
-    private async refillUploadURLs() {
+    private async refillUploadURLs(collectionID?: number) {
         try {
             if (!this.activeUploadURLRefill) {
-                this.activeUploadURLRefill = this._refillUploadURLs();
+                this.activeUploadURLRefill = this._refillUploadURLs(collectionID);
             }
             await this.activeUploadURLRefill;
         } finally {
@@ -216,7 +219,7 @@ class UploadService {
         }
     }
 
-    private async _refillUploadURLs() {
+    private async _refillUploadURLs(collectionID?: number) {
         if (this.publicAlbumsCredentials) {
             throw new Error(
                 "Public uploads should request metadata upload URLs",
@@ -224,7 +227,7 @@ class UploadService {
         }
         let urls: ObjectUploadURL[];
         try {
-            urls = await fetchUploadURLs(this.pendingUploadCount);
+            urls = await fetchUploadURLs(this.pendingUploadCount, collectionID);
         } catch (e) {
             throw translateURLFetchErrorIfNeeded(e);
         }
@@ -238,6 +241,7 @@ class UploadService {
             partLength: number;
             partMd5s: string[];
         },
+        collectionID?: number,
     ) {
         if (this.publicAlbumsCredentials) {
             if (
@@ -262,15 +266,18 @@ class UploadService {
             metadata.partLength > 0 &&
             metadata.partMd5s.length > 0
         ) {
-            return fetchMultipartUploadURLsWithMetadata(metadata).catch(
-                (e: unknown) => {
-                    throw translateURLFetchErrorIfNeeded(e);
-                },
-            );
+            return fetchMultipartUploadURLsWithMetadata({
+                ...metadata,
+                collectionID,
+            }).catch((e: unknown) => {
+                throw translateURLFetchErrorIfNeeded(e);
+            });
         }
-        return fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
-            throw translateURLFetchErrorIfNeeded(e);
-        });
+        return fetchMultipartUploadURLs(uploadPartCount, collectionID).catch(
+            (e: unknown) => {
+                throw translateURLFetchErrorIfNeeded(e);
+            },
+        );
     }
 }
 
@@ -704,6 +711,13 @@ interface UploadContext {
      * 0 and 100 (inclusive).
      */
     updateUploadProgress: (fileLocalID: number, percentage: number) => void;
+    /**
+     * The destination collection's ID, when known. Forwarded to the upload-URL
+     * presign endpoints so the server scopes the quota check to the album
+     * owner instead of the actor (lets a collaborator at quota cap upload to
+     * a shared album whose owner has space).
+     */
+    collectionID?: number;
 }
 
 /**
@@ -724,6 +738,9 @@ export const upload = async (
     worker: CryptoWorker,
     uploadContext: UploadContext,
 ): Promise<UploadResult> => {
+    // Per-file context: the upload is scoped to this file's destination
+    // collection, so the presign quota check should target its owner.
+    uploadContext = { ...uploadContext, collectionID: collection.id };
     const { abortIfCancelled } = uploadContext;
 
     log.info(`Upload ${fileName} | start`);
@@ -1788,6 +1805,7 @@ const uploadToBucket = async (
             shouldSendContentChecksum
                 ? { contentLength: data.length, contentMd5: fileMd5! }
                 : undefined,
+            uploadContext.collectionID,
         );
         fileObjectKey = fileUploadURL.objectKey;
         const shouldUseWorker = !isCFUploadProxyDisabled;
@@ -1813,6 +1831,7 @@ const uploadToBucket = async (
                   contentMd5: thumbnailMd5!,
               }
             : undefined,
+        uploadContext.collectionID,
     );
     const shouldUseWorkerForThumbnail = !isCFUploadProxyDisabled;
     if (shouldUseWorkerForThumbnail) {
@@ -1927,11 +1946,15 @@ const uploadStreamUsingMultipart = async (
         const partLength = firstPartLength;
 
         const multipartUploadURLs =
-            await uploadService.fetchMultipartUploadURLs(uploadPartCount, {
-                contentLength: fileSize,
-                partLength,
-                partMd5s,
-            });
+            await uploadService.fetchMultipartUploadURLs(
+                uploadPartCount,
+                {
+                    contentLength: fileSize,
+                    partLength,
+                    partMd5s,
+                },
+                uploadContext.collectionID,
+            );
 
         const percentPerPart = maxPercent / uploadPartCount;
         const completedParts: MultipartCompletedPart[] = [];
@@ -1983,8 +2006,11 @@ const uploadStreamUsingMultipart = async (
         return { objectKey: multipartUploadURLs.objectKey, fileSize };
     }
 
-    const multipartUploadURLs =
-        await uploadService.fetchMultipartUploadURLs(uploadPartCount);
+    const multipartUploadURLs = await uploadService.fetchMultipartUploadURLs(
+        uploadPartCount,
+        undefined,
+        uploadContext.collectionID,
+    );
 
     const percentPerPart = maxPercent / uploadPartCount;
     let fileSize = 0;

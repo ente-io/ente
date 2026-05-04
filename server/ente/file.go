@@ -165,6 +165,11 @@ type UploadURL struct {
 type UploadURLRequest struct {
 	ContentLength int64  `json:"contentLength" binding:"required"`
 	ContentMD5    string `json:"contentMD5" binding:"required"`
+	// CollectionID, when non-zero, scopes the quota check to the album owner
+	// instead of the actor. The actor must have CanAdd on this collection.
+	// Optional for backwards compatibility — clients that omit it (or pass 0)
+	// get the legacy actor-quota behavior.
+	CollectionID int64 `json:"collectionID,omitempty"`
 }
 
 // MultipartUploadURLs represents the part upload url for a specific object
@@ -179,6 +184,9 @@ type MultipartUploadURLRequest struct {
 	ContentLength int64    `json:"contentLength" binding:"required"`
 	PartLength    int64    `json:"partLength" binding:"required"`
 	PartMD5s      []string `json:"partMd5s" binding:"required"`
+	// CollectionID, when non-zero, scopes the quota check to the album owner
+	// instead of the actor. See UploadURLRequest.CollectionID.
+	CollectionID int64 `json:"collectionID,omitempty"`
 }
 
 type ObjectType string

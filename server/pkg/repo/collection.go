@@ -712,17 +712,29 @@ func (repo *CollectionRepository) RestoreFiles(ctx context.Context, userID int64
 	return tx.Commit()
 }
 
-// RemoveFilesV3 just remove the entries from the collection. This method assume that collection owner is
-// different from the file owners
+// RemoveFilesV3 just removes the entries from the collection. The defensive
+// guard ensures we never silently delete files that the collection owner
+// originally added — those have to flow through the suggest-action queue
+// instead. After the collaborator-upload work, file ownership is decoupled
+// from authorship (a collaborator-uploaded file is owned by the album owner
+// but its added_by_user_id stays with the collaborator), so we authorize on
+// added_by_user_id (with f_owner_id fallback for legacy NULL rows).
 func (repo *CollectionRepository) RemoveFilesV3(context context.Context, collectionID int64, collectionOwnerID int64, fileIDs []int64) error {
 	updationTime := time.Microseconds()
-	ownerToFileIDs, err := repo.FileRepo.GetOwnerToFileIDsMap(context, fileIDs)
+	rows, err := repo.DB.QueryContext(context,
+		`SELECT file_id FROM collection_files
+		  WHERE collection_id = $1 AND file_id = ANY($2)
+		    AND COALESCE(added_by_user_id, f_owner_id) = $3`,
+		collectionID, pq.Array(fileIDs), collectionOwnerID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	// verify that none of the file belongs to the collection owner
-	if _, ok := ownerToFileIDs[collectionOwnerID]; ok {
-		return errors.New("can not remove files owned by album owner")
+	defer rows.Close()
+	if rows.Next() {
+		return errors.New("can not remove files added by album owner")
+	}
+	if err := rows.Err(); err != nil {
+		return stacktrace.Propagate(err, "")
 	}
 
 	// check if there are files owned by collection owner

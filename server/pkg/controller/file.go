@@ -336,9 +336,39 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 	return response, nil
 }
 
+// resolveQuotaOwner returns the user_id whose quota the upload should be
+// charged to. When collectionID is non-zero, the actor must have CanAdd on
+// the destination and quota is charged to the album owner. When 0, fall back
+// to the actor — used by the public-link upload path and by clients that
+// haven't been updated to pass collectionID.
+func (c *FileController) resolveQuotaOwner(ctx *gin.Context, actorUserID int64, collectionID int64, app ente.App) (int64, error) {
+	if collectionID == 0 {
+		return actorUserID, nil
+	}
+	resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+		CollectionID:   collectionID,
+		ActorUserID:    actorUserID,
+		IncludeDeleted: false,
+	})
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
+	if ente.App(resp.Collection.App) != app {
+		return 0, stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("ctx app=%s collectionApp=%s", app, resp.Collection.App))
+	}
+	if !resp.Role.CanAdd() {
+		return 0, stacktrace.Propagate(ente.ErrPermissionDenied, fmt.Sprintf("user %d cannot upload to collection %d", actorUserID, collectionID))
+	}
+	return resp.Collection.Owner.ID, nil
+}
+
 // GetUploadURLs returns a bunch of presigned URLs for uploading files
-func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count int, app ente.App, ignoreLimit bool) ([]ente.UploadURL, error) {
-	err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app)
+func (c *FileController) GetUploadURLs(ctx *gin.Context, userID int64, count int, app ente.App, ignoreLimit bool, collectionID int64) ([]ente.UploadURL, error) {
+	quotaUserID, err := c.resolveQuotaOwner(ctx, userID, collectionID, app)
+	if err != nil {
+		return []ente.UploadURL{}, stacktrace.Propagate(err, "")
+	}
+	err = c.UsageCtrl.CanUploadFile(ctx, quotaUserID, nil, app)
 	if err != nil {
 		return []ente.UploadURL{}, stacktrace.Propagate(err, "")
 	}
@@ -372,7 +402,7 @@ func (c *FileController) ValidateUploadEligibility(ctx context.Context, userID i
 }
 
 // GetUploadURLWithMetadata returns a single presigned URL that enforces checksum & length
-func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID int64, req ente.UploadURLRequest, app ente.App) (ente.UploadURL, error) {
+func (c *FileController) GetUploadURLWithMetadata(ctx *gin.Context, userID int64, req ente.UploadURLRequest, app ente.App) (ente.UploadURL, error) {
 	if req.ContentLength <= 0 {
 		return ente.UploadURL{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength must be greater than 0")
 	}
@@ -383,7 +413,11 @@ func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID in
 	if err != nil {
 		return ente.UploadURL{}, err
 	}
-	if err := c.UsageCtrl.CanUploadFile(ctx, userID, &req.ContentLength, app); err != nil {
+	quotaUserID, err := c.resolveQuotaOwner(ctx, userID, req.CollectionID, app)
+	if err != nil {
+		return ente.UploadURL{}, stacktrace.Propagate(err, "")
+	}
+	if err := c.UsageCtrl.CanUploadFile(ctx, quotaUserID, &req.ContentLength, app); err != nil {
 		return ente.UploadURL{}, stacktrace.Propagate(err, "")
 	}
 	s3Client := c.S3Config.GetHotS3Client()
@@ -1084,11 +1118,15 @@ func (c *FileController) getObjectURL(s3Client *s3.S3, dc string, bucket *string
 }
 
 // GetMultipartUploadURLs return collections of url to upload the parts of the files
-func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int64, count int, app ente.App) (ente.MultipartUploadURLs, error) {
+func (c *FileController) GetMultipartUploadURLs(ctx *gin.Context, userID int64, count int, app ente.App, collectionID int64) (ente.MultipartUploadURLs, error) {
 	if count <= 0 || count > maxMultipartPartCount {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "multipart upload cannot exceed %d parts", maxMultipartPartCount)
 	}
-	err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app)
+	quotaUserID, err := c.resolveQuotaOwner(ctx, userID, collectionID, app)
+	if err != nil {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
+	}
+	err = c.UsageCtrl.CanUploadFile(ctx, quotaUserID, nil, app)
 	if err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
 	}
@@ -1132,7 +1170,7 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 }
 
 // GetMultipartUploadURLWithMetadata enforces content length & per-part checksum requirements
-func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, userID int64, req ente.MultipartUploadURLRequest, app ente.App) (ente.MultipartUploadURLs, error) {
+func (c *FileController) GetMultipartUploadURLWithMetadata(ctx *gin.Context, userID int64, req ente.MultipartUploadURLRequest, app ente.App) (ente.MultipartUploadURLs, error) {
 	if req.ContentLength <= 0 {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength must be greater than 0")
 	}
@@ -1161,7 +1199,11 @@ func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, 
 		normalizedChecksums[i] = normalized
 	}
 	partLengths := computePartLengths(req.ContentLength, req.PartLength, partCount)
-	if err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app); err != nil {
+	quotaUserID, err := c.resolveQuotaOwner(ctx, userID, req.CollectionID, app)
+	if err != nil {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
+	}
+	if err := c.UsageCtrl.CanUploadFile(ctx, quotaUserID, nil, app); err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
 	}
 	s3Client := c.S3Config.GetHotS3Client()

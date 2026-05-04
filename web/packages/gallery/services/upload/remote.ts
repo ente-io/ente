@@ -43,12 +43,19 @@ const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
  * the S3 bucket. Each URL also has an associated "object key" with which remote
  * will refer to the uploaded object after it has been uploaded.
  */
-export const fetchUploadURLs = async (countHint: number) => {
+export const fetchUploadURLs = async (
+    countHint: number,
+    collectionID?: number,
+) => {
     const count = Math.min(50, countHint * 2);
-    const res = await fetch(
-        await apiURL("/files/upload-urls", { count, ts: Date.now() }),
-        { headers: await authenticatedRequestHeaders() },
-    );
+    const params: Record<string, string | number | boolean> = {
+        count,
+        ts: Date.now(),
+    };
+    if (collectionID) params.collectionID = collectionID;
+    const res = await fetch(await apiURL("/files/upload-urls", params), {
+        headers: await authenticatedRequestHeaders(),
+    });
     ensureOk(res);
     return ObjectUploadURLResponse.parse(await res.json()).urls;
 };
@@ -56,18 +63,31 @@ export const fetchUploadURLs = async (countHint: number) => {
 export const fetchUploadURLWithMetadata = async ({
     contentLength,
     contentMd5,
+    collectionID,
 }: {
     contentLength: number;
     contentMd5: string;
+    /**
+     * Optional. When set, the server scopes the upload-quota check to the
+     * album owner of this collection (the actor must have CanAdd). Lets
+     * collaborators upload to shared albums even when their own account is
+     * at quota.
+     */
+    collectionID?: number;
 }) => {
     const headers = new Headers(await authenticatedRequestHeaders());
     headers.set("Content-Type", "application/json");
+    const body: Record<string, unknown> = {
+        contentLength,
+        contentMD5: contentMd5,
+    };
+    if (collectionID) body.collectionID = collectionID;
     const res = await fetch(
         await apiURL("/files/upload-url", { ts: Date.now() }),
         {
             method: "POST",
             headers,
-            body: JSON.stringify({ contentLength, contentMD5: contentMd5 }),
+            body: JSON.stringify(body),
         },
     );
     ensureOk(res);
@@ -104,19 +124,27 @@ export const fetchMultipartUploadURLsWithMetadata = async ({
     contentLength,
     partLength,
     partMd5s,
+    collectionID,
 }: {
     contentLength: number;
     partLength: number;
     partMd5s: string[];
+    collectionID?: number;
 }) => {
     const headers = new Headers(await authenticatedRequestHeaders());
     headers.set("Content-Type", "application/json");
+    const body: Record<string, unknown> = {
+        contentLength,
+        partLength,
+        partMd5s,
+    };
+    if (collectionID) body.collectionID = collectionID;
     const res = await fetch(
         await apiURL("/files/multipart-upload-url", { ts: Date.now() }),
         {
             method: "POST",
             headers,
-            body: JSON.stringify({ contentLength, partLength, partMd5s }),
+            body: JSON.stringify(body),
         },
     );
     ensureOk(res);
@@ -213,10 +241,18 @@ const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
  * @returns A structure ({@link MultipartUploadURLs}) containing pre-signed URLs
  * for uploading each part, a completion URL, and the final object key.
  */
-export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
+export const fetchMultipartUploadURLs = async (
+    uploadPartCount: number,
+    collectionID?: number,
+) => {
     const count = uploadPartCount;
+    const params: Record<string, string | number | boolean> = {
+        count,
+        ts: Date.now(),
+    };
+    if (collectionID) params.collectionID = collectionID;
     const res = await fetch(
-        await apiURL("/files/multipart-upload-urls", { count, ts: Date.now() }),
+        await apiURL("/files/multipart-upload-urls", params),
         { headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
