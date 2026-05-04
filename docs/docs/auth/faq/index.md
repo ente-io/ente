@@ -10,7 +10,7 @@ description: Frequently asked questions about Ente Auth
 **If a service shows a QR code:**
 
 1. Open Ente Auth.
-2. Tap the add button.
+2. Tap the + button.
 3. Select "Scan a QR code".
 4. Scan the QR code shown by the service.
 5. Enter the generated code to verify setup.
@@ -18,9 +18,9 @@ description: Frequently asked questions about Ente Auth
 **If a service shows a setup key:**
 
 1. Open Ente Auth.
-2. Tap the add button.
-3. Choose manual entry.
-4. Enter the account name, issuer, and setup key.
+2. Tap the + button.
+3. Choose "Enter details manually".
+4. Enter the account name, issuer, and secret (setup key).
 5. Save and verify the generated code.
 
 ### How secure is Ente Auth?
