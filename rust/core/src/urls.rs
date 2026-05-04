@@ -6,7 +6,7 @@ pub const PRODUCTION_API_BASE_URL: &str = "https://api.ente.com";
 /// Generate the download URL for a file.
 pub fn file_download_url(api_base_url: &str, file_id: i64) -> String {
     if api_base_url == PRODUCTION_API_BASE_URL {
-        format!("https://files.ente.io/?fileID={}", file_id)
+        format!("https://files.ente.com/?fileID={}", file_id)
     } else {
         format!("{}/files/download/{}", api_base_url, file_id)
     }
@@ -19,7 +19,7 @@ mod tests {
     #[test]
     fn test_production_url() {
         let url = file_download_url(PRODUCTION_API_BASE_URL, 12345);
-        assert_eq!(url, "https://files.ente.io/?fileID=12345");
+        assert_eq!(url, "https://files.ente.com/?fileID=12345");
     }
 
     #[test]

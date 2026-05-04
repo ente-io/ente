@@ -73,13 +73,13 @@ export const customAPIHost = async () => {
 /**
  * Return the origin that should be used for uploading files.
  *
- * This defaults to `https://uploader.ente.io`, serviced by a Cloudflare worker
+ * This defaults to `https://uploader.ente.com`, serviced by a Cloudflare worker
  * (see infra/workers/uploader). But if a {@link customAPIOrigin} is set then
  * this value is set to the {@link customAPIOrigin} itself, effectively
  * bypassing the Cloudflare worker for non-Ente deployments.
  */
 export const uploaderOrigin = async () =>
-    (await customAPIOrigin()) ?? "https://uploader.ente.io";
+    (await customAPIOrigin()) ?? "https://uploader.ente.com";
 
 /**
  * A static build time constant that is `true` if {@link albumsAppOrigin} has
