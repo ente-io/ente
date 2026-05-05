@@ -177,7 +177,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void loadPreview({bool update = false}) async {
     final previewPath = widget.playlistData?.preview.path;
     if (previewPath == null) {
-      loadOriginal(update: update);
+      loadOriginal(update: true);
       return;
     }
     _setFilePathForNativePlayer(previewPath, update);
