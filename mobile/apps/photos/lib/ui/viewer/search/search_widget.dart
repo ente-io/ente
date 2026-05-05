@@ -223,9 +223,10 @@ class SearchWidgetState extends State<SearchWidget> {
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
-      streamController.sink.add([]);
-      streamController.close();
-      return streamController.stream.asBroadcastStream();
+      return Stream<List<SearchResult>>.multi((controller) {
+        controller.add([]);
+        controller.close();
+      });
     }
 
     void onResultsReceived(List<SearchResult> results) {
