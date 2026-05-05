@@ -86,10 +86,7 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
                     component="img"
                     src="/images/locker-beta.svg"
                     alt="Locker beta"
-                    sx={{
-                        height: 29,
-                        width: "auto",
-                    }}
+                    sx={{ height: 29, width: "auto" }}
                 />
 
                 <Box sx={{ width: 40 }} />
