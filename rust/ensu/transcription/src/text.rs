@@ -1,13 +1,13 @@
-use once_cell::sync::Lazy;
 use regex::Regex;
+use std::sync::LazyLock;
 
 const FILLER_WORDS: &[&str] = &[
     "uh", "um", "uhm", "umm", "uhh", "uhhh", "ah", "eh", "hmm", "hm", "mmm", "mm", "mh", "ha",
     "ehh",
 ];
 
-static MULTI_SPACE_PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s{2,}").unwrap());
-static FILLER_PATTERNS: Lazy<Vec<Regex>> = Lazy::new(|| {
+static MULTI_SPACE_PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s{2,}").unwrap());
+static FILLER_PATTERNS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
     FILLER_WORDS
         .iter()
         .map(|word| Regex::new(&format!(r"(?i)\b{}\b[,.]?", regex::escape(word))).unwrap())

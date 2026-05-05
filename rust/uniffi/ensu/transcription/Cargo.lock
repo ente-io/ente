@@ -312,8 +312,6 @@ name = "ensu-transcription"
 version = "0.1.0"
 dependencies = [
  "flate2",
- "log",
- "once_cell",
  "ort",
  "regex",
  "reqwest",
