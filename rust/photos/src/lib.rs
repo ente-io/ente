@@ -1,4 +1,3 @@
-pub mod image;
 pub mod ml;
 pub mod vector_db;
 

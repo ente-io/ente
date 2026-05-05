@@ -1,21 +1,19 @@
-use crate::{
-    image::decode::decode_image_from_path,
-    ml::{
-        clip::{
-            image::run_clip_image, text::run_clip_text_query,
-            tokenizer::tokenize_clip_text as tokenize_clip_text_impl,
-        },
-        error::{MlError, MlResult},
-        face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
-        pet::{
-            align::run_pet_face_alignment,
-            detect::{run_pet_body_detection, run_pet_face_detection},
-            embed::{run_pet_body_embedding, run_pet_face_embedding},
-        },
-        runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
-        types::{self, ClipResult, Dimensions, FaceResult, PetBodyResult, PetFaceResult},
+use crate::ml::{
+    clip::{
+        image::run_clip_image, text::run_clip_text_query,
+        tokenizer::tokenize_clip_text as tokenize_clip_text_impl,
     },
+    error::{MlError, MlResult},
+    face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
+    pet::{
+        align::run_pet_face_alignment,
+        detect::{run_pet_body_detection, run_pet_face_detection},
+        embed::{run_pet_body_embedding, run_pet_face_embedding},
+    },
+    runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
+    types::{self, ClipResult, Dimensions, FaceResult, PetBodyResult, PetFaceResult},
 };
+use ente_image::decode::decode_image_from_path;
 
 #[derive(Clone, Debug)]
 pub struct AnalyzeImageRequest {

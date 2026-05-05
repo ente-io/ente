@@ -14,14 +14,14 @@ use tiff::{
     decoder::{Decoder as TiffDecoder, DecodingResult as TiffDecodingResult},
 };
 
-use crate::ml::{
-    error::{MlError, MlResult},
+use crate::{
+    error::{ImageError, ImageResult},
     types::{DecodedImage, Dimensions},
 };
 
 static IMAGE_DECODER_HOOKS_INIT: Once = Once::new();
 
-pub fn decode_image_from_path(image_path: &str) -> MlResult<DecodedImage> {
+pub fn decode_image_from_path(image_path: &str) -> ImageResult<DecodedImage> {
     let decoded_dynamic = decode_with_image_crate(image_path)?;
     let oriented = orient_decoded_image(decoded_dynamic, image_path).to_rgb8();
 
@@ -34,13 +34,13 @@ pub fn decode_image_from_path(image_path: &str) -> MlResult<DecodedImage> {
     })
 }
 
-fn decode_with_image_crate(image_path: &str) -> MlResult<DynamicImage> {
+fn decode_with_image_crate(image_path: &str) -> ImageResult<DynamicImage> {
     init_image_decoders();
 
     let reader = ImageReader::open(image_path)
-        .map_err(|e| MlError::Decode(format!("failed to open image file '{image_path}': {e}")))?
+        .map_err(|e| ImageError::Decode(format!("failed to open image file '{image_path}': {e}")))?
         .with_guessed_format()
-        .map_err(|e| MlError::Decode(format!("failed to guess image format: {e}")))?;
+        .map_err(|e| ImageError::Decode(format!("failed to guess image format: {e}")))?;
     let guessed_format = reader.format();
 
     match reader.decode() {
@@ -53,7 +53,7 @@ fn decode_with_image_crate(image_path: &str) -> MlResult<DynamicImage> {
 
             match decode_with_tiff_crate(image_path) {
                 Ok(decoded) => Ok(decoded),
-                Err(MlError::Decode(fallback_error)) => Err(MlError::Decode(format!(
+                Err(ImageError::Decode(fallback_error)) => Err(ImageError::Decode(format!(
                     "failed to decode TIFF with image crate: {primary_error}; fallback with tiff crate also failed: {fallback_error}"
                 ))),
                 Err(other) => Err(other),
@@ -67,20 +67,20 @@ fn should_attempt_tiff_fallback(format: Option<ImageFormat>) -> bool {
     matches!(format, Some(ImageFormat::Tiff))
 }
 
-fn decode_with_tiff_crate(image_path: &str) -> MlResult<DynamicImage> {
+fn decode_with_tiff_crate(image_path: &str) -> ImageResult<DynamicImage> {
     let file = File::open(image_path)
-        .map_err(|e| MlError::Decode(format!("failed to open TIFF file '{image_path}': {e}")))?;
+        .map_err(|e| ImageError::Decode(format!("failed to open TIFF file '{image_path}': {e}")))?;
     let mut decoder = TiffDecoder::new(BufReader::new(file))
-        .map_err(|e| MlError::Decode(format!("failed to initialize TIFF decoder: {e}")))?;
+        .map_err(|e| ImageError::Decode(format!("failed to initialize TIFF decoder: {e}")))?;
     let (width, height) = decoder
         .dimensions()
-        .map_err(|e| MlError::Decode(format!("failed to read TIFF dimensions: {e}")))?;
+        .map_err(|e| ImageError::Decode(format!("failed to read TIFF dimensions: {e}")))?;
     let color_type = decoder
         .colortype()
-        .map_err(|e| MlError::Decode(format!("failed to read TIFF color type: {e}")))?;
+        .map_err(|e| ImageError::Decode(format!("failed to read TIFF color type: {e}")))?;
     let decoded = decoder
         .read_image()
-        .map_err(|e| MlError::Decode(format!("failed to decode TIFF image data: {e}")))?;
+        .map_err(|e| ImageError::Decode(format!("failed to decode TIFF image data: {e}")))?;
 
     dynamic_image_from_tiff(image_path, width, height, color_type, decoded)
 }
@@ -91,7 +91,7 @@ fn dynamic_image_from_tiff(
     height: u32,
     color_type: TiffColorType,
     decoded: TiffDecodingResult,
-) -> MlResult<DynamicImage> {
+) -> ImageResult<DynamicImage> {
     match (color_type, decoded) {
         (TiffColorType::Gray(8), TiffDecodingResult::U8(data)) => {
             let image = image::GrayImage::from_raw(width, height, data)
@@ -134,7 +134,7 @@ fn dynamic_image_from_tiff(
                 .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "RGBA(16)"))?;
             Ok(DynamicImage::ImageRgba16(image))
         }
-        (observed_color_type, observed_result_type) => Err(MlError::Decode(format!(
+        (observed_color_type, observed_result_type) => Err(ImageError::Decode(format!(
             "unsupported TIFF pixel format for '{image_path}': color_type={observed_color_type:?}, sample_type={}",
             tiff_result_type_name(&observed_result_type)
         ))),
@@ -146,8 +146,8 @@ fn tiff_buffer_mismatch_error(
     width: u32,
     height: u32,
     color_type: &str,
-) -> MlError {
-    MlError::Decode(format!(
+) -> ImageError {
+    ImageError::Decode(format!(
         "decoded TIFF buffer length does not match dimensions for '{image_path}': {width}x{height}, color_type={color_type}"
     ))
 }

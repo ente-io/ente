@@ -614,16 +614,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "177a59811828ea5dbc8927662d444ffee7b55a44696486f1b1a245ae9e652533"
 
 [[package]]
+name = "ente_image"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "kamadak-exif",
+ "libheic-rs",
+ "thiserror 2.0.18",
+ "tiff",
+]
+
+[[package]]
 name = "ente_media_inspector"
 version = "0.1.0"
 dependencies = [
+ "ente_image",
  "fast_image_resize",
  "half",
  "html-escape",
  "image",
  "imageproc",
- "kamadak-exif",
- "libheic-rs",
  "nalgebra 0.33.2",
  "ndarray 0.16.1",
  "once_cell",
@@ -633,7 +643,6 @@ dependencies = [
  "regex",
  "tempfile",
  "thiserror 2.0.18",
- "tiff",
  "usearch",
 ]
 
