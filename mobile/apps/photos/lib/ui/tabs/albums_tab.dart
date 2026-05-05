@@ -27,6 +27,9 @@ import "package:photos/ui/components/buttons/filter_pill_widget.dart";
 import "package:photos/ui/components/buttons/soft_icon_button.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
+import "package:photos/ui/tabs/albums/empty_states/on_device_select_folders_empty_state.dart";
+import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
+import "package:photos/ui/tabs/albums/empty_states/shared_empty_state.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/utils/local_settings.dart";
 
@@ -189,6 +192,50 @@ class _AlbumsTabState extends State<AlbumsTab>
     return collections
         .where((c) => c.displayName.toLowerCase().contains(query))
         .toList();
+  }
+
+  Widget _buildCollectionContentSliver({
+    required List<Collection> collections,
+    required bool showCreateAlbum,
+    required Widget emptyState,
+  }) {
+    if (collections.isEmpty && _searchQuery.trim().isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: emptyState,
+      );
+    }
+
+    return CollectionsFlexiGridViewWidget(
+      _filterCollectionsByQuery(collections),
+      albumViewType: _viewType.value,
+      selectedAlbums: widget.selectedAlbums,
+      shrinkWrap: true,
+      shouldShowCreateAlbum: showCreateAlbum && _searchQuery.trim().isEmpty,
+      enableSelectionMode: true,
+    );
+  }
+
+  Widget _buildOnDeviceContentSliver() {
+    return FutureBuilder<bool>(
+      future: OnDeviceSelectFoldersEmptyState.shouldShow(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+        if (snapshot.data!) {
+          return const SliverFillRemaining(
+            hasScrollBody: false,
+            child: OnDeviceSelectFoldersEmptyState(),
+          );
+        }
+
+        return DeviceFolderVerticalGridSliver(
+          searchQuery: _searchQuery,
+          albumViewType: _viewType.value,
+        );
+      },
+    );
   }
 
   Future<void> _toggleViewMode() async {
@@ -595,18 +642,18 @@ class _AlbumsTabState extends State<AlbumsTab>
                         final filter = _filter.value;
                         final List<Collection>? collections;
                         final bool showCreateAlbum;
+                        final Widget emptyState;
                         switch (filter) {
                           case _AlbumsFilter.ente:
                             collections = _enteCollections.value;
                             showCreateAlbum = true;
+                            emptyState = const OnEnteEmptyState();
                           case _AlbumsFilter.shared:
                             collections = _sharedCollections.value;
                             showCreateAlbum = false;
+                            emptyState = const SharedEmptyState();
                           case _AlbumsFilter.onDevice:
-                            return DeviceFolderVerticalGridSliver(
-                              searchQuery: _searchQuery,
-                              albumViewType: _viewType.value,
-                            );
+                            return _buildOnDeviceContentSliver();
                         }
                         if (collections == null) {
                           return const SliverToBoxAdapter(
@@ -616,24 +663,12 @@ class _AlbumsTabState extends State<AlbumsTab>
                             ),
                           );
                         }
-                        final filteredCollections = _filterCollectionsByQuery(
-                          collections,
-                        );
-                        return CollectionsFlexiGridViewWidget(
-                          filteredCollections,
-                          albumViewType: _viewType.value,
-                          selectedAlbums: widget.selectedAlbums,
-                          shrinkWrap: true,
-                          shouldShowCreateAlbum:
-                              showCreateAlbum && _searchQuery.trim().isEmpty,
-                          enableSelectionMode: true,
+                        return _buildCollectionContentSliver(
+                          collections: collections,
+                          showCreateAlbum: showCreateAlbum,
+                          emptyState: emptyState,
                         );
                       },
-                    ),
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 64 + MediaQuery.paddingOf(context).bottom,
-                      ),
                     ),
                   ],
                 ),
