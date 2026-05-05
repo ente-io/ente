@@ -5,7 +5,6 @@ import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -42,7 +41,6 @@ import kotlin.math.roundToInt
 
 internal sealed interface VoiceInputState {
     data object Idle : VoiceInputState
-    data object Unsupported : VoiceInputState
     data object Recording : VoiceInputState
     data class Downloading(val percent: Int?) : VoiceInputState
     data object Transcribing : VoiceInputState
@@ -58,8 +56,7 @@ internal val VoiceInputState.isWorking: Boolean
         this is VoiceInputState.Transcribing
 
 internal fun VoiceInputState.statusText(): String? = when (this) {
-    VoiceInputState.Idle,
-    VoiceInputState.Unsupported -> null
+    VoiceInputState.Idle -> null
     VoiceInputState.Recording -> "Listening..."
     is VoiceInputState.Downloading -> {
         val suffix = percent?.let { " ($it%)" } ?: ""
@@ -109,9 +106,7 @@ internal class VoiceTranscriptionController(
     private var recordedPcm = ByteArrayOutputStream()
     private var recordingSampleRate = preferredSampleRate
 
-    var state by mutableStateOf(
-        if (isArm64Device()) VoiceInputState.Idle else VoiceInputState.Unsupported
-    )
+    var state: VoiceInputState by mutableStateOf(VoiceInputState.Idle)
         private set
 
     fun onPermissionDenied() {
@@ -121,10 +116,6 @@ internal class VoiceTranscriptionController(
     @SuppressLint("MissingPermission")
     fun startRecording() {
         transientErrorJob?.cancel()
-        if (!isArm64Device()) {
-            state = VoiceInputState.Unsupported
-            return
-        }
         if (state is VoiceInputState.Recording ||
             state is VoiceInputState.Downloading ||
             state is VoiceInputState.Transcribing
@@ -288,7 +279,7 @@ internal class VoiceTranscriptionController(
             throw error
         } catch (error: UnsatisfiedLinkError) {
             Log.w(TAG, "Voice transcription is not available on this device", error)
-            state = VoiceInputState.Unsupported
+            state = VoiceInputState.Error("Voice transcription is not available on this device.")
         } catch (error: TranscriptionException) {
             Log.w(TAG, "Voice transcription failed: ${error.message}", error)
             state = VoiceInputState.Error(transcriptionErrorMessage(error.message))
@@ -351,8 +342,6 @@ internal class VoiceTranscriptionController(
     }
 
     private fun minimumRecordingBytes(sampleRate: Int): Int = sampleRate / 4 * bytesPerSample
-
-    private fun isArm64Device(): Boolean = Build.SUPPORTED_ABIS.any { it == "arm64-v8a" }
 
     private fun downloadErrorMessage(): String =
         "Voice model download failed. Check your connection and try again."

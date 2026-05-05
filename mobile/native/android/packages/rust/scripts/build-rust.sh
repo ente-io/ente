@@ -7,7 +7,7 @@
 #                       <abi> is one of arm64-v8a, armeabi-v7a, x86_64.
 # Outputs (to $OUT_DIR/<abi>):
 #           libcore.so  libdb.so  libsync.so  libinference.so
-#           libtranscription.so (arm64-v8a only)  libc++_shared.so
+#           libtranscription.so  libc++_shared.so
 #
 # UniFFI Kotlin bindings are generated out-of-band by `cargo codegen
 # ensu-android`; this script only builds the JNI libs.
@@ -18,8 +18,7 @@ REPO_ROOT=$(cd "$(dirname "$0")/../../../../../.." && pwd)
 TOOLCHAIN=""
 OUT_DIR=""
 
-CRATES=(uniffi/core uniffi/ensu/db uniffi/ensu/sync uniffi/ensu/inference)
-ARM64_ONLY_CRATES=(uniffi/ensu/transcription)
+CRATES=(uniffi/core uniffi/ensu/db uniffi/ensu/sync uniffi/ensu/inference uniffi/ensu/transcription)
 
 ABIS=()
 while [[ $# -gt 0 ]]; do
@@ -84,13 +83,6 @@ build_abi() {
         local name=${crate##*/}
         cp "$REPO_ROOT/rust/$crate/target/$target/release/lib${name}.so" "$out/"
     done
-    if [[ $abi == "arm64-v8a" ]]; then
-        for crate in "${ARM64_ONLY_CRATES[@]}"; do
-            (cd "$REPO_ROOT/rust/$crate" && cargo build --release --target "$target")
-            local name=${crate##*/}
-            cp "$REPO_ROOT/rust/$crate/target/$target/release/lib${name}.so" "$out/"
-        done
-    fi
     cp "$TOOLCHAIN/sysroot/usr/lib/$libcxx_dir/libc++_shared.so" "$out/"
 }
 

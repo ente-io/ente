@@ -1,3 +1,4 @@
+import java.io.ByteArrayOutputStream
 import java.util.Properties
 
 plugins {
@@ -26,6 +27,40 @@ val hasReleaseKeystore = keystorePropsFile.exists()
 if (hasReleaseKeystore) {
     keystorePropsFile.inputStream().use { keystoreProps.load(it) }
 }
+
+val knownAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+
+fun capture(vararg cmd: String): String? = runCatching {
+    val out = ByteArrayOutputStream()
+    exec {
+        commandLine(*cmd)
+        standardOutput = out
+        errorOutput = ByteArrayOutputStream()
+    }
+    out.toString().trim()
+}.getOrNull()
+
+fun connectedDeviceAbi(): String? {
+    val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+    val adb = sdkRoot?.let { "$it/platform-tools/adb" } ?: "adb"
+    val serial = System.getenv("ANDROID_SERIAL")?.takeIf { it.isNotBlank() }
+        ?: capture(adb, "devices")?.lines()?.drop(1)
+            ?.mapNotNull { line ->
+                line.trim().takeIf { it.endsWith("\tdevice") }?.substringBefore('\t')
+            }
+            ?.singleOrNull()
+        ?: return null
+    return capture(adb, "-s", serial, "shell", "getprop", "ro.product.cpu.abi")
+        ?.takeIf { it in knownAbis }
+}
+
+fun hostAbi(): String = when (System.getProperty("os.arch")) {
+    "aarch64", "arm64" -> "arm64-v8a"
+    "x86_64", "amd64" -> "x86_64"
+    else -> error("Unsupported host architecture: ${System.getProperty("os.arch")}")
+}
+
+val debugAbis = listOf(connectedDeviceAbi() ?: hostAbi())
 
 android {
     namespace = "io.ente.ensu"
@@ -60,9 +95,15 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            ndk {
+                abiFilters += debugAbis
+            }
         }
         release {
             signingConfig = signingConfigs.getByName("release")
+            ndk {
+                abiFilters += knownAbis
+            }
         }
     }
 

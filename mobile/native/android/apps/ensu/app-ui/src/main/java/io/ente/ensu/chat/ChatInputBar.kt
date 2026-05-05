@@ -193,8 +193,7 @@ internal fun MessageInput(
                             tint = EnsuColor.stopButton
                         )
                     }
-                    VoiceInputState.Idle,
-                    VoiceInputState.Unsupported -> Unit
+                    VoiceInputState.Idle -> Unit
                 }
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
                 Text(
@@ -271,7 +270,7 @@ internal fun MessageInput(
                     }
                 }
 
-                if (voiceInputState != VoiceInputState.Unsupported && editingMessage == null) {
+                if (editingMessage == null) {
                     val isVoiceBusy = voiceInputState is VoiceInputState.Downloading ||
                         voiceInputState is VoiceInputState.Transcribing
                     val canUseVoice = voiceInputState.isRecording ||
