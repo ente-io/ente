@@ -617,7 +617,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   },
                 ),
               );
-            } else {
+            } else if (shouldOpenFile == false) {
               setState(() {
                 _shouldRenderCreateCollectionSheet = true;
                 _sharedFiles = value;
