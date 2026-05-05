@@ -426,15 +426,23 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future<Uint8List?> _getLocalThumbnailUsingHeapPriorityQueue() async {
+    final localID = widget.file.localID;
+    if (localID == null) {
+      _logger.info(
+        "Skipping local thumbnail load because localID is unavailable for ${widget.file.tag}",
+      );
+      return null;
+    }
+
     final completer = Completer<Uint8List?>();
 
     late TaskQueue<String> relevantTaskQueue;
     if (widget.thumbnailSize == thumbnailLargeSize) {
       relevantTaskQueue = largeLocalThumbnailQueue;
-      _localThumbnailQueueTaskId = [widget.file.localID!, "-large"].join();
+      _localThumbnailQueueTaskId = [localID, "-large"].join();
     } else if (widget.thumbnailSize == thumbnailSmallSize) {
       relevantTaskQueue = smallLocalThumbnailQueue;
-      _localThumbnailQueueTaskId = [widget.file.localID!, "-small"].join();
+      _localThumbnailQueueTaskId = [localID, "-small"].join();
     } else {
       assert(false, "Invalid thumbnail size ${widget.thumbnailSize}");
       _logger.severe(
@@ -519,9 +527,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = imageProvider;
         _hasLoadedThumbnail = true;
       });
+      precacheImage(imageProvider, context);
     }
-
-    precacheImage(imageProvider, context);
   }
 
   void _reset() {

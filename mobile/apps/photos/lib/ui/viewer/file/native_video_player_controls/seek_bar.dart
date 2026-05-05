@@ -173,6 +173,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     if (target == 0) {
       await Future.delayed(const Duration(milliseconds: 450));
     }
+    if (!mounted) {
+      return;
+    }
 
     final duration = widget.controller.videoInfo?.durationInMilliseconds;
     final double fractionTarget =

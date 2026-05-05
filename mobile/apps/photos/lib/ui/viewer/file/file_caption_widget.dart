@@ -193,9 +193,15 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   }
 
   bool _onEditFileFinish(bool isSuccess) {
+    if (!mounted) {
+      return isSuccess;
+    }
     if (isSuccess) {
       widget.file.pubMagicMetadata?.caption = editedCaption;
-      Bus.instance.fire(FileCaptionUpdatedEvent(widget.file.generatedID!));
+      final generatedID = widget.file.generatedID;
+      if (generatedID != null) {
+        Bus.instance.fire(FileCaptionUpdatedEvent(generatedID));
+      }
       return true;
     } else {
       showShortToast(context, AppLocalizations.of(context).somethingWentWrong);

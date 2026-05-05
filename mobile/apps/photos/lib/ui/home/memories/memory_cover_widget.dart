@@ -67,6 +67,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
               allTitles: widget.allTitle,
             ),
           );
+          if (!mounted) return;
           setState(() {});
         },
         child: Container(

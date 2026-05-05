@@ -819,6 +819,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
       );
     }
 
+    if (!mounted) {
+      return;
+    }
+
     if (compressedFile != null) {
       final imageProvider = MemoryImage(compressedFile);
 
