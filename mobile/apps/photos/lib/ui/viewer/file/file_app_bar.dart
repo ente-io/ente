@@ -696,7 +696,9 @@ class FileAppBarState extends State<FileAppBar> {
         );
       } catch (e) {
         _logger.warning("Failed to save file", e);
-        await showGenericErrorDialog(context: context, error: e);
+        if (mounted) {
+          await showGenericErrorDialog(context: context, error: e);
+        }
       }
       return;
     }
@@ -712,12 +714,18 @@ class FileAppBarState extends State<FileAppBar> {
         fileToDownload,
         persistToFilesDB: persistToFilesDB,
       );
+      if (!mounted) {
+        await dialog.hide();
+        return;
+      }
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
     }
   }
 
