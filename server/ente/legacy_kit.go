@@ -55,11 +55,14 @@ type LegacyKitDownloadContentResponse struct {
 }
 
 type LegacyKitRecoverySession struct {
-	ID        uuid.UUID               `json:"id"`
-	KitID     uuid.UUID               `json:"kitID"`
-	Status    LegacyKitRecoveryStatus `json:"status"`
-	WaitTill  int64                   `json:"waitTill"`
-	CreatedAt int64                   `json:"createdAt"`
+	ID     uuid.UUID               `json:"id"`
+	KitID  uuid.UUID               `json:"kitID"`
+	Status LegacyKitRecoveryStatus `json:"status"`
+	// Remaining microseconds until recovery becomes ready. This follows the
+	// existing emergency legacy recovery API shape, where waitTill is a
+	// duration in API responses, not an epoch timestamp.
+	WaitTill  int64 `json:"waitTill"`
+	CreatedAt int64 `json:"createdAt"`
 }
 
 type LegacyKitChallengeRequest struct {
