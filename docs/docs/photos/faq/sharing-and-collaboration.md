@@ -70,12 +70,12 @@ Learn more: [Public links guide](/photos/features/sharing-and-collaboration/publ
 
 ### Can I use my own domain for public links? {#custom-domains}
 
-Yes! Ente's custom domains feature lets you serve your public album links using your own personalized domain instead of `albums.ente.io`.
+Yes! Ente's custom domains feature lets you serve your public album links using your own personalized domain instead of `albums.ente.com`.
 
 For example, instead of:
 
 ```
-https://albums.ente.io/?t=...
+https://albums.ente.com/?t=...
 ```
 
 You can use:
@@ -101,7 +101,7 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 
 ### Do Trip albums work with custom domains? {#trip-custom-domains}
 
-Trip albums (albums with the Trip layout feature) are not currently supported on custom domains. When someone tries to access a Trip album through your custom domain, they will be automatically redirected to the default `albums.ente.io` domain.
+Trip albums (albums with the Trip layout feature) are not currently supported on custom domains. When someone tries to access a Trip album through your custom domain, they will be automatically redirected to the default `albums.ente.com` domain.
 
 Regular albums continue to work perfectly on your custom domain - only the Trip layout feature has this limitation.
 

@@ -4,6 +4,9 @@
     <string name="asset_statements" translatable="false">
         [{
         \"include\": \"https://web.ente.io/.well-known/assetlinks.json\"
+        },
+        {
+        \"include\": \"https://photos.ente.com/.well-known/assetlinks.json\"
         }]
     </string>
 

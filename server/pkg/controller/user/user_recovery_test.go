@@ -34,12 +34,12 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	contactUserID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       82,
-		Email:        "before-recovery@ente.io",
+		Email:        "before-recovery@ente.com",
 		CreationTime: 1,
 	})
 
@@ -64,7 +64,7 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 	if err != nil {
 		t.Fatalf("failed to fetch created contact: %v", err)
 	}
-	if created.Email == nil || *created.Email != "before-recovery@ente.io" {
+	if created.Email == nil || *created.Email != "before-recovery@ente.com" {
 		t.Fatalf("unexpected initial email: %v", created.Email)
 	}
 
@@ -93,7 +93,7 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 
 	if err := controller.HandleAccountRecovery(ctx, ente.RecoverAccountRequest{
 		UserID:  contactUserID,
-		EmailID: "after-recovery@ente.io",
+		EmailID: "after-recovery@ente.com",
 	}); err != nil {
 		t.Fatalf("HandleAccountRecovery() error = %v", err)
 	}
@@ -105,7 +105,7 @@ func TestHandleAccountRecoveryTouchesContactsForResolvedEmailSync(t *testing.T) 
 	if len(diff) != 1 {
 		t.Fatalf("diff length = %d, want 1", len(diff))
 	}
-	if diff[0].Email == nil || *diff[0].Email != "after-recovery@ente.io" {
+	if diff[0].Email == nil || *diff[0].Email != "after-recovery@ente.com" {
 		t.Fatalf("resolved email after recovery = %v, want updated email", diff[0].Email)
 	}
 }

@@ -567,7 +567,7 @@ class RemoteAssetsService {
 
   bool _shouldLogProbeDiagnosticsFor(String url) {
     final host = Uri.tryParse(url)?.host;
-    return host == "models.ente.io";
+    return host == "models.ente.com";
   }
 }
 

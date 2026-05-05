@@ -8,6 +8,7 @@
 	<array>
 		<string>webcredentials:web.ente.io</string>
 		<string>webcredentials:auth.ente.io</string>
+		<string>webcredentials:auth.ente.com</string>
 	</array>
 </dict>
 </plist>

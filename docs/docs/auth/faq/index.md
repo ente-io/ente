@@ -79,7 +79,7 @@ Also ensure that your system time is accurate, as any time drift can cause TOTP 
 
 ### Can I access my codes on web?
 
-You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
+You can access your codes on the web at [auth.ente.com](https://auth.ente.com).
 
 ### Does Ente Auth require an account?
 

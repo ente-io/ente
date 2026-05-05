@@ -33,7 +33,7 @@ Open the installer and follow the instructions to install it on your desktop dev
 
 ## Web browser
 
-You can also access Ente Photos directly in your browser without installing anything at [web.ente.io](https://web.ente.io).
+You can also access Ente Photos directly in your browser without installing anything at [photos.ente.com](https://photos.ente.com).
 
 ## Command Line Interface
 

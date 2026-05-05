@@ -125,7 +125,7 @@ func TestGetCollectionReturnsOwnerRole(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	collectionID := insertAccessTestCollection(t, db, ownerID, false)
@@ -150,12 +150,12 @@ func TestGetCollectionReturnsShareeRole(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	shareeID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "sharee@ente.io",
+		Email:        "sharee@ente.com",
 		CreationTime: 1,
 	})
 	collectionID := insertAccessTestCollection(t, db, ownerID, false)
@@ -178,12 +178,12 @@ func TestGetCollectionVerifyOwnerRejectsSharee(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	shareeID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "sharee@ente.io",
+		Email:        "sharee@ente.com",
 		CreationTime: 1,
 	})
 	collectionID := insertAccessTestCollection(t, db, ownerID, false)
@@ -204,7 +204,7 @@ func TestGetCollectionRejectsDeletedCollectionByDefault(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	collectionID := insertAccessTestCollection(t, db, ownerID, true)
@@ -223,7 +223,7 @@ func TestGetCollectionIncludesDeletedWhenRequested(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	collectionID := insertAccessTestCollection(t, db, ownerID, true)
@@ -258,7 +258,7 @@ func TestVerifyFileOwnershipSucceedsForOwner(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	fileIDOne := insertAccessTestFile(t, db, ownerID)
@@ -278,12 +278,12 @@ func TestVerifyFileOwnershipRejectsNonOwner(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	otherUserID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "other@ente.io",
+		Email:        "other@ente.com",
 		CreationTime: 1,
 	})
 	fileID := insertAccessTestFile(t, db, ownerID)
@@ -302,7 +302,7 @@ func TestVerifyFileOwnershipRejectsInvalidFileIDs(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	fileID := insertAccessTestFile(t, db, ownerID)
@@ -321,12 +321,12 @@ func TestVerifyFileOwnershipRejectsMixedOwners(t *testing.T) {
 
 	ownerOneID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner-one@ente.io",
+		Email:        "owner-one@ente.com",
 		CreationTime: 1,
 	})
 	ownerTwoID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "owner-two@ente.io",
+		Email:        "owner-two@ente.com",
 		CreationTime: 1,
 	})
 	fileIDOne := insertAccessTestFile(t, db, ownerOneID)
@@ -358,7 +358,7 @@ func TestCanAccessFileAllowsOwnerFiles(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	fileIDOne := insertAccessTestFile(t, db, ownerID)
@@ -378,12 +378,12 @@ func TestCanAccessFileAllowsSharedFiles(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	actorID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "actor@ente.io",
+		Email:        "actor@ente.com",
 		CreationTime: 1,
 	})
 	collectionID := insertAccessTestCollection(t, db, ownerID, false)
@@ -405,12 +405,12 @@ func TestCanAccessFileAllowsOwnedAndSharedFilesTogether(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	actorID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "actor@ente.io",
+		Email:        "actor@ente.com",
 		CreationTime: 1,
 	})
 	ownedFileID := insertAccessTestFile(t, db, actorID)
@@ -433,12 +433,12 @@ func TestCanAccessFileRejectsUnsharedForeignFiles(t *testing.T) {
 
 	ownerID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "owner@ente.io",
+		Email:        "owner@ente.com",
 		CreationTime: 1,
 	})
 	actorID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "actor@ente.io",
+		Email:        "actor@ente.com",
 		CreationTime: 1,
 	})
 	fileID := insertAccessTestFile(t, db, ownerID)

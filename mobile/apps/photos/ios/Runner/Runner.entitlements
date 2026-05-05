@@ -7,7 +7,9 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:web.ente.io</string>
+		<string>webcredentials:photos.ente.com</string>
 		<string>webcredentials:auth.ente.io</string>
+		<string>webcredentials:auth.ente.com</string>
 		<string>applinks:albums.ente.io</string>
 		<string>applinks:albums.ente.com</string>
 	</array>

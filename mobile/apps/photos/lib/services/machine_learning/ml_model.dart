@@ -13,7 +13,7 @@ abstract class MlModel {
   static final Logger isolateLogger = Logger("MlModel");
   Logger get logger;
 
-  String get kModelBucketEndpoint => "https://models.ente.io/";
+  String get kModelBucketEndpoint => "https://models.ente.com/";
 
   String get modelRemotePath;
 

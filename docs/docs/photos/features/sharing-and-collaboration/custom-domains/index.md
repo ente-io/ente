@@ -10,7 +10,7 @@ Custom domains allow you to serve your public links with your own personalized d
 For example, if I have an Ente album and wish to share it with my friends, I can open the album's sharing settings and create a public link. When I copy this link, it will be of the form of
 
 ```
-https://albums.ente.io/?t=...
+https://albums.ente.com/?t=...
 ```
 
 The custom domains feature allows you to instead create a link that uses your own domain, say
@@ -72,7 +72,7 @@ Note that orange proxy option is off. And here is how it would look for Namechea
 
 The time it takes for DNS records to update is dependent on your DNS provider. Usually the changes should start reflecting within a few minutes, and should almost always reflect within an hour.
 
-Once the DNS changes have been applied, then you can take any public link to your shared albums, replace `albums.ente.io` with your choice (e.g. `pics.example.org`), and the link will still work.
+Once the DNS changes have been applied, then you can take any public link to your shared albums, replace `albums.ente.com` with your choice (e.g. `pics.example.org`), and the link will still work.
 
 You don't need to do this manually though, the apps will do it for you. More on this in the next section. But first, some troubleshooting tips.
 

@@ -6,7 +6,7 @@
 # Specify the report_key of the test in perf_driver.dart. `report_key`` of
 # `traceAction`` in app_init_test.dart.
 
-export ENDPOINT="https://api.ente.io"
+export ENDPOINT="https://api.ente.com"
 
 flutter drive \
   --driver=test_driver/perf_driver.dart \
