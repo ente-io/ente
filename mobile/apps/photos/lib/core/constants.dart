@@ -9,7 +9,7 @@ const String sentryDSN =
     "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4";
 const String sentryDebugDSN =
     "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3";
-const String sentryTunnel = "https://sentry-reporter.ente.io";
+const String sentryTunnel = "https://sentry-reporter.ente.com";
 const String githubDiscussionsUrl =
     "https://github.com/ente-io/ente/discussions";
 const int microSecondsInDay = 86400000000;

@@ -5,8 +5,6 @@ const int compressedThumbnailResolution = 1080;
 const int thumbnailDataLimit = 100 * 1024;
 const String sentryDSN =
     "https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.io/9";
-const String sentryTunnel = "https://sentry-reporter.ente.io";
-const String roadmapURL = "https://roadmap.ente.io";
 
 const String kAccountsUrl = "https://accounts.ente.io";
 
