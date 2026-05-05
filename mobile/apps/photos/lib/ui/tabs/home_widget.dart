@@ -139,7 +139,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
-  late StreamSubscription _publicAlbumLinkSubscription;
+  StreamSubscription? _publicAlbumLinkSubscription;
   StreamSubscription<Uri?>? _authDeepLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
       _homepageSwipeToSelectInProgressEventSubscription;
@@ -552,7 +552,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    _publicAlbumLinkSubscription.cancel();
+    _publicAlbumLinkSubscription?.cancel();
     _authDeepLinkSubscription?.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _christmasBannerEventSubscription.cancel();
@@ -605,7 +605,10 @@ class _HomeWidgetState extends State<HomeWidget> {
               );
             },
           ).then((shouldOpenFile) {
-            if (shouldOpenFile) {
+            if (!mounted) {
+              return;
+            }
+            if (shouldOpenFile == true) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -615,12 +618,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                 ),
               );
             } else {
-              if (mounted) {
-                setState(() {
-                  _shouldRenderCreateCollectionSheet = true;
-                  _sharedFiles = value;
-                });
-              }
+              setState(() {
+                _shouldRenderCreateCollectionSheet = true;
+                _sharedFiles = value;
+              });
             }
           });
         }
@@ -1078,12 +1079,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (Configuration.instance.hasConfiguredAccount() || link == null) {
       return;
     }
-    final ott = link.queryParameters["ott"]!;
+    final ott = link.queryParameters["ott"];
+    if (ott == null || ott.isEmpty) {
+      return;
+    }
     UserService.instance.verifyEmail(context, ott);
   }
 
   showChangeLog(BuildContext context) async {
-    if (_isShowingChangeLog) {
+    if (_isShowingChangeLog || !mounted) {
       return;
     }
     _isShowingChangeLog = true;
