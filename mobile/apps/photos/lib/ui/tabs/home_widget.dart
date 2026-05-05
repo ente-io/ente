@@ -668,8 +668,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     final appLinks = AppLinks();
 
     // Handle public album deep links:
-    // - iOS: Universal Links (https://albums.ente.io/...)
-    // - Android: Custom scheme (ente://albums.ente.io/...) from web join feature
+    // - iOS: Universal Links (https://albums.ente.io/... or
+    //   https://albums.ente.com/...)
+    // - Android: Custom scheme (ente://albums.ente.io/... or
+    //   ente://albums.ente.com/...)
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
@@ -710,7 +712,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _isPublicAlbumUrl(String url) {
-    return url.contains("albums.ente.io");
+    final host = Uri.tryParse(url)?.host;
+    return host == "albums.ente.io" || host == "albums.ente.com";
   }
 
   @override

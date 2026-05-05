@@ -288,10 +288,14 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 
 func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
+	embedAlbumsOrigin := viper.GetString("apps.embed-albums")
 
 	if origin == "" ||
 		origin == viper.GetString("apps.public-albums") ||
-		origin == viper.GetString("apps.embed-albums") ||
+		origin == embedAlbumsOrigin ||
+		// Keep old embedded iframes working after moving the default embed app
+		// origin to embed.ente.com. Custom embed origins should not inherit this.
+		(embedAlbumsOrigin == "https://embed.ente.com" && origin == "https://embed.ente.io") ||
 		origin == viper.GetString("apps.public-locker") ||
 		strings.HasPrefix(strings.ToLower(origin), "http://localhost:") {
 		return nil

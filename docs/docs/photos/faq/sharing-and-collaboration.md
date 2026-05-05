@@ -592,11 +592,11 @@ Open the album in Ente (web or mobile app), create a public link, open link sett
 
 **Manual method:**
 
-Create a public link for your album, then add an iframe to your HTML with the URL, replacing `albums.ente.io` with `embed.ente.io`:
+Create a public link for your album, then add an iframe to your HTML with the URL, replacing `albums.ente.com` with `embed.ente.com`:
 
 ```html
 <iframe
-    src="https://embed.ente.io/?t=...#..."
+    src="https://embed.ente.com/?t=...#..."
     width="800"
     height="600"
     frameborder="0"
@@ -609,14 +609,14 @@ For complete details, see the [Embed albums guide](/photos/features/sharing-and-
 
 ### Do embedded albums work with custom domains? {#embed-custom-domains}
 
-Yes, but you need to use `embed.ente.io` instead of your custom domain in the iframe src.
+Yes, but you need to use `embed.ente.com` instead of your custom domain in the iframe src.
 
-If you're using the easy method (copy embed HTML button), the app automatically handles this for you - it will use `embed.ente.io` regardless of your custom domain setting.
+If you're using the easy method (copy embed HTML button), the app automatically handles this for you - it will use `embed.ente.com` regardless of your custom domain setting.
 
 If you're creating the embed code manually and have a custom domain configured:
 
-- Replace your custom domain with `embed.ente.io` in the iframe src
-- For example: `https://embed.ente.io/?t=...` (not `https://pics.example.org/?t=...`)
+- Replace your custom domain with `embed.ente.com` in the iframe src
+- For example: `https://embed.ente.com/?t=...` (not `https://pics.example.org/?t=...`)
 
 The embed will still work perfectly - it's just served from the embed subdomain instead of your custom domain.
 

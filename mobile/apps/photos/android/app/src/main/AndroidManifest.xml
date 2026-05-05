@@ -66,6 +66,9 @@
                 <data 
                     android:scheme="https" 
                     android:host="albums.ente.io"/>
+                <data 
+                    android:scheme="https" 
+                    android:host="albums.ente.com"/>
             </intent-filter>
             
             <!-- file provider to share files having a file:// URI -->
