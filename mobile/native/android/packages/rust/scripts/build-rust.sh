@@ -6,7 +6,8 @@
 # Inputs  (CLI args):   --toolchain DIR --out-dir DIR <abi>...
 #                       <abi> is one of arm64-v8a, armeabi-v7a, x86_64.
 # Outputs (to $OUT_DIR/<abi>):
-#           libcore.so  libdb.so  libsync.so  libinference.so  libc++_shared.so
+#           libcore.so  libdb.so  libsync.so  libinference.so
+#           libtranscription.so  libc++_shared.so
 #
 # UniFFI Kotlin bindings are generated out-of-band by `cargo codegen
 # ensu-android`; this script only builds the JNI libs.
@@ -17,7 +18,7 @@ REPO_ROOT=$(cd "$(dirname "$0")/../../../../../.." && pwd)
 TOOLCHAIN=""
 OUT_DIR=""
 
-CRATES=(uniffi/core uniffi/ensu/db uniffi/ensu/sync uniffi/ensu/inference)
+CRATES=(uniffi/core uniffi/ensu/db uniffi/ensu/sync uniffi/ensu/inference uniffi/ensu/transcription)
 
 ABIS=()
 while [[ $# -gt 0 ]]; do

@@ -11,9 +11,11 @@ exclude = [
     "ensu/db",
     "ensu/inference",
     "ensu/sync",
+    "ensu/transcription",
     "photos",
     "uniffi/core",
     "uniffi/ensu/db",
     "uniffi/ensu/inference",
     "uniffi/ensu/sync",
+    "uniffi/ensu/transcription",
 ]
