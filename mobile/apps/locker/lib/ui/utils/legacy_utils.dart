@@ -19,7 +19,16 @@ Future<void> openLegacyPage(BuildContext context) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return EmergencyPage(config: Configuration.instance);
+          return EmergencyPage(
+            config: Configuration.instance,
+            legacyKitAuthenticator: (context, reason) async {
+              if (kDebugMode) {
+                return true;
+              }
+              return LocalAuthenticationService.instance
+                  .requestLocalAuthentication(context, reason);
+            },
+          );
         },
       ),
     );
