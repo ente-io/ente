@@ -225,7 +225,7 @@ class SearchWidgetState extends State<SearchWidget> {
     if (query.isEmpty) {
       streamController.sink.add([]);
       streamController.close();
-      return streamController.stream;
+      return streamController.stream.asBroadcastStream();
     }
 
     void onResultsReceived(List<SearchResult> results) {
@@ -325,7 +325,7 @@ class SearchWidgetState extends State<SearchWidget> {
       },
     );
 
-    return streamController.stream;
+    return streamController.stream.asBroadcastStream();
   }
 
   bool _isYearValid(String year) {
