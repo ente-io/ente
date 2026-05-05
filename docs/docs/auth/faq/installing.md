@@ -83,7 +83,7 @@ You can grab the latest version of Ente Auth for Mac, Windows and Linux from
 # Web
 
 Latest versions of our web app are available at
-[auth.ente.io](https://auth.ente.io).
+[auth.ente.com](https://auth.ente.com).
 
 <br/>
 

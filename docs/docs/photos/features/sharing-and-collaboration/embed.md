@@ -21,7 +21,7 @@ The simplest way to get the embed code is directly from Ente, whether you're on 
 
 **On web:**
 
-1. Open the album in [web.ente.io](https://web.ente.io)
+1. Open the album in [photos.ente.com](https://photos.ente.com)
 2. Open the album's sharing settings
 3. Create a public link (if you haven't already)
 4. Open the link settings ("Manage link")

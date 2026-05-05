@@ -40,7 +40,7 @@ Chromecast TVs or any other internet-connected large screen devices.
 
     On all browsers, you'll see the option to "Pair with PIN". This option works
     with all devices, Chromecast-enabled or not. You'll be required to load up
-    [cast.ente.io](https://cast.ente.io) on your large screen device.
+    [cast.ente.com](https://cast.ente.com) on your large screen device.
 
 5. Enter the PIN displayed on your large screen device into the input field on
    your mobile or web device.
@@ -71,7 +71,7 @@ Chromecast TVs or any other internet-connected large screen devices.
 
 - Works with any browser and any large screen device
 - No Chromecast required
-- Load [cast.ente.io](https://cast.ente.io) on your large screen device
+- Load [cast.ente.com](https://cast.ente.com) on your large screen device
 - Enter the displayed PIN to establish connection
 - Universal compatibility
 
