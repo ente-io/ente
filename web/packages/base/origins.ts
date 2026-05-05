@@ -91,12 +91,12 @@ export const isCustomAlbumsAppOrigin =
 /**
  * Return the origin that serves public albums.
  *
- * Defaults to our production instance, "https://albums.ente.io", but can be
+ * Defaults to our production instance, "https://albums.ente.com", but can be
  * overridden by setting the `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT` environment
  * variable.
  */
 export const albumsAppOrigin = () =>
-    process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.io";
+    process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.com";
 
 /**
  * Return true if this build is Ente's official public albums deployment.

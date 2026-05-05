@@ -215,7 +215,7 @@ func (c *StripeController) findHandlerForEvent(event stripe.Event) func(event st
 func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var session stripe.CheckoutSession
 	json.Unmarshal(event.Data.Raw, &session)
-	if session.ClientReferenceID != "" { // via payments.ente.io, where we inserted the userID
+	if session.ClientReferenceID != "" { // via payments.ente.com, where we inserted the userID
 		userID, _ := strconv.ParseInt(session.ClientReferenceID, 10, 64)
 		newSubscription, err := c.GetVerifiedSubscription(userID, session.ID)
 		if err != nil {

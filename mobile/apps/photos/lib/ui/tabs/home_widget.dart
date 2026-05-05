@@ -668,14 +668,14 @@ class _HomeWidgetState extends State<HomeWidget> {
     final appLinks = AppLinks();
 
     // Handle public album deep links:
-    // - iOS: Universal Links (https://albums.ente.io/...)
-    // - Android: Custom scheme (ente://albums.ente.io/...) from web join feature
+    // - iOS: Universal Links (https://albums.ente.io/... or
+    //   https://albums.ente.com/...)
+    // - Android: App Links (https://albums...) or custom scheme
+    //   (ente://albums...)
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
-        if (_isPublicAlbumUrl(initialUri.toString()) &&
-            (Platform.isIOS ||
-                (Platform.isAndroid && initialUri.scheme == "ente"))) {
+        if (_isPublicAlbumDeepLink(initialUri)) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info("Ignoring deep link: $initialUri");
@@ -692,9 +692,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (_isPublicAlbumUrl(uri.toString()) &&
-              (Platform.isIOS ||
-                  (Platform.isAndroid && uri.scheme == "ente"))) {
+          if (_isPublicAlbumDeepLink(uri)) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info("Ignoring deep link: $uri");
@@ -709,8 +707,26 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  bool _isPublicAlbumDeepLink(Uri uri) {
+    if (!_isPublicAlbumHost(uri.host)) {
+      return false;
+    }
+    if (Platform.isIOS) {
+      return uri.scheme == "https";
+    }
+    if (Platform.isAndroid) {
+      return uri.scheme == "ente" || uri.scheme == "https";
+    }
+    return false;
+  }
+
   bool _isPublicAlbumUrl(String url) {
-    return url.contains("albums.ente.io");
+    final host = Uri.tryParse(url)?.host ?? "";
+    return _isPublicAlbumHost(host);
+  }
+
+  bool _isPublicAlbumHost(String host) {
+    return host == "albums.ente.io" || host == "albums.ente.com";
   }
 
   @override
