@@ -1,0 +1,17 @@
+{
+    "name": "legacy",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@mui/icons-material": "^7.3.4",
+        "ente-accounts-rs": "*",
+        "ente-base": "*",
+        "ente-wasm": "*",
+        "pdfjs-dist": "^5.4.394",
+        "qr": "^0.5.5",
+        "zod": "^4.1.12"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}
