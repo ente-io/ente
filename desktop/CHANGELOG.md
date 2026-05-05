@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.7.23 (unreleased)
+## v1.7.23
 
 - All People dialogs shows entire face clusters
 - Public Albums app separated from Photos app
