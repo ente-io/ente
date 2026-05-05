@@ -107,9 +107,7 @@ Future<ParsedExifDateTime?> tryParseExifDateTime(
   Map<String, IfdTag>? exifData,
 ) async {
   try {
-    if (file == null && exifData == null) {
-      return null;
-    }
+    assert(file != null || exifData != null);
     final exif = exifData ?? await readExifAsync(file!);
     final exifTime = exif.containsKey(kDateTimeOriginal)
         ? exif[kDateTimeOriginal]!.printable
