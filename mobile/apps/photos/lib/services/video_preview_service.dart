@@ -313,9 +313,17 @@ class VideoPreviewService {
     DateTime? beginDate,
     bool onlyFilesWithLocalId = true,
   }) async {
+    final userID = config.getUserID();
+    if (userID == null) {
+      _logger.warning(
+        "Skipping video preview queue because user ID is missing. "
+        "This can happen if queued preview work runs after logout or account mode changes.",
+      );
+      return [];
+    }
     return await filesDB.getStreamingEligibleVideoFiles(
       beginDate: beginDate,
-      userID: config.getUserID()!,
+      userID: userID,
       onlyFilesWithLocalId: onlyFilesWithLocalId,
     );
   }

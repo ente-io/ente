@@ -179,7 +179,7 @@ class CollectionsGateway {
   /// Returns the raw response data containing pending actions.
   Future<Map<String, dynamic>> fetchPendingRemovalActions() async {
     final response = await _enteDio.get(
-      "/collection-actions/pending-remove/",
+      "/collection-actions/pending-remove",
     );
     return response.data;
   }
@@ -189,7 +189,7 @@ class CollectionsGateway {
   /// Returns the raw response data containing delete suggestion actions.
   Future<Map<String, dynamic>> fetchDeleteSuggestions() async {
     final response = await _enteDio.get(
-      "/collection-actions/delete-suggestions/",
+      "/collection-actions/delete-suggestions",
     );
     return response.data;
   }
