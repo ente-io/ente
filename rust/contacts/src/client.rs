@@ -8,6 +8,18 @@ use uuid::Uuid;
 
 use crate::crypto as contacts_crypto;
 use crate::error::{ContactsError, Result};
+use crate::legacy_kit::{
+    create_legacy_kit_request, decode_download_content, decode_legacy_kit_record,
+    validate_notice_period,
+};
+use crate::legacy_kit_models::{
+    LegacyKit, LegacyKitCreateResult, LegacyKitOwnerRecoverySession, LegacyKitShare,
+};
+use crate::legacy_kit_transport::{
+    LegacyKitDownloadContentResponse, LegacyKitOwnerActionRequest,
+    LegacyKitOwnerRecoverySessionResponse, LegacyKitRecordResponse,
+    LegacyKitUpdateRecoveryNoticeRequest, ListLegacyKitsResponse,
+};
 use crate::legacy_models::{LegacyContactState, LegacyInfo, LegacyRecoveryBundle};
 use crate::legacy_transport::{
     LegacyAddContactRequest, LegacyChangePasswordRequest, LegacyChangePasswordResponse,
@@ -570,7 +582,7 @@ impl ContactsCtx {
             self.decrypt_legacy_recovery_key(&response.encrypted_key, current_user_key_attrs)?;
 
         Ok(LegacyRecoveryBundle {
-            recovery_key: crypto::encode_hex(&recovery_key),
+            recovery_key,
             user_key_attributes: response.user_key_attr,
         })
     }
@@ -584,17 +596,18 @@ impl ContactsCtx {
         let bundle = self
             .legacy_recovery_bundle(recovery_id, current_user_key_attrs)
             .await?;
-        let recovery_key = auth::recovery_key_from_mnemonic_or_hex(&bundle.recovery_key)?;
-        let target_master_key =
-            decrypt_master_key_with_recovery_key(&bundle.user_key_attributes, &recovery_key)?;
-        let (updated_key_attrs, _) = auth::generate_key_attributes_for_new_password(
+        let target_master_key = decrypt_master_key_with_recovery_key(
+            &bundle.user_key_attributes,
+            &bundle.recovery_key,
+        )?;
+        let (updated_key_attrs, login_key) = auth::generate_key_attributes_for_new_password(
             &target_master_key,
             &bundle.user_key_attributes,
             new_password,
         )?;
         let srp_user_id = Uuid::new_v4().to_string();
         let (mut srp_session, setup_request) =
-            password_reset_setup_request(&srp_user_id, new_password, &updated_key_attrs)?;
+            password_reset_setup_request(&srp_user_id, &login_key)?;
         let init_response = self
             .http
             .post_json::<LegacySetupSrpResponse, _>(
@@ -640,6 +653,121 @@ impl ContactsCtx {
         let server_m2 = crypto::decode_b64(&change_response.srp_m2)?;
         srp_session.verify_m2(&server_m2)?;
         Ok(())
+    }
+
+    pub async fn legacy_kits(&self) -> Result<Vec<LegacyKit>> {
+        let response = self
+            .http
+            .get_json::<ListLegacyKitsResponse>("/legacy-kits", &[])
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit list failed", error))?;
+        let master_key = self.master_key.read().expect("master key lock poisoned");
+        response
+            .kits
+            .into_iter()
+            .map(|kit| decode_legacy_kit_record(kit, &master_key))
+            .collect()
+    }
+
+    pub async fn legacy_kit_create(
+        &self,
+        current_user_key_attrs: &KeyAttributes,
+        part_names: [String; 3],
+        notice_period_in_hours: i32,
+    ) -> Result<LegacyKitCreateResult> {
+        let (request, shares) = {
+            let recovery_key = self.current_recovery_key(current_user_key_attrs)?;
+            let master_key = self.master_key.read().expect("master key lock poisoned");
+            create_legacy_kit_request(
+                &recovery_key,
+                &master_key,
+                part_names,
+                notice_period_in_hours,
+            )?
+        };
+
+        let response = self
+            .http
+            .post_json::<LegacyKitRecordResponse, _>("/legacy-kits", &request)
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit create failed", error))?;
+        let master_key = self.master_key.read().expect("master key lock poisoned");
+        let kit = decode_legacy_kit_record(response, &master_key)?;
+        Ok(LegacyKitCreateResult { kit, shares })
+    }
+
+    pub async fn legacy_kit_download_shares(&self, kit_id: &str) -> Result<Vec<LegacyKitShare>> {
+        let response = self
+            .http
+            .get_json::<LegacyKitDownloadContentResponse>(
+                &format!("/legacy-kits/{kit_id}/download-content"),
+                &[],
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit download failed", error))?;
+        let master_key = self.master_key.read().expect("master key lock poisoned");
+        decode_download_content(response, &master_key)
+    }
+
+    pub async fn legacy_kit_recovery_session(
+        &self,
+        kit_id: &str,
+    ) -> Result<LegacyKitOwnerRecoverySession> {
+        let response = self
+            .http
+            .get_json::<LegacyKitOwnerRecoverySessionResponse>(
+                &format!("/legacy-kits/{kit_id}/recovery-session"),
+                &[],
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| {
+                with_http_context("legacy kit recovery session fetch failed", error)
+            })?;
+        Ok(response.into())
+    }
+
+    pub async fn legacy_kit_update_recovery_notice(
+        &self,
+        kit_id: &str,
+        notice_period_in_hours: i32,
+    ) -> Result<()> {
+        validate_notice_period(notice_period_in_hours)?;
+        self.http
+            .post_empty(
+                "/legacy-kits/update-recovery-notice",
+                &LegacyKitUpdateRecoveryNoticeRequest {
+                    kit_id: kit_id.to_string(),
+                    notice_period_in_hours,
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit recovery notice update failed", error))
+    }
+
+    pub async fn legacy_kit_block_recovery(&self, kit_id: &str) -> Result<()> {
+        self.http
+            .post_empty(
+                "/legacy-kits/block-recovery",
+                &LegacyKitOwnerActionRequest {
+                    kit_id: kit_id.to_string(),
+                },
+            )
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit block failed", error))
+    }
+
+    pub async fn legacy_kit_delete(&self, kit_id: &str) -> Result<()> {
+        self.http
+            .delete_empty(&format!("/legacy-kits/{kit_id}"), &[])
+            .await
+            .map_err(Into::into)
+            .map_err(|error| with_http_context("legacy kit delete failed", error))
     }
 
     fn decode_contact(&self, entity: ContactEntityResponse) -> Result<ContactRecord> {
@@ -914,22 +1042,9 @@ fn decrypt_master_key_with_recovery_key(
 
 fn password_reset_setup_request(
     srp_user_id: &str,
-    new_password: &str,
-    updated_key_attrs: &KeyAttributes,
+    login_key: &[u8],
 ) -> Result<(SrpSession, LegacySetupSrpRequest)> {
-    let mem_limit = updated_key_attrs.mem_limit.ok_or_else(|| {
-        ContactsError::InvalidInput("updated key attributes missing memLimit".into())
-    })?;
-    let ops_limit = updated_key_attrs.ops_limit.ok_or_else(|| {
-        ContactsError::InvalidInput("updated key attributes missing opsLimit".into())
-    })?;
-    let kek = auth::derive_kek(
-        new_password,
-        &updated_key_attrs.kek_salt,
-        mem_limit,
-        ops_limit,
-    )?;
-    let generated_srp = auth::generate_srp_setup(&kek, srp_user_id)?;
+    let generated_srp = auth::generate_srp_setup_with_login_key(login_key, srp_user_id)?;
     let srp_session = SrpSession::new(
         srp_user_id,
         &generated_srp.srp_salt,
