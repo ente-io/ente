@@ -46,4 +46,4 @@ class FFDefault {
   static const bool disableCFWorker = false;
 }
 
-const kDefaultProductionEndpoint = 'https://api.ente.io';
+const kDefaultProductionEndpoint = 'https://api.ente.com';

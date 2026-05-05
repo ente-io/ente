@@ -275,7 +275,11 @@ class BaseConfiguration {
   }
 
   String getHttpEndpoint() {
-    return _preferences.getString(endPointKey) ?? endpoint;
+    final savedEndpoint = _preferences.getString(endPointKey) ?? endpoint;
+    if (savedEndpoint == kLegacyProductionEndpoint) {
+      return kDefaultProductionEndpoint;
+    }
+    return savedEndpoint;
   }
 
   // isEnteProduction checks if the current endpoint is the default production

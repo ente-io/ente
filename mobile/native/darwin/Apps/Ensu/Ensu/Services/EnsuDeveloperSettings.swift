@@ -6,7 +6,7 @@ struct NetworkConfiguration {
     let apiEndpoint: URL
 
     static var `default`: NetworkConfiguration {
-        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.com")!)
     }
 
     static func selfHosted(baseURL: URL) -> NetworkConfiguration {
@@ -17,6 +17,7 @@ struct NetworkConfiguration {
 
 enum EnsuDeveloperSettings {
     private static let endpointKey = "ensu.customEndpoint"
+    private static let legacyProductionEndpoint = "https://api.ente.io"
 
     static var currentEndpoint: URL? {
         if let envEndpoint = endpointURL(from: ProcessInfo.processInfo.environment["ENTE_API_ENDPOINT"]) {
@@ -45,7 +46,11 @@ enum EnsuDeveloperSettings {
     static func setEndpoint(_ url: URL?) {
         if let url {
             let normalized = normalize(url.absoluteString)
-            UserDefaults.standard.set(normalized, forKey: endpointKey)
+            if normalized == legacyProductionEndpoint {
+                UserDefaults.standard.removeObject(forKey: endpointKey)
+            } else {
+                UserDefaults.standard.set(normalized, forKey: endpointKey)
+            }
         } else {
             UserDefaults.standard.removeObject(forKey: endpointKey)
         }
@@ -54,6 +59,9 @@ enum EnsuDeveloperSettings {
     private static func endpointURL(from value: String?) -> URL? {
         guard let value, !value.isEmpty else { return nil }
         let normalized = normalize(value)
+        if normalized == legacyProductionEndpoint {
+            return nil
+        }
         return URL(string: normalized)
     }
 

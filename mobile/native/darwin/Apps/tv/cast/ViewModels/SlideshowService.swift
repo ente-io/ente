@@ -71,8 +71,8 @@ class RealSlideshowService: ObservableObject {
     // Simplified mode: only load first file (no slideshow navigation)
     private var didDisplayFirstFile: Bool = false
     
-    private let baseURL = "https://api.ente.io"
-    private let castDownloadURL = "https://cast-albums.ente.io/download"
+    private let baseURL = "https://api.ente.com"
+    private let castDownloadURL = "https://cast-albums.ente.com/download"
     
     // Configuration Flags
     private let verboseFileLogging = false          // Reduces per-file spam unless true
@@ -1011,7 +1011,7 @@ class RealSlideshowService: ObservableObject {
     
     private func downloadImage(castPayload: CastPayload, fileID: Int) async throws -> Data {
         // Use preview endpoint for thumbnails suitable for TV display
-        let url = URL(string: "https://cast-albums.ente.io/preview/?fileID=\(fileID)")!
+        let url = URL(string: "https://cast-albums.ente.com/preview/?fileID=\(fileID)")!
         
         var request = URLRequest(url: url)
         request.setValue(castPayload.castToken, forHTTPHeaderField: "X-Cast-Access-Token")
@@ -1409,4 +1409,3 @@ func extractLivePhotoComponents(from zipData: Data) throws -> LivePhotoComponent
         throw CastError.decryptionError("Failed to extract live photo zip: \(error)")
     }
 }
-

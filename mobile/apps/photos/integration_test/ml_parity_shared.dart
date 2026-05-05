@@ -28,7 +28,7 @@ const _internalUserRoute =
 const _localModelMirrorRelativeDir = ".cache/local_model_mirror";
 
 const _parityReportDataKey = "ml_parity_results_json";
-const _modelBaseUrl = "https://models.ente.io/";
+const _modelBaseUrl = "https://models.ente.com/";
 const _modelFiles = <String>[
   "yolov5s_face_640_640_dynamic.onnx",
   "mobilefacenet_opset15.onnx",
