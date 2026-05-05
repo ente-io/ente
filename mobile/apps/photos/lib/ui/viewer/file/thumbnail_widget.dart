@@ -428,6 +428,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   Future<Uint8List?> _getLocalThumbnailUsingHeapPriorityQueue() async {
     final localID = widget.file.localID;
     if (localID == null) {
+      _logger.info(
+        "Skipping local thumbnail load because localID is unavailable for ${widget.file.tag}",
+      );
       return null;
     }
 

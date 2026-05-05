@@ -474,6 +474,8 @@ class CollectionsService {
     }
     final int? userID = _config.getUserID();
     if (userID == null) {
+      _logger
+          .info("Skipping collections for UI because user ID is unavailable");
       return <Collection>[];
     }
     return _collectionIDToCollections.values

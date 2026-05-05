@@ -1081,6 +1081,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     final ott = link.queryParameters["ott"];
     if (ott == null || ott.isEmpty) {
+      _logger.info("Ignoring auth deep link without ott parameter");
       return;
     }
     UserService.instance.verifyEmail(context, ott);
