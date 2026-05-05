@@ -556,6 +556,14 @@ async fn run_legacy_kit_stage(endpoint: &str, owner: &mut legacy_kit::LegacyKitO
         waiting_handle.session().status,
         LegacyKitRecoveryStatus::Waiting
     );
+    assert!(
+        waiting_handle.session().wait_till > 0,
+        "legacy kit waitTill should be remaining wait duration"
+    );
+    assert!(
+        waiting_handle.session().wait_till <= 24 * 60 * 60 * 1_000_000,
+        "legacy kit waitTill should not be an epoch timestamp"
+    );
 
     let resumed_waiting_handle = recovery_client
         .open_from_encrypted_challenge(

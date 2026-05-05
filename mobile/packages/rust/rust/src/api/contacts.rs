@@ -286,7 +286,7 @@ pub struct LegacyKitRecoverySession {
     pub kit_id: String,
     /// Current recovery status.
     pub status: LegacyKitRecoveryStatus,
-    /// Timestamp when the recovery becomes usable.
+    /// Remaining microseconds until the recovery becomes usable.
     pub wait_till: i64,
     /// Session creation timestamp.
     pub created_at: i64,
