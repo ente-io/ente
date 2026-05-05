@@ -9,6 +9,8 @@ export const LegacyKitRecoverySessionSchema = z.object({
     id: z.string(),
     kitID: z.string(),
     status: z.enum(["WAITING", "READY", "BLOCKED", "CANCELLED", "RECOVERED"]),
+    // Matches the existing legacy contact recovery API: remaining microseconds,
+    // not an epoch timestamp.
     waitTill: z.number(),
     createdAt: z.number(),
 });
@@ -52,12 +54,12 @@ export const changeLegacyKitPassword = async (
     password: string,
 ) => handle.change_password(password);
 
-export const formatRecoveryWait = (waitTillMicros: number) => {
-    if (waitTillMicros <= 0) {
+export const formatRecoveryWait = (waitRemainingMicros: number) => {
+    if (waitRemainingMicros <= 0) {
         return "ready now";
     }
 
-    const totalMinutes = Math.ceil(waitTillMicros / (1000 * 1000 * 60));
+    const totalMinutes = Math.ceil(waitRemainingMicros / (1000 * 1000 * 60));
     if (totalMinutes >= 60 * 24) {
         const days = Math.ceil(totalMinutes / (60 * 24));
         return `${days} day${days === 1 ? "" : "s"}`;

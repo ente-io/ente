@@ -71,12 +71,12 @@ const parseSlotCode = (rawCode: string): Pick<SheetSlot, "error" | "share"> => {
     }
 };
 
-const displayWaitTarget = (waitTillMicros: number) => {
-    if (waitTillMicros <= 0) {
+const displayWaitTarget = (waitRemainingMicros: number) => {
+    if (waitRemainingMicros <= 0) {
         return "now";
     }
 
-    const target = new Date(Date.now() + waitTillMicros / 1000);
+    const target = new Date(Date.now() + waitRemainingMicros / 1000);
     return new Intl.DateTimeFormat(undefined, {
         day: "numeric",
         hour: "numeric",
