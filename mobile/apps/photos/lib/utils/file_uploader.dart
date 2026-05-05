@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 import "package:dio/dio.dart";
 import 'package:ente_crypto/ente_crypto.dart';
@@ -23,7 +21,6 @@ import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/gateways/collections/models/metadata.dart";
 import "package:photos/gateways/files/file_upload_gateway.dart";
 import "package:photos/main.dart" show isProcessBg, kLastBGTaskHeartBeatTime;
@@ -70,8 +67,6 @@ class FileUploader {
   final _uploadLocks = UploadLocksDB.instance;
   final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
-  final _uploadURLs = Queue<UploadURL>();
-
   // Track used upload URLs to detect race conditions
   final Map<String, DateTime> _usedUploadURLs = {};
 
@@ -98,11 +93,7 @@ class FileUploader {
   late MultiPartUploader _multiPartUploader;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
 
-  FileUploader._privateConstructor() {
-    Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      _uploadURLFetchInProgress = null;
-    });
-  }
+  FileUploader._privateConstructor();
 
   static FileUploader instance = FileUploader._privateConstructor();
 
@@ -245,9 +236,26 @@ class FileUploader {
   }
 
   void clearCachedUploadURLs() {
-    _uploadURLs.clear();
     _usedUploadURLs.clear();
-    _logger.info("Cleared upload URL cache and usage tracking");
+  }
+
+  /// Validates that the user can upload before starting expensive encryption.
+  /// Throws on 402 (no subscription) or 426 (storage exceeded).
+  Future<void> validateUploadEligibility() async {
+    try {
+      await _gateway.validateUploadEligibility();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        final error = NoActiveSubscriptionError();
+        clearQueue(error);
+        throw error;
+      } else if (e.response?.statusCode == 426) {
+        final error = StorageLimitExceededError();
+        clearQueue(error);
+        throw error;
+      }
+      rethrow;
+    }
   }
 
   void removeFromQueueWhere(
@@ -661,24 +669,18 @@ class FileUploader {
           _multiPartUploader.calculatePartCount(estimatedEncSize);
 
       FileEncryptResult? fileAttributes = multiPartFileEncResult;
-      String? fileMd5;
-      List<String>? partMd5s;
+      String? fileMd5 = fileAttributes?.fileMd5;
+      List<String>? partMd5s = fileAttributes?.partMd5s;
 
       if (fileAttributes == null) {
-        final result = flagService.enableUploadV2
-            ? (await CryptoUtil.encryptFileWithMD5(
-                mediaUploadData.sourceFile!.path,
-                encryptedFilePath,
-                key: key,
-                multiPartChunkSizeInBytes: (estimatedCount > 1)
-                    ? _multiPartUploader.multipartPartSizeForUpload
-                    : null,
-              ))
-            : (await CryptoUtil.encryptFile(
-                mediaUploadData.sourceFile!.path,
-                encryptedFilePath,
-                key: key,
-              ));
+        final result = await CryptoUtil.encryptFileWithMD5(
+          mediaUploadData.sourceFile!.path,
+          encryptedFilePath,
+          key: key,
+          multiPartChunkSizeInBytes: (estimatedCount > 1)
+              ? _multiPartUploader.multipartPartSizeForUpload
+              : null,
+        );
         fileAttributes = result;
         fileMd5 = result.fileMd5;
         partMd5s = result.partMd5s;
@@ -711,12 +713,7 @@ class FileUploader {
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
       encThumbSize = await encryptedThumbnailFile.length();
-      String? thumbnailMd5;
-      if (flagService.enableUploadV2) {
-        thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
-      }
-      final bool useChecksumThumbnailUpload =
-          flagService.enableUploadV2 && thumbnailMd5?.isNotEmpty == true;
+      final thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
 
       // Calculate the number of parts for the file.
       final count = _multiPartUploader.calculatePartCount(encFileSize);
@@ -725,9 +722,10 @@ class FileUploader {
       late String thumbnailObjectKey;
 
       if (count <= 1) {
+        fileMd5 ??= await computeMd5(encryptedFilePath);
         final thumbnailUploadURL = await _getUploadURL(
-          contentLength: useChecksumThumbnailUpload ? encThumbSize : null,
-          contentMd5: useChecksumThumbnailUpload ? thumbnailMd5 : null,
+          contentLength: encThumbSize,
+          contentMd5: thumbnailMd5,
         );
         thumbnailObjectKey = await _putFile(
           thumbnailUploadURL,
@@ -735,11 +733,9 @@ class FileUploader {
           encThumbSize,
           contentMd5: thumbnailMd5,
         );
-        final useChecksumUpload =
-            flagService.enableUploadV2 && fileMd5?.isNotEmpty == true;
         final fileUploadURL = await _getUploadURL(
-          contentLength: useChecksumUpload ? encFileSize : null,
-          contentMd5: useChecksumUpload ? fileMd5 : null,
+          contentLength: encFileSize,
+          contentMd5: fileMd5,
         );
         fileObjectKey = await _putFile(
           fileUploadURL,
@@ -761,6 +757,9 @@ class FileUploader {
             existingMultipartEncFileName,
           );
         } else {
+          if (partMd5s == null || partMd5s.isEmpty) {
+            throw MultiPartError("Missing part MD5s for multipart upload");
+          }
           final multipartPartLength = fileAttributes.partSize ??
               _multiPartUploader.multipartPartSizeForUpload;
           final fileUploadURLs =
@@ -768,7 +767,7 @@ class FileUploader {
             count: count,
             contentLength: encFileSize,
             partLength: multipartPartLength,
-            partMd5s: flagService.enableUploadV2 ? partMd5s : null,
+            partMd5s: partMd5s,
           );
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
@@ -796,8 +795,8 @@ class FileUploader {
         // In regular upload, always upload the thumbnail first to keep existing behaviour
         //
         final thumbnailUploadURL = await _getUploadURL(
-          contentLength: useChecksumThumbnailUpload ? encThumbSize : null,
-          contentMd5: useChecksumThumbnailUpload ? thumbnailMd5 : null,
+          contentLength: encThumbSize,
+          contentMd5: thumbnailMd5,
         );
         thumbnailObjectKey = await _putFile(
           thumbnailUploadURL,
@@ -1200,16 +1199,20 @@ class FileUploader {
       }
       // add k20MBStorageBuffer to the free storage
       final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
-      final num fileSize = await fileToBeUploaded.length();
+      final int fileSize = await fileToBeUploaded.length();
       if (fileSize > freeStorage) {
         _logger.warning('Storage limit exceeded fileSize $fileSize and '
             'freeStorage $freeStorage');
         throw StorageLimitExceededError();
       }
-      if (fileSize > kMaxFileSize10Gib) {
-        _logger.warning('File size exceeds 10GiB fileSize $fileSize');
+      final estimatedEncryptedSize = CryptoUtil.estimateEncryptedSize(fileSize);
+      if (estimatedEncryptedSize > kMaxFileSize10Gib) {
+        _logger.warning(
+          'Encrypted file size exceeds 10GiB sourceSize $fileSize '
+          'estimatedEncryptedSize $estimatedEncryptedSize',
+        );
         throw InvalidFileError(
-          'file size above 10GiB',
+          'encrypted file size above 10GiB',
           InvalidReason.tooLargeFile,
         );
       }
@@ -1385,21 +1388,13 @@ class FileUploader {
   }
 
   Future<UploadURL> _getUploadURL({
-    int? contentLength,
-    String? contentMd5,
+    required int contentLength,
+    required String contentMd5,
   }) async {
-    final bool useSingleEndpoint = flagService.enableUploadV2 &&
-        contentLength != null &&
-        contentMd5 != null &&
-        contentMd5.isNotEmpty;
-
-    final uploadURL = useSingleEndpoint
-        ? await _requestChecksumProtectedUploadURL(
-            contentLength: contentLength,
-            contentMd5: contentMd5,
-          )
-        : await _getLegacyUploadURL();
-
+    final uploadURL = await _requestChecksumProtectedUploadURL(
+      contentLength: contentLength,
+      contentMd5: contentMd5,
+    );
     return _registerUploadURLUsage(uploadURL);
   }
 
@@ -1407,28 +1402,25 @@ class FileUploader {
     required int contentLength,
     required String contentMd5,
   }) async {
-    return _gateway.getUploadUrl(
-      contentLength: contentLength,
-      contentMd5: contentMd5,
-    );
-  }
-
-  Future<UploadURL> _getLegacyUploadURL() async {
-    if (_uploadURLs.isEmpty) {
-      // the queue is empty, fetch at least for one file to handle force uploads
-      // that are not in the queue. This is to also avoid
-      await fetchUploadURLs(math.max(_queue.length, 1));
+    if (contentMd5.isEmpty) {
+      throw StateError("Missing MD5 for checksum-protected upload URL");
     }
     try {
-      final uploadURL = _uploadURLs.removeFirst();
-      return uploadURL;
-    } catch (e) {
-      if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
-        _logger.warning("Oops, uploadUrls has no element now, fetching again");
-        return _getLegacyUploadURL();
-      } else {
-        rethrow;
+      return await _gateway.getUploadUrl(
+        contentLength: contentLength,
+        contentMd5: contentMd5,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        final error = NoActiveSubscriptionError();
+        clearQueue(error);
+        throw error;
+      } else if (e.response?.statusCode == 426) {
+        final error = StorageLimitExceededError();
+        clearQueue(error);
+        throw error;
       }
+      rethrow;
     }
   }
 
@@ -1456,36 +1448,6 @@ class FileUploader {
     return uploadURL;
   }
 
-  Future<void>? _uploadURLFetchInProgress;
-
-  Future<void> fetchUploadURLs(int fileCount) async {
-    _uploadURLFetchInProgress ??= Future<void>(() async {
-      try {
-        final requestCount = math.min(42, fileCount * 2);
-        final urls = await _gateway.getUploadUrls(requestCount);
-        _uploadURLs.addAll(urls);
-      } on DioException catch (e, s) {
-        if (e.response != null) {
-          if (e.response!.statusCode == 402) {
-            final error = NoActiveSubscriptionError();
-            clearQueue(error);
-            throw error;
-          } else if (e.response!.statusCode == 426) {
-            final error = StorageLimitExceededError();
-            clearQueue(error);
-            throw error;
-          } else {
-            _logger.warning("Could not fetch upload URLs", e, s);
-          }
-        }
-        rethrow;
-      } finally {
-        _uploadURLFetchInProgress = null;
-      }
-    });
-    return _uploadURLFetchInProgress;
-  }
-
   bool get _shouldUseCFUploadProxy =>
       !flagService.disableCFWorker &&
       (localSettings.cfUploadProxyEnabled ??
@@ -1501,9 +1463,12 @@ class FileUploader {
     UploadURL uploadURL,
     File file,
     int fileSize, {
-    String? contentMd5,
+    required String contentMd5,
     int attempt = 1,
   }) async {
+    if (contentMd5.isEmpty) {
+      throw StateError("Missing MD5 for checksum-protected upload");
+    }
     final startTime = DateTime.now().millisecondsSinceEpoch;
     final fileName = basename(file.path);
     int bytesSent = 0;
@@ -1515,9 +1480,7 @@ class FileUploader {
       if (useUploadProxy) {
         headers["UPLOAD-URL"] = uploadURL.url;
       }
-      if (contentMd5 != null) {
-        headers[useUploadProxy ? 'CONTENT-MD5' : 'Content-MD5'] = contentMd5;
-      }
+      headers[useUploadProxy ? 'CONTENT-MD5' : 'Content-MD5'] = contentMd5;
 
       await _dio.put(
         useUploadProxy ? "$kUploadProxyEndpoint/file-upload" : uploadURL.url,
@@ -1549,7 +1512,10 @@ class FileUploader {
         _logger.info(
           "Upload failed for $fileName after sending ${formatBytes(bytesSent)} of ${formatBytes(fileSize)}, retrying attempt ${attempt + 1}",
         );
-        final newUploadURL = await _getUploadURL();
+        final newUploadURL = await _getUploadURL(
+          contentLength: fileSize,
+          contentMd5: contentMd5,
+        );
         return _putFile(
           newUploadURL,
           file,
