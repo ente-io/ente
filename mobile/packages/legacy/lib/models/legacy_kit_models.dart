@@ -14,6 +14,8 @@ class LegacyKitRecoverySession {
   final String id;
   final String kitId;
   final LegacyKitRecoveryStatus status;
+  // Remaining microseconds until recovery becomes ready, matching the existing
+  // legacy contact recovery API contract.
   final int waitTill;
   final int createdAt;
 

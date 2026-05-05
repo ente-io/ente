@@ -528,7 +528,7 @@ class _RecoveryBanner extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final createdAt = _formatDateTime(session.createdAt);
-    final waitTill = _formatWaitTill(session.waitTill);
+    final waitTill = _formatWaitRemaining(session.waitTill);
     final attemptSummaries = details == null
         ? const <_RecoveryAttemptSummary>[]
         : _summarizeAttempts(details!.initiators);
@@ -605,9 +605,9 @@ class _RecoveryBanner extends StatelessWidget {
     return DateFormat.yMMMd().add_jm().format(dateTime);
   }
 
-  String _formatWaitTill(int waitTillMicros) {
+  String _formatWaitRemaining(int waitRemainingMicros) {
     final dateTime = DateTime.now().add(
-      Duration(microseconds: waitTillMicros),
+      Duration(microseconds: waitRemainingMicros),
     );
     return DateFormat.yMMMd().add_jm().format(dateTime);
   }
