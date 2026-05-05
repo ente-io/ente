@@ -55,5 +55,5 @@ set to an address only the server can reach (typically `localhost:3200` from
 the quickstart).
 
 Change `endpoint` in `museum.yaml` to an address reachable from both museum and
-the clients — usually the server's LAN IP or a hostname. Learn more in
+the clients - usually the server's LAN IP or a hostname. Learn more in
 [Configuring Object Storage](/self-hosting/administration/object-storage#using-the-mobile-app-or-another-device).

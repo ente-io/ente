@@ -141,7 +141,7 @@ value into the pre-signed URLs it hands to clients. The quickstart ships with
 server. Uploads from the mobile app or another machine then silently fail
 (museum logs `OBJECT_SIZE_FETCH_FAILED: dial tcp …: i/o timeout`). Set
 `endpoint` in `museum.yaml` to an address reachable from both museum and the
-clients — typically the server's LAN IP or a hostname. Learn more in
+clients - typically the server's LAN IP or a hostname. Learn more in
 [Configuring Object Storage](/self-hosting/administration/object-storage#using-the-mobile-app-or-another-device).
 
 **Issue 2: CORS (Cross-Origin Resource Sharing).** Your browser treats requests between different ports on the same IP as cross-origin requests. For example:
