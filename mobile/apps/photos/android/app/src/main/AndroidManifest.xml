@@ -58,19 +58,24 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
 
-            <!-- App Link --> 
+            <!-- App Link -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data 
-                    android:scheme="https" 
+                <data
+                    android:scheme="https"
                     android:host="albums.ente.io"/>
-                <data 
-                    android:scheme="https" 
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
                     android:host="albums.ente.com"/>
             </intent-filter>
-            
+
             <!-- file provider to share files having a file:// URI -->
 
             <!--Filter
