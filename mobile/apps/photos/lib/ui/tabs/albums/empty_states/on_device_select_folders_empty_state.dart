@@ -1,32 +1,18 @@
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photo_manager/photo_manager.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/backup_flow_helper.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/tabs/albums/empty_states/albums_empty_state_feature_row.dart";
 
 class OnDeviceSelectFoldersEmptyState extends StatelessWidget {
-  const OnDeviceSelectFoldersEmptyState({super.key});
+  const OnDeviceSelectFoldersEmptyState({
+    this.onFoldersSelected,
+    super.key,
+  });
 
-  static Future<bool> shouldShow() async {
-    if (backupPreferenceService.hasSkippedOnboardingPermission) {
-      return true;
-    }
-
-    final state = await permissionService.getPermissionState();
-    final hasAccess =
-        state == PermissionState.authorized || state == PermissionState.limited;
-    if (hasAccess && !permissionService.hasGrantedPermissions()) {
-      await permissionService.onUpdatePermission(state);
-      Bus.instance.fire(PermissionGrantedEvent());
-    }
-    return !hasAccess;
-  }
+  final VoidCallback? onFoldersSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -103,5 +89,6 @@ class OnDeviceSelectFoldersEmptyState extends StatelessWidget {
 
   Future<void> _selectFolders(BuildContext context) async {
     await handleFolderSelectionBackupFlow(context);
+    onFoldersSelected?.call();
   }
 }

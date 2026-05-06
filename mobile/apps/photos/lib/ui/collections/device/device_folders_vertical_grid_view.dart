@@ -11,10 +11,12 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/ui/collections/device/device_folder_list_item.dart";
 import "package:photos/ui/collections/device/device_folder_row_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/searchable_appbar.dart';
+import "package:photos/ui/tabs/albums/empty_states/on_device_select_folders_empty_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/local_settings.dart";
 
@@ -130,6 +132,19 @@ class _DeviceFolderVerticalGridViewBodyState
     debugPrint(
       "${(DeviceFolderVerticalGridSliver).toString()} - $_loadReason",
     );
+    if (backupPreferenceService.hasSkippedOnboardingPermission) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: OnDeviceSelectFoldersEmptyState(
+          onFoldersSelected: () {
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        ),
+      );
+    }
+
     return FutureBuilder<List<DeviceCollection>>(
       future:
           FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true),
@@ -147,7 +162,12 @@ class _DeviceFolderVerticalGridViewBodyState
           }
 
           return deviceCollections.isEmpty
-              ? const SliverFillRemaining(child: EmptyState())
+              ? const SliverFillRemaining(
+                  child: Padding(
+                    padding: EdgeInsets.all(22),
+                    child: EmptyState(),
+                  ),
+                )
               : widget.albumViewType == AlbumViewType.grid
                   ? _buildGridView(context, deviceCollections)
                   : _buildListView(deviceCollections);

@@ -4,6 +4,7 @@ import "dart:math" as math;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/app_mode_changed_event.dart";
@@ -27,7 +28,6 @@ import "package:photos/ui/components/buttons/filter_pill_widget.dart";
 import "package:photos/ui/components/buttons/soft_icon_button.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
-import "package:photos/ui/tabs/albums/empty_states/on_device_select_folders_empty_state.dart";
 import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
 import "package:photos/ui/tabs/albums/empty_states/shared_empty_state.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
@@ -134,8 +134,19 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   Future<void> _loadAll() async {
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      _enteCollections.value = <Collection>[];
+      _sharedCollections.value = <Collection>[];
+      return;
+    }
     await Future.wait([_loadEnteCollections(), _loadSharedCollections()]);
   }
+
+  bool get _isLocalGalleryMode =>
+      isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+
+  _AlbumsFilter get _effectiveFilter =>
+      _isLocalGalleryMode ? _AlbumsFilter.onDevice : _filter.value;
 
   void _syncSortState() {
     _sortKey.value = localSettings.albumSortKey();
@@ -157,6 +168,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   void _selectFilter(_AlbumsFilter filter) {
+    if (_isLocalGalleryMode && filter != _AlbumsFilter.onDevice) return;
     if (_filter.value == filter) return;
     widget.selectedAlbums?.clearAll();
     _filter.value = filter;
@@ -213,28 +225,6 @@ class _AlbumsTabState extends State<AlbumsTab>
       shrinkWrap: true,
       shouldShowCreateAlbum: showCreateAlbum && _searchQuery.trim().isEmpty,
       enableSelectionMode: true,
-    );
-  }
-
-  Widget _buildOnDeviceContentSliver() {
-    return FutureBuilder<bool>(
-      future: OnDeviceSelectFoldersEmptyState.shouldShow(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-        if (snapshot.data!) {
-          return const SliverFillRemaining(
-            hasScrollBody: false,
-            child: OnDeviceSelectFoldersEmptyState(),
-          );
-        }
-
-        return DeviceFolderVerticalGridSliver(
-          searchQuery: _searchQuery,
-          albumViewType: _viewType.value,
-        );
-      },
     );
   }
 
@@ -322,6 +312,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       overlaySize.width - details.globalPosition.dx - 24,
     );
     final isListView = _viewType.value == AlbumViewType.list;
+    final showSortActions = _effectiveFilter != _AlbumsFilter.onDevice;
     final currentSortKey = _sortKey.value;
     final nameSortDirection =
         currentSortKey == AlbumSortKey.albumName ? _sortDirection.value : null;
@@ -368,6 +359,7 @@ class _AlbumsTabState extends State<AlbumsTab>
       items: [
         item(
           value: _AlbumsMenuAction.toggleView,
+          showDivider: showSortActions,
           child: _buildAlbumsMenuRow(
             label: isListView ? strings.grid : strings.list,
             trailingWidget: HugeIcon(
@@ -380,34 +372,36 @@ class _AlbumsTabState extends State<AlbumsTab>
             ),
           ),
         ),
-        item(
-          value: _AlbumsMenuAction.name,
-          child: _buildAlbumsMenuRow(
-            label: strings.name,
-            secondaryLabel: nameSortDirection != AlbumSortDirection.descending
-                ? strings.sortAToZ
-                : strings.sortZToA,
-            isActive: currentSortKey == AlbumSortKey.albumName,
-            reserveIndicatorSpace: true,
+        if (showSortActions) ...[
+          item(
+            value: _AlbumsMenuAction.name,
+            child: _buildAlbumsMenuRow(
+              label: strings.name,
+              secondaryLabel: nameSortDirection != AlbumSortDirection.descending
+                  ? strings.sortAToZ
+                  : strings.sortZToA,
+              isActive: currentSortKey == AlbumSortKey.albumName,
+              reserveIndicatorSpace: true,
+            ),
           ),
-        ),
-        item(
-          value: _AlbumsMenuAction.newest,
-          child: _buildAlbumsMenuRow(
-            label: strings.newest,
-            isActive: currentSortKey == AlbumSortKey.newestPhoto,
-            reserveIndicatorSpace: true,
+          item(
+            value: _AlbumsMenuAction.newest,
+            child: _buildAlbumsMenuRow(
+              label: strings.newest,
+              isActive: currentSortKey == AlbumSortKey.newestPhoto,
+              reserveIndicatorSpace: true,
+            ),
           ),
-        ),
-        item(
-          value: _AlbumsMenuAction.updated,
-          showDivider: false,
-          child: _buildAlbumsMenuRow(
-            label: strings.updated,
-            isActive: currentSortKey == AlbumSortKey.lastUpdated,
-            reserveIndicatorSpace: true,
+          item(
+            value: _AlbumsMenuAction.updated,
+            showDivider: false,
+            child: _buildAlbumsMenuRow(
+              label: strings.updated,
+              isActive: currentSortKey == AlbumSortKey.lastUpdated,
+              reserveIndicatorSpace: true,
+            ),
           ),
-        ),
+        ],
       ],
     );
 
@@ -458,6 +452,7 @@ class _AlbumsTabState extends State<AlbumsTab>
     final textTheme = getEnteTextTheme(context);
     final strings = AppLocalizations.of(context);
     final selectedAlbums = widget.selectedAlbums;
+    final localGalleryMode = _isLocalGalleryMode;
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -527,7 +522,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                           child: HugeIcon(
                                             icon:
                                                 HugeIcons.strokeRoundedCancel01,
-                                            size: 12,
+                                            size: 16,
                                             color: colorScheme.textMuted,
                                           ),
                                         ),
@@ -538,18 +533,20 @@ class _AlbumsTabState extends State<AlbumsTab>
                                         },
                                       ),
                                     ),
-                                    const SizedBox(width: 20),
-                                    SoftIconButton(
-                                      icon: HugeIcon(
-                                        icon: HugeIcons
-                                            .strokeRoundedFilterHorizontal,
-                                        size: 18,
-                                        color: colorScheme.textBase,
+                                    if (!localGalleryMode) ...[
+                                      const SizedBox(width: 20),
+                                      SoftIconButton(
+                                        icon: HugeIcon(
+                                          icon: HugeIcons
+                                              .strokeRoundedFilterHorizontal,
+                                          size: 18,
+                                          color: colorScheme.textBase,
+                                        ),
+                                        onTap: () => showAlbumsManageSheet(
+                                          context,
+                                        ),
                                       ),
-                                      onTap: () => showAlbumsManageSheet(
-                                        context,
-                                      ),
-                                    ),
+                                    ],
                                   ],
                                 )
                               : Text(
@@ -568,15 +565,17 @@ class _AlbumsTabState extends State<AlbumsTab>
                           ),
                           onTap: _activateSearch,
                         ),
-                        const SizedBox(width: 6),
-                        SoftIconButton(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedFilterHorizontal,
-                            size: 18,
-                            color: colorScheme.textBase,
+                        if (!localGalleryMode) ...[
+                          const SizedBox(width: 6),
+                          SoftIconButton(
+                            icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedFilterHorizontal,
+                              size: 18,
+                              color: colorScheme.textBase,
+                            ),
+                            onTap: () => showAlbumsManageSheet(context),
                           ),
-                          onTap: () => showAlbumsManageSheet(context),
-                        ),
+                        ],
                       ],
                     ],
                   ),
@@ -589,28 +588,42 @@ class _AlbumsTabState extends State<AlbumsTab>
                     Expanded(
                       child: ValueListenableBuilder<_AlbumsFilter>(
                         valueListenable: _filter,
-                        builder: (context, selected, _) => Row(
-                          children: [
-                            FilterPillWidget(
-                              label: strings.ente,
-                              selected: selected == _AlbumsFilter.ente,
-                              onTap: () => _selectFilter(_AlbumsFilter.ente),
-                            ),
-                            const SizedBox(width: 8),
-                            FilterPillWidget(
-                              label: strings.onDevice,
-                              selected: selected == _AlbumsFilter.onDevice,
-                              onTap: () =>
-                                  _selectFilter(_AlbumsFilter.onDevice),
-                            ),
-                            const SizedBox(width: 8),
-                            FilterPillWidget(
-                              label: strings.searchResultShared,
-                              selected: selected == _AlbumsFilter.shared,
-                              onTap: () => _selectFilter(_AlbumsFilter.shared),
-                            ),
-                          ],
-                        ),
+                        builder: (context, selected, _) {
+                          final effectiveFilter = localGalleryMode
+                              ? _AlbumsFilter.onDevice
+                              : selected;
+                          return Row(
+                            children: [
+                              if (!localGalleryMode) ...[
+                                FilterPillWidget(
+                                  label: strings.ente,
+                                  selected:
+                                      effectiveFilter == _AlbumsFilter.ente,
+                                  onTap: () =>
+                                      _selectFilter(_AlbumsFilter.ente),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              FilterPillWidget(
+                                label: strings.onDevice,
+                                selected:
+                                    effectiveFilter == _AlbumsFilter.onDevice,
+                                onTap: () =>
+                                    _selectFilter(_AlbumsFilter.onDevice),
+                              ),
+                              if (!localGalleryMode) ...[
+                                const SizedBox(width: 8),
+                                FilterPillWidget(
+                                  label: strings.searchResultShared,
+                                  selected:
+                                      effectiveFilter == _AlbumsFilter.shared,
+                                  onTap: () =>
+                                      _selectFilter(_AlbumsFilter.shared),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
                       ),
                     ),
                     SoftIconButton(
@@ -639,7 +652,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                         ],
                       ),
                       builder: (context, _) {
-                        final filter = _filter.value;
+                        final filter = _effectiveFilter;
                         final List<Collection>? collections;
                         final bool showCreateAlbum;
                         final Widget emptyState;
@@ -653,7 +666,10 @@ class _AlbumsTabState extends State<AlbumsTab>
                             showCreateAlbum = false;
                             emptyState = const SharedEmptyState();
                           case _AlbumsFilter.onDevice:
-                            return _buildOnDeviceContentSliver();
+                            return DeviceFolderVerticalGridSliver(
+                              searchQuery: _searchQuery,
+                              albumViewType: _viewType.value,
+                            );
                         }
                         if (collections == null) {
                           return const SliverToBoxAdapter(
@@ -682,7 +698,7 @@ class _AlbumsTabState extends State<AlbumsTab>
               [_filter, _enteCollections, _sharedCollections],
             ),
             builder: (context, _) {
-              final filter = _filter.value;
+              final filter = _effectiveFilter;
               final UISectionType sectionType;
               final List<Collection>? collections;
               switch (filter) {
