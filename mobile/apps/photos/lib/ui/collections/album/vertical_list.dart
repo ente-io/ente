@@ -42,6 +42,7 @@ class AlbumVerticalListWidget extends StatefulWidget {
   final List<Collection> selectedCollections;
   final Function()? onSelectionChanged;
   final List<String>? selectedPeople;
+  final ScrollController? scrollController;
 
   const AlbumVerticalListWidget(
     this.collections,
@@ -56,6 +57,7 @@ class AlbumVerticalListWidget extends StatefulWidget {
     this.sharedCollections = const [],
     this.enableSelection = false,
     this.onSelectionChanged,
+    this.scrollController,
     super.key,
   });
 
@@ -115,6 +117,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         sharedItemsCount;
 
     return ListView.separated(
+      controller: widget.scrollController,
       itemBuilder: (context, index) {
         // Create new album button
         if (index == 0 && widget.shouldShowCreateAlbum) {
