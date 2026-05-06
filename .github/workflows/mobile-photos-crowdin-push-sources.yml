@@ -1,13 +1,13 @@
-name: "Push sources to Crowdin (mobile)"
+name: "Push sources to Crowdin (mobile/photos)"
 
 on:
     push:
         branches: [main]
         paths:
-            # Run workflow when mobiles's intl_en.arb is changed
+            # Run workflow when photos's intl_en.arb is changed
             - "mobile/apps/photos/lib/l10n/intl_en.arb"
             # Or the workflow itself is changed
-            - ".github/workflows/mobile-crowdin.yml"
+            - ".github/workflows/mobile-photos-crowdin-push-sources.yml"
 
 permissions:
     contents: write

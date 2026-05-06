@@ -1,4 +1,4 @@
-name: "Push Crowdin translations (mobile)"
+name: "Push sources and translations to Crowdin (mobile)"
 
 # This is a variant of the mobile Crowdin sync workflows that uploads the
 # translated strings in addition to the source strings.
@@ -22,13 +22,13 @@ name: "Push Crowdin translations (mobile)"
 # 3. Branch from updated `main` and make the string edits.
 #
 # 4. Push the branch and run this workflow
-#   `gh workflow run mobile-crowdin-push-both.yml --ref <branch> -f app=photos`
+#   `gh workflow run mobile-crowdin-push-sources-and-translations.yml --ref <branch> -f app=photos`
 #
 # 5. After it succeeds, merge the string-edit PR.
 
 on:
     # Trigger manually, or using
-    # `gh workflow run mobile-crowdin-push-both.yml --ref <my-branch> -f app=photos`
+    # `gh workflow run mobile-crowdin-push-sources-and-translations.yml --ref <my-branch> -f app=photos`
     workflow_dispatch:
         inputs:
             app:
@@ -47,11 +47,10 @@ permissions:
     pull-requests: write
 
 jobs:
-    push-both-to-crowdin:
+    push-sources-and-translations-to-crowdin:
         name: "Push ${{ matrix.app }} sources and translations"
         runs-on: ubuntu-latest
         strategy:
-            fail-fast: false
             matrix:
                 include:
                     - app: photos
