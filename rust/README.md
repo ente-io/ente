@@ -41,7 +41,7 @@
 ## Contents (this repo)
 
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
-- `rust/photos/` (`ente_media_inspector`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
+- `rust/photos/` (`ente_photos`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
 - `rust/cli/` (`ente-rs`) - Rust CLI.
 - `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
 - `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
@@ -113,7 +113,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
-- `ente_media_inspector` - shared Photos Rust logic
+- `ente_photos` - shared Photos Rust logic
 - `ente-rs` - CLI binary
 - `ente-e2e` - ignored Rust integration tests that run against a live Museum
 - `ente-wasm` - wasm-bindgen wrappers for web
