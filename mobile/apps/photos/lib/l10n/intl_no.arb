@@ -1672,7 +1672,6 @@
   "spotlightOnThem": "Fremhev {name}",
   "personIsAge": "{name} er {age}!",
   "personTurningAge": "{name} fyller {age} snart",
-  "lastTimeWithThem": "Siste gang med {name}",
   "tripToLocation": "Reise til {location}",
   "tripInYear": "Reise i {year}",
   "lastYearsTrip": "Fjorårets tur",

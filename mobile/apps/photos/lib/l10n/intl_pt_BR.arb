@@ -1768,7 +1768,6 @@
   "spotlightOnThem": "Destaques em {name}",
   "personIsAge": "{name} tem {age} anos!",
   "personTurningAge": "{name} terá {age} em breve",
-  "lastTimeWithThem": "Últimos momentos com {name}",
   "tripToLocation": "Viajem à {location}",
   "tripInYear": "Viajem em {year}",
   "lastYearsTrip": "Viajem do ano passado",

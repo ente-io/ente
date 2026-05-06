@@ -2155,7 +2155,6 @@
   "spotlightOnThem": "В центре внимания {name}",
   "personIsAge": "{name} исполнилось {age}!",
   "personTurningAge": "{name} скоро исполнится {age}",
-  "lastTimeWithThem": "В последний раз с {name}",
   "unnamedPeopleSpotlight": "Знакомое лицо",
   "tripToLocation": "Поездка в {location}",
   "tripInYear": "Поездка в {year}",

@@ -1672,7 +1672,6 @@
   "spotlightOnThem": "تسليط الضوء على {name}",
   "personIsAge": "{name} يبلغ {age}!",
   "personTurningAge": "{name} سيبلغ {age} قريبًا",
-  "lastTimeWithThem": "آخر مرة مع {name}",
   "tripToLocation": "رحلة إلى {location}",
   "tripInYear": "رحلة في {year}",
   "lastYearsTrip": "رحلة العام الماضي",

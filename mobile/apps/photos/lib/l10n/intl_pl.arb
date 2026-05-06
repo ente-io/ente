@@ -1932,7 +1932,6 @@
   "spotlightOnThem": "Uwaga na {name}",
   "personIsAge": "{name} ma {age} lat!",
   "personTurningAge": "{name} wkrótce będzie mieć {age} lat",
-  "lastTimeWithThem": "Ostatnio z {name}",
   "tripToLocation": "Wyjazd do {location}",
   "tripInYear": "Podróż w {year}",
   "lastYearsTrip": "Zeszłoroczna podróż",
