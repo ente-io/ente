@@ -15,6 +15,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 
+// TODO: lau: neeraj: REMOVE this once the underlying issue is resolved and the user is unblocked.
 // Skip processing these fileIDs during diff for the given collection.
 // Used to unblock a specific user whose sync is failing on these files.
 const int _skipCollectionID = 1580559965692884;
@@ -143,6 +144,8 @@ class DiffFetcher {
         file.collectionID = item["collectionID"];
         file.updationTime = item["updationTime"];
         latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
+
+        // TODO: lau: neeraj: REMOVE below block once the underlying issue is resolved and the user is unblocked.
         if (_skipCollectionID == file.collectionID &&
             _skipFileIDs.contains(file.uploadedFileID)) {
           _logger.warning(
@@ -151,6 +154,7 @@ class DiffFetcher {
           );
           continue;
         }
+
         if (item["isDeleted"]) {
           if (existingUploadIDs.contains(file.uploadedFileID)) {
             deletedFiles.add(file);
