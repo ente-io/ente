@@ -6,5 +6,4 @@ files:
     translation: /lib/l10n/app_%two_letters_code%.arb
     dest: /%original_file_name%
     type: arb
-    skip_untranslated_strings: true
     skip_untranslated_files: false
