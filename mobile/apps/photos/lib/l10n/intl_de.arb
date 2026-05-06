@@ -29,6 +29,7 @@
   "deleteReason4": "Mein Grund ist nicht aufgeführt",
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
+  "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.com</warning> von deiner bei uns hinterlegten E-Mail-Adresse.",
   "entePhotosPerm": "Ente <i> benötigt Berechtigung, um </i> Ihre Fotos zu sichern",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
@@ -512,6 +513,7 @@
   },
   "discover_identity": "Identität",
   "discover_screenshots": "Bildschirmfotos",
+  "discover_qr_codes": "QR-Codes",
   "discover_receipts": "Belege",
   "discover_notes": "Notizen",
   "discover_memes": "Memes",
@@ -806,6 +808,15 @@
       }
     }
   },
+  "yourStorageIsLimitedTo": "Dein Speicherplatz ist beschränkt auf {limit}",
+  "@yourStorageIsLimitedTo": {
+    "placeholders": {
+      "limit": {
+        "type": "String",
+        "example": "50 GB"
+      }
+    }
+  },
   "storageLimitExplanation": "Lege die maximale Speicherkapazität fest, die dieses Mitglied verwenden kann. Sobald das Limit erreicht ist, wird ein Hochladen nicht mehr möglich sein.",
   "limit": "Limit",
   "noLimit": "Kein Limit",
@@ -926,6 +937,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Zahlungsdetails",
   "manageFamily": "Familiengruppe verwalten",
+  "contactToManageSubscription": "Bitte kontaktiere uns über support@ente.com, um dein {provider}-Abo zu verwalten.",
   "renewSubscription": "Abonnement erneuern",
   "cancelSubscription": "Abonnement kündigen",
   "areYouSureYouWantToRenew": "Bist du sicher, dass du verlängern möchtest?",
@@ -975,6 +987,7 @@
   "visitWebToManage": "Bitte rufe \"web.ente.io\" auf, um dein Abo zu verwalten",
   "managePaymentMethod": "Zahlungsmethode verwalten",
   "couldNotUpdateSubscription": "Abo konnte nicht aktualisiert werden",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Bitte kontaktiere support@ente.com und wir helfen dir gerne!",
   "paymentFailed": "Zahlung fehlgeschlagen",
   "paymentFailedTalkToProvider": "Bitte kontaktiere den Support von {providerName}, falls etwas abgebucht wurde",
   "@paymentFailedTalkToProvider": {
@@ -1201,6 +1214,16 @@
   "clickOnTheOverflowMenu": "• Klicken Sie auf das Überlaufmenü",
   "click": "• Klick",
   "nothingToSeeHere": "Hier gibt es nichts zu sehen! 👀",
+  "addANameAndPhoto": "Name und Foto hinzufügen",
+  "photosSharedByWillAppearHere": "Von {email} geteilte Fotos werden hier erscheinen.",
+  "@photosSharedByWillAppearHere": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "a@test.test"
+      }
+    }
+  },
   "selectFoldersToBackup": "<action>Wähle Ordner</action> zum Anzeigen und\nSichern auf Ente.",
   "unarchiveAlbum": "Album dearchivieren",
   "archiveAlbum": "Album archivieren",
@@ -1720,8 +1743,14 @@
   "editEmailAlreadyLinked": "Diese E-Mail ist bereits verknüpft mit {name}.",
   "viewPersonToUnlink": "{name} zum Entfernen des Links anzeigen",
   "enterName": "Name eingeben",
+  "editContact": "Kontakt bearbeiten",
+  "autoFetchFromPeople": "Automatischer Abruf von Personen",
+  "useTheirNameAndPhoto": "Name und Foto verwenden",
   "savePerson": "Person speichern",
+  "saveContact": "Kontakt speichern",
   "editPerson": "Person bearbeiten",
+  "enterDateOfBirthHint": "Geburtsdatum eingeben",
+  "setAContactPhoto": "Als Kontaktbild verwenden",
   "mergedPhotos": "Zusammengeführte Fotos",
   "orMergeWithExistingPerson": "Oder mit existierenden zusammenführen",
   "enterDateOfBirth": "Geburtstag (optional)",
@@ -2345,11 +2374,11 @@
   "spotlightOnThem": "Spot auf {name}",
   "personIsAge": "{name} ist {age}!",
   "personTurningAge": "{name} wird bald {age}",
-  "lastTimeWithThem": "Zuletzt mit {name}",
+  "throwbackWithThem": "Rückblick mit {name}",
   "unnamedPeopleSpotlight": "Ein vertrautes Gesicht",
   "unnamedPeopleYouAndThem": "Ihr beide",
   "unnamedPeopleDoingSomethingTogether": "Gemeinsam machen",
-  "unnamedPeopleLastTimeYouSawThem": "Letztes Mal zusammen",
+  "unnamedPeopleThrowbackTogether": "Gemeinsamer Rückblick",
   "tripToLocation": "Ausflug nach {location}",
   "tripInYear": "Reise in {year}",
   "lastYearsTrip": "Reise im letzten Jahr",
@@ -2384,6 +2413,7 @@
   "addMemoriesWidgetPrompt": "Füge ein Erinnerungen-Widget deinem Startbildschirm hinzu, um es hier anzupassen.",
   "addAlbumWidgetPrompt": "Füge ein Alben-Widget deinem Startbildschirm hinzu, um es hier anzupassen.",
   "addPeopleWidgetPrompt": "Füge ein Personen-Widget deinem Startbildschirm hinzu, um es hier anzupassen.",
+  "showTextOnWidget": "Text auf Widget anzeigen",
   "birthdayNotifications": "Geburtstagsbenachrichtigungen",
   "receiveRemindersOnBirthdays": "Erhalte Erinnerungen, wenn jemand Geburtstag hat. Ein Klick auf die Benachrichtigung bringt dich zu den Fotos der Person, die Geburtstag hat.",
   "happyBirthday": "Herzlichen Glückwunsch zum Geburtstag! 🥳",
@@ -2417,6 +2447,7 @@
   "thisWeek": "Diese Woche",
   "lastWeek": "Letzte Woche",
   "thisMonth": "Diesen Monat",
+  "lastMonth": "Letzten Monat",
   "thisYear": "Dieses Jahr",
   "groupBy": "Gruppieren nach",
   "groupByDay": "Tag",
@@ -2947,6 +2978,10 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
+  "couldNotLoadSelectedPhoto": "Ausgewähltes Foto konnte nicht geladen werden",
+  "@couldNotLoadSelectedPhoto": {
+    "description": "Toast when the selected contact photo cannot be loaded"
+  },
   "albumsCount": "{count, plural, =1{Ein Album} other{{count} Alben}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
@@ -3020,6 +3055,9 @@
   "moreThanJustAGallery": "Mehr als nur eine Galerie.",
   "encryptedBackupDescription": "Verschlüsseltes Backup, intelligente Suche, teilbare Links und nahtlose Synchronisation auf all deinen Geräten.",
   "getStarted": "Erste Schritte",
+  "offlineHomeSignupBannerTitle": "Schütze deine Erinnerungen für immer",
+  "offlineHomeSignupBannerDescription": "Verschlüsselte Sicherungen an drei Orten, um deine Erinnerungen sicher zu halten.",
+  "offlineHomeSignupBannerAction": "Jetzt sichern",
   "unlockSmartFeatures": "Schalte smarte Funktionen frei",
   "enableOnDeviceMLDescription": "Aktiviere lokales ML auf dem Gerät, um nach Gesichtern, Orten und mehr zu suchen. Deine Fotos verlassen niemals dein Gerät.",
   "offlineEnableSharingTitle": "Teilen beginnt hier",

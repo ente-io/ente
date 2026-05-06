@@ -92,7 +92,7 @@ https://pics.example.org/?t=...
 **Setup:**
 
 1. Link your domain in `Settings > Preferences > Custom domains` (currently web only)
-2. Add a CNAME DNS record pointing your domain to `my.ente.io`
+2. Add a CNAME DNS record pointing your domain to `my.ente.com`
 3. Wait for DNS changes to propagate (usually a few minutes)
 
 Once configured, Ente automatically uses your custom domain when creating new public links. Ente still hosts and serves your albums - only the URL changes.

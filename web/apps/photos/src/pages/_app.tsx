@@ -194,7 +194,7 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
 
     return (
         <ThemeProvider theme={photosTheme}>
-            <CustomHead title={title} canonicalURL="https://photos.ente.com" />
+            <CustomHead title={title} />
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />

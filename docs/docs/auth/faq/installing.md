@@ -85,6 +85,13 @@ You can grab the latest version of Ente Auth for Mac, Windows and Linux from
 Latest versions of our web app are available at
 [auth.ente.com](https://auth.ente.com).
 
+> [!NOTE]
+>
+> The older `auth.ente.io` address now redirects to `auth.ente.com`. Your same
+> Ente account and password continue to work there. If your password manager
+> suggests a login saved for the older address, you can use it on
+> `auth.ente.com`.
+
 <br/>
 
 ---

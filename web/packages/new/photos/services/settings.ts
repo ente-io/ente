@@ -99,7 +99,7 @@ export interface Settings {
      *
      * See also `apps.custom-domain.cname` in `server/local.yaml`.
      *
-     * Default: "my.ente.io"
+     * Default: "my.ente.com"
      */
     customDomainCNAME: string;
 }
@@ -110,7 +110,7 @@ const createDefaultSettings = (): Settings => ({
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.com",
     embedURL: "https://embed.ente.com",
-    customDomainCNAME: "my.ente.io",
+    customDomainCNAME: "my.ente.com",
 });
 
 /**

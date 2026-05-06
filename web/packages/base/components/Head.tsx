@@ -10,7 +10,6 @@ import {
 
 interface CustomHeadProps {
     title: string;
-    canonicalURL?: string;
 }
 
 const AlbumsFontPreloads: React.FC = () => (
@@ -33,13 +32,11 @@ const AlbumsFontPreloads: React.FC = () => (
  */
 export const CustomHead: React.FC<React.PropsWithChildren<CustomHeadProps>> = ({
     title,
-    canonicalURL,
     children,
 }) => (
     <Head>
         {children}
         <title>{title}</title>
-        {canonicalURL && <link rel="canonical" href={canonicalURL} />}
         <link rel="icon" href="/images/favicon.png" type="image/png" />
         <meta
             name="description"
