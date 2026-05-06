@@ -242,6 +242,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
           _kit = LegacyKit(
             id: _kit.id,
             noticePeriodInHours: selectedDays * 24,
+            legacyUrl: _kit.legacyUrl,
             parts: _kit.parts,
             createdAt: _kit.createdAt,
             updatedAt: _kit.updatedAt,
@@ -314,6 +315,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       for (final share in sortedShares) {
         final bytes = await const LegacyKitPdfService().buildRecoverySheet(
           accountEmail: widget.accountEmail,
+          recoveryUrl: _kit.legacyUrl,
           share: share,
           allShares: shares,
         );
@@ -347,6 +349,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       }
       final bytes = await const LegacyKitPdfService().buildRecoverySheet(
         accountEmail: widget.accountEmail,
+        recoveryUrl: _kit.legacyUrl,
         share: share,
         allShares: shares,
       );

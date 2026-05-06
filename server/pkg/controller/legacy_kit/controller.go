@@ -19,6 +19,7 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 var validNoticePeriods = map[int]struct{}{
@@ -29,7 +30,10 @@ var validNoticePeriods = map[int]struct{}{
 	720: {},
 }
 
-const maxActiveLegacyKits = 5
+const (
+	maxActiveLegacyKits = 5
+	defaultLegacyURL    = "https://legacy.ente.com"
+)
 
 type Controller struct {
 	Repo              *legacykitrepo.Repository
@@ -312,6 +316,7 @@ func toLegacyKit(row *legacykitrepo.KitRow, session *legacykitrepo.RecoverySessi
 		ID:                  row.ID,
 		Variant:             row.Variant,
 		NoticePeriodInHours: row.NoticePeriodInHrs,
+		LegacyURL:           legacyURL(),
 		EncryptedOwnerBlob:  row.EncryptedOwnerBlob,
 		CreatedAt:           row.CreatedAt,
 		UpdatedAt:           row.UpdatedAt,
@@ -321,6 +326,14 @@ func toLegacyKit(row *legacykitrepo.KitRow, session *legacykitrepo.RecoverySessi
 		kit.ActiveRecoverySession = &recoverySession
 	}
 	return kit
+}
+
+func legacyURL() string {
+	url := strings.TrimRight(strings.TrimSpace(viper.GetString("apps.legacy")), "/")
+	if url == "" {
+		return defaultLegacyURL
+	}
+	return url
 }
 
 func toRecoverySession(row *legacykitrepo.RecoverySessionRow) ente.LegacyKitRecoverySession {

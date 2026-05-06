@@ -34,6 +34,7 @@ type LegacyKit struct {
 	ID                  uuid.UUID        `json:"id"`
 	Variant             LegacyKitVariant `json:"variant"`
 	NoticePeriodInHours int32            `json:"noticePeriodInHours"`
+	LegacyURL           string           `json:"legacyUrl"`
 	// Base64(secretbox nonce || MAC || ciphertext) of owner-only part names and
 	// stored share payloads used for listing and downloading cards again.
 	EncryptedOwnerBlob    string                    `json:"encryptedOwnerBlob"`

@@ -52,6 +52,8 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
+  assets:
+    - assets/
 
 # This package is not meant to be published
 publish_to: none
