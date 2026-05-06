@@ -5,8 +5,6 @@ use crate::legacy_kit_models::{
     LegacyKitOwnerRecoverySession, LegacyKitRecoverySession, LegacyKitVariant,
 };
 
-pub const DEFAULT_LEGACY_URL: &str = "https://legacy.ente.com";
-
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateLegacyKitRequest {
@@ -24,23 +22,11 @@ pub struct LegacyKitRecordResponse {
     pub id: String,
     pub variant: LegacyKitVariant,
     pub notice_period_in_hours: i32,
-    #[serde(default)]
-    pub legacy_url: Option<String>,
+    pub legacy_url: String,
     pub encrypted_owner_blob: String,
     pub created_at: i64,
     pub updated_at: i64,
     pub active_recovery_session: Option<LegacyKitRecoverySession>,
-}
-
-impl LegacyKitRecordResponse {
-    pub fn legacy_url(&self) -> String {
-        self.legacy_url
-            .as_deref()
-            .map(str::trim)
-            .filter(|url| !url.is_empty())
-            .unwrap_or(DEFAULT_LEGACY_URL)
-            .to_owned()
-    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -212,7 +198,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn legacy_kit_record_response_accepts_missing_legacy_url() {
+    fn legacy_kit_record_response_requires_legacy_url() {
         let response = serde_json::from_str::<LegacyKitRecordResponse>(
             r#"{
                 "id":"kit-id",
@@ -223,10 +209,9 @@ mod tests {
                 "updatedAt":2,
                 "activeRecoverySession":null
             }"#,
-        )
-        .unwrap();
+        );
 
-        assert_eq!(response.legacy_url(), DEFAULT_LEGACY_URL);
+        assert!(response.is_err());
     }
 
     #[test]
@@ -245,6 +230,6 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(response.legacy_url(), "http://localhost:3013");
+        assert_eq!(response.legacy_url, "http://localhost:3013");
     }
 }

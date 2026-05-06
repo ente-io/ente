@@ -133,16 +133,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                   child: _buildPageTitle(colorScheme, textTheme),
                 ),
               ),
-              if (!showFullEmptyState)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      context.strings.legacyPageDesc,
-                      style: textTheme.smallMuted,
-                    ),
-                  ),
-                ),
               if (showFullEmptyState)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -252,7 +242,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                 captionedTextWidget: CaptionedTextWidgetV2(
                                   title: contact
                                       .emergencyContact.resolvedDisplayName,
-                                  subTitle: _contactStatusText(contact),
+                                  subTitle: _contactStatusText(
+                                    context,
+                                    contact,
+                                  ),
                                   subTitleInNewLine: true,
                                   textStyle: _legacyRowTitleStyle(
                                     colorScheme,
@@ -376,7 +369,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               MenuItemWidgetV2(
                                 captionedTextWidget: CaptionedTextWidgetV2(
                                   title: currentUser.user.resolvedDisplayName,
-                                  subTitle: _contactStatusText(currentUser),
+                                  subTitle: _contactStatusText(
+                                    context,
+                                    currentUser,
+                                  ),
                                   subTitleInNewLine: true,
                                   textStyle: _legacyRowTitleStyle(
                                     colorScheme,
@@ -728,8 +724,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
     return DateFormat.yMMMd().format(dateTime);
   }
 
-  String _contactStatusText(EmergencyContact contact) {
-    return contact.isPendingInvite() ? "Pending" : "Accepted";
+  String _contactStatusText(BuildContext context, EmergencyContact contact) {
+    return contact.isPendingInvite()
+        ? context.strings.trustedContactStatusPending
+        : context.strings.trustedContactStatusAccepted;
   }
 
   Future<void> showRevokeOrRemoveDialog(
