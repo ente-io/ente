@@ -1033,6 +1033,14 @@
   "@revokeInvite": {
     "description": "Button label to revoke a pending trusted contact invite"
   },
+  "trustedContactStatusPending": "Pending",
+  "@trustedContactStatusPending": {
+    "description": "Short status label shown for a pending trusted contact invite"
+  },
+  "trustedContactStatusAccepted": "Accepted",
+  "@trustedContactStatusAccepted": {
+    "description": "Short status label shown for an accepted trusted contact"
+  },
   "trustedContactInvitePending": "You have invited {email} to be a trusted contact. They are yet to accept your invite.",
   "@trustedContactInvitePending": {
     "description": "Description shown when a trusted contact invite is pending",
