@@ -175,6 +175,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
+name = "av-data"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fca67ba5d317924c02180c576157afd54babe48a76ebc66ce6d34bb8ba08308e"
+dependencies = [
+ "byte-slice-cast",
+ "bytes",
+ "num-derive",
+ "num-rational",
+ "num-traits",
+]
+
+[[package]]
 name = "av-scenechange"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -279,6 +292,12 @@ name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
+
+[[package]]
+name = "byte-slice-cast"
+version = "1.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7575182f7272186991736b70173b0ea045398f984bf5ebbb3804736ce1330c9d"
 
 [[package]]
 name = "bytemuck"
@@ -624,7 +643,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "heic_decoder"
 version = "0.1.0"
-source = "git+https://github.com/ente-io/heic-decoder.git?rev=53303b2936ec19467c61cf75f77e30b399c10445#53303b2936ec19467c61cf75f77e30b399c10445"
+source = "git+https://github.com/ente-io/heic-decoder.git?rev=d47a0f9c9e8c4c9e166c5a4b5734f8ad1f88f7a7#d47a0f9c9e8c4c9e166c5a4b5734f8ad1f88f7a7"
 dependencies = [
  "archmage",
  "brotli",
@@ -1142,10 +1161,11 @@ dependencies = [
 [[package]]
 name = "rav1d"
 version = "1.1.0"
-source = "git+https://github.com/ente-io/rav1d.git?branch=1.1.0_arm32_stable#05db46f1046b43a14019f31d51f74513a15cd2d0"
+source = "git+https://github.com/ente-io/rav1d.git?branch=arm32_stable#d8205d5e5c7aa0265956e660fae2c005b3b3ad9b"
 dependencies = [
  "assert_matches",
  "atomig",
+ "av-data",
  "bitflags",
  "cc",
  "cfg-if",
@@ -1154,6 +1174,7 @@ dependencies = [
  "parking_lot",
  "paste",
  "raw-cpuid",
+ "static_assertions",
  "strum",
  "to_method",
  "zerocopy 0.7.35",
@@ -1461,24 +1482,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
-name = "strum"
-version = "0.26.3"
+name = "static_assertions"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "strum"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "af23d6f6c1a224baef9d3f61e287d2761385a5b88fdab4eb4c6f11aeb54c4bcf"
 dependencies = [
  "strum_macros",
 ]
 
 [[package]]
 name = "strum_macros"
-version = "0.26.4"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+checksum = "7695ce3845ea4b33927c055a39dc438a45b059f7c1b3d91d38d10355fb8cbca7"
 dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "rustversion",
  "syn",
 ]
 
