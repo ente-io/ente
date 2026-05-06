@@ -32,7 +32,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final isLocalGallery = isLocalGalleryMode;
+    final isLocalGallery = isOfflineMode;
     return Material(
       color: enteColorScheme.backgroundElevated,
       child: Column(
