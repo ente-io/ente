@@ -6,7 +6,7 @@ Pure Rust HEIF/HEIC/AVIF decoder with first-class `image` crate integration.
 
 - Decode `.heif`, `.heic`, and `.avif` into RGBA buffers (`u8` or `u16`).
 - Decode from `bytes`, `Read`, `BufRead`, and file `Path`.
-- Keep default decode output aligned with primary-item transforms (`clap`/`irot`/`imir`) for libheif parity.
+- Keep default decode output aligned with primary-item transforms (`clap`/`irot`/`imir`) for reference-output parity.
 - Expose explicit EXIF orientation helpers so callers can apply orientation at the app layer:
   - `exif_orientation_hint`
   - `exif_orientation_hint_from_path`
@@ -70,7 +70,7 @@ fn decode_file(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
 ## EXIF Orientation Policy
 
 - `ente_heic` does **not** implicitly apply EXIF orientation to decoded output.
-- This keeps default output behavior stable and aligned with libheif parity.
+- This keeps default output behavior stable and suitable for reference-output comparisons.
 - If your app wants display-oriented output, apply EXIF orientation explicitly:
 
 ```rust
@@ -165,6 +165,15 @@ ente_heic/target/release/heif-decode \
   --max-temp-spool-bytes 134217728 \
   <input.heif|.heic|.avif> <output.png>
 ```
+
+## Correctness and Performance Testing
+
+See `TESTING.md` for the correctness and performance test harness. It keeps
+image corpora, external validator builds, and generated helper binaries out of
+git by using `.heic-test-assets/` and `.heic-test-runs/`. Point the harness at
+an external libheif checkout with `HEIC_LIBHEIF_SOURCE_DIR`, or place a checkout
+or symlink at `.heic-test-assets/libheif`. A libheif checkout directly at
+`.heic-test-assets` is accepted too.
 
 ## License
 
