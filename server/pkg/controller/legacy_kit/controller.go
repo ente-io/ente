@@ -30,10 +30,7 @@ var validNoticePeriods = map[int]struct{}{
 	720: {},
 }
 
-const (
-	maxActiveLegacyKits = 5
-	defaultLegacyURL    = "https://legacy.ente.com"
-)
+const maxActiveLegacyKits = 5
 
 type Controller struct {
 	Repo              *legacykitrepo.Repository
@@ -62,7 +59,7 @@ func (c *Controller) CreateKit(ctx *gin.Context, userID int64, req ente.CreateLe
 	if err != nil {
 		return nil, err
 	}
-	return toLegacyKit(row, nil), nil
+	return toLegacyKit(row, nil)
 }
 
 func (c *Controller) ListKits(ctx *gin.Context, userID int64) (*ente.ListLegacyKitsResponse, error) {
@@ -83,7 +80,11 @@ func (c *Controller) ListKits(ctx *gin.Context, userID int64) (*ente.ListLegacyK
 	resp := &ente.ListLegacyKitsResponse{Kits: make([]*ente.LegacyKit, 0, len(kits))}
 	for i := range kits {
 		row := kits[i]
-		resp.Kits = append(resp.Kits, toLegacyKit(&row, sessionByKit[row.ID]))
+		kit, err := toLegacyKit(&row, sessionByKit[row.ID])
+		if err != nil {
+			return nil, err
+		}
+		resp.Kits = append(resp.Kits, kit)
 	}
 	return resp, nil
 }
@@ -311,12 +312,16 @@ func (c *Controller) ChangePassword(ctx *gin.Context, req ente.LegacyKitRecovery
 	return resp, nil
 }
 
-func toLegacyKit(row *legacykitrepo.KitRow, session *legacykitrepo.RecoverySessionRow) *ente.LegacyKit {
+func toLegacyKit(row *legacykitrepo.KitRow, session *legacykitrepo.RecoverySessionRow) (*ente.LegacyKit, error) {
+	legacyURL, err := legacyURL()
+	if err != nil {
+		return nil, err
+	}
 	kit := &ente.LegacyKit{
 		ID:                  row.ID,
 		Variant:             row.Variant,
 		NoticePeriodInHours: row.NoticePeriodInHrs,
-		LegacyURL:           legacyURL(),
+		LegacyURL:           legacyURL,
 		EncryptedOwnerBlob:  row.EncryptedOwnerBlob,
 		CreatedAt:           row.CreatedAt,
 		UpdatedAt:           row.UpdatedAt,
@@ -325,15 +330,15 @@ func toLegacyKit(row *legacykitrepo.KitRow, session *legacykitrepo.RecoverySessi
 		recoverySession := toRecoverySession(session)
 		kit.ActiveRecoverySession = &recoverySession
 	}
-	return kit
+	return kit, nil
 }
 
-func legacyURL() string {
+func legacyURL() (string, error) {
 	url := strings.TrimRight(strings.TrimSpace(viper.GetString("apps.legacy")), "/")
 	if url == "" {
-		return defaultLegacyURL
+		return "", stacktrace.Propagate(ente.NewInternalError("legacy recovery app URL is not configured"), "")
 	}
-	return url
+	return url, nil
 }
 
 func toRecoverySession(row *legacykitrepo.RecoverySessionRow) ente.LegacyKitRecoverySession {

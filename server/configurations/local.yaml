@@ -113,10 +113,9 @@ apps:
     # If you're running a self-hosted instance and wish to serve public memory shares,
     # set this to the URL where your memories web app is running.
     public-memories:
-    # Default is https://legacy.ente.com
-    #
     # If you're running a self-hosted instance and wish to serve legacy kit recovery,
-    # set this to the URL where your legacy recovery web app is running.
+    # set this to the URL where your legacy recovery web app is running. This must
+    # be set before legacy kit records can be returned to clients.
     legacy:
     custom-domain:
         # Default is my.ente.io

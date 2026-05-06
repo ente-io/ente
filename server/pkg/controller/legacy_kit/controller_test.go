@@ -12,14 +12,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLegacyURLUsesDefaultWhenUnset(t *testing.T) {
+func TestLegacyURLRequiresConfiguration(t *testing.T) {
 	previousURL := viper.GetString("apps.legacy")
 	viper.Set("apps.legacy", "")
 	t.Cleanup(func() {
 		viper.Set("apps.legacy", previousURL)
 	})
 
-	require.Equal(t, defaultLegacyURL, legacyURL())
+	url, err := legacyURL()
+	require.Error(t, err)
+	require.Empty(t, url)
 }
 
 func TestLegacyURLUsesConfiguredURLWithoutTrailingSlash(t *testing.T) {
@@ -29,7 +31,9 @@ func TestLegacyURLUsesConfiguredURLWithoutTrailingSlash(t *testing.T) {
 		viper.Set("apps.legacy", previousURL)
 	})
 
-	require.Equal(t, "http://localhost:3013", legacyURL())
+	url, err := legacyURL()
+	require.NoError(t, err)
+	require.Equal(t, "http://localhost:3013", url)
 }
 
 func TestToRecoverySessionReturnsRemainingWaitTime(t *testing.T) {
