@@ -20,7 +20,7 @@ flate2 = "1.1"
 image = { version = "0.25", default-features = false, features = ["png"], optional = true }
 libc = "0.2"
 png = "0.18"
-rav1d = { git = "https://github.com/laurens-pilot/rav1d.git", branch = "1.1.0_arm32_stable", default-features = false, features = [
+rav1d = { git = "https://github.com/ente-io/rav1d.git", branch = "1.1.0_arm32_stable", default-features = false, features = [
     "bitdepth_8",
     "bitdepth_16",
 ] }

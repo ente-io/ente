@@ -2388,7 +2388,7 @@ dependencies = [
 [[package]]
 name = "rav1d"
 version = "1.1.0"
-source = "git+https://github.com/laurens-pilot/rav1d.git?branch=1.1.0_arm32_stable#05db46f1046b43a14019f31d51f74513a15cd2d0"
+source = "git+https://github.com/ente-io/rav1d.git?branch=1.1.0_arm32_stable#05db46f1046b43a14019f31d51f74513a15cd2d0"
 dependencies = [
  "assert_matches",
  "atomig",
