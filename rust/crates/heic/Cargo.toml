@@ -6,13 +6,17 @@ description = "Pure Rust HEIF/HEIC/AVIF decoder with image crate integration hoo
 readme = "README.md"
 
 [features]
-default = []
+default = ["std"]
 image-integration = ["dep:image"]
+std = ["archmage/std"]
 
 [dependencies]
+archmage = { version = "0.8", default-features = false, features = [
+    "macros",
+    "safe_unaligned_simd",
+] }
 brotli = "8.0"
 flate2 = "1.1"
-heic = "=0.1.4"
 image = { version = "0.25", default-features = false, features = ["png"], optional = true }
 libc = "0.2"
 png = "0.18"
@@ -20,4 +24,5 @@ rav1d = { git = "https://github.com/laurens-pilot/rav1d.git", branch = "1.1.0_ar
     "bitdepth_8",
     "bitdepth_16",
 ] }
+safe_unaligned_simd = "0.2"
 scuffle-h265 = "0.2.2"

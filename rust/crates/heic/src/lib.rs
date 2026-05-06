@@ -6,9 +6,11 @@
 //!
 //! See `API.md` in the crate root for an integration-oriented API guide.
 
+extern crate alloc;
+
 use brotli::Decompressor as BrotliDecompressor;
 use flate2::read::{DeflateDecoder, ZlibDecoder};
-use heic::DecodedFrame as HeicFrame;
+use heic_decoder::DecodedFrame as HeicFrame;
 use rav1d::Dav1dResult;
 use rav1d::include::dav1d::data::Dav1dData;
 use rav1d::include::dav1d::dav1d::{Dav1dContext, Dav1dSettings};
@@ -37,6 +39,8 @@ use std::mem::MaybeUninit;
 use std::path::{Path, PathBuf};
 use std::ptr::{self, NonNull};
 
+#[path = "heic-decoder/mod.rs"]
+mod heic_decoder;
 #[cfg(feature = "image-integration")]
 pub mod image_integration;
 pub mod isobmff;
@@ -4553,7 +4557,7 @@ fn decode_hevc_stream_to_image(stream: &[u8]) -> Result<DecodedHeicImage, Decode
         append_nal_with_u32_length_prefix(nal_unit.bytes, &mut backend_stream)?;
     }
 
-    let decoded = heic::hevc::decode(&backend_stream).map_err(|err| {
+    let decoded = heic_decoder::hevc::decode(&backend_stream).map_err(|err| {
         DecodeHeicError::BackendDecodeFailed {
             detail: err.to_string(),
         }
