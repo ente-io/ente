@@ -744,25 +744,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente_heic"
-version = "0.1.0"
-dependencies = [
- "archmage",
- "brotli",
- "flate2",
- "image",
- "libc",
- "png",
- "rav1d",
- "safe_unaligned_simd",
- "scuffle-h265",
-]
-
-[[package]]
 name = "ente_image"
 version = "0.1.0"
 dependencies = [
- "ente_heic",
+ "heic_decoder",
  "image",
  "kamadak-exif",
  "thiserror 2.0.18",
@@ -1148,6 +1133,22 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+
+[[package]]
+name = "heic_decoder"
+version = "0.1.0"
+source = "git+https://github.com/ente-io/heic-decoder.git?rev=53303b2936ec19467c61cf75f77e30b399c10445#53303b2936ec19467c61cf75f77e30b399c10445"
+dependencies = [
+ "archmage",
+ "brotli",
+ "flate2",
+ "image",
+ "libc",
+ "png",
+ "rav1d",
+ "safe_unaligned_simd",
+ "scuffle-h265",
+]
 
 [[package]]
 name = "hermit-abi"
