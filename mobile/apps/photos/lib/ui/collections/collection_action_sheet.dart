@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -19,9 +20,8 @@ import 'package:photos/ui/collections/album/vertical_list.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/common/progress_dialog.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
-import "package:photos/ui/components/text_input_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
+import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/separators_util.dart";
@@ -178,6 +178,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
     final double bottomPadding =
@@ -195,10 +196,14 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               Expanded(
                 child: Column(
                   children: [
-                    TextInputWidget(
+                    TextInputWidgetV2(
                       hintText:
                           AppLocalizations.of(context).searchByAlbumNameHint,
-                      prefixIcon: Icons.search_rounded,
+                      leadingWidget: HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        size: 18,
+                        color: colorScheme.textMuted,
+                      ),
                       onChange: (value) {
                         setState(() {
                           _searchQuery = value.trim();
@@ -214,15 +219,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               SafeArea(
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: _enableSelection
-                            ? getEnteColorScheme(context).strokeFaint
-                            : Colors.transparent,
-                      ),
-                    ),
-                  ),
                   child: Column(
                     children: [
                       ..._actionButtons(),
@@ -241,9 +237,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final List<Widget> widgets = [];
     if (_enableSelection) {
       widgets.add(
-        ButtonWidget(
+        ButtonWidgetV2(
           key: const ValueKey('add_button'),
-          buttonType: ButtonType.primary,
+          buttonType: ButtonTypeV2.primary,
           isInAlert: true,
           labelText: AppLocalizations.of(context).add,
           shouldSurfaceExecutionStates: false,

@@ -3,17 +3,21 @@ import "dart:async";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/memory_share/memory_share.dart";
+import "package:photos/models/button_result.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/memory_share_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
-import "package:photos/ui/components/action_sheet_widget.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget.dart"
+    show ButtonAction;
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/buttons/soft_icon_button.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/ui/tabs/shared/memory_link_item.dart";
@@ -41,8 +45,10 @@ class _AllLinksPageState extends State<AllLinksPage> {
   static const _quickLinkHeroTagPrefix = "outgoing_collection";
 
   final List<Collection> _selectedQuickLinks = [];
+  final Set<int> _selectedMemoryShareIDs = {};
 
-  bool get _hasSelection => _selectedQuickLinks.isNotEmpty;
+  bool get _hasSelection =>
+      _selectedQuickLinks.isNotEmpty || _selectedMemoryShareIDs.isNotEmpty;
 
   Future<void> _navigateToCollectionPage(Collection c) async {
     final thumbnail = await CollectionsService.instance.getCover(c);
@@ -62,7 +68,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
     if (_selectedQuickLinks.contains(c)) {
       _selectedQuickLinks.remove(c);
     } else {
-      if (_selectedQuickLinks.isEmpty) {
+      if (!_hasSelection) {
         await HapticFeedback.mediumImpact();
       }
       _selectedQuickLinks.add(c);
@@ -70,48 +76,67 @@ class _AllLinksPageState extends State<AllLinksPage> {
     setState(() {});
   }
 
-  Future<void> _removeSelectedQuickLinks() async {
-    if (_selectedQuickLinks.isEmpty) {
+  Future<void> _toggleMemoryShareSelection(MemoryShare share) async {
+    if (_selectedMemoryShareIDs.contains(share.id)) {
+      _selectedMemoryShareIDs.remove(share.id);
+    } else {
+      if (!_hasSelection) {
+        await HapticFeedback.mediumImpact();
+      }
+      _selectedMemoryShareIDs.add(share.id);
+    }
+    setState(() {});
+  }
+
+  Future<void> _removeSelectedLinks() async {
+    if (!_hasSelection) {
       await showErrorDialog(
         context,
-        AppLocalizations.of(context).noQuickLinksSelected,
+        AppLocalizations.of(context).deleteLinkQuestion,
         AppLocalizations.of(context).pleaseSelectQuickLinksToRemove,
       );
       return;
     }
-    final result = await showActionSheet(
-      context: context,
+    final result = await showAlertBottomSheet<ButtonResult>(
+      context,
+      title: AppLocalizations.of(context).removePublicLinks,
+      message: AppLocalizations.of(context).deleteMemoryLinkMessage,
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.critical,
+          labelText: AppLocalizations.of(context).remove,
           isInAlert: true,
-          shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: AppLocalizations.of(context).yesRemove,
-          onTap: () async {
-            for (final link in List<Collection>.of(_selectedQuickLinks)) {
-              await CollectionActions(CollectionsService.instance)
-                  .trashCollectionKeepingPhotos(link, context);
-              widget.quickLinks.remove(link);
-            }
-            setState(_selectedQuickLinks.clear);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: AppLocalizations.of(context).cancel,
+          onTap: _deleteSelectedLinks,
         ),
       ],
-      title: AppLocalizations.of(context).removePublicLinks,
-      body: AppLocalizations.of(context)
-          .thisWillRemovePublicLinksOfAllSelectedQuickLinks,
     );
-    if (result?.action == ButtonAction.error) {
-      await showGenericErrorDialog(context: context, error: result!.exception);
+    if (result?.action == ButtonAction.error && context.mounted) {
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: result?.exception,
+      );
+    }
+  }
+
+  Future<void> _deleteSelectedLinks() async {
+    for (final link in List<Collection>.of(_selectedQuickLinks)) {
+      await CollectionActions(CollectionsService.instance)
+          .trashCollectionKeepingPhotos(link, context);
+      if (!mounted) return;
+      setState(() {
+        widget.quickLinks.remove(link);
+        _selectedQuickLinks.remove(link);
+      });
+    }
+    for (final shareID in Set<int>.of(_selectedMemoryShareIDs)) {
+      await MemoryShareService.instance.deleteMemoryShare(shareID);
+      if (!mounted) return;
+      setState(() {
+        widget.memoryShares.removeWhere((share) => share.id == shareID);
+        _selectedMemoryShareIDs.remove(shareID);
+      });
     }
   }
 
@@ -131,9 +156,8 @@ class _AllLinksPageState extends State<AllLinksPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final strings = AppLocalizations.of(context);
-    final hasQuickLinks = widget.quickLinks.isNotEmpty;
-    final hasMemoryLinks = widget.memoryShares.isNotEmpty;
+    final linkItems = <Object>[...widget.quickLinks, ...widget.memoryShares];
+    final hasLinks = linkItems.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -145,11 +169,15 @@ class _AllLinksPageState extends State<AllLinksPage> {
         ),
         actions: [
           if (_hasSelection)
-            IconButton(
-              onPressed: _removeSelectedQuickLinks,
-              icon: Icon(
-                Icons.remove_circle_outline_outlined,
-                color: colorScheme.blurStrokeBase,
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: SoftIconButton(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete01,
+                  size: 18,
+                  color: colorScheme.warning500,
+                ),
+                onTap: _removeSelectedLinks,
               ),
             ),
         ],
@@ -164,7 +192,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TitleBarTitleWidget(
-                    title: "Links",
+                    title: AppLocalizations.of(context).links,
                     heroTag: widget.titleHeroTag,
                   ),
                   Text(
@@ -176,40 +204,54 @@ class _AllLinksPageState extends State<AllLinksPage> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          if (hasQuickLinks) ...[
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverToBoxAdapter(
-                child: Text(strings.quickLinks, style: textTheme.largeBold),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          if (hasLinks) ...[
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList.separated(
-                itemCount: widget.quickLinks.length,
+                itemCount: linkItems.length,
                 itemBuilder: (context, index) {
-                  final c = widget.quickLinks[index];
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
+                  final item = linkItems[index];
+                  if (item is Collection) {
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        if (_hasSelection) {
+                          _toggleQuickLinkSelection(item);
+                        } else {
+                          _navigateToCollectionPage(item);
+                        }
+                      },
+                      onLongPress: () {
+                        if (_hasSelection) {
+                          _navigateToCollectionPage(item);
+                        } else {
+                          _toggleQuickLinkSelection(item);
+                        }
+                      },
+                      child: QuickLinkAlbumItem(
+                        c: item,
+                        selectedQuickLinks: _selectedQuickLinks,
+                      ),
+                    );
+                  }
+
+                  final share = item as MemoryShare;
+                  final title =
+                      MemoryShareService.instance.getMemoryShareTitle(share) ??
+                          AppLocalizations.of(context).memoryLink;
+                  return MemoryLinkAlbumItem(
+                    title: title,
+                    fileCount: share.fileCount,
+                    previewUploadedFileID: share.previewUploadedFileID,
+                    isSelected: _selectedMemoryShareIDs.contains(share.id),
                     onTap: () {
                       if (_hasSelection) {
-                        _toggleQuickLinkSelection(c);
+                        _toggleMemoryShareSelection(share);
                       } else {
-                        _navigateToCollectionPage(c);
+                        _openMemoryLink(share);
                       }
                     },
-                    onLongPress: () {
-                      if (_hasSelection) {
-                        _navigateToCollectionPage(c);
-                      } else {
-                        _toggleQuickLinkSelection(c);
-                      }
-                    },
-                    child: QuickLinkAlbumItem(
-                      c: c,
-                      selectedQuickLinks: _selectedQuickLinks,
-                    ),
+                    onLongPress: () => _toggleMemoryShareSelection(share),
                   );
                 },
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -217,39 +259,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
-          if (hasMemoryLinks) ...[
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverToBoxAdapter(
-                child: Text(strings.memoryLinks, style: textTheme.largeBold),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList.separated(
-                itemCount: widget.memoryShares.length,
-                itemBuilder: (context, index) {
-                  final share = widget.memoryShares[index];
-                  final title = MemoryShareService.instance
-                          .getMemoryShareTitle(share) ??
-                      "Memory link";
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => _openMemoryLink(share),
-                    child: MemoryLinkAlbumItem(
-                      title: title,
-                      fileCount: share.fileCount,
-                      previewUploadedFileID: share.previewUploadedFileID,
-                    ),
-                  );
-                },
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
-          if (!hasQuickLinks && !hasMemoryLinks)
+          if (!hasLinks)
             SliverFillRemaining(
               hasScrollBody: false,
               child: Center(

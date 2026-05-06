@@ -149,8 +149,10 @@ class AlbumColumnItemWidget extends StatelessWidget {
               switchInCurve: Curves.easeOut,
               switchOutCurve: Curves.easeIn,
               child: isSelected
-                  ? const CollectionSelectedBadge(
+                  ? const Padding(
                       key: ValueKey("selected"),
+                      padding: EdgeInsets.only(right: 8),
+                      child: CollectionSelectedBadge(),
                     )
                   : null,
             ),
