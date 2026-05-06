@@ -8,6 +8,11 @@ description: Guide to download and install Ente Locker on your mobile devices
 Ente Locker is available on iOS and Android. Desktop and web versions are not
 currently available, though public links can be opened in any browser.
 
+> [!NOTE]
+>
+> Locker links now use `locker.ente.com`. The older `locker.ente.io` address
+> redirects there.
+
 ## iOS and iPadOS
 
 Install Ente Locker on Apple devices from the

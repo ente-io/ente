@@ -35,6 +35,13 @@ Open the installer and follow the instructions to install it on your desktop dev
 
 You can also access Ente Photos directly in your browser without installing anything at [photos.ente.com](https://photos.ente.com).
 
+> [!NOTE]
+>
+> The older `web.ente.io` and `photos.ente.io` addresses now redirect to
+> `photos.ente.com`. Your same Ente account and password continue to work there.
+> If your password manager suggests a login saved for the older address, you can
+> use it on `photos.ente.com`.
+
 ## Command Line Interface
 
 Ente Photos also offers a command-line interface (CLI) for advanced users and automation. The CLI is particularly useful for server environments, scheduled backups, and scripting workflows.
