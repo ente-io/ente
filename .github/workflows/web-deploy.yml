@@ -101,6 +101,16 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/auth web/apps/auth/out
 
+            - name: Build legacy
+              run: yarn build:legacy
+
+            - name: Publish legacy
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/legacy web/apps/legacy/out
+
             - name: Build cast
               run: yarn build:cast
 
