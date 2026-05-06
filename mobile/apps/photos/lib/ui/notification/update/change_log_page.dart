@@ -9,6 +9,8 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
 import 'package:photos/ui/notification/update/change_log_strings.dart';
 
+enum ChangeLogPageAction { openReferrals }
+
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
     super.key,
@@ -30,6 +32,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
+    final isLocalGallery = isLocalGalleryMode;
     return Material(
       color: enteColorScheme.backgroundElevated,
       child: Column(
@@ -79,11 +82,19 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                   ButtonWidget(
                     buttonType: ButtonType.trailingIconSecondary,
                     buttonSize: ButtonSize.large,
-                    labelText: AppLocalizations.of(context).rateUs,
+                    labelText: isLocalGallery
+                        ? AppLocalizations.of(context).rateUs
+                        : AppLocalizations.of(context).changeLogReferralCta,
                     icon: Icons.favorite_rounded,
                     iconColor: enteColorScheme.primary500,
                     onTap: () async {
-                      await updateService.launchReviewUrl();
+                      if (isLocalGallery) {
+                        await updateService.launchReviewUrl();
+                      } else if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop(
+                          ChangeLogPageAction.openReferrals,
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 16),

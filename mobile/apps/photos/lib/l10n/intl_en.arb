@@ -640,6 +640,7 @@
   "youveNoDuplicateFilesThatCanBeCleared": "You don't have any duplicate files that can be cleared",
   "success": "Success",
   "rateUs": "Rate us",
+  "changeLogReferralCta": "Give 10 GB, Get 10 GB",
   "remindToEmptyDeviceTrash": "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
   "youHaveSuccessfullyFreedUp": "You have successfully freed up {storageSaved}!",
   "@youHaveSuccessfullyFreedUp": {

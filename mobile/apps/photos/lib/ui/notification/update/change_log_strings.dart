@@ -68,146 +68,340 @@ class ChangeLogStrings {
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Photos experience',
+      title1: 'Smoother memories',
       desc1:
-          'Photos and videos now download faster, making the app feel quicker overall.',
-      title2: 'Memories load faster',
+          'Rediscovering old memories feels better, with new haptics and under-the-hood improvements.',
+      title2: 'Faster browsing',
       desc2:
-          'Rediscovering old memories should now feel smoother thanks to under-the-hood performance improvements.',
+          "Your photos and videos load faster. We've updated our infrastructure, so everything feels snappier.",
+      title3: 'Better memory lane',
+      desc3:
+          'Memory lanes now appear for more people in your life, including kids 3 and up. Shared links load faster, with smoother animations.',
     ),
     'cs': ChangeLogStrings(
-      title1: 'Prohlížení fotek',
+      title1: 'Plynulejší vzpomínky',
       desc1:
-          'Fotky a videa se teď stahují rychleji, takže celá aplikace působí svižněji.',
-      title2: 'Vzpomínky se načítají rychleji',
+          'Znovuobjevování starých vzpomínek je příjemnější díky nové haptické odezvě a vylepšením na pozadí.',
+      title2: 'Rychlejší prohlížení',
       desc2:
-          'Znovuobjevování starých vzpomínek by teď mělo být plynulejší díky vylepšením výkonu na pozadí.',
+          'Vaše fotky a videa se načítají rychleji. Aktualizovali jsme naši infrastrukturu, takže vše působí svižněji.',
+      title3: 'Lepší memory lane',
+      desc3:
+          'Memory lane se nyní zobrazuje pro více lidí ve vašem životě, včetně dětí od 3 let. Sdílené odkazy se načítají rychleji a animace jsou plynulejší.',
     ),
     'de': ChangeLogStrings(
-      title1: 'Fotoerlebnis',
+      title1: 'Flüssigere Erinnerungen',
       desc1:
-          'Fotos und Videos werden jetzt schneller heruntergeladen, sodass sich die App insgesamt schneller anfühlt.',
-      title2: 'Erinnerungen laden schneller',
+          'Das Wiederentdecken alter Erinnerungen fühlt sich mit neuer Haptik und Verbesserungen im Hintergrund besser an.',
+      title2: 'Schnelleres Browsen',
       desc2:
-          'Das Wiederentdecken alter Erinnerungen sollte sich dank Leistungsverbesserungen im Hintergrund jetzt flüssiger anfühlen.',
+          'Ihre Fotos und Videos laden schneller. Wir haben unsere Infrastruktur aktualisiert, damit sich alles reaktionsschneller anfühlt.',
+      title3: 'Bessere Memory Lane',
+      desc3:
+          'Memory Lanes erscheinen jetzt für mehr Menschen in Ihrem Leben, einschließlich Kindern ab 3 Jahren. Geteilte Links laden schneller und Animationen laufen flüssiger.',
     ),
     'es': ChangeLogStrings(
-      title1: 'Experiencia con fotos',
+      title1: 'Recuerdos más fluidos',
       desc1:
-          'Las fotos y los videos ahora se descargan más rápido, haciendo que la app se sienta más ágil en general.',
-      title2: 'Los recuerdos cargan más rápido',
+          'Redescubrir recuerdos antiguos se siente mejor, con nuevas respuestas hápticas y mejoras internas.',
+      title2: 'Navegación más rápida',
       desc2:
-          'Redescubrir recuerdos antiguos ahora debería sentirse más fluido gracias a mejoras de rendimiento internas.',
+          'Tus fotos y videos cargan más rápido. Hemos actualizado nuestra infraestructura para que todo se sienta más ágil.',
+      title3: 'Mejor memory lane',
+      desc3:
+          'Las memory lanes ahora aparecen para más personas en tu vida, incluidos niños de 3 años en adelante. Los enlaces compartidos cargan más rápido, con animaciones más fluidas.',
     ),
     'fr': ChangeLogStrings(
-      title1: 'Expérience photos',
+      title1: 'Souvenirs plus fluides',
       desc1:
-          'Les photos et vidéos se téléchargent désormais plus vite, ce qui rend l\'application globalement plus réactive.',
-      title2: 'Les souvenirs se chargent plus vite',
+          'Redécouvrir d’anciens souvenirs est plus agréable, avec de nouvelles vibrations et des améliorations internes.',
+      title2: 'Navigation plus rapide',
       desc2:
-          'Redécouvrir d\'anciens souvenirs devrait maintenant être plus fluide grâce à des améliorations de performance en coulisses.',
+          'Vos photos et vidéos se chargent plus vite. Nous avons mis à jour notre infrastructure pour rendre l’ensemble plus réactif.',
+      title3: 'Meilleure memory lane',
+      desc3:
+          'Les memory lanes apparaissent désormais pour davantage de personnes de votre vie, y compris les enfants de 3 ans et plus. Les liens partagés se chargent plus vite, avec des animations plus fluides.',
     ),
     'it': ChangeLogStrings(
-      title1: 'Esperienza foto',
+      title1: 'Ricordi più fluidi',
       desc1:
-          'Foto e video ora vengono scaricati più velocemente, rendendo l\'app complessivamente più rapida.',
-      title2: 'I ricordi si caricano più velocemente',
+          'Riscoprire vecchi ricordi è più piacevole, con nuovi feedback aptici e miglioramenti interni.',
+      title2: 'Navigazione più veloce',
       desc2:
-          'Riscoprire vecchi ricordi dovrebbe ora risultare più fluido grazie a miglioramenti delle prestazioni dietro le quinte.',
+          'Le tue foto e i tuoi video si caricano più velocemente. Abbiamo aggiornato la nostra infrastruttura, così tutto risulta più reattivo.',
+      title3: 'Memory lane migliorata',
+      desc3:
+          'Le memory lane ora appaiono per più persone nella tua vita, inclusi i bambini dai 3 anni in su. I link condivisi si caricano più rapidamente, con animazioni più fluide.',
     ),
     'ja': ChangeLogStrings(
-      title1: '写真体験',
-      desc1: '写真や動画のダウンロードがより速くなり、アプリ全体がより軽快に感じられるようになりました。',
-      title2: '思い出の読み込みが高速化',
-      desc2: '内部のパフォーマンス改善により、昔の思い出をよりスムーズに振り返れるようになりました。',
+      title1: 'よりスムーズな思い出',
+      desc1: '新しい触覚フィードバックと内部改善により、昔の思い出を振り返る体験がより心地よくなりました。',
+      title2: 'より速い閲覧',
+      desc2: '写真や動画の読み込みが速くなりました。インフラを更新し、全体がより軽快に感じられます。',
+      title3: 'より良いメモリーレーン',
+      desc3:
+          '3歳以上のお子さまを含め、より多くの大切な人のメモリーレーンが表示されるようになりました。共有リンクの読み込みも速くなり、アニメーションもよりスムーズです。',
     ),
     'nl': ChangeLogStrings(
-      title1: 'Foto-ervaring',
+      title1: 'Soepelere herinneringen',
       desc1:
-          'Foto\'s en video\'s worden nu sneller gedownload, waardoor de app in het algemeen sneller aanvoelt.',
-      title2: 'Herinneringen laden sneller',
+          'Oude herinneringen herontdekken voelt beter, met nieuwe haptiek en verbeteringen onder de motorkap.',
+      title2: 'Sneller bladeren',
       desc2:
-          'Oude herinneringen herontdekken zou nu soepeler moeten aanvoelen dankzij prestatieverbeteringen achter de schermen.',
+          'Je foto’s en video’s laden sneller. We hebben onze infrastructuur bijgewerkt, zodat alles vlotter aanvoelt.',
+      title3: 'Betere memory lane',
+      desc3:
+          'Memory lanes verschijnen nu voor meer mensen in je leven, inclusief kinderen vanaf 3 jaar. Gedeelde links laden sneller, met soepelere animaties.',
     ),
     'no': ChangeLogStrings(
-      title1: 'Fotoopplevelse',
+      title1: 'Jevnere minner',
       desc1:
-          'Bilder og videoer lastes nå ned raskere, slik at appen føles raskere totalt sett.',
-      title2: 'Minner lastes raskere',
+          'Det føles bedre å gjenoppdage gamle minner, med ny haptikk og forbedringer under panseret.',
+      title2: 'Raskere blaing',
       desc2:
-          'Det skal nå føles jevnere å gjenoppdage gamle minner takket være ytelsesforbedringer under panseret.',
+          'Bildene og videoene dine lastes raskere. Vi har oppdatert infrastrukturen vår, slik at alt føles kvikkere.',
+      title3: 'Bedre memory lane',
+      desc3:
+          'Memory lanes vises nå for flere personer i livet ditt, inkludert barn fra 3 år og oppover. Delte lenker lastes raskere, med jevnere animasjoner.',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Korzystanie ze zdjęć',
+      title1: 'Płynniejsze wspomnienia',
       desc1:
-          'Zdjęcia i filmy pobierają się teraz szybciej, dzięki czemu cała aplikacja działa sprawniej.',
-      title2: 'Wspomnienia ładują się szybciej',
+          'Odkrywanie dawnych wspomnień jest przyjemniejsze dzięki nowym reakcjom haptycznym i ulepszeniom pod spodem.',
+      title2: 'Szybsze przeglądanie',
       desc2:
-          'Ponowne odkrywanie dawnych wspomnień powinno być teraz płynniejsze dzięki wewnętrznym usprawnieniom wydajności.',
+          'Twoje zdjęcia i filmy ładują się szybciej. Zaktualizowaliśmy naszą infrastrukturę, więc wszystko działa sprawniej.',
+      title3: 'Lepsza memory lane',
+      desc3:
+          'Memory lane pojawia się teraz dla większej liczby osób w Twoim życiu, w tym dzieci od 3. roku życia. Udostępnione linki ładują się szybciej, a animacje są płynniejsze.',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Experiência com fotos',
+      title1: 'Memórias mais suaves',
       desc1:
-          'Fotos e vídeos agora baixam mais rápido, deixando o app mais ágil como um todo.',
-      title2: 'Memórias carregam mais rápido',
+          'Redescobrir memórias antigas ficou melhor, com novos retornos táteis e melhorias internas.',
+      title2: 'Navegação mais rápida',
       desc2:
-          'Redescobrir memórias antigas agora deve ser mais fluido graças a melhorias internas de desempenho.',
+          'Suas fotos e vídeos carregam mais rápido. Atualizamos nossa infraestrutura, então tudo fica mais ágil.',
+      title3: 'Memory lane melhor',
+      desc3:
+          'As memory lanes agora aparecem para mais pessoas na sua vida, incluindo crianças a partir de 3 anos. Links compartilhados carregam mais rápido, com animações mais suaves.',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Experiência de fotografias',
+      title1: 'Memórias mais suaves',
       desc1:
-          'As fotografias e os vídeos são agora transferidos mais rapidamente, tornando a aplicação mais ágil no geral.',
-      title2: 'As memórias carregam mais depressa',
+          'Redescobrir memórias antigas ficou melhor, com nova resposta háptica e melhorias internas.',
+      title2: 'Navegação mais rápida',
       desc2:
-          'Redescobrir memórias antigas deverá agora ser mais fluido graças a melhorias internas de desempenho.',
+          'As suas fotografias e vídeos carregam mais depressa. Atualizámos a nossa infraestrutura, para que tudo pareça mais ágil.',
+      title3: 'Memory lane melhor',
+      desc3:
+          'As memory lanes aparecem agora para mais pessoas na sua vida, incluindo crianças a partir dos 3 anos. As ligações partilhadas carregam mais depressa, com animações mais suaves.',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Experiența cu fotografii',
+      title1: 'Amintiri mai fluide',
       desc1:
-          'Fotografiile și videoclipurile se descarcă acum mai rapid, făcând aplicația să pară mai rapidă în ansamblu.',
-      title2: 'Amintirile se încarcă mai repede',
+          'Redescoperirea amintirilor vechi se simte mai bine, cu vibrații noi și îmbunătățiri interne.',
+      title2: 'Navigare mai rapidă',
       desc2:
-          'Redescoperirea amintirilor vechi ar trebui să fie acum mai fluidă datorită îmbunătățirilor de performanță din culise.',
+          'Fotografiile și videoclipurile tale se încarcă mai rapid. Ne-am actualizat infrastructura, așa că totul pare mai sprinten.',
+      title3: 'Memory lane mai bun',
+      desc3:
+          'Memory lane apare acum pentru mai multe persoane din viața ta, inclusiv copii de 3 ani și peste. Linkurile partajate se încarcă mai rapid, cu animații mai fluide.',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Работа с фото',
+      title1: 'Более плавные воспоминания',
       desc1:
-          'Фотографии и видео теперь загружаются быстрее, поэтому приложение в целом ощущается более быстрым.',
-      title2: 'Воспоминания загружаются быстрее',
+          'Возвращаться к старым воспоминаниям стало приятнее благодаря новой тактильной отдаче и внутренним улучшениям.',
+      title2: 'Более быстрый просмотр',
       desc2:
-          'Возвращаться к старым воспоминаниям теперь должно быть плавнее благодаря внутренним улучшениям производительности.',
+          'Ваши фото и видео загружаются быстрее. Мы обновили инфраструктуру, поэтому всё ощущается более отзывчивым.',
+      title3: 'Улучшенная memory lane',
+      desc3:
+          'Memory lane теперь появляется для большего числа людей в вашей жизни, включая детей от 3 лет. Общие ссылки загружаются быстрее, а анимации стали плавнее.',
     ),
     'tr': ChangeLogStrings(
-      title1: 'Fotoğraf deneyimi',
+      title1: 'Daha akıcı anılar',
       desc1:
-          'Fotoğraflar ve videolar artık daha hızlı indiriliyor, böylece uygulama genel olarak daha hızlı hissettiriyor.',
-      title2: 'Anılar daha hızlı yükleniyor',
+          'Eski anıları yeniden keşfetmek, yeni dokunsal geri bildirimler ve altyapı iyileştirmeleriyle daha iyi hissettiriyor.',
+      title2: 'Daha hızlı gezinme',
       desc2:
-          'Arka plandaki performans iyileştirmeleri sayesinde eski anıları yeniden keşfetmek artık daha akıcı olmalı.',
+          'Fotoğraflarınız ve videolarınız daha hızlı yükleniyor. Altyapımızı güncelledik, böylece her şey daha çevik hissettiriyor.',
+      title3: 'Daha iyi memory lane',
+      desc3:
+          'Memory lane artık hayatınızdaki daha fazla kişi için, 3 yaş ve üzeri çocuklar dahil, görünüyor. Paylaşılan bağlantılar daha hızlı yükleniyor ve animasyonlar daha akıcı.',
     ),
     'uk': ChangeLogStrings(
-      title1: 'Робота з фото',
+      title1: 'Плавніші спогади',
       desc1:
-          'Фотографії та відео тепер завантажуються швидше, тож застосунок загалом відчувається швидшим.',
-      title2: 'Спогади завантажуються швидше',
+          'Повертатися до старих спогадів стало приємніше завдяки новій тактильній віддачі та внутрішнім покращенням.',
+      title2: 'Швидший перегляд',
       desc2:
-          'Повертатися до старих спогадів тепер має бути плавніше завдяки внутрішнім покращенням продуктивності.',
+          'Ваші фото й відео завантажуються швидше. Ми оновили інфраструктуру, тож усе відчувається жвавішим.',
+      title3: 'Краща memory lane',
+      desc3:
+          'Memory lane тепер з’являється для більшої кількості людей у вашому житті, зокрема дітей від 3 років. Спільні посилання завантажуються швидше, а анімації стали плавнішими.',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Trải nghiệm ảnh',
+      title1: 'Kỷ niệm mượt mà hơn',
       desc1:
-          'Ảnh và video giờ tải xuống nhanh hơn, giúp toàn bộ ứng dụng có cảm giác nhanh hơn.',
-      title2: 'Kỷ niệm tải nhanh hơn',
+          'Việc khám phá lại các kỷ niệm cũ nay dễ chịu hơn, với phản hồi rung mới và các cải thiện bên trong.',
+      title2: 'Duyệt nhanh hơn',
       desc2:
-          'Việc khám phá lại các kỷ niệm cũ giờ sẽ mượt mà hơn nhờ những cải thiện hiệu năng bên trong.',
+          'Ảnh và video của bạn tải nhanh hơn. Chúng tôi đã cập nhật hạ tầng để mọi thứ phản hồi nhanh hơn.',
+      title3: 'Memory lane tốt hơn',
+      desc3:
+          'Memory lane nay xuất hiện cho nhiều người hơn trong cuộc sống của bạn, bao gồm cả trẻ từ 3 tuổi trở lên. Liên kết chia sẻ tải nhanh hơn, với hoạt ảnh mượt mà hơn.',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '照片体验',
-      desc1: '照片和视频现在下载更快，让整个应用用起来更加流畅。',
-      title2: '回忆加载更快',
-      desc2: '得益于底层性能改进，重温旧回忆现在应该会更加顺畅。',
+      title1: '更流畅的回忆',
+      desc1: '通过新的触觉反馈和底层改进，重新发现旧回忆的体验更好了。',
+      title2: '更快的浏览',
+      desc2: '你的照片和视频加载更快。我们更新了基础设施，让一切感觉更迅速。',
+      title3: '更好的 memory lane',
+      desc3: '现在，memory lane 会为你生活中的更多人显示，包括 3 岁及以上的孩子。共享链接加载更快，动画也更流畅。',
     ),
   };
 
-  static const Map<String, ChangeLogStrings> _offlineTranslations = {};
+  static const Map<String, ChangeLogStrings> _offlineTranslations = {
+    'en': ChangeLogStrings(
+      title1: 'Smoother memories',
+      desc1:
+          'Rediscovering old memories feels better, with new haptics and under-the-hood improvements.',
+      title2: 'Faster browsing',
+      desc2:
+          "Your photos and videos load faster. We've updated our infrastructure, so everything feels snappier.",
+    ),
+    'cs': ChangeLogStrings(
+      title1: 'Plynulejší vzpomínky',
+      desc1:
+          'Znovuobjevování starých vzpomínek je příjemnější díky nové haptické odezvě a vylepšením na pozadí.',
+      title2: 'Rychlejší prohlížení',
+      desc2:
+          'Vaše fotky a videa se načítají rychleji. Aktualizovali jsme naši infrastrukturu, takže vše působí svižněji.',
+    ),
+    'de': ChangeLogStrings(
+      title1: 'Flüssigere Erinnerungen',
+      desc1:
+          'Das Wiederentdecken alter Erinnerungen fühlt sich mit neuer Haptik und Verbesserungen im Hintergrund besser an.',
+      title2: 'Schnelleres Browsen',
+      desc2:
+          'Ihre Fotos und Videos laden schneller. Wir haben unsere Infrastruktur aktualisiert, damit sich alles reaktionsschneller anfühlt.',
+    ),
+    'es': ChangeLogStrings(
+      title1: 'Recuerdos más fluidos',
+      desc1:
+          'Redescubrir recuerdos antiguos se siente mejor, con nuevas respuestas hápticas y mejoras internas.',
+      title2: 'Navegación más rápida',
+      desc2:
+          'Tus fotos y videos cargan más rápido. Hemos actualizado nuestra infraestructura para que todo se sienta más ágil.',
+    ),
+    'fr': ChangeLogStrings(
+      title1: 'Souvenirs plus fluides',
+      desc1:
+          'Redécouvrir d’anciens souvenirs est plus agréable, avec de nouvelles vibrations et des améliorations internes.',
+      title2: 'Navigation plus rapide',
+      desc2:
+          'Vos photos et vidéos se chargent plus vite. Nous avons mis à jour notre infrastructure pour rendre l’ensemble plus réactif.',
+    ),
+    'it': ChangeLogStrings(
+      title1: 'Ricordi più fluidi',
+      desc1:
+          'Riscoprire vecchi ricordi è più piacevole, con nuovi feedback aptici e miglioramenti interni.',
+      title2: 'Navigazione più veloce',
+      desc2:
+          'Le tue foto e i tuoi video si caricano più velocemente. Abbiamo aggiornato la nostra infrastruttura, così tutto risulta più reattivo.',
+    ),
+    'ja': ChangeLogStrings(
+      title1: 'よりスムーズな思い出',
+      desc1: '新しい触覚フィードバックと内部改善により、昔の思い出を振り返る体験がより心地よくなりました。',
+      title2: 'より速い閲覧',
+      desc2: '写真や動画の読み込みが速くなりました。インフラを更新し、全体がより軽快に感じられます。',
+    ),
+    'nl': ChangeLogStrings(
+      title1: 'Soepelere herinneringen',
+      desc1:
+          'Oude herinneringen herontdekken voelt beter, met nieuwe haptiek en verbeteringen onder de motorkap.',
+      title2: 'Sneller bladeren',
+      desc2:
+          'Je foto’s en video’s laden sneller. We hebben onze infrastructuur bijgewerkt, zodat alles vlotter aanvoelt.',
+    ),
+    'no': ChangeLogStrings(
+      title1: 'Jevnere minner',
+      desc1:
+          'Det føles bedre å gjenoppdage gamle minner, med ny haptikk og forbedringer under panseret.',
+      title2: 'Raskere blaing',
+      desc2:
+          'Bildene og videoene dine lastes raskere. Vi har oppdatert infrastrukturen vår, slik at alt føles kvikkere.',
+    ),
+    'pl': ChangeLogStrings(
+      title1: 'Płynniejsze wspomnienia',
+      desc1:
+          'Odkrywanie dawnych wspomnień jest przyjemniejsze dzięki nowym reakcjom haptycznym i ulepszeniom pod spodem.',
+      title2: 'Szybsze przeglądanie',
+      desc2:
+          'Twoje zdjęcia i filmy ładują się szybciej. Zaktualizowaliśmy naszą infrastrukturę, więc wszystko działa sprawniej.',
+    ),
+    'pt_BR': ChangeLogStrings(
+      title1: 'Memórias mais suaves',
+      desc1:
+          'Redescobrir memórias antigas ficou melhor, com novos retornos táteis e melhorias internas.',
+      title2: 'Navegação mais rápida',
+      desc2:
+          'Suas fotos e vídeos carregam mais rápido. Atualizamos nossa infraestrutura, então tudo fica mais ágil.',
+    ),
+    'pt_PT': ChangeLogStrings(
+      title1: 'Memórias mais suaves',
+      desc1:
+          'Redescobrir memórias antigas ficou melhor, com nova resposta háptica e melhorias internas.',
+      title2: 'Navegação mais rápida',
+      desc2:
+          'As suas fotografias e vídeos carregam mais depressa. Atualizámos a nossa infraestrutura, para que tudo pareça mais ágil.',
+    ),
+    'ro': ChangeLogStrings(
+      title1: 'Amintiri mai fluide',
+      desc1:
+          'Redescoperirea amintirilor vechi se simte mai bine, cu vibrații noi și îmbunătățiri interne.',
+      title2: 'Navigare mai rapidă',
+      desc2:
+          'Fotografiile și videoclipurile tale se încarcă mai rapid. Ne-am actualizat infrastructura, așa că totul pare mai sprinten.',
+    ),
+    'ru': ChangeLogStrings(
+      title1: 'Более плавные воспоминания',
+      desc1:
+          'Возвращаться к старым воспоминаниям стало приятнее благодаря новой тактильной отдаче и внутренним улучшениям.',
+      title2: 'Более быстрый просмотр',
+      desc2:
+          'Ваши фото и видео загружаются быстрее. Мы обновили инфраструктуру, поэтому всё ощущается более отзывчивым.',
+    ),
+    'tr': ChangeLogStrings(
+      title1: 'Daha akıcı anılar',
+      desc1:
+          'Eski anıları yeniden keşfetmek, yeni dokunsal geri bildirimler ve altyapı iyileştirmeleriyle daha iyi hissettiriyor.',
+      title2: 'Daha hızlı gezinme',
+      desc2:
+          'Fotoğraflarınız ve videolarınız daha hızlı yükleniyor. Altyapımızı güncelledik, böylece her şey daha çevik hissettiriyor.',
+    ),
+    'uk': ChangeLogStrings(
+      title1: 'Плавніші спогади',
+      desc1:
+          'Повертатися до старих спогадів стало приємніше завдяки новій тактильній віддачі та внутрішнім покращенням.',
+      title2: 'Швидший перегляд',
+      desc2:
+          'Ваші фото й відео завантажуються швидше. Ми оновили інфраструктуру, тож усе відчувається жвавішим.',
+    ),
+    'vi': ChangeLogStrings(
+      title1: 'Kỷ niệm mượt mà hơn',
+      desc1:
+          'Việc khám phá lại các kỷ niệm cũ nay dễ chịu hơn, với phản hồi rung mới và các cải thiện bên trong.',
+      title2: 'Duyệt nhanh hơn',
+      desc2:
+          'Ảnh và video của bạn tải nhanh hơn. Chúng tôi đã cập nhật hạ tầng để mọi thứ phản hồi nhanh hơn.',
+    ),
+    'zh_CN': ChangeLogStrings(
+      title1: '更流畅的回忆',
+      desc1: '通过新的触觉反馈和底层改进，重新发现旧回忆的体验更好了。',
+      title2: '更快的浏览',
+      desc2: '你的照片和视频加载更快。我们更新了基础设施，让一切感觉更迅速。',
+    ),
+  };
 }
