@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["apps/codegen"]
+members = ["apps/codegen", "crates/image"]
 exclude = [
     "accounts",
     "apps/ensu/src-tauri",

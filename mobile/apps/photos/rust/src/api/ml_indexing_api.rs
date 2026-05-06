@@ -1,4 +1,4 @@
-use ente_media_inspector::ml::{
+use ente_photos::ml::{
     indexing as shared_indexing,
     runtime::{ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
     types as shared_types,
