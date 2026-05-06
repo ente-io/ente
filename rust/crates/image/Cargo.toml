@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 image = { version = "0.25.5", default-features = true }
 kamadak-exif = "0.6.1"
-libheic-rs = { git = "https://github.com/laurens-pilot/libheic-rs.git", tag = "v0.1.5", features = [
+ente_heic = { path = "../heic", features = [
     "image-integration",
 ] }
 thiserror = "2.0.11"

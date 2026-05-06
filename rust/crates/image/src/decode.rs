@@ -1,14 +1,14 @@
 use std::{ffi::OsStr, fs::File, io::BufReader, path::Path, sync::Once};
 
-use exif::{In, Reader as ExifReader, Tag};
-use image::{DynamicImage, ImageFormat, ImageReader, hooks::decoding_hook_registered};
-use libheic_rs::{
+use ente_heic::{
     DecodeGuardrails, exif_orientation_hint_from_path,
     image_integration::{
         apply_exif_orientation_dynamic, register_image_decoder_hooks_with_guardrails,
     },
     path_extension_is_heif,
 };
+use exif::{In, Reader as ExifReader, Tag};
+use image::{DynamicImage, ImageFormat, ImageReader, hooks::decoding_hook_registered};
 use tiff::{
     ColorType as TiffColorType,
     decoder::{Decoder as TiffDecoder, DecodingResult as TiffDecodingResult},
@@ -186,7 +186,7 @@ fn init_image_decoders() {
             );
         } else if !registration.all_decoder_hooks_registered() {
             eprintln!(
-                "[ml][decode] libheic-rs decoder hooks only partially registered (usually because another initializer registered first); registration_result=(heic:{}, heif:{}, avif:{}), active_hooks=(heic:{}, heif:{}, avif:{})",
+                "[ml][decode] ente_heic decoder hooks only partially registered (usually because another initializer registered first); registration_result=(heic:{}, heif:{}, avif:{}), active_hooks=(heic:{}, heif:{}, avif:{})",
                 registration.heic_decoder_hook_registered,
                 registration.heif_decoder_hook_registered,
                 registration.avif_decoder_hook_registered,
@@ -198,7 +198,7 @@ fn init_image_decoders() {
 
         debug_assert!(
             heic_hook_active || heif_hook_active || avif_hook_active,
-            "no libheic-rs image decoder hooks are active"
+            "no ente_heic image decoder hooks are active"
         );
     });
 }
