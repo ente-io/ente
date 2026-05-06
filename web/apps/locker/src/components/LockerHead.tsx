@@ -12,7 +12,6 @@ export const LockerHead: React.FC = () => (
     <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href={url} />
         <link rel="icon" type="image/png" href="/images/favicon.png" />
         <meta name="twitter:site" content="@enteio" />
         <meta property="og:type" content="website" />

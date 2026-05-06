@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Ente Photos</string>
-    <string name="backup">Backup</string>
     <string name="asset_statements" translatable="false">
         [{
         \"include\": \"https://web.ente.io/.well-known/assetlinks.json\"
