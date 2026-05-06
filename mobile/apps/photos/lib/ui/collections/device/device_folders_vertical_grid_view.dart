@@ -202,6 +202,7 @@ class _DeviceFolderVerticalGridViewBodyState
       padding: const EdgeInsets.only(
         left: horizontalPadding / 2,
         right: horizontalPadding / 2,
+        bottom: 200,
       ),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -230,6 +231,7 @@ class _DeviceFolderVerticalGridViewBodyState
         top: 8,
         left: 8,
         right: 8,
+        bottom: 200,
       ),
       sliver: SliverList.builder(
         itemBuilder: (context, index) {

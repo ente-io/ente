@@ -38,7 +38,6 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final bool enableSelectionMode;
   final bool shouldShowCreateAlbum;
   final SelectedAlbums? selectedAlbums;
-  final double scrollBottomSafeArea;
   final bool onlyAllowSelection;
   final UISectionType? sectionType;
 
@@ -51,7 +50,6 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.albumViewType = AlbumViewType.grid,
     this.shouldShowCreateAlbum = false,
     this.selectedAlbums,
-    this.scrollBottomSafeArea = 8,
     this.onlyAllowSelection = false,
     this.sectionType,
   });
@@ -146,18 +144,17 @@ class _CollectionsFlexiGridViewWidgetState
             totalCrossAxisSpacing -
             CollectionsFlexiGridViewWidget.horizontalPadding) /
         albumsCountInCrossAxis;
-
     final int totalCollections = widget.collections!.length;
     final bool showCreateAlbum = widget.shouldShowCreateAlbum;
     final int displayItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
 
     return SliverPadding(
       key: key,
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 8,
         left: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
         right: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
-        bottom: widget.scrollBottomSafeArea,
+        bottom: 200,
       ),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
@@ -214,11 +211,11 @@ class _CollectionsFlexiGridViewWidgetState
 
     return SliverPadding(
       key: key,
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 8,
         left: 8,
         right: 8,
-        bottom: widget.scrollBottomSafeArea,
+        bottom: 200,
       ),
       sliver: SliverPrototypeExtentList(
         prototypeItem: Padding(
