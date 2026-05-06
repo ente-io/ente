@@ -56,7 +56,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   final String _databaseName;
   final ClipVectorDB _clipVectorDB;
   final ClusterCentroidVectorDB _clusterCentroidVectorDB;
-  final bool _isOffline;
+  final bool _isLocalGallery;
   final List<String> _migrationScripts;
   int _clusterSummaryMutationVersion = 0;
   Future<void>? _clipVectorDbRecoveryFuture;
@@ -72,22 +72,22 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     String databaseName = "ente.ml.db",
     ClipVectorDB? clipVectorDB,
     ClusterCentroidVectorDB? clusterCentroidVectorDB,
-    bool isOffline = false,
+    bool isLocalGallery = false,
     List<String>? migrationScripts,
   })  : _databaseName = databaseName,
         _clipVectorDB = clipVectorDB ?? ClipVectorDB.instance,
         _clusterCentroidVectorDB =
             clusterCentroidVectorDB ?? ClusterCentroidVectorDB.instance,
-        _isOffline = isOffline,
+        _isLocalGallery = isLocalGallery,
         _migrationScripts = migrationScripts ?? _defaultMigrationScripts;
 
   static final MLDataDB instance = MLDataDB._privateConstructor();
-  static final MLDataDB offlineInstance = MLDataDB._privateConstructor(
+  static final MLDataDB localGalleryInstance = MLDataDB._privateConstructor(
     databaseName: "ente.ml.offline.db",
-    clipVectorDB: ClipVectorDB.offlineInstance,
-    clusterCentroidVectorDB: ClusterCentroidVectorDB.offlineInstance,
-    isOffline: true,
-    migrationScripts: _offlineMigrationScripts,
+    clipVectorDB: ClipVectorDB.localGalleryInstance,
+    clusterCentroidVectorDB: ClusterCentroidVectorDB.localGalleryInstance,
+    isLocalGallery: true,
+    migrationScripts: _localGalleryMigrationScripts,
   );
 
   static const List<String> _defaultMigrationScripts = [
@@ -107,7 +107,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetFaceVectorIdMappingTable,
     createPetBodyVectorIdMappingTable,
   ];
-  static const List<String> _offlineMigrationScripts = [
+  static const List<String> _localGalleryMigrationScripts = [
     ..._defaultMigrationScripts,
   ];
 
@@ -324,7 +324,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final vdb = PetVectorDB.forModel(
           species: entry.key,
           isFace: true,
-          offline: _isOffline,
+          localGallery: _isLocalGallery,
         );
         final petFaceIds = entry.value.map((e) => e.$1.petFaceId).toList();
         final idMap = await vdb.getPetFaceVectorIdMap(
@@ -390,7 +390,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final vdb = PetVectorDB.forModel(
           species: entry.key,
           isFace: false,
-          offline: _isOffline,
+          localGallery: _isLocalGallery,
         );
         final bodyIds = entry.value.map((e) => e.$1.petBodyId).toList();
         final idMap = await vdb.getObjectVectorIdMap(
@@ -576,8 +576,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deletePetBodiesTable);
     await db.execute(deletePetFaceVectorIdMappingTable);
     await db.execute(deletePetBodyVectorIdMappingTable);
-    final petVdbs =
-        _isOffline ? PetVectorDB.allOfflineInstances : PetVectorDB.allInstances;
+    final petVdbs = _isLocalGallery
+        ? PetVectorDB.allLocalGalleryInstances
+        : PetVectorDB.allInstances;
     for (final vdb in petVdbs) {
       await vdb.deleteIndexFile();
     }
@@ -2486,7 +2487,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final vdb = PetVectorDB.forModel(
           species: entry.key,
           isFace: true,
-          offline: _isOffline,
+          localGallery: _isLocalGallery,
         );
         await vdb.deleteEmbeddings(entry.value);
       } catch (e, s) {
@@ -2498,7 +2499,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final vdb = PetVectorDB.forModel(
           species: entry.key,
           isFace: false,
-          offline: _isOffline,
+          localGallery: _isLocalGallery,
         );
         await vdb.deleteEmbeddings(entry.value);
       } catch (e, s) {

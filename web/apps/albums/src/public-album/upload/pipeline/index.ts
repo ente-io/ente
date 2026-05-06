@@ -1,11 +1,8 @@
 import { exportMetadataDirectoryName } from "@/public-album/upload/pipeline/export-dirs";
 import { basename, dirname } from "ente-base/file-name";
-import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
 
 class UploadState {
     shouldDisableCFUploadProxy = false;
@@ -83,20 +80,5 @@ export const areChecksumProtectedUploadsEnabled = () =>
     _state.checksumProtectedUploadsEnabled;
 
 const computeShouldDisableCFUploadProxy = async () => {
-    if (await customAPIOrigin()) return true;
-
-    try {
-        const res = await fetch("https://static.ente.io/feature_flags.json");
-        return (
-            StaticFeatureFlags.parse(await res.json()).disableCFUploadProxy ??
-            false
-        );
-    } catch (e) {
-        log.warn("Ignoring error when getting feature_flags.json", e);
-        return false;
-    }
+    return !!(await customAPIOrigin());
 };
-
-const StaticFeatureFlags = z.object({
-    disableCFUploadProxy: z.boolean().nullish().transform(nullToUndefined),
-});

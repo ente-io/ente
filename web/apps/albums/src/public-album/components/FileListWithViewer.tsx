@@ -11,7 +11,7 @@ import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { fileCreationPhotoDate, fileFileName } from "ente-media/file-metadata";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -41,6 +41,10 @@ export type FileListWithViewerProps = {
      */
     pendingHighlightCommentID?: string;
     /**
+     * Resolved anonymous display names from the feed for the target album.
+     */
+    pendingAnonUserNames?: Map<string, string>;
+    /**
      * Called after the pending navigation is consumed.
      */
     onPendingNavigationConsumed?: () => void;
@@ -58,6 +62,7 @@ export type FileListWithViewerProps = {
     | "selected"
     | "setSelected"
     | "activeCollectionID"
+    | "emptyStateAction"
 > &
     Pick<
         FileViewerProps,
@@ -83,10 +88,12 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     selected,
     setSelected,
     activeCollectionID,
+    emptyStateAction,
     onAddSaveGroup,
     pendingFileIndex,
     pendingFileSidebar,
     pendingHighlightCommentID,
+    pendingAnonUserNames,
     onPendingNavigationConsumed,
     publicAlbumsCredentials,
     collectionKey,
@@ -102,6 +109,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const [highlightCommentID, setHighlightCommentID] = useState<
         string | undefined
     >(undefined);
+    const [initialAnonUserNames, setInitialAnonUserNames] = useState<
+        Map<string, string> | undefined
+    >(undefined);
 
     // Handle pending navigation from feed item clicks
     useEffect(() => {
@@ -109,6 +119,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             setCurrentIndex(pendingFileIndex);
             setInitialSidebar(pendingFileSidebar);
             setHighlightCommentID(pendingHighlightCommentID);
+            setInitialAnonUserNames(
+                pendingAnonUserNames
+                    ? new Map(pendingAnonUserNames)
+                    : undefined,
+            );
             setOpenFileViewer(true);
             onPendingNavigationConsumed?.();
         }
@@ -116,6 +131,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         pendingFileIndex,
         pendingFileSidebar,
         pendingHighlightCommentID,
+        pendingAnonUserNames,
         onPendingNavigationConsumed,
     ]);
 
@@ -123,6 +139,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleCloseFileViewerInternal = useCallback(() => {
         setInitialSidebar(undefined);
         setHighlightCommentID(undefined);
+        setInitialAnonUserNames(undefined);
         setOpenFileViewer(false);
     }, []);
 
@@ -176,6 +193,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             selected,
                             setSelected,
                             activeCollectionID,
+                            emptyStateAction,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
@@ -188,6 +206,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     initialIndex={currentIndex}
                     initialSidebar={initialSidebar}
                     highlightCommentID={highlightCommentID}
+                    initialAnonUserNames={initialAnonUserNames}
                     disableDownload={!enableDownload}
                     {...{
                         files,
@@ -214,7 +233,7 @@ const Container = styled("div")`
  * See: [Note: Timeline date string]
  */
 const fileTimelineDateString = (file: EnteFile) => {
-    const date = new Date(fileCreationTime(file) / 1000);
+    const date = fileCreationPhotoDate(file);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

@@ -76,8 +76,8 @@ class MultiPartUploader {
 
   bool get _shouldUseCFUploadProxy =>
       !_featureFlagService.disableCFWorker &&
-      _featureFlagService.cloudflareUploadWorker &&
-      localSettings.isCFUploadProxyEnabled &&
+      (localSettings.cfUploadProxyEnabled ??
+          _featureFlagService.cloudflareUploadWorker) &&
       Configuration.instance.isEnteProduction();
 
   int calculatePartCount(int fileSize) {
@@ -93,24 +93,17 @@ class MultiPartUploader {
     required int count,
     required int contentLength,
     required int partLength,
-    List<String>? partMd5s,
+    required List<String> partMd5s,
   }) async {
     try {
       // Expected number of parts for given content and part length
       final recomputedCount = (contentLength / partLength).ceil();
 
-      MultipartUploadURLs urls;
-      if (flagService.enableUploadV2 &&
-          partMd5s != null &&
-          partMd5s.isNotEmpty) {
-        urls = await _gateway.getMultipartUploadUrl(
-          contentLength: contentLength,
-          partLength: partLength,
-          partMd5s: partMd5s,
-        );
-      } else {
-        urls = await _gateway.getMultipartUploadUrls(count);
-      }
+      final urls = await _gateway.getMultipartUploadUrl(
+        contentLength: contentLength,
+        partLength: partLength,
+        partMd5s: partMd5s,
+      );
       // Validate server respected the requested count/segmentation
       if (urls.partsURLs.length != recomputedCount ||
           count != recomputedCount) {

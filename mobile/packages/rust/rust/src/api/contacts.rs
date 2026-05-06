@@ -5,9 +5,15 @@ use std::sync::Arc;
 use ente_contacts::{
     AttachmentType as CoreAttachmentType, ContactData as CoreContactData,
     ContactRecord as CoreContactRecord, ContactsCtx as CoreContactsCtx,
-    ContactsError as CoreContactsError, OpenContactsCtxInput as CoreOpenContactsCtxInput,
+    ContactsError as CoreContactsError, LegacyKit as CoreLegacyKit,
+    LegacyKitCreateResult as CoreLegacyKitCreateResult, LegacyKitMetadata as CoreLegacyKitMetadata,
+    LegacyKitOwnerRecoverySession, LegacyKitPart as CoreLegacyKitPart, LegacyKitRecoveryInitiator,
+    LegacyKitRecoverySession as CoreLegacyKitRecoverySession,
+    LegacyKitRecoveryStatus as CoreLegacyKitRecoveryStatus, LegacyKitShare as CoreLegacyKitShare,
+    LegacyKitVariant as CoreLegacyKitVariant, OpenContactsCtxInput as CoreOpenContactsCtxInput,
     RootKeySource as CoreRootKeySource, WrappedRootContactKey as CoreWrappedRootContactKey,
 };
+use ente_core::auth::KeyAttributes as CoreKeyAttributes;
 use flutter_rust_bridge::frb;
 
 #[frb]
@@ -40,6 +46,11 @@ pub enum ContactsError {
         /// Cryptographic error description.
         message: String,
     },
+    /// Authentication or recovery crypto operation failed.
+    Auth {
+        /// Authentication error description.
+        message: String,
+    },
     /// Input validation failed.
     InvalidInput {
         /// Validation failure description.
@@ -56,9 +67,9 @@ pub enum ContactsError {
 impl From<CoreContactsError> for ContactsError {
     fn from(value: CoreContactsError) -> Self {
         match value {
-            CoreContactsError::Http(ente_core::http::Error::Http { status, message }) => {
-                ContactsError::Http { message, status }
-            }
+            CoreContactsError::Http(ente_core::http::Error::Http {
+                status, message, ..
+            }) => ContactsError::Http { message, status },
             CoreContactsError::Http(ente_core::http::Error::Network(message)) => {
                 ContactsError::Network { message }
             }
@@ -69,6 +80,9 @@ impl From<CoreContactsError> for ContactsError {
                 ContactsError::InvalidUrl { message }
             }
             CoreContactsError::Crypto(message) => ContactsError::Crypto {
+                message: message.to_string(),
+            },
+            CoreContactsError::Auth(message) => ContactsError::Auth {
                 message: message.to_string(),
             },
             CoreContactsError::InvalidInput(message) => ContactsError::InvalidInput { message },
@@ -103,6 +117,55 @@ impl From<WrappedRootContactKey> for CoreWrappedRootContactKey {
         Self {
             encrypted_key: value.encrypted_key,
             header: value.header,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Account key attributes required to decrypt the owner's recovery key.
+pub struct AccountKeyAttributes {
+    /// Salt for deriving key-encryption-key from password (base64).
+    pub kek_salt: String,
+    /// Master key encrypted with KEK (base64).
+    pub encrypted_key: String,
+    /// Nonce for master key decryption (base64).
+    pub key_decryption_nonce: String,
+    /// X25519 public key (base64).
+    pub public_key: String,
+    /// Secret key encrypted with master key (base64).
+    pub encrypted_secret_key: String,
+    /// Nonce for secret key decryption (base64).
+    pub secret_key_decryption_nonce: String,
+    /// Argon2 memory limit.
+    pub mem_limit: Option<u32>,
+    /// Argon2 ops limit.
+    pub ops_limit: Option<u32>,
+    /// Master key encrypted with recovery key (base64).
+    pub master_key_encrypted_with_recovery_key: Option<String>,
+    /// Nonce for master key decryption with recovery key (base64).
+    pub master_key_decryption_nonce: Option<String>,
+    /// Recovery key encrypted with master key (base64).
+    pub recovery_key_encrypted_with_master_key: Option<String>,
+    /// Nonce for recovery key decryption (base64).
+    pub recovery_key_decryption_nonce: Option<String>,
+}
+
+impl From<AccountKeyAttributes> for CoreKeyAttributes {
+    fn from(value: AccountKeyAttributes) -> Self {
+        Self {
+            kek_salt: value.kek_salt,
+            encrypted_key: value.encrypted_key,
+            key_decryption_nonce: value.key_decryption_nonce,
+            public_key: value.public_key,
+            encrypted_secret_key: value.encrypted_secret_key,
+            secret_key_decryption_nonce: value.secret_key_decryption_nonce,
+            mem_limit: value.mem_limit,
+            ops_limit: value.ops_limit,
+            master_key_encrypted_with_recovery_key: value.master_key_encrypted_with_recovery_key,
+            master_key_decryption_nonce: value.master_key_decryption_nonce,
+            recovery_key_encrypted_with_master_key: value.recovery_key_encrypted_with_master_key,
+            recovery_key_decryption_nonce: value.recovery_key_decryption_nonce,
         }
     }
 }
@@ -170,23 +233,255 @@ impl From<CoreContactRecord> for ContactRecord {
 }
 
 #[frb]
+#[derive(Clone, Copy)]
+/// Offline legacy kit split variant.
+pub enum LegacyKitVariant {
+    /// Any two of three sheets can recover the account.
+    TwoOfThree,
+}
+
+impl From<CoreLegacyKitVariant> for LegacyKitVariant {
+    fn from(value: CoreLegacyKitVariant) -> Self {
+        match value {
+            CoreLegacyKitVariant::TwoOfThree => Self::TwoOfThree,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone, Copy)]
+/// Owner-visible recovery session status for an offline legacy kit.
+pub enum LegacyKitRecoveryStatus {
+    /// Waiting for the selected recovery time.
+    Waiting,
+    /// Recovery bundle is available.
+    Ready,
+    /// Owner blocked this recovery attempt.
+    Blocked,
+    /// Recovery was cancelled.
+    Cancelled,
+    /// Recovery completed.
+    Recovered,
+}
+
+impl From<CoreLegacyKitRecoveryStatus> for LegacyKitRecoveryStatus {
+    fn from(value: CoreLegacyKitRecoveryStatus) -> Self {
+        match value {
+            CoreLegacyKitRecoveryStatus::Waiting => Self::Waiting,
+            CoreLegacyKitRecoveryStatus::Ready => Self::Ready,
+            CoreLegacyKitRecoveryStatus::Blocked => Self::Blocked,
+            CoreLegacyKitRecoveryStatus::Cancelled => Self::Cancelled,
+            CoreLegacyKitRecoveryStatus::Recovered => Self::Recovered,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Owner-visible recovery session for an offline legacy kit.
+pub struct LegacyKitRecoverySession {
+    /// Recovery session id.
+    pub id: String,
+    /// Kit id being recovered.
+    pub kit_id: String,
+    /// Current recovery status.
+    pub status: LegacyKitRecoveryStatus,
+    /// Remaining microseconds until the recovery becomes usable.
+    pub wait_till: i64,
+    /// Session creation timestamp.
+    pub created_at: i64,
+}
+
+impl From<CoreLegacyKitRecoverySession> for LegacyKitRecoverySession {
+    fn from(value: CoreLegacyKitRecoverySession) -> Self {
+        Self {
+            id: value.id,
+            kit_id: value.kit_id,
+            status: value.status.into(),
+            wait_till: value.wait_till,
+            created_at: value.created_at,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Owner-facing audit hint for a successful legacy kit recovery open.
+pub struct LegacyKitRecoveryInitiatorHint {
+    /// Client-reported sheet indexes used by the recovery flow.
+    pub used_part_indexes: Vec<u8>,
+    /// Server-observed IP address.
+    pub ip: String,
+    /// Server-observed user agent.
+    pub user_agent: String,
+}
+
+impl From<LegacyKitRecoveryInitiator> for LegacyKitRecoveryInitiatorHint {
+    fn from(value: LegacyKitRecoveryInitiator) -> Self {
+        Self {
+            used_part_indexes: value.used_part_indexes,
+            ip: value.ip,
+            user_agent: value.user_agent,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Owner-facing recovery session details for a legacy kit.
+pub struct LegacyKitOwnerRecoverySessionDetails {
+    /// Active session, if one exists.
+    pub session: Option<LegacyKitRecoverySession>,
+    /// Server-captured audit hints for successful recovery opens.
+    pub initiators: Vec<LegacyKitRecoveryInitiatorHint>,
+}
+
+impl From<LegacyKitOwnerRecoverySession> for LegacyKitOwnerRecoverySessionDetails {
+    fn from(value: LegacyKitOwnerRecoverySession) -> Self {
+        Self {
+            session: value.session.map(Into::into),
+            initiators: value.initiators.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// One named part of an offline legacy kit.
+pub struct LegacyKitPart {
+    /// One-based part index encoded in the recovery sheet.
+    pub index: u8,
+    /// Human-readable part holder/storage name.
+    pub name: String,
+}
+
+impl From<CoreLegacyKitPart> for LegacyKitPart {
+    fn from(value: CoreLegacyKitPart) -> Self {
+        Self {
+            index: value.index,
+            name: value.name,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Decrypted owner metadata for an offline legacy kit.
+pub struct LegacyKitMetadata {
+    /// Named recovery parts.
+    pub parts: Vec<LegacyKitPart>,
+}
+
+impl From<CoreLegacyKitMetadata> for LegacyKitMetadata {
+    fn from(value: CoreLegacyKitMetadata) -> Self {
+        Self {
+            parts: value.parts.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Offline legacy kit record visible to the owner.
+pub struct LegacyKit {
+    /// Stable kit id.
+    pub id: String,
+    /// Split variant.
+    pub variant: LegacyKitVariant,
+    /// Configured notice period in hours.
+    pub notice_period_in_hours: i32,
+    /// Decrypted owner metadata.
+    pub metadata: LegacyKitMetadata,
+    /// Kit creation timestamp.
+    pub created_at: i64,
+    /// Kit update timestamp.
+    pub updated_at: i64,
+    /// Active owner-visible recovery session, if any.
+    pub active_recovery_session: Option<LegacyKitRecoverySession>,
+}
+
+impl From<CoreLegacyKit> for LegacyKit {
+    fn from(value: CoreLegacyKit) -> Self {
+        Self {
+            id: value.id,
+            variant: value.variant.into(),
+            notice_period_in_hours: value.notice_period_in_hours,
+            metadata: value.metadata.into(),
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+            active_recovery_session: value.active_recovery_session.map(Into::into),
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// One offline legacy kit recovery share to encode into a recovery sheet.
+pub struct LegacyKitShare {
+    /// Payload version.
+    pub payload_version: u8,
+    /// Split variant.
+    pub variant: LegacyKitVariant,
+    /// Kit id.
+    pub kit_id: String,
+    /// One-based share index.
+    pub share_index: u8,
+    /// Encoded share bytes.
+    pub share: String,
+    /// Share checksum.
+    pub checksum: String,
+    /// Human-readable part name.
+    pub part_name: String,
+}
+
+impl From<CoreLegacyKitShare> for LegacyKitShare {
+    fn from(value: CoreLegacyKitShare) -> Self {
+        Self {
+            payload_version: value.payload_version,
+            variant: value.variant.into(),
+            kit_id: value.kit_id,
+            share_index: value.share_index,
+            share: value.share,
+            checksum: value.checksum,
+            part_name: value.part_name,
+        }
+    }
+}
+
+#[frb]
+#[derive(Clone)]
+/// Result of creating an offline legacy kit.
+pub struct LegacyKitCreateResult {
+    /// Created kit record.
+    pub kit: LegacyKit,
+    /// Recovery shares that must be exported immediately.
+    pub shares: Vec<LegacyKitShare>,
+}
+
+impl From<CoreLegacyKitCreateResult> for LegacyKitCreateResult {
+    fn from(value: CoreLegacyKitCreateResult) -> Self {
+        Self {
+            kit: value.kit.into(),
+            shares: value.shares.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+#[frb]
 #[derive(Clone)]
 /// Source used to obtain the root contact key during open.
 pub enum RootKeySource {
     /// Reused the caller-provided cached wrapped root key.
     Cache,
-    /// Fetched the wrapped root key from the server.
-    Server,
-    /// Created a new wrapped root key on the server.
-    Created,
+    /// Opened without a cached wrapped root key; Rust will resolve it lazily.
+    Unresolved,
 }
 
 impl From<CoreRootKeySource> for RootKeySource {
     fn from(value: CoreRootKeySource) -> Self {
         match value {
             CoreRootKeySource::Cache => RootKeySource::Cache,
-            CoreRootKeySource::Server => RootKeySource::Server,
-            CoreRootKeySource::Created => RootKeySource::Created,
+            CoreRootKeySource::Unresolved => RootKeySource::Unresolved,
         }
     }
 }
@@ -219,7 +514,7 @@ pub struct OpenContactsCtxInput {
     /// Logged-in account key used to unwrap or create the root contact key.
     pub master_key: Vec<u8>,
     /// Optional cached wrapped root key for the current user.
-    pub cached_root_key: Option<WrappedRootContactKey>,
+    pub cached_wrapped_root_contact_key: Option<WrappedRootContactKey>,
     /// Optional user agent to send to Ente API endpoints.
     pub user_agent: Option<String>,
     /// Optional client package header to send to Ente API endpoints.
@@ -233,9 +528,9 @@ pub struct OpenContactsCtxInput {
 pub struct OpenContactsCtxResult {
     /// Opaque contacts context bound to the current account/session.
     pub ctx: ContactsCtx,
-    /// Current wrapped root key that the caller may persist.
-    pub wrapped_root_key: WrappedRootContactKey,
-    /// Source used to obtain the root key during open.
+    /// Current wrapped root key that the caller may persist, if already resolved.
+    pub wrapped_root_contact_key: Option<WrappedRootContactKey>,
+    /// State of the root key during open.
     pub root_key_source: RootKeySource,
 }
 
@@ -256,7 +551,7 @@ pub async fn open_contacts_ctx(
         auth_token: input.auth_token,
         user_id: input.user_id,
         master_key: input.master_key,
-        cached_root_key: input.cached_root_key.map(Into::into),
+        cached_wrapped_root_contact_key: input.cached_wrapped_root_contact_key.map(Into::into),
         user_agent: input.user_agent,
         client_package: input.client_package,
         client_version: input.client_version,
@@ -268,7 +563,7 @@ pub async fn open_contacts_ctx(
         ctx: ContactsCtx {
             inner: Arc::new(opened.ctx),
         },
-        wrapped_root_key: opened.wrapped_root_key.into(),
+        wrapped_root_contact_key: opened.wrapped_root_contact_key.map(Into::into),
         root_key_source: opened.root_key_source.into(),
     })
 }
@@ -286,9 +581,11 @@ impl ContactsCtx {
     }
 
     #[frb(sync)]
-    /// Return the current wrapped root key for caller-managed persistence.
-    pub fn current_wrapped_root_key(&self) -> WrappedRootContactKey {
-        self.inner.current_wrapped_root_key().into()
+    /// Return the current wrapped root key for caller-managed persistence, if resolved.
+    pub fn current_wrapped_root_contact_key(&self) -> Option<WrappedRootContactKey> {
+        self.inner
+            .current_wrapped_root_contact_key()
+            .map(Into::into)
     }
 
     /// Create a contact for the referenced user.
@@ -407,5 +704,90 @@ impl ContactsCtx {
     ) -> Result<ContactRecord, ContactsError> {
         self.delete_attachment(contact_id, AttachmentType::ProfilePicture)
             .await
+    }
+
+    /// List owner-created offline legacy kits.
+    pub async fn legacy_kits(&self) -> Result<Vec<LegacyKit>, ContactsError> {
+        self.inner
+            .legacy_kits()
+            .await
+            .map(|kits| kits.into_iter().map(Into::into).collect())
+            .map_err(Into::into)
+    }
+
+    /// Create an offline legacy kit and return the printable recovery shares.
+    pub async fn legacy_kit_create(
+        &self,
+        current_user_key_attrs: AccountKeyAttributes,
+        part_names: Vec<String>,
+        notice_period_in_hours: i32,
+    ) -> Result<LegacyKitCreateResult, ContactsError> {
+        let part_names: [String; 3] =
+            part_names
+                .try_into()
+                .map_err(|_| ContactsError::InvalidInput {
+                    message: "legacy kit requires exactly three part names".into(),
+                })?;
+        self.inner
+            .legacy_kit_create(
+                &current_user_key_attrs.into(),
+                part_names,
+                notice_period_in_hours,
+            )
+            .await
+            .map(Into::into)
+            .map_err(Into::into)
+    }
+
+    /// Download the printable recovery shares for an existing offline legacy kit.
+    pub async fn legacy_kit_download_shares(
+        &self,
+        kit_id: String,
+    ) -> Result<Vec<LegacyKitShare>, ContactsError> {
+        self.inner
+            .legacy_kit_download_shares(&kit_id)
+            .await
+            .map(|shares| shares.into_iter().map(Into::into).collect())
+            .map_err(Into::into)
+    }
+
+    /// Fetch owner-visible active recovery session details for a legacy kit.
+    pub async fn legacy_kit_recovery_session(
+        &self,
+        kit_id: String,
+    ) -> Result<LegacyKitOwnerRecoverySessionDetails, ContactsError> {
+        self.inner
+            .legacy_kit_recovery_session(&kit_id)
+            .await
+            .map(Into::into)
+            .map_err(Into::into)
+    }
+
+    /// Update the recovery wait time for a legacy kit.
+    pub async fn legacy_kit_update_recovery_notice(
+        &self,
+        kit_id: String,
+        notice_period_in_hours: i32,
+    ) -> Result<(), ContactsError> {
+        self.inner
+            .legacy_kit_update_recovery_notice(&kit_id, notice_period_in_hours)
+            .await
+            .map_err(Into::into)
+    }
+
+    /// Block the active recovery session for a legacy kit.
+    pub async fn legacy_kit_block_recovery(&self, kit_id: String) -> Result<(), ContactsError> {
+        self.inner
+            .legacy_kit_block_recovery(&kit_id)
+            .await
+            .map_err(Into::into)
+    }
+
+    /// Delete an offline legacy kit.
+    pub async fn legacy_kit_delete(&self, kit_id: String) -> Result<(), ContactsError> {
+        self.inner
+            .legacy_kit_delete(&kit_id)
+            .await
+            .map_err(Into::into)
     }
 }

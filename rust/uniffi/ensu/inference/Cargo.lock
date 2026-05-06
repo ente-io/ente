@@ -140,9 +140,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.56"
+version = "1.2.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aebf35691d1bfb0ac386a69bac2fde4dd276fb618cf8bf4f5318fe285e821bb2"
+checksum = "d16d90359e986641506914ba71350897565610e87ce0ad9e6f28569db3dd5c6d"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -334,7 +334,6 @@ name = "inference_rs"
 version = "0.1.0"
 dependencies = [
  "llama-cpp-2",
- "llama-cpp-sys-2",
  "parking_lot",
  "self_cell",
  "serde",
@@ -391,9 +390,9 @@ checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
 
 [[package]]
 name = "llama-cpp-2"
-version = "0.1.138"
+version = "0.1.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2947ab625c59d1fdf42e61f538c3fa66f43de2f78316971920873f359483d1d8"
+checksum = "b2e7a3cc3ed741aa3d5e6e3ff1d84d5ab7ba13bf15c857be06a5d11517767616"
 dependencies = [
  "encoding_rs",
  "enumflags2",
@@ -405,9 +404,9 @@ dependencies = [
 
 [[package]]
 name = "llama-cpp-sys-2"
-version = "0.1.138"
+version = "0.1.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84a529006bf16af70c7485ba957820dc2bc9467d75697e97970c81d2da73c76f"
+checksum = "0a2efa5c5675f4e2170c52c4418f71907d39b1e3931fd7566f8382cf9e166282"
 dependencies = [
  "bindgen",
  "cc",

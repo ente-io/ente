@@ -1,19 +1,20 @@
 use crate::{
-    api::ApiClient,
-    auth_flow::{
-        AuthFlow, AuthFlowUi, AuthenticatedAccount, CreateAccountParams, LoginParams, OtpPurpose,
-        SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
-    },
     cli::account::{AccountCommand, AccountSubcommands},
     models::{
-        account::{Account, App},
+        account::{Account, AccountSecrets as StoredAccountSecrets, App},
         error::{Error, Result},
     },
     storage::Storage,
 };
 use base64::Engine;
 use dialoguer::{Input, Password, Select};
+use ente_accounts::{
+    AccountsClient, AccountsClientConfig, AuthFlow, AuthFlowUi, AuthenticatedAccount,
+    CreateAccountParams, Error as AccountsError, LoginParams, OtpPurpose, Result as AccountsResult,
+    SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
+};
 use ente_core::crypto::SecretVec;
+use ente_core::urls::PRODUCTION_API_BASE_URL;
 use std::{path::PathBuf, str::FromStr};
 use zeroize::Zeroizing;
 
@@ -106,7 +107,12 @@ impl DialoguerAuthFlowUi {
 }
 
 impl AuthFlowUi for DialoguerAuthFlowUi {
-    fn read_email_otp(&mut self, email: &str, purpose: OtpPurpose, resent: bool) -> Result<String> {
+    fn read_email_otp(
+        &mut self,
+        email: &str,
+        purpose: OtpPurpose,
+        resent: bool,
+    ) -> AccountsResult<String> {
         if let Some(code) = self.email_otp.take() {
             return Ok(code);
         }
@@ -126,10 +132,10 @@ impl AuthFlowUi for DialoguerAuthFlowUi {
             }
         };
 
-        read_six_digit_code(&prompt)
+        read_six_digit_code_for_accounts(&prompt)
     }
 
-    fn read_totp_code(&mut self, purpose: TotpPurpose) -> Result<String> {
+    fn read_totp_code(&mut self, purpose: TotpPurpose) -> AccountsResult<String> {
         if let Some(code) = self.totp_code.take() {
             return Ok(code);
         }
@@ -139,10 +145,10 @@ impl AuthFlowUi for DialoguerAuthFlowUi {
             TotpPurpose::Setup => "Enter the current TOTP from your authenticator app",
         };
 
-        read_six_digit_code(prompt)
+        read_six_digit_code_for_accounts(prompt)
     }
 
-    fn report_retryable_error(&mut self, message: &str) -> Result<()> {
+    fn report_retryable_error(&mut self, message: &str) -> AccountsResult<()> {
         println!("\n{message}");
         Ok(())
     }
@@ -150,7 +156,7 @@ impl AuthFlowUi for DialoguerAuthFlowUi {
     fn choose_second_factor(
         &mut self,
         methods: &[SecondFactorMethod],
-    ) -> Result<SecondFactorMethod> {
+    ) -> AccountsResult<SecondFactorMethod> {
         if let Some(choice) = self.second_factor {
             return Ok(choice);
         }
@@ -168,15 +174,15 @@ impl AuthFlowUi for DialoguerAuthFlowUi {
             .items(&options)
             .default(0)
             .interact()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?;
+            .map_err(|e| AccountsError::InvalidInput(e.to_string()))?;
 
         methods
             .get(index)
             .copied()
-            .ok_or_else(|| Error::InvalidInput("Invalid second-factor selection".into()))
+            .ok_or_else(|| AccountsError::InvalidInput("Invalid second-factor selection".into()))
     }
 
-    fn present_passkey_verification(&mut self, url: &str) -> Result<()> {
+    fn present_passkey_verification(&mut self, url: &str) -> AccountsResult<()> {
         println!("\nPasskey verification required");
         println!("Open this URL in your browser to verify your passkey:\n{url}");
 
@@ -190,16 +196,16 @@ impl AuthFlowUi for DialoguerAuthFlowUi {
         Ok(())
     }
 
-    fn wait_for_passkey_verification(&mut self) -> Result<()> {
+    fn wait_for_passkey_verification(&mut self) -> AccountsResult<()> {
         let _: String = Input::new()
             .with_prompt("Press Enter once you have completed passkey verification")
             .allow_empty(true)
             .interact_text()
-            .map_err(|e| Error::InvalidInput(e.to_string()))?;
+            .map_err(|e| AccountsError::InvalidInput(e.to_string()))?;
         Ok(())
     }
 
-    fn present_totp_secret(&mut self, secret_code: &str, _qr_code: &str) -> Result<()> {
+    fn present_totp_secret(&mut self, secret_code: &str, _qr_code: &str) -> AccountsResult<()> {
         println!("\nTOTP setup secret: {secret_code}");
         println!("Add this secret to your authenticator app, then enter the current code.");
         Ok(())
@@ -222,8 +228,8 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     println!("{}", "-".repeat(110));
 
     for account in accounts {
-        let endpoint_display = if account.endpoint == "https://api.ente.io" {
-            "api.ente.io (prod)".to_string()
+        let endpoint_display = if account.endpoint == PRODUCTION_API_BASE_URL {
+            "api.ente.com (prod)".to_string()
         } else if account.endpoint.starts_with("http://localhost") {
             format!(
                 "localhost:{}",
@@ -273,9 +279,9 @@ async fn add_account(
     let export_dir = resolve_export_dir(export_dir_arg, &email)?;
     ensure_export_dir(&export_dir)?;
 
-    let api_client = new_api_client(&endpoint, app)?;
+    let client = new_accounts_client(&endpoint, app)?;
     let mut ui = DialoguerAuthFlowUi::new(otp, totp_code, second_factor);
-    let mut flow = AuthFlow::new(&api_client, app, &mut ui);
+    let mut flow = AuthFlow::new(&client, &mut ui);
     let authenticated = loop {
         match flow
             .login(LoginParams {
@@ -289,7 +295,7 @@ async fn add_account(
                 println!("\nIncorrect password. Try again.");
                 password = Zeroizing::new(prompt_password(None, "Re-enter your password")?);
             }
-            Err(error) => return Err(error),
+            Err(error) => return Err(error.into()),
         }
     };
 
@@ -332,9 +338,9 @@ async fn create_account(
     let export_dir = resolve_export_dir(export_dir_arg, &email)?;
     ensure_export_dir(&export_dir)?;
 
-    let api_client = new_api_client(&endpoint, app)?;
+    let client = new_accounts_client(&endpoint, app)?;
     let mut ui = DialoguerAuthFlowUi::new(otp, totp_code, Some(SecondFactorMethod::Totp));
-    let mut flow = AuthFlow::new(&api_client, app, &mut ui);
+    let mut flow = AuthFlow::new(&client, &mut ui);
     let created = flow
         .create_account(CreateAccountParams {
             email: email.clone(),
@@ -384,7 +390,6 @@ async fn create_account(
     if setup_2fa {
         let result = flow
             .setup_two_factor(SetupTwoFactorParams {
-                account_id: email.clone(),
                 master_key: SecretVec::new(two_factor_master_key),
                 key_attributes: Some(two_factor_key_attributes),
             })
@@ -416,15 +421,14 @@ async fn enable_two_factor(
         .get_secrets(account.user_id, account.app)?
         .ok_or_else(|| Error::NotFound(format!("Secrets not found for account {email}")))?;
 
-    let api_client = new_api_client(&account.endpoint, app)?;
+    let client = new_accounts_client(&account.endpoint, app)?;
     let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
-    api_client.add_token(&account.email, &token);
+    client.set_auth_token(Some(token));
 
     let mut ui = DialoguerAuthFlowUi::new(None, totp_code, Some(SecondFactorMethod::Totp));
-    let mut flow = AuthFlow::new(&api_client, app, &mut ui);
+    let mut flow = AuthFlow::new(&client, &mut ui);
     let result = flow
         .setup_two_factor(SetupTwoFactorParams {
-            account_id: account.email.clone(),
             master_key: SecretVec::new(secrets.master_key.clone()),
             key_attributes: None,
         })
@@ -495,9 +499,15 @@ fn persist_account(
     };
 
     storage.accounts().add(&account)?;
+    let stored_secrets = StoredAccountSecrets {
+        token: authenticated.secrets.token.clone(),
+        master_key: authenticated.secrets.master_key.clone(),
+        secret_key: authenticated.secrets.secret_key.clone(),
+        public_key: authenticated.secrets.public_key.clone(),
+    };
     storage
         .accounts()
-        .store_secrets(account.user_id, account.app, &authenticated.secrets)?;
+        .store_secrets(account.user_id, account.app, &stored_secrets)?;
 
     Ok(())
 }
@@ -561,15 +571,20 @@ fn parse_second_factor(second_factor: Option<&str>) -> Result<Option<SecondFacto
         .transpose()
 }
 
-fn new_api_client(endpoint: &str, app: App) -> Result<ApiClient> {
-    ApiClient::new_with_client_package(Some(endpoint.to_string()), app.client_package())
+fn new_accounts_client(endpoint: &str, app: App) -> Result<AccountsClient> {
+    AccountsClient::new(
+        AccountsClientConfig::new(app.client_package())
+            .with_base_url(endpoint.to_string())
+            .with_user_agent("ente-rs"),
+    )
+    .map_err(Error::from)
 }
 
-fn is_retryable_password_error(error: &Error) -> bool {
+fn is_retryable_password_error(error: &AccountsError) -> bool {
     matches!(
         error,
-        Error::AuthenticationFailed(message) if message == "Incorrect password"
-    ) || matches!(error, Error::ApiError { status: 401, .. })
+        AccountsError::AuthenticationFailed(message) if message == "Incorrect password"
+    ) || error.is_http_status(&[401])
 }
 
 fn read_six_digit_code(prompt: &str) -> Result<String> {
@@ -584,4 +599,8 @@ fn read_six_digit_code(prompt: &str) -> Result<String> {
         })
         .interact_text()
         .map_err(|e| Error::InvalidInput(e.to_string()))
+}
+
+fn read_six_digit_code_for_accounts(prompt: &str) -> AccountsResult<String> {
+    read_six_digit_code(prompt).map_err(|error| AccountsError::InvalidInput(error.to_string()))
 }

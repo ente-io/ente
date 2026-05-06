@@ -51,7 +51,7 @@ const Page: React.FC = () => {
                     "ente-wasm"
                 );
                 console.log(file_download_url("https://example.org", 88n));
-                const client = new HttpClient("https://api.ente.io");
+                const client = new HttpClient("https://api.ente.com");
                 console.log(await client.get("/ping"));
             }
 
@@ -206,7 +206,7 @@ const TappableContainer: React.FC<
     const [showDevSettings, setShowDevSettings] = useState(false);
 
     const handleClick: React.MouseEventHandler = (event) => {
-        // Don't allow this when running on (e.g.) web.ente.io.
+        // Don't allow this when running on (e.g.) photos.ente.com.
         if (!shouldAllowChangingAPIOrigin()) return;
 
         // Ignore clicks on buttons when counting up towards 7.
@@ -255,7 +255,11 @@ const TappableContainer: React.FC<
  */
 const shouldAllowChangingAPIOrigin = () => {
     const hostname = new URL(window.location.origin).hostname;
-    return !(hostname.endsWith(".ente.io") || hostname.endsWith(".ente.sh"));
+    return !(
+        hostname.endsWith(".ente.com") ||
+        hostname.endsWith(".ente.io") ||
+        hostname.endsWith(".ente.sh")
+    );
 };
 
 const SlideshowPanel = styled("div")`

@@ -1,4 +1,4 @@
-import { InformationCircleIcon, Menu01Icon } from "@hugeicons/core-free-icons";
+import { Menu01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -7,7 +7,6 @@ import {
     InputAdornment,
     Stack,
     TextField,
-    Typography,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useDeferredValue, useEffect, useState } from "react";
@@ -30,9 +29,9 @@ interface LockerNavbarProps {
 /**
  * Top navigation bar for the Locker web app.
  *
- * Blue gradient header matching the Figma design — hamburger on left,
- * "Locker" title centered. The blue gradient continues into the search
- * bar area rendered by ItemList below.
+ * Blue gradient header matching the Figma design, with the Locker branding
+ * centered. The blue gradient continues into the search bar area rendered by
+ * ItemList below.
  */
 export const LockerNavbar: React.FC<LockerNavbarProps> = ({
     onOpenSidebar,
@@ -85,14 +84,10 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
 
                 <Box
                     component="img"
-                    src="/images/locker.svg"
-                    alt="Locker"
-                    sx={{
-                        height: 20,
-                        width: "auto",
-                        filter: "brightness(0) invert(1)",
-                    }}
-                ></Box>
+                    src="/images/locker-beta.svg"
+                    alt="Locker beta"
+                    sx={{ height: 29, width: "auto" }}
+                />
 
                 <Box sx={{ width: 40 }} />
             </Stack>
@@ -143,65 +138,3 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
         </Box>
     );
 };
-
-export const LockerUnstableToast: React.FC = () => (
-    <Box sx={{ position: "sticky", top: 0, zIndex: 2 }}>
-        <Stack
-            direction="row"
-            role="status"
-            aria-live="polite"
-            sx={{
-                width: "100%",
-                px: { xs: 2, sm: 3 },
-                py: 1.25,
-                gap: 1,
-                alignItems: "center",
-                backgroundColor: "#EEF5FF",
-                border: "1px solid #C9DEFF",
-                borderRadius: 0,
-                boxShadow: "0 6px 18px rgba(16, 113, 255, 0.08)",
-            }}
-        >
-            <Stack
-                direction="row"
-                sx={{
-                    width: "100%",
-                    maxWidth: contentMaxWidth,
-                    mx: "auto",
-                    gap: 1,
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
-                <HugeiconsIcon
-                    icon={InformationCircleIcon}
-                    size={20}
-                    strokeWidth={2.1}
-                    color="#0056CC"
-                />
-                <Typography
-                    variant="mini"
-                    sx={{
-                        px: 0.75,
-                        py: 0.25,
-                        borderRadius: "999px",
-                        border: "1px solid rgba(16, 113, 255, 0.18)",
-                        backgroundColor: "rgba(16, 113, 255, 0.08)",
-                        color: "#0056CC",
-                        fontWeight: 700,
-                        letterSpacing: "0.03em",
-                        flexShrink: 0,
-                    }}
-                >
-                    Note
-                </Typography>
-                <Typography
-                    variant="small"
-                    sx={{ color: "#163B72", lineHeight: 1.4, fontWeight: 700 }}
-                >
-                    This is a beta version of Locker web.
-                </Typography>
-            </Stack>
-        </Stack>
-    </Box>
-);

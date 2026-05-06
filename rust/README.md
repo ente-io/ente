@@ -43,6 +43,7 @@
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/photos/` (`ente_media_inspector`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
 - `rust/cli/` (`ente-rs`) - Rust CLI.
+- `rust/e2e/` (`ente-e2e`) - live Museum-backed Rust end-to-end tests.
 - `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
 
 ## Directory Structure
@@ -54,6 +55,12 @@ rust/
 │   │   └── main.rs
 │   ├── Cargo.toml
 │   └── Cargo.lock
+│
+├── e2e/                          # Rust e2e tests requiring live Museum
+│   ├── src/
+│   │   └── lib.rs
+│   ├── tests/
+│   └── Cargo.toml
 │
 ├── core/                         # Pure Rust shared logic (ente-core)
 │   ├── src/
@@ -108,6 +115,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
 - `ente_media_inspector` - shared Photos Rust logic
 - `ente-rs` - CLI binary
+- `ente-e2e` - ignored Rust integration tests that run against a live Museum
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
 - `ente_photos_rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)
@@ -162,6 +170,14 @@ cargo clippy     # lint
 cargo build      # build
 cargo test       # test
 cargo run -- --help
+```
+
+**ente-e2e (rust/e2e/):**
+
+```sh
+cargo test --manifest-path rust/e2e/Cargo.toml                     # compile-only sanity check
+rust/e2e/scripts/run.sh                                            # starts Docker + runs ignored live suite
+cargo test --manifest-path rust/e2e/Cargo.toml -- --ignored --nocapture
 ```
 
 **ente-wasm (web/packages/wasm/):**

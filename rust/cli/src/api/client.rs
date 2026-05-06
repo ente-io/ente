@@ -2,6 +2,7 @@
 
 use crate::api::retry::RetryConfig;
 use crate::models::error::{Error, Result};
+use ente_core::urls::PRODUCTION_API_BASE_URL;
 use reqwest::{Client, RequestBuilder, Response, StatusCode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -9,7 +10,6 @@ use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::time::sleep;
 
-const ENTE_API_ENDPOINT: &str = "https://api.ente.io";
 const TOKEN_HEADER: &str = "X-Auth-Token";
 const CLIENT_PKG_HEADER: &str = "X-Client-Package";
 const DEFAULT_CLIENT_PACKAGE: &str = "io.ente.photos";
@@ -54,6 +54,9 @@ fn make_api_error(method: &str, path: &str, status: StatusCode, body: String) ->
 
     Error::ApiError {
         status: status.as_u16(),
+        code: serde_json::from_str::<ApiError>(&body)
+            .ok()
+            .and_then(|e| e.code),
         message,
     }
 }
@@ -93,7 +96,7 @@ impl ApiClient {
         Ok(Self {
             client,
             download_client,
-            base_url: base_url.unwrap_or_else(|| ENTE_API_ENDPOINT.to_string()),
+            base_url: base_url.unwrap_or_else(|| PRODUCTION_API_BASE_URL.to_string()),
             client_package: client_package.into(),
             tokens: Arc::new(RwLock::new(HashMap::new())),
             retry_config: RetryConfig::default(),
@@ -121,6 +124,16 @@ impl ApiClient {
     /// Set retry configuration
     pub fn set_retry_config(&mut self, config: RetryConfig) {
         self.retry_config = config;
+    }
+
+    /// Return the configured base URL.
+    pub fn base_url(&self) -> &str {
+        &self.base_url
+    }
+
+    /// Return the configured client package.
+    pub fn client_package(&self) -> &str {
+        &self.client_package
     }
 
     /// Build a request with common headers

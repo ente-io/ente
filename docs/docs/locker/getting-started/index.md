@@ -6,7 +6,7 @@ description: Step-by-step guide to set up secure document storage for you and yo
 # Getting Started
 
 Welcome to Ente Locker! Ente Locker is an end-to-end encrypted app for securely
-storing your important items and sensitive information on your mobile devices.
+storing your important items and sensitive information.
 
 This guide will walk you through everything you need to get started, from
 installation to creating your first item. Follow these steps in order for the
@@ -14,8 +14,8 @@ smoothest onboarding experience:
 
 ## 1. Installation
 
-Download and install Ente Locker on your mobile device. Available for iOS and
-Android.
+Download and install Ente Locker on your mobile device, or use it in your
+browser. Locker is available for iOS, Android, and the web.
 
 Learn more in the [Installation guide](/locker/getting-started/installation).
 

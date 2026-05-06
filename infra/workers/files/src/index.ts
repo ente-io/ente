@@ -35,8 +35,7 @@ const isAllowedOrigin = (origin: string | null) => {
         const hostname = url.hostname;
         return (
             origin == "ente://app" /* desktop app */ ||
-            hostname.endsWith("ente.io") ||
-            hostname.endsWith("ente.sh") ||
+            isEnteHostname(hostname) ||
             hostname == "localhost"
         );
     } catch {
@@ -44,6 +43,11 @@ const isAllowedOrigin = (origin: string | null) => {
         return false;
     }
 };
+
+const isEnteHostname = (hostname: string) =>
+    hostname.endsWith(".ente.com") ||
+    hostname.endsWith(".ente.io") ||
+    hostname.endsWith(".ente.sh");
 
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
@@ -76,13 +80,13 @@ const handleGET = async (request: Request) => {
         "X-Client-Package": request.headers.get("X-Client-Package") ?? "",
         "X-Client-Version": request.headers.get("X-Client-Version") ?? "",
         "User-Agent": request.headers.get("User-Agent") ?? "",
-        "Range": request.headers.get("Range") ?? "",
+        Range: request.headers.get("Range") ?? "",
         "X-Forwarded-For": request.headers.get("CF-Connecting-IP") ?? "",
         "CF-IPCountry": request.headers.get("CF-IPCountry") ?? "",
     };
 
     let response = await fetch(
-        `https://api.ente.io/files/download/${fileID}?${params.toString()}`,
+        `https://api.ente.com/files/download/${fileID}?${params.toString()}`,
         { headers },
     );
 

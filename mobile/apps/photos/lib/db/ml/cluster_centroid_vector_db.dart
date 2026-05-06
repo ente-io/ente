@@ -29,7 +29,8 @@ class ClusterCentroidVectorDB {
     "ente.ml.vectordb.cluster_centroid.usearch",
     "cluster_centroid_vectordb_migration",
   );
-  static final offlineInstance = ClusterCentroidVectorDB._privateConstructor(
+  static final localGalleryInstance =
+      ClusterCentroidVectorDB._privateConstructor(
     "ente.ml.offline.vectordb.cluster_centroid.usearch",
     "cluster_centroid_vectordb_migration_offline",
   );

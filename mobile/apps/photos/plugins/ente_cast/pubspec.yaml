@@ -11,7 +11,7 @@ dependencies:
       url: https://github.com/guyluz11/flutter_cast.git
       ref: af6378574352884beab6cddec462c7fdfc9a8c35
   collection: 1.19.1
-  dio: 5.8.0+1
+  dio: 5.9.2
   flutter:
     sdk: flutter
   shared_preferences: 2.5.3

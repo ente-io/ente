@@ -8,7 +8,8 @@ description: Secure, encrypted storage for your family's important documents, pa
 Ente Locker is a private space to store, share, and pass on your most important
 digital information. It's end-to-end encrypted, so we can't see your data - ever.
 
-Locker is available for iOS and Android.
+Locker is available for iOS, Android, and the web at
+[locker.ente.com](https://locker.ente.com).
 
 ## Keep your family's important information safe
 
@@ -53,7 +54,7 @@ making it easy to categorize information in ways that work for you.
 ### Secure sharing
 
 Share collections with other Ente users, or create public links for individual
-items that anyone can view in a browser.
+items and collections that anyone can view in a browser.
 
 ### Open source
 
@@ -101,7 +102,7 @@ View pricing at [ente.com/pricing](https://ente.com/pricing). Learn more about
 New to Locker? Start here:
 
 1. **[Installation](/locker/getting-started/installation)**: Download and
-   install on iOS or Android
+   install on iOS or Android, or use Locker in your browser
 2. **[Sign up](/locker/getting-started/signup)**: Create an account or sign in
    with your existing Ente account
 3. **[First item](/locker/getting-started/first-document)**: Add your first

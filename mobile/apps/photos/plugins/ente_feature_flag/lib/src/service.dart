@@ -12,10 +12,13 @@ import "package:shared_preferences/shared_preferences.dart";
 import "model.dart";
 
 class FlagService {
-  static const int _uploadV2Flag = 1 << 0;
   static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
+  static const int _cfUploadWorkerRolloutPercent = 10;
+  static const int _rustMlRolloutPercent = 20;
+
+  static const String _userIdKey = "user_id";
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
@@ -51,7 +54,8 @@ class FlagService {
     return (flags.internalUser || kDebugMode) && !isDisabled;
   }
 
-  bool get cloudflareUploadWorker => internalUser;
+  bool get cloudflareUploadWorker =>
+      internalUser || _isInUserRollout(_cfUploadWorkerRolloutPercent);
 
   bool get betaUser => flags.betaUser;
 
@@ -70,8 +74,6 @@ class FlagService {
   bool get hasGrantedMLConsent => flags.faceSearchEnabled;
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
-
-  bool get enableUploadV2 => _isServerFlagEnabled(_uploadV2Flag);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
@@ -106,11 +108,15 @@ class FlagService {
 
   bool get enableMemoryShareLink => true;
 
-  bool get useRustForML => internalUser;
+  bool get useRustForML =>
+      internalUser || _isInUserRollout(_rustMlRolloutPercent);
 
-  bool get enableMLInBackground => internalUser;
+  bool get enableMLInBackground =>
+      internalUser || _isInUserRollout(_rustMlRolloutPercent);
 
   bool get useRustForFaceThumbnails => internalUser;
+
+  bool get useRustForHeicDecoder => internalUser;
 
   bool get petEnabled => internalUser;
 
@@ -121,6 +127,8 @@ class FlagService {
   bool get enableBgLocalUploadPriority => internalUser;
 
   bool get syncRecoveryDiagnostics => internalUser;
+
+  bool get mLHydrationStaleFileRecovery => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {
@@ -197,4 +205,15 @@ class FlagService {
 
   bool _isServerFlagEnabled(int flagBit) =>
       (flags.serverApiFlag & flagBit) != 0;
+
+  bool _isInUserRollout(int percent) {
+    final userId = _prefs.getInt(_userIdKey);
+    if (userId == null || userId <= 0 || percent <= 0) {
+      return false;
+    }
+    if (percent >= 100) {
+      return true;
+    }
+    return (userId % 100) < percent;
+  }
 }

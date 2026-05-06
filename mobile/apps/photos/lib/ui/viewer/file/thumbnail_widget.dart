@@ -188,10 +188,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     final galleryContext = GalleryContextState.of(context);
     Widget? image;
     if (_imageProvider != null) {
-      image = Image(
-        image: _imageProvider!,
-        fit: widget.fit,
-      );
+      image = Image(image: _imageProvider!, fit: widget.fit);
     }
     // todo: [2ndJuly22] pref-review if the content Widget which depends on
     // thumbnail fetch logic should be part of separate stateFull widget.
@@ -220,11 +217,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
       if (shouldShowOwnerAvatar) {
         if (!widget.file.isOwner) {
-          final owner = CollectionsService.instance
-              .getFileOwner(widget.file.ownerID!, widget.file.collectionID);
-          contentChildren.add(
-            OwnerAvatarOverlayIcon(owner),
+          final owner = CollectionsService.instance.getFileOwner(
+            widget.file.ownerID!,
+            widget.file.collectionID,
           );
+          contentChildren.add(OwnerAvatarOverlayIcon(owner));
         } else if (widget.file.isCollect) {
           contentChildren.add(
             // Use -1 as userID for enforcing black avatar color
@@ -236,10 +233,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
       content = contentChildren.length == 1
           ? contentChildren.first
-          : Stack(
-              fit: StackFit.expand,
-              children: contentChildren,
-            );
+          : Stack(fit: StackFit.expand, children: contentChildren);
     }
     final List<Widget> viewChildren = [
       const ThumbnailPlaceHolder(),
@@ -247,16 +241,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     ];
     if (!widget.rawThumbnail && widget.file.fileType == FileType.video) {
       if (widget.shouldShowVideoDuration) {
-        viewChildren.add(
-          VideoOverlayDuration(duration: widget.file.duration),
-        );
+        viewChildren.add(VideoOverlayDuration(duration: widget.file.duration));
       } else if (widget.shouldShowVideoOverlayIcon) {
         viewChildren.add(const VideoOverlayIcon());
       }
     }
     if (widget.shouldShowSyncStatus &&
         !widget.file.isUploaded &&
-        !isOfflineMode) {
+        !isLocalGalleryMode) {
       viewChildren.add(const UnSyncedIcon());
     }
 
@@ -313,8 +305,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_errorLoadingLocalThumbnail &&
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
-      final cachedSmallThumbnail =
-          ThumbnailInMemoryLruCache.get(widget.file, _localCacheThumbnailSize);
+      final cachedSmallThumbnail = ThumbnailInMemoryLruCache.get(
+        widget.file,
+        _localCacheThumbnailSize,
+      );
       if (cachedSmallThumbnail != null) {
         final imageProvider = Image.memory(
           cachedSmallThumbnail,
@@ -432,15 +426,23 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future<Uint8List?> _getLocalThumbnailUsingHeapPriorityQueue() async {
+    final localID = widget.file.localID;
+    if (localID == null) {
+      _logger.info(
+        "Skipping local thumbnail load because localID is unavailable for ${widget.file.tag}",
+      );
+      return null;
+    }
+
     final completer = Completer<Uint8List?>();
 
     late TaskQueue<String> relevantTaskQueue;
     if (widget.thumbnailSize == thumbnailLargeSize) {
       relevantTaskQueue = largeLocalThumbnailQueue;
-      _localThumbnailQueueTaskId = [widget.file.localID!, "-large"].join();
+      _localThumbnailQueueTaskId = [localID, "-large"].join();
     } else if (widget.thumbnailSize == thumbnailSmallSize) {
       relevantTaskQueue = smallLocalThumbnailQueue;
-      _localThumbnailQueueTaskId = [widget.file.localID!, "-small"].join();
+      _localThumbnailQueueTaskId = [localID, "-small"].join();
     } else {
       assert(false, "Invalid thumbnail size ${widget.thumbnailSize}");
       _logger.severe(
@@ -525,9 +527,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = imageProvider;
         _hasLoadedThumbnail = true;
       });
+      precacheImage(imageProvider, context);
     }
-
-    precacheImage(imageProvider, context);
   }
 
   void _reset() {

@@ -215,7 +215,7 @@ func (c *StripeController) findHandlerForEvent(event stripe.Event) func(event st
 func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var session stripe.CheckoutSession
 	json.Unmarshal(event.Data.Raw, &session)
-	if session.ClientReferenceID != "" { // via payments.ente.io, where we inserted the userID
+	if session.ClientReferenceID != "" { // via payments.ente.com, where we inserted the userID
 		userID, _ := strconv.ParseInt(session.ClientReferenceID, 10, 64)
 		newSubscription, err := c.GetVerifiedSubscription(userID, session.ID)
 		if err != nil {
@@ -231,6 +231,11 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 		}
 		if currentSubscription.ExpiryTime >= newSubscription.ExpiryTime &&
 			currentSubscription.ProductID != ente.FreePlanProductID {
+			if currentSubscription.PaymentProvider != newSubscription.PaymentProvider ||
+				currentSubscription.OriginalTransactionID != newSubscription.OriginalTransactionID ||
+				currentSubscription.ProductID != newSubscription.ProductID {
+				c.notifySkippedPaidStripeSubscriptionReplacement(userID, currentSubscription, newSubscription)
+			}
 			log.Warn("Webhook is reporting an outdated purchase that was already verified stripeSubscription:", stripeSubscription.ID)
 			return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 		}
@@ -328,6 +333,9 @@ func (c *StripeController) handleInvoicePaid(event stripe.Event, country ente.St
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// See: Ignore webhooks received before user has been created
+			if invoice.BillingReason != stripe.InvoiceBillingReasonSubscriptionCreate {
+				c.notifyIgnoredPaidStripeWebhook(event.Type, country, stripeSubscriptionID, invoice.Customer.ID)
+			}
 			log.Warn("Webhook is reporting an event for un-verified subscription stripeSubscriptionID:", stripeSubscriptionID)
 			return ente.StripeEventLog{}, nil
 		}
@@ -589,6 +597,33 @@ func (c *StripeController) sendAccountOnHoldEmail(userID int64) error {
 			"PaymentProvider": "Stripe",
 		}, nil)
 	return err
+}
+
+func (c *StripeController) notifyIgnoredPaidStripeWebhook(eventType string, country ente.StripeAccountCountry, stripeSubscriptionID string, customerID string) {
+	message := fmt.Sprintf(
+		"Paid Stripe webhook `%s` for unknown subscription `%s` on `%s` account (customer `%s`) was acknowledged with 2xx and no subscription row was updated.",
+		eventType,
+		stripeSubscriptionID,
+		country,
+		customerID,
+	)
+	c.DiscordController.NotifyThrottled(message, 30*time.Minute)
+}
+
+func (c *StripeController) notifySkippedPaidStripeSubscriptionReplacement(userID int64, currentSubscription ente.Subscription, newSubscription ente.Subscription) {
+	message := fmt.Sprintf(
+		"Paid Stripe checkout for user `%d` was acknowledged with 2xx but subscription replacement was skipped. Current: provider=`%s` txn=`%s` product=`%s` expiry=`%d`; incoming: provider=`%s` txn=`%s` product=`%s` expiry=`%d`.",
+		userID,
+		currentSubscription.PaymentProvider,
+		currentSubscription.OriginalTransactionID,
+		currentSubscription.ProductID,
+		currentSubscription.ExpiryTime,
+		newSubscription.PaymentProvider,
+		newSubscription.OriginalTransactionID,
+		newSubscription.ProductID,
+		newSubscription.ExpiryTime,
+	)
+	c.DiscordController.NotifyThrottled(message, 30*time.Minute)
 }
 
 func (c *StripeController) getStripeSubscriptionFromSession(userID int64, checkoutSessionID string) (stripe.Subscription, error) {

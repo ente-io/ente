@@ -15,7 +15,7 @@ import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -94,14 +94,14 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       centerTitle: false,
       title: Text(
         _appBarTitle!,
-        style:
-            Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
+        style: Theme.of(
+          context,
+        ).textTheme.headlineSmall!.copyWith(fontSize: 16),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
       actions: _getDefaultActions(context),
-      scrolledUnderElevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.15),
+      scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
     );
   }
@@ -110,27 +110,25 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
     if (widget.selectedFiles.files.isNotEmpty ||
-        isOfflineMode ||
+        isLocalGalleryMode ||
         !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
 
     final List<EntePopupMenuItem<ClusterPopupAction>> items = [];
 
-    items.addAll(
-      [
-        EntePopupMenuItem(
-          AppLocalizations.of(context).ignorePerson,
-          value: ClusterPopupAction.ignore,
-          icon: Icons.hide_image_outlined,
-        ),
-        EntePopupMenuItem(
-          AppLocalizations.of(context).mixedGrouping,
-          value: ClusterPopupAction.breakupCluster,
-          icon: Icons.analytics_outlined,
-        ),
-      ],
-    );
+    items.addAll([
+      EntePopupMenuItem(
+        AppLocalizations.of(context).ignorePerson,
+        value: ClusterPopupAction.ignore,
+        icon: Icons.hide_image_outlined,
+      ),
+      EntePopupMenuItem(
+        AppLocalizations.of(context).mixedGrouping,
+        value: ClusterPopupAction.breakupCluster,
+        icon: Icons.analytics_outlined,
+      ),
+    ]);
     if (kDebugMode) {
       items.add(
         EntePopupMenuItem(
@@ -209,8 +207,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
 
           // Update to delete the old clusters and save the new clusters
           await mlDataDB.deleteClusterSummary(widget.clusterID);
-          await MLDataDB.instance
-              .clusterSummaryUpdate(breakupResult.newClusterSummaries);
+          await MLDataDB.instance.clusterSummaryUpdate(
+            breakupResult.newClusterSummaries,
+          );
           await mlDataDB.updateFaceIdToClusterId(newFaceIdToClusterID);
 
           // Find the biggest cluster
@@ -228,13 +227,12 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               .map((e) => getFileIdFromFaceId<int>(e))
               .toList();
           biggestClusterFiles = await FilesDB.instance
-              .getFileIDToFileFromIDs(
-                biggestClusterFileIDs,
-              )
+              .getFileIDToFileFromIDs(biggestClusterFileIDs)
               .then((mapping) => mapping.values.toList());
           // Sort the files to prevent issues with the order of the files in gallery
-          biggestClusterFiles
-              .sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+          biggestClusterFiles.sort(
+            (a, b) => b.creationTime!.compareTo(a.creationTime!),
+          );
 
           userConfirmed = true;
         } catch (e, s) {
@@ -250,10 +248,8 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       // Push the new cluster page
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ClusterPage(
-            biggestClusterFiles,
-            clusterID: biggestClusterID,
-          ),
+          builder: (context) =>
+              ClusterPage(biggestClusterFiles, clusterID: biggestClusterID),
         ),
       );
       Bus.instance.fire(PeopleChangedEvent());
@@ -261,8 +257,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   }
 
   Future<void> _breakUpClusterDebug(BuildContext context) async {
-    final breakupResult =
-        await ClusterFeedbackService.instance.breakUpCluster(widget.clusterID);
+    final breakupResult = await ClusterFeedbackService.instance.breakUpCluster(
+      widget.clusterID,
+    );
 
     final Map<String, List<String>> newClusterIDToFaceIDs =
         breakupResult.newClusterIdToFaceIds;

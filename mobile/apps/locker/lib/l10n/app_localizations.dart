@@ -270,6 +270,48 @@ abstract class AppLocalizations {
   /// **'Downloading... {percentage}%'**
   String downloadingProgress(int percentage);
 
+  /// No description provided for @keepOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep offline'**
+  String get keepOffline;
+
+  /// No description provided for @cloudOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove offline'**
+  String get cloudOnly;
+
+  /// No description provided for @savingOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving offline...'**
+  String get savingOffline;
+
+  /// Success message when files are saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file saved offline} other{{count} files saved offline}}'**
+  String filesAvailableOffline(int count);
+
+  /// Partial success message for offline save
+  ///
+  /// In en, this message translates to:
+  /// **'{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}'**
+  String filesAvailableOfflinePartial(int successCount, int failureCount);
+
+  /// Failure message when files could not be saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}'**
+  String failedToSaveFilesOffline(int count);
+
+  /// Success message when offline copies are removed
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}'**
+  String filesRemovedFromOffline(int count);
+
   /// No description provided for @downloadFailed.
   ///
   /// In en, this message translates to:
@@ -299,6 +341,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open item: {error}'**
   String couldNotOpenFile(String error);
+
+  /// Message shown when Android cannot find an app to open or preview a file
+  ///
+  /// In en, this message translates to:
+  /// **'No app is available to preview this file. You can download it and open it with another app.'**
+  String get noAppToOpenFileDownloadInstead;
 
   /// Time format for minutes ago
   ///

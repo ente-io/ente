@@ -29,6 +29,8 @@ pub enum Error {
     /// Server returned an HTTP error status.
     #[error("HTTP {status}: {message}")]
     Http {
+        /// Optional structured server error code.
+        code: Option<String>,
         /// Error message or response body.
         message: String,
         /// HTTP status code.
@@ -45,6 +47,30 @@ pub enum Error {
 }
 
 impl Error {
+    /// Return the HTTP status code if this is an HTTP error.
+    pub fn status_code(&self) -> Option<u16> {
+        match self {
+            Error::Http { status, .. } => Some(*status),
+            _ => None,
+        }
+    }
+
+    /// Return the structured server error code when available.
+    pub fn api_code(&self) -> Option<&str> {
+        match self {
+            Error::Http { code, .. } => code.as_deref(),
+            _ => None,
+        }
+    }
+
+    /// Return the server message when available.
+    pub fn api_message(&self) -> Option<&str> {
+        match self {
+            Error::Http { message, .. } => Some(message.as_str()),
+            _ => None,
+        }
+    }
+
     fn with_request_context(self, request_context: &str) -> Self {
         fn append_context(message: String, request_context: &str) -> String {
             if message.contains("[request:") {
@@ -56,8 +82,13 @@ impl Error {
 
         match self {
             Error::Network(message) => Error::Network(append_context(message, request_context)),
-            Error::Http { status, message } => Error::Http {
+            Error::Http {
                 status,
+                code,
+                message,
+            } => Error::Http {
+                status,
+                code,
                 message: append_context(message, request_context),
             },
             Error::Parse(message) => Error::Parse(append_context(message, request_context)),
@@ -74,12 +105,32 @@ impl From<reqwest::Error> for Error {
         if let Some(status) = e.status() {
             Error::Http {
                 status: status.as_u16(),
+                code: None,
                 message,
             }
         } else {
             Error::Network(message)
         }
     }
+}
+
+#[derive(Deserialize)]
+struct ApiErrorBody {
+    code: Option<String>,
+    message: Option<String>,
+}
+
+fn parse_api_error_body(body: &str) -> (Option<String>, String) {
+    if let Ok(error_body) = serde_json::from_str::<ApiErrorBody>(body) {
+        let message = error_body
+            .message
+            .clone()
+            .or_else(|| error_body.code.clone())
+            .unwrap_or_else(|| body.to_string());
+        return (error_body.code, message);
+    }
+
+    (None, body.to_string())
 }
 
 impl From<serde_json::Error> for Error {
@@ -631,6 +682,7 @@ impl HttpClient {
 
     fn build_public_headers(&self) -> Result<HeaderMap, Error> {
         let mut headers = HeaderMap::new();
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(user_agent) = &self.user_agent {
             let value =
                 HeaderValue::from_str(user_agent).map_err(|e| Error::Parse(e.to_string()))?;
@@ -749,11 +801,16 @@ fn resolve_redirect(current_url: &Url, location: &HeaderValue) -> Result<Url, Er
 async fn parse_text_response(response: Response) -> Result<String, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     response.text().await.map_err(Into::into)
 }
@@ -766,11 +823,16 @@ async fn parse_json_response<T: DeserializeOwned>(response: Response) -> Result<
 async fn parse_empty_response(response: Response) -> Result<(), Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     Ok(())
 }
@@ -778,11 +840,16 @@ async fn parse_empty_response(response: Response) -> Result<(), Error> {
 async fn parse_bytes_response(response: Response) -> Result<Vec<u8>, Error> {
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let message = response
+        let body = response
             .text()
             .await
             .unwrap_or_else(|_| "failed to read error body".to_string());
-        return Err(Error::Http { status, message });
+        let (code, message) = parse_api_error_body(&body);
+        return Err(Error::Http {
+            status,
+            code,
+            message,
+        });
     }
     response
         .bytes()
@@ -818,8 +885,8 @@ mod tests {
 
     #[test]
     fn test_client_creation() {
-        let client = test_client("https://api.ente.io/");
-        assert_eq!(client.base_url, "https://api.ente.io");
+        let client = test_client("https://api.ente.com/");
+        assert_eq!(client.base_url, "https://api.ente.com");
     }
 
     #[test]
@@ -830,17 +897,32 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_api_error_body_prefers_message_and_preserves_code() {
+        let (code, message) =
+            parse_api_error_body(r#"{"code":"TOO_MANY_WRONG_ATTEMPTS","message":"wait"}"#);
+        assert_eq!(code.as_deref(), Some("TOO_MANY_WRONG_ATTEMPTS"));
+        assert_eq!(message, "wait");
+    }
+
+    #[test]
+    fn test_parse_api_error_body_falls_back_to_code_when_message_missing() {
+        let (code, message) = parse_api_error_body(r#"{"code":"SESSION_EXPIRED"}"#);
+        assert_eq!(code.as_deref(), Some("SESSION_EXPIRED"));
+        assert_eq!(message, "SESSION_EXPIRED");
+    }
+
+    #[test]
     fn test_request_url_uses_string_join() {
-        let client = test_client("https://api.ente.io/v1");
+        let client = test_client("https://api.ente.com/v1");
         let url = client.request_url("/ping").unwrap();
-        assert_eq!(url, "https://api.ente.io/v1/ping");
+        assert_eq!(url, "https://api.ente.com/v1/ping");
     }
 
     #[test]
     fn test_request_url_preserves_query_and_special_bytes() {
-        let client = test_client("https://api.ente.io/v1");
+        let client = test_client("https://api.ente.com/v1");
         let url = client.request_url("/%2e%2e%5cadmin?fresh=true").unwrap();
-        assert_eq!(url, "https://api.ente.io/v1/%2e%2e%5cadmin?fresh=true");
+        assert_eq!(url, "https://api.ente.com/v1/%2e%2e%5cadmin?fresh=true");
     }
 
     #[test]
@@ -853,7 +935,7 @@ mod tests {
 
     #[test]
     fn test_request_url_rejects_missing_leading_slash() {
-        let client = test_client("https://api.ente.io");
+        let client = test_client("https://api.ente.com");
         let err = client.request_url("ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
@@ -867,21 +949,21 @@ mod tests {
 
     #[test]
     fn test_request_url_rejects_base_url_with_query() {
-        let client = test_client("https://api.ente.io/v1?stale=true");
+        let client = test_client("https://api.ente.com/v1?stale=true");
         let err = client.request_url("/ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
     fn test_request_url_rejects_base_url_with_fragment() {
-        let client = test_client("https://api.ente.io/v1#old");
+        let client = test_client("https://api.ente.com/v1#old");
         let err = client.request_url("/ping").unwrap_err();
         assert!(matches!(err, Error::InvalidUrl(_)));
     }
 
     #[test]
     fn test_set_auth_token_replaces_token() {
-        let client = test_client("https://api.ente.io");
+        let client = test_client("https://api.ente.com");
         client.set_auth_token(Some("token-1".to_string()));
         assert_eq!(
             client

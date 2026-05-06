@@ -8,10 +8,10 @@ import 'package:ente_auth/models/billing_plan.dart';
 import 'package:ente_network/network.dart';
 import 'package:logging/logging.dart';
 
-const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
+const kWebPaymentRedirectUrl = "https://payments.ente.com/frameRedirect";
 const kWebPaymentBaseEndpoint = String.fromEnvironment(
   "web-payment",
-  defaultValue: "https://payments.ente.io",
+  defaultValue: "https://payments.ente.com",
 );
 
 const kFamilyPlanManagementUrl = String.fromEnvironment(

@@ -12,7 +12,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/search/hierarchical/magic_filter.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -68,11 +68,12 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     files = widget.files;
     _enableGrouping = widget.enableGrouping;
     fileIDToRelevantPos = getFileIDToRelevantPos();
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       _loadLocalIntIds();
     }
-    _filesUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
+      event,
+    ) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
@@ -84,14 +85,13 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       }
     });
 
-    _magicSortChangeEvent =
-        Bus.instance.on<MagicSortChangeEvent>().listen((event) {
+    _magicSortChangeEvent = Bus.instance.on<MagicSortChangeEvent>().listen((
+      event,
+    ) {
       if (event.sortType == MagicSortType.mostRelevant) {
         if (_enableGrouping) {
           if (fileIDToRelevantPos.isNotEmpty) {
-            files.sort(
-              (a, b) => _posForFile(a) - _posForFile(b),
-            );
+            files.sort((a, b) => _posForFile(a) - _posForFile(b));
           } else {
             _logger.warning(
               "fileIdToPosMap is empty, cannot sort by most relevant.",
@@ -149,9 +149,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       }
       return map;
     } else {
-      _logger.warning(
-        "fileIdToPosMap is empty, cannot sort by most relevant.",
-      );
+      _logger.warning("fileIdToPosMap is empty, cannot sort by most relevant.");
       return <int, int>{};
     }
   }
@@ -163,7 +161,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   }
 
   int? _fileIdForSort(EnteFile file) {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       final localId = file.localID;
       if (localId == null || localId.isEmpty) return null;
       return _localIdToIntId[localId];
@@ -191,10 +189,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
             )
             .toList();
         return Future.value(
-          FileLoadResult(
-            result,
-            result.length < files.length,
-          ),
+          FileLoadResult(result, result.length < files.length),
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -237,9 +232,9 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
                   Builder(
                     builder: (context) {
                       return ValueListenableBuilder(
-                        valueListenable: InheritedSearchFilterData.of(context)
-                            .searchFilterDataProvider!
-                            .isSearchingNotifier,
+                        valueListenable: InheritedSearchFilterData.of(
+                          context,
+                        ).searchFilterDataProvider!.isSearchingNotifier,
                         builder: (context, value, _) {
                           return value
                               ? HierarchicalSearchGallery(
@@ -285,9 +280,6 @@ class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
     with BoundaryReporter {
   @override
   Widget build(BuildContext context) {
-    return boundaryWidget(
-      position: BoundaryPosition.top,
-      child: widget.child,
-    );
+    return boundaryWidget(position: BoundaryPosition.top, child: widget.child);
   }
 }

@@ -82,25 +82,25 @@ http:
 
 # Specify the base endpoints for various apps
 apps:
-    # Default is https://albums.ente.io
+    # Default is https://albums.ente.com
     #
     # If you're running a self hosted instance and wish to serve public links for photos,
     # set this to the URL where your albums web app is running.
     public-albums:
-    # Default is https://embed.ente.io
+    # Default is https://embed.ente.com
     # For self-hosted instances, set this to the URL where your embed app is running.
     embed-albums:
-    # Default is https://share.ente.io
+    # Default is https://share.ente.com
     #
     # If you're running a self-hosted instance and wish to serve public links for locker,
     # set this to the URL where your share web app is running.
     public-locker:
-    # Default is https://paste.ente.io
+    # Default is https://paste.ente.com
     #
     # If you're running a self-hosted instance and wish to serve Ente Paste,
     # set this to the URL where your paste web app is running.
     public-paste:
-    # Default is https://cast.ente.io
+    # Default is https://cast.ente.com
     cast:
     # Default is https://accounts.ente.io
     # Set this to the URL where your accounts web app is running, primarily used for
@@ -108,7 +108,7 @@ apps:
     accounts:
     # Default is https://family.ente.io
     family:
-    # Default is https://memories.ente.io
+    # Default is https://memories.ente.com
     #
     # If you're running a self-hosted instance and wish to serve public memory shares,
     # set this to the URL where your memories web app is running.

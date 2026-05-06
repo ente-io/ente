@@ -121,11 +121,13 @@ Logs help us diagnose issues but contain no personal data.
 
 ### Can I use Locker offline? {#locker-offline}
 
-Locker requires an internet connection to function. You cannot view or create
-items while offline.
+Yes, for items you choose to keep locally on your device.
 
-If you need access to critical information during travel or in areas with poor
-connectivity, consider keeping physical copies of essential documents.
+Locker now supports keeping specific items available offline so you can open
+them without an internet connection after they have been downloaded.
+
+You still need internet access for syncing changes, fetching items that are not
+already stored locally, and creating or refreshing shared links.
 
 ## Related Features
 

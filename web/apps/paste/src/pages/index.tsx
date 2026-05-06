@@ -38,11 +38,11 @@ const Page = () => {
                 />
                 <meta
                     property="og:image"
-                    content="https://paste.ente.io/images/metaimage.png"
+                    content="https://paste.ente.com/images/metaimage.png"
                 />
                 <meta
                     name="twitter:image"
-                    content="https://paste.ente.io/images/metaimage.png"
+                    content="https://paste.ente.com/images/metaimage.png"
                 />
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link

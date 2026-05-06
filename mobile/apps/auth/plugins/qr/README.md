@@ -1,4 +1,4 @@
-# ente_qr
+# ente_auth_qr
 
 A Flutter plugin for scanning QR codes from image files. This plugin provides a simple interface to scan QR codes from images on both Android and iOS platforms.
 
@@ -27,8 +27,8 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  ente_qr:
-    path: path/to/ente_qr
+  ente_auth_qr:
+    path: path/to/ente_auth_qr
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ dependencies:
 ### Basic Usage
 
 ```dart
-import 'package:ente_qr/ente_qr.dart';
+import 'package:ente_auth_qr/ente_qr.dart';
 
 final qr = EnteQr();
 
@@ -54,7 +54,7 @@ if (result.success) {
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:ente_qr/ente_qr.dart';
+import 'package:ente_auth_qr/ente_qr.dart';
 import 'package:file_picker/file_picker.dart';
 
 class QrScannerPage extends StatefulWidget {

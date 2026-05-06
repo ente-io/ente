@@ -7,12 +7,12 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  event_bus: ^2.0.1
+  event_bus: 2.0.1
   flutter:
     sdk: flutter
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: 5.0.0
   flutter_test:
     sdk: flutter
 

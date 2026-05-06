@@ -7,6 +7,8 @@
 export default {
     async fetch(request: Request) {
         switch (request.method) {
+            case "OPTIONS":
+                return handleOPTIONS();
             case "POST":
                 return handlePOST(request);
             default:
@@ -15,6 +17,16 @@ export default {
         }
     },
 } satisfies ExportedHandler;
+
+const handleOPTIONS = () =>
+    new Response(null, {
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Max-Age": "86400",
+        },
+    });
 
 const handlePOST = async (request: Request) => {
     // {job="worker"} |= `[csp-report]` | json log="logs[0]" | keep log

@@ -29,7 +29,7 @@ const (
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
 	storageWarningOneDayInMicroseconds         = 24 * time.MicroSecondsInOneHour
 	storageWarningBufferedCadenceExtraGrace    = 2 * storageWarningOneDayInMicroseconds
-	storageWarningRolloutPercentage            = 30
+	storageWarningRolloutPercentage            = 60
 	storageWarningRolloutNonce                 = "storage-warning-v1"
 
 	storageWarningActiveOverageNotificationGroup = "storage_warning_active_overage"
@@ -743,7 +743,9 @@ func storageWarningStageKey(snapshot storageWarningSnapshot) string {
 }
 
 func isEnteDomainStorageWarningAccount(email string) bool {
-	return strings.HasSuffix(emailUtil.NormalizeEmail(email), "@ente.io")
+	normalizedEmail := emailUtil.NormalizeEmail(email)
+	return strings.HasSuffix(normalizedEmail, "@ente.io") ||
+		strings.HasSuffix(normalizedEmail, "@ente.com")
 }
 
 func isInStorageWarningRollout(userID int64, email string) bool {

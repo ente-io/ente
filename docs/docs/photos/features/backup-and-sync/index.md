@@ -89,7 +89,7 @@ Learn more about how [Duplicate detection](/photos/features/backup-and-sync/dupl
 
 ## Backup only new photos {#backup-only-new-photos}
 
-By default, Ente backs up your entire photo library from selected folders. If you only want to back up photos going forward — without uploading your existing library — you can enable **Backup only new photos**.
+By default, Ente backs up your entire photo library from selected folders. If you only want to back up photos going forward - without uploading your existing library - you can enable **Backup only new photos**.
 
 This option is available in two places:
 
@@ -100,7 +100,7 @@ This option is available in two places:
 
 When you select this option during onboarding, Ente backs up photos from the **last 7 days** onward. This ensures you have some recent photos available right away rather than starting with an empty library.
 
-When you enable the toggle in settings after onboarding, Ente uses the **current moment** as the cutoff — only photos created from that point forward will be backed up.
+When you enable the toggle in settings after onboarding, Ente uses the **current moment** as the cutoff - only photos created from that point forward will be backed up.
 
 In both cases, photos older than the cutoff date on your device will not be uploaded.
 

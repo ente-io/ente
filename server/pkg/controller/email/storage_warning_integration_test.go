@@ -28,7 +28,7 @@ func TestSendStorageWarningMailsActiveOverageIntegration(t *testing.T) {
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       storageWarningIntegrationTestUserID,
-		Email:        "active-overage@ente.io",
+		Email:        "active-overage@ente.com",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 36*storageWarningIntegrationTestGiB)
@@ -58,7 +58,7 @@ func TestSendStorageWarningMailsExpiredIntegration(t *testing.T) {
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       storageWarningIntegrationTestUserID,
-		Email:        "expired-subscription@ente.io",
+		Email:        "expired-subscription@ente.com",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 26*storageWarningIntegrationTestGiB)
@@ -88,7 +88,7 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillUsesBufferedRecover
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       storageWarningIntegrationTestUserID,
-		Email:        "expired-backfill@ente.io",
+		Email:        "expired-backfill@ente.com",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 26*storageWarningIntegrationTestGiB)
@@ -134,7 +134,7 @@ func TestBuildIndividualStorageWarningSnapshotExpiredBackfillContinuesBufferedCy
 	cycleStart := anchorNow - (16 * 24 * timeutil.MicroSecondsInOneHour)
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       storageWarningIntegrationTestUserID,
-		Email:        "expired-buffered-progress@ente.io",
+		Email:        "expired-buffered-progress@ente.com",
 		CreationTime: anchorNow - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 26*storageWarningIntegrationTestGiB)
@@ -266,7 +266,7 @@ func setupExpiredBackfillWithOld0dAnd30dHistory(t *testing.T, db *sql.DB, subscr
 
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       storageWarningIntegrationTestUserID,
-		Email:        "expired-old-ladder@ente.io",
+		Email:        "expired-old-ladder@ente.com",
 		CreationTime: firstSendAt - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 26*storageWarningIntegrationTestGiB)

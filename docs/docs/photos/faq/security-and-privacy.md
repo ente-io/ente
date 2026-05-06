@@ -167,7 +167,7 @@ Yes. You can protect the Ente Photos app with an additional lock screen.
 - Configure **Auto lock** to lock the app automatically after a chosen delay
 - Enable **Hide content** in the mobile app to hide app previews in the app switcher
 
-Open `Settings > Security > App lock` on mobile, or `Settings > Account > App lock` on desktop/web.
+Open `Settings > Security > App lock` on mobile, or `Settings > Preferences > App lock` on desktop.
 
 Learn more in the [App lock guide](/photos/features/account/app-lock).
 

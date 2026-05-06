@@ -119,6 +119,12 @@ After enabling, the app will download and index your photos locally. This is fas
 
 Ente automatically creates collections of photos from past years on the same date, helping you rediscover memories.
 
+### Memory Lane
+
+Memory Lane creates a timeline for a person using photos of them from different years. When a person's timeline is ready, Ente shows a **Memory lane** banner on their page so you can open it and, on supported platforms, share it as a public link.
+
+**Learn more:** [Memory Lane](/photos/features/search-and-discovery/memory-lane)
+
 ### People section
 
 Browse all recognized faces and persons in your library. Name persons to organize and find photos of specific people quickly.
@@ -155,11 +161,11 @@ Learn more in [Albums and Organization FAQ](/photos/faq/albums-and-organization#
 
 ### Platform-specific features
 
-- **Web (web.ente.io)**: Basic search (date, file name, description, album) - ML features not available
+- **Web (photos.ente.com)**: Basic search (date, file name, description, album) - ML features not available
 - **Mobile apps**: All search features including ML (face recognition and magic search)
 - **Desktop apps**: All search features including ML (face recognition and magic search)
 
-> **Note**: Machine learning features (face recognition and magic search) only work on mobile and desktop apps, not on web.ente.io.
+> **Note**: Machine learning features (face recognition and magic search) only work on mobile and desktop apps, not on photos.ente.com.
 
 ## Privacy and Security
 
@@ -186,5 +192,6 @@ Learn more in [Security and Privacy FAQ](/photos/faq/security-and-privacy).
 - [Machine learning overview](/photos/features/search-and-discovery/machine-learning)
 - [Face recognition guide](/photos/features/search-and-discovery/face-recognition)
 - [Magic search guide](/photos/features/search-and-discovery/magic-search)
+- [Memory Lane](/photos/features/search-and-discovery/memory-lane)
 - [Map and location features](/photos/features/search-and-discovery/map-and-location)
 - [Search and Discovery FAQ](/photos/faq/search-and-discovery)

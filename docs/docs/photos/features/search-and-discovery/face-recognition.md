@@ -31,7 +31,7 @@ Open `Settings > Machine learning`, enable **Machine learning** and/or **Local i
 
 Open `Settings > Preferences > Machine learning`, enable **Machine learning** and/or **Local indexing**, and monitor indexing progress.
 
-> **Note**: Face recognition is not available on web.ente.io. You must use the mobile or desktop app.
+> **Note**: Face recognition is not available on photos.ente.com. You must use the mobile or desktop app.
 
 ### Initial Indexing
 
@@ -222,7 +222,7 @@ If you find a mixed grouping with several different babies:
 
 **Current limitation**: Face grouping management (editing clusters, removing incorrect faces) must be done on the mobile app. Desktop apps can view and name persons but cannot modify the groupings themselves.
 
-### Web (web.ente.io)
+### Web (photos.ente.com)
 
 - ❌ Face recognition not available
 - Must use mobile or desktop apps

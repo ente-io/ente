@@ -6,7 +6,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -92,12 +92,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
               : MemoryImage(snapshot.data!);
           return Stack(
             fit: StackFit.expand,
-            children: [
-              Image(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
-            ],
+            children: [Image(image: imageProvider, fit: BoxFit.cover)],
           );
         } else {
           if (snapshot.hasError) {
@@ -109,9 +104,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
           }
           return widget.thumbnailFallback
               ? ThumbnailWidget(widget.file)
-              : EnteLoadingWidget(
-                  color: getEnteColorScheme(context).fillMuted,
-                );
+              : EnteLoadingWidget(color: getEnteColorScheme(context).fillMuted);
         }
       },
     );
@@ -122,17 +115,19 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
       return widget.faceCrop;
     }
     try {
-      final mlDataDB =
-          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB = isLocalGalleryMode
+          ? MLDataDB.localGalleryInstance
+          : MLDataDB.instance;
       int? recentFileID;
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final localId = widget.file.localID;
         if (localId == null || localId.isEmpty) {
           _logger.severe("Missing local ID for face crop generation");
           return null;
         }
-        recentFileID =
-            await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+        recentFileID = await OfflineFilesDB.instance.getOrCreateLocalIntId(
+          localId,
+        );
       } else {
         recentFileID = widget.file.uploadedFileID;
       }

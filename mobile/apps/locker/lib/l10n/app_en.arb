@@ -29,6 +29,53 @@
       }
     }
   },
+  "keepOffline": "Keep offline",
+  "cloudOnly": "Remove offline",
+  "savingOffline": "Saving offline...",
+  "filesAvailableOffline": "{count, plural, =1{1 file saved offline} other{{count} files saved offline}}",
+  "@filesAvailableOffline": {
+    "description": "Success message when files are saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "filesAvailableOfflinePartial": "{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}",
+  "@filesAvailableOfflinePartial": {
+    "description": "Partial success message for offline save",
+    "placeholders": {
+      "successCount": {
+        "type": "int",
+        "example": "2"
+      },
+      "failureCount": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "failedToSaveFilesOffline": "{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}",
+  "@failedToSaveFilesOffline": {
+    "description": "Failure message when files could not be saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "filesRemovedFromOffline": "{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}",
+  "@filesRemovedFromOffline": {
+    "description": "Success message when offline copies are removed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "downloadFailed": "Download failed",
   "failedToDownloadOrDecrypt": "Failed to download item",
   "errorOpeningFile": "Error opening item",
@@ -51,6 +98,10 @@
         "example": "Permission denied"
       }
     }
+  },
+  "noAppToOpenFileDownloadInstead": "No app is available to preview this file. You can download it and open it with another app.",
+  "@noAppToOpenFileDownloadInstead": {
+    "description": "Message shown when Android cannot find an app to open or preview a file"
   },
   "minutesAgo": "{minutes}m ago",
   "@minutesAgo": {

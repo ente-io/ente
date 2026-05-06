@@ -919,6 +919,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 onRootClose={onCloseSidebar}
                 pendingAction={pendingPreferencesAction}
                 onActionHandled={onPreferencesActionHandled}
+                onAuthenticateUser={onAuthenticateUser}
             />
             <FreeUpSpace
                 {...freeUpSpaceVisibilityProps}
@@ -1144,12 +1145,6 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
-                {isDesktop && (
-                    <DesktopAppLockSettings
-                        onAuthenticateUser={onAuthenticateUser}
-                        onRootClose={onRootClose}
-                    />
-                )}
                 <RowButtonGroup>
                     <RowButton
                         label={t("change_password")}
@@ -1196,7 +1191,8 @@ const Account: React.FC<AccountProps> = ({
 };
 
 const DesktopAppLockSettings: React.FC<
-    Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
+    Pick<SidebarProps, "onAuthenticateUser"> &
+        Pick<NestedSidebarDrawerVisibilityProps, "onRootClose">
 > = ({ onAuthenticateUser, onRootClose }) => {
     const appLock = useAppLockSnapshot();
     const { show, props } = useModalVisibility();
@@ -1232,15 +1228,17 @@ const DesktopAppLockSettings: React.FC<
     );
 };
 
-type PreferencesProps = NestedSidebarDrawerVisibilityProps & {
-    pendingAction?: PreferencesAction;
-    onActionHandled?: (action?: PreferencesAction) => void;
-};
+type PreferencesProps = NestedSidebarDrawerVisibilityProps &
+    Pick<SidebarProps, "onAuthenticateUser"> & {
+        pendingAction?: PreferencesAction;
+        onActionHandled?: (action?: PreferencesAction) => void;
+    };
 
 const Preferences: React.FC<PreferencesProps> = ({
     open,
     onClose,
     onRootClose,
+    onAuthenticateUser,
     pendingAction,
     onActionHandled,
 }) => {
@@ -1334,6 +1332,12 @@ const Preferences: React.FC<PreferencesProps> = ({
                     label={t("advanced")}
                     onClick={showAdvancedSettings}
                 />
+                {isDesktop && (
+                    <DesktopAppLockSettings
+                        onAuthenticateUser={onAuthenticateUser}
+                        onRootClose={onRootClose}
+                    />
+                )}
                 {isHLSGenerationSupported && (
                     <RowButtonGroup>
                         <RowSwitch

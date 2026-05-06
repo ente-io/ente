@@ -9,10 +9,11 @@ import { useBaseContext } from "ente-base/context";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
+    isMuseumHTTPError,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import { isCustomAlbumsAppOrigin } from "ente-base/origins";
+import { apiOrigin, isCustomAlbumsAppOrigin } from "ente-base/origins";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { sortFiles } from "ente-gallery/utils/file";
@@ -28,7 +29,9 @@ import {
     savedPublicCollectionAccessTokenJWT,
     savedPublicCollectionByKey,
     savedPublicCollectionFiles,
+    savedPublicCollectionLinkDeviceToken,
     savePublicCollectionAccessTokenJWT,
+    savePublicCollectionLinkDeviceToken,
 } from "../services/public-albums-storage";
 import {
     pullCollection,
@@ -36,6 +39,10 @@ import {
     removePublicCollectionFileData,
     verifyPublicAlbumPassword,
 } from "../services/public-collection";
+
+const isDeviceLimitExceededError = async (e: unknown) =>
+    isHTTPErrorWithStatus(e, 429) ||
+    (await isMuseumHTTPError(e, 403, "LINK_DEVICE_LIMIT_EXCEEDED"));
 
 export default function EmbedGallery() {
     const { onGenericError } = useBaseContext();
@@ -59,10 +66,19 @@ export default function EmbedGallery() {
         showLoadingBar();
         setLoading(true);
         try {
-            const { collection } = await pullCollection(
-                accessToken,
+            const { collection, linkDeviceToken } = await pullCollection(
+                credentials.current!,
                 collectionKey.current!,
             );
+            if (linkDeviceToken) {
+                credentials.current!.linkDeviceToken = linkDeviceToken;
+                downloadManager.setPublicAlbumsCredentials(credentials.current);
+                savePublicCollectionLinkDeviceToken(
+                    await apiOrigin(),
+                    accessToken,
+                    linkDeviceToken,
+                );
+            }
 
             setPublicCollection(collection);
             const isPasswordProtected =
@@ -99,13 +115,14 @@ export default function EmbedGallery() {
                 }
             }
         } catch (e) {
+            const isDeviceLimitExceeded = await isDeviceLimitExceededError(e);
             if (
                 isHTTPErrorWithStatus(e, 401) ||
                 isHTTPErrorWithStatus(e, 410) ||
-                isHTTPErrorWithStatus(e, 429)
+                isDeviceLimitExceeded
             ) {
                 setErrorMessage(
-                    isHTTPErrorWithStatus(e, 429)
+                    isDeviceLimitExceeded
                         ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
@@ -144,7 +161,12 @@ export default function EmbedGallery() {
                 collectionKey.current = ck;
                 const collection = savedPublicCollectionByKey(ck);
                 const accessToken = t;
+                const currentAPIOrigin = await apiOrigin();
                 let accessTokenJWT: string | undefined;
+                const linkDeviceToken = savedPublicCollectionLinkDeviceToken(
+                    currentAPIOrigin,
+                    accessToken,
+                );
 
                 if (collection) {
                     setPublicCollection(collection);
@@ -161,7 +183,11 @@ export default function EmbedGallery() {
                         savedPublicCollectionAccessTokenJWT(accessToken);
                 }
 
-                credentials.current = { accessToken, accessTokenJWT };
+                credentials.current = {
+                    accessToken,
+                    accessTokenJWT,
+                    linkDeviceToken,
+                };
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
 
                 await publicAlbumsRemotePull();

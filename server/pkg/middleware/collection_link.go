@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"golang.org/x/net/idna"
@@ -64,9 +65,16 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 		userAgent := c.GetHeader("User-Agent")
 		var publicCollectionSummary ente.PublicCollectionSummary
 		var err error
+		reqPath := urlSanitizer(c)
+		shouldCheckDeviceLimit := shouldCheckCollectionLinkDeviceLimit(reqPath)
+		passwordValidated := false
 
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
-		cachedValue, cacheHit := m.Cache.Get(cacheKey)
+		var cachedValue interface{}
+		cacheHit := false
+		if !shouldCheckDeviceLimit {
+			cachedValue, cacheHit = m.Cache.Get(cacheKey)
+		}
 		if !cacheHit {
 			publicCollectionSummary, err = m.CollectionLinkRepo.GetCollectionSummaryByToken(c, accessToken)
 			if err != nil {
@@ -89,19 +97,37 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				publicCollectionSummary.DeviceLimit = public2.FreeUserDeviceLimit
 			}
 
-			// validate device limit
-			reached, err := m.isDeviceLimitReached(c, publicCollectionSummary, clientIP, userAgent)
-			if err != nil {
-				logrus.WithError(err).Error("failed to check device limit")
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+			if publicCollectionSummary.ValidTill > 0 && // expiry time is defined, 0 indicates no expiry
+				publicCollectionSummary.ValidTill < time.Microseconds() {
+				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "expired token"})
 				return
 			}
-			if reached {
-				c.AbortWithStatusJSON(
-					ente.ErrLinkDeviceLimitExceeded.HttpStatusCode,
-					&ente.ErrLinkDeviceLimitExceeded,
-				)
-				return
+			if publicCollectionSummary.PassHash != nil && *publicCollectionSummary.PassHash != "" {
+				if err = m.validatePassword(c, reqPath, publicCollectionSummary); err != nil {
+					logrus.WithError(err).Warn("password validation failed")
+					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err})
+					return
+				}
+				passwordValidated = true
+			}
+
+			if shouldCheckDeviceLimit {
+				linkDeviceToken, reached, limitErr := m.checkDeviceLimit(c, accessToken, publicCollectionSummary, clientIP, userAgent)
+				if limitErr != nil {
+					logrus.WithError(limitErr).Error("failed to check device limit")
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+					return
+				}
+				if reached {
+					c.AbortWithStatusJSON(
+						ente.ErrLinkDeviceLimitExceeded.HttpStatusCode,
+						&ente.ErrLinkDeviceLimitExceeded,
+					)
+					return
+				}
+				if linkDeviceToken != "" {
+					c.Set(auth.LinkDeviceTokenResponseKey, linkDeviceToken)
+				}
 			}
 		} else {
 			publicCollectionSummary = cachedValue.(ente.PublicCollectionSummary)
@@ -114,8 +140,7 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 		}
 
 		// checks password protected public collection
-		if publicCollectionSummary.PassHash != nil && *publicCollectionSummary.PassHash != "" {
-			reqPath := urlSanitizer(c)
+		if !passwordValidated && publicCollectionSummary.PassHash != nil && *publicCollectionSummary.PassHash != "" {
 			if err = m.validatePassword(c, reqPath, publicCollectionSummary); err != nil {
 				logrus.WithError(err).Warn("password validation failed")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err})
@@ -123,7 +148,7 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 			}
 		}
 
-		if !cacheHit {
+		if !cacheHit && !shouldCheckDeviceLimit {
 			m.Cache.Set(cacheKey, publicCollectionSummary, cache.DefaultExpiration)
 		}
 
@@ -152,6 +177,36 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 
 		c.Next()
 	}
+}
+
+func (m *CollectionLinkMiddleware) checkDeviceLimit(c *gin.Context, accessToken string,
+	collectionSummary ente.PublicCollectionSummary, ip string, ua string) (string, bool, error) {
+	linkID := strconv.FormatInt(collectionSummary.ID, 10)
+	linkDeviceToken := auth.GetLinkDeviceToken(c)
+	if linkDeviceToken != "" {
+		claim, err := public2.ValidateLinkDeviceToken(m.PublicCollectionCtrl.JwtSecret, linkDeviceToken, public2.LinkDeviceScopeCollection, linkID, accessToken)
+		if err == nil {
+			if claim.ExpiryTime-time.Microseconds() < public2.LinkDeviceTokenRefreshBefore {
+				token, _, tokenErr := public2.NewLinkDeviceToken(m.PublicCollectionCtrl.JwtSecret, public2.LinkDeviceScopeCollection, linkID, accessToken, collectionSummary.ValidTill)
+				return token, false, stacktrace.Propagate(tokenErr, "")
+			}
+			return "", false, nil
+		}
+	}
+	reached, err := m.isDeviceLimitReached(c, collectionSummary, ip, ua)
+	if err != nil || reached {
+		return "", reached, stacktrace.Propagate(err, "")
+	}
+	token, _, err := public2.NewLinkDeviceToken(m.PublicCollectionCtrl.JwtSecret, public2.LinkDeviceScopeCollection, linkID, accessToken, collectionSummary.ValidTill)
+	return token, false, stacktrace.Propagate(err, "")
+}
+
+func shouldCheckCollectionLinkDeviceLimit(reqPath string) bool {
+	// Device admission for public collections is intentionally tied to the two
+	// metadata endpoints used as the browser entry/refresh points. Other routes
+	// (download/upload/social) continue to use the already-admitted session.
+	return reqPath == "/public-collection/info" ||
+		reqPath == "/public-collection/diff"
 }
 
 // validateOwnersSubscription checks if the owner has an active subscription.
@@ -220,6 +275,9 @@ func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 // validatePassword will verify if the user is provided correct password for the public album
 func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
 	collectionSummary ente.PublicCollectionSummary) error {
+	// /public-collection/info is allowed before password unlock so clients can
+	// fetch the KDF parameters needed to verify the password. Device-limit
+	// admission is intentionally still applied to this public entrypoint.
 	if array.StringInList(reqPath, passwordWhiteListedURLs) {
 		return nil
 	}
@@ -232,10 +290,14 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 
 func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
+	embedAlbumsOrigin := viper.GetString("apps.embed-albums")
 
 	if origin == "" ||
 		origin == viper.GetString("apps.public-albums") ||
-		origin == viper.GetString("apps.embed-albums") ||
+		origin == embedAlbumsOrigin ||
+		// Keep old embedded iframes working after moving the default embed app
+		// origin to embed.ente.com. Custom embed origins should not inherit this.
+		(embedAlbumsOrigin == "https://embed.ente.com" && origin == "https://embed.ente.io") ||
 		origin == viper.GetString("apps.public-locker") ||
 		strings.HasPrefix(strings.ToLower(origin), "http://localhost:") {
 		return nil

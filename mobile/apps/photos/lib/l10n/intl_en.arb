@@ -513,6 +513,7 @@
   },
   "discover_identity": "Identity",
   "discover_screenshots": "Screenshots",
+  "discover_qr_codes": "QR Codes",
   "discover_receipts": "Receipts",
   "discover_notes": "Notes",
   "discover_memes": "Memes",
@@ -639,6 +640,7 @@
   "youveNoDuplicateFilesThatCanBeCleared": "You don't have any duplicate files that can be cleared",
   "success": "Success",
   "rateUs": "Rate us",
+  "changeLogReferralCta": "Give 10 GB, Get 10 GB",
   "remindToEmptyDeviceTrash": "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
   "youHaveSuccessfullyFreedUp": "You have successfully freed up {storageSaved}!",
   "@youHaveSuccessfullyFreedUp": {
@@ -1662,6 +1664,7 @@
   "successfullyUnhid": "Successfully unhid",
   "crashReporting": "Crash reporting",
   "resumableUploads": "Resumable uploads",
+  "fasterUploads": "Faster uploads",
   "addToHiddenAlbum": "Add to hidden album",
   "moveToHiddenAlbum": "Move to hidden album",
   "fileTypes": "File types",
@@ -2383,11 +2386,11 @@
   "spotlightOnThem": "Spotlight on {name}",
   "personIsAge": "{name} is {age}!",
   "personTurningAge": "{name} turning {age} soon",
-  "lastTimeWithThem": "Last time with {name}",
+  "throwbackWithThem": "Throwback with {name}",
   "unnamedPeopleSpotlight": "A familiar face",
   "unnamedPeopleYouAndThem": "You two",
   "unnamedPeopleDoingSomethingTogether": "Doing it together",
-  "unnamedPeopleLastTimeYouSawThem": "Last time together",
+  "unnamedPeopleThrowbackTogether": "Throwback together",
   "tripToLocation": "Trip to {location}",
   "tripInYear": "Trip in {year}",
   "lastYearsTrip": "Last year's trip",
@@ -2422,6 +2425,7 @@
   "addMemoriesWidgetPrompt": "Add a memories widget to your home screen to customize it here.",
   "addAlbumWidgetPrompt": "Add an album widget to your home screen to customize it here.",
   "addPeopleWidgetPrompt": "Add a people widget to your home screen to customize it here.",
+  "showTextOnWidget": "Show text on widget",
   "birthdayNotifications": "Birthday notifications",
   "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
   "happyBirthday": "Happy birthday! 🥳",
@@ -2455,6 +2459,7 @@
   "thisWeek": "This week",
   "lastWeek": "Last week",
   "thisMonth": "This month",
+  "lastMonth": "Last month",
   "thisYear": "This year",
   "groupBy": "Group by",
   "groupByDay": "Day",
@@ -2848,6 +2853,10 @@
   "@likedYourVideo": {
     "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
   },
+  "likedAVideo": "liked a video",
+  "@likedAVideo": {
+    "description": "Social action text shown after a person's name, for example 'John liked a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
   "commentedOnYourPhoto": "commented on your photo",
   "@commentedOnYourPhoto": {
     "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
@@ -3066,6 +3075,9 @@
   "moreThanJustAGallery": "More than just a gallery.",
   "encryptedBackupDescription": "Encrypted backup, smart search, shareable links, and seamless sync across all your devices.",
   "getStarted": "Get started",
+  "offlineHomeSignupBannerTitle": "Protect your memories forever",
+  "offlineHomeSignupBannerDescription": "Encrypted backups across 3 locations to keep your memories safe.",
+  "offlineHomeSignupBannerAction": "Back up now",
   "unlockSmartFeatures": "Unlock smart features",
   "enableOnDeviceMLDescription": "Enable on-device ML to search by faces, places, and more. Your photos never leave your device.",
   "offlineEnableSharingTitle": "Sharing starts here",

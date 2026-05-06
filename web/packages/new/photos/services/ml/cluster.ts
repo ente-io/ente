@@ -2,7 +2,7 @@ import { assertionFailed } from "ente-base/assert";
 import { newNonSecureID } from "ente-base/id-worker";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime } from "ente-media/file-metadata";
+import { fileCreationPhotoSortTime } from "ente-media/file-metadata";
 import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
@@ -203,8 +203,8 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
 }
 
 /**
- * Sort faces by the creation time of the file which contains them. The sorting
- * is in descending order, so the newest file is first.
+ * Sort faces by the local photo creation date of the file which contains them.
+ * The sorting is in descending order, so the newest file is first.
  *
  * Sorting faces temporally is meant as a heuristic for better clusters.
  */
@@ -213,25 +213,23 @@ const sortFacesNewestOnesFirst = (
     localFiles: EnteFile[],
 ) => {
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
-    const fileForFaceID = new Map(
-        faces.map(({ faceID }) => [
-            faceID,
-            localFileByID.get(fileIDFromFaceID(faceID)!),
-        ]),
-    );
-
     // In unexpected scenarios, we might run clustering without having the
     // corresponding EnteFile available locally. This shouldn't happen, so log
     // an warning, but meanwhile let the clustering proceed by assigning such
-    // files an arbitrary creationTime.
-    const sortTimeForFace = ({ faceID }: { faceID: string }) => {
-        const file = fileForFaceID.get(faceID);
+    // files an arbitrary sort time.
+    const sortTimeByFaceID = new Map<string, number>();
+    for (const { faceID } of faces) {
+        const file = localFileByID.get(fileIDFromFaceID(faceID)!);
         if (!file) {
             assertionFailed(`Did not find a local file for faceID ${faceID}`);
-            return 0;
+            sortTimeByFaceID.set(faceID, 0);
+        } else {
+            sortTimeByFaceID.set(faceID, fileCreationPhotoSortTime(file));
         }
-        return fileCreationTime(file);
-    };
+    }
+
+    const sortTimeForFace = ({ faceID }: { faceID: string }) =>
+        sortTimeByFaceID.get(faceID) ?? 0;
 
     return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));
 };

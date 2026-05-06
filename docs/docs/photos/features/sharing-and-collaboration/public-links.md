@@ -74,7 +74,7 @@ Choose how recipients view your public links with these layout options:
 
 > [!NOTE]
 >
-> Trip layout public links are not supported on custom domains yet. When someone tries to access such a link, they will be redirected to the Trip layout public link on the default `albums.ente.io` domain. Other layouts will work perfectly on your custom domain.
+> Trip layout public links are not supported on custom domains yet. When someone tries to access such a link, they will be redirected to the Trip layout public link on the default `albums.ente.com` domain. Other layouts will work perfectly on your custom domain.
 
 ### Password protection
 
@@ -177,7 +177,7 @@ When disabled, anyone with the link can still view the album in a browser, but t
 
 </div>
 
-- The prompt to reopen the link in the app does not work with custom domains; use the default `https://albums.ente.io` link instead.
+- The prompt to reopen the link in the app does not work with custom domains; use the default `https://albums.ente.com` link instead.
 
 ### Allow adding photos (Collect mode)
 
@@ -195,9 +195,9 @@ Learn more in the [Collaboration guide](/photos/features/sharing-and-collaborati
 
 ### Custom domains
 
-Use your own domain instead of `albums.ente.io` for your public links.
+Use your own domain instead of `albums.ente.com` for your public links.
 
-For example: `https://pics.example.org/?t=...` instead of `https://albums.ente.io/?t=...`
+For example: `https://pics.example.org/?t=...` instead of `https://albums.ente.com/?t=...`
 
 Learn more in the [Custom domains guide](/photos/features/sharing-and-collaboration/custom-domains/).
 

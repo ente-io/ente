@@ -2,6 +2,29 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/models/file/file.dart";
 
+/// Continuous zoom transform from the photo viewer.
+///
+/// [scale] is relative to the initial "contained" scale (1.0 = no zoom).
+/// [offset] is the pan translation in logical pixels.
+@immutable
+class ZoomTransform {
+  static const ZoomTransform identity =
+      ZoomTransform(scale: 1.0, offset: Offset.zero);
+
+  final double scale;
+  final Offset offset;
+
+  const ZoomTransform({required this.scale, required this.offset});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ZoomTransform && other.scale == scale && other.offset == offset;
+
+  @override
+  int get hashCode => Object.hash(scale, offset);
+}
+
 enum FullScreenRequestReason {
   userInteraction,
   playbackStateChange,
@@ -36,6 +59,10 @@ class InheritedDetailPageState extends InheritedWidget {
   /// Whether the photo viewer is currently zoomed in.
   final ValueNotifier<bool> isZoomedNotifier;
 
+  /// Continuous zoom transform (scale + offset) from the photo viewer.
+  /// Updated on every gesture frame so overlays can track the zoom.
+  final ValueNotifier<ZoomTransform> zoomTransformNotifier;
+
   // Cannot be const because we accept a ValueNotifier instance at runtime
   // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({
@@ -45,6 +72,7 @@ class InheritedDetailPageState extends InheritedWidget {
     required this.isInSharedCollectionNotifier,
     required this.showingThumbnailFallbackNotifier,
     required this.isZoomedNotifier,
+    required this.zoomTransformNotifier,
   });
 
   static InheritedDetailPageState of(BuildContext context) =>
@@ -96,5 +124,6 @@ class InheritedDetailPageState extends InheritedWidget {
       oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier ||
       oldWidget.showingThumbnailFallbackNotifier !=
           showingThumbnailFallbackNotifier ||
-      oldWidget.isZoomedNotifier != isZoomedNotifier;
+      oldWidget.isZoomedNotifier != isZoomedNotifier ||
+      oldWidget.zoomTransformNotifier != zoomTransformNotifier;
 }

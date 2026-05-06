@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { ContactDisplayRecord, WrappedRootContactKey } from "./types";
 
 const contactsKey = (sessionKey: string) => `contacts/${sessionKey}/records`;
-const wrappedRootKeyKey = (sessionKey: string) =>
+const wrappedRootContactKeyKey = (sessionKey: string) =>
     `contacts/${sessionKey}/root-key`;
 const sinceTimeKey = (sessionKey: string) =>
     `contacts/${sessionKey}/since-time`;
@@ -44,14 +44,14 @@ export const saveContactDisplayRecords = (
 export const savedWrappedRootContactKey = async (
     sessionKey: string,
 ): Promise<WrappedRootContactKey | undefined> => {
-    const saved = await getKV(wrappedRootKeyKey(sessionKey));
+    const saved = await getKV(wrappedRootContactKeyKey(sessionKey));
     return saved ? WrappedRootContactKeyZ.parse(saved) : undefined;
 };
 
 export const saveWrappedRootContactKey = (
     sessionKey: string,
-    wrappedRootKey: WrappedRootContactKey,
-) => setKV(wrappedRootKeyKey(sessionKey), wrappedRootKey);
+    wrappedRootContactKey: WrappedRootContactKey,
+) => setKV(wrappedRootContactKeyKey(sessionKey), wrappedRootContactKey);
 
 export const savedContactsSinceTime = (sessionKey: string) =>
     getKVN(sinceTimeKey(sessionKey));

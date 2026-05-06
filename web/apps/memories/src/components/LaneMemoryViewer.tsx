@@ -69,6 +69,7 @@ const LANE_GRID_DISPLACEMENT_SCALE = 9;
 const LANE_VERTICAL_STACK_GAP_PX = 32;
 const LANE_CARD_TO_CONTROLS_GAP_PX = 52;
 const LANE_CARD_SIZE_SCALE = 0.94;
+const LANE_MEDIA_ASPECT_RATIO_CHANGE_EPSILON = 0.00001;
 
 function calculateLaneXOffset(
     distance: number,
@@ -110,6 +111,9 @@ export function LaneMemoryViewer({
     const [activeMediaAspectRatio, setActiveMediaAspectRatio] = useState<
         number | undefined
     >(undefined);
+    const [mediaAspectRatios, setMediaAspectRatios] = useState<
+        Record<number, number>
+    >({});
     const [previousCaptionValue, setPreviousCaptionValue] = useState<
         number | undefined
     >(() => {
@@ -409,6 +413,29 @@ export function LaneMemoryViewer({
         })();
     }, [displayIndex, fileLoaded, files]);
 
+    const handleMediaAspectRatio = useCallback(
+        (fileID: number, width: number, height: number) => {
+            if (width <= 0 || height <= 0) {
+                return;
+            }
+
+            const nextAspectRatio = width / height;
+            setMediaAspectRatios((previousAspectRatios) => {
+                const previousAspectRatio = previousAspectRatios[fileID];
+                if (
+                    typeof previousAspectRatio === "number" &&
+                    Math.abs(previousAspectRatio - nextAspectRatio) <
+                        LANE_MEDIA_ASPECT_RATIO_CHANGE_EPSILON
+                ) {
+                    return previousAspectRatios;
+                }
+
+                return { ...previousAspectRatios, [fileID]: nextAspectRatio };
+            });
+        },
+        [],
+    );
+
     const handleActiveAspectRatio = useCallback(
         (width: number, height: number) => {
             if (width <= 0 || height <= 0) {
@@ -686,12 +713,12 @@ export function LaneMemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.com/get"
+                            href="https://ente.com/try"
                             target="_blank"
                             rel="noopener"
                             sx={laneHeaderJoinNowButtonSx}
                         >
-                            Try Ente
+                            Get Ente Photos
                         </JoinNowButton>
                     </LaneTopActionSection>
                 </LaneTopBar>
@@ -762,10 +789,15 @@ export function LaneMemoryViewer({
                                         FileType.video
                                             ? isDisplayCard
                                             : Math.abs(slice.distance) < 1.1;
-                                    const mediaAspectRatio = isDisplayCard
-                                        ? (activeMediaAspectRatio ??
-                                          getFileAspectRatio(file))
-                                        : getFileAspectRatio(file);
+                                    const fallbackMediaAspectRatio =
+                                        getFileAspectRatio(file);
+                                    const mediaAspectRatio =
+                                        file.metadata.fileType ===
+                                            FileType.video && isDisplayCard
+                                            ? (activeMediaAspectRatio ??
+                                              fallbackMediaAspectRatio)
+                                            : (mediaAspectRatios[file.id] ??
+                                              fallbackMediaAspectRatio);
 
                                     return (
                                         <LaneStackSlice
@@ -841,10 +873,15 @@ export function LaneMemoryViewer({
                                                                     ? handleFullLoad
                                                                     : undefined
                                                             }
-                                                            onAspectRatio={
-                                                                isDisplayCard
-                                                                    ? handleActiveAspectRatio
-                                                                    : undefined
+                                                            onAspectRatio={(
+                                                                width,
+                                                                height,
+                                                            ) =>
+                                                                handleMediaAspectRatio(
+                                                                    file.id,
+                                                                    width,
+                                                                    height,
+                                                                )
                                                             }
                                                             showLoadingOverlay={
                                                                 false

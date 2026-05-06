@@ -173,7 +173,7 @@ No. Storage from different accounts does not stack.
 
 When you create a family and add members, everyone in the family shares the storage of the admin's subscription.
 
-(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant— they will use the shared family storage instead.)
+(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant - they will use the shared family storage instead.)
 
 Family plans are designed to allow multiple people to use a single subscription, not to combine multiple plans into a larger pool.
 
@@ -255,7 +255,15 @@ Common reasons and solutions:
 **Problem 5: Purchased through App Store**
 
 - Family plans may have limited functionality for App Store purchases
-- Consider managing your subscription through [web.ente.io](https://web.ente.io) instead
+- Consider managing your subscription through [photos.ente.com](https://photos.ente.com) instead
+
+### How do I add a family member who already has a paid subscription? {#add-family-member-existing-subscriber}
+
+1. Subscribe to a paid plan on your account if you have not already.
+2. Ask your family member to cancel their existing subscription, then contact [support@ente.com](mailto:support@ente.com) so we can switch their account to the free plan.
+3. Once their account is on the free plan, add them via `Settings > Storage/Subscription > Manage subscription > Manage family`, or via `Settings > Account > Manage subscription`.
+
+> **Note**: Each family member gets their own private space. Members cannot see each other's files unless explicitly shared. Family plans are for sharing storage, not for sharing photos automatically.
 
 ### How do I remove someone from my family plan? {#remove-family-member}
 
@@ -307,7 +315,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 **Step-by-step process:**
 
 1. **Do NOT purchase through the iOS/Android App Store** - App Stores don't support discount codes
-2. Go to [web.ente.io](https://web.ente.io) on a desktop or laptop computer
+2. Go to [photos.ente.com](https://photos.ente.com) on a desktop or laptop computer
 3. Log in to your Ente account
 4. Open `Settings > Account > Manage subscription`
 5. Click "Buy subscription" or "Change plan"
@@ -322,7 +330,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 - Discount codes only work for **NEW paying customers** (first-time purchases)
 - Cannot be applied to existing paid subscriptions
 - Cannot be combined with cryptocurrency payments
-- Must purchase from web.ente.io or desktop app, NOT mobile app stores
+- Must purchase from photos.ente.com or desktop app, NOT mobile app stores
 
 **If you already purchased without applying a code:**
 
@@ -422,7 +430,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 **Important limitations:**
 
-⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through web.ente.io instead.
+⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through photos.ente.com instead.
 
 ⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.com/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
 

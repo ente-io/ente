@@ -1,116 +1,71 @@
-# Ensu Android
+# Ensu for Android
 
-## Prerequisites
+Source code for the Ensu Android app.
 
-- Android Studio or command-line tools
-- JDK 17
-- Android SDK with API level 35 (install in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT`)
-- Android NDK (install via `sdkmanager "ndk;<version>"`; optionally set `NDK_VERSION` to select a specific version)
-- Rust toolchain and `cargo-ndk` (`cargo install cargo-ndk`)
-- Python 3 (used to patch llama.cpp mtmd sources)
+To know more about Ente, see [our main README](../../../../../README.md) or visit [ente.com](https://ente.com).
 
-## Quick scripts
+## Building from source
 
-From `mobile/native/android/apps/ensu`:
+1. Install [Android Studio](https://developer.android.com/studio), [Rust](https://www.rust-lang.org/tools/install), and CMake (e.g. `brew install cmake`).
 
-```bash
-./build.sh                 # builds Rust + debug APK
-./build.sh apk             # builds Rust + release APK
-./build.sh aab             # builds Rust + release AAB (app bundle)
-./run.sh                   # builds + installs + launches on connected adb device
-```
+2. Generate the Kotlin bindings:
 
-Helpful flags:
+    ```sh
+    cd rust
+    cargo codegen ensu-android
+    ```
 
-- `--skip-rust` to skip Rust/jni rebuild
-- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
-- `--device <serial>` for `run.sh`
-- legacy aliases still supported: `release`/`release-apk` and `bundle`/`release-aab`
+3. Open the project in Android Studio and run the `app-ui` module. If the Android NDK is missing, Android Studio will prompt to install it.
 
-Run `./build.sh --help` or `./run.sh --help` for full options.
+That's it. Apart from the `cargo codegen`, this is a normal Android project.
 
-## Building
+> [!NOTE]
+>
+> Re-run `cargo codegen ensu-android` whenever the UniFFI interface under `rust/uniffi` changes.
+>
+> Gradle cross-compiles the Rust libraries to JNI `.so` files automatically when building the app.
 
-### 1. Build Rust Libraries
+A custom endpoint can be baked into the build via `./gradlew :app-ui:installDebug -PENTE_API_ENDPOINT=http://localhost:8080`, or by exporting `ENTE_API_ENDPOINT` before running Gradle.
 
-Before building the Android app, compile the Rust native libraries. Ensure the SDK is installed in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT` to the SDK containing an NDK. Optionally set `NDK_VERSION` to select a specific version. The build script applies the llama.cpp mtmd patch; set `APPLY_LLAMA_MTMD_PATCH=0` to skip it.
+## Terminal builds
 
-```bash
-cd mobile/native/android/packages/rust/tool
-./build_android.sh
-```
+> [!NOTE]
+>
+> If you'd rather not open Android Studio, this section is for you.
+>
+> To skip the Android Studio install entirely, see [photos/docs/android-cli.md](../../../../apps/photos/docs/android-cli.md).
 
-This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/` (including `libcore.so`, `libinference.so`, `libdb.so`, and `libsync.so`).
-It also generates the UniFFI Kotlin bindings into:
-- `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core.kt`
-- `android/packages/rust/src/main/kotlin/io/ente/labs/ensu_db/db.kt`
-- `android/packages/rust/src/main/kotlin/io/ente/labs/ensu_sync/sync.kt`
-- `android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference.kt`
+Build and install a debug APK on a connected device or emulator:
 
-These generated files are gitignored and are refreshed each time `build_android.sh` runs.
-
-### 2. Build Debug APK
-
-```bash
+```sh
 cd mobile/native/android/apps/ensu
-./gradlew :app-ui:assembleDebug
+./gradlew :app-ui:installDebug
+adb shell am start -n io.ente.ensu/.MainActivity
 ```
 
-Output: `app-ui/build/outputs/apk/debug/app-ui-debug.apk`
+Release APK:
 
-### 3. Build Release APK
-
-```bash
+```sh
 ./gradlew :app-ui:assembleRelease
 ```
 
-Output: `app-ui/build/outputs/apk/release/app-ui-release.apk`
+Output: `app-ui/build/outputs/apk/release/app-ui-release.apk`.
 
-Note: Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app-ui/build.gradle.kts`.
+Release AAB (Play Store bundle):
 
-## Installation
-
-### Install Debug Build
-
-```bash
-./gradlew :app-ui:installDebug
+```sh
+./gradlew :app-ui:bundleRelease
 ```
 
-Or via adb:
+Output: `app-ui/build/outputs/bundle/release/app-ui-release.aab`.
 
-```bash
-adb install -r app-ui/build/outputs/apk/debug/app-ui-debug.apk
-```
+Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app-ui/build.gradle.kts`.
 
-### Install Release Build
+## Modules
 
-```bash
-adb install -r app-ui/build/outputs/apk/release/app-ui-release.apk
-```
+- `app-ui/` — Compose UI and app entry point.
+- `domain/` — Business logic and state (pure Kotlin).
+- `data/` — Repositories, network, storage.
+- `crypto-auth-core/` — Cryptographic primitives (UniFFI-wrapped Rust).
 
-Note: If upgrading from a differently signed build, uninstall first:
-
-```bash
-adb uninstall io.ente.ensu
-```
-
-## Custom API Endpoint
-
-Set `ENTE_API_ENDPOINT` to override the default (`https://api.ente.io`).
-
-```bash
-ENTE_API_ENDPOINT=https://your-endpoint ./gradlew :app-ui:installDebug
-```
-
-Or via Gradle property:
-
-```bash
-./gradlew :app-ui:installDebug -PENTE_API_ENDPOINT=https://your-endpoint
-```
-
-## Project Structure
-
-- `app-ui/` - Main application module (Compose UI)
-- `domain/` - Domain layer (business logic, state management)
-- `data/` - Data layer (repositories, network, storage)
-- `crypto-auth-core/` - Cryptographic authentication utilities
+The Rust glue for `db` / `sync` / `inference` lives outside this app, at [`mobile/native/android/packages/rust/`](../../packages/rust/).

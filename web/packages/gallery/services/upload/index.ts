@@ -5,8 +5,7 @@ import type { ZipItem } from "ente-base/types/ipc";
 import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import type { ExternalParsedMetadata } from "./upload-service";
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -268,6 +267,7 @@ export interface ClusteredUploadItem {
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;
+    externalParsedMetadata?: ExternalParsedMetadata;
     // TODO: Tie this to the isLivePhoto flag using a discriminated union.
     livePhotoAssets?: LivePhotoAssets;
 }
@@ -509,21 +509,5 @@ const computeShouldDisableCFUploadProxy = async () => {
     // In such cases, disable the Cloudflare upload proxy (which won't work for
     // self-hosters), and instead just directly use the upload URLs that museum
     // gives us.
-    if (await customAPIOrigin()) return true;
-
-    // See if the global flag to disable this is set.
-    try {
-        const res = await fetch("https://static.ente.io/feature_flags.json");
-        return (
-            StaticFeatureFlags.parse(await res.json()).disableCFUploadProxy ??
-            false
-        );
-    } catch (e) {
-        log.warn("Ignoring error when getting feature_flags.json", e);
-        return false;
-    }
+    return !!(await customAPIOrigin());
 };
-
-const StaticFeatureFlags = z.object({
-    disableCFUploadProxy: z.boolean().nullish().transform(nullToUndefined),
-});

@@ -1,6 +1,10 @@
-import { Box } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Box, IconButton } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import type { PasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
+import type {
+    PasteResolvedMode,
+    PasteThemeTokens,
+} from "features/paste/theme/pasteThemeTokens";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface PasteQrCodeProps {
@@ -9,6 +13,10 @@ interface PasteQrCodeProps {
     size?: number;
     paperBg?: string;
     borderRadius?: string;
+    /** When set, shows a floating close control (e.g. to dismiss the QR panel). */
+    onClose?: () => void;
+    /** Color mode for close button hover; pass when `onClose` is used. */
+    resolvedMode?: PasteResolvedMode;
 }
 
 interface QRCodeStylingInstance {
@@ -65,6 +73,8 @@ export const PasteQrCode = ({
     size,
     paperBg,
     borderRadius,
+    onClose,
+    resolvedMode,
 }: PasteQrCodeProps) => {
     const qrContainerRef = useRef<HTMLDivElement | null>(null);
     const qrCodeRef = useRef<QRCodeStylingInstance | null>(null);
@@ -185,7 +195,7 @@ export const PasteQrCode = ({
         [],
     );
 
-    return (
+    const qrBox = (
         <Box
             ref={qrContainerRef}
             role={qrLoadError ? "status" : "img"}
@@ -218,5 +228,62 @@ export const PasteQrCode = ({
                 },
             }}
         />
+    );
+
+    if (!onClose) {
+        return qrBox;
+    }
+
+    const isDark = resolvedMode === "dark";
+
+    return (
+        <Box
+            sx={{
+                position: "relative",
+                width: "fit-content",
+                maxWidth: "100%",
+                mx: "auto",
+                overflow: "visible",
+            }}
+        >
+            {qrBox}
+            <IconButton
+                type="button"
+                aria-label="Close QR code"
+                disableRipple
+                onClick={onClose}
+                sx={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    zIndex: 1,
+                    width: 28,
+                    height: 28,
+                    minWidth: 28,
+                    padding: 0,
+                    borderRadius: "50%",
+                    border: `1px solid ${tokens.button.qrToggleBorder}`,
+                    color: tokens.text.secondary,
+                    bgcolor: tokens.surface.floatingCardBg,
+                    opacity: 1,
+                    boxShadow:
+                        "0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05)",
+                    transform: "translate(50%, -50%) scale(1)",
+                    transformOrigin: "center",
+                    transition:
+                        "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    "&:hover": {
+                        opacity: 1,
+                        transform: "translate(50%, -50%) scale(1.12)",
+                        bgcolor: isDark
+                            ? "rgba(26, 36, 72, 1)"
+                            : "rgba(237, 244, 255, 1)",
+                    },
+                    "& .MuiSvgIcon-root": { opacity: 1 },
+                }}
+            >
+                <CloseRoundedIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+        </Box>
     );
 };

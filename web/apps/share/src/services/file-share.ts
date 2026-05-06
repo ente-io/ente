@@ -7,6 +7,10 @@ import {
     fromHex,
     toB64,
 } from "ente-base/crypto";
+import {
+    linkDeviceTokenFromResponse,
+    linkDeviceTokenRequestHeader,
+} from "ente-base/http";
 import { apiOrigin } from "ente-base/origins";
 import type {
     DecryptedFileInfo,
@@ -15,6 +19,25 @@ import type {
     LinkKeyMaterial,
     LockerInfo,
 } from "../types/file-share";
+
+const deviceLimitExceededMessage =
+    "This link has been viewed on too many devices. Please contact the owner.";
+
+const isDeviceLimitExceededResponse = async (response: Response) => {
+    if (response.status === 429) {
+        return true;
+    }
+    if (response.status !== 403) {
+        return false;
+    }
+
+    try {
+        const payload = (await response.clone().json()) as { code?: string };
+        return payload.code === "LINK_DEVICE_LIMIT_EXCEEDED";
+    } catch {
+        return false;
+    }
+};
 
 /**
  * Extract file key from URL hash (similar to extractCollectionKeyFromShareURL)
@@ -50,19 +73,32 @@ export const extractFileKeyFromURL = async (
  */
 export const fetchFileInfo = async (
     accessToken: string,
-): Promise<FileLinkInfo> => {
+    linkDeviceToken?: string,
+): Promise<{ fileLinkInfo: FileLinkInfo; linkDeviceToken?: string }> => {
     const url = `${await apiOrigin()}/file-link/info`;
 
     const response = await fetch(url, {
-        headers: { "X-Auth-Access-Token": accessToken },
+        headers: {
+            "X-Auth-Access-Token": accessToken,
+            ...(linkDeviceToken && {
+                [linkDeviceTokenRequestHeader]: linkDeviceToken,
+            }),
+        },
+        cache: "no-store",
     });
 
     if (!response.ok) {
+        if (await isDeviceLimitExceededResponse(response)) {
+            throw new Error(deviceLimitExceededMessage);
+        }
         throw new Error(`Failed to fetch file`);
     }
 
     const data = (await response.json()) as FileLinkInfo;
-    return data;
+    return {
+        fileLinkInfo: data,
+        linkDeviceToken: linkDeviceTokenFromResponse(response),
+    };
 };
 
 /**
@@ -393,6 +429,9 @@ export const downloadFile = async (
     });
 
     if (!response.ok) {
+        if (await isDeviceLimitExceededResponse(response)) {
+            throw new Error(deviceLimitExceededMessage);
+        }
         throw new Error(`Failed to download file: ${response.statusText}`);
     }
 

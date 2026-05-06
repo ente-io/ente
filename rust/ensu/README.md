@@ -2,6 +2,8 @@
 
 This directory contains the Rust crates for the Ensu LLM chat stack.
 
+For the current Ensu packaging map, see [`packaging.md`](packaging.md).
+
 ## Crates
 
 - `db/` (`ensu-db`) — local chat database.

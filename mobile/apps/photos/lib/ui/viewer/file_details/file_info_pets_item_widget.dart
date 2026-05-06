@@ -10,7 +10,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -41,9 +41,9 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
 
   Future<void> _loadPetFaces() async {
     try {
-      final bool isOffline = isOfflineMode;
+      final bool isLocalGallery = isLocalGalleryMode;
       int? fileKey;
-      if (isOffline) {
+      if (isLocalGallery) {
         final localId = widget.file.localID;
         if (localId == null || localId.isEmpty) {
           if (mounted) setState(() => _isLoading = false);
@@ -58,7 +58,8 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
         }
       }
 
-      final mlDataDB = isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final mlDataDB =
+          isLocalGallery ? MLDataDB.localGalleryInstance : MLDataDB.instance;
       final dbPetFaces = await mlDataDB.getPetFacesForFileID(fileKey);
       if (dbPetFaces == null || dbPetFaces.isEmpty) {
         if (mounted) setState(() => _isLoading = false);
@@ -214,10 +215,7 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
             height: thumbnailWidth,
             width: thumbnailWidth,
             child: FaceThumbnailSquircleClip(
-              child: FileFaceWidget(
-                widget.file,
-                faceCrop: info.faceCrop,
-              ),
+              child: FileFaceWidget(widget.file, faceCrop: info.faceCrop),
             ),
           ),
           const SizedBox(height: 4),

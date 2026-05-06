@@ -46,6 +46,10 @@
       "hex": "0000ff"
     },
     {
+      "title":"Ahrefs",
+      "slug":"ahrefs"
+    },
+    {
       "title": "Airtable"
     },
     {
@@ -106,6 +110,13 @@
       "title": "AR24",
       "altNames": [
         "Docaposte AR24"
+      ]
+    },
+    {
+      "title": "Art Fight",
+      "slug": "art_fight",
+      "altNames": [
+        "ArtFight"
       ]
     },
     {
@@ -394,6 +405,10 @@
       "altNames": [
         "Carta.com"
       ]
+    },
+    {
+      "title": "CatRealm",
+      "slug": "catrealm"
     },
     {
       "title": "CERN",
@@ -1903,6 +1918,13 @@
       "hex": "0770E3"
     },
     {
+      "title": "Smogon",
+      "slug": "smogon",
+      "altNames": [
+        "Smogon University"
+      ]
+    },
+    {
       "title": "SMSPool",
       "slug": "sms_pool_net",
       "altNames": [
@@ -2377,6 +2399,10 @@
       "altNames": [
         "You Need A Budget"
       ]
+    },
+    {
+      "title": "Zabbix",
+      "slug": "zabbix"
     },
     {
       "title": "Zitadel"

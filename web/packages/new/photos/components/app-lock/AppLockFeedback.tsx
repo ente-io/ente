@@ -178,7 +178,9 @@ export const CooldownScreen = ({
 }: CooldownScreenProps) => {
     void remainingMs;
     void attemptCount;
-    const retryDescriptionText = `${t("app_lock_please_try_again_in")}\u00A0${cooldownText}`;
+    const retryDescriptionText = t("app_lock_please_try_again_in", {
+        time: cooldownText,
+    });
 
     return (
         <Stack

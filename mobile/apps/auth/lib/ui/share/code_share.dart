@@ -118,7 +118,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
     Uint8List input = utf8.encode(jsonEncode(data));
     final encResult = await CryptoUtil.encryptData(input, key);
     String url =
-        'https://auth.ente.io/share?data=${_uint8ListToUrlSafeBase64(encResult.encryptedData!)}&header=${_uint8ListToUrlSafeBase64(encResult.header!)}#${_uint8ListToUrlSafeBase64(key)}';
+        'https://auth.ente.com/share?data=${_uint8ListToUrlSafeBase64(encResult.encryptedData!)}&header=${_uint8ListToUrlSafeBase64(encResult.header!)}#${_uint8ListToUrlSafeBase64(key)}';
     try {
       await shareText(url, context: context);
     } catch (e) {
