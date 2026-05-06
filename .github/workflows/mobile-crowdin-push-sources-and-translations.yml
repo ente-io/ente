@@ -43,8 +43,7 @@ on:
                     - locker
 
 permissions:
-    contents: write
-    pull-requests: write
+    contents: read
 
 jobs:
     push-sources-and-translations-to-crowdin:
