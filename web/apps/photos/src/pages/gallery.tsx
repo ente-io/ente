@@ -971,17 +971,27 @@ const Page: React.FC = () => {
                         // If a selection is happening, there must be a user.
                         (f) => f.ownerID == user!.id,
                     );
+                    /**
+                     * Basically earlier we used userFiles to performCollectionOp earlier
+                     * irrespective of the op, and userFiles only have files of which the current
+                     * user is the owner. Now as we support upload from shared albums also, in case
+                     * it's an upload(add) using selectedFiles instead of userFiles
+                     */
+                    const filesToProcess =
+                        op == "add" ? selectedFiles : userFiles;
                     const sourceCollectionID = selected.collectionID;
-                    if (userFiles.length > 0) {
+                    if (filesToProcess.length > 0) {
                         await performCollectionOp(
                             op,
                             selectedCollection,
-                            userFiles,
+                            filesToProcess,
                             sourceCollectionID,
                         );
                     }
-                    // See: [Note: Add and move of non-user files]
-                    if (userFiles.length != selectedFiles.length) {
+                    if (
+                        op != "add" &&
+                        userFiles.length != selectedFiles.length
+                    ) {
                         showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
@@ -1125,6 +1135,7 @@ const Page: React.FC = () => {
                             },
                         );
                     }
+
                     // Apart from download, the other operations currently only work
                     // on the user's own files.
                     //

@@ -166,8 +166,11 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 } else if (attributes.action == "add") {
                     return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
+                    // Using add eligibility (not move eligibility) so shared incoming
+                    // albums are available as upload targets. Viewer-only shared incoming
+                    // albums are still excluded by `canAddToCollection`.
                     return (
-                        (canMoveToCollection(cs) ||
+                        (canAddToCollection(cs) ||
                             cs.type == "uncategorized") &&
                         cs.type != "userFavorites"
                     );

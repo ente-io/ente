@@ -73,6 +73,32 @@ export type FinishedUploads = Map<FileID, FinishedUploadType>;
 
 export type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
 
+export interface UploadBatchItemResult {
+    localID: number;
+    requestedCollectionID: number;
+    result: UploadResult;
+}
+
+export interface UploadBatchResult {
+    processedAny: boolean;
+    itemResults: UploadBatchItemResult[];
+}
+
+export const successfulFilesFromUploadBatchResult = (
+    batchResult: UploadBatchResult,
+) =>
+    batchResult.itemResults.flatMap(({ result }) => {
+        switch (result.type) {
+            case "alreadyUploaded":
+            case "addedSymlink":
+            case "uploaded":
+            case "uploadedWithStaticThumbnail":
+                return [result.file];
+            default:
+                return [];
+        }
+    });
+
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
     setUploadCounter: React.Dispatch<React.SetStateAction<UploadCounter>>;
@@ -258,6 +284,7 @@ class UploadManager {
     private itemsToBeUploaded: ClusteredUploadItem[] = [];
     private failedItems: ClusteredUploadItem[] = [];
     private existingFiles: EnteFile[] = [];
+    private itemResults: UploadBatchItemResult[] = [];
     private onUploadFile: ((file: EnteFile) => void) | undefined;
     private collections = new Map<number, Collection>();
     private uploadInProgress = false;
@@ -293,6 +320,7 @@ class UploadManager {
     ) {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
+        this.itemResults = [];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
         this.shouldUploadBeCancelled = false;
@@ -326,12 +354,13 @@ class UploadManager {
      * These are not all the user's collections - these are just the collections
      * mentioned by one or more {@link itemsWithCollection}.
      *
-     * @returns `true` if at least one file was processed
+     * @returns A summary of the completed batch and the per-item upload
+     * results for the files that were attempted.
      */
     public async uploadItems(
         itemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
-    ) {
+    ): Promise<UploadBatchResult> {
         if (this.uploadInProgress)
             throw new Error("Cannot run multiple uploads at once");
 
@@ -390,7 +419,10 @@ class UploadManager {
             clearInterval(logInterval);
         }
 
-        return this.uiService.hasFilesInResultList();
+        return {
+            processedAny: this.uiService.hasFilesInResultList(),
+            itemResults: [...this.itemResults],
+        };
     }
 
     /**
@@ -409,7 +441,7 @@ class UploadManager {
         file: File,
         collection: Collection,
         sourceEnteFile: EnteFile,
-    ) {
+    ): Promise<UploadBatchResult> {
         const timestamp = fileCreationTime(sourceEnteFile);
         const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
         const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
@@ -528,6 +560,11 @@ class UploadManager {
                 worker,
                 uploadContext,
             );
+            this.itemResults.push({
+                localID,
+                requestedCollectionID: collectionID,
+                result: uploadResult,
+            });
 
             const finishedUploadType = await this.postUploadTask(
                 uploadableItem,
