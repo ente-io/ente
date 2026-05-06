@@ -254,14 +254,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
               child: SizedBox(
                 width: screenRelativeImageWidth,
                 height: screenRelativeImageHeight,
-                child: Hero(
-                  tag: widget.tagPrefix! + _photo.tag,
-                  child: widget.isFromMemories
-                      ? const _DelayedLoadingIndicator()
-                      : const EnteLoadingWidget(
-                          color: Colors.white,
-                        ),
-                ),
+                child: widget.isFromMemories
+                    ? const _DelayedLoadingIndicator()
+                    : const EnteLoadingWidget(
+                        color: Colors.white,
+                      ),
               ),
             );
           },
