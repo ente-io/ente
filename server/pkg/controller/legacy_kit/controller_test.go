@@ -8,8 +8,29 @@ import (
 	legacykitrepo "github.com/ente-io/museum/pkg/repo/legacy_kit"
 	timeutil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
+
+func TestLegacyURLUsesDefaultWhenUnset(t *testing.T) {
+	previousURL := viper.GetString("apps.legacy")
+	viper.Set("apps.legacy", "")
+	t.Cleanup(func() {
+		viper.Set("apps.legacy", previousURL)
+	})
+
+	require.Equal(t, defaultLegacyURL, legacyURL())
+}
+
+func TestLegacyURLUsesConfiguredURLWithoutTrailingSlash(t *testing.T) {
+	previousURL := viper.GetString("apps.legacy")
+	viper.Set("apps.legacy", " http://localhost:3013/ ")
+	t.Cleanup(func() {
+		viper.Set("apps.legacy", previousURL)
+	})
+
+	require.Equal(t, "http://localhost:3013", legacyURL())
+}
 
 func TestToRecoverySessionReturnsRemainingWaitTime(t *testing.T) {
 	row := &legacykitrepo.RecoverySessionRow{

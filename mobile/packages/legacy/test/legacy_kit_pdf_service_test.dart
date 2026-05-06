@@ -32,6 +32,21 @@ void main() {
     );
   });
 
+  test("formats recovery URL for recovery sheet instructions", () {
+    expect(
+      LegacyKitPdfService.displayRecoveryUrl("https://legacy.ente.com/"),
+      "legacy.ente.com",
+    );
+    expect(
+      LegacyKitPdfService.displayRecoveryUrl(" http://localhost:3013/ "),
+      "localhost:3013",
+    );
+    expect(
+      LegacyKitPdfService.displayRecoveryUrl("https://legacy.example.com/r"),
+      "legacy.example.com/r",
+    );
+  });
+
   test("builds individual legacy kit recovery sheet PDFs", () async {
     final shares = [
       _share(1, "Mom"),
@@ -44,6 +59,7 @@ void main() {
       shares.map(
         (share) => service.buildRecoverySheet(
           accountEmail: "john@example.com",
+          recoveryUrl: "http://localhost:3013",
           share: share,
           allShares: shares,
         ),

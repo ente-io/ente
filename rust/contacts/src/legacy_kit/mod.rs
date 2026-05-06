@@ -91,10 +91,12 @@ pub(crate) fn decode_legacy_kit_record(
 ) -> Result<LegacyKit> {
     let owner_blob = decrypt_owner_blob(&response.encrypted_owner_blob, master_key)?;
     let metadata = metadata_from_owner_blob(&owner_blob);
+    let legacy_url = response.legacy_url();
     Ok(LegacyKit {
         id: response.id,
         variant: response.variant,
         notice_period_in_hours: response.notice_period_in_hours,
+        legacy_url,
         metadata,
         created_at: response.created_at,
         updated_at: response.updated_at,

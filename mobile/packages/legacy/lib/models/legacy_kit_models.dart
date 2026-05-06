@@ -2,6 +2,8 @@ import "dart:convert";
 
 import "package:ente_rust/ente_rust.dart" as rust;
 
+const String defaultLegacyRecoveryUrl = "https://legacy.ente.com";
+
 enum LegacyKitRecoveryStatus {
   waiting,
   ready,
@@ -102,6 +104,7 @@ class LegacyKitPart {
 class LegacyKit {
   final String id;
   final int noticePeriodInHours;
+  final String legacyUrl;
   final List<LegacyKitPart> parts;
   final int createdAt;
   final int updatedAt;
@@ -110,6 +113,7 @@ class LegacyKit {
   const LegacyKit({
     required this.id,
     required this.noticePeriodInHours,
+    required this.legacyUrl,
     required this.parts,
     required this.createdAt,
     required this.updatedAt,
@@ -120,6 +124,9 @@ class LegacyKit {
     return LegacyKit(
       id: kit.id,
       noticePeriodInHours: kit.noticePeriodInHours,
+      legacyUrl: kit.legacyUrl.trim().isEmpty
+          ? defaultLegacyRecoveryUrl
+          : kit.legacyUrl,
       parts: kit.metadata.parts.map(LegacyKitPart.fromRust).toList(
             growable: false,
           ),

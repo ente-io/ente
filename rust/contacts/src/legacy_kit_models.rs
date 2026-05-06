@@ -114,6 +114,7 @@ pub struct LegacyKit {
     pub id: String,
     pub variant: LegacyKitVariant,
     pub notice_period_in_hours: i32,
+    pub legacy_url: String,
     pub metadata: LegacyKitMetadata,
     pub created_at: i64,
     pub updated_at: i64,

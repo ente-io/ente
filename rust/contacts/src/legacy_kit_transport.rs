@@ -5,6 +5,8 @@ use crate::legacy_kit_models::{
     LegacyKitOwnerRecoverySession, LegacyKitRecoverySession, LegacyKitVariant,
 };
 
+pub const DEFAULT_LEGACY_URL: &str = "https://legacy.ente.com";
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateLegacyKitRequest {
@@ -22,10 +24,23 @@ pub struct LegacyKitRecordResponse {
     pub id: String,
     pub variant: LegacyKitVariant,
     pub notice_period_in_hours: i32,
+    #[serde(default)]
+    pub legacy_url: Option<String>,
     pub encrypted_owner_blob: String,
     pub created_at: i64,
     pub updated_at: i64,
     pub active_recovery_session: Option<LegacyKitRecoverySession>,
+}
+
+impl LegacyKitRecordResponse {
+    pub fn legacy_url(&self) -> String {
+        self.legacy_url
+            .as_deref()
+            .map(str::trim)
+            .filter(|url| !url.is_empty())
+            .unwrap_or(DEFAULT_LEGACY_URL)
+            .to_owned()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -190,4 +205,46 @@ pub struct LegacyKitChangePasswordResponse {
     pub setup_id: String,
     #[serde(rename = "srpM2")]
     pub srp_m2: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn legacy_kit_record_response_accepts_missing_legacy_url() {
+        let response = serde_json::from_str::<LegacyKitRecordResponse>(
+            r#"{
+                "id":"kit-id",
+                "variant":1,
+                "noticePeriodInHours":168,
+                "encryptedOwnerBlob":"owner-blob",
+                "createdAt":1,
+                "updatedAt":2,
+                "activeRecoverySession":null
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(response.legacy_url(), DEFAULT_LEGACY_URL);
+    }
+
+    #[test]
+    fn legacy_kit_record_response_uses_configured_legacy_url() {
+        let response = serde_json::from_str::<LegacyKitRecordResponse>(
+            r#"{
+                "id":"kit-id",
+                "variant":1,
+                "noticePeriodInHours":168,
+                "legacyUrl":"http://localhost:3013",
+                "encryptedOwnerBlob":"owner-blob",
+                "createdAt":1,
+                "updatedAt":2,
+                "activeRecoverySession":null
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(response.legacy_url(), "http://localhost:3013");
+    }
 }
