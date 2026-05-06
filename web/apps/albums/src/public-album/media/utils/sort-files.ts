@@ -1,5 +1,5 @@
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime } from "ente-media/file-metadata";
+import { fileCreationPhotoSortTime } from "ente-media/file-metadata";
 
 /**
  * Sort the given list of {@link EnteFile}s in place.
@@ -13,14 +13,22 @@ import { fileCreationTime } from "ente-media/file-metadata";
  * is first.
  */
 export const sortFiles = (files: EnteFile[], sortAsc = false) => {
-    // Sort based on the time of creation time of the file.
+    // Sort based on the local photo creation date shown in the UI.
     //
-    // For files with same creation time, sort based on the time of last
+    // For files with same creation date, sort based on the time of last
     // modification.
     const factor = sortAsc ? -1 : 1;
+    const sortTimeByFile = new Map<EnteFile, number>();
+    const sortTimeForFile = (file: EnteFile) => {
+        const cached = sortTimeByFile.get(file);
+        if (cached != undefined) return cached;
+        const t = fileCreationPhotoSortTime(file);
+        sortTimeByFile.set(file, t);
+        return t;
+    };
     return files.sort((a, b) => {
-        const at = fileCreationTime(a);
-        const bt = fileCreationTime(b);
+        const at = sortTimeForFile(a);
+        const bt = sortTimeForFile(b);
         return at == bt
             ? factor *
                   (b.metadata.modificationTime - a.metadata.modificationTime)

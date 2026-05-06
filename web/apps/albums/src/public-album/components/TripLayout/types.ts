@@ -3,7 +3,12 @@ export interface JourneyPoint {
     lng: number;
     name: string;
     country: string;
-    timestamp: string;
+    /**
+     * Millisecond sort/display key in the local photo timeline.
+     *
+     * This is not an absolute UTC timestamp.
+     */
+    timestamp: number;
     image: string;
     fileId: number;
 }

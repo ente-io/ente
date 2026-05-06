@@ -11,9 +11,7 @@ export const MobileTripStarted = memo<MobileTripStartedProps>(
     ({ onRef, journeyData }) => {
         // Get the first photo's date
         const sortedData = [...journeyData].sort(
-            (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
+            (a, b) => a.timestamp - b.timestamp,
         );
         const firstPhoto = sortedData[0];
         const firstPhotoDate = firstPhoto
