@@ -821,6 +821,102 @@
   "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
   "legacyAccounts": "Legacy accounts",
   "trustedContacts": "Trusted contacts",
+  "legacyKits": "Legacy kits",
+  "legacyKit": "Legacy kit",
+  "createLegacyKit": "Create legacy kit",
+  "createAnotherKit": "Create another kit",
+  "createKit": "Create kit",
+  "legacyKitCreateDescription": "Name the three people who will each hold a part of your recovery key.",
+  "legacyKitContactNameHint": "Contact {index} - e.g. {example}",
+  "@legacyKitContactNameHint": {
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      },
+      "example": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "legacyKitPartNameHint": "Part {index} name",
+  "@legacyKitPartNameHint": {
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "legacyKitStorageGuidance": "Store each sheet separately. Printed sheets can be disabled later by deleting the kit.",
+  "legacyKitPageDescription": "Name the three people who will each hold a part of your recovery key.",
+  "legacyKitPartOf": "Part {index} of {count}",
+  "@legacyKitPartOf": {
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "1"
+      },
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "recoveryWaitTime": "Recovery wait time",
+  "recoverySheets": "Recovery sheets",
+  "downloadAll": "Download all",
+  "legacyKitSheetDownloaded": "Recovery sheet downloaded",
+  "deleteLegacyKit": "Delete legacy kit",
+  "deleteLegacyKitMessage": "All shared sheets will become invalid and can no longer be used for recovery.",
+  "blockLegacyKitRecoveryMessage": "This will stop the active recovery attempt. The sheets can still be used to start a new attempt later.",
+  "legacyKitRecoveryInProgress": "Recovery attempt in progress",
+  "legacyKitRecoveryWindow": "Started on {startedAt}. Recovery will be available on {availableAt}.",
+  "@legacyKitRecoveryWindow": {
+    "placeholders": {
+      "startedAt": {
+        "type": "String",
+        "example": "Apr 8, 2026"
+      },
+      "availableAt": {
+        "type": "String",
+        "example": "Apr 15, 2026"
+      }
+    }
+  },
+  "legacyKitRecoveryAuditHints": "{count} recovery open attempts recorded",
+  "@legacyKitRecoveryAuditHints": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "legacyKitDownloaded": "Legacy kit downloaded",
+  "legacyKitMaxReached": "You can create up to 5 legacy kits.",
+  "authToManageLegacyKit": "Authenticate to manage legacy kits",
+  "createdOn": "Created {date}",
+  "@createdOn": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Apr 1, 2026"
+      }
+    }
+  },
+  "immediate": "Immediate",
+  "settings": "Settings",
+  "nHours": "{count} hours",
+  "@nHours": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
   "legacyInvite": "{email} has invited you to be a trusted contact",
   "@legacyInvite": {
     "placeholders": {
@@ -936,6 +1032,14 @@
   "revokeInvite": "Revoke invite",
   "@revokeInvite": {
     "description": "Button label to revoke a pending trusted contact invite"
+  },
+  "trustedContactStatusPending": "Pending",
+  "@trustedContactStatusPending": {
+    "description": "Short status label shown for a pending trusted contact invite"
+  },
+  "trustedContactStatusAccepted": "Accepted",
+  "@trustedContactStatusAccepted": {
+    "description": "Short status label shown for an accepted trusted contact"
   },
   "trustedContactInvitePending": "You have invited {email} to be a trusted contact. They are yet to accept your invite.",
   "@trustedContactInvitePending": {

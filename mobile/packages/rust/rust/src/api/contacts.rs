@@ -390,6 +390,8 @@ pub struct LegacyKit {
     pub variant: LegacyKitVariant,
     /// Configured notice period in hours.
     pub notice_period_in_hours: i32,
+    /// Public URL of the legacy recovery web app for this server.
+    pub legacy_url: String,
     /// Decrypted owner metadata.
     pub metadata: LegacyKitMetadata,
     /// Kit creation timestamp.
@@ -406,6 +408,7 @@ impl From<CoreLegacyKit> for LegacyKit {
             id: value.id,
             variant: value.variant.into(),
             notice_period_in_hours: value.notice_period_in_hours,
+            legacy_url: value.legacy_url,
             metadata: value.metadata.into(),
             created_at: value.created_at,
             updated_at: value.updated_at,

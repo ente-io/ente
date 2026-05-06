@@ -95,6 +95,7 @@ pub(crate) fn decode_legacy_kit_record(
         id: response.id,
         variant: response.variant,
         notice_period_in_hours: response.notice_period_in_hours,
+        legacy_url: response.legacy_url,
         metadata,
         created_at: response.created_at,
         updated_at: response.updated_at,

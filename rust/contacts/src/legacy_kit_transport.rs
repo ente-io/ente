@@ -22,6 +22,7 @@ pub struct LegacyKitRecordResponse {
     pub id: String,
     pub variant: LegacyKitVariant,
     pub notice_period_in_hours: i32,
+    pub legacy_url: String,
     pub encrypted_owner_blob: String,
     pub created_at: i64,
     pub updated_at: i64,
@@ -190,4 +191,45 @@ pub struct LegacyKitChangePasswordResponse {
     pub setup_id: String,
     #[serde(rename = "srpM2")]
     pub srp_m2: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn legacy_kit_record_response_requires_legacy_url() {
+        let response = serde_json::from_str::<LegacyKitRecordResponse>(
+            r#"{
+                "id":"kit-id",
+                "variant":1,
+                "noticePeriodInHours":168,
+                "encryptedOwnerBlob":"owner-blob",
+                "createdAt":1,
+                "updatedAt":2,
+                "activeRecoverySession":null
+            }"#,
+        );
+
+        assert!(response.is_err());
+    }
+
+    #[test]
+    fn legacy_kit_record_response_uses_configured_legacy_url() {
+        let response = serde_json::from_str::<LegacyKitRecordResponse>(
+            r#"{
+                "id":"kit-id",
+                "variant":1,
+                "noticePeriodInHours":168,
+                "legacyUrl":"http://localhost:3013",
+                "encryptedOwnerBlob":"owner-blob",
+                "createdAt":1,
+                "updatedAt":2,
+                "activeRecoverySession":null
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(response.legacy_url, "http://localhost:3013");
+    }
 }
