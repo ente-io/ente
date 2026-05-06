@@ -11,9 +11,7 @@ interface MobileCoverProps {
 export const MobileCover = memo<MobileCoverProps>(
     ({ journeyData, albumTitle, coverImageUrl }) => {
         const sortedData = [...journeyData].sort(
-            (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
+            (a, b) => a.timestamp - b.timestamp,
         );
         const firstData = sortedData[0];
         const lastData = sortedData[sortedData.length - 1];

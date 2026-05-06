@@ -11,7 +11,7 @@ import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { fileCreationPhotoDate, fileFileName } from "ente-media/file-metadata";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -233,7 +233,7 @@ const Container = styled("div")`
  * See: [Note: Timeline date string]
  */
 const fileTimelineDateString = (file: EnteFile) => {
-    const date = new Date(fileCreationTime(file) / 1000);
+    const date = fileCreationPhotoDate(file);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
