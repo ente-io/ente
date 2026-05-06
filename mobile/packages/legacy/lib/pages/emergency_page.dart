@@ -133,16 +133,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                   child: _buildPageTitle(colorScheme, textTheme),
                 ),
               ),
-              if (!showFullEmptyState)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      context.strings.legacyPageDesc,
-                      style: textTheme.smallMuted,
-                    ),
-                  ),
-                ),
               if (showFullEmptyState)
                 SliverFillRemaining(
                   hasScrollBody: false,
