@@ -82,7 +82,6 @@ import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/social/feed_screen.dart";
 import "package:photos/ui/tabs/albums_tab.dart";
-import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -105,7 +104,7 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static const _sharedCollectionTab = SharedCollectionsTab();
+  static const _feedTab = FeedScreen(showBackButton: false);
   static const _searchTab = SearchTab();
 
   final _logger = Logger("HomeWidgetState");
@@ -969,7 +968,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           )
                         : child!,
                     AlbumsTab(selectedAlbums: _selectedAlbums),
-                    _sharedCollectionTab,
+                    _feedTab,
                     _searchTab,
                   ],
                 );
