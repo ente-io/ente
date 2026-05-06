@@ -80,7 +80,7 @@ class RemoteFlags {
     castUrl: "https://cast.ente.com",
     customDomain: "",
     embedUrl: "https://embed.ente.com",
-    customDomainCNAME: "my.ente.io",
+    customDomainCNAME: "my.ente.com",
   );
 
   String toJson() => json.encode(toMap());

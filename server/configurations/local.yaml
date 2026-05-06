@@ -119,7 +119,7 @@ apps:
     # set this to the URL where your legacy recovery web app is running.
     legacy:
     custom-domain:
-        # Default is my.ente.io
+        # Default is my.ente.com
         cname:
 
 # Database connection parameters
