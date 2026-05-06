@@ -102,7 +102,6 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "expired token"})
 				return
 			}
-
 			if publicCollectionSummary.PassHash != nil && *publicCollectionSummary.PassHash != "" {
 				if err = m.validatePassword(c, reqPath, publicCollectionSummary); err != nil {
 					logrus.WithError(err).Warn("password validation failed")
@@ -120,7 +119,10 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 					return
 				}
 				if reached {
-					c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "reached device limit"})
+					c.AbortWithStatusJSON(
+						ente.ErrLinkDeviceLimitExceeded.HttpStatusCode,
+						&ente.ErrLinkDeviceLimitExceeded,
+					)
 					return
 				}
 				if linkDeviceToken != "" {
