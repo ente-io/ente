@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 image = { version = "0.25.5", default-features = true }
 kamadak-exif = "0.6.1"
-ente_heic = { package = "heic_decoder", git = "https://github.com/ente-io/heic-decoder.git", rev = "53303b2936ec19467c61cf75f77e30b399c10445", features = [
+ente_heic = { package = "heic_decoder", git = "https://github.com/ente-io/heic-decoder.git", rev = "d47a0f9c9e8c4c9e166c5a4b5734f8ad1f88f7a7", features = [
     "image-integration",
 ] }
 thiserror = "2.0.11"
