@@ -13,6 +13,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -20,6 +21,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/social_actor_contact_navigation.dart";
+import "package:photos/ui/social/widgets/feed_empty_state.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -562,15 +564,22 @@ class _FeedScreenState extends State<FeedScreen> {
                 onTap: () => Navigator.of(context).pop(),
               )
             : null,
-        title: Text(
-          AppLocalizations.of(context).feed,
-          style: widget.showBackButton ? textTheme.bodyBold : textTheme.h4Bold,
-        ),
+        title: _feedItems.isEmpty
+            ? null
+            : Text(
+                AppLocalizations.of(context).feed,
+                style: widget.showBackButton
+                    ? textTheme.bodyBold
+                    : textTheme.h4Bold,
+              ),
       ),
       body: _isLoading
           ? const Center(child: EnteLoadingWidget(size: 24))
           : _feedItems.isEmpty
-              ? _buildEmptyState(context)
+              ? FeedEmptyState(
+                  offlineUiMode: isOfflineMode &&
+                      !Configuration.instance.hasConfiguredAccount(),
+                )
               : RefreshIndicator(
                   onRefresh: _onRefresh,
                   child: ListView.builder(
@@ -646,35 +655,6 @@ class _FeedScreenState extends State<FeedScreen> {
                     },
                   ),
                 ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.notifications_none_outlined,
-              size: 48,
-              color: colorScheme.strokeMuted,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).noActivityYet,
-              style: textTheme.body.copyWith(
-                color: colorScheme.textMuted,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
