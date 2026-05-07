@@ -68,7 +68,6 @@ jobs:
                   download_translations: true
                   localization_branch_name: ${{ matrix.localization_branch_name }}
                   create_pull_request: true
-                  skip_untranslated_strings: true
                   pull_request_title: ${{ matrix.pull_request_title }}
                   pull_request_body: ${{ matrix.pull_request_body }}
                   pull_request_base_branch_name: "main"
