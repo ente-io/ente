@@ -7,8 +7,11 @@
 
 import { deriveKey } from "ente-base/crypto";
 import {
+    authenticatedPublicAlbumsDeviceLimitRequestHeaders,
+    authenticatedPublicAlbumsInfoRequestHeaders,
     authenticatedPublicAlbumsRequestHeaders,
     ensureOk,
+    linkDeviceTokenFromResponse,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
@@ -103,12 +106,12 @@ export const verifyPublicAlbumPassword = async (
  * secrets that are not sent by the browser to the server).
  */
 export const pullCollection = async (
-    accessToken: string,
+    credentials: PublicAlbumsCredentials,
     collectionKey: string,
 ) => {
     const res = await fetch(await apiURL("/public-collection/info"), {
         method: "GET",
-        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        headers: authenticatedPublicAlbumsInfoRequestHeaders(credentials),
     });
     ensureOk(res);
 
@@ -126,7 +129,11 @@ export const pullCollection = async (
 
     savePublicCollection(collection);
 
-    return { collection, referralCode } as const;
+    return {
+        collection,
+        referralCode,
+        linkDeviceToken: linkDeviceTokenFromResponse(res),
+    } as const;
 };
 
 /**
@@ -155,7 +162,12 @@ export const pullPublicCollectionFiles = async (
     while (hasMore) {
         const res = await fetch(
             await apiURL("/public-collection/diff", { sinceTime: time ?? 0 }),
-            { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+            {
+                headers:
+                    authenticatedPublicAlbumsDeviceLimitRequestHeaders(
+                        credentials,
+                    ),
+            },
         );
         ensureOk(res);
 

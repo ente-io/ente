@@ -88,10 +88,13 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               HugeIcons.strokeRoundedUpload04,
                             ),
                             trailingWidget: ToggleSwitchWidget(
-                              value: () => localSettings.isCFUploadProxyEnabled,
+                              value: () =>
+                                  localSettings.cfUploadProxyEnabled ??
+                                  flagService.cloudflareUploadWorker,
                               onChanged: () async {
                                 final newValue =
-                                    !localSettings.isCFUploadProxyEnabled;
+                                    !(localSettings.cfUploadProxyEnabled ??
+                                        flagService.cloudflareUploadWorker);
                                 await localSettings
                                     .setCFUploadProxyEnabled(newValue);
                                 setState(() {});

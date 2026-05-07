@@ -250,6 +250,41 @@ export const removePublicCollectionAccessTokenJWT = (accessToken: string) => {
     inMemoryStorage.removeItem(`public-${accessToken}-passkey`);
 };
 
+const publicCollectionLinkDeviceTokenKey = (
+    apiOrigin: string,
+    accessToken: string,
+) => `public-collection-link-device-token:${apiOrigin}:${accessToken}`;
+
+export const savedPublicCollectionLinkDeviceToken = (
+    apiOrigin: string,
+    accessToken: string,
+) =>
+    LocalString.parse(
+        inMemoryStorage.getItem(
+            publicCollectionLinkDeviceTokenKey(apiOrigin, accessToken),
+        ),
+    );
+
+export const savePublicCollectionLinkDeviceToken = (
+    apiOrigin: string,
+    accessToken: string,
+    linkDeviceToken: string,
+) => {
+    inMemoryStorage.setItem(
+        publicCollectionLinkDeviceTokenKey(apiOrigin, accessToken),
+        linkDeviceToken,
+    );
+};
+
+export const removePublicCollectionLinkDeviceToken = (
+    apiOrigin: string,
+    accessToken: string,
+) => {
+    inMemoryStorage.removeItem(
+        publicCollectionLinkDeviceTokenKey(apiOrigin, accessToken),
+    );
+};
+
 /**
  * Return the previously saved uploader name, if any, present in our local
  * storage corresponding to a public collection.

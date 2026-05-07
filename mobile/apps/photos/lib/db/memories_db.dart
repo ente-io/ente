@@ -20,7 +20,7 @@ class MemoriesDB {
   MemoriesDB._privateConstructor({String dbName = _databaseName})
       : _dbName = dbName;
   static final MemoriesDB instance = MemoriesDB._privateConstructor();
-  static final MemoriesDB offlineInstance =
+  static final MemoriesDB localGalleryInstance =
       MemoriesDB._privateConstructor(dbName: "ente.memories.offline.db");
 
   Future<Database>? _dbFuture;

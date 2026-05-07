@@ -1,8 +1,16 @@
 # CHANGELOG
 
-## v1.7.23 (unreleased)
+## v1.7.24 (unreleased)
 
 -
+
+## v1.7.23
+
+- All People dialogs shows entire face clusters
+- Public Albums app separated from Photos app
+- Faster and Light-weight public albums
+- Memory and Memory Lane links
+- Improvements (Public albums, file viewer, metadata preservation on editing, and more)
 
 ## v1.7.22
 

@@ -158,7 +158,9 @@ class FileListWidget extends StatelessWidget {
                       );
                     },
                     child: _buildTrailingIndicator(
-                      color: colorScheme.textMuted,
+                      color: isSelected
+                          ? colorScheme.primary700
+                          : colorScheme.textMuted,
                       isSelected: isSelected,
                       isIncoming: isIncoming,
                       isMarkedOffline: !isTrashFile && isMarkedOffline,

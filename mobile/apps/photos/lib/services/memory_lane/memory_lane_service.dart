@@ -34,7 +34,7 @@ class MemoryLaneService {
 
   static const _minimumYears = 2;
   static const _minimumFacesPerYear = 4;
-  static const _minimumEligibleAgeYears = 5;
+  static const _minimumEligibleAgeYears = 3;
   static const _recomputeCooldown = Duration(hours: 2);
   static const _timelineLogicVersion = 3;
   static const _startupBackfillDelay = Duration(seconds: 15);

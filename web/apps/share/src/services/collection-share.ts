@@ -5,8 +5,11 @@ import {
     deriveKey,
 } from "ente-base/crypto";
 import {
+    authenticatedPublicAlbumsDeviceLimitRequestHeaders,
+    authenticatedPublicAlbumsInfoRequestHeaders,
     authenticatedPublicAlbumsRequestHeaders,
     ensureOk,
+    linkDeviceTokenFromResponse,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiOrigin, apiURL } from "ente-base/origins";
@@ -48,6 +51,7 @@ export interface PublicCollectionShareMetadata {
     passwordEnabled: boolean;
     publicURL?: PublicURL;
     collectionKey: string;
+    linkDeviceToken?: string;
 }
 
 interface DownloadProgress {
@@ -238,7 +242,10 @@ const fetchPublicCollectionDiff = async (
         const res = await fetch(
             await apiURL("/public-collection/diff", { sinceTime }),
             {
-                headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+                headers:
+                    authenticatedPublicAlbumsDeviceLimitRequestHeaders(
+                        credentials,
+                    ),
                 cache: "no-store",
             },
         );
@@ -287,11 +294,11 @@ export const verifyPublicCollectionPassword = async (
 };
 
 export const fetchPublicCollectionShareMetadata = async (
-    accessToken: string,
+    credentials: PublicAlbumsCredentials,
     collectionKey: string,
 ): Promise<PublicCollectionShareMetadata> => {
     const res = await fetch(await apiURL("/public-collection/info"), {
-        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        headers: authenticatedPublicAlbumsInfoRequestHeaders(credentials),
         cache: "no-store",
     });
     ensureOk(res);
@@ -312,6 +319,7 @@ export const fetchPublicCollectionShareMetadata = async (
         passwordEnabled: publicURL?.passwordEnabled ?? false,
         publicURL,
         collectionKey: collection.key,
+        linkDeviceToken: linkDeviceTokenFromResponse(res),
     };
 };
 

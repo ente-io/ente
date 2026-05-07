@@ -577,7 +577,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ? const Center(child: EnteLoadingWidget(size: 24))
           : _feedItems.isEmpty
               ? FeedEmptyState(
-                  offlineUiMode: isOfflineMode &&
+                  localGalleryMode: isLocalGalleryMode &&
                       !Configuration.instance.hasConfiguredAccount(),
                 )
               : RefreshIndicator(

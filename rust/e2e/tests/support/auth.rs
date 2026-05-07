@@ -8,7 +8,7 @@ use ente_accounts::{
 };
 use ente_core::crypto::SecretVec;
 use ente_rs::models::account::App;
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use sha1::Sha1;
 use zeroize::Zeroizing;
 
@@ -120,6 +120,19 @@ pub async fn create_account(endpoint: &str, email: String, password: String) -> 
     test_account_from_authenticated(email, password, authenticated)
 }
 
+pub async fn create_account_strict(
+    endpoint: &str,
+    email_prefix: &str,
+    password_prefix: &str,
+) -> TestAccount {
+    create_account(
+        endpoint,
+        crate::support::unique_test_email(email_prefix),
+        crate::support::unique_password(password_prefix),
+    )
+    .await
+}
+
 pub async fn login_without_totp(
     endpoint: &str,
     email: &str,
@@ -183,10 +196,7 @@ pub async fn fetch_two_factor_status(endpoint: &str, account: &TestAccount) -> C
     fetch_two_factor_status_with_token(endpoint, &account.auth_token).await
 }
 
-async fn fetch_two_factor_status_with_token(
-    endpoint: &str,
-    auth_token: &str,
-) -> CliResult<bool> {
+async fn fetch_two_factor_status_with_token(endpoint: &str, auth_token: &str) -> CliResult<bool> {
     let client = accounts_client(endpoint)?;
     client.set_auth_token(Some(auth_token.to_string()));
     client.get_two_factor_status().await

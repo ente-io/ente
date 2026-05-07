@@ -138,7 +138,7 @@ class TripMemoriesCalculatorV2 {
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
     required Iterable<ToShowMemory> cachedTripMemories,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -158,7 +158,13 @@ class TripMemoriesCalculatorV2 {
 
     final baseLocations = _detectBaseLocations(
       allFiles,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
+    );
+    final baseCountriesToExclude = _baseCountriesToExcludeFromTripTitles(
+      baseLocations,
+      allFileIdsToFile,
+      cities,
+      seenTimes,
     );
 
     // ── Phase 2: Trip detection ──
@@ -235,10 +241,11 @@ class TripMemoriesCalculatorV2 {
         baseLocations,
         validTrips,
         allFileIdsToFile,
+        baseCountriesToExclude,
         nowInMicroseconds,
         windowEnd,
         seenTimes: seenTimes,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
         mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -255,8 +262,9 @@ class TripMemoriesCalculatorV2 {
       currentTime,
       nowInMicroseconds,
       shownTrips,
+      baseCountriesToExclude: baseCountriesToExclude,
       cachedTripMemories: cachedTripMemories,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
       mlEnabled: mlEnabled,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
@@ -271,17 +279,14 @@ class TripMemoriesCalculatorV2 {
 
   static List<BaseLocation> _detectBaseLocations(
     Iterable<EnteFile> allFiles, {
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
   }) {
     final filesWithLocation = allFiles
         .where((file) => file.hasLocation)
         .toList()
       ..sort((a, b) => a.creationTime!.compareTo(b.creationTime!));
     final smallRadiusClusters = _mergeNearbyLocationClusters(
-      _clusterByLocation(
-        filesWithLocation,
-        radius: baseRadius,
-      ),
+      _clusterByLocation(filesWithLocation, radius: baseRadius),
       radius: _baseMergeRadius,
     );
 
@@ -305,7 +310,7 @@ class TripMemoriesCalculatorV2 {
               .map(
                 (file) => SmartMemoriesService._memoryFileId(
                   file,
-                  isOfflineMode: isOfflineMode,
+                  isLocalGalleryMode: isLocalGalleryMode,
                 ),
               )
               .whereType<int>()
@@ -548,9 +553,7 @@ class TripMemoriesCalculatorV2 {
 
   static List<TripMemory> _mergeNearbyTrips(List<TripMemory> trips) {
     final sortedTrips = List<TripMemory>.from(trips)
-      ..sort(
-        (a, b) => a.firstCreationTime!.compareTo(b.firstCreationTime!),
-      );
+      ..sort((a, b) => a.firstCreationTime!.compareTo(b.firstCreationTime!));
     final merged = <TripMemory>[];
     for (final trip in sortedTrips) {
       final tripFirst = DateTime.fromMicrosecondsSinceEpoch(
@@ -582,12 +585,17 @@ class TripMemoriesCalculatorV2 {
         final mergedSpanDays = mergedLast.difference(mergedFirst).inDays;
         if (timeClose && spaceClose && mergedSpanDays <= _maxTripDays) {
           final combinedMemories = other.memories + trip.memories;
-          final mergedLocation =
-              _representativeLocationFromMemories(combinedMemories);
-          final mergedFirstCreationTime =
-              min(other.firstCreationTime!, trip.firstCreationTime!);
-          final mergedLastCreationTime =
-              max(other.lastCreationTime!, trip.lastCreationTime!);
+          final mergedLocation = _representativeLocationFromMemories(
+            combinedMemories,
+          );
+          final mergedFirstCreationTime = min(
+            other.firstCreationTime!,
+            trip.firstCreationTime!,
+          );
+          final mergedLastCreationTime = max(
+            other.lastCreationTime!,
+            trip.lastCreationTime!,
+          );
           merged[i] = TripMemory(
             combinedMemories,
             0,
@@ -727,8 +735,9 @@ class TripMemoriesCalculatorV2 {
     TripMemory trip,
     DateTime currentTime,
   ) {
-    final tripStart =
-        DateTime.fromMicrosecondsSinceEpoch(trip.firstCreationTime!);
+    final tripStart = DateTime.fromMicrosecondsSinceEpoch(
+      trip.firstCreationTime!,
+    );
     final tripEnd = DateTime.fromMicrosecondsSinceEpoch(trip.lastCreationTime!);
     final yearOffset = tripEnd.year - tripStart.year;
     _TripAnniversaryWindow? bestWindow;
@@ -859,10 +868,11 @@ class TripMemoriesCalculatorV2 {
     List<BaseLocation> baseLocations,
     List<TripMemory> validTrips,
     Map<int, EnteFile> allFileIdsToFile,
+    Set<String> baseCountriesToExclude,
     int nowInMicroseconds,
     int windowEnd, {
     required Map<int, int> seenTimes,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool mlEnabled,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -901,10 +911,11 @@ class TripMemoriesCalculatorV2 {
       final String? locationName = SmartMemoriesService._tryFindLocationName(
         trip.memories,
         cities,
+        excludedCountryNames: baseCountriesToExclude,
       );
       final photoSelection = await SmartMemoriesService._bestSelection(
         trip.memories,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
         mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -933,8 +944,9 @@ class TripMemoriesCalculatorV2 {
     DateTime currentTime,
     int nowInMicroseconds,
     List<TripsShownLog> shownTrips, {
+    required Set<String> baseCountriesToExclude,
     required Iterable<ToShowMemory> cachedTripMemories,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -947,8 +959,10 @@ class TripMemoriesCalculatorV2 {
       cachedTripMemories,
       currentTime,
     );
-    final remainingSlots =
-        max(0, kTripSurfaceSlots - activeTripIdentityKeys.length);
+    final remainingSlots = max(
+      0,
+      kTripSurfaceSlots - activeTripIdentityKeys.length,
+    );
     if (remainingSlots == 0 || validTrips.isEmpty) {
       return (memoryResults, baseLocations);
     }
@@ -1010,7 +1024,7 @@ class TripMemoriesCalculatorV2 {
 
     final currentShownCount =
         activeTripIdentityKeys.length + selectedCandidates.length;
-    if (isOfflineMode && currentShownCount == 0 && candidates.isNotEmpty) {
+    if (isLocalGalleryMode && currentShownCount == 0 && candidates.isNotEmpty) {
       final fallbackSeasonalCandidates = candidates
           .where(
             (candidate) =>
@@ -1036,15 +1050,17 @@ class TripMemoriesCalculatorV2 {
         currentTime.add(_tripDisplayDuration).microsecondsSinceEpoch;
     for (final candidate in selectedCandidates) {
       final trip = candidate.trip;
-      final year =
-          DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime()).year;
+      final year = DateTime.fromMicrosecondsSinceEpoch(
+        trip.averageCreationTime(),
+      ).year;
       final String? locationName = SmartMemoriesService._tryFindLocationName(
         trip.memories,
         cities,
+        excludedCountryNames: baseCountriesToExclude,
       );
       final photoSelection = await SmartMemoriesService._bestSelection(
         trip.memories,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
         mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -1062,5 +1078,39 @@ class TripMemoriesCalculatorV2 {
       );
     }
     return (memoryResults, baseLocations);
+  }
+
+  static Set<String> _baseCountriesToExcludeFromTripTitles(
+    List<BaseLocation> baseLocations,
+    Map<int, EnteFile> allFileIdsToFile,
+    List<City> cities,
+    Map<int, int> seenTimes,
+  ) {
+    final excludedCountries = <String>{};
+    for (final baseLocation in baseLocations) {
+      final files = baseLocation.fileIDs
+          .map((fileID) => allFileIdsToFile[fileID])
+          .whereType<EnteFile>()
+          .toList();
+      if (files.isEmpty) {
+        continue;
+      }
+
+      final countryName = SmartMemoriesService._tryFindCountryName(
+        Memory.fromFiles(files, seenTimes),
+        cities,
+      );
+      if (countryName == null) {
+        continue;
+      }
+
+      final normalizedCountry = SmartMemoriesService._normalizePlaceName(
+        countryName,
+      );
+      if (normalizedCountry.isNotEmpty) {
+        excludedCountries.add(normalizedCountry);
+      }
+    }
+    return excludedCountries;
   }
 }

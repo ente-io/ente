@@ -19,12 +19,12 @@ func TestDeleteTableDataDeletesContactsAndAttachmentsForUser(t *testing.T) {
 
 	targetUserID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       1,
-		Email:        "target@ente.io",
+		Email:        "target@ente.com",
 		CreationTime: 1,
 	})
 	otherUserID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       2,
-		Email:        "other@ente.io",
+		Email:        "other@ente.com",
 		CreationTime: 1,
 	})
 

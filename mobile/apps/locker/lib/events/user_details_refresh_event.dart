@@ -6,5 +6,4 @@ import "package:ente_events/models/event.dart";
 /// - File uploads complete (PDF/text files or info items)
 /// - Files are moved to trash
 /// - Files are restored from trash
-/// - Settings drawer is opened
 class UserDetailsRefreshEvent extends Event {}

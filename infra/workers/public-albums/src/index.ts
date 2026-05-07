@@ -4,7 +4,7 @@ export default {
     async fetch(request: Request) {
         switch (request.method) {
             case "OPTIONS":
-                return handleOPTIONS(request);
+                return handleOPTIONS();
             case "GET":
                 return handleGET(request);
             default:
@@ -14,10 +14,8 @@ export default {
     },
 } satisfies ExportedHandler;
 
-const handleOPTIONS = (request: Request) => {
-    const origin = request.headers.get("Origin");
-    if (!isAllowedOrigin(origin)) console.warn("Unknown origin", origin);
-    return new Response("", {
+const handleOPTIONS = () =>
+    new Response("", {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -26,20 +24,6 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Max-Age": "86400",
         },
     });
-};
-
-const isAllowedOrigin = (origin: string | null) => {
-    const allowed = ["albums.ente.io", "albums.ente.sh", "localhost"];
-
-    if (!origin) return false;
-    try {
-        const url = new URL(origin);
-        return allowed.includes(url.hostname);
-    } catch {
-        // origin is likely an invalid URL
-        return false;
-    }
-};
 
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
@@ -79,7 +63,7 @@ const handleGET = async (request: Request) => {
     };
 
     let response = await fetch(
-        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`,
+        `https://api.ente.com/public-collection/files${pathname}${fileID}?${params.toString()}`,
         { headers },
     );
 

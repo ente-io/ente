@@ -1,19 +1,15 @@
 [package]
-name = "ente_media_inspector"
+name = "ente_photos"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+ente_image = { path = "../crates/image" }
 quick-xml = "0.37"
 usearch = "2.21.3"
 fast_image_resize = { version = "5.5.0", features = ["image", "rayon"] }
 image = { version = "0.25.5", default-features = true }
 imageproc = "0.25.0"
-kamadak-exif = "0.6.1"
-libheic-rs = { git = "https://github.com/laurens-pilot/libheic-rs.git", tag = "v0.1.5", features = [
-    "image-integration",
-] }
-tiff = "0.10.3"
 nalgebra = "0.33.2"
 ndarray = "0.16.1"
 half = "2.1"

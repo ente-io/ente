@@ -1,14 +1,18 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/support/report_issue_page.dart";
+import "package:photos/ui/tools/debug/log_file_viewer.dart";
 import "package:photos/utils/email_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
@@ -109,6 +113,21 @@ class HelpSupportPage extends StatelessWidget {
                           );
                         },
                       ),
+                      if (flagService.internalUser || kDebugMode) ...[
+                        const SizedBox(height: 8),
+                        MenuItemWidgetNew(
+                          title: l10n.viewLogs,
+                          leadingIconWidget: _buildIconWidget(
+                            context,
+                            HugeIcons.strokeRoundedFile01,
+                          ),
+                          trailingIcon: Icons.chevron_right_outlined,
+                          trailingIconIsMuted: true,
+                          onTap: () async {
+                            await _viewLogs(context);
+                          },
+                        ),
+                      ],
                       _SupportLink(
                         label: l10n.exportLogs,
                         onTap: () async {
@@ -218,6 +237,22 @@ class HelpSupportPage extends StatelessWidget {
         builder: (BuildContext context) {
           return WebPage(title, url);
         },
+      ),
+    );
+  }
+
+  Future<void> _viewLogs(BuildContext context) async {
+    final logFile = SuperLogging.logFile;
+    if (logFile == null) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).somethingWentWrong,
+      );
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => LogFileViewer(logFile),
       ),
     );
   }

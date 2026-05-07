@@ -1,7 +1,10 @@
 pub mod auth;
 pub mod contacts;
 pub mod legacy;
+pub mod legacy_kit;
+pub mod suite;
 
+use std::collections::HashSet;
 use uuid::Uuid;
 
 pub fn endpoint() -> String {
@@ -23,6 +26,43 @@ pub async fn assert_server_or_skip(endpoint: &str, test_name: &str) -> bool {
             eprintln!("skipping {test_name}: could not reach {ping_url}: {error}");
             false
         }
+    }
+}
+
+pub fn assert_stage_enabled_or_skip(stage_name: &str) -> bool {
+    let normalized_stage = stage_name.trim().to_ascii_lowercase();
+    if let Some(only) = env_list("ENTE_E2E_ONLY") {
+        if !only.contains(&normalized_stage) {
+            eprintln!(
+                "skipping {stage_name}: not selected by ENTE_E2E_ONLY={}",
+                std::env::var("ENTE_E2E_ONLY").unwrap_or_default()
+            );
+            return false;
+        }
+    }
+    if let Some(skip) = env_list("ENTE_E2E_SKIP") {
+        if skip.contains(&normalized_stage) {
+            eprintln!(
+                "skipping {stage_name}: selected by ENTE_E2E_SKIP={}",
+                std::env::var("ENTE_E2E_SKIP").unwrap_or_default()
+            );
+            return false;
+        }
+    }
+    true
+}
+
+fn env_list(name: &str) -> Option<HashSet<String>> {
+    let raw = std::env::var(name).ok()?;
+    let values = raw
+        .split(',')
+        .map(|value| value.trim().to_ascii_lowercase())
+        .filter(|value| !value.is_empty())
+        .collect::<HashSet<_>>();
+    if values.is_empty() {
+        None
+    } else {
+        Some(values)
     }
 }
 

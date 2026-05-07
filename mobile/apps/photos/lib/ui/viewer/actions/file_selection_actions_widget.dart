@@ -90,8 +90,9 @@ class _FileSelectionActionsWidgetState
 
   bool get _canRemoveOthersFiles =>
       widget.collection != null &&
-      CollectionsService.instance
-          .canRemoveFilesFromAllParticipants(widget.collection!);
+      CollectionsService.instance.canRemoveFilesFromAllParticipants(
+        widget.collection!,
+      );
 
   @override
   void initState() {
@@ -142,14 +143,14 @@ class _FileSelectionActionsWidgetState
         ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
-    final bool hasUploadedFileIDs =
-        widget.selectedFiles.files.any((file) => file.uploadedFileID != null);
-    final showCollageOption = CollageCreatorPage.isValidCount(
-          widget.selectedFiles.files.length,
-        ) &&
-        !widget.selectedFiles.files.any(
-          (element) => element.fileType == FileType.video,
-        );
+    final bool hasUploadedFileIDs = widget.selectedFiles.files.any(
+      (file) => file.uploadedFileID != null,
+    );
+    final showCollageOption =
+        CollageCreatorPage.isValidCount(widget.selectedFiles.files.length) &&
+            !widget.selectedFiles.files.any(
+              (element) => element.fileType == FileType.video,
+            );
     final showDownloadOption = hasUploadedFileIDs;
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
@@ -230,8 +231,9 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.remove_circle_outline,
-            labelText: AppLocalizations.of(context)
-                .notPersonLabel(name: widget.person!.data.name),
+            labelText: AppLocalizations.of(
+              context,
+            ).notPersonLabel(name: widget.person!.data.name),
             onTap: _onNotpersonClicked,
           ),
         );
@@ -258,7 +260,7 @@ class _FileSelectionActionsWidgetState
 
       final showUploadIcon = widget.type == GalleryType.localFolder &&
           split.ownedByCurrentUser.isEmpty;
-      if (widget.type.showAddToAlbum() && !isOfflineMode) {
+      if (widget.type.showAddToAlbum() && !isLocalGalleryMode) {
         if (showUploadIcon) {
           items.add(
             SelectionActionButton(
@@ -552,9 +554,7 @@ class _FileSelectionActionsWidgetState
   Future<void> _editLocation() async {
     await showBarModalBottomSheet(
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(5),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
       ),
       backgroundColor: getEnteColorScheme(context).backgroundElevated,
       barrierColor: backdropFaintDark,
@@ -572,37 +572,33 @@ class _FileSelectionActionsWidgetState
             width: 40,
             decoration: const BoxDecoration(
               color: backgroundElevated2Light,
-              borderRadius: BorderRadius.all(
-                Radius.circular(5),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(5)),
             ),
           ),
         ],
       ),
       context: context,
       builder: (context) {
-        return UpdateLocationDataWidget(
-          widget.selectedFiles.files.toList(),
-        );
+        return UpdateLocationDataWidget(widget.selectedFiles.files.toList());
       },
     );
   }
 
   Future<void> _shareSelectedFiles() async {
-    shareSelected(
-      context,
-      shareButtonKey,
-      widget.selectedFiles.files.toList(),
-    );
+    shareSelected(context, shareButtonKey, widget.selectedFiles.files.toList());
     widget.selectedFiles.clearAll();
   }
 
   Future<void> _moveFiles() async {
     if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
-      widget.selectedFiles
-          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.pendingUploads.toSet(),
+        skipNotify: true,
+      );
+      widget.selectedFiles.unSelectAll(
+        split.ownedByOtherUsers.toSet(),
+        skipNotify: true,
+      );
     }
     showCollectionActionSheet(
       context,
@@ -648,17 +644,11 @@ class _FileSelectionActionsWidgetState
       await CollectionsService.instance.rejectDeleteSuggestions(fileIDs);
       widget.selectedFiles.clearAll();
       Bus.instance.fire(
-        FilesUpdatedEvent(
-          const [],
-          source: "reject-delete-suggestions",
-        ),
+        FilesUpdatedEvent(const [], source: "reject-delete-suggestions"),
       );
     } catch (e, s) {
       _logger.warning("Failed to reject delete suggestions", e, s);
-      await showGenericErrorDialog(
-        context: context,
-        error: e,
-      );
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 
@@ -691,12 +681,16 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _removeFilesFromAlbum() async {
     if (split.pendingUploads.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.pendingUploads.toSet(),
+        skipNotify: true,
+      );
     }
     if (!_canRemoveOthersFiles && split.ownedByOtherUsers.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.ownedByOtherUsers.toSet(),
+        skipNotify: true,
+      );
     }
     final bool removingOthersFile =
         _canRemoveOthersFiles && split.ownedByOtherUsers.isNotEmpty;
@@ -751,8 +745,9 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
-    final namedPersons =
-        await AddFilesToPersonPage.prefetchNamedPersons(context);
+    final namedPersons = await AddFilesToPersonPage.prefetchNamedPersons(
+      context,
+    );
     if (!mounted) {
       return;
     }
@@ -761,10 +756,7 @@ class _FileSelectionActionsWidgetState
     }
     final result = await routeToPage(
       context,
-      AddFilesToPersonPage(
-        files: filesWithIds,
-        initialPersons: namedPersons,
-      ),
+      AddFilesToPersonPage(files: filesWithIds, initialPersons: namedPersons),
       forceCustomPageRoute: true,
     );
     if (result is! ManualPersonAssignmentResult) {
@@ -866,10 +858,14 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _onUnhideClick() async {
     if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
-      widget.selectedFiles
-          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.pendingUploads.toSet(),
+        skipNotify: true,
+      );
+      widget.selectedFiles.unSelectAll(
+        split.ownedByOtherUsers.toSet(),
+        skipNotify: true,
+      );
     }
     showCollectionActionSheet(
       context,
@@ -919,8 +915,10 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    final updatedPerson =
-        await PersonService.instance.updateAvatar(widget.person!, file);
+    final updatedPerson = await PersonService.instance.updateAvatar(
+      widget.person!,
+      file,
+    );
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
@@ -956,8 +954,9 @@ class _FileSelectionActionsWidgetState
             isInAlert: true,
           ),
         ],
-        body: AppLocalizations.of(context)
-            .selectedItemsWillBeRemovedFromThisPerson,
+        body: AppLocalizations.of(
+          context,
+        ).selectedItemsWillBeRemovedFromThisPerson,
         actionSheetType: ActionSheetType.defaultActionSheet,
       );
       if (actionResult?.action != null) {
@@ -1002,8 +1001,9 @@ class _FileSelectionActionsWidgetState
           isInAlert: true,
         ),
       ],
-      body:
-          AppLocalizations.of(context).selectedItemsWillBeRemovedFromThisPerson,
+      body: AppLocalizations.of(
+        context,
+      ).selectedItemsWillBeRemovedFromThisPerson,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null) {
@@ -1043,10 +1043,7 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _permanentlyDelete() async {
-    if (await deleteFromTrash(
-      context,
-      widget.selectedFiles.files.toList(),
-    )) {
+    if (await deleteFromTrash(context, widget.selectedFiles.files.toList())) {
       widget.selectedFiles.clearAll();
     }
   }
@@ -1102,9 +1099,7 @@ class _FileSelectionActionsWidgetState
 
     final l10n = AppLocalizations.of(context);
     final existingLocalFolderNames = await Future.wait(
-      files.map(
-        (file) => getExistingLocalFolderNameForDownloadSkipToast(file),
-      ),
+      files.map((file) => getExistingLocalFolderNameForDownloadSkipToast(file)),
     );
 
     final filesToDownload = <EnteFile>[];
@@ -1193,11 +1188,7 @@ class _FileSelectionActionsWidgetState
           fileCount: skippedFilesCount,
         );
       }
-      showToast(
-        context,
-        finalMessage,
-        iosLongToastLengthInSec: 4,
-      );
+      showToast(context, finalMessage, iosLongToastLengthInSec: 4);
     }
 
     if (!flagService.internalUser &&

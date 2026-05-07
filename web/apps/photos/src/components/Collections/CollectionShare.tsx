@@ -1585,10 +1585,10 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
 
         void (async () => {
             try {
-                const publicURL = await createPublicURL(
-                    collection.id,
-                    attributes,
-                );
+                const publicURL = await createPublicURL(collection.id, {
+                    enableJoin: false,
+                    ...attributes,
+                });
                 setPending("");
                 setPublicURL(publicURL);
                 onLinkCreated();
@@ -1802,7 +1802,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     const embedURL = resolvedURL
         ? resolvedURL.replace(
               new URL(resolvedURL).origin,
-              embedBaseURL || "https://embed.ente.io",
+              embedBaseURL || "https://embed.ente.com",
           )
         : undefined;
     const iframeHTML = embedURL

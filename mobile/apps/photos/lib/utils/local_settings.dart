@@ -1,37 +1,30 @@
 import "dart:io";
 
 import 'package:flutter/foundation.dart';
+import 'package:home_widget/home_widget.dart' as hw;
 import 'package:photos/app_mode.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AlbumSortKey {
-  albumName,
-  newestPhoto,
-  lastUpdated,
-}
+enum AlbumSortKey { albumName, newestPhoto, lastUpdated }
 
-enum AlbumSortDirection {
-  ascending,
-  descending,
-}
+enum AlbumSortDirection { ascending, descending }
 
-enum AlbumViewType {
-  grid,
-  list,
-}
+enum AlbumViewType { grid, list }
 
-enum PeopleSortKey {
-  mostPhotos,
-  name,
-  lastUpdated,
-}
+enum PeopleSortKey { mostPhotos, name, lastUpdated }
 
-/// Bit positions for offline-related boolean flags stored as a single integer.
+/// Bit positions for per-widget-type "hide text" flags stored as a single
+/// integer. The same integer is mirrored to the home_widget plugin's data
+/// store so the native (Android/iOS) widget providers can read it directly.
 /// IMPORTANT: Never reorder or remove values. Only append new values at the end.
-enum OfflineFlag {
+enum WidgetHideTextFlag { memory, album, people }
+
+/// Bit positions for local-gallery boolean flags stored as a single integer.
+/// IMPORTANT: Never reorder or remove values. Only append new values at the end.
+enum LocalGalleryFlag {
   mlConsent,
   mapEnabled,
   // Reserved: previously getStartedBannerDismissed. Kept to preserve bit
@@ -41,7 +34,7 @@ enum OfflineFlag {
   nameFaceBannerDismissed,
   seenMLEnablingBanner,
   mlProgressBannerDismissed,
-  offlineSettingsBannerDismissed,
+  localGallerySettingsBannerDismissed,
 }
 
 class LocalSettings {
@@ -49,7 +42,8 @@ class LocalSettings {
   static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
-  static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
+  static const _kLocalGalleryMLLocalIndexingEnabled =
+      "ls.offline_ml_local_indexing";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
@@ -93,13 +87,22 @@ class LocalSettings {
   static const _kSemanticSearchExactInRustEnabled =
       "ml_debug.semantic_search_exact_in_rust";
   static const _kAppMode = "ls.app_mode";
-  static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
+  static const _kShowLocalGalleryModeOption = "ls.show_offline_mode_option";
 
-  static const _kOfflineFlags = "ls.offline_flags";
-  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
-  static const _kOfflineGetStartedBannerDismissedAt =
+  static const _kWidgetHideTextFlags = "ls.widget_hide_text_flags";
+
+  /// Key used by the native (Android/iOS) widget providers to read the
+  /// mirrored copy of the widget hide-text bitmask from the home_widget
+  /// data store. Must stay in sync with the native code.
+  static const _kWidgetHideTextFlagsNativeKey = "widgetHideTitleFlags";
+
+  static const _kLocalGalleryFlags = "ls.offline_flags";
+  static const _kLocalGalleryMapEnabled = "ls.offline_map_enabled";
+  static const _kLocalGalleryGetStartedBannerDismissedAt =
       "ls.offline_get_started_banner_dismissed_at";
-  static const _kOfflineGetStartedBannerDismissDuration = Duration(days: 7);
+  static const _kLocalGalleryGetStartedBannerDismissDuration = Duration(
+    days: 7,
+  );
 
   final SharedPreferences _prefs;
 
@@ -107,19 +110,41 @@ class LocalSettings {
 
   LocalSettings(this._prefs);
 
-  bool _getFlag(OfflineFlag flag) {
-    final bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+  bool _getFlag(LocalGalleryFlag flag) {
+    final bitmap = _prefs.getInt(_kLocalGalleryFlags) ?? 0;
     return (bitmap & (1 << flag.index)) != 0;
   }
 
-  Future<void> _setFlag(OfflineFlag flag, bool value) {
-    var bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+  Future<void> _setFlag(LocalGalleryFlag flag, bool value) {
+    var bitmap = _prefs.getInt(_kLocalGalleryFlags) ?? 0;
     if (value) {
       bitmap |= (1 << flag.index);
     } else {
       bitmap &= ~(1 << flag.index);
     }
-    return _prefs.setInt(_kOfflineFlags, bitmap);
+    return _prefs.setInt(_kLocalGalleryFlags, bitmap);
+  }
+
+  bool isWidgetTextHidden(WidgetHideTextFlag flag) {
+    final bitmap = _prefs.getInt(_kWidgetHideTextFlags) ?? 0;
+    return (bitmap & (1 << flag.index)) != 0;
+  }
+
+  Future<void> setWidgetTextHidden(WidgetHideTextFlag flag, bool value) async {
+    var bitmap = _prefs.getInt(_kWidgetHideTextFlags) ?? 0;
+    if (value) {
+      bitmap |= (1 << flag.index);
+    } else {
+      bitmap &= ~(1 << flag.index);
+    }
+    await _prefs.setInt(_kWidgetHideTextFlags, bitmap);
+    // Mirror into the home_widget data store so the native Android/iOS
+    // widget providers can read the flag directly from their sandboxed
+    // storage (widget SharedPreferences file / app-group UserDefaults).
+    await hw.HomeWidget.saveWidgetData<int>(
+      _kWidgetHideTextFlagsNativeKey,
+      bitmap,
+    );
   }
 
   AlbumSortKey albumSortKey() {
@@ -251,24 +276,25 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get offlineMLConsent => _getFlag(OfflineFlag.mlConsent);
+  bool get localGalleryMLConsent => _getFlag(LocalGalleryFlag.mlConsent);
 
-  Future<void> setOfflineMLConsent(bool value) =>
-      _setFlag(OfflineFlag.mlConsent, value);
+  Future<void> setLocalGalleryMLConsent(bool value) =>
+      _setFlag(LocalGalleryFlag.mlConsent, value);
 
-  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? true;
+  bool get localGalleryMapEnabled =>
+      _prefs.getBool(_kLocalGalleryMapEnabled) ?? true;
 
-  Future<void> setOfflineMapEnabled(bool value) async {
-    await _prefs.setBool(_kOfflineMapEnabled, value);
-    await _setFlag(OfflineFlag.mapEnabled, value);
+  Future<void> setLocalGalleryMapEnabled(bool value) async {
+    await _prefs.setBool(_kLocalGalleryMapEnabled, value);
+    await _setFlag(LocalGalleryFlag.mapEnabled, value);
   }
 
-  String get _mlLocalIndexingKey => appMode == AppMode.offline
-      ? _kOfflineMLLocalIndexingEnabled
+  String get _mlLocalIndexingKey => appMode == AppMode.localGallery
+      ? _kLocalGalleryMLLocalIndexingEnabled
       : _kisMLLocalIndexingEnabled;
 
-  bool get _defaultMLLocalIndexingEnabled => appMode == AppMode.offline
-      ? enoughRamForOfflineLocalIndexing
+  bool get _defaultMLLocalIndexingEnabled => appMode == AppMode.localGallery
+      ? enoughRamForLocalGalleryLocalIndexing
       : enoughRamForLocalIndexing;
 
   bool get isMLLocalIndexingEnabled {
@@ -360,9 +386,9 @@ class LocalSettings {
   }
 
   bool get hasSeenMLEnablingBanner =>
-      _getFlag(OfflineFlag.seenMLEnablingBanner);
+      _getFlag(LocalGalleryFlag.seenMLEnablingBanner);
   Future<void> setHasSeenMLEnablingBanner() =>
-      _setFlag(OfflineFlag.seenMLEnablingBanner, true);
+      _setFlag(LocalGalleryFlag.seenMLEnablingBanner, true);
 
   bool hasSeenMemoryLane(String personId) {
     final seenIds = _prefs.getStringList(_memoryLaneSeenKey);
@@ -454,8 +480,10 @@ class LocalSettings {
     await _prefs.setBool(_kBGDebugNotificationsEnabled, value);
   }
 
-  bool get isCFUploadProxyEnabled =>
-      _prefs.getBool(_kCFUploadProxyEnabled) ?? true;
+  /// User's explicit override for the Cloudflare upload proxy toggle.
+  /// `null` means the user has not chosen — callers should fall back to
+  /// `flagService.cloudflareUploadWorker` (the rollout default).
+  bool? get cfUploadProxyEnabled => _prefs.getBool(_kCFUploadProxyEnabled);
 
   Future<void> setCFUploadProxyEnabled(bool value) async {
     await _prefs.setBool(_kCFUploadProxyEnabled, value);
@@ -511,7 +539,7 @@ class LocalSettings {
       return _cachedAppMode!;
     }
 
-    _cachedAppMode = AppMode.online;
+    _cachedAppMode = AppMode.enteGallery;
     return _cachedAppMode!;
   }
 
@@ -522,53 +550,53 @@ class LocalSettings {
     _cachedAppMode = mode;
   }
 
-  bool get showOfflineModeOption =>
-      _prefs.getBool(_kShowOfflineModeOption) ?? true;
+  bool get showLocalGalleryModeOption =>
+      _prefs.getBool(_kShowLocalGalleryModeOption) ?? true;
 
-  Future<void> setShowOfflineModeOption(bool value) async {
-    await _prefs.setBool(_kShowOfflineModeOption, value);
+  Future<void> setShowLocalGalleryModeOption(bool value) async {
+    await _prefs.setBool(_kShowLocalGalleryModeOption, value);
   }
 
-  bool get isOfflineGetStartedBannerDismissed {
+  bool get isLocalGalleryGetStartedBannerDismissed {
     final dismissedAtMs =
-        _prefs.getInt(_kOfflineGetStartedBannerDismissedAt) ?? 0;
+        _prefs.getInt(_kLocalGalleryGetStartedBannerDismissedAt) ?? 0;
     if (dismissedAtMs == 0) return false;
     final elapsed = DateTime.now().millisecondsSinceEpoch - dismissedAtMs;
     return elapsed >= 0 &&
-        elapsed < _kOfflineGetStartedBannerDismissDuration.inMilliseconds;
+        elapsed < _kLocalGalleryGetStartedBannerDismissDuration.inMilliseconds;
   }
 
-  Future<void> setOfflineGetStartedBannerDismissed(bool value) {
+  Future<void> setLocalGalleryGetStartedBannerDismissed(bool value) {
     if (value) {
       return _prefs.setInt(
-        _kOfflineGetStartedBannerDismissedAt,
+        _kLocalGalleryGetStartedBannerDismissedAt,
         DateTime.now().millisecondsSinceEpoch,
       );
     }
-    return _prefs.remove(_kOfflineGetStartedBannerDismissedAt);
+    return _prefs.remove(_kLocalGalleryGetStartedBannerDismissedAt);
   }
 
   bool get isMLProgressBannerDismissed =>
-      _getFlag(OfflineFlag.mlProgressBannerDismissed);
+      _getFlag(LocalGalleryFlag.mlProgressBannerDismissed);
 
   Future<void> setMLProgressBannerDismissed(bool value) =>
-      _setFlag(OfflineFlag.mlProgressBannerDismissed, value);
+      _setFlag(LocalGalleryFlag.mlProgressBannerDismissed, value);
 
-  bool get isOfflineFacesBannerDismissed =>
-      _getFlag(OfflineFlag.facesBannerDismissed);
+  bool get isLocalGalleryFacesBannerDismissed =>
+      _getFlag(LocalGalleryFlag.facesBannerDismissed);
 
-  Future<void> setOfflineFacesBannerDismissed(bool value) =>
-      _setFlag(OfflineFlag.facesBannerDismissed, value);
+  Future<void> setLocalGalleryFacesBannerDismissed(bool value) =>
+      _setFlag(LocalGalleryFlag.facesBannerDismissed, value);
 
-  bool get isOfflineNameFaceBannerDismissed =>
-      _getFlag(OfflineFlag.nameFaceBannerDismissed);
+  bool get isLocalGalleryNameFaceBannerDismissed =>
+      _getFlag(LocalGalleryFlag.nameFaceBannerDismissed);
 
-  Future<void> setOfflineNameFaceBannerDismissed(bool value) =>
-      _setFlag(OfflineFlag.nameFaceBannerDismissed, value);
+  Future<void> setLocalGalleryNameFaceBannerDismissed(bool value) =>
+      _setFlag(LocalGalleryFlag.nameFaceBannerDismissed, value);
 
-  bool get isOfflineSettingsBannerDismissed =>
-      _getFlag(OfflineFlag.offlineSettingsBannerDismissed);
+  bool get isLocalGallerySettingsBannerDismissed =>
+      _getFlag(LocalGalleryFlag.localGallerySettingsBannerDismissed);
 
-  Future<void> setOfflineSettingsBannerDismissed(bool value) =>
-      _setFlag(OfflineFlag.offlineSettingsBannerDismissed, value);
+  Future<void> setLocalGallerySettingsBannerDismissed(bool value) =>
+      _setFlag(LocalGalleryFlag.localGallerySettingsBannerDismissed, value);
 }

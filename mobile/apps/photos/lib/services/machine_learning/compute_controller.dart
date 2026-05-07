@@ -64,6 +64,7 @@ class ComputeController {
   void _setDeviceHealth(bool healthy) {
     if (_isDeviceHealthy == healthy) return;
     _isDeviceHealthy = healthy;
+    _logger.info("Device health changed, healthy: $healthy");
     Bus.instance.fire(DeviceHealthChangedEvent(healthy));
   }
 
@@ -299,21 +300,22 @@ class ComputeController {
 
   void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {
     _androidLastBatteryInfo = batteryInfo;
-    _logger.info("Battery info: ${batteryInfo!.toJson()}");
     _setDeviceHealth(_computeIsAndroidDeviceHealthy());
     _fireControlEvent();
   }
 
   void _oniOSBatteryStateUpdate(IosBatteryInfo? batteryInfo) {
     _iosLastBatteryInfo = batteryInfo;
-    _logger.info("Battery info: ${batteryInfo!.toJson()}");
     _setDeviceHealth(_computeIsiOSDeviceHealthy());
     _fireControlEvent();
   }
 
   void _onThermalStateUpdate(ThermalStatus? thermalStatus) {
+    final changed = _lastThermalStatus != thermalStatus;
     _lastThermalStatus = thermalStatus;
-    _logger.info("Thermal status: $thermalStatus");
+    if (changed) {
+      _logger.info("Thermal status changed, status: $thermalStatus");
+    }
     _setDeviceHealth(
       Platform.isAndroid
           ? _computeIsAndroidDeviceHealthy()

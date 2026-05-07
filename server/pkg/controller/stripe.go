@@ -215,7 +215,7 @@ func (c *StripeController) findHandlerForEvent(event stripe.Event) func(event st
 func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var session stripe.CheckoutSession
 	json.Unmarshal(event.Data.Raw, &session)
-	if session.ClientReferenceID != "" { // via payments.ente.io, where we inserted the userID
+	if session.ClientReferenceID != "" { // via payments.ente.com, where we inserted the userID
 		userID, _ := strconv.ParseInt(session.ClientReferenceID, 10, 64)
 		newSubscription, err := c.GetVerifiedSubscription(userID, session.ID)
 		if err != nil {
@@ -333,7 +333,9 @@ func (c *StripeController) handleInvoicePaid(event stripe.Event, country ente.St
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// See: Ignore webhooks received before user has been created
-			c.notifyIgnoredPaidStripeWebhook(event.Type, country, stripeSubscriptionID, invoice.Customer.ID)
+			if invoice.BillingReason != stripe.InvoiceBillingReasonSubscriptionCreate {
+				c.notifyIgnoredPaidStripeWebhook(event.Type, country, stripeSubscriptionID, invoice.Customer.ID)
+			}
 			log.Warn("Webhook is reporting an event for un-verified subscription stripeSubscriptionID:", stripeSubscriptionID)
 			return ente.StripeEventLog{}, nil
 		}

@@ -1,6 +1,7 @@
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/models/button_result.dart";
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
@@ -430,7 +431,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         },
         onError: (error, stackTrace) {
           executionState = ExecutionState.error;
-          _exception = error as Exception;
+          _exception = error is Exception ? error : Exception(error.toString());
           _debouncer.cancelDebounceTimer();
         },
       );
@@ -462,6 +463,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                       ? (widget.isInAlert ? 1 : 2)
                       : 0,
                 ), () {
+              if (!mounted) return;
               widget.isInAlert
                   ? _popWithButtonAction(
                       context,
@@ -497,8 +499,10 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (widget.isInAlert) {
         Future.delayed(
           Duration(seconds: widget.shouldShowSuccessConfirmation ? 1 : 0),
-          () =>
-              _popWithButtonAction(context, buttonAction: widget.buttonAction),
+          () {
+            if (!mounted) return;
+            _popWithButtonAction(context, buttonAction: widget.buttonAction);
+          },
         );
       }
     }
@@ -510,8 +514,13 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     Exception? exception,
   }) {
     if (mounted) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop(ButtonResult(buttonAction, exception));
+      final route = ModalRoute.of(context);
+      final navigator = Navigator.of(context);
+      if (route != null &&
+          route.isCurrent &&
+          (route is PopupRoute || route is ModalSheetRoute) &&
+          navigator.canPop()) {
+        navigator.pop(ButtonResult(buttonAction, exception));
       } else if (exception != null) {
         //This is to show the execution was unsuccessful if the dialog is manually
         //closed before the execution completes.

@@ -62,7 +62,7 @@
 			</dict>
 			<dict>
 				<key>CFBundleURLName</key>
-				<string>albums.ente.io</string>
+				<string>public-albums</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>https</string>

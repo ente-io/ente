@@ -16,7 +16,7 @@ use super::srp::SrpSession;
 #[cfg(feature = "srp")]
 use sha2::Sha256;
 #[cfg(feature = "srp")]
-use srp::{client::SrpClient as SrpClientInner, groups::G_4096};
+use srp::ClientG4096;
 
 /// Credentials derived from password for SRP authentication.
 pub struct SrpCredentials {
@@ -207,14 +207,30 @@ pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
 #[cfg(feature = "srp")]
 pub fn generate_srp_setup(kek: &[u8], srp_user_id: &str) -> Result<GeneratedSrpSetup> {
     let login_sub_key = kdf::derive_login_key_secure(kek)?;
+    generate_srp_setup_with_login_key(&login_sub_key, srp_user_id)
+}
+
+/// Generate the SRP setup payload from an already-derived login key.
+#[cfg(feature = "srp")]
+pub fn generate_srp_setup_with_login_key(
+    login_key: &[u8],
+    srp_user_id: &str,
+) -> Result<GeneratedSrpSetup> {
+    if login_key.len() != 16 {
+        return Err(AuthError::InvalidKey(format!(
+            "Login key must be 16 bytes, got {}",
+            login_key.len()
+        )));
+    }
+
     let srp_salt = keys::generate_salt();
-    let client = SrpClientInner::<Sha256>::new(&G_4096);
-    let srp_verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_sub_key, &srp_salt);
+    let client = ClientG4096::<Sha256>::new();
+    let srp_verifier = client.compute_verifier(srp_user_id.as_bytes(), login_key, &srp_salt);
 
     Ok(GeneratedSrpSetup {
         srp_salt,
         srp_verifier,
-        login_sub_key,
+        login_sub_key: SecretVec::new(login_key.to_vec()),
     })
 }
 
@@ -437,6 +453,19 @@ mod tests {
 
         assert_eq!(srp_setup.srp_salt.len(), 16);
         assert_eq!(srp_setup.login_sub_key.len(), 16);
+        assert!(!srp_setup.srp_verifier.is_empty());
+    }
+
+    #[cfg(feature = "srp")]
+    #[test]
+    fn test_generate_srp_setup_with_login_key() {
+        crate::crypto::init().unwrap();
+
+        let login_key = [1u8; 16];
+        let srp_setup = generate_srp_setup_with_login_key(&login_key, "test-user-id").unwrap();
+
+        assert_eq!(srp_setup.srp_salt.len(), 16);
+        assert_eq!(srp_setup.login_sub_key.as_ref(), login_key);
         assert!(!srp_setup.srp_verifier.is_empty());
     }
 

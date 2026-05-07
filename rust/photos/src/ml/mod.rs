@@ -7,3 +7,4 @@ pub mod pet;
 pub mod preprocess;
 pub mod runtime;
 pub mod types;
+pub mod vector_db;

@@ -3,8 +3,6 @@ use std::fs;
 use std::io::{Read, Write};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
-#[cfg(target_os = "macos")]
-use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -190,30 +188,38 @@ fn default_llm_threads() -> i32 {
     i32::try_from(threads).unwrap_or(1)
 }
 
-#[cfg(target_os = "macos")]
-fn macos_total_memory_bytes() -> Option<u64> {
-    for candidate in ["/usr/sbin/sysctl", "/sbin/sysctl", "sysctl"] {
-        let output = match Command::new(candidate).args(["-n", "hw.memsize"]).output() {
-            Ok(output) => output,
-            Err(_) => continue,
-        };
-
-        if !output.status.success() {
-            continue;
-        }
-
-        if let Ok(text) = String::from_utf8(output.stdout) {
-            if let Ok(bytes) = text.trim().parse::<u64>() {
-                return Some(bytes);
-            }
-        }
+#[cfg(unix)]
+fn total_memory_bytes() -> Option<u64> {
+    let pages = unsafe { libc::sysconf(libc::_SC_PHYS_PAGES) };
+    let page_size = unsafe { libc::sysconf(libc::_SC_PAGESIZE) };
+    if pages <= 0 || page_size <= 0 {
+        return None;
     }
 
-    None
+    u64::try_from(pages)
+        .ok()?
+        .checked_mul(u64::try_from(page_size).ok()?)
 }
 
-#[cfg(not(target_os = "macos"))]
-fn macos_total_memory_bytes() -> Option<u64> {
+#[cfg(target_os = "windows")]
+fn total_memory_bytes() -> Option<u64> {
+    use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
+
+    let mut status = MEMORYSTATUSEX {
+        dwLength: std::mem::size_of::<MEMORYSTATUSEX>() as u32,
+        ..Default::default()
+    };
+
+    let ok = unsafe { GlobalMemoryStatusEx(&mut status) };
+    if ok == 0 {
+        None
+    } else {
+        Some(status.ullTotalPhys)
+    }
+}
+
+#[cfg(not(any(unix, target_os = "windows")))]
+fn total_memory_bytes() -> Option<u64> {
     None
 }
 
@@ -1560,7 +1566,7 @@ impl llm::EventSink for LlmEventSink {
 pub fn system_info() -> SystemInfo {
     SystemInfo {
         platform: std::env::consts::OS.to_string(),
-        total_memory_bytes: macos_total_memory_bytes(),
+        total_memory_bytes: total_memory_bytes(),
     }
 }
 

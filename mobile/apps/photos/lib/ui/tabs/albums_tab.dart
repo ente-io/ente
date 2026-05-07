@@ -143,7 +143,7 @@ class _AlbumsTabState extends State<AlbumsTab>
   }
 
   bool get _isLocalGalleryMode =>
-      isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+      isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
 
   _AlbumsFilter get _effectiveFilter =>
       _isLocalGalleryMode ? _AlbumsFilter.onDevice : _filter.value;

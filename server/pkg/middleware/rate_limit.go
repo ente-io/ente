@@ -187,6 +187,13 @@ func isPublicCollectionUploadURLPath(reqPath string) bool {
 		reqPath == "/public-collection/multipart-upload-url"
 }
 
+func isAuthenticatedUploadURLPath(reqPath string) bool {
+	return reqPath == "/files/upload-urls" ||
+		reqPath == "/files/upload-url" ||
+		reqPath == "/files/multipart-upload-urls" ||
+		reqPath == "/files/multipart-upload-url"
+}
+
 // getLimiter, based on reqPath & reqMethod, return instance of limiter.Limiter which needs to
 // be applied for a request. It returns nil if the request is not rate limited
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
@@ -227,6 +234,9 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		return r.limit200ReqPerMin
 	}
 	if isPublicCollectionUploadURLPath(reqPath) {
+		return r.limit250ReqPerMin
+	}
+	if isAuthenticatedUploadURLPath(reqPath) {
 		return r.limit250ReqPerMin
 	}
 	return nil

@@ -32,19 +32,24 @@ class FileUploadGateway {
     );
   }
 
-  /// Gets multiple upload URLs (legacy endpoint without checksums).
+  /// Validates that the user can upload without minting an upload URL.
   ///
-  /// [count] - The number of upload URLs to fetch.
-  ///
-  /// Returns a list of [UploadURL] objects.
-  Future<List<UploadURL>> getUploadUrls(int count) async {
-    final response = await _enteDio.get(
-      "/files/upload-urls",
-      queryParameters: {"count": count},
-    );
-    return (response.data["urls"] as List)
-        .map((e) => UploadURL.fromMap(e as Map<String, dynamic>))
-        .toList();
+  /// Throws 402 (no subscription) or 426 (storage exceeded) on failure.
+  /// Falls back to the legacy upload-urls endpoint when the eligibility
+  /// endpoint is not available on older servers.
+  Future<void> validateUploadEligibility() async {
+    try {
+      await _enteDio.get("/files/upload-eligibility");
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        await _enteDio.get(
+          "/files/upload-urls",
+          queryParameters: {"count": 1},
+        );
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// Creates a new file entry on the server after upload.
@@ -167,21 +172,6 @@ class FileUploadGateway {
         "partLength": partLength,
         "partMd5s": partMd5s,
       },
-    );
-    return MultipartUploadURLs.fromMap(
-      (response.data as Map).cast<String, dynamic>(),
-    );
-  }
-
-  /// Gets multiple multipart upload URLs (legacy endpoint without checksums).
-  ///
-  /// [count] - The number of parts.
-  ///
-  /// Returns a [MultipartUploadURLs] containing URLs for all parts.
-  Future<MultipartUploadURLs> getMultipartUploadUrls(int count) async {
-    final response = await _enteDio.get(
-      "/files/multipart-upload-urls",
-      queryParameters: {"count": count},
     );
     return MultipartUploadURLs.fromMap(
       (response.data as Map).cast<String, dynamic>(),

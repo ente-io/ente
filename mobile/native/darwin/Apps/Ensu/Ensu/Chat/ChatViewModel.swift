@@ -104,7 +104,7 @@ struct NetworkConfiguration {
     let apiEndpoint: URL
 
     static var `default`: NetworkConfiguration {
-        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.com")!)
     }
 }
 
@@ -456,8 +456,11 @@ final class ChatViewModel: ObservableObject {
     @Published var syncErrorMessage: String?
     @Published var syncSuccessMessage: String?
     @Published var generationErrorMessage: String?
+    @Published var voiceInputState: VoiceInputState = .initial
+    @Published var draftCursorMoveToken = UUID()
 
     private let provider: InferenceRsProvider
+    private let voiceTranscriber: VoiceTranscriptionService
     private var chatDb: EnsuDb
     private var syncEngine: EnsuSync
     private let attachmentsDir: URL
@@ -489,6 +492,7 @@ final class ChatViewModel: ObservableObject {
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
     private var downloadProgressMonitorTask: Task<Void, Never>?
+    private var voiceTransientErrorTask: Task<Void, Never>?
     private var sharedModelReadyTask: Task<Void, Error>?
     private var sharedModelReadyTaskId: UUID?
     private var sharedModelReadyKey: ModelReadyKey?
@@ -518,6 +522,7 @@ final class ChatViewModel: ObservableObject {
         // LLM model files.
         let llmDir = baseDir.appendingPathComponent("llm", isDirectory: true)
         let provider = InferenceRsProvider(modelDir: llmDir)
+        let voiceTranscriber = VoiceTranscriptionService(baseDir: baseDir)
 
         // Chat DB + attachments.
         let dbDir = baseDir.appendingPathComponent("llmchat", isDirectory: true)
@@ -562,6 +567,7 @@ final class ChatViewModel: ObservableObject {
 
         // Stored properties.
         self.provider = provider
+        self.voiceTranscriber = voiceTranscriber
         self.chatDb = chatDb
         self.syncEngine = syncEngine
         self.attachmentsDir = attachmentsDir
@@ -777,6 +783,7 @@ final class ChatViewModel: ObservableObject {
 
     func startNewSession() {
         resetGenerationState()
+        cancelVoiceInput()
         draftText = ""
         draftAttachments = []
         editingMessageId = nil
@@ -788,6 +795,7 @@ final class ChatViewModel: ObservableObject {
 
     func selectSession(_ session: ChatSession) {
         resetGenerationState()
+        cancelVoiceInput()
         currentSessionId = session.id
         messages = []
         loadMessagesFromDb(for: session.id)
@@ -1004,6 +1012,72 @@ final class ChatViewModel: ObservableObject {
         editingMessageId = nil
         draftText = ""
         draftAttachments = []
+    }
+
+    func toggleVoiceInput() {
+        if voiceInputState.isRecording {
+            voiceTranscriber.stopAndTranscribe(
+                onState: { [weak self] state in
+                    self?.setVoiceInputState(state)
+                },
+                onTranscript: { [weak self] transcript in
+                    self?.appendVoiceTranscript(transcript)
+                }
+            )
+            return
+        }
+
+        guard !isGenerating,
+              !isDownloading,
+              !isAttachmentDownloadBlocked,
+              editingMessageId == nil else {
+            return
+        }
+
+        voiceTranscriber.startRecording { [weak self] state in
+            self?.setVoiceInputState(state)
+        }
+    }
+
+    func cancelVoiceInput() {
+        voiceTransientErrorTask?.cancel()
+        voiceTransientErrorTask = nil
+        voiceTranscriber.cancel()
+        if voiceInputState != .unsupported {
+            voiceInputState = .idle
+        }
+    }
+
+    private func setVoiceInputState(_ state: VoiceInputState) {
+        voiceTransientErrorTask?.cancel()
+        voiceTransientErrorTask = nil
+        voiceInputState = state
+
+        guard state.isNoSpeechError else { return }
+        voiceTransientErrorTask = Task { @MainActor in
+            do {
+                try await Task.sleep(nanoseconds: 10_000_000_000)
+            } catch {
+                return
+            }
+            if self.voiceInputState == state {
+                self.voiceInputState = .idle
+            }
+            self.voiceTransientErrorTask = nil
+        }
+    }
+
+    private func appendVoiceTranscript(_ transcript: String) {
+        let cleaned = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return }
+
+        let trimmedDraft = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedDraft.isEmpty {
+            draftText = cleaned
+        } else {
+            draftText = "\(trimmedDraft) \(cleaned)"
+        }
+        draftCursorMoveToken = UUID()
     }
 
     func addImageAttachment(data: Data, fileName: String?) {

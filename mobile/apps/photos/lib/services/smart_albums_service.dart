@@ -89,7 +89,11 @@ class SmartAlbumsService {
 
     _logger.info("Syncing Smart Albums");
     final cachedConfigs = await getSmartConfigs();
-    final userId = Configuration.instance.getUserID()!;
+    final userId = Configuration.instance.getUserID();
+    if (userId == null) {
+      _logger.warning("No user ID, skipping smart album sync");
+      return;
+    }
 
     for (final entry in cachedConfigs.entries) {
       final collectionId = entry.key;

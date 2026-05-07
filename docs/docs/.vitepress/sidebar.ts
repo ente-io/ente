@@ -235,6 +235,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/detect-text",
                             },
                             {
+                                text: "QR codes in photos",
+                                link: "/photos/features/utilities/qr-codes-in-photos",
+                            },
+                            {
                                 text: "Home Widgets",
                                 link: "/photos/features/utilities/home-widgets",
                             },
@@ -350,8 +354,16 @@ export const sidebar = [
                         link: "/auth/migration/authy/",
                     },
                     {
+                        text: "From Microsoft Authenticator",
+                        link: "/auth/migration/microsoft-authenticator/",
+                    },
+                    {
                         text: "From Steam",
                         link: "/auth/migration/steam/",
+                    },
+                    {
+                        text: "From Others",
+                        link: "/auth/migration/import",
                     },
                     {
                         text: "Export",

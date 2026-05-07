@@ -67,15 +67,16 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   @override
   void initState() {
     super.initState();
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _debouncer.run(() async {
-        if (mounted) {
-          _loadReason = event.reason;
-          setState(() {});
-        }
-      });
-    });
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
+      (event) {
+        _debouncer.run(() async {
+          if (mounted) {
+            _loadReason = event.reason;
+            setState(() {});
+          }
+        });
+      },
+    );
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _debouncer.run(() async {
@@ -118,17 +119,17 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   Widget build(BuildContext context) {
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
-    final bool offlineUiMode =
-        isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+    final bool localGalleryMode =
+        isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<List<Collection>>(
-      future: offlineUiMode
+      future: localGalleryMode
           ? Future.value(<Collection>[])
           : CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getCollectionsGalleryWidget(
             snapshot.data!,
-            offlineUiMode: offlineUiMode,
+            localGalleryMode: localGalleryMode,
           );
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
@@ -141,15 +142,13 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
 
   Widget _getCollectionsGalleryWidget(
     List<Collection> collections, {
-    required bool offlineUiMode,
+    required bool localGalleryMode,
   }) {
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
-              color: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .color!
-                  .withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).textTheme.titleMedium!.color!.withValues(alpha: 0.5),
             );
     final colorScheme = getEnteColorScheme(context);
 
@@ -183,45 +182,46 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                     title: AppLocalizations.of(context).onDevice,
                   ),
                 ),
-                trailingWidget: backupPreferenceService
-                        .hasSkippedOnboardingPermission
-                    ? null
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButtonWidget(
-                            icon: Icons.search,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokePressed,
-                            onTap: () {
-                              unawaited(
-                                routeToPage(
-                                  context,
-                                  DeviceFolderVerticalGridView(
-                                    appTitle: SectionTitle(
-                                      title:
-                                          AppLocalizations.of(context).onDevice,
+                trailingWidget:
+                    backupPreferenceService.hasSkippedOnboardingPermission
+                        ? null
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButtonWidget(
+                                icon: Icons.search,
+                                iconButtonType: IconButtonType.secondary,
+                                iconColor: colorScheme.blurStrokePressed,
+                                onTap: () {
+                                  unawaited(
+                                    routeToPage(
+                                      context,
+                                      DeviceFolderVerticalGridView(
+                                        appTitle: SectionTitle(
+                                          title: AppLocalizations.of(
+                                            context,
+                                          ).onDevice,
+                                        ),
+                                        tag: "OnDeviceAppTitle",
+                                        startInSearchMode: true,
+                                      ),
                                     ),
-                                    tag: "OnDeviceAppTitle",
-                                    startInSearchMode: true,
-                                  ),
-                                ),
-                              );
-                            },
+                                  );
+                                },
+                              ),
+                              IconButtonWidget(
+                                icon: Icons.chevron_right,
+                                iconButtonType: IconButtonType.secondary,
+                                iconColor: colorScheme.blurStrokePressed,
+                              ),
+                            ],
                           ),
-                          IconButtonWidget(
-                            icon: Icons.chevron_right,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokePressed,
-                          ),
-                        ],
-                      ),
               ),
             ),
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
             SliverToBoxAdapter(
               child: SectionOptions(
-                onTap: offlineUiMode
+                onTap: localGalleryMode
                     ? null
                     : () {
                         unawaited(
@@ -238,7 +238,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         );
                       },
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: offlineUiMode
+                trailingWidget: localGalleryMode
                     ? null
                     : Row(
                         mainAxisSize: MainAxisSize.min,
@@ -273,10 +273,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
-            offlineUiMode
-                ? const SliverToBoxAdapter(
-                    child: EmptyOnEnteSection(),
-                  )
+            localGalleryMode
+                ? const SliverToBoxAdapter(child: EmptyOnEnteSection())
                 : Configuration.instance.hasConfiguredAccount()
                     ? CollectionsFlexiGridViewWidget(
                         collections,
@@ -286,11 +284,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         enableSelectionMode: true,
                       )
                     : const SliverToBoxAdapter(child: EmptyState()),
-            if (!offlineUiMode) ...[
+            if (!localGalleryMode) ...[
               SliverToBoxAdapter(
-                child: Divider(
-                  color: colorScheme.strokeFaint,
-                ),
+                child: Divider(color: colorScheme.strokeFaint),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
@@ -311,8 +307,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ],
             SliverToBoxAdapter(
-              child:
-                  SizedBox(height: 64 + MediaQuery.paddingOf(context).bottom),
+              child: SizedBox(
+                height: 64 + MediaQuery.paddingOf(context).bottom,
+              ),
             ),
           ],
         ),

@@ -14,7 +14,7 @@ import {
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { fileCreationPhotoDate, fileFileName } from "ente-media/file-metadata";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -458,7 +458,7 @@ const MapIcon = styled("img")<{ $isDarkMode: boolean }>(
  * See: [Note: Timeline date string]
  */
 const fileTimelineDateString = (file: EnteFile) => {
-    const date = new Date(fileCreationTime(file) / 1000);
+    const date = fileCreationPhotoDate(file);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

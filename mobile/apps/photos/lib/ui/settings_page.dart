@@ -70,7 +70,7 @@ class _SettingsBody extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
-    final showLoginEntry = isOfflineMode && !hasConfiguredAccount;
+    final showLoginEntry = isLocalGalleryMode && !hasConfiguredAccount;
 
     return Container(
       color: colorScheme.backgroundColour,
@@ -105,7 +105,7 @@ class _SettingsBody extends StatelessWidget {
                   _buildOfflineLoginCard(context, colorScheme),
                   const SizedBox(height: 8),
                 ],
-                if (hasLoggedIn && !isOfflineMode) ...[
+                if (hasLoggedIn && !isLocalGalleryMode) ...[
                   const StorageCardWidget(),
                   const SizedBox(height: 16),
                   _buildAccountCard(context, colorScheme),
@@ -117,11 +117,11 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildAppearanceCard(context, colorScheme),
                 const SizedBox(height: 8),
-                if (isOfflineMode) ...[
+                if (isLocalGalleryMode) ...[
                   _buildOfflineFeaturesCard(context, colorScheme),
                   const SizedBox(height: 8),
                 ],
-                if (hasLoggedIn && !isOfflineMode) ...[
+                if (hasLoggedIn && !isLocalGalleryMode) ...[
                   _buildPersonalFeaturesCard(context, colorScheme),
                   const SizedBox(height: 8),
                   _buildFeaturesAndPlansCard(context, colorScheme),
@@ -133,7 +133,7 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildAboutUsCard(context, colorScheme),
                 const SizedBox(height: 8),
-                if (hasLoggedIn && !isOfflineMode) ...[
+                if (hasLoggedIn && !isLocalGalleryMode) ...[
                   _buildLogoutCard(context, colorScheme),
                 ],
                 const Padding(
@@ -142,7 +142,7 @@ class _SettingsBody extends StatelessWidget {
                 ),
                 const AppVersionWidget(),
                 if (hasLoggedIn &&
-                    !isOfflineMode &&
+                    !isLocalGalleryMode &&
                     (flagService.flags.internalUser || kDebugMode)) ...[
                   _buildDebugCard(context, colorScheme),
                   const SizedBox(height: 8),
@@ -187,10 +187,7 @@ class _SettingsBody extends StatelessWidget {
                   ),
                 );
               },
-              icon: Icon(
-                Icons.search_rounded,
-                color: colorScheme.textMuted,
-              ),
+              icon: Icon(Icons.search_rounded, color: colorScheme.textMuted),
             ),
             if (localSettings.enableDatabaseLogging)
               IconButton(
@@ -204,10 +201,7 @@ class _SettingsBody extends StatelessWidget {
                     ),
                   );
                 },
-                icon: Icon(
-                  Icons.bug_report,
-                  color: colorScheme.textMuted,
-                ),
+                icon: Icon(Icons.bug_report, color: colorScheme.textMuted),
               ),
           ],
         ),
@@ -483,8 +477,9 @@ class _SettingsBody extends StatelessWidget {
           onTap: () async {
             late final UserDetails userDetails;
             try {
-              userDetails = await UserService.instance
-                  .getUserDetailsV2(memoryCount: false);
+              userDetails = await UserService.instance.getUserDetailsV2(
+                memoryCount: false,
+              );
             } catch (error) {
               if (!context.mounted) {
                 return;
@@ -652,7 +647,7 @@ class _SettingsBody extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             await launchUrlString(
-              "https://shop.ente.io",
+              "https://shop.ente.com",
               mode: LaunchMode.externalApplication,
             );
           },

@@ -13,7 +13,7 @@ class NotificationSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final showOnlyOnThisDay = isOfflineMode;
+    final showOnlyOnThisDay = isLocalGalleryMode;
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
@@ -45,8 +45,9 @@ class NotificationSettingsScreen extends StatelessWidget {
                     children: [
                       if (!showOnlyOnThisDay) ...[
                         MenuItemWidgetNew(
-                          title: AppLocalizations.of(context)
-                              .sharedPhotoNotifications,
+                          title: AppLocalizations.of(
+                            context,
+                          ).sharedPhotoNotifications,
                           trailingWidget: ToggleSwitchWidget(
                             value: () =>
                                 NotificationService.instance
@@ -72,15 +73,18 @@ class NotificationSettingsScreen extends StatelessWidget {
                             bottom: 16,
                           ),
                           child: Text(
-                            AppLocalizations.of(context)
-                                .sharedPhotoNotificationsExplanation,
-                            style: textTheme.mini
-                                .copyWith(color: colorScheme.textMuted),
+                            AppLocalizations.of(
+                              context,
+                            ).sharedPhotoNotificationsExplanation,
+                            style: textTheme.mini.copyWith(
+                              color: colorScheme.textMuted,
+                            ),
                           ),
                         ),
                         MenuItemWidgetNew(
-                          title:
-                              AppLocalizations.of(context).socialNotifications,
+                          title: AppLocalizations.of(
+                            context,
+                          ).socialNotifications,
                           trailingWidget: ToggleSwitchWidget(
                             value: () =>
                                 NotificationService.instance
@@ -106,10 +110,12 @@ class NotificationSettingsScreen extends StatelessWidget {
                             bottom: 16,
                           ),
                           child: Text(
-                            AppLocalizations.of(context)
-                                .socialNotificationsExplanation,
-                            style: textTheme.mini
-                                .copyWith(color: colorScheme.textMuted),
+                            AppLocalizations.of(
+                              context,
+                            ).socialNotificationsExplanation,
+                            style: textTheme.mini.copyWith(
+                              color: colorScheme.textMuted,
+                            ),
                           ),
                         ),
                       ],
@@ -136,10 +142,12 @@ class NotificationSettingsScreen extends StatelessWidget {
                           bottom: 16,
                         ),
                         child: Text(
-                          AppLocalizations.of(context)
-                              .onThisDayNotificationExplanation,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
+                          AppLocalizations.of(
+                            context,
+                          ).onThisDayNotificationExplanation,
+                          style: textTheme.mini.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
                         ),
                       ),
                       if (!showOnlyOnThisDay) ...[
@@ -166,10 +174,12 @@ class NotificationSettingsScreen extends StatelessWidget {
                             bottom: 16,
                           ),
                           child: Text(
-                            AppLocalizations.of(context)
-                                .receiveRemindersOnBirthdays,
-                            style: textTheme.mini
-                                .copyWith(color: colorScheme.textMuted),
+                            AppLocalizations.of(
+                              context,
+                            ).receiveRemindersOnBirthdays,
+                            style: textTheme.mini.copyWith(
+                              color: colorScheme.textMuted,
+                            ),
                           ),
                         ),
                       ],

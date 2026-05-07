@@ -64,7 +64,7 @@ class DeviceFolderListItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (!isBackedUp && !isOfflineMode)
+                  if (!isBackedUp && !isLocalGalleryMode)
                     const Positioned(
                       right: -4,
                       bottom: -4,

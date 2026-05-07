@@ -12,7 +12,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/service_locator.dart" show flagService, isOfflineMode;
+import "package:photos/service_locator.dart"
+    show flagService, isLocalGalleryMode;
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart"
@@ -199,7 +200,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
 
     // Add "Add person" button at the end
-    if (!isOfflineMode &&
+    if (!isLocalGalleryMode &&
         flagService.manualTagFileToPerson &&
         widget.file.uploadedFileID != null) {
       children.add(_buildAddPersonButton(thumbnailWidth));
@@ -207,11 +208,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
-      child: Wrap(
-        runSpacing: 8,
-        spacing: 12,
-        children: children,
-      ),
+      child: Wrap(runSpacing: 8, spacing: 12, children: children),
     );
   }
 
@@ -333,7 +330,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   Widget _buildNoFacesWidget() {
     final reason = _errorReason ?? NoFacesReason.noFacesFound;
-    final showManualTagOption = !isOfflineMode &&
+    final showManualTagOption = !isLocalGalleryMode &&
         flagService.manualTagFileToPerson &&
         reason == NoFacesReason.noFacesFound;
     final label = showManualTagOption
@@ -414,7 +411,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Widget _editStateButton() {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return const SizedBox.shrink();
     }
     if (_isEditMode) {
@@ -455,9 +452,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Future<_FaceDataResult> _fetchFaceData() async {
-    final bool isOffline = isOfflineMode;
+    final bool isLocalGallery = isLocalGalleryMode;
     int? fileKey;
-    if (isOffline) {
+    if (isLocalGallery) {
       final localId = widget.file.localID;
       if (localId == null || localId.isEmpty) {
         return _FaceDataResult(
@@ -482,15 +479,16 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
     // Fetch persons map early so we can check for manual assignments
     // even when no faces are detected
-    final persons = isOffline
+    final persons = isLocalGallery
         ? <String, PersonEntity>{}
         : await PersonService.instance.getPersonsMap();
 
-    final mlDataDB = isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final mlDataDB =
+        isLocalGallery ? MLDataDB.localGalleryInstance : MLDataDB.instance;
     final faces = await mlDataDB.getFacesForGivenFileID(fileKey);
 
     if (faces == null) {
-      final manualPersons = isOffline
+      final manualPersons = isLocalGallery
           ? const <PersonEntity>[]
           : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
@@ -506,11 +504,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
       faces.map((face) => face.faceID).toList(),
     );
-    final clusterIDToPerson = isOffline
+    final clusterIDToPerson = isLocalGallery
         ? <String, String>{}
         : await mlDataDB.getClusterIDToPersonID();
-    final faceCrops =
-        await getCachedFaceCrops(widget.file, faces, useTempCache: true);
     final defaultFaces = <Face>[];
     final remainingFaces = <Face>[];
 
@@ -532,7 +528,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       }
     }
     if (defaultFaces.isEmpty && remainingFaces.isEmpty) {
-      final manualPersons = isOffline
+      final manualPersons = isLocalGallery
           ? const <PersonEntity>[]
           : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
@@ -543,8 +539,15 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       );
     }
 
+    final facesToRender = [...defaultFaces, ...remainingFaces];
+    final faceCrops = await getCachedFaceCrops(
+      widget.file,
+      facesToRender,
+      useTempCache: true,
+    );
+
     if (faceCrops == null) {
-      final manualPersons = isOffline
+      final manualPersons = isLocalGallery
           ? const <PersonEntity>[]
           : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
@@ -601,8 +604,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       setState(() => _showRemainingFaces = !_showRemainingFaces);
 
   Future<void> _openAddFilesToPersonPage() async {
-    final namedPersons =
-        await AddFilesToPersonPage.prefetchNamedPersons(context);
+    final namedPersons = await AddFilesToPersonPage.prefetchNamedPersons(
+      context,
+    );
     if (!mounted) {
       return;
     }
@@ -636,7 +640,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     if (result?.action == ButtonAction.first) {
       try {
         await ClusterFeedbackService.instance.removeFilesFromPerson(
-          [widget.file],
+          [
+            widget.file,
+          ],
           person,
         );
         await loadFaces(isRefresh: true);
@@ -649,10 +655,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   Future<void> _openPersonPage(PersonEntity person) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => PeoplePage(
-          person: person,
-          searchResult: null,
-        ),
+        builder: (context) => PeoplePage(person: person, searchResult: null),
       ),
     );
   }

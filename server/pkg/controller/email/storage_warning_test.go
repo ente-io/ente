@@ -977,7 +977,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionSkipsResetWhenEmailFails(
 	resetter := &recordingUserAccessResetter{}
 	snapshot := storageWarningSnapshot{
 		RecipientID:      12345,
-		AccountEmail:     "user@ente.io",
+		AccountEmail:     "user@ente.com",
 		TotalUsage:       storageWarningOverageThreshold + 10,
 		AllottedStorage:  0,
 		AvailableStorage: -10,
@@ -1022,7 +1022,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionResetsAccessAfterEmail(t 
 	resetter := &recordingUserAccessResetter{callOrder: &callOrder}
 	snapshot := storageWarningSnapshot{
 		RecipientID:      12345,
-		AccountEmail:     "user@ente.io",
+		AccountEmail:     "user@ente.com",
 		TotalUsage:       storageWarningOverageThreshold + 10,
 		AllottedStorage:  0,
 		AvailableStorage: -10,
@@ -1061,7 +1061,7 @@ func TestBuildStorageWarningRunSummary(t *testing.T) {
 	stats.SkippedRolloutPct = 39
 
 	got := buildStorageWarningRunSummary(stats, 0)
-	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 | sent=3 | success={expired_0d=1, active_overage_0d=2} | failures={active_overage_60d=1} | skipped_rollout={expired_30d=39} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=30"
+	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 | sent=3 | success={expired_0d=1, active_overage_0d=2} | failures={active_overage_60d=1} | skipped_rollout={expired_30d=39} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=60"
 	if got != want {
 		t.Fatalf("unexpected summary:\n got: %s\nwant: %s", got, want)
 	}
@@ -1108,6 +1108,9 @@ func TestIsInStorageWarningRollout(t *testing.T) {
 
 	if !isInStorageWarningRollout(userID, "alerts@ente.io") {
 		t.Fatal("expected @ente.io account to always be in rollout")
+	}
+	if !isInStorageWarningRollout(userID, " ALERTS@ENTE.COM ") {
+		t.Fatal("expected normalized @ente.com account to always be in rollout")
 	}
 
 	want := rollout.IsInPercentageRollout(userID, storageWarningRolloutNonce, storageWarningRolloutPercentage)

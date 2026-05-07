@@ -119,10 +119,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         title: SvgPicture.asset(
           "assets/ente-branding.svg",
           height: 18,
-          colorFilter: const ColorFilter.mode(
-            Colors.white,
-            BlendMode.srcIn,
-          ),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
         centerTitle: true,
       ),
@@ -152,18 +149,20 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                   children: [
                     ButtonWidgetV2(
                       buttonType: ButtonTypeV2.neutral,
-                      labelText:
-                          AppLocalizations.of(context).createAnEnteAccount,
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).createAnEnteAccount,
                       onTap: _navigateToSignUpPage,
                       shouldSurfaceExecutionStates: false,
                       shouldStickToLightTheme: true,
                     ),
-                    if (localSettings.showOfflineModeOption) ...[
+                    if (localSettings.showLocalGalleryModeOption) ...[
                       const SizedBox(height: 12),
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.secondary,
-                        labelText:
-                            AppLocalizations.of(context).continueWithoutAccount,
+                        labelText: AppLocalizations.of(
+                          context,
+                        ).continueWithoutAccount,
                         onTap: _navigateWithoutAccount,
                         shouldSurfaceExecutionStates: false,
                         shouldStickToLightTheme: true,
@@ -202,10 +201,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         alignment: Alignment.topRight,
         child: Padding(
           padding: EdgeInsets.only(right: 16),
-          child: Text(
-            "Lang",
-            style: TextStyle(color: Colors.black54),
-          ),
+          child: Text("Lang", style: TextStyle(color: Colors.black54)),
         ),
       ),
       onTap: () async {
@@ -290,9 +286,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         size: const Size(10, 10),
         activeSize: const Size(20, 10),
         spacing: const EdgeInsets.all(6),
@@ -318,9 +312,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage(
-          mode: PasswordEntryMode.set,
-        );
+        page = const PasswordEntryPage(mode: PasswordEntryMode.set);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -348,9 +340,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage(
-          mode: PasswordEntryMode.set,
-        );
+        page = const PasswordEntryPage(mode: PasswordEntryMode.set);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -428,10 +418,7 @@ class FeatureItemWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Image.asset(
-          assetPath,
-          height: 200,
-        ),
+        Image.asset(assetPath, height: 200),
         const Padding(padding: EdgeInsets.all(16)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,

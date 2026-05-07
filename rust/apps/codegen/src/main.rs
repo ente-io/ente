@@ -13,7 +13,12 @@ type DynError = Box<dyn Error>;
 struct UniffiCrate<'a> {
     crate_name: &'a str,
     crate_dir: PathBuf,
-    dylib_name: &'a str,
+}
+
+struct AndroidCrate<'a> {
+    uniffi: UniffiCrate<'a>,
+    out_dir: PathBuf,
+    stale_path: PathBuf,
 }
 
 fn main() {
@@ -27,7 +32,8 @@ fn run() -> Result<(), DynError> {
     let mut args = env::args().skip(1);
     match (args.next().as_deref(), args.next()) {
         (Some("ensu-ios"), None) => generate_ensu_ios(),
-        _ => Err("usage: cargo codegen ensu-ios".into()),
+        (Some("ensu-android"), None) => generate_ensu_android(),
+        _ => Err("usage: cargo codegen <ensu-ios|ensu-android>".into()),
     }
 }
 
@@ -44,33 +50,104 @@ fn generate_ensu_ios() -> Result<(), DynError> {
         UniffiCrate {
             crate_name: "core",
             crate_dir: rust_root.join("uniffi/core"),
-            dylib_name: "libcore.dylib",
         },
         UniffiCrate {
             crate_name: "db",
             crate_dir: rust_root.join("uniffi/ensu/db"),
-            dylib_name: "libdb.dylib",
         },
         UniffiCrate {
             crate_name: "sync",
             crate_dir: rust_root.join("uniffi/ensu/sync"),
-            dylib_name: "libsync.dylib",
         },
         UniffiCrate {
             crate_name: "inference",
             crate_dir: rust_root.join("uniffi/ensu/inference"),
-            dylib_name: "libinference.dylib",
+        },
+        UniffiCrate {
+            crate_name: "transcription",
+            crate_dir: rust_root.join("uniffi/ensu/transcription"),
         },
     ];
 
     for uniffi_crate in crates {
-        build_host_dylib(&uniffi_crate.crate_dir)?;
-        remove_generated_bindings(&generated_dir, uniffi_crate.crate_name)?;
-        generate_swift_bindings(&generated_dir, &uniffi_crate)?;
+        build_host_library(&uniffi_crate.crate_dir)?;
+        remove_paths(&swift_generated_paths(
+            &generated_dir,
+            uniffi_crate.crate_name,
+        ))?;
+        generate_bindings(TargetLanguage::Swift, &generated_dir, &uniffi_crate)?;
     }
 
     sanitize_generated_swift_bindings(&generated_dir.join("db.swift"), "db")?;
     sanitize_generated_swift_bindings(&generated_dir.join("sync.swift"), "sync")?;
+
+    Ok(())
+}
+
+fn generate_ensu_android() -> Result<(), DynError> {
+    let rust_root = rust_root()?;
+    let repo_root = rust_root
+        .parent()
+        .ok_or("failed to resolve repo root from rust/apps/codegen")?;
+    let core_out_dir =
+        repo_root.join("mobile/native/android/apps/ensu/crypto-auth-core/src/main/java");
+    let rust_out_dir = repo_root.join("mobile/native/android/packages/rust/src/main/kotlin");
+
+    fs::create_dir_all(&core_out_dir)?;
+    fs::create_dir_all(&rust_out_dir)?;
+
+    let crates = [
+        AndroidCrate {
+            uniffi: UniffiCrate {
+                crate_name: "core",
+                crate_dir: rust_root.join("uniffi/core"),
+            },
+            out_dir: core_out_dir.clone(),
+            stale_path: core_out_dir.join("io/ente/ensu/crypto/core.kt"),
+        },
+        AndroidCrate {
+            uniffi: UniffiCrate {
+                crate_name: "db",
+                crate_dir: rust_root.join("uniffi/ensu/db"),
+            },
+            out_dir: rust_out_dir.clone(),
+            stale_path: rust_out_dir.join("io/ente/labs/ensu_db/db.kt"),
+        },
+        AndroidCrate {
+            uniffi: UniffiCrate {
+                crate_name: "sync",
+                crate_dir: rust_root.join("uniffi/ensu/sync"),
+            },
+            out_dir: rust_out_dir.clone(),
+            stale_path: rust_out_dir.join("io/ente/labs/ensu_sync/sync.kt"),
+        },
+        AndroidCrate {
+            uniffi: UniffiCrate {
+                crate_name: "inference",
+                crate_dir: rust_root.join("uniffi/ensu/inference"),
+            },
+            out_dir: rust_out_dir.clone(),
+            stale_path: rust_out_dir.join("io/ente/labs/inference_rs/inference.kt"),
+        },
+        AndroidCrate {
+            uniffi: UniffiCrate {
+                crate_name: "transcription",
+                crate_dir: rust_root.join("uniffi/ensu/transcription"),
+            },
+            out_dir: rust_out_dir.clone(),
+            stale_path: rust_out_dir.join("io/ente/labs/ensu_transcription/transcription.kt"),
+        },
+    ];
+
+    for crate_spec in crates {
+        build_host_library(&crate_spec.uniffi.crate_dir)?;
+        remove_path(&crate_spec.stale_path)?;
+        generate_bindings(
+            TargetLanguage::Kotlin,
+            &crate_spec.out_dir,
+            &crate_spec.uniffi,
+        )?;
+    }
 
     Ok(())
 }
@@ -84,7 +161,7 @@ fn rust_root() -> Result<PathBuf, DynError> {
         .ok_or_else(|| "failed to resolve rust workspace root".into())
 }
 
-fn build_host_dylib(crate_dir: &Path) -> Result<(), DynError> {
+fn build_host_library(crate_dir: &Path) -> Result<(), DynError> {
     run_command(
         Command::new("cargo")
             .arg("build")
@@ -95,31 +172,47 @@ fn build_host_dylib(crate_dir: &Path) -> Result<(), DynError> {
     )
 }
 
-fn remove_generated_bindings(generated_dir: &Path, crate_name: &str) -> Result<(), DynError> {
-    for suffix in [".swift", "FFI.h", "FFI.modulemap"] {
-        let path = generated_dir.join(format!("{crate_name}{suffix}"));
-        match fs::remove_file(&path) {
-            Ok(()) => {}
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-            Err(error) => {
-                return Err(format!("failed to remove {}: {error}", path.display()).into());
-            }
+fn swift_generated_paths(generated_dir: &Path, crate_name: &str) -> [PathBuf; 3] {
+    [
+        generated_dir.join(format!("{crate_name}.swift")),
+        generated_dir.join(format!("{crate_name}FFI.h")),
+        generated_dir.join(format!("{crate_name}FFI.modulemap")),
+    ]
+}
+
+fn remove_path(path: &Path) -> Result<(), DynError> {
+    match fs::remove_file(path) {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(format!("failed to remove {}: {error}", path.display()).into());
         }
     }
 
     Ok(())
 }
 
-fn generate_swift_bindings(
-    generated_dir: &Path,
+fn remove_paths(paths: &[PathBuf]) -> Result<(), DynError> {
+    for path in paths {
+        remove_path(path)?;
+    }
+
+    Ok(())
+}
+
+fn generate_bindings(
+    language: TargetLanguage,
+    out_dir: &Path,
     uniffi_crate: &UniffiCrate<'_>,
 ) -> Result<(), DynError> {
-    let source = uniffi_crate
-        .crate_dir
-        .join("target/release")
-        .join(uniffi_crate.dylib_name);
+    let source = uniffi_crate.crate_dir.join("target/release").join(format!(
+        "{}{}{}",
+        env::consts::DLL_PREFIX,
+        uniffi_crate.crate_name,
+        env::consts::DLL_SUFFIX
+    ));
     let source = utf8_path(&source)?;
-    let out_dir = utf8_path(generated_dir)?;
+    let out_dir = utf8_path(out_dir)?;
     let previous_dir = env::current_dir().map_err(|error| {
         format!(
             "failed to capture current directory before generating {} bindings: {error}",
@@ -135,7 +228,7 @@ fn generate_swift_bindings(
     })?;
 
     let result = bindings::generate(GenerateOptions {
-        languages: vec![TargetLanguage::Swift],
+        languages: vec![language],
         source,
         out_dir,
         config_override: None,

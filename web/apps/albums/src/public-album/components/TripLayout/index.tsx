@@ -13,7 +13,7 @@ import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Import extracted components
 import { MobileCover } from "./MobileCover";
@@ -71,7 +71,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     collectionKey,
     credentials,
     enableComment = true,
-    enableJoin = true,
+    enableJoin = false,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
@@ -84,6 +84,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     const { onAddSaveGroup } = useSaveGroupsActions();
     const { show: showPublicFeed, props: publicFeedVisibilityProps } =
         useModalVisibility();
+    const [keepPublicFeedSidebarMounted, setKeepPublicFeedSidebarMounted] =
+        useState(false);
+    const publicFeedSidebarOpenRef = useRef(publicFeedVisibilityProps.open);
 
     // Navigation state for feed item clicks
     const [initialSidebar, setInitialSidebar] = useState<
@@ -112,6 +115,19 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         collectionKey,
         credentials,
     });
+
+    useEffect(() => {
+        publicFeedSidebarOpenRef.current = publicFeedVisibilityProps.open;
+        if (publicFeedVisibilityProps.open) {
+            setKeepPublicFeedSidebarMounted(true);
+        }
+    }, [publicFeedVisibilityProps.open]);
+
+    const handlePublicFeedSidebarExited = useCallback(() => {
+        if (!publicFeedSidebarOpenRef.current) {
+            setKeepPublicFeedSidebarMounted(false);
+        }
+    }, []);
 
     /**
      * Handle clicks on feed items to navigate to the file and open sidebar.
@@ -234,14 +250,10 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         // Sort clusters by their earliest timestamp to maintain chronological order
                         const sortedClusters = clusters.sort((a, b) => {
                             const earliestA = Math.min(
-                                ...a.map((p) =>
-                                    new Date(p.timestamp).getTime(),
-                                ),
+                                ...a.map((p) => p.timestamp),
                             );
                             const earliestB = Math.min(
-                                ...b.map((p) =>
-                                    new Date(p.timestamp).getTime(),
-                                ),
+                                ...b.map((p) => p.timestamp),
                             );
                             return earliestA - earliestB;
                         });
@@ -360,10 +372,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         enableDownload={enableDownload}
                         onShowFeed={enableComment ? showPublicFeed : undefined}
                         collectionTitle={collectionTitle}
-                        publicCollection={collection}
-                        accessToken={accessToken}
-                        collectionKey={collectionKey}
-                        credentials={credentials}
+                        enableJoin={enableJoin}
+                        onJoinAlbum={handleJoinAlbum}
                     />
                 ) : (
                     <TopNavButtons
@@ -371,10 +381,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
                         onShowFeed={enableComment ? showPublicFeed : undefined}
-                        publicCollection={collection}
-                        accessToken={accessToken}
-                        collectionKey={collectionKey}
-                        credentials={credentials}
+                        enableJoin={enableJoin}
+                        onJoinAlbum={handleJoinAlbum}
                     />
                 ))}
             {/* Mobile Layout */}
@@ -612,7 +620,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             <ActiveDownloadStatusNotifications fullWidthOnMobile />
 
             {/* Public feed sidebar */}
-            {publicFeedVisibilityProps.open &&
+            {(publicFeedVisibilityProps.open || keepPublicFeedSidebarMounted) &&
                 collection &&
                 credentials?.current &&
                 collectionKey && (
@@ -622,6 +630,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         credentials={credentials.current}
                         collectionKey={collectionKey}
                         onItemClick={handleFeedItemClick}
+                        onExited={handlePublicFeedSidebarExited}
                     />
                 )}
         </TripLayoutContainer>

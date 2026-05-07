@@ -39,7 +39,7 @@ You can download Ensu from [ente.com/ensu](https://ente.com/ensu).
 | iOS | [App Store](https://apps.apple.com/app/ensu-entes-local-llm/id6758197006) |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=io.ente.ensu) / [GitHub releases](https://github.com/ente-io/ente/releases?q=ensu) |
 | macOS / Windows / Linux | [GitHub releases](https://github.com/ente-io/ente/releases?q=ensu) |
-| Web | [ensu.ente.io](https://ensu.ente.io) (experimental) |
+| Web | [ensu.ente.com](https://ensu.ente.com) (experimental) |
 
 If you install the Android APK directly from GitHub releases, see
 [Verify the Ensu Android APK](/ensu/faq/android-apk-signature).

@@ -9,6 +9,7 @@ import {
     deletePublicReaction,
     getStoredAnonIdentity,
 } from "@/public-album/social/api/public-reaction";
+import { useBrowserBackClose } from "@/shared/hooks/useBrowserBackClose";
 import { getAvatarColor } from "@/shared/utils/avatar-colors";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -469,6 +470,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     onJoinAlbum,
     enableJoin = true,
 }) => {
+    useBrowserBackClose({
+        open,
+        onClose,
+        stateKey: "__enteCommentsSidebarBackState",
+    });
+
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(
@@ -1996,6 +2003,7 @@ const LoadingContainer = styled(Box)(() => ({
     justifyContent: "center",
     alignItems: "center",
     height: "100%",
+    paddingRight: 24,
     // Offset for header (marginBottom: 48) + padding diff (32-24=8) = 56, halved
     marginTop: -28,
 }));
@@ -2005,6 +2013,7 @@ const EmptyMessage = styled(Typography)(({ theme }) => ({
     justifyContent: "center",
     alignItems: "center",
     height: "100%",
+    paddingRight: 24,
     // Offset for header (marginBottom: 48) + padding diff (32-24=8) = 56, halved
     marginTop: -28,
     color: "#666",
@@ -2051,7 +2060,6 @@ const CommentsContainer = styled(Box)(({ theme }) => ({
     overflow: "auto",
     marginBottom: 16,
     marginRight: -24,
-    paddingRight: 24,
     position: "relative",
     display: "flex",
     flexDirection: "column-reverse",
@@ -2105,6 +2113,7 @@ const OwnTimestamp = styled(Typography)(({ theme }) => ({
     textAlign: "right",
     marginBottom: 4,
     paddingRight: 52,
+    "@media (max-width: 450px)": { paddingRight: 40 },
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
@@ -2129,6 +2138,7 @@ const CommentBubbleWrapper = styled(Box, {
     paddingLeft: isOwn ? 0 : 28,
     position: "relative",
     zIndex: isHighlighted ? 11 : "auto",
+    "@media (max-width: 450px)": { paddingRight: isOwn ? 40 : 0 },
 }));
 
 const CommentBubbleInner = styled(Box)(() => ({

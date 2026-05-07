@@ -46,7 +46,7 @@ Open `Settings > Machine learning` and enable **Machine learning** and/or **Loca
 
 Open `Settings > Preferences > Machine learning` and enable **Machine learning** and/or **Local indexing**.
 
-> **Note**: Machine learning is not available on web.ente.io. You must use the mobile or desktop apps.
+> **Note**: Machine learning is not available on photos.ente.com. You must use the mobile or desktop apps.
 
 ## The Indexing Process
 
@@ -139,7 +139,7 @@ This way, you can continue to use ML features without impacting your phone's per
 - Cannot currently modify face groupings (view only)
 - Face grouping management must be done on mobile
 
-### Web (web.ente.io)
+### Web (photos.ente.com)
 
 - ML features not available
 - Basic search only (date, file name, description, album)

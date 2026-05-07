@@ -3,7 +3,7 @@ import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
-import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
+import { LockerNavbar } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
 import { DeleteCollectionDialog } from "components/lockerPage/DeleteCollectionDialog";
 import { LockerDragOverlay } from "components/lockerPage/LockerDragOverlay";
@@ -123,11 +123,9 @@ export const LockerPage: React.FC = () => {
     if (initialLoadError && collections.length === 0) {
         return (
             <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
-                <LockerUnstableToast />
                 <LockerNavbar
                     onOpenSidebar={() => setSidebarOpen(true)}
                     showMenuButton
-                    stickyTop={44}
                     searchTerm={searchTerm}
                     onSearchTermChange={setSearchTerm}
                 />
@@ -173,11 +171,9 @@ export const LockerPage: React.FC = () => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            <LockerUnstableToast />
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
-                stickyTop={44}
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
             />

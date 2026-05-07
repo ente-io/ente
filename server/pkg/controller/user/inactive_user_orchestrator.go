@@ -63,7 +63,7 @@ const (
 	inactiveUserGap7dTo1d    = 6 * inactiveUserOneDayInMicroSeconds
 	inactiveUserGap1dToFinal = inactiveUserOneDayInMicroSeconds
 
-	inactiveUserRolloutPercentage = 60
+	inactiveUserRolloutPercentage = 80
 	inactiveUserRolloutNonce      = "inactive-user-deletion-v1"
 )
 
@@ -466,12 +466,6 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		"template_id":   config.TemplateID,
 		"deletion_date": deletionDate,
 	}).Info("Sent inactive user email")
-
-	if config.IsFinal {
-		c.DiscordController.NotifyAdminAction(
-			fmt.Sprintf("Inactive user %d (%s) reached 13 months inactivity and account deletion was initiated",
-				user.ID, user.Email))
-	}
 
 	return stage, true, false, false, nil
 }

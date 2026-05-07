@@ -63,7 +63,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final showAccountSecurity =
-        _config.hasConfiguredAccount() && !isOfflineMode;
+        _config.hasConfiguredAccount() && !isLocalGalleryMode;
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
@@ -107,8 +107,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         ),
                         const SizedBox(height: 8),
                         MenuItemWidgetNew(
-                          title: AppLocalizations.of(context)
-                              .emailVerificationToggle,
+                          title: AppLocalizations.of(
+                            context,
+                          ).emailVerificationToggle,
                           leadingIconWidget: _buildIconWidget(
                             context,
                             HugeIcons.strokeRoundedMailSecure01,
@@ -195,7 +196,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   }
 
   Future<void> _refreshSecurityDetails() async {
-    if (!_config.hasConfiguredAccount() || isOfflineMode) {
+    if (!_config.hasConfiguredAccount() || isLocalGalleryMode) {
       return;
     }
     try {
@@ -230,16 +231,12 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   Future<void> _disableTwoFactor() async {
     final alert = AlertDialog(
       title: Text(AppLocalizations.of(context).disableTwofactor),
-      content: Text(
-        AppLocalizations.of(context).confirm2FADisable,
-      ),
+      content: Text(AppLocalizations.of(context).confirm2FADisable),
       actions: [
         TextButton(
           child: Text(
             AppLocalizations.of(context).no,
-            style: TextStyle(
-              color: getEnteColorScheme(context).primary500,
-            ),
+            style: TextStyle(color: getEnteColorScheme(context).primary500),
           ),
           onPressed: () {
             Navigator.of(context).pop("dialog");
@@ -248,9 +245,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         TextButton(
           child: Text(
             AppLocalizations.of(context).yes,
-            style: const TextStyle(
-              color: Colors.red,
-            ),
+            style: const TextStyle(color: Colors.red),
           ),
           onPressed: () async {
             await UserService.instance.disableTwoFactor(context);
@@ -283,15 +278,17 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Future<void> _updateEmailMFA(bool isEnabled) async {
     try {
-      final UserDetails details =
-          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      final UserDetails details = await UserService.instance.getUserDetailsV2(
+        memoryCount: false,
+      );
       if ((details.profileData?.canDisableEmailMFA ?? false) == false) {
         await routeToPage(
           context,
           RequestPasswordVerificationPage(
             onPasswordVerified: (Uint8List keyEncryptionKey) async {
-              final Uint8List loginKey =
-                  await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+              final Uint8List loginKey = await CryptoUtil.deriveLoginKey(
+                keyEncryptionKey,
+              );
               await UserService.instance.registerOrUpdateSrp(loginKey);
             },
           ),
@@ -323,10 +320,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             await UserService.instance.getOrCreateRecoveryKey(context);
         final resetKey = CryptoUtil.generateKey();
         final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
-        final encryptionResult = CryptoUtil.encryptSync(
-          resetKey,
-          recoveryKey,
-        );
+        final encryptionResult = CryptoUtil.encryptSync(resetKey, recoveryKey);
         await PasskeyService.instance.configurePasskeyRecovery(
           resetKeyBase64,
           CryptoUtil.bin2base64(encryptionResult.encryptedData!),
@@ -359,8 +353,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       await showErrorDialog(
         context,
         AppLocalizations.of(context).noSystemLockFound,
-        AppLocalizations.of(context)
-            .toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+        AppLocalizations.of(
+          context,
+        ).toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
       );
     }
   }

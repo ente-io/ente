@@ -187,7 +187,7 @@ jobs:
                       **Flutter:** ${{ env.FLUTTER_VERSION }}
                       **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
                       **Download:** [Play Store](https://play.google.com/store/apps/details?id=io.ente.photos)
-                      **Sentry:** [Exceptions](https://sentry.ente.io/organizations/ente/issues/?environment=production&project=2&query=release.build%3A%3E%3D${{ env.NEW_VERSION_CODE }}&referrer=issue-list&statsPeriod=7d)
+                      **Sentry:** [Exceptions](https://sentry.ente.com/organizations/ente/issues/?environment=production&project=2&query=release.build%3A%3E%3D${{ env.NEW_VERSION_CODE }}&referrer=issue-list&statsPeriod=7d)
                       **Changes:**
                       ${{ env.CHANGELOG_DISCORD }}
                   color: 0x00ff00

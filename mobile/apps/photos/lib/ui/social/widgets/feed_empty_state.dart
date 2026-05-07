@@ -9,11 +9,11 @@ import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart"
 
 class FeedEmptyState extends StatelessWidget {
   const FeedEmptyState({
-    required this.offlineUiMode,
+    required this.localGalleryMode,
     super.key,
   });
 
-  final bool offlineUiMode;
+  final bool localGalleryMode;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class FeedEmptyState extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    offlineUiMode
+                    localGalleryMode
                         ? strings.seeWhatYourPeopleAreUpTo
                         : strings.nothingHereYet,
                     textAlign: TextAlign.center,
@@ -48,7 +48,7 @@ class FeedEmptyState extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    offlineUiMode
+                    localGalleryMode
                         ? strings.signUpToShareMomentsPrivately
                         : strings.shareAnAlbumWithSomeoneYouLove,
                     textAlign: TextAlign.center,
@@ -61,7 +61,7 @@ class FeedEmptyState extends StatelessWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 320),
               child: Column(
-                children: offlineUiMode
+                children: localGalleryMode
                     ? [
                         EmptyStateFeatureRow(
                           icon: HugeIcons.strokeRoundedFavourite,
@@ -101,9 +101,9 @@ class FeedEmptyState extends StatelessWidget {
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.primary,
               labelText:
-                  offlineUiMode ? strings.getStarted : strings.shareAnAlbum,
+                  localGalleryMode ? strings.getStarted : strings.shareAnAlbum,
               onTap: () async {
-                if (offlineUiMode) {
+                if (localGalleryMode) {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const EmailEntryPage(

@@ -6,6 +6,7 @@ import "package:photos/db/social_db.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/reaction.dart";
@@ -294,6 +295,8 @@ class FeedDataProvider {
         createdAt: reactions.first.createdAt,
         isOwnedByCurrentUser:
             fileID != null && filesByID[fileID]?.ownerID == userID,
+        isVideo: fileID != null &&
+            filesByID[fileID]?.fileType == FileType.video,
       );
     }).toList();
   }
@@ -340,6 +343,8 @@ class FeedDataProvider {
         createdAt: comments.first.createdAt,
         isOwnedByCurrentUser:
             fileID != null && filesByID[fileID]?.ownerID == userID,
+        isVideo: fileID != null &&
+            filesByID[fileID]?.fileType == FileType.video,
       );
     }).toList();
   }

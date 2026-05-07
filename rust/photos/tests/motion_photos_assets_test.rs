@@ -1,4 +1,4 @@
-use ente_media_inspector::{extract_motion_video_from_path, get_motion_video_index_from_path};
+use ente_photos::{extract_motion_video_from_path, get_motion_video_index_from_path};
 use std::path::{Path, PathBuf};
 
 fn fixture_dir() -> Option<PathBuf> {

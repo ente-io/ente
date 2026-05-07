@@ -1246,8 +1246,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         );
         window.history.pushState(viewerState, "", window.location.href);
 
-        const handlePopState = () => {
+        const handlePopState = (event: PopStateEvent) => {
             if (browserBackStateRef.current != stateMarker) return;
+            if (hasFileViewerBackStateMarker(event.state, stateMarker)) return;
             browserBackStateRef.current = undefined;
             handleCloseRef.current();
         };

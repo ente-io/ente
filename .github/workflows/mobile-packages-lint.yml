@@ -10,6 +10,7 @@ on:
             - "rust/photos/**"
             - ".github/workflows/mobile-packages-lint.yml"
             - "mobile/scripts/check_frozen_pubspecs.rb"
+            - "mobile/scripts/check_source_arb_plurals.rb"
             - ".github/scripts/get-affected-packages.sh"
             - "mobile/analysis_options.yaml"
     # Allow manual trigger for testing
@@ -101,6 +102,9 @@ jobs:
 
             - name: Verify frozen mobile pubspecs
               run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile
+
+            - name: Verify source ARB plurals
+              run: ruby mobile/scripts/check_source_arb_plurals.rb
 
     packages-lint:
         needs: detect-changes

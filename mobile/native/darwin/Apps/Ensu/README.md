@@ -22,6 +22,8 @@ That's it. Apart from the `cargo codegen`, this is a normal iOS project.
 > [!NOTE]
 >
 > Re-run `cargo codegen ensu-ios` whenever the UniFFI interface under `rust/uniffi` changes.
+>
+> Xcode compiles and statically links the Rust libraries automatically when building the app.
 
 A custom endpoint can be baked into the build via `xcodebuild ENTE_API_ENDPOINT=http://localhost:8080 ...` or by editing the user-defined `ENTE_API_ENDPOINT` build setting in the `Ensu` target.
 
@@ -35,8 +37,12 @@ Build and run on the simulator:
 
 ```sh
 open -a Simulator
+
+cd mobile/native/darwin/Apps/Ensu
 xcodebuild -scheme Ensu -destination 'platform=iOS Simulator,name=iPhone 17'
-xcrun simctl install booted ~/Library/Developer/Xcode/DerivedData/Ensu-*/Build/Products/Debug-iphonesimulator/Ensu.app
+
+xcrun simctl install booted \
+  ~/Library/Developer/Xcode/DerivedData/Ensu-*/Build/Products/Debug-iphonesimulator/Ensu.app
 xcrun simctl launch booted io.ente.ensu
 ```
 

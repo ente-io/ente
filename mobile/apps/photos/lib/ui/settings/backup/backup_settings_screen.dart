@@ -107,6 +107,24 @@ class BackupSettingsScreen extends StatelessWidget {
                           ),
                         ),
                       ],
+                      if (Configuration.instance.isEnteProduction()) ...[
+                        const SizedBox(height: 8),
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).fasterUploads,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () =>
+                                localSettings.cfUploadProxyEnabled ??
+                                flagService.cloudflareUploadWorker,
+                            onChanged: () async {
+                              final newValue =
+                                  !(localSettings.cfUploadProxyEnabled ??
+                                      flagService.cloudflareUploadWorker);
+                              await localSettings
+                                  .setCFUploadProxyEnabled(newValue);
+                            },
+                          ),
+                        ),
+                      ],
                       if (Platform.isIOS) ...[
                         const SizedBox(height: 24),
                         MenuItemWidgetNew(

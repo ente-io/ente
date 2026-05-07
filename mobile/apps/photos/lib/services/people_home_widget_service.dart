@@ -152,10 +152,7 @@ class PeopleHomeWidgetService {
     );
   }
 
-  Future<void> onLaunchFromWidget(
-    int fileId,
-    String personId,
-  ) async {
+  Future<void> onLaunchFromWidget(int fileId, String personId) async {
     final file = await FilesDB.instance.getFile(fileId);
     if (file == null) {
       _logger.warning("Cannot launch widget: file with ID $fileId not found");
@@ -164,17 +161,15 @@ class PeopleHomeWidgetService {
 
     final person = await PersonService.instance.getPerson(personId);
     if (person == null) {
-      _logger
-          .warning("Cannot launch widget: person with ID $personId not found");
+      _logger.warning(
+        "Cannot launch widget: person with ID $personId not found",
+      );
       return;
     }
 
     AppNavigationService.instance
         .pushPage(
-          PeoplePage(
-            person: person,
-            searchResult: null,
-          ),
+          PeoplePage(person: person, searchResult: null),
           forceCustomPageRoute: true,
         )
         .ignore();
@@ -187,11 +182,7 @@ class PeopleHomeWidgetService {
     AppNavigationService.instance
         .pushPage(
           DetailPage(
-            DetailPageConfiguration(
-              files,
-              files.indexOf(file),
-              "peoplewidget",
-            ),
+            DetailPageConfiguration(files, files.indexOf(file), "peoplewidget"),
           ),
           forceCustomPageRoute: true,
         )
@@ -232,7 +223,7 @@ class PeopleHomeWidgetService {
     }
 
     // Check ML consent
-    if (isOfflineMode || !hasGrantedMLConsent) {
+    if (isLocalGalleryMode || !hasGrantedMLConsent) {
       return true;
     }
 
@@ -276,6 +267,10 @@ class PeopleHomeWidgetService {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
     final persons = await PersonService.instance.getCertainPersons(personIds);
     for (final person in persons) {
+      if (person.data.isIgnored) {
+        _logger.info("Skipping ignored person: ${person.data.name}");
+        continue;
+      }
       final files = await SearchService.instance.getFilesForPersonID(
         person.remoteID,
         sortOnTime: false,

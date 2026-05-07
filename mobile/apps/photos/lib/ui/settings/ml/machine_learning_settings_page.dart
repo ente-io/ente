@@ -8,6 +8,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -50,7 +51,9 @@ class _MachineLearningSettingsPageState
       wakeLockFor: WakeLockFor.machineLearningSettingsScreen,
     );
     computeController.forceOverrideML(turnOn: true);
-    if (!MLIndexingIsolate.instance.areModelsDownloaded) {
+    if (!MLModelDownloadService.instance.areModelsDownloaded(
+      onlyIndexingModels: false,
+    )) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         if (mounted) {
           setState(() {});
@@ -136,9 +139,7 @@ class _MachineLearningSettingsPageState
               Text(
                 AppLocalizations.of(context).mlIndexingDescription,
                 textAlign: TextAlign.left,
-                style: textTheme.small.copyWith(
-                  color: colorScheme.textMuted,
-                ),
+                style: textTheme.small.copyWith(color: colorScheme.textMuted),
               ),
               const SizedBox(height: 20),
               _getMlSettings(context),
@@ -240,9 +241,7 @@ class _MachineLearningSettingsPageState
     Bus.instance.fire(NotificationEvent());
     if (!mlConsent) {
       MLService.instance.pauseIndexingAndClustering();
-      unawaited(
-        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
-      );
+      unawaited(MLIndexingIsolate.instance.cleanupLocalIndexingModels());
       if (oldMlEnabled && !newMlEnabled) {
         await memoriesCacheService.purgeMlOnlyMemoriesFromCache();
       }
@@ -311,20 +310,16 @@ class _MachineLearningSettingsPageState
             ),
             alignment: Alignment.center,
             child: _hasAcknowledgedMLConsent
-                ? Icon(
-                    Icons.check,
-                    size: 14,
-                    color: colorScheme.contentReverse,
-                  )
+                ? Icon(Icons.check, size: 14, color: colorScheme.contentReverse)
                 : null,
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               AppLocalizations.of(context).mlConsentConfirmation,
-              style: getEnteTextTheme(context).small.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
+              style: getEnteTextTheme(
+                context,
+              ).small.copyWith(color: colorScheme.textMuted),
             ),
           ),
         ],
@@ -391,10 +386,10 @@ class _MachineLearningSettingsPageState
             },
           ),
         ),
-        const SizedBox(
-          height: 12,
-        ),
-        MLIndexingIsolate.instance.areModelsDownloaded ||
+        const SizedBox(height: 12),
+        MLModelDownloadService.instance.areModelsDownloaded(
+                  onlyIndexingModels: true,
+                ) ||
                 !localSettings.isMLLocalIndexingEnabled
             ? const MLStatusWidget()
             : const ModelLoadingState(),
@@ -404,9 +399,7 @@ class _MachineLearningSettingsPageState
 }
 
 class ModelLoadingState extends StatefulWidget {
-  const ModelLoadingState({
-    super.key,
-  });
+  const ModelLoadingState({super.key});
 
   @override
   State<ModelLoadingState> createState() => _ModelLoadingStateState();
@@ -419,8 +412,9 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
 
   @override
   void initState() {
-    _progressStream =
-        RemoteAssetsService.instance.progressStream.listen((event) {
+    _progressStream = RemoteAssetsService.instance.progressStream.listen((
+      event,
+    ) {
       final String url = event.$1;
       String title = "";
       if (url.contains(ClipImageEncoder.kRemoteBucketModelPath)) {
@@ -459,12 +453,14 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         MenuSectionTitle(title: AppLocalizations.of(context).status),
         const SizedBox(height: 8),
         FutureBuilder(
-          future: canUseHighBandwidth().then((v) => isOfflineMode || v),
+          future: canUseHighBandwidth().then((v) => isLocalGalleryMode || v),
           builder: (context, snapshot) {
             String title = "";
             if (snapshot.hasData) {
               if (snapshot.data!) {
-                MLIndexingIsolate.instance.triggerModelsDownload();
+                MLModelDownloadService.instance.triggerModelsDownload(
+                  onlyIndexingModels: false,
+                );
                 title = AppLocalizations.of(context).checkingModels;
               } else {
                 title = AppLocalizations.of(context).waitingForWifi;
@@ -501,9 +497,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
 }
 
 class MLStatusWidget extends StatefulWidget {
-  const MLStatusWidget({
-    super.key,
-  });
+  const MLStatusWidget({super.key});
 
   @override
   State<MLStatusWidget> createState() => MLStatusWidgetState();
@@ -552,8 +546,9 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
 
               if (!_isDeviceHealthy && pendingFiles > 0) {
                 return MenuSectionDescriptionWidget(
-                  content: AppLocalizations.of(context)
-                      .indexingPausedStatusDescription,
+                  content: AppLocalizations.of(
+                    context,
+                  ).indexingPausedStatusDescription,
                 );
               }
 

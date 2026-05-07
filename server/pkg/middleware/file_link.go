@@ -44,9 +44,16 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		}
 		clientIP := network.GetClientIP(c)
 		userAgent := c.GetHeader("User-Agent")
+		reqPath := urlSanitizer(c)
+		shouldCheckDeviceLimit := shouldCheckFileLinkDeviceLimit(reqPath)
+		passwordValidated := false
 
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
-		cachedValue, cacheHit := m.Cache.Get(cacheKey)
+		var cachedValue interface{}
+		cacheHit := false
+		if !shouldCheckDeviceLimit {
+			cachedValue, cacheHit = m.Cache.Get(cacheKey)
+		}
 		var fileLinkRow *ente.FileLinkRow
 		var err error
 		if !cacheHit {
@@ -60,16 +67,36 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "disabled token"})
 				return
 			}
-			// validate device limit
-			reached, limitErr := m.isDeviceLimitReached(c, fileLinkRow, clientIP, userAgent)
-			if limitErr != nil {
-				logrus.WithError(limitErr).Error("failed to check device limit")
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+			if fileLinkRow.ValidTill > 0 && // expiry time is defined, 0 indicates no expiry
+				fileLinkRow.ValidTill < time.Microseconds() {
+				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "expired token"})
 				return
 			}
-			if reached {
-				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "reached device limit"})
-				return
+			if fileLinkRow.PassHash != nil && *fileLinkRow.PassHash != "" {
+				if err = m.validatePassword(c, reqPath, fileLinkRow); err != nil {
+					logrus.WithError(err).Warn("password validation failed")
+					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err})
+					return
+				}
+				passwordValidated = true
+			}
+			if shouldCheckDeviceLimit {
+				linkDeviceToken, reached, limitErr := m.checkDeviceLimit(c, accessToken, fileLinkRow, clientIP, userAgent)
+				if limitErr != nil {
+					logrus.WithError(limitErr).Error("failed to check device limit")
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+					return
+				}
+				if reached {
+					c.AbortWithStatusJSON(
+						ente.ErrLinkDeviceLimitExceeded.HttpStatusCode,
+						&ente.ErrLinkDeviceLimitExceeded,
+					)
+					return
+				}
+				if linkDeviceToken != "" {
+					c.Set(auth.LinkDeviceTokenResponseKey, linkDeviceToken)
+				}
 			}
 		} else {
 			fileLinkRow = cachedValue.(*ente.FileLinkRow)
@@ -82,8 +109,7 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		}
 
 		// checks password protected public collection
-		if fileLinkRow.PassHash != nil && *fileLinkRow.PassHash != "" {
-			reqPath := urlSanitizer(c)
+		if !passwordValidated && fileLinkRow.PassHash != nil && *fileLinkRow.PassHash != "" {
 			if err = m.validatePassword(c, reqPath, fileLinkRow); err != nil {
 				logrus.WithError(err).Warn("password validation failed")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err})
@@ -91,7 +117,7 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 			}
 		}
 
-		if !cacheHit {
+		if !cacheHit && !shouldCheckDeviceLimit {
 			m.Cache.Set(cacheKey, fileLinkRow, cache.DefaultExpiration)
 		}
 
@@ -104,6 +130,33 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		})
 		c.Next()
 	}
+}
+
+func (m *FileLinkMiddleware) checkDeviceLimit(c *gin.Context, accessToken string,
+	fileLinkRow *ente.FileLinkRow, ip string, ua string) (string, bool, error) {
+	linkDeviceToken := auth.GetLinkDeviceToken(c)
+	if linkDeviceToken != "" {
+		claim, err := publicCtrl.ValidateLinkDeviceToken(m.FileLinkCtrl.JwtSecret, linkDeviceToken, publicCtrl.LinkDeviceScopeFile, fileLinkRow.LinkID, accessToken)
+		if err == nil {
+			if claim.ExpiryTime-time.Microseconds() < publicCtrl.LinkDeviceTokenRefreshBefore {
+				token, _, tokenErr := publicCtrl.NewLinkDeviceToken(m.FileLinkCtrl.JwtSecret, publicCtrl.LinkDeviceScopeFile, fileLinkRow.LinkID, accessToken, fileLinkRow.ValidTill)
+				return token, false, stacktrace.Propagate(tokenErr, "")
+			}
+			return "", false, nil
+		}
+	}
+	reached, err := m.isDeviceLimitReached(c, fileLinkRow, ip, ua)
+	if err != nil || reached {
+		return "", reached, stacktrace.Propagate(err, "")
+	}
+	token, _, err := publicCtrl.NewLinkDeviceToken(m.FileLinkCtrl.JwtSecret, publicCtrl.LinkDeviceScopeFile, fileLinkRow.LinkID, accessToken, fileLinkRow.ValidTill)
+	return token, false, stacktrace.Propagate(err, "")
+}
+
+func shouldCheckFileLinkDeviceLimit(reqPath string) bool {
+	// File-link admission is currently anchored to /file-link/info, which is the
+	// discovery endpoint clients call before fetching the actual blob.
+	return reqPath == "/file-link/info"
 }
 
 func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,

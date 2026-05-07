@@ -69,7 +69,7 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                 >
                     <Stack
                         component="a"
-                        href="https://paste.ente.io"
+                        href="https://paste.ente.com"
                         direction="row"
                         alignItems="center"
                         spacing={0.35}

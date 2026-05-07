@@ -78,15 +78,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   @override
   void initState() {
     super.initState();
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _debouncer.run(() async {
-        if (mounted) {
-          debugPrint("SetState Shared Collections on ${event.reason}");
-          setState(() {});
-        }
-      });
-    });
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
+      (event) {
+        _debouncer.run(() async {
+          if (mounted) {
+            debugPrint("SetState Shared Collections on ${event.reason}");
+            setState(() {});
+          }
+        });
+      },
+    );
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _debouncer.run(() async {
@@ -105,8 +106,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
-    _appModeChangedEvent =
-        Bus.instance.on<AppModeChangedEvent>().listen((event) {
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((
+      event,
+    ) {
       if (mounted) {
         setState(() {});
       }
@@ -205,19 +207,17 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final bool offlineUiMode =
-        isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+    final bool localGalleryMode =
+        isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<SharedCollectionsAndMemoryLinks>(
-      future: offlineUiMode
+      future: localGalleryMode
           ? Future.value(SharedCollectionsAndMemoryLinks.empty())
           : CollectionsService.instance.getSharedCollectionsAndMemoryLinks(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data!;
-          if (offlineUiMode) {
-            return const SafeArea(
-              child: SharedEmptyOfflineStateWidget(),
-            );
+          if (localGalleryMode) {
+            return const SafeArea(child: SharedEmptyOfflineStateWidget());
           }
           if (data.collections.incoming.isEmpty &&
               data.collections.quickLinks.isEmpty &&
@@ -418,9 +418,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ? SizedBox(
                         height: sideOfThumbnail + 46,
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (context, index) {
                             return Padding(

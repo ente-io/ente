@@ -8,7 +8,7 @@ class PeopleMemoriesCalculator {
     bool surfaceAll = false,
     required Map<int, int> seenTimes,
     required List<PersonEntity> persons,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool canUseUnnamedFallback,
     String? currentUserEmail,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -38,12 +38,13 @@ class PeopleMemoriesCalculator {
       for (final cluster in person.data.assigned) {
         if (cluster.faces.isEmpty) continue;
         personIdToFaceIDs[personID]!.addAll(cluster.faces);
-        personIdToFileIDs[personID]!
-            .addAll(cluster.faces.map((faceID) => getFileIdFromFaceId(faceID)));
+        personIdToFileIDs[personID]!.addAll(
+          cluster.faces.map((faceID) => getFileIdFromFaceId(faceID)),
+        );
       }
     }
     final List<String> orderedImportantPersonsID = persons
-        .where((person) => !isOfflineMode && !person.data.isIgnored)
+        .where((person) => !isLocalGalleryMode && !person.data.isIgnored)
         .map((p) => p.remoteID)
         .toList();
     orderedImportantPersonsID.shuffle(Random());
@@ -70,7 +71,7 @@ class PeopleMemoriesCalculator {
     Future<List<Memory>> selectPeopleMemories(List<Memory> memories) {
       return SmartMemoriesService._bestSelectionPeople(
         memories,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
@@ -88,7 +89,7 @@ class PeopleMemoriesCalculator {
       seenTimes: seenTimes,
       nowInMicroseconds: nowInMicroseconds,
       windowEnd: windowEnd,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
       selectionBuilder: selectPeopleMemories,
     );
     final randomizedUnnamedClusterCandidates =
@@ -201,8 +202,9 @@ class PeopleMemoriesCalculator {
           }
           final Map<int, double> similarities = {};
           for (final embedding in vectors) {
-            similarities[embedding.fileID] =
-                embedding.vector.dot(activityVector);
+            similarities[embedding.fileID] = embedding.vector.dot(
+              activityVector,
+            );
           }
           w?.log(
             'comparing embeddings for doingSomethingTogether and $activity',
@@ -251,15 +253,17 @@ class PeopleMemoriesCalculator {
         final file = allFileIdsToFile[fileID];
         if (file != null && file.creationTime != null) {
           final creationTime = file.creationTime!;
-          final creationDateTime =
-              DateTime.fromMicrosecondsSinceEpoch(creationTime);
+          final creationDateTime = DateTime.fromMicrosecondsSinceEpoch(
+            creationTime,
+          );
           if (currentTime.difference(creationDateTime).inDays < 365) {
             longAgo = false;
             break;
           }
           if (creationTime > lastCreationTime - microSecondsInDay) {
-            final lastDateTime =
-                DateTime.fromMicrosecondsSinceEpoch(lastCreationTime);
+            final lastDateTime = DateTime.fromMicrosecondsSinceEpoch(
+              lastCreationTime,
+            );
             if (creationDateTime.difference(lastDateTime).inHours > 24) {
               lastTimeYouSawThemFiles.clear();
             }
@@ -282,12 +286,10 @@ class PeopleMemoriesCalculator {
           lastTimeMemories,
           fileIDToImageEmbedding,
           minKeep: 2,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
         );
         final spacedLastTimeMemories =
-            SmartMemoriesService._filterByTimeSpacing(
-          filteredLastTimeMemories,
-        );
+            SmartMemoriesService._filterByTimeSpacing(filteredLastTimeMemories);
         final lastTimeList =
             personToCandidates.putIfAbsent(personID, () => {}).putIfAbsent(
                   PeopleMemoryType.lastTimeYouSawThem,
@@ -352,8 +354,11 @@ class PeopleMemoriesCalculator {
 
       final birthdate = DateTime.tryParse(person.data.birthDate ?? "");
       if (birthdate != null) {
-        final thisBirthday =
-            DateTime(currentTime.year, birthdate.month, birthdate.day);
+        final thisBirthday = DateTime(
+          currentTime.year,
+          birthdate.month,
+          birthdate.day,
+        );
         final daysTillBirthday = thisBirthday.difference(currentTime).inDays;
         if (daysTillBirthday < 6 && daysTillBirthday >= 0) {
           final int newAge = currentTime.year - birthdate.year;
@@ -416,8 +421,9 @@ class PeopleMemoriesCalculator {
     }
     w?.log('relevancy setup');
 
-    final shownPersonAndTypeTimeout =
-        Duration(days: shownPersonTimeout.inDays * 2);
+    final shownPersonAndTypeTimeout = Duration(
+      days: shownPersonTimeout.inDays * 2,
+    );
     bool addedFromRotation = false;
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
@@ -428,8 +434,9 @@ class PeopleMemoriesCalculator {
       }
       for (final shownLog in shownPeople) {
         if (shownLog.personID != personID) continue;
-        final shownDate =
-            DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+        final shownDate = DateTime.fromMicrosecondsSinceEpoch(
+          shownLog.lastTimeShown,
+        );
         final bool seenPersonRecently =
             currentTime.difference(shownDate) < shownPersonTimeout;
         if (seenPersonRecently) continue peopleRotationLoop;
@@ -459,8 +466,9 @@ class PeopleMemoriesCalculator {
           if (shownLog.peopleMemoryType != potentialCandidate.type) {
             continue;
           }
-          final shownTypeDate =
-              DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+          final shownTypeDate = DateTime.fromMicrosecondsSinceEpoch(
+            shownLog.lastTimeShown,
+          );
           final bool seenPersonTypeRecently =
               currentTime.difference(shownTypeDate) < shownPersonAndTypeTimeout;
           if (manyMemoryTypes && seenPersonTypeRecently) {

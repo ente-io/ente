@@ -125,15 +125,11 @@ class Configuration {
         _logger.info(
           "(for debugging) Token found, loading secure storage data",
         );
-        _key = await _secureStorage.read(
-          key: keyKey,
-        );
+        _key = await _secureStorage.read(key: keyKey);
         _logger.info(
           "(for debugging) Key loaded from secure storage, is null: ${_key == null}",
         );
-        _secretKey = await _secureStorage.read(
-          key: secretKeyKey,
-        );
+        _secretKey = await _secureStorage.read(key: secretKeyKey);
         _logger.info(
           "(for debugging) Secret Key loaded from secure storage, is null: ${_secretKey == null}",
         );
@@ -210,9 +206,9 @@ class Configuration {
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();
         try {
-          await SyncService.instance
-              .existingSync()
-              .timeout(const Duration(seconds: 5));
+          await SyncService.instance.existingSync().timeout(
+                const Duration(seconds: 5),
+              );
         } catch (e) {
           // ignore
         }
@@ -527,7 +523,11 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    return _preferences.getString(endPointKey) ?? endpoint;
+    final savedEndpoint = _preferences.getString(endPointKey) ?? endpoint;
+    if (savedEndpoint == kLegacyProductionEndpoint) {
+      return kDefaultProductionEndpoint;
+    }
+    return savedEndpoint;
   }
 
   // isEnteProduction checks if the current endpoint is the default production
@@ -554,7 +554,7 @@ class Configuration {
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
-    await localSettings.setAppMode(AppMode.online);
+    await localSettings.setAppMode(AppMode.enteGallery);
     Bus.instance.fire(AppModeChangedEvent());
     Bus.instance.fire(SignedInEvent());
   }

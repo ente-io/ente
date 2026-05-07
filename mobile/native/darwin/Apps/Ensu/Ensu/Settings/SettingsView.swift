@@ -257,7 +257,7 @@ struct SettingsView: View {
     private var endpointInfoText: String? {
         guard trimmedQuery.isEmpty else { return nil }
 
-        let defaultEndpoint = "https://api.ente.io"
+        let defaultEndpoint = "https://api.ente.com"
         let endpoint = EnsuDeveloperSettings.currentEndpointString
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))

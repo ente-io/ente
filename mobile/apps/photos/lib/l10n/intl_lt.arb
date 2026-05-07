@@ -455,6 +455,7 @@
   },
   "discover_identity": "Tapatybė",
   "discover_screenshots": "Ekrano kopijos",
+  "discover_qr_codes": "QR kodai",
   "discover_receipts": "Kvitai",
   "discover_notes": "Užrašai",
   "discover_memes": "Mėmai",
@@ -753,7 +754,7 @@
   "playstoreSubscription": "„PlayStore“ prenumerata",
   "appstoreSubscription": "„App Store“ prenumerata",
   "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
-  "visitWebToManage": "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą",
+  "visitWebToManage": "Aplankykite {webUrl}, kad tvarkytumėte savo prenumeratą",
   "couldNotUpdateSubscription": "Nepavyko atnaujinti prenumeratos",
   "paymentFailed": "Mokėjimas nepavyko",
   "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
@@ -1112,7 +1113,7 @@
   "loadMessage5": "Mūsų šaltinio kodas ir kriptografija buvo išoriškai audituoti.",
   "loadMessage6": "Galite bendrinti savo albumų nuorodas su artimaisiais.",
   "loadMessage7": "Mūsų mobiliosios programos veikia fone, kad užšifruotų ir sukurtų atsarginę kopiją visų naujų nuotraukų, kurias spustelėjate.",
-  "loadMessage8": "web.ente.io turi sklandų įkėlėją",
+  "loadMessage8": "{webUrl} turi sklandų įkėlėją",
   "loadMessage9": "Naudojame „Xchacha20Poly1305“, kad saugiai užšifruotume jūsų duomenis.",
   "photoDescriptions": "Nuotraukų aprašai",
   "searchResultFileName": "Failo pavadinimas",
@@ -1355,7 +1356,7 @@
   "playOnTv": "Paleisti albumą televizoriuje",
   "pair": "Susieti",
   "deviceNotFound": "Įrenginys nerastas",
-  "castInstruction": "Aplankykite cast.ente.io įrenginyje, kurį norite susieti.\n\nĮveskite toliau esantį kodą, kad paleistumėte albumą televizoriuje.",
+  "castInstruction": "Aplankykite {castUrl} įrenginyje, kurį norite susieti.\n\nĮveskite toliau esantį kodą, kad paleistumėte albumą televizoriuje.",
   "deviceCodeHint": "Įveskite kodą",
   "joinDiscord": "Jungtis prie „Discord“",
   "locations": "Vietovės",
@@ -1496,7 +1497,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1581,7 +1582,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1807,7 +1808,6 @@
   "spotlightOnThem": "Dėmesys {name}",
   "personIsAge": "{name} yra {age} m.!",
   "personTurningAge": "{name} netrukus sulauks {age} m.",
-  "lastTimeWithThem": "Paskutinį kartą su {name}",
   "tripToLocation": "Kelionė į {location}",
   "tripInYear": "Kelionė per {year}",
   "lastYearsTrip": "Pastarųjų metų kelionė",
@@ -1836,6 +1836,7 @@
   "sorryWeHadToPauseYourBackups": "Atsiprašome, turėjome pristabdyti jūsų atsarginių kopijų kūrimą.",
   "clickToInstallOurBestVersionYet": "Spustelėkite, kad įdiegtumėte geriausią mūsų versiją iki šiol",
   "onThisDayNotificationExplanation": "Gaukite priminimus apie praėjusių metų šios dienos prisiminimus.",
+  "showTextOnWidget": "Rodyti tekstą valdiklyje",
   "birthdayNotifications": "Gimtadienio pranešimai",
   "receiveRemindersOnBirthdays": "Gaukite priminimus, kai yra kažkieno gimtadienis. Paliesdami pranešimą, pateksite į gimtadienio šventės asmens nuotraukas.",
   "happyBirthday": "Su gimtadieniu! 🥳",

@@ -27,8 +27,8 @@ const ffmpegLazy = (): Promise<FFmpeg> => (_ffmpeg ??= createFFmpeg());
 const createFFmpeg = async () => {
     const ffmpeg = new FFmpeg();
     await ffmpeg.load({
-        coreURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.js",
-        wasmURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.wasm",
+        coreURL: "https://assets.ente.com/ffmpeg-core-0.12.10/ffmpeg-core.js",
+        wasmURL: "https://assets.ente.com/ffmpeg-core-0.12.10/ffmpeg-core.wasm",
     });
     // This is too noisy to enable even during development. Uncomment to taste.
     // ffmpeg.on("log", (e) => log.debug(() => ["[ffmpeg]", e.message]));

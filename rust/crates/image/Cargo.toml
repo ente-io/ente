@@ -1,0 +1,13 @@
+[package]
+name = "ente_image"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+image = { version = "0.25.5", default-features = true }
+kamadak-exif = "0.6.1"
+ente_heic = { package = "heic_decoder", git = "https://github.com/ente-io/heic-decoder.git", rev = "d47a0f9c9e8c4c9e166c5a4b5734f8ad1f88f7a7", features = [
+    "image-integration",
+] }
+thiserror = "2.0.11"
+tiff = "0.10.3"

@@ -39,12 +39,12 @@ class ChangeLogStrings {
 
   static ChangeLogStrings? maybeForLocale(
     Locale locale, {
-    bool isOffline = false,
+    bool isLocalGallery = false,
   }) {
     final key = locale.countryCode != null && locale.countryCode!.isNotEmpty
         ? '${locale.languageCode}_${locale.countryCode}'
         : locale.languageCode;
-    final translations = isOffline ? _offlineTranslations : _translations;
+    final translations = isLocalGallery ? _offlineTranslations : _translations;
     final strings = translations[key] ??
         translations[locale.languageCode] ??
         translations['en'];
@@ -57,247 +57,351 @@ class ChangeLogStrings {
 
   static bool hasContentForLocale(
     Locale locale, {
-    bool isOffline = false,
+    bool isLocalGallery = false,
   }) {
     return maybeForLocale(
           locale,
-          isOffline: isOffline,
+          isLocalGallery: isLocalGallery,
         ) !=
         null;
   }
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Memories Improvements',
+      title1: 'Smoother memories',
       desc1:
-          'We have shipped a bunch of improvements in our memories system, including surfacing better memories with other people, detecting your past trips, and surfacing recent photos from last week and last month.',
+          'Rediscovering old memories feels better, with new haptics and under-the-hood improvements.',
+      title2: 'Faster browsing',
+      desc2:
+          "Your photos and videos load faster. We've updated our infrastructure, so everything feels snappier.",
+      title3: 'Better memory lane',
+      desc3:
+          'Memory lanes now appear for more people in your life, including kids 3 and up. Shared links load faster, with smoother animations.',
     ),
     'cs': ChangeLogStrings(
-      title1: 'Vylepšení vzpomínek',
+      title1: 'Plynulejší vzpomínky',
       desc1:
-          'Přinášíme řadu vylepšení systému vzpomínek, včetně lepšího zobrazování společných momentů s blízkými, rozpoznávání vašich minulých cest a zobrazování nedávných fotek z minulého týdne a minulého měsíce.',
+          'Znovuobjevování starých vzpomínek je příjemnější díky nové haptické odezvě a vylepšením na pozadí.',
+      title2: 'Rychlejší prohlížení',
+      desc2:
+          'Vaše fotky a videa se načítají rychleji. Aktualizovali jsme naši infrastrukturu, takže vše působí svižněji.',
+      title3: 'Lepší memory lane',
+      desc3:
+          'Memory lane se nyní zobrazuje pro více lidí ve vašem životě, včetně dětí od 3 let. Sdílené odkazy se načítají rychleji a animace jsou plynulejší.',
     ),
     'de': ChangeLogStrings(
-      title1: 'Verbesserungen bei Erinnerungen',
+      title1: 'Flüssigere Erinnerungen',
       desc1:
-          'Wir haben eine Reihe von Verbesserungen an unserem Erinnerungssystem veröffentlicht, darunter bessere Erinnerungen mit anderen Personen, das Erkennen Ihrer vergangenen Reisen sowie aktuelle Fotos von letzter Woche und letztem Monat.',
+          'Das Wiederentdecken alter Erinnerungen fühlt sich mit neuer Haptik und Verbesserungen im Hintergrund besser an.',
+      title2: 'Schnelleres Browsen',
+      desc2:
+          'Ihre Fotos und Videos laden schneller. Wir haben unsere Infrastruktur aktualisiert, damit sich alles reaktionsschneller anfühlt.',
+      title3: 'Bessere Memory Lane',
+      desc3:
+          'Memory Lanes erscheinen jetzt für mehr Menschen in Ihrem Leben, einschließlich Kindern ab 3 Jahren. Geteilte Links laden schneller und Animationen laufen flüssiger.',
     ),
     'es': ChangeLogStrings(
-      title1: 'Mejoras en Recuerdos',
+      title1: 'Recuerdos más fluidos',
       desc1:
-          'Hemos lanzado varias mejoras en nuestro sistema de recuerdos, incluyendo mejores recuerdos con otras personas, la detección de tus viajes pasados y la aparición de fotos recientes de la semana pasada y del mes pasado.',
+          'Redescubrir recuerdos antiguos se siente mejor, con nuevas respuestas hápticas y mejoras internas.',
+      title2: 'Navegación más rápida',
+      desc2:
+          'Tus fotos y videos cargan más rápido. Hemos actualizado nuestra infraestructura para que todo se sienta más ágil.',
+      title3: 'Mejor memory lane',
+      desc3:
+          'Las memory lanes ahora aparecen para más personas en tu vida, incluidos niños de 3 años en adelante. Los enlaces compartidos cargan más rápido, con animaciones más fluidas.',
     ),
     'fr': ChangeLogStrings(
-      title1: 'Améliorations des souvenirs',
+      title1: 'Souvenirs plus fluides',
       desc1:
-          'Nous avons déployé de nombreuses améliorations de notre système de souvenirs, notamment de meilleurs souvenirs avec d\'autres personnes, la détection de vos voyages passés et l\'affichage de photos récentes de la semaine dernière et du mois dernier.',
+          'Redécouvrir d’anciens souvenirs est plus agréable, avec de nouvelles vibrations et des améliorations internes.',
+      title2: 'Navigation plus rapide',
+      desc2:
+          'Vos photos et vidéos se chargent plus vite. Nous avons mis à jour notre infrastructure pour rendre l’ensemble plus réactif.',
+      title3: 'Meilleure memory lane',
+      desc3:
+          'Les memory lanes apparaissent désormais pour davantage de personnes de votre vie, y compris les enfants de 3 ans et plus. Les liens partagés se chargent plus vite, avec des animations plus fluides.',
     ),
     'it': ChangeLogStrings(
-      title1: 'Miglioramenti ai ricordi',
+      title1: 'Ricordi più fluidi',
       desc1:
-          'Abbiamo introdotto diversi miglioramenti al nostro sistema dei ricordi, tra cui la possibilità di rivivere momenti condivisi con altre persone, il rilevamento dei tuoi viaggi passati e la comparsa di foto recenti della scorsa settimana e del mese scorso.',
+          'Riscoprire vecchi ricordi è più piacevole, con nuovi feedback aptici e miglioramenti interni.',
+      title2: 'Navigazione più veloce',
+      desc2:
+          'Le tue foto e i tuoi video si caricano più velocemente. Abbiamo aggiornato la nostra infrastruttura, così tutto risulta più reattivo.',
+      title3: 'Memory lane migliorata',
+      desc3:
+          'Le memory lane ora appaiono per più persone nella tua vita, inclusi i bambini dai 3 anni in su. I link condivisi si caricano più rapidamente, con animazioni più fluide.',
     ),
     'ja': ChangeLogStrings(
-      title1: '思い出の改善',
-      desc1:
-          '思い出機能に多数の改善を加えました。他の人と一緒の思い出をより良く表示し、過去の旅行を検出し、先週や先月の最近の写真も表示します。',
+      title1: 'よりスムーズな思い出',
+      desc1: '新しい触覚フィードバックと内部改善により、昔の思い出を振り返る体験がより心地よくなりました。',
+      title2: 'より速い閲覧',
+      desc2: '写真や動画の読み込みが速くなりました。インフラを更新し、全体がより軽快に感じられます。',
+      title3: 'より良いメモリーレーン',
+      desc3:
+          '3歳以上のお子さまを含め、より多くの大切な人のメモリーレーンが表示されるようになりました。共有リンクの読み込みも速くなり、アニメーションもよりスムーズです。',
     ),
     'nl': ChangeLogStrings(
-      title1: 'Verbeteringen aan Herinneringen',
+      title1: 'Soepelere herinneringen',
       desc1:
-          'We hebben een aantal verbeteringen doorgevoerd in ons herinneringssysteem, waaronder betere herinneringen met andere mensen, het herkennen van je eerdere reizen en het tonen van recente foto\'s van vorige week en vorige maand.',
+          'Oude herinneringen herontdekken voelt beter, met nieuwe haptiek en verbeteringen onder de motorkap.',
+      title2: 'Sneller bladeren',
+      desc2:
+          'Je foto’s en video’s laden sneller. We hebben onze infrastructuur bijgewerkt, zodat alles vlotter aanvoelt.',
+      title3: 'Betere memory lane',
+      desc3:
+          'Memory lanes verschijnen nu voor meer mensen in je leven, inclusief kinderen vanaf 3 jaar. Gedeelde links laden sneller, met soepelere animaties.',
     ),
     'no': ChangeLogStrings(
-      title1: 'Forbedringer i minner',
+      title1: 'Jevnere minner',
       desc1:
-          'Vi har lansert en rekke forbedringer i minnene våre, blant annet bedre minner med andre personer, gjenkjenning av tidligere reiser og visning av nylige bilder fra forrige uke og forrige måned.',
+          'Det føles bedre å gjenoppdage gamle minner, med ny haptikk og forbedringer under panseret.',
+      title2: 'Raskere blaing',
+      desc2:
+          'Bildene og videoene dine lastes raskere. Vi har oppdatert infrastrukturen vår, slik at alt føles kvikkere.',
+      title3: 'Bedre memory lane',
+      desc3:
+          'Memory lanes vises nå for flere personer i livet ditt, inkludert barn fra 3 år og oppover. Delte lenker lastes raskere, med jevnere animasjoner.',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Ulepszenia wspomnień',
+      title1: 'Płynniejsze wspomnienia',
       desc1:
-          'Wprowadziliśmy szereg ulepszeń w systemie wspomnień, w tym lepsze wspomnienia z innymi osobami, wykrywanie Twoich dawnych podróży oraz wyświetlanie ostatnich zdjęć z zeszłego tygodnia i zeszłego miesiąca.',
+          'Odkrywanie dawnych wspomnień jest przyjemniejsze dzięki nowym reakcjom haptycznym i ulepszeniom pod spodem.',
+      title2: 'Szybsze przeglądanie',
+      desc2:
+          'Twoje zdjęcia i filmy ładują się szybciej. Zaktualizowaliśmy naszą infrastrukturę, więc wszystko działa sprawniej.',
+      title3: 'Lepsza memory lane',
+      desc3:
+          'Memory lane pojawia się teraz dla większej liczby osób w Twoim życiu, w tym dzieci od 3. roku życia. Udostępnione linki ładują się szybciej, a animacje są płynniejsze.',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Melhorias nas memórias',
+      title1: 'Memórias mais suaves',
       desc1:
-          'Lançamos várias melhorias no nosso sistema de memórias, incluindo melhores momentos compartilhados com outras pessoas, detecção das suas viagens passadas e exibição de fotos recentes da semana passada e do mês passado.',
+          'Redescobrir memórias antigas ficou melhor, com novos retornos táteis e melhorias internas.',
+      title2: 'Navegação mais rápida',
+      desc2:
+          'Suas fotos e vídeos carregam mais rápido. Atualizamos nossa infraestrutura, então tudo fica mais ágil.',
+      title3: 'Memory lane melhor',
+      desc3:
+          'As memory lanes agora aparecem para mais pessoas na sua vida, incluindo crianças a partir de 3 anos. Links compartilhados carregam mais rápido, com animações mais suaves.',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Melhorias nas memórias',
+      title1: 'Memórias mais suaves',
       desc1:
-          'Lançámos várias melhorias no nosso sistema de memórias, incluindo melhores memórias com outras pessoas, deteção das suas viagens passadas e apresentação de fotografias recentes da semana passada e do mês passado.',
+          'Redescobrir memórias antigas ficou melhor, com nova resposta háptica e melhorias internas.',
+      title2: 'Navegação mais rápida',
+      desc2:
+          'As suas fotografias e vídeos carregam mais depressa. Atualizámos a nossa infraestrutura, para que tudo pareça mais ágil.',
+      title3: 'Memory lane melhor',
+      desc3:
+          'As memory lanes aparecem agora para mais pessoas na sua vida, incluindo crianças a partir dos 3 anos. As ligações partilhadas carregam mais depressa, com animações mais suaves.',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Îmbunătățiri ale amintirilor',
+      title1: 'Amintiri mai fluide',
       desc1:
-          'Am lansat o serie de îmbunătățiri pentru sistemul nostru de amintiri, inclusiv amintiri mai bune cu alte persoane, detectarea călătoriilor tale din trecut și afișarea fotografiilor recente din săptămâna trecută și luna trecută.',
+          'Redescoperirea amintirilor vechi se simte mai bine, cu vibrații noi și îmbunătățiri interne.',
+      title2: 'Navigare mai rapidă',
+      desc2:
+          'Fotografiile și videoclipurile tale se încarcă mai rapid. Ne-am actualizat infrastructura, așa că totul pare mai sprinten.',
+      title3: 'Memory lane mai bun',
+      desc3:
+          'Memory lane apare acum pentru mai multe persoane din viața ta, inclusiv copii de 3 ani și peste. Linkurile partajate se încarcă mai rapid, cu animații mai fluide.',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Улучшения воспоминаний',
+      title1: 'Более плавные воспоминания',
       desc1:
-          'Мы выпустили множество улучшений в системе воспоминаний: теперь лучше подбираются совместные моменты с близкими, распознаются ваши прошлые поездки и показываются недавние фотографии за прошлую неделю и месяц.',
+          'Возвращаться к старым воспоминаниям стало приятнее благодаря новой тактильной отдаче и внутренним улучшениям.',
+      title2: 'Более быстрый просмотр',
+      desc2:
+          'Ваши фото и видео загружаются быстрее. Мы обновили инфраструктуру, поэтому всё ощущается более отзывчивым.',
+      title3: 'Улучшенная memory lane',
+      desc3:
+          'Memory lane теперь появляется для большего числа людей в вашей жизни, включая детей от 3 лет. Общие ссылки загружаются быстрее, а анимации стали плавнее.',
     ),
     'tr': ChangeLogStrings(
-      title1: 'Anılar için iyileştirmeler',
+      title1: 'Daha akıcı anılar',
       desc1:
-          'Anılar sistemimizde birçok iyileştirme yayınladık. Artık başkalarıyla paylaştığınız anları daha iyi bir şekilde öne çıkarıyor, geçmiş seyahatlerinizi algılıyor ve geçen hafta ile geçen aydan son fotoğraflarınızı gösteriyoruz.',
+          'Eski anıları yeniden keşfetmek, yeni dokunsal geri bildirimler ve altyapı iyileştirmeleriyle daha iyi hissettiriyor.',
+      title2: 'Daha hızlı gezinme',
+      desc2:
+          'Fotoğraflarınız ve videolarınız daha hızlı yükleniyor. Altyapımızı güncelledik, böylece her şey daha çevik hissettiriyor.',
+      title3: 'Daha iyi memory lane',
+      desc3:
+          'Memory lane artık hayatınızdaki daha fazla kişi için, 3 yaş ve üzeri çocuklar dahil, görünüyor. Paylaşılan bağlantılar daha hızlı yükleniyor ve animasyonlar daha akıcı.',
     ),
     'uk': ChangeLogStrings(
-      title1: 'Покращення спогадів',
+      title1: 'Плавніші спогади',
       desc1:
-          'Ми випустили низку покращень у нашій системі спогадів, зокрема кращі спогади з іншими людьми, розпізнавання ваших минулих подорожей і показ недавніх фотографій за минулий тиждень і минулий місяць.',
+          'Повертатися до старих спогадів стало приємніше завдяки новій тактильній віддачі та внутрішнім покращенням.',
+      title2: 'Швидший перегляд',
+      desc2:
+          'Ваші фото й відео завантажуються швидше. Ми оновили інфраструктуру, тож усе відчувається жвавішим.',
+      title3: 'Краща memory lane',
+      desc3:
+          'Memory lane тепер з’являється для більшої кількості людей у вашому житті, зокрема дітей від 3 років. Спільні посилання завантажуються швидше, а анімації стали плавнішими.',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Cải thiện Kỷ niệm',
+      title1: 'Kỷ niệm mượt mà hơn',
       desc1:
-          'Chúng tôi đã phát hành nhiều cải tiến cho hệ thống kỷ niệm, bao gồm hiển thị những kỷ niệm tốt hơn với người khác, nhận diện các chuyến đi trước đây của bạn và hiển thị các ảnh gần đây từ tuần trước và tháng trước.',
+          'Việc khám phá lại các kỷ niệm cũ nay dễ chịu hơn, với phản hồi rung mới và các cải thiện bên trong.',
+      title2: 'Duyệt nhanh hơn',
+      desc2:
+          'Ảnh và video của bạn tải nhanh hơn. Chúng tôi đã cập nhật hạ tầng để mọi thứ phản hồi nhanh hơn.',
+      title3: 'Memory lane tốt hơn',
+      desc3:
+          'Memory lane nay xuất hiện cho nhiều người hơn trong cuộc sống của bạn, bao gồm cả trẻ từ 3 tuổi trở lên. Liên kết chia sẻ tải nhanh hơn, với hoạt ảnh mượt mà hơn.',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '回忆改进',
-      desc1: '我们对回忆系统进行了多项改进，包括展示与他人相关的更好回忆、识别你过去的旅行，以及展示上周和上个月的近期照片。',
+      title1: '更流畅的回忆',
+      desc1: '通过新的触觉反馈和底层改进，重新发现旧回忆的体验更好了。',
+      title2: '更快的浏览',
+      desc2: '你的照片和视频加载更快。我们更新了基础设施，让一切感觉更迅速。',
+      title3: '更好的 memory lane',
+      desc3: '现在，memory lane 会为你生活中的更多人显示，包括 3 岁及以上的孩子。共享链接加载更快，动画也更流畅。',
     ),
   };
 
   static const Map<String, ChangeLogStrings> _offlineTranslations = {
     'en': ChangeLogStrings(
-      title1: 'QR Code Detection',
+      title1: 'Smoother memories',
       desc1:
-          'Long-press any photo containing a QR code to instantly reveal and share the content behind it.',
-      title2: 'New Text Selection',
+          'Rediscovering old memories feels better, with new haptics and under-the-hood improvements.',
+      title2: 'Faster browsing',
       desc2:
-          'That same long-press gesture works for text too - use it to detect and select text in any photo.',
+          "Your photos and videos load faster. We've updated our infrastructure, so everything feels snappier.",
     ),
     'cs': ChangeLogStrings(
-      title1: 'Detekce QR kódů',
+      title1: 'Plynulejší vzpomínky',
       desc1:
-          'Dlouhým stisknutím na jakékoli fotce s QR kódem okamžitě zobrazíte a sdílíte obsah za ním.',
-      title2: 'Nový výběr textu',
+          'Znovuobjevování starých vzpomínek je příjemnější díky nové haptické odezvě a vylepšením na pozadí.',
+      title2: 'Rychlejší prohlížení',
       desc2:
-          'Stejné gesto dlouhého stisknutí funguje i pro text – použijte ho k detekci a výběru textu na jakékoli fotce.',
+          'Vaše fotky a videa se načítají rychleji. Aktualizovali jsme naši infrastrukturu, takže vše působí svižněji.',
     ),
     'de': ChangeLogStrings(
-      title1: 'QR-Code-Erkennung',
+      title1: 'Flüssigere Erinnerungen',
       desc1:
-          'Drücken Sie lange auf ein Foto mit einem QR-Code, um den Inhalt dahinter sofort anzuzeigen und zu teilen.',
-      title2: 'Neue Textauswahl',
+          'Das Wiederentdecken alter Erinnerungen fühlt sich mit neuer Haptik und Verbesserungen im Hintergrund besser an.',
+      title2: 'Schnelleres Browsen',
       desc2:
-          'Die gleiche Geste des langen Drückens funktioniert auch für Text – erkennen und markieren Sie Text in jedem Foto.',
+          'Ihre Fotos und Videos laden schneller. Wir haben unsere Infrastruktur aktualisiert, damit sich alles reaktionsschneller anfühlt.',
     ),
     'es': ChangeLogStrings(
-      title1: 'Detección de códigos QR',
+      title1: 'Recuerdos más fluidos',
       desc1:
-          'Mantén pulsada cualquier foto que contenga un código QR para revelar y compartir instantáneamente el contenido detrás de él.',
-      title2: 'Nueva selección de texto',
+          'Redescubrir recuerdos antiguos se siente mejor, con nuevas respuestas hápticas y mejoras internas.',
+      title2: 'Navegación más rápida',
       desc2:
-          'El mismo gesto de pulsación larga también funciona para texto: úsalo para detectar y seleccionar texto en cualquier foto.',
+          'Tus fotos y videos cargan más rápido. Hemos actualizado nuestra infraestructura para que todo se sienta más ágil.',
     ),
     'fr': ChangeLogStrings(
-      title1: 'Détection de codes QR',
+      title1: 'Souvenirs plus fluides',
       desc1:
-          'Appuyez longuement sur n\'importe quelle photo contenant un code QR pour révéler et partager instantanément le contenu qu\'il renferme.',
-      title2: 'Nouvelle sélection de texte',
+          'Redécouvrir d’anciens souvenirs est plus agréable, avec de nouvelles vibrations et des améliorations internes.',
+      title2: 'Navigation plus rapide',
       desc2:
-          'Le même geste d\'appui long fonctionne aussi pour le texte – utilisez-le pour détecter et sélectionner du texte dans n\'importe quelle photo.',
+          'Vos photos et vidéos se chargent plus vite. Nous avons mis à jour notre infrastructure pour rendre l’ensemble plus réactif.',
     ),
     'it': ChangeLogStrings(
-      title1: 'Rilevamento codici QR',
+      title1: 'Ricordi più fluidi',
       desc1:
-          'Tieni premuto su qualsiasi foto contenente un codice QR per rivelare e condividere istantaneamente il contenuto dietro di esso.',
-      title2: 'Nuova selezione del testo',
+          'Riscoprire vecchi ricordi è più piacevole, con nuovi feedback aptici e miglioramenti interni.',
+      title2: 'Navigazione più veloce',
       desc2:
-          'Lo stesso gesto di pressione prolungata funziona anche per il testo: usalo per rilevare e selezionare testo in qualsiasi foto.',
+          'Le tue foto e i tuoi video si caricano più velocemente. Abbiamo aggiornato la nostra infrastruttura, così tutto risulta più reattivo.',
     ),
     'ja': ChangeLogStrings(
-      title1: 'QRコード検出',
-      desc1: 'QRコードが含まれる写真を長押しすると、その内容を即座に表示・共有できます。',
-      title2: '新しいテキスト選択',
-      desc2: '同じ長押しジェスチャーはテキストにも対応しています。写真内のテキストを検出・選択できます。',
+      title1: 'よりスムーズな思い出',
+      desc1: '新しい触覚フィードバックと内部改善により、昔の思い出を振り返る体験がより心地よくなりました。',
+      title2: 'より速い閲覧',
+      desc2: '写真や動画の読み込みが速くなりました。インフラを更新し、全体がより軽快に感じられます。',
     ),
     'nl': ChangeLogStrings(
-      title1: 'QR-codedetectie',
+      title1: 'Soepelere herinneringen',
       desc1:
-          'Houd een foto met een QR-code lang ingedrukt om de inhoud erachter direct te onthullen en te delen.',
-      title2: 'Nieuwe tekstselectie',
+          'Oude herinneringen herontdekken voelt beter, met nieuwe haptiek en verbeteringen onder de motorkap.',
+      title2: 'Sneller bladeren',
       desc2:
-          'Hetzelfde gebaar van lang indrukken werkt ook voor tekst – gebruik het om tekst in elke foto te detecteren en te selecteren.',
+          'Je foto’s en video’s laden sneller. We hebben onze infrastructuur bijgewerkt, zodat alles vlotter aanvoelt.',
     ),
     'no': ChangeLogStrings(
-      title1: 'QR-kodegjenkjenning',
+      title1: 'Jevnere minner',
       desc1:
-          'Trykk og hold på et bilde som inneholder en QR-kode for å umiddelbart vise og dele innholdet bak den.',
-      title2: 'Ny tekstvelging',
+          'Det føles bedre å gjenoppdage gamle minner, med ny haptikk og forbedringer under panseret.',
+      title2: 'Raskere blaing',
       desc2:
-          'Den samme langtrykk-bevegelsen fungerer også for tekst – bruk den til å oppdage og velge tekst i et hvilket som helst bilde.',
+          'Bildene og videoene dine lastes raskere. Vi har oppdatert infrastrukturen vår, slik at alt føles kvikkere.',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Wykrywanie kodów QR',
+      title1: 'Płynniejsze wspomnienia',
       desc1:
-          'Przytrzymaj dowolne zdjęcie zawierające kod QR, aby natychmiast wyświetlić i udostępnić ukrytą treść.',
-      title2: 'Nowe zaznaczanie tekstu',
+          'Odkrywanie dawnych wspomnień jest przyjemniejsze dzięki nowym reakcjom haptycznym i ulepszeniom pod spodem.',
+      title2: 'Szybsze przeglądanie',
       desc2:
-          'Ten sam gest przytrzymania działa również dla tekstu – użyj go do wykrywania i zaznaczania tekstu na dowolnym zdjęciu.',
+          'Twoje zdjęcia i filmy ładują się szybciej. Zaktualizowaliśmy naszą infrastrukturę, więc wszystko działa sprawniej.',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Detecção de código QR',
+      title1: 'Memórias mais suaves',
       desc1:
-          'Pressione e segure qualquer foto contendo um código QR para revelar e compartilhar instantaneamente o conteúdo por trás dele.',
-      title2: 'Nova seleção de texto',
+          'Redescobrir memórias antigas ficou melhor, com novos retornos táteis e melhorias internas.',
+      title2: 'Navegação mais rápida',
       desc2:
-          'O mesmo gesto de pressionar e segurar também funciona para texto – use-o para detectar e selecionar texto em qualquer foto.',
+          'Suas fotos e vídeos carregam mais rápido. Atualizamos nossa infraestrutura, então tudo fica mais ágil.',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Deteção de código QR',
+      title1: 'Memórias mais suaves',
       desc1:
-          'Prima longamente qualquer fotografia que contenha um código QR para revelar e partilhar instantaneamente o conteúdo por detrás dele.',
-      title2: 'Nova seleção de texto',
+          'Redescobrir memórias antigas ficou melhor, com nova resposta háptica e melhorias internas.',
+      title2: 'Navegação mais rápida',
       desc2:
-          'O mesmo gesto de pressão longa também funciona para texto – utilize-o para detetar e selecionar texto em qualquer fotografia.',
+          'As suas fotografias e vídeos carregam mais depressa. Atualizámos a nossa infraestrutura, para que tudo pareça mais ágil.',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Detectare coduri QR',
+      title1: 'Amintiri mai fluide',
       desc1:
-          'Apasă lung pe orice fotografie care conține un cod QR pentru a dezvălui și partaja instantaneu conținutul din spatele acestuia.',
-      title2: 'Nouă selecție de text',
+          'Redescoperirea amintirilor vechi se simte mai bine, cu vibrații noi și îmbunătățiri interne.',
+      title2: 'Navigare mai rapidă',
       desc2:
-          'Același gest de apăsare lungă funcționează și pentru text – folosește-l pentru a detecta și selecta text din orice fotografie.',
+          'Fotografiile și videoclipurile tale se încarcă mai rapid. Ne-am actualizat infrastructura, așa că totul pare mai sprinten.',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Распознавание QR-кодов',
+      title1: 'Более плавные воспоминания',
       desc1:
-          'Нажмите и удерживайте любое фото с QR-кодом, чтобы мгновенно просмотреть и поделиться содержимым за ним.',
-      title2: 'Новое выделение текста',
+          'Возвращаться к старым воспоминаниям стало приятнее благодаря новой тактильной отдаче и внутренним улучшениям.',
+      title2: 'Более быстрый просмотр',
       desc2:
-          'Тот же жест долгого нажатия работает и для текста — используйте его для распознавания и выделения текста на любом фото.',
+          'Ваши фото и видео загружаются быстрее. Мы обновили инфраструктуру, поэтому всё ощущается более отзывчивым.',
     ),
     'tr': ChangeLogStrings(
-      title1: 'QR Kod Algılama',
+      title1: 'Daha akıcı anılar',
       desc1:
-          'QR kod içeren herhangi bir fotoğrafa uzun basarak arkasındaki içeriği anında görüntüleyin ve paylaşın.',
-      title2: 'Yeni Metin Seçimi',
+          'Eski anıları yeniden keşfetmek, yeni dokunsal geri bildirimler ve altyapı iyileştirmeleriyle daha iyi hissettiriyor.',
+      title2: 'Daha hızlı gezinme',
       desc2:
-          'Aynı uzun basma hareketi metin için de çalışır – herhangi bir fotoğraftaki metni algılamak ve seçmek için kullanın.',
+          'Fotoğraflarınız ve videolarınız daha hızlı yükleniyor. Altyapımızı güncelledik, böylece her şey daha çevik hissettiriyor.',
     ),
     'uk': ChangeLogStrings(
-      title1: 'Розпізнавання QR-кодів',
+      title1: 'Плавніші спогади',
       desc1:
-          'Натисніть і утримуйте будь-яке фото з QR-кодом, щоб миттєво переглянути та поділитися вмістом за ним.',
-      title2: 'Нове виділення тексту',
+          'Повертатися до старих спогадів стало приємніше завдяки новій тактильній віддачі та внутрішнім покращенням.',
+      title2: 'Швидший перегляд',
       desc2:
-          'Той самий жест довгого натискання працює і для тексту – використовуйте його для розпізнавання та виділення тексту на будь-якому фото.',
+          'Ваші фото й відео завантажуються швидше. Ми оновили інфраструктуру, тож усе відчувається жвавішим.',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Nhận diện mã QR',
+      title1: 'Kỷ niệm mượt mà hơn',
       desc1:
-          'Nhấn giữ bất kỳ ảnh nào chứa mã QR để hiển thị và chia sẻ ngay nội dung đằng sau nó.',
-      title2: 'Chọn văn bản mới',
+          'Việc khám phá lại các kỷ niệm cũ nay dễ chịu hơn, với phản hồi rung mới và các cải thiện bên trong.',
+      title2: 'Duyệt nhanh hơn',
       desc2:
-          'Cử chỉ nhấn giữ tương tự cũng hoạt động với văn bản – sử dụng nó để phát hiện và chọn văn bản trong bất kỳ ảnh nào.',
+          'Ảnh và video của bạn tải nhanh hơn. Chúng tôi đã cập nhật hạ tầng để mọi thứ phản hồi nhanh hơn.',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '二维码检测',
-      desc1: '长按任何包含二维码的照片，即可立即查看和分享其背后的内容。',
-      title2: '全新文字选择',
-      desc2: '同样的长按手势也适用于文字——用它来检测和选择任何照片中的文字。',
+      title1: '更流畅的回忆',
+      desc1: '通过新的触觉反馈和底层改进，重新发现旧回忆的体验更好了。',
+      title2: '更快的浏览',
+      desc2: '你的照片和视频加载更快。我们更新了基础设施，让一切感觉更迅速。',
     ),
   };
 }

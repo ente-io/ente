@@ -14,6 +14,7 @@ use ente_accounts::{
     SecondFactorMethod, SetupTwoFactorParams, TotpPurpose,
 };
 use ente_core::crypto::SecretVec;
+use ente_core::urls::PRODUCTION_API_BASE_URL;
 use std::{path::PathBuf, str::FromStr};
 use zeroize::Zeroizing;
 
@@ -227,8 +228,8 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     println!("{}", "-".repeat(110));
 
     for account in accounts {
-        let endpoint_display = if account.endpoint == "https://api.ente.io" {
-            "api.ente.io (prod)".to_string()
+        let endpoint_display = if account.endpoint == PRODUCTION_API_BASE_URL {
+            "api.ente.com (prod)".to_string()
         } else if account.endpoint.starts_with("http://localhost") {
             format!(
                 "localhost:{}",

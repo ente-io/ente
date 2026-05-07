@@ -321,12 +321,16 @@ class _PreviewTextContent extends StatelessWidget {
     switch (feedItem.type) {
       case FeedItemType.photoLike:
         return TextSpan(
-          text: isOwn ? l10n.likedYourPhoto : l10n.likedAPhoto,
+          text: feedItem.isVideo
+              ? (isOwn ? l10n.likedYourVideo : l10n.likedAVideo)
+              : (isOwn ? l10n.likedYourPhoto : l10n.likedAPhoto),
           style: baseStyle,
         );
       case FeedItemType.comment:
         return TextSpan(
-          text: isOwn ? l10n.commentedOnYourPhoto : l10n.commentedOnAPhoto,
+          text: feedItem.isVideo
+              ? (isOwn ? l10n.commentedOnYourVideo : l10n.commentedOnAVideo)
+              : (isOwn ? l10n.commentedOnYourPhoto : l10n.commentedOnAPhoto),
           style: baseStyle,
         );
       case FeedItemType.reply:
