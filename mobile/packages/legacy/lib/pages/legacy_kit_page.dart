@@ -17,6 +17,7 @@ import "package:ente_utils/file_saver_util.dart";
 import "package:file_saver/file_saver.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:share_plus/share_plus.dart";
 
 typedef LegacyKitAuthenticator = Future<bool> Function(
   BuildContext context,
@@ -168,7 +169,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
           cardColor: cardColor,
           avatarColor: _avatarColor(index),
           onTap: () async {
-            await _downloadPart(_kit.parts[index]);
+            await _sharePart(_kit.parts[index]);
           },
         ),
         if (index < _kit.parts.length - 1) const SizedBox(height: 8),
@@ -337,7 +338,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     }
   }
 
-  Future<void> _downloadPart(LegacyKitPart part) async {
+  Future<void> _sharePart(LegacyKitPart part) async {
     if (!await _authenticate(context.strings.authToManageLegacyKit)) {
       return;
     }
@@ -357,14 +358,12 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
         share: share,
         allShares: shares,
       );
-      final saved = await _savePdf(bytes, _kit, part: part);
       await dialog.hide();
-      if (!saved) {
+      final result = await _sharePdf(bytes, _kit, part: part);
+      if (!mounted || result.status != ShareResultStatus.unavailable) {
         return;
       }
-      if (mounted) {
-        showShortToast(context, context.strings.legacyKitSheetDownloaded);
-      }
+      showShortToast(context, context.strings.somethingWentWrong);
     } catch (_) {
       await dialog.hide();
       if (mounted) {
@@ -536,6 +535,28 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
       "pdf",
       bytes,
       MimeType.pdf,
+    );
+  }
+
+  Future<ShareResult> _sharePdf(
+    Uint8List bytes,
+    LegacyKit kit, {
+    LegacyKitPart? part,
+  }) {
+    final size = MediaQuery.sizeOf(context);
+    return SharePlus.instance.share(
+      ShareParams(
+        files: [
+          XFile.fromData(
+            bytes,
+            mimeType: "application/pdf",
+          ),
+        ],
+        fileNameOverrides: [
+          "${_fileNameForKit(kit, part: part)}.pdf",
+        ],
+        sharePositionOrigin: Offset.zero & size,
+      ),
     );
   }
 
@@ -811,7 +832,7 @@ class _LegacyKitPartRow extends StatelessWidget {
                   height: 40,
                   width: 40,
                   child: Center(
-                    child: LegacyKitDownloadIcon(
+                    child: LegacyKitShareIcon(
                       color: colorScheme.textBase,
                     ),
                   ),
