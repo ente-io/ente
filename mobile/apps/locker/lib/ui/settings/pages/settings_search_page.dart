@@ -3,7 +3,7 @@ import "dart:io";
 
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import "package:ente_ui/components/buttons/gradient_button.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
@@ -255,9 +255,9 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       message: context.l10n.areYouSureYouWantToLogout,
       assetPath: "assets/warning-grey.png",
       buttons: [
-        GradientButton(
-          buttonType: GradientButtonType.critical,
-          text: context.l10n.yesLogout,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.critical,
+          labelText: context.l10n.yesLogout,
           onTap: () async {
             await UserService.instance.logout(context);
           },

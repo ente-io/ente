@@ -1,7 +1,7 @@
 import "package:ente_ui/components/base_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/settings/widgets/change_log_strings.dart";
 
 class _ChangeLogEntry {
@@ -69,9 +69,12 @@ class _ChangeLogSheetBody extends StatelessWidget {
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
-            text: strings.continueLabel,
-            onTap: () => Navigator.of(context).pop(),
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            labelText: strings.continueLabel,
+            onTap: () async {
+              Navigator.of(context).pop();
+            },
           ),
         ),
       ],

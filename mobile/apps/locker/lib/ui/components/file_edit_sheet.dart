@@ -1,12 +1,12 @@
 import 'package:ente_ui/components/base_bottom_sheet.dart';
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
+import 'package:ente_ui/components/text_input_widget_v2.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import 'package:locker/ui/components/form_text_input_widget.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/utils/collection_list_util.dart';
 
 class FileEditSheetResult {
@@ -135,12 +135,12 @@ class _FileEditSheetState extends State<FileEditSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FormTextInputWidget(
-          controller: _titleController,
-          labelText: context.l10n.title,
+        TextInputWidgetV2(
+          textEditingController: _titleController,
+          label: context.l10n.title,
           hintText: context.l10n.enterNewTitle,
           maxLength: 200,
-          shouldUseTextInputWidget: false,
+          autoFocus: true,
         ),
         const SizedBox(height: 24),
         CollectionSelectionWidget(
@@ -153,11 +153,12 @@ class _FileEditSheetState extends State<FileEditSheet> {
         const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
             onTap: () async {
               await _onSave();
             },
-            text: context.l10n.save,
+            labelText: context.l10n.save,
           ),
         ),
       ],

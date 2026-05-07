@@ -1,3 +1,4 @@
+import 'package:ente_ui/components/text_input_widget_v2.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +25,6 @@ class _AccountCredentialsPageState
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
-  bool _passwordVisible = false;
 
   @override
   void initState() {
@@ -116,69 +116,35 @@ class _AccountCredentialsPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      CapsuleFormField(
-        labelText: context.l10n.credentialName,
+      TextInputWidgetV2(
+        label: context.l10n.credentialName,
         hintText: context.l10n.credentialNameHint,
-        controller: _nameController,
+        textEditingController: _nameController,
         textCapitalization: TextCapitalization.sentences,
-        autofocus: true,
-        textInputAction: TextInputAction.next,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterAccountName;
-          }
-          return null;
-        },
+        autoFocus: true,
       ),
       const SizedBox(height: 24),
-      CapsuleFormField(
-        labelText: context.l10n.username,
+      TextInputWidgetV2(
+        label: context.l10n.username,
         hintText: context.l10n.usernameHint,
-        controller: _usernameController,
-        textInputAction: TextInputAction.next,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterUsername;
-          }
-          return null;
-        },
+        textEditingController: _usernameController,
       ),
       const SizedBox(height: 24),
-      CapsuleFormField(
-        labelText: context.l10n.password,
+      TextInputWidgetV2(
+        label: context.l10n.password,
         hintText: context.l10n.passwordHint,
-        controller: _passwordController,
-        obscureText: !_passwordVisible,
-        textInputAction: TextInputAction.next,
-        trailing: GestureDetector(
-          onTap: () {
-            setState(() {
-              _passwordVisible = !_passwordVisible;
-            });
-          },
-          child: Icon(
-            _passwordVisible ? Icons.visibility : Icons.visibility_off,
-            semanticLabel: _passwordVisible ? 'hide_password' : 'show_password',
-          ),
-        ),
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterPassword;
-          }
-          return null;
-        },
+        textEditingController: _passwordController,
+        isPasswordInput: true,
       ),
       const SizedBox(height: 24),
-      CapsuleFormField(
-        labelText: context.l10n.credentialNotes,
+      TextInputWidgetV2(
+        label: context.l10n.credentialNotes,
         hintText: context.l10n.credentialNotesHint,
-        controller: _notesController,
+        textEditingController: _notesController,
         maxLines: 3,
         minLines: 3,
         textCapitalization: TextCapitalization.sentences,
         keyboardType: TextInputType.multiline,
-        textInputAction: TextInputAction.newline,
-        lineHeight: 1.5,
       ),
     ];
   }

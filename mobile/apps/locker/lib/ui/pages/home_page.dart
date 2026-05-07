@@ -6,6 +6,7 @@ import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import "package:ente_events/models/trigger_logout_event.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_utils/email_util.dart";
@@ -23,7 +24,6 @@ import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/states/user_details_state.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -348,8 +348,9 @@ class _HomePageState extends UploaderPageState<HomePage>
       buttons: [
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
-            text: context.l10n.ok,
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            labelText: context.l10n.ok,
             onTap: () async {
               navigator.pop();
               final dialog = createProgressDialog(
@@ -454,8 +455,9 @@ class _HomePageState extends UploaderPageState<HomePage>
           message: context.l10n.somethingWentWrong,
           assetPath: "assets/warning-grey.png",
           buttons: [
-            GradientButton(
-              text: context.l10n.contactSupport,
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: context.l10n.contactSupport,
               onTap: () async {
                 await sendLogs(
                   context,
@@ -731,9 +733,10 @@ class _HomePageState extends UploaderPageState<HomePage>
                 showBorder: false,
               ),
               const SizedBox(height: 20),
-              GradientButton(
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
                 onTap: _loadCollections,
-                text: context.l10n.retry,
+                labelText: context.l10n.retry,
               ),
             ],
           ),

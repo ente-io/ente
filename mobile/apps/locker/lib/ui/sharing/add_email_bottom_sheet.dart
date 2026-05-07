@@ -6,9 +6,11 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
+import "package:ente_ui/components/text_input_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
@@ -16,7 +18,6 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/viewer/date/date_time_picker.dart";
 import "package:locker/utils/collection_actions.dart";
 
@@ -114,48 +115,18 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
   }
 
   Widget _buildEmailInputField(colorScheme, textTheme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              focusNode: _textFieldFocusNode,
-              autofillHints: const [AutofillHints.email],
-              decoration: InputDecoration(
-                hintText: context.l10n.enterNameOrEmailToShareWith,
-                hintStyle: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-              ),
-              onChanged: (value) {
-                _email = value.trim();
-                _emailIsValid = _isValidEmail(_email);
-                setState(() {});
-              },
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.done,
-            ),
-          ),
-          // TODO: Re-enable role selection when collaborator role is available
-          // Padding(
-          //   padding: const EdgeInsets.only(right: 8),
-          //   child: _buildRoleDropdown(colorScheme, textTheme),
-          // ),
-        ],
-      ),
+    return TextInputWidgetV2(
+      textEditingController: _textController,
+      focusNode: _textFieldFocusNode,
+      autofillHints: const [AutofillHints.email],
+      hintText: context.l10n.enterNameOrEmailToShareWith,
+      keyboardType: TextInputType.emailAddress,
+      autoCorrect: false,
+      onChange: (value) {
+        _email = value.trim();
+        _emailIsValid = _isValidEmail(_email);
+        setState(() {});
+      },
     );
   }
 
@@ -429,8 +400,10 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
         _shareLater ? context.l10n.scheduleShare : context.l10n.share;
     return SizedBox(
       width: double.infinity,
-      child: GradientButton(
-        text: buttonText,
+      child: ButtonWidgetV2(
+        buttonType: ButtonTypeV2.primary,
+        isDisabled: !canShare,
+        labelText: buttonText,
         onTap: canShare ? _onShareTap : null,
       ),
     );

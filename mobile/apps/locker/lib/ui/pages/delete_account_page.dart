@@ -6,12 +6,12 @@ import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 class DeleteAccountPage extends StatelessWidget {
   final BaseConfiguration config;
@@ -82,8 +82,9 @@ class DeleteAccountPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              GradientButton(
-                text: l10n.sendFeedback,
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: l10n.sendFeedback,
                 onTap: () async {
                   await sendEmail(
                     context,
@@ -100,10 +101,12 @@ class DeleteAccountPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              GradientButton(
-                text: l10n.deleteAccount,
-                backgroundColor: colorScheme.warning700,
-                onTap: () async => {await _initiateDelete(context)},
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.critical,
+                labelText: l10n.deleteAccount,
+                onTap: () async {
+                  await _initiateDelete(context);
+                },
               ),
             ],
           ),
@@ -158,26 +161,24 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<bool?> _showDeleteConfirmationSheet(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
-
     return showAlertBottomSheet<bool>(
       context,
       title: context.strings.confirmAccountDeleteTitle,
       message: context.strings.confirmAccountDeleteMessage,
       assetPath: "assets/warning-grey.png",
       buttons: [
-        GradientButton(
-          text: context.strings.delete,
-          backgroundColor: colorScheme.warning700,
-          onTap: () => Navigator.of(context).pop(true),
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.critical,
+          labelText: context.strings.delete,
+          onTap: () async {
+            Navigator.of(context).pop(true);
+          },
         ),
       ],
     );
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
-
     await showAlertBottomSheet(
       context,
       title: context.strings.deleteAccount,
@@ -185,9 +186,9 @@ class DeleteAccountPage extends StatelessWidget {
           "Please send an email to account-deletion@ente.com from your registered email address.\n\nYour request will be processed within 72 hours.",
       assetPath: "assets/file_delete_icon.png",
       buttons: [
-        GradientButton(
-          text: context.strings.sendEmail,
-          backgroundColor: colorScheme.primary700,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: context.strings.sendEmail,
           onTap: () async {
             Navigator.of(context).pop();
             await sendEmail(

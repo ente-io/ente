@@ -1,3 +1,4 @@
+import 'package:ente_ui/components/text_input_widget_v2.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -111,45 +112,29 @@ class _PhysicalRecordsPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      CapsuleFormField(
-        labelText: context.l10n.name,
+      TextInputWidgetV2(
+        label: context.l10n.name,
         hintText: context.l10n.recordNameHint,
-        controller: _nameController,
-        autofocus: true,
+        textEditingController: _nameController,
+        autoFocus: true,
         textCapitalization: TextCapitalization.sentences,
-        textInputAction: TextInputAction.next,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterRecordName;
-          }
-          return null;
-        },
       ),
       const SizedBox(height: 24),
-      CapsuleFormField(
-        labelText: context.l10n.recordLocation,
+      TextInputWidgetV2(
+        label: context.l10n.recordLocation,
         hintText: context.l10n.recordLocationHint,
-        controller: _locationController,
+        textEditingController: _locationController,
         textCapitalization: TextCapitalization.sentences,
-        textInputAction: TextInputAction.next,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterLocation;
-          }
-          return null;
-        },
       ),
       const SizedBox(height: 24),
-      CapsuleFormField(
-        labelText: context.l10n.recordNotes,
+      TextInputWidgetV2(
+        label: context.l10n.recordNotes,
         hintText: context.l10n.recordNotesHint,
-        controller: _notesController,
+        textEditingController: _notesController,
         maxLines: 3,
         minLines: 3,
         textCapitalization: TextCapitalization.sentences,
         keyboardType: TextInputType.multiline,
-        textInputAction: TextInputAction.newline,
-        lineHeight: 1.5,
       ),
     ];
   }

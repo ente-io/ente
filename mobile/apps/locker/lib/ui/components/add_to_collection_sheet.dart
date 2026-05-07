@@ -1,10 +1,10 @@
 import "package:ente_ui/components/base_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/components/collection_selection_widget.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/utils/collection_list_util.dart";
 
 class AddToCollectionSheetResult {
@@ -91,11 +91,12 @@ class _AddToCollectionSheetState extends State<AddToCollectionSheet> {
         const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
-          child: GradientButton(
+          child: ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
             onTap: () async {
               await _onSave();
             },
-            text: context.l10n.save,
+            labelText: context.l10n.save,
           ),
         ),
       ],

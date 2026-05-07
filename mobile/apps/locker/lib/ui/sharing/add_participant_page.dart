@@ -3,14 +3,14 @@ import 'package:ente_contacts/contacts.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
-import "package:ente_ui/components/buttons/models/button_type.dart";
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/menu_section_description_widget.dart";
 import "package:ente_ui/components/menu_section_title.dart";
 import "package:ente_ui/components/separators.dart";
+import "package:ente_ui/components/text_input_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import 'package:flutter/material.dart';
@@ -248,9 +248,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final widgets = <Widget>[];
     if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
       widgets.add(
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          buttonSize: ButtonSizeV2.large,
           labelText: context.l10n.addViewers(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
@@ -287,12 +287,12 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       ActionTypesToShow.addCollaborator,
     )) {
       widgets.add(
-        ButtonWidget(
+        ButtonWidgetV2(
           buttonType:
               widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)
-                  ? ButtonType.neutral
-                  : ButtonType.primary,
-          buttonSize: ButtonSize.large,
+                  ? ButtonTypeV2.neutral
+                  : ButtonTypeV2.primary,
+          buttonSize: ButtonSizeV2.large,
           labelText: context.l10n.addCollaborators(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
@@ -350,56 +350,26 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     return Row(
       children: [
         Expanded(
-          child: TextFormField(
-            controller: _textController,
+          child: TextInputWidgetV2(
+            textEditingController: _textController,
             focusNode: textFieldFocusNode,
-            style: getEnteTextTheme(context).body,
-            decoration: InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                borderSide:
-                    BorderSide(color: getEnteColorScheme(context).strokeMuted),
-              ),
-              fillColor: getEnteColorScheme(context).fillFaint,
-              filled: true,
-              hintText: context.l10n.enterEmail,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              border: UnderlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              prefixIcon: Icon(
-                Icons.email_outlined,
-                color: getEnteColorScheme(context).strokeMuted,
-              ),
-              suffixIcon: _newEmail == ''
-                  ? null
-                  : IconButton(
-                      onPressed: clearFocus,
-                      icon: Icon(
-                        Icons.cancel,
-                        color: getEnteColorScheme(context).strokeMuted,
-                      ),
-                    ),
-            ),
-            onChanged: (value) {
+            hintText: context.l10n.enterEmail,
+            leadingWidget: const Icon(Icons.email_outlined),
+            isClearable: true,
+            shouldUnfocusOnClearOrSubmit: true,
+            keyboardType: TextInputType.emailAddress,
+            autoCorrect: false,
+            onChange: (value) {
               _newEmail = value.trim();
               _emailIsValid = EmailValidator.validate(_newEmail);
               setState(() {});
             },
-            autocorrect: false,
-            keyboardType: TextInputType.emailAddress,
-            //initialValue: _email,
-            textInputAction: TextInputAction.next,
           ),
         ),
         const SizedBox(width: 8),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.small,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.secondary,
+          buttonSize: ButtonSizeV2.small,
           labelText: context.l10n.add,
           isDisabled: !_emailIsValid,
           onTap: () async {

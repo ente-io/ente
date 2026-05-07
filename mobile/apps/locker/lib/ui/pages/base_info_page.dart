@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
+import "package:ente_ui/components/buttons/button_widget_v2.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -20,7 +21,6 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:logging/logging.dart';
 
@@ -238,7 +238,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   }
 
   Future<void> _saveRecord() async {
-    if (!_formKey.currentState!.validate() || !validateForm()) {
+    if (!validateForm()) {
       return;
     }
 
@@ -511,8 +511,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       assetPath: "assets/warning-grey.png",
       isDismissible: true,
       buttons: [
-        GradientButton(
-          text: context.l10n.contactSupport,
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: context.l10n.contactSupport,
           onTap: () async {
             await sendEmail(
               context,
@@ -557,7 +558,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           Text(
             label,
             style: textTheme.body,
-          ), // Use default style to match FormTextInputWidget
+          ),
           const SizedBox(height: 12),
         ],
         ClipRRect(
@@ -715,11 +716,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                     SafeArea(
                       child: SizedBox(
                         width: double.infinity,
-                        child: GradientButton(
+                        child: ButtonWidgetV2(
+                          buttonType: ButtonTypeV2.primary,
+                          isDisabled: !isSaveEnabled,
                           onTap: isSaveEnabled ? _saveRecord : null,
-                          text: _isLoading
-                              ? context.l10n.pleaseWait
-                              : submitButtonText,
+                          labelText: submitButtonText,
                         ),
                       ),
                     ),
