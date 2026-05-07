@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class TitleBarTitleWidget extends StatelessWidget {
+  static const _trailingActionSize = 38.0;
+
   final String? title;
   final bool isTitleH2;
   final IconData? icon;
@@ -67,7 +69,19 @@ class TitleBarTitleWidget extends StatelessWidget {
                     : widget,
               ),
             ),
-            ...trailingWidgets!,
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: _trailingActionSize,
+                minHeight: _trailingActionSize,
+              ),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: trailingWidgets!,
+                ),
+              ),
+            ),
           ],
         );
       }
