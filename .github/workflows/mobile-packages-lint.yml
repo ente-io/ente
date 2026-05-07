@@ -380,7 +380,10 @@ jobs:
 
             - name: Lint app - photos
               if: needs.detect-changes.outputs.lint_photos == 'true'
-              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
+              run: |
+                  flutter pub get --enforce-lockfile
+                  flutter analyze --no-fatal-infos
+                  flutter test
               working-directory: mobile/apps/photos
 
             - name: Lint app - auth
