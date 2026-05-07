@@ -74,6 +74,9 @@ jobs:
 
             - run: flutter analyze --no-fatal-infos
 
+            - name: Run Flutter tests
+              run: flutter test
+
             - name: Check formatting (ente_rust)
               working-directory: mobile/packages/rust/rust
               run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
