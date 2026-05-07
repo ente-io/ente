@@ -94,6 +94,12 @@ const FamilyData = z.object({
      * This excludes add-on and any other bonus storage.
      */
     storage: z.number(),
+    /**
+     * Usable bonus storage available to the family admin (e.g. from referrals).
+     *
+     * The total available family storage is storage + adminBonus.
+     */
+    adminBonus: z.number().nullish().transform(nullishToZero),
 });
 
 /**
@@ -613,7 +619,9 @@ export const hasExceededStorageQuota = (userDetails: UserDetails) => {
     let storage: number;
     if (isPartOfFamily(userDetails)) {
         usage = familyUsage(userDetails);
-        storage = userDetails.familyData?.storage ?? 0;
+        storage =
+            (userDetails.familyData?.storage ?? 0) +
+            (userDetails.familyData?.adminBonus ?? 0);
     } else {
         usage = userDetails.usage;
         storage = userDetails.subscription.storage;

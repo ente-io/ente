@@ -103,8 +103,10 @@ class UserDetails {
   // getTotalStorage will return total storage available including the
   // storage bonus
   int getTotalStorage() {
-    return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
-        storageBonus;
+    if (isPartOfFamily()) {
+      return familyData!.storage + familyData!.adminBonus + storageBonus;
+    }
+    return subscription.storage + storageBonus;
   }
 
   // return the member storage limit if user is part of family and the admin
