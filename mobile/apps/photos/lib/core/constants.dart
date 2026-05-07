@@ -71,8 +71,6 @@ const galleryGridSpacing = 2.0;
 
 const kSearchSectionLimit = 9;
 
-const maxPickAssetLimit = 50;
-
 const iOSGroupIDMemory = "group.io.ente.frame.EnteMemoryWidget";
 
 const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
