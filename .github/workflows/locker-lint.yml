@@ -10,6 +10,7 @@ on:
             - "mobile/packages/rust/**"
             - "mobile/packages/sharing/**"
             - ".github/workflows/locker-lint.yml"
+            - "mobile/scripts/check_source_arb_plurals.rb"
 
 env:
     FLUTTER_VERSION: "3.32.8"
@@ -30,6 +31,10 @@ jobs:
 
             - name: Verify frozen mobile pubspecs
               run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/locker
+              working-directory: ${{ github.workspace }}
+
+            - name: Verify source ARB plurals
+              run: ruby mobile/scripts/check_source_arb_plurals.rb
               working-directory: ${{ github.workspace }}
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
