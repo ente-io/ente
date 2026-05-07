@@ -71,4 +71,11 @@ jobs:
 
             - run: flutter pub get --enforce-lockfile
 
-            - run: flutter analyze --no-fatal-infos
+            - name: Generate locker localizations
+              run: flutter gen-l10n
+
+            - name: Analyze locker
+              run: flutter analyze --no-fatal-infos
+
+            - name: Test locker
+              run: flutter test

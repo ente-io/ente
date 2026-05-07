@@ -1,4 +1,4 @@
-name: "Lint (mobile)"
+name: "Lint (photos)"
 
 on:
     # Run on every pull request (open or push to it) that changes the photos app,
@@ -20,7 +20,7 @@ permissions:
     contents: read
 
 jobs:
-    mobile-lint:
+    photos-lint:
         runs-on: ubuntu-latest
         defaults:
             run:
