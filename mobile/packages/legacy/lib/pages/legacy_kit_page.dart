@@ -374,23 +374,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
   }
 
   Future<void> _deleteKit() async {
-    final colorScheme = getEnteColorScheme(context);
-    final confirmed = await showAlertBottomSheet<bool>(
-      context,
-      title: context.strings.deleteLegacyKit,
-      message: context.strings.deleteLegacyKitMessage,
-      assetPath: "assets/warning-red.png",
-      buttons: [
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            text: context.strings.delete,
-            backgroundColor: colorScheme.warning700,
-            onTap: () => Navigator.of(context).pop(true),
-          ),
-        ),
-      ],
-    );
+    final confirmed = await _showDeleteKitConfirmation();
     if (confirmed != true) {
       return;
     }
@@ -408,6 +392,88 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
         showShortToast(context, context.strings.somethingWentWrong);
       }
     }
+  }
+
+  Future<bool?> _showDeleteKitConfirmation() {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundElevated2,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 38,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            context.strings.deleteLegacyKit,
+                            style: textTheme.largeBold.copyWith(
+                              height: 24 / 18,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 38,
+                            height: 38,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(false),
+                          icon: Icon(
+                            Icons.close,
+                            color: colorScheme.strokeBase,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.strings.deleteLegacyKitMessage,
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textMuted,
+                      height: 20 / 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      text: context.strings.delete,
+                      height: 52,
+                      textStyle: textTheme.smallBold.copyWith(
+                        height: 20 / 14,
+                      ),
+                      backgroundColor: colorScheme.warning700,
+                      onTap: () => Navigator.of(context).pop(true),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _blockRecovery() async {
