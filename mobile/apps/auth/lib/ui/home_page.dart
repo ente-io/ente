@@ -1486,27 +1486,35 @@ class _HomePageState extends State<HomePage> {
       ),
       title: !_showSearchBox
           ? const AuthLogoWidget(height: 18)
-          : TextField(
-              autocorrect: false,
-              enableSuggestions: false,
-              autofocus: _autoFocusSearch,
-              controller: _textController,
-              onChanged: (val) {
-                _searchText = val;
-                _applyFilteringAndRefresh();
+          : GestureDetector(
+              onDoubleTap: () {
+                _textController.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: _textController.text.length,
+                );
               },
-              onSubmitted: (_) {
-                if (_filteredCodes.isNotEmpty) {
-                  // Move focus to the first item in the grid
-                  _firstItemFocusNode.requestFocus();
-                }
-              },
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
+              child: TextField(
+                autocorrect: false,
+                enableSuggestions: false,
+                autofocus: _autoFocusSearch,
+                controller: _textController,
+                onChanged: (val) {
+                  _searchText = val;
+                  _applyFilteringAndRefresh();
+                },
+                onSubmitted: (_) {
+                  if (_filteredCodes.isNotEmpty) {
+                    // Move focus to the first item in the grid
+                    _firstItemFocusNode.requestFocus();
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: l10n.searchHint,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                focusNode: searchBoxFocusNode,
               ),
-              focusNode: searchBoxFocusNode,
             ),
       centerTitle: true,
       actions: <Widget>[
