@@ -106,9 +106,11 @@ class _AllSectionsExamplesProviderState
         final allSectionsExamples = <Future<List<SearchResult>>>[];
         for (SectionType sectionType in SectionType.values) {
           // Contacts section have been moved to shared collections tab
-          // temporarily from search tab. So we can skip computing data here
-          // since 'allSectionsExamples' is for search tab sections only.
-          if (sectionType == SectionType.contacts) {
+          // temporarily from search tab. Albums are also not shown in the
+          // search tab. So we can skip computing data here since
+          // 'allSectionsExamples' is for search tab sections only.
+          if (sectionType == SectionType.contacts ||
+              sectionType == SectionType.album) {
             allSectionsExamples.add(Future.value([]));
           } else {
             allSectionsExamples.add(
