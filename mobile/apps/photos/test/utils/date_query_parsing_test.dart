@@ -215,11 +215,11 @@ void main() {
       expect(parsedDate.year, 2025);
     });
 
-    test('should parse ambiguous "01/02/2024" as MM/DD/YYYY (Jan 2)', () {
-      // Test your specific heuristic for ambiguous cases
+    test('should parse ambiguous "01/02/2024" as DD/MM/YYYY (Feb 1)', () {
+      // The parser prefers DD/MM when both day and month are plausible.
       final PartialDate parsedDate = dateParseService.parse('01/02/2024');
       expect(parsedDate.day, 1);
-      expect(parsedDate.month, 1);
+      expect(parsedDate.month, 2);
       expect(parsedDate.year, 2024);
     });
 

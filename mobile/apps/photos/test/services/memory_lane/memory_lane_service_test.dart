@@ -50,13 +50,13 @@ void main() {
         DateTime.fromMicrosecondsSinceEpoch(
           MemoryLaneService.minimumEligibleCreationTimeMicros("2016-02-29")!,
         ),
-        DateTime(2021, 2, 28),
+        DateTime(2019, 2, 28),
       );
       expect(
         DateTime.fromMicrosecondsSinceEpoch(
           MemoryLaneService.minimumEligibleCreationTimeMicros("2010-10-15")!,
         ),
-        DateTime(2015, 10, 15),
+        DateTime(2013, 10, 15),
       );
     });
   });

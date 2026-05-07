@@ -380,15 +380,26 @@ jobs:
 
             - name: Lint app - photos
               if: needs.detect-changes.outputs.lint_photos == 'true'
-              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
+              run: |
+                  flutter pub get --enforce-lockfile
+                  flutter analyze --no-fatal-infos
+                  flutter test
               working-directory: mobile/apps/photos
 
             - name: Lint app - auth
               if: needs.detect-changes.outputs.lint_auth == 'true'
-              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
+              run: |
+                  flutter pub get --enforce-lockfile
+                  flutter gen-l10n
+                  flutter analyze --no-fatal-infos
+                  flutter test
               working-directory: mobile/apps/auth
 
             - name: Lint app - locker
               if: needs.detect-changes.outputs.lint_locker == 'true'
-              run: flutter pub get --enforce-lockfile && flutter analyze --no-fatal-infos
+              run: |
+                  flutter pub get --enforce-lockfile
+                  flutter gen-l10n
+                  flutter analyze --no-fatal-infos
+                  flutter test
               working-directory: mobile/apps/locker

@@ -83,4 +83,11 @@ jobs:
 
             - run: flutter pub get --enforce-lockfile
 
-            - run: flutter analyze --no-fatal-infos
+            - name: Generate auth localizations
+              run: flutter gen-l10n
+
+            - name: Analyze auth
+              run: flutter analyze --no-fatal-infos
+
+            - name: Test auth
+              run: flutter test

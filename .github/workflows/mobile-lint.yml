@@ -1,13 +1,15 @@
-name: "Lint (mobile)"
+name: "Lint (photos)"
 
 on:
     # Run on every pull request (open or push to it) that changes the photos app,
-    # shared photos Rust, or rust core
+    # Photos Rust, or shared Rust crates used by Photos
     pull_request:
         paths:
             - "mobile/apps/photos/**"
             - "rust/photos/**"
             - "rust/core/**"
+            - "rust/contacts/**"
+            - "rust/crates/image/**"
             - ".github/workflows/mobile-lint.yml"
             - "mobile/scripts/check_source_arb_plurals.rb"
 
@@ -20,7 +22,7 @@ permissions:
     contents: read
 
 jobs:
-    mobile-lint:
+    photos-lint:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -28,6 +30,38 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
+              with:
+                  fetch-depth: 2
+
+            - name: Detect Rust changes
+              id: rust_changes
+              shell: bash
+              run: |
+                  ente_rust=false
+                  ente_photos_rust=false
+
+                  while IFS= read -r file; do
+                      case "$file" in
+                          .github/workflows/mobile-lint.yml|mobile/packages/rust/*|rust/core/*|rust/contacts/*)
+                              ente_rust=true
+                              ;;
+                      esac
+
+                      case "$file" in
+                          .github/workflows/mobile-lint.yml|mobile/apps/photos/rust/*|mobile/apps/photos/rust_builder/*|rust/photos/*|rust/crates/image/*)
+                              ente_photos_rust=true
+                              ;;
+                      esac
+                  done < <(git diff --name-only "${{ github.event.pull_request.base.sha }}...HEAD")
+
+                  echo "ente_rust=$ente_rust" >> "$GITHUB_OUTPUT"
+                  echo "ente_photos_rust=$ente_photos_rust" >> "$GITHUB_OUTPUT"
+
+                  if [[ "$ente_rust" == "true" || "$ente_photos_rust" == "true" ]]; then
+                      echo "any=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "any=false" >> "$GITHUB_OUTPUT"
+                  fi
 
             - name: Verify frozen mobile pubspecs
               run: ruby mobile/scripts/check_frozen_pubspecs.rb mobile/apps/photos
@@ -74,34 +108,45 @@ jobs:
 
             - run: flutter analyze --no-fatal-infos
 
+            - name: Run Flutter tests
+              run: flutter test
+
             - name: Check formatting (ente_rust)
+              if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
 
             - name: Run clippy (ente_rust)
+              if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_rust)
+              if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo build
 
             - name: Test (ente_rust)
+              if: steps.rust_changes.outputs.ente_rust == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo test
 
             - name: Check formatting (ente_photos_rust)
+              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
               run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
 
             - name: Run clippy (ente_photos_rust)
+              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
               run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_photos_rust)
+              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
               run: cargo build
 
             - name: Test (ente_photos_rust)
+              if: steps.rust_changes.outputs.ente_photos_rust == 'true'
               working-directory: mobile/apps/photos/rust
               run: cargo test
