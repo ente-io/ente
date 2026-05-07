@@ -1653,6 +1653,7 @@
   "successfullyUnhid": "Erfolgreich eingeblendet",
   "crashReporting": "Absturzbericht",
   "resumableUploads": "Fortsetzbares Hochladen",
+  "fasterUploads": "Schnelleres Hochladen",
   "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
   "moveToHiddenAlbum": "Zu verstecktem Album verschieben",
   "fileTypes": "Dateitypen",
@@ -2836,6 +2837,10 @@
   "likedYourVideo": "gefällt dein Video",
   "@likedYourVideo": {
     "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAVideo": "gefällt ein Video",
+  "@likedAVideo": {
+    "description": "Social action text shown after a person's name, for example 'John liked a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
   },
   "commentedOnYourPhoto": "kommentierte dein Foto",
   "@commentedOnYourPhoto": {
