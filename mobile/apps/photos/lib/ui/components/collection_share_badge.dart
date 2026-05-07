@@ -136,6 +136,35 @@ class CollectionShareBadge extends StatelessWidget {
   }
 }
 
+class CollectionLinkBadge extends StatelessWidget {
+  const CollectionLinkBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Container(
+      width: kCollectionBadgeSize,
+      height: kCollectionBadgeSize,
+      decoration: BoxDecoration(
+        color: colorScheme.greenBase,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: colorScheme.fill,
+          width: kCollectionBadgeBorderWidth,
+        ),
+      ),
+      child: const Center(
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedLink02,
+          strokeWidth: kCollectionBadgeStrokeWidth,
+          color: Colors.white,
+          size: kCollectionBadgeIconSize,
+        ),
+      ),
+    );
+  }
+}
+
 class CollectionUnSyncedBadge extends StatelessWidget {
   static const Color _backgroundColor = Color.fromRGBO(242, 72, 34, 1);
 

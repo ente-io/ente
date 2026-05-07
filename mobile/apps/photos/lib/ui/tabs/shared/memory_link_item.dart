@@ -72,29 +72,39 @@ class MemoryLinkAlbumItem extends StatelessWidget {
                   SizedBox(
                     width: _thumbSize,
                     height: _thumbSize,
-                    child: FutureBuilder<EnteFile?>(
-                      future: _loadPreviewFile(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data != null) {
-                          final String heroTag =
-                              heroTagPrefix + snapshot.data!.tag;
-                          return Hero(
-                            tag: heroTag,
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(_cornerRadius),
-                              child: ThumbnailWidget(
-                                snapshot.data!,
-                                key: ValueKey(heroTag),
-                              ),
-                            ),
-                          );
-                        }
-                        return const NoThumbnailWidget(
-                          addBorder: false,
-                          borderRadius: _cornerRadius,
-                        );
-                      },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        FutureBuilder<EnteFile?>(
+                          future: _loadPreviewFile(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              final String heroTag =
+                                  heroTagPrefix + snapshot.data!.tag;
+                              return Hero(
+                                tag: heroTag,
+                                child: ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.circular(_cornerRadius),
+                                  child: ThumbnailWidget(
+                                    snapshot.data!,
+                                    key: ValueKey(heroTag),
+                                  ),
+                                ),
+                              );
+                            }
+                            return const NoThumbnailWidget(
+                              addBorder: false,
+                              borderRadius: _cornerRadius,
+                            );
+                          },
+                        ),
+                        const Positioned(
+                          right: -4,
+                          bottom: -4,
+                          child: CollectionLinkBadge(),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
