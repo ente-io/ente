@@ -81,6 +81,8 @@ double getOverlapPadding(AvatarType type) {
       return 12.0;
     case AvatarType.medium:
       return 18.0;
+    case AvatarType.regular:
+      return 24.0;
     case AvatarType.large:
       return 24.0;
     case AvatarType.huge:
@@ -94,6 +96,8 @@ MoreCountType moreCountTypeFromAvatarType(AvatarType type) {
       return MoreCountType.small;
     case AvatarType.medium:
       return MoreCountType.medium;
+    case AvatarType.regular:
+      return MoreCountType.regular;
     case AvatarType.large:
       return MoreCountType.large;
     case AvatarType.huge:

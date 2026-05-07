@@ -406,7 +406,7 @@ class _StackedAvatars extends StatelessWidget {
                 ),
                 child: UserAvatarWidget(
                   actors.first,
-                  type: AvatarType.large,
+                  type: AvatarType.regular,
                   currentUserID: currentUserID,
                   addStroke: false,
                 ),
@@ -425,7 +425,7 @@ class _StackedAvatars extends StatelessWidget {
                 ),
                 child: UserAvatarWidget(
                   actors[1],
-                  type: AvatarType.large,
+                  type: AvatarType.regular,
                   currentUserID: currentUserID,
                   addStroke: false,
                 ),
@@ -449,7 +449,7 @@ class _StackedAvatars extends StatelessWidget {
       ),
       child: UserAvatarWidget(
         user,
-        type: AvatarType.large,
+        type: AvatarType.regular,
         currentUserID: currentUserID,
         addStroke: false,
       ),

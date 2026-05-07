@@ -15,7 +15,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import 'package:tuple/tuple.dart';
 
-enum AvatarType { small, medium, large, huge }
+enum AvatarType { small, medium, regular, large, huge }
 
 class UserAvatarWidget extends StatefulWidget {
   final User user;
@@ -248,6 +248,8 @@ class _FirstLetterCircularAvatarState
         return Tuple2(56.0, enteTextTheme.largeBold);
       case AvatarType.large:
         return Tuple2(32.0, enteTextTheme.mini);
+      case AvatarType.regular:
+        return Tuple2(28.0, enteTextTheme.mini);
       case AvatarType.medium:
         return Tuple2(24.0, enteTextTheme.mini);
       case AvatarType.small:
@@ -264,6 +266,8 @@ double getAvatarSize(
       return 56.0;
     case AvatarType.large:
       return 32.0;
+    case AvatarType.regular:
+      return 28.0;
     case AvatarType.medium:
       return 24.0;
     case AvatarType.small:

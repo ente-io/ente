@@ -443,7 +443,7 @@ class _LikeListItem extends StatelessWidget {
           UserAvatarWidget(
             user,
             currentUserID: currentUserID,
-            type: AvatarType.large,
+            type: AvatarType.regular,
             addStroke: false,
           ),
           const SizedBox(width: 12),

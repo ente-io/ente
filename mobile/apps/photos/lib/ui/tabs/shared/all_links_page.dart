@@ -272,7 +272,7 @@ class _AllLinksPageState extends State<AllLinksPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(32),
                   child: Text(
-                    "No links yet",
+                    AppLocalizations.of(context).noLinksYet,
                     style: textTheme.bodyMuted,
                     textAlign: TextAlign.center,
                   ),
