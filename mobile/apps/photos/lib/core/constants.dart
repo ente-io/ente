@@ -45,6 +45,7 @@ const multipartPartSize = 20 * 1024 * 1024;
 const kDefaultProductionEndpoint = 'https://api.ente.com';
 const kLegacyProductionEndpoint = 'https://api.ente.io';
 const kUploadProxyEndpoint = 'https://uploader.ente.com';
+const kPhotosWebDomain = 'photos.ente.com';
 const kAccountsUrl = 'https://accounts.ente.io';
 const kFamilyUrl = 'https://family.ente.io';
 

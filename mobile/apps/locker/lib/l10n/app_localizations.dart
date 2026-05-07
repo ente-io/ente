@@ -291,25 +291,25 @@ abstract class AppLocalizations {
   /// Success message when files are saved offline
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 file saved offline} other{{count} files saved offline}}'**
+  /// **'{count, plural, one{1 file saved offline} other{{count} files saved offline}}'**
   String filesAvailableOffline(int count);
 
   /// Partial success message for offline save
   ///
   /// In en, this message translates to:
-  /// **'{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}'**
+  /// **'{successCount, plural, one{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, one{1 failed} other{{failureCount} failed}}'**
   String filesAvailableOfflinePartial(int successCount, int failureCount);
 
   /// Failure message when files could not be saved offline
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}'**
+  /// **'{count, plural, one{Failed to save 1 file offline} other{Failed to save {count} files offline}}'**
   String failedToSaveFilesOffline(int count);
 
   /// Success message when offline copies are removed
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}'**
+  /// **'{count, plural, one{1 file removed from offline} other{{count} files removed from offline}}'**
   String filesRemovedFromOffline(int count);
 
   /// No description provided for @downloadFailed.
@@ -651,7 +651,7 @@ abstract class AppLocalizations {
   /// Number of items in a collection
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{no items} =1{1 item} other{{count} items}}'**
+  /// **'{count, plural, =0{no items} one{1 item} other{{count} items}}'**
   String files(int count);
 
   /// No description provided for @createCollectionTooltip.
@@ -1833,7 +1833,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareWithPeopleSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}'**
+  /// **'{numberOfPeople, plural, =0 {Share with specific people} one {Shared with 1 person} other {Shared with {numberOfPeople} people}}'**
   String shareWithPeopleSectionTitle(int numberOfPeople);
 
   /// No description provided for @linkHasExpired.
@@ -1917,25 +1917,25 @@ abstract class AppLocalizations {
   /// Number of viewers that were successfully added to a collection.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}'**
+  /// **'{count, plural, =0 {Added 0 viewers} one {Added 1 viewer} other {Added {count} viewers}}'**
   String viewersSuccessfullyAdded(int count);
 
   /// Number of collaborators that were successfully added to a collection.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}'**
+  /// **'{count, plural, =0 {Added 0 collaborator} one {Added 1 collaborator} other {Added {count} collaborators}}'**
   String collaboratorsSuccessfullyAdded(int count);
 
   /// No description provided for @addViewers.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}'**
+  /// **'{count, plural, =0 {Add viewer} one {Add viewer} other {Add viewers}}'**
   String addViewers(num count);
 
   /// No description provided for @addCollaborators.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}'**
+  /// **'{count, plural, =0 {Add collaborator} one {Add collaborator} other {Add collaborators}}'**
   String addCollaborators(num count);
 
   /// No description provided for @longPressAnEmailToVerifyEndToEndEncryption.
@@ -2145,7 +2145,7 @@ abstract class AppLocalizations {
   /// The count of participants in an album
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}'**
+  /// **'{count, plural, =0 {No Participants} one {1 Participant} other {{count} Participants}}'**
   String albumParticipantsCount(int count);
 
   /// No description provided for @addMore.
@@ -2403,7 +2403,7 @@ abstract class AppLocalizations {
   /// Number of items selected for upload
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}'**
+  /// **'{count, plural, =0{No items selected} one{1 item selected} other{{count} items selected}}'**
   String filesSelected(int count);
 
   /// No description provided for @addToCollection.
@@ -2463,7 +2463,7 @@ abstract class AppLocalizations {
   /// Success message when record is saved to multiple collections
   ///
   /// In en, this message translates to:
-  /// **'Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully'**
+  /// **'Record saved to {count, plural, one{1 collection} other{{count} collections}} successfully'**
   String recordSavedToMultipleCollections(int count);
 
   /// Message when a field is copied to clipboard
@@ -2475,7 +2475,7 @@ abstract class AppLocalizations {
   /// Search results count message
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 result} other{{count} results}} for \"{query}\"'**
+  /// **'{count, plural, one{1 result} other{{count} results}} for \"{query}\"'**
   String searchResultsCount(int count, String query);
 
   /// No description provided for @locker.
@@ -2691,13 +2691,13 @@ abstract class AppLocalizations {
   /// Confirmation message body for deleting multiple collections
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
+  /// **'{count, plural, one{1 collection} other{{count} collections}} will be deleted permanently.'**
   String deleteMultipleCollectionsDialogBody(int count);
 
   /// Confirmation message body for deleting multiple items
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.'**
+  /// **'{count, plural, one{1 item} other{{count} items}} will be deleted permanently.'**
   String deleteMultipleFilesDialogBody(int count);
 
   /// Checkbox label asking whether to delete collection items everywhere
@@ -2709,13 +2709,13 @@ abstract class AppLocalizations {
   /// Button label for confirming deletion of one or more collections
   ///
   /// In en, this message translates to:
-  /// **'Yes, delete {count, plural, =1{collection} other{collections}}'**
+  /// **'Yes, delete {count, plural, one{collection} other{collections}}'**
   String yesDeleteCollections(int count);
 
   /// Button label for confirming deletion of one or more items
   ///
   /// In en, this message translates to:
-  /// **'Yes, delete {count, plural, =1{item} other{items}}'**
+  /// **'Yes, delete {count, plural, one{item} other{items}}'**
   String yesDeleteFiles(int count);
 
   /// No description provided for @usage.
@@ -2769,7 +2769,7 @@ abstract class AppLocalizations {
   /// Success message when items are marked as important
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item marked as important} other{{count} items marked as important}}'**
+  /// **'{count, plural, one{1 item marked as important} other{{count} items marked as important}}'**
   String filesMarkedAsImportant(int count);
 
   /// No description provided for @allFilesAlreadyMarkedAsImportant.
@@ -2919,13 +2919,13 @@ abstract class AppLocalizations {
   /// Number of items selected
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
+  /// **'{count, plural, one{1 selected} other{{count} selected}}'**
   String selectedCount(int count);
 
   /// Message when action is not supported for shared files
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}'**
+  /// **'{count, plural, one{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}'**
   String actionNotSupportedForSharedFiles(int count);
 
   /// No description provided for @addTo.
@@ -3009,7 +3009,7 @@ abstract class AppLocalizations {
   /// Success message when leaving collections
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Left 1 collection successfully} other{Left {count} collections successfully}}'**
+  /// **'{count, plural, one{Left 1 collection successfully} other{Left {count} collections successfully}}'**
   String leftCollectionsSuccessfully(int count);
 
   /// No description provided for @removePublicLink.
@@ -3027,7 +3027,7 @@ abstract class AppLocalizations {
   /// Success message when collections are deleted
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}'**
+  /// **'{count, plural, one{1 collection deleted successfully} other{{count} collections deleted successfully}}'**
   String collectionsDeletedSuccessfully(int count);
 
   /// No description provided for @restoreToCollection.
@@ -3045,7 +3045,7 @@ abstract class AppLocalizations {
   /// Success message when items are restored from trash
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}'**
+  /// **'{count, plural, one{1 item restored successfully} other{{count} items restored successfully}}'**
   String filesRestoredSuccessfully(int count);
 
   /// No description provided for @failedToRestoreFiles.
@@ -3063,7 +3063,7 @@ abstract class AppLocalizations {
   /// Confirmation body for permanent deletion from trash
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.'**
+  /// **'{count, plural, one{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.'**
   String permanentlyDeleteFilesBody(int count);
 
   /// No description provided for @yesDelete.
@@ -3081,7 +3081,7 @@ abstract class AppLocalizations {
   /// Success message when items are permanently deleted from trash
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}'**
+  /// **'{count, plural, one{1 item deleted permanently} other{{count} items deleted permanently}}'**
   String filesDeletedPermanently(int count);
 
   /// No description provided for @failedToDeleteFiles.

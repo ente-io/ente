@@ -32,7 +32,7 @@
   "keepOffline": "Keep offline",
   "cloudOnly": "Remove offline",
   "savingOffline": "Saving offline...",
-  "filesAvailableOffline": "{count, plural, =1{1 file saved offline} other{{count} files saved offline}}",
+  "filesAvailableOffline": "{count, plural, one{1 file saved offline} other{{count} files saved offline}}",
   "@filesAvailableOffline": {
     "description": "Success message when files are saved offline",
     "placeholders": {
@@ -42,7 +42,7 @@
       }
     }
   },
-  "filesAvailableOfflinePartial": "{successCount, plural, =1{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, =1{1 failed} other{{failureCount} failed}}",
+  "filesAvailableOfflinePartial": "{successCount, plural, one{Saved 1 file offline} other{Saved {successCount} files offline}}, {failureCount, plural, one{1 failed} other{{failureCount} failed}}",
   "@filesAvailableOfflinePartial": {
     "description": "Partial success message for offline save",
     "placeholders": {
@@ -56,7 +56,7 @@
       }
     }
   },
-  "failedToSaveFilesOffline": "{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}",
+  "failedToSaveFilesOffline": "{count, plural, one{Failed to save 1 file offline} other{Failed to save {count} files offline}}",
   "@failedToSaveFilesOffline": {
     "description": "Failure message when files could not be saved offline",
     "placeholders": {
@@ -66,7 +66,7 @@
       }
     }
   },
-  "filesRemovedFromOffline": "{count, plural, =1{1 file removed from offline} other{{count} files removed from offline}}",
+  "filesRemovedFromOffline": "{count, plural, one{1 file removed from offline} other{{count} files removed from offline}}",
   "@filesRemovedFromOffline": {
     "description": "Success message when offline copies are removed",
     "placeholders": {
@@ -283,7 +283,7 @@
       }
     }
   },
-  "files": "{count, plural, =0{no items} =1{1 item} other{{count} items}}",
+  "files": "{count, plural, =0{no items} one{1 item} other{{count} items}}",
   "@files": {
     "description": "Number of items in a collection",
     "placeholders": {
@@ -541,7 +541,7 @@
   "linkDeviceLimit": "Device limit",
   "expiredLinkInfo": "This link has expired. Please select a new expiry time or disable link expiry.",
   "linkExpiresOn": "Link will expire on {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Share with specific people} one {Shared with 1 person} other {Shared with {numberOfPeople} people}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -563,7 +563,7 @@
   "add": "Add",
   "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add items to the shared collection.",
   "enterEmail": "Enter email",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} one {Added 1 viewer} other {Added {count} viewers}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -573,7 +573,7 @@
     },
     "description": "Number of viewers that were successfully added to a collection."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} one {Added 1 collaborator} other {Added {count} collaborators}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -583,8 +583,8 @@
     },
     "description": "Number of collaborators that were successfully added to a collection."
   },
-  "addViewers": "{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}",
-  "addCollaborators": "{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}",
+  "addViewers": "{count, plural, =0 {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, =0 {Add collaborator} one {Add collaborator} other {Add collaborators}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
   "sharing": "Sharing...",
   "invalidEmailAddress": "Invalid email address",
@@ -636,7 +636,7 @@
   "viewer": "Viewer",
   "collaborator": "Collaborator",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add items to the shared collection.",
-  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} one {1 Participant} other {{count} Participants}}",
   "@albumParticipantsCount": {
     "description": "The count of participants in an album",
     "placeholders": {
@@ -762,7 +762,7 @@
   "clickHereToUpload": "Click here to upload",
   "saveDocument": "Save document",
   "uploadFiles": "Upload items",
-  "filesSelected": "{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}",
+  "filesSelected": "{count, plural, =0{No items selected} one{1 item selected} other{{count} items selected}}",
   "@filesSelected": {
     "description": "Number of items selected for upload",
     "placeholders": {
@@ -790,7 +790,7 @@
     }
   },
   "informationCollectionName": "Information",
-  "recordSavedToMultipleCollections": "Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully",
+  "recordSavedToMultipleCollections": "Record saved to {count, plural, one{1 collection} other{{count} collections}} successfully",
   "@recordSavedToMultipleCollections": {
     "description": "Success message when record is saved to multiple collections",
     "placeholders": {
@@ -810,7 +810,7 @@
       }
     }
   },
-  "searchResultsCount": "{count, plural, =1{1 result} other{{count} results}} for \"{query}\"",
+  "searchResultsCount": "{count, plural, one{1 result} other{{count} results}} for \"{query}\"",
   "@searchResultsCount": {
     "description": "Search results count message",
     "placeholders": {
@@ -868,7 +868,7 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.",
+  "deleteMultipleCollectionsDialogBody": "{count, plural, one{1 collection} other{{count} collections}} will be deleted permanently.",
   "@deleteMultipleCollectionsDialogBody": {
     "description": "Confirmation message body for deleting multiple collections",
     "placeholders": {
@@ -878,7 +878,7 @@
       }
     }
   },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.",
+  "deleteMultipleFilesDialogBody": "{count, plural, one{1 item} other{{count} items}} will be deleted permanently.",
   "@deleteMultipleFilesDialogBody": {
     "description": "Confirmation message body for deleting multiple items",
     "placeholders": {
@@ -892,7 +892,7 @@
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
   },
-  "yesDeleteCollections": "Yes, delete {count, plural, =1{collection} other{collections}}",
+  "yesDeleteCollections": "Yes, delete {count, plural, one{collection} other{collections}}",
   "@yesDeleteCollections": {
     "description": "Button label for confirming deletion of one or more collections",
     "placeholders": {
@@ -902,7 +902,7 @@
       }
     }
   },
-  "yesDeleteFiles": "Yes, delete {count, plural, =1{item} other{items}}",
+  "yesDeleteFiles": "Yes, delete {count, plural, one{item} other{items}}",
   "@yesDeleteFiles": {
     "description": "Button label for confirming deletion of one or more items",
     "placeholders": {
@@ -933,7 +933,7 @@
   "markingAsImportant": "Marking as important...",
   "fileMarkedAsImportant": "Item marked as important",
   "fileRemovedFromImportant": "Item removed from important",
-  "filesMarkedAsImportant": "{count, plural, =1{1 item marked as important} other{{count} items marked as important}}",
+  "filesMarkedAsImportant": "{count, plural, one{1 item marked as important} other{{count} items marked as important}}",
   "@filesMarkedAsImportant": {
     "description": "Success message when items are marked as important",
     "placeholders": {
@@ -985,7 +985,7 @@
   "selectLanguage": "Select language",
   "general": "General",
   "language": "Language",
-  "selectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "selectedCount": "{count, plural, one{1 selected} other{{count} selected}}",
   "@selectedCount": {
     "description": "Number of items selected",
     "placeholders": {
@@ -995,7 +995,7 @@
       }
     }
   },
-  "actionNotSupportedForSharedFiles": "{count, plural, =1{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}",
+  "actionNotSupportedForSharedFiles": "{count, plural, one{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}",
   "@actionNotSupportedForSharedFiles": {
     "description": "Message when action is not supported for shared files",
     "placeholders": {
@@ -1018,7 +1018,7 @@
   "collectionUpdated": "Collection updated",
   "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album",
   "leaveCollectionSuccessfully": "Left collection successfully",
-  "leftCollectionsSuccessfully": "{count, plural, =1{Left 1 collection successfully} other{Left {count} collections successfully}}",
+  "leftCollectionsSuccessfully": "{count, plural, one{Left 1 collection successfully} other{Left {count} collections successfully}}",
   "@leftCollectionsSuccessfully": {
     "description": "Success message when leaving collections",
     "placeholders": {
@@ -1039,7 +1039,7 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}",
+  "collectionsDeletedSuccessfully": "{count, plural, one{1 collection deleted successfully} other{{count} collections deleted successfully}}",
   "@collectionsDeletedSuccessfully": {
     "description": "Success message when collections are deleted",
     "placeholders": {
@@ -1051,7 +1051,7 @@
   },
   "restoreToCollection": "Restore to collection",
   "restoringFiles": "Restoring...",
-  "filesRestoredSuccessfully": "{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}",
+  "filesRestoredSuccessfully": "{count, plural, one{1 item restored successfully} other{{count} items restored successfully}}",
   "@filesRestoredSuccessfully": {
     "description": "Success message when items are restored from trash",
     "placeholders": {
@@ -1063,7 +1063,7 @@
   },
   "failedToRestoreFiles": "Failed to restore items",
   "permanentlyDelete": "Permanently delete",
-  "permanentlyDeleteFilesBody": "{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.",
+  "permanentlyDeleteFilesBody": "{count, plural, one{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.",
   "@permanentlyDeleteFilesBody": {
     "description": "Confirmation body for permanent deletion from trash",
     "placeholders": {
@@ -1075,7 +1075,7 @@
   },
   "yesDelete": "Yes, delete",
   "deletingFiles": "Deleting...",
-  "filesDeletedPermanently": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
+  "filesDeletedPermanently": "{count, plural, one{1 item deleted permanently} other{{count} items deleted permanently}}",
   "@filesDeletedPermanently": {
     "description": "Success message when items are permanently deleted from trash",
     "placeholders": {
