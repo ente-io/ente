@@ -186,7 +186,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         resizeToAvoidBottomInset: false,
-        backgroundColor: colorScheme.backgroundBase,
+        backgroundColor: colorScheme.backgroundColour,
         body: ProImageEditor.file(
           key: editorKey,
           widget.file,
@@ -214,13 +214,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               hideToolbarOnInteraction: false,
             ),
             theme: ThemeData(
-              scaffoldBackgroundColor: colorScheme.backgroundBase,
+              scaffoldBackgroundColor: colorScheme.backgroundColour,
               appBarTheme: AppBarTheme(
                 titleTextStyle: textTheme.body,
-                backgroundColor: colorScheme.backgroundBase,
+                backgroundColor: colorScheme.backgroundColour,
               ),
               bottomAppBarTheme: BottomAppBarTheme(
-                color: colorScheme.backgroundBase,
+                color: colorScheme.backgroundColour,
               ),
               brightness: isLightMode ? Brightness.light : Brightness.dark,
             ),
@@ -235,9 +235,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                   statusBarIconBrightness:
                       isLightMode ? Brightness.dark : Brightness.light,
                 ),
-                appBarBackground: colorScheme.backgroundBase,
-                background: colorScheme.backgroundBase,
-                bottomBarBackground: colorScheme.backgroundBase,
+                appBarBackground: colorScheme.backgroundColour,
+                background: colorScheme.backgroundColour,
+                bottomBarBackground: colorScheme.backgroundColour,
               ),
               widgets: MainEditorWidgets(
                 removeLayerArea: (
@@ -335,7 +335,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               enabled: true,
               style: PaintEditorStyle(
                 initialColor: const Color(0xFF00FFFF),
-                background: colorScheme.backgroundBase,
+                background: colorScheme.backgroundColour,
               ),
               widgets: PaintEditorWidgets(
                 appBar: (editor, rebuildStream) {
@@ -432,7 +432,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               showRotateButton: true,
               enabled: true,
               style: CropRotateEditorStyle(
-                background: colorScheme.backgroundBase,
+                background: colorScheme.backgroundColour,
                 cropCornerColor:
                     Theme.of(context).colorScheme.imageEditorPrimaryColor,
               ),
@@ -470,7 +470,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               fadeInUpStaggerDelayDuration: fadeInDelay,
               filterList: filterList,
               style: FilterEditorStyle(
-                background: colorScheme.backgroundBase,
+                background: colorScheme.backgroundColour,
               ),
               widgets: FilterEditorWidgets(
                 slider: (
@@ -523,7 +523,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             tuneEditor: TuneEditorConfigs(
               enabled: true,
               style: TuneEditorStyle(
-                background: colorScheme.backgroundBase,
+                background: colorScheme.backgroundColour,
               ),
               widgets: TuneEditorWidgets(
                 appBar: (editor, rebuildStream) {
@@ -566,11 +566,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               style: EmojiEditorStyle(
                 bottomActionBarConfig: BottomActionBarConfig(
                   showSearchViewButton: true,
-                  buttonColor: colorScheme.backgroundBase,
+                  buttonColor: colorScheme.backgroundColour,
                   buttonIconColor: colorScheme.tabIcon,
-                  backgroundColor: colorScheme.backgroundBase,
+                  backgroundColor: colorScheme.backgroundColour,
                 ),
-                backgroundColor: colorScheme.backgroundBase,
+                backgroundColor: colorScheme.backgroundColour,
               ),
             ),
             stickerEditor: StickerEditorConfigs(

@@ -47,7 +47,7 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: backgroundBaseDark,
+      color: backgroundColorDark,
       child: PageView.builder(
         controller: pageController,
         physics: const BouncingScrollPhysics(),

@@ -306,14 +306,14 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                 : getEnteColorScheme(context).primary500,
             shape: BoxShape.circle,
             border: Border.all(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: getEnteColorScheme(context).backgroundColour,
               width: 2,
             ),
           ),
           child: Icon(
             hasPerson ? Icons.remove : Icons.add,
             size: 12,
-            color: getEnteColorScheme(context).backgroundBase,
+            color: getEnteColorScheme(context).backgroundColour,
           ),
         ),
       ),

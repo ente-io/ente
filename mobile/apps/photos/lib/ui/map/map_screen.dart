@@ -234,7 +234,7 @@ class _MapScreenState extends State<MapScreen> {
     final colorScheme = getEnteColorScheme(context);
     final bottomUnsafeArea = MediaQuery.of(context).padding.bottom;
     return Container(
-      color: colorScheme.backgroundBase,
+      color: colorScheme.backgroundColour,
       child: Theme(
         data: Theme.of(context).copyWith(
           bottomSheetTheme: const BottomSheetThemeData(

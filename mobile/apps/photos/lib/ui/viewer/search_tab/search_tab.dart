@@ -4,7 +4,6 @@ import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/intl/app_localizations.dart";
-import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
@@ -20,8 +19,6 @@ import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
-import "package:photos/ui/viewer/search_tab/albums_section.dart";
-import "package:photos/ui/viewer/search_tab/device_albums_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
@@ -62,10 +59,10 @@ class _SearchTabState extends State<SearchTab> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final resultsBackground = EnteTheme.isDark(context)
-        ? const Color.fromRGBO(22, 22, 22, 1)
+        ? colorScheme.backgroundColour
         : colorScheme.backgroundElevated2;
     final headerColor =
-        index == 1 ? resultsBackground : colorScheme.backgroundBase;
+        index == 1 ? resultsBackground : colorScheme.backgroundColour;
     return Column(
       children: [
         ColoredBox(
@@ -115,10 +112,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
             ).allSectionsExamplesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                // In offline mode, skip the empty state check since DeviceAlbumsSection
-                // fetches its own data and may have albums to show
-                if (!isLocalGalleryMode &&
-                    snapshot.data!.every((element) => element.isEmpty)) {
+                if (snapshot.data!.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
                     child: SearchTabEmptyState(),
@@ -166,13 +160,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
-                        if (isLocalGalleryMode) {
-                          return const DeviceAlbumsSection();
-                        }
-                        return AlbumsSection(
-                          snapshot.data!.elementAt(sectionIndex)
-                              as List<AlbumSearchResult>,
-                        );
+                        return const SizedBox.shrink();
                       case SectionType.ritual:
                         if (isLocalGalleryMode) {
                           return const SizedBox.shrink();

@@ -27,18 +27,18 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
 
     return Scaffold(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundColour,
       body: CropRotateEditor.memory(
         widget.imageBytes,
         initConfigs: CropRotateEditorInitConfigs(
           theme: ThemeData(
-            scaffoldBackgroundColor: colorScheme.backgroundBase,
+            scaffoldBackgroundColor: colorScheme.backgroundColour,
             appBarTheme: AppBarTheme(
               titleTextStyle: textTheme.body,
-              backgroundColor: colorScheme.backgroundBase,
+              backgroundColor: colorScheme.backgroundColour,
             ),
             bottomAppBarTheme: BottomAppBarTheme(
-              color: colorScheme.backgroundBase,
+              color: colorScheme.backgroundColour,
             ),
             brightness: isLightMode ? Brightness.light : Brightness.dark,
           ),
@@ -66,7 +66,7 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
                 AspectRatioItem(text: "1*1", value: 1.0),
               ],
               style: CropRotateEditorStyle(
-                background: colorScheme.backgroundBase,
+                background: colorScheme.backgroundColour,
                 cropCornerColor:
                     Theme.of(context).colorScheme.imageEditorPrimaryColor,
               ),
@@ -76,7 +76,7 @@ class _ContactPhotoAdjustPageState extends State<ContactPhotoAdjustPage> {
                   builder: (_) => AppBar(
                     elevation: 0,
                     automaticallyImplyLeading: false,
-                    backgroundColor: colorScheme.backgroundBase,
+                    backgroundColor: colorScheme.backgroundColour,
                     titleSpacing: 0,
                     title: Row(
                       children: [

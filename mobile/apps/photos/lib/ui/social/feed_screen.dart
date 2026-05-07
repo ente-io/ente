@@ -4,13 +4,16 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -18,6 +21,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/social_actor_contact_navigation.dart";
+import "package:photos/ui/social/widgets/feed_empty_state.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -78,10 +82,12 @@ class FeedNavigationTarget {
 /// Shows likes, comments, and replies on the user's photos and comments.
 class FeedScreen extends StatefulWidget {
   final FeedNavigationTarget? initialTarget;
+  final bool showBackButton;
 
   const FeedScreen({
     super.key,
     this.initialTarget,
+    this.showBackButton = true,
   });
 
   @override
@@ -93,6 +99,7 @@ class _FeedScreenState extends State<FeedScreen> {
   static const _kFeedLoadMoreStep = 50;
   static const _kMaxFeedLimit = 500;
   static const _kLoadMoreThresholdPx = 200.0;
+  static const _kFeedTabIndex = 2;
 
   List<FeedItem> _feedItems = [];
   bool _isLoading = true;
@@ -103,6 +110,9 @@ class _FeedScreenState extends State<FeedScreen> {
   FeedNavigationTarget? _pendingNavigationTarget;
   bool _didHandleNavigationTarget = false;
   bool _isOpeningNavigationTarget = false;
+  bool _hasMarkedSocialSeen = false;
+  bool _hasStartedLoading = false;
+  StreamSubscription<TabChangedEvent>? _tabChangedEventSubscription;
   final Set<String> _suppressedForwardHeroPrefixes = <String>{};
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _navigationTargetItemKey = GlobalKey();
@@ -116,15 +126,37 @@ class _FeedScreenState extends State<FeedScreen> {
     _currentUserID = Configuration.instance.getUserID() ?? 0;
     _pendingNavigationTarget = widget.initialTarget;
     _scrollController.addListener(_onScroll);
-    unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
-    _loadFeedItems();
+    if (widget.showBackButton) {
+      _activateFeed();
+    } else {
+      _tabChangedEventSubscription =
+          Bus.instance.on<TabChangedEvent>().listen((event) {
+        if (event.selectedIndex == _kFeedTabIndex) {
+          _activateFeed();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    _tabChangedEventSubscription?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _markSocialSeenOnce() {
+    if (_hasMarkedSocialSeen) return;
+    _hasMarkedSocialSeen = true;
+    unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
+  }
+
+  void _activateFeed() {
+    _markSocialSeenOnce();
+    if (_hasStartedLoading) return;
+    _hasStartedLoading = true;
+    _loadFeedItems();
   }
 
   void _onScroll() {
@@ -514,30 +546,40 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? null : const Color(0xFFFAFAFA),
+      backgroundColor: isDark ? null : colorScheme.backgroundColour,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: isDark ? null : const Color(0xFFFAFAFA),
+        backgroundColor: isDark ? null : colorScheme.backgroundColour,
         elevation: 0,
         centerTitle: false,
-        leading: IconButtonWidget(
-          iconButtonType: IconButtonType.primary,
-          icon: Icons.arrow_back,
-          onTap: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          AppLocalizations.of(context).feed,
-          style: textTheme.bodyBold,
-        ),
+        leading: widget.showBackButton
+            ? IconButtonWidget(
+                iconButtonType: IconButtonType.primary,
+                icon: Icons.arrow_back,
+                onTap: () => Navigator.of(context).pop(),
+              )
+            : null,
+        title: _feedItems.isEmpty
+            ? null
+            : Text(
+                AppLocalizations.of(context).feed,
+                style: widget.showBackButton
+                    ? textTheme.bodyBold
+                    : textTheme.h4Bold,
+              ),
       ),
       body: _isLoading
           ? const Center(child: EnteLoadingWidget(size: 24))
           : _feedItems.isEmpty
-              ? _buildEmptyState(context)
+              ? FeedEmptyState(
+                  localGalleryMode: isLocalGalleryMode &&
+                      !Configuration.instance.hasConfiguredAccount(),
+                )
               : RefreshIndicator(
                   onRefresh: _onRefresh,
                   child: ListView.builder(
@@ -545,7 +587,8 @@ class _FeedScreenState extends State<FeedScreen> {
                     padding: EdgeInsets.only(
                       left: 15,
                       right: 15,
-                      bottom: MediaQuery.paddingOf(context).bottom,
+                      bottom: MediaQuery.paddingOf(context).bottom +
+                          (widget.showBackButton ? 0 : 88),
                     ),
                     itemCount: _feedItems.length + (_isLoadingMore ? 1 : 0),
                     itemBuilder: (context, index) {
@@ -612,35 +655,6 @@ class _FeedScreenState extends State<FeedScreen> {
                     },
                   ),
                 ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.notifications_none_outlined,
-              size: 48,
-              color: colorScheme.strokeMuted,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).noActivityYet,
-              style: textTheme.body.copyWith(
-                color: colorScheme.textMuted,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

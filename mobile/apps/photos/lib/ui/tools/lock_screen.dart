@@ -119,7 +119,7 @@ class _LockScreenState extends State<LockScreen>
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colorTheme.backgroundBase,
+                              color: colorTheme.backgroundColour,
                             ),
                           ),
                         ),

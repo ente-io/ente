@@ -537,7 +537,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
               vertical: 8,
             ),
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: getEnteColorScheme(context).backgroundColour,
             ),
             child: Column(
               children: [

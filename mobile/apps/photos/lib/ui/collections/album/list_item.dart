@@ -1,17 +1,30 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/collection_share_badge.dart";
+import "package:photos/ui/sharing/album_share_info_widget.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class AlbumListItemWidget extends StatelessWidget {
+  static const _thumbSize = 52.0;
+  static const _cornerRadius = 12.0;
+  static const _rowHeight = 68.0;
+  static const _cardRadius = 20.0;
+  static const _padding = 8.0;
+
+  static final double _trailingWidth =
+      getAvatarSize(AvatarType.medium) + getOverlapPadding(AvatarType.medium);
+
   final Collection collection;
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
@@ -27,36 +40,61 @@ class AlbumListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    const sideOfThumbnail = 60.0;
+    final textTheme = getEnteTextTheme(context);
+    final bool isOwner =
+        collection.isOwner(Configuration.instance.getUserID()!);
+    final bool isOutgoing = isOwner && collection.hasSharees;
+    final bool isIncoming = !isOwner;
+    final bool showSharingIndicator = isOutgoing || isIncoming;
+    final bool isFavoriteAlbum = collection.type == CollectionType.favorites;
+    final bool showPin =
+        isOwner ? collection.isPinned : collection.hasShareePinned();
+    final bool showArchive =
+        isOwner ? collection.isArchived() : collection.hasShareeArchived();
+    final bool hasAnyStatus = isFavoriteAlbum || showPin || showArchive;
 
     final albumWidget = Flexible(
       flex: 6,
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: SizedBox(
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
-              child: FutureBuilder<EnteFile?>(
-                future: CollectionsService.instance.getCover(collection),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final thumbnail = snapshot.data!;
-                    return ThumbnailWidget(
-                      thumbnail,
-                      showFavForAlbumOnly: true,
-                      shouldShowOwnerAvatar: false,
-                    );
-                  } else {
-                    return const NoThumbnailWidget(
-                      addBorder: false,
-                    );
-                  }
-                },
-              ),
+          SizedBox(
+            height: _thumbSize,
+            width: _thumbSize,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(_cornerRadius),
+                  child: SizedBox(
+                    height: _thumbSize,
+                    width: _thumbSize,
+                    child: FutureBuilder<EnteFile?>(
+                      future: CollectionsService.instance.getCover(collection),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final thumbnail = snapshot.data!;
+                          return ThumbnailWidget(
+                            thumbnail,
+                            shouldShowFavoriteIcon: false,
+                            shouldShowOwnerAvatar: false,
+                          );
+                        } else {
+                          return const NoThumbnailWidget(
+                            addBorder: false,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                if (showSharingIndicator)
+                  Positioned(
+                    right: -4,
+                    bottom: -4,
+                    child: CollectionShareBadge(isOutgoing: isOutgoing),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 12),
@@ -69,33 +107,50 @@ class AlbumListItemWidget extends StatelessWidget {
                   collection.displayName,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 4),
                 FutureBuilder<int>(
                   future: CollectionsService.instance.getFileCount(collection),
                   builder: (context, snapshot) {
+                    String countText = "";
                     if (snapshot.hasData) {
-                      return Text(
-                        AppLocalizations.of(context).memoryCount(
-                          count: snapshot.data!,
-                          formattedCount: NumberFormat().format(snapshot.data!),
-                        ),
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
+                      countText = AppLocalizations.of(context).itemCount(
+                        count: snapshot.data!,
                       );
-                    } else {
-                      if (snapshot.hasError) {
-                        Logger("AlbumListItemWidget").severe(
-                          "Failed to fetch file count of collection",
-                          snapshot.error,
-                        );
-                      }
-                      return Text(
-                        "",
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
+                    } else if (snapshot.hasError) {
+                      Logger("AlbumListItemWidget").severe(
+                        "Failed to fetch file count of collection",
+                        snapshot.error,
                       );
                     }
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(countText, style: textTheme.smallMuted),
+                        if (hasAnyStatus) ...[
+                          Text(" • ", style: textTheme.smallMuted),
+                          if (showPin)
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedPin,
+                              size: 12,
+                              color: colorScheme.textMuted,
+                              strokeWidth: 2.0,
+                            ),
+                          if (showArchive)
+                            Icon(
+                              Icons.archive_outlined,
+                              size: 12,
+                              color: colorScheme.textMuted,
+                            ),
+                          if (isFavoriteAlbum)
+                            Icon(
+                              EnteIcons.favoriteFilled,
+                              size: 12,
+                              color: colorScheme.greenBase,
+                            ),
+                        ],
+                      ],
+                    );
                   },
                 ),
               ],
@@ -118,37 +173,43 @@ class AlbumListItemWidget extends StatelessWidget {
           return AnimatedContainer(
             curve: Curves.easeOut,
             duration: const Duration(milliseconds: 200),
+            height: _rowHeight,
+            padding: const EdgeInsets.all(_padding),
             decoration: BoxDecoration(
+              color: colorScheme.fill,
+              borderRadius:
+                  const BorderRadius.all(Radius.circular(_cardRadius)),
               border: Border.all(
-                color: isSelected
-                    ? colorScheme.strokeMuted
-                    : colorScheme.strokeFainter,
+                color: isSelected ? colorScheme.greenStroke : colorScheme.fill,
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 albumWidget,
-                Flexible(
-                  flex: 1,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: isSelected
-                        ? IconButtonWidget(
-                            key: const ValueKey("selected"),
-                            icon: Icons.check_circle_rounded,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokeBase,
-                          )
-                        : IconButtonWidget(
-                            key: const ValueKey("unselected"),
-                            icon: Icons.chevron_right_outlined,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokePressed,
-                          ),
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SizedBox(
+                    width: _trailingWidth,
+                    height: 24,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        );
+                      },
+                      child: _buildTrailingIndicator(
+                        isSelected: isSelected,
+                        isOwner: isOwner,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -157,5 +218,48 @@ class AlbumListItemWidget extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Widget _buildTrailingIndicator({
+    required bool isSelected,
+    required bool isOwner,
+  }) {
+    final double avatarSize = getAvatarSize(AvatarType.medium);
+    final double slotOverlap = getOverlapPadding(AvatarType.medium);
+
+    if (isSelected) {
+      return const CollectionSelectedBadge(
+        key: ValueKey("selected"),
+      );
+    }
+    if (!isOwner) {
+      return UserAvatarWidget(
+        key: const ValueKey("owner"),
+        collection.owner,
+        type: AvatarType.medium,
+        thumbnailView: true,
+      );
+    }
+    if (collection.hasSharees) {
+      final sharees = collection.getSharees();
+      final int total = sharees.length;
+      final int limit = total > 2 ? 1 : 2;
+      final int displayCount = total.clamp(1, limit);
+      final bool hasMore = total > limit;
+      final double contentWidth =
+          avatarSize + (displayCount - 1 + (hasMore ? 1 : 0)) * slotOverlap;
+      return SizedBox(
+        key: const ValueKey("sharees"),
+        width: contentWidth,
+        height: avatarSize,
+        child: AlbumSharesIcons(
+          sharees: sharees,
+          type: AvatarType.medium,
+          limitCountTo: limit,
+          padding: EdgeInsets.zero,
+        ),
+      );
+    }
+    return const SizedBox.shrink(key: ValueKey("unselected"));
   }
 }

@@ -97,7 +97,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
 
   Widget _buildFunctions(BoxConstraints constraints) {
     return BottomAppBar(
-      color: getEnteColorScheme(context).backgroundBase,
+      color: getEnteColorScheme(context).backgroundColour,
       padding: EdgeInsets.zero,
       height: editorBottomBarHeight,
       child: Align(

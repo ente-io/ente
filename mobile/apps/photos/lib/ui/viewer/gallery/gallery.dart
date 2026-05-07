@@ -998,7 +998,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
                     );
                   },
                   child: ColoredBox(
-                    color: getEnteColorScheme(context).backgroundBase,
+                    color: getEnteColorScheme(context).backgroundColour,
                     child: boundaryWidget(
                       position: BoundaryPosition.top,
                       child: GroupHeaderWidget(

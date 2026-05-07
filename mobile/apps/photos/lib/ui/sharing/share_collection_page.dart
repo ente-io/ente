@@ -396,7 +396,7 @@ class EmailItemWidget extends StatelessWidget {
                     sharees: collection.getSharees(),
                     padding: const EdgeInsets.all(0),
                     limitCountTo: 10,
-                    type: AvatarType.md,
+                    type: AvatarType.medium,
                     removeBorder: false,
                   ),
                 ),

@@ -135,7 +135,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: colorTheme.backgroundBase,
+                            color: colorTheme.backgroundColour,
                           ),
                         ),
                       ),

@@ -1,4 +1,3 @@
-import "package:dotted_border/dotted_border.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -11,11 +10,12 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class NewAlbumRowItemWidget extends StatelessWidget {
-  final Color? color;
+  static const _cornerRadius = 20.0;
+
   final double height;
   final double width;
+
   const NewAlbumRowItemWidget({
-    this.color,
     super.key,
     required this.height,
     required this.width,
@@ -69,25 +69,16 @@ class NewAlbumRowItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(_cornerRadius),
             child: Container(
               height: height,
               width: width,
-              color: Theme.of(context).brightness == Brightness.light
-                  ? colorScheme.backdropBase
-                  : colorScheme.backdropFaint,
-              child: DottedBorder(
-                borderType: BorderType.RRect,
-                strokeWidth: 1.75,
-                dashPattern: const [3.75, 3.75],
-                radius: const Radius.circular(12),
-                padding: EdgeInsets.zero,
-                color: colorScheme.strokeFaint,
-                child: Center(
-                  child: Icon(
-                    Icons.add,
-                    color: colorScheme.strokeFaint,
-                  ),
+              color: colorScheme.fill,
+              child: Center(
+                child: Image.asset(
+                  "assets/new_album_icon.png",
+                  width: 34,
+                  height: 34,
                 ),
               ),
             ),

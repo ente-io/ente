@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
-import "package:flutter_svg/flutter_svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/soft_icon_button.dart";
+import "package:photos/ui/components/text_input_widget_v2.dart";
 
 class SearchableAppBar extends StatefulWidget {
   final Widget title;
@@ -12,6 +14,7 @@ class SearchableAppBar extends StatefulWidget {
   final Color? backgroundColor;
   final bool? centerTitle;
   final EdgeInsetsGeometry searchIconPadding;
+  final bool pinned;
 
   const SearchableAppBar({
     super.key,
@@ -24,6 +27,7 @@ class SearchableAppBar extends StatefulWidget {
     this.backgroundColor,
     this.centerTitle,
     this.searchIconPadding = const EdgeInsets.all(12.0),
+    this.pinned = false,
   });
 
   @override
@@ -86,9 +90,10 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final colorScheme = getEnteColorScheme(context);
     return SliverAppBar(
-      floating: true,
+      floating: !widget.pinned,
+      pinned: widget.pinned,
       backgroundColor:
           widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
       surfaceTintColor: Colors.transparent,
@@ -118,19 +123,15 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
       actions: _isSearchActive
           ? null
           : [
-              GestureDetector(
-                onTap: _activateSearch,
-                child: Padding(
-                  padding: widget.searchIconPadding,
-                  child: SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: SvgPicture.asset(
-                      isLightMode
-                          ? "assets/icons/search_icon_light.svg"
-                          : "assets/icons/search_icon_dark.svg",
-                    ),
+              Padding(
+                padding: widget.searchIconPadding,
+                child: SoftIconButton(
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedSearch01,
+                    size: 18,
+                    color: colorScheme.textBase,
                   ),
+                  onTap: _activateSearch,
                 ),
               ),
               ...?widget.actions,
@@ -143,35 +144,25 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
     return Container(
       key: const ValueKey('searchBar'),
       alignment: Alignment.center,
-      child: TextFormField(
-        controller: _searchController,
+      child: TextInputWidgetV2(
+        textEditingController: _searchController,
         focusNode: _searchFocusNode,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: colorScheme.fillFaint,
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: colorScheme.strokeMuted,
-          ),
-          suffixIcon: IconButton(
-            icon: Icon(
-              Icons.cancel_rounded,
-              color: colorScheme.strokeMuted,
-            ),
-            onPressed: _deactivateSearch,
-          ),
-          border: const UnderlineInputBorder(
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.fromLTRB(12, 12, 0, 12),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: colorScheme.strokeFaint,
-            ),
-            borderRadius: BorderRadius.circular(8),
+        autoFocus: true,
+        shouldSurfaceExecutionStates: false,
+        leadingWidget: HugeIcon(
+          icon: HugeIcons.strokeRoundedSearch01,
+          size: 18,
+          color: colorScheme.textMuted,
+        ),
+        trailingWidget: GestureDetector(
+          onTap: _deactivateSearch,
+          child: HugeIcon(
+            icon: HugeIcons.strokeRoundedCancel01,
+            size: 18,
+            color: colorScheme.textMuted,
           ),
         ),
-        onChanged: widget.onSearch,
+        onChange: widget.onSearch,
       ),
     );
   }

@@ -229,7 +229,7 @@ class NotificationNoteWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         border: Border.all(color: colorScheme.strokeMuted),
-        color: colorScheme.backgroundBase,
+        color: colorScheme.backgroundColour,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
       child: Row(
