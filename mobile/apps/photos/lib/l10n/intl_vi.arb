@@ -640,6 +640,7 @@
   "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp nào bị trùng để xóa",
   "success": "Thành công",
   "rateUs": "Xếp hạng ứng dụng",
+  "changeLogReferralCta": "Tặng 10 GB, Nhận 10 GB",
   "remindToEmptyDeviceTrash": "Hãy xóa luôn \"Đã xóa gần đây\" từ \"Cài đặt\" -> \"Lưu trữ\" để lấy lại dung lượng đã giải phóng",
   "youHaveSuccessfullyFreedUp": "Bạn đã giải phóng thành công {storageSaved}!",
   "@youHaveSuccessfullyFreedUp": {
@@ -1663,6 +1664,7 @@
   "successfullyUnhid": "Đã hiện thành công",
   "crashReporting": "Báo cáo sự cố",
   "resumableUploads": "Cho phép tiếp tục tải lên",
+  "fasterUploads": "Tải lên nhanh hơn",
   "addToHiddenAlbum": "Thêm vào album ẩn",
   "moveToHiddenAlbum": "Di chuyển đến album ẩn",
   "fileTypes": "Loại tệp",
@@ -2850,6 +2852,10 @@
   "likedYourVideo": "đã thích video của bạn",
   "@likedYourVideo": {
     "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAVideo": "đã thích một video",
+  "@likedAVideo": {
+    "description": "Social action text shown after a person's name, for example 'John liked a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
   },
   "commentedOnYourPhoto": "đã bình luận về video của bạn",
   "@commentedOnYourPhoto": {

@@ -5,12 +5,15 @@
   "accountWelcomeBack": "Köszöntjük ismét!",
   "emailAlreadyRegistered": "Az email cím már foglalt.",
   "emailNotRegistered": "Nem regisztrált email cím.",
+  "accountSetupIncompleteCreateAccount": "A fiókbeállítás nem teljes. Hozz létre fiókot a folytatáshoz.",
   "email": "E-mail",
   "cancel": "Mégse",
   "verify": "Hitelesítés",
   "invalidEmailAddress": "Érvénytelen e-mail cím",
+  "validEmailAddress": "Érvényes e-mail-cím",
   "enterValidEmail": "Kérjük, adjon meg egy érvényes e-mail címet.",
   "deleteAccount": "Fiók törlése",
+  "deleteAccountWarning": "Ez törli az Ente Auth, Ente Photos és Ente Locker fiókjaidat.",
   "askDeleteReason": "Miért törli a fiókját?",
   "deleteAccountFeedbackPrompt": "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
   "feedback": "Visszajelzés",
@@ -26,13 +29,25 @@
   "deleteReason4": "Nincs a listán az ok",
   "sendEmail": "Email küldése",
   "deleteRequestSLAText": "A kérése 72 órán belül feldolgozásra kerül.",
+  "deleteEmailRequest": "Kérjük, küldj egy e-mailt a <warning>account-deletion@ente.com\n</warning> címre a regisztrált e-mail-címedről.",
   "entePhotosPerm": "Az Entének <i>engedélyre van szüksége </i>, hogy tárolhassa fotóit",
   "ok": "Rendben",
   "createAccount": "Felhasználó létrehozás",
+  "createAccountTitle": "Fiók létrehozása",
   "createNewAccount": "Új felhasználó létrehozás",
   "password": "Jelszó",
   "confirmPassword": "Jelszó megerősítés",
   "activeSessions": "Bejelentkezések",
+  "ocrProcessingOverlayMessage": "Szöveg felismerése…",
+  "ocrLoadingIndicatorLabel": "Szöveg felismerése…",
+  "ocrSelectionHint": "Húzd el vagy koppints duplán a kívánt rész kiválasztásához",
+  "ocrNoTextDetected": "Nem található szöveg",
+  "ocrRetryButtonLabel": "Újra",
+  "ocrModelsNetworkRequiredError": "Az OCR-modellek első letöltéséhez internetkapcsolat szükséges",
+  "ocrModelsPrepareFailed": "Nem sikerült előkészíteni az OCR-modelleket",
+  "ocrImageNotFoundError": "A képfájl nem található",
+  "ocrImageDecodeFailedError": "A képfájl nem olvasható",
+  "ocrGenericDetectError": "Nem sikerült szöveget felismerni a képen",
   "oops": "Hoppá",
   "somethingWentWrongPleaseTryAgain": "Valami félre sikerült, próbálja újból",
   "thisWillLogYouOutOfThisDevice": "Ezzel kijelentkezik az eszközről!",
@@ -47,6 +62,7 @@
   "incorrectRecoveryKeyBody": "A megadott visszaállítási kulcs hibás",
   "forgotPassword": "Elfelejtett jelszó",
   "enterYourRecoveryKey": "Adja meg visszaállítási kulcsát",
+  "noRecoveryKey": "Elfelejtetted a helyreállítási kulcsot?",
   "sorry": "Sajnálom",
   "noRecoveryKeyNoDecryption": "Az általunk használt végpontok közötti titkosítás miatt, az adatait nem lehet dekódolni a jelszava, vagy visszaállítási kulcsa nélkül",
   "verifyEmail": "Emailcím megerősítés",
@@ -54,9 +70,21 @@
   "checkInboxAndSpamFolder": "Kérjük, ellenőrizze beérkező leveleit (és spam mappát) az ellenőrzés befejezéséhez",
   "tapToEnterCode": "Koppintson a kód beírásához",
   "resendEmail": "E-mail újraküldése",
+  "resendCode": "Kód újraküldése",
   "weHaveSendEmailTo": "E-mailt küldtünk a következő címre: <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.com"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Egy kódot küldtünk a következő címre:",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
     "placeholders": {
       "email": {
         "description": "The email address of the user",
@@ -75,6 +103,10 @@
   "weakStrength": "Gyenge",
   "strongStrength": "Erős",
   "moderateStrength": "Közepes",
+  "strongPassword": "Erős jelszó",
+  "passwordRequirements": "Használj legalább 9 karaktert, egy nagybetűt és egy speciális karaktert",
+  "passwordsMatch": "A jelszavak egyeznek",
+  "passwordsDontMatch": "A jelszavak nem egyeznek",
   "passwordStrength": "Jelszó erőssége: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -91,6 +123,7 @@
   "generatingEncryptionKeys": "Titkosítási kulcs generálása...",
   "pleaseWait": "Kérem várjon...",
   "continueLabel": "Folytatás",
+  "continueInMailApp": "Tovább a levelezőre",
   "insecureDevice": "Nem biztonságos eszköz",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sajnáljuk, nem tudtunk biztonságos kulcsokat generálni ezen az eszközön.\n\nkérjük, regisztráljon egy másik eszközről.",
   "howItWorks": "Hogyan működik",
@@ -104,7 +137,13 @@
   "changeEmail": "E-mail cím módosítása",
   "enterYourPassword": "Adja meg a jelszavát",
   "welcomeBack": "Köszöntjük ismét!",
+  "readyToBackupTitle": "Készen áll a mentésre",
+  "readyToBackupSubtitle": "A fotóid a háttérben szinkronizálódnak. Az első mentés eltarthat egy ideig.",
   "contactSupport": "Lépj kapcsolatba az Ügyfélszolgálattal",
+  "locationPickerTip": "A fotó adatlapján is beállíthatsz egy helyet a fotó alapján",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Érvénytelen jelszó",
   "pleaseTryAgain": "Kérjük, próbálja meg újra",
   "recreatePasswordTitle": "Új jelszó létrehozása",
@@ -113,8 +152,10 @@
   "verifyPassword": "Jelszó megerősítése",
   "recoveryKey": "Visszaállítási kulcs",
   "recoveryKeyOnForgotPassword": "Ha elfelejti jelszavát, csak ezzel a kulccsal tudja visszaállítani adatait.",
+  "recoveryKeySaveDescription": "Mentsd el ezt a kulcsot biztonságos helyre.",
   "doThisLater": "Később",
   "saveKey": "Mentés",
+  "shareKey": "Kulcs megosztása",
   "recoveryKeyCopiedToClipboard": "A helyreállítási kulcs a vágólapra másolva",
   "recoverAccount": "Fiók visszaállítása",
   "recover": "Visszaállít",
@@ -135,6 +176,7 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Kód Másolása-Beillesztése az ön autentikátor alkalmazásába",
   "tapToCopy": "érintse meg másoláshoz",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Olvassa le ezt a QR kódot az autentikátor alkalmazásával",
+  "twoFAVerification": "Kétlépcsős azonosítás",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Írja be a 6 számjegyű kódot a hitelesítő alkalmazásból",
   "confirm": "Megerősítés",
   "setupComplete": "Beállítás kész",
@@ -154,6 +196,11 @@
   "confirmYourRecoveryKey": "Erősítse meg helyreállítási kulcsát",
   "addViewer": "Megtekintésre jogosult hozzáadása",
   "addCollaborator": "Együttműködő hozzáadása",
+  "admin": "Admin",
+  "admins": "Adminok",
+  "addAdmin": "Admin hozzáadása",
+  "addMoreAdmins": "További adminok hozzáadása",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "A rendszergazdák és a közreműködők is adhatnak hozzá fotókat. A rendszergazdák emellett a fotókat és a résztvevőket is kezelhetik.",
   "addANewEmail": "Új email cím hozzáadása",
   "orPickAnExistingOne": "Vagy válasszon egy létezőt",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Az együttműködők hozzá adhatnak fotókat és videókat a megosztott albumban.",
@@ -183,7 +230,9 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Csatlakozás engedélyezése az albumhoz",
   "allowAddPhotosDescription": "Engedélyezd a linkkel rendelkező személyeknek, hogy ők is hozzáadhassanak fotókat a megosztott albumhoz.",
+  "enableComment": "Kommentek és reakciók",
   "passwordLock": "Kóddal történő lezárás",
   "canNotOpenTitle": "Album nem nyitható meg",
   "canNotOpenBody": "Sajnálom, ez az album nem nyitható meg ebben az applikációban.",
@@ -195,6 +244,12 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Albumelrendezés",
+  "layoutMasonry": "Mozaikos elrendezés",
+  "layoutGrouped": "Csoportosított",
+  "layoutContinuous": "Folyamatos",
+  "layoutTrip": "Utazás nézet",
+  "preview": "Előnézet",
   "linkExpiry": "Link lejárata",
   "linkExpired": "Lejárt",
   "linkEnabled": "Engedélyezett",
@@ -234,8 +289,12 @@
   "shareWithNonenteUsers": "Megosztás nem Ente felhasználókkal",
   "createPublicLink": "Nyilvános hivatkozás létrehozása",
   "sendLink": "Hivatkozás küldése",
+  "qrCode": "QR-kód",
+  "sendQrCode": "QR-kód küldése",
   "copyLink": "Hivatkozás másolása",
+  "copyEmbedHtml": "Beágyazási HTML másolása",
   "linkHasExpired": "A hivatkozás érvényességi ideje lejárt",
+  "linkRequestLimitExceeded": "Ezt az albumot túl sok eszközön nyitották meg",
   "publicLinkEnabled": "Nyilvános hivatkozás engedélyezve",
   "shareALink": "Hivatkozás megosztása",
   "sharedAlbumSectionDescription": "Hozzon létre megosztott és együttműködő albumokat más Ente-felhasználókkal, beleértve az ingyenes csomagokat használó felhasználókat is.",
@@ -261,17 +320,26 @@
     }
   },
   "verificationId": "Ellenőrző azonosító",
+  "verifyEmailID": "Ellenőrzés",
   "emailNoEnteAccount": "{email} címnek nincs Ente fiókja.\n\nKüldjön nekik meghívót fotók megosztására.",
+  "shareMyVerificationID": "Az ente.com-hoz tartozó ellenőrzési azonosítóm: {verificationID}.",
+  "shareTextConfirmOthersVerificationID": "Szia, meg tudod erősíteni, hogy ez a te ente.com-hoz tartozó ellenőrzési azonosítód: {verificationID}",
   "somethingWentWrong": "Valami hiba történt",
   "sendInvite": "Meghívó küldése",
+  "shareTextRecommendUsingEnte": "Töltsd le az Ente alkalmazást, hogy könnyen megoszthassuk az eredeti minőségű fotókat és videókat https://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Töltsd le az Entét, hogy hozzáadhassalak a családi csomagomhoz\n\nhttps://ente.com",
   "done": "Kész",
   "applyCodeTitle": "Kód alkalmazása",
   "enterCodeDescription": "Add meg a barátod által megadott kódot, hogy mindkettőtöknek ingyenes tárhelyet igényelhess",
   "apply": "Alkalmaz",
   "failedToApplyCode": "Nem sikerült alkalmazni a kódot",
+  "invalidReferralCode": "Érvénytelen kód",
   "enterReferralCode": "Adja meg az ajánló kódot",
   "codeAppliedPageTitle": "Kód alkalmazva",
+  "changeYourReferralCode": "Kód módosítása",
   "change": "Módosítás",
+  "saveCode": "Kód mentése",
+  "referralCodeHint": "Ezt a kódot legfeljebb 3 alkalommal módosíthatod",
   "unavailableReferralCode": "Sajnáljuk, ez a kód nem érhető el.",
   "codeChangeLimitReached": "Sajnáljuk, elérted a kódmódosítások maximális számát.",
   "onlyFamilyAdminCanChangeCode": "Kérjük, vegye fel a kapcsolatot a {familyAdminEmail} e-mail címmel a kód módosításához.",
@@ -280,14 +348,26 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB tárhely aktiválva!",
   "details": "Részletek",
   "claimMore": "Igényelj többet!",
+  "earnMoreSpace": "Szerezz több tárhelyet!",
   "theyAlsoGetXGb": "Emellett {storageAmountInGB} GB-ot kapnak",
+  "referralStorageForBoth": "{storageAmountInGB} GB nekik + {storageAmountInGB} GB neked, amikor előfizetnek.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB minden alkalommal, amikor valaki fizetős csomagra fizet elő és felhasználja a kódodat",
+  "shareTextReferralCode": "Az Ente Photos egy privát és biztonságos hely a fotóid számára\n*Töltsd le az Ente Photos alkalmazást: https://ente.com/app\n*Hozz létre egy fiókot\n*Add meg az {referralCode} ajánlókódot a Beállítások → Ajánlókód menüpontban\n*Fizetős csomagra váltáskor {referralStorageInGB} GB ingyen tárhelyet kapsz",
   "claimFreeStorage": "Igényeljen ingyenes tárhelyet",
   "inviteYourFriends": "Hívd meg a barátaidat",
+  "earnFreeStorage": "Szerezz ingyen tárhelyet",
+  "shareCodeEarnStorage": "Oszd meg a kódod, és szerezz tárhelyet.",
+  "youBothGet": "Mindketten kaptok",
+  "free": "ingyenes",
   "failedToFetchReferralDetails": "Nem sikerült lekérni a hivatkozási adatokat. Kérjük, próbálja meg később.",
+  "referralStep1": "1. Szabd testre és oszd meg a kódod.",
+  "referralStep2": "2. Regisztrálnak az Entére a kódoddal.",
+  "referralStep3": "3. {storageInGB} GB ingyen nekik + {storageInGB} GB ingyen neked, amikor előfizetnek.",
   "referralsAreCurrentlyPaused": "Az ajánlások jelenleg szünetelnek",
+  "youCanAtMaxDoubleYourStorage": "„A tárhelyed legfeljebb megduplázhatod",
   "claimedStorageSoFar": "{isFamilyMember, select, true {A családod eddig {storageAmountInGb} GB tárhelyet igényelt} false {Eddig {storageAmountInGb} GB tárhelyet igényelt} other {Eddig {storageAmountInGb} GB tárhelyet igényelt!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -311,16 +391,26 @@
   "freeStorageClaimed": "Ingyenes tárhely igénylése",
   "freeStorageUsable": "Ingyenesen használható tárhely",
   "usableReferralStorageInfo": "A felhasználható tárhelyet a jelenlegi előfizetése korlátozza. A feleslegesen igényelt tárhely automatikusan felhasználhatóvá válik, amikor frissítesz a csomagodra.",
+  "referralStats": "Ajánlási statisztikák",
+  "usedYourCode": "a kódodat használta",
+  "claimedByYou": "általad beváltva",
+  "earned": "megszerezve",
+  "usable": "felhasználható",
+  "referralStorageInfo": "A fizetős előfizetők ajánlásai bónusz tárhelyet adnak.\n\nA tárhelyet a csomagod keretéig használhatod. A fennmaradó, megszerzett tárhely használatához válts magasabb csomagra.",
   "removeFromAlbumTitle": "Eltávolítás az albumból?",
   "removeFromAlbum": "Eltávolítás az albumból",
   "itemsWillBeRemovedFromAlbum": "A kiválasztott elemek eltávolításra kerülnek ebből az albumból.",
+  "removeShareItemsWarning": "A kijelölt fotók az album nézői számára nem lesznek elérhetők, csak a fotók tulajdonosai férhetnek hozzá.",
   "addingToFavorites": "Hozzáadás a kedvencekhez...",
   "removingFromFavorites": "Eltávolítás a kedvencek közül...",
   "sorryCouldNotAddToFavorites": "Sajnálom, nem sikerült hozzáadni a kedvencekhez!",
   "sorryCouldNotRemoveFromFavorites": "Sajnálom, nem sikerült eltávolítani a kedvencek közül!",
   "subscribeToEnableSharing": "A megosztás engedélyezéséhez aktív fizetős előfizetésre van szükség.",
+  "subscribeToChangeLinkSetting": "A linkbeállítás módosításához fizetős előfizetés szükséges.",
   "subscribe": "Előfizetés",
   "canOnlyRemoveFilesOwnedByYou": "Csak a saját tulajdonú fájlokat távolíthatja el",
+  "cannotMoveToSharedAlbums": "Nem helyezhető át megosztott albumokba.",
+  "cannotMoveToSharedAlbumsMessage": "Az elemeket csak hozzáadni lehet a megosztott albumokhoz, áthelyezni nem. Inkább hozzáadod?",
   "deleteSharedAlbum": "Törli a megosztott albumot?",
   "deleteAlbum": "Album törlése",
   "deleteAlbumDialog": "Törli az ebben az albumban található fotókat (és videókat) az <bold>összes</bold> többi albumból is, amelynek részét képezik?",
@@ -413,12 +503,17 @@
   "mlConsentPrivacy": "Kérjük, kattintson ide az adatvédelmi irányelveinkben található további részletekért erről a funkcióról.",
   "mlConsentConfirmation": "Értem, és szeretném engedélyezni a gépi tanulást",
   "magicSearch": "Varázslatos keresés",
+  "magic": "Varázslat",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Felfedezés",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
   },
   "discover_identity": "Személyazonosság",
   "discover_screenshots": "Képernyőképek",
+  "discover_qr_codes": "QR-kódok",
   "discover_receipts": "Nyugták",
   "discover_notes": "Jegyzetek",
   "discover_memes": "Mémek",
@@ -432,6 +527,7 @@
   "discover_sunset": "Napnyugta",
   "discover_hills": "Dombok",
   "discover_greenery": "Lomb",
+  "mlIndexingDescription": "Fontos: a gépi tanulás a feldolgozás végéig megnövelt adatforgalmat és akkumulátorhasználatot eredményez. Gyorsabb feldolgozáshoz érdemes az asztali alkalmazást használni; az eredmények automatikusan szinkronizálódnak.",
   "loadingModel": "Modellek letöltése...",
   "waitingForWifi": "Várakozás a WiFi-re...",
   "status": "Állapot",
@@ -439,10 +535,31 @@
   "pendingItems": "függőben lévő elemek",
   "clearIndexes": "Indexek törlése",
   "selectFoldersForBackup": "Mappák kiválasztása biztonsági mentéshez",
+  "selectFolders": "Mappák kiválasztása",
+  "backupToEnte": "Mentés az Entébe",
+  "selectAlbumsToBackUpToEnte": "Válaszd ki azokat az albumokat, amelyeket az Entébe szeretnél menteni.",
   "selectedFoldersWillBeEncryptedAndBackedUp": "A kiválasztott mappák titkosítva lesznek, és biztonsági másolat készül róluk.",
   "unselectAll": "Összes kijelölés törlése",
   "selectAll": "Összes kijelölése",
   "skip": "Kihagyás",
+  "chooseBackupModeHeader": "<i>Válaszd ki, hogyan</i> készít biztonsági mentést az Ente a fotóidról",
+  "startWithLatestPhotos": "Kezdés a legújabb fotókkal",
+  "backingUpLastSevenDaysPhotos": "Az elmúlt 7 nap fotóinak mentése…",
+  "backupOnlyNewPhotos": "Csak az új fotók mentése",
+  "backupOnlyNewPhotosAllFoldersSelected": "Jelenleg minden mappa ki van jelölve mentésre.\n\nFolytathatod így, vagy módosíthatod a kiválasztott mappákat.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Jelenleg nincs kiválasztva mappa mentésre.\n\nFolytathatod így, vagy módosíthatod a kiválasztott mappákat.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Jelenleg nincs kiválasztva mappa mentésre.\n\nA folytatáshoz válassz ki mappákat.",
+  "backupOnlyNewPhotosWarningBody": "Jelenleg a(z) {formattedDate} óta készült fotók mentése folyik. A beállítások módosításával minden fotót menthetsz.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Beállítások módosítása",
   "updatingFolderSelection": "Mappakijelölés frissítése...",
   "itemCount": "{count, plural, one{{count} elem} other{{count} elem}}",
   "deleteItemCount": "{count, plural, =1 {Elem {count} törlése} other {Elemek {count} törlése}}",
@@ -503,12 +620,22 @@
   "backedUpFolders": "Biztonsági másolatban lévő mappák",
   "backup": "Biztonsági mentés",
   "freeUpDeviceSpace": "Szabadítson fel tárhelyet",
+  "freeUpDeviceSpaceDesc": "Szabadíts fel helyet az eszközödön a már mentett fájlok törlésével.",
+  "freeUpDeviceSpaceDescICloud": "Az iCloud megosztott albumokban lévő fájlok nem törölhetők.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Minden tiszta",
   "noDeviceThatCanBeDeleted": "Nincsenek törölhető fájlok ezen az eszközön.",
   "removeDuplicates": "Távolítsa el a duplikációkat",
   "removeDuplicatesDesc": "Tekintse át és távolítsa el a pontos másolatokat tartalmazó fájlokat.",
   "viewLargeFiles": "Nagy fájlok",
   "viewLargeFilesDesc": "Tekintse meg a legtöbb tárhelyet foglaló fájlokat.",
+  "deleteSuggestions": "Javaslatok törlése",
+  "deleteSuggestionsDesc": "Tekintsd át a törlésre javasolt fájlokat.",
+  "rejectSuggestions": "Javaslat elutasítása",
+  "noDeleteSuggestion": "Nincs törlési javaslat",
+  "youHaveNoFileSuggestedForDeletion": "Nincsenek törlésre javasolt fájljaid.",
   "noDuplicates": "✨ Nincsenek duplikátumok",
   "youveNoDuplicateFilesThatCanBeCleared": "Nincsenek törölhető duplikált fájljaid",
   "success": "Sikeres",
@@ -525,5 +652,350 @@
       }
     }
   },
-  "remindToEmptyEnteTrash": "Ürítsd ki a \"Kukát\" is, hogy visszaszerezd a felszabadult helyet."
+  "remindToEmptyEnteTrash": "Ürítsd ki a \"Kukát\" is, hogy visszaszerezd a felszabadult helyet.",
+  "sparkleSuccess": "✨ Sikeres",
+  "duplicateFileCountWithStorageSaved": "öröltél {count, plural, one{{count} duplikált fájlt} other{{count} duplikált fájlt}}, így {storageSaved} tárhelyet szabadítottál fel!",
+  "@duplicateFileCountWithStorageSaved": {
+    "description": "The text to display when the user has successfully cleaned up duplicate files",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "familyPlans": "Családi csomagok",
+  "family": "Család",
+  "designedForFamilies": "Családok számára készült",
+  "shareYourSubscription": "Oszd meg az előfizetésedet a szeretteiddel",
+  "shareStorageWith5Members": "Oszd meg a tárhelyed 5 taggal",
+  "privateSpaceForEveryMember": "Privát tér minden tagnak",
+  "feedToEngageWithFamily": "Hírfolyam a családdal való kapcsolattartáshoz",
+  "plansStartAt": "Csomagok már {price}/hó-tól\n",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "Csomagok",
+  "bringYourFamilyAlong": "Hozd magaddal a családodat",
+  "yourPlanSupportsFamily": "A csomagod már támogatja a családi megosztást.",
+  "addUpTo5MembersFree": "Legfeljebb 5 tagot adhatsz hozzá ingyen",
+  "addFamilyMember": "Családtag hozzáadása",
+  "addMember": "Tag hozzáadása",
+  "inviteMembers": "Tag meghívása",
+  "enterEmailAddresses": "Add meg az e-mail-címüket. Ente-fiókra van szükségük.",
+  "inviteLimitReached": "5 meghívót már hozzáadtál. Új hozzáadásához törölj egyet.",
+  "emailAddress": "Email cím",
+  "sendInvites": "Meghívó küldése",
+  "sendCountInvites": "{count, plural, =0 {Meghívók küldése} =1 {1 meghívó küldése} other {{count} meghívó küldése}}",
+  "@sendCountInvites": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterAnEmailAddress": "E-mail cím megadása",
+  "enterAValidEmailAddress": "Adjon meg egy érvényes e-mail címet",
+  "alreadyAdded": "Már hozzáadva",
+  "thisUserIsNotOnEnte": "Ez a felhasználó nem használja az Entét",
+  "emailNeedsEnteAccountForFamily": "A(z) {email} nem rendelkezik Ente-fiókkal.\n\nKüldj neki meghívót, és add hozzá a családodhoz, miután létrehozott egy Ente-fiókot.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "invitesSentCount": "{count, plural, =1 {Meghívó elküldve} other {Meghívók elküldve}}",
+  "@invitesSentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToInvite": "Nem sikerült meghívni: {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInviteCount": "Nem sikerült meghívni {count} tagot",
+  "@failedToInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{total}-ből {used} felhasználva",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Tagok",
+  "pending": "Függőben levő",
+  "closeFamilyPlan": "Családi csomag megszüntetése",
+  "closeFamilyConfirmTitle": "Megszünteted a családi csomagot?",
+  "closeFamilyConfirmBody": "Minden tag elveszíti a hozzáférést a megosztott tárhelyhez. Ez nem vonható vissza.",
+  "editStorageLimit": "Tárhelykorlát módosítása",
+  "noLimitSet": "Nincs korlát beállítva",
+  "removeFromFamily": "Eltávolítás a családból",
+  "removeMemberConfirmTitle": "Felhasználó eltávolítása?",
+  "removeMemberConfirmBody": "{email} elveszíti a hozzáférést a megosztott tárhelyhez.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Meghívó újraküldése",
+  "revokeInviteConfirmTitle": "Visszavonod a meghívót?",
+  "revokeInviteConfirmBody": "A(z) {email} részére küldött meghívó visszavonásra kerül.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Visszavonás",
+  "inviteResent": "Meghívó újraküldve",
+  "memberStorageUsed": "{amount} felhasználva",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Tárhelykorlát",
+  "usingStorage": "{amount} használatban",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "yourStorageIsLimitedTo": "A tárhelyed {limit}-ra van korlátozva.",
+  "@yourStorageIsLimitedTo": {
+    "placeholders": {
+      "limit": {
+        "type": "String",
+        "example": "50 GB"
+      }
+    }
+  },
+  "storageLimitExplanation": "Állítsd be a tag által használható maximális tárhelyet. A korlát elérése után nem tud több fájlt feltölteni.",
+  "limit": "Korlát",
+  "noLimit": "Nincs korlát",
+  "currentUsageNote": "Jelenlegi használat: {amount}. A korlát kikapcsolásához állítsd 0-ra.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Kilépsz a családi csomagból?",
+  "leaveFamilyConfirmBody": "Elveszíted a hozzáférést a megosztott tárhelyhez.",
+  "referrals": "Ajánlások",
+  "notifications": "Értesítések",
+  "sharedPhotoNotifications": "Új megosztott fotók és albumok",
+  "sharedPhotoNotificationsExplanation": "Értesítéseket kapsz az általad használt megosztott albumok új fotóiról, valamint a veled megosztott új albumokról.",
+  "socialNotifications": "Tetszések és hozzászólások",
+  "socialNotificationsExplanation": "Értesítéseket kapsz a fotóidra érkező tetszésekről, valamint azokról a hozzászólásokról, amelyek azokban az albumokban jelennek meg, amelyekben részt veszel.",
+  "advanced": "Speciális",
+  "general": "Általános",
+  "security": "Biztonság",
+  "authToViewYourRecoveryKey": "A visszaállítási kulcsok megtekintéséhez hitelesítsd magad",
+  "twofactor": "Kétlépcsős",
+  "authToConfigureTwofactorAuthentication": "A kétlépcsős azonosítás beállításához kérjük, végezd el az azonosítást",
+  "lockscreen": "Képernyőzár",
+  "authToChangeLockscreenSetting": "A záróképernyő beállításainak módosításához hitelesítsd magad",
+  "viewActiveSessions": "Aktív munkamenetek megtekintése",
+  "authToViewYourActiveSessions": "Az aktív munkamenetek megtekintéséhez hitelesítsd magad",
+  "disableTwofactor": "Kétlépcsős azonosítás kikapcsolása",
+  "confirm2FADisable": "Biztosan ki szeretnéd kapcsolni a kétlépcsős hitelesítést?",
+  "no": "Nem",
+  "yes": "Igen",
+  "social": "Közösségi",
+  "rateUsOnStore": "Értékelj minket itt: {storeName}",
+  "blog": "Blog",
+  "merchandise": "Ajándéktárgyak",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
+  "yourStorageDetailsCouldNotBeFetched": "A tárhelyadatok nem tölthetők be",
+  "reportABug": "Hiba bejelentése",
+  "reportBug": "Hibajelentés",
+  "suggestFeatures": "Funkció ajánlása",
+  "support": "Támogatás",
+  "helpAndSupport": "Súgó és támogatás",
+  "browseHelpPages": "Súgó böngészése",
+  "searchAndDiscovery": "Keresés és felfedezés",
+  "searchAndDiscoveryDesc": "Arcok, helyszínek, leírások és egyéb",
+  "backupAndSync": "Mentés és szinkronizálás",
+  "backupAndSyncDesc": "Automatikus mentés, szinkronizálási állapot és feltöltések",
+  "sharingAndCollaboration": "Megosztás és együttműködés",
+  "sharingAndCollaborationDesc": "Albumok, linkek és családi csomagok",
+  "storageAndPlans": "Tárhely és csomagok",
+  "storageAndPlansDesc": "Csomagok, számlázás és tárhelyhasználat",
+  "troubleshooting": "Hibaelhárítás",
+  "monthly": "Havi",
+  "@monthly": {
+    "description": "The text to display for monthly plans",
+    "type": "text"
+  },
+  "yearly": "Éves",
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
+  "confirmPlanChange": "Csomagmódosítás megerősítése",
+  "areYouSureYouWantToChangeYourPlan": "Biztosan módosítani szeretné a csomagot?",
+  "youCannotDowngradeToThisPlan": "Erre a csomagra nem válthatsz vissza.",
+  "cancelOtherSubscription": "Kérjük, először mondd le a meglévő előfizetésedet a(z) {paymentProvider} szolgáltatónál.",
+  "@cancelOtherSubscription": {
+    "description": "The text to display when the user has an existing subscription from a different payment provider",
+    "type": "text",
+    "placeholders": {
+      "paymentProvider": {
+        "example": "Apple",
+        "type": "String"
+      }
+    }
+  },
+  "optionalAsShortAsYouLike": "Opcionális, lehet rövid is…",
+  "send": "Küldés",
+  "askCancelReason": "Az előfizetésedet lemondtad. Megosztanád velünk az okát?",
+  "thankYouForSubscribing": "Köszönjük, hogy előfizettél!",
+  "yourPurchaseWasSuccessful": "A vásárlás sikeres volt",
+  "yourPlanWasSuccessfullyUpgraded": "A csomagod sikeresen frissítve lett",
+  "yourPlanWasSuccessfullyDowngraded": "A csomagodat sikeresen visszaváltottuk",
+  "yourSubscriptionWasUpdatedSuccessfully": "Az előfizetésed sikeresen frissült",
+  "googlePlayId": "Google Play ID",
+  "appleId": "Apple ID",
+  "playstoreSubscription": "Google Play-előfizetés",
+  "appstoreSubscription": "App Store-előfizetés",
+  "subAlreadyLinkedErrMessage": "Az {id} már egy másik Ente fiókhoz van kapcsolva.\nHa ezt az {id}-t ezzel a fiókkal szeretnéd használni, kérjük, vedd fel a kapcsolatot az ügyfélszolgálattal",
+  "visitWebToManage": "Az előfizetésed kezeléséhez látogass el a web.ente.io oldalra",
+  "managePaymentMethod": "Fizetési módok kezelése",
+  "couldNotUpdateSubscription": "Nem sikerült frissíteni az előfizetést",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Lépj kapcsolatba a support@ente.com\n címen, és örömmel segítünk!",
+  "paymentFailed": "Sikertelen fizetés",
+  "paymentFailedTalkToProvider": "Ha terhelés történt, fordulj a(z) {providerName} ügyfélszolgálatához",
+  "@paymentFailedTalkToProvider": {
+    "description": "The text to display when the payment failed",
+    "type": "text",
+    "placeholders": {
+      "providerName": {
+        "example": "AppStore|PlayStore",
+        "type": "String"
+      }
+    }
+  },
+  "continueOnFreeTrial": "Folytatás az ingyenes próbaidőszakkal",
+  "areYouSureYouWantToExit": "Biztosan ki szeretnél lépni?",
+  "thankYou": "Köszönjük!",
+  "failedToVerifyPaymentStatus": "Nem sikerült ellenőrizni a fizetés állapotát.",
+  "pleaseWaitForSometimeBeforeRetrying": "Kérjük, várj egy kicsit az újrapróbálkozás előtt",
+  "paymentFailedMessage": "Sajnos a fizetés nem sikerült. Kérjük, vedd fel a kapcsolatot az ügyfélszolgálattal, és segítünk!",
+  "sessionExpired": "A munkamenet lejárt",
+  "loggingOut": "Kijelentkezés...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "Eszközön",
+  "name": "Név",
+  "newest": "Legújabb",
+  "lastUpdated": "Utoljára frissítve",
+  "updated": "Frissítve",
+  "deleteEmptyAlbums": "Üres albumok törlése",
+  "deleteEmptyAlbumsWithQuestionMark": "Törlöd az üres albumokat?",
+  "deleteAlbumsDialogBody": "Ez törli az összes üres albumot. Hasznos lehet, ha szeretnéd rendezettebbé tenni az albumlistádat.",
+  "deleteProgress": "Törlés: {currentlyDeleting} / {totalCount}",
+  "genericProgress": "Feldolgozás: {currentlyProcessing} / {totalCount}",
+  "@genericProgress": {
+    "description": "Generic progress text to display when processing multiple items",
+    "type": "text",
+    "placeholders": {
+      "currentlyProcessing": {
+        "example": "1",
+        "type": "int"
+      },
+      "totalCount": {
+        "example": "10",
+        "type": "int"
+      }
+    }
+  },
+  "permanentlyDelete": "Végleges törlés",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Csak a saját fájljaidhoz lehet linket létrehozni",
+  "publicLinkCreated": "Nyilvános link létrehozva",
+  "youCanManageYourLinksInTheShareTab": "A linkjeidet a Megosztás fülön kezelheted",
+  "linkCopiedToClipboard": "Hivatkozás vágólapra másolva",
+  "restore": "Visszaállítás",
+  "@restore": {
+    "description": "Display text for an action which triggers a restore of item from trash",
+    "type": "text"
+  },
+  "moveToAlbum": "Áthelyezés albumba",
+  "unhide": "Felfedés",
+  "unarchive": "Archiválás visszavonása",
+  "favorite": "Kedvenc",
+  "removeFromFavorite": "Eltávolítás a kedvencek közül",
+  "shareMemories": "Emlékek megosztása",
+  "shareTheseMemories": "Ezeknek az emlékeknek a megosztása",
+  "shareThisPhoto": "Fotó megosztása",
+  "shareThisVideo": "Videó megosztása",
+  "shareLink": "Link megosztasa",
+  "memoryShareLinkDescription": "Ez a link 7 nap múlva automatikusan lejár.",
+  "deleteLink": "Link törlése",
+  "deleteLinkQuestion": "Törlöd a linket?",
+  "deleteMemoryLinkMessage": "A link törlése után azok, akikkel megosztottad, elveszítik a hozzáférést.",
+  "linkDeletedSuccessfully": "A link sikeresen törölve",
+  "memoryLinks": "Emlék linkek",
+  "collageLayout": "Elrendezés",
+  "addToEnte": "Hozzáadás az Entéhez",
+  "addToAlbum": "Hozzáadás albumhoz",
+  "delete": "Törlés",
+  "hide": "Elrejtés",
+  "share": "Megosztás",
+  "unhideToAlbum": "Megjelenítés az albumban"
 }
