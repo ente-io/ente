@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:math" as math;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -26,6 +25,7 @@ import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/filter_pill_widget.dart";
 import "package:photos/ui/components/buttons/soft_icon_button.dart";
+import "package:photos/ui/components/popup_menu/ente_popup_menu_button.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:photos/ui/tabs/albums/albums_manage_sheet.dart";
 import "package:photos/ui/tabs/albums/empty_states/on_ente_empty_state.dart";
@@ -242,10 +242,8 @@ class _AlbumsTabState extends State<AlbumsTab>
       nextDirection = _sortDirection.value == AlbumSortDirection.ascending
           ? AlbumSortDirection.descending
           : AlbumSortDirection.ascending;
-    } else if (key == AlbumSortKey.albumName) {
-      nextDirection = AlbumSortDirection.ascending;
     } else {
-      nextDirection = AlbumSortDirection.descending;
+      nextDirection = AlbumSortDirection.ascending;
     }
 
     _sortKey.value = key;
@@ -257,154 +255,66 @@ class _AlbumsTabState extends State<AlbumsTab>
     }
   }
 
-  Widget _buildAlbumsMenuRow({
-    required String label,
-    String? secondaryLabel,
-    bool isActive = false,
-    bool reserveIndicatorSpace = false,
-    Widget? trailingWidget,
-  }) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final Widget title = secondaryLabel == null
-        ? Text(label, style: textTheme.mini)
-        : Row(
-            children: [
-              Text(label, style: textTheme.mini),
-              const SizedBox(width: 6),
-              Text("•", style: textTheme.miniMuted),
-              const SizedBox(width: 6),
-              Text(secondaryLabel, style: textTheme.miniMuted),
-            ],
-          );
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        title,
-        if (trailingWidget != null)
-          trailingWidget
-        else if (isActive)
-          HugeIcon(
-            icon: _sortDirection.value == AlbumSortDirection.ascending
-                ? HugeIcons.strokeRoundedArrowUp02
-                : HugeIcons.strokeRoundedArrowDown02,
-            size: 12,
-            strokeWidth: 3,
-            color: colorScheme.textMuted,
-          )
-        else if (reserveIndicatorSpace)
-          const SizedBox(width: 12),
-      ],
-    );
-  }
-
-  Future<void> _showAlbumsMenu(TapDownDetails details) async {
+  List<EntePopupMenuOption<_AlbumsMenuAction>> _buildAlbumsMenuOptions() {
     final colorScheme = getEnteColorScheme(context);
     final strings = AppLocalizations.of(context);
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox?;
-    final overlaySize = overlay?.size ?? MediaQuery.sizeOf(context);
-    final left = math.max(16.0, details.globalPosition.dx - 164);
-    final top = details.globalPosition.dy + 12;
-    final right = math.max(
-      16.0,
-      overlaySize.width - details.globalPosition.dx - 24,
-    );
     final isListView = _viewType.value == AlbumViewType.list;
     final showSortActions = _effectiveFilter != _AlbumsFilter.onDevice;
     final currentSortKey = _sortKey.value;
+    final currentSortDirection = _sortDirection.value;
     final nameSortDirection =
-        currentSortKey == AlbumSortKey.albumName ? _sortDirection.value : null;
-
-    PopupMenuItem<_AlbumsMenuAction> item({
-      required _AlbumsMenuAction value,
-      required Widget child,
-      bool showDivider = true,
-    }) {
-      return PopupMenuItem<_AlbumsMenuAction>(
-        value: value,
-        padding: EdgeInsets.zero,
-        height: 52,
-        child: Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            border: showDivider
-                ? Border(
-                    bottom: BorderSide(color: colorScheme.strokeFaint),
-                  )
-                : null,
-          ),
-          child: child,
-        ),
-      );
-    }
-
-    final selected = await showMenu<_AlbumsMenuAction>(
-      context: context,
-      color: colorScheme.fill,
-      elevation: 8,
-      constraints: const BoxConstraints.tightFor(width: 196),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.strokeFaint),
-      ),
-      position: RelativeRect.fromLTRB(
-        left,
-        top,
-        right,
-        overlaySize.height - top,
-      ),
-      items: [
-        item(
-          value: _AlbumsMenuAction.toggleView,
-          showDivider: showSortActions,
-          child: _buildAlbumsMenuRow(
-            label: isListView ? strings.grid : strings.list,
-            trailingWidget: HugeIcon(
-              icon: isListView
-                  ? HugeIcons.strokeRoundedGridView
-                  : HugeIcons.strokeRoundedMenu01,
-              size: 12,
-              strokeWidth: 3,
-              color: colorScheme.contentLight,
-            ),
-          ),
-        ),
-        if (showSortActions) ...[
-          item(
-            value: _AlbumsMenuAction.name,
-            child: _buildAlbumsMenuRow(
-              label: strings.name,
-              secondaryLabel: nameSortDirection != AlbumSortDirection.descending
-                  ? strings.sortAToZ
-                  : strings.sortZToA,
-              isActive: currentSortKey == AlbumSortKey.albumName,
-              reserveIndicatorSpace: true,
-            ),
-          ),
-          item(
-            value: _AlbumsMenuAction.newest,
-            child: _buildAlbumsMenuRow(
-              label: strings.newest,
-              isActive: currentSortKey == AlbumSortKey.newestPhoto,
-              reserveIndicatorSpace: true,
-            ),
-          ),
-          item(
-            value: _AlbumsMenuAction.updated,
-            showDivider: false,
-            child: _buildAlbumsMenuRow(
-              label: strings.updated,
-              isActive: currentSortKey == AlbumSortKey.lastUpdated,
-              reserveIndicatorSpace: true,
-            ),
-          ),
-        ],
-      ],
+        currentSortKey == AlbumSortKey.albumName ? currentSortDirection : null;
+    final activeTrailingWidget = HugeIcon(
+      icon: currentSortDirection == AlbumSortDirection.ascending
+          ? HugeIcons.strokeRoundedArrowUp02
+          : HugeIcons.strokeRoundedArrowDown02,
+      size: 12,
+      strokeWidth: 3,
+      color: colorScheme.textMuted,
     );
 
+    return [
+      EntePopupMenuOption(
+        value: _AlbumsMenuAction.toggleView,
+        label: isListView ? strings.grid : strings.list,
+        showDivider: showSortActions,
+        trailingWidget: HugeIcon(
+          icon: isListView
+              ? HugeIcons.strokeRoundedGridView
+              : HugeIcons.strokeRoundedMenu01,
+          size: 12,
+          strokeWidth: 3,
+          color: colorScheme.contentLight,
+        ),
+      ),
+      if (showSortActions) ...[
+        EntePopupMenuOption(
+          value: _AlbumsMenuAction.name,
+          label: strings.name,
+          secondaryLabel: nameSortDirection != AlbumSortDirection.descending
+              ? strings.sortAToZ
+              : strings.sortZToA,
+          isActive: currentSortKey == AlbumSortKey.albumName,
+          activeTrailingWidget: activeTrailingWidget,
+        ),
+        EntePopupMenuOption(
+          value: _AlbumsMenuAction.newest,
+          label: strings.newest,
+          isActive: currentSortKey == AlbumSortKey.newestPhoto,
+          activeTrailingWidget: activeTrailingWidget,
+        ),
+        EntePopupMenuOption(
+          value: _AlbumsMenuAction.updated,
+          label: strings.updated,
+          isActive: currentSortKey == AlbumSortKey.lastUpdated,
+          activeTrailingWidget: activeTrailingWidget,
+          showDivider: false,
+        ),
+      ],
+    ];
+  }
+
+  Future<void> _handleAlbumsMenuSelection(_AlbumsMenuAction selected) async {
     switch (selected) {
       case _AlbumsMenuAction.toggleView:
         await _toggleViewMode();
@@ -417,8 +327,6 @@ class _AlbumsTabState extends State<AlbumsTab>
         break;
       case _AlbumsMenuAction.updated:
         await _setSortMode(AlbumSortKey.lastUpdated);
-        break;
-      case null:
         break;
     }
   }
@@ -522,7 +430,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                                           child: HugeIcon(
                                             icon:
                                                 HugeIcons.strokeRoundedCancel01,
-                                            size: 16,
+                                            size: 18,
                                             color: colorScheme.textMuted,
                                           ),
                                         ),
@@ -626,14 +534,9 @@ class _AlbumsTabState extends State<AlbumsTab>
                         },
                       ),
                     ),
-                    SoftIconButton(
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedMoreVertical,
-                        size: 18,
-                        color: colorScheme.textBase,
-                      ),
-                      onTap: () {},
-                      onTapDown: _showAlbumsMenu,
+                    EntePopupMenuButton<_AlbumsMenuAction>(
+                      optionsBuilder: _buildAlbumsMenuOptions,
+                      onSelected: _handleAlbumsMenuSelection,
                     ),
                   ],
                 ),
