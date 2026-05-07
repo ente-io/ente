@@ -37,7 +37,7 @@ class LegacyKitEditIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HugeIcon(
-      icon: HugeIcons.strokeRoundedPencilEdit02,
+      icon: HugeIcons.strokeRoundedEdit03,
       color: color,
       size: size,
       strokeWidth: _hugeIconStrokeWidth,
