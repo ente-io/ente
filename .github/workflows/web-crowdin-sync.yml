@@ -1,4 +1,4 @@
-name: "Sync Crowdin translations (web)"
+name: "Sync Crowdin (web)"
 
 on:
     push:
@@ -6,8 +6,10 @@ on:
         paths:
             # Run workflow when web's en-US/translation.json is changed
             - "web/packages/base/locales/en-US/translation.json"
+            # Or the Crowdin config is changed
+            - "web/crowdin.yml"
             # Or the workflow itself is changed
-            - ".github/workflows/web-crowdin.yml"
+            - ".github/workflows/web-crowdin-sync.yml"
     schedule:
         # Run Mondays at ~6:00 AM IST
         #

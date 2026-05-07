@@ -1,17 +1,18 @@
-name: "Push sources to Crowdin (auth)"
+name: "Push sources to Crowdin (mobile/auth)"
 
 on:
     push:
         branches: [main]
         paths:
-            # Run workflow when auth's intl_en.arb is changed
+            # Run workflow when auth's app_en.arb is changed
             - "mobile/apps/auth/lib/l10n/arb/app_en.arb"
+            # Or the Crowdin config is changed
+            - "mobile/apps/auth/crowdin.yml"
             # Or the workflow itself is changed
-            - ".github/workflows/auth-crowdin.yml"
+            - ".github/workflows/mobile-auth-crowdin-push-sources.yml"
 
 permissions:
-    contents: write
-    pull-requests: write
+    contents: read
 
 jobs:
     push-sources-to-crowdin:

@@ -1,4 +1,4 @@
-name: "Push sources to Crowdin (locker)"
+name: "Push sources to Crowdin (mobile/locker)"
 
 on:
     push:
@@ -6,14 +6,13 @@ on:
         paths:
             # Run workflow when locker's app_en.arb is changed
             - "mobile/apps/locker/lib/l10n/app_en.arb"
+            # Or the Crowdin config is changed
+            - "mobile/apps/locker/crowdin.yml"
             # Or the workflow itself is changed
-            - ".github/workflows/locker-crowdin-push.yml"
-    # Allow manual runs from any branch (useful to push translations from a feature branch)
-    workflow_dispatch:
+            - ".github/workflows/mobile-locker-crowdin-push-sources.yml"
 
 permissions:
-    contents: write
-    pull-requests: write
+    contents: read
 
 jobs:
     push-sources-to-crowdin:
