@@ -1,6 +1,7 @@
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/models/button_result.dart";
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
@@ -515,7 +516,10 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     if (mounted) {
       final route = ModalRoute.of(context);
       final navigator = Navigator.of(context);
-      if (route is PopupRoute && route.isCurrent && navigator.canPop()) {
+      if (route != null &&
+          route.isCurrent &&
+          (route is PopupRoute || route is ModalSheetRoute) &&
+          navigator.canPop()) {
         navigator.pop(ButtonResult(buttonAction, exception));
       } else if (exception != null) {
         //This is to show the execution was unsuccessful if the dialog is manually
