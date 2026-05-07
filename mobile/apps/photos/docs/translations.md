@@ -67,6 +67,16 @@ of the developers (i.e. [laurenspriem](https://github.com/laurenspriem))
 1. After the PR is merged, the source-push workflow will upload new source
 strings to Crowdin's dashboard, allowing translators to translate it.
 
+## Plurals
+
+Use plural categories `one` and `other` in source ARBs, not `=1`.
+
+```json
+"photosCount": "{count, plural, =0{No photos} one{{count} photo} other{{count} photos}}"
+```
+
+`=0`, `one`, and `other` can be used together. Exact selectors win first; `one` is a locale category, not always exactly `1`. When showing the number in the `one` branch, use the count placeholder instead of hardcoding `1`.
+
 ## Updating an existing string
 
 1. Update the existing value for the key in the source `intl_en.arb`.
