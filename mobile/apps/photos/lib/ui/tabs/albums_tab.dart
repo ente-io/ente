@@ -490,7 +490,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
                   children: [
                     Expanded(
