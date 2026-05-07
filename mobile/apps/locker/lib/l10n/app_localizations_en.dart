@@ -90,7 +90,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count files saved offline',
-      one: '1 file saved offline',
+      one: '$count file saved offline',
     );
     return '$_temp0';
   }
@@ -101,13 +101,13 @@ class AppLocalizationsEn extends AppLocalizations {
       successCount,
       locale: localeName,
       other: 'Saved $successCount files offline',
-      one: 'Saved 1 file offline',
+      one: 'Saved $successCount file offline',
     );
     String _temp1 = intl.Intl.pluralLogic(
       failureCount,
       locale: localeName,
       other: '$failureCount failed',
-      one: '1 failed',
+      one: '$failureCount failed',
     );
     return '$_temp0, $_temp1';
   }
@@ -118,7 +118,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Failed to save $count files offline',
-      one: 'Failed to save 1 file offline',
+      one: 'Failed to save $count file offline',
     );
     return '$_temp0';
   }
@@ -129,7 +129,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count files removed from offline',
-      one: '1 file removed from offline',
+      one: '$count file removed from offline',
     );
     return '$_temp0';
   }
@@ -346,7 +346,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count items',
-      one: '1 item',
+      one: '$count item',
       zero: 'no items',
     );
     return '$_temp0';
@@ -980,7 +980,7 @@ class AppLocalizationsEn extends AppLocalizations {
       numberOfPeople,
       locale: localeName,
       other: 'Shared with $numberOfPeople people',
-      one: 'Shared with 1 person',
+      one: 'Shared with $numberOfPeople person',
       zero: 'Share with specific people',
     );
     return '$_temp0';
@@ -1033,7 +1033,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Added $count viewers',
-      one: 'Added 1 viewer',
+      one: 'Added $count viewer',
       zero: 'Added 0 viewers',
     );
     return '$_temp0';
@@ -1045,7 +1045,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Added $count collaborators',
-      one: 'Added 1 collaborator',
+      one: 'Added $count collaborator',
       zero: 'Added 0 collaborator',
     );
     return '$_temp0';
@@ -1202,7 +1202,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count Participants',
-      one: '1 Participant',
+      one: '$count Participant',
       zero: 'No Participants',
     );
     return '$_temp0';
@@ -1357,7 +1357,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count items selected',
-      one: '1 item selected',
+      one: '$count item selected',
       zero: 'No items selected',
     );
     return '$_temp0';
@@ -1398,7 +1398,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count collections',
-      one: '1 collection',
+      one: '$count collection',
     );
     return 'Record saved to $_temp0 successfully';
   }
@@ -1414,7 +1414,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count results',
-      one: '1 result',
+      one: '$count result',
     );
     return '$_temp0 for \"$query\"';
   }
@@ -1538,7 +1538,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count collections',
-      one: '1 collection',
+      one: '$count collection',
     );
     return '$_temp0 will be deleted permanently.';
   }
@@ -1549,7 +1549,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count items',
-      one: '1 item',
+      one: '$count item',
     );
     return '$_temp0 will be deleted permanently.';
   }
@@ -1612,7 +1612,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count items marked as important',
-      one: '1 item marked as important',
+      one: '$count item marked as important',
     );
     return '$_temp0';
   }
@@ -1702,7 +1702,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count selected',
-      one: '1 selected',
+      one: '$count selected',
     );
     return '$_temp0';
   }
@@ -1713,7 +1713,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Action is not supported for $count shared files',
-      one: 'Action is not supported for 1 shared file',
+      one: 'Action is not supported for $count shared file',
     );
     return '$_temp0';
   }
@@ -1768,7 +1768,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Left $count collections successfully',
-      one: 'Left 1 collection successfully',
+      one: 'Left $count collection successfully',
     );
     return '$_temp0';
   }
@@ -1787,7 +1787,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count collections deleted successfully',
-      one: '1 collection deleted successfully',
+      one: '$count collection deleted successfully',
     );
     return '$_temp0';
   }
@@ -1804,7 +1804,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count items restored successfully',
-      one: '1 item restored successfully',
+      one: '$count item restored successfully',
     );
     return '$_temp0';
   }
@@ -1838,7 +1838,7 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count items deleted permanently',
-      one: '1 item deleted permanently',
+      one: '$count item deleted permanently',
     );
     return '$_temp0';
   }
