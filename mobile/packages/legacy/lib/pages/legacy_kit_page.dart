@@ -319,7 +319,11 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
           share: share,
           allShares: shares,
         );
-        await _savePdf(bytes, _kit, part: _partForShare(share));
+        final saved = await _savePdf(bytes, _kit, part: _partForShare(share));
+        if (!saved) {
+          await dialog.hide();
+          return;
+        }
       }
       await dialog.hide();
       if (mounted) {
@@ -353,8 +357,11 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
         share: share,
         allShares: shares,
       );
-      await _savePdf(bytes, _kit, part: part);
+      final saved = await _savePdf(bytes, _kit, part: part);
       await dialog.hide();
+      if (!saved) {
+        return;
+      }
       if (mounted) {
         showShortToast(context, context.strings.legacyKitSheetDownloaded);
       }
@@ -453,7 +460,7 @@ class _LegacyKitPageState extends State<LegacyKitPage> {
     return authenticator(context, reason);
   }
 
-  Future<void> _savePdf(
+  Future<bool> _savePdf(
     Uint8List bytes,
     LegacyKit kit, {
     LegacyKitPart? part,
