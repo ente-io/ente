@@ -353,7 +353,7 @@ class _LegacyKitRecoveryWaitSheetState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "How long before account recovery can happen after your sheets are scanned.",
+          "How soon is account recovery possible after the legacy kit is scanned?",
           style: textTheme.small.copyWith(
             color: colorScheme.textMuted,
             height: 20 / 14,

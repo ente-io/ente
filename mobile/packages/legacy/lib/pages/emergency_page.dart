@@ -1175,7 +1175,7 @@ class _LegacyKitEmptyCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "Split your account recovery among people you really trust",
+            "Enable people you trust to come together to recover your account",
             textAlign: TextAlign.center,
             style: textTheme.small.copyWith(
               color: colorScheme.textMuted,
