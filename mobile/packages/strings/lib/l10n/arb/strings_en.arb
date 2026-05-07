@@ -826,7 +826,7 @@
   "createLegacyKit": "Create legacy kit",
   "createAnotherKit": "Create another kit",
   "createKit": "Create kit",
-  "legacyKitCreateDescription": "Name the three people who will each hold a part of your recovery key.",
+  "legacyKitCreateDescription": "Name the three people who will each hold a part of your account recovery.",
   "legacyKitContactNameHint": "Contact {index} - e.g. {example}",
   "@legacyKitContactNameHint": {
     "placeholders": {
@@ -869,7 +869,7 @@
   "downloadAll": "Download all",
   "legacyKitSheetDownloaded": "Recovery sheet downloaded",
   "deleteLegacyKit": "Delete legacy kit",
-  "deleteLegacyKitMessage": "All shared sheets will become invalid and can no longer be used for recovery.",
+  "deleteLegacyKitMessage": "Shared sheets can no longer be used for recovery",
   "blockLegacyKitRecoveryMessage": "This will stop the active recovery attempt. The sheets can still be used to start a new attempt later.",
   "legacyKitRecoveryInProgress": "Recovery attempt in progress",
   "legacyKitRecoveryWindow": "Started on {startedAt}. Recovery will be available on {availableAt}.",

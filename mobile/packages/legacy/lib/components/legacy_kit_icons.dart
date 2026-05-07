@@ -24,6 +24,27 @@ class LegacyKitDownloadIcon extends StatelessWidget {
   }
 }
 
+class LegacyKitShareIcon extends StatelessWidget {
+  final Color color;
+  final double size;
+
+  const LegacyKitShareIcon({
+    required this.color,
+    this.size = 18,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return HugeIcon(
+      icon: HugeIcons.strokeRoundedShare08,
+      color: color,
+      size: size,
+      strokeWidth: _hugeIconStrokeWidth,
+    );
+  }
+}
+
 class LegacyKitEditIcon extends StatelessWidget {
   final Color color;
   final double size;
@@ -37,7 +58,7 @@ class LegacyKitEditIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HugeIcon(
-      icon: HugeIcons.strokeRoundedPencilEdit02,
+      icon: HugeIcons.strokeRoundedEdit03,
       color: color,
       size: size,
       strokeWidth: _hugeIconStrokeWidth,

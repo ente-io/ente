@@ -536,7 +536,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
               isWarning: legacyKits[index].hasActiveRecoverySession,
             ),
           ),
-          leadingIconSize: 32,
+          leadingIconSize: 36,
           leadingIconWidget:
               _LegacyKitLeadingIcon(color: colorScheme.primary700),
           menuItemColor: cardColor,
@@ -1047,12 +1047,69 @@ class _LegacyKitLeadingIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Icon(
-        Icons.insert_drive_file_outlined,
-        size: 18,
-        color: color,
+      child: CustomPaint(
+        size: const Size.square(18),
+        painter: _LegacyKitLeadingIconPainter(color),
       ),
     );
+  }
+}
+
+class _LegacyKitLeadingIconPainter extends CustomPainter {
+  final Color color;
+
+  const _LegacyKitLeadingIconPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 18;
+    canvas.save();
+    canvas.scale(scale);
+
+    final strokePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final filePath = Path()
+      ..moveTo(3.5, 2.5)
+      ..lineTo(10.2, 2.5)
+      ..lineTo(14.5, 6.8)
+      ..lineTo(14.5, 15.5)
+      ..lineTo(3.5, 15.5)
+      ..close();
+    canvas.drawPath(filePath, strokePaint);
+
+    final foldPath = Path()
+      ..moveTo(10.2, 2.5)
+      ..lineTo(10.2, 6.8)
+      ..lineTo(14.5, 6.8);
+    canvas.drawPath(foldPath, strokePaint);
+
+    final heartPath = Path()
+      ..moveTo(13.5, 16)
+      ..cubicTo(13.1, 15.7, 10, 13.8, 10, 11.5)
+      ..cubicTo(10, 10.3, 10.8, 9.4, 12, 9.4)
+      ..cubicTo(12.6, 9.4, 13.1, 9.7, 13.5, 10.2)
+      ..cubicTo(13.9, 9.7, 14.4, 9.4, 15, 9.4)
+      ..cubicTo(16.2, 9.4, 17, 10.3, 17, 11.5)
+      ..cubicTo(17, 13.8, 13.9, 15.7, 13.5, 16)
+      ..close();
+
+    canvas.drawPath(
+      heartPath,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.fill,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_LegacyKitLeadingIconPainter oldDelegate) {
+    return color != oldDelegate.color;
   }
 }
 
@@ -1175,7 +1232,7 @@ class _LegacyKitEmptyCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "Split your account recovery among people you really trust",
+            "Enable people you trust to come together to recover your account",
             textAlign: TextAlign.center,
             style: textTheme.small.copyWith(
               color: colorScheme.textMuted,

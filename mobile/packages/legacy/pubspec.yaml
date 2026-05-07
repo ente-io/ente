@@ -44,6 +44,7 @@ dependencies:
   password_strength: 0.2.0
   pdf: 3.11.3
   pointycastle: 3.9.1
+  share_plus: 11.1.0
   uuid: 4.5.2
 
 dev_dependencies:

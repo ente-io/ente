@@ -89,7 +89,7 @@ class _LegacyKitAdvertContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _LegacyKitAdvertIllustration(colorScheme: colorScheme),
+        const _LegacyKitAdvertIllustration(),
         const SizedBox(height: 24),
         Text(
           "Create a legacy kit",
@@ -134,41 +134,15 @@ class _LegacyKitAdvertContent extends StatelessWidget {
 }
 
 class _LegacyKitAdvertIllustration extends StatelessWidget {
-  final EnteColorScheme colorScheme;
-
-  const _LegacyKitAdvertIllustration({required this.colorScheme});
+  const _LegacyKitAdvertIllustration();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Image.asset(
+      "assets/legacy_kit_advert_foreground.png",
       width: 200,
       height: 116,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 34,
-            top: 14,
-            child: Container(
-              width: 132,
-              height: 97,
-              decoration: BoxDecoration(
-                color: colorScheme.primary700,
-                borderRadius: BorderRadius.circular(97),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 37,
-            top: 0,
-            child: Image.asset(
-              "assets/legacy_kit_advert_foreground.png",
-              width: 120,
-              height: 115,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ],
-      ),
+      fit: BoxFit.contain,
     );
   }
 }
