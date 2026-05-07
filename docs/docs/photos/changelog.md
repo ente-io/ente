@@ -7,7 +7,7 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
-## v1.7.23 (dekstop) - Apr 2026
+## v1.7.23 (desktop) - May 2026
 
 - All People dialogs shows entire face clusters
 - Public Albums app separated from Photos app
