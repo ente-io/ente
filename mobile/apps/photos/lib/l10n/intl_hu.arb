@@ -913,7 +913,7 @@
   "playstoreSubscription": "Google Play-előfizetés",
   "appstoreSubscription": "App Store-előfizetés",
   "subAlreadyLinkedErrMessage": "Az {id} már egy másik Ente fiókhoz van kapcsolva.\nHa ezt az {id}-t ezzel a fiókkal szeretnéd használni, kérjük, vedd fel a kapcsolatot az ügyfélszolgálattal",
-  "visitWebToManage": "Az előfizetésed kezeléséhez látogass el a web.ente.io oldalra",
+  "visitWebToManage": "Az előfizetésed kezeléséhez látogass el a {webUrl} oldalra",
   "managePaymentMethod": "Fizetési módok kezelése",
   "couldNotUpdateSubscription": "Nem sikerült frissíteni az előfizetést",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Lépj kapcsolatba a support@ente.com\n címen, és örömmel segítünk!",

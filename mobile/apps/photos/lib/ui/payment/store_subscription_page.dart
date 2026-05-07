@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -330,7 +331,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             child: Text(
-              AppLocalizations.of(context).visitWebToManage,
+              AppLocalizations.of(context).visitWebToManage(
+                webUrl: kPhotosWebDomain,
+              ),
               style: getEnteTextTheme(context).small.copyWith(
                     color: colorScheme.textMuted,
                   ),
@@ -428,7 +431,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       showErrorDialog(
         context,
         AppLocalizations.of(context).sorry,
-        AppLocalizations.of(context).visitWebToManage,
+        AppLocalizations.of(context).visitWebToManage(
+          webUrl: kPhotosWebDomain,
+        ),
       );
     } else {
       final String capitalizedWord = paymentProvider.isNotEmpty
@@ -489,7 +494,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             showErrorDialog(
               context,
               AppLocalizations.of(context).sorry,
-              AppLocalizations.of(context).visitWebToManage,
+              AppLocalizations.of(context).visitWebToManage(
+                webUrl: kPhotosWebDomain,
+              ),
             );
           },
           child: SubscriptionPlanWidget(
@@ -692,7 +699,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       await showErrorDialog(
         context,
         AppLocalizations.of(context).sorry,
-        AppLocalizations.of(context).visitWebToManage,
+        AppLocalizations.of(context).visitWebToManage(
+          webUrl: kPhotosWebDomain,
+        ),
       );
       return;
     }
