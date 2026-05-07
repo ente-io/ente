@@ -167,20 +167,6 @@ class _AllLinksPageState extends State<AllLinksPage> {
           onTap: () => Navigator.pop(context),
           child: const Icon(Icons.arrow_back_outlined),
         ),
-        actions: [
-          if (_hasSelection)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: SoftIconButton(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete01,
-                  size: 18,
-                  color: colorScheme.warning500,
-                ),
-                onTap: _removeSelectedLinks,
-              ),
-            ),
-        ],
       ),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -194,6 +180,26 @@ class _AllLinksPageState extends State<AllLinksPage> {
                   TitleBarTitleWidget(
                     title: AppLocalizations.of(context).links,
                     heroTag: widget.titleHeroTag,
+                    trailingWidgets: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: _hasSelection
+                            ? SoftIconButton(
+                                key: const ValueKey("delete_links"),
+                                icon: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedDelete01,
+                                  size: 18,
+                                  color: colorScheme.warning500,
+                                ),
+                                onTap: _removeSelectedLinks,
+                              )
+                            : const SizedBox.shrink(
+                                key: ValueKey("no_selection_action"),
+                              ),
+                      ),
+                    ],
                   ),
                   Text(
                     (widget.quickLinks.length + widget.memoryShares.length)
