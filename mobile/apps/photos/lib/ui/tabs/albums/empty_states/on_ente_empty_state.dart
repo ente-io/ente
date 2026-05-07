@@ -8,7 +8,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/tabs/albums/empty_states/albums_empty_state_feature_row.dart";
+import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -58,17 +58,17 @@ class OnEnteEmptyState extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 320),
               child: Column(
                 children: [
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedLockSync01,
                     label: strings.endToEndEncryptedOnlyYourPeopleCanSeeIt,
                   ),
                   const SizedBox(height: 24),
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedCloudSavingDone01,
                     label: strings.backedUpSafelyAcrossDevices,
                   ),
                   const SizedBox(height: 24),
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedSparkles,
                     label: strings.smartAlbumsOrganizePhotosForYou,
                   ),

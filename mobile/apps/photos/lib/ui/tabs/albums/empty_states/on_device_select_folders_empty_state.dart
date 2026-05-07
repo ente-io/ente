@@ -4,7 +4,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/backup_flow_helper.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/tabs/albums/empty_states/albums_empty_state_feature_row.dart";
+import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 
 class OnDeviceSelectFoldersEmptyState extends StatelessWidget {
   const OnDeviceSelectFoldersEmptyState({
@@ -57,17 +57,17 @@ class OnDeviceSelectFoldersEmptyState extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 320),
               child: Column(
                 children: [
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedFolder02,
                     label: strings.allYourDeviceAlbumsInOnePlace,
                   ),
                   const SizedBox(height: 24),
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedCloudSavingDone01,
                     label: strings.youPickWhatGetsBackedUp,
                   ),
                   const SizedBox(height: 24),
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedLockSync01,
                     label: strings.privateAndEndToEndEncryptedAlways,
                   ),

@@ -2,8 +2,8 @@ import "package:flutter/widgets.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class AlbumsEmptyStateFeatureRow extends StatelessWidget {
-  const AlbumsEmptyStateFeatureRow({
+class EmptyStateFeatureRow extends StatelessWidget {
+  const EmptyStateFeatureRow({
     required this.icon,
     required this.label,
     super.key,
@@ -20,7 +20,7 @@ class AlbumsEmptyStateFeatureRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-          padding: const EdgeInsetsGeometry.all(6),
+          padding: const EdgeInsets.all(6),
           child: HugeIcon(
             icon: icon,
             size: 20,

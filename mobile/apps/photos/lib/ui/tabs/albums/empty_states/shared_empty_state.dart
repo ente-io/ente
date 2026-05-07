@@ -5,7 +5,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
-import "package:photos/ui/tabs/albums/empty_states/albums_empty_state_feature_row.dart";
+import "package:photos/ui/tabs/albums/empty_states/empty_state_feature_row.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class SharedEmptyState extends StatelessWidget {
@@ -54,17 +54,17 @@ class SharedEmptyState extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 320),
               child: Column(
                 children: [
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedUserMultiple,
                     label: strings.shareStorageWithUpToFiveFamilyMembers,
                   ),
                   const SizedBox(height: 24),
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedLock,
                     label: strings.privateSpaceForEveryMember,
                   ),
                   const SizedBox(height: 24),
-                  AlbumsEmptyStateFeatureRow(
+                  EmptyStateFeatureRow(
                     icon: HugeIcons.strokeRoundedFavourite,
                     label: strings.reactAndChatOnSharedMemories,
                   ),
