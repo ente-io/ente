@@ -9,8 +9,9 @@ A short summary list of changes to the Ente Auth mobile and desktop apps. For a 
 
 ## v4.4.17 - Feb 2026
 
-- New login/sign up screens
-- Bug fixes and improvements
+- New Login/Sign up screens
+- Fix dark mode icon on iOS
+- Scope global keyboard shortcuts so typing '?' (Shift+/) works in password fields on desktop
 
 ## v4.4.15 - Dec 2025
 
