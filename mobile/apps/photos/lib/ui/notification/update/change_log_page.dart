@@ -89,13 +89,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                           ChangeLogPageAction.openReferrals,
                         );
                       }
-                      if (isLocalGallery) {
-                        await updateService.launchReviewUrl();
-                      } else if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop(
-                          ChangeLogPageAction.openReferrals,
-                        );
-                      }
                     },
                   ),
                   const SizedBox(height: 16),
