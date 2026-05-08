@@ -63,11 +63,18 @@ fn generate_ensu_ios() -> Result<(), DynError> {
             crate_name: "inference",
             crate_dir: rust_root.join("uniffi/ensu/inference"),
         },
+        UniffiCrate {
+            crate_name: "transcription",
+            crate_dir: rust_root.join("uniffi/ensu/transcription"),
+        },
     ];
 
     for uniffi_crate in crates {
         build_host_library(&uniffi_crate.crate_dir)?;
-        remove_paths(&swift_generated_paths(&generated_dir, uniffi_crate.crate_name))?;
+        remove_paths(&swift_generated_paths(
+            &generated_dir,
+            uniffi_crate.crate_name,
+        ))?;
         generate_bindings(TargetLanguage::Swift, &generated_dir, &uniffi_crate)?;
     }
 
@@ -122,12 +129,24 @@ fn generate_ensu_android() -> Result<(), DynError> {
             out_dir: rust_out_dir.clone(),
             stale_path: rust_out_dir.join("io/ente/labs/inference_rs/inference.kt"),
         },
+        AndroidCrate {
+            uniffi: UniffiCrate {
+                crate_name: "transcription",
+                crate_dir: rust_root.join("uniffi/ensu/transcription"),
+            },
+            out_dir: rust_out_dir.clone(),
+            stale_path: rust_out_dir.join("io/ente/labs/ensu_transcription/transcription.kt"),
+        },
     ];
 
     for crate_spec in crates {
         build_host_library(&crate_spec.uniffi.crate_dir)?;
         remove_path(&crate_spec.stale_path)?;
-        generate_bindings(TargetLanguage::Kotlin, &crate_spec.out_dir, &crate_spec.uniffi)?;
+        generate_bindings(
+            TargetLanguage::Kotlin,
+            &crate_spec.out_dir,
+            &crate_spec.uniffi,
+        )?;
     }
 
     Ok(())
@@ -186,15 +205,12 @@ fn generate_bindings(
     out_dir: &Path,
     uniffi_crate: &UniffiCrate<'_>,
 ) -> Result<(), DynError> {
-    let source = uniffi_crate
-        .crate_dir
-        .join("target/release")
-        .join(format!(
-            "{}{}{}",
-            env::consts::DLL_PREFIX,
-            uniffi_crate.crate_name,
-            env::consts::DLL_SUFFIX
-        ));
+    let source = uniffi_crate.crate_dir.join("target/release").join(format!(
+        "{}{}{}",
+        env::consts::DLL_PREFIX,
+        uniffi_crate.crate_name,
+        env::consts::DLL_SUFFIX
+    ));
     let source = utf8_path(&source)?;
     let out_dir = utf8_path(out_dir)?;
     let previous_dir = env::current_dir().map_err(|error| {

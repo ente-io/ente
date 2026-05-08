@@ -21,7 +21,7 @@ func TestCreateUserEntityKeyIsIdempotentForReplay(t *testing.T) {
 
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       201,
-		Email:        "userentity-key-conflict@ente.io",
+		Email:        "userentity-key-conflict@ente.com",
 		CreationTime: 1,
 	})
 
@@ -47,7 +47,7 @@ func TestCreateUserEntityKeyReturnsAlreadyExistsForConflictingCreate(t *testing.
 
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:       202,
-		Email:        "userentity-key-already-exists@ente.io",
+		Email:        "userentity-key-already-exists@ente.com",
 		CreationTime: 1,
 	})
 

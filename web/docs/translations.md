@@ -10,8 +10,8 @@ Volunteers can add a new _translation_ in their language corresponding to each
 such source key-value to our
 [Crowdin project](https://crowdin.com/project/ente-photos-web).
 
-Everyday, we run a [GitHub workflow](../../.github/workflows/web-crowdin.yml)
-that
+Every Monday, and whenever source strings or the Crowdin config change on `main`,
+we run a [GitHub workflow](../../.github/workflows/web-crowdin-sync.yml) that
 
 - Uploads sources to Crowdin - So any new key value pair we add in the source
   `translation.json` becomes available to translators to translate.
@@ -20,8 +20,8 @@ that
   have made on the Crowdin dashboard (for existing sources) will be added to the
   corresponding `lang/translation.json`.
 
-The workflow also uploads existing translations and also downloads new sources
-from Crowdin, but these two should be no-ops.
+The workflow also uploads the current source strings before downloading
+translations.
 
 ## Adding a new string
 
@@ -41,5 +41,5 @@ from Crowdin, but these two should be no-ops.
 
 - Remove the key value pair from the source `translation.json`.
 - During the next sync, the workflow will delete that source item from all
-  existing translations (both in the Crowdin project and also from the he other
+  existing translations (both in the Crowdin project and also from the other
   `lang/translation.json` files in the repository).

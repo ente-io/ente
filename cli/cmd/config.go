@@ -42,7 +42,7 @@ var host string
 func init() {
 	// Set up Viper configuration
 	// Set a default value for 'host' configuration
-	viper.SetDefault("host", "https://api.ente.io")
+	viper.SetDefault("host", "https://api.ente.com")
 
 	// Add 'config' subcommands to the root command
 	//rootCmd.AddCommand(configCmd)

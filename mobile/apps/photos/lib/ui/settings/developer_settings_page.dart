@@ -79,7 +79,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   final url = _urlController.text.trim();
                   _logger.info("Entered endpoint: $url");
                   final modeToggleMessage =
-                      await _maybeToggleOfflineModeOption(url);
+                      await _maybeToggleLocalGalleryModeOption(
+                    url,
+                  );
                   if (modeToggleMessage != null) {
                     Bus.instance.fire(AppModeChangedEvent());
                     showToast(context, modeToggleMessage);
@@ -122,8 +124,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
 
   Future<void> _ping(String endpoint) async {
     try {
-      final response =
-          await NetworkClient.instance.getDio().get('$endpoint/ping');
+      final response = await NetworkClient.instance.getDio().get(
+            '$endpoint/ping',
+          );
       if (response.data['message'] != 'pong') {
         throw Exception('Invalid response');
       }
@@ -132,14 +135,14 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     }
   }
 
-  Future<String?> _maybeToggleOfflineModeOption(String input) async {
+  Future<String?> _maybeToggleLocalGalleryModeOption(String input) async {
     switch (input) {
       case "offline":
-        await localSettings.setShowOfflineModeOption(true);
-        return "Offline mode option enabled";
+        await localSettings.setShowLocalGalleryModeOption(true);
+        return "Local gallery mode option enabled";
       case "online":
-        await localSettings.setShowOfflineModeOption(false);
-        return "Offline mode option disabled";
+        await localSettings.setShowLocalGalleryModeOption(false);
+        return "Local gallery mode option disabled";
       default:
         return null;
     }

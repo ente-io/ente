@@ -4,8 +4,9 @@ Rust end-to-end tests that require a live Museum instance belong here.
 
 Current server-backed coverage in this crate:
 
-- a single ignored full e2e suite that reuses one owner/trusted pair and covers
-  auth, contacts CRUD, and the legacy recovery lifecycle
+- ignored stage tests that reuse shared fixtures inside one test binary:
+  `auth_contacts_e2e`, `legacy_contact_recovery_e2e`, and
+  `legacy_kit_recovery_e2e`
 
 Detailed scenario coverage lives in [`COVERAGE.md`](COVERAGE.md).
 
@@ -37,6 +38,19 @@ For ad hoc runs against an already-running server:
 
 ```sh
 ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test --manifest-path rust/e2e/Cargo.toml -- --ignored --nocapture
+```
+
+To run only one ignored stage:
+
+```sh
+ENTE_E2E_ENDPOINT=http://localhost:8080 cargo test --manifest-path rust/e2e/Cargo.toml legacy_kit_recovery_e2e -- --ignored --nocapture
+```
+
+To skip or select stages during a full ignored run:
+
+```sh
+ENTE_E2E_SKIP=legacy_kit_recovery_e2e rust/e2e/scripts/run.sh
+ENTE_E2E_ONLY=legacy_contact_recovery_e2e rust/e2e/scripts/run.sh
 ```
 
 Attachment/object-store coverage can be added as a separate fixture later, but

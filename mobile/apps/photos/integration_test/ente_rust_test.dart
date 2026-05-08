@@ -13,6 +13,6 @@ void main() {
   test('file_download_url integration smoke test', () {
     final url =
         fileDownloadUrl(apiBaseUrl: 'https://api.ente.com', fileId: 12345);
-    expect(url, equals('https://files.ente.io/?fileID=12345'));
+    expect(url, equals('https://files.ente.com/?fileID=12345'));
   });
 }

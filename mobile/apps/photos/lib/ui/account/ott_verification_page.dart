@@ -43,6 +43,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         isResettingPasswordScreen: widget.isResetPasswordScreen,
       );
     }
+    if (!mounted) {
+      return;
+    }
     FocusScope.of(context).unfocus();
   }
 

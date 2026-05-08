@@ -144,6 +144,8 @@ struct ChatView: View {
             .onChange(of: scenePhase) { newValue in
                 if newValue == .active {
                     viewModel.refreshModelDownloadInfo()
+                } else {
+                    viewModel.cancelVoiceInput()
                 }
             }
         }
@@ -310,6 +312,8 @@ struct ChatView: View {
                         editingMessage: editingMessage,
                         isProcessingAttachments: viewModel.isProcessingAttachments,
                         isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
+                        voiceInputState: viewModel.voiceInputState,
+                        moveCursorToEndToken: viewModel.draftCursorMoveToken,
                         onSend: {
                             viewState.didDismissKeyboard = true
                             isInputFocused = false
@@ -320,6 +324,11 @@ struct ChatView: View {
                         },
                         onCancelEdit: {
                             viewModel.cancelEditing()
+                        },
+                        onVoiceInput: {
+                            viewState.didDismissKeyboard = true
+                            isInputFocused = false
+                            viewModel.toggleVoiceInput()
                         },
                         onAddImage: { data, name in
                             viewModel.addImageAttachment(data: data, fileName: name)

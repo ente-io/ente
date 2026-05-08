@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ente_media_inspector::{
+use ente_photos::{
     VideoIndex as CoreVideoIndex, extract_motion_video_file_from_path, extract_xmp_from_path,
     get_motion_video_index_from_path,
 };

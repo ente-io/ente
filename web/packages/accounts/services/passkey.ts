@@ -79,16 +79,16 @@ interface OpenPasskeyVerificationURLOptions {
  * Photos web app.
  *
  * Thus, passkey creation and authentication in the desktop app works the same
- * way it works in the mobile app - the system browser is invoked to open
- * accounts.ente.io.
+ * way it works in the mobile app - the system browser is invoked to open the
+ * accounts app origin (e.g. accounts.ente.com) returned by remote.
  *
- * - For passkey creation, this is a one-way open. Passkeys get created at
- *   accounts.ente.io, and that's it.
+ * - For passkey creation, this is a one-way open. Passkeys get created at the
+ *   accounts app origin, and that's it.
  *
  * - For passkey verification, the flow is two-way. We register a custom
  *   protocol and provide that as a return path redirect. Passkey authentication
- *   happens at accounts.ente.io, and on success there is redirected back to the
- *   desktop app.
+ *   happens at the accounts app origin, and on success there is redirected back
+ *   to the desktop app.
  */
 export const openPasskeyVerificationURL = ({
     passkeySessionID,
@@ -200,7 +200,7 @@ export const passkeySessionExpiredErrorMessage = "Passkey session has expired";
  * Check if the user has already authenticated using their passkey for the given
  * session.
  *
- * This is useful in case the automatic redirect back from accounts.ente.io to
+ * This is useful in case the automatic redirect back from the accounts app to
  * the desktop app does not work for some reason. In such cases, the user can
  * press the "Check status" button: we'll make an API call to see if the
  * authentication has already completed, and if so, get the same "response"

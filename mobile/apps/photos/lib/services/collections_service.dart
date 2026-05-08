@@ -472,7 +472,12 @@ class CollectionsService {
       allowedRoles.add(CollectionParticipantRole.collaborator);
       allowedRoles.add(CollectionParticipantRole.admin);
     }
-    final int userID = _config.getUserID()!;
+    final int? userID = _config.getUserID();
+    if (userID == null) {
+      _logger
+          .info("Skipping collections for UI because user ID is unavailable");
+      return <Collection>[];
+    }
     return _collectionIDToCollections.values
         .where(
           (c) =>
@@ -1535,7 +1540,8 @@ class CollectionsService {
     Map<String, dynamic> collectionData,
     Uint8List collectionKey,
   ) async {
-    collection.setName(_decryptCollectionNameWithKey(collection, collectionKey));
+    collection
+        .setName(_decryptCollectionNameWithKey(collection, collectionKey));
     if (collectionData['pubMagicMetadata'] != null) {
       final utfEncodedMmd = await CryptoUtil.decryptChaCha(
         CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
@@ -1546,8 +1552,7 @@ class CollectionsService {
       );
       collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
       collection.mMbPubVersion = collectionData['pubMagicMetadata']['version'];
-      collection.pubMagicMetadata =
-          CollectionPubMagicMetadata.fromEncodedJson(
+      collection.pubMagicMetadata = CollectionPubMagicMetadata.fromEncodedJson(
         collection.mMdPubEncodedJson ?? '{}',
       );
     }

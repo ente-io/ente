@@ -250,14 +250,10 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         // Sort clusters by their earliest timestamp to maintain chronological order
                         const sortedClusters = clusters.sort((a, b) => {
                             const earliestA = Math.min(
-                                ...a.map((p) =>
-                                    new Date(p.timestamp).getTime(),
-                                ),
+                                ...a.map((p) => p.timestamp),
                             );
                             const earliestB = Math.min(
-                                ...b.map((p) =>
-                                    new Date(p.timestamp).getTime(),
-                                ),
+                                ...b.map((p) => p.timestamp),
                             );
                             return earliestA - earliestB;
                         });

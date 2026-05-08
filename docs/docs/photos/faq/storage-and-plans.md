@@ -255,7 +255,7 @@ Common reasons and solutions:
 **Problem 5: Purchased through App Store**
 
 - Family plans may have limited functionality for App Store purchases
-- Consider managing your subscription through [web.ente.io](https://web.ente.io) instead
+- Consider managing your subscription through [photos.ente.com](https://photos.ente.com) instead
 
 ### How do I add a family member who already has a paid subscription? {#add-family-member-existing-subscriber}
 
@@ -315,7 +315,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 **Step-by-step process:**
 
 1. **Do NOT purchase through the iOS/Android App Store** - App Stores don't support discount codes
-2. Go to [web.ente.io](https://web.ente.io) on a desktop or laptop computer
+2. Go to [photos.ente.com](https://photos.ente.com) on a desktop or laptop computer
 3. Log in to your Ente account
 4. Open `Settings > Account > Manage subscription`
 5. Click "Buy subscription" or "Change plan"
@@ -330,7 +330,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 - Discount codes only work for **NEW paying customers** (first-time purchases)
 - Cannot be applied to existing paid subscriptions
 - Cannot be combined with cryptocurrency payments
-- Must purchase from web.ente.io or desktop app, NOT mobile app stores
+- Must purchase from photos.ente.com or desktop app, NOT mobile app stores
 
 **If you already purchased without applying a code:**
 
@@ -430,7 +430,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 **Important limitations:**
 
-⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through web.ente.io instead.
+⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through photos.ente.com instead.
 
 ⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.com/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
 

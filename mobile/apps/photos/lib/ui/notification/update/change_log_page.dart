@@ -12,9 +12,7 @@ import 'package:photos/ui/notification/update/change_log_strings.dart';
 enum ChangeLogPageAction { openReferrals }
 
 class ChangeLogPage extends StatefulWidget {
-  const ChangeLogPage({
-    super.key,
-  });
+  const ChangeLogPage({super.key});
 
   @override
   State<ChangeLogPage> createState() => _ChangeLogPageState();
@@ -32,7 +30,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final isLocalGallery = isOfflineMode;
+    final isLocalGallery = isLocalGalleryMode;
     return Material(
       color: enteColorScheme.backgroundElevated,
       child: Column(
@@ -49,13 +47,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 24,
-          ),
+          const SizedBox(height: 24),
           Flexible(child: _getChangeLog()),
-          const DividerWidget(
-            dividerType: DividerType.solid,
-          ),
+          const DividerWidget(dividerType: DividerType.solid),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(
@@ -95,6 +89,13 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                           ChangeLogPageAction.openReferrals,
                         );
                       }
+                      if (isLocalGallery) {
+                        await updateService.launchReviewUrl();
+                      } else if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop(
+                          ChangeLogPageAction.openReferrals,
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 16),
@@ -110,7 +111,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final strings = ChangeLogStrings.maybeForLocale(
       Localizations.localeOf(context),
-      isOffline: isOfflineMode,
+      isLocalGallery: isLocalGalleryMode,
     );
     if (strings == null) {
       return const SizedBox.shrink();
@@ -119,10 +120,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       ChangeLogEntry(
         strings.title1,
         description: strings.desc1,
-        items: [
-          strings.desc1Item1,
-          strings.desc1Item2,
-        ].where((item) => item.trim().isNotEmpty).toList(growable: false),
+        items: [strings.desc1Item1, strings.desc1Item2]
+            .where((item) => item.trim().isNotEmpty)
+            .toList(growable: false),
         isFeature: true,
       ),
       ChangeLogEntry(

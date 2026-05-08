@@ -39,12 +39,12 @@ class ChangeLogStrings {
 
   static ChangeLogStrings? maybeForLocale(
     Locale locale, {
-    bool isOffline = false,
+    bool isLocalGallery = false,
   }) {
     final key = locale.countryCode != null && locale.countryCode!.isNotEmpty
         ? '${locale.languageCode}_${locale.countryCode}'
         : locale.languageCode;
-    final translations = isOffline ? _offlineTranslations : _translations;
+    final translations = isLocalGallery ? _offlineTranslations : _translations;
     final strings = translations[key] ??
         translations[locale.languageCode] ??
         translations['en'];
@@ -57,11 +57,11 @@ class ChangeLogStrings {
 
   static bool hasContentForLocale(
     Locale locale, {
-    bool isOffline = false,
+    bool isLocalGallery = false,
   }) {
     return maybeForLocale(
           locale,
-          isOffline: isOffline,
+          isLocalGallery: isLocalGallery,
         ) !=
         null;
   }

@@ -4,7 +4,7 @@ Nếu bạn đang tìm kiếm một giải pháp thân thiện thay thế Google
 
 Chúng tôi có ứng dụng Android, iOS, web và Desktop mã nguồn mở. Ảnh của bạn sẽ được đồng bộ liền mạch giữa tất cả thiết bị theo phương thức mã hóa đầu cuối (e2ee).
 
-ente cũng giúp bạn dễ dàng chia sẻ album của mình với những người thân yêu, kể cả khi họ không dùng ente. Bạn có thể chia sẻ các liên kết có thể xem công khai, nơi họ có thể xem album của bạn và cộng tác bằng cách thêm ảnh vào đó, ngay cả khi không có tài khoản hoặc ứng dụng.
+ente cũng giúp bạn dễ dàng chia sẻ album của mình với người thân, kể cả khi họ không dùng ente. Bạn có thể chia sẻ các liên kết có thể xem công khai, nơi họ có thể xem album của bạn và cộng tác bằng cách thêm ảnh vào đó, ngay cả khi không có tài khoản hoặc ứng dụng.
 
 Dữ liệu mã hóa của bạn được lưu trữ ở 3 địa điểm khác nhau, bao gồm một hầm trú ẩn hạt nhân ở Paris. Chúng tôi coi trọng sự trường tồn và giúp việc đảm bảo rằng những kỷ niệm của bạn sống lâu hơn bạn trở nên dễ dàng.
 

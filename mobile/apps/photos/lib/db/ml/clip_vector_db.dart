@@ -29,7 +29,7 @@ class ClipVectorDB {
     "ente.ml.vectordb.clip.usearch",
     "clip_vectordb_migration",
   );
-  static final offlineInstance = ClipVectorDB._privateConstructor(
+  static final localGalleryInstance = ClipVectorDB._privateConstructor(
     "ente.ml.offline.vectordb.clip.usearch",
     "clip_vectordb_migration_offline",
   );

@@ -18,6 +18,8 @@ import "package:photos/services/search_service.dart";
 import "package:photos/utils/cache_util.dart";
 
 class SimilarImagesService {
+  static const double _groupedClipEmbeddingLossRefreshRatio = 0.05;
+
   final _logger = Logger("SimilarImagesService");
 
   SimilarImagesService._privateConstructor();
@@ -168,6 +170,18 @@ class SimilarImagesService {
             deletedFromGroups.length > totalInGroups * 0.2) {
           needsFullRefresh = true;
         }
+
+        if (!needsFullRefresh && totalInGroups > 0) {
+          final groupedFilesWithoutClipEmbeddings =
+              cacheGroupedFileIDs.difference(clipIndexedFileIDs);
+          if (groupedFilesWithoutClipEmbeddings.length >
+              totalInGroups * _groupedClipEmbeddingLossRefreshRatio) {
+            _logger.info(
+              "Refreshing similar images cache because ${groupedFilesWithoutClipEmbeddings.length} of $totalInGroups grouped files no longer have CLIP embeddings",
+            );
+            needsFullRefresh = true;
+          }
+        }
       }
     }
 
@@ -233,6 +247,15 @@ class SimilarImagesService {
     // Identify new files
     final newFileIDs = currentFileIDsSet.difference(cachedFileIDs);
     if (newFileIDs.isEmpty) {
+      if (deletedFiles.isNotEmpty) {
+        await _cacheSimilarFiles(
+          existingGroups,
+          currentFileIDsSet,
+          distanceThreshold,
+          exact,
+          cachedData.cachedTime,
+        );
+      }
       return existingGroups;
     }
 

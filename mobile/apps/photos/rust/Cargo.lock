@@ -132,9 +132,9 @@ checksum = "c3d036a3c4ab069c7b410a2ce876bd74808d2d0888a82667669f8e783a898bf1"
 
 [[package]]
 name = "archmage"
-version = "0.8.6"
+version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b6d08808218c9a8bb39ac0490adc5d65a666cc38ddb730baf9ed57e32d803ee"
+checksum = "c0fb818f2e02ca08cc6416725044fadc84bcf5a96e2eb7ab103c966123667d86"
 dependencies = [
  "archmage-macros",
  "safe_unaligned_simd",
@@ -142,9 +142,9 @@ dependencies = [
 
 [[package]]
 name = "archmage-macros"
-version = "0.8.6"
+version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4320e26657ff06e4cb353df04642c3faa5390cae53705e846b788b59d14bc52e"
+checksum = "1886761e37995842cfbaf8c24d483e62d9b8c174254d29146f596d4d87efff2d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -214,6 +214,19 @@ name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
+
+[[package]]
+name = "av-data"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fca67ba5d317924c02180c576157afd54babe48a76ebc66ce6d34bb8ba08308e"
+dependencies = [
+ "byte-slice-cast",
+ "bytes",
+ "num-derive",
+ "num-rational",
+ "num-traits",
+]
 
 [[package]]
 name = "av-scenechange"
@@ -356,6 +369,12 @@ name = "bumpalo"
 version = "3.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
+
+[[package]]
+name = "byte-slice-cast"
+version = "1.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7575182f7272186991736b70173b0ea045398f984bf5ebbb3804736ce1330c9d"
 
 [[package]]
 name = "bytemuck"
@@ -744,22 +763,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "enough"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "177a59811828ea5dbc8927662d444ffee7b55a44696486f1b1a245ae9e652533"
-
-[[package]]
-name = "ente_media_inspector"
+name = "ente_image"
 version = "0.1.0"
 dependencies = [
+ "heic_decoder",
+ "image",
+ "kamadak-exif",
+ "thiserror 2.0.18",
+ "tiff",
+]
+
+[[package]]
+name = "ente_photos"
+version = "0.1.0"
+dependencies = [
+ "ente_image",
  "fast_image_resize",
  "half",
  "html-escape",
  "image",
  "imageproc",
- "kamadak-exif",
- "libheic-rs",
  "nalgebra 0.33.2",
  "ndarray 0.16.1",
  "once_cell",
@@ -768,7 +791,6 @@ dependencies = [
  "quick-xml",
  "regex",
  "thiserror 2.0.18",
- "tiff",
  "usearch",
 ]
 
@@ -776,7 +798,8 @@ dependencies = [
 name = "ente_photos_rust"
 version = "0.0.1"
 dependencies = [
- "ente_media_inspector",
+ "ente_image",
+ "ente_photos",
  "flutter_rust_bridge",
 ]
 
@@ -1131,14 +1154,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
-name = "heic-decoder"
+name = "heic_decoder"
 version = "0.1.0"
-source = "git+https://github.com/laurens-pilot/libheic-rs.git?tag=v0.1.5#18307d94c72c13eb9526655b748c333722ee145b"
+source = "git+https://github.com/ente-io/heic-decoder.git?rev=d47a0f9c9e8c4c9e166c5a4b5734f8ad1f88f7a7#d47a0f9c9e8c4c9e166c5a4b5734f8ad1f88f7a7"
 dependencies = [
  "archmage",
- "enough",
+ "brotli",
+ "flate2",
+ "image",
+ "libc",
+ "png",
+ "rav1d",
  "safe_unaligned_simd",
- "whereat",
+ "scuffle-h265",
 ]
 
 [[package]]
@@ -1710,21 +1738,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "libheic-rs"
-version = "0.1.5"
-source = "git+https://github.com/laurens-pilot/libheic-rs.git?tag=v0.1.5#18307d94c72c13eb9526655b748c333722ee145b"
-dependencies = [
- "brotli",
- "flate2",
- "heic-decoder",
- "image",
- "libc",
- "png",
- "rav1d",
- "scuffle-h265",
-]
-
-[[package]]
 name = "libloading"
 version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1817,9 +1830,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.7.6"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
+checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
 name = "miniz_oxide"
@@ -2395,10 +2408,11 @@ dependencies = [
 [[package]]
 name = "rav1d"
 version = "1.1.0"
-source = "git+https://github.com/laurens-pilot/libheic-rs.git?tag=v0.1.5#18307d94c72c13eb9526655b748c333722ee145b"
+source = "git+https://github.com/ente-io/rav1d.git?branch=arm32_stable#d8205d5e5c7aa0265956e660fae2c005b3b3ad9b"
 dependencies = [
  "assert_matches",
  "atomig",
+ "av-data",
  "bitflags",
  "cc",
  "cfg-if",
@@ -2407,6 +2421,7 @@ dependencies = [
  "parking_lot",
  "paste",
  "raw-cpuid",
+ "static_assertions",
  "strum",
  "to_method",
  "zerocopy 0.7.35",
@@ -2579,9 +2594,9 @@ dependencies = [
 
 [[package]]
 name = "safe_unaligned_simd"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1d612ce01a584cfab72164fb3f689112249fafeab7b4181c14601d19b34cb0a"
+checksum = "f9c874fb993656d484725d58fbfddb39dfcf98ebcadc1a1d09568aa6b39bafba"
 
 [[package]]
 name = "scopeguard"
@@ -2740,6 +2755,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
 name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2747,23 +2768,22 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "strum"
-version = "0.26.3"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+checksum = "af23d6f6c1a224baef9d3f61e287d2761385a5b88fdab4eb4c6f11aeb54c4bcf"
 dependencies = [
  "strum_macros",
 ]
 
 [[package]]
 name = "strum_macros"
-version = "0.26.4"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+checksum = "7695ce3845ea4b33927c055a39dc438a45b059f7c1b3d91d38d10355fb8cbca7"
 dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "rustversion",
  "syn",
 ]
 
@@ -3098,12 +3118,6 @@ name = "weezl"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
-
-[[package]]
-name = "whereat"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ec598a1ade4224cfe3c5dace0d5d7deec9ed670503ff99d4946973c8c094534"
 
 [[package]]
 name = "wide"

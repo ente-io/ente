@@ -1,12 +1,12 @@
 ---
 title: Installing Ente Locker
-description: Guide to download and install Ente Locker on your mobile devices
+description: Guide to install Ente Locker or use it in your browser
 ---
 
 # Installing Ente Locker
 
-Ente Locker is available on iOS and Android. Desktop and web versions are not
-currently available, though public links can be opened in any browser.
+Ente Locker is available on iOS, Android, and the web. Native desktop apps are
+not currently available.
 
 ## iOS and iPadOS
 
@@ -24,9 +24,19 @@ Ente Locker for Android can be downloaded through multiple channels:
 If you install the APK directly from GitHub, see
 [Verify the Ente Locker Android APK](/locker/getting-started/android-apk-signature).
 
+## Web browser
+
+You can access Ente Locker directly in your browser at
+[locker.ente.com](https://locker.ente.com).
+
+> [!NOTE]
+>
+> The older `locker.ente.io` address now redirects to `locker.ente.com`. Your
+> same Ente account and password continue to work there.
+
 ## Next steps
 
-Now that you've installed Ente Locker, proceed to
+After opening Ente Locker, proceed to
 [create your account and log in](/locker/getting-started/signup).
 
 ## Related FAQs
@@ -34,3 +44,4 @@ Now that you've installed Ente Locker, proceed to
 - [How do I install Ente Locker on Android?](/locker/faq/getting-started#locker-install-android)
 - [How do I install Ente Locker on iPhone or iPad?](/locker/faq/getting-started#locker-install-ios)
 - [Is Ente Locker available on desktop?](/locker/faq/getting-started#locker-desktop-availability)
+- [Can I access Locker from a web browser?](/locker/faq/getting-started#locker-web-access)

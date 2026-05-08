@@ -29,3 +29,12 @@ impl From<image::ImageError> for MlError {
         MlError::Decode(value.to_string())
     }
 }
+
+impl From<ente_image::ImageError> for MlError {
+    fn from(value: ente_image::ImageError) -> Self {
+        match value {
+            ente_image::ImageError::Decode(message) => MlError::Decode(message),
+            ente_image::ImageError::Postprocess(message) => MlError::Postprocess(message),
+        }
+    }
+}

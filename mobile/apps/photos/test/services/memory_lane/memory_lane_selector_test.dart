@@ -308,13 +308,13 @@ void main() {
       );
     });
 
-    test("computes fifth birthday cutoff", () {
+    test("computes third birthday cutoff", () {
       final birthDate = DateTime(2010, 6, 15);
       final cutoff = MemoryLaneService.minimumEligibleCreationTimeMicros(
         "2010-06-15",
       );
       final expected =
-          DateTime(birthDate.year + 5, birthDate.month, birthDate.day)
+          DateTime(birthDate.year + 3, birthDate.month, birthDate.day)
               .microsecondsSinceEpoch;
       expect(cutoff, equals(expected));
     });
@@ -323,7 +323,7 @@ void main() {
       final cutoff = MemoryLaneService.minimumEligibleCreationTimeMicros(
         "2012-02-29",
       );
-      final expected = DateTime(2017, 2, 28).microsecondsSinceEpoch;
+      final expected = DateTime(2015, 2, 28).microsecondsSinceEpoch;
       expect(cutoff, equals(expected));
     });
   });

@@ -46,7 +46,7 @@ import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
 
-const String kAccountsUrl = "https://accounts.ente.io";
+const String kAccountsUrl = "https://accounts.ente.com";
 
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
@@ -469,12 +469,13 @@ class UserService {
       await dialog.hide();
       if (response.statusCode == 200) {
         Widget page;
-        final String passkeySessionID = response.data["passkeySessionID"];
-        final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
-        String twoFASessionID = response.data["twoFactorSessionID"];
+        final responseData = response.data;
+        final String passkeySessionID = responseData["passkeySessionID"] ?? "";
+        final String accountsUrl = responseData["accountsUrl"] ?? kAccountsUrl;
+        String twoFASessionID = responseData["twoFactorSessionID"] ?? "";
         if (twoFASessionID.isEmpty &&
-            response.data["twoFactorSessionIDV2"] != null) {
-          twoFASessionID = response.data["twoFactorSessionIDV2"];
+            responseData["twoFactorSessionIDV2"] != null) {
+          twoFASessionID = responseData["twoFactorSessionIDV2"];
         }
         if (passkeySessionID.isNotEmpty) {
           page = PasskeyPage(
@@ -798,12 +799,13 @@ class UserService {
     );
     if (response.statusCode == 200) {
       Widget? page;
-      final String passkeySessionID = response.data["passkeySessionID"];
-      final String accountsUrl = response.data["accountsUrl"] ?? kAccountsUrl;
-      String twoFASessionID = response.data["twoFactorSessionID"];
+      final responseData = response.data;
+      final String passkeySessionID = responseData["passkeySessionID"] ?? "";
+      final String accountsUrl = responseData["accountsUrl"] ?? kAccountsUrl;
+      String twoFASessionID = responseData["twoFactorSessionID"] ?? "";
       if (twoFASessionID.isEmpty &&
-          response.data["twoFactorSessionIDV2"] != null) {
-        twoFASessionID = response.data["twoFactorSessionIDV2"];
+          responseData["twoFactorSessionIDV2"] != null) {
+        twoFASessionID = responseData["twoFactorSessionIDV2"];
       }
       _config.setVolatilePassword(userPassword);
       if (passkeySessionID.isNotEmpty) {

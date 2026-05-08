@@ -346,7 +346,7 @@ If you purchased a subscription through the iOS App Store but the app shows "Ple
 **Recommended solution:**
 
 1. Request a refund from Apple for the App Store purchase
-2. Purchase your subscription directly from [web.ente.io](https://web.ente.io) instead
+2. Purchase your subscription directly from [photos.ente.com](https://photos.ente.com) instead
 
 **How to request a refund from Apple:**
 
@@ -363,7 +363,7 @@ If you purchased a subscription through the iOS App Store but the app shows "Ple
 3. Reopen the app and wait a few minutes
 4. If still stuck, proceed with the refund and web purchase
 
-**Why purchase from web.ente.io?**
+**Why purchase from photos.ente.com?**
 
 - More reliable payment processing
 - Can apply discount codes (not possible through App Store)
@@ -467,9 +467,9 @@ If you see "A JavaScript error occurred in the main process - The specified modu
 **Solution:**
 Install the [Microsoft VC++ redistributable runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
 
-### Why can't I log in to web.ente.io on my mobile browser? {#web-login-mobile}
+### Why can't I log in to photos.ente.com on my mobile browser? {#web-login-mobile}
 
-If web.ente.io loads infinitely or gets stuck when you try to log in on a mobile browser (Safari on iPhone, Chrome on Android), this is a known limitation.
+If photos.ente.com loads infinitely or gets stuck when you try to log in on a mobile browser (Safari on iPhone, Chrome on Android), this is a known limitation.
 
 **Why this happens:**
 
@@ -483,12 +483,12 @@ Mobile browsers cannot handle the computationally intensive password derivation 
     - Full feature support including machine learning
 
 2. **Use a desktop or laptop computer**:
-    - web.ente.io works on desktop browsers (Chrome, Firefox, Safari, Edge)
+    - photos.ente.com works on desktop browsers (Chrome, Firefox, Safari, Edge)
     - Or install the [desktop app](https://ente.com/download/desktop)
 
 **Feature differences:**
 
-Mobile browsers on web.ente.io are not supported. Use native apps for the best experience:
+Mobile browsers on photos.ente.com are not supported. Use native apps for the best experience:
 
 - ✅ Mobile apps: Full features including ML, search, video streaming
 - ✅ Desktop/laptop web: Most features (no ML)
@@ -496,9 +496,9 @@ Mobile browsers on web.ente.io are not supported. Use native apps for the best e
 
 ### Why can I see my photos in the app but not in the browser? {#photos-visible-app-not-browser}
 
-If photos appear in the mobile or desktop app but not on web.ente.io, try logging out and logging back in on the browser. This clears any stale session data and refreshes your library view.
+If photos appear in the mobile or desktop app but not on photos.ente.com, try logging out and logging back in on the browser. This clears any stale session data and refreshes your library view.
 
-You can also try opening web.ente.io in an incognito or private window to rule out browser caching issues.
+You can also try opening photos.ente.com in an incognito or private window to rule out browser caching issues.
 
 ### How do I identify which files failed to upload? {#identify-failed-uploads}
 
@@ -516,11 +516,11 @@ Open `Settings > Backup` to see the backup status and any errors.
 
 ### Why aren't videos playing on web? {#content-blocker-videos}
 
-If videos aren't playing on web.ente.io, browser content blockers or ad blockers may be blocking video playback.
+If videos aren't playing on photos.ente.com, browser content blockers or ad blockers may be blocking video playback.
 
 **Solution:**
 
-Disable your content blocker or add `web.ente.io` to your allowlist. Wait 15-20 seconds for changes to take effect before trying again.
+Disable your content blocker or add `photos.ente.com` to your allowlist. Wait 15-20 seconds for changes to take effect before trying again.
 
 **Known issue with AdGuard:** AdGuard's basic filter blocks videos in Ente when using AdGuard Mini on Safari. This has been [reported to AdGuard filter developers](https://github.com/AdguardTeam/AdguardFilters/issues/216424).
 

@@ -102,7 +102,6 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "expired token"})
 				return
 			}
-
 			if publicCollectionSummary.PassHash != nil && *publicCollectionSummary.PassHash != "" {
 				if err = m.validatePassword(c, reqPath, publicCollectionSummary); err != nil {
 					logrus.WithError(err).Warn("password validation failed")
@@ -120,7 +119,10 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 					return
 				}
 				if reached {
-					c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "reached device limit"})
+					c.AbortWithStatusJSON(
+						ente.ErrLinkDeviceLimitExceeded.HttpStatusCode,
+						&ente.ErrLinkDeviceLimitExceeded,
+					)
 					return
 				}
 				if linkDeviceToken != "" {
@@ -288,10 +290,14 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 
 func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
+	embedAlbumsOrigin := viper.GetString("apps.embed-albums")
 
 	if origin == "" ||
 		origin == viper.GetString("apps.public-albums") ||
-		origin == viper.GetString("apps.embed-albums") ||
+		origin == embedAlbumsOrigin ||
+		// Keep old embedded iframes working after moving the default embed app
+		// origin to embed.ente.com. Custom embed origins should not inherit this.
+		(embedAlbumsOrigin == "https://embed.ente.com" && origin == "https://embed.ente.io") ||
 		origin == viper.GetString("apps.public-locker") ||
 		strings.HasPrefix(strings.ToLower(origin), "http://localhost:") {
 		return nil

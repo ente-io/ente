@@ -27,6 +27,7 @@
 .pub-cache/
 .pub/
 /build/
+**/.gradle/
 lib/l10n/untranslated_messages.json
 
 # Web related

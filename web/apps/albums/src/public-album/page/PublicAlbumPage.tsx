@@ -253,7 +253,7 @@ export default function PublicAlbumPage() {
         });
 
     /**
-     * Check if we need to redirect Trip albums from custom domains to albums.ente.io
+     * Check if we need to redirect Trip albums from custom domains to albums.ente.com
      * Returns true if a redirect was initiated, false otherwise.
      * Reason: custom domains do not support the Trip layout fully
      */

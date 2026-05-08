@@ -34,14 +34,15 @@ existing 2FA codes that you have configured (if any).
 Passkeys get enabled if you add one (or more) passkeys to your account.
 Conversely, passkeys get disabled if you remove all your existing passkeys.
 
-To add and remove passkeys, use the _Passkey_ option in the settings menu. This
-will open up _accounts.ente.io_, where you can manage your passkeys.
+To add and remove passkeys, use the _Passkey_ option in the settings menu. This will open the Ente Accounts web app (_accounts.ente.com_), where you can manage your passkeys.
+
+> [!NOTE]
+>
+> Ente Accounts has moved from _accounts.ente.io_ to _accounts.ente.com_. Older passkeys created on the old domain continue to work, and Ente will automatically open the right domain for your account. New passkeys are created on _accounts.ente.com_.
 
 ## Login with passkeys
 
-If passkeys are enabled, then _accounts.ente.io_ will automatically open when
-you log into your Ente account on a new device. Here you can follow the
-instructions given by the browser to verify your passkey.
+If passkeys are enabled, then the Ente Accounts web app will automatically open when you log into your Ente account on a new device. Here you can follow the instructions given by the browser to verify your passkey.
 
 > These instructions different for each browser and device, but generally they
 > will ask you to use the same mechanism that you used when you created the

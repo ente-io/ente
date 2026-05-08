@@ -21,6 +21,7 @@ import {
     LockerTitledNestedSidebarDrawer,
     type LockerNestedSidebarDrawerVisibilityProps,
 } from "./LockerSidebarShell";
+import { LockerTwoFactorDrawer } from "./LockerTwoFactorDrawer";
 
 export const LockerAccountDrawer: React.FC<
     LockerNestedSidebarDrawerVisibilityProps
@@ -31,17 +32,20 @@ export const LockerAccountDrawer: React.FC<
 
     const [isRecoveryKeyOpen, setIsRecoveryKeyOpen] = useState(false);
     const [isSessionsOpen, setIsSessionsOpen] = useState(false);
+    const [isTwoFactorOpen, setIsTwoFactorOpen] = useState(false);
 
     useEffect(() => {
         if (!open) {
             setIsRecoveryKeyOpen(false);
             setIsSessionsOpen(false);
+            setIsTwoFactorOpen(false);
         }
     }, [open]);
 
     const handleRootClose = () => {
         setIsRecoveryKeyOpen(false);
         setIsSessionsOpen(false);
+        setIsTwoFactorOpen(false);
         onClose();
         onRootClose();
     };
@@ -101,7 +105,7 @@ export const LockerAccountDrawer: React.FC<
                         <LockerSidebarCardButton
                             icon={SecurityCheckIcon}
                             label={t("two_factor")}
-                            onClick={() => handleNavigate("/two-factor/setup")}
+                            onClick={() => setIsTwoFactorOpen(true)}
                         />
                         <LockerSidebarCardButton
                             icon={Key01Icon}
@@ -137,6 +141,12 @@ export const LockerAccountDrawer: React.FC<
             <LockerSessionsDrawer
                 open={isSessionsOpen}
                 onClose={() => setIsSessionsOpen(false)}
+                onRootClose={handleRootClose}
+            />
+
+            <LockerTwoFactorDrawer
+                open={isTwoFactorOpen}
+                onClose={() => setIsTwoFactorOpen(false)}
                 onRootClose={handleRootClose}
             />
 

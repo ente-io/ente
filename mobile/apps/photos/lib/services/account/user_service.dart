@@ -62,8 +62,9 @@ class UserService {
   static const kIsEmailMFAEnabled = "is_email_mfa_enabled";
 
   final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
-  final _emailToPubKeyCache =
-      TimedCache<String, String>(duration: const Duration(seconds: 10));
+  final _emailToPubKeyCache = TimedCache<String, String>(
+    duration: const Duration(seconds: 10),
+  );
 
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
@@ -73,8 +74,9 @@ class UserService {
 
   UsersGateway get _gateway => usersGateway;
 
-  final ValueNotifier<String?> emailValueNotifier =
-      ValueNotifier<String?>(null);
+  final ValueNotifier<String?> emailValueNotifier = ValueNotifier<String?>(
+    null,
+  );
 
   UserService._privateConstructor();
 
@@ -85,8 +87,9 @@ class UserService {
     if (_loggedOutEventSubscription != null) {
       await _loggedOutEventSubscription!.cancel();
     }
-    _loggedOutEventSubscription =
-        Bus.instance.on<UserLoggedOutEvent>().listen((_) {
+    _loggedOutEventSubscription = Bus.instance.on<UserLoggedOutEvent>().listen((
+      _,
+    ) {
       emailValueNotifier.value = null;
     });
     if (_signedInEventSubscription != null) {
@@ -96,7 +99,7 @@ class UserService {
       emailValueNotifier.value = Configuration.instance.getEmail();
     });
     _preferences = await SharedPreferences.getInstance();
-    if (Configuration.instance.isLoggedIn() && !isOfflineMode) {
+    if (Configuration.instance.isLoggedIn() && !isLocalGalleryMode) {
       // add artificial delay in refreshing 2FA status
       Future.delayed(
         const Duration(seconds: 5),
@@ -113,8 +116,10 @@ class UserService {
     bool isResetPasswordScreen = false,
     String? purpose,
   }) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       await _gateway.sendOtt(
@@ -184,9 +189,7 @@ class UserService {
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
-      unawaited(
-        showGenericErrorBottomSheet(context: context, error: e),
-      );
+      unawaited(showGenericErrorBottomSheet(context: context, error: e));
     }
   }
 
@@ -233,10 +236,7 @@ class UserService {
       if (userDetails.profileData != null) {
         final bool currentEmailMFAStatus =
             userDetails.profileData!.isEmailMFAEnabled;
-        await _preferences.setBool(
-          kIsEmailMFAEnabled,
-          currentEmailMFAStatus,
-        );
+        await _preferences.setBool(kIsEmailMFAEnabled, currentEmailMFAStatus);
         hasSecurityStatusChanged = hasSecurityStatusChanged ||
             previousEmailMFAStatus != currentEmailMFAStatus;
         final bool currentTwoFactorStatus =
@@ -351,8 +351,10 @@ class UserService {
   }
 
   Future<void> onPassKeyVerified(BuildContext context, Map response) async {
-    final ProgressDialog dialog =
-        createProgressDialog(context, context.l10n.pleaseWait);
+    final ProgressDialog dialog = createProgressDialog(
+      context,
+      context.l10n.pleaseWait,
+    );
     await dialog.show();
     try {
       final userPassword = Configuration.instance.getVolatilePassword();
@@ -394,8 +396,10 @@ class UserService {
     String ott, {
     bool isResettingPasswordScreen = false,
   }) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       final responseData = await _gateway.verifyEmail(
@@ -430,9 +434,7 @@ class UserService {
             page = const PasswordReentryPage();
           }
         } else {
-          page = const PasswordEntryPage(
-            mode: PasswordEntryMode.set,
-          );
+          page = const PasswordEntryPage(mode: PasswordEntryMode.set);
         }
       }
       await Navigator.of(context).pushAndRemoveUntil(
@@ -459,8 +461,9 @@ class UserService {
         showAlertBottomSheet(
           context,
           title: AppLocalizations.of(context).incorrectCode,
-          message:
-              AppLocalizations.of(context).sorryTheCodeYouveEnteredIsIncorrect,
+          message: AppLocalizations.of(
+            context,
+          ).sorryTheCodeYouveEnteredIsIncorrect,
           assetPath: 'assets/warning-green.png',
         );
       }
@@ -495,8 +498,10 @@ class UserService {
     String email,
     String ott,
   ) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       await _gateway.changeEmail(email: email, ott: ott);
@@ -523,8 +528,9 @@ class UserService {
         showAlertBottomSheet(
           context,
           title: AppLocalizations.of(context).incorrectCode,
-          message:
-              AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+          message: AppLocalizations.of(
+            context,
+          ).authenticationFailedPleaseTryAgain,
           assetPath: 'assets/warning-green.png',
         );
       }
@@ -590,8 +596,9 @@ class UserService {
         isUpdate: false,
       );
       final setupSRPResponse = await _gateway.setupSrp(request);
-      final serverB =
-          SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+      final serverB = SRP6Util.decodeBigInt(
+        base64Decode(setupSRPResponse.srpB),
+      );
       // ignore: unused_local_variable, need to calculate secret to get M1
       final clientS = client.calculateSecret(serverB);
       final clientM = client.calculateClientEvidenceMessage();
@@ -811,8 +818,9 @@ class UserService {
         showAlertBottomSheet(
           context,
           title: AppLocalizations.of(context).incorrectCode,
-          message:
-              AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+          message: AppLocalizations.of(
+            context,
+          ).authenticationFailedPleaseTryAgain,
           assetPath: 'assets/warning-green.png',
         );
       }
@@ -823,8 +831,9 @@ class UserService {
       showAlertBottomSheet(
         context,
         title: AppLocalizations.of(context).oops,
-        message:
-            AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+        message: AppLocalizations.of(
+          context,
+        ).authenticationFailedPleaseTryAgain,
         assetPath: 'assets/warning-green.png',
       );
     }
@@ -835,8 +844,10 @@ class UserService {
     String sessionID,
     TwoFactorType type,
   ) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       _logger.info("recovering two factor");
@@ -879,8 +890,9 @@ class UserService {
         showAlertBottomSheet(
           context,
           title: AppLocalizations.of(context).oops,
-          message:
-              AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+          message: AppLocalizations.of(
+            context,
+          ).somethingWentWrongPleaseTryAgain,
           assetPath: 'assets/warning-green.png',
         );
       }
@@ -908,8 +920,10 @@ class UserService {
     String encryptedSecret,
     String secretDecryptionNonce,
   ) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     String secret;
     try {
@@ -933,8 +947,9 @@ class UserService {
       await showAlertBottomSheet(
         context,
         title: AppLocalizations.of(context).incorrectRecoveryKey,
-        message:
-            AppLocalizations.of(context).theRecoveryKeyYouEnteredIsIncorrect,
+        message: AppLocalizations.of(
+          context,
+        ).theRecoveryKeyYouEnteredIsIncorrect,
         assetPath: 'assets/warning-green.png',
       );
       return;
@@ -979,8 +994,9 @@ class UserService {
         showAlertBottomSheet(
           context,
           title: AppLocalizations.of(context).oops,
-          message:
-              AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+          message: AppLocalizations.of(
+            context,
+          ).somethingWentWrongPleaseTryAgain,
           assetPath: 'assets/warning-green.png',
         );
       }
@@ -1001,8 +1017,10 @@ class UserService {
   }
 
   Future<void> setupTwoFactor(BuildContext context, Completer completer) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       final responseData = await _gateway.setupTwoFactor();
@@ -1037,18 +1055,24 @@ class UserService {
       await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).verifying);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).verifying,
+    );
     await dialog.show();
-    final encryptionResult =
-        CryptoUtil.encryptSync(CryptoUtil.base642bin(secret), recoveryKey);
+    final encryptionResult = CryptoUtil.encryptSync(
+      CryptoUtil.base642bin(secret),
+      recoveryKey,
+    );
     try {
       await _gateway.enableTwoFactor(
         code: code,
-        encryptedTwoFactorSecret:
-            CryptoUtil.bin2base64(encryptionResult.encryptedData!),
-        twoFactorSecretDecryptionNonce:
-            CryptoUtil.bin2base64(encryptionResult.nonce!),
+        encryptedTwoFactorSecret: CryptoUtil.bin2base64(
+          encryptionResult.encryptedData!,
+        ),
+        twoFactorSecretDecryptionNonce: CryptoUtil.bin2base64(
+          encryptionResult.nonce!,
+        ),
       );
       await setTwoFactor(value: true);
       await dialog.hide();
@@ -1064,8 +1088,9 @@ class UserService {
           showAlertBottomSheet(
             context,
             title: AppLocalizations.of(context).incorrectCode,
-            message:
-                AppLocalizations.of(context).pleaseVerifyTheCodeYouHaveEntered,
+            message: AppLocalizations.of(
+              context,
+            ).pleaseVerifyTheCodeYouHaveEntered,
             assetPath: 'assets/warning-green.png',
           );
           return false;
@@ -1075,8 +1100,9 @@ class UserService {
       showAlertBottomSheet(
         context,
         title: AppLocalizations.of(context).somethingWentWrong,
-        message: AppLocalizations.of(context)
-            .pleaseContactSupportIfTheProblemPersists,
+        message: AppLocalizations.of(
+          context,
+        ).pleaseContactSupportIfTheProblemPersists,
         assetPath: 'assets/warning-green.png',
       );
     }
@@ -1104,8 +1130,9 @@ class UserService {
       await showAlertBottomSheet(
         context,
         title: AppLocalizations.of(context).somethingWentWrong,
-        message: AppLocalizations.of(context)
-            .pleaseContactSupportIfTheProblemPersists,
+        message: AppLocalizations.of(
+          context,
+        ).pleaseContactSupportIfTheProblemPersists,
         assetPath: 'assets/warning-green.png',
       );
     }
@@ -1167,8 +1194,9 @@ class UserService {
 
     await Configuration.instance.setUserID(responseData["id"]);
     if (responseData["encryptedToken"] != null) {
-      await Configuration.instance
-          .setEncryptedToken(responseData["encryptedToken"]);
+      await Configuration.instance.setEncryptedToken(
+        responseData["encryptedToken"],
+      );
       await Configuration.instance.setKeyAttributes(
         KeyAttributes.fromMap(responseData["keyAttributes"]),
       );

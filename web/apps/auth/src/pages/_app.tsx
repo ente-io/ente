@@ -47,7 +47,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     return (
         <ThemeProvider theme={authTheme}>
-            <CustomHead {...{ title }} />
+            <CustomHead title={title} />
             <CssBaseline enableColorScheme />
             <AttributedMiniDialog {...miniDialogProps} />
 

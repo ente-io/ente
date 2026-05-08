@@ -39,7 +39,7 @@ Ente's CLI is distributed directly over [GitHub](https://github.com/ente-io/ente
 
 ### Can I access Ente Photos from my browser? {#web-app}
 
-Yes. Ente Photos is also available on the web at [web.ente.io](https://web.ente.io). It offers most of the functionality of the desktop app, except for machine learning and generating video streams.
+Yes. Ente Photos is also available on the web at [photos.ente.com](https://photos.ente.com). It offers most of the functionality of the desktop app, except for machine learning and generating video streams.
 
 You don't need to install anything - just log in with your email and password.
 
@@ -136,10 +136,10 @@ For a detailed walkthrough, see [Creating an account](/photos/getting-started/si
 If you're not receiving the email verification code, try the following:
 
 1. Check your spam folder to see if the email was filtered there
-2. Make sure your email domain or provider isn't blocking emails from ente.io
+2. Make sure your email domain or provider isn't blocking emails from ente.com
 3. Resend the verification code
 
-If you still don't receive it after these steps, email [support@ente.io](mailto:support@ente.io) for further help.
+If you still don't receive it after these steps, email [support@ente.com](mailto:support@ente.com) for further help.
 
 ### What is the recovery key and why is it important? {#recovery-key}
 

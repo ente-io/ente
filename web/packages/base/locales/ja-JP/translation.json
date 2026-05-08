@@ -543,6 +543,7 @@
     "password_lock": "パスワードロック",
     "lock": "ロック",
     "file": "ファイル",
+    "files": "",
     "folder": "フォルダ",
     "google_takeout": "Google から取り出し",
     "free_up_space": "",

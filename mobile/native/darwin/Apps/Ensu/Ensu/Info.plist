@@ -57,6 +57,9 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Allow access to select photos and images to attach to chat messages.</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow microphone access to transcribe spoken chat drafts.</string>
+
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>

@@ -1,7 +1,7 @@
 import { assertionFailed } from "ente-base/assert";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime } from "ente-media/file-metadata";
+import { fileCreationPhotoSortTime } from "ente-media/file-metadata";
 import { randomSample } from "ente-utils/array";
 import { computeNormalCollectionFilesFromSaved } from "../file";
 import {
@@ -250,7 +250,7 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
     // file is otherwise existent.
     const personFaceByID = new Map<
         string,
-        { faceID: string; file: EnteFile; score: number }
+        { faceID: string; file: EnteFile; score: number; sortTime: number }
     >();
 
     const faceIndexes = await savedFaceIndexes();
@@ -260,12 +260,17 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             if (!fileID) continue;
             const file = fileByID.get(fileID);
             if (!file) continue;
-            personFaceByID.set(faceID, { faceID, file, score });
+            personFaceByID.set(faceID, {
+                faceID,
+                file,
+                score,
+                sortTime: fileCreationPhotoSortTime(file),
+            });
         }
     }
 
     // Return annotated "person faces" corresponding to the given face ids,
-    // sorting them by the creation time of the file they belong to.
+    // sorting them by the local photo creation date of the file they belong to.
     //
     // Within the same file, sort by the face score.
     const personFacesSortedNewestFirst = (faceIDs: string[]) =>
@@ -273,8 +278,8 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             .map((faceID) => personFaceByID.get(faceID))
             .filter((pf) => !!pf)
             .sort((a, b) => {
-                const at = fileCreationTime(a.file);
-                const bt = fileCreationTime(b.file);
+                const at = a.sortTime;
+                const bt = b.sortTime;
                 return bt == at ? b.score - a.score : bt - at;
             });
 

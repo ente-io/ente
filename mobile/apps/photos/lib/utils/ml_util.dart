@@ -43,7 +43,7 @@ const _kMlStaleCleanupMaxIds = 5;
 
 enum FileDataForML { thumbnailData, fileData }
 
-enum MLMode { online, offline }
+enum MLMode { enteGallery, localGallery }
 
 class IndexStatus {
   final int indexedItems, pendingItems;
@@ -55,7 +55,7 @@ class IndexStatus {
 class FileMLInstruction {
   final EnteFile file;
   final MLMode mode;
-  final int? offlineFileKey;
+  final int? localGalleryFileKey;
   bool shouldRunFaces;
   bool shouldRunClip;
   bool shouldRunPets;
@@ -64,14 +64,15 @@ class FileMLInstruction {
   FileMLInstruction({
     required this.file,
     required this.mode,
-    this.offlineFileKey,
+    this.localGalleryFileKey,
     required this.shouldRunFaces,
     required this.shouldRunClip,
     this.shouldRunPets = false,
   });
   bool get pendingML => shouldRunFaces || shouldRunClip || shouldRunPets;
-  bool get isOffline => mode == MLMode.offline;
-  int get fileKey => isOffline ? offlineFileKey! : file.uploadedFileID!;
+  bool get isLocalGallery => mode == MLMode.localGallery;
+  int get fileKey =>
+      isLocalGallery ? localGalleryFileKey! : file.uploadedFileID!;
 }
 
 class RemoteMLHydrationSummary {
@@ -102,9 +103,11 @@ class _OnlineMLIndexingCandidates {
 
 Future<IndexStatus> getIndexStatus() async {
   try {
-    final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
-    final mlDataDB =
-        mode == MLMode.offline ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final MLMode mode =
+        isLocalGalleryMode ? MLMode.localGallery : MLMode.enteGallery;
+    final mlDataDB = mode == MLMode.localGallery
+        ? MLDataDB.localGalleryInstance
+        : MLDataDB.instance;
     final int indexableFiles = await _getIndexableFileCount(mode: mode);
     final int facesIndexedFiles = await mlDataDB.getFaceIndexedFileCount();
     final int clipIndexedFiles = await mlDataDB.getClipIndexedFileCount();
@@ -112,7 +115,7 @@ Future<IndexStatus> getIndexStatus() async {
     if (flagService.petEnabled &&
         localSettings.petRecognitionEnabled &&
         localSettings.isMLLocalIndexingEnabled &&
-        (flagService.useRustForML || isOfflineMode)) {
+        (flagService.useRustForML || isLocalGalleryMode)) {
       final int petIndexedFiles = await mlDataDB.getPetIndexedFileCount();
       indexedFiles = math.min(indexedFiles, petIndexedFiles);
     }
@@ -121,7 +124,7 @@ Future<IndexStatus> getIndexStatus() async {
     final showPendingFiles = math.max(indexableFiles - indexedFiles, 0);
     final hasWifiEnabled = await canUseHighBandwidth();
     _logger.info(
-      "Shown IndexStatus: indexedFiles: $showIndexedFiles, pendingFiles: $showPendingFiles, hasWifiEnabled: $hasWifiEnabled, ifOffline: $isOfflineMode. Real values: indexedFiles: $indexedFiles (faces: $facesIndexedFiles, clip: $clipIndexedFiles), indexableFiles: $indexableFiles",
+      "Shown IndexStatus: indexedFiles: $showIndexedFiles, pendingFiles: $showPendingFiles, hasWifiEnabled: $hasWifiEnabled, ifOffline: $isLocalGalleryMode. Real values: indexedFiles: $indexedFiles (faces: $facesIndexedFiles, clip: $clipIndexedFiles), indexableFiles: $indexableFiles",
     );
     return IndexStatus(showIndexedFiles, showPendingFiles, hasWifiEnabled);
   } catch (e, s) {
@@ -146,7 +149,7 @@ Future<_OnlineMLIndexingCandidates>
   final bool petEnabled = flagService.petEnabled &&
       localSettings.petRecognitionEnabled &&
       localSettings.isMLLocalIndexingEnabled &&
-      (flagService.useRustForML || isOfflineMode);
+      (flagService.useRustForML || isLocalGalleryMode);
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFiledIDs = {};
@@ -175,10 +178,16 @@ Future<_OnlineMLIndexingCandidates>
     }
     queuedFiledIDs.add(enteFile.uploadedFileID!);
 
-    final shouldRunFaces =
-        _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip =
-        _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
+    final shouldRunFaces = _shouldRunIndexing(
+      enteFile,
+      faceIndexedFileIDs,
+      faceMlVersion,
+    );
+    final shouldRunClip = _shouldRunIndexing(
+      enteFile,
+      clipIndexedFileIDs,
+      clipMlVersion,
+    );
     final shouldRunPets = petEnabled &&
         _shouldRunIndexing(enteFile, petIndexedFileIDs, petMlVersion);
     if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
@@ -186,7 +195,7 @@ Future<_OnlineMLIndexingCandidates>
     }
     final instruction = FileMLInstruction(
       file: enteFile,
-      mode: MLMode.online,
+      mode: MLMode.enteGallery,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
       shouldRunPets: shouldRunPets,
@@ -208,10 +217,16 @@ Future<_OnlineMLIndexingCandidates>
       continue;
     }
     queuedFiledIDs.add(enteFile.uploadedFileID!);
-    final shouldRunFaces =
-        _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip =
-        _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
+    final shouldRunFaces = _shouldRunIndexing(
+      enteFile,
+      faceIndexedFileIDs,
+      faceMlVersion,
+    );
+    final shouldRunClip = _shouldRunIndexing(
+      enteFile,
+      clipIndexedFileIDs,
+      clipMlVersion,
+    );
     final shouldRunPets = petEnabled &&
         _shouldRunIndexing(enteFile, petIndexedFileIDs, petMlVersion);
     if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
@@ -220,7 +235,7 @@ Future<_OnlineMLIndexingCandidates>
     hiddenFilesToIndex.add(
       FileMLInstruction(
         file: enteFile,
-        mode: MLMode.online,
+        mode: MLMode.enteGallery,
         shouldRunFaces: shouldRunFaces,
         shouldRunClip: shouldRunClip,
         shouldRunPets: shouldRunPets,
@@ -271,15 +286,15 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return [...candidateSplit.matched, ...candidateSplit.unmatched];
 }
 
-Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
-  _logger.info('getOfflineFilesForMlIndexing called');
-  final mlDataDB = MLDataDB.offlineInstance;
+Future<List<FileMLInstruction>> getLocalGalleryFilesForMlIndexing() async {
+  _logger.info('getLocalGalleryFilesForMlIndexing called');
+  final mlDataDB = MLDataDB.localGalleryInstance;
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
   final bool petEnabled = flagService.petEnabled &&
       localSettings.petRecognitionEnabled &&
-      (flagService.useRustForML || isOfflineMode);
+      (flagService.useRustForML || isLocalGalleryMode);
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFileIDs = {};
@@ -302,8 +317,9 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
     localIds.add(localID);
   }
 
-  final localIdToIntId =
-      await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+  final localIdToIntId = await OfflineFilesDB.instance.ensureLocalIntIds(
+    localIds,
+  );
 
   for (final enteFile in candidateFiles) {
     final localID = enteFile.localID!;
@@ -337,8 +353,8 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
     instructions.add(
       FileMLInstruction(
         file: enteFile,
-        mode: MLMode.offline,
-        offlineFileKey: localIntId,
+        mode: MLMode.localGallery,
+        localGalleryFileKey: localIntId,
         shouldRunFaces: shouldRunFaces,
         shouldRunClip: shouldRunClip,
         shouldRunPets: shouldRunPets,
@@ -355,9 +371,9 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   int yieldSize, {
   required MLMode mode,
 }) async* {
-  if (mode == MLMode.offline) {
+  if (mode == MLMode.localGallery) {
     final List<FileMLInstruction> filesToIndex =
-        await getOfflineFilesForMlIndexing();
+        await getLocalGalleryFilesForMlIndexing();
     final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(yieldSize);
     for (final batch in chunks) {
       yield batch;
@@ -366,8 +382,9 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   }
   final mlDataDB = MLDataDB.instance;
   final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
-  final List<List<FileMLInstruction>> chunks =
-      filesToIndex.chunks(embeddingFetchLimit);
+  final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(
+    embeddingFetchLimit,
+  );
   List<FileMLInstruction> batchToYield = [];
 
   for (final chunk in chunks) {
@@ -468,8 +485,9 @@ Future<FileDataResponse> _fetchFilesDataForMlHydrationWithRecovery(
     await CollectionsService.instance.sync();
     final suspects = <int>{};
     for (final id in batchIds) {
-      final collectionIds =
-          await FilesDB.instance.getAllCollectionIDsOfFile(id);
+      final collectionIds = await FilesDB.instance.getAllCollectionIDsOfFile(
+        id,
+      );
       final hasAccess = collectionIds.any((cid) {
         final c = CollectionsService.instance.getCollectionByID(cid);
         return c != null && !c.isDeleted;
@@ -528,7 +546,7 @@ Future<List<FileMLInstruction>> hydrateRemoteMLDataForInstructions(
   final Set<int> ids = {};
   final Map<int, FileMLInstruction> pendingIndex = {};
   for (final instruction in instructions) {
-    if (instruction.isOffline) {
+    if (instruction.isLocalGallery) {
       continue;
     }
     ids.add(instruction.file.uploadedFileID!);
@@ -592,9 +610,7 @@ List<Face>? _getFacesFromRemoteEmbedding(FileDataEntity fileMl) {
   }
   final List<Face> faces = [];
   if (remoteFaceEmbedding!.faces.isEmpty) {
-    faces.add(
-      Face.empty(fileMl.fileID),
-    );
+    faces.add(Face.empty(fileMl.fileID));
   } else {
     for (final f in remoteFaceEmbedding.faces) {
       f.fileInfo = FileInfo(
@@ -611,8 +627,10 @@ bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
   final fileID = fileML.fileID;
   final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
   if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {
-    _logger.info("Discarding remote embedding for fileID $fileID "
-        "because version is ${faceEmbedding?.version} and we need $faceMlVersion");
+    _logger.info(
+      "Discarding remote embedding for fileID $fileID "
+      "because version is ${faceEmbedding?.version} and we need $faceMlVersion",
+    );
     return true;
   }
   // are all landmarks equal?
@@ -631,8 +649,10 @@ bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
     }
   }
   if (allLandmarksEqual) {
-    _logger.info("Discarding remote embedding for fileID $fileID "
-        "because landmarks are equal");
+    _logger.info(
+      "Discarding remote embedding for fileID $fileID "
+      "because landmarks are equal",
+    );
     _logger.info(
       faceEmbedding.faces
           .map((e) => e.detection.landmarks.toString())
@@ -650,7 +670,7 @@ Future<int> getIndexableFileCount() async {
 }
 
 Future<int> _getIndexableFileCount({required MLMode mode}) async {
-  if (mode == MLMode.offline) {
+  if (mode == MLMode.localGallery) {
     final files = await SearchService.instance.getAllFilesForSearch();
     return files
         .where(
@@ -694,11 +714,7 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
       }
       file = await getFile(enteFile, isOrigin: true);
     } catch (e, s) {
-      _logger.severe(
-        "Could not get file for $enteFile",
-        e,
-        s,
-      );
+      _logger.severe("Could not get file for $enteFile", e, s);
     }
   }
   imagePath = file?.path;
@@ -1259,10 +1275,7 @@ class _DecodeFallbackFile {
   final File file;
   final Directory directory;
 
-  const _DecodeFallbackFile({
-    required this.file,
-    required this.directory,
-  });
+  const _DecodeFallbackFile({required this.file, required this.directory});
 }
 
 Future<_DecodeFallbackFile?> _createJpegDecodeFallbackFile({

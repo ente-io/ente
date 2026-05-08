@@ -4,7 +4,7 @@ import "dart:collection";
 import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -36,7 +36,7 @@ class MemoryVideoPrefetcher {
     bool Function()? stillActive,
     bool replacePending = false,
   }) {
-    if (_disposed || isOfflineMode) return;
+    if (_disposed || isLocalGalleryMode) return;
     if (replacePending) {
       clearPending();
     }
@@ -70,7 +70,7 @@ class MemoryVideoPrefetcher {
   }
 
   void _pump() {
-    if (_disposed || isOfflineMode) return;
+    if (_disposed || isLocalGalleryMode) return;
     while (_activeCount < kMemoryVideoMaxConcurrentPrefetches &&
         _queue.isNotEmpty) {
       final entry = _queue.removeFirst();
@@ -93,7 +93,7 @@ class MemoryVideoPrefetcher {
 
   bool _isActive(bool Function()? stillActive) {
     return !_disposed &&
-        !isOfflineMode &&
+        !isLocalGalleryMode &&
         (stillActive == null || stillActive());
   }
 

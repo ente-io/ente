@@ -1,4 +1,4 @@
-use ente_media_inspector::vector_db;
+use ente_photos::ml::vector_db;
 use flutter_rust_bridge::frb;
 
 type SearchMatch = (Vec<u64>, Vec<f32>);
@@ -80,7 +80,6 @@ fn validate_semantic_search_exact_queries(
 
     Ok(())
 }
-
 
 fn flatten_semantic_search_exact_image_embeddings(
     image_embeddings: &[Vec<f32>],
@@ -201,7 +200,6 @@ pub struct SemanticSearchExactResponse {
     pub matches_per_query: Vec<Vec<SemanticSearchExactMatch>>,
 }
 
-
 #[frb(opaque)]
 pub struct SemanticSearchExactCache {
     image_file_ids: Vec<i64>,
@@ -258,7 +256,6 @@ pub fn semantic_search_exact(
         &minimum_similarities,
     )
 }
-
 
 #[frb(opaque)]
 pub struct VectorDB {
@@ -486,5 +483,4 @@ mod tests {
 
         assert!(err.contains("embedding dimension mismatch"));
     }
-
 }

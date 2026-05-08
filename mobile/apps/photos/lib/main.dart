@@ -207,8 +207,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // App LifeCycle
     AppLifecycleService.instance.init(prefs);
-    AppLifecycleService.instance
-        .onAppInBackground('init via: WorkManager $tlog');
+    AppLifecycleService.instance.onAppInBackground(
+      'init via: WorkManager $tlog',
+    );
 
     // Crypto rel.
     await Computer.shared().turnOn(workersCount: 4);
@@ -259,9 +260,16 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await initializeDateFormatting(locale?.languageCode ?? "en");
     // only runs for android
     _logger.info("[BG TASK] home widget sync");
+    if (!isLocalGalleryMode &&
+        hasGrantedMLConsent &&
+        localSettings.isMLLocalIndexingEnabled) {
+      PersonService.init(entityService, MLDataDB.instance, prefs);
+      _logger
+          .info("[BG TASK] person service initialized for memories recompute");
+    }
     await _homeWidgetSync(true);
 
-    if ((isOfflineMode || flagService.enableMLInBackground) &&
+    if ((isLocalGalleryMode || flagService.enableMLInBackground) &&
         hasGrantedMLConsent) {
       await controller.init();
       final canRunML = controller.requestCompute(ml: true);
@@ -435,10 +443,7 @@ Future<void> _ensureRustInitialized({required String via}) async {
     return;
   }
 
-  final initFuture = Future.wait([
-    EntePhotosRust.init(),
-    EnteRust.init(),
-  ]);
+  final initFuture = Future.wait([EntePhotosRust.init(), EnteRust.init()]);
   _rustInitFuture = initFuture;
   try {
     await initFuture;

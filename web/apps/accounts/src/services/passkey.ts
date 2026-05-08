@@ -43,6 +43,7 @@ const Passkey = z.object({
 export type Passkey = z.infer<typeof Passkey>;
 
 const GetPasskeysResponse = z.object({
+    accountsUrl: z.string().optional(),
     passkeys: z.array(Passkey).nullish().transform(nullToUndefined),
 });
 
@@ -59,8 +60,10 @@ export const getPasskeys = async (token: string) => {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
     ensureOk(res);
-    const { passkeys } = GetPasskeysResponse.parse(await res.json());
-    return passkeys ?? [];
+    const { accountsUrl, passkeys } = GetPasskeysResponse.parse(
+        await res.json(),
+    );
+    return { accountsUrl, passkeys: passkeys ?? [] };
 };
 
 /**
@@ -372,6 +375,7 @@ export const shouldRestrictToWhitelistedRedirect = () => {
     const hostname = new URL(window.location.origin).hostname;
     return (
         hostname.endsWith("localhost") ||
+        hostname.endsWith(".ente.com") ||
         hostname.endsWith(".ente.io") ||
         hostname.endsWith(".ente.sh")
     );
@@ -379,6 +383,7 @@ export const shouldRestrictToWhitelistedRedirect = () => {
 
 const _isWhitelistedRedirect = (redirectURL: URL) =>
     (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
+    redirectURL.host.endsWith(".ente.com") ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh");
 

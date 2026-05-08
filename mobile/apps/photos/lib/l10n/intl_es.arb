@@ -877,7 +877,7 @@
   "playstoreSubscription": "Suscripción en la PlayStore",
   "appstoreSubscription": "Suscripción en la AppStore",
   "subAlreadyLinkedErrMessage": "Tu {id} ya está vinculada a otra cuenta de Ente.\nSi deseas utilizar tu {id} con esta cuenta, ponte en contacto con nuestro servicio de asistencia''",
-  "visitWebToManage": "Por favor, visita web.ente.io para administrar tu suscripción",
+  "visitWebToManage": "Por favor, visita {webUrl} para administrar tu suscripción",
   "managePaymentMethod": "Gestionar métodos de pago",
   "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
   "paymentFailed": "Pago fallido",
@@ -1310,7 +1310,7 @@
   "loadMessage5": "Nuestro código fuente y criptografía han sido auditados externamente",
   "loadMessage6": "Puedes compartir enlaces a tus álbumes con tus seres queridos",
   "loadMessage7": "Nuestras aplicaciones móviles se ejecutan en segundo plano para cifrar y hacer copias de seguridad de las nuevas fotos que hagas clic",
-  "loadMessage8": "web.ente.io tiene un cargador sofisticado",
+  "loadMessage8": "{webUrl} tiene un cargador sofisticado",
   "loadMessage9": "Utilizamos Xchacha20Poly1305 para cifrar tus datos de forma segura",
   "photoDescriptions": "Descripciones de fotos",
   "searchResultFileName": "Nombre del archivo",
@@ -1587,7 +1587,7 @@
   "playOnTv": "Reproducir álbum en TV",
   "pair": "Emparejar",
   "deviceNotFound": "Dispositivo no encontrado",
-  "castInstruction": "Visita cast.ente.io en el dispositivo que quieres emparejar.\n\nIntroduce el código de abajo para reproducir el álbum en tu TV.",
+  "castInstruction": "Visita {castUrl} en el dispositivo que quieres emparejar.\n\nIntroduce el código de abajo para reproducir el álbum en tu TV.",
   "deviceCodeHint": "Introduce el código",
   "joinDiscord": "Únete al Discord",
   "locations": "Ubicaciones",
@@ -1728,7 +1728,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {Añadido 1 archivo a {personName}} other {Añadidos {count} archivos a {personName}}}",
+  "addedFilesToPerson": "{count, plural, one {}=1 {Añadido 1 archivo a {personName}} other {Añadidos {count} archivos a {personName}}}",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1742,7 +1742,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 archivo ya está enlazado a {personName}} other {{count} archivos ya están enlazados a {personName}}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, one {}=1 {1 archivo ya está enlazado a {personName}} other {{count} archivos ya están enlazados a {personName}}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1825,7 +1825,7 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
-  "adminsSuccessfullyAdded": "{count, plural, =0 {No se han añadido administradores} =1 {1 administrador añadido con éxito} other {{count} administradores añadidos con éxito}}",
+  "adminsSuccessfullyAdded": "{count, plural, one {}=0 {No se han añadido administradores} =1 {1 administrador añadido con éxito} other {{count} administradores añadidos con éxito}}",
   "@adminsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1835,7 +1835,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, =0 {Añade admin} =1 {¡Añade admin} other {¡Añade administradores}}",
+  "addAdmins": "{count, plural, one {}=0 {Añade admin} =1 {¡Añade admin} other {¡Añade administradores}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -2238,11 +2238,9 @@
   "spotlightOnThem": "Enfocar a {name}",
   "personIsAge": "¡{name} tiene {age} años!",
   "personTurningAge": "{name} cumpliendo {age} pronto",
-  "lastTimeWithThem": "Última vez con {name}",
   "unnamedPeopleSpotlight": "Una cara familiar",
   "unnamedPeopleYouAndThem": "Vosotros dos",
   "unnamedPeopleDoingSomethingTogether": "Haciendo esto juntos",
-  "unnamedPeopleLastTimeYouSawThem": "Última vez juntos",
   "tripToLocation": "Viaje a {location}",
   "tripInYear": "Viaje en {year}",
   "lastYearsTrip": "Viaje del año pasado",
@@ -2340,7 +2338,7 @@
   "font": "Fuente",
   "background": "Fondo",
   "align": "Alinear",
-  "addedToAlbums": "{count, plural, =1{Añadido con éxito a 1 álbum} other{Añadido con éxito a {count} álbumes}}",
+  "addedToAlbums": "{count, plural, one {}=1{Añadido con éxito a 1 álbum} other{Añadido con éxito a {count} álbumes}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -2379,7 +2377,7 @@
   "findSimilarImages": "Buscar imágenes similares",
   "noSimilarImagesFound": "No se encontraron imágenes similares",
   "yourPhotosLookUnique": "Tus fotos se ven únicas",
-  "similarGroupsFound": "{count, plural, =1{{count} grupo encontrado} other{{count} grupos encontrados}}",
+  "similarGroupsFound": "{count, plural, one {}=1{{count} grupo encontrado} other{{count} grupos encontrados}}",
   "@similarGroupsFound": {
     "placeholders": {
       "count": {
@@ -2738,7 +2736,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{1 como} other{{count} me gusta}}",
+  "likesCount": "{count, plural, one {}=1{1 como} other{{count} me gusta}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2759,7 +2757,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{Error al dar \"Me gusta\" a 1 álbum} other{Error al dar \"Me gusta\" a {count} álbumes}}",
+  "failedToLikeAlbums": "{count, plural, one {}=1{Error al dar \"Me gusta\" a 1 álbum} other{Error al dar \"Me gusta\" a {count} álbumes}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -2772,7 +2770,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, =1{1 álbum} other{{count} álbumes}}",
+  "albumsCount": "{count, plural, one {}=1{1 álbum} other{{count} álbumes}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -2818,7 +2816,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, =0{Sin comentarios} =1{1 comentario} other{{count} comentarios}}",
+  "commentsCount": "{count, plural, one {}=0{Sin comentarios} =1{1 comentario} other{{count} comentarios}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

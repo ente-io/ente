@@ -4,7 +4,7 @@ use rand_core::{OsRng, RngCore};
 use x25519_dalek::{PublicKey, StaticSecret};
 use zeroize::Zeroize;
 
-use crate::crypto::{Result, SecretVec};
+use crate::crypto::{CryptoError, Result, SecretVec};
 
 /// Size of a SecretBox key in bytes.
 pub const SECRETBOX_KEY_BYTES: usize = 32;
@@ -132,6 +132,33 @@ pub fn generate_keypair_secure() -> Result<(Vec<u8>, SecretVec)> {
     ))
 }
 
+/// Deterministically derive an X25519 key pair from a 32-byte seed.
+///
+/// The seed is clamped by `StaticSecret::from` per the X25519 construction,
+/// making this suitable for deriving stable box keys from a higher-entropy
+/// master secret.
+pub fn derive_keypair_from_seed_secure(seed: &[u8]) -> Result<(Vec<u8>, SecretVec)> {
+    if seed.len() != BOX_SECRET_KEY_BYTES {
+        return Err(CryptoError::InvalidKeyLength {
+            expected: BOX_SECRET_KEY_BYTES,
+            actual: seed.len(),
+        });
+    }
+
+    let mut secret_bytes = [0u8; BOX_SECRET_KEY_BYTES];
+    secret_bytes.copy_from_slice(seed);
+
+    let secret = StaticSecret::from(secret_bytes);
+    let public = PublicKey::from(&secret);
+
+    secret_bytes.zeroize();
+
+    Ok((
+        public.as_bytes().to_vec(),
+        SecretVec::new(secret.to_bytes().to_vec()),
+    ))
+}
+
 /// Generate random bytes of specified length.
 ///
 /// # Arguments
@@ -203,6 +230,22 @@ mod tests {
         let (pk2, sk2) = generate_keypair().unwrap();
         assert_ne!(pk, pk2);
         assert_ne!(sk, sk2);
+    }
+
+    #[test]
+    fn test_derive_keypair_from_seed_secure() {
+        let seed = [7u8; BOX_SECRET_KEY_BYTES];
+        let (pk1, sk1) = derive_keypair_from_seed_secure(&seed).unwrap();
+        let (pk2, sk2) = derive_keypair_from_seed_secure(&seed).unwrap();
+
+        assert_eq!(pk1, pk2);
+        assert_eq!(sk1.as_ref(), sk2.as_ref());
+    }
+
+    #[test]
+    fn test_derive_keypair_from_seed_secure_rejects_wrong_length() {
+        let err = derive_keypair_from_seed_secure(&[1u8; 16]).unwrap_err();
+        assert!(matches!(err, CryptoError::InvalidKeyLength { .. }));
     }
 
     #[test]

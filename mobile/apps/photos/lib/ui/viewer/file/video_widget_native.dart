@@ -120,6 +120,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     });
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
+      if (!mounted) return;
       setState(() {
         _isGuestView = event.isGuestView;
       });
@@ -174,7 +175,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void loadPreview({bool update = false}) async {
-    _setFilePathForNativePlayer(widget.playlistData!.preview.path, update);
+    final previewPath = widget.playlistData?.preview.path;
+    if (previewPath == null) {
+      loadOriginal(update: true);
+      return;
+    }
+    _setFilePathForNativePlayer(previewPath, update);
 
     await setVideoSource();
   }
@@ -199,7 +205,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         } else {
           // ignore: unawaited_futures
           getFile(widget.file, isOrigin: true).then((file) {
-            _setFilePathForNativePlayer(file!.path, update);
+            if (file == null) {
+              _loadNetworkVideo(update);
+              return;
+            }
+            _setFilePathForNativePlayer(file.path, update);
             if (Platform.isIOS) {
               _shouldClearCache = true;
             }
@@ -732,6 +742,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       _filePath = url;
     });
     _setAspectRatioFromVideoProps().then((_) {
+      if (!mounted) return;
       setState(() {});
     });
 

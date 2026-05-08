@@ -158,7 +158,7 @@ class GalleryState extends State<Gallery> {
   final scrollBarInUseNotifier = ValueNotifier<bool>(false);
   late GroupType _groupType;
   final scrollbarBottomPaddingNotifier = ValueNotifier<double>(0);
-  late GalleryGroups galleryGroups;
+  GalleryGroups? galleryGroups;
   List<EnteFile> _allFilesWithDummies = [];
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
@@ -283,6 +283,7 @@ class GalleryState extends State<Gallery> {
         ),
         context,
       ).then((size) {
+        if (!mounted) return;
         setState(() {
           groupHeaderExtent = size.height;
           _updateGalleryGroups(callSetState: false);
@@ -349,7 +350,7 @@ class GalleryState extends State<Gallery> {
 
   void _updateGalleryGroups({bool callSetState = true}) {
     if (groupHeaderExtent == null) return;
-    galleryGroups = GalleryGroups(
+    final groups = GalleryGroups(
       allFiles: _allGalleryFiles,
       groupType: _groupType,
       sortOrderAsc: _sortOrderAsc,
@@ -361,9 +362,10 @@ class GalleryState extends State<Gallery> {
       limitSelectionToOne: widget.limitSelectionToOne,
       showGallerySettingsCTA: widget.showGallerySettingsCTA,
     );
+    galleryGroups = groups;
 
     // Cache the list with dummies
-    _allFilesWithDummies = galleryGroups.allFilesWithDummies;
+    _allFilesWithDummies = groups.allFilesWithDummies;
 
     // Always update SwipeHelper when cache is updated
     _updateSwipeHelper();
@@ -610,7 +612,7 @@ class GalleryState extends State<Gallery> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (mounted) {
           final offset = galleryGroups
-              .getOffsetOfGroupContainingFile(widget.fileToJumpTo!);
+              ?.getOffsetOfGroupContainingFile(widget.fileToJumpTo!);
           if (offset != null) {
             _logger.info("Jumping to date at offset: $offset");
             _scrollController.jumpTo(offset - 50);
@@ -675,8 +677,16 @@ class GalleryState extends State<Gallery> {
       return widget.loadingWidget;
     }
 
+    if (galleryGroups == null) {
+      _updateGalleryGroups(callSetState: false);
+    }
+    final groups = galleryGroups;
+    if (groups == null) {
+      return widget.loadingWidget;
+    }
+
     // Check if width changed due to orientation change and update gallery groups
-    if (galleryGroups.widthAvailable != widthAvailable) {
+    if (groups.widthAvailable != widthAvailable) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _updateGalleryGroups();
@@ -708,7 +718,7 @@ class GalleryState extends State<Gallery> {
               )
             : CustomScrollBar(
                 scrollController: _scrollController,
-                galleryGroups: galleryGroups,
+                galleryGroups: groups,
                 inUseNotifier: scrollBarInUseNotifier,
                 heighOfViewport: MediaQuery.sizeOf(context).height,
                 topPadding: widget.disableVerticalPaddingForScrollbar
@@ -753,7 +763,7 @@ class GalleryState extends State<Gallery> {
                                 ),
                               ),
                               SectionedListSliver(
-                                sectionLayouts: galleryGroups.groupLayouts,
+                                sectionLayouts: groups.groupLayouts,
                               ),
                               SliverToBoxAdapter(
                                 child: widget.footer,
@@ -762,11 +772,11 @@ class GalleryState extends State<Gallery> {
                           );
                         },
                       ),
-                      galleryGroups.groupType.showGroupHeader() &&
+                      groups.groupType.showGroupHeader() &&
                               !widget.disablePinnedGroupHeader
                           ? PinnedGroupHeader(
                               scrollController: _scrollController,
-                              galleryGroups: galleryGroups,
+                              galleryGroups: groups,
                               headerHeightNotifier: _headerHeightNotifier,
                               selectedFiles: widget.selectedFiles,
                               showSelectAll: widget.showSelectAll &&

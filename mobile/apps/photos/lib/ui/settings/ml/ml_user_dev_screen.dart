@@ -170,6 +170,51 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                         ? const SizedBox(height: 24)
                         : const SizedBox.shrink(),
                     widget.mlIsEnabled
+                        ? MenuItemWidget(
+                            captionedTextWidget: const CaptionedTextWidget(
+                              title: "Run ML on interactions",
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () =>
+                                  localSettings.runMLDuringInteractionOverride,
+                              onChanged: () async {
+                                try {
+                                  final enabled = !localSettings
+                                      .runMLDuringInteractionOverride;
+                                  await computeController
+                                      .setMLDebugInteractionOverride(
+                                    turnOn: enabled,
+                                  );
+                                  _logger.info(
+                                    'run ML during interaction is turned ${enabled ? 'on' : 'off'}',
+                                  );
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                } catch (e, s) {
+                                  _logger.warning(
+                                    'run ML during interaction toggle failed ',
+                                    e,
+                                    s,
+                                  );
+                                  await showGenericErrorDialog(
+                                    context: context,
+                                    error: e,
+                                  );
+                                }
+                              },
+                            ),
+                            singleBorderRadius: 8,
+                            alignCaptionedTextToLeft: true,
+                            isBottomBorderRadiusRemoved: true,
+                            isGestureDetectorDisabled: true,
+                          )
+                        : const SizedBox.shrink(),
+                    widget.mlIsEnabled
+                        ? const SizedBox(height: 24)
+                        : const SizedBox.shrink(),
+                    widget.mlIsEnabled
                         ? _buildThresholdsCard(context)
                         : const SizedBox.shrink(),
                     widget.mlIsEnabled

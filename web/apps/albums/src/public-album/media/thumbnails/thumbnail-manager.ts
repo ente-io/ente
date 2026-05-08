@@ -154,7 +154,7 @@ const publicAlbums_downloadThumbnail = async (
             );
         } else {
             return fetch(
-                `https://public-albums.ente.io/preview/?fileID=${file.id}`,
+                `https://public-albums.ente.com/preview/?fileID=${file.id}`,
                 {
                     headers:
                         authenticatedPublicAlbumsRequestHeaders(credentials),

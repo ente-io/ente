@@ -1,4 +1,4 @@
-use ente_core::auth::KeyAttributes;
+use ente_core::{auth::KeyAttributes, crypto::SecretVec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -60,9 +60,8 @@ pub struct LegacyInfo {
     pub others_recovery_session: Vec<LegacyRecoverySession>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 pub struct LegacyRecoveryBundle {
-    pub recovery_key: String,
+    pub recovery_key: SecretVec,
     pub user_key_attributes: KeyAttributes,
 }

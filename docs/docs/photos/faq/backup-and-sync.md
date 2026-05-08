@@ -236,6 +236,44 @@ Live Photos behave differently depending on how you share them:
 - **Using "Download"**: Downloads the complete Live Photo (image + video)
 - **Using "Share" button to save/download**: Only saves the still image
 
+### How do I restore Live Photos from Ente? {#restore-live-photos}
+
+If you backed up your Live Photos to Ente and deleted them from your iPhone and iCloud, you can restore them as proper Live Photos (not as two separate files) using either of the methods below.
+
+**Method 1: Save directly from the Ente iOS app**
+
+This is the simplest path and works entirely on your iPhone.
+
+1. Open the Ente app on your iPhone.
+2. Navigate to the Live Photo you want to restore.
+3. Tap the download icon.
+
+Ente will save the photo and its paired video back to your Camera Roll as a proper Live Photo. You will see the Live Photo badge when you view it in the Photos app.
+
+Repeat for each Live Photo, or select multiple photos and use the bulk save option.
+
+**Method 2: Desktop export, then re-import into Mac Photos**
+
+Use this method if you want to restore a large library, or if you prefer working from a Mac.
+
+**Step 1 — Export from Ente**
+
+1. Sign in to the Ente desktop app.
+2. Open the sidebar and choose **Export data**.
+3. Pick a destination folder and click **Start**.
+
+When the export finishes, each Live Photo appears as two files in the export folder — an image file (`.heic` or `.jpg`) and a paired video (`.mov`) — both sharing the same base filename (e.g. `IMG_1234.heic` and `IMG_1234.mov`).
+
+**Step 2 — Import into Mac Photos**
+
+1. Open the Photos app on your Mac.
+2. Choose **File > Import**.
+3. Select the folder you exported from Ente and click **Review for Import**.
+4. Photos on Mac will automatically recognise the paired image and video files as Live Photos and import them as such.
+5. Click **Import All New Items**.
+
+If you have iCloud Photos enabled, the restored Live Photos will sync to your iPhone automatically. You can also connect your iPhone via USB and use Finder to transfer them directly.
+
 ### Does Ente backup Burst photos? {#burst-photos-backup}
 
 Ente backs up a single primary full-resolution image from the Burst. Additional frames from the Burst sequence are not backed up unless each frame is selected and uploaded.

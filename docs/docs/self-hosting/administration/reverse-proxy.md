@@ -92,6 +92,11 @@ share.ente.yourdomain.tld {
 embed.ente.yourdomain.tld {
     reverse_proxy http://localhost:3006
 }
+
+# For Ente Memories web app
+memories.ente.yourdomain.tld {
+    reverse_proxy http://localhost:3010
+}
 ```
 
 ## Step 3: Reload reverse proxy

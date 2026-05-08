@@ -99,10 +99,11 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     Color selectionColor = Colors.white;
     if (_isFileSelected &&
         widget.file.isUploaded &&
+        widget.file.ownerID != null &&
         widget.file.ownerID != widget.currentUserID) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
       selectionColor =
-          avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
+          avatarColors[widget.file.ownerID!.remainder(avatarColors.length)];
     }
     final String heroTag = widget.tag + widget.file.tag;
     final Widget thumbnailWidget = ThumbnailWidget(
@@ -216,8 +217,11 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   void _onTapNoSelectionLimit(BuildContext context, EnteFile file) async {
     final bool shouldToggleSelection =
         (widget.selectedFiles?.files.isNotEmpty ?? false) ||
-            GalleryContextState.of(context)!.inSelectionMode;
+            (GalleryContextState.of(context)?.inSelectionMode ?? false);
     if (shouldToggleSelection) {
+      if (widget.selectedFiles == null) {
+        return;
+      }
       _toggleFileSelection(file);
     } else {
       if (AppLifecycleService.instance.mediaExtensionAction.action ==
@@ -231,7 +235,8 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   }
 
   void _onLongPressNoSelectionLimit(BuildContext context, EnteFile file) {
-    if (widget.selectedFiles!.files.isNotEmpty) {
+    final selectedFiles = widget.selectedFiles;
+    if (selectedFiles == null || selectedFiles.files.isNotEmpty) {
       _routeToDetailPage(file, context);
     } else {
       _toggleFileSelection(file);

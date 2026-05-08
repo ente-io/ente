@@ -4,9 +4,10 @@ import "dart:io" show Platform;
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
 import "package:photos/service_locator.dart"
-    show flagService, isOfflineMode, localSettings;
+    show flagService, isLocalGalleryMode, localSettings;
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/ml_models_overview.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/pet_ml/pet_model_services.dart";
@@ -15,7 +16,6 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:photos/utils/isolate/super_isolate.dart";
 import "package:photos/utils/ml_util.dart";
-import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
 
 @pragma('vm:entry-point')
@@ -33,16 +33,14 @@ class MLIndexingIsolate extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => true;
 
-  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
+  bool get _shouldUseRustMl => flagService.useRustForML || isLocalGalleryMode;
 
   int _loadedModelsCount = 0;
   int _deloadedModelsCount = 0;
 
   final _initModelLock = Lock();
-  final _downloadModelLock = Lock();
   final _rustRuntimeLock = Lock();
 
-  bool areModelsDownloaded = false;
   Map<String, dynamic>? _cachedRustRuntimeArgs;
 
   @override
@@ -128,21 +126,15 @@ class MLIndexingIsolate extends SuperIsolate {
     }
     return _rustRuntimeLock.synchronized(() async {
       final rustRuntimeArgs = await _buildRustRuntimeArgs();
-      final frozenRuntimeArgs =
-          Map<String, dynamic>.unmodifiable(rustRuntimeArgs);
+      final frozenRuntimeArgs = Map<String, dynamic>.unmodifiable(
+        rustRuntimeArgs,
+      );
       await runInIsolate(
         IsolateOperation.prepareRustMlRuntime,
         frozenRuntimeArgs,
       );
       _cachedRustRuntimeArgs = frozenRuntimeArgs;
     });
-  }
-
-  /// Invalidate the download cache so the next indexing run re-enters
-  /// [ensureDownloadedModels], which checks bandwidth and downloads any
-  /// newly required models (e.g. pet models after toggling pet recognition).
-  void invalidateModelDownloadCache() {
-    areModelsDownloaded = false;
   }
 
   Future<void> releaseRustRuntime() async {
@@ -171,55 +163,6 @@ class MLIndexingIsolate extends SuperIsolate {
     });
   }
 
-  void triggerModelsDownload() {
-    if (!areModelsDownloaded && !_downloadModelLock.locked) {
-      _logger.info("Models not downloaded, starting download");
-      unawaited(ensureDownloadedModels());
-    }
-  }
-
-  Future<void> ensureDownloadedModels([bool forceRefresh = false]) async {
-    if (_downloadModelLock.locked) {
-      _logger.info("Download models already in progress");
-      return;
-    }
-    return _downloadModelLock.synchronized(() async {
-      if (areModelsDownloaded) {
-        return;
-      }
-      final goodInternet = isOfflineMode || await canUseHighBandwidth();
-      if (!goodInternet) {
-        _logger.info(
-          "Cannot download models because user is not connected to wifi and is in online mode",
-        );
-        return;
-      }
-      _logger.info('Downloading models');
-      final modelsToDownload = <Future<void>>[
-        FaceDetectionService.instance.downloadModel(forceRefresh),
-        FaceEmbeddingService.instance.downloadModel(forceRefresh),
-        ClipImageEncoder.instance.downloadModel(forceRefresh),
-      ];
-
-      if (flagService.petEnabled &&
-          localSettings.petRecognitionEnabled &&
-          _shouldUseRustMl) {
-        modelsToDownload.addAll([
-          PetFaceDetectionService.instance.downloadModel(forceRefresh),
-          PetFaceEmbeddingDogService.instance.downloadModel(forceRefresh),
-          PetFaceEmbeddingCatService.instance.downloadModel(forceRefresh),
-          PetBodyDetectionService.instance.downloadModel(forceRefresh),
-          PetBodyEmbeddingDogService.instance.downloadModel(forceRefresh),
-          PetBodyEmbeddingCatService.instance.downloadModel(forceRefresh),
-        ]);
-      }
-
-      await Future.wait(modelsToDownload);
-      areModelsDownloaded = true;
-      _logger.info('Downloaded models');
-    });
-  }
-
   Future<void> ensureLoadedModels(FileMLInstruction instruction) async {
     if (_shouldUseRustMl) {
       return;
@@ -243,8 +186,10 @@ class MLIndexingIsolate extends SuperIsolate {
       _logger.info(
         "Loaded models count: $_loadedModelsCount, deloaded models count: $_deloadedModelsCount",
       );
-      await MLIndexingIsolate.instance
-          ._loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
+      await MLIndexingIsolate.instance._loadModels(
+        loadFaces: shouldLoadFaces,
+        loadClip: shouldLoadClip,
+      );
       _logger.info('Models loaded');
     });
   }
@@ -307,8 +252,9 @@ class MLIndexingIsolate extends SuperIsolate {
       final modelName = modelInstance.modelName;
       final modelPath = await modelInstance.downloadModelSafe();
       if (modelPath == null) {
-        _logger
-            .warning("Could not download model '$modelName': WiFi unavailable");
+        _logger.warning(
+          "Could not download model '$modelName': WiFi unavailable",
+        );
         return;
       }
       final address = await runInIsolate(IsolateOperation.loadModel, {
@@ -321,7 +267,7 @@ class MLIndexingIsolate extends SuperIsolate {
 
   Future<void> cleanupLocalIndexingModels({bool delete = false}) async {
     await releaseRustRuntime();
-    if (!areModelsDownloaded) return;
+    if (!MLModelDownloadService.instance.areIndexingModelsDownloaded) return;
     await _releaseModels();
 
     if (delete) {
@@ -332,10 +278,11 @@ class MLIndexingIsolate extends SuperIsolate {
         final mlModel = model.model;
         remoteModelPaths.add(mlModel.modelRemotePath);
       }
-      await RemoteAssetsService.instance
-          .cleanupSelectedModels(remoteModelPaths);
+      await RemoteAssetsService.instance.cleanupSelectedModels(
+        remoteModelPaths,
+      );
 
-      areModelsDownloaded = false;
+      MLModelDownloadService.instance.invalidateModelDownloadCache();
     }
   }
 

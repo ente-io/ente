@@ -149,6 +149,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
       }
     }
 
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
       if (!hasError) {

@@ -20,22 +20,22 @@ class FileUrl {
       case FileUrlType.download:
         return disableWorker
             ? "$endpoint/files/download/$fileID"
-            : "https://files.ente.io/?fileID=$fileID";
+            : "https://files.ente.com/?fileID=$fileID";
 
       case FileUrlType.publicDownload:
         return disableWorker
             ? "$endpoint/public-collection/files/download/$fileID"
-            : "https://public-albums.ente.io/download/?fileID=$fileID";
+            : "https://public-albums.ente.com/download/?fileID=$fileID";
 
       case FileUrlType.thumbnail:
         return disableWorker
             ? "$endpoint/files/preview/$fileID"
-            : "https://thumbnails.ente.io/?fileID=$fileID";
+            : "https://thumbnails.ente.com/?fileID=$fileID";
 
       case FileUrlType.publicThumbnail:
         return disableWorker
             ? "$endpoint/public-collection/files/preview/$fileID"
-            : "https://public-albums.ente.io/preview/?fileID=$fileID";
+            : "https://public-albums.ente.com/preview/?fileID=$fileID";
     }
   }
 }

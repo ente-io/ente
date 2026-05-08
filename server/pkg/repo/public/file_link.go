@@ -25,11 +25,11 @@ type FileLinkRepository struct {
 func NewFileLinkRepo(db *sql.DB) *FileLinkRepository {
 	albumHost := viper.GetString("apps.public-albums")
 	if albumHost == "" {
-		albumHost = "https://albums.ente.io"
+		albumHost = "https://albums.ente.com"
 	}
 	lockerHost := viper.GetString("apps.public-locker")
 	if lockerHost == "" {
-		lockerHost = "https://share.ente.io"
+		lockerHost = "https://share.ente.com"
 	}
 	return &FileLinkRepository{
 		DB:         db,

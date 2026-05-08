@@ -1,7 +1,7 @@
 import { downloadManager } from "@/public-album/download/services/download-manager";
 import { type EnteFile } from "ente-media/file";
 import {
-    fileCreationTime,
+    fileCreationPhotoSortTime,
     fileFileName,
     fileLocation,
 } from "ente-media/file-metadata";
@@ -46,9 +46,7 @@ export const processPhotosData = ({
                     lng: location.longitude,
                     name: finalName,
                     country: finalCountry,
-                    timestamp: new Date(
-                        fileCreationTime(file) / 1000,
-                    ).toISOString(),
+                    timestamp: fileCreationPhotoSortTime(file),
                     image: "",
                     fileId: file.id,
                 });
@@ -58,10 +56,7 @@ export const processPhotosData = ({
         }
     }
 
-    photoData.sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    );
+    photoData.sort((a, b) => a.timestamp - b.timestamp);
 
     return { photoData, hasLocationData: photoData.length > 0 };
 };

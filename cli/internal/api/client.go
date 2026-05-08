@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	EnteAPIEndpoint = "https://api.ente.io"
+	EnteAPIEndpoint = "https://api.ente.com"
 	TokenHeader     = "X-Auth-Token"
 	TokenQuery      = "token"
 	ClientPkgHeader = "X-Client-Package"

@@ -83,7 +83,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             val endpoint = endpointPreferences.endpointFlow.first()
             val buildEndpoint = BuildConfig.API_ENDPOINT.trim()
             if (endpoint.isNullOrBlank()) {
-                val fallback = "https://api.ente.io"
+                val fallback = "https://api.ente.com"
                 val resolved = if (buildEndpoint.isNotBlank()) buildEndpoint else fallback
                 endpointPreferences.setEndpoint(resolved)
             } else if (buildEndpoint.isNotBlank() && buildEndpoint != endpoint) {

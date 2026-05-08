@@ -14,7 +14,7 @@ const DEFAULT_TAURI_CONTEXT_SIZE = 12000;
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
-const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
+const MIN_DESKTOP_DEFAULT_MEMORY_BYTES = 16 * 1024 * 1024 * 1024;
 
 // These fallback values must stay in sync with rust/ensu/inference/src/defaults.rs.
 // When running inside Tauri, resolveDefaultModelForDevice() overwrites them with
@@ -31,14 +31,14 @@ export const DEFAULT_MODEL: ModelInfo = {
 };
 
 const DESKTOP_DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-4b-q4km",
-    name: "Qwen 3.5 4B (Q4_K_M)",
-    url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+    id: "gemma-4-e4b-q4km",
+    name: "Gemma 4 E4B (Q4_K_M)",
+    url: "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf?download=true",
     mmprojUrl:
-        "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-    sizeBytes: 2_740_937_888,
-    mmprojSizeBytes: 672_423_616,
-    sizeHuman: "3.63 GB",
+        "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/mmproj-F16.gguf",
+    sizeBytes: 4_977_169_088,
+    mmprojSizeBytes: 990_372_800,
+    sizeHuman: "5.97 GB",
 };
 
 interface TauriEnsuModelPreset {
@@ -83,6 +83,11 @@ export const FALLBACK_MOBILE_MODEL_PRESETS: ResolvedModelPreset[] = [
 ];
 
 export const FALLBACK_DESKTOP_MODEL_PRESETS: ResolvedModelPreset[] = [
+    {
+        name: "Qwen 3.5 4B (Q4_K_M)",
+        url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+        mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+    },
     {
         name: "LFM 2.5 VL 1.6B (Q4_0)",
         url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
@@ -443,12 +448,8 @@ export class LlmProvider {
             const platform = info.platform?.toLowerCase();
             const totalMemoryBytes = info.totalMemoryBytes ?? 0;
 
-            const isMacPlatform =
-                platform === "macos" ||
-                platform === "darwin" ||
-                platform === "mac";
             this.useDesktopRustDefaults =
-                isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES;
+                totalMemoryBytes >= MIN_DESKTOP_DEFAULT_MEMORY_BYTES;
 
             if (this.useDesktopRustDefaults) {
                 this.defaultModel = DESKTOP_DEFAULT_MODEL;

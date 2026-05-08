@@ -231,7 +231,7 @@ For setup instructions, see the [Cast feature guide](/photos/features/utilities/
 
 ### Can I use Cast without Chromecast? {#cast-without-chromecast}
 
-Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente.io](https://cast.ente.io) on your large screen device and enter the displayed PIN on your mobile or web device.
+Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente.com](https://cast.ente.com) on your large screen device and enter the displayed PIN on your mobile or web device.
 
 ### App crashes with video streaming enabled {#app-crashes-video-streaming}
 
@@ -260,7 +260,7 @@ Large video uploads may fail when streaming is enabled, especially on mobile:
 
 ### PIN pairing isn't working for Cast {#cast-pin-not-working}
 
-- Verify that [cast.ente.io](https://cast.ente.io) is loaded on your large screen device
+- Verify that [cast.ente.com](https://cast.ente.com) is loaded on your large screen device
 - Check that both devices have internet connectivity
 - Make sure you're entering the PIN exactly as displayed (case-sensitive)
 - The PIN expires after a short time - refresh for a new PIN if needed
@@ -364,7 +364,7 @@ No, home widgets are only available on mobile apps (iOS and Android). Desktop ap
 
 ### Can I access Ente from multiple browsers? {#multiple-browsers}
 
-Yes! You can access Ente from any browser by going to [web.ente.io](https://web.ente.io) and logging in with your credentials.
+Yes! You can access Ente from any browser by going to [photos.ente.com](https://photos.ente.com) and logging in with your credentials.
 
 Your data syncs across all browsers and devices where you're logged in.
 

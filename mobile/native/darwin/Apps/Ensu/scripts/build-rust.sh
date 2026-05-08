@@ -7,7 +7,7 @@
 #                        CONFIGURATION, IPHONEOS_DEPLOYMENT_TARGET,
 #                        ENTE_API_ENDPOINT.
 # Outputs (to $TARGET_TEMP_DIR/ensu_rust):
-#           libcore.a  libdb.a  libsync.a  libinference.a
+#           libcore.a  libdb.a  libsync.a  libinference.a  libtranscription.a
 #
 # UniFFI Swift bindings under $SRCROOT/Ensu/Generated/ are generated
 # out-of-band by `cargo codegen ensu-ios`; this script only checks that
@@ -29,7 +29,7 @@ for tool in cargo rustup cmake; do
     command -v "$tool" >/dev/null || { echo "error: $tool not on PATH" >&2; exit 1; }
 done
 
-for name in core db sync inference; do
+for name in core db sync inference transcription; do
     for ext in .swift FFI.h FFI.modulemap; do
         [[ -f "$GENERATED_DIR/$name$ext" ]] || {
             echo "error: missing $GENERATED_DIR/$name$ext" >&2
@@ -133,3 +133,4 @@ build_crate core      "$REPO_ROOT/rust/uniffi/core"           libcore.a
 build_crate db        "$REPO_ROOT/rust/uniffi/ensu/db"        libdb.a
 build_crate sync      "$REPO_ROOT/rust/uniffi/ensu/sync"      libsync.a
 build_crate inference "$REPO_ROOT/rust/uniffi/ensu/inference" libinference.a
+build_crate transcription "$REPO_ROOT/rust/uniffi/ensu/transcription" libtranscription.a

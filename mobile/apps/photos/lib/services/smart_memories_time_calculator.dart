@@ -7,7 +7,7 @@ class TimeMemoriesCalculator {
     Iterable<EnteFile> allFiles,
     DateTime currentTime, {
     Iterable<EnteFile>? recentSourceFiles,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -23,8 +23,9 @@ class TimeMemoriesCalculator {
     final recentCandidates = recentSourceFiles ?? availableFiles;
 
     final startOfCurrentWeek = _startOfWeek(currentTime);
-    final startOfPreviousWeek =
-        startOfCurrentWeek.subtract(const Duration(days: 7));
+    final startOfPreviousWeek = startOfCurrentWeek.subtract(
+      const Duration(days: 7),
+    );
     await _maybeAddRecentTimeMemory(
       recentMemoryResult,
       recentCandidates,
@@ -33,7 +34,7 @@ class TimeMemoriesCalculator {
       showStart: startOfCurrentWeek,
       showEnd: startOfCurrentWeek.add(const Duration(days: 7)),
       kind: TimeMemoryKind.lastWeek,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
       mlEnabled: mlEnabled,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
@@ -58,7 +59,7 @@ class TimeMemoriesCalculator {
         startOfCurrentMonth.month + 1,
       ),
       kind: TimeMemoryKind.lastMonth,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
       mlEnabled: mlEnabled,
       seenTimes: seenTimes,
       fileIdToFaces: fileIdToFaces,
@@ -81,8 +82,9 @@ class TimeMemoriesCalculator {
     for (final file in availableFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
-      final creationTime =
-          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final creationTime = DateTime.fromMicrosecondsSinceEpoch(
+        file.creationTime!,
+      );
       final dayMonth = creationTime.month * 100 + creationTime.day;
       final year = creationTime.year;
 
@@ -103,12 +105,15 @@ class TimeMemoriesCalculator {
           .toList();
 
       if (significantDays.length >= 3) {
-        final date =
-            DateTime(currentTime.year, dayMonth ~/ 100, dayMonth % 100);
+        final date = DateTime(
+          currentTime.year,
+          dayMonth ~/ 100,
+          dayMonth % 100,
+        );
         final allPhotos = yearGroups.values.expand((x) => x).toList();
         final photoSelection = await SmartMemoriesService._bestSelection(
           allPhotos,
-          isOfflineMode: isOfflineMode,
+          isLocalGalleryMode: isLocalGalleryMode,
           mlEnabled: mlEnabled,
           fileIdToFaces: fileIdToFaces,
           faceIDsToPersonID: faceIDsToPersonID,
@@ -127,12 +132,15 @@ class TimeMemoriesCalculator {
       } else {
         for (final year in significantDays) {
           final date = DateTime(year, dayMonth ~/ 100, dayMonth % 100);
-          final showDate =
-              DateTime(currentYear, dayMonth ~/ 100, dayMonth % 100);
+          final showDate = DateTime(
+            currentYear,
+            dayMonth ~/ 100,
+            dayMonth % 100,
+          );
           final files = yearGroups[year]!;
           final photoSelection = await SmartMemoriesService._bestSelection(
             files,
-            isOfflineMode: isOfflineMode,
+            isLocalGalleryMode: isLocalGalleryMode,
             mlEnabled: mlEnabled,
             fileIdToFaces: fileIdToFaces,
             faceIDsToPersonID: faceIDsToPersonID,
@@ -157,8 +165,9 @@ class TimeMemoriesCalculator {
       for (final file in availableFiles) {
         if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
-        final creationTime =
-            DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final creationTime = DateTime.fromMicrosecondsSinceEpoch(
+          file.creationTime!,
+        );
         final week = getWeekNumber(creationTime);
         if (week != currentWeek) continue;
         final year = creationTime.year;
@@ -178,7 +187,7 @@ class TimeMemoriesCalculator {
               currentWeekYearGroups.values.expand((x) => x).toList();
           final photoSelection = await SmartMemoriesService._bestSelection(
             allPhotos,
-            isOfflineMode: isOfflineMode,
+            isLocalGalleryMode: isLocalGalleryMode,
             mlEnabled: mlEnabled,
             fileIdToFaces: fileIdToFaces,
             faceIDsToPersonID: faceIDsToPersonID,
@@ -194,13 +203,15 @@ class TimeMemoriesCalculator {
           );
         } else {
           for (final year in significantWeeks) {
-            final date = DateTime(year, 1, 1).add(
-              Duration(days: (currentWeek - 1) * 7),
-            );
+            final date = DateTime(
+              year,
+              1,
+              1,
+            ).add(Duration(days: (currentWeek - 1) * 7));
             final files = currentWeekYearGroups[year]!;
             final photoSelection = await SmartMemoriesService._bestSelection(
               files,
-              isOfflineMode: isOfflineMode,
+              isLocalGalleryMode: isLocalGalleryMode,
               mlEnabled: mlEnabled,
               fileIdToFaces: fileIdToFaces,
               faceIDsToPersonID: faceIDsToPersonID,
@@ -228,20 +239,21 @@ class TimeMemoriesCalculator {
     SmartMemoriesService._markUsedMemories(
       historicalMemoryFileIds,
       historicalMemoryResult,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
     );
     for (final file in availableFiles) {
       final fileId = SmartMemoriesService._memoryFileId(
         file,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
       );
       if (fileId != null && historicalMemoryFileIds.contains(fileId)) {
         continue;
       }
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
-      final creationTime =
-          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final creationTime = DateTime.fromMicrosecondsSinceEpoch(
+        file.creationTime!,
+      );
       final month = creationTime.month;
       if (month != currentMonth) continue;
       final year = creationTime.year;
@@ -264,7 +276,7 @@ class TimeMemoriesCalculator {
       final photoSelection = await SmartMemoriesService._bestSelection(
         monthYearFiles,
         prefferedSize: monthSelectionSize,
-        isOfflineMode: isOfflineMode,
+        isLocalGalleryMode: isLocalGalleryMode,
         mlEnabled: mlEnabled,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -294,7 +306,7 @@ class TimeMemoriesCalculator {
     final photoSelection = await SmartMemoriesService._bestSelection(
       allPhotos,
       prefferedSize: monthSelectionSize,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
       mlEnabled: mlEnabled,
       fileIdToFaces: fileIdToFaces,
       faceIDsToPersonID: faceIDsToPersonID,
@@ -323,7 +335,7 @@ class TimeMemoriesCalculator {
     required DateTime showStart,
     required DateTime showEnd,
     required TimeMemoryKind kind,
-    required bool isOfflineMode,
+    required bool isLocalGalleryMode,
     required bool mlEnabled,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -352,7 +364,7 @@ class TimeMemoriesCalculator {
       candidates,
       prefferedSize: _recentTimeMemorySelectionSize,
       distributionOverride: SelectionDistribution.timeBuckets,
-      isOfflineMode: isOfflineMode,
+      isLocalGalleryMode: isLocalGalleryMode,
       mlEnabled: mlEnabled,
       fileIdToFaces: fileIdToFaces,
       faceIDsToPersonID: faceIDsToPersonID,
@@ -381,8 +393,9 @@ class TimeMemoriesCalculator {
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     final currentYear = currentTime.year;
-    final cutOffTime = currentTime
-        .subtract(const Duration(days: 364) - kMemoriesUpdateFrequency);
+    final cutOffTime = currentTime.subtract(
+      const Duration(days: 364) - kMemoriesUpdateFrequency,
+    );
     final timeTillYearEnd = DateTime(currentYear + 1).difference(currentTime);
     final bool almostYearEnd = timeTillYearEnd < kMemoriesUpdateFrequency;
 
@@ -407,9 +420,8 @@ class TimeMemoriesCalculator {
               ),
             );
       } else if (almostYearEnd) {
-        final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
-              currentTime,
-            );
+        final altDiff =
+            fileDate.copyWith(year: currentYear + 1).difference(currentTime);
         if (!altDiff.isNegative && altDiff < kMemoriesUpdateFrequency) {
           final yearsAgo = currentYear - fileDate.year + 1;
           yearsAgoToMemories.putIfAbsent(yearsAgo, () => []).add(
@@ -459,8 +471,9 @@ class TimeMemoriesCalculator {
     final currentMonth = currentTime.month;
     final currentDay = currentTime.day;
     final startPoint = DateTime(currentYear, currentMonth, currentDay);
-    final cutOffTime = startPoint
-        .subtract(const Duration(days: 363) - kMemoriesUpdateFrequency);
+    final cutOffTime = startPoint.subtract(
+      const Duration(days: 363) - kMemoriesUpdateFrequency,
+    );
     final diffThreshold = Duration(days: daysToCompute);
 
     final Map<int, List<Memory>> daysToMemories = {};
@@ -490,9 +503,8 @@ class TimeMemoriesCalculator {
             );
         daysToYears.putIfAbsent(diff.inDays, () => []).add(fileDate.year);
       } else if (almostYearEnd) {
-        final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
-              currentTime,
-            );
+        final altDiff =
+            fileDate.copyWith(year: currentYear + 1).difference(currentTime);
         if (!altDiff.isNegative && altDiff < diffThreshold) {
           daysToMemories.putIfAbsent(altDiff.inDays, () => []).add(
                 Memory.fromFile(
@@ -520,8 +532,9 @@ class TimeMemoriesCalculator {
       if (memories.length > 20) {
         final Map<int, List<Memory>> memoriesByYear = {};
         for (final memory in memories) {
-          final creationTime =
-              DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
+          final creationTime = DateTime.fromMicrosecondsSinceEpoch(
+            memory.file.creationTime!,
+          );
           final year = creationTime.year;
           memoriesByYear.putIfAbsent(year, () => []).add(memory);
         }

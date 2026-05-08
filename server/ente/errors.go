@@ -231,6 +231,12 @@ var ErrLinkEditNotAllowed = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLinkDeviceLimitExceeded = ApiError{
+	Code:           LinkDeviceLimitExceeded,
+	Message:        "Public link device limit reached",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 var ErrFileInTrash = ApiError{
 	Code:           FileInTrash,
 	Message:        "One or more files are in trash or have been deleted, please restore them first",
@@ -308,6 +314,10 @@ const (
 
 	// LinkEditNotAllowed indicates that the user cannot change link settings
 	LinkEditNotAllowed ErrorCode = "LINK_EDIT_NOT_ALLOWED"
+
+	// LinkDeviceLimitExceeded indicates that the public link has exhausted its
+	// allowed unique device accesses.
+	LinkDeviceLimitExceeded ErrorCode = "LINK_DEVICE_LIMIT_EXCEEDED"
 )
 
 type ApiError struct {

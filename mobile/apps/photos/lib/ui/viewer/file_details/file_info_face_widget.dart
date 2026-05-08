@@ -11,7 +11,7 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show isLocalGalleryMode;
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
@@ -74,7 +74,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
               onTap: isEditMode
                   ? hasPerson
                       ? _onMinusIconTap
-                      : (isOfflineMode ? null : _onPlusIconTap)
+                      : (isLocalGalleryMode ? null : _onPlusIconTap)
                   : _routeToPersonOrClusterPage,
               child: Container(
                 height: thumbnailWidth,
@@ -162,30 +162,27 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
   Future<void> _routeToPersonOrClusterPage() async {
     final mlDataDB =
-        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-    if (!isOfflineMode && widget.person != null) {
+        isLocalGalleryMode ? MLDataDB.localGalleryInstance : MLDataDB.instance;
+    if (!isLocalGalleryMode && widget.person != null) {
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => PeoplePage(
-            person: widget.person!,
-            searchResult: null,
-          ),
+          builder: (context) =>
+              PeoplePage(person: widget.person!, searchResult: null),
         ),
       );
       return;
     }
     final String? clusterID = widget.clusterID ??
-        await mlDataDB.getClusterIDForFaceID(
-          widget.face.faceID,
-        );
+        await mlDataDB.getClusterIDForFaceID(widget.face.faceID);
     if (clusterID != null) {
       final fileIdsToClusterIds = await mlDataDB.getFileIdToClusterIds();
       final files = await SearchService.instance.getAllFilesForSearch();
       List<EnteFile> clusterFiles;
-      if (isOfflineMode) {
+      if (isLocalGalleryMode) {
         final localIntIds = fileIdsToClusterIds.keys.toSet();
-        final localIdMap =
-            await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+        final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
+          localIntIds,
+        );
         final localIdToFile = <String, EnteFile>{};
         for (final file in files) {
           final localId = file.localID;
@@ -219,37 +216,30 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           builder: (context) => ClusterPage(
             clusterFiles,
             clusterID: clusterID,
-            showNamingBanner: !isOfflineMode,
+            showNamingBanner: !isLocalGalleryMode,
           ),
         ),
       );
       return;
     }
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return;
     }
     if (widget.face.score <= kMinimumQualityFaceScore) {
       // The face score is too low for automatic clustering,
       // assigning a manual new clusterID so that the user can cluster it manually
       final String clusterID = newClusterID();
-      await mlDataDB.updateFaceIdToClusterId(
-        {widget.face.faceID: clusterID},
-      );
+      await mlDataDB.updateFaceIdToClusterId({widget.face.faceID: clusterID});
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ClusterPage(
-            [widget.file],
-            clusterID: clusterID,
-          ),
+          builder: (context) =>
+              ClusterPage([widget.file], clusterID: clusterID),
         ),
       );
       return;
     }
 
-    showShortToast(
-      context,
-      AppLocalizations.of(context).faceNotClusteredYet,
-    );
+    showShortToast(context, AppLocalizations.of(context).faceNotClusteredYet);
     unawaited(MLService.instance.clusterAllImages(force: true));
     return;
   }

@@ -117,7 +117,7 @@ class VideoPreviewService {
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
 
   bool get isVideoStreamingEnabled {
-    if (isOfflineMode) {
+    if (isLocalGalleryMode) {
       return false;
     }
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
@@ -313,9 +313,17 @@ class VideoPreviewService {
     DateTime? beginDate,
     bool onlyFilesWithLocalId = true,
   }) async {
+    final userID = config.getUserID();
+    if (userID == null) {
+      _logger.warning(
+        "Skipping video preview queue because user ID is missing. "
+        "This can happen if queued preview work runs after logout or account mode changes.",
+      );
+      return [];
+    }
     return await filesDB.getStreamingEligibleVideoFiles(
       beginDate: beginDate,
-      userID: config.getUserID()!,
+      userID: userID,
       onlyFilesWithLocalId: onlyFilesWithLocalId,
     );
   }
@@ -427,10 +435,13 @@ class VideoPreviewService {
         "Starting video preview generation for ${enteFile.displayName}",
       );
       // elimination case for <=10 MB with H.264
-      final isManual =
-          await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
-      var (props, result, file) =
-          await _checkFileForPreviewCreation(enteFile, isManual);
+      final isManual = await uploadLocksDB.isInStreamQueue(
+        enteFile.uploadedFileID!,
+      );
+      var (props, result, file) = await _checkFileForPreviewCreation(
+        enteFile,
+        isManual,
+      );
       if (result) {
         removeFile = true;
         return;
@@ -706,17 +717,11 @@ class VideoPreviewService {
         }
 
         // process next file
-        _logger.info(
-          "[chunk] Processing ${_items.length} items for streaming",
-        );
+        _logger.info("[chunk] Processing ${_items.length} items for streaming");
         final entry = fileQueue.entries.first;
         final file = entry.value;
         fileQueue.remove(entry.key);
-        await chunkAndUploadVideo(
-          ctx,
-          file,
-          continuation: true,
-        );
+        await chunkAndUploadVideo(ctx, file, continuation: true);
       } else {
         // Release compute when queue is empty or network is unavailable
         stop(shouldStopProcessing ? "network error" : "nothing to process");

@@ -76,6 +76,8 @@ class FileAppBarState extends State<FileAppBar> {
   bool _reloadActions = false;
   bool _isMenuOpen = false;
   bool _pendingActionsReload = false;
+  ValueNotifier<bool>? _isInSharedCollectionNotifier;
+  ValueNotifier<String?>? _showingThumbnailFallbackNotifier;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -89,23 +91,25 @@ class FileAppBarState extends State<FileAppBar> {
   @override
   void initState() {
     super.initState();
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
+    _guestViewEventSubscription = Bus.instance.on<GuestViewEvent>().listen((
+      event,
+    ) {
       setState(() {
         isGuestView = event.isGuestView;
       });
     });
+  }
 
-    // Listen to shared collection and thumbnail fallback changes to rebuild actions
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final sharedNotifier = InheritedDetailPageState.maybeOf(context)
-          ?.isInSharedCollectionNotifier;
-      sharedNotifier?.addListener(_onSharedCollectionChanged);
-
-      final fallbackNotifier = InheritedDetailPageState.maybeOf(context)
-          ?.showingThumbnailFallbackNotifier;
-      fallbackNotifier?.addListener(_onThumbnailFallbackChanged);
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final detailPageState = InheritedDetailPageState.maybeOf(context);
+    _updateIsInSharedCollectionNotifier(
+      detailPageState?.isInSharedCollectionNotifier,
+    );
+    _updateShowingThumbnailFallbackNotifier(
+      detailPageState?.showingThumbnailFallbackNotifier,
+    );
   }
 
   void _onSharedCollectionChanged() {
@@ -116,14 +120,36 @@ class FileAppBarState extends State<FileAppBar> {
     _requestActionsReload();
   }
 
+  void _updateIsInSharedCollectionNotifier(ValueNotifier<bool>? notifier) {
+    if (_isInSharedCollectionNotifier == notifier) {
+      return;
+    }
+    _isInSharedCollectionNotifier?.removeListener(_onSharedCollectionChanged);
+    _isInSharedCollectionNotifier = notifier;
+    _isInSharedCollectionNotifier?.addListener(_onSharedCollectionChanged);
+  }
+
+  void _updateShowingThumbnailFallbackNotifier(
+    ValueNotifier<String?>? notifier,
+  ) {
+    if (_showingThumbnailFallbackNotifier == notifier) {
+      return;
+    }
+    _showingThumbnailFallbackNotifier?.removeListener(
+      _onThumbnailFallbackChanged,
+    );
+    _showingThumbnailFallbackNotifier = notifier;
+    _showingThumbnailFallbackNotifier?.addListener(
+      _onThumbnailFallbackChanged,
+    );
+  }
+
   @override
   void dispose() {
-    InheritedDetailPageState.maybeOf(context)
-        ?.isInSharedCollectionNotifier
-        .removeListener(_onSharedCollectionChanged);
-    InheritedDetailPageState.maybeOf(context)
-        ?.showingThumbnailFallbackNotifier
-        .removeListener(_onThumbnailFallbackChanged);
+    _isInSharedCollectionNotifier?.removeListener(_onSharedCollectionChanged);
+    _showingThumbnailFallbackNotifier?.removeListener(
+      _onThumbnailFallbackChanged,
+    );
     _guestViewEventSubscription.cancel();
     super.dispose();
   }
@@ -227,9 +253,9 @@ class FileAppBarState extends State<FileAppBar> {
     _actions.clear();
 
     // Show info icon when thumbnail fallback is active for THIS file
-    final fallbackFileId = InheritedDetailPageState.maybeOf(context)
-        ?.showingThumbnailFallbackNotifier
-        .value;
+    final fallbackFileId = InheritedDetailPageState.maybeOf(
+      context,
+    )?.showingThumbnailFallbackNotifier.value;
     final currentFileId = detailPageFileIdentifier(widget.file);
     final showingFallback =
         fallbackFileId != null && fallbackFileId == currentFileId;
@@ -246,10 +272,7 @@ class FileAppBarState extends State<FileAppBar> {
             color: backgroundElevated2Dark,
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
+          textStyle: const TextStyle(color: Colors.white, fontSize: 14),
           preferBelow: true,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -268,9 +291,9 @@ class FileAppBarState extends State<FileAppBar> {
     final Collection? collection = collectionID != null
         ? CollectionsService.instance.getCollectionByID(collectionID)
         : null;
-    final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
-            ?.isInSharedCollectionNotifier
-            .value ??
+    final isInSharedCollection = InheritedDetailPageState.maybeOf(
+          context,
+        )?.isInSharedCollectionNotifier.value ??
         false;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
@@ -294,16 +317,11 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     if (!isFileHidden && isFileUploaded && widget.file is! TrashFile) {
-      _actions.add(
-        Center(child: FavoriteWidget(widget.file)),
-      );
+      _actions.add(Center(child: FavoriteWidget(widget.file)));
     }
-    if (!isFileUploaded && !isOfflineMode) {
+    if (!isFileUploaded && !isLocalGalleryMode) {
       _actions.add(
-        UploadIconWidget(
-          file: widget.file,
-          key: ValueKey(widget.file.tag),
-        ),
+        UploadIconWidget(file: widget.file, key: ValueKey(widget.file.tag)),
       );
     }
 
@@ -607,8 +625,9 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _handleHideRequest(BuildContext context) async {
     try {
-      final hideResult =
-          await CollectionsService.instance.hideFiles(context, [widget.file]);
+      final hideResult = await CollectionsService.instance.hideFiles(context, [
+        widget.file,
+      ]);
       if (hideResult) {
         widget.onFileRemoved(widget.file);
       }
@@ -633,7 +652,9 @@ class FileAppBarState extends State<FileAppBar> {
         widget.file.magicMetadata.visibility == archiveVisibility;
     await changeVisibility(
       context,
-      [widget.file],
+      [
+        widget.file,
+      ],
       isArchived ? visibleVisibility : archiveVisibility,
     );
     if (mounted) {
@@ -668,12 +689,16 @@ class FileAppBarState extends State<FileAppBar> {
     if (flagService.internalUser) {
       try {
         await galleryDownloadQueueService.enqueueFiles(
-          [fileToDownload],
+          [
+            fileToDownload,
+          ],
           persistToFilesDB: persistToFilesDB,
         );
       } catch (e) {
         _logger.warning("Failed to save file", e);
-        await showGenericErrorDialog(context: context, error: e);
+        if (mounted) {
+          await showGenericErrorDialog(context: context, error: e);
+        }
       }
       return;
     }
@@ -689,12 +714,18 @@ class FileAppBarState extends State<FileAppBar> {
         fileToDownload,
         persistToFilesDB: persistToFilesDB,
       );
+      if (!mounted) {
+        await dialog.hide();
+        return;
+      }
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
     }
   }
 
@@ -719,19 +750,19 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       return;
     }
-    final String url =
-        CollectionsService.instance.getPublicUrl(sharedLinkCollection);
+    final String url = CollectionsService.instance.getPublicUrl(
+      sharedLinkCollection,
+    );
     await dialog.hide();
     unawaited(Clipboard.setData(ClipboardData(text: url)));
-    await shareLinkWithDescription(
-      url,
-      context: context,
-    );
+    await shareLinkWithDescription(url, context: context);
   }
 
   Future<void> _setAs(EnteFile file) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       final File? fileToSave = await (getFile(file));
@@ -804,15 +835,14 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _handleVideoStream(String streamType) async {
     try {
-      final bool wasAdded = await VideoPreviewService.instance
-          .addToManualQueue(widget.file, streamType);
+      final bool wasAdded = await VideoPreviewService.instance.addToManualQueue(
+        widget.file,
+        streamType,
+      );
 
       if (!wasAdded) {
         // File was already in queue
-        showToast(
-          context,
-          AppLocalizations.of(context).videoAlreadyInQueue,
-        );
+        showToast(context, AppLocalizations.of(context).videoAlreadyInQueue);
         return;
       }
 

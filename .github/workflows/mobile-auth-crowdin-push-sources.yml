@@ -1,0 +1,36 @@
+name: "Push sources to Crowdin (mobile/auth)"
+
+on:
+    push:
+        branches: [main]
+        paths:
+            # Run workflow when auth's app_en.arb is changed
+            - "mobile/apps/auth/lib/l10n/arb/app_en.arb"
+            # Or the Crowdin config is changed
+            - "mobile/apps/auth/crowdin.yml"
+            # Or the workflow itself is changed
+            - ".github/workflows/mobile-auth-crowdin-push-sources.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    push-sources-to-crowdin:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: Crowdin's action
+              uses: crowdin/github-action@v2
+              with:
+                  base_path: "mobile/apps/auth/"
+                  config: "mobile/apps/auth/crowdin.yml"
+                  upload_sources: true
+                  upload_translations: false
+                  download_translations: false
+                  project_id: 575169
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

@@ -288,7 +288,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     } catch (e) {
       executionState = ExecutionState.error;
       _debouncer.cancelDebounceTimer();
-      _exception = e as Exception;
+      _exception = e is Exception ? e : Exception(e.toString());
       if (e.toString().contains("Incorrect password")) {
         _logger.warning("Incorrect password");
         _surfaceWrongPasswordState();
@@ -329,6 +329,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                         ? (widget.popNavAfterSubmission ? 1 : 2)
                         : 0,
                   ), () {
+                if (!mounted) return;
                 widget.popNavAfterSubmission
                     ? _popNavigatorStack(context)
                     : null;
@@ -357,7 +358,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       if (widget.popNavAfterSubmission) {
         Future.delayed(
           Duration(seconds: widget.alwaysShowSuccessState ? 1 : 0),
-          () => _popNavigatorStack(context),
+          () {
+            if (!mounted) return;
+            _popNavigatorStack(context);
+          },
         );
       }
     }

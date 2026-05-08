@@ -1,7 +1,5 @@
-import "package:dio/dio.dart";
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
 import 'package:flutter_test/flutter_test.dart';
-import "package:mockito/annotations.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/upload_locks_db.dart";
@@ -14,49 +12,19 @@ import 'package:photos/services/filedata/model/file_data.dart';
 import "package:photos/services/isolated_ffmpeg_service.dart";
 import 'package:photos/services/video_preview_service.dart';
 
-import "video_preview_service_test.mocks.dart";
-
-@GenerateMocks([
-  ServiceLocator,
-  Configuration,
-  FilesDB,
-  UploadLocksDB,
-  FileMagicService,
-  IsolatedFfmpegService,
-  Dio,
-  DefaultCacheManager,
-  CacheManager,
-])
 void main() {
   late VideoPreviewService videoPreviewService;
-  late MockServiceLocator mockServiceLocator;
-  late MockConfiguration mockConfiguration;
-  late MockFilesDB mockFilesDB;
-  late MockUploadLocksDB mockUploadLocksDB;
-  late MockFileMagicService mockFileMagicService;
-  late MockIsolatedFfmpegService mockFfmpegService;
-  late MockDefaultCacheManager mockCacheManager;
-  late MockCacheManager mockVideoCacheManager;
 
   setUp(() {
-    mockServiceLocator = MockServiceLocator();
-    mockConfiguration = MockConfiguration();
-    mockFilesDB = MockFilesDB();
-    mockUploadLocksDB = MockUploadLocksDB();
-    mockFileMagicService = MockFileMagicService();
-    mockFfmpegService = MockIsolatedFfmpegService();
-    mockCacheManager = MockDefaultCacheManager();
-    mockVideoCacheManager = MockCacheManager();
-
     videoPreviewService = VideoPreviewService(
-      mockConfiguration,
-      mockServiceLocator,
-      mockFilesDB,
-      mockUploadLocksDB,
-      mockFileMagicService,
-      mockFfmpegService,
-      mockCacheManager,
-      mockVideoCacheManager,
+      _FakeConfiguration(),
+      _FakeServiceLocator(),
+      _FakeFilesDB(),
+      _FakeUploadLocksDB(),
+      _FakeFileMagicService(),
+      _FakeIsolatedFfmpegService(),
+      _FakeDefaultCacheManager(),
+      _FakeCacheManager(),
     );
   });
 
@@ -354,3 +322,20 @@ void main() {
     });
   });
 }
+
+class _FakeServiceLocator extends Fake implements ServiceLocator {}
+
+class _FakeConfiguration extends Fake implements Configuration {}
+
+class _FakeFilesDB extends Fake implements FilesDB {}
+
+class _FakeUploadLocksDB extends Fake implements UploadLocksDB {}
+
+class _FakeFileMagicService extends Fake implements FileMagicService {}
+
+class _FakeIsolatedFfmpegService extends Fake
+    implements IsolatedFfmpegService {}
+
+class _FakeDefaultCacheManager extends Fake implements DefaultCacheManager {}
+
+class _FakeCacheManager extends Fake implements CacheManager {}

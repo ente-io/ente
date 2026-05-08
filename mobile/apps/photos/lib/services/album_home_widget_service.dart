@@ -51,7 +51,7 @@ class AlbumHomeWidgetService {
   void _listenToLocalPhotoUpdates() {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type != EventType.hide ||
-          isOfflineMode ||
+          isLocalGalleryMode ||
           !Configuration.instance.hasConfiguredAccount()) {
         return;
       }
@@ -195,12 +195,10 @@ class AlbumHomeWidgetService {
     return albums;
   }
 
-  Future<void> onLaunchFromWidget(
-    int fileId,
-    int collectionId,
-  ) async {
-    final collection =
-        CollectionsService.instance.getCollectionByID(collectionId);
+  Future<void> onLaunchFromWidget(int fileId, int collectionId) async {
+    final collection = CollectionsService.instance.getCollectionByID(
+      collectionId,
+    );
     if (collection == null) {
       _logger.warning(
         "Cannot launch widget: collection with ID $collectionId not found",
@@ -212,13 +210,12 @@ class AlbumHomeWidgetService {
     final thumbnail = await CollectionsService.instance.getCover(collection);
     AppNavigationService.instance
         .pushPage(
-          CollectionPage(
-            CollectionWithThumbnail(collection, thumbnail),
-          ),
+          CollectionPage(CollectionWithThumbnail(collection, thumbnail)),
         )
         .ignore();
-    final getAllFilesCollection =
-        await FilesDB.instance.getAllFilesCollection(collection.id);
+    final getAllFilesCollection = await FilesDB.instance.getAllFilesCollection(
+      collection.id,
+    );
 
     // Then open the specific file
     final file = await FilesDB.instance.getFile(fileId);
@@ -335,9 +332,7 @@ class AlbumHomeWidgetService {
         return decoded;
       }
       if (decoded is Map) {
-        return decoded.map(
-          (key, value) => MapEntry(key.toString(), value),
-        );
+        return decoded.map((key, value) => MapEntry(key.toString(), value));
       }
       return null;
     }
@@ -347,9 +342,7 @@ class AlbumHomeWidgetService {
     }
 
     if (data is Map) {
-      return data.map(
-        (key, value) => MapEntry(key.toString(), value),
-      );
+      return data.map((key, value) => MapEntry(key.toString(), value));
     }
 
     return null;
@@ -448,15 +441,18 @@ class AlbumHomeWidgetService {
     for (final albumId in selectedAlbumIds) {
       final collection = CollectionsService.instance.getCollectionByID(albumId);
       if (collection != null) {
-        final allFiles =
-            await FilesDB.instance.getAllFilesCollection(collection.id);
+        final allFiles = await FilesDB.instance.getAllFilesCollection(
+          collection.id,
+        );
         final files = allFiles.where((file) {
           final uploadedID = file.uploadedFileID;
           return uploadedID == null || !hiddenUploadIDs.contains(uploadedID);
         }).toList();
         if (files.isNotEmpty) {
-          albumsWithFiles[collection.id] =
-              (collection.decryptedName ?? "Album", files);
+          albumsWithFiles[collection.id] = (
+            collection.decryptedName ?? "Album",
+            files,
+          );
         }
       }
     }
@@ -565,9 +561,7 @@ class AlbumHomeWidgetService {
 
         // Show update toast after first item is rendered
         if (renderedCount == 1) {
-          await _refreshWidget(
-            message: "First album fetched, updating widget",
-          );
+          await _refreshWidget(message: "First album fetched, updating widget");
           await updateAlbumsStatus(WidgetStatus.syncedPartially);
         }
 

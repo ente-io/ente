@@ -88,15 +88,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   @override
   void initState() {
     super.initState();
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _debouncer.run(() async {
-        if (mounted) {
-          debugPrint("SetState Shared Collections on ${event.reason}");
-          setState(() {});
-        }
-      });
-    });
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen(
+      (event) {
+        _debouncer.run(() async {
+          if (mounted) {
+            debugPrint("SetState Shared Collections on ${event.reason}");
+            setState(() {});
+          }
+        });
+      },
+    );
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _debouncer.run(() async {
@@ -121,8 +122,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
-    _appModeChangedEvent =
-        Bus.instance.on<AppModeChangedEvent>().listen((event) {
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((
+      event,
+    ) {
       if (mounted) {
         setState(() {});
       }
@@ -221,19 +223,17 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final bool offlineUiMode =
-        isOfflineMode && !Configuration.instance.hasConfiguredAccount();
+    final bool localGalleryUiMode =
+        isLocalGalleryMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<SharedCollectionsAndMemoryLinks>(
-      future: offlineUiMode
+      future: localGalleryUiMode
           ? Future.value(SharedCollectionsAndMemoryLinks.empty())
           : CollectionsService.instance.getSharedCollectionsAndMemoryLinks(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data!;
-          if (offlineUiMode) {
-            return const SafeArea(
-              child: SharedEmptyOfflineStateWidget(),
-            );
+          if (localGalleryUiMode) {
+            return const SafeArea(child: SharedEmptyOfflineStateWidget());
           }
           if (data.collections.incoming.isEmpty &&
               data.collections.quickLinks.isEmpty &&
@@ -278,10 +278,12 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             albumsCountInRow;
     const quickLinkTitleHeroTag = "quick_link_title";
     const memoryLinkTitleHeroTag = "memory_link_title";
-    final SectionTitle sharedWithYou =
-        SectionTitle(title: AppLocalizations.of(context).sharedWithYou);
-    final SectionTitle sharedByYou =
-        SectionTitle(title: AppLocalizations.of(context).sharedByYou);
+    final SectionTitle sharedWithYou = SectionTitle(
+      title: AppLocalizations.of(context).sharedWithYou,
+    );
+    final SectionTitle sharedByYou = SectionTitle(
+      title: AppLocalizations.of(context).sharedByYou,
+    );
     final colorTheme = getEnteColorScheme(context);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -439,9 +441,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ? SizedBox(
                         height: sideOfThumbnail + 46,
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (context, index) {
                             return Padding(
@@ -577,9 +577,11 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           final share = memoryLinks[index];
-                          final title = MemoryShareService.instance
-                                  .getMemoryShareTitle(share) ??
-                              "Memory link";
+                          final title =
+                              MemoryShareService.instance.getMemoryShareTitle(
+                                    share,
+                                  ) ??
+                                  "Memory link";
                           return GestureDetector(
                             onTap: () async {
                               final deleted = await showMemoryLinkDetailsSheet(

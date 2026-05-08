@@ -126,7 +126,7 @@ Open `Settings > Preferences > Machine learning` and toggle ON face recognition 
 
 **Important limitations:**
 
-- ❌ ML does NOT work on web.ente.io (web browser)
+- ❌ ML does NOT work on photos.ente.com (web browser)
 - ✅ ML only works on desktop and mobile apps
 - Initial indexing can take time depending on library size
 
@@ -181,7 +181,7 @@ Open `Settings > Preferences > Machine learning`, enable "Face recognition", and
 **Troubleshooting:**
 
 - If stuck at 100% but faces don't appear, try disabling and re-enabling ML
-- Make sure you're using the desktop or mobile app, NOT web.ente.io
+- Make sure you're using the desktop or mobile app, NOT photos.ente.com
 - Check that indexing has actually completed (not just showing 100%)
 
 Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning).
@@ -383,7 +383,7 @@ Learn more in [Albums and Organization FAQ](/photos/faq/albums-and-organization#
 
 If indexing shows 100% but you don't see faces:
 
-1. Make sure you're using the mobile or desktop app (not web.ente.io)
+1. Make sure you're using the mobile or desktop app (not photos.ente.com)
 2. Try disabling and re-enabling machine learning
 3. Check that indexing has truly completed (not just displaying 100%)
 4. Restart the app
@@ -426,9 +426,9 @@ If search results aren't what you expect:
 
 If face recognition or magic search isn't available:
 
-- Ensure you're using mobile or desktop app (not web.ente.io)
+- Ensure you're using mobile or desktop app (not photos.ente.com)
 - Check that machine learning is enabled in ML settings
 - Verify indexing has completed
 - Restart the app
 
-Note: Machine learning features only work on mobile and desktop apps, not on web.ente.io.
+Note: Machine learning features only work on mobile and desktop apps, not on photos.ente.com.

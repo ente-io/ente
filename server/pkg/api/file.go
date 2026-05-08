@@ -150,6 +150,17 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 	})
 }
 
+// ValidateUploadEligibility verifies that the user can upload without minting upload URLs.
+func (h *FileHandler) ValidateUploadEligibility(c *gin.Context) {
+	enteApp := auth.GetApp(c)
+	userID := auth.GetUserID(c.Request.Header)
+	if err := h.Controller.ValidateUploadEligibility(c, userID, enteApp); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
 // GetUploadURLV2 returns a single upload URL that enforces checksum + content-length headers
 func (h *FileHandler) GetUploadURLV2(c *gin.Context) {
 	enteApp := auth.GetApp(c)

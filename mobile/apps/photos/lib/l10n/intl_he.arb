@@ -548,7 +548,7 @@
   "appleId": "Apple ID",
   "playstoreSubscription": "מנוי PlayStore",
   "appstoreSubscription": "מנוי AppStore",
-  "visitWebToManage": "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך",
+  "visitWebToManage": "אנא בקר ב-{webUrl} על מנת לנהל את המנוי שלך",
   "couldNotUpdateSubscription": "לא ניתן לעדכן את המנוי",
   "paymentFailed": "התשלום נכשל",
   "paymentFailedTalkToProvider": "אנא דבר עם התמיכה של {providerName} אם אתה חוייבת",

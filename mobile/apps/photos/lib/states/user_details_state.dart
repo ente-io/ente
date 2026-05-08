@@ -11,10 +11,7 @@ import 'package:photos/services/account/user_service.dart';
 class UserDetailsStateWidget extends StatefulWidget {
   final Widget child;
 
-  const UserDetailsStateWidget({
-    required this.child,
-    super.key,
-  });
+  const UserDetailsStateWidget({required this.child, super.key});
 
   @override
   State<UserDetailsStateWidget> createState() => UserDetailsStateWidgetState();
@@ -57,7 +54,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
       );
 
   void _fetchUserDetails() async {
-    if (isOfflineMode) return;
+    if (isLocalGalleryMode) return;
     _userDetails = await UserService.instance.getUserDetailsV2(
       memoryCount: true,
       shouldCache: true,

@@ -20,6 +20,8 @@ type WebAuthnSession struct {
 
 	UserID int64
 
+	RPID string
+
 	AllowedCredentialIDs string // [][]byte as b64
 
 	ExpiresAt int64

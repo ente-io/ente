@@ -18,14 +18,15 @@ type PasskeyHandler struct {
 func (h *PasskeyHandler) GetPasskeys(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 
-	passkeys, err := h.Controller.GetPasskeys(userID)
+	passkeys, accountsURL, err := h.Controller.GetPasskeysAndAccountsURL(userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"passkeys": passkeys,
+		"accountsUrl": accountsURL,
+		"passkeys":    passkeys,
 	})
 }
 

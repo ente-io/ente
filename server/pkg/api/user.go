@@ -484,9 +484,14 @@ func (h *UserHandler) GetAccountsToken(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	accountsURL, err := h.UserController.PasskeyRepo.AccountsURLForUser(userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"accountsToken": token,
-		"accountsUrl":   viper.GetString("apps.accounts"),
+		"accountsUrl":   accountsURL,
 	})
 }
 

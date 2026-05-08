@@ -29,7 +29,7 @@ thiserror = "1"
 #
 # "mtmd" is used on all platforms for enabling multimodal support.
 [target.'cfg(target_os = "macos")'.dependencies]
-llama-cpp-2 = { version = "=0.1.138", default-features = false, features = ["mtmd"] }
+llama-cpp-2 = { version = "=0.1.144", default-features = false, features = ["mtmd"] }
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
-llama-cpp-2 = { version = "=0.1.138", features = ["mtmd"] }
+llama-cpp-2 = { version = "=0.1.144", features = ["mtmd"] }
