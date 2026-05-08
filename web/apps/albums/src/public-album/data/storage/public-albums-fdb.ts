@@ -264,6 +264,41 @@ export const removePublicCollectionAccessTokenJWT = async (
     await localForage.removeItem(`public-${accessToken}-passkey`);
 };
 
+const publicCollectionLinkDeviceTokenKey = (
+    apiOrigin: string,
+    accessToken: string,
+) => `public-collection-link-device-token:${apiOrigin}:${accessToken}`;
+
+export const savedPublicCollectionLinkDeviceToken = async (
+    apiOrigin: string,
+    accessToken: string,
+) =>
+    LocalString.parse(
+        await localForage.getItem(
+            publicCollectionLinkDeviceTokenKey(apiOrigin, accessToken),
+        ),
+    );
+
+export const savePublicCollectionLinkDeviceToken = async (
+    apiOrigin: string,
+    accessToken: string,
+    linkDeviceToken: string,
+) => {
+    await localForage.setItem(
+        publicCollectionLinkDeviceTokenKey(apiOrigin, accessToken),
+        linkDeviceToken,
+    );
+};
+
+export const removePublicCollectionLinkDeviceToken = async (
+    apiOrigin: string,
+    accessToken: string,
+) => {
+    await localForage.removeItem(
+        publicCollectionLinkDeviceTokenKey(apiOrigin, accessToken),
+    );
+};
+
 /**
  * Return the previously saved uploader name, if any, present in our local
  * database corresponding to a public collection.

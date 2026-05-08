@@ -10,14 +10,11 @@ use llama_cpp_2::mtmd::{
 use llama_cpp_2::openai::OpenAIChatTemplateParams;
 use llama_cpp_2::sampling::LlamaSampler;
 use llama_cpp_2::token::LlamaToken;
-use llama_cpp_sys_2::{
-    GGML_LOG_LEVEL_ERROR, GGML_LOG_LEVEL_WARN, ggml_log_level, mtmd_helper_log_set,
-};
 use parking_lot::Mutex;
 use self_cell::self_cell;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::num::NonZeroU32;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::Path;
@@ -43,8 +40,6 @@ where
 static BACKEND: OnceLock<Result<LlamaBackend, String>> = OnceLock::new();
 static JOB_COUNTER: AtomicI64 = AtomicI64::new(1);
 static CANCEL_FLAGS: OnceLock<Mutex<HashMap<JobId, Arc<AtomicBool>>>> = OnceLock::new();
-static MTMD_LOG_BUFFER: OnceLock<Mutex<String>> = OnceLock::new();
-static MTMD_LOG_HOOK: OnceLock<()> = OnceLock::new();
 
 const CANCEL_MESSAGE: &str = "Generation cancelled";
 const DEFAULT_GENERATION_MAX_TOKENS: i32 = 8_192;
@@ -58,46 +53,6 @@ fn backend() -> Result<&'static LlamaBackend, String> {
 
 fn cancel_flags() -> &'static Mutex<HashMap<JobId, Arc<AtomicBool>>> {
     CANCEL_FLAGS.get_or_init(|| Mutex::new(HashMap::new()))
-}
-
-fn mtmd_log_buffer() -> &'static Mutex<String> {
-    MTMD_LOG_BUFFER.get_or_init(|| Mutex::new(String::new()))
-}
-
-unsafe extern "C" fn mtmd_log_callback(
-    level: ggml_log_level,
-    text: *const ::std::os::raw::c_char,
-    _user_data: *mut ::std::os::raw::c_void,
-) {
-    if text.is_null() {
-        return;
-    }
-    if level != GGML_LOG_LEVEL_WARN && level != GGML_LOG_LEVEL_ERROR {
-        return;
-    }
-    let cstr = unsafe { CStr::from_ptr(text) };
-    if let Ok(message) = cstr.to_str() {
-        let mut guard = mtmd_log_buffer().lock();
-        guard.push_str(message);
-        const MAX_LEN: usize = 8192;
-        if guard.len() > MAX_LEN {
-            let drain = guard.len() - MAX_LEN;
-            guard.drain(..drain);
-        }
-    }
-}
-
-fn init_mtmd_logging() {
-    MTMD_LOG_HOOK.get_or_init(|| unsafe {
-        mtmd_helper_log_set(Some(mtmd_log_callback), std::ptr::null_mut());
-    });
-}
-
-fn take_mtmd_logs() -> String {
-    let mut guard = mtmd_log_buffer().lock();
-    let logs = guard.clone();
-    guard.clear();
-    logs
 }
 
 fn register_job() -> (JobId, Arc<AtomicBool>) {
@@ -939,9 +894,6 @@ pub fn generate_chat_stream(
                 return Err(format!("mmproj file not found at {mmproj_path}"));
             }
 
-            init_mtmd_logging();
-            take_mtmd_logs();
-
             let media_marker = CString::new(marker.clone())
                 .map_err(|err| format_error("Invalid media marker", err))?;
             let mtmd_params = MtmdContextParams {
@@ -952,14 +904,7 @@ pub fn generate_chat_stream(
             };
 
             let mtmd_ctx = MtmdContext::init_from_file(&mmproj_path, ctx.model, &mtmd_params)
-                .map_err(|err| {
-                    let logs = take_mtmd_logs();
-                    if logs.trim().is_empty() {
-                        format_error("Failed to initialize mmproj", err)
-                    } else {
-                        format!("Failed to initialize mmproj: {err}. Logs: {logs}")
-                    }
-                })?;
+                .map_err(|err| format_error("Failed to initialize mmproj", err))?;
 
             if !mtmd_ctx.support_vision() {
                 return Err("Model does not support vision input".to_string());

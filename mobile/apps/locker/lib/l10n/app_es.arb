@@ -145,7 +145,7 @@
       }
     }
   },
-  "fileUpdatedSuccessfully": "Elemento actualizado correctamente!",
+  "fileUpdatedSuccessfully": "¡Elemento actualizado correctamente!",
   "failedToUpdateFile": "Error al actualizar el elemento: {error}",
   "@failedToUpdateFile": {
     "description": "Error message when item update fails",
@@ -566,7 +566,7 @@
       }
     }
   },
-  "removeWithQuestionMark": "Quitar?",
+  "removeWithQuestionMark": "¿Quitar?",
   "removeParticipantBody": "{userEmail} sera eliminado de esta coleccion compartida\n\nTodos los elementos agregados por esta persona tambien seran eliminados de la coleccion",
   "yesRemove": "Sí, quitar",
   "remove": "Quitar",
@@ -921,7 +921,7 @@
   "selectLanguage": "Selecciona el idioma",
   "general": "General",
   "language": "Idioma",
-  "selectedCount": "{count, plural, one {}=1{1 seleccionado} other{{count} seleccionados}}",
+  "selectedCount": "{count, plural, =1{1 seleccionado} other{{count} seleccionados}}",
   "@selectedCount": {
     "description": "Number of items selected",
     "placeholders": {
@@ -931,7 +931,7 @@
       }
     }
   },
-  "actionNotSupportedForSharedFiles": "{count, plural, one {}=1{La acción no es compatible con 1 archivo compartido} other{La acción no es compatible con {count} archivos compartidos}}",
+  "actionNotSupportedForSharedFiles": "{count, plural, =1{La acción no es compatible con 1 archivo compartido} other{La acción no es compatible con {count} archivos compartidos}}",
   "@actionNotSupportedForSharedFiles": {
     "description": "Message when action is not supported for shared files",
     "placeholders": {
@@ -954,7 +954,7 @@
   "collectionUpdated": "Colección actualizada",
   "actionNotSupportedOnFavouritesAlbum": "Acción no compatible con el álbum de Favoritos",
   "leaveCollectionSuccessfully": "Se salió de la colección con éxito",
-  "leftCollectionsSuccessfully": "{count, plural, one {}=1{¡Salió de una colección con exito} other{¡Salió de {count} colecciones con exito}}!",
+  "leftCollectionsSuccessfully": "{count, plural, =1{¡Salió de una colección con éxito} other{¡Salió de {count} colecciones con éxito}}!",
   "@leftCollectionsSuccessfully": {
     "description": "Success message when leaving collections",
     "placeholders": {
@@ -975,7 +975,7 @@
       }
     }
   },
-  "collectionsDeletedSuccessfully": "{count, plural, one {}=1{1 colección eliminada con éxito} other{{count} colecciones eliminadas con éxito}}",
+  "collectionsDeletedSuccessfully": "{count, plural, =1{1 colección eliminada con éxito} other{{count} colecciones eliminadas con éxito}}",
   "@collectionsDeletedSuccessfully": {
     "description": "Success message when collections are deleted",
     "placeholders": {
@@ -987,7 +987,7 @@
   },
   "restoreToCollection": "Restaurar a la colección",
   "restoringFiles": "Restaurando...",
-  "filesRestoredSuccessfully": "{count, plural, one {}=1{1 elemento restaurado con éxito} other{{count} elementos restaurados con éxito}}",
+  "filesRestoredSuccessfully": "{count, plural, =1{1 elemento restaurado con éxito} other{{count} elementos restaurados con éxito}}",
   "@filesRestoredSuccessfully": {
     "description": "Success message when items are restored from trash",
     "placeholders": {
@@ -999,7 +999,7 @@
   },
   "failedToRestoreFiles": "Error al restaurar los elementos",
   "permanentlyDelete": "Borrar permanentemente",
-  "permanentlyDeleteFilesBody": "{count, plural, one {}=1{¡Este elemento será eliminado} other{Estos {count} elementos serán eliminados}} permanentemente y no se podrá recuperar.",
+  "permanentlyDeleteFilesBody": "{count, plural, =1{Este elemento será eliminado} other{Estos {count} elementos serán eliminados}} permanentemente y no se podrá recuperar.",
   "@permanentlyDeleteFilesBody": {
     "description": "Confirmation body for permanent deletion from trash",
     "placeholders": {
@@ -1011,7 +1011,7 @@
   },
   "yesDelete": "Sí, eliminar",
   "deletingFiles": "Eliminando...",
-  "filesDeletedPermanently": "{count, plural, one {}=1{1 elemento eliminado permanentemente} other{{count} elementos eliminados permanentemente}}",
+  "filesDeletedPermanently": "{count, plural, =1{1 elemento eliminado permanentemente} other{{count} elementos eliminados permanentemente}}",
   "@filesDeletedPermanently": {
     "description": "Success message when items are permanently deleted from trash",
     "placeholders": {

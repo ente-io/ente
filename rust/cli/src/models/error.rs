@@ -1,3 +1,4 @@
+use ente_accounts::Error as AccountsError;
 use ente_core::{auth::AuthError, crypto::CryptoError};
 use thiserror::Error;
 
@@ -40,7 +41,11 @@ pub enum Error {
     Zip(#[from] zip::result::ZipError),
 
     #[error("API error ({status}): {message}")]
-    ApiError { status: u16, message: String },
+    ApiError {
+        status: u16,
+        code: Option<String>,
+        message: String,
+    },
 
     #[error("{0}")]
     Generic(String),
@@ -72,6 +77,38 @@ impl From<AuthError> for Error {
             AuthError::Decode(msg) => Error::Crypto(msg),
             AuthError::InvalidKey(msg) => Error::Crypto(msg),
             AuthError::Srp(msg) => Error::Srp(msg),
+        }
+    }
+}
+
+impl From<AccountsError> for Error {
+    fn from(err: AccountsError) -> Self {
+        match err {
+            AccountsError::Http(ente_core::http::Error::Http {
+                status,
+                code,
+                message,
+            }) => Error::ApiError {
+                status,
+                code,
+                message,
+            },
+            AccountsError::Http(ente_core::http::Error::Network(message)) => {
+                Error::Generic(format!("Network error: {message}"))
+            }
+            AccountsError::Http(ente_core::http::Error::Parse(message)) => {
+                Error::Generic(format!("JSON parse error: {message}"))
+            }
+            AccountsError::Http(ente_core::http::Error::InvalidUrl(message)) => {
+                Error::InvalidConfig(message)
+            }
+            AccountsError::Serialization(source) => Error::Serialization(source),
+            AccountsError::Crypto(message) => Error::Crypto(message),
+            AccountsError::AuthenticationFailed(message) => Error::AuthenticationFailed(message),
+            AccountsError::InvalidInput(message) => Error::InvalidInput(message),
+            AccountsError::Srp(message) => Error::Srp(message),
+            AccountsError::Base64Decode(source) => Error::Base64Decode(source),
+            AccountsError::Generic(message) => Error::Generic(message),
         }
     }
 }

@@ -81,7 +81,7 @@ class _PeopleSectionState extends State<PeopleSection> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Building section for ${widget.sectionType.name}");
-    final shouldShowMore = _examples.length >= widget.limit - 1;
+    final shouldShowMore = _examples.isNotEmpty;
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return _examples.isNotEmpty

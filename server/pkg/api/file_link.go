@@ -38,6 +38,11 @@ func (h *FileHandler) LinkInfo(c *gin.Context) {
 	if linkMeta != nil {
 		response["link"] = linkMeta
 	}
+	if linkDeviceToken, ok := c.Get(auth.LinkDeviceTokenResponseKey); ok {
+		if token, ok := linkDeviceToken.(string); ok && token != "" {
+			c.Header(auth.LinkDeviceTokenResponseHeader, token)
+		}
+	}
 	c.JSON(http.StatusOK, response)
 }
 

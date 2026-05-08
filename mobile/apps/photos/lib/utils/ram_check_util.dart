@@ -6,6 +6,9 @@ int? deviceTotalRAM;
 bool get enoughRamForLocalIndexing =>
     deviceTotalRAM == null || deviceTotalRAM! >= 5 * 1024;
 
+bool get hasLessThan5GBRAM =>
+    deviceTotalRAM != null && deviceTotalRAM! < 5 * 1024;
+
 bool get enoughRamForOfflineLocalIndexing =>
     deviceTotalRAM == null || deviceTotalRAM! > 3 * 1024;
 

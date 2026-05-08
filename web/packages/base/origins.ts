@@ -4,11 +4,11 @@ import { getKVS } from "ente-base/kv";
  * Return the origin (scheme, host, port triple) that should be used for making
  * API requests to museum.
  *
- * This defaults "https://api.ente.io", Ente's production API servers. but can
+ * This defaults "https://api.ente.com", Ente's production API servers, but can
  * be overridden when self hosting or developing (see {@link customAPIOrigin}).
  */
 export const apiOrigin = async () =>
-    (await customAPIOrigin()) ?? "https://api.ente.io";
+    (await customAPIOrigin()) ?? "https://api.ente.com";
 
 /**
  * A convenience function to construct an endpoint in a one-liner.

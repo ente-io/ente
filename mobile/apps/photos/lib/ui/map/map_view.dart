@@ -107,6 +107,7 @@ class _MapViewState extends State<MapView> {
                 alignment: Alignment.topCenter,
                 maxClusterRadius: 100,
                 showPolygon: false,
+                spiderfyCluster: false,
                 size: widget.markerSize,
                 padding: const EdgeInsets.all(80),
                 markers: _markers,

@@ -1,0 +1,7 @@
+[package]
+name = "codegen"
+edition = "2024"
+
+[dependencies]
+camino = "=1.2.2"
+uniffi_bindgen = { version = "=0.31.0", default-features = false, features = ["cargo-metadata"] }

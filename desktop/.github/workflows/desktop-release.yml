@@ -39,7 +39,7 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   # If triggered by a tag, checkout photosd-$tag from the source
                   # repository. Otherwise checkout $source (default: "main").
@@ -49,7 +49,7 @@ jobs:
                       || 'main' ) }}"
 
             - name: Setup node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22
 

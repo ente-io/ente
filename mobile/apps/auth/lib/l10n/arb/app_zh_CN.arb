@@ -581,7 +581,7 @@
   "addNew": "新增",
   "selected": "已选",
   "moveMultipleToTrashMessage": "您确定要将 {count} 个项目移至回收站吗？",
-  "nSelected": "{count, plural, =1{已选择 1 个} other{已选择 {count} 个}}",
+  "nSelected": "{count, plural, one {已选择 {count} 个} other{已选择 {count} 个}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -592,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{已置顶 1 个项目} other{已置顶 {count} 个项目}}",
+  "pinnedCount": "{count, plural, one{已置顶 {count} 个项目} other{已置顶 {count} 个项目}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -603,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{已取消置顶 1 个项目} other{已取消置顶 {count} 个项目}}",
+  "unpinnedCount": "{count, plural, one{已取消置顶 {count} 个项目} other{已取消置顶 {count} 个项目}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

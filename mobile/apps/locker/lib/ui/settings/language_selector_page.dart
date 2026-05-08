@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -103,47 +104,7 @@ class _LanguageItemsWidgetState extends State<_LanguageItemsWidget> {
         bgColor: getEnteColorScheme(context).fillFaint,
       ),
     );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
-    );
-  }
-
-  String _getLanguageName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'cs':
-        return 'Čeština';
-      case 'de':
-        return 'Deutsch';
-      case 'en':
-        return 'English';
-      case 'es':
-        return 'Español';
-      case 'fr':
-        return 'Français';
-      case 'it':
-        return 'Italiano';
-      case 'ja':
-        return '日本語';
-      case 'nl':
-        return 'Nederlands';
-      case 'pl':
-        return 'Polski';
-      case 'pt':
-        return 'Português';
-      case 'ro':
-        return 'Română';
-      case 'ru':
-        return 'Русский';
-      case 'tr':
-        return 'Türkçe';
-      case 'uk':
-        return 'Українська';
-      case 'vi':
-        return 'Tiếng Việt';
-      default:
-        return locale.languageCode;
-    }
+    return Column(mainAxisSize: MainAxisSize.min, children: items);
   }
 
   Widget _menuItemForPicker(Locale locale) {
@@ -151,7 +112,7 @@ class _LanguageItemsWidgetState extends State<_LanguageItemsWidget> {
       key: ValueKey(locale.toString()),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: _getLanguageName(locale) + (kDebugMode ? ' ($locale)' : ''),
+        title: getLocaleDisplayName(locale) + (kDebugMode ? ' ($locale)' : ''),
       ),
       trailingIcon: currentLocale == locale ? Icons.check : null,
       alignCaptionedTextToLeft: true,

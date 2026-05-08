@@ -64,7 +64,7 @@ For more check: [Troubleshooting](https://ente.com/help/photos/faq/troubleshooti
 
 ### How do I prevent duplicates while migrating from Google Photos? {#prevent-duplicates-migration}
 
-Ente detects duplicates by identical hash, file name and creation time.
+Ente detects duplicates by identical hash and file name.
 
 Duplicates can occur:
 
@@ -204,3 +204,31 @@ rest.
 > Note: In case your uploads get interrupted, just drag and drop the folders
 > into the same albums again, and we will ignore already backed up files and
 > upload just the rest.
+
+## Importing from other cloud services
+
+### I have photos on my phone and also photos autosynced from my phone to a cloud storage. How do I upload all these photos to Ente without duplicates? {#prevent-duplicates-cloud-sync}
+
+Ente detects duplicates by identical hash and file name. If your
+previous cloud service modified your photos in any way (re-compressed them,
+stripped or altered EXIF metadata, converted formats, etc.), the hashes won't
+match and duplicates may occur.
+
+**Recommended workflow:**
+
+1. Turn off auto-upload in your current cloud app.
+2. Download all your photos and videos from your current cloud service to your
+   computer.
+3. Upload them to Ente via the desktop app or web. The desktop app handles large
+   uploads more reliably.
+4. Sign into Ente on your phone and let the app fully sync.
+5. Enable
+   [automatic backups](/photos/getting-started/daily-use#select-albums-folders-to-back-up).
+   If duplicates are a concern, enable the "Back up only new photos" toggle
+   (`Settings > Back up > Back up settings > Back up only new photos`), which
+   skips existing photos on your phone and backs up only new ones.
+
+**If duplicates still arise after migration and upload:**
+
+- Use the [Remove duplicates](/photos/features/albums-and-organization/storage-optimization#remove-exact-duplicates) option.
+- Use the [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) option. (Ensure Machine Learning is enabled in Settings for similar-image detection)

@@ -5,13 +5,19 @@ import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
+import "package:photos/utils/local_settings.dart";
 
 class PeopleWidgetSettings extends StatefulWidget {
   const PeopleWidgetSettings({super.key});
@@ -22,12 +28,14 @@ class PeopleWidgetSettings extends StatefulWidget {
 
 class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
   bool hasInstalledAny = false;
+  late bool _showText;
   final _selectedPeople = SelectedPeople();
   Set<String>? lastSelectedPeople;
 
   @override
   void initState() {
     super.initState();
+    _showText = !localSettings.isWidgetTextHidden(WidgetHideTextFlag.people);
     getSelections();
     checkIfAnyWidgetInstalled();
   }
@@ -48,7 +56,9 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
+      backgroundColor: colorScheme.backgroundColour,
       bottomNavigationBar: hasInstalledAny
           ? Padding(
               padding: EdgeInsets.fromLTRB(
@@ -93,6 +103,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
+            backgroundColor: colorScheme.backgroundColour,
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: AppLocalizations.of(context).people,
             ),
@@ -131,13 +142,39 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                 ),
               ),
             )
-          else
+          else ...[
+            if (kDebugMode)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 18, 6, 8),
+                  child: MenuItemWidgetNew(
+                    title: AppLocalizations.of(context).showTextOnWidget,
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => _showText,
+                      onChanged: () async {
+                        final next = !_showText;
+                        setState(() => _showText = next);
+                        await localSettings.setWidgetTextHidden(
+                          WidgetHideTextFlag.people,
+                          !next,
+                        );
+                        await HomeWidgetService.instance.updateWidget(
+                          androidClass:
+                              PeopleHomeWidgetService.ANDROID_CLASS_NAME,
+                          iOSClass: PeopleHomeWidgetService.IOS_CLASS_NAME,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
             SliverFillRemaining(
               child: PeopleSectionAllWidget(
                 selectedPeople: _selectedPeople,
                 namedOnly: true,
               ),
             ),
+          ],
         ],
       ),
     );

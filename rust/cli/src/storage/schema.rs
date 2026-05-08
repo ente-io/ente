@@ -11,7 +11,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             user_id INTEGER NOT NULL,
             app TEXT NOT NULL,
             email TEXT NOT NULL,
-            endpoint TEXT NOT NULL DEFAULT 'https://api.ente.io',
+            endpoint TEXT NOT NULL DEFAULT 'https://api.ente.com',
             export_dir TEXT,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,

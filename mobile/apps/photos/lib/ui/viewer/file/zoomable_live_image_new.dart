@@ -155,6 +155,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       shouldDisableScroll: widget.shouldDisableScroll,
       backgroundDecoration: widget.backgroundDecoration,
       isGuestView: isGuestView,
+      isFromMemories: widget.isFromMemories,
       onFinalFileLoad: widget.onFinalFileLoad,
     );
 

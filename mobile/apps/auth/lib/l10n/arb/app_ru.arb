@@ -581,7 +581,7 @@
   "addNew": "",
   "selected": "выбрано",
   "moveMultipleToTrashMessage": "Вы уверены, что хотите переместить {count} элемент(ы) в корзину?",
-  "nSelected": "{count, plural, =1{1 выбран} other{{count} выбрано}}",
+  "nSelected": "{count, plural, one{{count} выбран} few{{count} выбрано} many{{count} выбрано} other{{count} выбрано}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -592,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{Закреплён 1 элемент} other{Закреплёно {count} элементов}}",
+  "pinnedCount": "{count, plural, one{Закреплён {count} элемент} few{Закреплено {count} элемента} many{Закреплено {count} элементов} other{Закреплено {count} элементов}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -603,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{Откреплён 1 элемент} other{Откреплёно {count} элементов}}",
+  "unpinnedCount": "{count, plural, one{Откреплён {count} элемент} few{Откреплено {count} элемента} many{Откреплено {count} элементов} other{Откреплено {count} элементов}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

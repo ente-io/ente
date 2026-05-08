@@ -23,6 +23,10 @@ const (
 	FileLinkAccessKey    = "X-Public-FileLink-Access-ID"
 	CastContext          = "X-Cast-Context"
 	MemoryShareAccessKey = "X-Memory-Share-Access-ID"
+
+	LinkDeviceTokenHeader         = "X-Auth-Link-Device-Token"
+	LinkDeviceTokenResponseHeader = "X-Ente-Link-Device-Token"
+	LinkDeviceTokenResponseKey    = "linkDeviceToken"
 )
 
 // GenerateRandomBytes returns securely generated random bytes.
@@ -132,6 +136,10 @@ func GetAccessTokenJWT(c *gin.Context) string {
 		token = c.Query("accessTokenJWT")
 	}
 	return token
+}
+
+func GetLinkDeviceToken(c *gin.Context) string {
+	return c.GetHeader(LinkDeviceTokenHeader)
 }
 
 func MustGetPublicAccessContext(c *gin.Context) ente.PublicAccessContext {

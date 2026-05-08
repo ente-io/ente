@@ -83,7 +83,7 @@ export const parseAndHandleRequest = async () => {
     }
 };
 
-const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
+const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.com";
 const paymentIntentPollIntervalMs = 2_000;
 const paymentIntentPollTimeoutMs = 300_000;
 const pendingPaymentContextStorageKey = "ente.payments.pending-context";

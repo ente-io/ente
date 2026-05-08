@@ -1,7 +1,7 @@
 //! Example: ping the Ente API.
 //!
 //! ```sh
-//! cargo run --example ping -- https://api.ente.io
+//! cargo run --example ping -- https://api.ente.com
 //! ```
 
 use ente_core::http::HttpClient;

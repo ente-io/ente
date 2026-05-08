@@ -34,7 +34,9 @@ impl From<CoreError> for HttpError {
     fn from(e: CoreError) -> Self {
         match e {
             CoreError::Network(message) => HttpError::Network { message },
-            CoreError::Http { status, message } => HttpError::Http { status, message },
+            CoreError::Http {
+                status, message, ..
+            } => HttpError::Http { status, message },
             CoreError::Parse(message) => HttpError::Parse { message },
             CoreError::InvalidUrl(message) => HttpError::InvalidUrl { message },
         }

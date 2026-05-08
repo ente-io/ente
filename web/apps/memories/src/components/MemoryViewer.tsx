@@ -706,11 +706,11 @@ export function MemoryViewer({
                             variant="contained"
                             color="accent"
                             disableElevation
-                            href="https://ente.com/get"
+                            href="https://ente.com/try"
                             target="_blank"
                             rel="noopener"
                         >
-                            Try Ente
+                            Get Ente Photos
                         </MobileJoinNowButton>
                     </MobileTopActions>
                 ) : (
@@ -734,7 +734,7 @@ export function MemoryViewer({
                                 variant="contained"
                                 color="accent"
                                 disableElevation
-                                href="https://ente.com/get"
+                                href="https://ente.com/try"
                                 target="_blank"
                                 rel="noopener"
                                 sx={
@@ -743,7 +743,7 @@ export function MemoryViewer({
                                         : undefined
                                 }
                             >
-                                Try Ente
+                                Get Ente Photos
                             </JoinNowButton>
                         </TopRightActions>
                     </TopControls>

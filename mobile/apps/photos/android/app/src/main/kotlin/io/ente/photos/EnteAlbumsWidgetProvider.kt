@@ -23,7 +23,8 @@ data class AlbumsFileData(
         val title: String?,
         val subText: String?,
         val generatedId: Int?,
-        val mainKey: String?
+        val mainKey: String?,
+        val uploadedFileID: Int? = null
 )
 
 class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
@@ -93,21 +94,31 @@ class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
                                                                 "EnteAlbumsWidgetProvider",
                                                                 "Image exists: $imagePath"
                                                         )
+                                                        val hideFlags =
+                                                                widgetData.getInt(
+                                                                        "widgetHideTitleFlags",
+                                                                        0
+                                                                )
+                                                        val hideText =
+                                                                (hideFlags and (1 shl 1)) != 0
+                                                        val textVisibility =
+                                                                if (hideText) View.GONE
+                                                                else View.VISIBLE
                                                         setViewVisibility(
                                                                 R.id.widget_img,
                                                                 View.VISIBLE
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_subtitle,
-                                                                View.VISIBLE
+                                                                textVisibility
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_title,
-                                                                View.VISIBLE
+                                                                textVisibility
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_overlay,
-                                                                View.VISIBLE
+                                                                textVisibility
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_placeholder,

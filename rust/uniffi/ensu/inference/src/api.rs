@@ -193,9 +193,17 @@ impl From<core::EnsuDefaults> for EnsuDefaults {
             system_prompt_date_placeholder: value.system_prompt_date_placeholder,
             session_summary_system_prompt: value.session_summary_system_prompt,
             mobile_default_model: value.mobile_default_model.into(),
-            mobile_model_presets: value.mobile_model_presets.into_iter().map(Into::into).collect(),
+            mobile_model_presets: value
+                .mobile_model_presets
+                .into_iter()
+                .map(Into::into)
+                .collect(),
             desktop_default_model: value.desktop_default_model.into(),
-            desktop_model_presets: value.desktop_model_presets.into_iter().map(Into::into).collect(),
+            desktop_model_presets: value
+                .desktop_model_presets
+                .into_iter()
+                .map(Into::into)
+                .collect(),
         }
     }
 }

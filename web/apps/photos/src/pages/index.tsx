@@ -51,7 +51,7 @@ const Page: React.FC = () => {
                     "ente-wasm"
                 );
                 console.log(file_download_url("https://example.org", 88n));
-                const client = new HttpClient("https://api.ente.io");
+                const client = new HttpClient("https://api.ente.com");
                 console.log(await client.get("/ping"));
             }
 

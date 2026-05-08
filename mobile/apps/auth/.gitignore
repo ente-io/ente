@@ -33,6 +33,7 @@ android/app/build/
 .pub-cache/
 .pub/
 /build/
+lib/l10n/untranslated_messages.json
 macos/build/
 
 # Web related

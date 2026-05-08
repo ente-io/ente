@@ -62,6 +62,7 @@ export type FileListWithViewerProps = {
     | "selected"
     | "setSelected"
     | "activeCollectionID"
+    | "emptyStateAction"
 > &
     Pick<
         FileViewerProps,
@@ -87,6 +88,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     selected,
     setSelected,
     activeCollectionID,
+    emptyStateAction,
     onAddSaveGroup,
     pendingFileIndex,
     pendingFileSidebar,
@@ -191,6 +193,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             selected,
                             setSelected,
                             activeCollectionID,
+                            emptyStateAction,
                         }}
                         onItemClick={handleThumbnailClick}
                     />

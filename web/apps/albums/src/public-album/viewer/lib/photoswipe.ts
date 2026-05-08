@@ -228,6 +228,12 @@ export const moreButtonID = "ente-pswp-more-button";
 export const moreMenuID = "ente-pswp-more-menu";
 
 /**
+ * This is the timeout after which the controls are hidden
+ * by triggering the function for the H shortcut.
+ */
+const fullscreenControlsAutoHideDelayMS = 3000;
+
+/**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
  * viewer.
  *
@@ -832,25 +838,96 @@ export class FileViewerPhotoSwipe {
             }
         };
 
+        // Timer variable for hiding the controls
+        let fullscreenUIControlsHideTimer:
+            | ReturnType<typeof setTimeout>
+            | undefined;
+
         /**
-         * Update UI state when fullscreen mode changes (e.g., user presses Esc).
+         * This variable is used to check whether the controls were
+         * intentionally hidden by the H keypress, if so then
+         * moving the mouse no longer bring the conrol back.
          */
-        const handleFullscreenChange = () => {
-            if (!document.fullscreenElement) {
-                // Exiting fullscreen - restore the top navigation bar
-                pswp.element?.classList.remove("pswp--video-fullscreen");
-                pswp.element?.classList.remove("pswp--controls-visible");
-                document.removeEventListener(
-                    "mousemove",
-                    handleMouseMoveInFullscreen,
-                );
+        let areFullscreenUIControlsHiddenByShortcut = false;
+
+        // Function to clear the timeout.
+        const clearFullscreenUIControlsHideTimer = () => {
+            if (fullscreenUIControlsHideTimer) {
+                clearTimeout(fullscreenUIControlsHideTimer);
+                fullscreenUIControlsHideTimer = undefined;
             }
         };
 
         /**
-         * Timer ID for hiding controls after mouse inactivity in fullscreen.
+         * Function start the 3 second timer that hides the main Photoswipe UI
+         * controls in the fullscreen.
          */
-        let hideControlsTimer: ReturnType<typeof setTimeout> | undefined;
+        const scheduleFullscreenUIControlsAutoHide = () => {
+            clearFullscreenUIControlsHideTimer();
+            fullscreenUIControlsHideTimer = setTimeout(() => {
+                pswp.element?.classList.remove("pswp--ui-visible");
+                fullscreenUIControlsHideTimer = undefined;
+            }, fullscreenControlsAutoHideDelayMS);
+        };
+
+        /**
+         * If the photoswipe controls were actually auto hidden
+         * and not by the H shortcut then, this function brings
+         * them back on mouse movement.
+         */
+        const handleFullscreenMouseMove = () => {
+            if (!document.fullscreenElement) return;
+            if (areFullscreenUIControlsHiddenByShortcut) return;
+
+            pswp.element?.classList.add("pswp--ui-visible");
+            scheduleFullscreenUIControlsAutoHide();
+        };
+
+        /**
+         * Update UI state when fullscreen mode changes (e.g., user presses Esc).
+         */
+        const handleFullscreenChange = () => {
+            /**
+             * If on fullscreen then adding the eventListener
+             * for the photoswipe controls hiding after 3 seconds
+             */
+            if (document.fullscreenElement) {
+                document.addEventListener(
+                    "mousemove",
+                    handleFullscreenMouseMove,
+                );
+                handleFullscreenMouseMove();
+                return;
+            }
+
+            // Removing the event listener when exiting fullscreen.
+            // And clearning the timeout variable.
+            document.removeEventListener(
+                "mousemove",
+                handleFullscreenMouseMove,
+            );
+            clearFullscreenUIControlsHideTimer();
+            areFullscreenUIControlsHiddenByShortcut = false;
+            pswp.element?.classList.add("pswp--ui-visible");
+
+            // Exiting fullscreen - restore the top navigation bar
+            pswp.element?.classList.remove("pswp--video-fullscreen");
+            pswp.element?.classList.remove("pswp--controls-visible");
+            document.removeEventListener(
+                "mousemove",
+                handleMouseMoveInFullscreen,
+            );
+            if (hideVideoControlsTimer) {
+                clearTimeout(hideVideoControlsTimer);
+                hideVideoControlsTimer = undefined;
+            }
+        };
+
+        /**
+         * Timer ID for hiding video controls after mouse inactivity in
+         * fullscreen.
+         */
+        let hideVideoControlsTimer: ReturnType<typeof setTimeout> | undefined;
 
         /**
          * Show video controls on mouse movement, hide after inactivity.
@@ -859,15 +936,15 @@ export class FileViewerPhotoSwipe {
             pswp.element?.classList.add("pswp--controls-visible");
 
             // Clear any pending hide timer
-            if (hideControlsTimer) {
-                clearTimeout(hideControlsTimer);
+            if (hideVideoControlsTimer) {
+                clearTimeout(hideVideoControlsTimer);
             }
 
             // Hide controls after inactivity
-            hideControlsTimer = setTimeout(() => {
+            hideVideoControlsTimer = setTimeout(() => {
                 pswp.element?.classList.remove("pswp--controls-visible");
-                hideControlsTimer = undefined;
-            }, 2000);
+                hideVideoControlsTimer = undefined;
+            }, fullscreenControlsAutoHideDelayMS);
         };
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
@@ -1741,8 +1818,18 @@ export class FileViewerPhotoSwipe {
 
         // Toggle controls infrastructure
 
-        const handleToggleUIControls = () =>
-            pswp.element!.classList.toggle("pswp--ui-visible");
+        const handleToggleUIControls = () => {
+            const areUIControlsVisible =
+                pswp.element!.classList.toggle("pswp--ui-visible");
+            if (!document.fullscreenElement) return;
+
+            areFullscreenUIControlsHiddenByShortcut = !areUIControlsVisible;
+            if (areUIControlsVisible) {
+                scheduleFullscreenUIControlsAutoHide();
+            } else {
+                clearFullscreenUIControlsHideTimer();
+            }
+        };
 
         // Return true if the current keyboard focus is on any of the UI
         // controls (e.g. as a result of user tabbing through them).
@@ -1956,8 +2043,14 @@ export class FileViewerPhotoSwipe {
                 "mousemove",
                 handleMouseMoveInFullscreen,
             );
-            if (hideControlsTimer) {
-                clearTimeout(hideControlsTimer);
+            clearFullscreenUIControlsHideTimer();
+            document.removeEventListener(
+                "mousemove",
+                handleFullscreenMouseMove,
+            );
+            if (hideVideoControlsTimer) {
+                clearTimeout(hideVideoControlsTimer);
+                hideVideoControlsTimer = undefined;
             }
             fileViewerDidClose();
             // Let our parent know that we have been closed.

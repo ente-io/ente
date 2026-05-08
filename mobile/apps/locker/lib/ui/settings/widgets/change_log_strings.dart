@@ -38,10 +38,12 @@ class ChangeLogStrings {
       sheetTitle: "What's new",
       sheetSubtitle: "",
       continueLabel: "Continue",
-      title1: "",
-      desc1: "",
-      title2: "",
-      desc2: "",
+      title1: "Share collections as a link",
+      desc1:
+          "You can now share any collection as a link. This includes password protection, device limits, and link expiry.",
+      title2: "Keep items offline",
+      desc2:
+          "Keep your important items available locally for offline use. They stay encrypted on your device and are decrypted only when you open them in Locker.",
       title3: "",
       desc3: "",
     ),

@@ -28,7 +28,7 @@ jobs:
                 working-directory: rust/apps/ensu/src-tauri
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Cache
               uses: actions/cache@v4
@@ -51,10 +51,6 @@ jobs:
 
             - name: Fetch Rust dependencies
               run: cargo fetch
-
-            - name: Patch llama.cpp mtmd sources
-              shell: bash
-              run: ../../../ensu/inference/tool/patch_llama_mtmd.sh
 
             - name: Ensure Tauri distDir exists for macro checks
               run: mkdir -p ../../../../web/apps/ensu/out

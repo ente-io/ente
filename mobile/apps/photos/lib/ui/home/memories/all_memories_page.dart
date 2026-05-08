@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/home/memories/memory_cover_util.dart";
 
 // TODO: Use a single instance variable for `allMemories` and `allTitles`
 class AllMemoriesPage extends StatefulWidget {
@@ -56,7 +57,7 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
           final initialMemoryIndex =
               widget.isFromWidgetOrNotifications && isFirstLoad
                   ? widget.inititalFileIndex
-                  : _getNextMemoryIndex(index);
+                  : getNextMemoryIndex(widget.allMemories[index]);
           isFirstLoad = false;
           return FullScreenMemoryDataUpdater(
             initialIndex: initialMemoryIndex,
@@ -81,26 +82,5 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
         },
       ),
     );
-  }
-
-  int _getNextMemoryIndex(int currentIndex) {
-    int lastSeenIndex = 0;
-    int lastSeenTimestamp = 0;
-    final allMemoriesLength = widget.allMemories[currentIndex].length;
-    for (var index = 0; index < allMemoriesLength; index++) {
-      final memory = widget.allMemories[currentIndex][index];
-      if (!memory.isSeen()) {
-        return index;
-      } else {
-        if (memory.seenTime() > lastSeenTimestamp) {
-          lastSeenIndex = index;
-          lastSeenTimestamp = memory.seenTime();
-        }
-      }
-    }
-    if (lastSeenIndex == widget.allMemories[currentIndex].length - 1) {
-      return 0;
-    }
-    return lastSeenIndex + 1;
   }
 }

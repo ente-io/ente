@@ -2,6 +2,7 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -57,18 +58,16 @@ class FileListWidget extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            height: 60,
-            width: 60,
+            height: 40,
+            width: 40,
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: _buildFileIcon(),
-                ),
+                _buildFileIcon(),
                 if (showSharingIndicator)
                   Positioned(
-                    right: 1,
-                    bottom: 10,
+                    right: -4,
+                    bottom: -4,
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -127,6 +126,7 @@ class FileListWidget extends StatelessWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border.all(
                 color: isSelected
@@ -138,34 +138,33 @@ class FileListWidget extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 fileRowWidget,
-                Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
-                          alignment: Alignment.centerRight,
-                          children: [
-                            ...previousChildren,
-                            if (currentChild != null) currentChild,
-                          ],
-                        );
-                      },
-                      child: _buildTrailingIndicator(
-                        primaryColor: colorScheme.primary700,
-                        isSelected: isSelected,
-                        isIncoming: isIncoming,
-                        isMarkedOffline: !isTrashFile && isMarkedOffline,
-                        owner: collection?.owner,
-                      ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    layoutBuilder: (currentChild, previousChildren) {
+                      return Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    child: _buildTrailingIndicator(
+                      color: isSelected
+                          ? colorScheme.primary700
+                          : colorScheme.textMuted,
+                      isSelected: isSelected,
+                      isIncoming: isIncoming,
+                      isMarkedOffline: !isTrashFile && isMarkedOffline,
+                      owner: collection?.owner,
                     ),
                   ),
                 ),
@@ -208,7 +207,7 @@ class FileListWidget extends StatelessWidget {
   }
 
   Widget _buildTrailingIndicator({
-    required Color primaryColor,
+    required Color color,
     required bool isSelected,
     required bool isIncoming,
     required bool isMarkedOffline,
@@ -218,18 +217,18 @@ class FileListWidget extends StatelessWidget {
       return Icon(
         key: const ValueKey("selected"),
         Icons.check_circle_rounded,
-        color: primaryColor,
+        color: color,
         size: 24,
       );
     }
 
     if (isMarkedOffline) {
-      return HugeIcon(
+      return SvgPicture.asset(
+        "assets/svg/keep_offline.svg",
         key: const ValueKey("offline"),
-        icon: HugeIcons.strokeRoundedBookmark02,
-        color: primaryColor,
-        size: 20.0,
-        strokeWidth: 2.0,
+        width: 20.0,
+        height: 20.0,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       );
     }
 

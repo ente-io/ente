@@ -63,6 +63,7 @@ import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
+import "package:photos/ui/growth/referral_screen.dart";
 import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
 import "package:photos/ui/home/christmas/christmas_utils.dart";
 import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
@@ -1109,7 +1110,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         return;
       }
       final colorScheme = getEnteColorScheme(context);
-      await showBarModalBottomSheet(
+      final sheetAction = await showBarModalBottomSheet<ChangeLogPageAction>(
         topControl: const SizedBox.shrink(),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -1132,6 +1133,12 @@ class _HomeWidgetState extends State<HomeWidget> {
       );
       // Do not show change dialog again
       await updateService.hideChangeLog();
+      if (!mounted) {
+        return;
+      }
+      if (sheetAction == ChangeLogPageAction.openReferrals) {
+        await routeToPage(context, const ReferralScreen());
+      }
     } finally {
       _isShowingChangeLog = false;
     }

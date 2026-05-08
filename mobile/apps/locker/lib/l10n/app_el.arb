@@ -470,7 +470,7 @@
   "linkDeviceLimit": "Όριο συσκευών",
   "expiredLinkInfo": "Αυτός ο σύνδεσμος έχει λήξει. Επιλέξτε νέα ώρα λήξης ή απενεργοποιήστε τη λήξη συνδέσμου.",
   "linkExpiresOn": "Ο σύνδεσμος θα λήξει στις {expiryTime}",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -512,8 +512,8 @@
     },
     "description": "Number of collaborators that were successfully added to a collection."
   },
-  "addViewers": "{count, plural, one {}=0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
-  "addCollaborators": "{count, plural, one {}=0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
+  "addViewers": "{count, plural, =0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
+  "addCollaborators": "{count, plural, =0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Πατήστε παρατεταμένα ένα email για να επιβεβαιώσετε την κρυπτογράφηση από άκρη σε άκρη.",
   "sharing": "Κοινή χρήση...",
   "invalidEmailAddress": "Μη έγκυρη διεύθυνση email",

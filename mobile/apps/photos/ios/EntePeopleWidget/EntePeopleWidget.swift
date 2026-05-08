@@ -12,17 +12,24 @@ struct Provider: TimelineProvider {
     let minutes = 15
     let data = UserDefaults(suiteName: widgetGroupId)
 
+    private func shouldHideTitle() -> Bool {
+        let hideFlags = data?.integer(forKey: "widgetHideTitleFlags") ?? 0
+        return (hideFlags & (1 << 2)) != 0
+    }
+
     func placeholder(in _: Context) -> FileEntry {
-        FileEntry(
+        let hideTitle = shouldHideTitle()
+        return FileEntry(
             date: Date(), index: nil, imageData: nil, title: "Title", subTitle: "Sub Title",
-            generatedId: nil, mainKey: nil)
+            generatedId: nil, mainKey: nil, hideTitle: hideTitle)
     }
 
     func getSnapshot(in _: Context, completion: @escaping (FileEntry) -> Void) {
+        let hideTitle = shouldHideTitle()
         let entry = FileEntry(
             date: Date(), index: -2, imageData: nil, title: "Jane Fonda",
             subTitle: "Sep 23, 2021",
-            generatedId: nil, mainKey: nil)
+            generatedId: nil, mainKey: nil, hideTitle: hideTitle)
         completion(entry)
     }
 
@@ -37,6 +44,8 @@ struct Provider: TimelineProvider {
 
         var totalPeople =
             data?.integer(forKey: "totalPeople")
+
+        let hideTitle = shouldHideTitle()
 
         if totalPeople != nil && totalPeople! > 0 {
             let count = totalPeople! > 5 ? 5 : totalPeople
@@ -56,13 +65,14 @@ struct Provider: TimelineProvider {
 
                 let entry = FileEntry(
                     date: entryDate, index: randomInt, imageData: imageData, title: title,
-                    subTitle: subTitle, generatedId: generatedId, mainKey: mainKey)
+                    subTitle: subTitle, generatedId: generatedId, mainKey: mainKey,
+                    hideTitle: hideTitle)
                 entries.append(entry)
             }
         } else {
             let entry = FileEntry(
                 date: Date(), index: -1, imageData: nil, title: nil, subTitle: nil,
-                generatedId: nil, mainKey: nil
+                generatedId: nil, mainKey: nil, hideTitle: hideTitle
             )
             entries.append(entry)
         }
@@ -84,6 +94,7 @@ struct FileEntry: TimelineEntry {
     let subTitle: String?
     var generatedId: Int?
     var mainKey: String?
+    var hideTitle: Bool = false
 }
 
 struct EntePeopleWidgetEntryView: View {
@@ -102,31 +113,40 @@ struct EntePeopleWidgetEntryView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .overlay(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.black.opacity(0.7), Color.clear]),
-                                startPoint: .bottom,
-                                endPoint: .top
-                            )
-
-                            .frame(height: geometry.size.height * 0.4)
-                            .frame(maxHeight: .infinity, alignment: .bottom)
-                            .backwardWidgetAccentable(true)
+                            Group {
+                                if !entry.hideTitle {
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.black.opacity(0.7), Color.clear,
+                                        ]),
+                                        startPoint: .bottom,
+                                        endPoint: .top
+                                    )
+                                    .frame(height: geometry.size.height * 0.4)
+                                    .frame(maxHeight: .infinity, alignment: .bottom)
+                                    .backwardWidgetAccentable(true)
+                                }
+                            }
                         )
                         .overlay(
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(entry.title ?? "").font(
-                                    .custom("Inter", size: 14, relativeTo: .caption)
-                                )  // Custom with fallback
-                                .bold()
-                                .foregroundStyle(.white)
-                                .shadow(radius: 20)
-                                Text(entry.subTitle ?? "")
-                                    .font(.custom("Inter", size: 12, relativeTo: .caption2))
-                                    .foregroundStyle(.white)
-                                    .shadow(radius: 20)
-                            }
-                            .padding(.leading, geometry.size.width * 0.05)
-                            .padding(.bottom, geometry.size.height * 0.05),
+                            Group {
+                                if !entry.hideTitle {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(entry.title ?? "").font(
+                                            .custom("Inter", size: 14, relativeTo: .caption)
+                                        )  // Custom with fallback
+                                        .bold()
+                                        .foregroundStyle(.white)
+                                        .shadow(radius: 20)
+                                        Text(entry.subTitle ?? "")
+                                            .font(.custom("Inter", size: 12, relativeTo: .caption2))
+                                            .foregroundStyle(.white)
+                                            .shadow(radius: 20)
+                                    }
+                                    .padding(.leading, geometry.size.width * 0.05)
+                                    .padding(.bottom, geometry.size.height * 0.05)
+                                }
+                            },
                             alignment: .bottomLeading
                         )
                 } else if entry.index == -2 {
@@ -137,33 +157,43 @@ struct EntePeopleWidgetEntryView: View {
                             .aspectRatio(contentMode: .fill)
                             .frame(width: geometry.size.width, height: geometry.size.height)
                             .overlay(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.black.opacity(0.7), Color.clear,
-                                    ]),
-                                    startPoint: .bottom,
-                                    endPoint: .top
-                                )
-
-                                .frame(height: geometry.size.height * 0.4)
-                                .frame(maxHeight: .infinity, alignment: .bottom)
-                                .backwardWidgetAccentable(true)
+                                Group {
+                                    if !entry.hideTitle {
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color.black.opacity(0.7), Color.clear,
+                                            ]),
+                                            startPoint: .bottom,
+                                            endPoint: .top
+                                        )
+                                        .frame(height: geometry.size.height * 0.4)
+                                        .frame(maxHeight: .infinity, alignment: .bottom)
+                                        .backwardWidgetAccentable(true)
+                                    }
+                                }
                             )
                             .overlay(
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(entry.title ?? "").font(
-                                        .custom("Inter", size: 14, relativeTo: .caption)
-                                    )  // Custom with fallback
-                                    .bold()
-                                    .foregroundStyle(.white)
-                                    .shadow(radius: 20)
-                                    Text(entry.subTitle ?? "")
-                                        .font(.custom("Inter", size: 12, relativeTo: .caption2))
-                                        .foregroundStyle(.white)
-                                        .shadow(radius: 20)
-                                }
-                                .padding(.leading, geometry.size.width * 0.05)
-                                .padding(.bottom, geometry.size.height * 0.05),
+                                Group {
+                                    if !entry.hideTitle {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(entry.title ?? "").font(
+                                                .custom("Inter", size: 14, relativeTo: .caption)
+                                            )  // Custom with fallback
+                                            .bold()
+                                            .foregroundStyle(.white)
+                                            .shadow(radius: 20)
+                                            Text(entry.subTitle ?? "")
+                                                .font(
+                                                    .custom(
+                                                        "Inter", size: 12, relativeTo: .caption2)
+                                                )
+                                                .foregroundStyle(.white)
+                                                .shadow(radius: 20)
+                                        }
+                                        .padding(.leading, geometry.size.width * 0.05)
+                                        .padding(.bottom, geometry.size.height * 0.05)
+                                    }
+                                },
                                 alignment: .bottomLeading
                             )
                     }

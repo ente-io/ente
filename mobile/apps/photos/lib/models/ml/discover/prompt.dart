@@ -1,4 +1,4 @@
-// https://discover.ente.io/v1.json
+// Loaded from assets/discover.json
 class Prompt {
   final String id;
   final int position;

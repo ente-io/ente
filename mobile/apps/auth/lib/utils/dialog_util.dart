@@ -180,9 +180,7 @@ Future<ButtonResult?> showGenericErrorDialog({
           buttonAction: ButtonAction.third,
           isInAlert: true,
           onTap: () async {
-            PlatformUtil.openWebView(
-              context,
-              context.l10n.faq,
+            PlatformUtil.openUrlInBrowser(
               "https://ente.com/help/auth/troubleshooting/windows-login",
             ).ignore();
           },

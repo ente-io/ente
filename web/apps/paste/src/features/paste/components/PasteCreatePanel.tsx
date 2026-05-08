@@ -44,9 +44,9 @@ export const PasteCreatePanel = ({
     const isCreateDisabled = isInputEmpty;
     const privacyPills = [
         "Private",
-        isMobile ? "E2EE" : "End To End Encrypted",
-        "One-Time View",
-        "Deletes In 24 Hrs",
+        isMobile ? "E2EE" : "End-to-end encrypted",
+        "One-time view",
+        "Auto-deletes after 24 hours",
     ];
 
     return (
@@ -165,14 +165,21 @@ export const PasteCreatePanel = ({
                         disabled={isCreateDisabled}
                         sx={{
                             pointerEvents: "auto",
+                            boxSizing: "border-box",
                             width: { xs: 34, sm: 38 },
                             height: { xs: 34, sm: 38 },
+                            minWidth: { xs: 34, sm: 38 },
+                            minHeight: { xs: 34, sm: 38 },
+                            padding: 0,
                             marginBottom: { xs: "3px", sm: "4px" },
                             marginRight: { xs: "-1px", sm: "-2px" },
                             borderRadius: { xs: "12px", sm: "14px" },
                             bgcolor: tokens.button.primaryBg,
                             color: tokens.button.primaryText,
                             boxShadow: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                             "&:hover": {
                                 bgcolor: tokens.button.primaryHoverBg,
                                 boxShadow: "none",
@@ -184,11 +191,29 @@ export const PasteCreatePanel = ({
                         }}
                     >
                         {creating ? (
-                            <CircularProgress
-                                size={17}
-                                thickness={5.2}
-                                sx={{ color: tokens.button.primaryText }}
-                            />
+                            <Box
+                                sx={{
+                                    width: 18,
+                                    height: 18,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    lineHeight: 0,
+                                }}
+                            >
+                                <CircularProgress
+                                    size={17}
+                                    thickness={5.2}
+                                    sx={{
+                                        color: tokens.button.primaryText,
+                                        display: "block",
+                                        "& .MuiCircularProgress-svg": {
+                                            display: "block",
+                                            transformOrigin: "50% 50%",
+                                        },
+                                    }}
+                                />
+                            </Box>
                         ) : (
                             <Box
                                 sx={{

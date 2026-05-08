@@ -8,7 +8,7 @@ description: Share sensitive text with one-time, end-to-end encrypted links
 Ente Paste lets you share short sensitive text (keys, snippets, notes) using a
 one-time, end-to-end encrypted link.
 
-Open [paste.ente.io](https://paste.ente.io), paste your text, and share the
+Open [paste.ente.com](https://paste.ente.com), paste your text, and share the
 generated link.
 
 ## How it works

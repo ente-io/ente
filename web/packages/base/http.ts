@@ -65,7 +65,19 @@ export interface PublicAlbumsCredentials {
      * public collections related API requests.
      */
     accessTokenJWT?: string | undefined;
+    /**
+     * A signed token issued after this browser has been admitted once for this
+     * public link's device limit. It is separate from the password JWT.
+     */
+    linkDeviceToken?: string | undefined;
 }
+
+export const linkDeviceTokenRequestHeader = "X-Auth-Link-Device-Token";
+
+export const linkDeviceTokenResponseHeader = "X-Ente-Link-Device-Token";
+
+export const linkDeviceTokenFromResponse = (res: Response) =>
+    res.headers.get(linkDeviceTokenResponseHeader) ?? undefined;
 
 /**
  * Return headers that should be passed alongwith public collection related
@@ -83,6 +95,18 @@ export const authenticatedPublicAlbumsRequestHeaders = ({
     ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }),
     "X-Client-Package": clientPackageName,
 });
+
+export const authenticatedPublicAlbumsDeviceLimitRequestHeaders = (
+    credentials: PublicAlbumsCredentials,
+) => ({
+    ...authenticatedPublicAlbumsRequestHeaders(credentials),
+    ...(credentials.linkDeviceToken && {
+        [linkDeviceTokenRequestHeader]: credentials.linkDeviceToken,
+    }),
+});
+
+export const authenticatedPublicAlbumsInfoRequestHeaders =
+    authenticatedPublicAlbumsDeviceLimitRequestHeaders;
 
 /**
  * A custom Error that is thrown if a fetch fails with a non-2xx HTTP status.

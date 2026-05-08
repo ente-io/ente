@@ -581,7 +581,7 @@
   "addNew": "Afegir nou",
   "selected": "seleccionat",
   "moveMultipleToTrashMessage": "Esteu segur que voleu moure {count} element(s) a la paperera?",
-  "nSelected": "{count, plural, =1{1 seleccionat} other{{count} seleccionats}}",
+  "nSelected": "{count, plural, one {{count} seleccionat} other{{count} seleccionats}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -592,7 +592,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1{1 element fixat} other{{count} elements fixats}}",
+  "pinnedCount": "{count, plural, one{{count} element fixat} other{{count} elements fixats}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -603,7 +603,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1{1 element deixat de fixar} other{{count} elements deixats de fixar}}",
+  "unpinnedCount": "{count, plural, one{{count} element deixat de fixar} other{{count} elements deixats de fixar}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

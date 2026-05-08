@@ -27,6 +27,7 @@
 .pub-cache/
 .pub/
 /build/
+lib/l10n/untranslated_messages.json
 
 # Web related
 lib/generated_plugin_registrant.dart

@@ -125,8 +125,8 @@ Future<ParsedExifDateTime?> tryParseExifDateTime(
       }
     }
     return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
-  } catch (e) {
-    _logger.severe("failed to getCreationTimeFromEXIF", e);
+  } catch (e, s) {
+    _logger.severe("failed to getCreationTimeFromEXIF", e, s);
   }
   return null;
 }

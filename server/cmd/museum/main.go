@@ -106,7 +106,7 @@ func main() {
 	viper.SetDefault("apps.embed-albums", "https://embed.ente.io")
 	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
 	viper.SetDefault("apps.public-locker", "https://share.ente.io")
-	viper.SetDefault("apps.public-paste", "https://paste.ente.io")
+	viper.SetDefault("apps.public-paste", "https://paste.ente.com")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
@@ -1298,8 +1298,8 @@ func cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.GetHeader("Origin"))
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, X-Auth-Token, X-Auth-Access-Token, X-Cast-Access-Token, X-Auth-Access-Token-JWT, X-Client-Package, X-Client-Version, X-Paste-Consume, Authorization, accept, origin, Cache-Control, X-Requested-With, upgrade-insecure-requests, Range")
-		c.Writer.Header().Set("Access-Control-Expose-Headers", "X-Request-Id")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, X-Auth-Token, X-Auth-Access-Token, X-Cast-Access-Token, X-Auth-Access-Token-JWT, X-Auth-Link-Device-Token, X-Client-Package, X-Client-Version, X-Paste-Consume, Authorization, accept, origin, Cache-Control, X-Requested-With, upgrade-insecure-requests, Range")
+		c.Writer.Header().Set("Access-Control-Expose-Headers", "X-Request-Id, X-Ente-Link-Device-Token")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")
 

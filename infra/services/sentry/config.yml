@@ -10,4 +10,4 @@ mail.use-tls: true
 
 # ...
 
-system.url-prefix: "https://sentry.ente.io"
+system.url-prefix: "https://sentry.ente.com"

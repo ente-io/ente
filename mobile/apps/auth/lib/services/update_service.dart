@@ -97,9 +97,9 @@ class UpdateService {
 
   // getRateDetails returns details about the place
   Tuple2<String, String> getRateDetails() {
-    // Note: in auth, currently we don't have a way to identify if the
-    // app was installed from play store, f-droid or github based on pkg name
     if (Platform.isAndroid) {
+      // Note: in auth, currently we don't have a way to identify if the
+      // app was installed from play store, f-droid or github based on pkg name
       if (flavor == "playstore") {
         return const Tuple2(
           "Play Store",
@@ -111,9 +111,15 @@ class UpdateService {
         "https://alternativeto.net/software/ente-authenticator/about/",
       );
     }
+    if (Platform.isIOS) {
+      return const Tuple2(
+        "App Store",
+        "https://apps.apple.com/in/app/ente-photos/id6444121398",
+      );
+    }
     return const Tuple2(
-      "App Store",
-      "https://apps.apple.com/in/app/ente-photos/id6444121398",
+      "AlternativeTo",
+      "https://alternativeto.net/software/ente-authenticator/about/",
     );
   }
 

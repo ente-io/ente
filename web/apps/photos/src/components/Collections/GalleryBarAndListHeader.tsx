@@ -35,6 +35,7 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
+import type { Person } from "ente-new/photos/services/ml/people";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlbumCastDialog } from "./AlbumCastDialog";
@@ -59,6 +60,7 @@ type GalleryBarAndListHeaderProps = Omit<
      */
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
+    allPeople: Person[];
     activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
@@ -115,6 +117,7 @@ export const GalleryBarAndListHeader: React.FC<
     setActiveCollectionID,
     setBlockingLoad,
     people,
+    allPeople,
     saveGroups,
     files,
     activePerson,
@@ -322,6 +325,7 @@ export const GalleryBarAndListHeader: React.FC<
             <AllPeople
                 {...allPeopleVisibilityProps}
                 people={sortedPeople}
+                allPeople={allPeople}
                 onSelectPerson={onSelectPerson}
                 peopleSortBy={peopleSortBy}
                 onChangePeopleSortBy={setPeopleSortBy}

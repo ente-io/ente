@@ -1933,6 +1933,11 @@ const Page: React.FC = () => {
                         ? state.view.visiblePeople
                         : undefined) ?? []
                 }
+                allPeople={
+                    (state.view?.type == "people"
+                        ? state.view.people
+                        : undefined) ?? []
+                }
                 onChangeMode={handleChangeBarMode}
                 setBlockingLoad={setBlockingLoad}
                 setActiveCollectionID={handleShowCollectionSummaryWithID}

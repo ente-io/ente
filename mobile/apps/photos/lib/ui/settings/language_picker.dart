@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:photos/l10n/l10n.dart";
@@ -126,63 +127,12 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     );
   }
 
-  String _getLanguageName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'ca':
-        return 'Català';
-      case 'cs':
-        return 'Čeština';
-      case 'en':
-        return 'English';
-      case 'es':
-        return 'Español';
-      case 'fr':
-        return 'Français';
-      case 'de':
-        return 'Deutsch';
-      case 'it':
-        return 'Italiano';
-      case 'ja':
-        return '日本語';
-      case 'nl':
-        return 'Nederlands';
-      case 'no':
-        return 'Norsk';
-      case 'pl':
-        return 'Polski';
-      case 'pt':
-        if (locale.countryCode == 'BR') {
-          return 'Português (Brasil)';
-        } else if (locale.countryCode == 'PT') {
-          return 'Português (Portugal)';
-        }
-        return 'Português';
-      case 'ro':
-        return 'Română';
-      case 'ru':
-        return 'Русский';
-      case 'tr':
-        return 'Türkçe';
-      case 'zh':
-        if (locale.countryCode == 'CN') {
-          return '中文 (简体)';
-        }
-        return '中文';
-      case 'uk':
-        return 'Українська';
-      case 'vi':
-        return 'Tiếng Việt';
-      default:
-        return locale.languageCode;
-    }
-  }
-
   Widget _menuItemForPicker(Locale locale) {
     return MenuItemWidget(
       key: ValueKey(locale.toString()),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: _getLanguageName(locale) + (kDebugMode ? ' ($locale)' : ''),
+        title: getLocaleDisplayName(locale) + (kDebugMode ? ' ($locale)' : ''),
       ),
       trailingIcon: currentLocale == locale ? Icons.check : null,
       alignCaptionedTextToLeft: true,

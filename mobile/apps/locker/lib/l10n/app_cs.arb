@@ -10,11 +10,11 @@
   "invalidEndpoint": "Neplatný koncový bod",
   "invalidEndpointMessage": "Omlouváme se, zadaný koncový bod je neplatný. Zadejte platný koncový bod a zkuste to prosím znovu.",
   "saveAction": "Uložit",
-  "untitled": "Bez nazvu",
+  "untitled": "Bez názvu",
   "edit": "Upravit",
   "delete": "Smazat",
-  "noFilesFound": "Žadne položky",
-  "addFiles": "Pridat položky",
+  "noFilesFound": "Nejsou zde žádné položky",
+  "addFiles": "Přidat položky",
   "name": "Název",
   "date": "Datum",
   "pleaseWait": "Čekejte prosím...",
@@ -26,6 +26,53 @@
       "percentage": {
         "type": "int",
         "example": "75"
+      }
+    }
+  },
+  "keepOffline": "Ponechat lokálně",
+  "cloudOnly": "Smazat lokálně",
+  "savingOffline": "Ukládání lokálně...",
+  "filesAvailableOffline": "{count, plural, few {{count} soubory uloženy lokálně}=1{1 soubor uložen lokálně} other{{count} souborů uloženo lokálně}}",
+  "@filesAvailableOffline": {
+    "description": "Success message when files are saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "filesAvailableOfflinePartial": "{successCount, plural, few {{successCount} soubory uloženy lokálně}=1{1 soubor uložen lokálně} other{{successCount} souborů uloženo lokálně}}{failureCount, plural, few {{failureCount} selhaly}=1{1 selhal} other{{failureCount} selhalo}}",
+  "@filesAvailableOfflinePartial": {
+    "description": "Partial success message for offline save",
+    "placeholders": {
+      "successCount": {
+        "type": "int",
+        "example": "2"
+      },
+      "failureCount": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "failedToSaveFilesOffline": "{count, plural, =1{Nepodařilo se uložit 1 soubor lokálně} few{Nepodařilo se uložit {count} soubory lokálně} other{Nepodařilo se uložit {count} souborů lokálně}}",
+  "@failedToSaveFilesOffline": {
+    "description": "Failure message when files could not be saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "filesRemovedFromOffline": "{count, plural, =1{1 soubor odstraněn z lokálních} few{{count} soubory odstraněny z lokálních} other{{count} souborů odstraněno z lokálních}}",
+  "@filesRemovedFromOffline": {
+    "description": "Success message when offline copies are removed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
       }
     }
   },
@@ -84,7 +131,7 @@
     }
   },
   "collectionRenamedSuccessfully": "Kolekce byla úspěšně přejmenována",
-  "failedToRenameCollection": "Prejmenovani kolekce se nezdarilo: {error}",
+  "failedToRenameCollection": "Nepodařilo se přejmenovat kolekci: {error}",
   "@failedToRenameCollection": {
     "description": "Error message when collection rename fails",
     "placeholders": {
@@ -96,7 +143,7 @@
   },
   "collectionCannotBeDeleted": "Tuto kolekci nelze smazat",
   "collectionCannotBeEdited": "Tuto kolekci nelze upravit",
-  "collectionCannotBeShared": "Tuto kolekci nelze sdilet",
+  "collectionCannotBeShared": "Tuto kolekci nelze sdílet",
   "deleteCollection": "Smazat kolekci",
   "deleteCollectionConfirmation": "Opravdu chcete smazat \"{collectionName}\"?",
   "@deleteCollectionConfirmation": {
@@ -109,8 +156,8 @@
     }
   },
   "cancel": "Zrušit",
-  "collectionDeletedSuccessfully": "Kolekce byla uspesne smazana",
-  "failedToDeleteCollection": "Smazani kolekce se nezdarilo: {error}",
+  "collectionDeletedSuccessfully": "Kolekce byla úspěšně odstraněna",
+  "failedToDeleteCollection": "Odstranění kolekce se nezdařilo: {error}",
   "@failedToDeleteCollection": {
     "description": "Error message when collection deletion fails",
     "placeholders": {
@@ -122,7 +169,7 @@
   },
   "collections": "Kolekce",
   "retry": "Znovu",
-  "failedToSyncTrash": "Synchronizace koše se nezdarila: {error}",
+  "failedToSyncTrash": "Synchronizace koše se nezdařila: {error}",
   "@failedToSyncTrash": {
     "description": "Error message when trash sync fails",
     "placeholders": {
@@ -132,10 +179,10 @@
       }
     }
   },
-  "pleaseSelectAtLeastOneCollection": "Vyberte prosim alespon jednu kolekci",
-  "unknownItemType": "Neznamy typ položky",
-  "fileDeletedSuccessfully": "Položka byla uspesne smazana",
-  "failedToDeleteFile": "Smazani položky se nezdarilo: {error}",
+  "pleaseSelectAtLeastOneCollection": "Vyberte alespoň jednu kolekci",
+  "unknownItemType": "Neznámý typ položky",
+  "fileDeletedSuccessfully": "Položka byla úspěšně smazána",
+  "failedToDeleteFile": "Smazání položky se nezdařilo: {error}",
   "@failedToDeleteFile": {
     "description": "Error message when item deletion fails",
     "placeholders": {
@@ -145,8 +192,8 @@
       }
     }
   },
-  "fileUpdatedSuccessfully": "Položka byla uspesne aktualizovana!",
-  "failedToUpdateFile": "Aktualizace položky se nezdarila: {error}",
+  "fileUpdatedSuccessfully": "Položka byla úspěšně aktualizována!",
+  "failedToUpdateFile": "Nepodařilo se aktualizovat položku: {error}",
   "@failedToUpdateFile": {
     "description": "Error message when item update fails",
     "placeholders": {
@@ -156,10 +203,10 @@
       }
     }
   },
-  "noChangesWereMade": "Nebyly provedeny žadne zmeny",
-  "noCollectionsAvailableForRestore": "Žadne kolekce nejsou k dispozici pro obnoveni",
-  "trashClearedSuccessfully": "Koš byl uspesne vyprazdnen",
-  "failedToClearTrash": "Vyprazdneni koše se nezdarilo: {error}",
+  "noChangesWereMade": "Nebyly provedeny žádné změny",
+  "noCollectionsAvailableForRestore": "Nejsou k dispozici žádné kolekce k obnovení",
+  "trashClearedSuccessfully": "Koš byl úspěšně vyprázdněn",
+  "failedToClearTrash": "Nepodařilo se vyprázdnit koš: {error}",
   "@failedToClearTrash": {
     "description": "Error message when clearing trash fails",
     "placeholders": {
@@ -170,7 +217,7 @@
     }
   },
   "trash": "Koš",
-  "deletedPermanently": "\"{fileName}\" byl trvale smazan",
+  "deletedPermanently": "Soubor \"{fileName}\" byl trvale smazán",
   "@deletedPermanently": {
     "description": "Message when item is permanently deleted from trash",
     "placeholders": {
@@ -180,7 +227,7 @@
       }
     }
   },
-  "failedToRestoreFile": "Obnoveni \"{fileName}\" se nezdarilo: {error}",
+  "failedToRestoreFile": "Nepodařilo se obnovit \"{fileName}\": {error}",
   "@failedToRestoreFile": {
     "description": "Error message when item restoration fails",
     "placeholders": {
@@ -194,10 +241,11 @@
       }
     }
   },
-  "createNewCollection": "Vytvorit novou kolekci",
+  "createNewCollection": "Vytvořit novou kolekci",
   "create": "Vytvořit",
-  "renameCollection": "Prejmenovat kolekci",
+  "renameCollection": "Přejmenovat kolekci",
   "save": "Uložit",
+  "download": "Stáhnout",
   "deleteFile": "Smazat položku",
   "deleteFileConfirmation": "Opravdu chcete smazat \"{fileName}\"?",
   "@deleteFileConfirmation": {
@@ -209,18 +257,18 @@
       }
     }
   },
-  "noCollectionsFound": "Žadne kolekce nenalezeny",
-  "createYourFirstCollection": "Vytvorte svou prvni kolekci a zacnete",
-  "createCollection": "Vytvorit kolekci",
-  "enterCollectionName": "Zadejte nazev kolekce",
-  "nothingYet": "Zatim nic",
-  "uploadYourFirstDocument": "Nahrajte svuj prvni dokument a zacnete",
+  "noCollectionsFound": "Nenalezeny žádné kolekce",
+  "createYourFirstCollection": "Vytvořte svou první kolekci a začněte",
+  "createCollection": "Vytvořit kolekci",
+  "enterCollectionName": "Zadejte název kolekce",
+  "nothingYet": "Zatím nic",
+  "uploadYourFirstDocument": "Nahrajte svůj první dokument a začněte",
   "collectionEmptyStateTitle": "Nic k zobrazeni",
-  "collectionEmptyStateSubtitle": "V teto kolekci nejsou žadne položky",
-  "yourTrashIsEmpty": "Vas koš je prazdny",
-  "homeLockerEmptyTitle": "Vas Locker je prazdny",
-  "homeLockerEmptySubtitle": "Kliknete na tlacitko + a zacnete",
-  "uploadDocument": "Nahrat dokument",
+  "collectionEmptyStateSubtitle": "V této kolekci nejsou žádné položky",
+  "yourTrashIsEmpty": "Váš koš je prázdný",
+  "homeLockerEmptyTitle": "Váš Locker je prázdný",
+  "homeLockerEmptySubtitle": "Klikněte na tlačítko + a můžete začít",
+  "uploadDocument": "Nahrát dokument",
   "items": "{count} položek",
   "@items": {
     "description": "Number of items in a collection",
@@ -231,7 +279,7 @@
       }
     }
   },
-  "files": "{count, plural, =0{žadne položky} =1{1 položka} few{{count} položky} other{{count} položek}}",
+  "files": "{count, plural, =0{žádné položky} =1{1 položka} few{{count} položky} other{{count} položek}}",
   "@files": {
     "description": "Number of items in a collection",
     "placeholders": {
@@ -241,8 +289,8 @@
       }
     }
   },
-  "createCollectionTooltip": "Vytvorit kolekci",
-  "uploadDocumentTooltip": "Nahrat dokument",
+  "createCollectionTooltip": "Vytvořit kolekci",
+  "uploadDocumentTooltip": "Nahrát dokument",
   "restore": "Obnovit",
   "restoreFile": "Obnovit {fileName}",
   "@restoreFile": {
@@ -254,19 +302,19 @@
       }
     }
   },
-  "noCollectionsAvailable": "Žadne kolekce nejsou k dispozici",
-  "emptyTrash": "Vyprazdnit koš",
-  "emptyTrashTooltip": "Vyprazdnit koš",
-  "emptyTrashConfirmation": "Opravdu chcete trvale smazat všechny položky v koši? Tuto akci nelze vratit.",
-  "fileTitle": "Nazev položky",
+  "noCollectionsAvailable": "Žádné kolekce nejsou k dispozici",
+  "emptyTrash": "Vyprázdnit koš",
+  "emptyTrashTooltip": "Vyprázdnit koš",
+  "emptyTrashConfirmation": "Opravdu chcete trvale odstranit všechny položky z koše? Tuto akci nelze vrátit zpět.",
+  "fileTitle": "Název položky",
   "note": "Poznámka",
-  "optionalNote": "Nepovinná poznamka",
-  "upload": "Nahrat",
+  "optionalNote": "Volitelná poznámka",
+  "upload": "Nahrát",
   "documentsHint": "Dokumenty",
   "searchHint": "Hledat...",
-  "searchEmptyTitle": "Žadne vysledky",
-  "searchEmptyDescription": "Zkuste hledat neco jineho.",
-  "searchEverywhereTitle": "Hledat všude \"{query}\"",
+  "searchEmptyTitle": "Nebyly nalezeny žádné výsledky",
+  "searchEmptyDescription": "Zkuste vyhledat něco jiného.",
+  "searchEverywhereTitle": "Hledat \"{query}\" všude",
   "@searchEverywhereTitle": {
     "description": "CTA title prompting the user to search globally",
     "placeholders": {
@@ -276,8 +324,8 @@
       }
     }
   },
-  "searchEverywhereSubtitle": "Hledat ve všech kolekcich a souborech.",
-  "noCollectionsFoundForQuery": "Žadne kolekce nenalezeny pro \"{query}\"",
+  "searchEverywhereSubtitle": "Hledat ve všech kolekcích a souborech.",
+  "noCollectionsFoundForQuery": "Nebyly nalezeny žádné kolekce pro \"{query}\"",
   "@noCollectionsFoundForQuery": {
     "description": "Message when no collections match the search query",
     "placeholders": {
@@ -288,6 +336,7 @@
     }
   },
   "uncategorized": "Nezařazené",
+  "syncing": "Synchronizování...",
   "syncingTrash": "Synchronizuji koš...",
   "restoring": "Obnovuji...",
   "restoredFileToCollection": "\"{fileName}\" obnoven do \"{collectionName}\"",
@@ -304,29 +353,30 @@
       }
     }
   },
-  "clearingTrash": "Vyprazdnuji koš...",
-  "trashIsEmpty": "Koš je prazdny",
+  "clearingTrash": "Vymazání koše...",
+  "trashIsEmpty": "Koš je prázdný",
   "share": "Sdílet",
   "shareLink": "Sdílet odkaz",
   "creatingShareLink": "Vytváření odkazu...",
-  "shareThisLink": "Tento odkaz umožnuje komukoliv, kdo jej obdrži, pristup k vaši položce. Pristup muzete kdykoliv zrušit smazanim odkazu.",
+  "shareThisLink": "Tento odkaz umožňuje každému, kdo jej obdrží, přístup k vašemu obsahu. Přístup můžete kdykoli zrušit smazáním odkazu.",
   "copyLink": "Kopírovat odkaz",
   "deleteLink": "Smazat odkaz",
   "close": "Zavřít",
   "linkCopiedToClipboard": "Odkaz zkopírován do schránky",
   "deleteShareLink": "Smazat odkaz",
   "deleteShareLinkDialogTitle": "Smazat odkaz?",
-  "deleteShareLinkConfirmation": "Lide s timto odkazem již nebudou moci pristupovat k položce.",
-  "deletingShareLink": "Mazani odkazu...",
-  "shareLinkDeletedSuccessfully": "Odkaz byl uspesne smazan",
-  "failedToCreateShareLink": "Vytvoreni odkazu se nezdarilo",
-  "failedToDeleteShareLink": "Smazani odkazu se nezdarilo",
-  "deletingFile": "Mazani položky...",
-  "changeEmail": "Změnit e-mail",
-  "authToChangeYourEmail": "Pro změnu e-mailové adresy se prosím ověřte",
+  "deleteShareLinkConfirmation": "Lidé s tímto odkazem již nebudou mít k danému obsahu přístup.",
+  "deletingShareLink": "Odstraňování odkazu...",
+  "shareLinkDeletedSuccessfully": "Odkaz byl úspěšně odstraněn",
+  "failedToCreateShareLink": "Vytvoření odkazu se nezdařilo",
+  "failedToDeleteShareLink": "Odkaz se nepodařilo odstranit",
+  "deletingFile": "Odstraňování položky...",
+  "changeEmail": "Změnit email",
+  "authToChangeYourEmail": "Pro změnu emailové adresy se prosím ověřte",
   "changePasswordTitle": "Změnit heslo",
   "authToChangeYourPassword": "Pro změnu hesla se prosím ověřte",
   "recoveryKey": "Obnovovací klíč",
+  "ok": "Ok",
   "logout": "Odhlásit se",
   "deleteAccount": "Smazat účet",
   "areYouSureYouWantToLogout": "Opravdu se chcete odhlásit?",
@@ -335,8 +385,8 @@
   "authToViewYourRecoveryKey": "Pro zobrazení Vašeho obnovovacího klíče se prosím ověřte",
   "account": "Účet",
   "security": "Zabezpečení",
-  "emailVerificationToggle": "Ověření pomocí e-mailu",
-  "authToChangeEmailVerificationSetting": "Pro změnu ověření pomocí e-mailu se prosím ověřte",
+  "emailVerificationToggle": "Ověření pomocí emailu",
+  "authToChangeEmailVerificationSetting": "Pro změnu ověření pomocí emailu se prosím ověřte",
   "passkey": "Přístupový klíč",
   "authenticateGeneric": "Ověřte se prosím",
   "somethingWentWrong": "Něco se pokazilo",
@@ -346,41 +396,58 @@
   "authToChangeLockscreenSetting": "Pro změnu nastavení uzamčení obrazovky se prosím ověřte",
   "authToViewPasskey": "Pro zobrazení Vašeho přístupového klíče se prosím ověřte",
   "theme": "Motiv",
+  "appearance": "Motiv",
   "lightTheme": "Světlý",
   "darkTheme": "Tmavý",
   "systemTheme": "Systém",
   "settings": "Nastavení",
   "about": "O aplikaci",
+  "aboutUs": "O nás",
   "weAreOpenSource": "Jsme open source!",
   "privacy": "Soukromí",
   "terms": "Podmínky služby",
   "termsOfServicesTitle": "Podmínky služby",
+  "checkForUpdates": "Zkontrolovat aktualizace",
+  "checkingForUpdates": "Kontrola aktualizací...",
+  "unableToCheckForUpdatesRightNow": "Momentálně nelze ověřit aktualizace",
+  "youAreOnTheLatestVersion": "Máte nejnovější verzi",
+  "aNewVersionOfEnteLockerIsAvailable": "Je k dispozici nová verze Ente Locker.",
+  "criticalUpdateAvailable": "Je k dispozici kritická aktualizace",
+  "updateAvailable": "Je k dispozici aktualizace",
+  "downloadUpdate": "Stáhnout aktualizaci",
   "support": "Podpora",
+  "helpAndSupport": "Nápověda a podpora",
   "contactSupport": "Kontaktovat podporu",
   "help": "Nápověda",
   "suggestFeatures": "Navrhnout funkce",
   "reportABug": "Nahlásit chybu",
   "reportBug": "Nahlásit chybu",
-  "logsDialogBodyLocker": "Timto odešlete logy, ktere nam pomohou vyresit vas problem.",
+  "logsDialogBodyLocker": "Tím se odešlou protokoly, které nám pomohou vyřešit Váš problém.",
   "@logsDialogBodyLocker": {
     "description": "Dialog body text for sending logs in Locker app (without file name warning)"
   },
   "social": "Sociální sítě",
   "rateUsOnStore": "Ohodnoťte nás na {storeName}",
+  "blog": "Blog",
   "merchandise": "E-shop",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
   "information": "Informace",
   "saveInformation": "Uložit informace",
   "saveToLocker": "Uložit do Locker",
   "saveDocumentTitle": "Dokument",
-  "saveDocumentDescription": "Nahrajte dulezite dokumenty.",
-  "informationDescription": "Uložte a sdílejte informace s blízkymi.",
+  "saveDocumentDescription": "Nahrát důležité dokumenty.",
+  "informationDescription": "Ukládejte informace a sdílejte je se svými blízkými.",
   "personalNote": "Poznámka",
-  "personalNoteDescription": "Zapisujte si myslenky a pokyny.",
-  "physicalRecords": "Vec",
-  "physicalRecordsDescription": "Uložte umisteni skutecnych predmetu.",
+  "personalNoteDescription": "Zapište si myšlenky a pokyny.",
+  "physicalRecords": "Věc",
+  "physicalRecordsDescription": "Ukládejte polohy předmětů v reálném světě.",
   "accountCredentials": "Tajný klíč",
-  "accountCredentialsDescription": "Uchovejte prihlasovaci udaje.",
-  "editSecret": "Upravit tajemstvi",
+  "accountCredentialsDescription": "Zachovat přihlašovací údaje účtu.",
+  "editSecret": "Upravit tajný klíč",
   "@editSecret": {
     "description": "Title shown when editing an existing secret"
   },
@@ -388,56 +455,57 @@
   "@editLocation": {
     "description": "Title shown when editing an existing location record"
   },
-  "editNote": "Upravit poznamku",
+  "editNote": "Upravit poznámku",
   "@editNote": {
     "description": "Title shown when editing an existing note"
   },
   "emergencyContact": "Nouzovy kontakt",
-  "emergencyContactDescription": "Uchovejte kontaktni udaje na klicove osoby v krizovych situacich.",
-  "noteName": "Nazev",
-  "noteNameHint": "Nazev poznamky",
+  "emergencyContactDescription": "Uchovávejte kontaktní údaje na klíčové osoby pro případ krize.",
+  "noteName": "Název",
+  "noteNameHint": "Název poznámky",
   "noteContent": "Obsah",
-  "noteContentHint": "Zapisujte dulezite myslenky nebo pokyny",
-  "unsavedNoteChangesTitle": "Zahodit zmeny?",
-  "unsavedNoteChangesDescription": "V teto poznamce mate neuložene zmeny. Pokud se nyni vratite, budou ztraceny.",
-  "keepEditing": "Pokracovat v upravach",
+  "noteContentHint": "Zapište si důležité myšlenky nebo pokyny",
+  "unsavedNoteChangesTitle": "Zahodit změny?",
+  "unsavedNoteChangesDescription": "V této poznámce máte neuložené změny. Pokud se nyní vrátíte zpět, budou ztraceny.",
+  "keepEditing": "Pokračovat v úpravách",
   "discardChanges": "Zahodit",
-  "recordName": "Nazev zaznamu",
-  "recordNameHint": "Nazev skutecneho predmetu",
+  "recordName": "Název záznamu",
+  "recordNameHint": "Název skutečného předmětu",
   "recordLocation": "Poloha",
-  "recordLocationHint": "Kde je tento predmet uložen?",
+  "recordLocationHint": "Kde je tato položka uložena?",
   "recordNotes": "Poznámky",
-  "recordNotesHint": "Dalši informace o predmetu",
+  "recordNotesHint": "Doplňující informace o položce",
   "credentialName": "Účet",
-  "credentialNameHint": "Nazev služby",
-  "username": "Uživatelske jmeno",
-  "usernameHint": "Prihlasovaci ID nebo e-mail",
+  "credentialNameHint": "Název služby",
+  "username": "Uživatelské jméno",
+  "usernameHint": "Přihlašovací ID nebo email",
   "password": "Heslo",
   "passwordHint": "Heslo",
-  "credentialNotes": "Dalši poznamky",
-  "credentialNotesHint": "Metody obnoveni, bezpecnostni otazky, ...",
-  "contactName": "Jmeno kontaktu",
-  "contactNameHint": "Cele jmeno nouzoveho kontaktu",
-  "contactDetails": "Kontaktni udaje",
-  "contactDetailsHint": "Telefonni cislo, e-mail nebo dalši kontaktni informace",
-  "contactNotes": "Zprava pro kontakt",
-  "contactNotesHint": "Dulezite informace ke sdileni s touto osobou pri kontaktovani",
+  "credentialNotes": "Další poznámky",
+  "credentialNotesHint": "Způsoby obnovení, bezpečnostní otázky, ...",
+  "contactName": "Jméno kontaktní osoby",
+  "contactNameHint": "Celé jméno kontaktní osoby pro případ nouze",
+  "contactDetails": "Kontaktní údaje",
+  "contactDetailsHint": "Telefonní číslo, emailová adresa nebo jiné kontaktní údaje",
+  "contactNotes": "Zpráva pro kontakt",
+  "contactNotesHint": "Důležité informace, které je třeba této osobě sdělit při navázání kontaktu",
   "saveRecord": "Uložit",
-  "recordSavedSuccessfully": "Zaznam byl uspesne uložen",
-  "failedToSaveRecord": "Uloženi zaznamu se nezdarilo",
-  "pleaseEnterNoteName": "Prosim zadejte nazev",
-  "pleaseEnterNoteContent": "Prosim zadejte obsah",
-  "pleaseEnterRecordName": "Prosim zadejte nazev zaznamu",
-  "pleaseEnterLocation": "Prosim zadejte umisteni",
-  "pleaseEnterAccountName": "Prosim zadejte nazev uctu",
-  "pleaseEnterUsername": "Prosim zadejte uživatelske jmeno",
-  "pleaseEnterPassword": "Prosim zadejte heslo",
-  "pleaseEnterContactName": "Prosim zadejte jmeno kontaktu",
-  "pleaseEnterContactDetails": "Prosim zadejte kontaktni udaje",
+  "recordSavedSuccessfully": "Záznam byl úspěšně uložen",
+  "failedToSaveRecord": "Uložení záznamu se nezdařilo",
+  "pleaseEnterNoteName": "Zadejte prosím nadpis",
+  "pleaseEnterNoteContent": "Zadejte prosím obsah",
+  "pleaseEnterRecordName": "Zadejte prosím název záznamu",
+  "pleaseEnterLocation": "Zadejte prosím polohu",
+  "pleaseEnterAccountName": "Zadejte prosím název účtu",
+  "pleaseEnterUsername": "Zadejte prosím uživatelské jméno",
+  "pleaseEnterPassword": "Zadejte prosím heslo",
+  "pleaseEnterContactName": "Zadejte prosím jméno kontaktu",
+  "pleaseEnterContactDetails": "Zadejte prosím kontaktní údaje",
   "allowDownloads": "Povolit stahování",
   "sharedByYou": "Sdíleno mnou",
   "sharedWithYou": "Sdíleno se mnou",
   "manageLink": "Spravovat odkaz",
+  "linkLabel": "Odkaz",
   "linkExpiry": "Platnost odkazu",
   "linkNeverExpires": "Nikdy",
   "linkExpired": "Vypršel",
@@ -449,10 +517,10 @@
   "sendLink": "Odeslat odkaz",
   "setPasswordTitle": "Nastavit heslo",
   "resetPasswordTitle": "Obnovit heslo",
-  "allowAddingFiles": "Povolit pridavani položek",
+  "allowAddingFiles": "Povolit přidávání položek",
   "disableDownloadWarningTitle": "Upozornění",
-  "disableDownloadWarningBody": "Prohlížejici mohou stale porizovat snimky obrazovky nebo uložit kopii vasich položek pomoci externich nastroju.",
-  "allowAddFilesDescription": "Umožnete lidem s odkazem pridavat položky do sdilene kolekce.",
+  "disableDownloadWarningBody": "Prohlížející si stále mohou pořizovat snímky obrazovky nebo ukládat kopie vašich položek pomocí externích nástrojů.",
+  "allowAddFilesDescription": "Umožněte lidem s odkazem přidávat položky do sdílené kolekce.",
   "after1Hour": "Po 1 hodině",
   "after1Day": "Po 1 dni",
   "after1Week": "Po 1 týdnu",
@@ -481,17 +549,17 @@
   "linkHasExpired": "Platnost odkazu vypršela",
   "publicLinkEnabled": "Veřejný odkaz povolen",
   "shareALink": "Sdílet odkaz",
-  "addViewer": "Přidat diváka",
+  "addViewer": "Přidat prohlížejícího",
   "addCollaborator": "Přidat spolupracovníka",
   "addANewEmail": "Přidejte nový email",
   "orPickAnExistingOne": "Nebo vyberte existující",
-  "sharedCollectionSectionDescription": "Vytvarejte sdilene kolekce pro spolupraci s dalšimi uživateli Ente, vcetne uživatelu na bezplatnych planech.",
+  "sharedCollectionSectionDescription": "Vytvářejte sdílené kolekce pro spolupráci s dalšími uživateli Ente, včetně uživatelů na bezplatných tarifech.",
   "createPublicLink": "Vytvořit veřejný odkaz",
   "addParticipants": "Přidat účastníky",
   "add": "Přidat",
-  "collaboratorsCanAddFilesToTheSharedCollection": "Spolupracovnici mohou pridavat položky do sdilene kolekce.",
+  "collaboratorsCanAddFilesToTheSharedCollection": "Spolupracovníci mohou přidávat položky do sdílené kolekce.",
   "enterEmail": "Zadejte email",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Přidáno 0 diváků} =1 {Přidán 1 divák} few {Přidáni {count} diváci} other {Přidáno {count} diváků}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Přidáno 0 prohlížejících} =1 {Přidán 1 prohlížející} few {Přidáni {count} prohlížející} other {Přidáno {count} prohlížejících}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -511,21 +579,22 @@
     },
     "description": "Number of collaborators that were successfully added to a collection."
   },
-  "addViewers": "{count, plural, one {} few {Přidat diváky} many {Přidat diváků}=0 {Přidat diváků} =1 {Přidat diváka} other {Přidat diváků}}",
-  "addCollaborators": "{count, plural, one {} few {Přidejte spolupracovníky} many {Přidejte spolupracovníky}=0 {Přidejte spolupracovníka} =1 {Přidejte spolupracovníka} other {Přidejte spolupracovníků}}",
-  "longPressAnEmailToVerifyEndToEndEncryption": "Dlouhým stisknutím e-mailu ověříte koncové šifrování.",
+  "addViewers": "{count, plural, few {Přidat prohlížející} many {Přidat prohlížejících}=0 {Přidat prohlížejícího} =1 {Přidat prohlížejícího} other {Přidat prohlížející}}",
+  "addCollaborators": "{count, plural, few {Přidejte spolupracovníky} many {Přidejte spolupracovníky}=0 {Přidejte spolupracovníka} =1 {Přidejte spolupracovníka} other {Přidejte spolupracovníky}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Dlouhým stisknutím emailu ověříte koncové šifrování.",
   "sharing": "Sdílení...",
-  "invalidEmailAddress": "Neplatná e-mailová adresa",
-  "enterValidEmail": "Prosím, zadejte platnou e-mailovou adresu.",
+  "invalidEmailAddress": "Neplatná emailová adresa",
+  "enterValidEmail": "Prosím, zadejte platnou emailovou adresu.",
   "oops": "Jejda",
-  "noItemsMatchSelectedFilters": "Žadne položky neodpovidaji vybranym filtrum",
-  "noCollections": "Žadne kolekce",
+  "noItemsMatchSelectedFilters": "Žádné položky neodpovídají vybraným filtrům",
+  "noCollections": "Žádné kolekce",
   "youCannotShareWithYourself": "Nemůžete sdílet se sebou",
   "inviteToEnte": "Pozvat do Ente",
   "sendInvite": "Odeslat pozvánku",
+  "shareTextRecommendUsingEnte": "Stáhněte si Ente\n\nhttps://ente.com",
   "thisIsYourVerificationId": "Toto je Vaše ověřovací ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Osoba, která s Vámi sdílí alba, by měla na svém zařízení vidět stejné ID.",
-  "howToViewShareeVerificationID": "Požádejte je, aby dlouze stiskli svou e-mailovou adresu na obrazovce nastavení a ověřili, zda se ID na obou zařízeních shodují.",
+  "howToViewShareeVerificationID": "Požádejte je, aby dlouze stiskli svou emailovou adresu na obrazovce nastavení a ověřili, zda se ID na obou zařízeních shodují.",
   "thisIsPersonVerificationId": "Toto je ověřovací ID pro {email}",
   "@thisIsPersonVerificationId": {
     "placeholders": {
@@ -537,14 +606,16 @@
   },
   "verificationId": "Ověřovací ID",
   "verifyEmailID": "Ověřit {email}",
-  "emailNoEnteAccount": "{email} nema ucet Ente.\n\nPošlete mu pozvanku pro sdileni položek.",
+  "emailNoEnteAccount": "{email} nemá účet Ente.\n\nPošlete jim pozvánku pro sdílení položek.",
+  "shareMyVerificationID": "Toto je moje ověřovací ID: {verificationID} pro ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ahoj, můžeš potvrdit, že toto je tvé ověřovací ID na ente.com: {verificationID}",
   "passwordLock": "Zámek heslem",
   "manage": "Spravovat",
   "addedAs": "Přidán jako",
   "removeParticipant": "Odebrat účastníka",
-  "yesConvertToViewer": "Ano, převést na diváka",
-  "changePermissions": "Zmenit opravneni",
-  "cannotAddMoreFilesAfterBecomingViewer": "{name} již nebude moci pridavat položky do kolekce po prevedeni na prohlížejiciho.",
+  "yesConvertToViewer": "Ano, převést na prohlížejícího",
+  "changePermissions": "Změnit oprávnění",
+  "cannotAddMoreFilesAfterBecomingViewer": "{name} již nebude moci přidávat položky do kolekce po převedení na prohlížejícího.",
   "@cannotAddMoreFilesAfterBecomingViewer": {
     "description": "Warning message when changing a collaborator to viewer",
     "placeholders": {
@@ -555,13 +626,13 @@
     }
   },
   "removeWithQuestionMark": "Odstranit?",
-  "removeParticipantBody": "{userEmail} bude odebran z teto sdilene kolekce\n\nVšechny položky pridane touto osobou budou take odebrany z kolekce",
+  "removeParticipantBody": "{userEmail} bude odebrán z této sdílené kolekce\n\nVšechny položky přidané touto osobou budou také odebrány z kolekce",
   "yesRemove": "Ano, odstranit",
   "remove": "Odstranit",
   "viewer": "Divák",
   "collaborator": "Spolupracovník",
-  "collaboratorsCanAddFilesToTheSharedAlbum": "Spolupracovnici mohou pridavat položky do sdilene kolekce.",
-  "albumParticipantsCount": "{count, plural, one {} few {{count} účastníci} many {{count} účastníků}=0 {Žádní účastníci} =1 {1 účastník} other {{count} účastníků}}",
+  "collaboratorsCanAddFilesToTheSharedAlbum": "Spolupracovníci mohou přidávat položky do sdílené kolekce.",
+  "albumParticipantsCount": "{count, plural, few {{count} účastníci} many {{count} účastníků}=0 {Žádní účastníci} =1 {1 účastník} other {{count} účastníků}}",
   "@albumParticipantsCount": {
     "description": "The count of participants in an album",
     "placeholders": {
@@ -574,7 +645,7 @@
   "addMore": "Přidat další",
   "you": "Vy",
   "albumOwner": "Vlastník",
-  "typeOfCollectionTypeIsNotSupportedForRename": "Typ kolekce {collectionType} nepodporuje prejmenovani",
+  "typeOfCollectionTypeIsNotSupportedForRename": "Typ kolekce {collectionType} nepodporuje přejmenování",
   "@typeOfCollectionTypeIsNotSupportedForRename": {
     "placeholders": {
       "collectionType": {
@@ -584,43 +655,51 @@
     }
   },
   "leaveCollection": "Opustit kolekci",
-  "filesAddedByYouWillBeRemovedFromTheCollection": "Položky pridane vami budou odebrany z kolekce",
-  "leaveSharedCollection": "Opustit sdilenou kolekci?",
+  "filesAddedByYouWillBeRemovedFromTheCollection": "Položky přidané Vámi budou odebrány z kolekce",
+  "leaveSharedCollection": "Opustit sdílenou kolekci?",
   "noSystemLockFound": "Zámek systému nenalezen",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Chcete-li povolit zámek aplikace, nastavte v nastavení systému přístupový kód zařízení nebo zámek obrazovky.",
   "legacy": "Dědictví",
   "authToManageLegacy": "Pro správu důvěryhodných kontaktů se prosím ověřte",
-  "uploadError": "Chyba nahravani",
-  "uploadStorageLimitErrorTitle": "Limit ulozište dosazen",
+  "uploadError": "Chyba nahrávání",
+  "uploadStorageLimitErrorTitle": "Limit úložiště dosažen",
   "@uploadStorageLimitErrorTitle": {
     "description": "Title shown when uploads fail due to running out of storage"
   },
-  "uploadStorageLimitErrorBody": "Došlo vam misto v ulozisti. Uvolnete misto pro pokracovani v nahravani.",
+  "uploadStorageLimitErrorBody": "Došlo Vám místo v úložišti. Uvolněte místo pro pokračování v nahrávání.",
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
-  "uploadFileCountLimitErrorTitle": "Limit souboru dosazen",
+  "uploadSubscriptionExpiredErrorTitle": "Předplatné vypršelo",
+  "@uploadSubscriptionExpiredErrorTitle": {
+    "description": "Title shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadSubscriptionExpiredErrorBody": "Vaše předplatné Ente Photos vypršelo. Obnovte své předplatné, abyste mohli pokračovat v nahrávání.",
+  "@uploadSubscriptionExpiredErrorBody": {
+    "description": "Body shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadFileCountLimitErrorTitle": "Dosažen limit souborů",
   "@uploadFileCountLimitErrorTitle": {
     "description": "Title shown when uploads fail because the locker already has the maximum file count"
   },
-  "uploadFileCountLimitErrorBody": "Dosahli jste limitu souboru. Pro vice ulozište prejdete na placeny plan.",
+  "uploadFileCountLimitErrorBody": "Dosáhli jste limitu souborů. Pro více úložiště přejděte na placený tarif.",
   "@uploadFileCountLimitErrorBody": {
     "description": "Body shown when uploads fail because the locker already has the maximum file count"
   },
-  "uploadFileCountLimitErrorToast": "Akce se nezdarila. Dosahli jste limitu souboru.",
+  "uploadFileCountLimitErrorToast": "Akce se nezdařila. Dosáhli jste limitu souborů.",
   "@uploadFileCountLimitErrorToast": {
     "description": "Toast shown when info items fail to save due to hitting the file count limit"
   },
-  "uploadFileTooLargeErrorTitle": "Soubor je priliš velky",
+  "uploadFileTooLargeErrorTitle": "Soubor je příliš velký",
   "@uploadFileTooLargeErrorTitle": {
     "description": "Title shown when uploads fail because the file exceeds the supported size"
   },
-  "uploadFileTooLargeErrorBody": "Tento soubor je vetši než maximalni podporovana velikost nahravani 10 GB.",
+  "uploadFileTooLargeErrorBody": "Tento soubor přesahuje maximální povolenou velikost pro nahrání, která činí 10GB.",
   "@uploadFileTooLargeErrorBody": {
     "description": "Body shown when uploads fail because the file exceeds the supported size"
   },
-  "tryAdjustingYourSearchQuery": "Zkuste upravit vyhledavaci dotaz",
-  "noFilesFoundForQuery": "Žadne položky nenalezeny pro \"{query}\"",
+  "tryAdjustingYourSearchQuery": "Zkuste upravit vyhledávací dotaz",
+  "noFilesFoundForQuery": "Žádné položky nenalezeny pro \"{query}\"",
   "@noFilesFoundForQuery": {
     "description": "Message when no items match the search query",
     "placeholders": {
@@ -632,8 +711,9 @@
   },
   "deselectAll": "Zrušit výběr všech",
   "selectAll": "Vybrat vše",
-  "unnamedCollection": "Nepojmenovana kolekce",
-  "uploadedFilesProgress": "Nahrano {completed}/{total} položek...",
+  "unnamedCollection": "Nepojmenovaná kolekce",
+  "enteLocker": "ente Locker",
+  "uploadedFilesProgress": "Nahráno {completed}/{total} položek...",
   "@uploadedFilesProgress": {
     "description": "Progress message showing uploaded items",
     "placeholders": {
@@ -647,7 +727,7 @@
       }
     }
   },
-  "uploadedFilesProgressWithError": "Nahrano {completed}/{total} položek... ({error})",
+  "uploadedFilesProgressWithError": "Nahráno {completed}/{total} položek... ({error})",
   "@uploadedFilesProgressWithError": {
     "description": "Progress message showing uploaded items with error",
     "placeholders": {
@@ -665,20 +745,20 @@
       }
     }
   },
-  "noCollectionsAvailableForSelection": "Žadne kolekce nejsou k dispozici",
-  "createCollectionButton": "Vytvorit kolekci",
+  "noCollectionsAvailableForSelection": "Žádné kolekce nejsou k dispozici",
+  "createCollectionButton": "Vytvořit kolekci",
   "collectionButtonLabel": "Kolekce",
   "hideWindow": "Skryt okno",
   "showWindow": "Zobrazit okno",
-  "exitApp": "Ukoncit aplikaci",
+  "exitApp": "Ukončit aplikaci",
   "lockerLogs": "Logy Locker",
-  "recents": "Nedavne",
+  "recents": "Nedávné",
   "clear": "Vymazat",
-  "uploadAFile": "Nahrat položku",
-  "clickHereToUpload": "Kliknete sem pro nahrani",
+  "uploadAFile": "Nahrát položku",
+  "clickHereToUpload": "Klikněte sem pro nahrání",
   "saveDocument": "Uložit dokument",
-  "uploadFiles": "Nahrat položky",
-  "filesSelected": "{count, plural, =0{Žadne položky vybrana} =1{1 položka vybrana} few{{count} položky vybrany} other{{count} položek vybrano}}",
+  "uploadFiles": "Nahrát položky",
+  "filesSelected": "{count, plural, =0{Žádné položky nebyly vybrány} =1{1 položka vybrána} few{{count} položky vybrány} other{{count} položek vybráno}}",
   "@filesSelected": {
     "description": "Number of items selected for upload",
     "placeholders": {
@@ -688,14 +768,14 @@
       }
     }
   },
-  "addToCollection": "Pridat do kolekce",
-  "newCollection": "Nova kolekce",
-  "title": "Nazev",
+  "addToCollection": "Přidat do kolekce",
+  "newCollection": "Nová kolekce",
+  "title": "Název",
   "editItem": "Upravit položku",
-  "enterNewTitle": "Zadejte novy nazev",
-  "backToView": "Zpet na zobrazeni",
+  "enterNewTitle": "Zadejte nový název",
+  "backToView": "Zpět na zobrazení",
   "back": "Zpět",
-  "failedToLoadCollections": "Nacitani kolekci se nezdarilo: {error}",
+  "failedToLoadCollections": "Načítání kolekcí se nezdařilo: {error}",
   "@failedToLoadCollections": {
     "description": "Error message when loading collections fails",
     "placeholders": {
@@ -706,7 +786,7 @@
     }
   },
   "informationCollectionName": "Informace",
-  "recordSavedToMultipleCollections": "Zaznam uspesne uložen do {count, plural, =1{1 kolekce} few{{count} kolekci} other{{count} kolekci}}",
+  "recordSavedToMultipleCollections": "Záznam úspěšně uložen do {count, plural, =1{1 kolekce} few{{count} kolekcí} other{{count} kolekcí}}",
   "@recordSavedToMultipleCollections": {
     "description": "Success message when record is saved to multiple collections",
     "placeholders": {
@@ -716,7 +796,7 @@
       }
     }
   },
-  "copiedToClipboard": "{fieldName} zkopirovan do schranky",
+  "copiedToClipboard": "{fieldName} zkopírován do schránky",
   "@copiedToClipboard": {
     "description": "Message when a field is copied to clipboard",
     "placeholders": {
@@ -726,7 +806,7 @@
       }
     }
   },
-  "searchResultsCount": "{count, plural, =1{1 vysledek} few{{count} vysledky} other{{count} vysledku}} pro \"{query}\"",
+  "searchResultsCount": "{count, plural, =1{1 výsledek} few{{count} výsledky} other{{count} výsledků}} pro \"{query}\"",
   "@searchResultsCount": {
     "description": "Search results count message",
     "placeholders": {
@@ -740,40 +820,41 @@
       }
     }
   },
-  "loginToEnteAccount": "Prihlaste se ke svemu uctu Ente",
-  "unlockLockerNewUserTitle": "Pripojte se k Ente pro použiti Locker",
-  "unlockLockerNewUserBody": "Locker je momentalne dostupny pouze stavajicim uživatelum Ente. Muzete si vytvorit ucet v Ente Photos pro použiti Locker.",
-  "checkoutEntePhotos": "Prohlédnete si Ente Photos",
-  "okay": "V poradku",
-  "noAccountCta": "Nemam ucet",
-  "featureSaveImportant": "Uložte sve dulezite dokumenty a prihlasovaci udaje",
-  "featurePassAutomatically": "Automaticky je predejte v pripade nouze",
-  "featureShareAnytime": "Sdilejte je kdykoliv",
-  "emailIdLabel": "E-mail",
-  "emailIdHint": "Zadejte svou e-mailovou adresu",
+  "locker": "Locker",
+  "loginToEnteAccount": "Přihlaste se ke svému účtu Ente",
+  "unlockLockerNewUserTitle": "Připojte se k Ente pro použití Lockeru",
+  "unlockLockerNewUserBody": "Locker je momentálně dostupný pouze stávajícím uživatelům Ente. Můžete si vytvořit účet v Ente Photos pro použití Lockeru.",
+  "checkoutEntePhotos": "Prohlédněte si Ente Photos",
+  "okay": "V pořádku",
+  "noAccountCta": "Nemám účet",
+  "featureSaveImportant": "Uložte své důležité dokumenty a přihlašovací údaje",
+  "featurePassAutomatically": "Automaticky je předejte v případě nouze",
+  "featureShareAnytime": "Sdílejte je kdykoliv",
+  "emailIdLabel": "Email",
+  "emailIdHint": "Zadejte svou emailovou adresu",
   "loginPasswordLabel": "Heslo",
   "loginPasswordHint": "Zadejte své heslo",
-  "forgotPassword": "Zapomenute heslo?",
+  "forgotPassword": "Zapomenuté heslo?",
   "logInAction": "Přihlásit se",
-  "dontHaveAccount": "Nemate ucet?",
+  "dontHaveAccount": "Nemáte účet?",
   "signUp": "Zaregistrovat se",
   "incorrectPassword": "Nesprávné heslo",
   "pleaseTryAgain": "Zkuste to prosím znovu",
   "noInternetConnection": "Žádné připojení k internetu",
-  "checkInternetConnection": "Zkontrolujte prosim sve internetove pripojeni a zkuste to znovu",
+  "checkInternetConnection": "Zkontrolujte prosím své internetové připojení a zkuste to znovu",
   "verificationFailedTryAgain": "Ověření se nezdařilo, zkuste to prosím znovu",
   "recreatePassword": "Znovu vytvořit heslo",
-  "deviceCannotVerifyPassword": "Vaše zarizeni nema dostatek pameti pro overeni vašeho hesla",
+  "deviceCannotVerifyPassword": "Vaše zařízení nemá dostatek paměti pro ověření Vašeho hesla",
   "useRecoveryKey": "Použít obnovovací klíč",
-  "invalidEmail": "Neplatny e-mail",
-  "enterValidEmailFirst": "Nejprve prosim zadejte platnou e-mailovou adresu",
-  "lockerLoginIssueSubject": "Problem s prihlašenim do Locker",
-  "unnamed": "Bez nazvu",
+  "invalidEmail": "Neplatný email",
+  "enterValidEmailFirst": "Nejprve prosím zadejte platnou emailovou adresu",
+  "lockerLoginIssueSubject": "Problém s přihlášením do Lockeru",
+  "unnamed": "Bez názvu",
   "collectionLabel": "Kolekce",
   "areYouSure": "Jste si jisti?",
   "yesDeleteCollection": "Ano, smazat kolekci",
   "yesDeleteFile": "Ano, smazat položku",
-  "deleteCollectionDialogBody": "\"{collectionName}\" bude trvale smazana.",
+  "deleteCollectionDialogBody": "\"{collectionName}\" bude trvale smazána.",
   "@deleteCollectionDialogBody": {
     "description": "Confirmation message body for deleting a single collection",
     "placeholders": {
@@ -783,7 +864,7 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 kolekce bude trvale smazana} few{{count} kolekce budou trvale smazany} other{{count} kolekci bude trvale smazano}}.",
+  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 kolekce bude trvale smazána} few{{count} kolekce budou trvale smazány} other{{count} kolekcí bude trvale smazáno}}.",
   "@deleteMultipleCollectionsDialogBody": {
     "description": "Confirmation message body for deleting multiple collections",
     "placeholders": {
@@ -793,7 +874,7 @@
       }
     }
   },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 položka bude trvale smazana} few{{count} položky budou trvale smazany} other{{count} položek bude trvale smazano}}.",
+  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 položka bude trvale smazána} few{{count} položky budou trvale smazány} other{{count} položek bude trvale smazáno}}.",
   "@deleteMultipleFilesDialogBody": {
     "description": "Confirmation message body for deleting multiple items",
     "placeholders": {
@@ -803,11 +884,11 @@
       }
     }
   },
-  "deleteCollectionFromEverywhere": "Smazat položky také odevšud",
+  "deleteCollectionFromEverywhere": "Smazat položky také ze všech míst",
   "@deleteCollectionFromEverywhere": {
     "description": "Checkbox label asking whether to delete collection items everywhere"
   },
-  "yesDeleteCollections": "Ano, smazat {count, plural, =1{kolekci} few{kolekce} other{kolekce}}",
+  "yesDeleteCollections": "Ano, smazat {count, plural, =1{kolekci} few{kolekce} other{kolekcí}}",
   "@yesDeleteCollections": {
     "description": "Button label for confirming deletion of one or more collections",
     "placeholders": {
@@ -817,7 +898,7 @@
       }
     }
   },
-  "yesDeleteFiles": "Ano, smazat {count, plural, =1{položku} few{položky} other{položky}}",
+  "yesDeleteFiles": "Ano, smazat {count, plural, =1{položku} few{položky} other{položek}}",
   "@yesDeleteFiles": {
     "description": "Button label for confirming deletion of one or more items",
     "placeholders": {
@@ -828,13 +909,27 @@
     }
   },
   "usage": "Využiti",
-  "important": "Dulezite",
-  "unimportant": "Nedulezite",
-  "removingFromImportant": "Odstranuji z dulezitych...",
-  "markingAsImportant": "Oznacuji jako dulezite...",
-  "fileMarkedAsImportant": "Položka oznacena jako dulezita",
-  "fileRemovedFromImportant": "Položka odebrána z dulezitych",
-  "filesMarkedAsImportant": "{count, plural, =1{1 položka oznacena jako dulezita} few{{count} položky oznaceny jako dulezite} other{{count} položek oznaceno jako dulezite}}",
+  "fileCount": "{used} / {max}",
+  "@fileCount": {
+    "description": "Display item count usage in the format 'used / max'",
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "8"
+      },
+      "max": {
+        "type": "String",
+        "example": "1,000"
+      }
+    }
+  },
+  "important": "Důležité",
+  "unimportant": "Nedůležité",
+  "removingFromImportant": "Odstraňuji z důležitých...",
+  "markingAsImportant": "Označuji jako důležité...",
+  "fileMarkedAsImportant": "Položka označena jako důležitá",
+  "fileRemovedFromImportant": "Položka odebrána z důležitých",
+  "filesMarkedAsImportant": "{count, plural, =1{1 položka označena jako důležitá} few{{count} položky označeny jako důležité} other{{count} položek označeno jako důležitých}}",
   "@filesMarkedAsImportant": {
     "description": "Success message when items are marked as important",
     "placeholders": {
@@ -844,8 +939,8 @@
       }
     }
   },
-  "allFilesAlreadyMarkedAsImportant": "Všechny položky jsou již oznaceny jako dulezite",
-  "failedToMarkFilesAsImportant": "Oznaceni položek jako dulezitych se nezdarilo: {error}",
+  "allFilesAlreadyMarkedAsImportant": "Všechny položky jsou již označeny jako důležité",
+  "failedToMarkFilesAsImportant": "Označení položek jako důležitých se nezdařilo: {error}",
   "@failedToMarkFilesAsImportant": {
     "description": "Error message when marking items as important fails",
     "placeholders": {
@@ -855,7 +950,7 @@
       }
     }
   },
-  "failedToUpdateImportantStatus": "Aktualizace stavu dulezitosti se nezdarila: {error}",
+  "failedToUpdateImportantStatus": "Aktualizace stavu důležitosti se nezdařila: {error}",
   "@failedToUpdateImportantStatus": {
     "description": "Error message when updating important status fails",
     "placeholders": {
@@ -867,16 +962,17 @@
   },
   "sorry": "Omlouváme se",
   "subscribe": "Odebírat",
-  "sharedWith": "Sdileno s",
-  "shareLater": "Sdilet pozdeji",
-  "enterNameOrEmailToShareWith": "Zadejte jmeno nebo e-mail pro sdileni",
-  "chooseFromAnExistingContact": "Vyberte z existujiciho kontaktu",
-  "scheduleShare": "Naplanovat sdileni",
-  "addEmail": "Pridat e-mail",
-  "addNewEmail": "Pridat novy e-mail",
-  "noSharedUsers": "Zatim neni sdileno s nikym. Sdílejte tuto kolekci pridanim e-mailu níže.",
-  "removeAccess": "Odebrat pristup",
-  "subscriptionRequiredForSharing": "Pro sdileni odkazu potrebujete placene predplatne",
+  "sharedWith": "Sdíleno s",
+  "shareCollection": "Sdílet kolekci",
+  "shareLater": "Sdílet později",
+  "enterNameOrEmailToShareWith": "Zadejte jméno nebo email pro sdílení",
+  "chooseFromAnExistingContact": "Vyberte z existujícího kontaktu",
+  "scheduleShare": "Naplánovat sdílení",
+  "addEmail": "Přidat email",
+  "addNewEmail": "Přidat nový email",
+  "noSharedUsers": "Zatím není s nikým sdíleno. Sdílejte tuto kolekci přidáním emailu níže.",
+  "removeAccess": "Odebrat přístup",
+  "subscriptionRequiredForSharing": "Pro sdílení odkazu potřebujete placené předplatné",
   "sessionExpired": "Relace vypršela",
   "pleaseLoginAgain": "Prosím, přihlaste se znovu",
   "filters": "Filtry",
@@ -884,5 +980,125 @@
   "clearAllFilters": "Vymazat všechny filtry",
   "selectLanguage": "Vybrat jazyk",
   "general": "Obecné",
-  "language": "Jazyk"
+  "language": "Jazyk",
+  "selectedCount": "{count, plural, =1{1 vybrána} few{{count} vybrány} other{{count} vybráno}}",
+  "@selectedCount": {
+    "description": "Number of items selected",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "actionNotSupportedForSharedFiles": "{count, plural, =1{Akce není podporována pro 1 sdílený soubor} few{Akce není podporována pro {count} sdílené soubory} other{Akce není podporována pro {count} sdílených souborů}}",
+  "@actionNotSupportedForSharedFiles": {
+    "description": "Message when action is not supported for shared files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addTo": "Přidat do",
+  "shareNotSupportedForSharedFiles": "Sdílení není u sdílených souborů podporováno",
+  "editNotSupportedForSharedFiles": "U sdílených souborů není funkce úprav podporována",
+  "deleteNotSupportedForSharedFiles": "U sdílených souborů není funkce odstranit podporována",
+  "importantNotSupportedForSharedFiles": "Funkce „Důležité“ není u sdílených souborů podporována",
+  "sharingSection": "Sdílení",
+  "sharingEnabledToggle": "Sdílení povoleno",
+  "publicLinkSection": "Veřejný odkaz",
+  "linkEnabledToggle": "Odkaz povolen",
+  "allowUploads": "Povolit nahrávání",
+  "collectionUpdated": "Kolekce aktualizována",
+  "actionNotSupportedOnFavouritesAlbum": "Tato akce není v albu Oblíbené podporována",
+  "leaveCollectionSuccessfully": "Úspěšně jste opustili kolekci",
+  "leftCollectionsSuccessfully": "{count, plural, =1{1 kolekce úspěšně opuštěna} few{{count} kolekce úspěšně opuštěny} other{{count} kolekcí úspěšně opuštěno}}",
+  "@leftCollectionsSuccessfully": {
+    "description": "Success message when leaving collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "removePublicLink": "Odstranit veřejný odkaz",
+  "removePublicLinkConfirmation": "Toto odstraní veřejný odkaz pro přístup k \"{collectionName}\".",
+  "@removePublicLinkConfirmation": {
+    "description": "Confirmation message when removing public link",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
+  "collectionsDeletedSuccessfully": "{count, plural, =1{1 kolekce úspěšně odstraněna} few{{count} kolekce úspěšně odstraněny} other{{count} kolekcí úspěšně odstraněno}}",
+  "@collectionsDeletedSuccessfully": {
+    "description": "Success message when collections are deleted",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "restoreToCollection": "Obnovit do kolekce",
+  "restoringFiles": "Obnovuji...",
+  "filesRestoredSuccessfully": "{count, plural, =1{1 položka úspěšně obnovena} few{{count} položky úspěšně obnoveny} other{{count} položek úspěšně obnoveno}}",
+  "@filesRestoredSuccessfully": {
+    "description": "Success message when items are restored from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToRestoreFiles": "Nepodařilo se obnovit položky",
+  "permanentlyDelete": "Trvale smazat",
+  "permanentlyDeleteFilesBody": "{count, plural, =1{Tato položka bude trvale odstraněna a nelze ji obnovit} few{Tyto {count} položky budou trvale odstraněny a nelze je obnovit} other{Těchto {count} položek bude trvale odstraněno a nelze je obnovit}}.",
+  "@permanentlyDeleteFilesBody": {
+    "description": "Confirmation body for permanent deletion from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDelete": "Ano, smazat",
+  "deletingFiles": "Mazání...",
+  "filesDeletedPermanently": "{count, plural, =1{1 položka byla trvale odstraněna} few{{count} položky byly trvale odstraněny} other{{count} položek bylo trvale odstraněno}}",
+  "@filesDeletedPermanently": {
+    "description": "Success message when items are permanently deleted from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToDeleteFiles": "Odstranění položek se nezdařilo",
+  "itemsStored": "Uložené položky",
+  "of_": "z",
+  "usageYou": "Vy",
+  "usageFamily": "Rodina",
+  "searchSettings": "Nastavení vyhledávání",
+  "suggestions": "Doporučení",
+  "noResultsFound": "Nebyly nalezeny žádné výsledky",
+  "viewActiveSessions": "Zobrazit aktivní relace",
+  "authToViewYourActiveSessions": "Pro zobrazení aktivních relací se prosím ověřte",
+  "deleteAccountFeedbackPrompt": "Něco nefunguje? Napište nám na {email}, rádi Vám pomůžeme.",
+  "@deleteAccountFeedbackPrompt": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "sendFeedback": "Odeslat zpětnou vazbu",
+  "deleteAccountPermanentWarning": "Tím dojde k trvalému smazání vašich údajů z aplikací Ente Auth, Photos a Locker"
 }

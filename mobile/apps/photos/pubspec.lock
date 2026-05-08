@@ -451,14 +451,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
-  cupertino_http:
-    dependency: transitive
-    description:
-      name: cupertino_http
-      sha256: "72187f715837290a63479a5b0ae709f4fedad0ed6bd0441c275eceaa02d5abae"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -527,10 +519,18 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: d90ee57923d1828ac14e492ca49440f65477f4bb1263575900be731a3dac66a9
+      sha256: aff32c08f92787a557dd5c0145ac91536481831a01b4648136373cddb0e64f8c
       url: "https://pub.dev"
     source: hosted
-    version: "5.9.0"
+    version: "5.9.2"
+  dio_http2_adapter:
+    dependency: "direct main"
+    description:
+      name: dio_http2_adapter
+      sha256: "79f3d69b155b92a786c8734bd11860390b986210d4e07cbb6a5c8c806a7187b2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   dio_web_adapter:
     dependency: transitive
     description:
@@ -1282,6 +1282,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.0"
+  http2:
+    dependency: transitive
+    description:
+      name: http2
+      sha256: "382d3aefc5bd6dc68c6b892d7664f29b5beb3251611ae946a98d35158a82bbfa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   http_client_helper:
     dependency: transitive
     description:
@@ -1791,14 +1799,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  native_dio_adapter:
-    dependency: "direct main"
-    description:
-      name: native_dio_adapter
-      sha256: "7420bc9517b2abe09810199a19924617b45690a44ecfb0616ac9babc11875c03"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.0"
   native_video_editor:
     dependency: "direct main"
     description:
@@ -1838,14 +1838,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  objective_c:
-    dependency: transitive
-    description:
-      name: objective_c
-      sha256: "9f034ba1eeca53ddb339bc8f4813cb07336a849cd735559b60cdc068ecce2dc7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.0"
   octo_image:
     dependency: transitive
     description:

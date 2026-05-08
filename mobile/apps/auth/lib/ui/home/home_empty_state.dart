@@ -132,9 +132,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                             TextLinkButton(
                               label: l10n.faq,
                               onTap: () {
-                                PlatformUtil.openWebView(
-                                  context,
-                                  context.l10n.faq,
+                                PlatformUtil.openUrlInBrowser(
                                   'https://ente.com/help/auth/faq',
                                 );
                               },

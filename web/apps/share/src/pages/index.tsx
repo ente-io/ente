@@ -1,12 +1,29 @@
+import { Box, CircularProgress } from "@mui/material";
 import { CustomHeadShare } from "ente-base/components/Head";
+import Head from "next/head";
 import React, { useEffect, useState } from "react";
+import { CollectionShareView } from "../components/file-share/CollectionShareView";
 import { FileShareView } from "../components/file-share/FileShareView";
 
+const detectShareView = (pathname: string): "file" | "collection" | null => {
+    if (/^\/c\/[^/]+\/?$/.test(pathname)) {
+        return "collection";
+    }
+
+    if (pathname === "/" || pathname === "") {
+        return null;
+    }
+
+    return "file";
+};
+
 /**
- * Index page that handles both root redirect and share links
+ * Index page that handles root redirect, single-file share links, and
+ * locker collection share links.
  *
  * - Root domain (/) redirects to ente.com/locker
- * - Share links (/token#key) render the FileShareView
+ * - Single-file share links (/{token}#{key}) render FileShareView
+ * - Collection share links (/c/{token}#{collectionKey}) render CollectionShareView
  *
  * This page is served for all routes via:
  * - _redirects file for Cloudflare Pages
@@ -15,25 +32,45 @@ import { FileShareView } from "../components/file-share/FileShareView";
  */
 const Page: React.FC = () => {
     const [hideContent, setHideContent] = useState(false);
+    const [shareView, setShareView] = useState<"file" | "collection" | null>(
+        null,
+    );
 
     useEffect(() => {
-        // Check if we're at the root path (client-side only)
         const pathname = window.location.pathname;
+        const nextShareView = detectShareView(pathname);
+        setShareView(nextShareView);
 
-        if (pathname === "/" || pathname === "") {
-            // Hide content before redirect to avoid error flash
+        if (nextShareView === null) {
             setHideContent(true);
-            // Redirect to ente.com/locker for root path
             window.location.href = "https://ente.com/locker";
         }
     }, []);
 
-    // Always render CustomHeadShare for SSR (ensures meta tags are in static HTML)
     return (
         <>
             <CustomHeadShare title="Ente Locker" />
-            {/* Hide FileShareView only when we detect root path on client */}
-            {!hideContent && <FileShareView />}
+            <Head>
+                <meta name="robots" content="noindex, nofollow" />
+            </Head>
+            {!hideContent && shareView === null && (
+                <Box
+                    sx={{
+                        minHeight: "100dvh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: "#08090A",
+                    }}
+                >
+                    <CircularProgress sx={{ color: "accent.main" }} size={32} />
+                </Box>
+            )}
+            {!hideContent && shareView === "collection" ? (
+                <CollectionShareView />
+            ) : !hideContent && shareView === "file" ? (
+                <FileShareView />
+            ) : null}
         </>
     );
 };

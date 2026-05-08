@@ -93,21 +93,31 @@ class EntePeopleWidgetProvider : HomeWidgetProvider() {
                                                                 "EntePeopleWidgetProvider",
                                                                 "Image exists: $imagePath"
                                                         )
+                                                        val hideFlags =
+                                                                widgetData.getInt(
+                                                                        "widgetHideTitleFlags",
+                                                                        0
+                                                                )
+                                                        val hideText =
+                                                                (hideFlags and (1 shl 2)) != 0
+                                                        val textVisibility =
+                                                                if (hideText) View.GONE
+                                                                else View.VISIBLE
                                                         setViewVisibility(
                                                                 R.id.widget_img,
                                                                 View.VISIBLE
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_subtitle,
-                                                                View.VISIBLE
+                                                                textVisibility
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_title,
-                                                                View.VISIBLE
+                                                                textVisibility
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_overlay,
-                                                                View.VISIBLE
+                                                                textVisibility
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_placeholder,
