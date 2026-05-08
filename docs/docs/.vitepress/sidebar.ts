@@ -377,6 +377,7 @@ export const sidebar = [
         text: "Locker",
         items: [
             { text: "Introduction", link: "/locker/" },
+            { text: "Changelog", link: "/locker/changelog" },
             {
                 text: "Getting Started",
                 collapsed: true,

@@ -110,6 +110,10 @@ New to Locker? Start here:
 4. **[Family setup](/locker/getting-started/family-setup)**: Set up Locker for
    your family with shared collections and Legacy
 
+## Changelog
+
+For a list of recent changes, see the [Changelog](/locker/changelog).
+
 ## Getting Help
 
 If you need assistance with Ente Locker, multiple support channels are

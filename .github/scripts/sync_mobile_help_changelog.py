@@ -4,14 +4,39 @@ import argparse
 import json
 import os
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
 
-TAG_PATTERN = re.compile(r"^photos-v(?P<version>[0-9]+\.[0-9]+\.[0-9]+)$")
 BULLET_PATTERN = re.compile(r"^([-*+])\s+(?P<text>.+?)\s*$")
 ORDERED_PATTERN = re.compile(r"^\d+[.)]\s+(?P<text>.+?)\s*$")
+TAG_PATTERN = re.compile(
+    r"^(?P<product>photos|auth|locker)-v(?P<version>[0-9]+\.[0-9]+\.[0-9]+)$"
+)
+
+
+@dataclass(frozen=True)
+class ProductConfig:
+    changelog_path: str
+    heading_has_mobile_label: bool
+
+
+PRODUCTS = {
+    "photos": ProductConfig(
+        changelog_path="docs/docs/photos/changelog.md",
+        heading_has_mobile_label=True,
+    ),
+    "auth": ProductConfig(
+        changelog_path="docs/docs/auth/changelog.md",
+        heading_has_mobile_label=False,
+    ),
+    "locker": ProductConfig(
+        changelog_path="docs/docs/locker/changelog.md",
+        heading_has_mobile_label=True,
+    ),
+}
 
 
 def set_output(name: str, value: str) -> None:
@@ -24,9 +49,8 @@ def set_output(name: str, value: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Sync docs/docs/photos/changelog.md with a photos release entry."
+        description="Sync mobile app help changelogs with release entries."
     )
-    parser.add_argument("--changelog-path", required=True)
     parser.add_argument("--event-path", default=os.getenv("GITHUB_EVENT_PATH", ""))
     parser.add_argument("--tag-name", default="")
     parser.add_argument("--published-at", default="")
@@ -72,11 +96,11 @@ def resolve_release_fields(args: argparse.Namespace) -> Tuple[str, str, str]:
     return tag_name, published_at, body
 
 
-def parse_tag(tag_name: str) -> Optional[str]:
+def parse_tag(tag_name: str) -> Tuple[Optional[str], Optional[str]]:
     match = TAG_PATTERN.match(tag_name)
     if not match:
-        return None
-    return match.group("version")
+        return None, None
+    return match.group("product"), match.group("version")
 
 
 def month_year_label(published_at: str) -> str:
@@ -135,15 +159,27 @@ def extract_bullets(body: str) -> List[str]:
     return dedupe_preserve_order(fallback)
 
 
-def build_section(version: str, date_label: str, bullets: List[str]) -> str:
-    section_lines = [f"## v{version} (mobile) - {date_label}", ""]
+def build_heading(version: str, date_label: str, config: ProductConfig) -> str:
+    if config.heading_has_mobile_label:
+        return f"## v{version} (mobile) - {date_label}"
+    return f"## v{version} - {date_label}"
+
+
+def build_section(
+    version: str,
+    date_label: str,
+    bullets: List[str],
+    config: ProductConfig,
+) -> str:
+    section_lines = [build_heading(version, date_label, config), ""]
     section_lines.extend(f"- {item}" for item in bullets)
     return "\n".join(section_lines).rstrip() + "\n"
 
 
 def replace_or_insert_section(content: str, version: str, section: str) -> str:
     heading_pattern = re.compile(
-        rf"^## v{re.escape(version)} \(mobile\) - .*$", re.MULTILINE
+        rf"^## v{re.escape(version)}(?: \(mobile\))? - .*$",
+        re.MULTILINE,
     )
     heading_match = heading_pattern.search(content)
 
@@ -171,16 +207,21 @@ def replace_or_insert_section(content: str, version: str, section: str) -> str:
 
 def main() -> int:
     args = parse_args()
-    changelog_path = Path(args.changelog_path)
 
     tag_name, published_at, body = resolve_release_fields(args)
-    version = parse_tag(tag_name)
+    product, version = parse_tag(tag_name)
 
-    if not version:
+    if not product or not version:
         print(f"Skipping: unsupported tag '{tag_name}'")
         set_output("changed", "false")
         set_output("reason", "unsupported_tag")
         return 0
+
+    config = PRODUCTS[product]
+    changelog_path = Path(config.changelog_path)
+
+    set_output("product", product)
+    set_output("changelog_path", config.changelog_path)
 
     bullets = extract_bullets(body)
     if not bullets:
@@ -192,7 +233,7 @@ def main() -> int:
         return 0
 
     date_label = month_year_label(published_at)
-    section = build_section(version, date_label, bullets)
+    section = build_section(version, date_label, bullets, config)
 
     original = changelog_path.read_text(encoding="utf-8")
     updated = replace_or_insert_section(original, version, section)
