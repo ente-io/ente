@@ -46,6 +46,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
+              with:
+                  ref: main
 
             - name: Sync changelog entry
               id: sync
@@ -79,6 +81,7 @@ jobs:
 
                       Trigger: `${{ github.event_name }} / ${{ github.event.action || 'manual' }}`
                   branch: automation/photos-changelog-v${{ steps.sync.outputs.version }}
+                  base: main
                   delete-branch: true
                   add-paths: |
                       docs/docs/photos/changelog.md
