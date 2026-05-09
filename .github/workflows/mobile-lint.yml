@@ -14,7 +14,7 @@ on:
             - "mobile/scripts/check_source_arb_plurals.rb"
 
 env:
-    FLUTTER_VERSION: "3.32.8"
+    FLUTTER_VERSION: "3.38.10"
     RUST_VERSION: "1.90.0"
     RUSTFLAGS: -D warnings
 
