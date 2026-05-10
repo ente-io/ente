@@ -794,7 +794,7 @@ class MemoriesCacheService {
         for (final typedMemory in typedMemories) {
           try {
             typedMemory.$2.title = typedMemory.$2.createTitle(s, languageCode);
-          } catch (_, __) {
+          } catch (_) {
             typedMemory.$2.title = typedMemory.$1.title;
           }
         }

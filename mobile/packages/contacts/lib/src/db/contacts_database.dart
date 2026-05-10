@@ -281,7 +281,7 @@ class ContactsDatabase {
 
   Future<Directory> _resolvedDirectory() async {
     if (_directoryResolver != null) {
-      final directory = await _directoryResolver!();
+      final directory = await _directoryResolver();
       if (!directory.existsSync()) {
         await directory.create(recursive: true);
       }

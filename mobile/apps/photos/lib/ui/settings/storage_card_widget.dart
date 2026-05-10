@@ -293,15 +293,15 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   }
 
   List<TextSpan> _usedStorageDetails({
-    @required isMobileScreenSmall,
-    @required shouldShowUsedStorageInTBs,
-    @required shouldShowTotalStorageInTBs,
-    @required shouldShowUsedStorageInMBs,
-    @required usedStorageInBytes,
-    @required usedStorageInGB,
-    @required totalStorageInGB,
-    @required usedStorageInTB,
-    @required totalStorageInTB,
+    required bool isMobileScreenSmall,
+    required bool shouldShowUsedStorageInTBs,
+    required bool shouldShowTotalStorageInTBs,
+    required bool shouldShowUsedStorageInMBs,
+    required int usedStorageInBytes,
+    required num usedStorageInGB,
+    required int totalStorageInGB,
+    required num usedStorageInTB,
+    required num totalStorageInTB,
   }) {
     if (isMobileScreenSmall) {
       return [

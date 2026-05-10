@@ -73,7 +73,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                 ? Switch(
                     inactiveTrackColor: Colors.transparent,
                     activeTrackColor: enteColorScheme.primary500,
-                    activeColor: Colors.white,
+                    activeThumbColor: Colors.white,
                     inactiveThumbColor: enteColorScheme.primary500,
                     trackOutlineColor: WidgetStateColor.resolveWith(
                       (states) => enteColorScheme.primary500,

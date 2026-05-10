@@ -1365,9 +1365,9 @@ class _MemoryLaneCard extends StatelessWidget {
     );
 
     final transform = Matrix4.identity()
-      ..translate(0.0, yOffset)
+      ..translateByDouble(0.0, yOffset, 0.0, 1.0)
       ..rotateZ(rotation)
-      ..scale(scale, scale);
+      ..scaleByDouble(scale, scale, 1.0, 1.0);
 
     return Positioned.fill(
       child: IgnorePointer(

@@ -448,8 +448,18 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
             overlay = Transform(
               alignment: Alignment.center,
               transform: Matrix4.identity()
-                ..translate(transform.offset.dx, transform.offset.dy)
-                ..scale(transform.scale),
+                ..translateByDouble(
+                  transform.offset.dx,
+                  transform.offset.dy,
+                  0.0,
+                  1.0,
+                )
+                ..scaleByDouble(
+                  transform.scale,
+                  transform.scale,
+                  transform.scale,
+                  1.0,
+                ),
               child: overlay,
             );
 

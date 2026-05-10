@@ -85,13 +85,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: enteColorScheme.fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        LinkExpiryPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
+                      unawaited(
+                        routeToPage(
+                          context,
+                          LinkExpiryPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        }),
+                      );
                     },
                   ),
                   const Padding(padding: EdgeInsets.only(top: 24)),
@@ -111,13 +112,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        DeviceLimitPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
+                      unawaited(
+                        routeToPage(
+                          context,
+                          DeviceLimitPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        }),
+                      );
                     },
                     surfaceExecutionStates: false,
                   ),
