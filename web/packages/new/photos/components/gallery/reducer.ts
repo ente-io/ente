@@ -1859,6 +1859,13 @@ const stateForUpdatedCollectionFiles = (
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
         const searchFiles = state.searchResults ?? state.filteredFiles;
+        /**
+         * the suppressSharedFilesSavedByUser is a utlity function added in during the
+         * UploadToSharedAlbum feature implementation.
+         *
+         * This particular function actually filters out any files which are actually
+         * owned by someone else for which the currentUser has a copy.
+         */
         const visibleSearchFiles = suppressSharedFilesSavedByUser(
             searchFiles,
             state.user?.id,

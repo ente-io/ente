@@ -73,6 +73,12 @@ export type FinishedUploads = Map<FileID, FinishedUploadType>;
 
 export type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
 
+/**
+ * Earlier we just returned a boolean if the uploads
+ * were completed, we are make it a more verbose one,
+ * and the below two types UploadBatchItemResult and UploadBatchResult
+ * are for facilitating the same.
+ */
 export interface UploadBatchItemResult {
     localID: number;
     requestedCollectionID: number;
@@ -84,6 +90,14 @@ export interface UploadBatchResult {
     itemResults: UploadBatchItemResult[];
 }
 
+/**
+ *
+ * @param batchResult
+ * @returns an array of the files which completed the uploads.
+ *
+ * This is an utility function which actaully takes in the batchResult
+ * and tranforms it to an array of files
+ */
 export const successfulFilesFromUploadBatchResult = (
     batchResult: UploadBatchResult,
 ) =>

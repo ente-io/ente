@@ -597,6 +597,18 @@ export const Upload: React.FC<UploadProps> = ({
         uploadManager.showUploadProgressDialog();
     };
 
+    /**
+     *
+     * @param batchResult
+     * @param targetCollection
+     *
+     * This function actually receives the batchResult which is the post-upload
+     * object and the target collection of upload.
+     *
+     * the {@link successfulFilesFromUploadBatchResult} take the batchResult
+     * and then returns an array of files which is of the type {@link EnteFile}
+     * this file is then added to the corresponding shared album.
+     */
     const handlePostUploadBatchResult = async (
         batchResult: UploadBatchResult,
         targetCollection: Collection | undefined,
