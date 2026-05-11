@@ -520,7 +520,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       return;
     }
 
-    _loadWithPlatformDecoder(file);
+    unawaited(_loadWithPlatformDecoder(file));
   }
 
   Future<void> _loadAndroidHeic(File file) async {
@@ -543,7 +543,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       return;
     }
 
-    _loadWithPlatformDecoder(file);
+    unawaited(_loadWithPlatformDecoder(file));
   }
 
   Future<bool> _heicNeedsExifRotation(File file) async {
@@ -562,13 +562,51 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
   }
 
-  void _loadWithPlatformDecoder(File file) {
+  // Reads the file's raw pixel dimensions and EXIF orientation, then returns
+  // the display dimensions (width, height) — swapping when orientation is
+  // 5..8 (rotated 90/270). Falls back to _photo.width/height when EXIF cannot
+  // be parsed.
+  Future<(double, double)> _readDisplayDimensions(File file) async {
+    try {
+      final exif = await readExifAsync(file);
+      final rawW = exif['Image ImageWidth']?.values.firstAsInt() ??
+          exif['EXIF ExifImageWidth']?.values.firstAsInt();
+      final rawH = exif['Image ImageLength']?.values.firstAsInt() ??
+          exif['EXIF ExifImageLength']?.values.firstAsInt();
+      final orientation =
+          exif['Image Orientation']?.values.firstAsInt() ?? 1;
+      if (rawW != null && rawH != null && rawW > 0 && rawH > 0) {
+        final isRotated = orientation >= 5 && orientation <= 8;
+        final w = (isRotated ? rawH : rawW).toDouble();
+        final h = (isRotated ? rawW : rawH).toDouble();
+        return (w, h);
+      }
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to read raw dimensions for ${_photo.displayName}",
+        e,
+        s,
+      );
+    }
+    return (_photo.width.toDouble(), _photo.height.toDouble());
+  }
+
+  Future<void> _loadWithPlatformDecoder(File file) async {
     ImageProvider imageProvider;
     if (isTooLargeImage) {
+      // _photo.width/height can be wrong (swapped) for portrait shots on some
+      // Android devices due to MediaStore/photo_manager dimension/orientation
+      // mismatch. Read raw pixel dimensions + EXIF orientation from the file
+      // itself and compute display dimensions, so the cacheWidth/cacheHeight
+      // here preserve aspect ratio and don't squish the image.
+      final (displayW, displayH) = await _readDisplayDimensions(file);
+      if (!mounted) {
+        return;
+      }
       _logger.info(
-        "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to ${_maxImagePixels ~/ 1000000}MP to prevent crash",
+        "Handling very large image (${displayW}x$displayH) by decreasing resolution to ${_maxImagePixels ~/ 1000000}MP to prevent crash",
       );
-      final aspectRatio = _photo.width / _photo.height;
+      final aspectRatio = displayW / displayH;
       final maxPixels = min(50000000, _maxImagePixels);
       final targetHeight = sqrt(maxPixels / aspectRatio);
       final targetWidth = aspectRatio * targetHeight;
