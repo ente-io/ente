@@ -295,6 +295,19 @@ class MagicCacheService {
         "/cache/magic_cache$suffix";
   }
 
+  static Future<void> clearPersistedCache({
+    required bool forLocalGallery,
+  }) async {
+    final suffix = forLocalGallery ? "_offline" : "";
+    final file = File(
+      (await getApplicationSupportDirectory()).path +
+          "/cache/magic_cache$suffix",
+    );
+    if (file.existsSync()) {
+      await file.delete();
+    }
+  }
+
   Future<void> updateCache({bool forced = false}) async {
     if (!enableDiscover) {
       return;
@@ -387,11 +400,10 @@ class MagicCacheService {
     return cache ?? [];
   }
 
-  Future<void> clearMagicCache() async {
-    final file = File(await _getCachePath());
-    if (file.existsSync()) {
-      await file.delete();
-    }
+  Future<void> clearMagicCache({bool? forLocalGallery}) async {
+    await clearPersistedCache(
+      forLocalGallery: forLocalGallery ?? isLocalGalleryMode,
+    );
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult(

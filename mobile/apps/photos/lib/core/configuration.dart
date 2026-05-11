@@ -39,12 +39,15 @@ import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/services/magic_cache_service.dart";
+import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -199,6 +202,7 @@ class Configuration {
 
   Future<void> logout({bool autoLogout = false}) async {
     _logger.info("Logging out, autoLogout: $autoLogout");
+    final wasLocalGalleryMode = LocalSettings(_preferences).isLocalGalleryMode;
     if (!autoLogout) {
       if (flagService.stopStreamProcess) {
         VideoPreviewService.instance.stop('logout');
@@ -258,13 +262,29 @@ class Configuration {
 
     // Clear additional caches (safe to call even if not initialized)
     try {
-      await magicCacheService.clearMagicCache();
+      if (ServiceLocator.instance.isInitialized) {
+        await magicCacheService.clearMagicCache(
+          forLocalGallery: wasLocalGalleryMode,
+        );
+      } else {
+        await MagicCacheService.clearPersistedCache(
+          forLocalGallery: wasLocalGalleryMode,
+        );
+      }
     } catch (e) {
       _logger.info("MagicCacheService not initialized or failed to clear", e);
     }
 
     try {
-      await memoriesCacheService.clearMemoriesCache();
+      if (ServiceLocator.instance.isInitialized) {
+        await memoriesCacheService.clearMemoriesCache(
+          forLocalGallery: wasLocalGalleryMode,
+        );
+      } else {
+        await MemoriesCacheService.clearPersistedCache(
+          forLocalGallery: wasLocalGalleryMode,
+        );
+      }
     } catch (e) {
       _logger.info(
         "MemoriesCacheService not initialized or failed to clear",
@@ -274,7 +294,9 @@ class Configuration {
 
     // Reset Ente Rewind caches and services
     try {
-      wrappedService.resetForLogout();
+      if (ServiceLocator.instance.isInitialized) {
+        wrappedService.resetForLogout();
+      }
     } catch (e) {
       _logger.info("WrappedService not initialized or failed to reset", e);
     }

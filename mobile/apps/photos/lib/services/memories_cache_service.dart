@@ -1111,6 +1111,19 @@ class MemoriesCacheService {
         "/cache/memories_cache$suffix";
   }
 
+  static Future<void> clearPersistedCache({
+    required bool forLocalGallery,
+  }) async {
+    final suffix = forLocalGallery ? "_offline" : "";
+    final file = File(
+      (await getApplicationSupportDirectory()).path +
+          "/cache/memories_cache$suffix",
+    );
+    if (file.existsSync()) {
+      await file.delete();
+    }
+  }
+
   Future<bool> _cacheFileExists() async {
     return File(await _getCachePath()).existsSync();
   }
@@ -1215,12 +1228,14 @@ class MemoriesCacheService {
     );
   }
 
-  Future<void> clearMemoriesCache({bool fromDisk = true}) async {
+  Future<void> clearMemoriesCache({
+    bool fromDisk = true,
+    bool? forLocalGallery,
+  }) async {
     if (fromDisk) {
-      final file = File(await _getCachePath());
-      if (file.existsSync()) {
-        await file.delete();
-      }
+      await clearPersistedCache(
+        forLocalGallery: forLocalGallery ?? isLocalGalleryMode,
+      );
     }
     _cachedMemories = null;
   }

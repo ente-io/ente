@@ -48,11 +48,14 @@ class ServiceLocator {
   late final Dio enteDio;
   late final Dio nonEnteDio;
   late final PackageInfo packageInfo;
+  bool _isInitialized = false;
 
   // instance
   ServiceLocator._privateConstructor();
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
+
+  bool get isInitialized => _isInitialized;
 
   init(
     SharedPreferences prefs,
@@ -64,6 +67,7 @@ class ServiceLocator {
     this.enteDio = enteDio;
     this.nonEnteDio = nonEnteDio;
     this.packageInfo = packageInfo;
+    _isInitialized = true;
   }
 }
 
