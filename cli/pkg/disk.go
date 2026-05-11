@@ -14,6 +14,7 @@ import (
 const (
 	albumMetaFile   = "album_meta.json"
 	albumMetaFolder = ".meta"
+	metadataFolder  = "metadata"
 )
 
 type albumDiskInfo struct {

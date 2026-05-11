@@ -44,7 +44,10 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 
 		if metaByID != nil {
 			if strings.EqualFold(metaByID.AlbumName, album.AlbumName) {
-				//log.Printf("Skipping album %s as it already exists", album.AlbumName)
+				existingAlbumPath := filepath.Join(path, metaByID.FolderName)
+				if err = migrateMetaToMetadataDir(existingAlbumPath); err != nil {
+					return err
+				}
 				continue
 			}
 		}
@@ -68,10 +71,11 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 		}
 		// Create album and meta folders if they don't exist
 		albumPath := filepath.Clean(filepath.Join(path, albumFolderName))
-		metaPath := filepath.Join(albumPath, ".meta")
+		metaPath := filepath.Join(albumPath, albumMetaFolder)
+		metadataPath := filepath.Join(albumPath, metadataFolder)
 		if metaByID == nil {
 			log.Printf("Adding folder %s for album %s", albumFolderName, album.AlbumName)
-			for _, p := range []string{albumPath, metaPath} {
+			for _, p := range []string{albumPath, metaPath, metadataPath} {
 				if _, err := os.Stat(p); os.IsNotExist(err) {
 					if err = os.Mkdir(p, 0755); err != nil {
 						return err
@@ -83,6 +87,9 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 			oldAlbumPath := filepath.Join(path, metaByID.FolderName)
 			log.Printf("Renaming path from %s to %s for album %s", oldAlbumPath, albumPath, album.AlbumName)
 			if err = os.Rename(oldAlbumPath, albumPath); err != nil {
+				return err
+			}
+			if err = migrateMetaToMetadataDir(albumPath); err != nil {
 				return err
 			}
 		}
@@ -101,6 +108,32 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 		}
 		folderToMetaMap[albumFolderName] = &metaData
 		albumIDToMetaMap[albumID] = &metaData
+	}
+	return nil
+}
+
+// migrateMetaToMetadataDir creates the metadata/ directory if it doesn't exist and moves
+// any per-file JSON sidecars out of .meta/ into it. album_meta.json is left in .meta/.
+func migrateMetaToMetadataDir(albumPath string) error {
+	metadataPath := filepath.Join(albumPath, metadataFolder)
+	if _, err := os.Stat(metadataPath); os.IsNotExist(err) {
+		if err = os.Mkdir(metadataPath, 0755); err != nil {
+			return err
+		}
+	}
+	entries, err := os.ReadDir(filepath.Join(albumPath, albumMetaFolder))
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || entry.Name() == albumMetaFile || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		src := filepath.Join(albumPath, albumMetaFolder, entry.Name())
+		dst := filepath.Join(albumPath, metadataFolder, entry.Name())
+		if err = os.Rename(src, dst); err != nil {
+			return err
+		}
 	}
 	return nil
 }

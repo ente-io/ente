@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+func TestFolderConstants(t *testing.T) {
+	if albumMetaFolder != ".meta" {
+		t.Errorf("albumMetaFolder = %q, want %q", albumMetaFolder, ".meta")
+	}
+	if metadataFolder != "metadata" {
+		t.Errorf("metadataFolder = %q, want %q", metadataFolder, "metadata")
+	}
+}
+
 func TestGenerateUniqueFileName(t *testing.T) {
 	existingFilenames := make(map[string]bool)
 	testFilename := "FullSizeRender.jpg" // what Apple calls shared files

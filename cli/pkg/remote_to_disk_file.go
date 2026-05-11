@@ -197,7 +197,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 			return err
 		}
 
-		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskMetaFileName), fileDiskMetadata)
+		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, metadataFolder, diskMetaFileName), fileDiskMetadata)
 		if err != nil {
 			return err
 		}
@@ -213,7 +213,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 func removeDiskFile(diskFileMeta *export.DiskFileMetadata, diskInfo *albumDiskInfo) error {
 	// remove the file from disk
 	log.Printf("Removing file %s from disk", diskFileMeta.MetaFileName)
-	err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskFileMeta.MetaFileName))
+	err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, metadataFolder, diskFileMeta.MetaFileName))
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -228,11 +228,11 @@ func removeDiskFile(diskFileMeta *export.DiskFileMetadata, diskInfo *albumDiskIn
 
 // readFolderMetadata reads the metadata of the files in the given path
 // For disk export, a particular albums files are stored in a folder named after the album.
-// Inside the folder, the files are stored at top level and its metadata is stored in a .meta folder
+// Inside the folder, the files are stored at top level and its metadata is stored in a metadata folder
 func readFilesMetadata(home string, albumMeta *export.AlbumMetadata) (*albumDiskInfo, error) {
-	albumMetadataFolder := filepath.Join(home, albumMeta.FolderName, albumMetaFolder)
+	albumMetadataFolder := filepath.Join(home, albumMeta.FolderName, metadataFolder)
 	albumPath := filepath.Join(home, albumMeta.FolderName)
-	// verify the both the album folder and the .meta folder exist
+	// verify both the album folder and the metadata folder exist
 	if _, err := os.Stat(albumMetadataFolder); err != nil {
 		return nil, err
 	}
@@ -260,9 +260,6 @@ func readFilesMetadata(home string, albumMeta *export.AlbumMetadata) (*albumDisk
 	for _, entry := range metaEntries {
 		if !entry.IsDir() {
 			fileName := entry.Name()
-			if fileName == albumMetaFile {
-				continue
-			}
 			if !strings.HasSuffix(fileName, ".json") {
 				log.Printf("Skipping file %s as it is not a JSON file", fileName)
 				continue
