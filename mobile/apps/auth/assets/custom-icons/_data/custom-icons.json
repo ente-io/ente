@@ -1848,6 +1848,13 @@
       "slug": "runescape_wiki"
     },
     {
+      "title": "RustDesk",
+      "slug": "rustdesk",
+      "altNames": [
+      "RustDesk Connection"
+      ]
+    },
+    {
       "title": "Rust Language Forum",
       "slug": "rust_language_forum",
       "hex": "000000"
