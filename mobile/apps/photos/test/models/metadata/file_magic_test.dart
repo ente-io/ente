@@ -4,21 +4,15 @@ import "package:test/test.dart";
 
 void main() {
   group("PubMagicMetadata", () {
-    test("parses raw dimensions and rotation metadata", () {
-      final metadata =
-          PubMagicMetadata.fromMap({
-                widthKey: "12240",
-                heightKey: 16320,
-                rawWidthKey: "16320",
-                rawHeightKey: 12240,
-                rotationDegreesKey: "90",
-              })
-              as PubMagicMetadata;
+    test("parses display dimensions and rotation metadata", () {
+      final metadata = PubMagicMetadata.fromMap({
+        widthKey: "12240",
+        heightKey: 16320,
+        rotationDegreesKey: "90",
+      }) as PubMagicMetadata;
 
       expect(metadata.w, 12240);
       expect(metadata.h, 16320);
-      expect(metadata.rw, 16320);
-      expect(metadata.rh, 12240);
       expect(metadata.rot, 90);
     });
 
@@ -29,22 +23,22 @@ void main() {
 
       expect(metadata.w, 4000);
       expect(metadata.h, 3000);
-      expect(metadata.rw, isNull);
-      expect(metadata.rh, isNull);
       expect(metadata.rot, isNull);
     });
   });
 
-  group("EnteFile raw dimensions", () {
-    test("requires positive raw dimensions", () {
+  group("EnteFile rotation metadata", () {
+    test("tracks whether rotation metadata exists", () {
       final file = EnteFile()
-        ..pubMagicMetadata = PubMagicMetadata(rw: -16320, rh: 12240);
+        ..pubMagicMetadata = PubMagicMetadata(w: 12240, h: 16320);
 
-      expect(file.hasRawDimensions, isFalse);
+      expect(file.rotationDegrees, isNull);
+      expect(file.hasRotationDegrees, isFalse);
 
-      file.pubMagicMetadata = PubMagicMetadata(rw: 16320, rh: 12240);
+      file.pubMagicMetadata = PubMagicMetadata(w: 12240, h: 16320, rot: 90);
 
-      expect(file.hasRawDimensions, isTrue);
+      expect(file.rotationDegrees, 90);
+      expect(file.hasRotationDegrees, isTrue);
     });
   });
 }

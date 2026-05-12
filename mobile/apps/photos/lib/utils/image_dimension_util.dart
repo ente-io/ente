@@ -37,8 +37,15 @@ class ImageDimensionMetadata {
   factory ImageDimensionMetadata.displayOnly({
     required int width,
     required int height,
+    int? rotationDegrees,
   }) {
-    return ImageDimensionMetadata(width: width, height: height);
+    return ImageDimensionMetadata(
+      width: width,
+      height: height,
+      rotationDegrees: rotationDegrees == null
+          ? null
+          : normalizeRotationDegrees(rotationDegrees),
+    );
   }
 
   bool get hasRawDimensions => (rawWidth ?? 0) > 0 && (rawHeight ?? 0) > 0;
@@ -91,6 +98,7 @@ ImageDimensionMetadata? imageDimensionMetadataFromExifOrFallback(
       return ImageDimensionMetadata.displayOnly(
         width: shouldSwap ? displayHeight : displayWidth,
         height: shouldSwap ? displayWidth : displayHeight,
+        rotationDegrees: rotationDegrees,
       );
     }
     return ImageDimensionMetadata.displayOnly(

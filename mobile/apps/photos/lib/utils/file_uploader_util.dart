@@ -41,8 +41,6 @@ class MediaUploadData {
   final FileHashData? hashData;
   final int? height;
   final int? width;
-  final int? rawHeight;
-  final int? rawWidth;
   final int? rotationDegrees;
   final String? cameraMake;
   final String? cameraModel;
@@ -62,8 +60,6 @@ class MediaUploadData {
     this.hashData, {
     this.height,
     this.width,
-    this.rawHeight,
-    this.rawWidth,
     this.rotationDegrees,
     this.cameraMake,
     this.cameraModel,
@@ -134,13 +130,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   final asset = await file.getAsset
       .timeout(const Duration(seconds: 3))
       .catchError((e) async {
-        if (e is TimeoutException) {
-          _logger.info("Asset fetch timed out for " + file.toString());
-          return await file.getAsset;
-        } else {
-          throw e;
-        }
-      });
+    if (e is TimeoutException) {
+      _logger.info("Asset fetch timed out for " + file.toString());
+      return await file.getAsset;
+    } else {
+      throw e;
+    }
+  });
   if (asset == null) {
     throw InvalidFileError("", InvalidReason.assetDeleted);
   }
@@ -151,13 +147,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   sourceFile = await asset.originFile
       .timeout(const Duration(seconds: 15))
       .catchError((e) async {
-        if (e is TimeoutException) {
-          _logger.info("Origin file fetch timed out for " + file.tag);
-          return await asset.originFile;
-        } else {
-          throw e;
-        }
-      });
+    if (e is TimeoutException) {
+      _logger.info("Origin file fetch timed out for " + file.tag);
+      return await asset.originFile;
+    } else {
+      throw e;
+    }
+  });
   if (sourceFile == null || !sourceFile.existsSync()) {
     throw InvalidFileError(
       "id: ${file.localID}",
@@ -246,8 +242,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     FileHashData(fileHash, zipHash: zipHash),
     height: height,
     width: width,
-    rawHeight: imageDimensions?.rawHeight,
-    rawWidth: imageDimensions?.rawWidth,
     rotationDegrees: imageDimensions?.rotationDegrees,
     cameraMake: cameraMake,
     cameraModel: cameraModel,
@@ -500,8 +494,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       FileHashData(fileHash),
       height: imageDimensions?.height ?? dimensions?['height'],
       width: imageDimensions?.width ?? dimensions?['width'],
-      rawHeight: imageDimensions?.rawHeight,
-      rawWidth: imageDimensions?.rawWidth,
       rotationDegrees: imageDimensions?.rotationDegrees,
       cameraMake: cameraMake,
       cameraModel: cameraModel,

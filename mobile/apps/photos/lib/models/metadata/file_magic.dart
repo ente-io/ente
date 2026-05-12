@@ -9,8 +9,6 @@ const captionKey = "caption";
 const uploaderNameKey = "uploaderName";
 const widthKey = 'w';
 const heightKey = 'h';
-const rawWidthKey = 'rw';
-const rawHeightKey = 'rh';
 const rotationDegreesKey = 'rot';
 const streamVersionKey = 'sv';
 const mediaTypeKey = 'mediaType';
@@ -51,8 +49,6 @@ class PubMagicMetadata {
   String? uploaderName;
   int? w;
   int? h;
-  int? rw;
-  int? rh;
   int? rot;
   double? lat;
   double? long;
@@ -91,8 +87,6 @@ class PubMagicMetadata {
     this.uploaderName,
     this.w,
     this.h,
-    this.rw,
-    this.rh,
     this.rot,
     this.lat,
     this.long,
@@ -122,8 +116,6 @@ class PubMagicMetadata {
       uploaderName: map[uploaderNameKey],
       w: safeParseInt(map[widthKey], widthKey),
       h: safeParseInt(map[heightKey], heightKey),
-      rw: safeParseInt(map[rawWidthKey], rawWidthKey),
-      rh: safeParseInt(map[rawHeightKey], rawHeightKey),
       rot: safeParseInt(map[rotationDegreesKey], rotationDegreesKey),
       lat: safeParseDouble(map[latKey], latKey),
       long: safeParseDouble(map[longKey], longKey),

@@ -124,6 +124,7 @@ void main() {
       expect(dimensions, isNotNull);
       expect(dimensions!.width, 12240);
       expect(dimensions.height, 16320);
+      expect(dimensions.rotationDegrees, 90);
       expect(dimensions.hasRawDimensions, isFalse);
     });
 

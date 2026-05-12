@@ -99,9 +99,8 @@ class FileUploader {
 
   Future<void> init(SharedPreferences preferences, bool isBackground) async {
     _prefs = preferences;
-    _processType = isBackground
-        ? ProcessType.background
-        : ProcessType.foreground;
+    _processType =
+        isBackground ? ProcessType.background : ProcessType.foreground;
     final currentTime = DateTime.now().microsecondsSinceEpoch;
     await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
       _processType.toString(),
@@ -144,27 +143,26 @@ class FileUploader {
     if (_localPhotosUpdatedSubscription != null) {
       await _localPhotosUpdatedSubscription!.cancel();
     }
-    _localPhotosUpdatedSubscription = Bus.instance
-        .on<LocalPhotosUpdatedEvent>()
-        .listen((event) {
-          if (event.type == EventType.deletedFromDevice ||
-              event.type == EventType.deletedFromEverywhere) {
-            removeFromQueueWhere(
-              (file) {
-                for (final updatedFile in event.updatedFiles) {
-                  if (file.generatedID == updatedFile.generatedID) {
-                    return true;
-                  }
-                }
-                return false;
-              },
-              InvalidFileError(
-                "File already deleted",
-                InvalidReason.assetDeletedEvent,
-              ),
-            );
-          }
-        });
+    _localPhotosUpdatedSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      if (event.type == EventType.deletedFromDevice ||
+          event.type == EventType.deletedFromEverywhere) {
+        removeFromQueueWhere(
+          (file) {
+            for (final updatedFile in event.updatedFiles) {
+              if (file.generatedID == updatedFile.generatedID) {
+                return true;
+              }
+            }
+            return false;
+          },
+          InvalidFileError(
+            "File already deleted",
+            InvalidReason.assetDeletedEvent,
+          ),
+        );
+      }
+    });
   }
 
   // upload future will return null as File when the file entry is deleted
@@ -210,10 +208,9 @@ class FileUploader {
       );
 
       return CollectionsService.instance
-          .addOrCopyToCollection(collectionID, [uploadedFile])
-          .then((aVoid) {
-            return uploadedFile;
-          });
+          .addOrCopyToCollection(collectionID, [uploadedFile]).then((aVoid) {
+        return uploadedFile;
+      });
     });
   }
 
@@ -226,8 +223,8 @@ class FileUploader {
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
-          uploadsToBeRemoved.add(pendingUpload.key);
-        });
+      uploadsToBeRemoved.add(pendingUpload.key);
+    });
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id)?.completer.completeError(reason);
       _allBackups[id] = _allBackups[id]!.copyWith(
@@ -270,10 +267,10 @@ class FileUploader {
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
-          if (fn(pendingUpload.value.file)) {
-            uploadsToBeRemoved.add(pendingUpload.key);
-          }
-        });
+      if (fn(pendingUpload.value.file)) {
+        uploadsToBeRemoved.add(pendingUpload.key);
+      }
+    });
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id)?.completer.completeError(reason);
       _allBackups[id] = _allBackups[id]!.copyWith(
@@ -321,8 +318,8 @@ class FileUploader {
         pendingEntry.status = UploadStatus.inProgress;
         _allBackups[pendingEntry.file.localID!] =
             _allBackups[pendingEntry.file.localID]!.copyWith(
-              status: BackupItemStatus.uploading,
-            );
+          status: BackupItemStatus.uploading,
+        );
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         _encryptAndUploadFileToCollection(
           pendingEntry.file,
@@ -343,14 +340,14 @@ class FileUploader {
     }
     final localID = file.localID!;
     try {
-      final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload)
-          .timeout(
-            kFileUploadTimeout,
-            onTimeout: () {
-              final message = "Upload timed out for file " + file.toString();
-              throw TimeoutException(message);
-            },
-          );
+      final uploadedFile =
+          await _tryToUpload(file, collectionID, forcedUpload).timeout(
+        kFileUploadTimeout,
+        onTimeout: () {
+          final message = "Upload timed out for file " + file.toString();
+          throw TimeoutException(message);
+        },
+      );
       _queue.remove(localID)!.completer.complete(uploadedFile);
       _allBackups[localID] = _allBackups[localID]!.copyWith(
         status: BackupItemStatus.uploaded,
@@ -399,8 +396,8 @@ class FileUploader {
       });
       if (filesToDelete.isNotEmpty) {
         _logger.info('Deleting ${filesToDelete.length} stale upload files ');
-        final fileNameToLastAttempt = await _uploadLocks
-            .getFileNameToLastAttemptedAtMap();
+        final fileNameToLastAttempt =
+            await _uploadLocks.getFileNameToLastAttemptedAtMap();
         for (final file in filesToDelete) {
           final fileName = file.path.split('/').last;
           final lastAttemptTime = fileNameToLastAttempt[fileName] != null
@@ -426,8 +423,8 @@ class FileUploader {
         if (sharedFiles.isNotEmpty) {
           _logger.info('Shared media directory cleanup ${sharedFiles.length}');
           final int ownerID = Configuration.instance.getUserID()!;
-          final existingLocalFileIDs = await FilesDB.instance
-              .getExistingLocalFileIDs(ownerID);
+          final existingLocalFileIDs =
+              await FilesDB.instance.getExistingLocalFileIDs(ownerID);
           final Set<String> trackedSharedFilePaths = {};
           for (String localID in existingLocalFileIDs) {
             if (localID.contains(sharedMediaIdentifier)) {
@@ -518,8 +515,7 @@ class FileUploader {
     await checkNetworkForUpload(isForceUpload: forcedUpload);
     if (!forcedUpload) {
       final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
-      final wasAlreadyUploaded =
-          fileOnDisk != null &&
+      final wasAlreadyUploaded = fileOnDisk != null &&
           fileOnDisk.uploadedFileID != null &&
           (fileOnDisk.updationTime ?? -1) != -1 &&
           (fileOnDisk.collectionID ?? -1) == collectionID;
@@ -586,12 +582,12 @@ class FileUploader {
 
     final String? existingMultipartEncFileName =
         mediaUploadData.hashData?.fileHash != null
-        ? await _uploadLocks.getEncryptedFileName(
-            lockKey,
-            mediaUploadData.hashData!.fileHash!,
-            collectionID,
-          )
-        : null;
+            ? await _uploadLocks.getEncryptedFileName(
+                lockKey,
+                mediaUploadData.hashData!.fileHash!,
+                collectionID,
+              )
+            : null;
     final sourceLength = await mediaUploadData.sourceFile!.length();
     final bool hasExistingMultiPart = existingMultipartEncFileName != null;
     final tempDirectory = Configuration.instance.getTempDirectory();
@@ -660,8 +656,7 @@ class FileUploader {
             'multiPartResume: encryptedFile missing',
           );
         }
-        final bool updateWithDiffKey =
-            isUpdatedFile &&
+        final bool updateWithDiffKey = isUpdatedFile &&
             multiPartFileEncResult != null &&
             !listEquals(key, multiPartFileEncResult.key);
         if (updateWithDiffKey) {
@@ -772,16 +767,15 @@ class FileUploader {
           if (partMd5s == null || partMd5s.isEmpty) {
             throw MultiPartError("Missing part MD5s for multipart upload");
           }
-          final multipartPartLength =
-              fileAttributes.partSize ??
+          final multipartPartLength = fileAttributes.partSize ??
               _multiPartUploader.multipartPartSizeForUpload;
-          final fileUploadURLs = await _multiPartUploader
-              .getMultipartUploadURLs(
-                count: count,
-                contentLength: encFileSize,
-                partLength: multipartPartLength,
-                partMd5s: partMd5s,
-              );
+          final fileUploadURLs =
+              await _multiPartUploader.getMultipartUploadURLs(
+            count: count,
+            contentLength: encFileSize,
+            partLength: multipartPartLength,
+            partMd5s: partMd5s,
+          );
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
             lockKey,
@@ -991,12 +985,9 @@ class FileUploader {
       pubMetadata[widthKey] = mediaUploadData.width;
       pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
     }
-    if (flagService.useFileDerivedImageDimensions &&
-        (mediaUploadData.rawHeight ?? 0) != 0 &&
-        (mediaUploadData.rawWidth ?? 0) != 0) {
-      pubMetadata[rawHeightKey] = mediaUploadData.rawHeight;
-      pubMetadata[rawWidthKey] = mediaUploadData.rawWidth;
-      pubMetadata[rotationDegreesKey] = mediaUploadData.rotationDegrees ?? 0;
+    final rotationDegrees = mediaUploadData.rotationDegrees;
+    if (flagService.useFileDerivedImageDimensions && rotationDegrees != null) {
+      pubMetadata[rotationDegreesKey] = rotationDegrees;
     }
     if (mediaUploadData.motionPhotoStartIndex != null) {
       pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
@@ -1066,24 +1057,24 @@ class FileUploader {
     }
     final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
 
-    final List<EnteFile> existingUploadedFiles = await FilesDB.instance
-        .getUploadedFilesWithHashes(
-          mediaUploadData.hashData!,
-          fileToUpload.fileType,
-          Configuration.instance.getUserID()!,
-        );
+    final List<EnteFile> existingUploadedFiles =
+        await FilesDB.instance.getUploadedFilesWithHashes(
+      mediaUploadData.hashData!,
+      fileToUpload.fileType,
+      Configuration.instance.getUserID()!,
+    );
     if (existingUploadedFiles.isEmpty) {
       // continueUploading this file
       return Tuple2(false, fileToUpload);
     }
 
     // case a
-    final EnteFile? sameLocalSameCollection = existingUploadedFiles
-        .firstWhereOrNull(
-          (e) =>
-              e.collectionID == toCollectionID &&
-              (e.localID == fileToUpload.localID || isSandBoxFile),
-        );
+    final EnteFile? sameLocalSameCollection =
+        existingUploadedFiles.firstWhereOrNull(
+      (e) =>
+          e.collectionID == toCollectionID &&
+          (e.localID == fileToUpload.localID || isSandBoxFile),
+    );
     if (sameLocalSameCollection != null) {
       _logger.info(
         "sameLocalSameCollection: toUpload  ${fileToUpload.tag} "
@@ -1137,12 +1128,12 @@ class FileUploader {
     }
 
     // case c
-    final EnteFile? fileExistsButDifferentCollection = existingUploadedFiles
-        .firstWhereOrNull(
-          (e) =>
-              e.collectionID != toCollectionID &&
-              (e.localID == fileToUpload.localID || isSandBoxFile),
-        );
+    final EnteFile? fileExistsButDifferentCollection =
+        existingUploadedFiles.firstWhereOrNull(
+      (e) =>
+          e.collectionID != toCollectionID &&
+          (e.localID == fileToUpload.localID || isSandBoxFile),
+    );
     if (fileExistsButDifferentCollection != null) {
       _logger.info(
         "fileExistsButDifferentCollection: toUpload  ${fileToUpload.tag} "
@@ -1150,10 +1141,10 @@ class FileUploader {
       );
       final linkedFile = await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(
-            toCollectionID,
-            localFileToUpload: fileToUpload,
-            existingUploadedFile: fileExistsButDifferentCollection,
-          );
+        toCollectionID,
+        localFileToUpload: fileToUpload,
+        existingUploadedFile: fileExistsButDifferentCollection,
+      );
       return Tuple2(true, linkedFile);
     }
     final Set<String> matchLocalIDs = existingUploadedFiles
@@ -1215,8 +1206,8 @@ class FileUploader {
    */
   Future<void> _checkIfWithinStorageLimit(File fileToBeUploaded) async {
     try {
-      final UserDetails? userDetails = UserService.instance
-          .getCachedUserDetails();
+      final UserDetails? userDetails =
+          UserService.instance.getCachedUserDetails();
       if (userDetails == null) {
         return;
       }
@@ -1252,8 +1243,7 @@ class FileUploader {
 
   Future _onInvalidFileError(EnteFile file, InvalidFileError e) async {
     try {
-      final bool canIgnoreFile =
-          file.localID != null &&
+      final bool canIgnoreFile = file.localID != null &&
           file.deviceFolder != null &&
           file.title != null &&
           !file.isSharedMediaToAppSandbox;
