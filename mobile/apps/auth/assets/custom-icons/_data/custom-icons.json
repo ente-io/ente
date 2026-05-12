@@ -2417,6 +2417,10 @@
     {
       "title": "DLsite",
       "slug": "dlsite"
+    },
+    {
+      "title": "Zyxel Nebula",
+      "slug": "zyxel-nebula"
     }
   ]
 }
