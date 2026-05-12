@@ -118,6 +118,8 @@ class FlagService {
 
   bool get useRustForHeicDecoder => internalUser;
 
+  bool get useFileDerivedImageDimensions => internalUser;
+
   bool get petEnabled => internalUser;
 
   bool get qrFeatureEnabled => true;

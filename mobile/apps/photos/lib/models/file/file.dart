@@ -239,7 +239,8 @@ class EnteFile {
         // This is done because many times the fileTimeStamp will only give us
         // the date, not time value but the photo_manager's creation time will
         // contain the time.
-        final bool useFileTimeStamp = creationTime == null ||
+        final bool useFileTimeStamp =
+            creationTime == null ||
             !areFromSameDay(
               creationTime!,
               timeFromFileName.microsecondsSinceEpoch,
@@ -306,6 +307,22 @@ class EnteFile {
 
   int get width {
     return pubMagicMetadata?.w ?? 0;
+  }
+
+  int get rawHeight {
+    return pubMagicMetadata?.rh ?? 0;
+  }
+
+  int get rawWidth {
+    return pubMagicMetadata?.rw ?? 0;
+  }
+
+  int get rotationDegrees {
+    return pubMagicMetadata?.rot ?? 0;
+  }
+
+  bool get hasRawDimensions {
+    return rawHeight > 0 && rawWidth > 0;
   }
 
   bool get hasDimensions {
