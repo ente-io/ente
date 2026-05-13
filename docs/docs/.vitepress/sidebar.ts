@@ -504,6 +504,10 @@ export const sidebar = [
                                 text: "Overview",
                                 link: "/locker/features/legacy/",
                             },
+                            {
+                                text: "Legacy Kits",
+                                link: "/locker/features/legacy/legacy-kits",
+                            },
                         ],
                     },
                 ],
