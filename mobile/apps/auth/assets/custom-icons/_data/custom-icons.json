@@ -538,6 +538,10 @@
       "slug": "coolify"
     },
     {
+      "title": "Cove Backup",
+      "slug": "cove"
+    },  
+    {
       "title": "Creately",
       "slug": "creately"
     },
@@ -928,6 +932,10 @@
       "title": "Habbo"
     },
     {
+      "title": "HaloPSA",
+      "slug": "halopsa"
+    },
+    {
       "title": "Healthchecks.io",
       "slug": "healthchecks"
     },
@@ -1080,6 +1088,10 @@
         "JOYCE"
       ]
     },
+    {
+      "title": "JumpCloud",
+      "slug": "jumpcloud"
+    },  
     {
       "title": "Kagi"
     },
@@ -1582,6 +1594,10 @@
       "title": "Parsec"
     },
     {
+      "title": "Patchmon",
+      "slug": "patchmon"
+    },
+    {
       "title": "Patient Access",
       "slug": "patient_access"
     },
@@ -1622,6 +1638,10 @@
         "PKU",
         "Peking Univ"
       ]
+    },
+    {
+      "title": "Perimeter81",
+      "slug": "perimeter81"
     },
     {
       "title": "Perkbox",
@@ -1869,6 +1889,10 @@
       "hex": "000000"
     },
     {
+      "title": "SaaS Alerts",
+      "slug": "saasalerts"
+    },
+    {
       "title": "Samsung",
       "altNames": [
         "Samsung Account"
@@ -1904,10 +1928,18 @@
       "title": "Sendgrid"
     },
     {
+      "title": "Sentinel One",
+      "slug": "sentinelone"
+    },
+    {
       "title": "service-bw"
     },
     {
       "title": "Shakepay"
+    },
+    {
+      "title": "Sherweb",
+      "slug": "sherweb"
     },
     {
       "title": "SimpleLogin"
@@ -1956,6 +1988,10 @@
     },
     {
       "title": "SpaceHey"
+    },
+    {
+      "title": "Splashtop",
+      "slug": "splashtop"
     },
     {
       "title": "Square Enix",
@@ -2011,6 +2047,10 @@
     },
     {
       "title": "Surfshark"
+    },
+    {
+      "title": "SyncroMSP",
+      "slug": "syncromsp"
     },
     {
       "title": "Synology DSM",
