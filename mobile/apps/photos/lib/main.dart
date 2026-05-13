@@ -156,6 +156,7 @@ Future<void> _runInForeground(
       ),
     );
     if (isPickerStartup) {
+      _schedulePickerSyncAfterFirstFrame();
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -174,6 +175,38 @@ Future<void> _warmPickerFilesDb() async {
     _logger.info("Picker FilesDB warm-up done $tlog");
   } catch (e, s) {
     _logger.warning("Picker FilesDB warm-up failed", e, s);
+  }
+}
+
+void _schedulePickerSyncAfterFirstFrame() {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    unawaited(_runPickerSyncOnce());
+  });
+}
+
+Future<void> _runPickerSyncOnce() async {
+  if (!Configuration.instance.hasConfiguredAccount() && !isLocalGalleryMode) {
+    _logger.info(
+      "Picker sync skipped: no account configured and not in local gallery mode",
+    );
+    return;
+  }
+
+  final tlog = TimeLogger();
+  try {
+    _logger.info("Picker sync services init $tlog");
+    final preferences = ServiceLocator.instance.prefs;
+    LocalFileUpdateService.instance.init(preferences);
+    await FileUploader.instance.init(preferences, false);
+    await LocalSyncService.instance.init(preferences);
+    RemoteSyncService.instance.init(preferences);
+    await SyncService.instance.init(preferences);
+
+    _logger.info("Picker sync starting $tlog");
+    await _sync("pickerPostFrame");
+    _logger.info("Picker sync done $tlog");
+  } catch (e, s) {
+    _logger.warning("Picker sync failed", e, s);
   }
 }
 
