@@ -31,7 +31,7 @@ Ente registers as a handler for the standard Android picker intents, so it works
 
 ## Open camera thumbnails directly in Ente
 
-After taking a photo or video, many camera apps show a small thumbnail you can tap to review the shot. With Ente installed, that thumbnail can open the photo directly in Ente's viewer.
+After taking a photo or video, many camera apps show a small thumbnail you can tap to review the shot. On supported camera apps, that thumbnail can open the photo directly in Ente's viewer.
 
 **How it works:**
 
@@ -42,7 +42,7 @@ After taking a photo or video, many camera apps show a small thumbnail you can t
 
 The first time you tap a camera thumbnail, Android may ask which app should handle it. Choose Ente, and optionally set it as the default to skip the prompt next time.
 
-> **Note**: Whether the thumbnail uses this integration depends on your camera app. Most stock and OEM camera apps (Google Camera, Samsung Camera, and others) send a standard review intent that Ente can handle.
+> **Note**: Whether the thumbnail uses this integration depends entirely on your camera app, and not all camera apps support it. Notably, the default Pixel Camera and Samsung Camera apps do not send the review intent that Ente listens for, so tapping the thumbnail in those apps will not open the photo in Ente.
 
 ## Set Ente as your default gallery
 
