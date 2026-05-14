@@ -1640,10 +1640,6 @@
       ]
     },
     {
-      "title": "Perimeter81",
-      "slug": "perimeter81"
-    },
-    {
       "title": "Perkbox",
       "slug": "perkbox"
     },
@@ -1924,10 +1920,6 @@
       "title": "Sendgrid"
     },
     {
-      "title": "Sentinel One",
-      "slug": "sentinel"
-    },
-    {
       "title": "service-bw"
     },
     {
@@ -1986,10 +1978,6 @@
       "title": "SpaceHey"
     },
     {
-      "title": "Splashtop",
-      "slug": "splashtop"
-    },
-    {
       "title": "Square Enix",
       "slug": "square_enix"
     },
@@ -2043,10 +2031,6 @@
     },
     {
       "title": "Surfshark"
-    },
-    {
-      "title": "SyncroMSP",
-      "slug": "syncro"
     },
     {
       "title": "Synology DSM",
