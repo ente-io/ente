@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 
 pub mod account;
 pub mod export;
+pub mod paste;
 pub mod version;
 
 #[derive(Parser)]
@@ -19,6 +20,9 @@ pub enum Commands {
 
     /// Export photos and files
     Export(export::ExportCommand),
+
+    /// Create and consume encrypted pastes
+    Paste(paste::PasteCommand),
 
     /// Print version information
     Version,
