@@ -1823,7 +1823,6 @@ class _FilterChipPreviewState extends State<_FilterChipPreview> {
 class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview();
 
-  static const _image = AssetImage('assets/avatar_sample.png');
   static const _sizes = [
     (label: 'Default', size: AvatarComponentSize.normal),
     (label: 'Small', size: AvatarComponentSize.small),
@@ -1852,14 +1851,6 @@ class _AvatarPreview extends StatelessWidget {
               children: [
                 const _AvatarTableHeader(sizes: _sizes),
                 const SizedBox(height: Spacing.lg),
-                _AvatarTableRow(
-                  label: 'Image',
-                  children: [
-                    for (final item in _sizes)
-                      AvatarComponent.image(image: _image, size: item.size),
-                  ],
-                ),
-                const SizedBox(height: Spacing.md),
                 for (final item in _colors) ...[
                   _AvatarTableRow(
                     label: item.label,
