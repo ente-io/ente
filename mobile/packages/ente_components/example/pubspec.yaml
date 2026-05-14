@@ -1,0 +1,21 @@
+name: ente_components_catalog
+description: Visual catalog for the mobile component package.
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  ente_components:
+    path: ..
+  flutter:
+    sdk: flutter
+  hugeicons: 1.1.5
+
+dev_dependencies:
+  flutter_lints: 5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
