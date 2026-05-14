@@ -1,0 +1,274 @@
+import 'package:ente_components/theme/colors.dart';
+import 'package:ente_components/theme/spacing.dart';
+import 'package:ente_components/theme/text_styles.dart';
+import 'package:ente_components/theme/theme.dart';
+import 'package:flutter/material.dart';
+
+enum AvatarComponentSize {
+  small,
+  normal,
+  large,
+  contactHuge,
+}
+
+enum AvatarComponentColor {
+  yellow,
+  green,
+  orange,
+  pink,
+  purple,
+  blue,
+}
+
+/// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=2482-6547&m=dev
+/// Section: Labels and avatars / Avatar
+/// Specs: 16px, 24px, 32px, and 56px circular avatars with image, color, and add-icon variants.
+class AvatarComponent extends StatelessWidget {
+  const AvatarComponent({
+    super.key,
+    this.initials = '',
+    this.size = AvatarComponentSize.normal,
+    this.color = AvatarComponentColor.yellow,
+    this.seed,
+    this.semanticLabel,
+  })  : image = null,
+        icon = null;
+
+  const AvatarComponent.image({
+    super.key,
+    required this.image,
+    this.size = AvatarComponentSize.normal,
+    this.semanticLabel,
+  })  : initials = '',
+        color = AvatarComponentColor.yellow,
+        seed = null,
+        icon = null;
+
+  const AvatarComponent.icon({
+    super.key,
+    this.icon = const Icon(Icons.add_rounded),
+    this.size = AvatarComponentSize.contactHuge,
+    this.semanticLabel,
+  })  : initials = '',
+        image = null,
+        color = AvatarComponentColor.yellow,
+        seed = null;
+
+  const AvatarComponent.seeded({
+    super.key,
+    required this.initials,
+    required this.seed,
+    this.size = AvatarComponentSize.normal,
+    this.semanticLabel,
+  })  : image = null,
+        color = AvatarComponentColor.yellow,
+        icon = null;
+
+  final String initials;
+  final AvatarComponentSize size;
+  final AvatarComponentColor color;
+  final int? seed;
+  final ImageProvider? image;
+  final Widget? icon;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    final dimension = size.dimension;
+    final borderWidth = size.borderWidth;
+    final child = _child(context);
+
+    return Semantics(
+      image: image != null,
+      label: semanticLabel ?? _semanticLabel,
+      child: SizedBox.square(
+        key: const ValueKey('avatar-surface'),
+        dimension: dimension,
+        child: image != null
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colors.backgroundBase,
+                    width: borderWidth,
+                  ),
+                  image: DecorationImage(
+                    image: image!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+            : icon != null
+                ? CustomPaint(
+                    foregroundPainter: _DashedCircleBorderPainter(
+                      color: colors.strokeFaint,
+                      strokeWidth: borderWidth,
+                    ),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colors.specialWhite,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(child: child),
+                    ),
+                  )
+                : DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: _backgroundColor(context),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colors.backgroundBase,
+                        width: borderWidth,
+                      ),
+                    ),
+                    child: Center(child: child),
+                  ),
+      ),
+    );
+  }
+
+  Widget _child(BuildContext context) {
+    if (icon != null) {
+      return Padding(
+        padding: const EdgeInsets.all(Spacing.md),
+        child: IconTheme.merge(
+          data: IconThemeData(
+            color: context.componentColors.textLight,
+            size: size.iconSize,
+          ),
+          child: icon!,
+        ),
+      );
+    }
+
+    final text = initials.trim().isEmpty ? '?' : initials.trim().toUpperCase();
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        text,
+        maxLines: 1,
+        textAlign: TextAlign.center,
+        style: size.textStyle
+            .copyWith(color: context.componentColors.specialWhite),
+      ),
+    );
+  }
+
+  Color _backgroundColor(BuildContext context) {
+    final colors = context.componentColors;
+    if (seed != null) {
+      final palette = Theme.of(context).brightness == Brightness.dark
+          ? avatarDark
+          : avatarLight;
+      return palette[seed!.abs() % palette.length];
+    }
+
+    return switch (color) {
+      AvatarComponentColor.yellow => colors.caution,
+      AvatarComponentColor.green => colors.primary,
+      AvatarComponentColor.orange => colors.accentOrange,
+      AvatarComponentColor.pink => colors.accentPink,
+      AvatarComponentColor.purple => colors.accentPurple,
+      AvatarComponentColor.blue => colors.info,
+    };
+  }
+
+  String? get _semanticLabel {
+    if (image != null) return 'AvatarComponent image';
+    if (icon != null) return 'Add avatar';
+    if (initials.trim().isEmpty) return 'AvatarComponent';
+    return 'AvatarComponent $initials';
+  }
+}
+
+extension on AvatarComponentSize {
+  double get dimension {
+    return switch (this) {
+      AvatarComponentSize.small => 16,
+      AvatarComponentSize.normal => 24,
+      AvatarComponentSize.large => 32,
+      AvatarComponentSize.contactHuge => 56,
+    };
+  }
+
+  double get borderWidth {
+    return switch (this) {
+      AvatarComponentSize.small || AvatarComponentSize.normal => 1,
+      AvatarComponentSize.large || AvatarComponentSize.contactHuge => 2,
+    };
+  }
+
+  double get iconSize {
+    return switch (this) {
+      AvatarComponentSize.contactHuge => 24,
+      AvatarComponentSize.large => 18,
+      AvatarComponentSize.normal => 16,
+      AvatarComponentSize.small => 12,
+    };
+  }
+
+  TextStyle get textStyle {
+    return switch (this) {
+      AvatarComponentSize.small => const TextStyle(
+          fontFamily: TextStyles.fontFamily,
+          fontSize: 8,
+          height: 15 / 8,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0,
+        ),
+      AvatarComponentSize.contactHuge => TextStyles.h2,
+      AvatarComponentSize.normal ||
+      AvatarComponentSize.large =>
+        const TextStyle(
+          fontFamily: TextStyles.fontFamily,
+          fontSize: 12,
+          height: 15 / 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0,
+        ),
+    };
+  }
+}
+
+class _DashedCircleBorderPainter extends CustomPainter {
+  const _DashedCircleBorderPainter({
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  final Color color;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    final radius = (size.shortestSide - strokeWidth) / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    const dashLength = 4.0;
+    const gapLength = 4.0;
+    final circumference = 2 * 3.141592653589793 * radius;
+    final dashCount = (circumference / (dashLength + gapLength)).floor();
+    final sweep = (dashLength / circumference) * 2 * 3.141592653589793;
+    final gap = (gapLength / circumference) * 2 * 3.141592653589793;
+
+    for (var index = 0; index < dashCount; index++) {
+      final start = index * (sweep + gap);
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        start,
+        sweep,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedCircleBorderPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
+  }
+}
