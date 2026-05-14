@@ -48,7 +48,8 @@ class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
     final now = event.timeStamp;
     final lastPointerUpAt = _lastPointerUpAt;
     final lastPointerUpPosition = _lastPointerUpPosition;
-    final isDoubleTap = lastPointerUpAt != null &&
+    final isDoubleTap =
+        lastPointerUpAt != null &&
         lastPointerUpPosition != null &&
         now - lastPointerUpAt <= const Duration(milliseconds: 320) &&
         (event.position - lastPointerUpPosition).distance <= 48;
@@ -114,7 +115,7 @@ class _CatalogHomeState extends State<CatalogHome> {
             return IconButtonComponent(
               tooltip: 'Settings',
               variant: IconButtonComponentVariant.unfilled,
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              onTap: () => Scaffold.of(context).openDrawer(),
               icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedMenu01),
             );
           },
@@ -252,23 +253,13 @@ class _CatalogHomeState extends State<CatalogHome> {
       CatalogSection(
         title: 'Avatar',
         icon: HugeIcons.strokeRoundedUser,
-        components: const [
-          'Sizes',
-          'Seed palette',
-          'Add contact',
-        ],
+        components: const ['Sizes', 'Seed palette', 'Add contact'],
         previewBuilder: (_) => const _AvatarPreview(),
       ),
       CatalogSection(
         title: 'Selection controls',
         icon: HugeIcons.strokeRoundedSlidersHorizontal,
-        components: const [
-          'Checkbox',
-          'Radio',
-          'Switch',
-          'Slider',
-          'Stepper',
-        ],
+        components: const ['Checkbox', 'Radio', 'Switch', 'Slider', 'Stepper'],
         previewBuilder: (_) => const _SelectionPreview(),
       ),
     ];
@@ -312,15 +303,13 @@ class CatalogSettingsDrawer extends StatelessWidget {
                   icon: const _CatalogHugeIcon(
                     HugeIcons.strokeRoundedArrowLeft02,
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onTap: () => Navigator.of(context).pop(),
                 ),
                 const SizedBox(width: Spacing.md),
                 Expanded(
                   child: Text(
                     'Settings',
-                    style: TextStyles.h1Bold.copyWith(
-                      color: colors.textBase,
-                    ),
+                    style: TextStyles.h1Bold.copyWith(color: colors.textBase),
                   ),
                 ),
               ],
@@ -340,11 +329,7 @@ double _drawerWidth(BuildContext context) {
 }
 
 class _CatalogHugeIcon extends StatelessWidget {
-  const _CatalogHugeIcon(
-    this.icon, {
-    this.color,
-    this.size = 24,
-  });
+  const _CatalogHugeIcon(this.icon, {this.color, this.size = 24});
 
   final HugeIconData icon;
   final Color? color;
@@ -423,7 +408,7 @@ class _CatalogThemeCycleButton extends StatelessWidget {
       tooltip: 'Theme: $_currentLabel. Tap for $_nextLabel',
       variant: IconButtonComponentVariant.unfilled,
       icon: _CatalogHugeIcon(_icon),
-      onPressed: () => onChanged(_nextMode),
+      onTap: () => onChanged(_nextMode),
     );
   }
 }
@@ -499,7 +484,7 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
         leading: IconButtonComponent(
           tooltip: 'Back',
           icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedArrowLeft02),
-          onPressed: () => Navigator.of(context).pop(),
+          onTap: () => Navigator.of(context).pop(),
         ),
         actions: [
           _CatalogThemeCycleButton(
@@ -510,9 +495,7 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
       ),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.lg),
-        children: [
-          widget.section.previewBuilder(context),
-        ],
+        children: [widget.section.previewBuilder(context)],
       ),
       backgroundColor: colors.backgroundBase,
     );
@@ -520,10 +503,7 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
 }
 
 class _CatalogPreviewGroup extends StatelessWidget {
-  const _CatalogPreviewGroup({
-    required this.title,
-    required this.child,
-  });
+  const _CatalogPreviewGroup({required this.title, required this.child});
 
   final String title;
   final Widget child;
@@ -534,10 +514,7 @@ class _CatalogPreviewGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: TextStyles.large.copyWith(color: colors.textBase),
-        ),
+        Text(title, style: TextStyles.large.copyWith(color: colors.textBase)),
         const SizedBox(height: Spacing.md),
         child,
       ],
@@ -627,7 +604,7 @@ class _SettingsMainContent extends StatelessWidget {
           ),
           trailing: _SettingsTrailingIcon(color: colors.textLight),
         ),
-        const SizedBox(height: Spacing.xxl),
+        const SizedBox(height: Spacing.xl),
         Center(
           child: Text(
             'Version 1.0.0',
@@ -657,9 +634,9 @@ class _SettingsNavigationItem extends StatelessWidget {
       leading: _CatalogHugeIcon(icon),
       trailing: const _SettingsTrailingIcon(),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => page),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => page));
       },
     );
   }
@@ -681,10 +658,7 @@ class _SettingsTrailingIcon extends StatelessWidget {
 }
 
 class _SettingsExampleShell extends StatelessWidget {
-  const _SettingsExampleShell({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsExampleShell({required this.title, required this.children});
 
   final String title;
   final List<Widget> children;
@@ -698,7 +672,7 @@ class _SettingsExampleShell extends StatelessWidget {
         leading: IconButtonComponent(
           tooltip: 'Back',
           icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedArrowLeft02),
-          onPressed: () => Navigator.of(context).pop(),
+          onTap: () => Navigator.of(context).pop(),
         ),
       ),
       body: ListView(
@@ -1147,15 +1121,9 @@ class _TypeSample extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          text,
-          style: style.copyWith(color: color),
-        ),
+        Text(text, style: style.copyWith(color: color)),
         const SizedBox(height: Spacing.xs),
-        Text(
-          detail,
-          style: TextStyles.mini.copyWith(color: colors.textLight),
-        ),
+        Text(detail, style: TextStyles.mini.copyWith(color: colors.textLight)),
       ],
     );
   }
@@ -1170,14 +1138,8 @@ class _ButtonMatrix extends StatelessWidget {
       children: [
         ButtonStateCyclePreview(),
         _ButtonStateGroup(title: 'Default'),
-        _ButtonStateGroup(
-          title: 'Disabled',
-          disabled: true,
-        ),
-        _CatalogPreviewGroup(
-          title: 'Icon button',
-          child: _IconButtonMatrix(),
-        ),
+        _ButtonStateGroup(title: 'Disabled', disabled: true),
+        _CatalogPreviewGroup(title: 'Icon button', child: _IconButtonMatrix()),
       ],
     );
   }
@@ -1257,10 +1219,7 @@ class _ButtonPreviewSpec {
 }
 
 class _ButtonStateGroup extends StatelessWidget {
-  const _ButtonStateGroup({
-    required this.title,
-    this.disabled = false,
-  });
+  const _ButtonStateGroup({required this.title, this.disabled = false});
 
   final String title;
   final bool disabled;
@@ -1286,10 +1245,7 @@ class _ButtonStateGroup extends StatelessWidget {
 }
 
 class _ButtonPreviewRow extends StatelessWidget {
-  const _ButtonPreviewRow({
-    required this.spec,
-    required this.disabled,
-  });
+  const _ButtonPreviewRow({required this.spec, required this.disabled});
 
   final _ButtonPreviewSpec spec;
   final bool disabled;
@@ -1428,10 +1384,7 @@ class _IconButtonPreviewRow extends StatelessWidget {
             width: 76,
             child: Center(
               child: states.contains(state)
-                  ? _IconButtonStatePreview(
-                      variant: variant,
-                      state: state,
-                    )
+                  ? _IconButtonStatePreview(variant: variant, state: state)
                   : const SizedBox.square(dimension: 38),
             ),
           ),
@@ -1441,10 +1394,7 @@ class _IconButtonPreviewRow extends StatelessWidget {
 }
 
 class _IconButtonStatePreview extends StatelessWidget {
-  const _IconButtonStatePreview({
-    required this.variant,
-    required this.state,
-  });
+  const _IconButtonStatePreview({required this.variant, required this.state});
 
   final IconButtonComponentVariant variant;
   final String state;
@@ -1461,11 +1411,8 @@ class _IconButtonStatePreview extends StatelessWidget {
       },
       isLoading: state == 'Loading',
       isSuccess: state == 'Success',
-      onPressed: state == 'Disabled' ? null : () {},
-      icon: const _CatalogHugeIcon(
-        HugeIcons.strokeRoundedAdd01,
-        size: 18,
-      ),
+      onTap: state == 'Disabled' ? null : () {},
+      icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01, size: 18),
     );
   }
 }
@@ -1506,8 +1453,9 @@ class _FilterChipPreviewState extends State<_FilterChipPreview> {
                 label: 'Videos',
                 selected: _selected.contains('Videos'),
                 onChanged: _toggle('Videos'),
-                trailing:
-                    const _CatalogHugeIcon(HugeIcons.strokeRoundedVideo01),
+                trailing: const _CatalogHugeIcon(
+                  HugeIcons.strokeRoundedVideo01,
+                ),
               ),
             ],
           ),
@@ -1732,10 +1680,7 @@ class _AvatarTableHeader extends StatelessWidget {
 }
 
 class _AvatarTableRow extends StatelessWidget {
-  const _AvatarTableRow({
-    required this.label,
-    required this.children,
-  });
+  const _AvatarTableRow({required this.label, required this.children});
 
   final String label;
   final List<Widget> children;
@@ -1753,11 +1698,7 @@ class _AvatarTableRow extends StatelessWidget {
           ),
         ),
         for (final child in children)
-          SizedBox(
-            width: 96,
-            height: 64,
-            child: Center(child: child),
-          ),
+          SizedBox(width: 96, height: 64, child: Center(child: child)),
       ],
     );
   }
@@ -1796,10 +1737,7 @@ class _EditableChip extends StatelessWidget {
 }
 
 class _FaceAvatar extends StatelessWidget {
-  const _FaceAvatar({
-    required this.seed,
-    required this.initials,
-  });
+  const _FaceAvatar({required this.seed, required this.initials});
 
   final int seed;
   final String initials;
@@ -1860,8 +1798,10 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
       children: [
         const _CatalogPreviewGroup(
           title: 'Normal',
-          child:
-              TextInputComponent(label: 'Email address', hintText: 'Hint text'),
+          child: TextInputComponent(
+            label: 'Email address',
+            hintText: 'Hint text',
+          ),
         ),
         _CatalogPreviewGroup(
           title: 'Focused',
@@ -2038,10 +1978,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
         ),
         const _CatalogPreviewGroup(
           title: 'Multiline: no label',
-          child: TextInputComponent(
-            hintText: 'Hint text',
-            maxLines: 4,
-          ),
+          child: TextInputComponent(hintText: 'Hint text', maxLines: 4),
         ),
         const _CatalogPreviewGroup(
           title: 'Multiline: focused',
@@ -2203,11 +2140,13 @@ class _TitleBarSample extends StatelessWidget {
       TitleBarComponentVariant.partiallyPreserved ||
       TitleBarComponentVariant.preserved ||
       TitleBarComponentVariant.syncing ||
-      TitleBarComponentVariant.videoProcessing =>
-        const _CatalogHugeIcon(HugeIcons.strokeRoundedMoreHorizontal),
+      TitleBarComponentVariant.videoProcessing => const _CatalogHugeIcon(
+        HugeIcons.strokeRoundedMoreHorizontal,
+      ),
       TitleBarComponentVariant.settings ||
-      TitleBarComponentVariant.titleTopbar =>
-        const _CatalogHugeIcon(HugeIcons.strokeRoundedSearch01),
+      TitleBarComponentVariant.titleTopbar => const _CatalogHugeIcon(
+        HugeIcons.strokeRoundedSearch01,
+      ),
       _ => null,
     };
   }
@@ -2216,14 +2155,15 @@ class _TitleBarSample extends StatelessWidget {
     return switch (variant) {
       TitleBarComponentVariant.preserving ||
       TitleBarComponentVariant.partiallyPreserved ||
-      TitleBarComponentVariant.preserved =>
-        const _CatalogHugeIcon(HugeIcons.strokeRoundedCheckmarkCircle01),
+      TitleBarComponentVariant.preserved => const _CatalogHugeIcon(
+        HugeIcons.strokeRoundedCheckmarkCircle01,
+      ),
       TitleBarComponentVariant.syncing => const _CatalogHugeIcon(
-          HugeIcons.strokeRoundedRefresh,
-        ),
+        HugeIcons.strokeRoundedRefresh,
+      ),
       TitleBarComponentVariant.videoProcessing => const _CatalogHugeIcon(
-          HugeIcons.strokeRoundedVideo01,
-        ),
+        HugeIcons.strokeRoundedVideo01,
+      ),
       _ => null,
     };
   }
@@ -2238,10 +2178,7 @@ class _HeaderPreview extends StatelessWidget {
       children: [
         _CatalogPreviewGroup(
           title: 'Title + subtitle + two actions',
-          child: _HeaderSample(
-            subtitle: true,
-            actionCount: 2,
-          ),
+          child: _HeaderSample(subtitle: true, actionCount: 2),
         ),
         _CatalogPreviewGroup(
           title: 'Title + two actions',
@@ -2255,45 +2192,26 @@ class _HeaderPreview extends StatelessWidget {
           title: 'Title + subtitle',
           child: _HeaderSample(subtitle: true),
         ),
-        _CatalogPreviewGroup(
-          title: 'Title only',
-          child: _HeaderSample(),
-        ),
+        _CatalogPreviewGroup(title: 'Title only', child: _HeaderSample()),
         _CatalogPreviewGroup(
           title: 'Title + subtitle + one action',
-          child: _HeaderSample(
-            subtitle: true,
-            actionCount: 1,
-          ),
+          child: _HeaderSample(subtitle: true, actionCount: 1),
         ),
         _CatalogPreviewGroup(
           title: 'Image + subtitle + two actions',
-          child: _HeaderSample(
-            image: true,
-            subtitle: true,
-            actionCount: 2,
-          ),
+          child: _HeaderSample(image: true, subtitle: true, actionCount: 2),
         ),
         _CatalogPreviewGroup(
           title: 'Image + two actions',
-          child: _HeaderSample(
-            image: true,
-            actionCount: 2,
-          ),
+          child: _HeaderSample(image: true, actionCount: 2),
         ),
         _CatalogPreviewGroup(
           title: 'Image + one action',
-          child: _HeaderSample(
-            image: true,
-            actionCount: 1,
-          ),
+          child: _HeaderSample(image: true, actionCount: 1),
         ),
         _CatalogPreviewGroup(
           title: 'Image + subtitle',
-          child: _HeaderSample(
-            image: true,
-            subtitle: true,
-          ),
+          child: _HeaderSample(image: true, subtitle: true),
         ),
         _CatalogPreviewGroup(
           title: 'Image only',
@@ -2301,11 +2219,7 @@ class _HeaderPreview extends StatelessWidget {
         ),
         _CatalogPreviewGroup(
           title: 'Image + subtitle + one action',
-          child: _HeaderSample(
-            image: true,
-            subtitle: true,
-            actionCount: 1,
-          ),
+          child: _HeaderSample(image: true, subtitle: true, actionCount: 1),
         ),
       ],
     );
@@ -2335,7 +2249,7 @@ class _HeaderSample extends StatelessWidget {
             tooltip: index == 0 ? 'Add' : 'Create',
             variant: IconButtonComponentVariant.primary,
             icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
-            onPressed: () {},
+            onTap: () {},
           ),
       ],
     );
@@ -2428,8 +2342,10 @@ class _SelectionPreviewState extends State<_SelectionPreview> {
                 label: 'Selected radio',
               ),
               LabeledControlComponent(
-                control:
-                    ToggleSwitchComponent(selected: false, onChanged: null),
+                control: ToggleSwitchComponent(
+                  selected: false,
+                  onChanged: null,
+                ),
                 label: 'Off switch',
               ),
             ],
@@ -2469,11 +2385,7 @@ class _SelectionPreviewState extends State<_SelectionPreview> {
   }
 }
 
-enum _MenuItemTrailingKind {
-  icon,
-  toggle,
-  none,
-}
+enum _MenuItemTrailingKind { icon, toggle, none }
 
 class _MenuItemPreview extends StatefulWidget {
   const _MenuItemPreview();
@@ -2524,8 +2436,9 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
               return MenuComponent(
                 title: 'Storage plan',
                 subtitle: 'Gestures disabled for read-only rows',
-                leading:
-                    const _CatalogHugeIcon(HugeIcons.strokeRoundedDatabase),
+                leading: const _CatalogHugeIcon(
+                  HugeIcons.strokeRoundedDatabase,
+                ),
                 trailing: Text(
                   '2 TB',
                   style: TextStyles.body.copyWith(color: colors.textLight),
@@ -2555,8 +2468,9 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
               return MenuComponent(
                 title: 'Delete account',
                 subtitle: 'Warning color title and icon',
-                leading:
-                    const _CatalogHugeIcon(HugeIcons.strokeRoundedDelete02),
+                leading: const _CatalogHugeIcon(
+                  HugeIcons.strokeRoundedDelete02,
+                ),
                 trailing: const _CatalogTrailingIcon(
                   HugeIcons.strokeRoundedArrowRight01,
                 ),
@@ -2718,12 +2632,12 @@ class _MenuItemExample extends StatelessWidget {
     }
     return switch (trailingKind) {
       _MenuItemTrailingKind.icon => const _CatalogTrailingIcon(
-          HugeIcons.strokeRoundedMoreVertical,
-        ),
+        HugeIcons.strokeRoundedMoreVertical,
+      ),
       _MenuItemTrailingKind.toggle => ToggleSwitchComponent(
-          selected: toggleSelected,
-          onChanged: onToggleChanged,
-        ),
+        selected: toggleSelected,
+        onChanged: onToggleChanged,
+      ),
       _MenuItemTrailingKind.none => null,
     };
   }
