@@ -933,7 +933,7 @@
     },
     {
       "title": "HaloPSA",
-      "slug": "halopsa"
+      "slug": "halo"
     },
     {
       "title": "Healthchecks.io",
@@ -1890,7 +1890,7 @@
     },
     {
       "title": "SaaS Alerts",
-      "slug": "saasalerts"
+      "slug": "saas"
     },
     {
       "title": "Samsung",
@@ -1929,7 +1929,7 @@
     },
     {
       "title": "Sentinel One",
-      "slug": "sentinelone"
+      "slug": "sentinel"
     },
     {
       "title": "service-bw"
@@ -2050,7 +2050,7 @@
     },
     {
       "title": "SyncroMSP",
-      "slug": "syncromsp"
+      "slug": "syncro"
     },
     {
       "title": "Synology DSM",
