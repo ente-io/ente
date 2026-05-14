@@ -292,7 +292,7 @@ void main() {
       ),
     );
 
-    expect(_containerColor(tester), const Color(0xFFE7F6E9));
+    expect(_containerColor(tester), const Color(0xFFDDEEDF));
     expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
 
     await tester.pumpWidget(

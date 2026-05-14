@@ -2,31 +2,45 @@ import 'package:flutter/material.dart';
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=57-6281&view=variables
 /// Section: Colours / Semantic tokens
-/// Specs: Color Tokens collection with Photos-Light and Photos-Dark modes.
-enum EnteApp {
-  photos,
-  auth,
-  locker,
-}
+/// Specs: Color Tokens collection with light and dark modes.
+enum EnteApp { photos, auth, locker }
 
 class ColorTokens {
   const ColorTokens({
     required this.primaryLight,
+    required this.primaryLightHover,
+    required this.primaryLightPressed,
     required this.primaryStroke,
     required this.primary,
     required this.primaryDark,
     required this.primaryDarker,
+    required this.greenLight,
+    required this.greenLightHover,
+    required this.greenLightPressed,
+    required this.greenStroke,
+    required this.green,
+    required this.greenDark,
+    required this.greenDarker,
+    required this.blueLight,
+    required this.blueLightHover,
+    required this.blueLightPressed,
+    required this.blueStroke,
+    required this.blue,
+    required this.blueDark,
+    required this.blueDarker,
+    required this.purpleLight,
+    required this.purpleLightHover,
+    required this.purpleLightPressed,
+    required this.purpleStroke,
+    required this.purple,
+    required this.purpleDark,
+    required this.purpleDarker,
     required this.warningLight,
     required this.warning,
     required this.warningDark,
     required this.warningDarker,
     required this.cautionLight,
     required this.caution,
-    required this.infoLight,
-    required this.infoStroke,
-    required this.info,
-    required this.infoDark,
-    required this.infoDarker,
     required this.textLight,
     required this.textBase,
     required this.textDark,
@@ -45,11 +59,9 @@ class ColorTokens {
     required this.strokeFaint,
     required this.accentOrangeLight,
     required this.accentPinkLight,
-    required this.accentPurpleLight,
     required this.accentTealLight,
     required this.accentOrange,
     required this.accentPink,
-    required this.accentPurple,
     required this.accentTeal,
     required this.specialContentReverse,
     required this.specialScrim,
@@ -58,21 +70,39 @@ class ColorTokens {
   });
 
   final Color primaryLight;
+  final Color primaryLightHover;
+  final Color primaryLightPressed;
   final Color primaryStroke;
   final Color primary;
   final Color primaryDark;
   final Color primaryDarker;
+  final Color greenLight;
+  final Color greenLightHover;
+  final Color greenLightPressed;
+  final Color greenStroke;
+  final Color green;
+  final Color greenDark;
+  final Color greenDarker;
+  final Color blueLight;
+  final Color blueLightHover;
+  final Color blueLightPressed;
+  final Color blueStroke;
+  final Color blue;
+  final Color blueDark;
+  final Color blueDarker;
+  final Color purpleLight;
+  final Color purpleLightHover;
+  final Color purpleLightPressed;
+  final Color purpleStroke;
+  final Color purple;
+  final Color purpleDark;
+  final Color purpleDarker;
   final Color warningLight;
   final Color warning;
   final Color warningDark;
   final Color warningDarker;
   final Color cautionLight;
   final Color caution;
-  final Color infoLight;
-  final Color infoStroke;
-  final Color info;
-  final Color infoDark;
-  final Color infoDarker;
   final Color textLight;
   final Color textBase;
   final Color textDark;
@@ -91,11 +121,9 @@ class ColorTokens {
   final Color strokeFaint;
   final Color accentOrangeLight;
   final Color accentPinkLight;
-  final Color accentPurpleLight;
   final Color accentTealLight;
   final Color accentOrange;
   final Color accentPink;
-  final Color accentPurple;
   final Color accentTeal;
   final Color specialContentReverse;
   final Color specialScrim;
@@ -117,21 +145,39 @@ class ColorTokens {
   ColorTokens withPrimary(PrimaryColorTokens primaryTokens) {
     return ColorTokens(
       primaryLight: primaryTokens.primaryLight,
+      primaryLightHover: primaryTokens.primaryLightHover,
+      primaryLightPressed: primaryTokens.primaryLightPressed,
       primaryStroke: primaryTokens.primaryStroke,
       primary: primaryTokens.primary,
       primaryDark: primaryTokens.primaryDark,
       primaryDarker: primaryTokens.primaryDarker,
+      greenLight: greenLight,
+      greenLightHover: greenLightHover,
+      greenLightPressed: greenLightPressed,
+      greenStroke: greenStroke,
+      green: green,
+      greenDark: greenDark,
+      greenDarker: greenDarker,
+      blueLight: blueLight,
+      blueLightHover: blueLightHover,
+      blueLightPressed: blueLightPressed,
+      blueStroke: blueStroke,
+      blue: blue,
+      blueDark: blueDark,
+      blueDarker: blueDarker,
+      purpleLight: purpleLight,
+      purpleLightHover: purpleLightHover,
+      purpleLightPressed: purpleLightPressed,
+      purpleStroke: purpleStroke,
+      purple: purple,
+      purpleDark: purpleDark,
+      purpleDarker: purpleDarker,
       warningLight: warningLight,
       warning: warning,
       warningDark: warningDark,
       warningDarker: warningDarker,
       cautionLight: cautionLight,
       caution: caution,
-      infoLight: infoLight,
-      infoStroke: infoStroke,
-      info: info,
-      infoDark: infoDark,
-      infoDarker: infoDarker,
       textLight: textLight,
       textBase: textBase,
       textDark: textDark,
@@ -150,11 +196,9 @@ class ColorTokens {
       strokeFaint: strokeFaint,
       accentOrangeLight: accentOrangeLight,
       accentPinkLight: accentPinkLight,
-      accentPurpleLight: accentPurpleLight,
       accentTealLight: accentTealLight,
       accentOrange: accentOrange,
       accentPink: accentPink,
-      accentPurple: accentPurple,
       accentTeal: accentTeal,
       specialContentReverse: specialContentReverse,
       specialScrim: specialScrim,
@@ -167,6 +211,8 @@ class ColorTokens {
 class PrimaryColorTokens {
   const PrimaryColorTokens({
     required this.primaryLight,
+    required this.primaryLightHover,
+    required this.primaryLightPressed,
     required this.primaryStroke,
     required this.primary,
     required this.primaryDark,
@@ -174,6 +220,8 @@ class PrimaryColorTokens {
   });
 
   final Color primaryLight;
+  final Color primaryLightHover;
+  final Color primaryLightPressed;
   final Color primaryStroke;
   final Color primary;
   final Color primaryDark;
@@ -183,29 +231,47 @@ class PrimaryColorTokens {
 PrimaryColorTokens _primaryTokensForApp(EnteApp app, Brightness brightness) {
   final dark = brightness == Brightness.dark;
   return switch (app) {
-    EnteApp.photos => dark ? photosPrimaryTokensDark : photosPrimaryTokensLight,
-    EnteApp.auth => dark ? authPrimaryTokensDark : authPrimaryTokensLight,
-    EnteApp.locker => dark ? lockerPrimaryTokensDark : lockerPrimaryTokensLight,
+    EnteApp.photos => dark ? greenPrimaryTokensDark : greenPrimaryTokensLight,
+    EnteApp.auth => dark ? purplePrimaryTokensDark : purplePrimaryTokensLight,
+    EnteApp.locker => dark ? bluePrimaryTokensDark : bluePrimaryTokensLight,
   };
 }
 
 const ColorTokens colorTokensLight = ColorTokens(
-  primaryLight: primaryLightLight,
-  primaryStroke: primaryStrokeLight,
-  primary: primaryDefaultLight,
-  primaryDark: primaryDarkLight,
-  primaryDarker: primaryDarkerLight,
+  primaryLight: greenLightLight,
+  primaryLightHover: greenLightHoverLight,
+  primaryLightPressed: greenLightPressedLight,
+  primaryStroke: greenStrokeLight,
+  primary: greenDefaultLight,
+  primaryDark: greenDarkLight,
+  primaryDarker: greenDarkerLight,
+  greenLight: greenLightLight,
+  greenLightHover: greenLightHoverLight,
+  greenLightPressed: greenLightPressedLight,
+  greenStroke: greenStrokeLight,
+  green: greenDefaultLight,
+  greenDark: greenDarkLight,
+  greenDarker: greenDarkerLight,
+  blueLight: blueLightLight,
+  blueLightHover: blueLightHoverLight,
+  blueLightPressed: blueLightPressedLight,
+  blueStroke: blueStrokeLight,
+  blue: blueDefaultLight,
+  blueDark: blueDarkLight,
+  blueDarker: blueDarkerLight,
+  purpleLight: purpleLightLight,
+  purpleLightHover: purpleLightHoverLight,
+  purpleLightPressed: purpleLightPressedLight,
+  purpleStroke: purpleStrokeLight,
+  purple: purpleDefaultLight,
+  purpleDark: purpleDarkLight,
+  purpleDarker: purpleDarkerLight,
   warningLight: warningLightLight,
   warning: warningDefaultLight,
   warningDark: warningDarkLight,
   warningDarker: warningDarkerLight,
   cautionLight: cautionLightLight,
   caution: cautionDefaultLight,
-  infoLight: infoLightLight,
-  infoStroke: infoStrokeLight,
-  info: infoDefaultLight,
-  infoDark: infoDarkLight,
-  infoDarker: infoDarkerLight,
   textLight: textLightLight,
   textBase: textBaseLight,
   textDark: textDarkLight,
@@ -224,11 +290,9 @@ const ColorTokens colorTokensLight = ColorTokens(
   strokeFaint: strokeFaintLight,
   accentOrangeLight: accentOrangeLightLight,
   accentPinkLight: accentPinkLightLight,
-  accentPurpleLight: accentPurpleLightLight,
   accentTealLight: accentTealLightLight,
   accentOrange: accentOrangeDefaultLight,
   accentPink: accentPinkDefaultLight,
-  accentPurple: accentPurpleDefaultLight,
   accentTeal: accentTealDefaultLight,
   specialContentReverse: specialContentReverseLight,
   specialScrim: specialScrimLight,
@@ -237,22 +301,40 @@ const ColorTokens colorTokensLight = ColorTokens(
 );
 
 const ColorTokens colorTokensDark = ColorTokens(
-  primaryLight: primaryLightDark,
-  primaryStroke: primaryStrokeDark,
-  primary: primaryDefaultDark,
-  primaryDark: primaryDarkDark,
-  primaryDarker: primaryDarkerDark,
+  primaryLight: greenLightDark,
+  primaryLightHover: greenLightHoverDark,
+  primaryLightPressed: greenLightPressedDark,
+  primaryStroke: greenStrokeDark,
+  primary: greenDefaultDark,
+  primaryDark: greenDarkDark,
+  primaryDarker: greenDarkerDark,
+  greenLight: greenLightDark,
+  greenLightHover: greenLightHoverDark,
+  greenLightPressed: greenLightPressedDark,
+  greenStroke: greenStrokeDark,
+  green: greenDefaultDark,
+  greenDark: greenDarkDark,
+  greenDarker: greenDarkerDark,
+  blueLight: blueLightDark,
+  blueLightHover: blueLightHoverDark,
+  blueLightPressed: blueLightPressedDark,
+  blueStroke: blueStrokeDark,
+  blue: blueDefaultDark,
+  blueDark: blueDarkDark,
+  blueDarker: blueDarkerDark,
+  purpleLight: purpleLightDark,
+  purpleLightHover: purpleLightHoverDark,
+  purpleLightPressed: purpleLightPressedDark,
+  purpleStroke: purpleStrokeDark,
+  purple: purpleDefaultDark,
+  purpleDark: purpleDarkDark,
+  purpleDarker: purpleDarkerDark,
   warningLight: warningLightDark,
   warning: warningDefaultDark,
   warningDark: warningDarkDark,
   warningDarker: warningDarkerDark,
   cautionLight: cautionLightDark,
   caution: cautionDefaultDark,
-  infoLight: infoLightDark,
-  infoStroke: infoStrokeDark,
-  info: infoDefaultDark,
-  infoDark: infoDarkDark,
-  infoDarker: infoDarkerDark,
   textLight: textLightDark,
   textBase: textBaseDark,
   textDark: textDarkDark,
@@ -271,11 +353,9 @@ const ColorTokens colorTokensDark = ColorTokens(
   strokeFaint: strokeFaintDark,
   accentOrangeLight: accentOrangeLightDark,
   accentPinkLight: accentPinkLightDark,
-  accentPurpleLight: accentPurpleLightDark,
   accentTealLight: accentTealLightDark,
   accentOrange: accentOrangeDefaultDark,
   accentPink: accentPinkDefaultDark,
-  accentPurple: accentPurpleDefaultDark,
   accentTeal: accentTealDefaultDark,
   specialContentReverse: specialContentReverseDark,
   specialScrim: specialScrimDark,
@@ -283,101 +363,131 @@ const ColorTokens colorTokensDark = ColorTokens(
   specialWhiteOverlay: specialWhiteOverlayDark,
 );
 
-const PrimaryColorTokens photosPrimaryTokensLight = PrimaryColorTokens(
-  primaryLight: primaryLightLight,
-  primaryStroke: primaryStrokeLight,
-  primary: primaryDefaultLight,
-  primaryDark: primaryDarkLight,
-  primaryDarker: primaryDarkerLight,
+const PrimaryColorTokens greenPrimaryTokensLight = PrimaryColorTokens(
+  primaryLight: greenLightLight,
+  primaryLightHover: greenLightHoverLight,
+  primaryLightPressed: greenLightPressedLight,
+  primaryStroke: greenStrokeLight,
+  primary: greenDefaultLight,
+  primaryDark: greenDarkLight,
+  primaryDarker: greenDarkerLight,
 );
 
-const PrimaryColorTokens photosPrimaryTokensDark = PrimaryColorTokens(
-  primaryLight: primaryLightDark,
-  primaryStroke: primaryStrokeDark,
-  primary: primaryDefaultDark,
-  primaryDark: primaryDarkDark,
-  primaryDarker: primaryDarkerDark,
+const PrimaryColorTokens greenPrimaryTokensDark = PrimaryColorTokens(
+  primaryLight: greenLightDark,
+  primaryLightHover: greenLightHoverDark,
+  primaryLightPressed: greenLightPressedDark,
+  primaryStroke: greenStrokeDark,
+  primary: greenDefaultDark,
+  primaryDark: greenDarkDark,
+  primaryDarker: greenDarkerDark,
 );
 
-const PrimaryColorTokens authPrimaryTokensLight = PrimaryColorTokens(
-  primaryLight: authPrimaryLightLight,
-  primaryStroke: authPrimaryStrokeLight,
-  primary: authPrimaryDefaultLight,
-  primaryDark: authPrimaryDarkLight,
-  primaryDarker: authPrimaryDarkerLight,
+const PrimaryColorTokens purplePrimaryTokensLight = PrimaryColorTokens(
+  primaryLight: purpleLightLight,
+  primaryLightHover: purpleLightHoverLight,
+  primaryLightPressed: purpleLightPressedLight,
+  primaryStroke: purpleStrokeLight,
+  primary: purpleDefaultLight,
+  primaryDark: purpleDarkLight,
+  primaryDarker: purpleDarkerLight,
 );
 
-const PrimaryColorTokens authPrimaryTokensDark = PrimaryColorTokens(
-  primaryLight: authPrimaryLightDark,
-  primaryStroke: authPrimaryStrokeDark,
-  primary: authPrimaryDefaultDark,
-  primaryDark: authPrimaryDarkDark,
-  primaryDarker: authPrimaryDarkerDark,
+const PrimaryColorTokens purplePrimaryTokensDark = PrimaryColorTokens(
+  primaryLight: purpleLightDark,
+  primaryLightHover: purpleLightHoverDark,
+  primaryLightPressed: purpleLightPressedDark,
+  primaryStroke: purpleStrokeDark,
+  primary: purpleDefaultDark,
+  primaryDark: purpleDarkDark,
+  primaryDarker: purpleDarkerDark,
 );
 
-const PrimaryColorTokens lockerPrimaryTokensLight = PrimaryColorTokens(
-  primaryLight: lockerPrimaryLightLight,
-  primaryStroke: lockerPrimaryStrokeLight,
-  primary: lockerPrimaryDefaultLight,
-  primaryDark: lockerPrimaryDarkLight,
-  primaryDarker: lockerPrimaryDarkerLight,
+const PrimaryColorTokens bluePrimaryTokensLight = PrimaryColorTokens(
+  primaryLight: blueLightLight,
+  primaryLightHover: blueLightHoverLight,
+  primaryLightPressed: blueLightPressedLight,
+  primaryStroke: blueStrokeLight,
+  primary: blueDefaultLight,
+  primaryDark: blueDarkLight,
+  primaryDarker: blueDarkerLight,
 );
 
-const PrimaryColorTokens lockerPrimaryTokensDark = PrimaryColorTokens(
-  primaryLight: lockerPrimaryLightDark,
-  primaryStroke: lockerPrimaryStrokeDark,
-  primary: lockerPrimaryDefaultDark,
-  primaryDark: lockerPrimaryDarkDark,
-  primaryDarker: lockerPrimaryDarkerDark,
+const PrimaryColorTokens bluePrimaryTokensDark = PrimaryColorTokens(
+  primaryLight: blueLightDark,
+  primaryLightHover: blueLightHoverDark,
+  primaryLightPressed: blueLightPressedDark,
+  primaryStroke: blueStrokeDark,
+  primary: blueDefaultDark,
+  primaryDark: blueDarkDark,
+  primaryDarker: blueDarkerDark,
 );
 
-// Primary Colors
-const Color primaryLightLight = Color.fromRGBO(231, 246, 233, 1);
-const Color primaryLightDark = Color.fromRGBO(41, 41, 41, 1);
+// Green Colors
+const Color greenLightLight = Color.fromRGBO(221, 238, 223, 1);
+const Color greenLightDark = Color.fromRGBO(41, 41, 41, 1);
 
-const Color primaryStrokeLight = Color.fromRGBO(186, 236, 194, 1);
-const Color primaryStrokeDark = Color.fromRGBO(28, 65, 34, 1);
+const Color greenLightHoverLight = Color.fromRGBO(205, 229, 208, 1);
+const Color greenLightHoverDark = Color.fromRGBO(31, 48, 35, 1);
 
-const Color primaryDefaultLight = Color.fromRGBO(8, 194, 37, 1);
-const Color primaryDefaultDark = Color.fromRGBO(8, 194, 37, 1);
+const Color greenLightPressedLight = Color.fromRGBO(184, 213, 187, 1);
+const Color greenLightPressedDark = Color.fromRGBO(44, 66, 50, 1);
 
-const Color primaryDarkLight = Color.fromRGBO(6, 157, 30, 1);
-const Color primaryDarkDark = Color.fromRGBO(6, 157, 30, 1);
+const Color greenStrokeLight = Color.fromRGBO(186, 236, 194, 1);
+const Color greenStrokeDark = Color.fromRGBO(28, 65, 34, 1);
 
-const Color primaryDarkerLight = Color.fromRGBO(5, 124, 24, 1);
-const Color primaryDarkerDark = Color.fromRGBO(5, 124, 24, 1);
+const Color greenDefaultLight = Color.fromRGBO(8, 194, 37, 1);
+const Color greenDefaultDark = Color.fromRGBO(8, 194, 37, 1);
 
-// Auth Primary Colors
-const Color authPrimaryLightLight = Color.fromRGBO(248, 243, 254, 1);
-const Color authPrimaryLightDark = Color.fromRGBO(41, 41, 41, 1);
+const Color greenDarkLight = Color.fromRGBO(6, 157, 30, 1);
+const Color greenDarkDark = Color.fromRGBO(6, 157, 30, 1);
 
-const Color authPrimaryStrokeLight = Color.fromRGBO(221, 191, 248, 1);
-const Color authPrimaryStrokeDark = Color.fromRGBO(61, 34, 88, 1);
+const Color greenDarkerLight = Color.fromRGBO(5, 124, 24, 1);
+const Color greenDarkerDark = Color.fromRGBO(5, 124, 24, 1);
 
-const Color authPrimaryDefaultLight = Color(0xFF8F33D6);
-const Color authPrimaryDefaultDark = Color(0xFF8F33D6);
+// Purple Colors
+const Color purpleLightLight = Color.fromRGBO(248, 243, 254, 1);
+const Color purpleLightDark = Color.fromRGBO(41, 41, 41, 1);
 
-const Color authPrimaryDarkLight = Color(0xFF722ED1);
-const Color authPrimaryDarkDark = Color(0xFF722ED1);
+const Color purpleLightHoverLight = Color.fromRGBO(232, 210, 250, 1);
+const Color purpleLightHoverDark = Color.fromRGBO(61, 27, 92, 1);
 
-const Color authPrimaryDarkerLight = Color(0xFF5D25AD);
-const Color authPrimaryDarkerDark = Color(0xFF5D25AD);
+const Color purpleLightPressedLight = Color.fromRGBO(217, 188, 241, 1);
+const Color purpleLightPressedDark = Color.fromRGBO(79, 40, 115, 1);
 
-// Locker Primary Colors
-const Color lockerPrimaryLightLight = Color.fromRGBO(231, 239, 250, 1);
-const Color lockerPrimaryLightDark = Color.fromRGBO(41, 41, 41, 1);
+const Color purpleStrokeLight = Color.fromRGBO(216, 181, 244, 1);
+const Color purpleStrokeDark = Color.fromRGBO(61, 27, 92, 1);
 
-const Color lockerPrimaryStrokeLight = Color.fromRGBO(200, 216, 238, 1);
-const Color lockerPrimaryStrokeDark = Color.fromRGBO(26, 43, 77, 1);
+const Color purpleDefaultLight = Color.fromRGBO(138, 56, 245, 1);
+const Color purpleDefaultDark = Color.fromRGBO(138, 56, 245, 1);
 
-const Color lockerPrimaryDefaultLight = Color.fromRGBO(16, 113, 255, 1);
-const Color lockerPrimaryDefaultDark = Color.fromRGBO(16, 113, 255, 1);
+const Color purpleDarkLight = Color.fromRGBO(122, 12, 174, 1);
+const Color purpleDarkDark = Color.fromRGBO(122, 12, 174, 1);
 
-const Color lockerPrimaryDarkLight = Color.fromRGBO(14, 95, 217, 1);
-const Color lockerPrimaryDarkDark = Color.fromRGBO(14, 95, 217, 1);
+const Color purpleDarkerLight = Color.fromRGBO(93, 8, 132, 1);
+const Color purpleDarkerDark = Color.fromRGBO(93, 8, 132, 1);
 
-const Color lockerPrimaryDarkerLight = Color.fromRGBO(11, 76, 173, 1);
-const Color lockerPrimaryDarkerDark = Color.fromRGBO(11, 76, 173, 1);
+// Blue Colors
+const Color blueLightLight = Color.fromRGBO(231, 239, 250, 1);
+const Color blueLightDark = Color.fromRGBO(41, 41, 41, 1);
+
+const Color blueLightHoverLight = Color.fromRGBO(216, 228, 244, 1);
+const Color blueLightHoverDark = Color.fromRGBO(26, 38, 56, 1);
+
+const Color blueLightPressedLight = Color.fromRGBO(194, 210, 232, 1);
+const Color blueLightPressedDark = Color.fromRGBO(42, 59, 85, 1);
+
+const Color blueStrokeLight = Color.fromRGBO(16, 113, 255, 1);
+const Color blueStrokeDark = Color.fromRGBO(16, 113, 255, 1);
+
+const Color blueDefaultLight = Color.fromRGBO(16, 113, 255, 1);
+const Color blueDefaultDark = Color.fromRGBO(16, 113, 255, 1);
+
+const Color blueDarkLight = Color.fromRGBO(14, 95, 217, 1);
+const Color blueDarkDark = Color.fromRGBO(14, 95, 217, 1);
+
+const Color blueDarkerLight = Color.fromRGBO(11, 76, 173, 1);
+const Color blueDarkerDark = Color.fromRGBO(11, 76, 173, 1);
 
 // Warning Colors
 const Color warningLightLight = Color.fromRGBO(250, 235, 235, 1);
@@ -396,24 +506,8 @@ const Color warningDarkerDark = Color.fromRGBO(197, 46, 46, 1);
 const Color cautionLightLight = Color.fromRGBO(250, 244, 235, 1);
 const Color cautionLightDark = Color.fromRGBO(41, 41, 41, 1);
 
-const Color cautionDefaultLight = Color.fromRGBO(255, 169, 57, 1);
-const Color cautionDefaultDark = Color.fromRGBO(255, 169, 57, 1);
-
-// Info Colors
-const Color infoLightLight = Color.fromRGBO(231, 239, 250, 1);
-const Color infoLightDark = Color.fromRGBO(41, 41, 41, 1);
-
-const Color infoStrokeLight = Color.fromRGBO(200, 216, 238, 1);
-const Color infoStrokeDark = Color.fromRGBO(26, 43, 77, 1);
-
-const Color infoDefaultLight = Color.fromRGBO(16, 113, 255, 1);
-const Color infoDefaultDark = Color.fromRGBO(16, 113, 255, 1);
-
-const Color infoDarkLight = Color.fromRGBO(14, 95, 217, 1);
-const Color infoDarkDark = Color.fromRGBO(14, 95, 217, 1);
-
-const Color infoDarkerLight = Color.fromRGBO(11, 76, 173, 1);
-const Color infoDarkerDark = Color.fromRGBO(11, 76, 173, 1);
+const Color cautionDefaultLight = Color.fromRGBO(240, 138, 30, 1);
+const Color cautionDefaultDark = Color.fromRGBO(240, 138, 30, 1);
 
 // Text Colors
 const Color textLightLight = Color.fromRGBO(102, 102, 102, 1);
@@ -475,9 +569,6 @@ const Color accentOrangeLightDark = Color.fromRGBO(41, 41, 41, 1);
 const Color accentPinkLightLight = Color.fromRGBO(253, 246, 251, 1);
 const Color accentPinkLightDark = Color.fromRGBO(41, 41, 41, 1);
 
-const Color accentPurpleLightLight = Color.fromRGBO(248, 243, 254, 1);
-const Color accentPurpleLightDark = Color.fromRGBO(41, 41, 41, 1);
-
 const Color accentTealLightLight = Color.fromRGBO(245, 251, 251, 1);
 const Color accentTealLightDark = Color.fromRGBO(41, 41, 41, 1);
 
@@ -486,9 +577,6 @@ const Color accentOrangeDefaultDark = Color.fromRGBO(242, 72, 34, 1);
 
 const Color accentPinkDefaultLight = Color.fromRGBO(223, 97, 187, 1);
 const Color accentPinkDefaultDark = Color.fromRGBO(223, 97, 187, 1);
-
-const Color accentPurpleDefaultLight = Color.fromRGBO(138, 56, 245, 1);
-const Color accentPurpleDefaultDark = Color.fromRGBO(138, 56, 245, 1);
 
 const Color accentTealDefaultLight = Color.fromRGBO(95, 183, 187, 1);
 const Color accentTealDefaultDark = Color.fromRGBO(95, 183, 187, 1);

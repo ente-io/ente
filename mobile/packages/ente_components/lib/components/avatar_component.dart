@@ -169,8 +169,8 @@ class AvatarComponent extends StatelessWidget {
       AvatarComponentColor.green => colors.primary,
       AvatarComponentColor.orange => colors.accentOrange,
       AvatarComponentColor.pink => colors.accentPink,
-      AvatarComponentColor.purple => colors.accentPurple,
-      AvatarComponentColor.blue => colors.info,
+      AvatarComponentColor.purple => colors.purple,
+      AvatarComponentColor.blue => colors.blue,
     };
   }
 

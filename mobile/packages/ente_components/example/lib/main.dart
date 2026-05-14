@@ -1236,7 +1236,7 @@ class _ColorColumn extends StatelessWidget {
         _Swatch(color: colors.primary),
         _Swatch(color: colors.warning),
         _Swatch(color: colors.caution),
-        _Swatch(color: colors.info),
+        _Swatch(color: colors.blue),
         _Swatch(color: colors.textBase),
         _Swatch(color: colors.backgroundBase),
         _Swatch(color: colors.fillLight),

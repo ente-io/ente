@@ -14,10 +14,7 @@ void main() {
       expect(Radii.md, 12);
       expect(Radii.button, 20);
       expect(Radii.buttonRadius, const Radius.circular(20));
-      expect(
-        Radii.buttonBorder,
-        const BorderRadius.all(Radius.circular(20)),
-      );
+      expect(Radii.buttonBorder, const BorderRadius.all(Radius.circular(20)));
 
       expect(Motion.quick, const Duration(milliseconds: 120));
       expect(Motion.standard, const Duration(milliseconds: 180));
@@ -54,62 +51,116 @@ void main() {
         brightness: Brightness.dark,
       );
 
-      expect(photosLight.primary, primaryDefaultLight);
-      expect(photosLight.primaryLight, primaryLightLight);
-      expect(photosLight.primaryStroke, primaryStrokeLight);
-      expect(photosLight.primaryDark, primaryDarkLight);
-      expect(photosLight.primaryDarker, primaryDarkerLight);
+      expect(photosLight.primary, greenDefaultLight);
+      expect(photosLight.primaryLight, greenLightLight);
+      expect(photosLight.primaryLightHover, greenLightHoverLight);
+      expect(photosLight.primaryLightPressed, greenLightPressedLight);
+      expect(photosLight.primaryStroke, greenStrokeLight);
+      expect(photosLight.primaryDark, greenDarkLight);
+      expect(photosLight.primaryDarker, greenDarkerLight);
 
-      expect(authLight.primary, authPrimaryDefaultLight);
-      expect(authLight.primaryLight, authPrimaryLightLight);
-      expect(authLight.primaryStroke, authPrimaryStrokeLight);
-      expect(authLight.primaryDark, authPrimaryDarkLight);
-      expect(authLight.primaryDarker, authPrimaryDarkerLight);
+      expect(authLight.primary, purpleDefaultLight);
+      expect(authLight.primaryLight, purpleLightLight);
+      expect(authLight.primaryLightHover, purpleLightHoverLight);
+      expect(authLight.primaryLightPressed, purpleLightPressedLight);
+      expect(authLight.primaryStroke, purpleStrokeLight);
+      expect(authLight.primaryDark, purpleDarkLight);
+      expect(authLight.primaryDarker, purpleDarkerLight);
 
-      expect(lockerLight.primary, lockerPrimaryDefaultLight);
-      expect(lockerLight.primaryLight, lockerPrimaryLightLight);
-      expect(lockerLight.primaryStroke, lockerPrimaryStrokeLight);
-      expect(lockerLight.primaryDark, lockerPrimaryDarkLight);
-      expect(lockerLight.primaryDarker, lockerPrimaryDarkerLight);
+      expect(lockerLight.primary, blueDefaultLight);
+      expect(lockerLight.primaryLight, blueLightLight);
+      expect(lockerLight.primaryLightHover, blueLightHoverLight);
+      expect(lockerLight.primaryLightPressed, blueLightPressedLight);
+      expect(lockerLight.primaryStroke, blueStrokeLight);
+      expect(lockerLight.primaryDark, blueDarkLight);
+      expect(lockerLight.primaryDarker, blueDarkerLight);
 
-      expect(authDark.primary, authPrimaryDefaultDark);
-      expect(authDark.primaryLight, authPrimaryLightDark);
+      expect(authDark.primary, purpleDefaultDark);
+      expect(authDark.primaryLight, purpleLightDark);
 
       expect(authLight.backgroundBase, ColorTokens.light.backgroundBase);
       expect(authLight.warning, ColorTokens.light.warning);
-      expect(authLight.info, ColorTokens.light.info);
+      expect(authLight.green, ColorTokens.light.green);
+      expect(authLight.blue, ColorTokens.light.blue);
+      expect(authLight.purple, ColorTokens.light.purple);
       expect(lockerLight.textBase, ColorTokens.light.textBase);
       expect(lockerLight.iconColor, ColorTokens.light.iconColor);
-      expect(lockerLight.accentPurple, ColorTokens.light.accentPurple);
     });
 
-    test("match Figma Color Tokens light and dark modes", () {
+    test("match Figma color family values used as app primary colors", () {
+      const expectedLight = <String, Color>{
+        "greens/green-light": Color.fromRGBO(221, 238, 223, 1),
+        "greens/green-light-hover": Color.fromRGBO(205, 229, 208, 1),
+        "greens/green-light-pressed": Color.fromRGBO(184, 213, 187, 1),
+        "greens/green-stroke": Color.fromRGBO(186, 236, 194, 1),
+        "greens/green": Color.fromRGBO(8, 194, 37, 1),
+        "greens/green-dark": Color.fromRGBO(6, 157, 30, 1),
+        "greens/green-darker": Color.fromRGBO(5, 124, 24, 1),
+        "purples/purple-light": Color.fromRGBO(248, 243, 254, 1),
+        "purples/purple-light-hover": Color.fromRGBO(232, 210, 250, 1),
+        "purples/purple-light-pressed": Color.fromRGBO(217, 188, 241, 1),
+        "purples/purple-stroke": Color.fromRGBO(216, 181, 244, 1),
+        "purples/purple": Color.fromRGBO(138, 56, 245, 1),
+        "purples/purple-dark": Color.fromRGBO(122, 12, 174, 1),
+        "purples/purple-darker": Color.fromRGBO(93, 8, 132, 1),
+        "blues/blue-light": Color.fromRGBO(231, 239, 250, 1),
+        "blues/blue-light-hover": Color.fromRGBO(216, 228, 244, 1),
+        "blues/blue-light-pressed": Color.fromRGBO(194, 210, 232, 1),
+        "blues/blue-stroke": Color.fromRGBO(16, 113, 255, 1),
+        "blues/blue": Color.fromRGBO(16, 113, 255, 1),
+        "blues/blue-dark": Color.fromRGBO(14, 95, 217, 1),
+        "blues/blue-darker": Color.fromRGBO(11, 76, 173, 1),
+      };
+      const expectedDark = <String, Color>{
+        "greens/green-light": Color.fromRGBO(41, 41, 41, 1),
+        "greens/green-light-hover": Color.fromRGBO(31, 48, 35, 1),
+        "greens/green-light-pressed": Color.fromRGBO(44, 66, 50, 1),
+        "greens/green-stroke": Color.fromRGBO(28, 65, 34, 1),
+        "greens/green": Color.fromRGBO(8, 194, 37, 1),
+        "greens/green-dark": Color.fromRGBO(6, 157, 30, 1),
+        "greens/green-darker": Color.fromRGBO(5, 124, 24, 1),
+        "purples/purple-light": Color.fromRGBO(41, 41, 41, 1),
+        "purples/purple-light-hover": Color.fromRGBO(61, 27, 92, 1),
+        "purples/purple-light-pressed": Color.fromRGBO(79, 40, 115, 1),
+        "purples/purple-stroke": Color.fromRGBO(61, 27, 92, 1),
+        "purples/purple": Color.fromRGBO(138, 56, 245, 1),
+        "purples/purple-dark": Color.fromRGBO(122, 12, 174, 1),
+        "purples/purple-darker": Color.fromRGBO(93, 8, 132, 1),
+        "blues/blue-light": Color.fromRGBO(41, 41, 41, 1),
+        "blues/blue-light-hover": Color.fromRGBO(26, 38, 56, 1),
+        "blues/blue-light-pressed": Color.fromRGBO(42, 59, 85, 1),
+        "blues/blue-stroke": Color.fromRGBO(16, 113, 255, 1),
+        "blues/blue": Color.fromRGBO(16, 113, 255, 1),
+        "blues/blue-dark": Color.fromRGBO(14, 95, 217, 1),
+        "blues/blue-darker": Color.fromRGBO(11, 76, 173, 1),
+      };
+
+      expect(_figmaColorFamilyMap(ColorTokens.light), expectedLight);
+      expect(_figmaColorFamilyMap(ColorTokens.dark), expectedDark);
+    });
+
+    test("match Figma shared Color Tokens light and dark modes", () {
       const expectedLight = <String, Color>{
         "accent/orange": Color.fromRGBO(242, 72, 34, 1),
         "accent/orange-light": Color.fromRGBO(255, 247, 244, 1),
         "accent/pink": Color.fromRGBO(223, 97, 187, 1),
         "accent/pink-light": Color.fromRGBO(253, 246, 251, 1),
-        "accent/purple": Color.fromRGBO(138, 56, 245, 1),
-        "accent/purple-light": Color.fromRGBO(248, 243, 254, 1),
         "accent/teal": Color.fromRGBO(95, 183, 187, 1),
         "accent/teal-light": Color.fromRGBO(245, 251, 251, 1),
         "background/base": Color.fromRGBO(250, 250, 250, 1),
-        "caution/default": Color.fromRGBO(255, 169, 57, 1),
+        "caution/default": Color.fromRGBO(240, 138, 30, 1),
         "caution/light": Color.fromRGBO(250, 244, 235, 1),
         "fill/base": Color.fromRGBO(0, 0, 0, 1),
         "fill/dark": Color.fromRGBO(245, 245, 245, 1),
         "fill/darker": Color.fromRGBO(233, 233, 233, 1),
         "fill/darkest": Color.fromRGBO(210, 210, 210, 1),
         "fill/light": Color.fromRGBO(255, 255, 255, 1),
-        "info/dark": Color.fromRGBO(14, 95, 217, 1),
-        "info/darker": Color.fromRGBO(11, 76, 173, 1),
-        "info/default": Color.fromRGBO(16, 113, 255, 1),
-        "info/light": Color.fromRGBO(231, 239, 250, 1),
-        "info/stroke": Color.fromRGBO(200, 216, 238, 1),
         "primary/dark": Color.fromRGBO(6, 157, 30, 1),
         "primary/darker": Color.fromRGBO(5, 124, 24, 1),
         "primary/default": Color.fromRGBO(8, 194, 37, 1),
-        "primary/light": Color.fromRGBO(231, 246, 233, 1),
+        "primary/light": Color.fromRGBO(221, 238, 223, 1),
+        "primary/light-hover": Color.fromRGBO(205, 229, 208, 1),
+        "primary/light-pressed": Color.fromRGBO(184, 213, 187, 1),
         "primary/stroke": Color.fromRGBO(186, 236, 194, 1),
         "special/content-reverse": Color.fromRGBO(255, 255, 255, 1),
         "special/scrim": Color.fromRGBO(0, 0, 0, 0.4),
@@ -134,27 +185,22 @@ void main() {
         "accent/orange-light": Color.fromRGBO(41, 41, 41, 1),
         "accent/pink": Color.fromRGBO(223, 97, 187, 1),
         "accent/pink-light": Color.fromRGBO(41, 41, 41, 1),
-        "accent/purple": Color.fromRGBO(138, 56, 245, 1),
-        "accent/purple-light": Color.fromRGBO(41, 41, 41, 1),
         "accent/teal": Color.fromRGBO(95, 183, 187, 1),
         "accent/teal-light": Color.fromRGBO(41, 41, 41, 1),
         "background/base": Color.fromRGBO(22, 22, 22, 1),
-        "caution/default": Color.fromRGBO(255, 169, 57, 1),
+        "caution/default": Color.fromRGBO(240, 138, 30, 1),
         "caution/light": Color.fromRGBO(41, 41, 41, 1),
         "fill/base": Color.fromRGBO(255, 255, 255, 1),
         "fill/dark": Color.fromRGBO(10, 10, 10, 1),
         "fill/darker": Color.fromRGBO(20, 20, 20, 1),
         "fill/darkest": Color.fromRGBO(41, 41, 41, 1),
         "fill/light": Color.fromRGBO(33, 33, 33, 1),
-        "info/dark": Color.fromRGBO(14, 95, 217, 1),
-        "info/darker": Color.fromRGBO(11, 76, 173, 1),
-        "info/default": Color.fromRGBO(16, 113, 255, 1),
-        "info/light": Color.fromRGBO(41, 41, 41, 1),
-        "info/stroke": Color.fromRGBO(26, 43, 77, 1),
         "primary/dark": Color.fromRGBO(6, 157, 30, 1),
         "primary/darker": Color.fromRGBO(5, 124, 24, 1),
         "primary/default": Color.fromRGBO(8, 194, 37, 1),
         "primary/light": Color.fromRGBO(41, 41, 41, 1),
+        "primary/light-hover": Color.fromRGBO(31, 48, 35, 1),
+        "primary/light-pressed": Color.fromRGBO(44, 66, 50, 1),
         "primary/stroke": Color.fromRGBO(28, 65, 34, 1),
         "special/content-reverse": Color.fromRGBO(0, 0, 0, 1),
         "special/scrim": Color.fromRGBO(0, 0, 0, 0.4),
@@ -208,52 +254,28 @@ void main() {
       final theme = ComponentTheme.lightTheme();
 
       expect(theme.brightness, Brightness.light);
-      expect(
-        theme.scaffoldBackgroundColor,
-        ColorTokens.light.backgroundBase,
-      );
+      expect(theme.scaffoldBackgroundColor, ColorTokens.light.backgroundBase);
       expect(theme.colorScheme.primary, ColorTokens.light.primary);
       expect(theme.colorScheme.error, ColorTokens.light.warning);
-      expect(
-        theme.textTheme.headlineLarge?.fontFamily,
-        TextStyles.fontFamily,
-      );
-      expect(
-        theme.textTheme.headlineLarge?.fontSize,
-        TextStyles.h1.fontSize,
-      );
+      expect(theme.textTheme.headlineLarge?.fontFamily, TextStyles.fontFamily);
+      expect(theme.textTheme.headlineLarge?.fontSize, TextStyles.h1.fontSize);
       expect(
         theme.textTheme.headlineLarge?.fontWeight,
         TextStyles.h1.fontWeight,
       );
-      expect(
-        theme.textTheme.bodyMedium?.fontFamily,
-        TextStyles.fontFamily,
-      );
-      expect(
-        theme.textTheme.bodyMedium?.fontSize,
-        TextStyles.body.fontSize,
-      );
+      expect(theme.textTheme.bodyMedium?.fontFamily, TextStyles.fontFamily);
+      expect(theme.textTheme.bodyMedium?.fontSize, TextStyles.body.fontSize);
     });
 
     test("maps color and text tokens into dark ThemeData", () {
       final theme = ComponentTheme.darkTheme();
 
       expect(theme.brightness, Brightness.dark);
-      expect(
-        theme.scaffoldBackgroundColor,
-        ColorTokens.dark.backgroundBase,
-      );
+      expect(theme.scaffoldBackgroundColor, ColorTokens.dark.backgroundBase);
       expect(theme.colorScheme.primary, ColorTokens.dark.primary);
       expect(theme.colorScheme.error, ColorTokens.dark.warning);
-      expect(
-        theme.textTheme.labelSmall?.fontFamily,
-        TextStyles.fontFamily,
-      );
-      expect(
-        theme.textTheme.labelSmall?.fontSize,
-        TextStyles.tiny.fontSize,
-      );
+      expect(theme.textTheme.labelSmall?.fontFamily, TextStyles.fontFamily);
+      expect(theme.textTheme.labelSmall?.fontSize, TextStyles.tiny.fontSize);
       expect(
         theme.textTheme.labelSmall?.fontWeight,
         TextStyles.tiny.fontWeight,
@@ -264,20 +286,21 @@ void main() {
       final authTheme = ComponentTheme.lightTheme(app: EnteApp.auth);
       final lockerTheme = ComponentTheme.darkTheme(app: EnteApp.locker);
 
-      expect(authTheme.colorScheme.primary, authPrimaryDefaultLight);
+      expect(authTheme.colorScheme.primary, purpleDefaultLight);
       expect(
         authTheme.scaffoldBackgroundColor,
         ColorTokens.light.backgroundBase,
       );
-      expect(lockerTheme.colorScheme.primary, lockerPrimaryDefaultDark);
+      expect(lockerTheme.colorScheme.primary, blueDefaultDark);
       expect(
         lockerTheme.scaffoldBackgroundColor,
         ColorTokens.dark.backgroundBase,
       );
     });
 
-    testWidgets("selects color tokens from the ambient brightness",
-        (tester) async {
+    testWidgets("selects color tokens from the ambient brightness", (
+      tester,
+    ) async {
       late ColorTokens lightColors;
       late ColorTokens darkColors;
 
@@ -311,8 +334,9 @@ void main() {
       expect(darkColors.textBase, ColorTokens.dark.textBase);
     });
 
-    testWidgets("reads app-aware tokens from ComponentTheme ThemeData",
-        (tester) async {
+    testWidgets("reads app-aware tokens from ComponentTheme ThemeData", (
+      tester,
+    ) async {
       late ColorTokens authColors;
       late ColorTokens lockerColors;
 
@@ -340,19 +364,45 @@ void main() {
         ),
       );
 
-      expect(authColors.primary, authPrimaryDefaultLight);
+      expect(authColors.primary, purpleDefaultLight);
       expect(authColors.backgroundBase, ColorTokens.light.backgroundBase);
-      expect(lockerColors.primary, lockerPrimaryDefaultDark);
+      expect(lockerColors.primary, blueDefaultDark);
       expect(lockerColors.backgroundBase, ColorTokens.dark.backgroundBase);
     });
 
     test("defaults to photos primary tokens when no app is passed", () {
       expect(
         ComponentTheme.lightTheme().colorScheme.primary,
-        primaryDefaultLight,
+        greenDefaultLight,
       );
     });
   });
+}
+
+Map<String, Color> _figmaColorFamilyMap(ColorTokens colors) {
+  return {
+    "greens/green-light": colors.greenLight,
+    "greens/green-light-hover": colors.greenLightHover,
+    "greens/green-light-pressed": colors.greenLightPressed,
+    "greens/green-stroke": colors.greenStroke,
+    "greens/green": colors.green,
+    "greens/green-dark": colors.greenDark,
+    "greens/green-darker": colors.greenDarker,
+    "purples/purple-light": colors.purpleLight,
+    "purples/purple-light-hover": colors.purpleLightHover,
+    "purples/purple-light-pressed": colors.purpleLightPressed,
+    "purples/purple-stroke": colors.purpleStroke,
+    "purples/purple": colors.purple,
+    "purples/purple-dark": colors.purpleDark,
+    "purples/purple-darker": colors.purpleDarker,
+    "blues/blue-light": colors.blueLight,
+    "blues/blue-light-hover": colors.blueLightHover,
+    "blues/blue-light-pressed": colors.blueLightPressed,
+    "blues/blue-stroke": colors.blueStroke,
+    "blues/blue": colors.blue,
+    "blues/blue-dark": colors.blueDark,
+    "blues/blue-darker": colors.blueDarker,
+  };
 }
 
 Map<String, Color> _figmaColorTokenMap(ColorTokens colors) {
@@ -361,8 +411,6 @@ Map<String, Color> _figmaColorTokenMap(ColorTokens colors) {
     "accent/orange-light": colors.accentOrangeLight,
     "accent/pink": colors.accentPink,
     "accent/pink-light": colors.accentPinkLight,
-    "accent/purple": colors.accentPurple,
-    "accent/purple-light": colors.accentPurpleLight,
     "accent/teal": colors.accentTeal,
     "accent/teal-light": colors.accentTealLight,
     "background/base": colors.backgroundBase,
@@ -373,15 +421,12 @@ Map<String, Color> _figmaColorTokenMap(ColorTokens colors) {
     "fill/darker": colors.fillDarker,
     "fill/darkest": colors.fillDarkest,
     "fill/light": colors.fillLight,
-    "info/dark": colors.infoDark,
-    "info/darker": colors.infoDarker,
-    "info/default": colors.info,
-    "info/light": colors.infoLight,
-    "info/stroke": colors.infoStroke,
     "primary/dark": colors.primaryDark,
     "primary/darker": colors.primaryDarker,
     "primary/default": colors.primary,
     "primary/light": colors.primaryLight,
+    "primary/light-hover": colors.primaryLightHover,
+    "primary/light-pressed": colors.primaryLightPressed,
     "primary/stroke": colors.primaryStroke,
     "special/content-reverse": colors.specialContentReverse,
     "special/scrim": colors.specialScrim,
