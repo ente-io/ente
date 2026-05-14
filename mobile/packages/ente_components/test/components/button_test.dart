@@ -310,7 +310,6 @@ void main() {
         IconButtonComponent(
           icon: const Icon(Icons.add),
           variant: IconButtonComponentVariant.primary,
-          state: IconButtonComponentState.pressed,
           onTap: () {},
         ),
       ),
@@ -321,7 +320,16 @@ void main() {
     final decoration = surface.decoration! as BoxDecoration;
 
     expect(tester.getSize(surfaceFinder), const Size(36, 36));
-    expect(decoration.color, ColorTokens.light.fillDarker);
+    expect(decoration.color, ColorTokens.light.fillLight);
+
+    final gesture = await tester.startGesture(tester.getCenter(surfaceFinder));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final pressedSurface = tester.widget<AnimatedContainer>(surfaceFinder);
+    final pressedDecoration = pressedSurface.decoration! as BoxDecoration;
+    expect(pressedDecoration.color, ColorTokens.light.fillDarker);
+
+    await gesture.up();
   });
 
   testWidgets("IconButtonComponent default variant is secondary", (

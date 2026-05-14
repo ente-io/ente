@@ -16,17 +16,6 @@ enum IconButtonComponentVariant {
   circular,
 }
 
-enum IconButtonComponentState { normal, hover, pressed }
-
-enum _ResolvedIconButtonState {
-  normal,
-  hover,
-  pressed,
-  disabled,
-  loading,
-  success,
-}
-
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=2207-42075&m=dev
 /// Section: Buttons / Icon Button
 /// Specs: 36px square, compact icon affordance with default, hover, pressed,
@@ -37,7 +26,6 @@ class IconButtonComponent extends StatefulWidget {
     required this.icon,
     required this.onTap,
     this.variant = IconButtonComponentVariant.secondary,
-    this.state,
     this.isLoading = false,
     this.isSuccess = false,
     this.shouldSurfaceExecutionStates = true,
@@ -48,7 +36,6 @@ class IconButtonComponent extends StatefulWidget {
   final Widget icon;
   final FutureOr<void> Function()? onTap;
   final IconButtonComponentVariant variant;
-  final IconButtonComponentState? state;
   final bool isLoading;
   final bool isSuccess;
   final bool shouldSurfaceExecutionStates;
@@ -104,9 +91,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
   @override
   Widget build(BuildContext context) {
     final enabled = _canHandleGestures;
-    final visualState = _visualState;
-    final foreground = _foreground(context, visualState);
-    final background = _background(context, visualState);
+    final colors = _colors(context);
     final radius = widget.variant == IconButtonComponentVariant.circular
         ? BorderRadius.circular(35)
         : BorderRadius.circular(Radii.md);
@@ -136,7 +121,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
               height: _buttonSize,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: background,
+                color: colors.background,
                 borderRadius: radius,
               ),
               child: Padding(
@@ -145,7 +130,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
                   duration: Motion.quick,
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
-                  child: _content(foreground),
+                  child: _content(colors.foreground),
                 ),
               ),
             ),
@@ -164,35 +149,6 @@ class _IconButtonComponentState extends State<IconButtonComponent>
       label: widget.tooltip,
       child: button,
     );
-  }
-
-  _ResolvedIconButtonState get _visualState {
-    if (_showLoading) {
-      return _ResolvedIconButtonState.loading;
-    }
-    if (_showSuccess) {
-      return _ResolvedIconButtonState.success;
-    }
-    if (widget.onTap == null) {
-      return _ResolvedIconButtonState.disabled;
-    }
-
-    final forcedState = widget.state;
-    if (forcedState != null) {
-      return switch (forcedState) {
-        IconButtonComponentState.normal => _ResolvedIconButtonState.normal,
-        IconButtonComponentState.hover => _ResolvedIconButtonState.hover,
-        IconButtonComponentState.pressed => _ResolvedIconButtonState.pressed,
-      };
-    }
-
-    if (_isPressed) {
-      return _ResolvedIconButtonState.pressed;
-    }
-    if (_isHovered) {
-      return _ResolvedIconButtonState.hover;
-    }
-    return _ResolvedIconButtonState.normal;
   }
 
   void _setHovered(bool value) {
@@ -379,49 +335,116 @@ class _IconButtonComponentState extends State<IconButtonComponent>
     });
   }
 
-  Color _background(BuildContext context, _ResolvedIconButtonState state) {
+  _ResolvedIconButtonColors _colors(BuildContext context) {
+    if (_showLoading) {
+      return _ResolvedIconButtonColors(
+        background: _executionBackground(context),
+        foreground: _foreground(context),
+      );
+    }
+    if (_showSuccess) {
+      return _ResolvedIconButtonColors(
+        background: _executionBackground(context),
+        foreground: _foreground(context, isSuccess: true),
+      );
+    }
+    if (widget.onTap == null) {
+      return _ResolvedIconButtonColors(
+        background: _disabledBackground(context),
+        foreground: _foreground(context, isDisabled: true),
+      );
+    }
+
+    return _ResolvedIconButtonColors(
+      background: _isPressed
+          ? _pressedBackground(context)
+          : _isHovered
+          ? _hoverBackground(context)
+          : _background(context),
+      foreground: _foreground(context),
+    );
+  }
+
+  Color _background(BuildContext context) {
     final colors = context.componentColors;
     final transparent = colors.specialScrim.withAlpha(0);
 
     return switch (widget.variant) {
       IconButtonComponentVariant.unfilled ||
       IconButtonComponentVariant.secondary => transparent,
-      IconButtonComponentVariant.primary => switch (state) {
-        _ResolvedIconButtonState.normal => colors.fillLight,
-        _ResolvedIconButtonState.hover ||
-        _ResolvedIconButtonState.disabled ||
-        _ResolvedIconButtonState.loading ||
-        _ResolvedIconButtonState.success => colors.fillDark,
-        _ResolvedIconButtonState.pressed => colors.fillDarker,
-      },
-      IconButtonComponentVariant.critical => switch (state) {
-        _ResolvedIconButtonState.hover => colors.fillDarker,
-        _ResolvedIconButtonState.pressed => colors.fillDarkest,
-        _ => colors.fillDark,
-      },
-      IconButtonComponentVariant.green => switch (state) {
-        _ResolvedIconButtonState.hover => colors.primaryDark,
-        _ResolvedIconButtonState.pressed => colors.primaryDarker,
-        _ResolvedIconButtonState.disabled => colors.fillDark,
-        _ => colors.primary,
-      },
-      IconButtonComponentVariant.circular => switch (state) {
-        _ResolvedIconButtonState.hover ||
-        _ResolvedIconButtonState.disabled => colors.fillDark,
-        _ResolvedIconButtonState.pressed => colors.fillDarker,
-        _ => colors.fillLight,
-      },
+      IconButtonComponentVariant.primary => colors.fillLight,
+      IconButtonComponentVariant.critical => colors.fillDark,
+      IconButtonComponentVariant.green => colors.primary,
+      IconButtonComponentVariant.circular => colors.fillLight,
     };
   }
 
-  Color _foreground(BuildContext context, _ResolvedIconButtonState state) {
+  Color _hoverBackground(BuildContext context) {
     final colors = context.componentColors;
-    if (state == _ResolvedIconButtonState.success &&
-        widget.variant != IconButtonComponentVariant.green) {
+    final transparent = colors.specialScrim.withAlpha(0);
+
+    return switch (widget.variant) {
+      IconButtonComponentVariant.unfilled ||
+      IconButtonComponentVariant.secondary => transparent,
+      IconButtonComponentVariant.primary => colors.fillDark,
+      IconButtonComponentVariant.critical => colors.fillDarker,
+      IconButtonComponentVariant.green => colors.primaryDark,
+      IconButtonComponentVariant.circular => colors.fillDark,
+    };
+  }
+
+  Color _pressedBackground(BuildContext context) {
+    final colors = context.componentColors;
+    final transparent = colors.specialScrim.withAlpha(0);
+
+    return switch (widget.variant) {
+      IconButtonComponentVariant.unfilled ||
+      IconButtonComponentVariant.secondary => transparent,
+      IconButtonComponentVariant.primary => colors.fillDarker,
+      IconButtonComponentVariant.critical => colors.fillDarkest,
+      IconButtonComponentVariant.green => colors.primaryDarker,
+      IconButtonComponentVariant.circular => colors.fillDarker,
+    };
+  }
+
+  Color _disabledBackground(BuildContext context) {
+    final colors = context.componentColors;
+    final transparent = colors.specialScrim.withAlpha(0);
+
+    return switch (widget.variant) {
+      IconButtonComponentVariant.unfilled ||
+      IconButtonComponentVariant.secondary => transparent,
+      IconButtonComponentVariant.primary ||
+      IconButtonComponentVariant.critical ||
+      IconButtonComponentVariant.green ||
+      IconButtonComponentVariant.circular => colors.fillDark,
+    };
+  }
+
+  Color _executionBackground(BuildContext context) {
+    final colors = context.componentColors;
+    final transparent = colors.specialScrim.withAlpha(0);
+
+    return switch (widget.variant) {
+      IconButtonComponentVariant.unfilled ||
+      IconButtonComponentVariant.secondary => transparent,
+      IconButtonComponentVariant.primary ||
+      IconButtonComponentVariant.critical => colors.fillDark,
+      IconButtonComponentVariant.green => colors.primary,
+      IconButtonComponentVariant.circular => colors.fillLight,
+    };
+  }
+
+  Color _foreground(
+    BuildContext context, {
+    bool isSuccess = false,
+    bool isDisabled = false,
+  }) {
+    final colors = context.componentColors;
+    if (isSuccess && widget.variant != IconButtonComponentVariant.green) {
       return colors.primary;
     }
-    if (widget.variant == IconButtonComponentVariant.green &&
-        state != _ResolvedIconButtonState.disabled) {
+    if (widget.variant == IconButtonComponentVariant.green && !isDisabled) {
       return colors.specialWhite;
     }
     if (widget.variant == IconButtonComponentVariant.unfilled ||
@@ -434,3 +457,13 @@ class _IconButtonComponentState extends State<IconButtonComponent>
 
 const double _buttonSize = 36;
 const double _iconSize = 18;
+
+class _ResolvedIconButtonColors {
+  const _ResolvedIconButtonColors({
+    required this.background,
+    required this.foreground,
+  });
+
+  final Color background;
+  final Color foreground;
+}

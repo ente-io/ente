@@ -1277,14 +1277,7 @@ class _IconButtonMatrix extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const columns = [
-      'Default',
-      'Hover',
-      'Pressed',
-      'Disabled',
-      'Loading',
-      'Success',
-    ];
+    const columns = ['Default', 'Disabled', 'Loading', 'Success'];
     const rows = [
       _IconButtonPreviewRow(
         label: 'Primary',
@@ -1299,12 +1292,12 @@ class _IconButtonMatrix extends StatelessWidget {
       _IconButtonPreviewRow(
         label: 'Unfilled',
         variant: IconButtonComponentVariant.unfilled,
-        states: ['Default', 'Disabled', 'Loading', 'Success'],
+        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Secondary',
         variant: IconButtonComponentVariant.secondary,
-        states: ['Default', 'Disabled', 'Loading', 'Success'],
+        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Green',
@@ -1404,11 +1397,6 @@ class _IconButtonStatePreview extends StatelessWidget {
     return IconButtonComponent(
       tooltip: state,
       variant: variant,
-      state: switch (state) {
-        'Hover' => IconButtonComponentState.hover,
-        'Pressed' => IconButtonComponentState.pressed,
-        _ => IconButtonComponentState.normal,
-      },
       isLoading: state == 'Loading',
       isSuccess: state == 'Success',
       onTap: state == 'Disabled' ? null : () {},
