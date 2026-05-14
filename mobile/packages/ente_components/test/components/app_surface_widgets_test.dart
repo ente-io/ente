@@ -273,38 +273,6 @@ void main() {
     expect(tester.getSize(find.byType(MenuComponent)).height, greaterThan(60));
   });
 
-  testWidgets(
-      'MenuComponent grows with text scale from typography-derived height', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ComponentTheme.lightTheme(),
-        home: const MediaQuery(
-          data: MediaQueryData(
-            textScaler: TextScaler.linear(1.6),
-          ),
-          child: Scaffold(
-            body: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: 260,
-                child: MenuComponent(
-                  title: 'Camera uploads',
-                  subtitle: 'Enabled on Wi-Fi',
-                  leading: Icon(Icons.cloud_upload_outlined),
-                  trailing: Icon(Icons.chevron_right),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.getSize(find.byType(MenuComponent)).height, greaterThan(60));
-  });
-
   testWidgets('TitleBarComponent renders heading and status variants',
       (tester) async {
     await pumpComponent(

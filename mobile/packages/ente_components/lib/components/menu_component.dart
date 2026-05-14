@@ -92,7 +92,7 @@ class _MenuComponentState extends State<MenuComponent> {
                 borderRadius: BorderRadius.circular(Radii.button),
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: _minimumHeight(context)),
+                constraints: BoxConstraints(minHeight: _minimumHeight()),
                 child: Padding(
                   padding: EdgeInsets.only(
                     left: widget.leading == null ? Spacing.lg : Spacing.md,
@@ -215,20 +215,21 @@ class _MenuComponentState extends State<MenuComponent> {
     return widget.trailing;
   }
 
-  double _minimumHeight(BuildContext context) {
-    final textHeight = _scaledLineHeight(context, TextStyles.body) +
+  double _minimumHeight() {
+    final textHeight =
+        _lineHeight(TextStyles.body) +
         Spacing.xs +
-        _scaledLineHeight(context, TextStyles.mini);
-    final contentHeight =
-        textHeight > _leadingSlotSize ? textHeight : _leadingSlotSize;
+        _lineHeight(TextStyles.mini);
+    final contentHeight = textHeight > _leadingSlotSize
+        ? textHeight
+        : _leadingSlotSize;
     return contentHeight + (_menuItemVerticalPadding * 2);
   }
 
-  double _scaledLineHeight(BuildContext context, TextStyle style) {
-    final fontSize =
-        style.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
+  double _lineHeight(TextStyle style) {
+    final fontSize = style.fontSize ?? 14;
     final height = style.height ?? 1;
-    return MediaQuery.textScalerOf(context).scale(fontSize) * height;
+    return fontSize * height;
   }
 
   void _setHovered(bool value) {

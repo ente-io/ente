@@ -19,7 +19,6 @@ class ComponentsCatalogApp extends StatefulWidget {
 class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
   ThemeMode _themeMode = ThemeMode.light;
   EnteApp _appTheme = EnteApp.photos;
-  double _textScale = 1;
   Duration? _lastPointerUpAt;
   Offset? _lastPointerUpPosition;
 
@@ -39,10 +38,6 @@ class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
 
   void _setThemeMode(ThemeMode mode) {
     setState(() => _themeMode = mode);
-  }
-
-  void _setTextScale(double scale) {
-    setState(() => _textScale = scale);
   }
 
   void _handlePointerEvent(PointerEvent event) {
@@ -83,20 +78,9 @@ class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
       theme: ComponentTheme.lightTheme(app: _appTheme),
       darkTheme: ComponentTheme.darkTheme(app: _appTheme),
       themeMode: _themeMode,
-      builder: (context, child) {
-        final mediaQuery = MediaQuery.of(context);
-        return MediaQuery(
-          data: mediaQuery.copyWith(
-            textScaler: TextScaler.linear(_textScale),
-          ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
       home: CatalogHome(
         themeMode: _themeMode,
-        textScale: _textScale,
         onThemeModeChanged: _setThemeMode,
-        onTextScaleChanged: _setTextScale,
       ),
     );
   }
@@ -106,15 +90,11 @@ class CatalogHome extends StatefulWidget {
   const CatalogHome({
     super.key,
     required this.themeMode,
-    required this.textScale,
     required this.onThemeModeChanged,
-    required this.onTextScaleChanged,
   });
 
   final ThemeMode themeMode;
-  final double textScale;
   final ValueChanged<ThemeMode> onThemeModeChanged;
-  final ValueChanged<double> onTextScaleChanged;
 
   @override
   State<CatalogHome> createState() => _CatalogHomeState();
@@ -140,18 +120,6 @@ class _CatalogHomeState extends State<CatalogHome> {
           },
         ),
         actions: [
-          Builder(
-            builder: (context) {
-              return IconButtonComponent(
-                tooltip: 'Text scale',
-                variant: IconButtonComponentVariant.unfilled,
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
-                icon: const _CatalogHugeIcon(
-                  HugeIcons.strokeRoundedTextFont,
-                ),
-              );
-            },
-          ),
           _CatalogThemeCycleButton(
             themeMode: widget.themeMode,
             onChanged: widget.onThemeModeChanged,
@@ -159,10 +127,6 @@ class _CatalogHomeState extends State<CatalogHome> {
         ],
       ),
       drawer: const CatalogSettingsDrawer(),
-      endDrawer: CatalogTextScaleDrawer(
-        textScale: widget.textScale,
-        onTextScaleChanged: widget.onTextScaleChanged,
-      ),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.lg),
         children: [
@@ -170,9 +134,7 @@ class _CatalogHomeState extends State<CatalogHome> {
             _CatalogSectionTile(
               section: section,
               themeMode: widget.themeMode,
-              textScale: widget.textScale,
               onThemeModeChanged: widget.onThemeModeChanged,
-              onTextScaleChanged: widget.onTextScaleChanged,
             ),
             if (section != sections.last) const SizedBox(height: Spacing.lg),
           ],
@@ -372,70 +334,6 @@ class CatalogSettingsDrawer extends StatelessWidget {
   }
 }
 
-class CatalogTextScaleDrawer extends StatefulWidget {
-  const CatalogTextScaleDrawer({
-    super.key,
-    required this.textScale,
-    required this.onTextScaleChanged,
-  });
-
-  final double textScale;
-  final ValueChanged<double> onTextScaleChanged;
-
-  @override
-  State<CatalogTextScaleDrawer> createState() => _CatalogTextScaleDrawerState();
-}
-
-class _CatalogTextScaleDrawerState extends State<CatalogTextScaleDrawer> {
-  late double _textScale = widget.textScale;
-
-  void _setTextScale(double scale) {
-    setState(() => _textScale = scale);
-    widget.onTextScaleChanged(scale);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    return Drawer(
-      width: _drawerWidth(context),
-      shape: const RoundedRectangleBorder(),
-      backgroundColor: colors.backgroundBase,
-      child: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.all(Spacing.lg),
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Text scale',
-                    style: TextStyles.h1Bold.copyWith(
-                      color: colors.textBase,
-                    ),
-                  ),
-                ),
-                IconButtonComponent(
-                  tooltip: 'Close text scale',
-                  variant: IconButtonComponentVariant.unfilled,
-                  icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedCancel01),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: Spacing.xl),
-            _CatalogSettingsPreview(
-              textScale: _textScale,
-              onTextScaleChanged: _setTextScale,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 double _drawerWidth(BuildContext context) {
   final width = MediaQuery.sizeOf(context).width;
   return width < 430 ? width : 430;
@@ -534,16 +432,12 @@ class _CatalogSectionTile extends StatelessWidget {
   const _CatalogSectionTile({
     required this.section,
     required this.themeMode,
-    required this.textScale,
     required this.onThemeModeChanged,
-    required this.onTextScaleChanged,
   });
 
   final CatalogSection section;
   final ThemeMode themeMode;
-  final double textScale;
   final ValueChanged<ThemeMode> onThemeModeChanged;
-  final ValueChanged<double> onTextScaleChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -563,9 +457,7 @@ class _CatalogSectionTile extends StatelessWidget {
             builder: (_) => CatalogDetailPage(
               section: section,
               themeMode: themeMode,
-              textScale: textScale,
               onThemeModeChanged: onThemeModeChanged,
-              onTextScaleChanged: onTextScaleChanged,
             ),
           ),
         );
@@ -579,16 +471,12 @@ class CatalogDetailPage extends StatefulWidget {
     super.key,
     required this.section,
     required this.themeMode,
-    required this.textScale,
     required this.onThemeModeChanged,
-    required this.onTextScaleChanged,
   });
 
   final CatalogSection section;
   final ThemeMode themeMode;
-  final double textScale;
   final ValueChanged<ThemeMode> onThemeModeChanged;
-  final ValueChanged<double> onTextScaleChanged;
 
   @override
   State<CatalogDetailPage> createState() => _CatalogDetailPageState();
@@ -614,25 +502,11 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          Builder(
-            builder: (context) {
-              return IconButtonComponent(
-                tooltip: 'Text scale',
-                variant: IconButtonComponentVariant.unfilled,
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
-                icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedTextFont),
-              );
-            },
-          ),
           _CatalogThemeCycleButton(
             themeMode: _themeMode,
             onChanged: _setThemeMode,
           ),
         ],
-      ),
-      endDrawer: CatalogTextScaleDrawer(
-        textScale: widget.textScale,
-        onTextScaleChanged: widget.onTextScaleChanged,
       ),
       body: ListView(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -641,75 +515,6 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
         ],
       ),
       backgroundColor: colors.backgroundBase,
-    );
-  }
-}
-
-class _CatalogSettingsPreview extends StatelessWidget {
-  const _CatalogSettingsPreview({
-    required this.textScale,
-    required this.onTextScaleChanged,
-  });
-
-  final double textScale;
-  final ValueChanged<double> onTextScaleChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Text scale',
-                style: TextStyles.large.copyWith(
-                  color: colors.textBase,
-                ),
-              ),
-            ),
-            Text(
-              '${textScale.toStringAsFixed(2)}x',
-              style: TextStyles.bodyBold.copyWith(color: colors.textBase),
-            ),
-          ],
-        ),
-        SliderComponent(
-          value: textScale,
-          min: 0.85,
-          max: 2,
-          divisions: 23,
-          onChanged: onTextScaleChanged,
-        ),
-        Wrap(
-          spacing: Spacing.sm,
-          runSpacing: Spacing.sm,
-          children: [
-            ButtonComponent(
-              label: '1.0x',
-              variant: ButtonComponentVariant.secondary,
-              onTap: () => onTextScaleChanged(1),
-            ),
-            ButtonComponent(
-              label: '1.3x',
-              variant: ButtonComponentVariant.secondary,
-              onTap: () => onTextScaleChanged(1.3),
-            ),
-            ButtonComponent(
-              label: '1.6x',
-              variant: ButtonComponentVariant.secondary,
-              onTap: () => onTextScaleChanged(1.6),
-            ),
-            ButtonComponent(
-              label: '2.0x',
-              variant: ButtonComponentVariant.secondary,
-              onTap: () => onTextScaleChanged(2),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
