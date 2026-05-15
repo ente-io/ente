@@ -1840,7 +1840,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
   late final TextEditingController _disabledController;
   late final TextEditingController _clearableController;
   late final TextEditingController _passwordController;
-  late final TextEditingController _readOnlyController;
+  late final TextEditingController _submitController;
+  late final ValueNotifier<int> _submitNotifier;
 
   @override
   void initState() {
@@ -1851,7 +1852,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
     _disabledController = TextEditingController(text: 'mira.roy@example.com');
     _clearableController = TextEditingController(text: 'family trip');
     _passwordController = TextEditingController(text: 'correct horse');
-    _readOnlyController = TextEditingController(text: 'Mira Roy');
+    _submitController = TextEditingController(text: 'wrong password');
+    _submitNotifier = ValueNotifier<int>(0);
   }
 
   @override
@@ -1862,7 +1864,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
     _disabledController.dispose();
     _clearableController.dispose();
     _passwordController.dispose();
-    _readOnlyController.dispose();
+    _submitController.dispose();
+    _submitNotifier.dispose();
     super.dispose();
   }
 
@@ -1882,9 +1885,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             controller: _focusedController,
             label: 'Email address',
-            isFocused: true,
-            prefix: const _CatalogHugeIcon(HugeIcons.strokeRoundedMail01),
-            suffix: const _CatalogHugeIcon(HugeIcons.strokeRoundedView),
+            prefix: const _TextInputPreviewIcon(HugeIcons.strokeRoundedMail01),
+            suffix: const _TextInputPreviewIcon(HugeIcons.strokeRoundedView),
           ),
         ),
         _CatalogPreviewGroup(
@@ -1892,10 +1894,43 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             controller: _errorController,
             label: 'Password',
-            errorText: 'Use at least 8 characters.',
-            obscureText: true,
-            prefix: const _CatalogHugeIcon(HugeIcons.strokeRoundedLockPassword),
-            suffix: const _CatalogHugeIcon(HugeIcons.strokeRoundedView),
+            message: 'Use at least 8 characters.',
+            messageType: TextInputComponentMessageType.error,
+            isPasswordInput: true,
+            prefix: const _TextInputPreviewIcon(
+              HugeIcons.strokeRoundedLockPassword,
+            ),
+          ),
+        ),
+        _CatalogPreviewGroup(
+          title: 'Submit error',
+          child: Column(
+            children: [
+              TextInputComponent(
+                controller: _submitController,
+                submitNotifier: _submitNotifier,
+                label: 'Password',
+                hintText: 'Enter password',
+                isPasswordInput: true,
+                popNavAfterSubmission: true,
+                prefix: const _TextInputPreviewIcon(
+                  HugeIcons.strokeRoundedLockPassword,
+                ),
+                onSubmit: (_) async {
+                  await Future<void>.delayed(const Duration(milliseconds: 300));
+                  throw Exception('Incorrect password');
+                },
+              ),
+              const SizedBox(height: Spacing.md),
+              ButtonComponent(
+                label: 'Submit',
+                size: ButtonComponentSize.small,
+                shouldSurfaceExecutionStates: false,
+                onTap: () {
+                  _submitNotifier.value++;
+                },
+              ),
+            ],
           ),
         ),
         _CatalogPreviewGroup(
@@ -1903,8 +1938,9 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             controller: _successController,
             label: 'Recovery code',
-            successText: 'Recovery code verified.',
-            suffix: const _CatalogHugeIcon(
+            message: 'Recovery code verified.',
+            messageType: TextInputComponentMessageType.success,
+            suffix: const _TextInputPreviewIcon(
               HugeIcons.strokeRoundedCheckmarkCircle01,
             ),
           ),
@@ -1914,8 +1950,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             controller: _disabledController,
             label: 'Account email',
-            enabled: false,
-            prefix: const _CatalogHugeIcon(HugeIcons.strokeRoundedMail01),
+            isDisabled: true,
+            prefix: const _TextInputPreviewIcon(HugeIcons.strokeRoundedMail01),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -1935,7 +1971,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             label: 'Recovery email',
             hintText: 'mira@example.com',
-            helperText: 'Used for receipts and security alerts.',
+            message: 'Used for receipts and security alerts.',
           ),
         ),
         const _CatalogPreviewGroup(
@@ -1943,7 +1979,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             label: 'Search',
             hintText: 'Search albums',
-            prefix: _CatalogHugeIcon(HugeIcons.strokeRoundedSearch01),
+            prefix: _TextInputPreviewIcon(HugeIcons.strokeRoundedSearch01),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -1951,7 +1987,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             label: 'Password',
             hintText: 'Enter password',
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedView),
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedView),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -1959,8 +1995,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             label: 'Search',
             hintText: 'Search people',
-            prefix: _CatalogHugeIcon(HugeIcons.strokeRoundedSearch01),
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedCancel01),
+            prefix: _TextInputPreviewIcon(HugeIcons.strokeRoundedSearch01),
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedCancel01),
           ),
         ),
         _CatalogPreviewGroup(
@@ -1969,11 +2005,11 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             controller: _clearableController,
             label: 'Search',
             hintText: 'Search files',
-            prefix: const _CatalogHugeIcon(HugeIcons.strokeRoundedSearch01),
+            prefix: const _TextInputPreviewIcon(
+              HugeIcons.strokeRoundedSearch01,
+            ),
             isClearable: true,
-            textInputAction: TextInputAction.search,
             autocorrect: false,
-            enableSuggestions: false,
           ),
         ),
         _CatalogPreviewGroup(
@@ -1982,9 +2018,10 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             controller: _passwordController,
             label: 'Password',
             hintText: 'Enter password',
-            obscureText: true,
-            showPasswordToggle: true,
-            prefix: const _CatalogHugeIcon(HugeIcons.strokeRoundedLockPassword),
+            isPasswordInput: true,
+            prefix: const _TextInputPreviewIcon(
+              HugeIcons.strokeRoundedLockPassword,
+            ),
             autofillHints: const [AutofillHints.password],
           ),
         ),
@@ -1993,16 +2030,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             label: 'Recovery key',
             hintText: 'Enter recovery key',
-            alertText: 'Save this key somewhere safe before continuing.',
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Read only',
-          child: TextInputComponent(
-            controller: _readOnlyController,
-            label: 'Owner',
-            readOnly: true,
-            suffix: const _CatalogHugeIcon(HugeIcons.strokeRoundedLock),
+            message: 'Save this key somewhere safe before continuing.',
+            messageType: TextInputComponentMessageType.alert,
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2011,7 +2040,6 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             label: 'Referral code',
             hintText: 'SUMMER2026',
             maxLength: 12,
-            counterText: '',
             textCapitalization: TextCapitalization.characters,
           ),
         ),
@@ -2020,9 +2048,10 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             label: 'Description',
             hintText: 'Hint text',
-            errorText: 'This is an error',
+            message: 'This is an error',
+            messageType: TextInputComponentMessageType.error,
             maxLines: 4,
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedCopy01),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2031,7 +2060,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             label: 'Description',
             hintText: 'Hint text',
             maxLines: 4,
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedCopy01),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2047,7 +2076,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
           child: TextInputComponent(
             hintText: 'Hint text',
             maxLines: 4,
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedCopy01),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2060,8 +2089,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             label: 'Description',
             hintText: 'Hint text',
             maxLines: 4,
-            isFocused: true,
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedCopy01),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2070,7 +2098,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             label: 'Description',
             hintText: 'Hint text',
             maxLines: 4,
-            errorText: 'This is an error',
+            message: 'This is an error',
+            messageType: TextInputComponentMessageType.error,
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2079,7 +2108,8 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             label: 'Description',
             hintText: 'Hint text',
             maxLines: 4,
-            successText: 'Saved',
+            message: 'Saved',
+            messageType: TextInputComponentMessageType.success,
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2088,12 +2118,23 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
             label: 'Description',
             hintText: 'Hint text',
             maxLines: 4,
-            enabled: false,
-            suffix: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+            isDisabled: true,
+            suffix: _TextInputPreviewIcon(HugeIcons.strokeRoundedCopy01),
           ),
         ),
       ],
     );
+  }
+}
+
+class _TextInputPreviewIcon extends StatelessWidget {
+  const _TextInputPreviewIcon(this.icon);
+
+  final HugeIconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CatalogHugeIcon(icon, color: context.componentColors.textLighter);
   }
 }
 
