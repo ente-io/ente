@@ -2491,16 +2491,8 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
           ),
         ),
         const _CatalogPreviewGroup(
-          title: 'Loading',
-          child: _MenuItemLoadingPreview(),
-        ),
-        const _CatalogPreviewGroup(
-          title: 'Success',
-          child: _MenuItemSuccessPreview(),
-        ),
-        const _CatalogPreviewGroup(
-          title: 'Loading only',
-          child: _MenuItemLoadingOnlyPreview(),
+          title: 'Interaction states',
+          child: _MenuItemInteractionStatesPreview(),
         ),
         _CatalogPreviewGroup(
           title: 'Display only',
@@ -2517,21 +2509,9 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
                   '2 TB',
                   style: TextStyles.body.copyWith(color: colors.textLight),
                 ),
-                gesturesEnabled: false,
+                isDisabled: true,
               );
             },
-          ),
-        ),
-        const _CatalogPreviewGroup(
-          title: 'Async state',
-          child: MenuComponent(
-            title: 'Check for updates',
-            subtitle: 'Shows loading and success states',
-            leading: _CatalogHugeIcon(HugeIcons.strokeRoundedRefresh),
-            trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
-            surfaceExecutionStates: true,
-            alwaysShowSuccessState: true,
-            onTap: _completeAfterDelay,
           ),
         ),
         _CatalogPreviewGroup(
@@ -2580,50 +2560,84 @@ Future<void> _completeAfterDelay() {
   return Future<void>.delayed(const Duration(milliseconds: 650));
 }
 
-class _MenuItemLoadingPreview extends StatelessWidget {
-  const _MenuItemLoadingPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return const MenuComponent(
-      title: 'Updating backup',
-      subtitle: 'Tap to see the trailing loading state',
-      leading: _CatalogHugeIcon(HugeIcons.strokeRoundedCloudUpload),
-      trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
-      surfaceExecutionStates: true,
-      onTap: _completeAfterDelay,
-    );
-  }
+Future<void> _completeSlowly() {
+  return Future<void>.delayed(const Duration(milliseconds: 900));
 }
 
-class _MenuItemLoadingOnlyPreview extends StatelessWidget {
-  const _MenuItemLoadingOnlyPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return const MenuComponent(
-      title: 'Opening sessions',
-      subtitle: 'Loading-only execution state',
-      leading: _CatalogHugeIcon(HugeIcons.strokeRoundedUserGroup),
-      trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
-      showOnlyLoadingState: true,
-      onTap: _completeAfterDelay,
-    );
-  }
+Future<void> _completeQuickly() {
+  return Future<void>.delayed(const Duration(milliseconds: 120));
 }
 
-class _MenuItemSuccessPreview extends StatelessWidget {
-  const _MenuItemSuccessPreview();
+Future<void> _failAfterDelay(BuildContext context) async {
+  await Future<void>.delayed(const Duration(milliseconds: 900));
+  if (context.mounted) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Something went wrong')));
+  }
+  throw StateError('Preview action failed');
+}
+
+class _MenuItemInteractionStatesPreview extends StatelessWidget {
+  const _MenuItemInteractionStatesPreview();
 
   @override
   Widget build(BuildContext context) {
-    return const MenuComponent(
-      title: 'Copied recovery key',
-      subtitle: 'Tap to see completion replace trailing slot',
-      leading: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
-      trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
-      alwaysShowSuccessState: true,
-      onTap: _completeAfterDelay,
+    return Column(
+      children: [
+        MenuComponent(
+          title: 'Open storage plan',
+          subtitle: 'Tap only, no execution UI',
+          leading: const _CatalogHugeIcon(HugeIcons.strokeRoundedDatabase),
+          trailing: const _CatalogTrailingIcon(
+            HugeIcons.strokeRoundedArrowRight01,
+          ),
+          shouldSurfaceExecutionStates: false,
+          onTap: () {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Opened')));
+          },
+        ),
+        const SizedBox(height: Spacing.md),
+        const MenuComponent(
+          title: 'Updating backup',
+          subtitle: 'Execution loading, then success',
+          leading: _CatalogHugeIcon(HugeIcons.strokeRoundedCloudUpload),
+          trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
+          onTap: _completeSlowly,
+        ),
+        const SizedBox(height: Spacing.md),
+        const MenuComponent(
+          title: 'Copied recovery key',
+          subtitle: 'Fast success confirmation',
+          leading: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+          trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
+          shouldShowSuccessConfirmation: true,
+          onTap: _completeQuickly,
+        ),
+        const SizedBox(height: Spacing.md),
+        MenuComponent(
+          title: 'Sync backup',
+          subtitle: 'Error resets to idle',
+          leading: const _CatalogHugeIcon(HugeIcons.strokeRoundedRefresh),
+          trailing: const _CatalogTrailingIcon(
+            HugeIcons.strokeRoundedArrowRight01,
+          ),
+          titleColor: context.componentColors.warning,
+          iconColor: context.componentColors.warning,
+          onTap: () => _failAfterDelay(context),
+        ),
+        const SizedBox(height: Spacing.md),
+        const MenuComponent(
+          title: 'Opening sessions',
+          subtitle: 'Loading only, no success tick',
+          leading: _CatalogHugeIcon(HugeIcons.strokeRoundedUserGroup),
+          trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
+          showOnlyLoadingState: true,
+          onTap: _completeSlowly,
+        ),
+      ],
     );
   }
 }

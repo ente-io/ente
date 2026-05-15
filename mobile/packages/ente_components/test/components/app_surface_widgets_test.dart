@@ -28,8 +28,9 @@ Future<void> pumpComponent(
 }
 
 void main() {
-  testWidgets('MenuComponent renders slots, states, and handles taps',
-      (tester) async {
+  testWidgets('MenuComponent renders slots, states, and handles taps', (
+    tester,
+  ) async {
     var tapped = false;
 
     await pumpComponent(
@@ -67,8 +68,9 @@ void main() {
       ColorTokens.light.warning,
     );
     expect(
-      IconTheme.of(tester.element(find.byIcon(Icons.cloud_upload_outlined)))
-          .color,
+      IconTheme.of(
+        tester.element(find.byIcon(Icons.cloud_upload_outlined)),
+      ).color,
       ColorTokens.light.primary,
     );
     expect(
@@ -82,44 +84,48 @@ void main() {
   });
 
   testWidgets(
-      'MenuComponent delays loading, blocks repeat taps, and shows success',
-      (tester) async {
-    final completer = Completer<void>();
-    var tapCount = 0;
+    'MenuComponent delays loading, blocks repeat taps, and shows success',
+    (tester) async {
+      final completer = Completer<void>();
+      var tapCount = 0;
 
-    await pumpComponent(
-      tester,
-      MenuComponent(
-        title: 'Sync now',
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          tapCount += 1;
-          return completer.future;
-        },
-      ),
-    );
+      await pumpComponent(
+        tester,
+        MenuComponent(
+          title: 'Sync now',
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            tapCount += 1;
+            return completer.future;
+          },
+        ),
+      );
 
-    await tester.tap(find.text('Sync now'));
-    await tester.pump(const Duration(milliseconds: 299));
-    expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
+      await tester.tap(find.text('Sync now'));
+      await tester.pump(const Duration(milliseconds: 299));
+      expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
 
-    await tester.tap(find.text('Sync now'));
-    await tester.pump(const Duration(milliseconds: 1));
-    expect(tapCount, 1);
-    expect(find.byKey(const ValueKey('menu-item-loading')), findsOneWidget);
-    expect(find.byIcon(Icons.chevron_right), findsNothing);
+      await tester.tap(find.text('Sync now'));
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(tapCount, 1);
+      expect(find.byKey(const ValueKey('menu-item-loading')), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
 
-    completer.complete();
-    await tester.pump();
-    expect(find.byKey(const ValueKey('menu-item-success')), findsOneWidget);
-    expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
+      completer.complete();
+      await tester.pump();
+      expect(find.byKey(const ValueKey('menu-item-success')), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
 
-    await tester.pump(const Duration(seconds: 2));
-    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-  });
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    },
+  );
 
-  testWidgets('MenuComponent can show only loading without success',
-      (tester) async {
+  testWidgets('MenuComponent can show only loading without success', (
+    tester,
+  ) async {
     final completer = Completer<void>();
 
     await pumpComponent(
@@ -141,13 +147,14 @@ void main() {
     expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
   });
 
-  testWidgets('MenuComponent can force success for fast actions',
-      (tester) async {
+  testWidgets('MenuComponent can force success for fast actions', (
+    tester,
+  ) async {
     await pumpComponent(
       tester,
       MenuComponent(
         title: 'Copy',
-        alwaysShowSuccessState: true,
+        shouldShowSuccessConfirmation: true,
         onTap: () async {},
       ),
     );
@@ -156,19 +163,49 @@ void main() {
     await tester.pump();
     expect(find.byKey(const ValueKey('menu-item-success')), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
     expect(find.byKey(const ValueKey('menu-item-success')), findsNothing);
   });
 
-  testWidgets('MenuComponent can disable gestures for display-only rows',
-      (tester) async {
+  testWidgets('MenuComponent resets to idle after async errors', (
+    tester,
+  ) async {
+    await pumpComponent(
+      tester,
+      MenuComponent(
+        title: 'Fail',
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          throw StateError('failed');
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Fail'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('menu-item-loading')), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Fail'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
+    expect(find.byKey(const ValueKey('menu-item-success')), findsNothing);
+  });
+
+  testWidgets('MenuComponent can disable gestures for display-only rows', (
+    tester,
+  ) async {
     var tapCount = 0;
 
     await pumpComponent(
       tester,
       MenuComponent(
         title: 'Storage plan',
-        gesturesEnabled: false,
+        isDisabled: true,
         onTap: () {
           tapCount += 1;
         },
@@ -204,7 +241,7 @@ void main() {
           MenuComponent(
             title: 'Success row',
             trailing: const Icon(Icons.chevron_right),
-            alwaysShowSuccessState: true,
+            shouldShowSuccessConfirmation: true,
             onTap: () async {},
           ),
         ],
@@ -218,6 +255,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Success row'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     final surfaces = tester.widgetList<AnimatedContainer>(
       find.byKey(const ValueKey('menu-item-surface')),
@@ -230,11 +268,11 @@ void main() {
     expect(tapCount, 0);
     loadingCompleter.complete();
     await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
   });
 
-  testWidgets(
-      'MenuComponent long text uses two title lines and one subtitle line', (
+  testWidgets('MenuComponent long text uses two title lines and one subtitle line', (
     tester,
   ) async {
     await pumpComponent(
@@ -273,8 +311,9 @@ void main() {
     expect(tester.getSize(find.byType(MenuComponent)).height, greaterThan(60));
   });
 
-  testWidgets('TitleBarComponent renders heading and status variants',
-      (tester) async {
+  testWidgets('TitleBarComponent renders heading and status variants', (
+    tester,
+  ) async {
     await pumpComponent(
       tester,
       const TitleBarComponent(
@@ -319,36 +358,33 @@ void main() {
   });
 
   testWidgets(
-      'TitleBarComponent keeps title centered with multiple trailing actions', (
-    tester,
-  ) async {
-    await pumpComponent(
-      tester,
-      const TitleBarComponent(
-        variant: TitleBarComponentVariant.titleTopbar,
-        title: 'Buttons',
-        leadingWidth: 44,
-        trailingWidth: 88,
-        leading: Icon(Icons.arrow_back),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.text_fields),
-            Icon(Icons.dark_mode),
-          ],
+    'TitleBarComponent keeps title centered with multiple trailing actions',
+    (tester) async {
+      await pumpComponent(
+        tester,
+        const TitleBarComponent(
+          variant: TitleBarComponentVariant.titleTopbar,
+          title: 'Buttons',
+          leadingWidth: 44,
+          trailingWidth: 88,
+          leading: Icon(Icons.arrow_back),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [Icon(Icons.text_fields), Icon(Icons.dark_mode)],
+          ),
         ),
-      ),
-      width: 327,
-      height: 42,
-    );
+        width: 327,
+        height: 42,
+      );
 
-    final titleCenter = tester.getCenter(find.text('Buttons')).dx;
-    final barCenter = tester.getCenter(find.byType(TitleBarComponent)).dx;
+      final titleCenter = tester.getCenter(find.text('Buttons')).dx;
+      final barCenter = tester.getCenter(find.byType(TitleBarComponent)).dx;
 
-    expect((titleCenter - barCenter).abs(), lessThan(1));
-    expect(find.byIcon(Icons.text_fields), findsOneWidget);
-    expect(find.byIcon(Icons.dark_mode), findsOneWidget);
-  });
+      expect((titleCenter - barCenter).abs(), lessThan(1));
+      expect(find.byIcon(Icons.text_fields), findsOneWidget);
+      expect(find.byIcon(Icons.dark_mode), findsOneWidget);
+    },
+  );
 
   testWidgets('HeaderComponent renders image, subtitle, and multiple actions', (
     tester,
@@ -358,14 +394,8 @@ void main() {
       const HeaderComponent(
         title: 'Title',
         subtitle: 'Subtitle',
-        leading: ColoredBox(
-          key: ValueKey('header-image'),
-          color: Colors.blue,
-        ),
-        actions: [
-          Icon(Icons.add),
-          Icon(Icons.more_horiz),
-        ],
+        leading: ColoredBox(key: ValueKey('header-image'), color: Colors.blue),
+        actions: [Icon(Icons.add), Icon(Icons.more_horiz)],
       ),
       width: 327,
     );
@@ -376,8 +406,9 @@ void main() {
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
 
-    final imageSize =
-        tester.getSize(find.byKey(const ValueKey('header-image')));
+    final imageSize = tester.getSize(
+      find.byKey(const ValueKey('header-image')),
+    );
     expect(imageSize, const Size(36, 36));
   });
 }

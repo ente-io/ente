@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
@@ -11,6 +12,8 @@ import 'package:flutter/material.dart';
 const double _menuItemVerticalPadding = 9;
 const double _leadingSlotSize = 36;
 const double _trailingSlotSize = 36;
+const Duration _loadingDelay = Duration(milliseconds: 300);
+const Duration _successDisplayDuration = Duration(seconds: 1);
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=4055-18734&m=dev
 /// Section: List items / Menu Item
@@ -24,10 +27,10 @@ class MenuComponent extends StatefulWidget {
     this.trailing,
     this.selected = false,
     this.onTap,
-    this.gesturesEnabled = true,
+    this.isDisabled = false,
     this.showOnlyLoadingState = false,
-    this.surfaceExecutionStates = true,
-    this.alwaysShowSuccessState = false,
+    this.shouldSurfaceExecutionStates = true,
+    this.shouldShowSuccessConfirmation = false,
     this.titleMaxLines = 2,
     this.subtitleMaxLines = 1,
     this.titleColor,
@@ -40,10 +43,10 @@ class MenuComponent extends StatefulWidget {
   final Widget? trailing;
   final bool selected;
   final FutureOr<void> Function()? onTap;
-  final bool gesturesEnabled;
+  final bool isDisabled;
   final bool showOnlyLoadingState;
-  final bool surfaceExecutionStates;
-  final bool alwaysShowSuccessState;
+  final bool shouldSurfaceExecutionStates;
+  final bool shouldShowSuccessConfirmation;
   final int titleMaxLines;
   final int subtitleMaxLines;
   final Color? titleColor;
@@ -56,16 +59,16 @@ class MenuComponent extends StatefulWidget {
 class _MenuComponentState extends State<MenuComponent> {
   bool _isHovered = false;
   bool _isPressed = false;
-  bool _isBusy = false;
-  bool _showsLoading = false;
-  bool _showsSuccess = false;
+  bool _loadingVisible = false;
   Timer? _loadingTimer;
+  ComponentExecutionState _executionState = ComponentExecutionState.idle;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     final enabled = _canHandleGestures;
     final trailing = _trailing(colors);
+    final shouldReserveTrailingSlot = _shouldReserveTrailingSlot;
     return UnconstrainedBox(
       alignment: Alignment.topLeft,
       constrainedAxis: Axis.horizontal,
@@ -144,14 +147,25 @@ class _MenuComponentState extends State<MenuComponent> {
                           ],
                         ),
                       ),
-                      if (trailing != null) ...[
+                      if (shouldReserveTrailingSlot) ...[
                         const SizedBox(width: Spacing.md),
                         ConstrainedBox(
                           constraints: const BoxConstraints(
                             minWidth: _trailingSlotSize,
                             minHeight: _trailingSlotSize,
                           ),
-                          child: Center(child: trailing),
+                          child: Center(
+                            child: AnimatedSwitcher(
+                              duration: Motion.quick,
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              child:
+                                  trailing ??
+                                  const SizedBox.shrink(
+                                    key: ValueKey('menu-item-empty-trailing'),
+                                  ),
+                            ),
+                          ),
                         ),
                       ],
                     ],
@@ -172,13 +186,26 @@ class _MenuComponentState extends State<MenuComponent> {
   }
 
   bool get _canHandleGestures {
-    return widget.gesturesEnabled && widget.onTap != null && !_isBusy;
+    return !widget.isDisabled && widget.onTap != null && !_isBusy;
   }
 
+  bool get _isBusy => _executionState == ComponentExecutionState.inProgress;
+
+  bool get _showsLoading =>
+      _executionState == ComponentExecutionState.inProgress && _loadingVisible;
+
+  bool get _showsSuccess =>
+      _executionState == ComponentExecutionState.successful;
+
   bool get _shouldSurfaceExecutionState {
-    return widget.surfaceExecutionStates ||
-        widget.showOnlyLoadingState ||
-        widget.alwaysShowSuccessState;
+    return widget.shouldSurfaceExecutionStates || widget.showOnlyLoadingState;
+  }
+
+  bool get _shouldReserveTrailingSlot {
+    return widget.trailing != null ||
+        (!widget.isDisabled &&
+            widget.onTap != null &&
+            _shouldSurfaceExecutionState);
   }
 
   Color _backgroundColor(ColorTokens colors, bool enabled) {
@@ -202,9 +229,7 @@ class _MenuComponentState extends State<MenuComponent> {
         ),
       );
     }
-    if (_showsSuccess &&
-        _shouldSurfaceExecutionState &&
-        !widget.showOnlyLoadingState) {
+    if (_showsSuccess && _shouldShowSuccess) {
       return Icon(
         key: const ValueKey('menu-item-success'),
         Icons.check_rounded,
@@ -213,6 +238,10 @@ class _MenuComponentState extends State<MenuComponent> {
       );
     }
     return widget.trailing;
+  }
+
+  bool get _shouldShowSuccess {
+    return widget.shouldSurfaceExecutionStates && !widget.showOnlyLoadingState;
   }
 
   double _minimumHeight() {
@@ -251,34 +280,35 @@ class _MenuComponentState extends State<MenuComponent> {
       return;
     }
 
-    _isBusy = true;
     var loadingWasShown = false;
-    _loadingTimer = Timer(const Duration(milliseconds: 300), () {
+    _loadingTimer?.cancel();
+    setState(() {
+      _executionState = ComponentExecutionState.inProgress;
+      _loadingVisible = false;
+    });
+    _loadingTimer = Timer(_loadingDelay, () {
       if (!mounted || !_isBusy) {
         return;
       }
       loadingWasShown = true;
-      setState(() => _showsLoading = true);
+      setState(() => _loadingVisible = true);
     });
 
     try {
       await widget.onTap?.call();
-      _loadingTimer?.cancel();
       if (!mounted) {
         return;
       }
 
-      if (widget.alwaysShowSuccessState) {
-        await _showSuccessThenReset();
-        return;
-      }
+      final loadingPending = _loadingTimer?.isActive ?? false;
+      _loadingTimer?.cancel();
+      _loadingTimer = null;
 
-      if (widget.showOnlyLoadingState) {
-        _resetExecutionState();
-        return;
-      }
-
-      if (widget.surfaceExecutionStates && loadingWasShown) {
+      final shouldShowSuccess =
+          _shouldShowSuccess &&
+          (loadingWasShown ||
+              (loadingPending && widget.shouldShowSuccessConfirmation));
+      if (shouldShowSuccess) {
         await _showSuccessThenReset();
         return;
       }
@@ -286,6 +316,7 @@ class _MenuComponentState extends State<MenuComponent> {
       _resetExecutionState();
     } catch (_) {
       _loadingTimer?.cancel();
+      _loadingTimer = null;
       if (mounted) {
         _resetExecutionState();
       }
@@ -297,10 +328,10 @@ class _MenuComponentState extends State<MenuComponent> {
       return;
     }
     setState(() {
-      _showsLoading = false;
-      _showsSuccess = true;
+      _executionState = ComponentExecutionState.successful;
+      _loadingVisible = false;
     });
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(_successDisplayDuration);
     if (mounted) {
       _resetExecutionState();
     }
@@ -309,10 +340,9 @@ class _MenuComponentState extends State<MenuComponent> {
   void _resetExecutionState() {
     _loadingTimer?.cancel();
     setState(() {
-      _isBusy = false;
+      _executionState = ComponentExecutionState.idle;
       _isPressed = false;
-      _showsLoading = false;
-      _showsSuccess = false;
+      _loadingVisible = false;
     });
   }
 }
