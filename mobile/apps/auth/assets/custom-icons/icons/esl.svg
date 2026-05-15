@@ -1,22 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 86.3 86.3">
-
-  <g>
-    <!-- Background circle -->
-    <circle cx="43.2" cy="43.2" r="43.2"
-            fill="#000000"/>
-
-    <!-- Foreground shapes -->
-    <path fill="#FFFFFF"
-          d="M44.8,7.8L12,59.9c1.1,2,2.4,3.9,3.8,5.7l49.8-49.8C59.9,11.1,52.7,8.1,44.8,7.8z"/>
-
-    <path fill="#FFFFFF"
-          d="M70.7,20.8L20.8,70.7c1.8,1.4,3.7,2.7,5.7,3.8l52-32.7C78.2,33.8,75.3,26.6,70.7,20.8z"/>
-
-    <path fill="#FFFFFF"
-          d="M77.8,50.7L35,77.6C57.6,82.6,74.6,66.7,77.8,50.7z"/>
-  </g>
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86.3 86.3" fill="none">
+<circle cx="43.2" cy="43.2" r="43.2" fill="#black"/>
+<g style="mix-blend-mode:difference">
+<path fill="#white" d="M44.8,7.8L12,59.9c1.1,2,2.4,3.9,3.8,5.7l49.8-49.8C59.9,11.1,52.7,8.1,44.8,7.8z"/>
+<path fill="#white" d="M70.7,20.8L20.8,70.7c1.8,1.4,3.7,2.7,5.7,3.8l52-32.7C78.2,33.8,75.3,26.6,70.7,20.8z"/>
+<path fill="#white" d="M77.8,50.7L35,77.6C57.6,82.6,74.6,66.7,77.8,50.7z"/>
+</g>
 </svg>
