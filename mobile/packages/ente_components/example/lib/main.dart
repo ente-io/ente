@@ -1137,9 +1137,13 @@ class _ButtonMatrix extends StatelessWidget {
     return const _CatalogPreviewList(
       children: [
         ButtonStateCyclePreview(),
+        _ButtonExecutionPreview(),
         _ButtonStateGroup(title: 'Default'),
         _ButtonStateGroup(title: 'Disabled', disabled: true),
-        _CatalogPreviewGroup(title: 'Icon button', child: _IconButtonMatrix()),
+        _CatalogPreviewGroup(
+          title: 'Icon button async actions',
+          child: _IconButtonMatrix(),
+        ),
       ],
     );
   }
@@ -1170,6 +1174,85 @@ class _ButtonStateCyclePreviewState extends State<ButtonStateCyclePreview> {
 
   Future<void> _runPreviewAction() {
     return Future<void>.delayed(const Duration(milliseconds: 900));
+  }
+}
+
+class _ButtonExecutionPreview extends StatelessWidget {
+  const _ButtonExecutionPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return _CatalogPreviewGroup(
+      title: 'Async actions',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Success',
+            style: TextStyles.large.copyWith(color: colors.textBase),
+          ),
+          const SizedBox(height: Spacing.xs),
+          ButtonComponent(
+            label: 'Save changes',
+            variant: ButtonComponentVariant.primary,
+            size: ButtonComponentSize.large,
+            onTap: () =>
+                Future<void>.delayed(const Duration(milliseconds: 900)),
+          ),
+          const SizedBox(height: Spacing.md),
+          Text(
+            'Error',
+            style: TextStyles.large.copyWith(color: colors.textBase),
+          ),
+          const SizedBox(height: Spacing.xs),
+          ButtonComponent(
+            label: 'Sync backup',
+            variant: ButtonComponentVariant.critical,
+            size: ButtonComponentSize.large,
+            onTap: () => _runPreviewError(context),
+          ),
+          const SizedBox(height: Spacing.md),
+          Text(
+            'Fast confirmation',
+            style: TextStyles.large.copyWith(color: colors.textBase),
+          ),
+          const SizedBox(height: Spacing.xs),
+          ButtonComponent(
+            label: 'Copy link',
+            variant: ButtonComponentVariant.secondary,
+            size: ButtonComponentSize.large,
+            shouldShowSuccessConfirmation: true,
+            onTap: () =>
+                Future<void>.delayed(const Duration(milliseconds: 120)),
+          ),
+          const SizedBox(height: Spacing.md),
+          Text(
+            'Surface off',
+            style: TextStyles.large.copyWith(color: colors.textBase),
+          ),
+          const SizedBox(height: Spacing.xs),
+          ButtonComponent(
+            label: 'Refresh',
+            variant: ButtonComponentVariant.neutral,
+            size: ButtonComponentSize.large,
+            shouldSurfaceExecutionStates: false,
+            onTap: () =>
+                Future<void>.delayed(const Duration(milliseconds: 900)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _runPreviewError(BuildContext context) async {
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Something went wrong')));
+    }
+    throw StateError('Preview action failed');
   }
 }
 
@@ -1277,37 +1360,31 @@ class _IconButtonMatrix extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const columns = ['Default', 'Disabled', 'Loading', 'Success'];
+    const columns = ['Default', 'Disabled', 'Loading', 'Success', 'Error'];
     const rows = [
       _IconButtonPreviewRow(
         label: 'Primary',
         variant: IconButtonComponentVariant.primary,
-        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Critical',
         variant: IconButtonComponentVariant.critical,
-        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Unfilled',
         variant: IconButtonComponentVariant.unfilled,
-        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Secondary',
         variant: IconButtonComponentVariant.secondary,
-        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Green',
         variant: IconButtonComponentVariant.green,
-        states: columns,
       ),
       _IconButtonPreviewRow(
         label: 'Circular',
         variant: IconButtonComponentVariant.circular,
-        states: columns,
       ),
     ];
     final colors = context.componentColors;
@@ -1343,15 +1420,10 @@ class _IconButtonMatrix extends StatelessWidget {
 }
 
 class _IconButtonPreviewRow extends StatelessWidget {
-  const _IconButtonPreviewRow({
-    required this.label,
-    required this.variant,
-    required this.states,
-  });
+  const _IconButtonPreviewRow({required this.label, required this.variant});
 
   final String label;
   final IconButtonComponentVariant variant;
-  final List<String> states;
 
   @override
   Widget build(BuildContext context) {
@@ -1367,18 +1439,15 @@ class _IconButtonPreviewRow extends StatelessWidget {
         ),
         for (final state in const [
           'Default',
-          'Hover',
-          'Pressed',
           'Disabled',
           'Loading',
           'Success',
+          'Error',
         ])
           SizedBox(
             width: 76,
             child: Center(
-              child: states.contains(state)
-                  ? _IconButtonStatePreview(variant: variant, state: state)
-                  : const SizedBox.square(dimension: 38),
+              child: _IconButtonStatePreview(variant: variant, state: state),
             ),
           ),
       ],
@@ -1397,11 +1466,28 @@ class _IconButtonStatePreview extends StatelessWidget {
     return IconButtonComponent(
       tooltip: state,
       variant: variant,
-      isLoading: state == 'Loading',
-      isSuccess: state == 'Success',
-      onTap: state == 'Disabled' ? null : () {},
+      shouldShowSuccessConfirmation: state == 'Success',
+      onTap: state == 'Disabled'
+          ? null
+          : state == 'Loading'
+          ? () => Future<void>.delayed(const Duration(milliseconds: 900))
+          : state == 'Success'
+          ? () => Future<void>.delayed(const Duration(milliseconds: 120))
+          : state == 'Error'
+          ? () => _runPreviewError(context)
+          : () {},
       icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01, size: 18),
     );
+  }
+
+  Future<void> _runPreviewError(BuildContext context) async {
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Something went wrong')));
+    }
+    throw StateError('Preview action failed');
   }
 }
 

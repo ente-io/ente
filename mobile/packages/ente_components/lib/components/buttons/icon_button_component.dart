@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -26,8 +27,6 @@ class IconButtonComponent extends StatefulWidget {
     required this.icon,
     required this.onTap,
     this.variant = IconButtonComponentVariant.secondary,
-    this.isLoading = false,
-    this.isSuccess = false,
     this.shouldSurfaceExecutionStates = true,
     this.shouldShowSuccessConfirmation = false,
     this.tooltip,
@@ -36,8 +35,6 @@ class IconButtonComponent extends StatefulWidget {
   final Widget icon;
   final FutureOr<void> Function()? onTap;
   final IconButtonComponentVariant variant;
-  final bool isLoading;
-  final bool isSuccess;
   final bool shouldSurfaceExecutionStates;
   final bool shouldShowSuccessConfirmation;
   final String? tooltip;
@@ -49,17 +46,15 @@ class IconButtonComponent extends StatefulWidget {
 class _IconButtonComponentState extends State<IconButtonComponent>
     with SingleTickerProviderStateMixin {
   static const Duration _loadingDelay = Duration(milliseconds: 300);
-  static const Duration _successDisplayDuration = Duration(seconds: 2);
+  static const Duration _successDisplayDuration = Duration(seconds: 1);
 
   late final AnimationController _loadingController;
   bool _isHovered = false;
   bool _isPressed = false;
-  int _executionToken = 0;
   Timer? _loadingTimer;
   Timer? _successResetTimer;
-  bool _isExecuting = false;
-  bool _isSuccessful = false;
   bool _loadingVisible = false;
+  ComponentExecutionState _executionState = ComponentExecutionState.idle;
 
   @override
   void initState() {
@@ -74,9 +69,6 @@ class _IconButtonComponentState extends State<IconButtonComponent>
   @override
   void didUpdateWidget(covariant IconButtonComponent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_parentControlsExecutionState) {
-      _resetInternalExecutionState();
-    }
     _syncLoadingController();
   }
 
@@ -143,12 +135,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
       button = Tooltip(message: widget.tooltip!, child: button);
     }
 
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: widget.tooltip,
-      child: button,
-    );
+    return button;
   }
 
   void _setHovered(bool value) {
@@ -193,27 +180,23 @@ class _IconButtonComponentState extends State<IconButtonComponent>
   }
 
   bool get _canHandleGestures {
-    return widget.onTap != null &&
-        !widget.isLoading &&
-        !widget.isSuccess &&
-        !_isExecuting &&
-        !_isSuccessful;
+    return widget.onTap != null && !_isExecuting && !_isSuccessful;
   }
 
+  bool get _isExecuting =>
+      _executionState == ComponentExecutionState.inProgress;
+
+  bool get _isSuccessful =>
+      _executionState == ComponentExecutionState.successful;
+
   bool get _showLoading {
-    return widget.isLoading ||
-        (widget.shouldSurfaceExecutionStates &&
-            _isExecuting &&
-            _loadingVisible);
+    return widget.shouldSurfaceExecutionStates &&
+        _isExecuting &&
+        _loadingVisible;
   }
 
   bool get _showSuccess {
-    return widget.isSuccess ||
-        (widget.shouldSurfaceExecutionStates && _isSuccessful);
-  }
-
-  bool get _parentControlsExecutionState {
-    return widget.onTap == null || widget.isLoading || widget.isSuccess;
+    return widget.shouldSurfaceExecutionStates && _isSuccessful;
   }
 
   void _syncLoadingController() {
@@ -230,26 +213,30 @@ class _IconButtonComponentState extends State<IconButtonComponent>
     }
   }
 
-  void _resetInternalExecutionState() {
-    _executionToken++;
-    _cancelLoadingTimer();
-    _successResetTimer?.cancel();
-    _successResetTimer = null;
-    _isExecuting = false;
-    _isSuccessful = false;
-    _loadingVisible = false;
-    _isPressed = false;
-  }
-
   Future<void> _handleTap() async {
     final callback = widget.onTap;
     if (callback == null) return;
 
-    final executionToken = _beginExecution();
+    _successResetTimer?.cancel();
+    _successResetTimer = null;
+    _cancelLoadingTimer();
+    setState(() {
+      _executionState = ComponentExecutionState.inProgress;
+      _loadingVisible = false;
+      _isPressed = false;
+    });
+    _loadingTimer = Timer(_loadingDelay, () {
+      if (!mounted) return;
+      setState(() {
+        _loadingVisible = true;
+        _isPressed = false;
+      });
+      _syncLoadingController();
+    });
 
     try {
       await Future.sync(callback);
-      if (!mounted || !_isCurrentExecution(executionToken)) {
+      if (!mounted) {
         return;
       }
 
@@ -267,38 +254,11 @@ class _IconButtonComponentState extends State<IconButtonComponent>
         _clearExecutionState();
       }
     } catch (_) {
-      if (!mounted || !_isCurrentExecution(executionToken)) {
-        return;
+      if (mounted) {
+        _cancelLoadingTimer();
+        _clearExecutionState();
       }
-      _cancelLoadingTimer();
-      _clearExecutionState();
     }
-  }
-
-  int _beginExecution() {
-    _successResetTimer?.cancel();
-    _successResetTimer = null;
-    _cancelLoadingTimer();
-    final executionToken = ++_executionToken;
-    setState(() {
-      _isExecuting = true;
-      _isSuccessful = false;
-      _loadingVisible = false;
-      _isPressed = false;
-    });
-    _loadingTimer = Timer(_loadingDelay, () {
-      if (!mounted || executionToken != _executionToken) return;
-      setState(() {
-        _loadingVisible = true;
-        _isPressed = false;
-      });
-      _syncLoadingController();
-    });
-    return executionToken;
-  }
-
-  bool _isCurrentExecution(int executionToken) {
-    return executionToken == _executionToken && !_parentControlsExecutionState;
   }
 
   void _cancelLoadingTimer() {
@@ -308,8 +268,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
 
   void _clearExecutionState() {
     setState(() {
-      _isExecuting = false;
-      _isSuccessful = false;
+      _executionState = ComponentExecutionState.idle;
       _loadingVisible = false;
       _isPressed = false;
     });
@@ -318,8 +277,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
 
   void _showSuccessForDuration() {
     setState(() {
-      _isExecuting = false;
-      _isSuccessful = true;
+      _executionState = ComponentExecutionState.successful;
       _loadingVisible = false;
       _isPressed = false;
     });
@@ -328,7 +286,7 @@ class _IconButtonComponentState extends State<IconButtonComponent>
     _successResetTimer = Timer(_successDisplayDuration, () {
       if (!mounted) return;
       setState(() {
-        _isSuccessful = false;
+        _executionState = ComponentExecutionState.idle;
         _loadingVisible = false;
       });
       _syncLoadingController();
@@ -441,6 +399,9 @@ class _IconButtonComponentState extends State<IconButtonComponent>
     bool isDisabled = false,
   }) {
     final colors = context.componentColors;
+    if (isDisabled) {
+      return colors.textLighter;
+    }
     if (isSuccess && widget.variant != IconButtonComponentVariant.green) {
       return colors.primary;
     }

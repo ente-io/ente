@@ -176,7 +176,7 @@ void main() {
       expect(find.text("Saved"), findsOneWidget);
       expect(tester.getSize(find.byType(AnimatedContainer)).height, 52);
 
-      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
@@ -219,6 +219,26 @@ void main() {
       await tester.pump();
     },
   );
+
+  testWidgets("ButtonComponent resets state after async errors", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        ButtonComponent(
+          label: "Fail",
+          onTap: () async => throw StateError("failed"),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text("Fail"));
+    await tester.pump();
+
+    expect(find.text("Fail"), findsOneWidget);
+    expect(find.byKey(const ValueKey('loading')), findsNothing);
+    expect(find.byKey(const ValueKey('success')), findsNothing);
+  });
 
   testWidgets(
     "ButtonComponent remains disabled when onTap is null or disabled",
@@ -342,46 +362,6 @@ void main() {
     expect(_iconButtonColor(tester), Colors.transparent);
   });
 
-  testWidgets("IconButtonComponent maps loading and success affordances", (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        IconButtonComponent(
-          icon: const Icon(Icons.add),
-          variant: IconButtonComponentVariant.green,
-          isSuccess: true,
-          onTap: () {},
-        ),
-      ),
-    );
-
-    final surface = tester.widget<AnimatedContainer>(
-      find.byKey(const ValueKey('icon-button-surface')),
-    );
-    final decoration = surface.decoration! as BoxDecoration;
-    final successIcon = tester.widget<HugeIcon>(find.byType(HugeIcon));
-
-    expect(decoration.color, ColorTokens.light.primary);
-    expect(successIcon.color, ColorTokens.light.specialWhite);
-
-    await tester.pumpWidget(
-      _wrap(
-        IconButtonComponent(
-          icon: const Icon(Icons.add),
-          isLoading: true,
-          onTap: () {},
-        ),
-      ),
-    );
-
-    final loadingFinder = find.byKey(const ValueKey('loading'));
-    expect(loadingFinder, findsOneWidget);
-    expect(tester.widget(loadingFinder), isA<RotationTransition>());
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byIcon(Icons.add), findsNothing);
-  });
-
   testWidgets("IconButtonComponent calls taps only when enabled", (
     tester,
   ) async {
@@ -400,13 +380,36 @@ void main() {
     await tester.pump();
 
     expect(tapCount, 1);
+  });
 
+  testWidgets("IconButtonComponent mutes disabled foreground", (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const IconButtonComponent(
+          icon: Icon(Icons.add),
+          variant: IconButtonComponentVariant.primary,
+          onTap: null,
+        ),
+      ),
+    );
+
+    final iconTheme = tester.widget<IconTheme>(
+      find.descendant(
+        of: find.byKey(const ValueKey('icon-button-surface')),
+        matching: find.byType(IconTheme),
+      ),
+    );
+    expect(iconTheme.data.color, ColorTokens.light.textLighter);
+  });
+
+  testWidgets("IconButtonComponent resets state after async errors", (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(
         IconButtonComponent(
           icon: const Icon(Icons.add),
-          isLoading: true,
-          onTap: () => tapCount += 1,
+          onTap: () async => throw StateError("failed"),
         ),
       ),
     );
@@ -414,7 +417,9 @@ void main() {
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
 
-    expect(tapCount, 1);
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.byKey(const ValueKey('loading')), findsNothing);
+    expect(find.byKey(const ValueKey('success')), findsNothing);
   });
 
   testWidgets("IconButtonComponent surfaces async execution states", (
@@ -458,83 +463,6 @@ void main() {
 
     expect(find.byKey(const ValueKey('success')), findsOneWidget);
   });
-
-  testWidgets(
-    "IconButtonComponent clears internal execution when parent takes control",
-    (tester) async {
-      final completer = Completer<void>();
-      var externalLoading = false;
-
-      Widget buildButton() {
-        return _wrap(
-          IconButtonComponent(
-            icon: const Icon(Icons.add),
-            isLoading: externalLoading,
-            onTap: () => completer.future,
-          ),
-        );
-      }
-
-      await tester.pumpWidget(buildButton());
-      await tester.tap(find.byType(GestureDetector));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.byKey(const ValueKey('loading')), findsOneWidget);
-
-      externalLoading = true;
-      await tester.pumpWidget(buildButton());
-      await tester.pump();
-
-      expect(find.byKey(const ValueKey('loading')), findsOneWidget);
-
-      externalLoading = false;
-      await tester.pumpWidget(buildButton());
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.byKey(const ValueKey('loading')), findsNothing);
-      expect(find.byIcon(Icons.add), findsOneWidget);
-
-      completer.complete();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
-
-      expect(find.byKey(const ValueKey('success')), findsNothing);
-      expect(find.byIcon(Icons.add), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    "IconButtonComponent is semantically disabled while success is visible",
-    (tester) async {
-      var tapCount = 0;
-
-      await tester.pumpWidget(
-        _wrap(
-          IconButtonComponent(
-            icon: const Icon(Icons.add),
-            tooltip: "Add",
-            shouldShowSuccessConfirmation: true,
-            onTap: () => tapCount += 1,
-          ),
-        ),
-      );
-
-      await tester.tap(find.byType(GestureDetector));
-      await tester.pump();
-
-      expect(tapCount, 1);
-      expect(find.byKey(const ValueKey('success')), findsOneWidget);
-
-      final semantics = tester.widget<Semantics>(
-        find.byWidgetPredicate(
-          (widget) => widget is Semantics && widget.properties.label == "Add",
-        ),
-      );
-      expect(semantics.properties.button, isTrue);
-      expect(semantics.properties.enabled, isFalse);
-    },
-  );
 
   testWidgets("IconButtonComponent can show success for fast actions", (
     tester,

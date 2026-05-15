@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_components/models/component_execution_state.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
@@ -57,7 +58,7 @@ class _ButtonComponentState extends State<ButtonComponent>
   static const double _contentMinHeight = 24;
   static const double _verticalPadding = 14;
   static const Duration _loadingDelay = Duration(milliseconds: 300);
-  static const Duration _successDisplayDuration = Duration(seconds: 2);
+  static const Duration _successDisplayDuration = Duration(seconds: 1);
   static const Duration _minimumPressDuration = Duration(milliseconds: 120);
 
   late final AnimationController _loadingController;
@@ -68,9 +69,8 @@ class _ButtonComponentState extends State<ButtonComponent>
   Timer? _loadingTimer;
   Timer? _successResetTimer;
   Timer? _pressReleaseTimer;
-  bool _isExecuting = false;
-  bool _isSuccessful = false;
   bool _loadingVisible = false;
+  ComponentExecutionState _executionState = ComponentExecutionState.idle;
 
   @override
   void initState() {
@@ -368,6 +368,12 @@ class _ButtonComponentState extends State<ButtonComponent>
       !_isExecuting &&
       !_isSuccessful;
 
+  bool get _isExecuting =>
+      _executionState == ComponentExecutionState.inProgress;
+
+  bool get _isSuccessful =>
+      _executionState == ComponentExecutionState.successful;
+
   bool get _showLoading =>
       widget.shouldSurfaceExecutionStates && _isExecuting && _loadingVisible;
 
@@ -381,8 +387,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     var loadingSurfaced = false;
     _loadingTimer?.cancel();
     setState(() {
-      _isExecuting = true;
-      _isSuccessful = false;
+      _executionState = ComponentExecutionState.inProgress;
       _loadingVisible = false;
     });
     _loadingTimer = Timer(_loadingDelay, () {
@@ -412,8 +417,7 @@ class _ButtonComponentState extends State<ButtonComponent>
         _showSuccessForDuration();
       } else {
         setState(() {
-          _isExecuting = false;
-          _isSuccessful = false;
+          _executionState = ComponentExecutionState.idle;
           _loadingVisible = false;
           _isPressed = false;
         });
@@ -422,21 +426,20 @@ class _ButtonComponentState extends State<ButtonComponent>
     } catch (_) {
       _loadingTimer?.cancel();
       _loadingTimer = null;
-      if (!mounted) return;
-      setState(() {
-        _isExecuting = false;
-        _isSuccessful = false;
-        _loadingVisible = false;
-        _isPressed = false;
-      });
-      _syncLoadingController();
+      if (mounted) {
+        setState(() {
+          _executionState = ComponentExecutionState.idle;
+          _loadingVisible = false;
+          _isPressed = false;
+        });
+        _syncLoadingController();
+      }
     }
   }
 
   void _showSuccessForDuration() {
     setState(() {
-      _isExecuting = false;
-      _isSuccessful = true;
+      _executionState = ComponentExecutionState.successful;
       _loadingVisible = false;
       _isPressed = false;
     });
@@ -445,7 +448,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     _successResetTimer = Timer(_successDisplayDuration, () {
       if (!mounted) return;
       setState(() {
-        _isSuccessful = false;
+        _executionState = ComponentExecutionState.idle;
         _loadingVisible = false;
       });
       _syncLoadingController();
