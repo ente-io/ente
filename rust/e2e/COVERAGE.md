@@ -5,6 +5,7 @@ Current suite entrypoint:
 - [`auth_contacts_e2e`](tests/full_e2e.rs)
 - [`legacy_contact_recovery_e2e`](tests/full_e2e.rs)
 - [`legacy_kit_recovery_e2e`](tests/full_e2e.rs)
+- [`paste_cli_e2e`](tests/paste_cli_e2e.rs)
 
 Shared setup and helpers:
 
@@ -12,6 +13,7 @@ Shared setup and helpers:
 - auth helpers: [`tests/support/auth.rs`](tests/support/auth.rs)
 - contacts and legacy-info helpers: [`tests/support/contacts.rs`](tests/support/contacts.rs)
 - local/CI runner: [`scripts/run.sh`](scripts/run.sh)
+- no-Docker paste runner: [`scripts/run-pglite.sh`](scripts/run-pglite.sh)
 - CI workflow: [`../../.github/workflows/rust-e2e-test.yml`](../../.github/workflows/rust-e2e-test.yml)
 
 ## Covered Scenarios
@@ -32,6 +34,9 @@ Shared setup and helpers:
 | Legacy   | trusted contact stops recovery and both recovery-session views clear                 | [`run_legacy_stop_stage`](tests/full_e2e.rs)                                                                   |
 | Legacy   | revoke and re-invite trusted contact back to accepted state                          | [`run_legacy_reinvite_stage`](tests/full_e2e.rs)                                                               |
 | Legacy   | full recovery flow to `READY` after owner approval                                   | [`run_legacy_reset_stage`](tests/full_e2e.rs)                                                                  |
+| Paste    | CLI creates a one-time encrypted paste through Museum                                | [`paste_cli_e2e`](tests/paste_cli_e2e.rs)                                                                      |
+| Paste    | CLI consumes and decrypts the paste body                                             | [`paste_cli_e2e`](tests/paste_cli_e2e.rs)                                                                      |
+| Paste    | second consume fails with `410 Paste is unavailable`                                 | [`paste_cli_e2e`](tests/paste_cli_e2e.rs)                                                                      |
 | Recovery | recovered contact changes password through legacy recovery                           | [`run_legacy_reset_stage`](tests/full_e2e.rs)                                                                  |
 | Recovery | old password login fails after recovery                                              | [`run_legacy_reset_stage`](tests/full_e2e.rs)                                                                  |
 | Recovery | new password login succeeds after recovery                                           | [`run_legacy_reset_stage`](tests/full_e2e.rs)                                                                  |
