@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_components/models/component_execution_state.dart';
+import 'package:ente_components/src/components/menu_component_surface_style.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
@@ -29,7 +30,7 @@ class MenuComponent extends StatefulWidget {
     this.onTap,
     this.isDisabled = false,
     this.showOnlyLoadingState = false,
-    this.shouldSurfaceExecutionStates = true,
+    this.shouldSurfaceExecutionStates = false,
     this.shouldShowSuccessConfirmation = false,
     this.titleMaxLines = 2,
     this.subtitleMaxLines = 1,
@@ -69,6 +70,9 @@ class _MenuComponentState extends State<MenuComponent> {
     final enabled = _canHandleGestures;
     final trailing = _trailing(colors);
     final shouldReserveTrailingSlot = _shouldReserveTrailingSlot;
+    final surfaceStyle = MenuComponentSurfaceStyle.maybeOf(context);
+    final borderRadius =
+        surfaceStyle?.borderRadius ?? BorderRadius.circular(Radii.button);
     return UnconstrainedBox(
       alignment: Alignment.topLeft,
       constrainedAxis: Axis.horizontal,
@@ -81,18 +85,22 @@ class _MenuComponentState extends State<MenuComponent> {
           child: InkWell(
             onTap: enabled ? _handleTap : null,
             onHighlightChanged: enabled ? _setPressed : null,
-            borderRadius: BorderRadius.circular(Radii.button),
+            borderRadius: borderRadius,
             child: AnimatedContainer(
               key: const ValueKey('menu-item-surface'),
               duration: Motion.quick,
               decoration: BoxDecoration(
-                color: _backgroundColor(colors, enabled),
+                color: _backgroundColor(
+                  colors,
+                  enabled,
+                  surfaceStyle?.backgroundColor,
+                ),
                 border: Border.all(
                   color: widget.selected
                       ? colors.primaryStroke
                       : Colors.transparent,
                 ),
-                borderRadius: BorderRadius.circular(Radii.button),
+                borderRadius: borderRadius,
               ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: _minimumHeight()),
@@ -208,14 +216,18 @@ class _MenuComponentState extends State<MenuComponent> {
             _shouldSurfaceExecutionState);
   }
 
-  Color _backgroundColor(ColorTokens colors, bool enabled) {
+  Color _backgroundColor(
+    ColorTokens colors,
+    bool enabled,
+    Color? backgroundColor,
+  ) {
     if (_isPressed) {
       return colors.fillDarker;
     }
     if (_isHovered && enabled) {
       return colors.fillDark;
     }
-    return colors.fillLight;
+    return backgroundColor ?? colors.fillLight;
   }
 
   Widget? _trailing(ColorTokens colors) {

@@ -12,9 +12,8 @@ import 'package:hugeicons/hugeicons.dart';
 /// Section: Bottom sheet / Bottom Sheet Header
 /// Specs: H2 title, optional 36px circular close action, and optional centered
 /// illustration slot for warning and error sheets.
-class BottomSheetHeaderComponent extends StatelessWidget {
-  const BottomSheetHeaderComponent({
-    super.key,
+class _BottomSheetHeaderComponent extends StatelessWidget {
+  const _BottomSheetHeaderComponent({
     this.title,
     this.illustration,
     this.onClose,
@@ -139,7 +138,7 @@ class BottomSheetComponent extends StatelessWidget {
     final effectiveHeader =
         header ??
         ((title != null || showCloseButton || usesCenteredLayout)
-            ? BottomSheetHeaderComponent(
+            ? _BottomSheetHeaderComponent(
                 title: title,
                 illustration: illustration,
                 onClose: onClose,

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_components/components/app_bar_component.dart';
 import 'package:ente_components/components/menu_component.dart';
+import 'package:ente_components/components/menu_group_component.dart';
 import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -97,6 +98,7 @@ void main() {
         MenuComponent(
           title: 'Sync now',
           trailing: const Icon(Icons.chevron_right),
+          shouldSurfaceExecutionStates: true,
           onTap: () {
             tapCount += 1;
             return completer.future;
@@ -157,6 +159,7 @@ void main() {
       tester,
       MenuComponent(
         title: 'Copy',
+        shouldSurfaceExecutionStates: true,
         shouldShowSuccessConfirmation: true,
         onTap: () async {},
       ),
@@ -179,6 +182,7 @@ void main() {
       MenuComponent(
         title: 'Fail',
         trailing: const Icon(Icons.chevron_right),
+        shouldSurfaceExecutionStates: true,
         onTap: () async {
           await Future<void>.delayed(const Duration(milliseconds: 400));
           throw StateError('failed');
@@ -220,6 +224,82 @@ void main() {
     expect(tapCount, 0);
   });
 
+  testWidgets('MenuGroupComponent shapes a list of menu items', (tester) async {
+    var tapped = false;
+    var disabledTapped = false;
+
+    await pumpComponent(
+      tester,
+      MenuGroupComponent(
+        backgroundColor: Colors.orange,
+        items: [
+          MenuComponent(
+            title: 'Account',
+            leading: const Icon(Icons.person_outline),
+            selected: true,
+            titleColor: ColorTokens.light.warning,
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => tapped = true,
+          ),
+          MenuComponent(
+            title: 'Security',
+            leading: const Icon(Icons.lock_outline),
+            isDisabled: true,
+            onTap: () => disabledTapped = true,
+          ),
+          const MenuComponent(
+            title: 'Appearance',
+            leading: Icon(Icons.palette_outlined),
+          ),
+        ],
+      ),
+      height: 180,
+    );
+
+    expect(find.text('Account'), findsOneWidget);
+    expect(find.text('Security'), findsOneWidget);
+    expect(find.text('Appearance'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('Account')).style?.color,
+      ColorTokens.light.warning,
+    );
+
+    final groupSurface = tester.widget<Container>(
+      find.byKey(const ValueKey('menu-group-surface')),
+    );
+    final groupDecoration = groupSurface.decoration! as BoxDecoration;
+    expect(
+      groupDecoration.borderRadius,
+      const BorderRadius.all(Radius.circular(20)),
+    );
+
+    final itemSurfaces = tester.widgetList<AnimatedContainer>(
+      find.byKey(const ValueKey('menu-item-surface')),
+    );
+    final itemRadii = itemSurfaces
+        .map((surface) => (surface.decoration! as BoxDecoration).borderRadius)
+        .toList();
+    final itemColors = itemSurfaces
+        .map((surface) => (surface.decoration! as BoxDecoration).color)
+        .toList();
+
+    expect(itemRadii[0], const BorderRadius.vertical(top: Radius.circular(20)));
+    expect(itemRadii[1], BorderRadius.zero);
+    expect(
+      itemRadii[2],
+      const BorderRadius.vertical(bottom: Radius.circular(20)),
+    );
+    expect(itemColors, everyElement(Colors.orange));
+
+    await tester.tap(find.text('Account'));
+    await tester.tap(find.text('Security'));
+    await tester.pump();
+
+    expect(tapped, isTrue);
+    expect(disabledTapped, isFalse);
+  });
+
   testWidgets('MenuComponent supports pressed and execution visuals', (
     tester,
   ) async {
@@ -239,11 +319,13 @@ void main() {
             title: 'Loading row',
             trailing: const Icon(Icons.chevron_right),
             showOnlyLoadingState: true,
+            shouldSurfaceExecutionStates: true,
             onTap: () => loadingCompleter.future,
           ),
           MenuComponent(
             title: 'Success row',
             trailing: const Icon(Icons.chevron_right),
+            shouldSurfaceExecutionStates: true,
             shouldShowSuccessConfirmation: true,
             onTap: () async {},
           ),

@@ -590,40 +590,48 @@ class _SettingsMainContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SettingsNavigationItem(
-          title: 'Account',
-          icon: HugeIcons.strokeRoundedUser,
-          page: _SettingsAccountPage(),
+        MenuGroupComponent(
+          items: [
+            _settingsNavigationItem(
+              context,
+              title: 'Account',
+              icon: HugeIcons.strokeRoundedUser,
+              page: const _SettingsAccountPage(),
+            ),
+            _settingsNavigationItem(
+              context,
+              title: 'Security',
+              icon: HugeIcons.strokeRoundedSecurityCheck,
+              page: const _SettingsSecurityPage(),
+            ),
+            _settingsNavigationItem(
+              context,
+              title: 'Appearance',
+              icon: HugeIcons.strokeRoundedPaintBoard,
+              page: const _SettingsAppearancePage(),
+            ),
+          ],
         ),
         const SizedBox(height: Spacing.md),
-        const _SettingsNavigationItem(
-          title: 'Security',
-          icon: HugeIcons.strokeRoundedSecurityCheck,
-          page: _SettingsSecurityPage(),
-        ),
-        const SizedBox(height: Spacing.md),
-        const _SettingsNavigationItem(
-          title: 'Appearance',
-          icon: HugeIcons.strokeRoundedPaintBoard,
-          page: _SettingsAppearancePage(),
-        ),
-        const SizedBox(height: Spacing.md),
-        const _SettingsNavigationItem(
+        _settingsNavigationItem(
+          context,
           title: 'General',
           icon: HugeIcons.strokeRoundedSettings01,
-          page: _SettingsGeneralPage(),
+          page: const _SettingsGeneralPage(),
         ),
         const SizedBox(height: Spacing.md),
-        const _SettingsNavigationItem(
+        _settingsNavigationItem(
+          context,
           title: 'Help and support',
           icon: HugeIcons.strokeRoundedHelpCircle,
-          page: _SettingsSupportPage(),
+          page: const _SettingsSupportPage(),
         ),
         const SizedBox(height: Spacing.md),
-        const _SettingsNavigationItem(
+        _settingsNavigationItem(
+          context,
           title: 'About',
           icon: HugeIcons.strokeRoundedInformationCircle,
-          page: _SettingsAboutPage(),
+          page: const _SettingsAboutPage(),
         ),
         const SizedBox(height: Spacing.xl),
         MenuComponent(
@@ -644,21 +652,13 @@ class _SettingsMainContent extends StatelessWidget {
       ],
     );
   }
-}
 
-class _SettingsNavigationItem extends StatelessWidget {
-  const _SettingsNavigationItem({
-    required this.title,
-    required this.icon,
-    required this.page,
-  });
-
-  final String title;
-  final HugeIconData icon;
-  final Widget page;
-
-  @override
-  Widget build(BuildContext context) {
+  MenuComponent _settingsNavigationItem(
+    BuildContext context, {
+    required String title,
+    required HugeIconData icon,
+    required Widget page,
+  }) {
     return MenuComponent(
       title: title,
       leading: _CatalogHugeIcon(icon),
@@ -2557,6 +2557,7 @@ class _MenuItemInteractionStatesPreview extends StatelessWidget {
           subtitle: 'Execution loading, then success',
           leading: _CatalogHugeIcon(HugeIcons.strokeRoundedCloudUpload),
           trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
+          shouldSurfaceExecutionStates: true,
           onTap: _completeSlowly,
         ),
         const SizedBox(height: Spacing.md),
@@ -2565,6 +2566,7 @@ class _MenuItemInteractionStatesPreview extends StatelessWidget {
           subtitle: 'Fast success confirmation',
           leading: _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
           trailing: _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight01),
+          shouldSurfaceExecutionStates: true,
           shouldShowSuccessConfirmation: true,
           onTap: _completeQuickly,
         ),
@@ -2578,6 +2580,7 @@ class _MenuItemInteractionStatesPreview extends StatelessWidget {
           ),
           titleColor: context.componentColors.warning,
           iconColor: context.componentColors.warning,
+          shouldSurfaceExecutionStates: true,
           onTap: () => _failAfterDelay(context),
         ),
         const SizedBox(height: Spacing.md),
@@ -2723,24 +2726,6 @@ class _BottomSheetPreview extends StatelessWidget {
                 onTap: () => _showErrorSheet(context),
               ),
             ],
-          ),
-        ),
-        const _CatalogPreviewGroup(
-          title: 'Header',
-          child: _InlineSheetFrame(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BottomSheetHeaderComponent(title: 'Title'),
-                SizedBox(height: Spacing.xl),
-                BottomSheetHeaderComponent(),
-                SizedBox(height: Spacing.xl),
-                BottomSheetHeaderComponent(
-                  title: 'Title',
-                  illustration: _WarningIllustration(),
-                ),
-              ],
-            ),
           ),
         ),
         const _CatalogPreviewGroup(
@@ -2951,10 +2936,10 @@ class _CustomBottomSheetContent extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(
-              Spacing.xl,
-              Spacing.xl,
-              56,
-              Spacing.xl,
+              Spacing.md,
+              Spacing.md,
+              48,
+              Spacing.md,
             ),
             decoration: BoxDecoration(
               color: colors.fillDark,

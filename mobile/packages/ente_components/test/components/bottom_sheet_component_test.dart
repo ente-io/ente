@@ -5,21 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('BottomSheetHeaderComponent renders title and close action', (
+  testWidgets('BottomSheetComponent renders title and close action', (
     tester,
   ) async {
     var closeCount = 0;
 
     await tester.pumpWidget(
       _wrap(
-        BottomSheetHeaderComponent(
+        BottomSheetComponent(
           title: 'Title',
+          content: const Text('Body copy'),
           onClose: () => closeCount += 1,
         ),
       ),
     );
 
     expect(find.text('Title'), findsOneWidget);
+    expect(find.text('Body copy'), findsOneWidget);
     expect(find.byTooltip('Close'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Close'));
