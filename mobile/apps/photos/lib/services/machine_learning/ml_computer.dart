@@ -10,6 +10,7 @@ import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart"
     show flagService, isLocalGalleryMode;
 import "package:photos/services/machine_learning/ml_constants.dart";
+import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/services/remote_assets_service.dart";
@@ -91,7 +92,7 @@ class MLComputer extends SuperIsolate {
           "RustMLMissingModelPath: Missing required model path: clipTextVocabPath",
         );
       }
-      final textEmbedding = await runInIsolate(IsolateOperation.runClipText, {
+      final isolateResult = await runInIsolate(IsolateOperation.runClipText, {
         "text": query,
         "useRustMl": useRustMl,
         if (useRustMl) ...{
@@ -104,13 +105,26 @@ class MLComputer extends SuperIsolate {
         } else ...{
           "address": ClipTextEncoder.instance.sessionAddress,
         },
-      }) as List<double>;
+      });
+      if (isolateResult is RustCorruptModelCacheDeletedException) {
+        _clipTextModelPath = null;
+        MLModelDownloadService.instance.invalidateModelDownloadCache(
+          includeNonIndexingModels: true,
+        );
+        throw isolateResult;
+      }
+      final textEmbedding = isolateResult as List<double>;
       return textEmbedding;
     } on WiFiUnavailableError catch (e, s) {
       _logger.warning(
         "Could not run clip text because model is unavailable",
         e,
         s,
+      );
+      rethrow;
+    } on RustCorruptModelCacheDeletedException catch (e) {
+      _logger.warning(
+        "Deleted corrupt Rust CLIP text model cache at ${e.modelPath}",
       );
       rethrow;
     } catch (e, s) {
@@ -141,6 +155,7 @@ class MLComputer extends SuperIsolate {
           final tokenizerRemotePath = ClipTextEncoder.instance.vocabRemotePath;
           _clipTextVocabPath = await RemoteAssetsService.instance.getAssetPath(
             tokenizerRemotePath,
+            expectedSha256: ClipTextEncoder.instance.vocabSha256,
           );
         }
 

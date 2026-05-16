@@ -61,6 +61,7 @@ pub enum RustMlError {
     Decode(String),
     Preprocess(String),
     Ort(String),
+    CorruptModel(String),
     Postprocess(String),
     Runtime(String),
 }
@@ -184,7 +185,7 @@ pub fn analyze_image_rust(req: AnalyzeImageRequest) -> Result<AnalyzeImageResult
         .map_err(RustMlError::from)
 }
 
-pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, String> {
+pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, RustMlError> {
     let shared_req = shared_indexing::RunClipTextRequest {
         text: req.text,
         model_path: req.model_path,
@@ -200,7 +201,7 @@ pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, 
                 .map(|value| value as f64)
                 .collect(),
         })
-        .map_err(|e| e.to_string())
+        .map_err(RustMlError::from)
 }
 
 pub fn tokenize_clip_text_rust(text: String, vocab_path: String) -> Result<Vec<i32>, String> {
@@ -245,6 +246,7 @@ impl From<SharedMlError> for RustMlError {
             SharedMlError::Decode(message) => RustMlError::Decode(message),
             SharedMlError::Preprocess(message) => RustMlError::Preprocess(message),
             SharedMlError::Ort(message) => RustMlError::Ort(message),
+            SharedMlError::CorruptModel(message) => RustMlError::CorruptModel(message),
             SharedMlError::Postprocess(message) => RustMlError::Postprocess(message),
             SharedMlError::Runtime(message) => RustMlError::Runtime(message),
         }

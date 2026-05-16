@@ -946,6 +946,9 @@ Future<MLResult> analyzeImageRust(Map args) async {
       rustResult = await runRustAnalyzeForPath(imagePath);
     } catch (e, s) {
       if (!_isRustDecodeIssue(e)) {
+        if (_isRustCorruptModelIssue(e)) {
+          rethrow;
+        }
         _logger.severe(
           "Rust pipeline failed (non-decode) for fileID $enteFileID (format: $fileFormat)",
           e,
@@ -1129,6 +1132,10 @@ String formatExpectedMlSkipReasonForLogs(Object error) {
 
 bool _isRustDecodeIssue(Object error) {
   return error is rust_ml.RustMlError_Decode;
+}
+
+bool _isRustCorruptModelIssue(Object error) {
+  return error is rust_ml.RustMlError_CorruptModel;
 }
 
 String _normalizedErrorMessage(Object error) {

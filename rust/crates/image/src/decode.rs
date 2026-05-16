@@ -29,7 +29,7 @@ static IMAGE_DECODER_HOOKS_INIT: Once = Once::new();
 
 pub fn decode_image_from_path(image_path: &str) -> ImageResult<DecodedImage> {
     let decoded_dynamic = decode_with_image_crate(image_path)?;
-    let oriented = orient_decoded_image(decoded_dynamic, image_path).to_rgb8();
+    let oriented = orient_decoded_image(decoded_dynamic, image_path).into_rgb8();
 
     Ok(DecodedImage {
         dimensions: Dimensions {
@@ -42,7 +42,7 @@ pub fn decode_image_from_path(image_path: &str) -> ImageResult<DecodedImage> {
 
 pub fn decode_image_from_bytes(image_bytes: &[u8]) -> ImageResult<DecodedImage> {
     let decoded_dynamic = decode_bytes_with_image_crate(image_bytes)?;
-    let oriented = orient_decoded_image_from_bytes(decoded_dynamic, image_bytes).to_rgb8();
+    let oriented = orient_decoded_image_from_bytes(decoded_dynamic, image_bytes).into_rgb8();
 
     Ok(DecodedImage {
         dimensions: Dimensions {

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:ente_components/models/component_execution_state.dart';
+import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
@@ -7,7 +9,6 @@ import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 enum ButtonComponentVariant {
@@ -19,26 +20,11 @@ enum ButtonComponentVariant {
   link,
 }
 
-enum ButtonComponentSize {
-  small,
-  large,
-}
-
-enum _ButtonVisualState {
-  normal,
-  hover,
-  pressed,
-}
-
-enum _ButtonExecutionState {
-  idle,
-  inProgress,
-  successful,
-}
+enum ButtonComponentSize { small, large }
 
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=2207-41578&m=dev
 /// Section: Buttons / Button Small
-/// Specs: 52px height, 20px radius, 24px horizontal padding, 8px icon gap.
+/// Specs: 52px height, 20px radius, 24px horizontal padding.
 /// States: default, hover, pressed, disabled, loading, success.
 class ButtonComponent extends StatefulWidget {
   const ButtonComponent({
@@ -46,29 +32,21 @@ class ButtonComponent extends StatefulWidget {
     required this.label,
     this.onTap,
     this.variant = ButtonComponentVariant.primary,
-    this.size = ButtonComponentSize.small,
-    this.leading,
-    this.trailing,
+    this.size = ButtonComponentSize.large,
     this.isDisabled = false,
     this.shouldSurfaceExecutionStates = true,
     this.shouldShowSuccessConfirmation = false,
     this.progressStatus,
-    this.iconColor,
-    this.width,
   });
 
   final String label;
   final FutureOr<void> Function()? onTap;
   final ButtonComponentVariant variant;
   final ButtonComponentSize size;
-  final Widget? leading;
-  final Widget? trailing;
   final bool isDisabled;
   final bool shouldSurfaceExecutionStates;
   final bool shouldShowSuccessConfirmation;
   final ValueListenable<String>? progressStatus;
-  final Color? iconColor;
-  final double? width;
 
   @override
   State<ButtonComponent> createState() => _ButtonComponentState();
@@ -80,7 +58,7 @@ class _ButtonComponentState extends State<ButtonComponent>
   static const double _contentMinHeight = 24;
   static const double _verticalPadding = 14;
   static const Duration _loadingDelay = Duration(milliseconds: 300);
-  static const Duration _successDisplayDuration = Duration(seconds: 2);
+  static const Duration _successDisplayDuration = Duration(seconds: 1);
   static const Duration _minimumPressDuration = Duration(milliseconds: 120);
 
   late final AnimationController _loadingController;
@@ -88,12 +66,11 @@ class _ButtonComponentState extends State<ButtonComponent>
   bool _isPressed = false;
   int _pressToken = 0;
   DateTime? _tapDownTime;
-  double? _idleWidth;
   Timer? _loadingTimer;
   Timer? _successResetTimer;
   Timer? _pressReleaseTimer;
-  _ButtonExecutionState _executionState = _ButtonExecutionState.idle;
   bool _loadingVisible = false;
+  ComponentExecutionState _executionState = ComponentExecutionState.idle;
 
   @override
   void initState() {
@@ -108,14 +85,6 @@ class _ButtonComponentState extends State<ButtonComponent>
   @override
   void didUpdateWidget(covariant ButtonComponent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final idleContentChanged = widget.variant != oldWidget.variant ||
-        widget.label != oldWidget.label ||
-        widget.leading != oldWidget.leading ||
-        widget.trailing != oldWidget.trailing;
-    if (widget.size != oldWidget.size ||
-        (widget.size == ButtonComponentSize.small && idleContentChanged)) {
-      _idleWidth = null;
-    }
     if (widget.isDisabled && !oldWidget.isDisabled) {
       _isPressed = false;
     }
@@ -133,12 +102,12 @@ class _ButtonComponentState extends State<ButtonComponent>
 
   @override
   Widget build(BuildContext context) {
-    final isInlineLink = widget.variant == ButtonComponentVariant.link &&
+    final isInlineLink =
+        widget.variant == ButtonComponentVariant.link &&
         widget.size == ButtonComponentSize.small;
     final resolvedColors = _colors(context);
     final enabled = _canHandleGestures;
     final verticalPadding = isInlineLink ? Spacing.xs : _buttonVerticalPadding;
-    _captureIdleWidth();
 
     return MouseRegion(
       cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
@@ -157,17 +126,14 @@ class _ButtonComponentState extends State<ButtonComponent>
           child: AnimatedContainer(
             duration: Motion.standard,
             curve: Curves.easeInOutCubic,
-            width: widget.width ??
-                (widget.size == ButtonComponentSize.large
-                    ? double.infinity
-                    : _executionWidth),
+            width: widget.size == ButtonComponentSize.large
+                ? double.infinity
+                : null,
             decoration: BoxDecoration(
               color: resolvedColors.background,
-              borderRadius:
-                  BorderRadius.circular(isInlineLink ? 0 : Radii.button),
-              border: resolvedColors.border == null
-                  ? null
-                  : Border.all(color: resolvedColors.border!),
+              borderRadius: BorderRadius.circular(
+                isInlineLink ? 0 : Radii.button,
+              ),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -182,20 +148,7 @@ class _ButtonComponentState extends State<ButtonComponent>
                   duration: Motion.quick,
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(
-                        scale: Tween<double>(begin: 0.92, end: 1).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        ),
-                        child: child,
-                      ),
-                    );
-                  },
+                  transitionBuilder: _contentTransition,
                   child: _content(context, resolvedColors.foreground),
                 ),
               ),
@@ -204,12 +157,6 @@ class _ButtonComponentState extends State<ButtonComponent>
         ),
       ),
     );
-  }
-
-  _ButtonVisualState get _effectiveVisualState {
-    if (_isPressed) return _ButtonVisualState.pressed;
-    if (_isHovered) return _ButtonVisualState.hover;
-    return _ButtonVisualState.normal;
   }
 
   void _setHovered(bool value) {
@@ -259,31 +206,89 @@ class _ButtonComponentState extends State<ButtonComponent>
 
   Widget _content(BuildContext context, Color foreground) {
     if (_showLoading) {
-      final spinner = SizedBox(
-        width: _executionIconSize,
-        height: _executionIconSize,
-        child: Center(
-          child: RotationTransition(
-            turns: _loadingController,
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedLoading03,
-              color: _iconForeground(foreground),
-              size: _executionIconSize,
-            ),
-          ),
+      return _executionContent(
+        key: const ValueKey('loading'),
+        child: _loadingContent(foreground),
+      );
+    }
+    if (_showSuccess) {
+      return _executionContent(
+        key: const ValueKey('success'),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedTick02,
+          size: _executionIconSize,
+          color: foreground,
         ),
       );
-      if (widget.progressStatus == null) {
-        return KeyedSubtree(
-          key: const ValueKey('loading'),
-          child: spinner,
-        );
-      }
-      return Row(
-        key: const ValueKey('loading'),
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    }
+
+    return _idleContent(foreground);
+  }
+
+  Widget _idleContent(Color foreground) {
+    final underlined =
+        widget.variant == ButtonComponentVariant.link ||
+        widget.variant == ButtonComponentVariant.tertiaryCritical;
+    final label = Text(
+      widget.label,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+      style: TextStyles.bodyBold.copyWith(
+        color: foreground,
+        decoration: underlined ? TextDecoration.underline : null,
+        decorationColor: underlined ? foreground : null,
+      ),
+    );
+    return Row(
+      key: const ValueKey('content'),
+      mainAxisSize: widget.size == ButtonComponentSize.large
+          ? MainAxisSize.max
+          : MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.variant != ButtonComponentVariant.link)
+          Flexible(child: label)
+        else
+          label,
+      ],
+    );
+  }
+
+  Widget _executionContent({required Key key, required Widget child}) {
+    return Stack(
+      key: key,
+      alignment: Alignment.center,
+      children: [
+        Visibility(
+          visible: false,
+          maintainAnimation: true,
+          maintainSize: true,
+          maintainState: true,
+          child: _idleContent(Colors.transparent),
+        ),
+        child,
+      ],
+    );
+  }
+
+  Widget _contentTransition(Widget child, Animation<double> animation) {
+    return FadeTransition(
+      opacity: animation,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 0.92, end: 1).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _loadingContent(Color foreground) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.progressStatus != null)
           ValueListenableBuilder<String>(
             valueListenable: widget.progressStatus!,
             builder: (context, value, _) {
@@ -297,65 +302,23 @@ class _ButtonComponentState extends State<ButtonComponent>
               );
             },
           ),
-          spinner,
-        ],
-      );
-    }
-    if (_showSuccess) {
-      return HugeIcon(
-        key: const ValueKey('success'),
-        icon: HugeIcons.strokeRoundedTick02,
-        size: _executionIconSize,
-        color: _iconForeground(foreground),
-      );
-    }
-
-    final underlined = widget.variant == ButtonComponentVariant.link ||
-        widget.variant == ButtonComponentVariant.tertiaryCritical;
-    final label = Text(
-      widget.label,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 2,
-      style: TextStyles.bodyBold.copyWith(
-        color: foreground,
-        decoration: underlined ? TextDecoration.underline : null,
-        decorationColor: underlined ? foreground : null,
-      ),
-    );
-    final children = <Widget>[
-      if (widget.leading != null) ...[
-        IconTheme.merge(
-          data: IconThemeData(size: 20, color: _iconForeground(foreground)),
-          child: widget.leading!,
-        ),
-        const SizedBox(width: Spacing.sm),
-      ],
-      if (widget.size == ButtonComponentSize.large)
-        Flexible(child: label)
-      else
-        label,
-      if (widget.trailing != null) ...[
-        const SizedBox(width: Spacing.md),
-        IconTheme.merge(
-          data: IconThemeData(size: 20, color: _iconForeground(foreground)),
-          child: widget.trailing!,
+        SizedBox(
+          width: _executionIconSize,
+          height: _executionIconSize,
+          child: Center(
+            child: RotationTransition(
+              turns: _loadingController,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedLoading03,
+                color: foreground,
+                size: _executionIconSize,
+              ),
+            ),
+          ),
         ),
       ],
-    ];
-
-    return Row(
-      key: const ValueKey('content'),
-      mainAxisSize: widget.size == ButtonComponentSize.large
-          ? MainAxisSize.max
-          : MainAxisSize.min,
-      mainAxisAlignment: widget.trailing == null
-          ? MainAxisAlignment.center
-          : MainAxisAlignment.spaceBetween,
-      children: children,
     );
   }
-
-  Color _iconForeground(Color foreground) => widget.iconColor ?? foreground;
 
   double get _buttonVerticalPadding {
     return _verticalPadding;
@@ -365,23 +328,23 @@ class _ButtonComponentState extends State<ButtonComponent>
     if (widget.isDisabled || widget.onTap == null) {
       return _ResolvedButtonColors(
         background: _disabledBackground(context),
-        foreground: context.componentColors.textLighter,
-        border: null,
+        foreground: _componentColors(context).textLighter,
       );
     }
 
-    final visualState =
-        _showLoading ? _ButtonVisualState.pressed : _effectiveVisualState;
+    final isPressed = !_showLoading && !_showSuccess && _isPressed;
+    final isHovered = !_showLoading && !_showSuccess && _isHovered;
     return _ResolvedButtonColors(
-      background: switch (visualState) {
-        _ButtonVisualState.pressed when !_showSuccess =>
-          _pressedBackground(context),
-        _ButtonVisualState.hover when !_showSuccess =>
-          _hoverBackground(context),
-        _ => _background(context),
-      },
-      foreground: _foreground(context, visualState),
-      border: _borderColor(),
+      background: isPressed
+          ? _pressedBackground(context)
+          : isHovered
+          ? _hoverBackground(context)
+          : _background(context),
+      foreground: _foreground(
+        context,
+        isPressed: isPressed,
+        isHovered: isHovered,
+      ),
     );
   }
 
@@ -402,24 +365,19 @@ class _ButtonComponentState extends State<ButtonComponent>
   bool get _canHandleGestures =>
       !widget.isDisabled &&
       widget.onTap != null &&
-      _executionState == _ButtonExecutionState.idle;
+      !_isExecuting &&
+      !_isSuccessful;
+
+  bool get _isExecuting =>
+      _executionState == ComponentExecutionState.inProgress;
+
+  bool get _isSuccessful =>
+      _executionState == ComponentExecutionState.successful;
 
   bool get _showLoading =>
-      widget.shouldSurfaceExecutionStates &&
-      _executionState == _ButtonExecutionState.inProgress &&
-      _loadingVisible;
+      widget.shouldSurfaceExecutionStates && _isExecuting && _loadingVisible;
 
-  bool get _showSuccess =>
-      widget.shouldSurfaceExecutionStates &&
-      _executionState == _ButtonExecutionState.successful;
-
-  double? get _executionWidth {
-    if (widget.size != ButtonComponentSize.small ||
-        (!_showLoading && !_showSuccess)) {
-      return null;
-    }
-    return _idleWidth;
-  }
+  bool get _showSuccess => widget.shouldSurfaceExecutionStates && _isSuccessful;
 
   Future<void> _handleTap() async {
     final callback = widget.onTap;
@@ -429,7 +387,7 @@ class _ButtonComponentState extends State<ButtonComponent>
     var loadingSurfaced = false;
     _loadingTimer?.cancel();
     setState(() {
-      _executionState = _ButtonExecutionState.inProgress;
+      _executionState = ComponentExecutionState.inProgress;
       _loadingVisible = false;
     });
     _loadingTimer = Timer(_loadingDelay, () {
@@ -450,7 +408,8 @@ class _ButtonComponentState extends State<ButtonComponent>
       _loadingTimer?.cancel();
       _loadingTimer = null;
 
-      final shouldShowSuccess = widget.shouldSurfaceExecutionStates &&
+      final shouldShowSuccess =
+          widget.shouldSurfaceExecutionStates &&
           (loadingSurfaced ||
               (loadingPending && widget.shouldShowSuccessConfirmation));
 
@@ -458,7 +417,7 @@ class _ButtonComponentState extends State<ButtonComponent>
         _showSuccessForDuration();
       } else {
         setState(() {
-          _executionState = _ButtonExecutionState.idle;
+          _executionState = ComponentExecutionState.idle;
           _loadingVisible = false;
           _isPressed = false;
         });
@@ -467,19 +426,20 @@ class _ButtonComponentState extends State<ButtonComponent>
     } catch (_) {
       _loadingTimer?.cancel();
       _loadingTimer = null;
-      if (!mounted) return;
-      setState(() {
-        _executionState = _ButtonExecutionState.idle;
-        _loadingVisible = false;
-        _isPressed = false;
-      });
-      _syncLoadingController();
+      if (mounted) {
+        setState(() {
+          _executionState = ComponentExecutionState.idle;
+          _loadingVisible = false;
+          _isPressed = false;
+        });
+        _syncLoadingController();
+      }
     }
   }
 
   void _showSuccessForDuration() {
     setState(() {
-      _executionState = _ButtonExecutionState.successful;
+      _executionState = ComponentExecutionState.successful;
       _loadingVisible = false;
       _isPressed = false;
     });
@@ -488,37 +448,18 @@ class _ButtonComponentState extends State<ButtonComponent>
     _successResetTimer = Timer(_successDisplayDuration, () {
       if (!mounted) return;
       setState(() {
-        _executionState = _ButtonExecutionState.idle;
+        _executionState = ComponentExecutionState.idle;
         _loadingVisible = false;
       });
       _syncLoadingController();
     });
   }
 
-  void _captureIdleWidth() {
-    if (widget.size != ButtonComponentSize.small ||
-        _showLoading ||
-        _showSuccess) {
-      return;
-    }
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || widget.size != ButtonComponentSize.small) return;
-      final box = context.findRenderObject() as RenderBox?;
-      if (box == null || !box.hasSize) return;
-      final width = box.size.width;
-      if (_idleWidth != null && (_idleWidth! - width).abs() < 0.5) return;
-      setState(() => _idleWidth = width);
-    });
-  }
-
   Color _background(BuildContext context) {
-    final colors = context.componentColors;
+    final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.primary,
-      ButtonComponentVariant.secondary
-          when widget.size == ButtonComponentSize.large =>
-        colors.primaryLight,
-      ButtonComponentVariant.secondary => colors.fillDark,
+      ButtonComponentVariant.secondary => colors.primaryLight,
       ButtonComponentVariant.neutral => colors.fillBase,
       ButtonComponentVariant.critical => colors.warning,
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
@@ -527,10 +468,10 @@ class _ButtonComponentState extends State<ButtonComponent>
   }
 
   Color _hoverBackground(BuildContext context) {
-    final colors = context.componentColors;
+    final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.primaryDark,
-      ButtonComponentVariant.secondary => colors.fillDarker,
+      ButtonComponentVariant.secondary => colors.primaryLightHover,
       ButtonComponentVariant.neutral => colors.fillBase,
       ButtonComponentVariant.critical => colors.warningDark,
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
@@ -539,10 +480,10 @@ class _ButtonComponentState extends State<ButtonComponent>
   }
 
   Color _pressedBackground(BuildContext context) {
-    final colors = context.componentColors;
+    final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.primaryDarker,
-      ButtonComponentVariant.secondary => colors.fillDarkest,
+      ButtonComponentVariant.secondary => colors.primaryLightPressed,
       ButtonComponentVariant.neutral => colors.fillBase,
       ButtonComponentVariant.critical => colors.warningDarker,
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
@@ -551,7 +492,7 @@ class _ButtonComponentState extends State<ButtonComponent>
   }
 
   Color _disabledBackground(BuildContext context) {
-    final colors = context.componentColors;
+    final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.tertiaryCritical => Colors.transparent,
       ButtonComponentVariant.link => Colors.transparent,
@@ -559,34 +500,35 @@ class _ButtonComponentState extends State<ButtonComponent>
     };
   }
 
-  Color _foreground(BuildContext context, _ButtonVisualState visualState) {
-    final colors = context.componentColors;
+  Color _foreground(
+    BuildContext context, {
+    required bool isPressed,
+    required bool isHovered,
+  }) {
+    final colors = _componentColors(context);
     return switch (widget.variant) {
       ButtonComponentVariant.primary => colors.specialWhite,
-      ButtonComponentVariant.secondary
-          when widget.size == ButtonComponentSize.large =>
-        switch (visualState) {
-          _ButtonVisualState.normal => colors.primary,
-          _ => colors.textBase,
-        },
-      ButtonComponentVariant.secondary => colors.textBase,
+      ButtonComponentVariant.secondary =>
+        isPressed ? colors.primaryDarker : colors.primaryDark,
       ButtonComponentVariant.neutral => colors.textReverse,
       ButtonComponentVariant.critical => colors.specialWhite,
-      ButtonComponentVariant.tertiaryCritical => switch (visualState) {
-          _ButtonVisualState.pressed => colors.warningDarker,
-          _ButtonVisualState.hover => colors.warningDark,
-          _ButtonVisualState.normal => colors.warning,
-        },
-      ButtonComponentVariant.link => switch (visualState) {
-          _ButtonVisualState.pressed => colors.primaryDarker,
-          _ButtonVisualState.hover => colors.primaryDark,
-          _ButtonVisualState.normal => colors.primary,
-        },
+      ButtonComponentVariant.tertiaryCritical =>
+        isPressed
+            ? colors.warningDarker
+            : isHovered
+            ? colors.warningDark
+            : colors.warning,
+      ButtonComponentVariant.link =>
+        isPressed
+            ? colors.primaryDarker
+            : isHovered
+            ? colors.primaryDark
+            : colors.primary,
     };
   }
 
-  Color? _borderColor() {
-    return null;
+  ColorTokens _componentColors(BuildContext context) {
+    return context.componentColors;
   }
 }
 
@@ -594,10 +536,8 @@ class _ResolvedButtonColors {
   const _ResolvedButtonColors({
     required this.background,
     required this.foreground,
-    required this.border,
   });
 
   final Color background;
   final Color foreground;
-  final Color? border;
 }

@@ -60,6 +60,12 @@ export const customAPIOrigin = async () =>
     undefined;
 
 /**
+ * A static build time constant that is `true` if the API origin has been
+ * customized through the environment.
+ */
+export const isCustomAPIOrigin = !!process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+
+/**
  * A convenience wrapper over {@link customAPIOrigin} that returns the only the
  * host part of the custom origin (if any).
  *
@@ -80,53 +86,3 @@ export const customAPIHost = async () => {
  */
 export const uploaderOrigin = async () =>
     (await customAPIOrigin()) ?? "https://uploader.ente.com";
-
-/**
- * A static build time constant that is `true` if {@link albumsAppOrigin} has
- * been customized.
- */
-export const isCustomAlbumsAppOrigin =
-    !!process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;
-
-/**
- * Return the origin that serves public albums.
- *
- * Defaults to our production instance, "https://albums.ente.com", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT` environment
- * variable.
- */
-export const albumsAppOrigin = () =>
-    process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.com";
-
-/**
- * Return true if this build is Ente's official public albums deployment.
- */
-export const isOfficialAlbumsApp =
-    !!process.env.NEXT_PUBLIC_ENTE_OFFICIAL_ALBUMS_APP;
-
-/**
- * A static build time constant that is `true` if {@link shareAppOrigin} has
- * been customized.
- */
-export const isCustomShareAppOrigin =
-    !!process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT;
-
-/**
- * Return the origin that serves public locker (share app).
- *
- * Defaults to our production instance, "https://share.ente.com", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_SHARE_ENDPOINT` environment
- * variable.
- */
-export const shareAppOrigin = (): string =>
-    process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT ?? "https://share.ente.com";
-
-/**
- * Return the origin that serves the photos app.
- *
- * Defaults to our production instance, "https://photos.ente.com", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT` environment
- * variable.
- */
-export const photosAppOrigin = (): string =>
-    process.env.NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT ?? "https://photos.ente.com";

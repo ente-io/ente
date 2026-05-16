@@ -156,6 +156,7 @@ class MLModelDownloadService {
       RemoteAssetsService.instance.getAssetPath(
         ClipTextEncoder.instance.vocabRemotePath,
         refetch: forceRefresh,
+        expectedSha256: ClipTextEncoder.instance.vocabSha256,
       ),
     ];
   }

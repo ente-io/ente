@@ -1,3 +1,4 @@
+import 'dart:io' show File;
 import 'dart:typed_data' show Float32List, Uint8List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
@@ -25,6 +26,15 @@ import "package:photos/utils/ml_util.dart";
 final Map<String, dynamic> _isolateCache = {};
 const _rustLibLoadedCacheKey = "rustLibLoaded";
 const _rustMlRuntimeConfigCacheKey = "rustMlRuntimeConfig";
+
+class RustCorruptModelCacheDeletedException implements Exception {
+  const RustCorruptModelCacheDeletedException(this.modelPath);
+
+  final String modelPath;
+
+  @override
+  String toString() => "RustCorruptModelCacheDeletedException: $modelPath";
+}
 
 enum IsolateOperation {
   /// [MLIndexingIsolate]
@@ -123,9 +133,18 @@ Future<dynamic> isolateFunction(
       if (useRustMl) {
         await _ensureRustLoaded();
       }
-      final MLResult result = useRustMl
-          ? await analyzeImageRust(args)
-          : await analyzeImageStatic(args);
+      final MLResult result;
+      try {
+        result = useRustMl
+            ? await analyzeImageRust(args)
+            : await analyzeImageStatic(args);
+      } on rust_ml.RustMlError_CorruptModel catch (e) {
+        final file = File(e.field0);
+        if (await file.exists()) {
+          await file.delete();
+        }
+        return RustCorruptModelCacheDeletedException(e.field0);
+      }
       return result.toJsonString();
 
     /// MLIndexingIsolate
@@ -242,19 +261,28 @@ Future<dynamic> isolateFunction(
         );
       }
 
-      final result = await rust_ml.runClipTextRust(
-        req: rust_ml.RunClipTextRequest(
-          text: text,
-          modelPath: clipTextModelPath,
-          vocabPath: clipTextVocabPath,
-          providerPolicy: rust_ml.RustExecutionProviderPolicy(
-            preferCoreml: args["preferCoreml"] as bool? ?? true,
-            preferNnapi: args["preferNnapi"] as bool? ?? true,
-            preferXnnpack: args["preferXnnpack"] as bool? ?? false,
-            allowCpuFallback: args["allowCpuFallback"] as bool? ?? true,
+      final rust_ml.RunClipTextResult result;
+      try {
+        result = await rust_ml.runClipTextRust(
+          req: rust_ml.RunClipTextRequest(
+            text: text,
+            modelPath: clipTextModelPath,
+            vocabPath: clipTextVocabPath,
+            providerPolicy: rust_ml.RustExecutionProviderPolicy(
+              preferCoreml: args["preferCoreml"] as bool? ?? true,
+              preferNnapi: args["preferNnapi"] as bool? ?? true,
+              preferXnnpack: args["preferXnnpack"] as bool? ?? false,
+              allowCpuFallback: args["allowCpuFallback"] as bool? ?? true,
+            ),
           ),
-        ),
-      );
+        );
+      } on rust_ml.RustMlError_CorruptModel catch (e) {
+        final file = File(e.field0);
+        if (await file.exists()) {
+          await file.delete();
+        }
+        return RustCorruptModelCacheDeletedException(e.field0);
+      }
       return List<double>.from(result.embedding, growable: false);
 
     /// MLComputer

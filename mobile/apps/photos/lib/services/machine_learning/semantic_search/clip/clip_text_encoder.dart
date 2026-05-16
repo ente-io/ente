@@ -12,13 +12,22 @@ import "package:photos/utils/ml_util.dart";
 class ClipTextEncoder extends MlModel {
   static const kRemoteBucketModelPath =
       "mobileclip_s2_text_opset18_quant.onnx"; // Quantized model
+  static const kModelSha256 =
+      "d92f33dfcff83077fc2e0d3414250710efbb51795dfd89767bdbefb5fdc47322";
   static const _kVocabRemotePath = "bpe_simple_vocab_16e6.txt";
+  static const kVocabSha256 =
+      "67603cfda2e032ad77b5f8808af37789d590db664b26df8705d2bf8b3c553fc8";
 
   static const _modelName = "ClipTextEncoder";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  @override
+  String get modelSha256 => kModelSha256;
+
   String get vocabRemotePath => kModelBucketEndpoint + _kVocabRemotePath;
+  String get vocabSha256 => kVocabSha256;
 
   @override
   Logger get logger => _logger;

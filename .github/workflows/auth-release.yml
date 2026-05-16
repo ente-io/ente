@@ -211,21 +211,48 @@ jobs:
             - name: Create artifacts directory
               run: mkdir artifacts
 
-            - name: Build Windows installer
+            - name: Build Windows release
               run: |
                   flutter config --enable-windows-desktop
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
                   choco install innosetup -y
-                  fastforge.bat package --platform=windows --targets=exe --skip-clean
-                  shopt -s globstar
-                  mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+                  flutter build windows --release
               shell: bash
 
-            - name: Retain Windows EXE and DLLs
-              run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
-              shell: bash
+            - name: Verify Windows PE allowlist
+              run: |
+                  & ./scripts/verify_windows_pe_allowlist.ps1 `
+                    -PayloadDir "build/windows/x64/runner/Release" `
+                    -AllowlistPath "windows/signing/allowed-pe-files.txt"
+              shell: pwsh
 
-            - name: Sign files with Trusted Signing
+            - name: Sign Windows payload with Trusted Signing
+              uses: azure/trusted-signing-action@v0
+              with:
+                azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+                endpoint: ${{ secrets.AZURE_ENDPOINT }}
+                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                files-folder: ${{ github.workspace }}/mobile/apps/auth/build/windows/x64/runner/Release
+                files-folder-filter: exe,dll
+                files-folder-recurse: true
+                file-digest: SHA256
+                timestamp-rfc3161: http://timestamp.acs.microsoft.com
+                timestamp-digest: SHA256
+
+            - name: Verify signed Windows payload
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "build/windows/x64/runner/Release"
+              shell: pwsh
+
+            - name: Build Windows installer
+              run: |
+                  & ./scripts/build_windows_installer.ps1 `
+                    -SourceDir "build/windows/x64/runner/Release" `
+                    -InstallerPath "artifacts/ente-${{ github.ref_name }}-installer.exe"
+              shell: pwsh
+
+            - name: Sign Windows installer with Trusted Signing
               uses: azure/trusted-signing-action@v0
               with:
                 azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -236,15 +263,29 @@ jobs:
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
                       ${{ github.workspace }}/mobile/apps/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
-                      ${{ github.workspace }}/mobile/apps/auth/ente-${{ github.ref_name }}-windows/auth.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
-                timestamp-digest: SHA256  
+                timestamp-digest: SHA256
 
+            - name: Verify signed Windows installer
+              run: ./scripts/verify_windows_authenticode.ps1 -Path "artifacts/ente-${{ github.ref_name }}-installer.exe"
+              shell: pwsh
+
+            - name: Retain signed Windows EXE and DLLs
+              run: Copy-Item -Recurse -Force "build/windows/x64/runner/Release" "ente-${{ github.ref_name }}-windows"
+              shell: pwsh
 
             - name: Zip Windows EXE and DLLs
-              run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
-              shell: bash
+              shell: pwsh
+              run: |
+                  $zipPath = "artifacts/ente-${{ github.ref_name }}-windows.zip"
+                  Compress-Archive `
+                    -Path "ente-${{ github.ref_name }}-windows" `
+                    -DestinationPath $zipPath `
+                    -Force
+                  Add-Type -AssemblyName System.IO.Compression.FileSystem
+                  $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zipPath))
+                  $zip.Dispose()
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows

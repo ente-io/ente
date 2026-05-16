@@ -1,12 +1,6 @@
 import Head from "next/head";
 import React from "react";
-import { haveWindow } from "../env";
-import {
-    albumsAppOrigin,
-    isCustomAlbumsAppOrigin,
-    isCustomShareAppOrigin,
-    shareAppOrigin,
-} from "../origins";
+import { isCustomAPIOrigin } from "../origins";
 
 interface CustomHeadProps {
     title: string;
@@ -59,8 +53,8 @@ export const CustomHead: React.FC<React.PropsWithChildren<CustomHeadProps>> = ({
  *
  * - "og:image" needs to be an absolute URL.
  *
- * To avoid getting in the way of self hosters, we do a deployment URL check
- * before inlining this into the build.
+ * To avoid getting in the way of self hosters, only inline this into builds
+ * that use Ente's production API.
  */
 export const CustomHeadAlbumsStatic: React.FC = () => (
     <Head>
@@ -89,14 +83,12 @@ export const CustomHeadAlbumsStatic: React.FC = () => (
  * A convenience fan out to conditionally show one of {@link CustomHead} or
  * {@link CustomHeadAlbumsStatic}.
  *
- * This component defaults to {@link CustomHeadAlbumsStatic} during SSR unless a
- * custom endpoint is defined, and then does a client side update when it
- * detects that the origin it is being served on is not the albums origin.
+ * Use static production preview tags only when using Ente's production API.
+ * Custom API builds should not inline production preview metadata into the
+ * static HTML.
  */
 export const CustomHeadAlbums: React.FC<CustomHeadProps> = ({ title }) =>
-    isCustomAlbumsAppOrigin ||
-    (haveWindow() &&
-        new URL(window.location.href).origin != albumsAppOrigin()) ? (
+    isCustomAPIOrigin ? (
         <CustomHead {...{ title }}>
             <AlbumsFontPreloads />
         </CustomHead>
@@ -136,14 +128,12 @@ export const CustomHeadShareStatic: React.FC = () => (
  * A convenience fan out to conditionally show one of {@link CustomHead} or
  * {@link CustomHeadShareStatic}.
  *
- * This component defaults to {@link CustomHeadShareStatic} during SSR unless a
- * custom endpoint is defined, and then does a client side update when it
- * detects that the origin it is being served on is not the share origin.
+ * Use static production preview tags only when using Ente's production API.
+ * Custom API builds should not inline production preview metadata into the
+ * static HTML.
  */
 export const CustomHeadShare: React.FC<CustomHeadProps> = ({ title }) =>
-    isCustomShareAppOrigin ||
-    (haveWindow() &&
-        new URL(window.location.href).origin != shareAppOrigin()) ? (
+    isCustomAPIOrigin ? (
         <CustomHead {...{ title }} />
     ) : (
         <CustomHeadShareStatic />

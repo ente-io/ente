@@ -18,10 +18,15 @@ class YOLOFaceInterpreterRunException implements Exception {}
 /// Model size: ~30.8 MB.
 class FaceDetectionService extends MlModel {
   static const kRemoteBucketModelPath = "yolov5s_face_640_640_dynamic.onnx";
+  static const kModelSha256 =
+      "71a008707283b03db4881449a24f4da197f9dbd9ddaca5c91fcdb363fbf7e06f";
   static const _modelName = "YOLOv5Face";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  @override
+  String get modelSha256 => kModelSha256;
 
   @override
   Logger get logger => _logger;

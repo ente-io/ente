@@ -73,7 +73,7 @@ const desktopAppVersion = isDesktop
           .version
     : undefined;
 
-// Fail the build if the user is setting any of the legacy environment variables
+// Fail the build if the user is setting legacy environment variables
 // which have now been replaced with museum configuration. This is meant to help
 // self hosters find the new setting instead of being caught unawares.
 
@@ -91,6 +91,35 @@ if (process.env.NEXT_PUBLIC_ENTE_FAMILY_URL) {
     );
     console.log("Use apps.family in the museum configuration instead.");
     process.exit(1);
+}
+
+// Print a notice if the user is setting legacy environment variables which
+// were only client-side handoff hints, and now no-ops. The functional effects
+// (previously and now) require setting Museum's app config.
+
+if (process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT) {
+    console.log(
+        "The NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT environment variable is not used anymore and is ignored.",
+    );
+    console.log("Use apps.public-albums in the museum configuration instead.");
+}
+
+if (process.env.NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT) {
+    console.log(
+        "The NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT environment variable is not used anymore and is ignored.",
+    );
+    console.log(
+        "It only affected client-side handoffs; public link behavior is configured through Museum.",
+    );
+}
+
+if (process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT) {
+    console.log(
+        "The NEXT_PUBLIC_ENTE_SHARE_ENDPOINT environment variable is not used anymore and is ignored.",
+    );
+    console.log(
+        "It only affected link preview metadata; public link behavior is configured through Museum.",
+    );
 }
 
 /**

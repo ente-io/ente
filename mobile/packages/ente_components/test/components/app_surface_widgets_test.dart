@@ -41,11 +41,7 @@ void main() {
       MenuComponent(
         title: 'Camera uploads',
         subtitle: 'Enabled on Wi-Fi',
-        leading: Icon(
-          Icons.cloud_upload_outlined,
-          color: ColorTokens.light.primary,
-          size: 18,
-        ),
+        leading: const Icon(Icons.cloud_upload_outlined),
         trailing: Icon(
           Icons.chevron_right,
           color: ColorTokens.light.textLight,
@@ -53,6 +49,7 @@ void main() {
         ),
         selected: true,
         titleColor: ColorTokens.light.warning,
+        iconColor: ColorTokens.light.primary,
         onTap: () async => tapped = true,
       ),
     );
@@ -74,7 +71,9 @@ void main() {
       ColorTokens.light.warning,
     );
     expect(
-      tester.widget<Icon>(find.byIcon(Icons.cloud_upload_outlined)).color,
+      IconTheme.of(
+        tester.element(find.byIcon(Icons.cloud_upload_outlined)),
+      ).color,
       ColorTokens.light.primary,
     );
     expect(
@@ -113,14 +112,16 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1));
       expect(tapCount, 1);
       expect(find.byKey(const ValueKey('menu-item-loading')), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 200));
       expect(find.byIcon(Icons.chevron_right), findsNothing);
 
       completer.complete();
       await tester.pump();
       expect(find.byKey(const ValueKey('menu-item-success')), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 200));
       expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
 
-      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byIcon(Icons.chevron_right), findsOneWidget);
     },
   );
@@ -156,7 +157,7 @@ void main() {
       tester,
       MenuComponent(
         title: 'Copy',
-        alwaysShowSuccessState: true,
+        shouldShowSuccessConfirmation: true,
         onTap: () async {},
       ),
     );
@@ -165,7 +166,36 @@ void main() {
     await tester.pump();
     expect(find.byKey(const ValueKey('menu-item-success')), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byKey(const ValueKey('menu-item-success')), findsNothing);
+  });
+
+  testWidgets('MenuComponent resets to idle after async errors', (
+    tester,
+  ) async {
+    await pumpComponent(
+      tester,
+      MenuComponent(
+        title: 'Fail',
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          throw StateError('failed');
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Fail'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('menu-item-loading')), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Fail'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.byKey(const ValueKey('menu-item-loading')), findsNothing);
     expect(find.byKey(const ValueKey('menu-item-success')), findsNothing);
   });
 
@@ -178,7 +208,7 @@ void main() {
       tester,
       MenuComponent(
         title: 'Storage plan',
-        gesturesEnabled: false,
+        isDisabled: true,
         onTap: () {
           tapCount += 1;
         },
@@ -214,7 +244,7 @@ void main() {
           MenuComponent(
             title: 'Success row',
             trailing: const Icon(Icons.chevron_right),
-            alwaysShowSuccessState: true,
+            shouldShowSuccessConfirmation: true,
             onTap: () async {},
           ),
         ],
@@ -228,6 +258,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Success row'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     final surfaces = tester.widgetList<AnimatedContainer>(
       find.byKey(const ValueKey('menu-item-surface')),
@@ -240,7 +271,8 @@ void main() {
     expect(tapCount, 0);
     loadingCompleter.complete();
     await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
   });
 
   testWidgets('MenuComponent long text uses two title lines and one subtitle line', (

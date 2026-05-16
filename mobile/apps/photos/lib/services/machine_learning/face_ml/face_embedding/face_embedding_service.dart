@@ -13,10 +13,15 @@ class MobileFaceNetInterpreterRunException implements Exception {}
 /// Model size: ~5.3 MB.
 class FaceEmbeddingService extends MlModel {
   static const kRemoteBucketModelPath = "mobilefacenet_opset15.onnx";
+  static const kModelSha256 =
+      "472a0f7e24d0b070cbbdc031b085bc2a06c70655b3bdefb87dbd69bc98662f45";
   static const String _modelName = "MobileFaceNet";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  @override
+  String get modelSha256 => kModelSha256;
 
   @override
   Logger get logger => _logger;

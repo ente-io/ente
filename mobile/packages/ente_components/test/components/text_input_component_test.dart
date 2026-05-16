@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -5,180 +7,185 @@ import "package:flutter_test/flutter_test.dart";
 
 void main() {
   testWidgets(
-      "TextInputComponent renders label, required mark, and helper text", (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        const TextInputComponent(
-          label: "Email",
-          hintText: "name@example.com",
-          helperText: "Use your account email",
-          isRequired: true,
+    "TextInputComponent renders label, required mark, and helper message",
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          const TextInputComponent(
+            label: "Email",
+            hintText: "name@example.com",
+            message: "Use your account email",
+            isRequired: true,
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(_richText("Email *"), findsOneWidget);
-    expect(find.text("Use your account email"), findsOneWidget);
-    expect(
-      tester.widget<Text>(find.text("Use your account email")).style?.color,
-      ColorTokens.light.textLight,
-    );
-    expect(
-      tester
-          .widget<TextField>(
-            find.byType(TextField),
-          )
-          .decoration
-          ?.hintText,
-      "name@example.com",
-    );
-  });
+      expect(_richText("Email *"), findsNothing);
+      expect(find.text("Email"), findsOneWidget);
+      expect(find.text("*"), findsOneWidget);
+      expect(find.text("Use your account email"), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.text("Use your account email")).style?.color,
+        ColorTokens.light.textLight,
+      );
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).decoration?.hintText,
+        "name@example.com",
+      );
+    },
+  );
 
-  testWidgets("TextInputComponent gives error text priority over helper text", (
+  testWidgets("TextInputComponent renders error message visuals", (
     tester,
   ) async {
     await tester.pumpWidget(
       _wrap(
         const TextInputComponent(
           label: "Password",
-          helperText: "At least 8 characters",
-          errorText: "Password is required",
+          message: "Password is required",
+          messageType: TextInputComponentMessageType.error,
         ),
       ),
     );
 
     expect(find.text("Password is required"), findsOneWidget);
-    expect(find.text("At least 8 characters"), findsNothing);
     expect(
       tester.widget<Text>(find.text("Password is required")).style?.color,
       ColorTokens.light.warning,
     );
-  });
-
-  testWidgets("TextInputComponent renders success text when valid",
-      (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        const TextInputComponent(
-          label: "Code",
-          successText: "Looks good",
-        ),
-      ),
-    );
-
-    expect(find.text("Looks good"), findsOneWidget);
     expect(
-      tester.widget<Text>(find.text("Looks good")).style?.color,
-      ColorTokens.light.primary,
+      _fieldDecoration(tester).border?.top.color,
+      ColorTokens.light.warning,
     );
   });
 
-  testWidgets("TextInputComponent supports explicit focused visual state", (
+  testWidgets("TextInputComponent renders success message visuals", (
     tester,
   ) async {
     await tester.pumpWidget(
       _wrap(
         const TextInputComponent(
-          label: "Email",
-          isFocused: true,
+          label: "Code",
+          message: "Looks good",
+          messageType: TextInputComponentMessageType.success,
         ),
       ),
     );
 
-    final input = tester.widget<TextField>(
-      find.byType(TextField),
+    expect(find.text("Looks good"), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text("Looks good")).style?.color,
+      ColorTokens.light.primary,
     );
-    final border = input.decoration?.enabledBorder as OutlineInputBorder?;
-    expect(border?.borderSide.color, ColorTokens.light.primary);
-    expect(border?.borderSide.width, 2);
+    expect(
+      _fieldDecoration(tester).border?.top.color,
+      ColorTokens.light.primary,
+    );
   });
 
-  testWidgets(
-      "TextInputComponent maps error and success states to Figma borders", (
+  testWidgets("TextInputComponent maps actual focus to the focused border", (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(const TextInputComponent(label: "Email")));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    expect(
+      _fieldDecoration(tester).border?.top.color,
+      ColorTokens.light.primary,
+    );
+  });
+
+  testWidgets("TextInputComponent maps error and success states to borders", (
     tester,
   ) async {
     await tester.pumpWidget(
       _wrap(
         const Column(
           children: [
-            TextInputComponent(label: "Error", errorText: "This is an error"),
-            TextInputComponent(label: "Success", successText: "Saved"),
+            TextInputComponent(
+              label: "Error",
+              message: "This is an error",
+              messageType: TextInputComponentMessageType.error,
+            ),
+            TextInputComponent(
+              label: "Success",
+              message: "Saved",
+              messageType: TextInputComponentMessageType.success,
+            ),
           ],
         ),
       ),
     );
 
-    final inputs = tester.widgetList<TextField>(
-      find.byType(TextField),
-    );
-    final errorBorder =
-        inputs.first.decoration?.enabledBorder as OutlineInputBorder?;
-    final successBorder =
-        inputs.last.decoration?.enabledBorder as OutlineInputBorder?;
+    final borders = tester
+        .widgetList<Container>(_fieldContainers())
+        .map((container) => container.decoration! as BoxDecoration)
+        .map((decoration) => decoration.border! as Border)
+        .toList();
 
-    expect(errorBorder?.borderSide.color, ColorTokens.light.warning);
-    expect(errorBorder?.borderSide.width, 1.5);
-    expect(successBorder?.borderSide.color, ColorTokens.light.primary);
-    expect(successBorder?.borderSide.width, 1.5);
+    expect(borders.first.top.color, ColorTokens.light.warning);
+    expect(borders.first.top.width, 1);
+    expect(borders.last.top.color, ColorTokens.light.primary);
+    expect(borders.last.top.width, 1);
   });
 
   testWidgets(
-      "TextInputComponent forwards disabled state to the platform field", (
+    "TextInputComponent forwards disabled state to the platform field",
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(const TextInputComponent(label: "Email", isDisabled: true)),
+      );
+
+      final input = tester.widget<TextField>(find.byType(TextField));
+      expect(input.enabled, isFalse);
+      expect(_fieldDecoration(tester).color, ColorTokens.light.fillDark);
+      expect(
+        _fieldDecoration(tester).border?.top.color,
+        ColorTokens.light.strokeFaint,
+      );
+    },
+  );
+
+  testWidgets("TextInputComponent supports the multiline layout", (
     tester,
   ) async {
     await tester.pumpWidget(
       _wrap(
         const TextInputComponent(
-          label: "Email",
-          enabled: false,
-        ),
-      ),
-    );
-
-    final input = tester.widget<TextField>(
-      find.byType(TextField),
-    );
-    expect(input.enabled, isFalse);
-    expect(input.decoration?.fillColor, ColorTokens.light.fillLight);
-    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.38);
-  });
-
-  testWidgets("TextInputComponent supports the Figma multiline layout",
-      (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        const TextInputComponent(
           label: "Notes",
           hintText: "Hint text",
-          errorText: "This is an error",
+          message: "This is an error",
+          messageType: TextInputComponentMessageType.error,
           maxLines: 4,
           suffix: Icon(Icons.copy, key: ValueKey("copy-icon")),
         ),
       ),
     );
 
-    final input = tester.widget<TextField>(
-      find.byType(TextField),
-    );
-    final border = input.decoration?.enabledBorder as OutlineInputBorder?;
+    final input = tester.widget<TextField>(find.byType(TextField));
+    final container = tester.widget<Container>(_fieldContainers().first);
 
     expect(input.maxLines, 4);
     expect(
-      input.decoration?.contentPadding,
-      const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
+      container.padding,
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
-    expect(border?.borderRadius, BorderRadius.circular(16));
-    expect(border?.borderSide.color, ColorTokens.light.warning);
-    expect(border?.borderSide.width, 1.5);
+    expect(_fieldDecoration(tester).borderRadius, BorderRadius.circular(16));
+    expect(
+      _fieldDecoration(tester).border?.top.color,
+      ColorTokens.light.warning,
+    );
     expect(find.byKey(const ValueKey("copy-icon")), findsOneWidget);
     expect(
+      tester.getTopLeft(find.byKey(const ValueKey("copy-icon"))).dy,
+      tester.getTopLeft(find.byType(TextField)).dy,
+    );
+    expect(
       tester.widget<Text>(find.text("This is an error")).style?.fontSize,
-      TextStyles.tiny.fontSize,
+      TextStyles.mini.fontSize,
     );
   });
 
@@ -199,7 +206,7 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextInputComponent), "Ada Lovelace");
+    await tester.enterText(find.byType(TextField), "Ada Lovelace");
     await tester.pump();
 
     expect(controller.text, "Ada Lovelace");
@@ -212,124 +219,104 @@ void main() {
   ) async {
     final controller = TextEditingController();
     final focusNode = FocusNode();
-    final scrollController = ScrollController();
+    final isEmptyNotifier = ValueNotifier<bool>(false);
     var submitted = "";
-    var editingComplete = false;
     addTearDown(controller.dispose);
     addTearDown(focusNode.dispose);
-    addTearDown(scrollController.dispose);
+    addTearDown(isEmptyNotifier.dispose);
 
     await tester.pumpWidget(
       _wrap(
         TextInputComponent(
           controller: controller,
           focusNode: focusNode,
+          isEmptyNotifier: isEmptyNotifier,
           label: "Invite email",
           autofocus: true,
-          readOnly: true,
-          showCursor: false,
-          enableInteractiveSelection: false,
           textCapitalization: TextCapitalization.words,
-          textInputAction: TextInputAction.done,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp("[a-z@.]")),
           ],
           maxLength: 48,
-          counterText: "",
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
           autocorrect: false,
-          enableSuggestions: false,
-          textAlign: TextAlign.center,
-          textAlignVertical: TextAlignVertical.top,
-          scrollController: scrollController,
-          onSubmitted: (value) => submitted = value,
-          onEditingComplete: () => editingComplete = true,
+          onSubmit: (value) => submitted = value,
         ),
       ),
     );
 
-    final input = tester.widget<TextField>(
-      find.byType(TextField),
-    );
+    final input = tester.widget<TextField>(find.byType(TextField));
     expect(input.focusNode, focusNode);
     expect(input.autofocus, isTrue);
-    expect(input.readOnly, isTrue);
-    expect(input.showCursor, isFalse);
-    expect(input.enableInteractiveSelection, isFalse);
     expect(input.textCapitalization, TextCapitalization.words);
-    expect(input.textInputAction, TextInputAction.done);
-    expect(input.maxLength, 48);
-    expect(input.decoration?.counterText, "");
+    expect(input.maxLength, isNull);
     expect(input.keyboardType, TextInputType.emailAddress);
     expect(input.autofillHints, const [AutofillHints.email]);
     expect(input.autocorrect, isFalse);
-    expect(input.enableSuggestions, isFalse);
-    expect(input.textAlign, TextAlign.center);
-    expect(input.textAlignVertical, TextAlignVertical.top);
-    expect(input.scrollController, scrollController);
 
-    input.onSubmitted?.call("mira@example.com");
-    input.onEditingComplete?.call();
+    await tester.enterText(find.byType(TextField), "mira@example.com");
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
     expect(submitted, "mira@example.com");
-    expect(editingComplete, isTrue);
+    expect(isEmptyNotifier.value, isFalse);
   });
 
   testWidgets(
-      "TextInputComponent supports clear and password visibility affordances", (
+    "TextInputComponent supports clear and password visibility affordances",
+    (tester) async {
+      final clearController = TextEditingController(text: "search");
+      final passwordController = TextEditingController(text: "secret");
+      addTearDown(clearController.dispose);
+      addTearDown(passwordController.dispose);
+
+      await tester.pumpWidget(
+        _wrap(
+          Column(
+            children: [
+              TextInputComponent(
+                controller: clearController,
+                label: "Search",
+                isClearable: true,
+              ),
+              TextInputComponent(
+                controller: passwordController,
+                label: "Password",
+                isPasswordInput: true,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.byKey(const ValueKey("text-field-clear")), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey("text-field-clear")));
+      await tester.pump();
+      expect(clearController.text, "");
+      expect(find.byKey(const ValueKey("text-field-clear")), findsNothing);
+
+      var inputs = tester.widgetList<TextField>(find.byType(TextField));
+      expect(inputs.last.obscureText, isTrue);
+
+      await tester.tap(
+        find.byKey(const ValueKey("text-field-password-toggle")),
+      );
+      await tester.pump();
+      inputs = tester.widgetList<TextField>(find.byType(TextField));
+      expect(inputs.last.obscureText, isFalse);
+    },
+  );
+
+  testWidgets("TextInputComponent renders alert message visuals", (
     tester,
   ) async {
-    final clearController = TextEditingController(text: "search");
-    final passwordController = TextEditingController(text: "secret");
-    addTearDown(clearController.dispose);
-    addTearDown(passwordController.dispose);
-
-    await tester.pumpWidget(
-      _wrap(
-        Column(
-          children: [
-            TextInputComponent(
-              controller: clearController,
-              label: "Search",
-              isClearable: true,
-            ),
-            TextInputComponent(
-              controller: passwordController,
-              label: "Password",
-              obscureText: true,
-              showPasswordToggle: true,
-            ),
-          ],
-        ),
-      ),
-    );
-
-    expect(find.byKey(const ValueKey("text-field-clear")), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey("text-field-clear")));
-    await tester.pump();
-    expect(clearController.text, "");
-    expect(find.byKey(const ValueKey("text-field-clear")), findsNothing);
-
-    var inputs = tester.widgetList<TextField>(
-      find.byType(TextField),
-    );
-    expect(inputs.last.obscureText, isTrue);
-
-    await tester.tap(find.byKey(const ValueKey("text-field-password-toggle")));
-    await tester.pump();
-    inputs = tester.widgetList<TextField>(
-      find.byType(TextField),
-    );
-    expect(inputs.last.obscureText, isFalse);
-  });
-
-  testWidgets("TextInputComponent renders alert message visuals",
-      (tester) async {
     await tester.pumpWidget(
       _wrap(
         const TextInputComponent(
           label: "Recovery key",
-          alertText: "Save this somewhere safe.",
+          message: "Save this somewhere safe.",
+          messageType: TextInputComponentMessageType.alert,
         ),
       ),
     );
@@ -341,6 +328,94 @@ void main() {
       ColorTokens.light.warning,
     );
   });
+
+  testWidgets("TextInputComponent submits without surfacing execution UI", (
+    tester,
+  ) async {
+    final submitNotifier = ValueNotifier<int>(0);
+    final submitCompleter = Completer<void>();
+    var submitCount = 0;
+    addTearDown(submitNotifier.dispose);
+
+    await tester.pumpWidget(
+      _wrap(
+        TextInputComponent(
+          initialValue: "album",
+          submitNotifier: submitNotifier,
+          onSubmit: (_) {
+            submitCount += 1;
+            return submitCompleter.future;
+          },
+        ),
+      ),
+    );
+
+    submitNotifier.value++;
+    await tester.pump();
+    submitNotifier.value++;
+    await tester.pump();
+
+    expect(submitCount, 1);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byIcon(Icons.check_rounded), findsNothing);
+
+    submitCompleter.complete();
+    await tester.pump();
+    submitNotifier.value++;
+    await tester.pump();
+
+    expect(submitCount, 2);
+    expect(find.byIcon(Icons.check_rounded), findsNothing);
+  });
+
+  testWidgets("TextInputComponent surfaces wrong password as an error border", (
+    tester,
+  ) async {
+    final submitNotifier = ValueNotifier<int>(0);
+    addTearDown(submitNotifier.dispose);
+
+    await tester.pumpWidget(
+      _wrap(
+        TextInputComponent(
+          initialValue: "secret",
+          submitNotifier: submitNotifier,
+          popNavAfterSubmission: true,
+          onSubmit: (_) => throw Exception("Incorrect password"),
+        ),
+      ),
+    );
+
+    submitNotifier.value++;
+    await tester.pump();
+
+    expect(
+      _fieldDecoration(tester).border?.top.color,
+      ColorTokens.light.warning,
+    );
+  });
+
+  testWidgets("TextInputComponent listens for cancel notifications", (
+    tester,
+  ) async {
+    final cancelNotifier = ValueNotifier<int>(0);
+    final controller = TextEditingController(text: "draft");
+    addTearDown(cancelNotifier.dispose);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _wrap(
+        TextInputComponent(
+          controller: controller,
+          cancelNotifier: cancelNotifier,
+        ),
+      ),
+    );
+
+    cancelNotifier.value++;
+    await tester.pump();
+
+    expect(controller.text, "");
+  });
 }
 
 Finder _richText(String value) {
@@ -349,14 +424,27 @@ Finder _richText(String value) {
   );
 }
 
+Finder _fieldContainers() {
+  return find.byWidgetPredicate((widget) {
+    if (widget is! Container || widget.decoration is! BoxDecoration) {
+      return false;
+    }
+    final decoration = widget.decoration! as BoxDecoration;
+    return decoration.borderRadius == BorderRadius.circular(16) &&
+        decoration.border is Border;
+  });
+}
+
+BoxDecoration _fieldDecoration(WidgetTester tester) {
+  return tester.widget<Container>(_fieldContainers().first).decoration!
+      as BoxDecoration;
+}
+
 Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ComponentTheme.lightTheme(),
     home: Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: child,
-      ),
+      body: Padding(padding: const EdgeInsets.all(24), child: child),
     ),
   );
 }

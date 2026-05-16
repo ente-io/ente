@@ -55,10 +55,22 @@ pub fn build_session(model_path: &str, policy: &ExecutionProviderPolicy) -> MlRe
         ));
     }
 
+    if has_protobuf_parse_failure(&errors) {
+        return Err(MlError::CorruptModel(model_path.to_string()));
+    }
+
     Err(MlError::Ort(format!(
         "failed to create ONNX session for model '{model_path}' across EP fallbacks: {}",
         errors.join(" | ")
     )))
+}
+
+fn has_protobuf_parse_failure(errors: &[String]) -> bool {
+    errors.iter().any(|error| {
+        error
+            .to_ascii_lowercase()
+            .contains("protobuf parsing failed")
+    })
 }
 
 fn providers_for_policy(
@@ -200,4 +212,23 @@ pub fn run_i32_f32<const N: usize>(
     let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
     let data = tensor.iter().copied().collect::<Vec<_>>();
     Ok((shape, data))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::has_protobuf_parse_failure;
+
+    #[test]
+    fn detects_protobuf_parse_failure() {
+        assert!(has_protobuf_parse_failure(&[String::from(
+            "Load model failed:Protobuf parsing failed.",
+        )]));
+    }
+
+    #[test]
+    fn ignores_other_onnx_errors() {
+        assert!(!has_protobuf_parse_failure(&[String::from(
+            "Load model failed: missing initializer",
+        )]));
+    }
 }
