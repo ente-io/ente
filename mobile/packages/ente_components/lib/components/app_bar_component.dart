@@ -171,6 +171,8 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     final titleRight = actions.isEmpty
         ? 0.0
         : _actionsWidth(actions.length) + Spacing.md;
+    final leadingOpacity = 1 - titleProgress;
+    final isLeadingHidden = leadingOpacity <= 0.01;
 
     return ColoredBox(
       color: backgroundColor ?? colors.backgroundBase,
@@ -187,13 +189,19 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               Positioned(
                 left: 0,
                 top: leadingTop,
-                child: Opacity(
-                  opacity: 1 - titleProgress,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox.square(
-                      dimension: _headerControlSize,
-                      child: leading,
+                child: IgnorePointer(
+                  ignoring: isLeadingHidden,
+                  child: ExcludeSemantics(
+                    excluding: isLeadingHidden,
+                    child: Opacity(
+                      opacity: leadingOpacity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox.square(
+                          dimension: _headerControlSize,
+                          child: leading,
+                        ),
+                      ),
                     ),
                   ),
                 ),

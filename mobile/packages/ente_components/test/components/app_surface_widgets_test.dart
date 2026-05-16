@@ -318,6 +318,7 @@ void main() {
     tester,
   ) async {
     var addTapped = false;
+    var leadingTapped = false;
 
     await pumpComponent(
       tester,
@@ -327,9 +328,11 @@ void main() {
             title: 'Menu items',
             subtitle: 'Scroll to collapse',
             onBack: () {},
-            leading: const ColoredBox(
-              key: ValueKey('header-leading'),
-              color: Colors.blue,
+            leading: GestureDetector(
+              key: const ValueKey('header-leading'),
+              behavior: HitTestBehavior.opaque,
+              onTap: () => leadingTapped = true,
+              child: const ColoredBox(color: Colors.blue),
             ),
             actions: [
               GestureDetector(
@@ -366,6 +369,10 @@ void main() {
     );
     expect(tester.getCenter(find.byIcon(Icons.add)).dy, closeTo(67, 1));
 
+    await tester.tap(find.byKey(const ValueKey('header-leading')));
+    await tester.pump();
+    expect(leadingTapped, isTrue);
+
     await tester.tap(find.byKey(const ValueKey('header-add-action')));
     await tester.pump();
     expect(addTapped, isTrue);
@@ -379,7 +386,15 @@ void main() {
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -180));
     await tester.pump();
 
+    leadingTapped = false;
+    await tester.tap(
+      find.byKey(const ValueKey('header-leading')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+
     expect(tester.takeException(), isNull);
+    expect(leadingTapped, isFalse);
     expect(
       tester.getCenter(find.byIcon(Icons.add)).dy,
       closeTo(tester.getCenter(find.byIcon(Icons.arrow_back)).dy, 1),
