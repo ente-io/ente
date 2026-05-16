@@ -124,50 +124,55 @@ class _CatalogHomeState extends State<CatalogHome> {
 
     return Scaffold(
       drawer: const CatalogSettingsDrawer(),
-      body: CustomScrollView(
-        slivers: [
-          HeaderAppBarComponent(
-            title: 'Components',
-            subtitle: 'Design system catalog',
-            backButton: Builder(
-              builder: (context) {
-                return IconButtonComponent(
-                  tooltip: 'Settings',
-                  variant: IconButtonComponentVariant.unfilled,
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedMenu01),
-                );
-              },
-            ),
-            actions: [
-              _CatalogThemeCycleButton(
-                themeMode: _themeMode,
-                onChanged: _setThemeMode,
+      appBar: AppBar(
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colors.backgroundBase,
+        foregroundColor: colors.textBase,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          'Components',
+          style: TextStyles.h1Bold.copyWith(color: colors.textBase),
+        ),
+        leading: Builder(
+          builder: (context) {
+            return Center(
+              child: IconButtonComponent(
+                tooltip: 'Settings',
+                variant: IconButtonComponentVariant.unfilled,
+                onTap: () => Scaffold.of(context).openDrawer(),
+                icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedMenu01),
               ),
-            ],
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              Spacing.lg,
-              Spacing.xs,
-              Spacing.lg,
-              Spacing.lg,
-            ),
-            sliver: SliverList.builder(
-              itemCount: sections.length * 2 - 1,
-              itemBuilder: (context, index) {
-                if (index.isOdd) {
-                  return const SizedBox(height: Spacing.lg);
-                }
-                return _CatalogSectionTile(
-                  section: sections[index ~/ 2],
-                  themeMode: _themeMode,
-                  onThemeModeChanged: widget.onThemeModeChanged,
-                );
-              },
+            );
+          },
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: Spacing.lg),
+            child: _CatalogThemeCycleButton(
+              themeMode: _themeMode,
+              onChanged: _setThemeMode,
             ),
           ),
         ],
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(
+          Spacing.lg,
+          Spacing.lg,
+          Spacing.lg,
+          Spacing.lg,
+        ),
+        itemCount: sections.length,
+        separatorBuilder: (_, _) => const SizedBox(height: Spacing.lg),
+        itemBuilder: (context, index) {
+          return _CatalogSectionTile(
+            section: sections[index],
+            themeMode: _themeMode,
+            onThemeModeChanged: widget.onThemeModeChanged,
+          );
+        },
       ),
       backgroundColor: colors.backgroundBase,
     );
@@ -175,18 +180,6 @@ class _CatalogHomeState extends State<CatalogHome> {
 
   List<CatalogSection> _sections() {
     return [
-      CatalogSection(
-        title: 'Colours',
-        icon: HugeIcons.strokeRoundedColors,
-        components: const ['Color tokens'],
-        previewBuilder: (_) => _ColorPreview(),
-      ),
-      CatalogSection(
-        title: 'Text styles',
-        icon: HugeIcons.strokeRoundedTextFont,
-        components: const ['H1', 'H1-Bold', 'H2', 'Large', 'Body', 'Mini'],
-        previewBuilder: (_) => const _TextStylesPreview(),
-      ),
       CatalogSection(
         title: 'Menu Item',
         icon: HugeIcons.strokeRoundedUser,
@@ -217,17 +210,17 @@ class _CatalogHomeState extends State<CatalogHome> {
         previewBuilder: (_) => const _ButtonMatrix(),
       ),
       CatalogSection(
-        title: 'Filter chips',
-        icon: HugeIcons.strokeRoundedFilter,
+        title: 'Bottom sheets',
+        icon: HugeIcons.strokeRoundedLayoutTable01,
         components: const [
-          'Selected',
-          'Unselected',
-          'Disabled',
-          'Leading icon',
-          'Trailing icon',
-          'Face',
+          'Header',
+          'Default sheet',
+          'Choice sheet',
+          'Warning sheet',
+          'Error sheet',
+          'Custom content',
         ],
-        previewBuilder: (_) => const _FilterChipPreview(),
+        previewBuilder: (_) => const _BottomSheetPreview(),
       ),
       CatalogSection(
         title: 'Text input',
@@ -245,6 +238,25 @@ class _CatalogHomeState extends State<CatalogHome> {
           'Max length',
         ],
         previewBuilder: (_) => const _TextInputPreview(),
+      ),
+      CatalogSection(
+        title: 'Selection controls',
+        icon: HugeIcons.strokeRoundedSlidersHorizontal,
+        components: const ['Checkbox', 'Radio', 'Switch', 'Slider', 'Stepper'],
+        previewBuilder: (_) => const _SelectionPreview(),
+      ),
+      CatalogSection(
+        title: 'Filter chips',
+        icon: HugeIcons.strokeRoundedFilter,
+        components: const [
+          'Selected',
+          'Unselected',
+          'Disabled',
+          'Leading icon',
+          'Trailing icon',
+          'Face',
+        ],
+        previewBuilder: (_) => const _FilterChipPreview(),
       ),
       CatalogSection(
         title: 'Header app bar',
@@ -265,10 +277,10 @@ class _CatalogHomeState extends State<CatalogHome> {
         previewBuilder: (_) => const _AvatarPreview(),
       ),
       CatalogSection(
-        title: 'Selection controls',
-        icon: HugeIcons.strokeRoundedSlidersHorizontal,
-        components: const ['Checkbox', 'Radio', 'Switch', 'Slider', 'Stepper'],
-        previewBuilder: (_) => const _SelectionPreview(),
+        title: 'Text styles',
+        icon: HugeIcons.strokeRoundedTextFont,
+        components: const ['H1', 'H1-Bold', 'H2', 'Large', 'Body', 'Mini'],
+        previewBuilder: (_) => const _TextStylesPreview(),
       ),
     ];
   }
@@ -318,34 +330,23 @@ class CatalogSettingsDrawer extends StatelessWidget {
       width: _drawerWidth(context),
       shape: const RoundedRectangleBorder(),
       backgroundColor: colors.backgroundBase,
-      child: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.all(Spacing.lg),
-          children: [
-            Row(
-              children: [
-                IconButtonComponent(
-                  tooltip: 'Close settings',
-                  variant: IconButtonComponentVariant.unfilled,
-                  icon: const _CatalogHugeIcon(
-                    HugeIcons.strokeRoundedArrowLeft02,
-                  ),
-                  onTap: () => Navigator.of(context).pop(),
-                ),
-                const SizedBox(width: Spacing.md),
-                Expanded(
-                  child: Text(
-                    'Settings',
-                    style: TextStyles.h1Bold.copyWith(color: colors.textBase),
-                  ),
-                ),
-              ],
+      child: CustomScrollView(
+        slivers: [
+          HeaderAppBarComponent(
+            title: 'Settings',
+            subtitle: 'aman@example.com',
+            onBack: () => Navigator.of(context).pop(),
+          ),
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(
+              Spacing.sm,
+              Spacing.xs,
+              Spacing.sm,
+              Spacing.lg,
             ),
-            const SizedBox(height: Spacing.xl),
-            const _SettingsMainContent(),
-          ],
-        ),
+            sliver: SliverToBoxAdapter(child: _SettingsMainContent()),
+          ),
+        ],
       ),
     );
   }
@@ -589,16 +590,6 @@ class _SettingsMainContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-          child: Text(
-            'aman@example.com',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyles.body.copyWith(color: colors.textLight),
-          ),
-        ),
-        const SizedBox(height: Spacing.md),
         const _SettingsNavigationItem(
           title: 'Account',
           icon: HugeIcons.strokeRoundedUser,
@@ -1026,67 +1017,6 @@ class _SettingsAboutPage extends StatelessWidget {
           trailing: _SettingsTrailingIcon(),
         ),
       ],
-    );
-  }
-}
-
-class _ColorPreview extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const _CatalogPreviewList(
-      children: [
-        _CatalogPreviewGroup(
-          title: 'Light palette',
-          child: _ColorColumn(colors: ColorTokens.light),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Dark palette',
-          child: _ColorColumn(colors: ColorTokens.dark),
-        ),
-      ],
-    );
-  }
-}
-
-class _ColorColumn extends StatelessWidget {
-  const _ColorColumn({required this.colors});
-
-  final ColorTokens colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: Spacing.sm,
-      runSpacing: Spacing.sm,
-      children: [
-        _Swatch(color: colors.primary),
-        _Swatch(color: colors.warning),
-        _Swatch(color: colors.caution),
-        _Swatch(color: colors.blue),
-        _Swatch(color: colors.textBase),
-        _Swatch(color: colors.backgroundBase),
-        _Swatch(color: colors.fillLight),
-        _Swatch(color: colors.strokeDark),
-      ],
-    );
-  }
-}
-
-class _Swatch extends StatelessWidget {
-  const _Swatch({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 34,
-      height: 34,
-      decoration: BoxDecoration(
-        color: color,
-        border: Border.all(color: context.componentColors.strokeFaint),
-        borderRadius: BorderRadius.circular(Radii.xs),
-      ),
     );
   }
 }
@@ -2750,5 +2680,346 @@ class _MenuItemExample extends StatelessWidget {
       ),
       _MenuItemTrailingKind.none => null,
     };
+  }
+}
+
+class _BottomSheetPreview extends StatelessWidget {
+  const _BottomSheetPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return _CatalogPreviewList(
+      children: [
+        _CatalogPreviewGroup(
+          title: 'Launch sheets',
+          child: Column(
+            children: [
+              ButtonComponent(
+                label: 'Open default sheet',
+                onTap: () => _showDefaultSheet(context),
+              ),
+              const SizedBox(height: Spacing.md),
+              ButtonComponent(
+                label: 'Open choice sheet',
+                variant: ButtonComponentVariant.secondary,
+                onTap: () => _showChoiceSheet(context),
+              ),
+              const SizedBox(height: Spacing.md),
+              ButtonComponent(
+                label: 'Open warning sheet',
+                variant: ButtonComponentVariant.neutral,
+                onTap: () => _showWarningSheet(context),
+              ),
+              const SizedBox(height: Spacing.md),
+              ButtonComponent(
+                label: 'Open custom content sheet',
+                variant: ButtonComponentVariant.neutral,
+                onTap: () => _showCustomSheet(context),
+              ),
+              const SizedBox(height: Spacing.md),
+              ButtonComponent(
+                label: 'Open generic error sheet',
+                variant: ButtonComponentVariant.critical,
+                onTap: () => _showErrorSheet(context),
+              ),
+            ],
+          ),
+        ),
+        const _CatalogPreviewGroup(
+          title: 'Header',
+          child: _InlineSheetFrame(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BottomSheetHeaderComponent(title: 'Title'),
+                SizedBox(height: Spacing.xl),
+                BottomSheetHeaderComponent(),
+                SizedBox(height: Spacing.xl),
+                BottomSheetHeaderComponent(
+                  title: 'Title',
+                  illustration: _WarningIllustration(),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const _CatalogPreviewGroup(
+          title: 'Default sheet',
+          child: _InlineSheetFrame(child: _DefaultBottomSheetContent()),
+        ),
+        const _CatalogPreviewGroup(
+          title: 'Choice sheet',
+          child: _InlineSheetFrame(child: _ChoiceBottomSheetContent()),
+        ),
+        const _CatalogPreviewGroup(
+          title: 'Warning sheet',
+          child: _InlineSheetFrame(child: _WarningBottomSheetContent()),
+        ),
+        const _CatalogPreviewGroup(
+          title: 'Error sheet',
+          child: _InlineSheetFrame(child: _ErrorBottomSheetContent()),
+        ),
+        const _CatalogPreviewGroup(
+          title: 'Custom content',
+          child: _InlineSheetFrame(child: _CustomBottomSheetContent()),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showDefaultSheet(BuildContext context) async {
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (_) => const _DefaultBottomSheetContent(),
+    );
+  }
+
+  Future<void> _showChoiceSheet(BuildContext context) async {
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (_) => const _ChoiceBottomSheetContent(),
+    );
+  }
+
+  Future<void> _showWarningSheet(BuildContext context) async {
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (_) => const _WarningBottomSheetContent(),
+    );
+  }
+
+  Future<void> _showCustomSheet(BuildContext context) async {
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (_) => const _CustomBottomSheetContent(),
+    );
+  }
+
+  Future<void> _showErrorSheet(BuildContext context) async {
+    await showErrorBottomSheetComponent<void>(
+      context: context,
+      message:
+          'It looks like something went wrong. Please retry after some time.',
+      illustration: const _WarningIllustration(),
+      actions: [
+        ButtonComponent(
+          label: 'Contact support',
+          variant: ButtonComponentVariant.secondary,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DefaultBottomSheetContent extends StatelessWidget {
+  const _DefaultBottomSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return BottomSheetComponent(
+      title: 'Title',
+      content: Text(
+        'Imagine a scenario where a message has been sent, a bridge of trust '
+        'is being built, yet the other side remains silent.',
+        style: TextStyles.body.copyWith(color: colors.textLight),
+      ),
+      actions: [
+        ButtonComponent(
+          label: 'Button',
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+        ButtonComponent(
+          label: 'Button',
+          variant: ButtonComponentVariant.secondary,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ChoiceBottomSheetContent extends StatelessWidget {
+  const _ChoiceBottomSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return BottomSheetComponent(
+      title: 'Delete link?',
+      content: Text(
+        'This action removes access for anyone who has the shared link.',
+        style: TextStyles.body.copyWith(color: colors.textLight),
+      ),
+      actions: [
+        ButtonComponent(
+          label: 'Delete link',
+          variant: ButtonComponentVariant.critical,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+        ButtonComponent(
+          label: 'Cancel',
+          variant: ButtonComponentVariant.secondary,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _WarningBottomSheetContent extends StatelessWidget {
+  const _WarningBottomSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomSheetComponent(
+      title: 'Title',
+      message:
+          'Imagine a scenario where a message has been sent, a bridge of trust '
+          'is being built, yet the other side remains silent.',
+      illustration: const _WarningIllustration(),
+      actions: [
+        ButtonComponent(
+          label: 'Button',
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+        ButtonComponent(
+          label: 'Button',
+          variant: ButtonComponentVariant.secondary,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ErrorBottomSheetContent extends StatelessWidget {
+  const _ErrorBottomSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomSheetComponent(
+      title: 'Error',
+      message:
+          'It looks like something went wrong. Please retry after some time.',
+      illustration: const _WarningIllustration(),
+      actions: [
+        ButtonComponent(
+          label: 'Contact support',
+          variant: ButtonComponentVariant.secondary,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomBottomSheetContent extends StatelessWidget {
+  const _CustomBottomSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return BottomSheetComponent(
+      title: 'Share link',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Anyone with this link can view the shared item.',
+            style: TextStyles.body.copyWith(color: colors.textLight),
+          ),
+          const SizedBox(height: Spacing.md),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.xl,
+              Spacing.xl,
+              56,
+              Spacing.xl,
+            ),
+            decoration: BoxDecoration(
+              color: colors.fillDark,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Text(
+                  'https://ente.io/share/example-link',
+                  style: TextStyles.body.copyWith(color: colors.textBase),
+                ),
+                Positioned(
+                  right: -44,
+                  top: -8,
+                  child: IconButtonComponent(
+                    tooltip: 'Copy link',
+                    variant: IconButtonComponentVariant.unfilled,
+                    icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedCopy01),
+                    onTap: () {},
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        ButtonComponent(
+          label: 'Share link',
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+        ButtonComponent(
+          label: 'Delete link',
+          variant: ButtonComponentVariant.tertiaryCritical,
+          onTap: () async {
+            await Navigator.of(context).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _InlineSheetFrame extends StatelessWidget {
+  const _InlineSheetFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 375),
+      child: child,
+    );
+  }
+}
+
+class _WarningIllustration extends StatelessWidget {
+  const _WarningIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset('assets/warning-grey.png', width: 101, height: 89);
   }
 }
