@@ -14,6 +14,7 @@ void main() {
       expect(Radii.xs, 4);
       expect(Radii.md, 12);
       expect(Radii.button, 20);
+      expect(Radii.bottomSheet, 20);
       expect(Radii.buttonRadius, const Radius.circular(20));
       expect(Radii.buttonBorder, const BorderRadius.all(Radius.circular(20)));
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_components/components/buttons/icon_button_component.dart';
+import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
@@ -25,6 +26,10 @@ class BottomSheetHeaderComponent extends StatelessWidget {
 
   final String? title;
   final Widget? illustration;
+
+  /// Called when the close button is pressed, before the sheet is dismissed.
+  ///
+  /// Barrier taps, drag dismissals, and system back dismissals do not call this.
   final FutureOr<void> Function()? onClose;
   final bool showCloseButton;
   final String closeTooltip;
@@ -97,9 +102,8 @@ class BottomSheetComponent extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.padding = const EdgeInsets.all(Spacing.xl),
     this.contentSpacing = Spacing.lg,
-    this.actionsSpacing = Spacing.lg,
+    this.actionsTopSpacing = Spacing.lg,
     this.backgroundColor,
-    this.borderColor,
     this.isKeyboardAware = false,
   });
 
@@ -109,6 +113,10 @@ class BottomSheetComponent extends StatelessWidget {
   final Widget? illustration;
   final Widget? content;
   final List<Widget> actions;
+
+  /// Called when the close button is pressed, before the sheet is dismissed.
+  ///
+  /// Barrier taps, drag dismissals, and system back dismissals do not call this.
   final FutureOr<void> Function()? onClose;
   final bool showCloseButton;
   final String closeTooltip;
@@ -116,9 +124,8 @@ class BottomSheetComponent extends StatelessWidget {
   final CrossAxisAlignment crossAxisAlignment;
   final EdgeInsets padding;
   final double contentSpacing;
-  final double actionsSpacing;
+  final double actionsTopSpacing;
   final Color? backgroundColor;
-  final Color? borderColor;
   final bool isKeyboardAware;
 
   @override
@@ -127,7 +134,8 @@ class BottomSheetComponent extends StatelessWidget {
     final bottomInset = isKeyboardAware
         ? MediaQuery.viewInsetsOf(context).bottom
         : 0.0;
-    final usesCenteredLayout = illustration != null || message != null;
+    final usesCenteredLayout =
+        illustration != null || (message != null && content == null);
     final effectiveHeader =
         header ??
         ((title != null || showCloseButton || usesCenteredLayout)
@@ -164,10 +172,9 @@ class BottomSheetComponent extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: backgroundColor ?? colors.backgroundBase,
-          border: borderColor == null ? null : Border.all(color: borderColor!),
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(_sheetRadius),
-            topRight: Radius.circular(_sheetRadius),
+            topLeft: Radius.circular(Radii.bottomSheet),
+            topRight: Radius.circular(Radii.bottomSheet),
           ),
         ),
         child: SafeArea(
@@ -185,7 +192,7 @@ class BottomSheetComponent extends StatelessWidget {
                   effectiveContent,
                 ],
                 if (actions.isNotEmpty) ...[
-                  SizedBox(height: actionsSpacing),
+                  SizedBox(height: actionsTopSpacing),
                   _BottomSheetActions(actions: actions),
                 ],
               ],
@@ -270,6 +277,7 @@ class _CenteredHeader extends StatelessWidget {
 class _BottomSheetCloseButton extends StatelessWidget {
   const _BottomSheetCloseButton({required this.onClose, required this.tooltip});
 
+  /// Called when the close button is pressed, before the sheet is dismissed.
   final FutureOr<void> Function()? onClose;
   final String tooltip;
 
@@ -280,12 +288,20 @@ class _BottomSheetCloseButton extends StatelessWidget {
       variant: IconButtonComponentVariant.circular,
       shouldSurfaceExecutionStates: false,
       icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
-      onTap:
-          onClose ??
-          () async {
-            await Navigator.of(context).maybePop();
-          },
+      onTap: () => _handleClose(context),
     );
+  }
+
+  Future<void> _handleClose(BuildContext context) async {
+    await Future.sync(onClose ?? () {});
+    if (!context.mounted) {
+      return;
+    }
+
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) {
+      await Navigator.of(context).maybePop();
+    }
   }
 }
 
@@ -309,5 +325,4 @@ class _BottomSheetActions extends StatelessWidget {
   }
 }
 
-const double _sheetRadius = 20;
 const double _headerHeight = 38;

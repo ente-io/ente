@@ -11,6 +11,10 @@ Future<T?> showErrorBottomSheetComponent<T>({
   String title = 'Error',
   Widget? illustration,
   List<Widget> actions = const [],
+
+  /// Called when the close button is pressed, before the sheet is dismissed.
+  ///
+  /// Barrier taps, drag dismissals, and system back dismissals do not call this.
   FutureOr<void> Function()? onClose,
   bool showCloseButton = true,
   bool isDismissible = true,
