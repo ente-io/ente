@@ -45,10 +45,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
+  late TextEditingController _pinController;
   late TextEditingController _notesController;
   late TextEditingController _digitsController;
   late TextEditingController _periodController;
   late bool _secretKeyObscured;
+  late bool _pinObscured;
   late List<String> selectedTags = [...?widget.code?.display.tags];
   List<String> allTags = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
@@ -71,6 +73,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _secretController = TextEditingController(
       text: widget.code?.secret,
     );
+    _pinController = TextEditingController(
+      text: widget.code?.pin ?? '',
+    );
     _notesController = TextEditingController(
       text: widget.code?.display.note,
     );
@@ -86,6 +91,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     );
 
     _secretKeyObscured = widget.code != null;
+    _pinObscured = widget.code != null;
     _loadTags();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadTags();
@@ -101,12 +107,14 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     });
 
     if (widget.code == null ||
-        (widget.code!.issuer.length < _otherTextLimit &&
-            widget.code!.account.length < _otherTextLimit &&
-            widget.code!.secret.length < _otherTextLimit)) {
+      (widget.code!.issuer.length < _otherTextLimit &&
+        widget.code!.account.length < _otherTextLimit &&
+        widget.code!.secret.length < _otherTextLimit &&
+        (widget.code!.pin?.length ?? 0) < _otherTextLimit)) {
       _limitTextLength(_issuerController, _otherTextLimit);
       _limitTextLength(_accountController, _otherTextLimit);
       _limitTextLength(_secretController, _otherTextLimit);
+      _limitTextLength(_pinController, _otherTextLimit);
     }
 
     isCustomIcon = widget.code?.display.isCustomIcon ?? false;
@@ -123,6 +131,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
     _algorithm = widget.code == null ? Algorithm.sha1 : widget.code!.algorithm;
     _type = widget.code == null ? Type.totp : widget.code!.type;
+    if (_type == Type.yandex) {
+      _applyYandexDefaults();
+    }
 
     super.initState();
   }
@@ -143,10 +154,22 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _streamSubscription?.cancel();
     _issuerController.dispose();
     _accountController.dispose();
+    _pinController.dispose();
     _notesController.dispose();
     _digitsController.dispose();
     _periodController.dispose();
     super.dispose();
+  }
+
+  bool _isYandexIssuer(String issuer) {
+    final String lower = issuer.trim().toLowerCase();
+    return lower == 'yandex' || lower.contains('yandex');
+  }
+
+  void _applyYandexDefaults() {
+    _digitsController.text = Code.yandexDigits.toString();
+    _periodController.text = Code.yandexPeriod.toString();
+    _algorithm = Algorithm.sha256;
   }
 
   Future<void> _loadTags() async {
@@ -240,6 +263,54 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         ),
                       ),
                     ],
+                  ),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _issuerController,
+                    builder: (context, value, child) {
+                      final bool showPinField =
+                          _type == Type.yandex || _isYandexIssuer(value.text);
+                      if (!showPinField) {
+                        return const SizedBox.shrink();
+                      }
+                      return Row(
+                        children: [
+                          FieldLabel(l10n.pinLock),
+                          Expanded(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Please enter some text";
+                                }
+                                return null;
+                              },
+                              style: getEnteTextTheme(context).small,
+                              decoration: InputDecoration(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 12.0),
+                                suffixIcon: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _pinObscured = !_pinObscured;
+                                    });
+                                  },
+                                  child: _pinObscured
+                                      ? const Icon(
+                                          Icons.visibility_off_rounded,
+                                          size: 18,
+                                        )
+                                      : const Icon(
+                                          Icons.visibility_rounded,
+                                          size: 18,
+                                        ),
+                                ),
+                              ),
+                              obscureText: _pinObscured,
+                              controller: _pinController,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   Row(
                     children: [
@@ -422,12 +493,16 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
+      final pin = _pinController.text.trim();
       final notes = _notesController.text.trim();
       final digits = int.tryParse(_digitsController.text.trim());
       final period = int.tryParse(_periodController.text.trim());
 
-      final isStreamCode = issuer.toLowerCase() == "steam" ||
-          issuer.toLowerCase().contains('steampowered.com');
+      final String issuerLower = issuer.toLowerCase();
+      final isStreamCode = issuerLower == "steam" ||
+          issuerLower.contains('steampowered.com');
+      final bool isYandexCode =
+          _type == Type.yandex || _isYandexIssuer(issuer);
       final CodeDisplay display =
           widget.code?.display.copyWith(tags: selectedTags) ??
               CodeDisplay(tags: selectedTags);
@@ -458,26 +533,46 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         }
       }
 
+      if (isYandexCode && pin.isEmpty) {
+        _showIncorrectDetailsDialog(
+          context,
+          message: "PIN cannot be empty",
+        );
+        return;
+      }
+
+      final Type effectiveType =
+          isStreamCode ? Type.steam : (isYandexCode ? Type.yandex : _type);
+      final int resolvedDigits = isStreamCode
+          ? Code.steamDigits
+          : (isYandexCode ? Code.yandexDigits : digits!);
+      final int resolvedPeriod =
+          isYandexCode ? Code.yandexPeriod : period!;
+      final Algorithm resolvedAlgorithm =
+          isYandexCode ? Algorithm.sha256 : _algorithm;
+
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
-              isStreamCode ? Type.steam : _type,
+              effectiveType,
               account,
               issuer,
               secret,
               display,
-              isStreamCode ? Code.steamDigits : digits!,
-              algorithm: _algorithm,
-              period: period!,
+              resolvedDigits,
+              algorithm: resolvedAlgorithm,
+              period: resolvedPeriod,
+              pin: isYandexCode ? pin : null,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
               display: display,
-              algorithm: _algorithm,
-              digits: digits!,
-              type: _type,
-              period: period,
+              algorithm: resolvedAlgorithm,
+              digits: resolvedDigits,
+              type: effectiveType,
+              period: resolvedPeriod,
+              pin: isYandexCode ? pin : '',
             );
 
       // Verify the validity of the code
@@ -526,6 +621,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
   Widget advanceOptionWidget() {
     final l10n = context.l10n;
+    final bool isYandexType = _type == Type.yandex;
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: Column(
@@ -583,13 +679,16 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   FieldLabel(l10n.algorithm, width: 60),
-                                  AlgorithmSelectorWidget(
-                                    currentAlgorithm: _algorithm,
-                                    onSelected: (newAlgorithm) async {
-                                      setState(() {
-                                        _algorithm = newAlgorithm;
-                                      });
-                                    },
+                                  IgnorePointer(
+                                    ignoring: isYandexType,
+                                    child: AlgorithmSelectorWidget(
+                                      currentAlgorithm: _algorithm,
+                                      onSelected: (newAlgorithm) async {
+                                        setState(() {
+                                          _algorithm = newAlgorithm;
+                                        });
+                                      },
+                                    ),
                                   ),
                                 ],
                               ),
@@ -602,6 +701,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                     onSelected: (newTopt) async {
                                       setState(() {
                                         _type = newTopt;
+                                        if (_type == Type.yandex) {
+                                          _applyYandexDefaults();
+                                        }
                                       });
                                     },
                                   ),
@@ -612,6 +714,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                   FieldLabel(l10n.period, width: 60),
                                   Expanded(
                                     child: TextFormField(
+                                      readOnly: isYandexType,
                                       keyboardType: TextInputType.number,
                                       // The validator receives the text that the user has entered.
                                       validator: (value) {
@@ -641,6 +744,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                   FieldLabel(l10n.digits, width: 60),
                                   Expanded(
                                     child: TextFormField(
+                                      readOnly: isYandexType,
                                       keyboardType: TextInputType.number,
                                       // The validator receives the text that the user has entered.
                                       validator: (value) {

@@ -36,7 +36,17 @@ void main() {
   test("shareCodesSupport", () {
     expect(Type.totp.canShareCodes, true);
     expect(Type.steam.canShareCodes, true);
+    expect(Type.yandex.canShareCodes, true);
     expect(Type.hotp.canShareCodes, false);
+  });
+
+  test("parseYandexOtp", () {
+    final code = Code.fromOTPAuthUrl(
+      "otpauth://yandex/test@ente.io?secret=AAAAAAAAAAAAAAAAAAAAAAAAAA&issuer=Yandex&pin=1234",
+    );
+    expect(code.type, Type.yandex);
+    expect(code.pin, "1234");
+    expect(code.digits, Code.yandexDigits);
   });
 
   test("validateDisplay", () {

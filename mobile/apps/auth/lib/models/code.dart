@@ -7,7 +7,9 @@ import 'package:logging/logging.dart';
 class Code {
   static const defaultDigits = 6;
   static const steamDigits = 5;
+  static const yandexDigits = 8;
   static const defaultPeriod = 30;
+  static const yandexPeriod = 30;
 
   int? generatedID;
   final String account;
@@ -15,6 +17,7 @@ class Code {
   final int digits;
   final int period;
   final String secret;
+  final String? pin;
   final Algorithm algorithm;
   final Type type;
 
@@ -60,6 +63,7 @@ class Code {
     this.type,
     this.counter,
     this.rawData, {
+    this.pin,
     this.generatedID,
     required this.display,
     this.err,
@@ -87,6 +91,7 @@ class Code {
     int? digits,
     int? period,
     String? secret,
+    String? pin,
     Algorithm? algorithm,
     Type? type,
     int? counter,
@@ -97,26 +102,39 @@ class Code {
     final int updatedDigits = digits ?? this.digits;
     final int updatePeriod = period ?? this.period;
     final String updatedSecret = secret ?? this.secret;
+    final String? updatedPinRaw = pin ?? this.pin;
+    final String? updatedPin =
+        (updatedPinRaw != null && updatedPinRaw.isNotEmpty)
+            ? updatedPinRaw
+            : null;
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
     final CodeDisplay updatedDisplay = display ?? this.display;
     final String encodedIssuer = Uri.encodeQueryComponent(updateIssuer);
+    final bool isYandex = updatedType == Type.yandex;
+    final int resolvedDigits = isYandex ? yandexDigits : updatedDigits;
+    final int resolvedPeriod = isYandex ? yandexPeriod : updatePeriod;
+    final Algorithm resolvedAlgorithm =
+        isYandex ? Algorithm.sha256 : updatedAlgo;
+    final String pinQuery =
+        updatedPin != null ? "&pin=${Uri.encodeQueryComponent(updatedPin)}" : "";
 
     return Code(
       updateAccount,
       updateIssuer,
-      updatedDigits,
-      updatePeriod,
+      resolvedDigits,
+      resolvedPeriod,
       updatedSecret,
-      updatedAlgo,
+      resolvedAlgorithm,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name.toUpperCase()}"
-      "&digits=$updatedDigits&issuer=$encodedIssuer"
-      "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
+      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${resolvedAlgorithm.name.toUpperCase()}"
+      "&digits=$resolvedDigits&issuer=$encodedIssuer"
+      "&period=$resolvedPeriod&secret=$updatedSecret$pinQuery${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
       display: updatedDisplay,
+      pin: updatedPin,
     );
   }
 
@@ -129,19 +147,30 @@ class Code {
     int digits, {
     Algorithm algorithm = Algorithm.sha1,
     int period = defaultPeriod,
+    String? pin,
   }) {
     final String encodedIssuer = Uri.encodeQueryComponent(issuer);
+    final String? normalizedPin = (pin != null && pin.isNotEmpty) ? pin : null;
+    final bool isYandex = type == Type.yandex;
+    final int resolvedDigits = isYandex ? yandexDigits : digits;
+    final int resolvedPeriod = isYandex ? yandexPeriod : period;
+    final Algorithm resolvedAlgorithm =
+        isYandex ? Algorithm.sha256 : algorithm;
+    final String pinQuery = normalizedPin != null
+        ? "&pin=${Uri.encodeQueryComponent(normalizedPin)}"
+        : "";
     return Code(
       account,
       issuer,
-      digits,
-      period,
+      resolvedDigits,
+      resolvedPeriod,
       secret,
-      algorithm,
+      resolvedAlgorithm,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=$period&secret=$secret",
+      "otpauth://${type.name}/$issuer:$account?algorithm=${resolvedAlgorithm.name.toUpperCase()}&digits=$resolvedDigits&issuer=$encodedIssuer&period=$resolvedPeriod&secret=$secret$pinQuery",
       display: display ?? CodeDisplay(),
+      pin: normalizedPin,
     );
   }
 
@@ -151,16 +180,27 @@ class Code {
     final account = _getAccount(uri, issuer);
 
     try {
+      final Type type = _getType(uri);
+      int digits = _getDigits(uri);
+      int period = _getPeriod(uri);
+      Algorithm algorithm = _getAlgorithm(uri);
+      final String? pin = _getPin(uri);
+      if (type == Type.yandex) {
+        digits = yandexDigits;
+        period = yandexPeriod;
+        algorithm = Algorithm.sha256;
+      }
       final code = Code(
         account,
         issuer,
-        _getDigits(uri),
-        _getPeriod(uri),
+        digits,
+        period,
         getSanitizedSecret(uri.queryParameters['secret']!),
-        _getAlgorithm(uri),
-        _getType(uri),
+        algorithm,
+        type,
         _getCounter(uri),
         rawData,
+        pin: pin,
         display: CodeDisplay.fromUri(uri) ?? CodeDisplay(),
       );
       return code;
@@ -244,6 +284,9 @@ class Code {
       if (uri.host == "steam") {
         return steamDigits;
       }
+      if (uri.host == "yandex") {
+        return yandexDigits;
+      }
       return defaultDigits;
     }
   }
@@ -270,8 +313,14 @@ class Code {
 
   static Algorithm _getAlgorithm(Uri uri) {
     try {
-      final algorithm =
-          uri.queryParameters['algorithm'].toString().toLowerCase();
+      final rawAlgorithm = uri.queryParameters['algorithm'];
+      if (rawAlgorithm == null || rawAlgorithm.isEmpty) {
+        if (uri.host == "yandex") {
+          return Algorithm.sha256;
+        }
+        return Algorithm.sha1;
+      }
+      final algorithm = rawAlgorithm.toLowerCase();
       if (algorithm == "sha256" || "algorithm.sha256" == algorithm) {
         return Algorithm.sha256;
       } else if (algorithm == "sha512" || "algorithm.sha512" == algorithm) {
@@ -283,9 +332,22 @@ class Code {
     return Algorithm.sha1;
   }
 
+  static String? _getPin(Uri uri) {
+    final String? pin = uri.queryParameters['pin'];
+    if (pin == null || pin.isEmpty) {
+      return null;
+    }
+    return pin;
+  }
+
   static Type _getType(Uri uri) {
     if (uri.host == "totp") {
+      if (uri.queryParameters.containsKey("pin")) {
+        return Type.yandex;
+      }
       return Type.totp;
+    } else if (uri.host == "yandex") {
+      return Type.yandex;
     } else if (uri.host == "steam") {
       return Type.steam;
     } else if (uri.host == "hotp") {
@@ -304,6 +366,7 @@ class Code {
         other.digits == digits &&
         other.period == period &&
         other.secret == secret &&
+      other.pin == pin &&
         other.counter == counter &&
         other.type == type &&
         other.rawData == rawData;
@@ -316,6 +379,7 @@ class Code {
         digits.hashCode ^
         period.hashCode ^
         secret.hashCode ^
+        pin.hashCode ^
         type.hashCode ^
         counter.hashCode ^
         rawData.hashCode;
@@ -325,11 +389,13 @@ class Code {
 enum Type {
   totp,
   hotp,
-  steam;
+  steam,
+  yandex;
 
-  bool get isTOTPCompatible => this == totp || this == steam;
+  bool get isTOTPCompatible =>
+      this == totp || this == steam || this == yandex;
 
-  bool get canShareCodes => this == totp || this == steam;
+  bool get canShareCodes => this == totp || this == steam || this == yandex;
 }
 
 enum Algorithm {
