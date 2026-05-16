@@ -102,6 +102,21 @@ class CatalogHome extends StatefulWidget {
 }
 
 class _CatalogHomeState extends State<CatalogHome> {
+  late ThemeMode _themeMode = widget.themeMode;
+
+  @override
+  void didUpdateWidget(covariant CatalogHome oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.themeMode != widget.themeMode) {
+      _themeMode = widget.themeMode;
+    }
+  }
+
+  void _setThemeMode(ThemeMode mode) {
+    setState(() => _themeMode = mode);
+    widget.onThemeModeChanged(mode);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
@@ -126,8 +141,8 @@ class _CatalogHomeState extends State<CatalogHome> {
             ),
             actions: [
               _CatalogThemeCycleButton(
-                themeMode: widget.themeMode,
-                onChanged: widget.onThemeModeChanged,
+                themeMode: _themeMode,
+                onChanged: _setThemeMode,
               ),
             ],
           ),
@@ -146,7 +161,7 @@ class _CatalogHomeState extends State<CatalogHome> {
                 }
                 return _CatalogSectionTile(
                   section: sections[index ~/ 2],
-                  themeMode: widget.themeMode,
+                  themeMode: _themeMode,
                   onThemeModeChanged: widget.onThemeModeChanged,
                 );
               },
@@ -2127,6 +2142,7 @@ class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
             title: 'Menu items',
             subtitle: 'Scroll to collapse into a single app bar row',
             onBack: () => Navigator.of(context).pop(),
+            leading: const _HeaderAppBarDemoLeading(),
             actions: [
               IconButtonComponent(
                 tooltip: 'Add item',
@@ -2158,6 +2174,25 @@ class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HeaderAppBarDemoLeading extends StatelessWidget {
+  const _HeaderAppBarDemoLeading();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return DecoratedBox(
+      decoration: BoxDecoration(color: colors.primary),
+      child: Center(
+        child: _CatalogHugeIcon(
+          HugeIcons.strokeRoundedMenuCircle,
+          color: colors.specialWhite,
+          size: 20,
+        ),
       ),
     );
   }

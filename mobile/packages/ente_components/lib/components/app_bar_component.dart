@@ -1,288 +1,14 @@
 import 'dart:ui';
 
-import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/spacing.dart';
 import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 
-enum TitleBarComponentVariant {
-  brand,
-  home,
-  preserving,
-  partiallyPreserved,
-  preserved,
-  syncing,
-  videoProcessing,
-  back,
-  onboarding,
-  settings,
-  titleTopbar,
-  titleTopbarNoIcon,
-  onboardingTitle,
-}
-
-/// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=2472-5809&m=dev
-/// Section: Title Bar
-/// Specs: 327px design width, 42px title/status row, centered or leading title layouts.
-class TitleBarComponent extends StatelessWidget implements PreferredSizeWidget {
-  const TitleBarComponent({
-    super.key,
-    this.variant = TitleBarComponentVariant.brand,
-    this.title,
-    this.statusText,
-    this.leading,
-    this.trailing,
-    this.statusIcon,
-    this.height = 42,
-    this.leadingWidth = 44,
-    this.trailingWidth = 44,
-  });
-
-  final TitleBarComponentVariant variant;
-  final String? title;
-  final String? statusText;
-  final Widget? leading;
-  final Widget? trailing;
-  final Widget? statusIcon;
-  final double height;
-  final double leadingWidth;
-  final double trailingWidth;
-
-  @override
-  Size get preferredSize => Size.fromHeight(height);
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    final child = variant == TitleBarComponentVariant.titleTopbarNoIcon
-        ? _buildLeadingTitleBar(colors)
-        : _buildCenteredTitleBar(colors);
-
-    return IconTheme(
-      data: IconThemeData(color: colors.textBase, size: 24),
-      child: SizedBox(height: height, child: child),
-    );
-  }
-
-  Widget _buildCenteredTitleBar(ColorTokens colors) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: _centerContentHorizontalPadding,
-          ),
-          child: ColoredBox(
-            color: colors.specialScrim.withAlpha(0),
-            child: Center(child: _centerContent(colors)),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          top: 0,
-          bottom: 0,
-          child: _TitleBarSlot(
-            width: leadingWidth,
-            visible: _leadingVisible,
-            child: leading,
-          ),
-        ),
-        Positioned(
-          right: 0,
-          top: 0,
-          bottom: 0,
-          child: _TitleBarSlot(
-            width: trailingWidth,
-            visible: _trailingVisible,
-            alignment: Alignment.centerRight,
-            child: trailing,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLeadingTitleBar(ColorTokens colors) {
-    return Row(
-      children: [
-        _TitleBarSlot(
-          width: leadingWidth,
-          visible: _leadingVisible,
-          child: leading,
-        ),
-        const SizedBox(width: Spacing.md),
-        Expanded(
-          child: Text(
-            _effectiveTitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyles.h1Bold.copyWith(color: colors.textBase),
-          ),
-        ),
-        _TitleBarSlot(
-          width: trailingWidth,
-          visible: _trailingVisible,
-          alignment: Alignment.centerRight,
-          child: trailing,
-        ),
-      ],
-    );
-  }
-
-  Widget _centerContent(ColorTokens colors) {
-    if (_usesStatus) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (statusIcon != null) ...[
-            IconTheme(
-              data: IconThemeData(color: colors.primary, size: 20),
-              child: SizedBox.square(dimension: 20, child: statusIcon),
-            ),
-            const SizedBox(width: Spacing.sm),
-          ],
-          Flexible(
-            child: Text(
-              _effectiveStatusText,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyles.body.copyWith(color: colors.textBase),
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (!_titleVisible) {
-      return const SizedBox.shrink();
-    }
-
-    return Text(
-      _effectiveTitle,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: _usesHeadingStyle
-          ? TextStyles.h1Bold.copyWith(color: colors.textBase)
-          : TextStyles.h1.copyWith(color: colors.textBase),
-    );
-  }
-
-  bool get _usesStatus {
-    return switch (variant) {
-      TitleBarComponentVariant.preserving ||
-      TitleBarComponentVariant.partiallyPreserved ||
-      TitleBarComponentVariant.preserved ||
-      TitleBarComponentVariant.syncing ||
-      TitleBarComponentVariant.videoProcessing => true,
-      _ => false,
-    };
-  }
-
-  bool get _usesHeadingStyle {
-    return switch (variant) {
-      TitleBarComponentVariant.titleTopbar ||
-      TitleBarComponentVariant.titleTopbarNoIcon ||
-      TitleBarComponentVariant.onboardingTitle => true,
-      _ => false,
-    };
-  }
-
-  bool get _titleVisible {
-    return switch (variant) {
-      TitleBarComponentVariant.back ||
-      TitleBarComponentVariant.settings => false,
-      _ => true,
-    };
-  }
-
-  bool get _leadingVisible {
-    return switch (variant) {
-      TitleBarComponentVariant.onboarding => false,
-      _ => true,
-    };
-  }
-
-  bool get _trailingVisible {
-    return switch (variant) {
-      TitleBarComponentVariant.home ||
-      TitleBarComponentVariant.preserving ||
-      TitleBarComponentVariant.partiallyPreserved ||
-      TitleBarComponentVariant.preserved ||
-      TitleBarComponentVariant.syncing ||
-      TitleBarComponentVariant.videoProcessing ||
-      TitleBarComponentVariant.settings ||
-      TitleBarComponentVariant.titleTopbar ||
-      TitleBarComponentVariant.titleTopbarNoIcon => true,
-      _ => false,
-    };
-  }
-
-  String get _effectiveTitle {
-    if (title != null) {
-      return title!;
-    }
-    return _usesHeadingStyle ? 'Heading' : 'ente';
-  }
-
-  String get _effectiveStatusText {
-    if (statusText != null) {
-      return statusText!;
-    }
-    return switch (variant) {
-      TitleBarComponentVariant.preserving => 'Preserving 3 memories',
-      TitleBarComponentVariant.partiallyPreserved => '1/3 memories preserved',
-      TitleBarComponentVariant.preserved => 'All memories preserved',
-      TitleBarComponentVariant.syncing => 'Syncing...',
-      TitleBarComponentVariant.videoProcessing => 'Video processing',
-      _ => '',
-    };
-  }
-
-  double get _centerContentHorizontalPadding {
-    return _trailingVisible
-        ? leadingWidth > trailingWidth
-              ? leadingWidth
-              : trailingWidth
-        : leadingWidth;
-  }
-}
-
-class _TitleBarSlot extends StatelessWidget {
-  const _TitleBarSlot({
-    required this.width,
-    required this.visible,
-    required this.child,
-    this.alignment = Alignment.center,
-  });
-
-  final double width;
-  final bool visible;
-  final Widget? child;
-  final Alignment alignment;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Align(
-        alignment: alignment,
-        child: Visibility(
-          visible: visible && child != null,
-          maintainAnimation: true,
-          maintainSize: true,
-          maintainState: true,
-          child: child ?? const SizedBox.square(dimension: 24),
-        ),
-      ),
-    );
-  }
-}
-
 /// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=11439-5036&m=dev
 /// Section: Appbar/header / Header v2
-/// Specs: Pinned sliver app bar that animates HeaderComponent between expanded
-/// and collapsed states as the surrounding scroll view collapses it.
+/// Specs: Pinned sliver app bar that animates between expanded and collapsed
+/// states as the surrounding scroll view collapses it.
 class HeaderAppBarComponent extends StatelessWidget {
   const HeaderAppBarComponent({
     super.key,
@@ -313,6 +39,27 @@ class HeaderAppBarComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    final expandedTitleLineHeight = _scaledLineHeight(
+      textScaler,
+      TextStyles.h1Bold,
+    );
+    final collapsedTitleLineHeight = _scaledLineHeight(
+      textScaler,
+      TextStyles.h2,
+    );
+    final subtitleLineHeight = _scaledLineHeight(textScaler, TextStyles.mini);
+    final effectiveCollapsedHeight = _maxDouble(
+      collapsedHeight,
+      _maxDouble(_headerControlSize, collapsedTitleLineHeight),
+    );
+    final effectiveExpandedHeight = _maxDouble(
+      expandedHeight,
+      _expandedContentTop +
+          expandedTitleLineHeight +
+          (subtitle == null ? 0 : _subtitleGap + subtitleLineHeight),
+    );
+
     return SliverPersistentHeader(
       pinned: true,
       delegate: _HeaderAppBarDelegate(
@@ -322,12 +69,15 @@ class HeaderAppBarComponent extends StatelessWidget {
         backButton: backButton,
         onBack: onBack,
         actions: actions,
-        expandedHeight: expandedHeight,
-        collapsedHeight: collapsedHeight,
+        expandedHeight: effectiveExpandedHeight,
+        collapsedHeight: effectiveCollapsedHeight,
         horizontalPadding: horizontalPadding,
         topPadding: MediaQuery.paddingOf(context).top,
         backgroundColor: backgroundColor,
         showExpandedBackButton: showExpandedBackButton,
+        expandedTitleLineHeight: expandedTitleLineHeight,
+        collapsedTitleLineHeight: collapsedTitleLineHeight,
+        subtitleLineHeight: subtitleLineHeight,
       ),
     );
   }
@@ -347,6 +97,9 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.topPadding,
     required this.backgroundColor,
     required this.showExpandedBackButton,
+    required this.expandedTitleLineHeight,
+    required this.collapsedTitleLineHeight,
+    required this.subtitleLineHeight,
   });
 
   final String title;
@@ -361,6 +114,9 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double topPadding;
   final Color? backgroundColor;
   final bool showExpandedBackButton;
+  final double expandedTitleLineHeight;
+  final double collapsedTitleLineHeight;
+  final double subtitleLineHeight;
 
   @override
   double get maxExtent => topPadding + expandedHeight;
@@ -382,20 +138,39 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
     final titleProgress = Curves.easeInOut.transform(
       (progress / 0.85).clamp(0.0, 1.0),
     );
-    final actionsOffsetY = _expandedActionsOffsetY * (1 - titleProgress);
+    final collapsedControlTop = _centeredTop(
+      collapsedHeight,
+      _headerControlSize,
+    );
+    final collapsedTitleTop = _centeredTop(
+      collapsedHeight,
+      collapsedTitleLineHeight,
+    );
+    final expandedTextBlockHeight =
+        expandedTitleLineHeight +
+        (subtitle == null ? 0 : _subtitleGap + subtitleLineHeight);
+    final leadingTop =
+        _expandedContentTop +
+        _centerOffset(expandedTextBlockHeight, _headerControlSize);
+    final actionsTop = lerpDouble(
+      _expandedContentTop,
+      collapsedControlTop,
+      titleProgress,
+    )!;
+    final collapsedTitleLeft = _collapsedLeadingWidth(backButton) + Spacing.md;
     final titleLeft = lerpDouble(
-      leading == null ? 0 : _expandedLeadingSize + Spacing.md,
-      showExpandedBackButton ? _collapsedTitleLeft : 0,
+      leading == null ? 0 : _headerControlSize + Spacing.md,
+      showExpandedBackButton ? collapsedTitleLeft : 0,
       titleProgress,
     )!;
     final titleTop = lerpDouble(
-      _expandedTitleTop,
-      _collapsedTitleTop,
+      _expandedContentTop,
+      collapsedTitleTop,
       titleProgress,
     )!;
     final titleRight = actions.isEmpty
         ? 0.0
-        : _estimatedActionsWidth(actions.length) + Spacing.md;
+        : _actionsWidth(actions.length) + Spacing.md;
 
     return ColoredBox(
       color: backgroundColor ?? colors.backgroundBase,
@@ -411,13 +186,13 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
             if (leading != null)
               Positioned(
                 left: 0,
-                top: _expandedTitleTop,
+                top: leadingTop,
                 child: Opacity(
                   opacity: 1 - titleProgress,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: SizedBox.square(
-                      dimension: _expandedLeadingSize,
+                      dimension: _headerControlSize,
                       child: leading,
                     ),
                   ),
@@ -434,7 +209,10 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               Positioned(
                 left: titleLeft,
                 right: titleRight,
-                top: _expandedTitleTop + 28,
+                top:
+                    _expandedContentTop +
+                    expandedTitleLineHeight +
+                    _subtitleGap,
                 child: IgnorePointer(
                   child: ExcludeSemantics(
                     child: Opacity(
@@ -455,12 +233,13 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
               top: 0,
               left: 0,
               right: 0,
-              height: _pinnedHeaderChromeHeight,
+              bottom: 0,
               child: _PinnedHeaderChrome(
                 backButton: backButton,
                 onBack: onBack,
                 actions: actions,
-                actionsOffsetY: actionsOffsetY,
+                actionsTop: actionsTop,
+                chromeHeight: collapsedHeight,
                 showBackButton: showExpandedBackButton,
               ),
             ),
@@ -483,7 +262,10 @@ class _HeaderAppBarDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.horizontalPadding != horizontalPadding ||
         oldDelegate.topPadding != topPadding ||
         oldDelegate.backgroundColor != backgroundColor ||
-        oldDelegate.showExpandedBackButton != showExpandedBackButton;
+        oldDelegate.showExpandedBackButton != showExpandedBackButton ||
+        oldDelegate.expandedTitleLineHeight != expandedTitleLineHeight ||
+        oldDelegate.collapsedTitleLineHeight != collapsedTitleLineHeight ||
+        oldDelegate.subtitleLineHeight != subtitleLineHeight;
   }
 }
 
@@ -492,45 +274,61 @@ class _PinnedHeaderChrome extends StatelessWidget {
     required this.backButton,
     required this.onBack,
     required this.actions,
-    required this.actionsOffsetY,
+    required this.actionsTop,
+    required this.chromeHeight,
     required this.showBackButton,
   });
 
   final Widget? backButton;
   final VoidCallback? onBack;
   final List<Widget> actions;
-  final double actionsOffsetY;
+  final double actionsTop;
+  final double chromeHeight;
   final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _pinnedHeaderChromeHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (showBackButton) ...[
-            _HeaderAppBarBackButton(backButton: backButton, onBack: onBack),
-            const SizedBox(width: Spacing.md),
-          ],
-          const Expanded(child: SizedBox.shrink()),
-          if (actions.isNotEmpty) ...[
-            const SizedBox(width: Spacing.md),
-            Transform.translate(
-              offset: Offset(0, actionsOffsetY),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var index = 0; index < actions.length; index++) ...[
-                    actions[index],
-                    if (index != actions.length - 1) const SizedBox(width: 6),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (showBackButton)
+          Align(
+            alignment: Alignment.topLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _HeaderAppBarBackButton(
+                  backButton: backButton,
+                  onBack: onBack,
+                  height: chromeHeight,
+                ),
+                const SizedBox(width: Spacing.md),
+              ],
+            ),
+          ),
+        if (actions.isNotEmpty)
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: EdgeInsets.only(top: actionsTop),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: _headerControlSize,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var index = 0; index < actions.length; index++) ...[
+                      actions[index],
+                      if (index != actions.length - 1)
+                        const SizedBox(width: _headerControlGap),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ],
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -539,10 +337,12 @@ class _HeaderAppBarBackButton extends StatelessWidget {
   const _HeaderAppBarBackButton({
     required this.backButton,
     required this.onBack,
+    required this.height,
   });
 
   final Widget? backButton;
   final VoidCallback? onBack;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -550,15 +350,12 @@ class _HeaderAppBarBackButton extends StatelessWidget {
     final tooltip = MaterialLocalizations.of(context).backButtonTooltip;
 
     if (backButton != null) {
-      return IconTheme.merge(
-        data: IconThemeData(color: colors.textBase, size: 24),
-        child: backButton!,
-      );
+      return backButton!;
     }
 
     return SizedBox(
-      width: _headerAppBarBackIconSize,
-      height: _pinnedHeaderChromeHeight,
+      width: _defaultBackIconSize,
+      height: height,
       child: Align(
         alignment: Alignment.centerLeft,
         child: Semantics(
@@ -568,8 +365,12 @@ class _HeaderAppBarBackButton extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: onBack ?? () => Navigator.maybePop(context),
             child: SizedBox.square(
-              dimension: 24,
-              child: Icon(Icons.arrow_back, color: colors.textBase, size: 24),
+              dimension: _defaultBackIconSize,
+              child: Icon(
+                Icons.arrow_back,
+                color: colors.textBase,
+                size: _defaultBackIconSize,
+              ),
             ),
           ),
         ),
@@ -578,20 +379,39 @@ class _HeaderAppBarBackButton extends StatelessWidget {
   }
 }
 
-const _pinnedHeaderChromeHeight = 56.0;
-const _headerAppBarBackIconSize = 24.0;
-const _expandedActionsOffsetY =
-    _expandedTitleTop -
-    ((_pinnedHeaderChromeHeight - _estimatedActionWidth) / 2);
-const _expandedLeadingSize = 36.0;
-const _expandedTitleTop = 48.0;
-const _collapsedTitleTop = 16.0;
-const _collapsedTitleLeft = _headerAppBarBackIconSize + Spacing.md;
-const _estimatedActionWidth = 38.0;
+const _headerControlSize = 38.0;
+const _headerControlGap = Spacing.sm;
+const _defaultBackIconSize = 24.0;
+const _expandedContentTop = 48.0;
+const _subtitleGap = 2.0;
 
-double _estimatedActionsWidth(int actionCount) {
-  return (actionCount * _estimatedActionWidth) +
-      ((actionCount - 1) * 6).clamp(0, double.infinity);
+double _collapsedLeadingWidth(Widget? backButton) {
+  return backButton == null ? _defaultBackIconSize : _headerControlSize;
+}
+
+double _centeredTop(double containerHeight, double childHeight) {
+  return ((containerHeight - childHeight) / 2)
+      .clamp(0.0, double.infinity)
+      .toDouble();
+}
+
+double _centerOffset(double containerHeight, double childHeight) {
+  return (containerHeight - childHeight) / 2;
+}
+
+double _maxDouble(double first, double second) {
+  return first > second ? first : second;
+}
+
+double _scaledLineHeight(TextScaler textScaler, TextStyle style) {
+  final fontSize = style.fontSize ?? 14;
+  final height = style.height ?? 1;
+  return textScaler.scale(fontSize) * height;
+}
+
+double _actionsWidth(int actionCount) {
+  return (actionCount * _headerControlSize) +
+      ((actionCount - 1) * _headerControlGap).clamp(0, double.infinity);
 }
 
 class _MovingHeaderTitle extends StatelessWidget {

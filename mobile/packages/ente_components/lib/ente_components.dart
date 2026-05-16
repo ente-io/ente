@@ -3,7 +3,6 @@ export 'components/avatar_component.dart';
 export 'components/buttons/button_component.dart';
 export 'components/buttons/icon_button_component.dart';
 export 'components/filter_chip_component.dart';
-export 'components/header_component.dart';
 export 'components/menu_component.dart';
 export 'components/selection_control_components.dart';
 export 'components/slider_component.dart';
