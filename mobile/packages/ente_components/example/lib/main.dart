@@ -48,7 +48,8 @@ class _ComponentsCatalogAppState extends State<ComponentsCatalogApp> {
     final now = event.timeStamp;
     final lastPointerUpAt = _lastPointerUpAt;
     final lastPointerUpPosition = _lastPointerUpPosition;
-    final isDoubleTap = lastPointerUpAt != null &&
+    final isDoubleTap =
+        lastPointerUpAt != null &&
         lastPointerUpPosition != null &&
         now - lastPointerUpAt <= const Duration(milliseconds: 320) &&
         (event.position - lastPointerUpPosition).distance <= 48;
@@ -107,37 +108,50 @@ class _CatalogHomeState extends State<CatalogHome> {
     final sections = _sections();
 
     return Scaffold(
-      appBar: AppBarComponent(
-        title: 'Components',
-        leading: Builder(
-          builder: (context) {
-            return IconButtonComponent(
-              tooltip: 'Settings',
-              variant: IconButtonComponentVariant.unfilled,
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedMenu01),
-            );
-          },
-        ),
-        actions: [
-          _CatalogThemeCycleButton(
-            themeMode: widget.themeMode,
-            onChanged: widget.onThemeModeChanged,
-          ),
-        ],
-      ),
       drawer: const CatalogSettingsDrawer(),
-      body: ListView(
-        padding: const EdgeInsets.all(Spacing.lg),
-        children: [
-          for (final section in sections) ...[
-            _CatalogSectionTile(
-              section: section,
-              themeMode: widget.themeMode,
-              onThemeModeChanged: widget.onThemeModeChanged,
+      body: CustomScrollView(
+        slivers: [
+          HeaderAppBarComponent(
+            title: 'Components',
+            subtitle: 'Design system catalog',
+            backButton: Builder(
+              builder: (context) {
+                return IconButtonComponent(
+                  tooltip: 'Settings',
+                  variant: IconButtonComponentVariant.unfilled,
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedMenu01),
+                );
+              },
             ),
-            if (section != sections.last) const SizedBox(height: Spacing.lg),
-          ],
+            actions: [
+              _CatalogThemeCycleButton(
+                themeMode: widget.themeMode,
+                onChanged: widget.onThemeModeChanged,
+              ),
+            ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              Spacing.xs,
+              Spacing.lg,
+              Spacing.lg,
+            ),
+            sliver: SliverList.builder(
+              itemCount: sections.length * 2 - 1,
+              itemBuilder: (context, index) {
+                if (index.isOdd) {
+                  return const SizedBox(height: Spacing.lg);
+                }
+                return _CatalogSectionTile(
+                  section: sections[index ~/ 2],
+                  themeMode: widget.themeMode,
+                  onThemeModeChanged: widget.onThemeModeChanged,
+                );
+              },
+            ),
+          ),
         ],
       ),
       backgroundColor: colors.backgroundBase,
@@ -218,61 +232,49 @@ class _CatalogHomeState extends State<CatalogHome> {
         previewBuilder: (_) => const _TextInputPreview(),
       ),
       CatalogSection(
-        title: 'Title bar',
-        icon: HugeIcons.strokeRoundedMenu01,
-        components: const [
-          'Default',
-          'Home',
-          'Preserving',
-          'Partially preserved',
-          'Preserved',
-          'Syncing',
-          'Video processing',
-          'Back',
-          'Onboarding',
-          'Settings',
-          'Title topbar',
-          'Title topbar no icon',
-          'Onboarding title',
-        ],
-        previewBuilder: (_) => const TitleBarPreview(),
-      ),
-      CatalogSection(
-        title: 'Header',
+        title: 'Header app bar',
         icon: HugeIcons.strokeRoundedHeading,
         components: const [
-          'Title',
-          'Subtitle',
-          'Image',
-          'One action',
-          'Two actions',
+          'Expanded header',
+          'Collapsed app bar',
+          'Scroll animation',
+          'Long list',
         ],
-        previewBuilder: (_) => const _HeaderPreview(),
+        previewBuilder: (_) => const _HeaderAppBarEntryPreview(),
+        routeBuilder: _buildHeaderAppBarDemo,
       ),
       CatalogSection(
         title: 'Avatar',
         icon: HugeIcons.strokeRoundedUser,
-        components: const [
-          'Sizes',
-          'Seed palette',
-          'Add contact',
-        ],
+        components: const ['Sizes', 'Seed palette', 'Add contact'],
         previewBuilder: (_) => const _AvatarPreview(),
       ),
       CatalogSection(
         title: 'Selection controls',
         icon: HugeIcons.strokeRoundedSlidersHorizontal,
-        components: const [
-          'Checkbox',
-          'Radio',
-          'Switch',
-          'Slider',
-          'Stepper',
-        ],
+        components: const ['Checkbox', 'Radio', 'Switch', 'Slider', 'Stepper'],
         previewBuilder: (_) => const _SelectionPreview(),
       ),
     ];
   }
+}
+
+typedef CatalogSectionRouteBuilder =
+    Widget Function(
+      BuildContext context,
+      ThemeMode themeMode,
+      ValueChanged<ThemeMode> onThemeModeChanged,
+    );
+
+Widget _buildHeaderAppBarDemo(
+  BuildContext context,
+  ThemeMode themeMode,
+  ValueChanged<ThemeMode> onThemeModeChanged,
+) {
+  return HeaderAppBarDemoPage(
+    themeMode: themeMode,
+    onThemeModeChanged: onThemeModeChanged,
+  );
 }
 
 class CatalogSection {
@@ -281,12 +283,14 @@ class CatalogSection {
     required this.icon,
     required this.components,
     required this.previewBuilder,
+    this.routeBuilder,
   });
 
   final String title;
   final HugeIconData icon;
   final List<String> components;
   final WidgetBuilder previewBuilder;
+  final CatalogSectionRouteBuilder? routeBuilder;
 }
 
 class CatalogSettingsDrawer extends StatelessWidget {
@@ -318,9 +322,7 @@ class CatalogSettingsDrawer extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Settings',
-                    style: TextStyles.h1Bold.copyWith(
-                      color: colors.textBase,
-                    ),
+                    style: TextStyles.h1Bold.copyWith(color: colors.textBase),
                   ),
                 ),
               ],
@@ -340,11 +342,7 @@ double _drawerWidth(BuildContext context) {
 }
 
 class _CatalogHugeIcon extends StatelessWidget {
-  const _CatalogHugeIcon(
-    this.icon, {
-    this.color,
-    this.size = 24,
-  });
+  const _CatalogHugeIcon(this.icon, {this.color, this.size = 24});
 
   final HugeIconData icon;
   final Color? color;
@@ -421,7 +419,7 @@ class _CatalogThemeCycleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButtonComponent(
       tooltip: 'Theme: $_currentLabel. Tap for $_nextLabel',
-      variant: IconButtonComponentVariant.unfilled,
+      variant: IconButtonComponentVariant.primary,
       icon: _CatalogHugeIcon(_icon),
       onPressed: () => onChanged(_nextMode),
     );
@@ -452,13 +450,16 @@ class _CatalogSectionTile extends StatelessWidget {
         size: 18,
       ),
       onTap: () {
+        final routeBuilder = section.routeBuilder;
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => CatalogDetailPage(
-              section: section,
-              themeMode: themeMode,
-              onThemeModeChanged: onThemeModeChanged,
-            ),
+            builder: (context) => routeBuilder == null
+                ? CatalogDetailPage(
+                    section: section,
+                    themeMode: themeMode,
+                    onThemeModeChanged: onThemeModeChanged,
+                  )
+                : routeBuilder(context, themeMode, onThemeModeChanged),
           ),
         );
       },
@@ -494,24 +495,30 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Scaffold(
-      appBar: AppBarComponent(
-        title: widget.section.title,
-        leading: IconButtonComponent(
-          tooltip: 'Back',
-          icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedArrowLeft02),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          _CatalogThemeCycleButton(
-            themeMode: _themeMode,
-            onChanged: _setThemeMode,
+      body: CustomScrollView(
+        slivers: [
+          HeaderAppBarComponent(
+            title: widget.section.title,
+            subtitle: widget.section.components.join(', '),
+            onBack: () => Navigator.of(context).pop(),
+            actions: [
+              _CatalogThemeCycleButton(
+                themeMode: _themeMode,
+                onChanged: _setThemeMode,
+              ),
+            ],
           ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(Spacing.lg),
-        children: [
-          widget.section.previewBuilder(context),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              Spacing.xs,
+              Spacing.lg,
+              Spacing.lg,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: widget.section.previewBuilder(context),
+            ),
+          ),
         ],
       ),
       backgroundColor: colors.backgroundBase,
@@ -520,10 +527,7 @@ class _CatalogDetailPageState extends State<CatalogDetailPage> {
 }
 
 class _CatalogPreviewGroup extends StatelessWidget {
-  const _CatalogPreviewGroup({
-    required this.title,
-    required this.child,
-  });
+  const _CatalogPreviewGroup({required this.title, required this.child});
 
   final String title;
   final Widget child;
@@ -534,10 +538,7 @@ class _CatalogPreviewGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: TextStyles.large.copyWith(color: colors.textBase),
-        ),
+        Text(title, style: TextStyles.large.copyWith(color: colors.textBase)),
         const SizedBox(height: Spacing.md),
         child,
       ],
@@ -657,9 +658,9 @@ class _SettingsNavigationItem extends StatelessWidget {
       leading: _CatalogHugeIcon(icon),
       trailing: const _SettingsTrailingIcon(),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => page),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => page));
       },
     );
   }
@@ -681,10 +682,7 @@ class _SettingsTrailingIcon extends StatelessWidget {
 }
 
 class _SettingsExampleShell extends StatelessWidget {
-  const _SettingsExampleShell({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsExampleShell({required this.title, required this.children});
 
   final String title;
   final List<Widget> children;
@@ -693,22 +691,30 @@ class _SettingsExampleShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     return Scaffold(
-      appBar: AppBarComponent(
-        title: title,
-        leading: IconButtonComponent(
-          tooltip: 'Back',
-          icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedArrowLeft02),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(Spacing.lg),
-        children: [
-          for (var index = 0; index < children.length; index++) ...[
-            children[index],
-            if (index != children.length - 1)
-              const SizedBox(height: Spacing.md),
-          ],
+      body: CustomScrollView(
+        slivers: [
+          HeaderAppBarComponent(
+            title: title,
+            subtitle: 'Settings',
+            onBack: () => Navigator.of(context).pop(),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              Spacing.xs,
+              Spacing.lg,
+              Spacing.lg,
+            ),
+            sliver: SliverList.builder(
+              itemCount: children.length * 2 - 1,
+              itemBuilder: (context, index) {
+                if (index.isOdd) {
+                  return const SizedBox(height: Spacing.md);
+                }
+                return children[index ~/ 2];
+              },
+            ),
+          ),
         ],
       ),
       backgroundColor: colors.backgroundBase,
@@ -1147,15 +1153,9 @@ class _TypeSample extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          text,
-          style: style.copyWith(color: color),
-        ),
+        Text(text, style: style.copyWith(color: color)),
         const SizedBox(height: Spacing.xs),
-        Text(
-          detail,
-          style: TextStyles.mini.copyWith(color: colors.textLight),
-        ),
+        Text(detail, style: TextStyles.mini.copyWith(color: colors.textLight)),
       ],
     );
   }
@@ -1170,14 +1170,8 @@ class _ButtonMatrix extends StatelessWidget {
       children: [
         ButtonStateCyclePreview(),
         _ButtonStateGroup(title: 'Default'),
-        _ButtonStateGroup(
-          title: 'Disabled',
-          disabled: true,
-        ),
-        _CatalogPreviewGroup(
-          title: 'Icon button',
-          child: _IconButtonMatrix(),
-        ),
+        _ButtonStateGroup(title: 'Disabled', disabled: true),
+        _CatalogPreviewGroup(title: 'Icon button', child: _IconButtonMatrix()),
       ],
     );
   }
@@ -1257,10 +1251,7 @@ class _ButtonPreviewSpec {
 }
 
 class _ButtonStateGroup extends StatelessWidget {
-  const _ButtonStateGroup({
-    required this.title,
-    this.disabled = false,
-  });
+  const _ButtonStateGroup({required this.title, this.disabled = false});
 
   final String title;
   final bool disabled;
@@ -1286,10 +1277,7 @@ class _ButtonStateGroup extends StatelessWidget {
 }
 
 class _ButtonPreviewRow extends StatelessWidget {
-  const _ButtonPreviewRow({
-    required this.spec,
-    required this.disabled,
-  });
+  const _ButtonPreviewRow({required this.spec, required this.disabled});
 
   final _ButtonPreviewSpec spec;
   final bool disabled;
@@ -1428,10 +1416,7 @@ class _IconButtonPreviewRow extends StatelessWidget {
             width: 76,
             child: Center(
               child: states.contains(state)
-                  ? _IconButtonStatePreview(
-                      variant: variant,
-                      state: state,
-                    )
+                  ? _IconButtonStatePreview(variant: variant, state: state)
                   : const SizedBox.square(dimension: 38),
             ),
           ),
@@ -1441,10 +1426,7 @@ class _IconButtonPreviewRow extends StatelessWidget {
 }
 
 class _IconButtonStatePreview extends StatelessWidget {
-  const _IconButtonStatePreview({
-    required this.variant,
-    required this.state,
-  });
+  const _IconButtonStatePreview({required this.variant, required this.state});
 
   final IconButtonComponentVariant variant;
   final String state;
@@ -1462,10 +1444,7 @@ class _IconButtonStatePreview extends StatelessWidget {
       isLoading: state == 'Loading',
       isSuccess: state == 'Success',
       onPressed: state == 'Disabled' ? null : () {},
-      icon: const _CatalogHugeIcon(
-        HugeIcons.strokeRoundedAdd01,
-        size: 18,
-      ),
+      icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01, size: 18),
     );
   }
 }
@@ -1506,8 +1485,9 @@ class _FilterChipPreviewState extends State<_FilterChipPreview> {
                 label: 'Videos',
                 selected: _selected.contains('Videos'),
                 onChanged: _toggle('Videos'),
-                trailing:
-                    const _CatalogHugeIcon(HugeIcons.strokeRoundedVideo01),
+                trailing: const _CatalogHugeIcon(
+                  HugeIcons.strokeRoundedVideo01,
+                ),
               ),
             ],
           ),
@@ -1732,10 +1712,7 @@ class _AvatarTableHeader extends StatelessWidget {
 }
 
 class _AvatarTableRow extends StatelessWidget {
-  const _AvatarTableRow({
-    required this.label,
-    required this.children,
-  });
+  const _AvatarTableRow({required this.label, required this.children});
 
   final String label;
   final List<Widget> children;
@@ -1753,11 +1730,7 @@ class _AvatarTableRow extends StatelessWidget {
           ),
         ),
         for (final child in children)
-          SizedBox(
-            width: 96,
-            height: 64,
-            child: Center(child: child),
-          ),
+          SizedBox(width: 96, height: 64, child: Center(child: child)),
       ],
     );
   }
@@ -1796,10 +1769,7 @@ class _EditableChip extends StatelessWidget {
 }
 
 class _FaceAvatar extends StatelessWidget {
-  const _FaceAvatar({
-    required this.seed,
-    required this.initials,
-  });
+  const _FaceAvatar({required this.seed, required this.initials});
 
   final int seed;
   final String initials;
@@ -1860,8 +1830,10 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
       children: [
         const _CatalogPreviewGroup(
           title: 'Normal',
-          child:
-              TextInputComponent(label: 'Email address', hintText: 'Hint text'),
+          child: TextInputComponent(
+            label: 'Email address',
+            hintText: 'Hint text',
+          ),
         ),
         _CatalogPreviewGroup(
           title: 'Focused',
@@ -2038,10 +2010,7 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
         ),
         const _CatalogPreviewGroup(
           title: 'Multiline: no label',
-          child: TextInputComponent(
-            hintText: 'Hint text',
-            maxLines: 4,
-          ),
+          child: TextInputComponent(hintText: 'Hint text', maxLines: 4),
         ),
         const _CatalogPreviewGroup(
           title: 'Multiline: focused',
@@ -2086,262 +2055,6 @@ class _TextInputPreviewState extends State<_TextInputPreview> {
   }
 }
 
-class TitleBarPreview extends StatelessWidget {
-  const TitleBarPreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _CatalogPreviewList(
-      children: [
-        _CatalogPreviewGroup(
-          title: 'Default',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.brand),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Home',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.home),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Preserving',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.preserving),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Partially preserved',
-          child: _TitleBarSample(
-            variant: TitleBarComponentVariant.partiallyPreserved,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Preserved',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.preserved),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Syncing',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.syncing),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Video processing',
-          child: _TitleBarSample(
-            variant: TitleBarComponentVariant.videoProcessing,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Back',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.back),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Onboarding',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.onboarding),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Settings',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.settings),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title topbar',
-          child: _TitleBarSample(variant: TitleBarComponentVariant.titleTopbar),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title topbar no icon',
-          child: _TitleBarSample(
-            variant: TitleBarComponentVariant.titleTopbarNoIcon,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Onboarding title',
-          child: _TitleBarSample(
-            variant: TitleBarComponentVariant.onboardingTitle,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TitleBarSample extends StatelessWidget {
-  const _TitleBarSample({required this.variant});
-
-  final TitleBarComponentVariant variant;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: TitleBarComponent(
-        variant: variant,
-        title: _title,
-        leading: _leading,
-        trailing: _trailing,
-        statusIcon: _statusIcon,
-      ),
-    );
-  }
-
-  String? get _title {
-    return switch (variant) {
-      TitleBarComponentVariant.brand => 'Photos',
-      TitleBarComponentVariant.home => 'Home',
-      TitleBarComponentVariant.onboarding => 'Create account',
-      TitleBarComponentVariant.titleTopbar => 'Albums',
-      TitleBarComponentVariant.titleTopbarNoIcon => 'Albums',
-      TitleBarComponentVariant.onboardingTitle => 'Secure backup',
-      _ => null,
-    };
-  }
-
-  Widget? get _leading {
-    return switch (variant) {
-      TitleBarComponentVariant.onboarding => null,
-      _ => const _CatalogHugeIcon(HugeIcons.strokeRoundedArrowLeft02),
-    };
-  }
-
-  Widget? get _trailing {
-    return switch (variant) {
-      TitleBarComponentVariant.home ||
-      TitleBarComponentVariant.preserving ||
-      TitleBarComponentVariant.partiallyPreserved ||
-      TitleBarComponentVariant.preserved ||
-      TitleBarComponentVariant.syncing ||
-      TitleBarComponentVariant.videoProcessing =>
-        const _CatalogHugeIcon(HugeIcons.strokeRoundedMoreHorizontal),
-      TitleBarComponentVariant.settings ||
-      TitleBarComponentVariant.titleTopbar =>
-        const _CatalogHugeIcon(HugeIcons.strokeRoundedSearch01),
-      _ => null,
-    };
-  }
-
-  Widget? get _statusIcon {
-    return switch (variant) {
-      TitleBarComponentVariant.preserving ||
-      TitleBarComponentVariant.partiallyPreserved ||
-      TitleBarComponentVariant.preserved =>
-        const _CatalogHugeIcon(HugeIcons.strokeRoundedCheckmarkCircle01),
-      TitleBarComponentVariant.syncing => const _CatalogHugeIcon(
-          HugeIcons.strokeRoundedRefresh,
-        ),
-      TitleBarComponentVariant.videoProcessing => const _CatalogHugeIcon(
-          HugeIcons.strokeRoundedVideo01,
-        ),
-      _ => null,
-    };
-  }
-}
-
-class _HeaderPreview extends StatelessWidget {
-  const _HeaderPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return const _CatalogPreviewList(
-      children: [
-        _CatalogPreviewGroup(
-          title: 'Title + subtitle + two actions',
-          child: _HeaderSample(
-            subtitle: true,
-            actionCount: 2,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title + two actions',
-          child: _HeaderSample(actionCount: 2),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title + one action',
-          child: _HeaderSample(actionCount: 1),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title + subtitle',
-          child: _HeaderSample(subtitle: true),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title only',
-          child: _HeaderSample(),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Title + subtitle + one action',
-          child: _HeaderSample(
-            subtitle: true,
-            actionCount: 1,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Image + subtitle + two actions',
-          child: _HeaderSample(
-            image: true,
-            subtitle: true,
-            actionCount: 2,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Image + two actions',
-          child: _HeaderSample(
-            image: true,
-            actionCount: 2,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Image + one action',
-          child: _HeaderSample(
-            image: true,
-            actionCount: 1,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Image + subtitle',
-          child: _HeaderSample(
-            image: true,
-            subtitle: true,
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Image only',
-          child: _HeaderSample(image: true),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Image + subtitle + one action',
-          child: _HeaderSample(
-            image: true,
-            subtitle: true,
-            actionCount: 1,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HeaderSample extends StatelessWidget {
-  const _HeaderSample({
-    this.image = false,
-    this.subtitle = false,
-    this.actionCount = 0,
-  });
-
-  final bool image;
-  final bool subtitle;
-  final int actionCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return HeaderComponent(
-      title: 'Title',
-      subtitle: subtitle ? 'Subtitle' : null,
-      leading: image ? const _HeaderImage() : null,
-      actions: [
-        for (var index = 0; index < actionCount; index++)
-          IconButtonComponent(
-            tooltip: index == 0 ? 'Add' : 'Create',
-            variant: IconButtonComponentVariant.primary,
-            icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
-            onPressed: () {},
-          ),
-      ],
-    );
-  }
-}
-
 class _HeaderImage extends StatelessWidget {
   const _HeaderImage();
 
@@ -2357,6 +2070,152 @@ class _HeaderImage extends StatelessWidget {
           size: 20,
         ),
       ),
+    );
+  }
+}
+
+class _HeaderAppBarEntryPreview extends StatelessWidget {
+  const _HeaderAppBarEntryPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return Text(
+      'Open this section from the catalog list to test the pinned animated '
+      'header app bar with a long scrollable list.',
+      style: TextStyles.body.copyWith(color: colors.textLight),
+    );
+  }
+}
+
+class HeaderAppBarDemoPage extends StatefulWidget {
+  const HeaderAppBarDemoPage({
+    super.key,
+    required this.themeMode,
+    required this.onThemeModeChanged,
+  });
+
+  final ThemeMode themeMode;
+  final ValueChanged<ThemeMode> onThemeModeChanged;
+
+  @override
+  State<HeaderAppBarDemoPage> createState() => _HeaderAppBarDemoPageState();
+}
+
+class _HeaderAppBarDemoPageState extends State<HeaderAppBarDemoPage> {
+  static const _itemCount = 48;
+
+  late ThemeMode _themeMode = widget.themeMode;
+
+  void _setThemeMode(ThemeMode mode) {
+    setState(() => _themeMode = mode);
+    widget.onThemeModeChanged(mode);
+  }
+
+  void _showAction(String label) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(label)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return Scaffold(
+      backgroundColor: colors.backgroundBase,
+      body: CustomScrollView(
+        slivers: [
+          HeaderAppBarComponent(
+            title: 'Menu items',
+            subtitle: 'Scroll to collapse into a single app bar row',
+            onBack: () => Navigator.of(context).pop(),
+            actions: [
+              IconButtonComponent(
+                tooltip: 'Add item',
+                variant: IconButtonComponentVariant.primary,
+                icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
+                onPressed: () => _showAction('Add tapped'),
+              ),
+              _CatalogThemeCycleButton(
+                themeMode: _themeMode,
+                onChanged: _setThemeMode,
+              ),
+            ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              Spacing.xs,
+              Spacing.lg,
+              Spacing.xxl,
+            ),
+            sliver: SliverList.builder(
+              itemCount: _itemCount * 2 - 1,
+              itemBuilder: (context, index) {
+                if (index.isOdd) {
+                  return const SizedBox(height: Spacing.md);
+                }
+                return _HeaderAppBarDemoListItem(index: index ~/ 2);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderAppBarDemoListItem extends StatelessWidget {
+  const _HeaderAppBarDemoListItem({required this.index});
+
+  final int index;
+
+  static const _titles = [
+    'Camera uploads',
+    'Private albums',
+    'Recovery key',
+    'Shared links',
+    'Device folders',
+    'Storage plan',
+    'Notifications',
+    'Hidden items',
+    'Trash cleanup',
+    'Export data',
+  ];
+
+  static const _subtitles = [
+    'Enabled on Wi-Fi',
+    'Only visible to you',
+    'Last checked today',
+    'Manage public access',
+    'Choose folders to sync',
+    'Family plan active',
+    'Activity and reminders',
+    'Protected by device lock',
+    'Auto-delete in 30 days',
+    'Prepare local archive',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    final hasSubtitle = index % 3 != 1;
+    final hasImage = index % 4 == 0 || index % 4 == 3;
+    final hasAction = index % 5 != 2;
+    final title = _titles[index % _titles.length];
+    final subtitle = _subtitles[index % _subtitles.length];
+
+    return MenuComponent(
+      title: '$title ${index + 1}',
+      subtitle: hasSubtitle ? subtitle : null,
+      leading: hasImage ? const _HeaderImage() : null,
+      trailing: hasAction
+          ? IconButtonComponent(
+              tooltip: 'Add $title',
+              variant: IconButtonComponentVariant.primary,
+              icon: const _CatalogHugeIcon(HugeIcons.strokeRoundedAdd01),
+              onPressed: () {},
+            )
+          : const _CatalogTrailingIcon(HugeIcons.strokeRoundedArrowRight02),
+      titleColor: index % 7 == 0 ? colors.primary : null,
     );
   }
 }
@@ -2428,8 +2287,10 @@ class _SelectionPreviewState extends State<_SelectionPreview> {
                 label: 'Selected radio',
               ),
               LabeledControlComponent(
-                control:
-                    ToggleSwitchComponent(selected: false, onChanged: null),
+                control: ToggleSwitchComponent(
+                  selected: false,
+                  onChanged: null,
+                ),
                 label: 'Off switch',
               ),
             ],
@@ -2469,11 +2330,7 @@ class _SelectionPreviewState extends State<_SelectionPreview> {
   }
 }
 
-enum _MenuItemTrailingKind {
-  icon,
-  toggle,
-  none,
-}
+enum _MenuItemTrailingKind { icon, toggle, none }
 
 class _MenuItemPreview extends StatefulWidget {
   const _MenuItemPreview();
@@ -2524,8 +2381,9 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
               return MenuComponent(
                 title: 'Storage plan',
                 subtitle: 'Gestures disabled for read-only rows',
-                leading:
-                    const _CatalogHugeIcon(HugeIcons.strokeRoundedDatabase),
+                leading: const _CatalogHugeIcon(
+                  HugeIcons.strokeRoundedDatabase,
+                ),
                 trailing: Text(
                   '2 TB',
                   style: TextStyles.body.copyWith(color: colors.textLight),
@@ -2555,13 +2413,15 @@ class _MenuItemPreviewState extends State<_MenuItemPreview> {
               return MenuComponent(
                 title: 'Delete account',
                 subtitle: 'Warning color title and icon',
-                leading:
-                    const _CatalogHugeIcon(HugeIcons.strokeRoundedDelete02),
+                leading: _CatalogHugeIcon(
+                  HugeIcons.strokeRoundedDelete02,
+                  color: colors.warning,
+                  size: 18,
+                ),
                 trailing: const _CatalogTrailingIcon(
                   HugeIcons.strokeRoundedArrowRight01,
                 ),
                 titleColor: colors.warning,
-                iconColor: colors.warning,
                 onTap: () {},
               );
             },
@@ -2718,12 +2578,12 @@ class _MenuItemExample extends StatelessWidget {
     }
     return switch (trailingKind) {
       _MenuItemTrailingKind.icon => const _CatalogTrailingIcon(
-          HugeIcons.strokeRoundedMoreVertical,
-        ),
+        HugeIcons.strokeRoundedMoreVertical,
+      ),
       _MenuItemTrailingKind.toggle => ToggleSwitchComponent(
-          selected: toggleSelected,
-          onChanged: onToggleChanged,
-        ),
+        selected: toggleSelected,
+        onChanged: onToggleChanged,
+      ),
       _MenuItemTrailingKind.none => null,
     };
   }

@@ -7,7 +7,8 @@ void main() {
     test("expose expected spacing, radii, motion, and shadow values", () {
       expect(2, 2);
       expect(Spacing.sm, 8);
-      expect(Spacing.xl, 24);
+      expect(Spacing.xl, 20);
+      expect(Spacing.xxl, 24);
       expect(40, 40);
 
       expect(Radii.xs, 4);

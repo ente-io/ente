@@ -31,7 +31,6 @@ class MenuComponent extends StatefulWidget {
     this.titleMaxLines = 2,
     this.subtitleMaxLines = 1,
     this.titleColor,
-    this.iconColor,
   });
 
   final String title;
@@ -47,7 +46,6 @@ class MenuComponent extends StatefulWidget {
   final int titleMaxLines;
   final int subtitleMaxLines;
   final Color? titleColor;
-  final Color? iconColor;
 
   @override
   State<MenuComponent> createState() => _MenuComponentState();
@@ -105,15 +103,7 @@ class _MenuComponentState extends State<MenuComponent> {
                       if (widget.leading != null) ...[
                         SizedBox.square(
                           dimension: _leadingSlotSize,
-                          child: Center(
-                            child: IconTheme.merge(
-                              data: IconThemeData(
-                                color: widget.iconColor ?? colors.textLight,
-                                size: 18,
-                              ),
-                              child: widget.leading!,
-                            ),
-                          ),
+                          child: Center(child: widget.leading!),
                         ),
                         const SizedBox(width: Spacing.md),
                       ],
