@@ -1,6 +1,10 @@
 {
   "icons": [
     {
+      "title": "TESTFILE",
+      "slug": "proxmox_test"
+    },        
+    {
       "title": "1xBet",
       "slug": "1x_bet"
     },
